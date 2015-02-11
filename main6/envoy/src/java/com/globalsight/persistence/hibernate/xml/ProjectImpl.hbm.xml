@@ -34,10 +34,18 @@
 			type="boolean" not-null="false" />
 		<property name="reviewOnlyAutoSend" column="REVIEWONLYAUTOSEND"
 			type="boolean" not-null="false" />
+		<property name="reviewReportIncludeCompactTags" column="REVIEW_REPORT_INCLUDE_COMPACT_TAGS"
+			type="boolean" not-null="false" />
 		<property name="autoAcceptPMTask" column="AUTOACCEPTPMTASK"
 			type="boolean" not-null="false" />
 		<property name="checkUnTranslatedSegments" column="CHECK_UNTRANSLATED_SEGMENTS"
-			type="boolean" not-null="false" />	
+			type="boolean" not-null="false" />
+		<property name="saveTranslationsEditReport" column="SAVE_TRANSLATIONS_EDIT_REPORT"
+			type="yes_no" not-null="false" />
+		<property name="saveReviewersCommentsReport" column="SAVE_REVIEWERS_COMMENTS_REPORT"
+			type="yes_no" not-null="false" />
+		<property name="saveOfflineFiles" column="SAVE_OFFLINE_FILES"
+			type="yes_no" not-null="false" />
 
 		<many-to-one name="attributeSet" column="ATTRIBUTE_SET_ID"
 			class="com.globalsight.cxe.entity.customAttribute.AttributeSet"

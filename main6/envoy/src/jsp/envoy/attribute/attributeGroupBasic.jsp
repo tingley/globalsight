@@ -239,7 +239,7 @@ function checkName()
     </tr>
 	<tr>
 		<td><%=bundle.getString("lb_name")%><span class="asterisk">*</span>:</td>
-		<td><input type="text" name="name" id="name" style="width: 160px;" value="<%=name%>" onfocus="initNameMsg()" onblur="checkName()"></td>
+		<td><input type="text" name="name" id="name" style="width: 160px;" value="<%=name%>" onfocus="initNameMsg()" onblur="checkName()" maxLength="40"></td>
 	</tr>
 	<tr>
 		<td valign="top"><%=bundle.getString("lb_description")%>:</td>

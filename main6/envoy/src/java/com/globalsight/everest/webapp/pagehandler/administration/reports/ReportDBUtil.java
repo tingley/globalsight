@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -34,10 +35,14 @@ import com.globalsight.util.SortUtil;
 public class ReportDBUtil
 {
     static private final Logger logger = Logger.getLogger(ReportDBUtil.class);
+    static final int MAX_LENGTH = 500;
+    
     static private final String SQL_REPORTSDATA_SELECT = 
             "SELECT STATUS, PERCENT FROM REPORTS_DATA WHERE USER_ID = ? AND REPORT_JOBIDS = ? AND REPORT_TYPELIST = ?";
     static private final String SQL_REPORTSDATA_SELECT_ALL = 
             "SELECT USER_ID, REPORT_JOBIDS, REPORT_TYPELIST, STATUS, PERCENT FROM REPORTS_DATA";
+    static private final String SQL_REPORTSDATA_SELECT_BYUSER = 
+            "SELECT REPORT_JOBIDS, REPORT_TYPELIST, STATUS, PERCENT FROM REPORTS_DATA WHERE USER_ID = ? ORDER BY REPORT_TYPELIST";
     static private final String SQL_REPORTSDATA_DELETE = 
             "DELETE FROM REPORTS_DATA WHERE USER_ID = ? AND REPORT_JOBIDS = ? AND REPORT_TYPELIST = ?";
     static private final String SQL_REPORTSDATA_DELETE_ALL = "DELETE FROM REPORTS_DATA";
@@ -65,8 +70,8 @@ public class ReportDBUtil
         ResultSet rs = null;
         try
         {
-            String jobIdStr = getString(p_reportJobIDS, 500);
-            String typeListStr = getString(p_reportTypeList, 500);
+            String jobIdStr = getString(p_reportJobIDS, MAX_LENGTH);
+            String typeListStr = getString(p_reportTypeList, MAX_LENGTH);
             
             conn = SqlUtil.hireConnection();
             ps = conn.prepareStatement(SQL_REPORTSDATA_SELECT);
@@ -79,6 +84,42 @@ public class ReportDBUtil
                 result = new ReportsData(p_userId, p_reportJobIDS,
                         p_reportTypeList, rs.getDouble("PERCENT"),
                         rs.getString("STATUS"));
+            }
+        }
+        catch (SQLException e)
+        {
+            String message = "getReportsData error on user:" + p_userId;
+            logger.error(message, e);
+        }
+        finally
+        {
+            SqlUtil.silentClose(rs);
+            SqlUtil.silentClose(ps);
+            SqlUtil.fireConnection(conn);
+        }
+
+        return result;
+    }
+    
+    public static synchronized List<ReportsData> getReportsData(String p_userId)
+    {
+        List<ReportsData> result = new ArrayList<ReportsData>();
+        Connection conn = null;
+        PreparedStatement ps  = null;
+        ResultSet rs = null;
+        try
+        {            
+            conn = SqlUtil.hireConnection();
+            ps = conn.prepareStatement(SQL_REPORTSDATA_SELECT_BYUSER);
+            ps.setString(1, p_userId);
+            rs = ps.executeQuery();
+            while (rs.next())
+            {
+                ReportsData data = new ReportsData(p_userId, null, null, 
+                        rs.getDouble("PERCENT"), rs.getString("STATUS"));
+                data.setReportJobIDString(rs.getString("REPORT_JOBIDS"));
+                data.setReportTypeString(rs.getString("REPORT_TYPELIST"));
+                result.add(data);
             }
         }
         catch (SQLException e)
@@ -108,8 +149,8 @@ public class ReportDBUtil
         ResultSet rs = null;
         try
         {
-            String jobIdStr = getString(p_reportJobIDS, 500);
-            String typeListStr = getString(p_reportTypeList, 500);
+            String jobIdStr = getString(p_reportJobIDS, MAX_LENGTH);
+            String typeListStr = getString(p_reportTypeList, MAX_LENGTH);
             
             conn = SqlUtil.hireConnection();
             
@@ -165,8 +206,8 @@ public class ReportDBUtil
         PreparedStatement ps = null;
         try
         {
-            String jobIdStr = getString(p_reportJobIDS, 500);
-            String typeListStr = getString(p_reportTypeList, 500);
+            String jobIdStr = getString(p_reportJobIDS, MAX_LENGTH);
+            String typeListStr = getString(p_reportTypeList, MAX_LENGTH);
             
             conn = SqlUtil.hireConnection();
             ps = conn.prepareStatement(SQL_REPORTSDATA_DELETE);
@@ -235,19 +276,27 @@ public class ReportDBUtil
         return true;
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static String getString(List p_list, int p_maxLength)
     {
-        if (p_list == null)
-            return "";
+        if (p_list == null || p_list.size() == 0)
+            return "[]";
         
-        SortUtil.sort(p_list);
-        String result = p_list.toString();
+        List dataList = new ArrayList(p_list);
+        SortUtil.sort(dataList);
+        StringBuilder result = new StringBuilder("[");
+        for (int i = 0; i < dataList.size(); i++)
+        {
+            result.append(dataList.get(i)).append(",");
+            if (result.length() > p_maxLength)
+                break;
+        }
+        result.deleteCharAt(result.lastIndexOf(","));
+        result.append("]");
         if (result.length() > p_maxLength)
         {
-            result = result.substring(0, p_maxLength - 1);
+            return result.substring(0, p_maxLength - 1);
         }
 
-        return result;
+        return result.toString();
     }
 }

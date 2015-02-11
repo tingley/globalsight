@@ -29,12 +29,12 @@ import java.util.Iterator;
 /**
  * Represents the state of a Tuv.
  */
-public final class TuvState
-    implements Serializable
+public final class TuvState implements Serializable
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TuvState.class.getName());
+    private static final long serialVersionUID = 4923628543358721762L;
+
+    private static final Logger CATEGORY = Logger.getLogger(TuvState.class
+            .getName());
 
     private String m_name;
     private int m_value;
@@ -58,9 +58,11 @@ public final class TuvState
         new TuvState("ALIGNMENT_LOCALIZED", 7);
     public static final TuvState UNVERIFIED_EXACT_MATCH =
         new TuvState("UNVERIFIED_EXACT_MATCH", 8);
+    public static final TuvState APPROVED = new TuvState("APPROVED", 9);
+    public static final TuvState DO_NOT_TRANSLATE = new TuvState("DO_NOT_TRANSLATE", 10);
 
-    public static final HashMap ALL_TUV_STATES_BY_VALUE = new HashMap(9);
-    public static final HashMap ALL_TUV_STATES_BY_NAME = new HashMap(9);
+    public static final HashMap<Integer, TuvState> ALL_TUV_STATES_BY_VALUE = new HashMap<Integer, TuvState>(10);
+    public static final HashMap<String, TuvState> ALL_TUV_STATES_BY_NAME = new HashMap<String, TuvState>(10);
 
     static
     {
@@ -84,7 +86,9 @@ public final class TuvState
         ALL_TUV_STATES_BY_VALUE.put(
             new Integer(UNVERIFIED_EXACT_MATCH.getValue()),
             UNVERIFIED_EXACT_MATCH);
-
+        ALL_TUV_STATES_BY_VALUE.put(new Integer(APPROVED.getValue()), APPROVED);
+        ALL_TUV_STATES_BY_VALUE.put(new Integer(DO_NOT_TRANSLATE.getValue()),
+                DO_NOT_TRANSLATE);
 
         ALL_TUV_STATES_BY_NAME.put(UNSPECIFIED.getName(), UNSPECIFIED);
         ALL_TUV_STATES_BY_NAME.put(NOT_LOCALIZED.getName(), NOT_LOCALIZED);
@@ -99,7 +103,9 @@ public final class TuvState
             ALIGNMENT_LOCALIZED);
         ALL_TUV_STATES_BY_NAME.put(UNVERIFIED_EXACT_MATCH.getName(),
             UNVERIFIED_EXACT_MATCH);
-
+        ALL_TUV_STATES_BY_NAME.put(APPROVED.getName(), APPROVED);
+        ALL_TUV_STATES_BY_NAME
+                .put(DO_NOT_TRANSLATE.getName(), DO_NOT_TRANSLATE);
 
         // self check that the two HashMaps contain the same values
         try
@@ -205,8 +211,8 @@ public final class TuvState
     static void consistencyTest() throws TuvException
     {
         TuvState tuvState = null;
-        Collection values = null;
-        Iterator valuesIt = null;
+        Collection<TuvState> values = null;
+        Iterator<TuvState> valuesIt = null;
 
         values = ALL_TUV_STATES_BY_VALUE.values();
         valuesIt = values.iterator();

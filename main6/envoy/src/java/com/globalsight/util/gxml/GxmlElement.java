@@ -381,15 +381,22 @@ public class GxmlElement
 
         return m_childElements;
     }
-    
-    public List getTextNodeWithoutInternal()
+
+    /**
+     * Return all TextNode that is not in internal text (internal="yes"), this
+     * does not include sub elements.
+     * 
+     * @return List<GxmlElement>.
+     */
+    public List<GxmlElement> getTextNodeWithoutInternal()
     {
         if (m_childElements == null)
         {
-            return new ArrayList(0);
+            return new ArrayList<GxmlElement>(0);
         }
-        
-        List someChildElmts = new ArrayList(m_childElements.size());
+
+        List<GxmlElement> someChildElmts = new ArrayList<GxmlElement>(
+                m_childElements.size());
 
         boolean inInternal = false;
         String bptI = "-1";
@@ -489,15 +496,17 @@ public class GxmlElement
      * @return a List of descendant elements having the specified
      * element types
      */
-    public List getDescendantElements(int[] p_types, boolean... fromPage)
+    public List<GxmlElement> getDescendantElements(int[] p_types,
+            boolean... fromPage)
     {
         if (m_childElements == null)
         {
-            return new ArrayList(0);
+            return new ArrayList<GxmlElement>(0);
         }
 
         // First get the immediate children of the specified types
-        List descendants = new ArrayList(m_childElements.size());
+        List<GxmlElement> descendants = new ArrayList<GxmlElement>(
+                m_childElements.size());
 
         for (int i = 0; i < m_childElements.size(); i++)
         {

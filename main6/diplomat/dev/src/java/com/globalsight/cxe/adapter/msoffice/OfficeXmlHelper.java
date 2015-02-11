@@ -65,11 +65,11 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
 import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class OfficeXmlHelper implements IConverterHelper2
 {
     private static final String CATEGORY_NAME = "OfficeXmlAdapter";
-    private static Object m_locker = new Object();
     private Logger m_logger;
     private static int gcCounter = 0;
 
@@ -117,7 +117,6 @@ public class OfficeXmlHelper implements IConverterHelper2
     private HashMap<String, String> m_hideCellMap = new HashMap<String, String>();
 
     private List<String> m_hideCellStyleIds = new ArrayList<String>();
-    private Set<String> hideSharedStrings = new HashSet<String>();
     private Set<String> m_unextractableExcelCellStyles = new HashSet<String>();
 
     private static Hashtable<String, Integer> s_exportBatches = new Hashtable<String, Integer>();
@@ -192,19 +191,18 @@ public class OfficeXmlHelper implements IConverterHelper2
     // for GBS-2554
     private static final String W_VANISH = "<w:vanish/>";
     private static final String W_VANISH0 = "<w:vanish w:val=\"0\"/>";
-    private static final String RE_WP = "(<w:p[^>]*>)([\\d\\D]*?)(</w:p>)";
+    private static final Pattern WP = Pattern.compile("(<w:p[^>]*>)([\\d\\D]*?)(</w:p>)");
     private static final String RE_STYLE = "<w:style[^>]*w:styleId=\"{0}\"[^>]*>([\\d\\D]*?)</w:style>";
-    private static final String RE_RPR = "(<w:rPr>)([\\d\\D]*?)(</w:rPr>)";
-    private static final String RE_PPR = "(<w:pPr>)([\\d\\D]*?)(</w:pPr>)";
-    private static final String RE_WR = "(<w:r[^>]*>)([\\d\\D]*?)(</w:r>)";
-    private static final String RE_RSTYLE = "<w:rStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>";
-    private static final String RE_PSTYLE = "<w:pStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>";
+    private static final Pattern RPR = Pattern.compile("(<w:rPr>)([\\d\\D]*?)(</w:rPr>)");
+    private static final Pattern PPR = Pattern.compile("(<w:pPr>)([\\d\\D]*?)(</w:pPr>)");
+    private static final Pattern WR = Pattern.compile("(<w:r[^>]*>)([\\d\\D]*?)(</w:r>)");
+    private static final Pattern RSTYLE = Pattern.compile("<w:rStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
+    private static final Pattern PSTYLE = Pattern.compile("<w:pStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
 
     // for xlsx repeated strings shared in sharedStrings.xml
-    private static final String RE_SI = "<si>([\\d\\D]*?)</si>";
-    private static final String RE_SI_T = "<t[^>]*>([\\d\\D]*?)</t>";
-    private static final String RE_C = "(<c[^>]*t=\"s\"[^>]*>)([\\d\\D]*?)(</c>)";
-    private static final String RE_V = "<v>([\\d]*?)</v>";
+    private static final Pattern SI = Pattern.compile("<si>([\\d\\D]*?)</si>");
+    private static final Pattern C = Pattern.compile("(<c[^>]*t=\"s\"[^>]*>)([\\d\\D]*?)(</c>)");
+    private static final Pattern V = Pattern.compile("<v>([\\d]*?)</v>");
 
     /**
      * Init OfficeXmlHelper for office 2010 importing
@@ -1203,8 +1201,8 @@ public class OfficeXmlHelper implements IConverterHelper2
             numStyleIds = ",";
         }
 
-        p_xmlFilename = p_xmlFilename.replace("\\", File.separator);
-        p_xmlFilename = p_xmlFilename.replace("/", File.separator);
+        p_xmlFilename = StringUtil.replace(p_xmlFilename, "\\", File.separator);
+        p_xmlFilename = StringUtil.replace(p_xmlFilename, "/", File.separator);
         String fileNamePrefix = FileUtils.getPrefix(FileUtils
                 .getBaseName(p_xmlFilename));
 
@@ -1549,8 +1547,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             int lastStart = -1;
             int lastEnd = -1;
 
-            Pattern p = Pattern.compile(RE_SI);
-            Matcher m = p.matcher(sharedStringsContent);
+            Matcher m = SI.matcher(sharedStringsContent);
             while (m.find())
             {
                 siNumber++;
@@ -1567,12 +1564,13 @@ public class OfficeXmlHelper implements IConverterHelper2
             for (File sheet : sheets)
             {
                 String sheetContent = FileUtil.readFile(sheet, "utf-8");
-                p = Pattern.compile(RE_C);
-                m = p.matcher(sheetContent);
+                m = C.matcher(sheetContent);
+                StringBuilder output = new StringBuilder();
+                int start = 0;
+                
                 while (m.find())
                 {
-                    Pattern p1 = Pattern.compile(RE_V);
-                    Matcher m1 = p1.matcher(m.group(2));
+                    Matcher m1 = V.matcher(m.group(2));
                     if (m1.find())
                     {
                         long v = Long.parseLong(m1.group(1));
@@ -1586,8 +1584,12 @@ public class OfficeXmlHelper implements IConverterHelper2
                                 // with new one to be added in sharedStrings.xml
                                 String newC = m.group(1) + "<v>" + (++siNumber)
                                         + "</v>" + m.group(3);
-                                sheetContent = sheetContent.replace(m.group(),
-                                        newC);
+                                // Write out all characters before this matched region
+                                output.append(sheetContent.substring(start, m.start()));
+                                // Write out the replacement text. This will vary by method.
+                                output.append(newC);
+                                start = m.end();
+                                
                                 repeatedSIds.add(v);
                             }
                             else
@@ -1597,8 +1599,10 @@ public class OfficeXmlHelper implements IConverterHelper2
                         }
                     }
                 }
+                
+                output.append(sheetContent.substring(start));
 
-                FileUtil.writeFile(sheet, sheetContent, "utf-8");
+                FileUtil.writeFile(sheet, output.toString(), "utf-8");
             }
 
             StringBuilder newLast = new StringBuilder(lastSiContent);
@@ -1645,17 +1649,14 @@ public class OfficeXmlHelper implements IConverterHelper2
             String styleContent = FileUtil.readFile(style, "utf-8");
 
             // "<w:pPr><w:pStyle"
-            Pattern p = Pattern.compile(RE_WP);
-            Matcher m = p.matcher(documentContent);
+            Matcher m = WP.matcher(documentContent);
             while (m.find())
             {
-                Pattern p1 = Pattern.compile(RE_PPR);
-                Matcher m1 = p1.matcher(m.group(2));
+                Matcher m1 = PPR.matcher(m.group(2));
                 if (m1.find())
                 {
                     String wppr = m1.group(2);
-                    Pattern p2 = Pattern.compile(RE_PSTYLE);
-                    Matcher m2 = p2.matcher(wppr);
+                    Matcher m2 = PSTYLE.matcher(wppr);
                     if (m2.find())
                     {
                         Pattern p3 = Pattern.compile(MessageFormat.format(
@@ -1663,8 +1664,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                         Matcher m3 = p3.matcher(styleContent);
                         if (m3.find())
                         {
-                            Pattern p31 = Pattern.compile(RE_RPR);
-                            Matcher m31 = p31.matcher(m3.group(1));
+                            Matcher m31 = RPR.matcher(m3.group(1));
                             if (m31.find())
                             {
                                 if (!m31.group(2).contains(W_VANISH))
@@ -1680,15 +1680,13 @@ public class OfficeXmlHelper implements IConverterHelper2
                             // found "<w:vanish/>", indicating the style is
                             // hidden
                             String wp = m.group(2);
-                            Pattern p4 = Pattern.compile(RE_WR);
-                            Matcher m4 = p4.matcher(wp);
+                            Matcher m4 = WR.matcher(wp);
                             while (m4.find())
                             {
                                 String wr = m4.group(2);
                                 if (wr.contains("<w:t"))
                                 {
-                                    Pattern p41 = Pattern.compile(RE_RPR);
-                                    Matcher m41 = p41.matcher(wr);
+                                    Matcher m41 = RPR.matcher(wr);
                                     if (m41.find())
                                     {
                                         String wrpr = m41.group(2);
@@ -1699,8 +1697,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                                             if (!wrpr.contains(W_VANISH))
                                             {
                                                 wrpr = W_VANISH + wrpr;
-                                                wr = wr.replace(m41.group(),
-                                                        m41.group(1) + wrpr
+                                                wr = StringUtil.replace(wr, m41.group(), m41.group(1) + wrpr
                                                                 + m41.group(3));
                                             }
                                         }
@@ -1709,14 +1706,14 @@ public class OfficeXmlHelper implements IConverterHelper2
                                             // remove "<w:vanish w:val=\"0\"/>"
                                             // since the text with it is not
                                             // hidden
-                                            wrpr = wrpr.replace(W_VANISH0, "");
+                                            wrpr = StringUtil.replace(wrpr, W_VANISH0, "");
                                             if (wrpr.trim().isEmpty())
                                             {
-                                                wr = wr.replace(m41.group(), "");
+                                                wr = StringUtil.replace(wr, m41.group(), "");
                                             }
                                             else
                                             {
-                                                wr = wr.replace(m41.group(),
+                                                wr = StringUtil.replace(wr,m41.group(),
                                                         m41.group(1) + wrpr
                                                                 + m41.group(3));
                                             }
@@ -1730,29 +1727,26 @@ public class OfficeXmlHelper implements IConverterHelper2
                                     }
                                 }
 
-                                wp = wp.replace(m4.group(), m4.group(1) + wr
+                                wp = StringUtil.replace(wp, m4.group(), m4.group(1) + wr
                                         + m4.group(3));
                             }
 
                             String newContent = m.group(1) + wp + m.group(3);
-                            documentContent = documentContent.replace(
+                            documentContent = StringUtil.replace(documentContent, 
                                     m.group(), newContent);
                         }
                     }
                 }
             }
             // "<w:rPr><w:rStyle"
-            p = Pattern.compile(RE_WR);
-            m = p.matcher(documentContent);
+            m = WR.matcher(documentContent);
             while (m.find())
             {
-                Pattern p1 = Pattern.compile(RE_RPR);
-                Matcher m1 = p1.matcher(m.group(2));
+                Matcher m1 = RPR.matcher(m.group(2));
                 if (m1.find())
                 {
                     String wrpr = m1.group(2);
-                    Pattern p2 = Pattern.compile(RE_RSTYLE);
-                    Matcher m2 = p2.matcher(wrpr);
+                    Matcher m2 = RSTYLE.matcher(wrpr);
                     if (m2.find())
                     {
                         Pattern p3 = Pattern.compile(MessageFormat.format(
@@ -1761,8 +1755,7 @@ public class OfficeXmlHelper implements IConverterHelper2
 
                         if (m3.find())
                         {
-                            Pattern p21 = Pattern.compile(RE_RPR);
-                            Matcher m21 = p21.matcher(m3.group(1));
+                            Matcher m21 = RPR.matcher(m3.group(1));
                             if (m21.find())
                             {
                                 if (!m21.group(2).contains(W_VANISH))
@@ -1787,7 +1780,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                                     if (!wrpr.contains(W_VANISH))
                                     {
                                         wrpr = W_VANISH + wrpr;
-                                        wr = wr.replace(m1.group(), m1.group(1)
+                                        wr = StringUtil.replace(wr, m1.group(), m1.group(1)
                                                 + wrpr + m1.group(3));
                                     }
                                 }
@@ -1796,21 +1789,21 @@ public class OfficeXmlHelper implements IConverterHelper2
                                     // remove "<w:vanish w:val=\"0\"/>"
                                     // since the text with it is not
                                     // hidden
-                                    wrpr = wrpr.replace(W_VANISH0, "");
+                                    wrpr = StringUtil.replace(wrpr, W_VANISH0, "");
                                     if (wrpr.trim().isEmpty())
                                     {
-                                        wr = wr.replace(m1.group(), "");
+                                        wr = StringUtil.replace(wr, m1.group(), "");
                                     }
                                     else
                                     {
-                                        wr = wr.replace(m1.group(), m1.group(1)
+                                        wr = StringUtil.replace(wr, m1.group(), m1.group(1)
                                                 + wrpr + m1.group(3));
                                     }
                                 }
 
                                 String newContent = m.group(1) + wr
                                         + m.group(3);
-                                documentContent = documentContent.replace(
+                                documentContent = StringUtil.replace(documentContent,
                                         m.group(), newContent);
                             }
                         }
@@ -2334,360 +2327,20 @@ public class OfficeXmlHelper implements IConverterHelper2
         {
             return;
         }
-
-        String sheetnameXml = FileUtils.concatPath(dir, XLSX_SHEET_NAME);
-        String sheetsDir = FileUtils.concatPath(dir, XLSX_SHEETS_DIR);
-
-        Set<String> hiddenSharedIds = new HashSet<String>();
-
-        // get it in hidden sheets
-        List<String> hiddenSheetIds = getExcelHiddenSheetId(sheetnameXml);
-        if (hiddenSheetIds != null && hiddenSheetIds.size() > 0)
-        {
-            for (String id : hiddenSheetIds)
-            {
-                String sheet = FileUtils.concatPath(sheetsDir, "sheet" + id
-                        + ".xml");
-                hiddenSharedIds.addAll(getSharedIdInSheet(sheet));
-            }
-        }
-
-        // get it in visible sheets, hidden row, column, cell
-        File[] sheets = getSheetFiles(new File(sheetsDir));
-        if (sheets != null && sheets.length >= 0)
-        {
-            // get each sheet and check if it is empty
-            for (int i = 0; i < sheets.length; i++)
-            {
-                File f = sheets[i];
-                String sheetPath = f.getPath();
-                String fbasename = FileUtils.getBaseName(sheetPath);
-                String fprefix = FileUtils.getPrefix(fbasename);
-                String fid = fprefix.substring(5);
-                Set<String> hiddenCells = new HashSet<String>();
-
-                if (hiddenSheetIds.contains(fid))
-                {
-                    continue;
-                }
-
-                // not hide sheet
-                try
-                {
-                    // check first to avoid unnecessary XML parse
-                    String text = FileUtils.read(f, "UTF-8");
-                    if (!text.contains(" hidden=\"1\"")
-                            && !text.contains("hidden=\"true\"")
-                            && (m_hideCellStyleIds == null || m_hideCellStyleIds
-                                    .isEmpty()))
-                    {
-                        continue;
-                    }
-
-                    if (!text.contains("</row>"))
-                    {
-                        continue;
-                    }
-
-                    // get hidden cell and its shared id
-                    // change xerces to JDom for null pointer exception of
-                    // DeferredElementNSImpl.synchronizeData
-                    Set<String> cells = new HashSet<String>();
-                    org.jdom.input.SAXBuilder saxb = new org.jdom.input.SAXBuilder();
-                    org.jdom.Document jdomDoc = saxb.build(sheetPath);
-                    org.jdom.Element jdomElem = jdomDoc.getRootElement();
-
-                    // 1 hidden cell
-                    if (m_hideCellStyleIds != null
-                            && !m_hideCellStyleIds.isEmpty())
-                    {
-                        for (String id : m_hideCellStyleIds)
-                        {
-                            String xpath = "//*[local-name()=\"c\"][@s=\"" + id
-                                    + "\"]";
-                            List affectedNodes = org.jdom.xpath.XPath
-                                    .selectNodes(jdomElem, xpath);
-
-                            handleHiddenCellElementJdom(affectedNodes,
-                                    hiddenSharedIds, hiddenCells);
-                        }
-                    }
-
-                    // 2 hidden row, split rows to 4 parts to handle exception
-                    // if there are so many rows
-                    // String xpath0 =
-                    // "//*[position() mod 4 = 0 ][local-name()=\"row\"][@hidden=\"1\"]";
-                    String xpath = "//*[local-name()=\"row\"][@hidden=\"1\"]";
-                    List affectedNodes = org.jdom.xpath.XPath.selectNodes(
-                            jdomElem, xpath);
-
-                    if (affectedNodes != null && affectedNodes.size() > 0)
-                    {
-                        int nodesLen = affectedNodes.size();
-                        for (int j = 0; j < nodesLen; j++)
-                        {
-                            org.jdom.Element ce = (org.jdom.Element) affectedNodes
-                                    .get(j);
-                            String rowId = ce.getAttributeValue("r");
-                            String spans = ce.getAttributeValue("spans");
-
-                            addAllCells(cells, Integer.parseInt(rowId), spans);
-                        }
-                    }
-
-                    // 3 hidden column case 1
-                    xpath = "//*[local-name()=\"col\"][@hidden=\"1\"]";
-                    affectedNodes = org.jdom.xpath.XPath.selectNodes(jdomElem,
-                            xpath);
-
-                    if (affectedNodes != null && affectedNodes.size() > 0)
-                    {
-                        String lastRow = "//*[local-name()=\"row\"][last()]";
-                        List lastRowNodes = org.jdom.xpath.XPath.selectNodes(
-                                jdomElem, lastRow);
-                        String lastRowIndexStr = ((org.jdom.Element) lastRowNodes
-                                .get(0)).getAttributeValue("r");
-                        int lastRowIndex = Integer.parseInt(lastRowIndexStr);
-
-                        int nodesLen = affectedNodes.size();
-                        for (int j = 0; j < nodesLen; j++)
-                        {
-                            org.jdom.Element ce = (org.jdom.Element) affectedNodes
-                                    .get(j);
-                            String min = ce.getAttributeValue("min");
-                            String max = ce.getAttributeValue("max");
-
-                            for (int k = 1; k <= lastRowIndex; k++)
-                            {
-                                addAllCells(cells, k, min + ":" + max);
-                            }
-                        }
-                    }
-
-                    // 4 hidden column case 2
-                    // <col min="9" max="9" customWidth="true" style="1"
-                    // width="5.7109375" collapsed="true" hidden="true" />
-                    xpath = "//*[local-name()=\"col\"][@hidden=\"true\"]";
-                    affectedNodes = org.jdom.xpath.XPath.selectNodes(jdomElem,
-                            xpath);
-                    int nodesLen = affectedNodes.size();
-
-                    if (affectedNodes != null && nodesLen > 0)
-                    {
-                        String lastRow = "//*[local-name()=\"row\"][last()]";
-                        List lastRowNodes = org.jdom.xpath.XPath.selectNodes(
-                                jdomElem, lastRow);
-                        String lastRowIndexStr = ((org.jdom.Element) lastRowNodes
-                                .get(0)).getAttributeValue("r");
-                        int lastRowIndex = Integer.parseInt(lastRowIndexStr);
-                        for (int j = 0; j < nodesLen; j++)
-                        {
-                            org.jdom.Element e = (org.jdom.Element) affectedNodes
-                                    .get(j);
-                            String min = e.getAttributeValue("min");
-                            String max = e.getAttributeValue("max");
-
-                            if (min != null && max != null && min.equals(max))
-                            {
-                                for (int k = 1; k <= lastRowIndex; k++)
-                                {
-                                    addAllCells(cells, k, min + ":" + max);
-                                }
-                            }
-                        }
-                    }
-
-                    if (cells.size() != 0)
-                    {
-                        for (String id : cells)
-                        {
-                            String cellpath = "//*[local-name()=\"c\"][@r=\""
-                                    + id + "\"]";
-                            List cellaffectedNodes = org.jdom.xpath.XPath
-                                    .selectNodes(jdomElem, cellpath);
-
-                            handleHiddenCellElementJdom(cellaffectedNodes,
-                                    hiddenSharedIds, hiddenCells);
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    // ignore
-                    logException(e);
-                }
-
-                // each sheet
-                if (hiddenCells.size() != 0)
-                {
-                    m_hideCellMap.put(fprefix, MSOffice2010Filter
-                            .toString(new ArrayList<String>(hiddenCells)));
-                }
-            }
-        }
-
-        hiddenSharedIds.addAll(hideSharedStrings);
-        m_hiddenSharedId = MSOffice2010Filter.toString(new ArrayList<String>(
-                hiddenSharedIds));
+        
+        ExcelHiddenHandler handler = new ExcelHiddenHandler(dir, m_hideCellStyleIds);
+        handler.run();
+        
+        m_hiddenSharedId = handler.getHiddenSharedString();
+        m_hideCellMap = handler.getHideCellMap();
     }
 
-    private void addAllCells(Set<String> cells, int row, String spans)
-    {
-        String[] span = spans.split(":");
-        if (span != null && span.length == 2)
-        {
-            int s1 = Integer.parseInt(span[0]);
-            int s2 = Integer.parseInt(span[1]);
-
-            for (int i = s1; i <= s2; i++)
-            {
-                String column = getExcelColumnChar(i);
-                addValueIfNotExists(cells, column + row);
-            }
-        }
-    }
-
-    private void handleHiddenCellElementJdom(List affectedNodes,
-            Set<String> hiddenSharedId, Set<String> hiddenCells)
-    {
-        if (affectedNodes != null && affectedNodes.size() > 0)
-        {
-            for (int j = 0; j < affectedNodes.size(); j++)
-            {
-                org.jdom.Element ce = (org.jdom.Element) affectedNodes.get(j);
-                String rr = ce.getAttributeValue("r");
-                hiddenCells = addValueIfNotExists(hiddenCells, rr);
-                String ss = ce.getAttributeValue("t");
-                if ("s".equals(ss))
-                {
-                    String vnid = getExcelVTextJdom(ce);
-                    if (vnid != null)
-                    {
-                        hiddenSharedId = addValueIfNotExists(hiddenSharedId,
-                                vnid);
-                    }
-                }
-            }
-        }
-    }
-
-    private String getExcelVTextJdom(org.jdom.Element ce)
-    {
-        List children = ce.getChildren();
-        org.jdom.Element vn = null;
-        for (int i = 0; i < children.size(); i++)
-        {
-            org.jdom.Element jdElem = (org.jdom.Element) children.get(i);
-            if ("v".equals(jdElem.getName()))
-            {
-                vn = jdElem;
-                break;
-            }
-        }
-
-        if (vn != null)
-        {
-            String vnid = vn.getText();
-            return vnid;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private void handleHiddenCellElement(NodeList affectedNodes,
-            Set<String> hiddenSharedId, Set<String> hiddenCells)
-    {
-        if (affectedNodes != null && affectedNodes.getLength() > 0)
-        {
-            for (int j = 0; j < affectedNodes.getLength(); j++)
-            {
-                Element ce = (Element) affectedNodes.item(j);
-                String rr = ce.getAttribute("r");
-                hiddenCells = addValueIfNotExists(hiddenCells, rr);
-                String ss = ce.getAttribute("t");
-                if ("s".equals(ss))
-                {
-                    String vnid = getExcelVText(ce);
-                    hiddenSharedId = addValueIfNotExists(hiddenSharedId, vnid);
-                }
-            }
-        }
-    }
 
     private String getExcelVText(Element ce)
     {
         Node vn = ce.getElementsByTagName("v").item(0);
         String vnid = vn.getFirstChild().getNodeValue();
         return vnid;
-    }
-
-    private String getExcelColumnChar(int num)
-    {
-        int A = 65;
-        String sCol = "";
-        int iRemain = 0;
-
-        if (num > 701)
-        {
-            return "";
-        }
-
-        if (num <= 26)
-        {
-            if (num == 0)
-            {
-                sCol = "" + (char) ((A + 26) - 1);
-            }
-            else
-            {
-                sCol = "" + (char) ((A + num) - 1);
-            }
-        }
-        else
-        {
-            iRemain = (num / 26) - 1;
-            if ((num % 26) == 0)
-            {
-                sCol = getExcelColumnChar(iRemain) + getExcelColumnChar(0);
-            }
-            else
-            {
-                sCol = (char) (A + iRemain) + getExcelColumnChar(num % 26);
-            }
-        }
-
-        return sCol;
-    }
-
-    private Set<String> getSharedIdInSheet(String sheet)
-    {
-        Set<String> result = new HashSet<String>();
-        try
-        {
-            String xpath = "//*[local-name()=\"c\"][@t=\"s\"]/*[local-name()=\"v\"]";
-
-            NodeList affectedNodes = getAffectedNodes(sheet, xpath);
-
-            if (affectedNodes != null && affectedNodes.getLength() > 0)
-            {
-                int len = affectedNodes.getLength();
-                for (int i = 0; i < len; i++)
-                {
-                    Element nd = (Element) affectedNodes.item(i);
-                    String id = nd.getFirstChild().getNodeValue();
-                    result.add(id);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            // ignore
-            logException(e);
-        }
-
-        return result;
     }
 
     private NodeList getAffectedNodes(String xmlfile, String xpath)
@@ -2847,7 +2500,7 @@ public class OfficeXmlHelper implements IConverterHelper2
         {
             String locale = targetLocales[i];
             String path = expectedFile.getParent();
-            path = path.replace('\\', '/');
+            path = StringUtil.replace(path, "\\", "/");
             StringBuffer targetDir = new StringBuffer(path);
             int srcIndex = targetDir.lastIndexOf('/' + srcLocale + '/') + 1;
             if (srcIndex == 0)

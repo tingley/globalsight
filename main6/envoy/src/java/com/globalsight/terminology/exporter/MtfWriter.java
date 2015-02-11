@@ -30,6 +30,7 @@ import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.SessionInfo;
 
 import org.dom4j.Attribute;
@@ -38,8 +39,6 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.io.*;
 
 /**
@@ -125,8 +124,10 @@ public class MtfWriter
         String filename = directory + m_filename;
 
         // XML files get written as Unicode (in UTF-8).
-        m_output = new PrintWriter(new BufferedWriter(
-            new OutputStreamWriter(new FileOutputStream(filename), encoding)));
+        FileOutputStream fos = new FileOutputStream(filename);
+        FileUtil.writeBom(fos, ianaEncoding);
+        m_output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(
+                fos, encoding)));
 
         m_output.print("<?xml version=\"1.0\" encoding=\"");
         m_output.print(ianaEncoding);

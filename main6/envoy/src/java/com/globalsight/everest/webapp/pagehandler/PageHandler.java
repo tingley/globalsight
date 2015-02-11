@@ -917,7 +917,7 @@ public class PageHandler implements WebAppConstants
 
         if ("xml".equalsIgnoreCase(kf.getFormatType()))
         {
-            if (fileProfile.getXmlRuleFileId() > 0L)
+            if (fileProfile.getXmlRuleId() > 0L)
             {
                 return true;
             }
@@ -930,7 +930,7 @@ public class PageHandler implements WebAppConstants
         {
             if (kf.getFormatType().startsWith("javaprop"))
             {
-                if (fileProfile.getSupportSid())
+                if (fileProfile.supportsSid())
                 {
                     return true;
                 }

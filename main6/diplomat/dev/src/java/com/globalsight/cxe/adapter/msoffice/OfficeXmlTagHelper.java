@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class OfficeXmlTagHelper
 {
@@ -32,6 +33,18 @@ public class OfficeXmlTagHelper
     private static final String REGEX_AR_PPTX = "(((<a:r [^>]*>)|(<a:r>)).*?</a:r>)";
     private static final String REGEX_CONTENT_PPTX = "(<a:t[^>]*>)([^<]*?)</a:t>";
     private static final String REGEX_ARPR_PPTX = "<a:rPr [^>]*/?>";
+    private static Pattern P_WR_DOCX = Pattern.compile(REGEX_WR_DOCX);
+    private static Pattern P_CONTENT_DOCX = Pattern.compile(REGEX_CONTENT_DOCX);
+    private static Pattern P_AR_PPTX = Pattern.compile(REGEX_AR_PPTX);
+    private static Pattern P_CONTENT_PPTX = Pattern.compile(REGEX_CONTENT_PPTX);
+    private static Pattern P_ARPR_PPTX = Pattern.compile(REGEX_ARPR_PPTX);
+    
+    // put string here
+    private static final String unusedTag_ss = "<w:proofErr w:type=\"spellStart\"/>";
+    private static final String unusedTag_se = "<w:proofErr w:type=\"spellEnd\"/>";
+    private static final String unusedTag_gs = "<w:proofErr w:type=\"gramStart\"/>";
+    private static final String unusedTag_ge = "<w:proofErr w:type=\"gramEnd\"/>";
+    private static final String unusedTag_lrpb = "<w:lastRenderedPageBreak/>";
 
     private int m_type = OfficeXmlHelper.OFFICE_DOCX;
 
@@ -51,20 +64,26 @@ public class OfficeXmlTagHelper
      */
     public void mergeTags(String[] xmlFiles) throws Exception
     {
-        List<String> wrs = new ArrayList<String>();
-        List<Integer> indexes = new ArrayList<Integer>();
-
-        Pattern p = Pattern.compile(REGEX_WR_DOCX);
-
+        Pattern p = P_WR_DOCX;
         if (m_type == OfficeXmlHelper.OFFICE_PPTX)
         {
-            p = Pattern.compile(REGEX_AR_PPTX);
+            p = P_AR_PPTX;
         }
+        
         if (xmlFiles != null && xmlFiles.length > 0)
         {
             for (String xmlFile : xmlFiles)
             {
                 File f = new File(xmlFile);
+                
+                // ignore some files
+                if (isIgnoredFile(f))
+                {
+                    continue;
+                }
+                
+                List<String> wrs = new ArrayList<String>();
+                List<Integer> indexes = new ArrayList<Integer>();
                 String content = FileUtil.readFile(f, "utf-8");
                 content = removeUnusdTags(content);
 
@@ -73,13 +92,25 @@ public class OfficeXmlTagHelper
                 while (m.find())
                 {
                     wrs.add(m.group());
-                    n = content.indexOf(m.group(), n);
+                    n = m.start();
                     indexes.add(n);
                 }
 
                 mergeTag(f, content, wrs, indexes);
             }
         }
+    }
+
+    /**
+     * Check if this file is igored for merging tag : 
+     * 1. ignore slide notes files
+     * @param f
+     * @return
+     */
+    private boolean isIgnoredFile(File f)
+    {
+        return f.getName().startsWith("notesSlide")
+                || f.getName().startsWith("slideLayout");
     }
 
     /**
@@ -106,17 +137,10 @@ public class OfficeXmlTagHelper
 
         return mindexes;
     }
-
+    
     private void mergeTag(File f, String content, List<String> wrs,
             List<Integer> indexes) throws IOException
     {
-        // ignore slide notes files
-        if (f.getName().startsWith("notesSlide")
-                || f.getName().startsWith("slideLayout"))
-        {
-            return;
-        }
-
         StringBuffer contentSB = new StringBuffer(content);
         List<Integer> mergeindexes = getMergeindexes(wrs, indexes);
 
@@ -124,22 +148,44 @@ public class OfficeXmlTagHelper
         {
             String wr = wrs.get(i);
             String last = wrs.get(i - 1);
+            
+            int currentIndex = indexes.get(i);
+            int lastIndex = indexes.get(i - 1);
 
-            if (mergeindexes.contains(indexes.get(i)))
+            if (mergeindexes.contains(currentIndex))
             {
                 String mergedTag = getMergedTags(m_type, last, wr);
+                
                 if (mergedTag != last)
                 {
+                    int iStart = i;
                     wrs.set(i - 1, mergedTag);
                     String oldStr = last + wr;
-                    String newStr = mergedTag;
-
-                    int oldLen = oldStr.length();
-                    int index = contentSB.lastIndexOf(oldStr);
-                    if (index > -1)
+                    
+                    while (mergeindexes.contains(lastIndex) && i >= 2)
                     {
-                        contentSB = contentSB.replace(index, index + oldLen,
-                          newStr);
+                        String last2 = wrs.get(i - 2);
+                        mergedTag = getMergedTags(m_type, last2, wrs.get(i - 1));
+                        
+                        if (mergedTag == last2)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            oldStr = last2 + oldStr;
+                            wrs.set(i - 2, mergedTag);
+                            i = i - 1;
+                            lastIndex = indexes.get(i - 1);
+                        }
+                    }
+                    
+                    String newStr = wrs.get(i - 1);
+                    int oldLen = oldStr.length();
+                    if (lastIndex > -1)
+                    {
+                        contentSB = contentSB.replace(lastIndex, lastIndex
+                                + oldLen, newStr);
                     }
                 }
             }
@@ -636,7 +682,7 @@ public class OfficeXmlTagHelper
 
     private static String getARPR(String firstTemp)
     {
-        Pattern p = Pattern.compile(REGEX_ARPR_PPTX);
+        Pattern p = P_ARPR_PPTX;
         Matcher m1 = p.matcher(firstTemp);
 
         String arPr1 = null;
@@ -651,7 +697,7 @@ public class OfficeXmlTagHelper
     private static boolean isArPrAttributeSame(String firstTemp,
             String secondTemp, String regex_b)
     {
-        Pattern p = Pattern.compile(REGEX_ARPR_PPTX);
+        Pattern p = P_ARPR_PPTX;
         Matcher m1 = p.matcher(firstTemp);
         String b1 = null;
         String arPr1 = null;
@@ -704,11 +750,11 @@ public class OfficeXmlTagHelper
         Pattern p = null;
         if (filetype == OfficeXmlHelper.OFFICE_DOCX)
         {
-            p = Pattern.compile(REGEX_CONTENT_DOCX);
+            p = P_CONTENT_DOCX;
         }
         else if (filetype == OfficeXmlHelper.OFFICE_PPTX)
         {
-            p = Pattern.compile(REGEX_CONTENT_PPTX);
+            p = P_CONTENT_PPTX;
         }
         Matcher m = p.matcher(all);
         if (m.find())
@@ -723,11 +769,11 @@ public class OfficeXmlTagHelper
         Pattern p = null;
         if (filetype == OfficeXmlHelper.OFFICE_DOCX)
         {
-            p = Pattern.compile(REGEX_CONTENT_DOCX);
+            p = P_CONTENT_DOCX;
         }
         else if (filetype == OfficeXmlHelper.OFFICE_PPTX)
         {
-            p = Pattern.compile(REGEX_CONTENT_PPTX);
+            p = P_CONTENT_PPTX;
         }
         Matcher m = p.matcher(all);
         if (m.find())
@@ -742,12 +788,11 @@ public class OfficeXmlTagHelper
     {
         if (m_type == OfficeXmlHelper.OFFICE_DOCX)
         {
-            String temp = content.replace(
-                    "<w:proofErr w:type=\"spellStart\"/>", "");
-            temp = temp.replace("<w:proofErr w:type=\"spellEnd\"/>", "");
-            temp = temp.replace("<w:proofErr w:type=\"gramStart\"/>", "");
-            temp = temp.replace("<w:proofErr w:type=\"gramEnd\"/>", "");
-            temp = temp.replace("<w:lastRenderedPageBreak/>", "");
+            String temp = StringUtil.replace(content, unusedTag_ss, "");
+            temp = StringUtil.replace(temp, unusedTag_se, "");
+            temp = StringUtil.replace(temp, unusedTag_gs, "");
+            temp = StringUtil.replace(temp, unusedTag_ge, "");
+            temp = StringUtil.replace(temp, unusedTag_lrpb, "");
             // temp = temp.replaceAll("<w:bookmarkStart [^>]*/>", "");
             // temp = temp.replaceAll("<w:bookmarkEnd [^>]*/>", "");
             return temp;

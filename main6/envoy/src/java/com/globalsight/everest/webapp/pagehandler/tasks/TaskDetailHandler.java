@@ -24,9 +24,11 @@ import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
@@ -42,10 +44,13 @@ import org.apache.commons.fileupload.DefaultFileItemFactory;
 import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 
+import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.costing.Cost;
@@ -54,6 +59,7 @@ import com.globalsight.everest.costing.CostingEngineLocal;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.edit.EditHelper;
+import com.globalsight.everest.edit.offline.download.JobPackageZipper;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserRole;
@@ -61,10 +67,12 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.PageState;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -76,19 +84,23 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.comment.CommentMainHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.TranslationProgressReportHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.common.URLEncoder;
+import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GeneralExceptionConstants;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.zip.ZipIt;
 
+@SuppressWarnings("deprecation")
 public class TaskDetailHandler extends PageHandler
 {
     private static final Logger CATEGORY = Logger
@@ -183,11 +195,11 @@ public class TaskDetailHandler extends PageHandler
 
         String action = p_request.getParameter(TASK_ACTION);
 
-        if (action != null && action.equals(TASK_ACTION_SAVEDETAILS))
+        if (TASK_ACTION_SAVEDETAILS.equals(action))
         {
             saveTaskDetails(p_request, httpSession, user.getUserId());
         }
-        else if (action != null && action.equals(TASK_ACTION_ACCEPT))
+        else if (TASK_ACTION_ACCEPT.equals(action))
         {
             acceptTask(p_request, httpSession, user.getUserId());
 
@@ -195,20 +207,20 @@ public class TaskDetailHandler extends PageHandler
             TaskHelper.storeObject(httpSession, TASK_DETAILPAGE_ID,
                     TaskHelper.DETAIL_PAGE_2);
         }
-        else if (action != null && action.equals(DTP_DOWNLOAD))
+        else if (DTP_DOWNLOAD.equals(action))
         {
             dtpDownload(p_request, p_response);
             return;
         }
-        else if (action != null && action.equals(DTP_UPLOAD))
+        else if (DTP_UPLOAD.equals(action))
         {
             dtpUpload(p_request);
         }
-        else if (action != null && action.equals(TASK_ACTION_CREATE_STF))
+        else if (TASK_ACTION_CREATE_STF.equals(action))
         {
             startStfCreationForWorkflow(httpSession, user.getUserId());
         }
-        else if (action != null && action.equals(TASK_ACTION_RETRIEVE))
+        else if (TASK_ACTION_RETRIEVE.equals(action))
         {
             // Get taskId parameter
             String taskIdParam = p_request.getParameter(TASK_ID);
@@ -320,7 +332,7 @@ public class TaskDetailHandler extends PageHandler
             // WebAppConstants.PERMISSIONS);
             boolean isProjectMgr = perms
                     .getPermissionFor(Permission.PROJECTS_MANAGE);
-            if (isProjectMgr && task != null)
+            if (isProjectMgr)
             {
                 TaskHelper.storeObject(httpSession, IS_ASSIGNEE, new Boolean(
                         task.getAllAssignees().contains(uid)));
@@ -365,7 +377,7 @@ public class TaskDetailHandler extends PageHandler
         }
         // default case action==null but must also handle pagesearch action
         else if (action == null
-                || action.equals(JobManagementHandler.PAGE_SEARCH_BEAN))
+                || JobManagementHandler.PAGE_SEARCH_BEAN.equals(action))
         {
             Task task = TaskHelper.retrieveMergeObject(httpSession, TASK);
 
@@ -385,8 +397,7 @@ public class TaskDetailHandler extends PageHandler
             // also filters them according to the search params
             setPages(p_request, httpSession, targetPages, uiLocale);
         }
-        else if (action != null
-                && action.equals(TASK_ACTION_TRANSLATED_TEXT_RETRIEVE))
+        else if (TASK_ACTION_TRANSLATED_TEXT_RETRIEVE.equals(action))
         {
             // for counting translated text issue
             String pageIds = p_request.getParameter(TASK_PAGE_IDS);
@@ -395,23 +406,46 @@ public class TaskDetailHandler extends PageHandler
             {
                 return;
             }
-            String[] pageId = pageIds.split(",");
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < pageId.length; i++)
-            {
-                String percent = TranslationProgressReportHelper
-                        .getTranslatedPercentage(pageId[i]);
-                sb.append(percent).append(",");
-            }
+            String[] pageIdsArray = pageIds.split(",");
+            getPercent(p_response, pageIdsArray);
 
-            if (sb.length() != 0)
-            {
-                PrintWriter out = p_response.getWriter();
-                p_response.setContentType("text/html");
-                out.write(sb.toString());
-                out.close();
-            }
+            return;
+        }
+        else if (TASK_ACTION_APPROVE_TUV.equals(action))
+        {
+            String pageIds = p_request.getParameter(TASK_PAGE_IDS);
+            if (StringUtils.isBlank(pageIds))
+                return;
 
+            // for counting translated text issue
+            PrintWriter out = p_response.getWriter();
+            p_response.setContentType("text/html");
+            // Approve TUVs
+            SegmentTuvUtil.approveTuvByTargetPageIds(pageIds);
+            out.write("1");
+            out.close();
+            return;
+        }
+        else if (TASK_ACTION_DOWNLOAD_SOURCEPAGES.equals(action))
+        {
+            // Get taskId parameter
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            Task task = null;
+            // get task state (determines from which tab, the task details is
+            // requested)
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
+                                                                   // default
+            try
+            {
+                // Get task
+                task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+            }
+            catch (Exception e)
+            {
+            }
+            downloadSourcePages(p_request, p_response, task);
             return;
         }
 
@@ -440,6 +474,26 @@ public class TaskDetailHandler extends PageHandler
         // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
+    }
+
+    private void getPercent(HttpServletResponse p_response,
+            String[] pageIdsArray) throws IOException
+    {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < pageIdsArray.length; i++)
+        {
+            String percent = SegmentTuvUtil.getTranslatedPercentage(Long
+                    .parseLong(pageIdsArray[i]));
+            sb.append(percent).append(",");
+        }
+
+        if (sb.length() != 0)
+        {
+            PrintWriter out = p_response.getWriter();
+            p_response.setContentType("text/html");
+            out.write(sb.toString());
+            out.close();
+        }
     }
 
     /**
@@ -631,6 +685,133 @@ public class TaskDetailHandler extends PageHandler
         }
 
         return newName;
+    }
+
+    private void downloadSourcePages(HttpServletRequest p_request,
+            HttpServletResponse p_response, Task p_task) throws IOException
+    {
+        HttpSession session = p_request.getSession(false);
+        List sourcePages = (List) p_task.getSourcePages();
+
+        Iterator it = sourcePages.iterator();
+        String m_cxeDocsDir = SystemConfiguration.getInstance()
+                .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR,
+                		String.valueOf(p_task.getCompanyId()));
+        ArrayList<String> fileNames = new ArrayList<String>();
+        ArrayList<String> filePaths = new ArrayList<String>();
+        Map<String, String> mapOfNamePath = new HashMap<String, String>();
+        while (it.hasNext())
+        {
+            SourcePage sourcePage = (SourcePage) it.next();
+
+            if (sourcePage.hasRemoved())
+            {
+                continue;
+            }
+
+            StringBuffer sourceSb = new StringBuffer().append(m_cxeDocsDir)
+                    .append("/");
+            String externalPageId = sourcePage.getExternalPageId();
+            externalPageId = externalPageId.replace("\\", "/");
+
+            if (PassoloUtil.isPassoloFile(sourcePage))
+            {
+                externalPageId = externalPageId.substring(0,
+                        externalPageId.lastIndexOf(".lpu/") + 4);
+            }
+
+            externalPageId = SourcePage.filtSpecialFile(externalPageId);
+
+            if (filePaths.contains(externalPageId))
+                continue;
+
+            sourceSb = sourceSb.append(externalPageId);
+            filePaths.add(externalPageId);
+            fileNames.add(sourceSb.toString());
+            mapOfNamePath.put(sourceSb.toString(), externalPageId);
+        }
+        Map<String, String> entryNamesMap = new HashMap<String, String>();
+        String jobName = p_task.getJobName();
+        String zipFileName = URLEncoder.encode(jobName + ".zip");
+        File tmpFile = File.createTempFile("GSDownloadSource", ".zip");
+        try
+        {
+            JobPackageZipper m_zipper = new JobPackageZipper();
+            m_zipper.createZipFile(tmpFile);
+            entryNamesMap = ZipIt.getEntryNamesMap(filePaths);
+            for (int i = 0; i < fileNames.size(); i++)
+            {
+                filePaths.set(i,
+                        entryNamesMap.get(mapOfNamePath.get(fileNames.get(i))));
+            }
+            addSourcePages(m_zipper, fileNames, filePaths, zipFileName);
+            m_zipper.closeZipFile();
+            CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
+            commentFilesDownload.sendFileToClient(p_request, p_response,
+            		jobName + ".zip", tmpFile);
+        }
+        finally
+        {
+            FileUtil.deleteTempFile(tmpFile);
+        }
+    }
+
+    private void addSourcePages(JobPackageZipper m_zipper,
+            List<String> fileNames, List<String> filePaths, String zipFileName)
+    {
+        for (int i = 0; i < fileNames.size(); i++)
+        {
+            File file = new File(fileNames.get(i));
+
+            if (!file.exists())
+            {
+                XmlEntities entity = new XmlEntities();
+                File dir = file.getParentFile();
+                if (dir.isDirectory())
+                {
+                    File[] files = dir.listFiles();
+                    for (File f : files)
+                    {
+                        if (file.getName().equals(
+                                entity.decodeStringBasic(f.getName())))
+                        {
+                            file = f;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (file.exists())
+            {
+                FileInputStream input = null;
+                try
+                {
+                    input = new FileInputStream(file);
+                    m_zipper.writePath(filePaths.get(i));
+                    m_zipper.writeFile(input);
+                    input.close();
+                }
+                catch (IOException ex)
+                {
+                    CATEGORY.warn("cannot write file: " + file
+                            + " to zip stream.", ex);
+                }
+                finally
+                {
+                    try
+                    {
+                        if (input != null)
+                        {
+                            input.close();
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                    }
+                }
+            }
+        }
     }
 
     private void dtpDownload(HttpServletRequest p_request,

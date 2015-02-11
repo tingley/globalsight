@@ -61,11 +61,11 @@ public class MatchState
     // map for getting MatchState object by looking up its name
     // Key: state name
     // Value: MatchState object
-    static private final HashMap c_nameLookupTable = createNameLookup();
-    
-    static private HashMap createNameLookup()
+    static private final HashMap<String, MatchState> c_nameLookupTable = createNameLookup();
+
+    static private HashMap<String, MatchState> createNameLookup()
     {
-        HashMap map = new HashMap();
+        HashMap<String, MatchState> map = new HashMap<String, MatchState>();
         
         map.put(IN_PROGRESS_TM_EXACT_MATCH.getName(),
             IN_PROGRESS_TM_EXACT_MATCH);
@@ -149,7 +149,7 @@ public class MatchState
 
     public static MatchState getMatchState(String p_stateName)
     {
-        return (MatchState)c_nameLookupTable.get(p_stateName);
+        return (MatchState) c_nameLookupTable.get(p_stateName);
     }
     
     public static int getCompareKey(String p_stateName)

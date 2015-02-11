@@ -421,7 +421,7 @@ function doOnload()
 <tr>
     <td><%=bundle.getString("lb_export_as")%></td>
     <td>
-        <input type="radio" name="exportFormat" value="xls" checked>XLS<br>
+        <input type="radio" name="exportFormat" value="xlsx" checked>XLSX<br>
         <input type="radio" name="exportFormat" value="csv">CSV
     </td>
 </tr>

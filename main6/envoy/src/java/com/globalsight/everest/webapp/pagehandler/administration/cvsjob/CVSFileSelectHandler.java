@@ -199,9 +199,9 @@ public class CVSFileSelectHandler extends PageHandler
         sb.append(File.separator);
         sb.append(p_sourceLocale);
         sb.append(File.separator);
-        sb.append(sdf.format(p_uploadDate));
-        sb.append("_");
         sb.append(p_jobName);
+        sb.append("_");
+        sb.append(sdf.format(p_uploadDate));
         return sb.toString();
     }
 

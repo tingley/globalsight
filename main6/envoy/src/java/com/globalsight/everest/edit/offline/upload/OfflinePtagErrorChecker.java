@@ -180,6 +180,7 @@ public class OfflinePtagErrorChecker implements Cancelable
         PseudoData pTagData = new PseudoData();
         pTagData.setMode(PseudoConstants.PSEUDO_COMPACT);
         PseudoErrorChecker errorChecker = new PseudoErrorChecker();
+        errorChecker.setEscapeResult(true);
         errorChecker.setStyles(SegmentUtil2.getTAGS());
         boolean hasError = false;
         List<List<String>> errorInternalList = new ArrayList<List<String>>();
@@ -224,19 +225,12 @@ public class OfflinePtagErrorChecker implements Cancelable
 	           	 String path = sp.getExternalPageId().toLowerCase();
 	           	 if ("office-xml".equals(tuv.getDataType(companyId)))
 	           	 {
-	           		 if (path.endsWith(".docx") || path.endsWith(".pptx"))
-	           		 {
-	           			 pTagData.setAddables("office-xml");
-	           		 }
-	           		 else
-	           		 {
-	           			 pTagData.setAddables("office");
-	           		 }
+	           		 pTagData.setAddables("office-xml");
 	           	 }
 	           	 else
 	           	 {
 	           		// all other non-html formats
-	                    pTagData.setAddables(tuv.getDataType(companyId));
+	                 pTagData.setAddables(tuv.getDataType(companyId));
 	           	 }
             }
             TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pTagData);
@@ -417,10 +411,10 @@ public class OfflinePtagErrorChecker implements Cancelable
         // Create PTag resources
         pTagData = new PseudoData();
         pTagData.setLocale(m_errWriter.getLocale());
-        pTagData.setDataType(p_uploadPage.getDocumentFormat());
 
         convertor = new TmxPseudo();
         errorChecker = new PseudoErrorChecker();
+        errorChecker.setEscapeResult(true);
         errorChecker.setStyles(SegmentUtil2.getTAGS());
         // Confirm/get the ptag display mode.
         if (p_uploadPage.getPlaceholderFormat().equals(
@@ -479,6 +473,8 @@ public class OfflinePtagErrorChecker implements Cancelable
 
                 uploadSeg = p_uploadPage.getSegmentByDisplayId(refSeg
                         .getDisplaySegmentID());
+                
+                pTagData.setDataType(refSeg.getDisplaySegmentFormat());
 
                 // Detect SegmentMissingError.
                 // Note: SegmentAddError is detected way below - it is the last

@@ -16,19 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.projects;
 
-/* Copyright (c) 2000, GlobalSight Corporation.  All rights reserved.
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
-// java
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,26 +32,31 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
 import com.globalsight.everest.projecthandler.ProjectImpl;
+import com.globalsight.everest.projecthandler.ProjectInfo;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.usermgr.UserInfo;
-import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
-public class ProjectHandlerHelper 
+public class ProjectHandlerHelper
 {
-    private static Logger logger = Logger.getLogger(ProjectHandlerHelper.class.getName());
-    
+    private static Logger logger = Logger.getLogger(ProjectHandlerHelper.class
+            .getName());
+
     /**
      * Add a project to the system.
      * <p>
-     * @param p_project The project to add.
-     * @exception EnvoyServletException.  Failed to add the profile;
-     *		  the cause is indicated by the exception code.
+     * 
+     * @param p_project
+     *            The project to add.
+     * @exception EnvoyServletException. Failed
+     *                to add the profile; the cause is indicated by the
+     *                exception code.
      */
-    public static void addProject(Project p_project) throws EnvoyServletException
+    public static void addProject(Project p_project)
+            throws EnvoyServletException
     {
         try
         {
@@ -72,7 +64,7 @@ public class ProjectHandlerHelper
         }
         catch (ProjectHandlerException phe)
         {
-            throw new EnvoyServletException(phe.getExceptionId(), phe);
+            throw new EnvoyServletException(phe);
         }
         catch (NamingException ne)
         {
@@ -80,7 +72,7 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -91,9 +83,11 @@ public class ProjectHandlerHelper
     /**
      * Create a project.
      * <p>
+     * 
      * @return Return the project that is created.
-     * @exception EnvoyServletException.  Failed to create the project; the cause
-     *		  is indicated by the exception code.
+     * @exception EnvoyServletException. Failed
+     *                to create the project; the cause is indicated by the
+     *                exception code.
      */
     public static Project createProject() throws EnvoyServletException
     {
@@ -103,7 +97,7 @@ public class ProjectHandlerHelper
         }
         catch (ProjectHandlerException phe)
         {
-            throw new EnvoyServletException(phe.getExceptionId(), phe);
+            throw new EnvoyServletException(phe);
         }
         catch (NamingException ne)
         {
@@ -111,7 +105,7 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -122,11 +116,15 @@ public class ProjectHandlerHelper
     /**
      * Delete a project from the system.
      * <p>
-     * @param p_project The project to be deleted.
-     * @exception EnvoyServletException.  Failed to delete the project; the cause
-     * 		  is indicated by the exception code.
+     * 
+     * @param p_project
+     *            The project to be deleted.
+     * @exception EnvoyServletException. Failed
+     *                to delete the project; the cause is indicated by the
+     *                exception code.
      */
-    public static void deleteProject(Project p_project) throws EnvoyServletException
+    public static void deleteProject(Project p_project)
+            throws EnvoyServletException
     {
         try
         {
@@ -134,7 +132,7 @@ public class ProjectHandlerHelper
         }
         catch (ProjectHandlerException phe)
         {
-            throw new EnvoyServletException(phe.getExceptionId(), phe);
+            throw new EnvoyServletException(phe);
         }
         catch (NamingException ne)
         {
@@ -142,7 +140,7 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -153,11 +151,14 @@ public class ProjectHandlerHelper
     /**
      * Returns all the projects in the system.
      * <p>
+     * 
      * @return Return all the projects in the system.
-     * @exception EnvoyServletException.  Miscellaneous exception, most likely
-     *            occuring in the persistence component.
+     * @exception EnvoyServletException. Miscellaneous
+     *                exception, most likely occuring in the persistence
+     *                component.
      */
-    public static Collection getAllProjects() throws EnvoyServletException
+    public static Collection<Project> getAllProjects()
+            throws EnvoyServletException
     {
         try
         {
@@ -165,7 +166,7 @@ public class ProjectHandlerHelper
         }
         catch (ProjectHandlerException phe)
         {
-            throw new EnvoyServletException(phe.getExceptionId(), phe);
+            throw new EnvoyServletException(phe);
         }
         catch (NamingException ne)
         {
@@ -173,7 +174,7 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -184,11 +185,14 @@ public class ProjectHandlerHelper
     /**
      * Returns all the projects (as ProjectInfo) in the system.
      * <p>
+     * 
      * @return Return all the projects (as ProjectInfo) in the system.
-     * @exception EnvoyServletException.  Miscellaneous exception, most likely
-     *            occuring in the persistence component.
+     * @exception EnvoyServletException. Miscellaneous
+     *                exception, most likely occuring in the persistence
+     *                component.
      */
-    public static Collection getAllProjectsForGUI() throws EnvoyServletException
+    public static Collection<ProjectInfo> getAllProjectsForGUI()
+            throws EnvoyServletException
     {
         try
         {
@@ -196,7 +200,7 @@ public class ProjectHandlerHelper
         }
         catch (ProjectHandlerException phe)
         {
-            throw new EnvoyServletException(phe.getExceptionId(), phe);
+            throw new EnvoyServletException(phe);
         }
         catch (NamingException ne)
         {
@@ -204,7 +208,7 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -215,7 +219,9 @@ public class ProjectHandlerHelper
     /**
      * Get user matched the given uid.
      * <p>
-     * @param p_userId - The user id
+     * 
+     * @param p_userId
+     *            - The user id
      * @return The user associated with the user id.
      * @exception EnvoyServletException
      */
@@ -227,29 +233,7 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
-        }
-        catch (RemoteException re)
-        {
-            throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
-        }
-    }
-
-    /**
-     * Get the Tm objects in the system.
-     * <p>
-     * @return A collection of Tms.
-     * @exception EnvoyServletException.
-     */
-    public static Collection getAllTms() throws EnvoyServletException
-    {
-        try
-        {
-            return ServerProxy.getTmManager().getAllTms();
-        }
-        catch (GeneralException ge)
-        {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -260,21 +244,23 @@ public class ProjectHandlerHelper
     /**
      * Modify a project in the system.
      * <p>
-     * @param p_project The project to be modified.
-     * @exception EnvoyServletException.  Componenet related exception.
+     * 
+     * @param p_project
+     *            The project to be modified.
+     * @exception EnvoyServletException. Componenet
+     *                related exception.
      */
-    public static void modifyProject(Project p_project, 
-                                     String p_modifierId)
-        throws EnvoyServletException
+    public static void modifyProject(Project p_project, String p_modifierId)
+            throws EnvoyServletException
     {
-	try
+        try
         {
-            ServerProxy.getProjectHandler().modifyProject(
-                p_project, p_modifierId);
+            ServerProxy.getProjectHandler().modifyProject(p_project,
+                    p_modifierId);
         }
         catch (ProjectHandlerException phe)
         {
-            throw new EnvoyServletException(phe.getExceptionId(), phe);
+            throw new EnvoyServletException(phe);
         }
         catch (NamingException ne)
         {
@@ -282,7 +268,7 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -293,11 +279,14 @@ public class ProjectHandlerHelper
     /**
      * Retrieve an existing project.
      * <p>
+     * 
      * @return Return an existing project.
-     * @exception EnvoyServletException.  Failed to access the project; the cause
-     *		  is indicated by the exception code.
+     * @exception EnvoyServletException. Failed
+     *                to access the project; the cause is indicated by the
+     *                exception code.
      */
-    public static Project getProjectById(long p_id) throws EnvoyServletException
+    public static Project getProjectById(long p_id)
+            throws EnvoyServletException
     {
         try
         {
@@ -305,7 +294,7 @@ public class ProjectHandlerHelper
         }
         catch (ProjectHandlerException phe)
         {
-            throw new EnvoyServletException(phe.getExceptionId(), phe);
+            throw new EnvoyServletException(phe);
         }
         catch (NamingException ne)
         {
@@ -313,37 +302,41 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
             throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
         }
     }
-    
+
     public static ProjectImpl getProjectByName(String p_name)
     {
         try
         {
-            return (ProjectImpl) ServerProxy.getProjectHandler().getProjectByName(p_name);
+            return (ProjectImpl) ServerProxy.getProjectHandler()
+                    .getProjectByName(p_name);
         }
         catch (Exception e)
         {
-            logger.error("getProjectByName Error, with input name is " + p_name + ": ", e);
+            logger.error("getProjectByName Error, with input name is " + p_name
+                    + ": ", e);
         }
-        
+
         return null;
     }
-    
+
     /**
      * 
      * Returns all the projects (as Project) in the system.
      * <p>
+     * 
      * @return Return all the projects in the system.
-     * @exception EnvoyServletException. 
+     * @exception EnvoyServletException.
      * 
      */
-    public static List getProjectByUser(String p_id) throws EnvoyServletException
+    public static List<Project> getProjectByUser(String p_id)
+            throws EnvoyServletException
     {
         try
         {
@@ -351,7 +344,7 @@ public class ProjectHandlerHelper
         }
         catch (ProjectHandlerException phe)
         {
-            throw new EnvoyServletException(phe.getExceptionId(), phe);
+            throw new EnvoyServletException(phe);
         }
         catch (NamingException ne)
         {
@@ -359,7 +352,7 @@ public class ProjectHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -370,18 +363,19 @@ public class ProjectHandlerHelper
     /**
      * Retrieve possible users for a project that a particular pm owns
      * <p>
+     * 
      * @return Return an list of users.
      */
-    public static List getPossibleUsersForProject(User pm)
-         throws EnvoyServletException
+    public static List<UserInfo> getPossibleUsersForProject(User pm)
+            throws EnvoyServletException
     {
         try
         {
-             return ServerProxy.getProjectHandler().getAllPossibleUserInfos(pm);
+            return ServerProxy.getProjectHandler().getAllPossibleUserInfos(pm);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -396,24 +390,25 @@ public class ProjectHandlerHelper
     /**
      * Extract data from users page and set in project.
      */
-    public static void extractUsers(Project project, HttpServletRequest request,
-                                    SessionManager sessionMgr)
-        throws EnvoyServletException
+    public static void extractUsers(Project project,
+            HttpServletRequest request, SessionManager sessionMgr)
+            throws EnvoyServletException
     {
         // Set users
-        String toField = (String)request.getParameter("toField");
+        String toField = (String) request.getParameter("toField");
         // First, make sure default users are in the list
-        ArrayList defUsers = (ArrayList)sessionMgr.getAttribute("defUsers");
-        TreeSet addedUsers = new TreeSet();
+        ArrayList<UserInfo> defUsers = (ArrayList<UserInfo>) sessionMgr
+                .getAttribute("defUsers");
+        TreeSet<String> addedUsers = new TreeSet<String>();
         for (int i = 0; i < defUsers.size(); i++)
         {
-            addedUsers.add(((UserInfo)defUsers.get(i)).getUserId());
+            addedUsers.add(((UserInfo) defUsers.get(i)).getUserId());
         }
 
         if (toField != null && !toField.equals(""))
         {
             String[] userids = toField.split(",");
-            for (int i=0; i < userids.length; i++)
+            for (int i = 0; i < userids.length; i++)
             {
                 addedUsers.add(userids[i]);
             }
@@ -421,36 +416,27 @@ public class ProjectHandlerHelper
         project.setUserIds(addedUsers);
     }
 
-    private static UserManager getUserManager()
-        throws EnvoyServletException
-    {
-        try
-        {
-            return ServerProxy.getUserManager();
-        }
-        catch (GeneralException ge)
-        {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
-        }
-    }
-    
     /**
      * Set Project Data from request
-     * @param p_updatePm    Whether update the Project PM
+     * 
+     * @param p_updatePm
+     *            Whether update the Project PM
      */
-    public static void setData(ProjectImpl p_project, HttpServletRequest p_request,
-            boolean p_updatePm) throws EnvoyServletException
+    public static void setData(ProjectImpl p_project,
+            HttpServletRequest p_request, boolean p_updatePm)
+            throws EnvoyServletException
     {
         p_project.setName((String) p_request.getParameter("nameField"));
         p_project.setTermbaseName((String) p_request.getParameter("tbField"));
-        
+
         // Update Project PM
         if (p_updatePm)
         {
             String pmName = (String) p_request.getParameter("pmField");
             if (pmName != null)
             {
-                p_project.setProjectManager(ProjectHandlerHelper.getUser(pmName));
+                p_project.setProjectManager(ProjectHandlerHelper
+                        .getUser(pmName));
             }
         }
 
@@ -506,8 +492,18 @@ public class ProjectHandlerHelper
                 .getParameter("reviewOnlyAS")));
         p_project.setAutoAcceptPMTask("on".equalsIgnoreCase(p_request
                 .getParameter("autoAcceptPMTask")));
-        
+        p_project.setReviewReportIncludeCompactTags("on".equalsIgnoreCase(p_request
+                .getParameter("reviewReportIncludeCompactTags")));
+
         p_project.setCheckUnTranslatedSegments("on".equalsIgnoreCase(p_request
                 .getParameter("checkUnTransSeg")));
+
+        p_project.setSaveTranslationsEditReport("on".equalsIgnoreCase(p_request
+                .getParameter("saveTranslationsEditReport")));
+        p_project.setSaveReviewersCommentsReport("on"
+                .equalsIgnoreCase(p_request
+                        .getParameter("saveReviewersCommentsReport")));
+        p_project.setSaveOfflineFiles("on".equalsIgnoreCase(p_request
+                .getParameter("saveOfflineFiles")));
     }
 }

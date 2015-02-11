@@ -23,11 +23,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvMerger;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
@@ -109,7 +111,9 @@ public class PageJobData
      */
     public Collection getCompleteTus() throws Exception
     {
-        return getTusByState("COMPLETE", INCLUDE_STATE);
+        Set<String> states = new HashSet<String>();
+        states.add(TuvState.COMPLETE.getName());
+        return getTusByState(states, INCLUDE_STATE);
     }
 
     // Returns a Collection of Tus in this object that have Tuvs that
@@ -128,7 +132,11 @@ public class PageJobData
         }
         else
         {
-            tuList = getTusByState("NOT_LOCALIZED", EXCLUDE_STATE);
+            Set<String> states = new HashSet<String>();
+            states.add(TuvState.NOT_LOCALIZED.getName());
+            states.add(TuvState.APPROVED.getName());
+            states.add(TuvState.DO_NOT_TRANSLATE.getName());
+            tuList = getTusByState(states, EXCLUDE_STATE);
         }
 
         return tuList;
@@ -147,8 +155,8 @@ public class PageJobData
      *            indicates whether Tuvs returned have p_state or not have
      *            p_state
      */
-    private Collection getTusByState(String p_state, boolean p_excludeState)
-            throws Exception
+    private Collection getTusByState(Set<String> p_states,
+            boolean p_excludeState) throws Exception
     {
         populateMergedTus();
 
@@ -170,7 +178,7 @@ public class PageJobData
 
                 // Source Tuvs are added regardless of its state
                 if (tuvLocale.equals(m_sourceLocale)
-                        || (p_excludeState ^ tuv.getState().equals(p_state)))
+                        || (p_excludeState ^ p_states.contains(tuv.getState())))
                 {
                     clonedTu.addTuv(tuv);
                 }

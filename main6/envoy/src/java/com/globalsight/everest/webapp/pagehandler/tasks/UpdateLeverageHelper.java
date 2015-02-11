@@ -93,8 +93,11 @@ public class UpdateLeverageHelper
     public static Collection<Tuv> getUntranslatedTuvs(TargetPage p_tp,
             long p_sourceLocaleId)
     {
-        logger.debug("Begin getUntranslatedTuvs() for target page "
-                + p_tp.getId() + ", source locale Id " + p_sourceLocaleId);
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Begin getUntranslatedTuvs() for target page "
+                    + p_tp.getId() + ", source locale Id " + p_sourceLocaleId);            
+        }
         if (p_tp == null || p_sourceLocaleId < 1)
         {
             return new ArrayList<Tuv>();
@@ -144,8 +147,13 @@ public class UpdateLeverageHelper
                     untranslatedSrcTuvs.add(srcTuv);
                 }
             }
-            logger.debug("End getUntranslatedTuvs() for target page "
-                    + p_tp.getId() + ", source locale Id " + p_sourceLocaleId);
+
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("End getUntranslatedTuvs() for target page "
+                        + p_tp.getId() + ", source locale Id "
+                        + p_sourceLocaleId);                
+            }
         }
         catch (Exception e)
         {
@@ -458,13 +466,7 @@ public class UpdateLeverageHelper
                             }
                         }
                     }
-
-                    Collection tuvList2 = leveragedTu
-                            .getTuvList(p_targetLocale);
-                    if (tuvList2 != null && tuvList2.size() > 0)
-                    {
-                        newLeveragedTus.add(leveragedTu);
-                    }
+                    newLeveragedTus.add(leveragedTu);
                 }
 
                 levMatches.setLeveragedTus(newLeveragedTus);

@@ -302,10 +302,11 @@ public class Uploader
         wr.flush();
         wr.close();
 
-        String l = null;
+        // Invoke "getInputStream()" method to send out the request to
+        // "CapExportServlet".
         BufferedReader rd = new BufferedReader(new InputStreamReader(conn
                 .getInputStream()));
-        while ((l = rd.readLine()) != null)
+        while ((rd.readLine()) != null)
         {
             /* just read the output */
         }

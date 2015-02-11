@@ -30,7 +30,6 @@ import org.jbpm.graph.def.Node;
 import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
-import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
@@ -225,6 +224,8 @@ public class TaskThread extends MultiCompanySupportedThread
             if (p_activityType == Activity.TYPE_REVIEW)
             {
                 generator = new ReviewersCommentsReportGenerator(p_companyName);
+                ((ReviewersCommentsReportGenerator)generator).setIncludeCompactTags(
+                        p_project.isReviewReportIncludeCompactTags());
             }
             else
             {

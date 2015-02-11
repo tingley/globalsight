@@ -23,7 +23,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -31,14 +33,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-
-import jxl.write.NumberFormat;
-import jxl.write.WritableCellFormat;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -49,7 +49,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -59,6 +58,9 @@ import com.globalsight.util.SortUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 import com.globalsight.util.zip.ZipIt;
+//import jxl.write.NumberFormat;
+//import jxl.write.WritableCellFormat;
+//import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 
 public class ReportHelper
 {
@@ -277,72 +279,86 @@ public class ReportHelper
     // }
 
     /**
-     * Gets the Excel Report File, such as
-     * {FileStorage}/{CompanyName}/GlobalSight/Reports/
-     * {ReportType}-[jobName][jobId].xls.
+     * Gets the Excel Report File.
      */
     public static File getXLSReportFile(String p_reportType, Job p_job)
     {
-        String extension = ".xls";
-        if (ReportConstants.TRANSLATIONS_EDIT_REPORT.equals(p_reportType)
-                || ReportConstants.REVIEWERS_COMMENTS_REPORT
-                        .equals(p_reportType)
-                || ReportConstants.COMMENTS_ANALYSIS_REPORT
-                        .equals(p_reportType))
-        {
-            extension = ".xlsx";
-        }
-        return getReportFile(p_reportType, p_job, extension);
+        return getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX);
     }
 
     /**
      * Gets the Report File, such as
-     * {FileStorage}/{CompanyName}/GlobalSight/Reports
-     * /{ReportType}-[jobName][jobId].xls.
+     * {FileStorage}/{CompanyName}/Reports/
+     * {ReportType}-(jobName)(jobId)-{Timestamp}.xlsx
      * 
      * @param p_reportType
      *            Report Type
      * @param p_job
      * @param p_extension
-     *            Report File Extension, such as .xls/.csv
+     *            Report File Extension, such as .xlsx/.csv
      * @return
      */
     public static File getReportFile(String p_reportType, Job p_job,
             String p_extension)
     {
-        String companyId = p_job != null ? String.valueOf(p_job.getCompanyId())
-                : CompanyWrapper.getCurrentCompanyId();
-
-        int maxLen = 50;
         StringBuffer result = new StringBuffer();
-        result.append(AmbFileStoragePathUtils.getFileStorageDirPath(companyId))
+        result.append(AmbFileStoragePathUtils.getFileStorageDirPath(1))
                 .append(File.separator);
         result.append(ReportConstants.REPORTS_SUB_DIR).append(File.separator);
         new File(result.toString()).mkdirs();
+        // Report Name Part 1: Report Type
+        result.append(p_reportType);
+        // Report Name Part 2: Job Info
         if (p_job != null)
         {
             String jobName = p_job.getJobName();
-            if (jobName != null && jobName.length() > maxLen)
-            {
-                jobName = jobName.substring(0, maxLen);
-            }
-            result.append(p_reportType + "-(" + jobName + ")("
-                    + p_job.getJobId() + ")" + p_extension);
+            result.append("-(").append(jobName).append(")(")
+                  .append(p_job.getJobId()).append(")");
         }
-        else
-        {
-            result.append(p_reportType + p_extension);
-        }
+        //  Report Name Part 3: Timestamp
+        result.append("-").append(new SimpleDateFormat("yyyyMMdd HHmmss").format(new Date()));
+        //  Report Name Part 4: File Extension
+        result.append(p_extension);
 
         return new File(result.toString());
     }
-
-    public static void deleteFiles(File[] files)
+    
+    /**
+     * Move the report to the user folder for download, the path will be 
+     * {FileStorage}/Reports/{userID}/{ReportType}/{dateRange}/{ReportName.xlsx}.
+     * 
+     * @param p_fileList
+     *            The temp report file list.
+     * @param p_userID
+     *            The operator user id.
+     */
+    public static File[] moveReports(List<File> p_fileList, String p_userID)
     {
-        for (File file : files)
+        if(p_fileList == null || p_fileList.size() == 0)
+            return new File[0];
+        
+        File reports[] = new File[p_fileList.size()];
+        for (int i = 0; i < reports.length; i++)
         {
-            file.delete();
+            File srcReport = p_fileList.get(i);
+            String name = srcReport.getName();
+            String srcPath = srcReport.getPath();
+            srcPath = srcPath.substring(0, srcPath.lastIndexOf(File.separator) + 1);
+            String destPath = p_userID + File.separator;
+            destPath += name.substring(0, name.indexOf("-")) + File.separator;
+            destPath += new SimpleDateFormat("yyyyMMdd").format(new Date()) + File.separator;
+            destPath = srcPath + destPath;
+            File destFolder = new File(destPath);
+            destFolder.mkdirs();
+            
+            File report = new File(destPath + srcReport.getName());
+            if(report.exists())
+                report.delete();
+            srcReport.renameTo(report);
+            reports[i] = report;
         }
+        
+        return reports;
     }
 
     /**
@@ -354,10 +370,13 @@ public class ReportHelper
      *            response content type
      * @param p_response
      *            response
+     * @param p_isDelete
+     *            whether delete the input file(p_file).
      * @throws IOException
      * @throws ServletException
      */
-    protected static void sendFile(File p_file, HttpServletResponse p_response)
+    protected static void sendFile(File p_file, HttpServletResponse p_response, 
+            boolean p_isDelete) 
             throws IOException, ServletException
     {
         BufferedInputStream buf = null;
@@ -365,11 +384,9 @@ public class ReportHelper
         try
         {
             p_response.setContentType(getMINEType(p_file));
-            p_response.setHeader("Content-Disposition", "attachment; filename="
-                    + p_file.getName().replace(" ", ""));
+            p_response.setHeader("Content-Disposition", "attachment; filename=\"" + p_file.getName() + "\"");
             p_response.setHeader("Expires", "0");
-            p_response.setHeader("Cache-Control",
-                    "must-revalidate, post-check=0,pre-check=0");
+            p_response.setHeader("Cache-Control", "must-revalidate, post-check=0,pre-check=0");
             p_response.setHeader("Pragma", "public");
             p_response.setContentLength((int) p_file.length());
             FileInputStream fis = new FileInputStream(p_file);
@@ -390,7 +407,8 @@ public class ReportHelper
                 buf.close();
             if (out != null)
                 out.close();
-            p_file.delete();
+            if (p_isDelete)
+                p_file.delete();
         }
     }
 
@@ -401,6 +419,13 @@ public class ReportHelper
         File[] files = p_reports.toArray(new File[p_reports.size()]);
         sendFiles(files, p_zipFileName, p_response);
     }
+    
+    public static void sendFiles(File[] p_files, String p_zipFileName,
+            HttpServletResponse p_response) throws FileNotFoundException,
+            IOException, ServletException
+    {
+        sendFiles(p_files, p_zipFileName, p_response, false);
+    }
 
     /**
      * Sends Files to Client.
@@ -410,12 +435,17 @@ public class ReportHelper
      * @param p_zipFileName
      *            ZIP File Name.
      * @param p_response
+     *            Servlet Response
+     * @param p_isDelete
+     *            Whether delete input files(p_files)
      */
-    public static void sendFiles(File[] p_files, String p_zipFileName,
-            HttpServletResponse p_response) throws FileNotFoundException,
-            IOException, ServletException
+    public static void sendFiles(File[] p_files, String p_zipFileName, 
+            HttpServletResponse p_response, boolean p_isDelete) 
+            throws FileNotFoundException, IOException, ServletException
     {
         File file = null;
+        // Whether delete the final file(Delete ZIP file).
+        boolean isDeleteFinalFile = true;
         if (p_files == null || p_files.length == 0)
         {
             return;
@@ -423,6 +453,7 @@ public class ReportHelper
         else if (p_files.length == 1)
         {
             file = p_files[0];
+            isDeleteFinalFile = p_isDelete;
         }
         else
         {
@@ -432,10 +463,42 @@ public class ReportHelper
             }
             file = new File(p_zipFileName + ".zip");
             ZipIt.addEntriesToZipFile(file, p_files, true, "");
-            ReportHelper.deleteFiles(p_files);
+            if (p_isDelete)
+                ReportHelper.deleteFiles(p_files);
         }
 
-        sendFile(file, p_response);
+        sendFile(file, p_response, isDeleteFinalFile);
+    }
+    
+    public static void sendFiles(Set<File> p_files, String p_zipFileName, 
+            HttpServletResponse p_response, boolean p_isDelete) 
+            throws FileNotFoundException, IOException, ServletException
+    {
+        File file = null;
+        // Whether delete the final file(Delete ZIP file).
+        boolean isDeleteFinalFile = true;
+        if (p_files == null || p_files.size() == 0)
+        {
+            return;
+        }
+        else if (p_files.size() == 1)
+        {
+            file = p_files.iterator().next();
+            isDeleteFinalFile = p_isDelete;
+        }
+        else
+        {
+            if (p_zipFileName == null || p_zipFileName.trim().length() == 0)
+            {
+                p_zipFileName = ReportConstants.REPORTS_NAME;
+            }
+            file = new File(p_zipFileName + ".zip");
+            ZipIt.addEntriesToZipFile(file, p_files, true, "");
+            if (p_isDelete)
+                ReportHelper.deleteFiles(p_files);
+        }
+
+        sendFile(file, p_response, isDeleteFinalFile);
     }
 
     /**
@@ -451,7 +514,11 @@ public class ReportHelper
         {
             return "application/zip";
         }
-        else if (fileName.endsWith(".xls") || fileName.endsWith(".csv"))
+        else if(fileName.endsWith(".csv"))
+        {
+            return "application/csv";
+        }
+        else if (fileName.endsWith(".xls"))
         {
             return "application/msexcel";
         }
@@ -586,13 +653,13 @@ public class ReportHelper
                 .clone();
     }
 
-    public static WritableCellFormat getMoneyFormat(String p_currencyName)
-    {
-        String symbol = ReportUtil.getCurrencySymbol(p_currencyName);
-        NumberFormat moneyFormat = new NumberFormat(symbol + "###,###,##0.000",
-                NumberFormat.COMPLEX_FORMAT);
-        return new WritableCellFormat(moneyFormat);
-    }
+//    public static WritableCellFormat getMoneyFormat(String p_currencyName)
+//    {
+//        String symbol = ReportUtil.getCurrencySymbol(p_currencyName);
+//        NumberFormat moneyFormat = new NumberFormat(symbol + "###,###,##0.000",
+//                NumberFormat.COMPLEX_FORMAT);
+//        return new WritableCellFormat(moneyFormat);
+//    }
 
     public static String getJobStatusDisplayName(String p_jobState)
     {
@@ -641,11 +708,15 @@ public class ReportHelper
             defaultName = "Exporting";
             propertyKey = "lb_state_exporting";
         }
-        else if ((p_jobState.equals(Job.EXPORTED))
-                || (p_jobState.equals(Job.EXPORT_FAIL)))
+        else if (p_jobState.equals(Job.EXPORTED))
         {
             defaultName = "Exported";
             propertyKey = "lb_exported";
+        }
+        else if(p_jobState.equals(Job.EXPORT_FAIL))
+        {
+        	defaultName = "Export Failed";
+            propertyKey = "lb_exported_failed";
         }
         else if (p_jobState.equals(Job.UPLOADING))
         {
@@ -811,5 +882,21 @@ public class ReportHelper
             result.add(job.getJobId());
         }
         return result;
+    }
+    
+    public static void deleteFiles(File[] files)
+    {
+        for (File file : files)
+        {
+            file.delete();
+        }
+    }
+    
+    public static void deleteFiles(Set<File> files)
+    {
+        for (File file : files)
+        {
+            file.delete();
+        }
     }
 }

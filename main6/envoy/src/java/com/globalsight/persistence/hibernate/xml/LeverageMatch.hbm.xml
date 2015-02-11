@@ -34,6 +34,9 @@
  		<property name="mtName" column="MT_NAME" type="string"/>
  		<property name="matchedOriginalSource" column="MATCHED_ORIGINAL_SOURCE" type="string"/>
  		<property name="jobDataTuId" column="JOB_DATA_TU_ID" type="long" />
+    	<property name="sid" length="255" column="SID" type="string" not-null="false" unique="false" />
+    	<property name="creationUser" length="80" column="CREATION_USER" type="string" not-null="false" unique="false" />
+    	<property name="modifyDate" column="MODIFY_DATE" type="timestamp" not-null="true" unique="false" />
     </class>
 
 </hibernate-mapping>

@@ -27,6 +27,7 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
 {
 
     private long sharedStorageId;
+    private TuStorage<T> tuStorage;
 
     protected MultilingualSharedStorageInfo(MultilingualSharedTm<T> tm)
     {
@@ -118,7 +119,11 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
     @Override
     TuStorage<T> getTuStorage()
     {
-        return new SharedTuStorage<T>(this);
+        if (tuStorage == null)
+        {
+            tuStorage = new SharedTuStorage<T>(this);
+        }
+        return tuStorage;
     }
 
     @Override

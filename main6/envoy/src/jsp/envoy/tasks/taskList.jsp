@@ -582,7 +582,7 @@
         // alert("<%= errorMsg %>");
         <% } %>
     }
-
+    var selectedTasks = "";
     function submitForm(selectedButton)
     {
     	// Ensuer at least one task is selected
@@ -591,7 +591,7 @@
             return false;
         }
 
-        var selectedTasks = "";
+        selectedTasks = "";
        
        <% if (state == stateAvailable || state == stateInProgress) { %>
             var valuesArray;
@@ -640,15 +640,45 @@
             ActivityForm.submit();
             return;
         }
-
+		//click "TranslatedText"  open new window
+      // if( selectedButton == "TranslatedText"){
+    	 // url += "&taskParam=" + selectedTasks + "&jobId=" + jobId + "&jobName=" + jobName;
+    	 // window.open(url, "TranslateText", "resizable=no,scrollbars=yes,width=1000,height=500,hotkeys=yes");
+		 //return;
+      // }
+       //click "TranslatedText" add new column
+       if(selectedButton == "TranslatedText"){
+    	   var urlJSON = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=retrieveTranslatedText"%>";
+    	   urlJSON += "&taskParam=" + selectedTasks;
+    	   $.getJSON(urlJSON,function(data){
+    		   if(data.progress){
+    			   var data = data.progress;
+        		   var taskPrens = data.substring(0, data.length - 1);
+        		   var taskPrenAllArr = taskPrens.split(",");
+        		   for(var i = 0;i < taskPrenAllArr.length; i++){
+        		   		var taskPren = taskPrenAllArr[i];
+        		   		var taskPrenArr = taskPren.split("_");
+        		   		var objName = "translated"+taskPrenArr[0];
+        		   		var obj = document.getElementById(objName);
+        		   		if(taskPrenArr[1] < 100){
+        		   			obj.style.color = "red";
+        		   			obj.innerHTML = "(" + taskPrenArr[1] + "%)";
+        		   		}else{
+        		   			obj.style.color = "black";
+        		   			obj.innerHTML = "(" + taskPrenArr[1] + "%)";
+        		   		}
+        		   		
+        		   }
+    		   }
+    	   });
+    	   return;
+       }
        // Batch complete activity button
        if (selectedButton == "CompleteActivity")
        {
-           if(confirm('<%=bundle.getString("jsmsg_batch_complete_activity")%>')) 
-           {
 			    //for GBS-1939
 				var urlJSON = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=selectedTasksStatus"%>";
-				urlJSON += "&taskParam=" + selectedTasks;
+				urlJSON += "&taskParam=" + selectedTasks + "&fresh=" + Math.random();
 				$.getJSON(urlJSON, function(data) {
 					if (data.isUploadingJobName)
 					{
@@ -656,38 +686,65 @@
 					}
 					if (data.isFinishedTaskId)
 					{
+						var confirmInfo="";
 						var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeActivity"%>";
 						action += "&taskParam=" + data.isFinishedTaskId;
 						ActivityForm.action = action;
-						ActivityForm.submit();
+						if(selectedTasks!=data.isFinishedTaskId)
+						{
+							confirmInfo ="Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+						}
+						else
+						{
+							confirmInfo='<%=bundle.getString("jsmsg_batch_complete_activity")%>';
+						}
+						if(confirm(confirmInfo))
+						{
+							ActivityForm.submit();
+						}
+					}
+					else
+					{
+						 alert ("The selected activities are not 100% translated, can not be completed.");
 					}
 				});
-           }
            return;
        }
        
        // Batch complete workflow button
        if (selectedButton == "CompleteWorkflow")
        {
-           if(confirm('<%=bundle.getString("jsmsg_batch_complete_workflow")%>')) 
-           {
-                //for GBS-1939
-                var urlJSON = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=selectedTasksStatus"%>";
-                urlJSON += "&taskParam=" + selectedTasks;
-                $.getJSON(urlJSON, function(data) {
-                    if (data.isUploadingJobName)
-                    {
-                        alert("<%=bundle.getString("jsmsg_my_activities_multi_cannotcomplete_workflow_uploading")%>" +"\n" + data.isUploadingJobName);
-                    }
-                    if (data.isFinishedTaskId)
-                    {
-                       var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeWorkflow"%>";
-                       action += "&taskParam=" + selectedTasks;
-                       ActivityForm.action = action;
-                       ActivityForm.submit();
-                    }
-                });
-           }
+           var urlJSON = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=selectedTasksStatus"%>";
+           urlJSON += "&taskParam=" + selectedTasks + "&fresh=" + Math.random();
+           $.getJSON(urlJSON, function(data) {
+               if (data.isUploadingJobName)
+               {
+                   alert("<%=bundle.getString("jsmsg_my_activities_multi_cannotcomplete_workflow_uploading")%>" +"\n" + data.isUploadingJobName);
+               }
+                 
+               if (data.isFinishedTaskId)
+               {
+                   var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeWorkflow"%>";
+                   action += "&taskParam=" + data.isFinishedTaskId;
+                   ActivityForm.action = action;
+
+                   if(selectedTasks!=data.isFinishedTaskId)
+                   {
+                       confirmInfo ="Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                   }
+                   else
+                   {
+                       confirmInfo='<%=bundle.getString("jsmsg_batch_complete_workflow")%>';
+                   }
+                   if(confirm(confirmInfo)) {
+                      ActivityForm.submit();
+				   }
+                }
+                else
+                {
+                    alert ("The selected activities are not 100% translated, can not be completed.");
+                }
+            });
            return;
        }
 
@@ -1233,7 +1290,7 @@
     <COL>   <!-- Priority -->
     <COL>   <!-- Overdue (clock icon) -->
     <COL>   <!-- Job ID -->
-    <COL width="130px">  <!-- Job Name -->
+    <COL width="180px">  <!-- Job Name -->
     <COL>   <!-- Spacer column -->
     <COL>   <!-- Due/Accept By -->
     <%
@@ -1256,6 +1313,14 @@
             <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=activityColLink%>"><%=labelJobName%><%=jobSortArrow%></A></TD>
 
             <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=totalWordCountColLink%>"><%=labelWordCount%><%=totalWrdCntSortArrow%></A></TD>
+            <%
+            	if(state == stateInProgress || state == stateAvailable){
+            %>
+            	<TD CLASS="headerCell"><%=bundle.getString("lb_translated_text") %></TD>
+            <%
+            	}
+            %>
+            
             <TD CLASS="headerCell" ><A CLASS="sortHREFWhite" HREF="<%=urlABorDBorCOColLink%>"><%=labelABorDBorCODate%><%=ABorDBorCODateSortArrow%></A></TD>
         <%
             if (state == stateAvailable) 
@@ -1454,6 +1519,9 @@
                     out.println("<a class=standardHREF href=\"javascript:wordcountLink(\'radio"+ i +"\');\">" + totalWordCount + "</a>");
                 }
                 out.println("</B></SPAN></TD>");
+                if(state == stateInProgress || state == stateAvailable){
+                	out.println("<TD STYLE=\"padding-left: 10px;\"><SPAN CLASS=standardText  ID=\"translated"+tsk.getId()+"\" style = \"font-weight:600\"></SPAN></TD>"); 
+                }
                 out.println("<TD STYLE=\"padding-left: 10px;\"><SPAN CLASS=standardText>"+ valueABorDBorCODate + "</SPAN></TD>"); 
                 if (state == stateAvailable) 
                 {
@@ -1594,9 +1662,11 @@ if (state==stateAvailable) {
     <INPUT TYPE="BUTTON" NAME="AcceptAllButton" VALUE="<%=bundle.getString("lb_accept")%>" onClick="submitForm('AcceptAll');">
     </amb:permission>
 <% } %>
+
 <%
 if (state==stateAvailable || state==stateInProgress) {
 %>
+    <INPUT TYPE="BUTTON" NAME="TranslatedTextButton" VALUE="<%=bundle.getString("lb_translated_text") %>"  onClick = "submitForm('TranslatedText');">
     <amb:permission name="<%=Permission.ACTIVITIES_BATCH_COMPLETE_ACTIVITY%>" >
     <INPUT TYPE="BUTTON" NAME="CompleteActivityButton" VALUE="<%=bundle.getString("lb_complete_activity")%>" onClick="submitForm('CompleteActivity');">
     </amb:permission>

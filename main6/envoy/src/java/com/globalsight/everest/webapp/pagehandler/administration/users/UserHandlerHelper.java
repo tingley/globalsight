@@ -76,7 +76,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
 
         return data;
@@ -96,7 +96,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
 
         return data;
@@ -116,7 +116,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
 
         return data;
@@ -138,7 +138,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
 
         return data;
@@ -181,7 +181,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (Exception e)
         {
@@ -266,7 +266,7 @@ public class UserHandlerHelper
         }
         catch (UserManagerException ume)
         {
-            throw new EnvoyServletException(ume.getExceptionId(), ume);
+            throw new EnvoyServletException(ume);
         }
         catch (RemoteException re)
         {
@@ -274,7 +274,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
     }
 
@@ -287,7 +287,7 @@ public class UserHandlerHelper
         }
         catch (UserManagerException ume)
         {
-            throw new EnvoyServletException(ume.getExceptionId(), ume);
+            throw new EnvoyServletException(ume);
         }
         catch (RemoteException re)
         {
@@ -295,7 +295,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         return data;
     }
@@ -339,7 +339,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
     }
 
@@ -375,7 +375,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -401,7 +401,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -424,7 +424,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -442,7 +442,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -469,7 +469,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -486,7 +486,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -503,7 +503,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -519,7 +519,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (RemoteException re)
         {
@@ -527,7 +527,7 @@ public class UserHandlerHelper
         }
     }
 
-    public static List getProjectsManagedByUser(User user)
+    public static List<Project> getProjectsManagedByUser(User user)
             throws EnvoyServletException
     {
         try
@@ -537,7 +537,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (NamingException ne)
         {
@@ -564,7 +564,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (NamingException ne)
         {
@@ -771,7 +771,7 @@ public class UserHandlerHelper
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
+            throw new EnvoyServletException(ge);
         }
         catch (Exception e)
         {

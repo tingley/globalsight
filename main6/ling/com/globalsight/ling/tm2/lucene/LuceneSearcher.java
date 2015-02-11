@@ -20,12 +20,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
@@ -137,23 +138,25 @@ public class LuceneSearcher
         // no index to search
         if(m_indexSearcher == null)
         {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         
         // due to indexing anomalies, it's possible for the same TUV to be
-        // indexed twice, so eliminate dups with a Set
+        // indexed twice.  Add the hits to a list in the order we 
+        // find them, but use a temporary set to eliminate duplicates.
         List<TMidTUid> result = new ArrayList<TMidTUid>();
+        Set<TMidTUid> duplicateCheck = new HashSet<TMidTUid>();
         Query query = TuvDocument.makeQuery(m_analyzer, p_searchPattern,
             m_targetLocale);
         if (query == null)
         {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         // For special search, only with reserved word and stop words
         String queryStr = query.toString();
         if (queryStr.startsWith("+target_locales:") || "".equals(queryStr))
         {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         if(c_logger.isDebugEnabled())
@@ -165,14 +168,14 @@ public class LuceneSearcher
         Hits hits = m_indexSearcher.search(query);
         for(int i = 0; i < hits.length(); i++)
         {
-            Document document = hits.doc(i);
             float score = hits.score(i);
             TuvDocument tuvDoc = new TuvDocument(hits.doc(i));
             TMidTUid tt = new TMidTUid(tuvDoc.getTmId(), tuvDoc.getTuId(),
                     score);
-            if (!result.contains(tt))
+            if (!duplicateCheck.contains(tt))
             {
                 result.add(tt);
+                duplicateCheck.add(tt);
             }
         }
 

@@ -407,12 +407,10 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
     @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter) throws LingManagerException
+            String createdAfter, Connection conn) throws LingManagerException
     {
-        Connection conn = null;
         try
         {
-            conn = DbUtil.getConnection();
             return new Tm2SegmentResultSet(conn, TmExportHelper.getAllTuIds(
                     conn, tm, createdAfter, createdBefore), EXPORT_BATCH_SIZE);
         }
@@ -420,30 +418,20 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         {
             throw new LingManagerException(e);
         }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
     }
 
     @Override
-    public SegmentResultSet getAllSegments(Tm tm, long startTUId)
-            throws LingManagerException
+    public SegmentResultSet getAllSegments(Tm tm, long startTUId,
+            Connection conn) throws LingManagerException
     {
-        Connection conn = null;
         try
         {
-            conn = DbUtil.getConnection();
             return new Tm2SegmentResultSet(conn, TmExportHelper.getAllTuIds(
                     conn, tm, startTUId), EXPORT_BATCH_SIZE);
         }
         catch (Exception e)
         {
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -490,24 +478,18 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
     @Override
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
-            String createdBefore, String createdAfter)
+            String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException
     {
-        Connection conn = null;
         try
         {
-            conn = DbUtil.getConnection();
             return new Tm2SegmentResultSet(conn,
-                    TmExportHelper.getFilteredTuIds(tm, locale, createdBefore,
-                            createdAfter), EXPORT_BATCH_SIZE);
+                    TmExportHelper.getFilteredTuIds(tm, locale, createdAfter,
+                            createdBefore), EXPORT_BATCH_SIZE);
         }
         catch (Exception e)
         {
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -529,24 +511,18 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
     @Override
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter)
+            String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException
     {
-        Connection conn = null;
         try
         {
-            conn = DbUtil.getConnection();
             return new Tm2SegmentResultSet(conn,
                     TmExportHelper.getProjectNameTuIds(tm, projectName,
-                            createdBefore, createdAfter), EXPORT_BATCH_SIZE);
+                            createdAfter, createdBefore), EXPORT_BATCH_SIZE);
         }
         catch (Exception e)
         {
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -646,11 +622,11 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public boolean reindexTm(Tm tm, Reindexer reindexer)
+    public boolean reindexTm(Tm tm, Reindexer reindexer, boolean indexTarget)
     {
         try
         {
-            return new Tm2Reindexer().reindexTm(tm, reindexer);
+            return new Tm2Reindexer().reindexTm(tm, reindexer, indexTarget);
         }
         catch (Exception e)
         {

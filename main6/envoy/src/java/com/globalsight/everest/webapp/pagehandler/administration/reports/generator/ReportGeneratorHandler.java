@@ -118,7 +118,8 @@ public class ReportGeneratorHandler extends PageHandler implements
     }
     
     /**
-     * Generate Reports
+     * Operate Generate Report Request from Activity Download Report Page.
+     * The reports are TranslationsEditReport and ReviewersCommentsReport.
      */
     @ActionHandler(action = GENERATE_REPORT, formClass = "")
     public void generateOneReport(HttpServletRequest p_request,
@@ -141,6 +142,9 @@ public class ReportGeneratorHandler extends PageHandler implements
     	
         try 
         {
+            // Initial Reports percent and status for m_reportsDataMap.
+            ReportHelper.setReportsData(userId, reportJobIDS, reportType, 0, ReportsData.STATUS_INPROGRESS);
+            
             ReportGenerator generator = ReportGeneratorFactory
                     .getReportGenerator(reportType, p_request, p_response);
 	        
@@ -152,6 +156,9 @@ public class ReportGeneratorHandler extends PageHandler implements
 	        File[] files = generator.generateReports(reportJobIDS,
 	                reportTargetLocales);
 	        info.setFiles(files);
+	        
+	        // Set Reports percent and status for m_reportsDataMap.
+	        ReportHelper.setReportsData(userId, reportJobIDS, reportType, 100, ReportsData.STATUS_FINISHED);
         }
         finally
         {
@@ -182,7 +189,7 @@ public class ReportGeneratorHandler extends PageHandler implements
         // Cancel Duplicate Request
         if (ReportHelper.checkReportsDataInProgressStatus(userId, reportJobIDS, reportTypeList))
         {
-            String message = "Cancel the request, due the report is generating, userID/reportJobIDS/reportTypeList:"
+            String message = "Ignore the request, due the report is generating, userID/reportJobIDS/reportTypeList:"
                     + userId + ", " + reportJobIDS + ", " + reportTypeList;
             logger.info(message);
             p_response.sendError(p_response.SC_NO_CONTENT);
@@ -313,11 +320,11 @@ public class ReportGeneratorHandler extends PageHandler implements
     /**
      * Check if selected jobs are using same source locale.
      */
-    @ActionHandler(action = "checkSourceLocale", formClass = "")
+    @ActionHandler(action = ACTION_CHECK_SOURCE_LOCALE, formClass = "")
     public void checkSourceLocale(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
-    {
-    	List<Long> reportJobIDS = filterByDateRang(p_request);
+    {   
+    	List<Long> reportJobIDS = filterByDateRang(p_request);   	
     	JSONObject jsonObj = new JSONObject();
     	List<GlobalSightLocale> reportTargetLocales = ReportHelper
         .getTargetLocaleList(p_request

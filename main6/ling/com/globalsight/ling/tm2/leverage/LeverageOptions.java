@@ -108,14 +108,10 @@ public class LeverageOptions
         return m_tmProfile.getIsExactMatchLeveraging();
     }
 
-    // TODO: rename this getTmIdsToLeverageFrom()
-    @SuppressWarnings("unchecked")
-    public Collection<Long> getTmsToLeverageFrom()
+    public Collection<Long> getTmIdsToLeverageFrom()
     {
-        Collection<LeverageProjectTM> tms = m_tmProfile
-                .getProjectTMsToLeverageFrom();
-        List<LeverageProjectTM> tms2 = new ArrayList<LeverageProjectTM>(tms);
-        SortUtil.sort(tms2, new Comparator<LeverageProjectTM>()
+        Vector<LeverageProjectTM> tms = m_tmProfile.getProjectTMsToLeverageFrom();
+        SortUtil.sort(tms, new Comparator<LeverageProjectTM>()
         {
             @Override
             public int compare(LeverageProjectTM o1, LeverageProjectTM o2)
@@ -123,18 +119,15 @@ public class LeverageOptions
                 return o1.getProjectTmIndex() - o2.getProjectTmIndex();
             }
         });
-        Collection<Long> tmIds = new ArrayList<Long>(tms2.size());
-        Iterator<LeverageProjectTM> itTms = tms2.iterator();
-        while (itTms.hasNext())
+        Collection<Long> tmIds = new ArrayList<Long>(tms.size());
+        for (LeverageProjectTM tm : tms)
         {
-            LeverageProjectTM tm = (LeverageProjectTM) itTms.next();
-            tmIds.add(new Long(tm.getProjectTmId()));
+            tmIds.add(tm.getProjectTmId());
         }
 
         return tmIds;
     }
 
-    @SuppressWarnings("unchecked")
     public Map<Long, Integer> getTmIndexsToLeverageFrom()
     {
         Map<Long, Integer> tmIndexs = new HashMap<Long, Integer>();
@@ -343,8 +336,6 @@ public class LeverageOptions
         return m_tmProfile.getRefTMsToLeverageFrom();
     }
 
-    // TODO: change callers of current getTmsToLeverageFrom() over to use
-    // this where possible
     public List<ProjectTM> getLeverageTms() throws LingManagerException
     {
         if (m_projectTms == null)
@@ -353,7 +344,7 @@ public class LeverageOptions
             try
             {
                 ProjectHandler ph = ServerProxy.getProjectHandler();
-                for (Long tmId : getTmsToLeverageFrom())
+                for (Long tmId : getTmIdsToLeverageFrom())
                 {
                     m_projectTms.add(ph.getProjectTMById(tmId, false));
                 }
@@ -403,7 +394,7 @@ public class LeverageOptions
      */
     public Set<Long> getTmIdsForLevInProgressTmPurpose()
     {
-        HashSet<Long> results = new HashSet();
+        HashSet<Long> results = new HashSet<Long>();
 
         // Leverage from jobs that writes to population TM
         // For option "and from Jobs that write to the Storage TM".
@@ -417,7 +408,7 @@ public class LeverageOptions
         // For option "and from Jobs that write to selected Reference TM(s)".
         if (dynamicLeveragesFromReferenceTm())
         {
-            Collection<Long> tmIds = getTmsToLeverageFrom();
+            Collection<Long> tmIds = getTmIdsToLeverageFrom();
             results.addAll(tmIds);
         }
 
@@ -432,5 +423,10 @@ public class LeverageOptions
     public void setFromTMSearchPage(boolean fromTMSearchPage)
     {
         this.fromTMSearchPage = fromTMSearchPage;
+    }
+
+    public boolean getUniqueFromMultipleTranslation()
+    {
+        return getTmProfile().isUniqueFromMultipleTranslation();
     }
 }

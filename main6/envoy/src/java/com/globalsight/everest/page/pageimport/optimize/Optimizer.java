@@ -161,7 +161,7 @@ public abstract class Optimizer
             String end = contents.get(contents.size() - 1);
 
             int firstIndex = s.indexOf('>' + first + '<') + 1;
-            int endIndex = s.indexOf('>' + end + '<') + 1 + end.length();
+            int endIndex = s.lastIndexOf('>' + end + '<') + 1 + end.length();
 
             content = s.substring(firstIndex, endIndex);
             if (content.indexOf("<bpt") > 0 || content.indexOf("<ept") > 0)

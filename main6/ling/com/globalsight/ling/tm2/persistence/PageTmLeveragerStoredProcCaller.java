@@ -268,7 +268,7 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
                 + "         tmp.org_sub_id org_sub_id, "
                 + "         tu.id tu_id, tu.tm_id tm_id, tu.format format, "
                 + "         tu.type type, tuv.id tuv_id, tuv.segment_string segment_string, "
-                + "         tuv.segment_clob segment_clob, "
+                + "         tuv.segment_clob segment_clob, tuv.creation_user creation_user, "
                 + "         tuv.exact_match_key exact_match_key, tuv.locale_id locale_id, "
                 + "         tuv.modify_date modify_date, 100 score " + " FROM "
                 + tu_table_name + " tu, " + tuv_table_name + " tuv, "

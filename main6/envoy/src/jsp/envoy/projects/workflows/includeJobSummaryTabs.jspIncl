@@ -20,6 +20,143 @@
 	padding: 10px 5px 10px 10px;
 }
 </style>
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/jQueryUI.redmond.css"/>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/jquery/jquery-latest.min.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="/globalsight/includes/modalDialog.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var confirmInfo="<%=bundle.getString("jsmsg_admin_system_parameters")%>";
+var ajaxUrl=getRootPath();
+var checkedId;
+var random;
+var node;
+
+$(
+		function (){
+			$("#editJobName").click(function(){
+				vilidateRename();
+				
+			})
+			
+			var dialog=$("#dialog-complActivity").dialog({
+		        modal: true,
+				autoOpen: false,
+				width: 500,
+				minHeight: 110,
+		        buttons: {
+		            Save: function () {
+		            	changed();
+		                $(this).dialog("close");
+		            },
+					Cancel: function () {
+						$(this).dialog("close");
+		            }
+		        }
+		    });
+		    
+			
+		}
+)
+
+
+function isInteger(str){  
+      var regu = /^[-]{0,1}[0-9]{1,}$/; 
+      return regu.test(str); 
+}
+
+function getRootPath() {  
+    var pathName = window.location.pathname.substring(1);  
+   	return window.location.protocol + '//' + window.location.host + '/'+ pathName;  
+}  
+
+function rename(){
+	checkedId=".name"+"${jobId}";
+	var jabname=$(checkedId).text();
+	if(!jabname){
+		return;
+	}
+	var f=jabname.lastIndexOf("_");
+	random=jabname.substring(f+1);
+	if(isInteger(random)){
+		jabname=jabname.substring(0,f);
+	}
+	node=$("<input type='text' style='width:460px' maxlength='120'/>").val(jabname);
+	$("#dialog-complActivity").html(node);
+	$("#dialog-complActivity").dialog("open").height("auto");
+}
+
+var pjinfo="<%=bundle.getString("jsmsg_customer_job_name")%>";
+var chinfo="<%=bundle.getString("jsmsg_invalid_job_name_1")%>";
+function invalidJobName(newvl){
+	 // validation of job name
+    newvl = $.trim(newvl);
+    if (!newvl)
+    {
+        alert(pjinfo);// Please enter a Job Name.
+        return true;
+    }
+    var jobNameRegex = /[\\/:;\*\?\|\"<>&%]/;
+    if (jobNameRegex.test(newvl))
+    {
+        alert(chinfo);
+        return true;
+    }
+    return false;
+}
+
+function changed(){
+		var newvl=$.trim(node.val());
+		if(invalidJobName(newvl))return;
+		if(isInteger(random)){
+			newvl=newvl+"_"+random;
+		}
+		$.ajax({
+			  type: 'GET',
+			   dataType: "text",
+			  url: ajaxUrl+"?linkName=ready&pageName=WF2&action=renameJobSummary&jobId="+${jobId}+"&jobName="+newvl,
+			  success: function(data)
+		        {
+		            if (data=="")
+		            {
+		            	//window.location.reload();
+						$(checkedId).text(newvl);
+						$("#Previous").attr("disabled",true);
+		            }
+		            else
+		            {
+		                alert(data);               
+		            }
+		        },
+			  error:function(error)
+		        {
+		            alert(error.message);
+		        }
+			});
+}	
+
+function vilidateRename(){
+	$.ajax({
+		  type: 'GET',
+		  dataType: "text",
+		  url: ajaxUrl+"?linkName=ready&pageName=WF2&action=validateBeforeRename&jobId="+ ${jobId} + "&fresh=" + Math.random(),
+		  success: function(data)
+	        {
+	            if (data=="")
+	            {
+	            	rename();
+	            }
+	            else
+	            {
+	                alert(data);               
+	            }
+	        },
+		  error:function(error)
+	        {
+	            alert(error.message);
+	        }
+		});
+}
+</SCRIPT>
 <div class="mainHeading" style="margin-bottom:8px">
 	<%=bundle.getString("lb_job")%>: ${Job.name}
 </div>
@@ -31,11 +168,11 @@
 	<div id="jobSummaryTitle" class="standardtext" style="font-weight:bold;border-bottom:1px groove #0C1476;">Summary</div>
 	<div id="jobSummaryContent">
 		<div>
-			<span class="jobSummaryContentName"><%=bundle.getString("lb_job_id")%>:</span><span class="jobSummaryContentValue">${jobId}</span>
+			<span class="jobSummaryContentName"><%=bundle.getString("lb_job_id")%> :</span><span class="jobSummaryContentValue">${jobId}</span>
 			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_loc_profile")%>:</span><span class="jobSummaryContentValue">${Job.l10nProfile.name}</span>
 		</div>
 		<div>
-			<span class="jobSummaryContentName"><%=bundle.getString("lb_job_name")%>:</span><span class="jobSummaryContentValue">${Job.name}</span>
+			<span class="jobSummaryContentName"><%=bundle.getString("lb_job_name")%><amb:permission  name="<%=Permission.JOB_CHANGE_NAME%>" > (<a id="editJobName" href="#" class="standardHREFDetail" ><%=bundle.getString("lb_edit")%></A>)</amb:permission>:</span><span class="jobSummaryContentValue name${jobId}">${Job.name}</span>
 			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_date_created")%>:</span><span class="jobSummaryContentValue">${dateCreated}</span>
 		</div>
 		<div>
@@ -129,7 +266,7 @@
 		</div>
 	</amb:permission>
 </div>
-
+<div id="dialog-complActivity" title="<%=bundle.getString("lb_rename")%>"  style="display:none" class="detailText"></div>
 <div id="jobTabs" style="width:825px;border-bottom:1px groove #0C1476;padding-top:10px">
 	<table cellpadding="0" cellspacing="0" border="0">
 		<tr>
@@ -187,4 +324,5 @@
 			</amb:permission>
 		</tr>
 	</table>
+
 </div>

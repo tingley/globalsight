@@ -46,7 +46,11 @@ public class StringUtil
         return !isEmpty(s);
     }
 
-    public static String replace(String src, String oldString, String newString)
+    /***
+     * @deprecated just leave it here for testing purpose
+     */
+    private static String replaceOld(String src, String oldString,
+            String newString)
     {
         if (!isEmpty(src) && oldString != null)
         {
@@ -65,6 +69,103 @@ public class StringUtil
         }
 
         return src;
+    }
+    
+    /**
+     * Take place of String Replace method, refined for performance
+     * @param src
+     * @param oldString
+     * @param newString
+     * @return
+     */
+    public static String replace(String src, String oldString, String newString)
+    {
+        if (src == null || src.length() == 0 || oldString == null
+                || oldString.length() == 0)
+        {
+            return src;
+        }
+
+        if (newString == null)
+        {
+            newString = "";
+        }
+
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        int index = src.indexOf(oldString);
+        int oldLength = oldString.length();
+
+        while (index > -1)
+        {
+            output.append(src.substring(start, index));
+            output.append(newString);
+            start = index + oldLength;
+            index = src.indexOf(oldString, start);
+        }
+
+        output.append(src.substring(start));
+
+        return output.toString();
+    }
+    
+    /**
+     * Take place of String Replace method, refined for big data
+     * @param src
+     * @param oldString
+     * @param newString
+     * @return
+     */
+    public static String replaceWithRE(String src, String re, String newString)
+    {
+        if (src == null || src.length() == 0 || re == null || re.length() == 0)
+        {
+            return src;
+        }
+
+        if (newString == null)
+        {
+            newString = "";
+        }
+
+        Pattern p = Pattern.compile(re);
+        Matcher m = p.matcher(src);
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        while (m.find(start))
+        {
+            // Write out all characters before this matched region
+            output.append(src.substring(start, m.start()));
+            // Write out the replacement text. This will vary by method.
+            output.append(newString);
+            start = m.end();
+        }
+        // Handle chars after the last match
+        output.append(src.substring(start));
+        return output.toString();
+    }
+    
+    public static String replaceWithRE(String src, Pattern p, Replacer replacer)
+    {
+        if (src == null || src.length() == 0 || p == null || replacer == null)
+        {
+            return src;
+        }
+
+        Matcher m = p.matcher(src);
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        while (m.find(start))
+        {
+            // Write out all characters before this matched region
+            output.append(src.substring(start, m.start()));
+            // Write out the replacement text. This will vary by method.
+            output.append(replacer.getReplaceString(m));
+            start = m.end();
+        }
+        // Handle chars after the last match
+        output.append(src.substring(start));
+        return output.toString();
     }
 
     public static void replaceStringBuffer(StringBuffer src, String oldString, String newString,

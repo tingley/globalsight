@@ -34,29 +34,23 @@ function doRefresh()
 
 function doLoad()
 {
-<%
-   if (messages != null)
-   {
-     for (int i = 0, max = messages.size(); i < max; i++)
-     {
-       String msg = (String)messages.get(i);
-       out.print("parent.showProgress(");
-       out.print(counter);
-       out.print(",");
-       out.print(percentage);
-       out.print(",'");
-       out.print(EditUtil.toJavascript(msg));
-       out.println("');");
-     }
-   }
-   else
-   {
-%>
-  parent.showProgress(<%=counter%>, <%=percentage%>, "");
-<%
-   }
-%>
-
+	parent.showProgress(<%=counter%>, <%=percentage%>, "");
+	<%
+	if (messages != null)
+	   {
+		StringBuffer buffer = new StringBuffer();
+	     for (int i = 0, max = messages.size(); i < max; i++)
+	     {
+	       String msg = (String)messages.get(i);
+	       buffer.append(msg);
+	       buffer.append("<br/>");
+	     }
+	     out.print("parent.showMessage('");
+	     out.print(EditUtil.toJavascript(buffer.toString()));
+	     out.println("');");
+	   }
+	%>
+	
   // refresh frame
   if ("<%=done%>" == "false")
   {

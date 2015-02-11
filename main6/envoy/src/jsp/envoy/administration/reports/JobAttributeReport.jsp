@@ -8,10 +8,11 @@
          session="true"
 %>
 <%
-response.setHeader("Content-Disposition","attachment; filename=JobAttributes.xls" );
+response.setHeader("Content-Disposition","attachment; filename=JobAttributes.xlsx" );
 response.setHeader("Expires", "0");
 response.setHeader("Cache-Control","must-revalidate, post-check=0,pre-check=0");
 response.setHeader("Pragma","public");
+response.setContentType("application/x-excel");
 JobAttributeReportHelper helper = new JobAttributeReportHelper(request,response);
 helper.generateReport();
 out.clear();out = pageContext.pushBody();

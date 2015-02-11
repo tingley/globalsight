@@ -61,6 +61,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
 import com.globalsight.everest.page.pageimport.TargetPagePersistence;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
@@ -70,6 +71,7 @@ import com.globalsight.everest.request.WorkflowRequestImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -843,8 +845,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
         try
         {
-            Collection c = getSourceTranslatableTuvs(p_sourcePage);
-            ArrayList sourceTuvs = new ArrayList(c);
+            ArrayList<Tuv> sourceTuvs = SegmentTuvUtil.getSourceTuvs(p_sourcePage);
 
             if (sourceTuvs.size() > 0 && termbaseName != null
                     && termbaseName.length() > 0)
@@ -885,19 +886,6 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         }
 
         return result;
-    }
-
-    /**
-     * Retrieves all translatable source TUVs in the source page by iterating
-     * through the page's leverage groups and TUs.
-     */
-    private Collection getSourceTranslatableTuvs(SourcePage p_sourcePage)
-            throws Exception
-    {
-        Collection tuvs = ServerProxy.getTuvManager()
-                .getSourceTuvsForStatistics(p_sourcePage);
-
-        return tuvs;
     }
 
     /**

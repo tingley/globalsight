@@ -1,0 +1,3 @@
+## GBS-3191: Add index to TUV_ID column of XLIFF_ALT table.
+
+CREATE INDEX INDEX_TUV_ID ON XLIFF_ALT(TUV_ID);

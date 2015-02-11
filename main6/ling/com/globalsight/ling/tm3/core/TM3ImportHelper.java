@@ -7,12 +7,9 @@ import java.sql.Timestamp;
 import java.util.Date;
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.tm.Tm;
-import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.integration.GSTuvData;
-import com.globalsight.ling.tm3.integration.segmenttm.EventType;
 
 public class TM3ImportHelper extends TM3Event
 {
@@ -20,13 +17,15 @@ public class TM3ImportHelper extends TM3Event
             .getLogger(TM3ImportHelper.class);
 
     public static TM3Event createTM3Event(TM3Tm<GSTuvData> tm, String user,
-            int eventType, String attr)
+            int eventType, String attr, Date modifyDate)
     {
         TM3Event event = null;
         try
         {
-            Date now = new Date();
-            event = new TM3Event((BaseTm<?>) tm, eventType, user, attr, now);
+            if (modifyDate == null) {
+                modifyDate = new Date();
+            }
+            event = new TM3Event((BaseTm<?>) tm, eventType, user, attr, modifyDate);
 
             Statement stmt = tm.getConnection().createStatement();
             StringBuilder sql = new StringBuilder();

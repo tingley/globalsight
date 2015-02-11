@@ -128,20 +128,25 @@ public class ExcelTableRepairer
     private void repairNumberWithComma(File f) throws Exception
     {
         String content = FileUtil.readFile(f, "utf-8");
-
         Pattern p = Pattern.compile("(<v>)([\\d,]*)(</v>)");
         Matcher m = p.matcher(content);
-        while (m.find())
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        
+        while (m.find(start))
         {
             String number = m.group(2);
-
             String newNumber = number.replace(",", ".");
-            String newString = m.group(1) + newNumber + m.group(3);
 
-            content = content.replace(m.group(), newString);
+            output.append(content.substring(start, m.start()));
+            output.append(m.group(1));
+            output.append(newNumber);
+            output.append(m.group(3));
+            start = m.end();
         }
+        output.append(content.substring(start));
 
-        FileUtil.writeFile(f, content, "utf-8");
+        FileUtil.writeFile(f, output.toString(), "utf-8");
     }
 
     private void repairTablesInSheetXml(File f, List<String> oldNames,
@@ -151,7 +156,10 @@ public class ExcelTableRepairer
 
         Pattern p = Pattern.compile("(<f>Table)([^<]*?)(</f>)");
         Matcher m = p.matcher(content);
-        while (m.find())
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        
+        while (m.find(start))
         {
             String s = m.group(2);
             Pattern p2 = Pattern.compile("\\[[^\\[#][^\\]]*?]");
@@ -182,12 +190,17 @@ public class ExcelTableRepairer
                     s = s.replace(m2.group(), "[" + newName + "]");
                 }
             }
-            String newString = m.group(1) + s + m.group(3);
 
-            content = content.replace(m.group(), newString);
+            output.append(content.substring(start, m.start()));
+            output.append(m.group(1));
+            output.append(s);
+            output.append(m.group(3));
+            start = m.end();
         }
+        
+        output.append(content.substring(start));
 
-        FileUtil.writeFile(f, content, "utf-8");
+        FileUtil.writeFile(f, output.toString(), "utf-8");
     }
 
     private List<String> getAllSharedString(File workbook) throws Exception
@@ -217,7 +230,9 @@ public class ExcelTableRepairer
 
         Pattern p = Pattern.compile("(<tableColumn [^>]* name=\")([^\"]*)\"");
         Matcher m = p.matcher(content);
-        while (m.find())
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        while (m.find(start))
         {
             String name = m.group(2);
             String newName = null;
@@ -232,15 +247,27 @@ public class ExcelTableRepairer
 
             if (newName != null && !newName.equals(name))
             {
-                String newString = m.group(1) + newName + "\"";
-                content = content.replace(m.group(), newString);
+                output.append(content.substring(start, m.start()));
+                output.append(m.group(1));
+                output.append(newName);
+                output.append("\"");
+                start = m.end();
+            }
+            else
+            {
+                output.append(content.substring(start, m.end()));
+                start = m.end();
             }
         }
-
+        output.append(content.substring(start));
+        content = output.toString();
+        
+        output = new StringBuilder();
+        start = 0;
         p = Pattern
                 .compile("(<calculatedColumnFormula>)([^<]*?)(</calculatedColumnFormula>)");
         m = p.matcher(content);
-        while (m.find())
+        while (m.find(start))
         {
             String s = m.group(2);
             Pattern p2 = Pattern.compile("\\[[^\\[#][^\\]]*?]");
@@ -271,11 +298,15 @@ public class ExcelTableRepairer
                     s = s.replace(m2.group(), "[" + newName + "]");
                 }
             }
-            String newString = m.group(1) + s + m.group(3);
-
-            content = content.replace(m.group(), newString);
+            
+            output.append(content.substring(start, m.start()));
+            output.append(m.group(1));
+            output.append(s);
+            output.append(m.group(3));
+            start = m.end();
         }
+        output.append(content.substring(start));
 
-        FileUtil.writeFile(f, content, "utf-8");
+        FileUtil.writeFile(f, output.toString(), "utf-8");
     }
 }

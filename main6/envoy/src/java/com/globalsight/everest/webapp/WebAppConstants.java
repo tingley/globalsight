@@ -125,7 +125,9 @@ public interface WebAppConstants
     public static final String TASK_ACTION_MODIFY_ACCOUNT = "modifyAccount";
     public static final String TASK_ACTION_RETRIEVE = "getTask";
     public static final String TASK_ACTION_SAVEDETAILS = "saveDetails";
+    public static final String TASK_ACTION_APPROVE_TUV = "approveTuv";
     public static final String TASK_ACTION_TRANSLATED_TEXT_RETRIEVE = "retrieveTranslatedText";
+    public static final String TASK_ACTION_DOWNLOAD_SOURCEPAGES = "downloadSourcePages";
     public static final String RECREATE_EDITION_JOB = "recreateEditionJob";
     public static final String UPDATE_LEVERAGE = "updateLeverage";
 

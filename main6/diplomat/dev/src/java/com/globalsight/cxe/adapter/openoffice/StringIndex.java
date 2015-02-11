@@ -22,6 +22,10 @@ public class StringIndex
     public String value;
     public int start;
     public int end;
+    
+    public String allValue;
+    public int allStart;
+    public int allEnd;
 
     public StringIndex(String v, int s, int e)
     {
@@ -40,7 +44,12 @@ public class StringIndex
             if (index_e != -1)
             {
                 int st = index_s + start.length();
-                return new StringIndex(src.substring(st, index_e), st, index_e);
+                StringIndex si = new StringIndex(src.substring(st, index_e), st, index_e);
+                si.allStart = index_s;
+                si.allEnd = index_e + 1;
+                si.allValue = src.substring(index_s, index_e + 1);
+                
+                return si;
             }
         }
 

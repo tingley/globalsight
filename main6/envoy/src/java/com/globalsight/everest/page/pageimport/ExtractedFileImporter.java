@@ -119,6 +119,8 @@ public class ExtractedFileImporter extends FileImporter
     private static Logger c_logger = Logger
             .getLogger(ExtractedFileImporter.class.getName());
     private static XmlEntities m_xmlDecoder = new XmlEntities();
+    private static Pattern p_fileProfileId = Pattern
+            .compile("<fileProfileId>([\\d\\D]*)</fileProfileId>");
 
     public static String EMPTYTARGET = "empty target";
 
@@ -160,9 +162,12 @@ public class ExtractedFileImporter extends FileImporter
             pages.put(sourcePage.getGlobalSightLocale().getIdAsLong(),
                     sourcePage);
 
-            c_logger.debug("Performance:: Creating source page time = "
-                    + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
-                    + p_request.getExternalPageId());
+            if (c_logger.isDebugEnabled())
+            {
+                c_logger.debug("Performance:: Creating source page time = "
+                        + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
+                        + p_request.getExternalPageId());
+            }
 
             if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
             {
@@ -176,9 +181,12 @@ public class ExtractedFileImporter extends FileImporter
 
                     exactMatchedSegments = leveragePage(p_request, sourcePage);
 
-                    c_logger.debug("Performance:: TM leveraging time = "
-                            + +(System.currentTimeMillis() - time_PERFORMANCE)
-                            + " " + p_request.getExternalPageId());
+                    if (c_logger.isDebugEnabled())
+                    {
+                        c_logger.debug("Performance:: TM leveraging time = "
+                                + +(System.currentTimeMillis() - time_PERFORMANCE)
+                                + " " + p_request.getExternalPageId());
+                    }
                 }
 
                 c_logger.info("Term leveraging for page: "
@@ -188,9 +196,12 @@ public class ExtractedFileImporter extends FileImporter
                 TermLeverageResult termMatches = leverageTermsForPage(
                         p_request, sourcePage);
 
-                c_logger.debug("Performance:: Term leveraging time = "
-                        + +(System.currentTimeMillis() - time_PERFORMANCE)
-                        + " " + p_request.getExternalPageId());
+                if (c_logger.isDebugEnabled())
+                {
+                    c_logger.debug("Performance:: Term leveraging time = "
+                            + +(System.currentTimeMillis() - time_PERFORMANCE)
+                            + " " + p_request.getExternalPageId());
+                }
 
                 c_logger.info("Creating target pages for page: "
                         + p_request.getExternalPageId());
@@ -206,9 +217,12 @@ public class ExtractedFileImporter extends FileImporter
                 }
                 pages = removeUnActiveWorkflowTargetPages(pages,
                         p_request.getL10nProfile());
-                c_logger.debug("Performance:: Creating target pages time = "
-                        + +(System.currentTimeMillis() - time_PERFORMANCE)
-                        + " " + p_request.getExternalPageId());
+                if (c_logger.isDebugEnabled())
+                {
+                    c_logger.debug("Performance:: Creating target pages time = "
+                            + +(System.currentTimeMillis() - time_PERFORMANCE)
+                            + " " + p_request.getExternalPageId());
+                }
             }
 
             // go through target pages and only send the ones that
@@ -313,9 +327,12 @@ public class ExtractedFileImporter extends FileImporter
             c_logger.info("Done importing page: "
                     + p_request.getExternalPageId());
 
-            c_logger.debug("Performance:: import time = "
-                    + (System.currentTimeMillis() - start_PERFORMANCE) + " "
-                    + p_request.getExternalPageId());
+            if (c_logger.isDebugEnabled())
+            {
+                c_logger.debug("Performance:: import time = "
+                        + (System.currentTimeMillis() - start_PERFORMANCE)
+                        + " " + p_request.getExternalPageId());
+            }
         }
 
         return pages;
@@ -627,9 +644,7 @@ public class ExtractedFileImporter extends FileImporter
             return p_tuList;
         }
 
-        Pattern p = Pattern
-                .compile("<fileProfileId>([\\d\\D]*)</fileProfileId>");
-        Matcher m = p.matcher(p_request.getEventFlowXml());
+        Matcher m = p_fileProfileId.matcher(p_request.getEventFlowXml());
         String pageDataType = null;
         boolean isJavaProperties = false;
         boolean supportSid = false;
@@ -648,7 +663,7 @@ public class ExtractedFileImporter extends FileImporter
                 String fId = m.group(1);
                 FileProfileImpl fileProfile = HibernateUtil.get(
                         FileProfileImpl.class, Long.parseLong(fId), false);
-                supportSid = fileProfile.getSupportSid();
+                supportSid = fileProfile.supportsSid();
                 isJavaProperties = "javaprop".equals(pageDataType);
             }
         }
@@ -1004,7 +1019,11 @@ public class ExtractedFileImporter extends FileImporter
             }
             catch (Exception te2)
             {
-                c_logger.debug("TuvException when creating TU and TUV.", te2);
+                if (c_logger.isDebugEnabled())
+                {
+                    c_logger.debug("TuvException when creating TU and TUV.",
+                            te2);
+                }
                 String[] args = new String[1];
                 args[0] = Long.toString(p_request.getId());
                 throw new FileImportException(
@@ -1095,7 +1114,10 @@ public class ExtractedFileImporter extends FileImporter
             }
             catch (Exception te)
             {
-                c_logger.debug("TuvException when creating TU and TUV.", te);
+                if (c_logger.isDebugEnabled())
+                {
+                    c_logger.debug("TuvException when creating TU and TUV.", te);
+                }
                 String[] args = new String[1];
                 args[0] = Long.toString(p_request.getId());
                 throw new FileImportException(

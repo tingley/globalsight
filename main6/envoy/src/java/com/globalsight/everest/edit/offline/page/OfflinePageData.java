@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,7 +43,6 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistoryImpl;
 import com.globalsight.everest.comment.IssueImpl;
@@ -61,19 +61,20 @@ import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tm.exporter.TmxChecker;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.rtf.RtfDocument;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpEventHandlerInterface;
 import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpParser;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.GeneralException;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -125,6 +126,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
      * m_ref_allOSDMerged), we use this list to build a target page.
      */
     private Vector m_segmentList = new Vector();
+    
+    private Vector<OfflineSegmentData> m_segmentListUnmerged = new Vector<OfflineSegmentData>();
 
     /** Key: a OfflineSegmentData's DisplaySegmentID; value: the OSD. */
     private HashMap m_segmentMap = new HashMap();
@@ -221,6 +224,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private String m_alljobnames;
 
     private boolean m_isRepetitons = false;
+    
+    private Vector m_excludedItemTypes = new Vector();
 
     /**
      * Constructor.
@@ -2261,8 +2266,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     }
 
     /*
-     * According to diffrent tm, then get the diffrent soruce and target
-     * content.
+     * According to different TM, get the different source and target content.
      */
     public ArrayList<String> getSourceTargetText(OfflineSegmentData osd,
             LeverageMatch match, String sourceText, String targetText,
@@ -2310,7 +2314,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             {
                 userId = "REMOTE_TM";
 
-                tmpSourceText = getMatchedOriginalSource(osd, match, sourceText);
+                tmpSourceText = getMatchedOriginalSource(match, sourceText);
                 sourceText = GxmlUtil.stripRootTag(tmpSourceText);
             }
             // XLF matches
@@ -2329,7 +2333,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     if (xliffTarget != null && Text.isBlank(xliffTarget))
                     {
                         // is populate from alt-trans
-                        tmpSourceText = getMatchedOriginalSource(osd, match,
+                        tmpSourceText = getMatchedOriginalSource(match,
                                 sourceText);
                         sourceText = GxmlUtil.stripRootTag(tmpSourceText);
                         sourceText = EditUtil.decodeXmlEntities(sourceText);
@@ -2370,7 +2374,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             else if (match.getProjectTmIndex() == Leverager.TDA_TM_PRIORITY)
             {
                 userId = "TDA";
-                sourceText = getMatchedOriginalSource(osd, match, sourceText);
+                sourceText = getMatchedOriginalSource(match, sourceText);
             }
             // PO matches
             else if (match.getProjectTmIndex() == Leverager.PO_TM_PRIORITY)
@@ -2381,7 +2385,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             {
                 userId = "XLF Source";
 
-                tmpSourceText = getMatchedOriginalSource(osd, match, sourceText);
+                tmpSourceText = getMatchedOriginalSource(match, sourceText);
                 sourceText = GxmlUtil.stripRootTag(tmpSourceText);
             }
             else if (match.getProjectTmIndex() == Leverager.IN_PROGRESS_TM_PRIORITY)
@@ -2390,12 +2394,11 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             }
             else
             {
-                sourceText = getMatchedOriginalSource(osd, match, sourceText);
-
+                sourceText = getMatchedOriginalSource(match, sourceText);
                 sourceText = match.getLeveragedString(sourceText);
 
-                userId = TmUtil.getCreationUserIdForTuv(match.getTmId(),
-                        match.getMatchedTuvId());
+                userId = match.getCreationUser();
+
                 if (userId == null)
                 {
                     userId = "";
@@ -2411,8 +2414,17 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         {
         }
 
-        sourceText = getFixResultForTMX(sourceText);
-        targetText = getFixResultForTMX(targetText);
+        try
+        {
+            sourceText = getFixResultForTMX(sourceText);
+            targetText = getFixResultForTMX(targetText);
+        }
+        catch (Exception e)
+        {
+            throw new AmbassadorDwUpException(
+                    AmbassadorDwUpExceptionConstants.INVALID_GXML, getMsg(osd)
+                            + ": " + e.getMessage());
+        }
 
         array.add(sourceText);
         array.add(targetText);
@@ -2421,39 +2433,43 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         return array;
     }
 
+    private String getMsg(OfflineSegmentData p_OSD)
+    {
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SegmentID is ")
+                    .append(p_OSD.getDisplaySegmentID())
+                    .append("; source TUV ID is ")
+                    .append(p_OSD.getSourceTuv().getId())
+                    .append("; target TUV ID is ")
+                    .append(p_OSD.getTrgTuvId());
+            return sb.toString();
+        }
+        catch (Exception e)
+        {
+        }
+
+        return "";
+    }
+
     /**
-     * Get matched segment's original source text After GS 8.2.2, it uses a new
-     * logic to get original source text of matched segment. Then this method
-     * can do, 1.Get source text using new logic supported after 8.2.2 2.If #1
-     * has null, then using old logic before 8.2.2 3.If #2 has null, then using
-     * current segment's source text as matched original source text.
+     * Get matched segment's original source text (since 8.2.2 version), if
+     * empty, return source text.
      * 
-     * @param osd
-     *            Offline page data
      * @param match
      *            Matched segments
      * @param sourceText
      *            Source text of current segment
      * @return java.lang.String Matched original source text
      */
-    private String getMatchedOriginalSource(OfflineSegmentData osd,
-            LeverageMatch match, String sourceText)
+    private String getMatchedOriginalSource(LeverageMatch match,
+            String sourceText)
     {
-        long srcLocaleId = -1;
-
-        if (osd.getSourceTuv() != null)
-        {
-            srcLocaleId = osd.getSourceTuv().getLocaleId();
-        }
-
-        String tmpSourceText = sourceText;
-        sourceText = match.getMatchedOriginalSource();
-        if (StringUtil.isEmpty(sourceText))
-            sourceText = TmUtil.getSourceTextForTuv(match.getTmId(),
-                    match.getMatchedTuvId(), srcLocaleId);
-        if (StringUtil.isEmpty(sourceText))
-            sourceText = tmpSourceText;
-        return sourceText;
+        if (!StringUtil.isEmpty(match.getMatchedOriginalSource()))
+            return match.getMatchedOriginalSource();
+        else
+            return sourceText;
     }
 
     /*
@@ -2480,6 +2496,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         return s.replace("\n", replace);
     }
 
+    @SuppressWarnings("rawtypes")
     public void writeOfflineTmxFile(OutputStreamWriter p_outputStream,
             DownloadParams p_params, int p_tmxLevel, int p_mode)
     {
@@ -2513,338 +2530,442 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     p_tmxLevel);
             TmxUtil.writeBodyOpenTag(p_outputStream);
 
-            // segments
-            Set<Long> tpIdsTuvsHaveLoaded = new HashSet<Long>();
-            for (ListIterator it = m_segmentList.listIterator(); it.hasNext();)
+            Set<Long> tpIdsTuvsAlreadyLoaded = new HashSet<Long>();
+            if (p_mode != TmxUtil.TMX_MODE_ICE_ONLY)
             {
-                OfflineSegmentData osd = (OfflineSegmentData) it.next();
-
-                if (osd.getDisplaySegmentID().length() <= 0)
+                for (ListIterator it = m_segmentList.listIterator(); it
+                        .hasNext();)
                 {
-                    p_outputStream.close();
-
-                    osd = (OfflineSegmentData) it.previous();
-                    String msg = "Cannot write a format two segment:\n"
-                            + "The in-memory segment ID for the segment following "
-                            + osd.getDisplaySegmentID() + " is empty.";
-
-                    CATEGORY.error(msg);
-
-                    throw new AmbassadorDwUpException(
-                            AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT,
-                            msg);
-                }
-
-                String sourceText = null;
-                String targetText = null;
-                String userId = null;
-                String translateTuString = null;
-                StringBuffer tuString = new StringBuffer();
-                StringBuffer fuzzyTuString = new StringBuffer();
-                boolean isAddTail = false;
-                boolean changeCreationId = p_params
-                        .getChangeCreationIdForMTSegments();
-                boolean isFromXliff = false;
-                String targetLocal = new String();
-                String sourceLocal = new String();
-
-                if (osd.getTargetTuv() != null)
-                {
-                    sourceText = osd.getSourceTuv().getGxml();
-                    targetText = osd.getTargetTuv().getGxml();
-
-                    if (osd.getTargetTuv().getTu(companyId).getDataType()
-                            .equals(IFormatNames.FORMAT_XLIFF))
+                    OfflineSegmentData osd = (OfflineSegmentData) it.next();
+                    if (osd.getDisplaySegmentID().length() <= 0)
                     {
-                        isFromXliff = true;
+                        p_outputStream.close();
+
+                        osd = (OfflineSegmentData) it.previous();
+                        String msg = "Cannot write a format two segment:\n"
+                                + "The in-memory segment ID for the segment following "
+                                + osd.getDisplaySegmentID() + " is empty.";
+
+                        CATEGORY.error(msg);
+
+                        throw new AmbassadorDwUpException(
+                                AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT,
+                                msg);
                     }
 
-                    sourceLocal = osd.getSourceTuv().getGlobalSightLocale()
-                            .getLocaleCode();
-                    targetLocal = osd.getTargetTuv().getGlobalSightLocale()
-                            .getLocaleCode();
-                }
-
-                boolean isCreatedFromMT = false;
-                boolean addThis = false;
-                // write content in target tuv into tmx as one TU.
-                if (osd.getTargetTuv() != null
-                        && osd.getTargetTuv().isLocalized())
-                {
-                    userId = osd.getTargetTuv().getLastModifiedUser();
-                    isCreatedFromMT = isCreatedFromMTEngine(userId);
-
-                    // If "Set Creation ID to 'MT!' for machine translated
-                    // segments" is checked, creationId should be changed to "MT!".
-                    if (changeCreationId && isCreatedFromMT)
+                    // Find the orignal non-ice segment.
+                    if (p_mode == TmxUtil.TMX_MODE_NON_ICE && isContinue(osd))
                     {
-                        userId = "MT!";
+                        continue;
                     }
 
-                    if (p_mode == TmxUtil.TMX_MODE_INC_ALL
-                            || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
-                            || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT))
-                    {
-                        addThis = true;
-                    }
-                    else
-                    {
-                        addThis = false;
-                    }
+                    String sourceText = null;
+                    String targetText = null;
+                    String userId = null;
+                    boolean isAddTail = false;
+                    boolean changeCreationIdToMT = p_params
+                            .getChangeCreationIdForMTSegments();
+                    boolean isFromXliff = false;
+                    String sourceLocale = new String();
+                    String targetLocale = new String();
 
-                    if (addThis)
+                    if (osd.getTargetTuv() != null)
                     {
-                        String tempSource = new String();
-                        String tempTarget = new String();
+                        sourceText = osd.getSourceTuv().getGxml();
+                        targetText = osd.getTargetTuv().getGxml();
 
-                        if (isFromXliff)
+                        if (osd.getTargetTuv().getTu(companyId).getDataType()
+                                .equals(IFormatNames.FORMAT_XLIFF))
                         {
-                            tempSource = getFixResultForTMX(SegmentUtil
-                                    .restoreSegment(sourceText, sourceLocal));
-                            tempTarget = getFixResultForTMX(SegmentUtil
-                                    .restoreSegment(targetText, targetLocal));
-                        }
-                        else
-                        {
-                            tempSource = getFixResultForTMX(GxmlUtil
-                                    .stripRootTag(sourceText));
-                            tempTarget = getFixResultForTMX(GxmlUtil
-                                    .stripRootTag(targetText));
+                            isFromXliff = true;
                         }
 
-                        if (isOmegaT)
-                        {
-                            tempSource = convertOmegaT(tempSource);
-                            tempTarget = convertOmegaT(tempTarget);
-                        }
-                        else if (m_isConvertLf)
-                        {
-                            tempSource = convertLf(tempSource, p_tmxLevel);
-                            tempTarget = convertLf(tempTarget, p_tmxLevel);
-                        }
-
-                        translateTuString = TmxUtil.composeTu(tempSource,
-                                m_sourceLocaleName, tempTarget,
-                                m_targetLocaleName, userId,
-                                osd.getTargetTuvModifyDate(companyId),
-                                p_tmxLevel, null, p_params);
-                    }
-                }
-                
-                // avoid to output two same tu for Machine Translate
-                boolean isAddTrasnlatedTU = true;
-                StringIndex ttuSI = null;
-                if (translateTuString != null && translateTuString.length() > 0)
-                {
-                    ttuSI = StringIndex.getValueBetween(new StringBuffer(
-                            translateTuString), 0, "\" creationid=\"", "</tu>");
-                }
-                else
-                {
-                    isAddTrasnlatedTU = false;
-                }
-
-                // write TM matches into tmx(from "leverage_match" table).
-                if (osd.hasTMMatches() || osd.hasMTMatches())
-                {
-                    List<LeverageMatch> matchList = osd
-                            .getOriginalFuzzyLeverageMatchList();
-                    // Add all xliff alts into the match list
-                    List<LeverageMatch> listAlt = new ArrayList<LeverageMatch>();
-                    listAlt.addAll(matchList);
-                    Tuv tuvTemp = ServerProxy.getTuvManager()
-                            .getTuvForSegmentEditor(osd.getTrgTuvId(),
-                                    companyId);
-                    // Load Tuvs/XliffAlts of current page for performance.
-                    try
-                    {
-
-                        TargetPage myTp = ((TuvImpl) tuvTemp)
-                                .getTargetPage(companyId);
-                        if (!tpIdsTuvsHaveLoaded.contains(myTp.getIdAsLong()))
-                        {
-                            SegmentTuvUtil.getExportTuvs(companyId, myTp
-                                    .getLocaleId(), myTp.getSourcePage()
-                                    .getId());
-                            tpIdsTuvsHaveLoaded.add(myTp.getIdAsLong());
-                        }
-                    }
-                    catch (Exception e)
-                    {
-
+                        sourceLocale = osd.getSourceTuv().getGlobalSightLocale()
+                                .getLocaleCode();
+                        targetLocale = osd.getTargetTuv().getGlobalSightLocale()
+                                .getLocaleCode();
                     }
 
-                    Set xliffAltSet = tuvTemp.getXliffAlt(true);
-                    int altFlag = -100;
-
-                    if (xliffAltSet != null && xliffAltSet.size() > 0)
+                    String translateTuString = null;
+                    boolean isCreatedFromMT = false;
+                    String[] translatedSrcTrgSegments = new String[2];
+                    // ## Compose the translated segment into tmx string first,
+                    // but write at last.
+                    if (osd.getTargetTuv() != null
+                            && osd.getTargetTuv().isLocalized())
                     {
-                        Iterator itAlt = xliffAltSet.iterator();
-
-                        while (itAlt.hasNext())
-                        {
-                            XliffAlt alt = (XliffAlt) itAlt.next();
-                            LeverageMatch lm = new LeverageMatch();
-                            lm.setMatchedOriginalSource(EditUtil
-                                    .decodeXmlEntities(alt.getSourceSegment()));
-                            lm.setMatchedText(EditUtil.decodeXmlEntities(alt
-                                    .getSegment()));
-                            float score = (float) TdaHelper.PecentToDouble(alt
-                                    .getQuality());
-                            lm.setScoreNum(score);
-                            lm.setProjectTmIndex(altFlag);
-                            lm.setOriginalSourceTuvId(0);
-                            listAlt.add(lm);
-                        }
-                    }
-
-                    LeverageMatch.orderMatchResult(listAlt);
-
-                    SortUtil.sort(listAlt, new GeneralComparatorBySID());
-                    Iterator matches = listAlt.iterator();
-
-                    String sid = null;
-
-                    if (matches.hasNext())
-                    {
-                        // write the tu head, the source and first match
-                        LeverageMatch match = (LeverageMatch) matches.next();
-                        // Set current user id as default create_id
-                        userId = p_params.getUser().getUserId();
-                        ArrayList<String> array = getSourceTargetText(osd,
-                                match, sourceText, targetText, userId,
-                                isFromXliff, sourceLocal, targetLocal,
-                                changeCreationId, companyId);
-                        sourceText = array.get(0);
-                        targetText = array.get(1);
-                        userId = array.get(2);
+                        userId = osd.getTargetTuv().getLastModifiedUser();
                         isCreatedFromMT = isCreatedFromMTEngine(userId);
-
-                        if (isOmegaT)
+                        if (isAddLocalizedTargetAsTu(p_mode, isCreatedFromMT))
                         {
-                            sourceText = convertOmegaT(sourceText);
-                            targetText = convertOmegaT(targetText);
-                        }
-                        else if (m_isConvertLf)
-                        {
-                            sourceText = convertLf(sourceText, p_tmxLevel);
-                            targetText = convertLf(targetText, p_tmxLevel);
-                        }
-
-                        if (p_mode == TmxUtil.TMX_MODE_INC_ALL
-                                || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
-                                || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT))
-                        {
-                            if (match.getScoreNum() == 100)
-                            {
-                                tuString = new StringBuffer(TmxUtil.composeFirstMatch(
-                                        sourceText, m_sourceLocaleName,
-                                        targetText, m_targetLocaleName, userId,
-                                        null, p_tmxLevel,
-                                        match.getMatchedSid(), p_params));
-                                isAddTail = true;
-                            }
-                            else
-                            {
-                                fuzzyTuString = new StringBuffer(TmxUtil.composeTu(sourceText,
-                                        m_sourceLocaleName, targetText,
-                                        m_targetLocaleName, userId,
-                                        osd.getTargetTuvModifyDate(companyId),
-                                        p_tmxLevel, match.getMatchedSid(),
-                                        p_params));
-
-                                isAddTail = false;
-                            }
+                            translateTuString = getTranslatedTuString(osd,
+                                    sourceText, sourceLocale, targetText,
+                                    targetLocale, isOmegaT, isFromXliff,
+                                    p_tmxLevel, changeCreationIdToMT,
+                                    translatedSrcTrgSegments);
                         }
                     }
 
-                    while (matches.hasNext())
+                    // avoid to output two same tu for Machine Translate
+                    boolean isAddTrasnlatedTU = true;
+                    if (StringUtil.isEmpty(translateTuString))
                     {
-                        LeverageMatch match = (LeverageMatch) matches.next();
-                        // Set current user id as default create_id
-                        userId = p_params.getUser().getUserId();
-                        ArrayList<String> array = getSourceTargetText(osd,
-                                match, sourceText, targetText, userId,
-                                isFromXliff, sourceLocal, targetLocal,
-                                changeCreationId, companyId);
-                        sourceText = array.get(0);
-                        targetText = array.get(1);
-                        userId = array.get(2);
-                        isCreatedFromMT = isCreatedFromMTEngine(userId);
+                        isAddTrasnlatedTU = false;
+                    }
 
-                        if (m_isConvertLf)
-                        {
-                            sourceText = convertLf(sourceText, p_tmxLevel);
-                            targetText = convertLf(targetText, p_tmxLevel);
-                        }
+                    // Write TM matches into tmx.
+                    StringBuffer exactTuString = new StringBuffer();
+                    StringBuffer fuzzyTuString = new StringBuffer();
+                    List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
+                    if (osd.hasTMMatches() || osd.hasMTMatches())
+                    {
+                        // Load Tuvs/XliffAlts of current page for performance.
+                        loadCurrentTargetPageTuvsForPerformance(
+                                tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
+                                companyId);
 
-                        if (p_mode == TmxUtil.TMX_MODE_INC_ALL
-                                || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
-                                || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT))
+                        allLMs = getAllLeverageMatches(osd, companyId);
+                        Iterator<LeverageMatch> matches = allLMs.iterator();
+                        String sid = null;
+                        if (matches.hasNext())
                         {
-                            if (match.getScoreNum() == 100)
+                            // write the tu head, the source and first match
+                            LeverageMatch match = (LeverageMatch) matches.next();
+                            // Set current user id as default create_id
+                            userId = p_params.getUser().getUserId();
+                            ArrayList<String> array = getSourceTargetText(osd,
+                                    match, sourceText, targetText, userId,
+                                    isFromXliff, sourceLocale, targetLocale,
+                                    changeCreationIdToMT, companyId);
+                            sourceText = array.get(0);
+                            targetText = array.get(1);
+                            userId = array.get(2);
+                            isCreatedFromMT = isCreatedFromMTEngine(userId);
+
+                            if (isOmegaT)
                             {
-                                if (sid != null
-                                        && sid.equals(match.getMatchedSid()))
+                                sourceText = convertOmegaT(sourceText);
+                                targetText = convertOmegaT(targetText);
+                            }
+                            else if (m_isConvertLf)
+                            {
+                                sourceText = convertLf(sourceText, p_tmxLevel);
+                                targetText = convertLf(targetText, p_tmxLevel);
+                            }
+
+                            if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                                    || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
+                                    || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
+                                    || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
+                            {
+                                if (isSameAsLocalizedSegments(
+                                        translatedSrcTrgSegments, sourceText,
+                                        targetText))
                                 {
-                                    tuString.append(TmxUtil.composeTmTuv(
-                                            m_targetLocaleName, targetText,
-                                            p_tmxLevel, p_params));
+                                    isAddTrasnlatedTU = false;
+                                }
+
+                                if (match.getScoreNum() == 100)
+                                {
+                                    TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
+                                            sourceText, m_sourceLocaleName,
+                                            null, null, null, null);
+                                    TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
+                                            targetText, m_targetLocaleName,
+                                            "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
+                                            match.getCreationDate(),
+                                            "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
+                                            match.getModifyDate());
+                                    exactTuString = new StringBuffer(
+                                            TmxUtil.composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid()));
                                     isAddTail = true;
+                                }
+                                else
+                                {
+                                    TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
+                                            sourceText, m_sourceLocaleName,
+                                            null, null, null, null);
+                                    TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
+                                            targetText, m_targetLocaleName,
+                                            "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
+                                            match.getCreationDate(),
+                                            "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
+                                            match.getModifyDate());
+                                    fuzzyTuString = new StringBuffer(
+                                            TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid()));
+                                    isAddTail = false;
+                                }
+                            }
+                        }
+
+                        while (matches.hasNext())
+                        {
+                            LeverageMatch match = matches.next();
+                            // Set current user id as default create_id
+                            userId = p_params.getUser().getUserId();
+                            ArrayList<String> array = getSourceTargetText(osd,
+                                    match, sourceText, targetText, userId,
+                                    isFromXliff, sourceLocale, targetLocale,
+                                    changeCreationIdToMT, companyId);
+                            sourceText = array.get(0);
+                            targetText = array.get(1);
+                            userId = array.get(2);
+                            isCreatedFromMT = isCreatedFromMTEngine(userId);
+
+                            if (m_isConvertLf)
+                            {
+                                sourceText = convertLf(sourceText, p_tmxLevel);
+                                targetText = convertLf(targetText, p_tmxLevel);
+                            }
+
+                            if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                                    || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
+                                    || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
+                                    || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
+                            {
+                                if (isSameAsLocalizedSegments(
+                                        translatedSrcTrgSegments, sourceText,
+                                        targetText))
+                                {
+                                    isAddTrasnlatedTU = false;
+                                }
+
+                                if (match.getScoreNum() == 100)
+                                {
+                                    if (sid != null
+                                            && sid.equals(match.getSid()))
+                                    {
+                                        TmxUtil.TmxTuvInfo tuvInfo = new TmxUtil.TmxTuvInfo(
+                                                targetText, m_targetLocaleName,
+                                                "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
+                                                match.getCreationDate(),
+                                                "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
+                                                match.getModifyDate());
+                                        exactTuString.append(TmxUtil.composeTmTuv(tuvInfo, p_tmxLevel));
+                                        isAddTail = true;
+                                    }
+                                    else
+                                    {
+                                        if (isAddTail)
+                                        {
+                                            exactTuString.append(TmxUtil.composeTuTail());
+                                        }
+
+                                        TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
+                                                sourceText, m_sourceLocaleName,
+                                                null, null, null, null);
+                                        TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
+                                                targetText, m_targetLocaleName,
+                                                "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
+                                                match.getCreationDate(),
+                                                "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
+                                                match.getModifyDate());
+                                        String tuHere = TmxUtil.composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid());
+                                        exactTuString.append(tuHere);
+
+                                        isAddTail = true;
+                                        sid = match.getSid();
+                                    }
                                 }
                                 else
                                 {
                                     if (isAddTail)
                                     {
-                                        tuString.append(TmxUtil.composeTuTail());
+                                        exactTuString.append(TmxUtil.composeTuTail());
                                     }
 
-                                    tuString.append(TmxUtil.composeFirstMatch(
+                                    TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
                                             sourceText, m_sourceLocaleName,
+                                            null, null, null, null);
+                                    TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
                                             targetText, m_targetLocaleName,
-                                            userId, null, p_tmxLevel,
-                                            match.getMatchedSid(), p_params));
-                                    isAddTail = true;
-                                    sid = match.getMatchedSid();
+                                            "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
+                                            match.getCreationDate(),
+                                            "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
+                                            match.getModifyDate());
+                                    String fuHere = TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid());
+
+                                    fuzzyTuString.append(fuHere);
+
+                                    isAddTail = false;
                                 }
+                            }
+                        }
+
+                        if (isAddTail)
+                        {
+                            exactTuString.append(TmxUtil.composeTuTail());
+                        }
+
+                        String exactAndFuzzy = exactTuString.append(fuzzyTuString).toString();
+                        p_outputStream.write(exactAndFuzzy);
+                    }
+
+                    if (isAddTrasnlatedTU)
+                    {
+                        p_outputStream.write(translateTuString);
+                    }
+
+                }
+            }
+            else if (m_segmentListUnmerged != null)
+            {
+                // write ice for omegat
+                for (ListIterator it = m_segmentListUnmerged.listIterator(); it.hasNext();)
+                {
+                    OfflineSegmentData osd = (OfflineSegmentData) it.next();
+                    if (osd.getDisplaySegmentID().length() <= 0)
+                    {
+                        p_outputStream.close();
+
+                        osd = (OfflineSegmentData) it.previous();
+                        String msg = "Cannot write a format two segment:\n"
+                                + "The in-memory segment ID for the segment following "
+                                + osd.getDisplaySegmentID() + " is empty.";
+
+                        CATEGORY.error(msg);
+
+                        throw new AmbassadorDwUpException(
+                                AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT,
+                                msg);
+                    }
+
+                    String matchType = osd.getDisplayMatchType();
+                    boolean isIce = matchType == null ? false : matchType
+                            .contains("Context Exact Match");
+
+                    if (isIce)
+                    {
+                        String userId = null;
+                        String sourceText = null;
+                        String targetText = null;
+                        boolean isFromXliff = false;
+                        String targetLocal = new String();
+                        String sourceLocal = new String();
+                        boolean isCreatedFromMT = false;
+                        boolean changeCreationId = p_params
+                                .getChangeCreationIdForMTSegments();
+                        boolean addThis = false;
+                        String sid = null;
+
+                        if (osd.getTargetTuv() != null)
+                        {
+                            sourceText = osd.getSourceTuv().getGxml();
+                            targetText = osd.getTargetTuv().getGxml();
+                            sid = osd.getSourceTuv().getSid();
+
+                            if (osd.getTargetTuv().getTu(companyId)
+                                    .getDataType()
+                                    .equals(IFormatNames.FORMAT_XLIFF))
+                            {
+                                isFromXliff = true;
+                            }
+
+                            sourceLocal = osd.getSourceTuv()
+                                    .getGlobalSightLocale().getLocaleCode();
+                            targetLocal = osd.getTargetTuv()
+                                    .getGlobalSightLocale().getLocaleCode();
+                        }
+
+                        List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
+                        if (osd.hasTMMatches() || osd.hasMTMatches())
+                        {
+                            // Load Tuvs/XliffAlts of current page for performance.
+                            loadCurrentTargetPageTuvsForPerformance(
+                                    tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
+                                    companyId);
+
+                            allLMs = getAllLeverageMatches(osd, companyId);
+                        }
+
+                        if (allLMs != null
+                                && allLMs.size() > 0
+                                && osd.getTargetTuv() != null
+                                && osd.getTargetTuv().isExactMatchLocalized(
+                                        companyId))
+                        {
+                            LeverageMatch match = allLMs.get(0);
+                            
+                            if (sid != null && !sid.equals(match.getSid()))
+                            {
+                                for (int i = 1; i < allLMs.size(); i++)
+                                {
+                                    LeverageMatch match1 = allLMs.get(i);
+
+                                    if (sid.equals(match1.getSid()))
+                                    {
+                                        match = match1;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            userId = match.getCreationUser();
+                            ArrayList<String> array = getSourceTargetText(osd,
+                                    match, sourceText, targetText, userId,
+                                    isFromXliff, sourceLocal, targetLocal,
+                                    changeCreationId, companyId);
+                            sourceText = array.get(0);
+                            targetText = array.get(1);
+                            userId = array.get(2);
+                            isCreatedFromMT = isCreatedFromMTEngine(userId);
+
+                            if (!isCreatedFromMT)
+                            {
+                                addThis = true;
                             }
                             else
                             {
-                                if (isAddTail)
+                                addThis = false;
+                            }
+
+                            if (addThis)
+                            {
+                                String tempSource = new String();
+                                String tempTarget = new String();
+
+                                if (isFromXliff)
                                 {
-                                    tuString.append(TmxUtil.composeTuTail());
+                                    tempSource = getFixResultForTMX(SegmentUtil
+                                            .restoreSegment(sourceText,
+                                                    sourceLocal));
+                                    tempTarget = getFixResultForTMX(SegmentUtil
+                                            .restoreSegment(targetText,
+                                                    targetLocal));
+                                }
+                                else
+                                {
+                                    tempSource = getFixResultForTMX(sourceText);
+                                    tempTarget = getFixResultForTMX(targetText);
                                 }
 
-                                fuzzyTuString.append(TmxUtil.composeTu(sourceText,
-                                        m_sourceLocaleName, targetText,
-                                        m_targetLocaleName, userId,
-                                        osd.getTargetTuvModifyDate(companyId),
-                                        p_tmxLevel, match.getMatchedSid(),
-                                        p_params));
+                                if (isOmegaT)
+                                {
+                                    tempSource = convertOmegaT(tempSource);
+                                    tempTarget = convertOmegaT(tempTarget);
+                                }
+                                else if (m_isConvertLf)
+                                {
+                                    tempSource = convertLf(tempSource,
+                                            p_tmxLevel);
+                                    tempTarget = convertLf(tempTarget,
+                                            p_tmxLevel);
+                                }
 
-                                isAddTail = false;
+                                TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
+                                        sourceText, m_sourceLocaleName,
+                                        null, null, null, null);
+                                TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
+                                        targetText, m_targetLocaleName,
+                                        "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
+                                        match.getCreationDate(),
+                                        "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
+                                        match.getModifyDate());
+                                String ttuString = TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid());
+                                p_outputStream.write(ttuString.toString());
                             }
                         }
                     }
-
-                    if (isAddTail)
-                    {
-                        tuString.append(TmxUtil.composeTuTail());
-                    }
-                    
-                    String tuAndFuzzy = tuString.append(fuzzyTuString).toString();
-                    p_outputStream.write(tuAndFuzzy);
-                    
-                    // check if the translated tu is already output
-                    if (ttuSI != null && tuAndFuzzy.contains(ttuSI.value))
-                    {
-                        isAddTrasnlatedTU = false;
-                    }
-                }
-                
-                if (isAddTrasnlatedTU)
-                {
-                    p_outputStream.write(translateTuString);
                 }
             }
 
@@ -2858,6 +2979,225 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_WRITE_ERROR, ex);
         }
+    }
+
+    // I am not sure what these codes mean actually, just move them into a
+    // separate method to make it easier to read.
+    private boolean isContinue(OfflineSegmentData osd)
+    {
+        String matchType = osd.getDisplayMatchType();
+        boolean isIce = matchType == null ? false : matchType
+                .contains("Context Exact Match");
+
+        if (isIce && m_segmentListUnmerged != null
+                && m_segmentListUnmerged.size() > 0)
+        {
+            int osdHash = osd.hashCode();
+            for (ListIterator it2 = m_segmentListUnmerged
+                    .listIterator(); it2.hasNext();)
+            {
+                OfflineSegmentData osd2 = (OfflineSegmentData) it2
+                        .next();
+                String matchType2 = osd2.getDisplayMatchType();
+                boolean isIce2 = matchType2 == null ? false
+                        : matchType2
+                                .contains("Context Exact Match");
+                if (!isIce2 && osd2.hashCode() == osdHash)
+                {
+                    osd = osd2;
+                    break;
+                }
+            }
+        }
+        
+        // if the segment is still ICE match, continue
+        matchType = osd.getDisplayMatchType();
+        isIce = matchType == null ? false : matchType
+                .contains("Context Exact Match");
+
+        return isIce;
+    }
+
+    private boolean isAddLocalizedTargetAsTu(int p_mode, boolean isCreatedFromMT)
+    {
+        boolean addThis = false;
+        if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
+                || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
+                || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
+        {
+            addThis = true;
+        }
+        else
+        {
+            addThis = false;
+        }
+
+        return addThis;
+    }
+
+    /**
+     * Compose the tmx tu string for localized segment. 
+     */
+    private String getTranslatedTuString(OfflineSegmentData osd,
+            String sourceText, String sourceLocale, String targetText,
+            String targetLocale, boolean isOmegaT, boolean isFromXliff,
+            int p_tmxLevel, boolean changeCreationIdToMT,
+            String[] translatedSrcTrgSegments)
+    {
+        String tempSource = new String();
+        String tempTarget = new String();
+
+        if (isFromXliff)
+        {
+            tempSource = getFixResultForTMX(SegmentUtil
+                    .restoreSegment(sourceText, sourceLocale));
+            tempTarget = getFixResultForTMX(SegmentUtil
+                    .restoreSegment(targetText, targetLocale));
+        }
+        else
+        {
+            tempSource = getFixResultForTMX(GxmlUtil
+                    .stripRootTag(sourceText));
+            tempTarget = getFixResultForTMX(GxmlUtil
+                    .stripRootTag(targetText));
+        }
+
+        if (isOmegaT)
+        {
+            tempSource = convertOmegaT(tempSource);
+            tempTarget = convertOmegaT(tempTarget);
+        }
+        else if (m_isConvertLf)
+        {
+            tempSource = convertLf(tempSource, p_tmxLevel);
+            tempTarget = convertLf(tempTarget, p_tmxLevel);
+        }
+
+        translatedSrcTrgSegments[0] = tempSource;
+        translatedSrcTrgSegments[1] = tempTarget;
+
+        String userId = osd.getTargetTuv().getLastModifiedUser();
+        // If "Set Creation ID to 'MT!' for machine translated
+        // segments" is checked, creationId should be changed to "MT!".
+        boolean isCreatedFromMT = isCreatedFromMTEngine(userId);
+        if (changeCreationIdToMT && isCreatedFromMT)
+        {
+            userId = "MT!";
+        }
+
+        Tuv sourceTuv = osd.getSourceTuv();
+        Tuv targetTuv = osd.getTargetTuv();
+        TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
+                tempSource, m_sourceLocaleName,
+                sourceTuv.getCreatedUser(),
+                sourceTuv.getCreatedDate(),
+                sourceTuv.getLastModifiedUser(),
+                sourceTuv.getLastModified());
+        TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
+                tempTarget, m_targetLocaleName,
+                "MT!".equals(userId) ? "MT!" : targetTuv.getCreatedUser(),
+                targetTuv.getCreatedDate(),
+                "MT!".equals(userId) ? "MT!" : targetTuv.getLastModifiedUser(),
+                targetTuv.getLastModified());
+
+        return TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, null);
+    }
+
+    private boolean isSameAsLocalizedSegments(
+            String[] translatedSrcTrgSegments, String sourceText,
+            String targetText)
+    {
+        if (translatedSrcTrgSegments == null
+                || translatedSrcTrgSegments.length != 2)
+            return false;
+
+        boolean isSourceSame = sourceText != null
+                && sourceText.equals(translatedSrcTrgSegments[0]);
+        boolean isTargetSame = targetText != null
+                && targetText.equals(translatedSrcTrgSegments[1]);
+        if (isSourceSame && isTargetSame)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<LeverageMatch> getAllLeverageMatches(OfflineSegmentData osd,
+            long companyId) throws TuvException, RemoteException,
+            GeneralException
+    {
+        List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
+
+        // Matches from "leverage_match_xx" table
+        allLMs.addAll(osd.getOriginalFuzzyLeverageMatchList());
+
+        Tuv currTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
+                osd.getTrgTuvId(), companyId);
+
+        // Add all xliff alts into the match list
+        List<LeverageMatch> lmFromXliffAlts = convertXliffAltToLeverageMatches(currTuv
+                .getXliffAlt(true));
+        allLMs.addAll(lmFromXliffAlts);
+
+        LeverageMatch.orderMatchResult(allLMs);
+        SortUtil.sort(allLMs, new GeneralComparatorBySID());
+
+        return allLMs;
+    }
+
+    /**
+     * Load Tuvs/XliffAlts of current page for performance.
+     */
+    private void loadCurrentTargetPageTuvsForPerformance(
+            Set<Long> tpIdsAlreadyLoaed, long tuvId, long companyId)
+    {
+        try
+        {
+            Tuv currTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
+                    tuvId, companyId);
+            TargetPage myTp = ((TuvImpl) currTuv).getTargetPage(companyId);
+            if (!tpIdsAlreadyLoaed.contains(myTp.getIdAsLong()))
+            {
+                SegmentTuvUtil.getExportTuvs(companyId, myTp.getLocaleId(),
+                        myTp.getSourcePage().getId());
+                tpIdsAlreadyLoaed.add(myTp.getIdAsLong());
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
+    /**
+     * Need write matches from xliff file "alt-trans" into offline tmx, so
+     * convert "XliffAlt" to "LeverageMatch" object.
+     */
+    private List<LeverageMatch> convertXliffAltToLeverageMatches(
+            Set<XliffAlt> xliffAltSet)
+    {
+        List<LeverageMatch> lms = new ArrayList<LeverageMatch>();
+        if (xliffAltSet != null && xliffAltSet.size() > 0)
+        {
+            for (XliffAlt alt : xliffAltSet)
+            {
+                LeverageMatch lm = new LeverageMatch();
+                lm.setMatchedOriginalSource(EditUtil.decodeXmlEntities(alt
+                        .getSourceSegment()));
+                lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));
+                float score = (float) TdaHelper
+                        .PecentToDouble(alt.getQuality());
+                lm.setScoreNum(score);
+                lm.setProjectTmIndex(-100);
+                lm.setOriginalSourceTuvId(0);
+                lms.add(lm);
+            }
+        }
+
+        return lms;
     }
 
     /**
@@ -2892,20 +3232,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
        **/
 
         return tempSource;
-    }
-
-    private boolean isExists(String originalSourceText, List originalSourceTexts)
-    {
-        boolean flag = false;
-        for (int i = 0; i < originalSourceTexts.size(); i++)
-        {
-            if (originalSourceText.equals(originalSourceTexts.get(i)))
-            {
-                flag = true;
-                break;
-            }
-        }
-        return flag;
     }
 
     /**
@@ -3019,6 +3345,16 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         this.m_segmentList = segmentList;
     }
+    
+    public Vector<OfflineSegmentData> getSegmentListUnmerged()
+    {
+        return m_segmentListUnmerged;
+    }
+
+    public void setSegmentListUnmerged(Vector<OfflineSegmentData> segmentList)
+    {
+        this.m_segmentListUnmerged = segmentList;
+    }
 
     class GeneralComparatorBySID implements Comparator
     {
@@ -3030,8 +3366,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             int result = (int) (match2.getScoreNum() - match2.getScoreNum());
             if (result == 0)
             {
-                String sid1 = match1.getMatchedSid();
-                String sid2 = match2.getMatchedSid();
+                String sid1 = match1.getSid();
+                String sid2 = match2.getSid();
                 if (sid1 == null || sid2 == null)
                 {
                     return result;

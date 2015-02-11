@@ -26,6 +26,8 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.exporter.IExportManager;
+import com.globalsight.util.Replacer;
+import com.globalsight.util.StringUtil;
 
 public class ExportUtil
 {
@@ -33,6 +35,12 @@ public class ExportUtil
 
     public static String EXPORT_BASE_DIRECTORY = "/";
     public static Properties WHITE_SPACE_EXPORT = new Properties();
+    
+    private static Pattern SKELETON_PATTERN = Pattern
+            .compile("<skeleton>(\\s*)</skeleton>([\\r\\n]*<translatable [^>]*>)");
+    private static Pattern SKELETON2_PATTERN = Pattern
+            .compile("(</translatable>[\\r\\n]*)<skeleton>(\\s*)</skeleton>");
+    
     static
     {
         try
@@ -106,46 +114,44 @@ public class ExportUtil
     private static String replaceLeadingWhitespace(String s, String[] rules)
             throws Exception
     {
-        Pattern p = Pattern
-                .compile("<skeleton>(\\s*)</skeleton>([\\r\\n]*<translatable [^>]*>)");
-        Matcher m = p.matcher(s);
-        while (m.find())
+        s = StringUtil.replaceWithRE(s, SKELETON_PATTERN, new Replacer(rules[0], rules[1]) 
         {
-            String all = m.group();
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+	            String s1 = r1.substring(1, r1.length() - 1);
+	            String s2 = r2.substring(1, r2.length() - 1);
 
-            String s1 = rules[0].substring(1, rules[0].length() - 1);
-            String s2 = rules[1].substring(1, rules[1].length() - 1);
+	            String sk = m.group(1);
+	            sk = StringUtil.replace(sk, s1, s2);
 
-            String sk = m.group(1);
-            sk = sk.replace(s1, s2);
-
-            String newString = "<skeleton>" + sk + "</skeleton>" + m.group(2);
-            s = s.replace(all, newString);
-        }
-
+	            String newString = "<skeleton>" + sk + "</skeleton>" + m.group(2);
+				return newString;
+			}
+		});
+        
         return s;
     }
 
     private static String replaceTrailingWhitespace(String s, String[] rules)
             throws Exception
     {
-        Pattern p = Pattern
-                .compile("(</translatable>[\\r\\n]*)<skeleton>(\\s*)</skeleton>");
-        Matcher m = p.matcher(s);
-        while (m.find())
+        s = StringUtil.replaceWithRE(s, SKELETON2_PATTERN, new Replacer(rules[0], rules[1]) 
         {
-            String all = m.group();
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+	            String s1 = r1.substring(1, r1.length() - 1);
+	            String s2 = r2.substring(1, r2.length() - 1);
 
-            String s1 = rules[0].substring(1, rules[0].length() - 1);
-            String s2 = rules[1].substring(1, rules[1].length() - 1);
+	            String sk = m.group(2);
+	            sk = StringUtil.replace(sk, s1, s2);
 
-            String sk = m.group(2);
-            sk = sk.replace(s1, s2);
-
-            String newString = m.group(1) + "<skeleton>" + sk + "</skeleton>";
-            s = s.replace(all, newString);
-        }
-
+	            String newString = m.group(1) + "<skeleton>" + sk + "</skeleton>";
+				return newString;
+			}
+		});
+        
         return s;
     }
 
@@ -155,7 +161,7 @@ public class ExportUtil
         for (Object ob : WHITE_SPACE_EXPORT.keySet())
         {
             String key = (String) ob;
-            String key2 = key.replace("*", ".*");
+            String key2 = StringUtil.replace(key, "*", ".*");
             if (locale.matches(key2))
             {
                 rule = WHITE_SPACE_EXPORT.getProperty(key);

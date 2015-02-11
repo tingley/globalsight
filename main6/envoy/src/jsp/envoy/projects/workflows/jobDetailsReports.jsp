@@ -224,23 +224,7 @@ $(document).ready(function(){
         	<TD CLASS="tableHeadingBasic"><%=bundle.getString("reportDesc")%></TD>
     	</TR>
     
-    <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ONLINE_JOBS)) {
-		reportUrl="/globalsight/ControlServlet?activityName=xlsReportOnlineJobs";
-        reportName=companyName + bundle.getString("online_jobs");
-        reportWindowName="OnlineJobs";
-	%>
-        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-        	<TD><input type="checkbox" name="checkReport" value="<%=ReportConstants.ONLINE_JOBS_REPORT %>"></TD>
-            <TD>
-				<A CLASS=standardHREF href="javascript:;" onclick="javascript:fnGenerateReport(this.parentNode.parentNode);">
-					<%=reportName%>
-				</A>
-            </TD>
-            <TD>XLS</TD>
-            <TD><%=bundle.getString("online_jobs_desc_in_jobDetails")%></TD>
-        </TR>
-	<% } 
-
+    <% 
     if (userPerms.getPermissionFor(Permission.REPORTS_DELL_FILE_LIST))
     {
 		reportUrl="/globalsight/ControlServlet?activityName=xlsReportFileList";
@@ -256,7 +240,7 @@ $(document).ready(function(){
         	</TD>
         	<TD>
             	<select name="exportFormat">
-            		<option value="xls">XLS</option>
+            		<option value="xlsx">XLSX</option>
             		<option value="csv">CSV</option>
             	</select>
         	</TD>
@@ -298,7 +282,7 @@ $(document).ready(function(){
              		<%=bundle.getString("character_count_report")%>
 				</A>
             </TD>
-            <TD>XLS</TD>
+            <TD>XLSX</TD>
             <TD><%=bundle.getString("character_count_report_desc")%></TD>
         </TR>
         </amb:permission>

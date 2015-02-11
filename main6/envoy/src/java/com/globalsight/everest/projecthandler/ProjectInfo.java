@@ -30,8 +30,11 @@ public class ProjectInfo implements java.io.Serializable
     private boolean reviewOnlyAutoSend = false;
     private boolean autoAcceptPMTask = false;
     private boolean checkUnTranslatedSegments = false;
+    private boolean saveTranslationsEditReport = true;
+    private boolean saveReviewersCommentsReport = true;
+    private boolean saveOfflineFiles = true;
     private String attributeSetName;
-    
+
     /**
      * Default Constructor
      */
@@ -48,9 +51,11 @@ public class ProjectInfo implements java.io.Serializable
         reviewOnlyAutoSend = pp.getReviewOnlyAutoSend();
         autoAcceptPMTask = pp.getAutoAcceptPMTask();
         checkUnTranslatedSegments = pp.isCheckUnTranslatedSegments();
+        saveTranslationsEditReport = pp.getSaveTranslationsEditReport();
+        saveReviewersCommentsReport = pp.getSaveReviewersCommentsReport();
+        saveOfflineFiles = pp.getSaveOfflineFiles();
         attributeSetName = pp.getAttributeSet() == null ? "" : pp
-                .getAttributeSet()
-                .getName();
+                .getAttributeSet().getName();
     }
 
     /**
@@ -209,7 +214,7 @@ public class ProjectInfo implements java.io.Serializable
     public void setCheckUnTranslatedSegments(boolean checkUnTranslatedSegments)
     {
         this.checkUnTranslatedSegments = checkUnTranslatedSegments;
-    }    
+    }
 
     public float getPMCost()
     {
@@ -219,5 +224,35 @@ public class ProjectInfo implements java.io.Serializable
     public void setPMCost(float pMCost)
     {
         PMCost = pMCost;
+    }
+
+    public boolean saveTranslationsEditReport()
+    {
+        return saveTranslationsEditReport;
+    }
+
+    public void saveTranslationsEditReport(boolean saveTranslationsEditReport)
+    {
+        this.saveTranslationsEditReport = saveTranslationsEditReport;
+    }
+
+    public boolean saveReviewersCommentsReport()
+    {
+        return saveReviewersCommentsReport;
+    }
+
+    public void saveReviewersCommentsReport(boolean saveReviewersCommentsReport)
+    {
+        this.saveReviewersCommentsReport = saveReviewersCommentsReport;
+    }
+
+    public boolean saveOfflineFiles()
+    {
+        return saveOfflineFiles;
+    }
+
+    public void saveOfflineFiles(boolean saveOfflineFiles)
+    {
+        this.saveOfflineFiles = saveOfflineFiles;
     }
 }

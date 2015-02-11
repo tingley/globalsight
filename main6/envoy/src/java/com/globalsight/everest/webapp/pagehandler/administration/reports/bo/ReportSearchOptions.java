@@ -54,6 +54,7 @@ public class ReportSearchOptions
     private Calendar startDate = Calendar.getInstance();
     private Calendar endDate = Calendar.getInstance();
     private Company curCompany;
+    private String userId;
     
     private ResourceBundle bundle;
     
@@ -327,5 +328,15 @@ public class ReportSearchOptions
             return;
         
         curCompany = CompanyWrapper.getCompanyById(p_companyId);
+    }
+
+    public String getUserId()
+    {
+        return userId;
+    }
+
+    public void setUserId(String userId)
+    {
+        this.userId = userId;
     }
 }

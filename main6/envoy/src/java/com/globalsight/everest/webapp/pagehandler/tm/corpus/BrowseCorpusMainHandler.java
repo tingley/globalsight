@@ -110,7 +110,7 @@ public class BrowseCorpusMainHandler extends PageHandler
      * puts information on the request for the JSP to use
      * 
      * @param p_pageDescriptor
-     *            the page desciptor
+     *            the page descriptor
      * @param p_request
      *            the original request sent from the browser
      * @param p_response
@@ -784,8 +784,8 @@ public class BrowseCorpusMainHandler extends PageHandler
     }
 
     /**
-     * get tmList for current user If current user is a super PM, then only
-     * fetch TM list of his in current company
+     * Get tmList for current user.
+     * If current user is a super PM, then only fetch TM list of his in current company.
      * 
      * @param p_request
      * 

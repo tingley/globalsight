@@ -97,7 +97,7 @@ class Tm3Leverager {
 
         TM3LeverageResults<GSTuvData> results = tm.findMatches(new GSTuvData(
                 srcTuv), srcLocale, leverageOptions.getLeveragingLocales()
-                .getAllTargetLocales(), attrs, matchType, lookupTarget,
+                .getAllLeveragingLocales(), attrs, matchType, lookupTarget,
                 MAX_HITS, leverageOptions.getMatchThreshold());
         
         // NB in this conversion, we lose which tuv was matched, only which

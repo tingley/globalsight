@@ -147,7 +147,7 @@ public class JarManager
             ALL_JARS.add(new Jar(INSTALL_JAR_PATH, INSTALL_JAR_NEW_PATH,
                     "/tools/install/"));
             ALL_JARS.add(new Jar(GRAPHICAL_WF_JAR_PATH,
-                    GRAPHICAL_WF_JAR_NEW_PATH, "/gui/planview/", "/everest/webapp/applet/common/"));
+                    GRAPHICAL_WF_JAR_NEW_PATH, "/gui/planview/", "/everest/webapp/applet/common/", "/SortUtil"));
             ALL_JARS.add(new Jar(CUSTOMER_JAR_PATH, CUSTOMER_JAR_NEW_PATH,
                     "/everest/webapp/applet/", "/zip/ZipIt"));
             ALL_JARS.add(new Jar(PROMT_UTIL_JAR, PROMT_UTIL_NEW_JAR,

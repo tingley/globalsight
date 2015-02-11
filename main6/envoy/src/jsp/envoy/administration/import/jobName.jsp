@@ -81,6 +81,8 @@
             String[] tokens = normalizedFileName.split("/");
             if (tokens.length > 1)
             {
+                suggestedJobName = tokens[1];
+                /**
                suggestedJobName = tokens[tokens.length - 1];
 
                String localeTemp = tokens[0];
@@ -109,6 +111,7 @@
                        }
 			       }
 		       }
+			   */
             }
                 
         }

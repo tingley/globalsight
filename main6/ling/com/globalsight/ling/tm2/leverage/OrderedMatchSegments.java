@@ -250,13 +250,74 @@ class OrderedMatchSegments
                         }
                     }
                 }
-
             }
         }
-
+    }
+    
+    /**
+     * Gets duplicate tuvs in leveragedTuvList.
+     * 
+     * @param leveragedTuvList
+     * @return
+     */
+    private List<LeveragedTuv> getDuplicateTuv(
+            List<LeveragedTuv> leveragedTuvList)
+    {
+        List<LeveragedTuv> removedTuv = new ArrayList<LeveragedTuv>();
+        
+        for (int i = 0; i < leveragedTuvList.size() - 1; i++)
+        {
+             LeveragedTuv tuv1 = (LeveragedTuv) leveragedTuvList.get(i);
+             String sText1 = getSegmentText(tuv1.getSourceTuv().getSegment());
+             String tText1 = getSegmentText(tuv1.getSegment());
+             
+             for (int j = i + 1; j < leveragedTuvList.size(); j++)
+             {
+                 LeveragedTuv tuv2 = (LeveragedTuv) leveragedTuvList.get(j);
+                 
+                 String sText2 = getSegmentText(tuv2.getSourceTuv().getSegment());
+                 String tText2 = getSegmentText(tuv2.getSegment());
+                 
+                 if (sText1.equals(sText2) && tText1.equals(tText2))
+                 {
+                     removedTuv.add(tuv2);
+                 }
+             }
+        }
+        
+        return removedTuv;
+    }
+    
+    /**
+     * Can not use leveragedTuvList.removeAll(removedTuv). The equals method has
+     * been rewrited.
+     * 
+     * @param leveragedTuvList
+     * @param removedTuv
+     */
+    private void removeAll(List<LeveragedTuv> leveragedTuvList,
+            List<LeveragedTuv> removedTuv)
+    {
+        for (LeveragedTuv aa : removedTuv)
+        {
+            for (int i = 0; i < leveragedTuvList.size(); i++)
+            {
+                LeveragedTuv aa2 = leveragedTuvList.get(i);
+                if (aa2.getId() == aa.getId())
+                {
+                    leveragedTuvList.remove(i);
+                    break;
+                }
+            }
+        }
     }
 
-    // remove duplicates
+    /**
+     * Removes duplicates
+     * @param p_leverageOptions
+     * @param companyId
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void removeDuplicates(LeverageOptions p_leverageOptions,
             long companyId)
     {
@@ -265,40 +326,13 @@ class OrderedMatchSegments
         {
             GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale
                     .next();
-            List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
-
-            Iterator itTuv = leveragedTuvList.iterator();
-            ArrayList<String> existedTargetSegments = new ArrayList<String>();
-            ArrayList<String> existedSourceSegments = new ArrayList<String>();
-            String targetSegmentText = "", sourceSegmentText = "";
-
-            /**
-             * GBS-3011, Vincent Yan 2013/03/14 To remove duplicated matched
-             * TUV, we don't check the original source TUV and only check if the
-             * content of matched TUV is the same. If yes, then remove the
-             * duplicated leverage match.
-             */
-            while (itTuv.hasNext())
-            {
-                LeveragedTuv leveragedTuv = (LeveragedTuv) itTuv.next();
-                if (!leveragedTuv.getMatchState().equals(
-                        MatchState.SEGMENT_TM_EXACT_MATCH))
-                    continue;
-
-                sourceSegmentText = getSegmentText(leveragedTuv.getSourceTuv()
-                        .getSegment());
-                targetSegmentText = getSegmentText(leveragedTuv.getSegment());
-                if (existedSourceSegments.contains(sourceSegmentText)
-                        && existedTargetSegments.contains(targetSegmentText))
-                {
-                    itTuv.remove();
-                }
-                else
-                {
-                    existedTargetSegments.add(targetSegmentText);
-                    existedSourceSegments.add(sourceSegmentText);
-                }
-            }
+            List<LeveragedTuv> leveragedTuvList = (List) m_localeMatchMap
+                    .get(targetLocale);
+            SortUtil.sort(leveragedTuvList, new AssignOrderComparator(
+                    targetLocale, p_leverageOptions, companyId));
+            
+            List<LeveragedTuv> removedTuv = getDuplicateTuv(leveragedTuvList);
+            removeAll(leveragedTuvList, removedTuv);
         }
     }
 
@@ -339,9 +373,6 @@ class OrderedMatchSegments
                 continue;
             }
 
-            SortUtil.sort(leveragedTuvList, new MultiTransComparator(
-                    targetLocale, p_leverageOptions, companyId));
-
             LeveragedTuv firstTuv = (LeveragedTuv) leveragedTuvList.get(0);
             LeveragedTuv secondTuv = (LeveragedTuv) leveragedTuvList.get(1);
             MatchState firstState = firstTuv.getMatchState();
@@ -361,6 +392,11 @@ class OrderedMatchSegments
                     && (!(firstLocale.equals(targetLocale) ^ secondLocale
                             .equals(targetLocale))))
             {
+            	if (LeverageUtil.getSidCompareRusult(firstTuv, companyId) == 1 
+            			&& LeverageUtil.getSidCompareRusult(secondTuv, companyId) < 1)
+            	{
+            		continue;
+            	}
                 assignMultiTransStateAndScore(leveragedTuvList,
                         p_leverageOptions);
             }
@@ -594,6 +630,21 @@ class OrderedMatchSegments
 
             return cmp1 - cmp2;
         }
+        
+        int compareTm(LeveragedTuv tuv1, LeveragedTuv tuv2)
+        {
+        	if (!options.isTmProcedence())
+            {
+        		return 0;
+            }
+        	
+            long tmId1 = tuv1.getTu().getTmId();
+            long tmId2 = tuv2.getTu().getTmId();
+            int projectTmIndex1 = Leverager.getProjectTmIndex(options, tmId1);
+            int projectTmIndex2 = Leverager.getProjectTmIndex(options, tmId2);
+            
+            return projectTmIndex1 - projectTmIndex2;
+        }
 
         // // This method compares the last modified time of the two
         // // Tuvs. The order of the sort depends on the option the user
@@ -671,12 +722,6 @@ class OrderedMatchSegments
                 }
             }
 
-            result = projectTmIndex1 - projectTmIndex2;
-            if (result != 0)
-            {
-                return result;
-            }
-
             // Ok, same score. Compare match state.
             result = compareMatchState(tuv1, tuv2);
             if (result != 0)
@@ -695,101 +740,4 @@ class OrderedMatchSegments
             return result;
         }
     }
-
-    private class DuplicateRemovalComparator extends LeveragedTuvComparator
-    {
-        LeverageOptions m_leverageOptions;
-
-        DuplicateRemovalComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions p_leverageOptions, long companyId)
-        {
-            super(p_targetLocale, p_leverageOptions, companyId);
-            m_leverageOptions = p_leverageOptions;
-        }
-
-        public int compare(Object p_o1, Object p_o2)
-        {
-            LeveragedTuv tuv1 = (LeveragedTuv) p_o1;
-            LeveragedTuv tuv2 = (LeveragedTuv) p_o2;
-
-            String seg1 = getSegmentText(tuv1.getSourceTuv().getSegment());
-            String seg2 = getSegmentText(tuv2.getSourceTuv().getSegment());
-
-            int result = seg1.compareTo(seg2);
-
-            if (result != 0)
-                return result;
-
-            seg1 = getSegmentText(tuv1.getSegment());
-            seg2 = getSegmentText(tuv2.getSegment());
-            // Ok, the source segment is the same. Compare the target
-            result = seg1.compareTo(seg2);
-            if (result != 0)
-                return result;
-
-            result = LeverageUtil.compareSid(tuv1, tuv2, companyId);
-            if (result != 0)
-                return result;
-
-            // Ok, the target segment is the same. Compare match state.
-            result = compareMatchState(tuv1, tuv2);
-            if (result != 0)
-                return result;
-
-            // Ok, same match state. Compare locale
-            result = compareLocale(tuv1, tuv2);
-            if (result != 0)
-                return result;
-
-            // Ok, same locale, Compare last modified time
-            result = LeverageUtil.compareTime(tuv1, tuv2, m_leverageOptions);
-
-            return result;
-        }
-    }
-
-    private class MultiTransComparator extends LeveragedTuvComparator
-    {
-        LeverageOptions m_leverageOptions;
-
-        MultiTransComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions p_leverageOptions, long companyId)
-        {
-            super(p_targetLocale, p_leverageOptions, companyId);
-            m_leverageOptions = p_leverageOptions;
-        }
-
-        public int compare(Object p_o1, Object p_o2)
-        {
-            LeveragedTuv tuv1 = (LeveragedTuv) p_o1;
-            LeveragedTuv tuv2 = (LeveragedTuv) p_o2;
-
-            int result = (int) (tuv2.getScore() - tuv1.getScore());
-
-            if (result == 0 && tuv1.getScore() == 100)
-            {
-                result = LeverageUtil.compareSid(tuv1, tuv2, companyId);
-                if (result != 0)
-                    return result;
-
-                // Ok, the score are the same and they are
-                // 100%. Compare match state
-                result = compareMatchState(tuv1, tuv2);
-                if (result != 0)
-                    return result;
-
-                // Ok, same match state. Compare locale
-                result = compareLocale(tuv1, tuv2);
-                if (result != 0)
-                    return result;
-
-                // Ok, same locale, Compare last modified time
-                result = LeverageUtil
-                        .compareTime(tuv1, tuv2, m_leverageOptions);
-            }
-
-            return result;
-        }
-    }
-
 }

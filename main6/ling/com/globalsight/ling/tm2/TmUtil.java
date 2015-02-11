@@ -294,6 +294,10 @@ public class TmUtil
         return handler.toString();
     }
 
+    /**
+     *@deprecated [#GBS-3220] Code refactor for getting "SID", "ModifiedDate" etc for performance 
+     *
+     */
     public static String getSidForTuv(long tmId, long tuvId)
             throws LingManagerException
     {
@@ -312,6 +316,10 @@ public class TmUtil
         return null;
     }
 
+    /**
+     *@deprecated [#GBS-3220] Code refactor for getting "SID", "ModifiedDate" etc for performance 
+     *
+     */
     public static Date getModifyDateForTuv(long tmId, long tuvId)
             throws LingManagerException
     {
@@ -331,6 +339,10 @@ public class TmUtil
         return null;
     }
 
+    /**
+     *@deprecated [#GBS-3220] Code refactor for getting "SID", "ModifiedDate" etc for performance 
+     *
+     */
     public static String getCreationUserIdForTuv(long tmId, long tuvId)
             throws LingManagerException
     {
@@ -350,6 +362,10 @@ public class TmUtil
         return null;
     }
 
+    /**
+     *@deprecated [#GBS-3220] Code refactor for getting "SID", "ModifiedDate" etc for performance 
+     *
+     */
     public static String getSourceTextForTuv(long tmId, long tuvId,
             long srcLocaleId) throws LingManagerException
     {

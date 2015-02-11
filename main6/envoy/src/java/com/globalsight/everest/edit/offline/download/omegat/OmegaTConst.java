@@ -40,7 +40,7 @@ public class OmegaTConst
             + "    <project version=\"1.0\">\n"
             + "        <source_dir>inbox</source_dir>\n"
             + "        <target_dir>__DEFAULT__</target_dir>\n"
-            + "        <tm_dir>tmx</tm_dir>\n"
+            + "        <tm_dir>__DEFAULT__</tm_dir>\n"
             + "        <offline_mt_dir>__DEFAULT__</offline_mt_dir>\n"
             + "        <glossary_dir>terminology</glossary_dir>\n"
             + "        <glossary_file>terminology/new-glossary.txt</glossary_file>\n"

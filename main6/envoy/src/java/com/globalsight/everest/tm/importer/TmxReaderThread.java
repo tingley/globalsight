@@ -214,7 +214,7 @@ public class TmxReaderThread
                                 }
                                 else
                                 {
-                                    CATEGORY.warn(msg, ex);
+                                    CATEGORY.warn(msg);
                                 }
                             }
 
@@ -614,6 +614,11 @@ public class TmxReaderThread
             }
 
             result.setModifyDate(new Timestamp(date.getTime()));
+        }
+        else
+        {
+            // If no "changedate", set it same as "creationdate".
+            result.setModifyDate(result.getCreationDate());
         }
 
         // Segment text: need to produce root elements <translatable>

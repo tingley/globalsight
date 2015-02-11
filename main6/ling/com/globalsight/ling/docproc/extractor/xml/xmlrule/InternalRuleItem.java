@@ -59,42 +59,9 @@ public class InternalRuleItem extends XmlRuleItem
             ruleMap.put(node, rule);
         }
 
+        rule.setTranslate(true);
         rule.setInternal(true);
         rule.setInline(true);
-
-        // do not set internal for office 2010 files
-        boolean isOfficeXml = false;
-        try
-        {
-            String rootNodeName = node.getOwnerDocument().getDocumentElement().getNodeName();
-            isOfficeXml = "w:document".equals(rootNodeName) || "w:comments".equals(rootNodeName)
-                    || "w:hdr".equals(rootNodeName) || "w:ftr".equals(rootNodeName)
-                    || "w:footnotes".equals(rootNodeName);
-        }
-        catch (Exception e)
-        {
-            // ignore
-            isOfficeXml = false;
-        }
-        NamedNodeMap attributes = node.getAttributes();
-        if (attributes != null && !isOfficeXml)
-        {
-            for (int i = 0; i < attributes.getLength(); i++)
-            {
-                Node attr = attributes.item(i);
-                updateInternal(ruleMap, attr);
-            }
-        }
-
-        NodeList nodes = node.getChildNodes();
-        if (nodes != null)
-        {
-            for (int i = 0; i < nodes.getLength(); i++)
-            {
-                Node childNode = nodes.item(i);
-                updateInternal(ruleMap, childNode);
-            }
-        }
     }
 
     @Override

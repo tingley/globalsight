@@ -107,12 +107,25 @@ namespace GlobalSight.Office2007Converters
 		/// the file was written in</param>
 		public void Convert(string p_fileName, string p_language)
 		{
-			try
-			{
-				ResetState();
-				m_statusFileName = p_fileName.Substring(
-					0, p_fileName.Length - FILE_EXT_LEN) + "status";
-				DetermineConversionValues(p_fileName);
+            try
+            {
+                DoConvert(p_fileName, p_language, true);
+            }
+            finally
+            {
+                DeleteInputFile(p_fileName);
+                QuitWord();
+            }
+		}
+
+        private void DoConvert(string p_fileName, string p_language, bool retry)
+        {
+            try
+            {
+                ResetState();
+                m_statusFileName = p_fileName.Substring(
+                    0, p_fileName.Length - FILE_EXT_LEN) + "status";
+                DetermineConversionValues(p_fileName);
 
                 if (m_newFileName.EndsWith(PDF))
                 {
@@ -120,28 +133,37 @@ namespace GlobalSight.Office2007Converters
                         0, p_fileName.Length - FILE_EXT_LEN) + "pdf.status";
                 }
 
-				m_log.Log("Processing file " + m_originalFileName);
+                m_log.Log("Processing file " + m_originalFileName);
 
-				CreateWordAppClass();
-				OpenWordDoc();
-				SaveDocument();
+                CreateWordAppClass();
+                OpenWordDoc();
+                SaveDocument();
 
-				StatusFile.WriteSuccessStatus(m_statusFileName,
-					m_originalFileName + " was converted successfully.");
+                StatusFile.WriteSuccessStatus(m_statusFileName,
+                    m_originalFileName + " was converted successfully.");
 
-				m_log.Log("Converted successfully to " + m_newFileName);
-			}
-			catch (Exception e)
-			{
-				Logger.LogError(m_log, "Word 2007 Conversion Failed", e);
-				StatusFile.WriteErrorStatus(m_statusFileName,e,(int)1);
-			}
-			finally
-			{
-				DeleteInputFile(p_fileName);
-				QuitWord();
-			}
-		}
+                m_log.Log("Converted successfully to " + m_newFileName);
+            }
+            catch (Exception e)
+            {
+                string emsg = e.StackTrace.ToString();
+                if (retry && emsg != null && emsg.Contains("RPC_E_SERVERCALL_RETRYLATER"))
+                {
+                    // sleep 10 seconds
+                    Thread.Sleep(1000 * 10);
+                    QuitWord();
+                    Thread.Sleep(1000 * 10);
+
+                    m_log.Log("Retry conversion after exception: " + emsg);
+                    DoConvert(p_fileName, p_language, false);
+                }
+                else
+                {
+                    Logger.LogError(m_log, "Word 2007 Conversion Failed", e);
+                    StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
+                }
+            }
+        }
 
 		/// <summary>
 		/// See Converter interface for details.
@@ -436,7 +458,10 @@ namespace GlobalSight.Office2007Converters
 			try
 			{
 				FileInfo fi = new FileInfo(p_fileName);
-				fi.Delete();
+                if (fi.Exists)
+                {
+                    fi.Delete();
+                }
 			}
 			catch (Exception e)
 			{

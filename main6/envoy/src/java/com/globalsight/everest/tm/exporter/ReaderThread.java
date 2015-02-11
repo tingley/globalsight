@@ -17,7 +17,7 @@
 
 package com.globalsight.everest.tm.exporter;
 
-import java.util.Iterator;
+import java.sql.Connection;
 
 import org.apache.log4j.Logger;
 
@@ -27,6 +27,7 @@ import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
@@ -38,8 +39,7 @@ import com.globalsight.util.SessionInfo;
  */
 public class ReaderThread extends Thread
 {
-    static private final Logger CATEGORY = Logger
-            .getLogger(ReaderThread.class);
+    static private final Logger CATEGORY = Logger.getLogger(ReaderThread.class);
 
     /** When reading TUs from the TM, read BATCH_READ_SIZE TUs at a time. */
     static private final int BATCH_READ_SIZE = 200;
@@ -73,15 +73,18 @@ public class ReaderThread extends Thread
     {
         ReaderResult result = null;
         SegmentResultSet tus = null;
+        Connection conn = null;
         try
         {
             CATEGORY.debug("ReaderThread: start reading TM "
                     + m_database.getName());
+            conn = DbUtil.getConnection();
 
             // Simple, not optimal: get all TU ids, keep them in memory.
             // Then read each TUs in batches and output.
-            tus = getTuIds();
-            while (tus.hasNext()) {
+            tus = getTuIds(conn);
+            while (tus.hasNext())
+            {
                 SegmentTmTu tu = tus.next();
                 result = m_results.hireResult();
                 result.setResultObject(tu);
@@ -107,15 +110,11 @@ public class ReaderThread extends Thread
             {
                 m_results.fireResult(result);
             }
-
             m_results.producerDone();
             m_results = null;
-
-            if (tus != null) {
-                tus.finish();
-            }
-            CATEGORY.debug("ReaderThread: done.");
+            DbUtil.silentReturnConnection(conn);
             HibernateUtil.closeSession();
+            CATEGORY.debug("ReaderThread: done.");
         }
     }
 
@@ -127,7 +126,7 @@ public class ReaderThread extends Thread
      * Retrieves a list of TU ids (as Long objects) that need to be exported
      * from the TM.
      */
-    private SegmentResultSet getTuIds() throws Exception
+    private SegmentResultSet getTuIds(Connection conn) throws Exception
     {
         com.globalsight.everest.tm.exporter.ExportOptions options = m_options;
 
@@ -138,21 +137,21 @@ public class ReaderThread extends Thread
         String createdAfter = filterString.m_createdAfter;
         String createdBefore = filterString.m_createdBefore;
         TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-        
+
         if (mode.equals(ExportOptions.SELECT_ALL))
         {
-            return mgr.getAllSegments(m_database, createdBefore, 
-                                      createdAfter);
+            return mgr.getAllSegments(m_database, createdBefore, createdAfter,
+                    conn);
         }
         else if (mode.equals(ExportOptions.SELECT_FILTERED))
         {
-            return mgr.getSegmentsByLocale(m_database, lang, createdBefore, 
-                                           createdAfter);
+            return mgr.getSegmentsByLocale(m_database, lang, createdBefore,
+                    createdAfter, conn);
         }
-        else if (mode.equals(options.SELECT_FILTER_PROP_TYPE)) 
+        else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
         {
-            return mgr.getSegmentsByProjectName(m_database, propType, 
-                                                createdBefore, createdAfter);
+            return mgr.getSegmentsByProjectName(m_database, propType,
+                    createdBefore, createdAfter, conn);
         }
         else
         {

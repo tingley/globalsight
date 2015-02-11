@@ -170,6 +170,7 @@ public class JobVoSearchCriteria
         }
 
         createCompanyExpression();
+        HibernateUtil.closeSession();
         return HibernateUtil.searchWithSql(sql.toString(), params);
     }
 

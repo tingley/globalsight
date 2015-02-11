@@ -18,144 +18,133 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.custom
 
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.Border;
-import jxl.format.BorderLineStyle;
-import jxl.format.Colour;
-import jxl.format.UnderlineStyle;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.NumberFormat;
-import jxl.write.WritableCell;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
+import javax.servlet.ServletOutputStream;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.CurrencyThreadLocal;
 
 public class ExcelReportWriter implements ReportWriter
 {
-    private WritableWorkbook workbook = null;
-    
-    private ArrayList sheets = new ArrayList();
-    private WritableSheet workSheet = null;
+ 
+	private Workbook workbook = null;
+	private Sheet workSheet = null;
+    private ArrayList<Sheet> sheets = new ArrayList<Sheet>();
     private ResourceBundle bundle = null;
     
-    private WritableCellFormat titleFormat = null;
-    private WritableCellFormat headerFormat = null;
-    private WritableCellFormat moneyFormat = null;
-    private WritableCellFormat stringFormat = null;
-    private WritableCellFormat intFormat = null;
-    private WritableCellFormat totalFormat = null;
-    private WritableCellFormat totalMoneyFormat = null;
-    
+    private CellStyle titleStyle = null;
+    private CellStyle headerStyle = null;
+    private CellStyle moneyStyle = null;
+    private CellStyle stringStyle = null;
+    private CellStyle intStyle = null;
+    private CellStyle totalStyle = null;
+    private CellStyle totalMoneyStyle = null;
 
-    public ExcelReportWriter(OutputStream outputStream, ResourceBundle bundle) throws IOException
+    public ExcelReportWriter(ResourceBundle bundle) throws IOException
     {
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setSuppressWarnings(true);
         this.bundle = bundle;
-        this.workbook = Workbook.createWorkbook(outputStream, settings);
+        this.workbook = new SXSSFWorkbook();
         this.setFormats();
     }
-
     
     public int createSheet(String sheetName)
     {
-        this.sheets.add(0, this.workbook.createSheet(sheetName, 0));
+        this.sheets.add(0, this.workbook.createSheet(sheetName));
         return 0;
     }
     
     public void setSheet(int sheetId)
     {
-        this.workSheet = (WritableSheet)this.sheets.get(sheetId);
+        this.workSheet = (Sheet)this.sheets.get(sheetId);
     }
     
-    public void setColumnView(int beginIndex, int endIndex)
+    public void setColumnWidth(int beginIndex, int endIndex)
     {
-        this.workSheet.setColumnView(beginIndex, endIndex);
+        this.workSheet.setColumnWidth(beginIndex, endIndex);
     }
     
     public void addTitleCell(int column, int row, String label) 
     throws IOException 
     {
-        this.addCell(new Label(column, row, label, titleFormat));
+    	Cell cell = getCell(getRow(row), column);
+    	cell.setCellValue(label);
+    	cell.setCellStyle(titleStyle);
     }
     
     public void addHeaderCell(int column, int row, String label) 
     throws IOException 
     {
-        this.addCell(new Label(column, row, label, headerFormat));
+    	Cell cell = getCell(getRow(row), column);
+    	cell.setCellValue(label);
+    	cell.setCellStyle(headerStyle);
     }
     
     public void addContentCell(int column, int row, Object contentObj) 
     throws IOException 
     {
-        WritableCell cell = null;
+    	Cell cell = getCell(getRow(row), column);
         
         if (contentObj instanceof BigDecimal)
         {
-            cell = new Number(column, row, 
-                              ((BigDecimal)contentObj).doubleValue(), 
-                              moneyFormat);
+        	cell.setCellValue(((BigDecimal)contentObj).doubleValue());
+        	cell.setCellStyle(moneyStyle);
         }
         else if (contentObj instanceof Long)
         {
-            cell = new Number(column, row, 
-                              ((Long)contentObj).longValue(), 
-                              intFormat);
+        	cell.setCellValue(((Long)contentObj).longValue());
+        	cell.setCellStyle(intStyle);
         }
         else if (contentObj instanceof Integer)
         {
-            cell = new Number(column, row, 
-                              ((Integer)contentObj).intValue(), 
-                              intFormat);
+        	cell.setCellValue(((Integer)contentObj).intValue());
+        	cell.setCellStyle(intStyle);
         }
         else
         {
-            cell = new Label(column, row, contentObj.toString(), stringFormat);
+        	cell.setCellValue(contentObj.toString());
+        	cell.setCellStyle(stringStyle);
         }
-        
-        this.addCell(cell);
     }
     
     public void addTotal(final int totalRow, List total) 
     throws IOException
     {
-        this.addCell(new Label(0, totalRow, bundle.getString("lb_total"), totalFormat));
+    	Cell totalCell = getCell(getRow(totalRow), 0);
+    	totalCell.setCellValue(bundle.getString("lb_total"));
+    	totalCell.setCellStyle(totalStyle);
         
         for (int i = 1; i < total.size(); i++)
         {
-            WritableCell cell = null;
+            Cell cell = getCell(getRow(totalRow), i);
             if (total.get(i) instanceof BigDecimal)
             {
-                cell = new Number(i, 
-                                  totalRow, 
-                                  ((BigDecimal)total.get(i)).doubleValue(), 
-                                  totalMoneyFormat);
+            	cell.setCellValue(((BigDecimal)total.get(i)).doubleValue());
+            	cell.setCellStyle(totalMoneyStyle);
             }
             else if (total.get(i) instanceof Long)
             {
-                cell = new Number(i, 
-                                  totalRow, 
-                                  ((Long)total.get(i)).longValue(), 
-                                  totalFormat);
+            	cell.setCellValue(((Long)total.get(i)).longValue());
+            	cell.setCellStyle(totalStyle);
             }
             else
             {
-                cell = new Label(i, totalRow, " ", totalFormat);
+            	cell.setCellValue("");
+            	cell.setCellStyle(totalStyle);
             }
-            
-            this.addCell(cell);
         }
     }
     
@@ -165,119 +154,123 @@ public class ExcelReportWriter implements ReportWriter
                            int endRow)
     throws IOException
     {
-        try
-        {
-            this.workSheet.mergeCells(beginColumn, beginRow, endColumn, endRow);
-        }
-        catch (WriteException e) 
-        {
-            throw new IOException(e.toString());
-        }
+    	this.workSheet.addMergedRegion(new CellRangeAddress(beginRow, endRow, beginColumn, endColumn));
+        setRegionStyle(this.workSheet, new CellRangeAddress(beginRow, endRow, beginColumn, endColumn), headerStyle);   
     }
     
-    public void commit() throws IOException
+    public void commit(ServletOutputStream outputStream) throws IOException
     {
-        this.workbook.write();
-        
-        try
-        {
-            this.workbook.close();
-        }
-        catch(WriteException e)
-        {
-            throw new IOException(e.toString());
-        }
+    	ServletOutputStream out = outputStream;
+    	this.workbook.write(out);
+        out.close();
         
     }
     
     
     private void setFormats() throws IOException 
     {
-        try
-        {
-            // Set title format
-            WritableFont titleFont = new WritableFont(
-                                         WritableFont.TIMES, 
-                                         14,
-                                         WritableFont.BOLD, 
-                                         false, 
-                                         UnderlineStyle.NO_UNDERLINE,
-                                         Colour.BLACK);
+        // Set title format
+    	Font titleFont = this.workbook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Times");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        titleFont.setColor(IndexedColors.BLACK.getIndex());
+    
+        this.titleStyle = this.workbook.createCellStyle();
+        titleStyle.setFont(titleFont);
+        titleStyle.setWrapText(false);
+
+        // Set header format
+        Font headerFont = this.workbook.createFont();
+        headerFont.setUnderline(Font.U_NONE);
+        headerFont.setFontName("Times");
+        headerFont.setFontHeightInPoints((short) 11);
+        headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        headerFont.setColor(IndexedColors.BLACK.getIndex());
         
-            this.titleFormat = new WritableCellFormat(titleFont);
-            titleFormat.setWrap(false);
-            titleFormat.setShrinkToFit(false);
-
-            // Set header format
-            WritableFont headerFont = new WritableFont(
-                                          WritableFont.TIMES, 
-                                          11,
-                                          WritableFont.BOLD, 
-                                          false, 
-                                          UnderlineStyle.NO_UNDERLINE,
-                                          Colour.BLACK);
-            
-            this.headerFormat = new WritableCellFormat(headerFont);
-            headerFormat.setWrap(true);
-            headerFormat.setBackground(Colour.GRAY_25);
-            headerFormat.setShrinkToFit(false);
-            headerFormat.setBorder(Border.TOP, BorderLineStyle.THIN);
-            headerFormat.setBorder(Border.BOTTOM, BorderLineStyle.THIN);
-            headerFormat.setBorder(Border.LEFT, BorderLineStyle.THIN);
-            headerFormat.setBorder(Border.RIGHT, BorderLineStyle.THIN);
-            
-            // Set content format
-            this.stringFormat = new WritableCellFormat();
-            this.intFormat = new WritableCellFormat();
-            
-            // Set money format
-            String moneyFormatString = CurrencyThreadLocal.getMoneyFormatString();
-            this.moneyFormat = new WritableCellFormat(new NumberFormat(moneyFormatString));
-            moneyFormat.setWrap(false);
-            moneyFormat.setShrinkToFit(false);
-            
-            // Set total format
-            WritableFont totalFont = new WritableFont(WritableFont.ARIAL, 
-                                                      10,
-                                                      WritableFont.BOLD,
-                                                      false,
-                                                      UnderlineStyle.NO_UNDERLINE,
-                                                      Colour.BLACK);
-
-            totalFormat = new WritableCellFormat(totalFont);
-            totalFormat.setWrap(true);
-            totalFormat.setShrinkToFit(false);
-            totalFormat.setBorder(Border.TOP, BorderLineStyle.THIN);
-            totalFormat.setBorder(Border.BOTTOM, BorderLineStyle.THIN);
-            totalFormat.setBackground(Colour.GRAY_25);
-            
-            // Set total money format
-            this.totalMoneyFormat = new WritableCellFormat(new NumberFormat(moneyFormatString));
-            moneyFormat.setWrap(false);
-            totalMoneyFormat.setShrinkToFit(false);
-            totalMoneyFormat.setBorder(Border.TOP, BorderLineStyle.THIN);
-            totalMoneyFormat.setBorder(Border.BOTTOM, BorderLineStyle.THIN);
-            totalMoneyFormat.setBackground(Colour.GRAY_25);
-            
-        } 
-        catch (WriteException e) 
-        {
-            throw new IOException(e.toString());
-        }
-
+        this.headerStyle = this.workbook.createCellStyle();
+        headerStyle.setFont(headerFont);
+        headerStyle.setWrapText(true);
+        headerStyle.setFillPattern(CellStyle.SOLID_FOREGROUND );
+        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerStyle.setBorderBottom(CellStyle.BORDER_THIN);
+        headerStyle.setBorderRight(CellStyle.BORDER_THIN);
+        headerStyle.setBorderTop(CellStyle.BORDER_THIN);
+        headerStyle.setBorderLeft(CellStyle.BORDER_THIN);
+        
+        // Set content format
+        Font font = this.workbook.createFont();
+        font.setFontName("Arial");
+        font.setFontHeightInPoints((short) 10);
+        
+        this.stringStyle = this.workbook.createCellStyle();
+        stringStyle.setAlignment(CellStyle.ALIGN_LEFT);
+        stringStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        this.intStyle = this.workbook.createCellStyle();
+        intStyle.setAlignment(CellStyle.ALIGN_LEFT);
+        intStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        
+        // Set money format
+        String moneyFormatString = CurrencyThreadLocal.getMoneyFormatString();
+        DataFormat moneyFormat = this.workbook.createDataFormat();
+        this.moneyStyle = this.workbook.createCellStyle();
+        moneyStyle.setDataFormat(moneyFormat.getFormat(moneyFormatString));
+        moneyStyle.setWrapText(false);
+        
+        // Set total format
+        Font totalFont = this.workbook.createFont();
+        totalFont.setUnderline(Font.U_NONE);
+        totalFont.setFontName("Arial");
+        totalFont.setFontHeightInPoints((short) 10);
+        totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        totalFont.setColor(IndexedColors.BLACK.getIndex());
+        
+        this.totalStyle = this.workbook.createCellStyle();
+        totalStyle.setFont(totalFont);
+        totalStyle.setWrapText(true);
+        totalStyle.setBorderTop(CellStyle.BORDER_THIN);
+        totalStyle.setBorderBottom(CellStyle.BORDER_THIN);
+        totalStyle.setFillPattern(CellStyle.SOLID_FOREGROUND );
+        totalStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        
+        // Set total money format
+        this.totalMoneyStyle = this.workbook.createCellStyle();
+        totalMoneyStyle.setDataFormat(moneyFormat.getFormat(moneyFormatString));
+        totalMoneyStyle.setWrapText(false);
+        totalMoneyStyle.setBorderTop(CellStyle.BORDER_THIN);
+        totalMoneyStyle.setBorderBottom(CellStyle.BORDER_THIN);
+        totalMoneyStyle.setFillPattern(CellStyle.SOLID_FOREGROUND );
+        totalMoneyStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
     }
     
-    private void addCell(WritableCell cell) 
-    throws IOException 
+    public void setRegionStyle(Sheet sheet, CellRangeAddress cellRangeAddress,
+    		CellStyle cs) {
+    		for (int i = cellRangeAddress.getFirstRow(); i <= cellRangeAddress.getLastRow();
+    			i++) {
+    			Row row = getRow(i);
+    			for (int j = cellRangeAddress.getFirstColumn(); 
+    				j <= cellRangeAddress.getLastColumn(); j++) {
+    				Cell cell = getCell(row, j);
+    				cell.setCellStyle(cs);
+    			}
+    	  }
+    }
+    
+    private Row getRow(int p_col)
     {
-        try
-        {
-            this.workSheet.addCell(cell);
-        }
-        catch (WriteException e) 
-        {
-            throw new IOException(e.toString());
-        }
-    } 
+        Row row = this.workSheet.getRow(p_col);
+        if (row == null)
+            row = this.workSheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
+    }
     
 }

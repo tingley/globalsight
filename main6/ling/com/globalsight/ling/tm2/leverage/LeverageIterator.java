@@ -255,6 +255,9 @@ public class LeverageIterator implements Iterator
         long localeId = m_resultSet.getLong("locale_id");
         GlobalSightLocale targetLocale = GlobalSightLocalePool
                 .getLocaleById(localeId);
+        String creationUser = m_resultSet.getString("creation_user");
+        Timestamp creationDate = m_resultSet.getTimestamp("creation_date");
+        String modifyUser = m_resultSet.getString("modify_user");
         Timestamp modifyDate = m_resultSet.getTimestamp("modify_date");
         String sid = null;
         try
@@ -277,6 +280,9 @@ public class LeverageIterator implements Iterator
         }
 
         leveragedTuv.setExactMatchKey(exactMatchKey);
+        leveragedTuv.setCreationUser(creationUser);
+        leveragedTuv.setCreationDate(creationDate);
+        leveragedTuv.setModifyUser(modifyUser);
         leveragedTuv.setModifyDate(modifyDate);
         leveragedTuv.setSid(sid);
         leveragedTuv.setOrgSid(this.m_currentOriginalTuv.getSid());

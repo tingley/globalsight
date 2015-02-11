@@ -157,7 +157,7 @@ function submitForm()
             for (Iterator iter = targetLocaleList.iterator(); iter.hasNext();)
             {
                 targetLocale = (GlobalSightLocale) iter.next();
-%>          <option VALUE="<%=targetLocale.toString()%>"><%=targetLocale.getDisplayName(uiLocale)%></OPTION>
+%>          <option VALUE="<%=targetLocale.getId()%>"><%=targetLocale.getDisplayName(uiLocale)%></OPTION>
 <%          }
 %>
         </select>

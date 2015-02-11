@@ -28,11 +28,15 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.page.ExtractedFile;
+import com.globalsight.everest.page.ExtractedSourceFile;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.RemovedPrefixTag;
 import com.globalsight.everest.tuv.RemovedSuffixTag;
 import com.globalsight.everest.tuv.RemovedTag;
 import com.globalsight.everest.tuv.TuImpl;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDataMigration;
+import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -296,5 +300,43 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
             
             recordWhichTuExtraDataAlreadyLoaded(p_tu.getIdAsLong(), REMOVED_SUFFIX_TAG);
         }
+    }
+
+    /**
+     * Office2010("docx", "xlsx" and "pptx"), openoffice("odt", "odp", and
+     * "ods") and IDML file formats will generate removed tags into
+     * "removed_tag", "removed_suffix_tag" and "removed_prefix_tag".
+     * 
+     * @param p_sourcePageId
+     * @return boolean
+     */
+    public static boolean isGenerateRemovedTags(Long p_sourcePageId)
+    {
+        try
+        {
+            SourcePage sp = ServerProxy.getPageManager().getSourcePage(
+                    p_sourcePageId);
+            if (sp.getPrimaryFileType() == ExtractedFile.EXTRACTED_FILE)
+            {
+                ExtractedFile ef = (ExtractedFile) sp.getPrimaryFile();
+                String dataType = ((ExtractedSourceFile) ef).getDataType();
+                boolean isOffice2010 = IFormatNames.FORMAT_OFFICE_XML
+                        .equalsIgnoreCase(dataType);
+                boolean isOpenOffice = IFormatNames.FORMAT_OPENOFFICE_XML
+                        .equalsIgnoreCase(dataType);
+                boolean isIdml = (IFormatNames.FORMAT_XML
+                        .equalsIgnoreCase(dataType) && sp.getExternalPageId()
+                        .endsWith(".idml"));
+                if (isOffice2010 || isOpenOffice || isIdml)
+                {
+                    return true;
+                }
+            }
+        }
+        catch (Exception ignore)
+        {
+            return false;
+        }
+        return false;
     }
 }

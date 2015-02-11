@@ -576,7 +576,7 @@ public class UserImportHandler extends PageHandler
                     throw new EnvoyServletException(e);
                 }
 
-                List projects = null;
+                List<Project> projects = null;
                 if (!isSuperPM)
                 {
                     String companyName = user.getCompanyName();
@@ -601,8 +601,8 @@ public class UserImportHandler extends PageHandler
                 }
                 else
                 {
-                    projects = new ArrayList(
-                            ProjectHandlerHelper.getAllProjects());
+                    projects = (List<Project>) ProjectHandlerHelper
+                            .getAllProjects();
                 }
 
                 if (projects != null)

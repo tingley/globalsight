@@ -269,7 +269,11 @@ public class SegmentTmPopulator
 
                 c_logger.debug("Save index begin");
                 // index segments
-                TmSegmentIndexer tmSegmentIndexer = new TmSegmentIndexer();
+                boolean indexTarget = false;
+                if (projectTM != null) {
+                    indexTarget = projectTM.isIndexTarget();
+                }
+                TmSegmentIndexer tmSegmentIndexer = new TmSegmentIndexer(indexTarget);
                 tmSegmentIndexer.indexSegmentTmSegments(segmentsForSave);
                 c_logger.debug("Save index end");
 

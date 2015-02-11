@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 // Envoy packages
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.projecthandler.ProjectImpl;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -97,10 +97,10 @@ public class ReportsMainHandler extends PageHandler
                         .getCompanyById(
                                 Long.parseLong(CompanyWrapper.SUPER_COMPANY_ID))
                         .getCompanyName();
-                List<ProjectImpl> projects = ServerProxy.getProjectHandler()
+                List<Project> projects = ServerProxy.getProjectHandler()
                         .getProjectsByUser(userId);
                 Set<String> set = new HashSet<String>();
-                for (ProjectImpl pr : projects)
+                for (Project pr : projects)
                 {
                     String name = CompanyWrapper.getCompanyNameById(pr
                             .getCompanyId());

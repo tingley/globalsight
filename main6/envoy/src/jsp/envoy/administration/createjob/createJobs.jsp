@@ -19,6 +19,7 @@
         userName = user.getUserName();
         password = user.getPassword();
     }
+    Integer creatingJobsNum = (Integer)request.getAttribute("creatingJobsNum");
 %>
 <html>
 <head>
@@ -66,7 +67,8 @@ $(document).ready(function() {
                         "<PARAM NAME = 'servletUrl' value='/globalsight/ControlServlet?linkName=next&pageName=CUSTOMERUP&applet=true&doPost=true&createJob=true&rand='>" +
                         "<PARAM NAME = 'rand' VALUE = <c:out value='${rand}'/>>" +
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
-                        "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar'>" +
+                        "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar,"+
+                        "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
                         "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'CODE' VALUE = 'com.globalsight.everest.webapp.applet.createjob.SelectFilesApplet.class' >" +
@@ -81,7 +83,8 @@ $(document).ready(function() {
                         "<PARAM NAME = 'servletUrl' value='/globalsight/ControlServlet?linkName=next&pageName=CUSTOMERUP&applet=true&doPost=true&createJob=attachment&rand='>" +
                         "<PARAM NAME = 'rand' VALUE = <c:out value='${rand}'/>>" +
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
-                        "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar'>" +
+                        "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar,"+
+                        "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
                         "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'CODE' VALUE = 'com.globalsight.everest.webapp.applet.createjob.UploadAttachment.class' >" +
@@ -94,7 +97,8 @@ $(document).ready(function() {
                         "<PARAM NAME = 'servletUrl' value='/globalsight/ControlServlet?linkName=next&pageName=CUSTOMERUP&applet=true&doPost=true&&createJob=true&rand='>" +
                         "<PARAM NAME = 'rand' VALUE = <c:out value='${rand}'/>>" +
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
-                        "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar'>" +
+                        "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar,"+
+                        "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
                         "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'folderName' VALUE = <c:out value='${tmpFolderName}'/>>" +
@@ -107,7 +111,8 @@ $(document).ready(function() {
                         "<PARAM NAME = 'servletUrl' value='/globalsight/ControlServlet?linkName=next&pageName=CUSTOMERUP&applet=true&doPost=true&&createJob=attachment&rand='>" +
                         "<PARAM NAME = 'rand' VALUE = <c:out value='${rand}'/>>" +
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
-                        "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar'>" +
+                        "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar,"+
+                        "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
                         "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'folderName' VALUE = <c:out value='${tmpFolderName}'/>>" +
@@ -277,7 +282,10 @@ $(document).ready(function() {
     var msg = "<c:out value='${create_result}'/>";
     if (msg != "") {
         alert(msg);
+        document.location.href="/globalsight/ControlServlet?activityName=createJobs";
     }
+
+   // setInterval("getCreatingJobsNum()", 10000);
 });
 
 function addDivForNewFile(paramArray) {
@@ -741,6 +749,16 @@ function OAW(obj) {
     });
 }
 
+function getCreatingJobsNum()
+{
+	$.get("/globalsight/ControlServlet?pageName=CJ&linkName=createJob", 
+	{"uploadAction":"getCreatingJobsNum","no":Math.random()}, 
+	function(data)
+	{
+		$("#creatingJobs").html("<c:out value='${lb_job_creation_queue}'/> " + data + " <c:out value='${lb_jobs_creating}'/>");
+	},
+	"text");
+}
 </script>
 </head>
 
@@ -750,6 +768,7 @@ function OAW(obj) {
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
 <span class='mainHeading'><c:out value="${lb_create_job}"/></span><p>
+<span id="creatingJobs" style="color:red"><c:out value="${lb_job_creation_queue}"/> <%=creatingJobsNum %> <c:out value="${lb_jobs_creating}"/></span><p>
 <table cellspacing=0 cellpadding=0 border=0 class=standardText><tr><td width="100%"><c:out value="${helper_text_create_job}"/></td></tr></table>
 <form name="createJobForm" method="post" action="/globalsight/ControlServlet?pageName=CJ&linkName=createJob">
 <input type="hidden" name="tmpFolderName" value="<c:out value='${tmpFolderName}'/>">

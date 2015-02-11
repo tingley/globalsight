@@ -147,6 +147,7 @@
 			<fileset dir="${cap.serverclassesDest}" includes="${cap.UiWorkflowClasses}/costing/Rate*.class,
 				${cap.UiWorkflowClasses}/util/comparator/RateComparator.class,
 				${cap.UiWorkflowClasses}/util/comparator/StringComparator.class,
+				${cap.UiWorkflowClasses}/util/comparator/CachingStringComparator.class,
                  ${cap.UiWorkflowClasses}/costing/AmountOfWork.class,
 		 ${cap.UiWorkflowClasses}/costing/IsoCurrency.class,
 		 ${cap.UiWorkflowClasses}/costing/Currency.class,
@@ -251,6 +252,12 @@
 	            <include name="jaxrpc.jar" />
 	            <include name="wsdl4j.jar" />
    			</fileset>
+			<fileset dir="../../tools/j2eeVendor/jboss/veap6.1/server/modules/system/layers/base/javax/mail/api/main">
+				<include name="mail-1.4.5.jar"/>
+			</fileset>
+			<fileset dir="../../tools/j2eeVendor/jboss/veap6.1/server/modules/system/layers/base/javax/activation/api/main">
+				<include name="activation-1.1.1.jar"/>
+			</fileset>
 		</signjar>
 	</target>
 

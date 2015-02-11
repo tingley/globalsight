@@ -97,9 +97,9 @@ public interface TermLeverageManager
      * @return a list of TermLeverageMatchResult. The list is empty
      * when there is no match, but it is never null.
      */
-    ArrayList getTermMatchesForSegment(long p_srcTuvId, long p_subId,
-        GlobalSightLocale p_targetPageLocale)
-        throws GeneralException, RemoteException;
+    ArrayList<TermLeverageMatchResult> getTermMatchesForSegment(
+            long p_srcTuvId, long p_subId, GlobalSightLocale p_targetPageLocale)
+            throws GeneralException, RemoteException;
     
     /**
      * Retrieves Map<TuvId, Set<TermLeverageMatch>> for given SourcePages.
@@ -110,6 +110,7 @@ public interface TermLeverageManager
      *            target page locale
      */
     public Map<Long, Set<TermLeverageMatch>> getTermMatchesForPages(
-        Set<SourcePage> p_sourcePages, GlobalSightLocale p_targetPageLocale)
-        throws GeneralException, RemoteException;
+            Collection<SourcePage> p_sourcePages,
+            GlobalSightLocale p_targetPageLocale) throws GeneralException,
+            RemoteException;
 }

@@ -187,7 +187,7 @@ public class SlaReportDataAssembler
                 }
 
                 // skip workflows without special target lang
-                String targetLang = w.getTargetLocale().toString();
+                String targetLang = Long.toString(w.getTargetLocale().getId());
                 if (!(reportData.wantsAllTargetLangs || reportData.targetLangList
                         .contains(targetLang)))
                 {
@@ -216,7 +216,7 @@ public class SlaReportDataAssembler
 
                     data.jobId = jobId;
 
-                    data.targetLang = targetLang;
+                    data.targetLang = w.getTargetLocale().toString();
 
                     data.workflowName = l10nProfile.getWorkflowTemplateInfo(
                             w.getTargetLocale()).getName();

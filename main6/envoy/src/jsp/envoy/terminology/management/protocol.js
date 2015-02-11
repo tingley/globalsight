@@ -11,15 +11,16 @@ function init()
     //res is an array in Firefox instread of string in IE
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      var baseUrl = url.substring(res.index, res.lastIndex - 1);
+      //var baseUrl = url.substring(res.index, res.lastIndex - 1);
+    	var baseUrl = res;
     }
     else
     {
-      var baseUrl = res[0].substring(0, res[0].length - 1);
+      var baseUrl = res[0].substring(0, res[0].length);
     }
     
-    baseUrlTB = baseUrl + "/TerminologyServlet";
-    baseUrlUserdata = baseUrl + "/UserdataServlet";
+    baseUrlTB = baseUrl + "TerminologyServlet";
+    baseUrlUserdata = baseUrl + "UserdataServlet";
 }
 
 // initialize this module

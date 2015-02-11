@@ -21,35 +21,20 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
-import com.globalsight.everest.edit.online.OnlineEditorException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.edit.GxmlUtil;
-import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.everest.edit.online.SegmentView;
-import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.WebAppConstants;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.ListIterator;
-
 
 /**
  * <p>SegmentEditorPageHandler is responsible for:</p>
@@ -57,14 +42,11 @@ import java.util.ListIterator;
  * <li>Displaying the segment editor screen.</li>
  * </ol>
  */
-
-public class ImageUploadPageHandler
-    extends PageHandler
-    implements EditorConstants
+public class ImageUploadPageHandler extends PageHandler implements
+        EditorConstants
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-          ImageUploadPageHandler.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(ImageUploadPageHandler.class);
 
     //
     // Constructor
@@ -108,7 +90,6 @@ public class ImageUploadPageHandler
         }
         catch (/*EnvoyServletException + RemoteException*/ Exception e)
         {
-            // TODO: tell user the upload failed
             CATEGORY.error("Image upload error", e);
         }
 

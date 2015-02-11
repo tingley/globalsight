@@ -13,6 +13,7 @@
             com.globalsight.everest.edit.SynchronizationStatus,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.everest.taskmanager.Task,
+            com.globalsight.everest.projecthandler.ProjectImpl,
             com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
             com.globalsight.everest.foundation.User,
             com.globalsight.everest.edit.online.PaginateInfo,
@@ -26,6 +27,8 @@
 <jsp:useBean id="save" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="close" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+ <jsp:useBean id="editorSameWindow" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="pageInfo" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
@@ -57,7 +60,7 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
 EditorState state =
   (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
 String pageName = state.getSourcePageName().toLowerCase();
-boolean isWord = pageName.endsWith(".docx") || pageName.endsWith(".pptx");
+boolean isOffice = pageName.endsWith(".docx") || pageName.endsWith(".pptx") || pageName.endsWith(".xlsx");
 EditorState.Layout layout = state.getLayout();
 
 String str_userId =
@@ -65,6 +68,7 @@ String str_userId =
 
 String url_save     = save.getPageURL();
 String url_pageInfo = pageInfo.getPageURL();
+String url_editorSameWindow =editorSameWindow.getPageURL();
 String url_tmInfo   = tminfo.getPageURL();
 String url_options  = options.getPageURL();
 String url_concordance = concordance.getPageURL();
@@ -137,16 +141,21 @@ String taskId = (String)request.getParameter(WebAppConstants.TASK_ID);
 Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
 //Above variable taskId will lost when using File Navigation 
 String taskIdForUpdateLeverage = Long.toString(task.getId());
+ProjectImpl project = (ProjectImpl) task.getWorkflow().getJob().getProject();
+boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
 int task_state = task.getState();
+String jobName=task.getJobName();
+long jobId = task.getJobId();
 long companyId = task.getCompanyId();
-
+String taskParam= "&" + WebAppConstants.TASK_ID +
+"=" + taskId;
 String closeUrl = close.getPageURL() +
    "&" + WebAppConstants.TASK_ACTION +
    "=" + WebAppConstants.TASK_ACTION_RETRIEVE +
    "&" + WebAppConstants.TASK_STATE +
-   "=" + task_state +
-   "&" + WebAppConstants.TASK_ID +
-   "=" + taskId;
+   "=" + task_state +taskParam;
+String approveUrl="&" + WebAppConstants.TASK_ACTION + "=" + WebAppConstants.TASK_ACTION_APPROVE_TUV;
+String percentUrl= "&" + WebAppConstants.TASK_ACTION + "=" + WebAppConstants.TASK_ACTION_TRANSLATED_TEXT_RETRIEVE;
 
 SynchronizationStatus oldStatus = state.getOldSynchronizationStatus();
 SynchronizationStatus newStatus = state.getNewSynchronizationStatus();
@@ -209,6 +218,7 @@ if (b_readonly || !perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)
   href="/globalsight/includes/menu/skins/winclassic.css">
 <link type="text/css" rel="StyleSheet" id="cssPtag"
   href="/globalsight/envoy/edit/online2/ptag.css">
+<link href="/globalsight/jquery/jquery.tree.css" rel="stylesheet" type="text/css" />
 <script src="/globalsight/includes/menu/js/poslib.js"></script>
 <script src="/globalsight/includes/menu/js/scrollbutton.js"></script>
 <script src="/globalsight/includes/menu/js/menu4.js"></script>
@@ -272,9 +282,23 @@ if (b_readonly || !perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 9pt;
 }
+
+.blackSpan{
+	font-weight: 600;
+	color:black;
+}
+
+.redSpan{
+	font-weight: 600;
+	color:red;
+}
+
 .editorComment { cursor: hand;cursor:pointer; }
 </style>
-
+<link rel="stylesheet" type="text/css"  href="/globalsight/jquery/jQueryUI.redmond.css"/>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script src="/globalsight/jquery/jquery.tree.js"></script>
 <SCRIPT type="text/javascript">
 var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
@@ -385,8 +409,227 @@ tmp.mnemonic = "o";
 
 var menuBar = new MenuBar();
 menuBar.add(tmp = new MenuButton("<%=bundle.getString("lb_actions") %>", actionMenu));
-
+var keyId;
 // End Menus
+ var treedata = [];
+ var job={}
+	
+var parseQueryString = function(_query,match) {
+    var args = new Object();
+    var pairs = _query.split(match);
+    for (var i = 0; i < pairs.length; i++) {
+        var pos = pairs[i].indexOf("=");
+        if (pos == -1) continue;
+        var argname = pairs[i].substring(0, pos);
+        var value = pairs[i].substring(pos + 1);
+        args[argname] = value;
+    }
+    return args;
+}
+
+var query="" ;
+var args;
+var comment;
+var taskPageIds="";
+var ajaxUrl;
+var treeWidth;
+var treeInfo="";
+var treeLink='<%=sessionMgr.getAttribute("treeLink")%>';
+var ajaxUrl='<%=sessionMgr.getAttribute("ajaxUrl")%>';
+var approveUrl='<%=approveUrl%>';
+var percentUrl='<%=percentUrl%>';
+var url_editorSameWindow='<%=url_editorSameWindow%>';
+var requestUrl="";
+var bro=$.browser;
+var bro_msie=bro.msie;
+function initParam(){
+	args= parseQueryString(window.location.href,"&");
+	 keyId=args.targetPageId;
+	 
+	 if(args.taskId){
+		 taskParam="&orgtaskId="+args.taskId
+	 }else{
+		 taskParam="&orgtaskId="+args.orgtaskId;
+	 }
+	 var url=$('#SplitMergeForm').attr('action');
+	 $('#SplitMergeForm').attr('action',url+taskParam);
+	 if(args.treeWidth){
+		 treeWidth=args.treeWidth;
+		 $("#treeContainer").width(treeWidth);
+	 }
+	job["id"]="0";
+	job["showcheck"]=true;
+	job["hasChildren"]=true;
+	job["isexpand"]=true;
+	job["checkstate"]=1;
+	job["complete"]=false;
+}
+
+var parseArrayString = function(query,match) {
+    var comment = new Array();
+    var pairs = query.split(match);
+    for (var i = 0; i < pairs.length-1; i++) {
+    	var args=parseQueryString(pairs[i],"|");
+    	taskPageIds+=args.targetPageId+",";
+    	args["value"]=args["id"]=args.targetPageId+"";
+    	args["showcheck"]=true;
+    	args["complete"]=true;
+    	args["checkstate"]=args.targetPageId==keyId?1:0;
+    	comment.push(args);
+    }
+    return comment;
+}
+var ajaxRequest;
+var isCheckUnTranslatedSegments="<%=isCheckUnTranslatedSegments%>";
+var taskParam='';
+$(document).ready(function() {
+	if(isCheckUnTranslatedSegments!="true"){
+		$("#Approve").hide();
+	}
+	
+	treeLink=treeLink.replace(/</g,'\\');
+	initParam();	
+	//if the file path contain the  & maybe substring is safe
+	comment = parseArrayString(treeLink,"?");
+	job["text"]='<%=jobName%>' + ' (JobID:<%=jobId%>)';
+	job["ChildNodes"]=comment;
+     treedata.push(job);
+      var o = {
+          showcheck: true,          
+          theme: "bbit-tree-lines", //bbit-tree-lines ,bbit-tree-no-lines,bbit-tree-arrows
+          showcheck: true,
+          theme: "bbit-tree-arrows", //bbit-tree-lines ,bbit-tree-no-lines,bbit-tree-arrows
+          onnodeclick:function(item){
+        	  href=url_editorSameWindow;
+        	 if("0"==item.id)return;
+          	var newUrlKey="&sourcePageId="+item.sourcePageId+"&targetPageId="+item.targetPageId;
+          	href=href;
+          	taskParam=taskParam.replace("org","&");
+          	readUI(href,newUrlKey);
+          }
+      };
+      o.data = treedata;
+      $("#tree").treeview(o);
+      requestUrl=percentUrl;
+      buildData();
+      bindEvent();
+      initUI();
+              
+});
+
+function readUI(href,newUrlKey){
+	var temp=href.indexOf("&segmentFilter");
+	if(temp<0){
+		href+="&segmentFilter="+args.segmentFilter;
+	}
+	temp=href.indexOf("&treeWidth");
+	if(temp>0){
+		href=href.substring(0,temp);
+	}
+		href+=taskParam+"&treeWidth="+$("#treeContainer").width()+"&scrollTop="+$("#treeContainer").scrollTop()+newUrlKey;
+	
+	 window.location.href=href;
+}
+
+function initUI(){
+	    $('#treeContainer').resizable({stop:function(event, ui){
+	    	//resolve ie bugs show
+			 if($.browser.msie){
+				 var rd=Math.random()*5+"px";
+				 $(".picBox").css("padding-right",rd);
+	    	    }
+		}} );
+	    $(".ui-resizable-handle:first").addClass("picBox");
+	    $(".ui-resizable-handle:first").append($("#contract"));
+		
+	   if(args.treeWidth){
+			$("#treeContainer").width(args.treeWidth);
+			if(args.treeWidth==5){
+				 contract();
+			}
+		}else{
+			$("#treeContainer").width(300);
+		}
+
+	  
+
+	    var temp=$("#percent"+keyId);
+		temp.css('color','#337ABB');
+		temp.next().css('font-weight','bold');
+	
+}
+
+function bindEvent(){
+	$("#Approve").click(function(e){
+        var s=$("#tree").getTSVs();
+        if(s !=null){
+        	taskPageIds=$.trim(s.join(" "));
+        	taskPageIds=taskPageIds.replace(/\s/g,',');
+        	requestUrl=approveUrl;
+        	buildData();
+        }
+        else
+        alert("No target page is selected!");
+    });
+
+     $("#contract").click(function(e){
+     	 treeWidth=$("#treeContainer").width();
+        $("#treeContainer").animate({ 
+			    width: "5px",
+			    fontSize: "10em"
+			  }, 500 ,contract);
+  	});
+   $("#expanding").click(function(e){
+	    if(bro_msie){
+	    	location.reload();
+	    	return;
+	    }
+	   if(treeWidth<8){
+		   treeWidth=300;
+	   }
+  		$("#treeContainer").animate({ 
+			    width: treeWidth,
+			    fontSize: "10em"
+			  }, 500,treeCstate );
+   		$("#helper").append($("#expanding"));
+     	$(".ui-resizable-handle:first").append($("#contract"));
+  	});
+}
+
+function contract(){
+	$("#treeContainer").css('overflow-y','hidden');
+	$("#helper").append($("#contract"));
+	$(".ui-resizable-handle:first").append($("#expanding"));
+	
+}
+
+function buildData(){
+	var ajaxRequest = $.ajax({
+	  		type: 'POST',
+			url: ajaxUrl+requestUrl+"&taskPageIds="+taskPageIds
+		});
+	
+	ajaxRequest.done(function(msg){
+		if(msg=="1"){
+			 location.reload();
+			 return;
+		}
+	  	  var arr=taskPageIds.split(",");
+	  	  var percent=msg.split(",");
+	  	  for (var i=0;i<percent.length; i++){
+	  		  var temp=$("#percent"+arr[i]);
+	  		 if(percent[i]==100){
+	  			temp.removeClass("redSpan")
+	  			temp.addClass("blackSpan")
+	  			temp.text("(100%)");
+	  		 }else{
+	  			temp.addClass("redSpan")
+  			 	temp.text("("+percent[i]+"%)");
+	  		 }
+	  	  }
+ 	});
+
+}
 
 function debug(s)
 {
@@ -413,7 +656,7 @@ function doKeyPress()
 {
   var event = getEvent();
   var key;
-  if (document.recalc)
+  if (isIE)
   {
 	  key = event.keyCode;
   }
@@ -459,7 +702,7 @@ function doKeyUp()
 function fnGetKey(event)
 {
   var tempKEY;
-  if (document.recalc)
+  if (isIE)
   {
 	  tempKEY = event.keyCode;
   } else {
@@ -1100,13 +1343,13 @@ function closeEditor()
 
 function HasOfficeTags()
 {
-	return <%=isWord%> || "mif" == g_datatype;
+	return <%=isOffice%> || "mif" == g_datatype;
 }
 
 // Formatting tags are B/I/U
 function HasFormattingTags()
 {
-  if (<%=isWord%> || "mif" == g_datatype)
+  if (<%=isOffice%> || "mif" == g_datatype)
   {
 	  return true;
   }
@@ -1329,7 +1572,7 @@ function addCr()
 {
   if (!g_target) return;
 
-  o_textbox.addCr();
+  o_textbox.addCR();
   o_textbox.frameWindow.focus();
 }
 
@@ -1506,9 +1749,22 @@ function navigatePage(offset)
 	    var next = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
 		document.getElementById("fileNavPre").innerHTML = pre;
 		document.getElementById("fileNavNext").innerHTML = next;
-		
-    	var str_url = "<%=url_refresh%>&refresh=" + offset;
-		document.location = str_url;
+		var j=0;
+		for(var i=0;i<comment.length;i++){
+        	if(keyId==comment[i]["value"]){
+        		j=i;
+        	}
+		}
+		var newUrlKey="";
+		if(offset==11||offset==-11){
+			href = "<%=url_refresh%>&refresh=" + offset;
+			newUrlKey="&sourcePageId="+comment[j].sourcePageId+"&targetPageId="+comment[j].targetPageId;
+		}else{
+			taskParam=taskParam.replace("org","&");
+			 href=url_editorSameWindow;
+			 newUrlKey="&sourcePageId="+comment[offset+j].sourcePageId+"&targetPageId="+comment[offset+j].targetPageId;
+		}
+      	readUI(href,newUrlKey);
     }
 }
 
@@ -1773,6 +2029,7 @@ function splitSegments()
   var tuv2 = ids[2];
 
   var form = document.SplitMergeForm;
+ 
   form.action.value = 'split';
   form.tuv1.value = tuv1;
   form.tuv2.value = tuv2;
@@ -2130,7 +2387,7 @@ function doExit()
 function showMtButton(show)
 {
   g_showMt = show;
-
+ 
   //set 'show' to false to hide mt label for now
   show = false;
   if (g_canShowMt && show)
@@ -2502,7 +2759,13 @@ function doOnLoad()
   updatePageNavigationArrow();
   
   doInit();
-  initSize();
+  var height=initSize();
+  var treeHeight=$("#tree").height();
+  height=height>treeHeight?height:treeHeight;
+	$(".ui-resizable-handle:first").height(height+5);
+	 if(args.scrollTop){
+		    $("#treeContainer").scrollTop(args.scrollTop);
+		}
 }
 
 function updateFileNavigationArrow()
@@ -2575,7 +2838,7 @@ function updateLeverage()
 
 function openAutoPropagate()
 {
-    w_autoPropagate = window.open("/globalsight/ControlServlet?linkName=autoPropagate&pageName=ED2&action=default&targetPageId=<%=state.getTargetPageId()%>", "AutoPropagate",
+    w_autoPropagate = window.open("/globalsight/ControlServlet?linkName=autoPropagate&pageName=ED2&action=default&targetPageId="+keyId, "AutoPropagate",
     	"resizable=yes,scrollbars=no,width=350,height=350");
 }
 
@@ -2586,7 +2849,11 @@ function refresh(direction)
 
 function doSegmentFilter(segmentFilter)
 {
-	location.href = "${refresh.pageURL}&segmentFilter=" + segmentFilter;
+	query= window.location.href;
+	var start=query.indexOf("&sourcePageId=");
+	treeInfo=query.substring(start);
+	var href = "${refresh.pageURL}&segmentFilter=" + segmentFilter;
+	readUI(href,treeInfo)
 }
 
 function SE(tuId, tuvId, subId)
@@ -2620,29 +2887,85 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.submit();
 }
 
+
+var heightOffset=26;
 function initSize()
 {
 	var headerHeight = $(".header").css("height").replace("px","");
 	var idMenuBarDivHeight = $("#idMenuBarDiv").css("height").replace("px","");
+	var mainHeight=window.innerHeight - headerHeight - idMenuBarDivHeight;
 	if($.browser.msie){ 
- 	    $("#idSegments").css("height",document.body.clientHeight - headerHeight - idMenuBarDivHeight - 10 + "px");
- 	    $("#idSegments").css("width",document.body.clientWidth - 10 + "px");
+		var orgHeight=$("#idSegments").height();
+		mainHeight=document.body.clientHeight - headerHeight - idMenuBarDivHeight
+ 	    $("#idSegments").css("height", mainHeight- 10 + "px");
+ 	   $("#treeContainer").height(mainHeight - 10);
+		//IE10 SHOW OUT BUTTONS
+ 	   if(document.documentMode=='10'){
+ 		  $("#idSegments").css("height", mainHeight- 35 + "px");
+ 	 	   $("#treeContainer").height(mainHeight - 35);
+ 		   var meHeight=$("#idSegments").height();
+ 		  if(orgHeight>meHeight){
+ 		  	$('.header').css('margin-top','15px')
+ 		  }
+ 	 	}
 	} else if($.browser.webkit) {
- 	    $("#idSegments").css("height",window.innerHeight - headerHeight - idMenuBarDivHeight - 45 + "px");
-	} 
-	else {
- 	    $("#idSegments").css("height",window.innerHeight - headerHeight - idMenuBarDivHeight - 35 + "px");
+		heightOffset=56;
+ 	    $("#idSegments").css("height", mainHeight- 45 + "px");
+	} else {
+ 	    $("#idSegments").css("height",mainHeight - 35 + "px");
 	}
+
+	if($.browser.msie&&document.documentMode!='10'){ 
+ 		$("#treeContainer").css("min-height",mainHeight - 10 + "px");
+ 	    $("#treeContainer").css("max-height",mainHeight - 10 + "px");
+	} else if($.browser.webkit) {
+ 	    $("#treeContainer").css("min-height",mainHeight - 45 + "px");
+ 	    $("#treeContainer").css("max-height",mainHeight - 45 + "px");
+	} else {
+ 	    $("#treeContainer").css("min-height",mainHeight - 35 + "px");
+        $("#treeContainer").css("max-height",mainHeight - 45 + "px");
+	}
+
+	var height=$("#tree").height();
+	if(height+heightOffset>mainHeight){
+		treeCstate=function() {
+	  		$("#treeContainer").css('overflow-y','auto');
+	  		if($.browser.msie){
+	  			$(".picBox").css("padding-right","5px");
+	  		}
+		}
+	} else {
+		treeCstate=function() {
+		    $("#treeContainer").css('overflow-y','hidden');
+		    
+		}
+    	
+    }
+	treeCstate();
+	
+	return mainHeight+heightOffset;
+}
+
+var treeCstate=function(){
+	$("#treeContainer").css('overflow-y','auto');
 }
 
 function refresh(direction)
 {
-    var str_url;
-    str_url = "/globalsight/ControlServlet?linkName=refresh&pageName=EDN1&refresh=" + direction;
-    window.location.href = str_url;
+
+	var j=0;
+	for(var i=0;i<comment.length;i++){
+    	if(keyId==comment[i]["value"]){
+    		j=i;
+    	}
+	}
+	var newUrlKey="";
+	href = "/globalsight/ControlServlet?linkName=refresh&pageName=EDN1&refresh=" + direction;
+	newUrlKey="&sourcePageId="+comment[j].sourcePageId+"&targetPageId="+comment[j].targetPageId;
+  	readUI(href,newUrlKey);
 }
 </SCRIPT>
-<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+
 <style type="text/css">
 .wrapper-dropdown-5 {
     /* Size & position */
@@ -2713,6 +3036,9 @@ function refresh(direction)
     border: 1px solid rgba(0,0,0,0.2);
     max-height: 400px;
 }
+.treeContainer{ float:left;border: 1px solid black;overflow-x:hidden;padding-bottom: 8px;padding-top: 8px;margin: 5px;}
+.picBox {float:right;height:99%;display: table-cell; text-align: center;  vertical-align: middle; align:center; width:12px;background:#337ABB  no-repeat center center;}
+
 </style>
 <style type="text/css">
       #menu1  {display:block; width:400px; height:400px; 
@@ -2723,6 +3049,10 @@ function refresh(direction)
 
 <body id="idBody" return onkeydown='doKeyDown()' onkeypress='return doKeyPress()'
  onkeyup="doKeyUp()"  onbeforeunload="doExit()" scroll="no" onload="doOnLoad()" style="margin:0px;" onresize="initSize();">
+<div id="helper" style="display: none">
+	<a href='#' id='contract' style='cursor:hand'><img src='/globalsight/images/right.gif'></img></a>
+	<a href='#' id='expanding' style='cursor:hand'><img src='/globalsight/images/left.gif'></img></a>
+</div>
 
 <div id="idLoading" style="position: absolute; top: 100; left: 200;
 background-color: lightgrey; color: black; text-align: center;
@@ -2859,9 +3189,9 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
       ><img src="/globalsight/envoy/edit/online2/Undo.gif" id="idImgUndo"></td>
     <td id="idButRedo" onaction="makeRedo()" title="<%=bundle.getString("lb_redo") %>"
       ><img src="/globalsight/envoy/edit/online2/Redo.gif" id="idImgRedo"></td>
-    <td id="idButSub" onaction="makeSub()" title="<%=bundle.getString("lb_subscript") %>"
+    <td id="idButSub" onclick="makeSub()" title="<%=bundle.getString("lb_subscript") %>"
       ><img src="/globalsight/envoy/edit/online2/subscript.gif" id="idImgSub"></td>  
-    <td id="idButSup" onaction="makeSup()" title="<%=bundle.getString("lb_superscript") %>"
+    <td id="idButSup" onclick="makeSup()" title="<%=bundle.getString("lb_superscript") %>"
       ><img src="/globalsight/envoy/edit/online2/superscript.gif" id="idImgSup"></td>  
     <td id="idButBold" onaction="makeBold()" title="<%=bundle.getString("lb_bold") %>"
       ><img src="/globalsight/envoy/edit/online2/Bold.gif" id="idImgBold"></td>
@@ -2882,9 +3212,9 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
     <td id="idButDetails" onaction="showDetails()" title="<%=bundle.getString("lb_editor_show_segment_details") %>"
       ><img src="/globalsight/envoy/edit/online2/Details.gif" id="idImgDetails"></td>
     <td width="25px"></td>
-    <td id="idButMerge" onaction="mergeSegments()" title="<%=bundle.getString("lb_editor_merge_segments") %>"
+    <td id="idButMerge" onclick="mergeSegments()" title="<%=bundle.getString("lb_editor_merge_segments") %>"
       ><img src="/globalsight/envoy/edit/online2/Merge.gif" id="idImgMerge"></td>
-    <td id="idButSplit" onaction="splitSegments()" title="<%=bundle.getString("lb_editor_split_segments") %>"
+    <td id="idButSplit" onclick="splitSegments()" title="<%=bundle.getString("lb_editor_split_segments") %>"
       ><img src="/globalsight/envoy/edit/online2/Split.gif" id="idImgSplit"></td>
     <td width="25px"></td>
     <td id="idButTm" onaction="showTmWindow();" title="<%=bundle.getString("lb_editor_show_tm_window") %>"
@@ -2927,6 +3257,12 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 </table>
 </div>
 
+<div id="treeContainer" class="treeContainer">
+     <div style="margin-top:5px;">
+        <button id="Approve" class="tooltree">Approve</button>
+    </div>
+    <div id="tree" class="tooltree"></div>
+</div>
 <div id="idSegments" style="
   border: 1px solid black; overflow: auto; padding: 8px;margin:5px;">
 <%=str_pageHtml%>
@@ -2955,7 +3291,7 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 <INPUT TYPE="hidden" NAME="subId" VALUE="">
 </FORM>
 
-<FORM name="SplitMergeForm" METHOD="POST" ACTION="<%=url_splitmerge%>">
+<FORM name="SplitMergeForm" id="SplitMergeForm" METHOD="POST" ACTION="<%=url_splitmerge%>">
 <INPUT TYPE="hidden" NAME="action" VALUE="">
 <INPUT TYPE="hidden" NAME="tuv1" VALUE="">
 <INPUT TYPE="hidden" NAME="tuv2" VALUE="">

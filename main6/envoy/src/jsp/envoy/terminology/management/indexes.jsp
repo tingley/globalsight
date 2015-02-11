@@ -166,7 +166,7 @@ function doSave()
        {
 	        sendTermbaseManagementRequest(
 	          "<%=WebAppConstants.TERMBASE_ACTION_MODIFY%>", tbid,
-	          oDefinition.XMLDocument.xml);
+	          result.dom.xml);
        }
        else
        {
@@ -220,7 +220,10 @@ function buildDefinition()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oDefinition.XMLDocument;
+     // dom = oDefinition.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 
@@ -423,8 +426,14 @@ function parseDefinition()
 
   if(window.navigator.userAgent.indexOf("MSIE")>0)
   {
-      def = oDefinition.XMLDocument;
-      stat = oStatistics.XMLDocument;
+      //def = oDefinition.XMLDocument;
+      //stat = oStatistics.XMLDocument;
+	  def=new ActiveXObject("Microsoft.XMLDOM");
+      def.async="false";
+      def.loadXML(defStr);
+      stat = new ActiveXObject("Microsoft.XMLDOM");
+      stat.async="false";
+      stat.loadXML(statStr);
   }
   else if(window.DOMParser)
   { 

@@ -35,7 +35,8 @@ import com.globalsight.smartbox.util.WebClientHelper;
 import com.globalsight.smartbox.util.ZipUtil;
 
 /**
- * Special uploading/prefix process for "Use case 01"
+ * Special prefix/uploading process for "Use case 01"
+ * The job info(jobName, fpName, targetLocales) comes from ZIP file.
  * 
  * @author Leon
  * @author Joey         2013-01-22

@@ -20,6 +20,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 
+import com.globalsight.everest.util.comparator.CachingStringComparator;
+
 /**
  * Uses jdk 1.6's sort methods to replace Collections.sort() for resolving the
  * "Comparison method violates its general contract" error.
@@ -40,6 +42,11 @@ public class SortUtil
         {
             i.next();
             i.set(a[j]);
+        }
+        if (c instanceof CachingStringComparator)
+        {
+            // Release any memory held by cached CollationKeys
+            ((CachingStringComparator) c).clearCollationKeyCache();
         }
     }
 

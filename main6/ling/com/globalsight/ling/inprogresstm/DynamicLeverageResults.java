@@ -250,6 +250,10 @@ public class DynamicLeverageResults implements Serializable
                 dynLevSegment.setOrderNum(levMatch.getOrderNum());
                 dynLevSegment.setMtName(levMatch.getMtName());
                 dynLevSegment.setOrgSid(levMatch.getOrgSid(companyId));
+                
+                // 3220 : Code refactor for getting "SID", "ModifiedDate" etc for performance
+                dynLevSegment.setSid(levMatch.getSid());
+                dynLevSegment.setModifyDate(levMatch.getModifyDate());
                 add(dynLevSegment);
             }
             catch (Exception ignore)

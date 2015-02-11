@@ -114,13 +114,12 @@ public class ModuleMappingHelper {
 			File srcFolder = new File(realSourceModulePath);
 			//If source module is a file, then get its parent path as a parentPath to use to match if 
 			String parentPath = "";
-//			if (srcFolder.isFile()) {
-				parentPath = srcFolder.getParent().substring(baseDocDir.length());
-//				isFile = true;
-//			} else
-//				isFile = false;
-			//logger.info("srcFolder == " + srcFolder.getAbsolutePath());
-			//logger.info("parentPath == " + parentPath + ", File type == " + isFile);
+			parentPath = srcFolder.getParent();
+			if (parentPath.length() > baseDocDir.length())
+			    parentPath = parentPath.substring(baseDocDir.length());
+			else
+			    parentPath = "";
+				
 			sql = new StringBuilder();
 			sql.append("select * from module_mapping where is_active='Y' and company_id=").append(p_companyId).append(" and module_id=").append(p_moduleId);
 			sql.append(" and source_locale='").append(p_srcLocale).append("' and target_locale='").append(p_tarLocale).append("'");

@@ -59,6 +59,8 @@ public class Reindexer extends MultiCompanySupportedThread implements
     // Injected Session to use while reindexing
     private Session m_session;
 
+    private boolean indexTarget = false;
+
     /**
      * Reindexer constructor.
      * 
@@ -94,7 +96,8 @@ public class Reindexer extends MultiCompanySupportedThread implements
             {
                 m_message = getStringFormattedFromBundle("lb_tm_indexing_msg",
                         "Indexing \"{0}\"...", tm.getName());
-                boolean success = tm.getSegmentTmInfo().reindexTm(tm, this);
+                boolean success = tm.getSegmentTmInfo().reindexTm(tm, this,
+                        indexTarget);
                 if (!success)
                 {
                     // canceled
@@ -246,6 +249,16 @@ public class Reindexer extends MultiCompanySupportedThread implements
         sb.append("m_interrupted = ").append(m_interrupted).append("\r\n");
 
         return sb.toString();
+    }
+
+    public boolean isIndexTarget()
+    {
+        return indexTarget;
+    }
+
+    public void setIndexTarget(boolean indexTarget)
+    {
+        this.indexTarget = indexTarget;
     }
 
 }

@@ -42,6 +42,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.globalsight.cxe.adapter.ling.ExtractRule;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
@@ -217,6 +218,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private static String[] m_uselessWords = new String[]
     { "&L", "&C", "&R" };
 
+    private List<ExtractRule> rules = new ArrayList<ExtractRule>();
+
     //
     // Constructors
     //
@@ -368,6 +371,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             // get rule map for the document
             m_ruleMap = m_rules.buildRulesWithFilter(document,
                     m_xmlFilterHelper.getXmlFilterTags(), mainFormat);
+
+            for (ExtractRule rule : rules)
+            {
+                rule.buildRule(document, m_ruleMap);
+            }
 
             m_useEmptyTag = m_rules.usesEmptyTag();
             m_useEmptyTag = m_xmlFilterHelper.usesEmptyTag();
@@ -2167,12 +2175,13 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private boolean isClosedTag(Node p_node)
     {
         NamedNodeMap attributes = p_node.getAttributes();
-        if (attributes.getLength() == 0)
+        int length = attributes.getLength();
+        if (length == 0)
         {
             // no ATTRIBUTE_PRESERVE_CLOSED_TAG attribute
             return false;
         }
-        for (int i = 0; i < attributes.getLength(); i++)
+        for (int i = 0; i < length; i++)
         {
             Node attribute = attributes.item(i);
             String attname = attribute.getNodeName();
@@ -2378,9 +2387,10 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     {
         String s = "";
         NodeList nodes = p_node.getChildNodes();
-        if (nodes.getLength() > 0)
+        int length = nodes.getLength();
+        if (length > 0)
         {
-            for (int i = 0; i < nodes.getLength(); i++)
+            for (int i = 0; i < length; i++)
             {
                 Node node = nodes.item(i);
                 if (node.getNodeType() == Node.TEXT_NODE)
@@ -2514,15 +2524,17 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         // make xml declare version first
         // <xml version="1.0" encoding="UTF-8" standalone="yes"/>
         Node versionNode = null;
+        int length = attrs.getLength();
         if (isClosedTag && "xml".equals(parentNode.getNodeName()))
         {
-            if (attrs.getNamedItem("version") != null && attrs.getLength() > 2)
+            if (attrs.getNamedItem("version") != null && length > 2)
             {
                 versionNode = attrs.removeNamedItem("version");
+                length--;
             }
         }
 
-        for (int i = 0; i < attrs.getLength(); ++i)
+        for (int i = 0; i < length; ++i)
         {
             Node att = attrs.item(i);
             String attname = att.getNodeName();
@@ -3269,8 +3281,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 {
                     String newTagName = tagName + " "
                             + ATTRIBUTE_PRESERVE_CLOSED_TAG + "=\"\"";
-                    content = content.replace(m.group(), "<" + newTagName
-                            + "/>");
+                    content = StringUtil.replace(content, m.group(), "<"
+                            + newTagName + "/>");
                 }
             }
             FileUtil.writeFile(f, content, encoding);
@@ -3392,7 +3404,10 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     encoding = getInput().getCodeset();
                 }
                 String content = FileUtil.readFile(f, encoding);
-                if (content != null && content.startsWith("<?xml version="))
+                // if there is BOM, indexOf returns 1.
+                if (content != null
+                        && (content.indexOf("<?xml ") == 0 || content
+                                .indexOf("<?xml ") == 1))
                 {
                     m_haveXMLDecl = true;
                 }
@@ -3403,11 +3418,13 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     // version
                     m_version = document.getXmlVersion();
 
-                    String xmlDecl = content.substring(0, content.indexOf(">") + 1);
+                    String xmlDecl = content.substring(0,
+                            content.indexOf(">") + 1);
                     boolean hasStandaloneAttr = (xmlDecl.indexOf("standalone") > -1);
                     if (hasStandaloneAttr)
                     {
-                        m_standalone = document.getXmlStandalone() ? "yes" : "no";
+                        m_standalone = document.getXmlStandalone() ? "yes"
+                                : "no";
                     }
                 }
             }
@@ -3419,6 +3436,31 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             }
         }
 
+    }
+
+    /**
+     * @return the rules
+     */
+    public List<ExtractRule> getRules()
+    {
+        return rules;
+    }
+
+    /**
+     * @param rules
+     *            the rules to set
+     */
+    public void setRules(List<ExtractRule> rules)
+    {
+        this.rules = rules;
+    }
+
+    /**
+     * @see com.globalsight.cxe.adapter.ling.HasExtractRule#addExtractRule()
+     */
+    public void addExtractRule(ExtractRule rule)
+    {
+        rules.add(rule);
     }
 
 }

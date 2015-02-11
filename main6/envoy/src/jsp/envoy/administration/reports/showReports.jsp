@@ -43,11 +43,17 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<style type="text/css">
+TR.standardText 
+{
+    vertical-align: top;
+}
+</style>
+<script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<SCRIPT LANGUAGE="JavaScript">
+<script type="text/javascript">
     var needWarning = false;
     var objectName = "";
     var guideNode = "reports";
@@ -81,28 +87,27 @@
        window.open(newurl,target,
        'height=710,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
     }
+    
     $(function(){
-   		oSheng=$("#sheng");
-    	if(companyJson&&companyJson!="null"){
+   		oSheng = $("#companySel");
+    	if(companyJson && companyJson!="null"){
 	    	var array=companyJson.split(",");
 	    	for(var i=0;i<array.length;i++){
 	    		var opt=$("<option value='" + array[i] + "'>" + array[i] + "</option>");
 	    		oSheng.append(opt);
 	        }
-	    	$("#shengC").show();
+	    	$("#companySpan").show();
     	}
-    })
+    });   
     
-   
-    	
-</SCRIPT>
-
-<STYLE>
-TR.standardText 
-{
-    vertical-align: top;
-}
-</STYLE>
+    function fnOpenRecentReports(){    	
+  		var url = "/globalsight/ControlServlet?activityName=recentReports";
+    	var specs = "width=600,height=490,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no";
+    	specs += ",left="+ (screen.width)/20  + ",top=" + (screen.width)/20;
+    	controlWindow = window.open(url, "RecentReports", specs);
+    	controlWindow.focus(); 
+    }
+</script>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     ONLOAD="loadGuides()">
@@ -117,8 +122,9 @@ TR.standardText
 <TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
 <TR><TD WIDTH=538><%=bundle.getString("helper_text_reports")%></TD></TR>
 <TR><TD WIDTH=538>&nbsp</TD></TR>
-<TR id="shengC" style="display:none"><TD>
-<%=bundle.getString("lb_current_company")%>&nbsp<select id='sheng' ><option value=' '>ALL</option></select>
+<TR><TD>
+<span id="companySpan" style="display:none;"><%=bundle.getString("lb_current_company")%>&nbsp<select id='companySel'><option value=' '>ALL</option></select></span>
+<input type="button" style="float:right;" value="Recent Reports" onClick="fnOpenRecentReports();">
 </TD></TR>
 </TABLE>
 <P>
@@ -215,24 +221,6 @@ TR.standardText
             <TD><%=bundle.getString("comments_desc")%></TD>
         </TR>
         <% } %>
-
-    <%
-        //new added for word count report
-        if (userPerms.getPermissionFor(Permission.REPORTS_WORD_COUNT)) {
-
-        reportUrl="/globalsight/ControlServlet?activityName=xlsWordCount";
-        reportWindowName= "WordCount";
-        %>
-        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-            <TD>
-          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
-             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=bundle.getString("word_count")%>
-             </A>
-            </TD>
-            <TD><%=bundle.getString("word_count_desc")%></TD>
-        </TR>
-        <% } %>
-
     <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_JOB_STATUS)) {
     
         reportUrl="/globalsight/ControlServlet?activityName=xlsReportJobStatus";

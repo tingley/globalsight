@@ -18,6 +18,7 @@ package com.globalsight.everest.edit.offline.page;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -33,9 +34,9 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.everest.tm.util.Tmx.Prop;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.UTC;
 import com.globalsight.util.XmlParser;
@@ -67,6 +68,14 @@ public class TmxUtil
      * Include local machine translation only
      */
     public static final int TMX_MODE_MT_ONLY = 2;
+    /**
+     * Include ICE match only
+     */
+    public static final int TMX_MODE_ICE_ONLY = 3;
+    /**
+     * Include non ICE match only
+     */
+    public static final int TMX_MODE_NON_ICE = 4;
 
     public static void writeTmxOpenTag(OutputStreamWriter p_writer,
             int p_tmxLevel) throws IOException
@@ -136,28 +145,13 @@ public class TmxUtil
         p_writer.write(result.getHeaderXml());
     }
 
-    public static String composeFirstMatch(String p_source,
-            String p_sourceLocale, String p_target, String p_targetLocale,
-            String p_userId, Date p_date, int p_tmxLevel, String sid,
-            DownloadParams p_params)
+    public static String composeTuWithoutTuCloseTag(
+            TmxUtil.TmxTuvInfo srcTuvInfo, TmxUtil.TmxTuvInfo trgTuvInfo,
+            int p_tmxLevel, String sid)
     {
         StringBuffer result = new StringBuffer();
-        if (p_date == null)
-        {
-            p_date = new Date();
-        }
-        result.append("<tu ");
-        result.append(Tmx.CREATIONDATE);
-        result.append("=\"");
-        result.append(UTC.valueOfNoSeparators(p_date));
-        result.append("\" ");
-        result.append(Tmx.CREATIONID);
-        result.append("=\"");
-        result.append(EditUtil.encodeXmlEntities(p_userId));
-        result.append("\"");
-        result.append(">\r\n");
 
-        // sid
+        result.append("<tu>\r\n");
         if (sid != null)
         {
             Prop prop = new Tmx.Prop(Tmx.PROP_TM_UDA_SID, sid);
@@ -165,29 +159,78 @@ public class TmxUtil
         }
 
         // Source TUV
-        result.append(composeTmTuv(p_sourceLocale, p_source, p_tmxLevel, p_params));
+        result.append(composeTmTuv(srcTuvInfo, p_tmxLevel));
 
         // Target TUV
-        result.append(composeTmTuv(p_targetLocale, p_target, p_tmxLevel, p_params));
+        result.append(composeTmTuv(trgTuvInfo, p_tmxLevel));
 
         return result.toString();
     }
-    
-    public static String composeTmTuv(String p_localeName, String p_tuvStr,
-            int p_tmxLevel, DownloadParams p_params)
+
+    public static String composeTu(TmxUtil.TmxTuvInfo srcTuvInfo,
+            TmxUtil.TmxTuvInfo trgTuvInfo, int p_tmxLevel, String sid)
     {
         StringBuffer result = new StringBuffer();
-        String tuv = operateCDATA(p_tuvStr);
-        
-        result.append("<tuv xml:lang=\"");
-        result.append(p_localeName.replace("_", "-"));
-        result.append("\">\r\n");
-        result.append(convertToTmxLevel(tuv, p_tmxLevel));
-        result.append("</tuv>\r\n");
+
+        result.append(composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo,
+                p_tmxLevel, sid));
+
+        // TU close tag
+        result.append(TmxUtil.composeTuTail());
 
         return result.toString();
     }
-    
+
+    public static String composeTmTuv(TmxUtil.TmxTuvInfo tmxTuvInfo,
+            int p_tmxLevel)
+    {
+        StringBuffer result = new StringBuffer();
+        if (tmxTuvInfo != null)
+        {
+            String tuvText = tmxTuvInfo.getTuvText();
+            String tuvLocale = tmxTuvInfo.getTuvLocale();
+            String creationUser = tmxTuvInfo.getCreationUser();
+            Timestamp creationDate = tmxTuvInfo.getCreationDate();
+            String modifyUser = tmxTuvInfo.getModifyUser();
+            Timestamp modifyDate = tmxTuvInfo.getModifyDate();
+
+            String tuv = operateCDATA(tuvText);
+            result.append("<tuv xml:lang=\"");
+            result.append(tuvLocale.replace("_", "-")).append("\"");
+
+            if (creationUser != null)
+            {
+                result.append(" ").append(Tmx.CREATIONID).append("=\"")
+                        .append(EditUtil.encodeXmlEntities(creationUser))
+                        .append("\"");
+            }
+            if (creationDate != null)
+            {
+                result.append(" ").append(Tmx.CREATIONDATE).append("=\"")
+                        .append(UTC.valueOfNoSeparators(creationDate))
+                        .append("\"");
+            }
+            if (modifyUser != null && !modifyUser.equals(creationUser))
+            {
+                result.append(" ").append(Tmx.CHANGEID).append("=\"")
+                        .append(EditUtil.encodeXmlEntities(modifyUser))
+                        .append("\"");
+            }
+            if (modifyDate != null && !modifyDate.equals(creationDate))
+            {
+                result.append(" ").append(Tmx.CHANGEDATE).append("=\"")
+                        .append(UTC.valueOfNoSeparators(modifyDate))
+                        .append("\"");
+            }
+
+            result.append(">\r\n");
+            result.append(convertToTmxLevel(tuv, p_tmxLevel));
+            result.append("</tuv>\r\n");
+        }
+
+        return result.toString();
+    }
+
     //Encodes Greater Than and Less Than in CDATA element.
     public static String operateCDATA(String p_segText)
     {
@@ -208,65 +251,6 @@ public class TmxUtil
     public static String composeTuTail()
     {
         return "</tu>\r\n";
-    }
-
-    public static String composeTu(String p_source, String p_sourceLocale,
-            String p_target, String p_targetLocale, String p_userId,
-            Date p_date, int p_tmxLevel, String sid, DownloadParams p_params)
-    {
-        StringBuffer result = new StringBuffer();
-        if (p_date == null)
-        {
-            p_date = new Date();
-        }
-        // TU open tag
-        result.append("<tu ");
-        result.append(Tmx.CREATIONDATE);
-        result.append("=\"");
-        result.append(UTC.valueOfNoSeparators(p_date));
-        result.append("\" ");
-        result.append(Tmx.CREATIONID);
-        result.append("=\"");
-        result.append(EditUtil.encodeXmlEntities(p_userId));
-        result.append("\"");
-        result.append(">\r\n");
-
-        // sid
-        if (sid != null)
-        {
-            Prop prop = new Tmx.Prop(Tmx.PROP_TM_UDA_SID, sid);
-            result.append(prop.asXML());
-        }
-
-        // Source TUV
-        result.append(composeTmTuv(p_sourceLocale, p_source, p_tmxLevel, p_params));
-        
-        if (p_source == null || "null".equalsIgnoreCase(p_source.trim()))
-            s_logger.warn(getEmptySourceSegmentInfo(p_source, p_sourceLocale,
-                    p_target, p_targetLocale, p_userId,
-                    p_date, p_tmxLevel, sid));
-        
-        // Target TUV
-        result.append(composeTmTuv(p_targetLocale, p_target, p_tmxLevel, p_params));
-        // TU close tag
-        result.append("</tu>\r\n");
-
-        return result.toString();
-    }
-
-    private static String getEmptySourceSegmentInfo(String p_source,
-            String p_sourceLocale, String p_target, String p_targetLocale,
-            String p_userId, Date p_date, int p_tmxLevel, String sid)
-    {
-        StringBuilder emptySourceSegmentInfo = new StringBuilder();
-        emptySourceSegmentInfo.append("Empty source segment. [source::")
-                .append(p_source).append(", sourceLocale::")
-                .append(p_sourceLocale).append(", target::").append(p_target)
-                .append(", targetLocale::").append(p_targetLocale)
-                .append(", userId::").append(p_userId).append(", date::")
-                .append(p_date.toLocaleString()).append(", tmxLevel::")
-                .append(p_tmxLevel).append(", sid::").append(sid).append("]");
-        return emptySourceSegmentInfo.toString();
     }
 
     private static String convertToTmxLevel(String p_xml, int p_tmxLevel)
@@ -601,4 +585,74 @@ public class TmxUtil
         }
     }
 
+    static class TmxTuvInfo
+    {
+        String tuvText = null;
+        String tuvLocale = null;
+        String creationUser = null;
+        String modifyUser = null;
+        Timestamp creationDate = null;
+        Timestamp modifyDate = null;
+
+        TmxTuvInfo(String tuvText, String tuvLocale, String creationUser,
+                Timestamp creationDate, String modifyUser, Timestamp modifyDate)
+        {
+            this.tuvText = tuvText;
+            this.tuvLocale = tuvLocale;
+            this.creationUser = creationUser;
+            this.creationDate = creationDate;
+            this.modifyUser = modifyUser;
+            this.modifyDate = modifyDate;
+        }
+
+        TmxTuvInfo(String tuvText, String tuvLocale, String creationUser,
+                Date creationDate, String modifyUser, Date modifyDate)
+        {
+            this.tuvText = tuvText;
+            this.tuvLocale = tuvLocale;
+            this.creationUser = creationUser;
+            if (creationDate != null)
+            {
+                this.creationDate = new Timestamp(creationDate.getTime());                
+            }
+            this.modifyUser = modifyUser;
+            if (modifyDate != null)
+            {
+                this.modifyDate = new Timestamp(modifyDate.getTime());                
+            }
+        }
+
+        String getTuvText()
+        {
+            return this.tuvText;
+        }
+        
+        String getTuvLocale()
+        {
+            return this.tuvLocale;
+        }
+
+        String getCreationUser()
+        {
+            return EditUtil.encodeXmlEntities(UserUtil
+                    .getUserNameById(this.creationUser));
+        }
+
+        Timestamp getCreationDate()
+        {
+            return this.creationDate;
+        }
+
+        String getModifyUser()
+        {
+            return EditUtil.encodeXmlEntities(UserUtil
+                    .getUserNameById(this.modifyUser));
+        }
+
+        Timestamp getModifyDate()
+        {
+            return this.modifyDate;
+        }
+
+    }
 }

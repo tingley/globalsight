@@ -17,6 +17,7 @@
 package com.globalsight.util.edit;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,11 +43,14 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.ling.tw.internal.ColorInternalTag;
+import com.globalsight.util.Replacer;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlException;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 import com.globalsight.util.gxml.GxmlNames;
+import com.globalsight.util.gxml.TextNode;
 
 /**
  * Various utility functions for converting GxmlElements to strings.
@@ -68,6 +72,7 @@ public class GxmlUtil
 
     private static final String MOVE_TAGS_REGEX_BEGIAN = "<bpt[^>]*i=\"([^\"]*)\"[^>]*>{0}</bpt>";
     private static final String MOVE_TAGS_REGEX_ALL = "<bpt[^>]*i=\"{0}\"[^>]*>{1}</bpt>(.*?)<ept[^>]*i=\"{0}\"[^>]*>{2}</ept>";
+    private static Pattern O_PATTERN = Pattern.compile("o:gfxdata=\"[^\\s]+\"");
 
     static
     {
@@ -1208,13 +1213,15 @@ public class GxmlUtil
         String result = p_html;
         // Remove the o:gfxdata value that is very large which causes
         // StackOverFlow error during the match
-        Pattern p = Pattern.compile("o:gfxdata=\"([^\\s]+)\"");
-        Matcher m = p.matcher(result);
-        while (m.find())
+        result = StringUtil.replaceWithRE(result, O_PATTERN, new Replacer() 
         {
-            result = result.replace(m.group(1), "");
-            m = p.matcher(result);
-        }
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+				// TODO Auto-generated method stub
+				return "o:gfxdata=\"\"";
+			}
+		});
 
         RE re = new RE();
 
@@ -1350,6 +1357,14 @@ public class GxmlUtil
         {
             int i_start = p_xml.indexOf('>');
             int i_end = p_xml.lastIndexOf('<');
+            int xmlLen = p_xml.length();
+            if (i_end == 0 && i_end < i_start && i_start != (xmlLen -1))
+            {
+                // indicates this is not an empty tag, like <x1>segment content,
+                // then return original.
+                return p_xml;
+            }
+            
             if (i_end < i_start)
             {
                 // indicates this is an empty tag, like <localizable xxxx />,
@@ -1497,15 +1512,65 @@ public class GxmlUtil
             matchText = MessageFormat.format(MOVE_TAGS_REGEX_ALL, new String[]
             { id, startTag, endTag });
             p = Pattern.compile(matchText);
-            m = p.matcher(src);
-            while (m.find())
+            
+            src = StringUtil.replaceWithRE(src, Pattern.compile(matchText), new Replacer() 
             {
-                src = m.replaceFirst(m.group(1));
-                m = p.matcher(src);
-            }
+				@Override
+				public String getReplaceString(Matcher m) 
+				{
+					return m.group(1);
+				}
+			});
         }
 
         return src;
+    }
+
+    /**
+     * Check if the GxmlElement is completely composed of protection
+     * text (internal text).
+     * <p>
+     * If yes, this segment does not need translate, in protection.
+     * </p>
+     * 
+     * @param p_rootElement
+     * @return true|false
+     */
+    public static boolean isEntireInternalText(GxmlElement p_rootElement)
+    {
+        if (p_rootElement == null)
+        {
+            return false;
+        }
+
+        List<GxmlElement> allNotInternalTextNodes = new ArrayList<GxmlElement>();
+        // Immediate TextNode list for the root element
+        allNotInternalTextNodes.addAll(p_rootElement
+                .getTextNodeWithoutInternal());
+        // Add immediate TextNode list for all sub GxmlElement.
+        List<GxmlElement> subFlowList = p_rootElement
+                .getDescendantElements(GxmlElement.SUB_TYPE);
+        if (subFlowList != null && subFlowList.size() > 0)
+        {
+            for (GxmlElement subEle : subFlowList)
+            {
+                allNotInternalTextNodes.addAll(subEle.getTextNodeWithoutInternal());
+            }
+        }
+
+        if (allNotInternalTextNodes.size() == 0)
+            return true;
+
+        for (GxmlElement ele : allNotInternalTextNodes)
+        {
+            String textValue = ((TextNode) ele).getTextNodeValue();
+            if (textValue != null && textValue.trim().length() > 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     //

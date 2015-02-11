@@ -14,14 +14,13 @@
   <define name="schemarules">
     <element name="schemarules">
       <optional>
-        <ref name="use-empty-tag" />
+        <ref name="use-empty-tag"/>
       </optional>
       <oneOrMore>
         <ref name="ruleset"/>
       </oneOrMore>
     </element>
   </define>
-
 
   <c:c>
          One ruleset element for each XML instance. There can be multiple 
@@ -43,14 +42,14 @@
     </element>
   </define>
  
-  <c:c> Specify an element that is comment tag</c:c>
+  <c:c> Specify an element that is comment tag </c:c>
   <define name="comment">
     <element name="comment">
       <ref name="path"/>        <c:c> Mandatory attribute </c:c>      
     </element>
   </define> 
 
-  <c:c> Specify an element that is internal text</c:c>
+  <c:c> Specify an element that is internal text </c:c>
   <define name="internal">
     <element name="internal">
       <ref name="path"/>        <c:c> Mandatory attribute </c:c>      
@@ -88,11 +87,10 @@
     </element>
   </define>      
 
-
   <c:c> Specify an element that is not to be translated </c:c>
   <define name="dont-translate">
     <element name="dont-translate">
-      <ref name="path"/>
+      <ref name="path"/>        <c:c> Mandatory attribute </c:c>
       <optional>
         <ref name="inline"/>
       </optional>
@@ -102,19 +100,21 @@
     </element>
   </define>
   
+  <c:c> Specify an element that is sid </c:c>
   <define name="sid">
     <element name="sid">
-      <ref name="path"/>
+      <ref name="path"/>        <c:c> Mandatory attribute </c:c>
       <optional>
 	     <ref name="name"/>
 	  </optional>
     </element>
   </define>
 
+  <c:c> Specify an element with words that are not to be extracted or counted </c:c>
   <define name="dont-count">
     <element name="dont-count">
-      <ref name="path"/>
-      <ref name="words"/>
+      <ref name="path"/>        <c:c> Mandatory attribute </c:c>
+      <ref name="words"/>        <c:c> Mandatory attribute </c:c>
     </element>
   </define>
 
@@ -129,16 +129,17 @@
     </attribute>
   </define>
 
-
   <c:c> XPath expression to select parts of XML documents </c:c>
   <define name="path">
     <attribute name="path"/>
   </define>
   
+  <c:c> name: specify the sid name </c:c>
   <define name="name">
     <attribute name="name"/>
   </define>
   
+  <c:c> words: specify the words that not to be extracted or counted </c:c>
   <define name="words">
     <attribute name="words"/>
   </define>
@@ -162,7 +163,6 @@
     <attribute name="datatype"/>
   </define>
 
-
   <c:c> 
          Type: type of the segment. e.g. link, abbr, font-name,
          etc. Default is text.
@@ -170,7 +170,6 @@
   <define name="type">
     <attribute name="type"/>
   </define>
-
 
   <c:c> Inline: segment breaking tag or not </c:c>
   <define name="inline">
@@ -203,12 +202,6 @@
     </attribute>
   </define>
   
-  <c:c> priority: priority or not </c:c>
-  <define name="priority">
-    <attribute name="priority">
-    </attribute>
-  </define>
-
   <c:c> Erasable: erasable tag or not </c:c>
   <define name="erasable">
     <attribute name="erasable">
@@ -218,7 +211,10 @@
       </choice>
     </attribute>
   </define>
+  
+  <c:c> priority: specify the priority on the rule </c:c>
+  <define name="priority">
+    <attribute name="priority"/>
+  </define>
 
 </grammar>
-
-

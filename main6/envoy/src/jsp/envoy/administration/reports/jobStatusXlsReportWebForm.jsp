@@ -167,7 +167,7 @@ function submitForm()
                 for(GlobalSightLocale gsLocale : targetLocales)
                 {
 %>
-                <option VALUE="<%=gsLocale.toString()%>"><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
+                <option VALUE="<%=gsLocale.getId()%>"><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
 <%
                 }
 %>
@@ -219,6 +219,7 @@ function submitForm()
             <OPTION VALUE="<%=dateFormats[i]%>"><%=dateFormats[i]%></OPTION>
 <%          }
 %>
+
             </select>
         </td>
     </tr>

@@ -20,6 +20,8 @@
 			not-null="false" unique="false" />
 		<property name="creationUser" length="80" column="CREATION_USER"
 			type="string" not-null="false" unique="false" />
+        <property name="indexTarget" column="INDEX_TARGET" type="yes_no"
+            not-null="false" unique="false" />
 		<property name="isRemoteTm" column="IS_REMOTE_TM" type="yes_no"
 			not-null="false" unique="false" />
 		<property name="gsEditionId" column="GS_EDITION_ID" type="long"

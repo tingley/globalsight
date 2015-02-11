@@ -146,15 +146,14 @@ public class CustomizeReportsMainHandler extends PageHandler
     {
         // Set response header
         p_response.setHeader("Content-Disposition",
-                "inline; filename=CustomizeReports.xls");
+                "inline; filename=CustomizeReports.xlsx");
         p_response.setHeader("Expires", "0");
         p_response.setHeader("Cache-Control",
                 "must-revalidate, post-check=0,pre-check=0");
         p_response.setHeader("Pragma", "public");
-        p_response.setContentType("application/vnd.ms-excel");
+        p_response.setContentType("application/x-excel");
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
-        ExcelReportWriter reportWriter = new ExcelReportWriter(
-                p_response.getOutputStream(), bundle);
+        ExcelReportWriter reportWriter = new ExcelReportWriter(bundle);
 
         String currency = request.getParameter("currency");
         CurrencyThreadLocal.setCurrency(currency);
@@ -166,7 +165,7 @@ public class CustomizeReportsMainHandler extends PageHandler
                 p_paramMap, reportWriter);
         generator.pupulate();
 
-        reportWriter.commit();
+        reportWriter.commit(p_response.getOutputStream());
     }
 
     /**
@@ -187,32 +186,87 @@ public class CustomizeReportsMainHandler extends PageHandler
 
         List<JobSearchParameters> jobRangeParam = new ArrayList<JobSearchParameters>();
 
-        //
-        // Get JobSearchParameters
-        //
-        JobSearchParameters sp = new JobSearchParameters();
-
-        // If sepcified job ids, then use job ids only.
+        List<String> stateList = new ArrayList<String>();
         if ((paramJobIds != null) && !("*".equals(paramJobIds[0])))
         {
-            // just get the specific jobs they chose
             for (int i = 0; i < paramJobIds.length; i++)
             {
-                sp.setJobId(paramJobIds[i]);
-                sp.setJobIdCondition(JobSearchParameters.EQUALS);
+                if ((paramProjectIds != null) && !("*".equals(paramProjectIds[0])))
+                {
+                    for (int j = 0; j < paramProjectIds.length; j++)
+                    {
+                    	JobSearchParameters sp = new JobSearchParameters();
+                    	sp.setJobId(paramJobIds[i]);
+                    	sp.setJobIdCondition(JobSearchParameters.EQUALS);
+                        sp.setProjectId(paramProjectIds[j]);
+                        stateList =disposeSp(p_request, paramStatus, sp);
+                        jobRangeParam.add(sp);
+                    }
+                }
+                else 
+                {
+                	JobSearchParameters sp = new JobSearchParameters();
+                	sp.setJobId(paramJobIds[i]);
+                	sp.setJobIdCondition(JobSearchParameters.EQUALS);
+                	stateList = disposeSp(p_request, paramStatus, sp);
+                    jobRangeParam.add(sp);
+				}
             }
         }
-
-        // Get project ids
-        if ((paramProjectIds != null) && !("*".equals(paramProjectIds[0])))
+        else 
         {
-            for (int i = 0; i < paramProjectIds.length; i++)
+            if ((paramProjectIds != null) && !("*".equals(paramProjectIds[0])))
             {
-                sp.setProjectId(paramProjectIds[i]);
+                for (int i = 0; i < paramProjectIds.length; i++)
+                {
+                	JobSearchParameters sp = new JobSearchParameters();
+                    sp.setProjectId(paramProjectIds[i]);
+                    stateList = disposeSp(p_request, paramStatus, sp);
+                    jobRangeParam.add(sp);
+                }
+            }
+            else 
+            {
+            	JobSearchParameters sp = new JobSearchParameters();
+            	stateList = disposeSp(p_request, paramStatus, sp);
+                jobRangeParam.add(sp);
+			}
+		}
+        
+        paramMap.put(WebAppConstants.JOB_RANGE_PARAM, jobRangeParam);
+
+        //
+        // Get target locales
+        //
+        List targetLocaleList = new ArrayList();
+        if (paramTargetLocales != null && !paramTargetLocales[0].equals("*"))
+        {
+            for (int i = 0; i < paramTargetLocales.length; i++)
+            {
+                targetLocaleList.add(paramTargetLocales[i]);
             }
         }
+        paramMap.put(WebAppConstants.TARGET_LOCALE_PARAM, targetLocaleList);
 
-        // Get job status.
+        //
+        // Get workflow status
+        //
+        paramMap.put(WebAppConstants.WORKFLOW_STATUS_PARAM, stateList);
+
+        //
+        // Get date format
+        //
+        String dateFormat = p_request.getParameter("dateFormat");
+        SimpleDateFormat dateFormatParam = new SimpleDateFormat(dateFormat);
+
+        paramMap.put(WebAppConstants.DATE_FORMAT_PARAM, dateFormatParam);
+
+        return paramMap;
+    }
+    
+    private List<String> disposeSp(HttpServletRequest p_request, String[] paramStatus, JobSearchParameters sp)
+    {
+    	// Get job status.
         List<String> stateList = new ArrayList<String>();
         if ((paramStatus != null) && !("*".equals(paramStatus[0])))
         {
@@ -260,37 +314,8 @@ public class CustomizeReportsMainHandler extends PageHandler
             sp.setCreationEnd(new Integer(paramCreateDateEndCount));
             sp.setCreationEndCondition(paramCreateDateEndOpts);
         }
-
-        jobRangeParam.add(sp);
-        paramMap.put(WebAppConstants.JOB_RANGE_PARAM, jobRangeParam);
-
-        //
-        // Get target locales
-        //
-        List targetLocaleList = new ArrayList();
-        if (paramTargetLocales != null && !paramTargetLocales[0].equals("*"))
-        {
-            for (int i = 0; i < paramTargetLocales.length; i++)
-            {
-                targetLocaleList.add(paramTargetLocales[i]);
-            }
-        }
-        paramMap.put(WebAppConstants.TARGET_LOCALE_PARAM, targetLocaleList);
-
-        //
-        // Get workflow status
-        //
-        paramMap.put(WebAppConstants.WORKFLOW_STATUS_PARAM, stateList);
-
-        //
-        // Get date format
-        //
-        String dateFormat = p_request.getParameter("dateFormat");
-        SimpleDateFormat dateFormatParam = new SimpleDateFormat(dateFormat);
-
-        paramMap.put(WebAppConstants.DATE_FORMAT_PARAM, dateFormatParam);
-
-        return paramMap;
+        
+        return stateList;
     }
 
     /**

@@ -132,7 +132,7 @@ public class MTDetailHandler extends PageHandler
             {
                 try
                 {
-                    if (MTProfileHandlerHelper.isExite(mtProfile)
+                    if (MTProfileHandlerHelper.isMtProfileExisted(mtProfile)
                             || StringUtils
                                     .isEmpty(mtProfile.getMtProfileName()))
                     {

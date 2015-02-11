@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.population.SegmentsForSave;
 import com.globalsight.util.GlobalSightLocale;
@@ -35,23 +36,7 @@ import com.globalsight.util.GlobalSightLocale;
 public class TmSegmentIndexer
 {
     // Flag to determine if target segments are indexed
-    private static boolean c_indexesTarget;
-    static
-    {
-        try
-        {
-            // Fix for GBS-2448
-            // SystemConfiguration sc = SystemConfiguration.getInstance();
-            // c_indexesTarget=
-            // sc.getBooleanParameter("leverager.targetIndexing");
-            c_indexesTarget = true;
-        }
-        catch(Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-    
+    private boolean indexTarget = false;
 
     private static final boolean TRANSLATABLE = true;
     private static final boolean LOCALIZABLE = false;
@@ -59,6 +44,10 @@ public class TmSegmentIndexer
     public static final boolean SOURCE = true;
     public static final boolean NOT_SOURCE = false;
 
+    public TmSegmentIndexer(boolean p_indexTarget)
+    {
+        indexTarget = p_indexTarget;
+    }
 
     /**
      * Index saved segments in Segment Tm index table
@@ -72,18 +61,8 @@ public class TmSegmentIndexer
         indexSavedSegments(p_segmentsForSave);
     }
     
-
-    /**
-     * Tests if target segments are indexed.
-     */
-    static public boolean indexesTargetSegments()
-    {
-        return c_indexesTarget;
-    }
-    
-
     // Sort the saved segments and call indexTuvs()
-    // XXX only adds to the index, doesn't deindex anything
+    // XXX only adds to the index, doesn't re-index anything
     private void indexSavedSegments(
         SegmentsForSave p_segmentsForSave)
         throws Exception
@@ -191,7 +170,7 @@ public class TmSegmentIndexer
         }
         
         // index target segments
-        if(c_indexesTarget)
+        if(indexTarget)
         {
             Iterator itLocale = p_localeTuvMap.keySet().iterator();
             while(itLocale.hasNext())
@@ -235,5 +214,19 @@ public class TmSegmentIndexer
         }
     }
     
+    public static boolean indexesTargetSegments(long projectTmId)
+    {
+        boolean indexTarget = false;
+        try
+        {
+            indexTarget = ServerProxy.getProjectHandler()
+                    .getProjectTMById(projectTmId, false)
+                    .isIndexTarget();
+        }
+        catch (Exception e)
+        {
+        }
 
+        return indexTarget;
+    }
 }

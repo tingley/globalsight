@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.BatchStatementBuilder;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
@@ -36,11 +35,10 @@ import com.globalsight.util.StringUtil;
 // DedicatedTuStorage up to TuStorage (just wrap the queries, essentially)
 class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 {
-    private Logger logger = Logger.getLogger(SharedTuStorage.class);
-    
     private long tmId;
-    
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
+            "yyyy-MM-dd");
 
     SharedTuStorage(StorageInfo<T> storage)
     {
@@ -117,8 +115,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
         sb.append(" WHERE fingerprint = ? AND localeId = ? ")
                 .addValues(key.getFingerprint(), srcLocale.getId())
-                .append("AND tuv.tmId IN")
-                .append(SQLUtil.longGroup(tm3TmIds));
+                .append("AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
         if (!lookupTarget)
         {
             sb.append("AND tu.srcLocaleId = ? ").addValue(srcLocale.getId());
@@ -497,7 +494,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             {
                 sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
                         .append(getStorage().getTuTableName())
-                        .append(" as tu ")
+                        .append(" as tu ,")
                         .append(getStorage().getTuvTableName())
                         .append(" as tuv, ").append("TM3_EVENTS as event ");
                 getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
@@ -601,9 +598,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         .append("WHERE tuv.lastEventId = event.id ")
                         .append("AND tuv.tmId = ? ").addValue(tmId)
                         .append(" AND event.time >= ? AND event.time <= ? ")
-                        .addValues(start, end)
+                        .addValues(parseStartDate(start), parseEndDate(end))
                         .append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
-                        .addValues(parseStartDate(start), parseEndDate(end));
+                        .addValues(startId, count);
             }
             else
             {
@@ -812,16 +809,18 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             DbUtil.silentReturnConnection(conn);
         }
     }
-    
-    private String parseStartDate(Date start) {
+
+    private String parseStartDate(Date start)
+    {
         String startDate = dateFormat.format(start);
         if (StringUtil.isNotEmpty(startDate))
             return startDate + " 00:00:00";
         else
             return null;
     }
-    
-    private String parseEndDate(Date end) {
+
+    private String parseEndDate(Date end)
+    {
         String endDate = dateFormat.format(end);
         if (StringUtil.isNotEmpty(endDate))
             return endDate + " 23:59:59";

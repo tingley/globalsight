@@ -288,9 +288,12 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             long companyId = SegmentTuTuvCacheManager
                     .getCompanyIdBySourcePageId(sp.getId());
             result = convertResultSetToTuImpl(rs, false, companyId);
-            // Load "removed tags" info in page level to improve performance.
-            RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
-                    sp.getId(), tuTableName);
+            if (RemovedTagsUtil.isGenerateRemovedTags(sp.getId()))
+            {
+                // Load "removed tags" in page level to improve performance.
+                RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
+                        sp.getId(), tuTableName);
+            }
         }
         catch (SQLException e)
         {
@@ -350,9 +353,12 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             long companyId = SegmentTuTuvCacheManager
                     .getCompanyIdBySourcePageId(p_sourcePageId);
             result = convertResultSetToTuImpl(rs, false, companyId);
-            // Load "removed tags" info in page level to improve performance.
-            RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
-                    p_sourcePageId, tuTableName);
+            if (RemovedTagsUtil.isGenerateRemovedTags(p_sourcePageId))
+            {
+                // Load "removed tags" in page level to improve performance.
+                RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
+                        p_sourcePageId, tuTableName);
+            }
         }
         catch (Exception e)
         {

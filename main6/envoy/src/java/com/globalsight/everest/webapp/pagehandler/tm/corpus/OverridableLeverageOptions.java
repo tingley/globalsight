@@ -19,9 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.tm.corpus;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.ArrayList;
 
 /**
@@ -36,7 +34,7 @@ public class OverridableLeverageOptions extends LeverageOptions
      * the fuzzy threshold value to use
      */
     private int m_overriddenFuzzyThreshold = 50;
-    private ArrayList m_overriddenTms = null;
+    private ArrayList<Long> m_overriddenTms = null;
 
     /**
      * Creates a LeverageOptions with a fuzzy match threshold
@@ -45,7 +43,8 @@ public class OverridableLeverageOptions extends LeverageOptions
      * @param p_tmProfile
      * @param p_leveragingLocales
      */
-    public OverridableLeverageOptions(TranslationMemoryProfile p_tmProfile, LeveragingLocales p_leveragingLocales)
+    public OverridableLeverageOptions(TranslationMemoryProfile p_tmProfile,
+            LeveragingLocales p_leveragingLocales)
     {
         super(p_tmProfile,p_leveragingLocales);
     }
@@ -72,14 +71,12 @@ public class OverridableLeverageOptions extends LeverageOptions
         m_overriddenFuzzyThreshold = p_value;
     }
 
-
-
     /**
      * Returns the collection of overridden TM ids
      * 
      * @return 
      */
-    public Collection getTmsToLeverageFrom()
+    public Collection<Long> getTmIdsToLeverageFrom()
     {
         return m_overriddenTms;
     }
@@ -88,9 +85,8 @@ public class OverridableLeverageOptions extends LeverageOptions
      * Sets the collection of overridden TM ids
      * 
      */
-    public void setTmsToLeverageFrom(Collection p_tmIds)
+    public void setTmsToLeverageFrom(Collection<Long> p_tmIds)
     {
-        m_overriddenTms = new ArrayList(p_tmIds);
+        m_overriddenTms = new ArrayList<Long>(p_tmIds);
     }
 }
-

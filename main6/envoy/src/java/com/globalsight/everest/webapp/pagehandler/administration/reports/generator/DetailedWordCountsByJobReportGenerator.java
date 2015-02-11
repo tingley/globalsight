@@ -17,27 +17,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.UnderlineStyle;
-import jxl.write.Formula;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import org.apache.log4j.Logger;
 
 import com.csvreader.CsvWriter;
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.TargetPage;
@@ -63,8 +59,11 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 {
     static private final Logger logger = Logger
             .getLogger(DetailedWordCountsByJobReportGenerator.class);
-    private WritableWorkbook m_workbook = null;
+//    private WritableWorkbook m_workbook = null;
     private CsvWriter csvWriter = null;
+    private CellStyle contentStyle = null;
+    private CellStyle headerStyle = null;
+    private CellStyle subTotalStyle = null;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(
             "MM/dd/yy hh:mm:ss a z");
     private boolean useInContext = false;
@@ -88,7 +87,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         // Need to search job by projects, status, date
         boolean needSearchJob = false;
 
-        boolean exportWithXls = true;
+        boolean exportWithXlsx = true;
 
         ArrayList<GlobalSightLocale> trgLocaleList = new ArrayList<GlobalSightLocale>();
 
@@ -168,18 +167,22 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
         ArrayList<Job> jobs = ReportHelper.getJobListByIDS(p_jobIDS);
         File file;
-        if (data.exportWithXls)
+        if (data.exportWithXlsx)
         {
-            WorkbookSettings settings = new WorkbookSettings();
-            settings.setSuppressWarnings(true);
+        	setAllCellStyleNull();
             file = ReportHelper.getXLSReportFile(getReportType(), null);
-            m_workbook = Workbook.createWorkbook(file, settings);
-            addJobsForXls(jobs, p_targetLocales);
-            if (m_workbook != null)
+            Workbook workBook = new SXSSFWorkbook();
+            Sheet sheet = workBook.createSheet(m_bundle.getString("jobinfo.tradosmatches"));
+            getUseInContextInfos(jobs, data.wantsAllLocales, data.trgLocaleList);
+            addTitleForXls(workBook, sheet);
+            addHeaderForXls(workBook, sheet);
+            addJobsForXlsx(workBook, sheet, jobs, p_targetLocales);
+            if (workBook != null)
             {
-                addCriteriaSheet(m_request);
-                m_workbook.write();
-                m_workbook.close();
+            	FileOutputStream out = new FileOutputStream(file);
+            	addCriteriaSheet(workBook, m_request);
+                workBook.write(out);
+                out.close();
             }
             else
             {
@@ -201,11 +204,768 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                 return new File[0];
             }
         }
-
-        return new File[]
-        { file };
+        
+        List<File> workBooks = new ArrayList<File>();
+        workBooks.add(file);
+        return ReportHelper.moveReports(workBooks, m_userId);
+    }
+    
+    private void addTitleForXls(Workbook p_workBook, 
+    		Sheet p_sheet)throws Exception
+    {
+        String EMEA = CompanyWrapper.getCurrentCompanyName();
+        
+        Font titleFont = p_workBook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Arial");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        titleFont.setColor(IndexedColors.BLACK.getIndex());
+        CellStyle titleStyle = p_workBook.createCellStyle();
+        titleStyle.setWrapText(false);
+        titleStyle.setFont(titleFont);
+        
+        Row firRow = getRow(p_sheet, 0);
+        Cell titleCell = getCell(firRow, 0);
+        titleCell.setCellValue(EMEA + " "
+                + m_bundle.getString("file_list_report"));
+        titleCell.setCellStyle(titleStyle);
+        
+        Font ldflFont = p_workBook.createFont();
+        ldflFont.setUnderline(Font.U_NONE);
+        ldflFont.setFontName("Arial");
+        ldflFont.setFontHeightInPoints((short) 10);
+        ldflFont.setBoldweight(Font.DEFAULT_CHARSET);
+        ldflFont.setColor(IndexedColors.BLACK.getIndex());
+        CellStyle ldflStyle = p_workBook.createCellStyle();
+        ldflStyle.setWrapText(false);
+        ldflStyle.setFont(ldflFont);
+        
+        Row secRow = getRow(p_sheet, 1);
+        Cell ldflCell = getCell(secRow, 0);
+        ldflCell.setCellValue(m_bundle.getString("lb_desp_file_list"));
+        ldflCell.setCellStyle(ldflStyle);
+        
+        p_sheet.setColumnWidth(0, 15 * 256);
     }
 
+    /**
+     * Adds the table header to the sheet
+     * 
+     * @param p_sheet
+     */
+    private void addHeaderForXls(Workbook p_workBook, 
+    		Sheet p_sheet)throws Exception
+    {
+        int col = 0;
+        Row segHeaderRow = getRow(p_sheet, 2);
+        Cell cell_A = getCell(segHeaderRow, col);
+        cell_A.setCellValue(m_bundle.getString("lb_job_id"));
+        cell_A.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 15 * 256);
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_B = getCell(segHeaderRow, col);
+        cell_B.setCellValue(m_bundle.getString("lb_job_name"));
+        cell_B.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 30 * 256);
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_C = getCell(segHeaderRow, col);
+        cell_C.setCellValue(m_bundle.getString("lb_file_path"));
+        cell_C.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 55 * 256);
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_D = getCell(segHeaderRow, col);
+        cell_D.setCellValue(m_bundle.getString("lb_file_name"));
+        cell_D.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 25 * 256);
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workBook));
+        col++;
+        // p_sheet.addCell(new Label(col, 2, bundle.getString("lb_loc_profile"),
+        // headerFormat));
+        // p_sheet.setColumnView(col, 20);
+        // p_sheet.mergeCells(col, 2, col, 3);
+        // col++;
+        // p_sheet.addCell(new Label(col, 2,
+        // bundle.getString("lb_file_profile"),
+        // headerFormat));
+        // p_sheet.setColumnView(col, 20);
+        // p_sheet.mergeCells(col, 2, col, 3);
+        // col++;
+        Cell cell_E = getCell(segHeaderRow, col);
+        cell_E.setCellValue(m_bundle.getString("reportDesc"));
+        cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 30 * 256);
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_F = getCell(segHeaderRow, col);
+        cell_F.setCellValue(m_bundle.getString("lb_creation_date"));
+        cell_F.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 25 * 256);
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_G = getCell(segHeaderRow, col);
+        cell_G.setCellValue(m_bundle.getString("lb_lang"));
+        cell_G.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_H_Header = getCell(segHeaderRow, col);
+        cell_H_Header.setCellValue(m_bundle.getString("lb_word_counts"));
+        cell_H_Header.setCellStyle(getHeaderStyle(p_workBook));
+        wordCountCol = col;
+        int span = 6;
+        if (useDefaultContext && useInContext)
+        {
+            span += 2;
+        }
+        else if (useDefaultContext || useInContext)
+        {
+            span += 1;
+        }
+        if (data.inludeMtColumn)
+        {
+            span += 1;
+        }
+
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + span));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + span), 
+        		getHeaderStyle(p_workBook));
+
+        segHeaderRow = getRow(p_sheet, 3);
+        Cell cell_H = getCell(segHeaderRow, col);
+        cell_H.setCellValue(m_bundle
+                .getString("jobinfo.tradosmatches.wordcounts.per100matches"));
+        cell_H.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_I = getCell(segHeaderRow, col);
+        cell_I.setCellValue(m_bundle.getString("lb_95_99"));
+        cell_I.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_J = getCell(segHeaderRow, col);
+        cell_J.setCellValue(m_bundle.getString("lb_85_94"));
+        cell_J.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_K = getCell(segHeaderRow, col);
+        cell_K.setCellValue(m_bundle.getString("lb_75_84") + "*");
+        cell_K.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_L = getCell(segHeaderRow, col);
+        cell_L.setCellValue(m_bundle.getString("lb_no_match"));
+        cell_L.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell cell_M = getCell(segHeaderRow, col);
+        cell_M.setCellValue(m_bundle.getString("lb_repetition_word_cnt"));
+        cell_M.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 13 * 256);
+        col++;
+        
+        if (useDefaultContext)
+        {
+        	Cell cell_Context = getCell(segHeaderRow, col);
+        	cell_Context.setCellValue(m_bundle.getString("lb_context_tm_report"));
+        	cell_Context.setCellStyle(getHeaderStyle(p_workBook));
+        }
+
+        if (useInContext)
+        {
+            if (useDefaultContext)
+                col++;
+            Cell cell_InContext = getCell(segHeaderRow, col);
+            cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+            cell_InContext.setCellStyle(getHeaderStyle(p_workBook));
+        }
+
+        if (data.inludeMtColumn)
+        {
+            col++;
+            Cell cell_MT = getCell(segHeaderRow, col);
+            cell_MT.setCellValue("MT");
+            cell_MT.setCellStyle(getHeaderStyle(p_workBook));
+        }
+
+        if (useDefaultContext || useInContext)
+        {
+            col++;
+        }
+        Cell cell_Total = getCell(segHeaderRow, col);
+        cell_Total.setCellValue(m_bundle.getString("lb_total"));
+        cell_Total.setCellStyle(getHeaderStyle(p_workBook));
+
+        if (data.inludeMtColumn)
+        {
+        	segHeaderRow = getRow(p_sheet, 2);
+            col++;
+            Cell cell_Score = getCell(segHeaderRow, col);
+            cell_Score.setCellValue(m_bundle.getString("lb_tm_mt_confidence_score"));
+            cell_Score.setCellStyle(getHeaderStyle(p_workBook));
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+            		getHeaderStyle(p_workBook));
+            p_sheet.setColumnWidth(col, 20 * 256);
+        }
+    }
+
+    /**
+     * Gets the jobs and outputs workflow information.
+     * 
+     * @exception Exception
+     */
+    private void addJobsForXlsx(Workbook p_workbook,Sheet p_sheet, ArrayList<Job> p_jobs,
+            List<GlobalSightLocale> p_targetLocales) throws Exception
+    {
+        // sort jobs by job name
+        SortUtil.sort(p_jobs, new JobComparator(Locale.US));
+
+        IntHolder row = new IntHolder(4);
+        int finishedJobNum = 0;
+        for (Job j : p_jobs)
+        {
+            // Cancel generate reports.
+            if (isCancelled())
+            {
+                p_workbook = null;
+                printMsg("Cancelled Report Generator. " + j);
+                return;
+            }
+
+            // Sets Reports Percent.
+            setPercent(++finishedJobNum);
+
+            for (Workflow w : j.getWorkflows())
+            {
+                String state = w.getState();
+                // skip certain workflow whose target locale is not selected
+                if (!p_targetLocales.contains(w.getTargetLocale()))
+                {
+                    continue;
+                }
+                // if (data.workflowStateList.contains(state))
+                if (Workflow.DISPATCHED.equals(state)
+                        || Workflow.READY_TO_BE_DISPATCHED.equals(state)
+                        || Workflow.PENDING.equals(state)
+                        || Workflow.EXPORTED.equals(state)
+                        || Workflow.EXPORT_FAILED.equals(state)
+                        || Workflow.ARCHIVED.equals(state)
+                        || Workflow.LOCALIZED.equals(state))
+                {
+                    addWorkflowForXls(p_workbook, p_sheet, j, w, row);
+                }
+            }
+            printMsg("Finished Job: " + j);
+        }
+
+        row.inc();
+        addTotals(p_workbook, p_sheet, row);
+    }
+    
+    /**
+     * Gets the task for the workflow and outputs page information.
+     * 
+     * @exception Exception
+     */
+    private void addWorkflowForXls(Workbook p_workBook, Sheet p_sheet, Job p_job,
+            Workflow p_workflow, IntHolder p_row) throws Exception
+    {
+        int threshold = p_job.getLeverageMatchThreshold();
+        int mtConfidenceScore = p_workflow.getMtConfidenceScore();
+        // write word count and file info
+        for (TargetPage tg : p_workflow.getTargetPages())
+        {
+            // write job id, job name, description, creation date, creation
+            // time, language
+        	Row row = getRow(p_sheet, p_row.value);
+        	CellStyle cs = getContentStyle(p_workBook);
+            Cell cell_A = getCell(row, 0);
+            cell_A.setCellValue(String.valueOf(p_job.getId()));
+            cell_A.setCellStyle(cs);
+            
+            Cell cell_B = getCell(row, 1);
+            cell_B.setCellValue(p_job.getJobName());
+            cell_B.setCellStyle(cs);
+
+            // file path 2 & file name 3
+            try
+            {
+                String[] pathName = getFilePathName(tg);
+                Cell cell_C = getCell(row, 2);
+                cell_C.setCellValue(pathName[0]);
+                cell_C.setCellStyle(cs);
+                
+                Cell cell_D = getCell(row, 3);
+                cell_D.setCellValue(pathName[1]);
+                cell_D.setCellStyle(cs);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            // p_sheet.addCell(new Label(4, p_row.value, p_job.getL10nProfile()
+            // .getName())); // getL10nProfile
+            // p_sheet.addCell(new Label(5, p_row.value,
+            // getFileProfileNameForDisplay(tg)));
+            Cell cell_E = getCell(row, 4);
+            cell_E.setCellValue(getProjectDesc(p_job));
+            cell_E.setCellStyle(cs);
+            
+            Cell cell_F = getCell(row, 5);
+            cell_F.setCellValue(dateFormat.format(p_job.getCreateDate()));
+            cell_F.setCellStyle(cs);
+            
+            Cell cell_G = getCell(row,6);
+            cell_G.setCellValue(p_workflow.getTargetLocale().toString());
+            cell_G.setCellStyle(cs);
+
+            try
+            {
+                addWordCountForXls(p_workBook, tg, p_row, p_sheet, threshold,
+                        mtConfidenceScore);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            p_row.inc();
+        }
+    }
+    
+    /**
+     * Add word count for Excel File
+     */
+    private int addWordCountForXls(Workbook p_workBook, TargetPage tg, IntHolder p_row,
+            Sheet p_sheet, int threshold, int mtConfidenceScore)
+            throws Exception
+    {
+        boolean isInContextMatch = PageHandler.isInContextMatch(tg
+                .getSourcePage().getRequest().getJob());
+        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(tg
+                .getSourcePage().getRequest().getJob());
+        boolean isUseDefaultContextMatch = PageHandler
+                .isDefaultContextMatch(tg);
+        PageWordCounts pageWC = tg.getWordCount();
+
+        // 100% match
+        int _100MatchWordCount = 0;
+        // in context word match
+        int inContextWordCount = 0;
+        // Context match
+        int contextMatchWC = pageWC.getContextMatchWordCount();
+        if (isInContextMatch)
+        {
+            inContextWordCount = pageWC.getInContextWordCount();
+            _100MatchWordCount = pageWC.getSegmentTmWordCount();
+            contextMatchWC = 0;
+        }
+        else
+        {
+            if (isUseDefaultContextMatch)
+            {
+                _100MatchWordCount = pageWC.getTotalExactMatchWordCount()
+                        - contextMatchWC;
+            }
+            else
+            {
+                _100MatchWordCount = pageWC.getTotalExactMatchWordCount();
+                contextMatchWC = 0;
+            }
+        }
+
+        int hiFuzzyWordCount = pageWC.getThresholdHiFuzzyWordCount();
+        int medHiFuzzyWordCount = pageWC.getThresholdMedHiFuzzyWordCount();
+        int medFuzzyWordCount = pageWC.getThresholdMedFuzzyWordCount();
+        int lowFuzzyWordCount = pageWC.getThresholdLowFuzzyWordCount();
+        int noMatchWordCount = pageWC.getThresholdNoMatchWordCount();
+        int repetitionsWordCount = pageWC.getRepetitionWordCount();
+        int totalWords = pageWC.getTotalWordCount();
+        // MT
+        int mtTotalWordCount = pageWC.getMtTotalWordCount();
+        int mtExactMatchWordCount = pageWC.getMtExactMatchWordCount();
+        int mtFuzzyNoMatchWordCount = pageWC.getMtFuzzyNoMatchWordCount();
+        int mtRepetitionsWordCount = pageWC.getMtRepetitionsWordCount();
+
+        int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
+        // If include MT column, need adjust word count according to threshold
+        // and MT confidence score.
+        if (data.inludeMtColumn)
+        {
+            if (mtConfidenceScore == 100)
+            {
+                _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
+            }
+            else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
+            {
+                if (mtConfidenceScore >= 95)
+                {
+                    hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
+                {
+                    medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
+                {
+                    medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 75)
+                {
+                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                }
+                repetitionsWordCount -= mtRepetitionsWordCount;
+            }
+            else if (mtConfidenceScore < threshold)
+            {
+                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                repetitionsWordCount -= mtRepetitionsWordCount;
+            }
+        }
+
+        
+        // write the information of word count
+        int cursor = wordCountCol;
+        Row row = getRow(p_sheet, p_row.value);
+        CellStyle cs = getContentStyle(p_workBook);
+        Cell cell_H = getCell(row, cursor);
+        cell_H.setCellValue(_100MatchWordCount);
+        cell_H.setCellStyle(cs);
+        
+        Cell cell_I = getCell(row, ++cursor);
+        cell_I.setCellValue(hiFuzzyWordCount);
+        cell_I.setCellStyle(cs);
+        
+        Cell cell_J = getCell(row, ++cursor);
+        cell_J.setCellValue(medHiFuzzyWordCount);
+        cell_J.setCellStyle(cs);
+        
+        Cell cell_K = getCell(row, ++cursor);
+        cell_K.setCellValue(medFuzzyWordCount);
+        cell_K.setCellStyle(cs);
+        
+        Cell cell_L = getCell(row, ++cursor);
+        cell_L.setCellValue(noMatchWorcCountForDisplay);
+        cell_L.setCellStyle(cs);
+        
+        Cell cell_M = getCell(row, ++cursor);
+        cell_M.setCellValue(repetitionsWordCount);
+        cell_M.setCellStyle(cs);
+
+        cursor++;
+        if (useDefaultContext)
+        {
+        	Cell cell_Context = getCell(row, cursor);
+            if (isDefaultContextMatch)
+            {
+            	cell_Context.setCellValue(contextMatchWC);
+            	cell_Context.setCellStyle(cs);
+            }
+            else
+            {
+            	cell_Context.setCellValue(0);
+            	cell_Context.setCellStyle(cs);
+            }
+        }
+        if (useInContext)
+        {
+            if (useDefaultContext)
+                cursor++;
+
+            Cell cell_InContext = getCell(row, cursor);
+            if (isInContextMatch)
+            {
+            	cell_InContext.setCellValue(inContextWordCount);
+            	cell_InContext.setCellStyle(cs);
+            }
+            else
+            {
+            	cell_InContext.setCellValue(0);
+            	cell_InContext.setCellStyle(cs);
+            }
+        }
+
+        if (data.inludeMtColumn)
+        {
+            cursor++;
+            Cell cell_MT = getCell(row, cursor);
+            cell_MT.setCellValue(mtTotalWordCount);
+            cell_MT.setCellStyle(cs);
+        }
+
+        if (useDefaultContext || useInContext)
+            cursor++;
+
+        Cell cell_Total = getCell(row, cursor);
+        cell_Total.setCellValue(totalWords);
+        cell_Total.setCellStyle(cs);
+
+        if (data.inludeMtColumn)
+        {
+            cursor++;
+            Cell cell_Score = getCell(row, cursor);
+            cell_Score.setCellValue(mtConfidenceScore);
+            cell_Score.setCellStyle(cs);
+        }
+
+        return totalWords;
+    }
+
+    /**
+     * Add totals for Excel File
+     * 
+     * @param p_sheet
+     * @param p_row
+     * @param bundle
+     * @throws Exception
+     */
+    private void addTotals(Workbook p_workbook, Sheet p_sheet, IntHolder p_row)
+    	throws Exception
+    {
+        int row = p_row.getValue() + 1; // skip a row       
+        // For "Add Job Id into online job report" issue
+        String title = m_bundle.getString("lb_totals");
+        char sumStartCellCol = 'H';
+        int c = 7;
+        
+        Row segHeaderRow = getRow(p_sheet, row);
+        Cell cell_A = getCell(segHeaderRow, 0);
+        cell_A.setCellValue(title);
+        p_sheet.addMergedRegion(new CellRangeAddress(row, row, 0, sumStartCellCol - 'B'));
+        setRegionStyle(p_sheet, new CellRangeAddress(row, row, 0, sumStartCellCol - 'B'),
+        		getSubTotalStyle(p_workbook));
+        int lastRow = p_row.getValue() - 1;
+
+        // add in word count totals
+        // word counts
+        Cell cell_H = getCell(segHeaderRow, c++);
+        cell_H.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                + sumStartCellCol + lastRow + ")");
+        cell_H.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCellCol++;
+        // Matches
+        Cell cell_I = getCell(segHeaderRow, c++);
+        cell_I.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                + sumStartCellCol + lastRow + ")");
+        cell_I.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCellCol++;
+        
+        Cell cell_J = getCell(segHeaderRow, c++);
+        cell_J.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                + sumStartCellCol + lastRow + ")");
+        cell_J.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCellCol++;
+        
+        Cell cell_K = getCell(segHeaderRow, c++);
+        cell_K.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                + sumStartCellCol + lastRow + ")");
+        cell_K.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCellCol++;
+        
+        Cell cell_L = getCell(segHeaderRow, c++);
+        cell_L.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                + sumStartCellCol + lastRow + ")");
+        cell_L.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCellCol++;
+        
+        Cell cell_M = getCell(segHeaderRow, c++);
+        cell_M.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                + sumStartCellCol + lastRow + ")");
+        cell_M.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCellCol++;
+        
+        if (useDefaultContext)
+        {
+        	Cell cell_Context = getCell(segHeaderRow, c++);
+        	cell_Context.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                    + sumStartCellCol + lastRow + ")");
+        	cell_Context.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCellCol++;
+        }
+
+        if (useInContext)
+        {
+        	Cell cell_InContext = getCell(segHeaderRow, c++);
+        	cell_InContext.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                    + sumStartCellCol + lastRow + ")");
+        	cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCellCol++;
+        }
+
+        if (data.inludeMtColumn)
+        {
+        	Cell cell_MT = getCell(segHeaderRow, c++);
+        	cell_MT.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                    + sumStartCellCol + lastRow + ")");
+        	cell_MT.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCellCol++;
+        }
+        
+        Cell cell_Total = getCell(segHeaderRow, c++);
+        cell_Total.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                + sumStartCellCol + lastRow + ")");
+        cell_Total.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCellCol++;
+
+        // Add empty black sum line for MT Confidence Score.
+        if (data.inludeMtColumn)
+        {
+        	Cell cell_Score = getCell(segHeaderRow, c++);
+        	cell_Score.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCellCol++;
+        }
+    }
+    
+    /**
+     * Add criteria sheet
+     * 
+     * @param p_workbook
+     * @param p_request
+     * @throws Exception
+     */
+    private void addCriteriaSheet(Workbook p_workbook, HttpServletRequest p_request)
+            throws Exception
+    {
+    	Sheet paramsSheet = p_workbook.createSheet(m_bundle.getString("lb_criteria"));
+    	Row firRow = getRow(paramsSheet, 0);
+    	Cell cell_A_Title = getCell(firRow, 0);
+    	cell_A_Title.setCellValue(m_bundle.getString("lb_report_criteria"));
+    	cell_A_Title.setCellStyle(getContentStyle(p_workbook));
+
+    	paramsSheet.setColumnWidth(0, 50 * 256);
+
+    	Row secRow = getRow(paramsSheet, 1);
+    	Cell cell_A_Header = getCell(secRow, 0);
+        if (data.wantsAllProjects)
+        {
+        	cell_A_Header.setCellValue(m_bundle
+                    .getString("lb_selected_projects")
+                    + " "
+                    + m_bundle.getString("all"));
+        	cell_A_Header.setCellStyle(getContentStyle(p_workbook));
+        }
+        else
+        {
+        	cell_A_Header.setCellValue(m_bundle
+                    .getString("lb_selected_projects"));
+        	cell_A_Header.setCellStyle(getContentStyle(p_workbook));
+            Iterator<Long> iter = data.projectIdList.iterator();
+            int r = 2;
+            while (iter.hasNext())
+            {
+                Long pid = (Long) iter.next();
+                String projectName = "??";
+                try
+                {
+                    Project p = ServerProxy.getProjectHandler().getProjectById(
+                            pid.longValue());
+                    projectName = p.getName();
+                }
+                catch (Exception e)
+                {
+                }
+                Row row = getRow(paramsSheet, r);
+                Cell cell_A = getCell(row, 0);
+                cell_A.setCellValue(projectName);
+                cell_A.setCellStyle(getContentStyle(p_workbook));
+            	
+            	Cell cell_B = getCell(row, 1);
+            	cell_B.setCellValue(m_bundle.getString("lb_id")
+                        + "=" + pid.toString());
+            	cell_B.setCellStyle(getContentStyle(p_workbook));
+                r++;
+            }
+        }
+
+        String from = "";
+        String to = "";
+        String startCount = p_request
+                .getParameter(JobSearchConstants.CREATION_START);
+        String startOpts = p_request
+                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
+        if (startOpts != null && !"-1".equals(startOpts))
+        {
+            from = startCount + " " + translateOpts(startOpts);
+        }
+
+        String endCount = p_request
+                .getParameter(JobSearchConstants.CREATION_END);
+        String endOpts = p_request
+                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
+
+        if (startOpts != null && !"-1".equals(endOpts))
+        {
+            to = endCount + " " + translateOpts(endOpts);
+        }
+
+        Row thirRow = getRow(paramsSheet, 2);
+        Cell cell_C_Header = getCell(secRow, 2);
+        cell_C_Header.setCellValue(m_bundle.getString("lb_from") + ":");
+        cell_C_Header.setCellStyle(getContentStyle(p_workbook));
+    	
+    	Cell cell_C = getCell(thirRow, 2);
+    	cell_C.setCellValue(from);
+    	cell_C.setCellStyle(getContentStyle(p_workbook));
+    	
+    	Cell cell_D_Header = getCell(secRow, 3);
+    	cell_D_Header.setCellValue(m_bundle.getString("lb_until") + ":");
+    	cell_D_Header.setCellStyle(getContentStyle(p_workbook));
+    	
+    	Cell cell_D = getCell(thirRow, 3);
+    	cell_D.setCellValue(to);
+    	cell_D.setCellStyle(getContentStyle(p_workbook));
+
+    	Cell cell_E_Header = getCell(secRow, 4);
+        if (data.wantsAllLocales)
+        {
+        	cell_E_Header.setCellValue(m_bundle
+                    .getString("lb_selected_langs")
+                    + " "
+                    + m_bundle.getString("all"));
+        	cell_E_Header.setCellStyle(getContentStyle(p_workbook));
+        }
+        else
+        {
+        	cell_E_Header.setCellValue(m_bundle.getString("lb_selected_langs"));
+        	cell_E_Header.setCellStyle(getContentStyle(p_workbook));
+            Iterator<GlobalSightLocale> iter = data.trgLocaleList.iterator();
+            int r = 2;
+            while (iter.hasNext())
+            {
+                String locale = iter.next().toString();
+                Row row = getRow(paramsSheet, r);
+                Cell cell_E = getCell(row, 4);
+            	cell_E.setCellValue(locale);
+            	cell_E.setCellStyle(getContentStyle(p_workbook));
+                r++;
+            }
+        }
+
+    }
+    
     @Override
     public String getReportType()
     {
@@ -411,394 +1171,34 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         String exportFormat = p_request.getParameter("exportFormat");
         if (exportFormat != null)
             exportFormat = exportFormat.toLowerCase();
-        data.exportWithXls = "xls".equals(exportFormat);
+        data.exportWithXlsx = "xlsx".equals(exportFormat);
     }
 
-    /**
-     * Add criteria sheet
-     * 
-     * @param p_request
-     * @throws Exception
-     */
-    private void addCriteriaSheet(HttpServletRequest p_request)
-            throws Exception
-    {
-        WritableSheet paramsSheet = m_workbook.createSheet(
-                m_bundle.getString("lb_criteria"), 1);
-        paramsSheet.addCell(new Label(0, 0, m_bundle
-                .getString("lb_report_criteria")));
-        paramsSheet.setColumnView(0, 50);
-
-        if (data.wantsAllProjects)
-        {
-            paramsSheet.addCell(new Label(0, 1, m_bundle
-                    .getString("lb_selected_projects")
-                    + " "
-                    + m_bundle.getString("all")));
-        }
-        else
-        {
-            paramsSheet.addCell(new Label(0, 1, m_bundle
-                    .getString("lb_selected_projects")));
-            Iterator<Long> iter = data.projectIdList.iterator();
-            int r = 2;
-            while (iter.hasNext())
-            {
-                Long pid = (Long) iter.next();
-                String projectName = "??";
-                try
-                {
-                    Project p = ServerProxy.getProjectHandler().getProjectById(
-                            pid.longValue());
-                    projectName = p.getName();
-                }
-                catch (Exception e)
-                {
-                }
-                paramsSheet.addCell(new Label(0, r, projectName));
-                paramsSheet.addCell(new Label(1, r, m_bundle.getString("lb_id")
-                        + "=" + pid.toString()));
-                r++;
-            }
-        }
-
-        String from = "";
-        String to = "";
-        String startCount = p_request
-                .getParameter(JobSearchConstants.CREATION_START);
-        String startOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if (startOpts != null && !"-1".equals(startOpts))
-        {
-            from = startCount + " " + translateOpts(startOpts, m_bundle);
-        }
-
-        String endCount = p_request
-                .getParameter(JobSearchConstants.CREATION_END);
-        String endOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-
-        if (startOpts != null && !"-1".equals(endOpts))
-        {
-            to = endCount + " " + translateOpts(endOpts, m_bundle);
-        }
-
-        paramsSheet
-                .addCell(new Label(2, 1, m_bundle.getString("lb_from") + ":"));
-        paramsSheet.addCell(new Label(2, 2, from));
-        paramsSheet.addCell(new Label(3, 1, m_bundle.getString("lb_until")
-                + ":"));
-        paramsSheet.addCell(new Label(3, 2, to));
-
-        if (data.wantsAllLocales)
-        {
-            paramsSheet.addCell(new Label(4, 1, m_bundle
-                    .getString("lb_selected_langs")
-                    + " "
-                    + m_bundle.getString("all")));
-        }
-        else
-        {
-            paramsSheet.addCell(new Label(4, 1, m_bundle
-                    .getString("lb_selected_langs")));
-            Iterator<GlobalSightLocale> iter = data.trgLocaleList.iterator();
-            int r = 2;
-            while (iter.hasNext())
-            {
-                String locale = iter.next().toString();
-                paramsSheet.addCell(new Label(4, r, locale));
-                r++;
-            }
-        }
-
-    }
-
-    private String translateOpts(String opt, ResourceBundle bundle)
+    private String translateOpts(String opt)
     {
         String optLabel = "";
         if (SearchCriteriaParameters.NOW.equals(opt))
         {
-            optLabel = bundle.getString("lb_now");
+            optLabel = m_bundle.getString("lb_now");
         }
         else if (SearchCriteriaParameters.HOURS_AGO.equals(opt))
         {
-            optLabel = bundle.getString("lb_hours_ago");
+            optLabel = m_bundle.getString("lb_hours_ago");
         }
         else if (SearchCriteriaParameters.DAYS_AGO.equals(opt))
         {
-            optLabel = bundle.getString("lb_days_ago");
+            optLabel = m_bundle.getString("lb_days_ago");
         }
         else if (SearchCriteriaParameters.WEEKS_AGO.equals(opt))
         {
-            optLabel = bundle.getString("lb_weeks_ago");
+            optLabel = m_bundle.getString("lb_weeks_ago");
         }
         else if (SearchCriteriaParameters.MONTHS_AGO.equals(opt))
         {
-            optLabel = bundle.getString("lb_months_ago");
+            optLabel = m_bundle.getString("lb_months_ago");
         }
 
         return optLabel;
-    }
-
-    /**
-     * Returns search params used to find the in progress jobs for all PMs
-     * 
-     * @return JobSearchParams
-     */
-    private JobSearchParameters getSearchParams(HttpServletRequest p_request)
-            throws Exception
-    {
-        JobSearchParameters sp = new JobSearchParameters();
-
-        sp.setJobState(data.jobStateList);
-
-        if (!data.wantsAllProjects)
-        {
-            sp.setProjectId(data.projectIdList);
-        }
-
-        String paramCreateDateStartCount = p_request
-                .getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if (!"-1".equals(paramCreateDateStartOpts))
-        {
-            sp.setCreationStart(new Integer(paramCreateDateStartCount));
-            sp.setCreationStartCondition(paramCreateDateStartOpts);
-        }
-
-        String paramCreateDateEndCount = p_request
-                .getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-        if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new java.util.Date());
-        }
-        else if (!"-1".equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new Integer(paramCreateDateEndCount));
-            sp.setCreationEndCondition(paramCreateDateEndOpts);
-        }
-
-        return sp;
-    }
-
-    /**
-     * Adds the table header to the sheet
-     * 
-     * @param p_sheet
-     */
-    private void addHeaderForXls(WritableSheet p_sheet, ResourceBundle bundle)
-            throws Exception
-    {
-        // title font is black bold on white
-        String EMEA = CompanyWrapper.getCurrentCompanyName();
-        WritableFont titleFont = new WritableFont(WritableFont.ARIAL, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
-
-        p_sheet.addCell(new Label(0, 0, EMEA + " "
-                + bundle.getString("file_list_report"), titleFormat));
-        p_sheet.addCell(new Label(0, 1, bundle.getString("lb_desp_file_list")));
-        p_sheet.setColumnView(0, 20);
-
-        // headerFont is black bold on light grey
-        WritableFont headerFont = new WritableFont(WritableFont.ARIAL, 9,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-        headerFormat.setWrap(true);
-        headerFormat.setBackground(jxl.format.Colour.GRAY_25);
-        headerFormat.setShrinkToFit(false);
-        headerFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THIN);
-
-        WritableCellFormat langFormat = new WritableCellFormat(headerFont);
-        langFormat.setWrap(true);
-        langFormat.setBackground(jxl.format.Colour.GRAY_25);
-        langFormat.setShrinkToFit(false);
-        langFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableCellFormat wordCountFormat = new WritableCellFormat(headerFont);
-        wordCountFormat.setWrap(true);
-        wordCountFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountFormat.setShrinkToFit(false);
-        wordCountFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableCellFormat wordCountValueFormat = new WritableCellFormat(
-                headerFont);
-        wordCountValueFormat.setWrap(true);
-        wordCountValueFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountValueFormat.setShrinkToFit(false);
-        wordCountValueFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountValueFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THIN);
-
-        WritableCellFormat wordCountValueRightFormat = new WritableCellFormat(
-                headerFont);
-        wordCountValueRightFormat.setWrap(true);
-        wordCountValueRightFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountValueRightFormat.setShrinkToFit(false);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        int col = 0;
-
-        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_job_id"),
-                headerFormat));
-        p_sheet.setColumnView(col, 15);
-        p_sheet.mergeCells(col, 2, col, 3);
-        col++;
-        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_job_name"),
-                headerFormat));
-        p_sheet.setColumnView(col, 30);
-        p_sheet.mergeCells(col, 2, col, 3);
-        col++;
-        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_file_path"),
-                headerFormat));
-        p_sheet.setColumnView(col, 55);
-        p_sheet.mergeCells(col, 2, col, 3);
-        col++;
-        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_file_name"),
-                headerFormat));
-        p_sheet.setColumnView(col, 25);
-        p_sheet.mergeCells(col, 2, col, 3);
-        col++;
-        // p_sheet.addCell(new Label(col, 2, bundle.getString("lb_loc_profile"),
-        // headerFormat));
-        // p_sheet.setColumnView(col, 20);
-        // p_sheet.mergeCells(col, 2, col, 3);
-        // col++;
-        // p_sheet.addCell(new Label(col, 2,
-        // bundle.getString("lb_file_profile"),
-        // headerFormat));
-        // p_sheet.setColumnView(col, 20);
-        // p_sheet.mergeCells(col, 2, col, 3);
-        // col++;
-        p_sheet.addCell(new Label(col, 2, bundle.getString("reportDesc"),
-                headerFormat));
-        p_sheet.setColumnView(col, 30);
-        p_sheet.mergeCells(col, 2, col, 3);
-        col++;
-        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_creation_date"),
-                headerFormat));
-        p_sheet.setColumnView(col, 25);
-        p_sheet.mergeCells(col, 2, col, 3);
-        col++;
-        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_lang"),
-                langFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        col++;
-        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_word_counts"),
-                wordCountFormat));
-        wordCountCol = col;
-        int span = 6;
-        if (useDefaultContext && useInContext)
-        {
-            span += 2;
-        }
-        else if (useDefaultContext || useInContext)
-        {
-            span += 1;
-        }
-        if (data.inludeMtColumn)
-        {
-            span += 1;
-        }
-
-        p_sheet.mergeCells(col, 2, col + span, 2);
-
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("jobinfo.tradosmatches.wordcounts.per100matches"),
-                wordCountValueFormat));
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_95_99"),
-                wordCountValueFormat));
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_85_94"),
-                wordCountValueFormat));
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_75_84") + "*",
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_no_match"),
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("lb_repetition_word_cnt"), wordCountValueFormat));
-
-        col++;
-        if (useDefaultContext)
-        {
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_context_tm_report"), wordCountValueFormat));
-        }
-
-        if (useInContext)
-        {
-            if (useDefaultContext)
-                col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_in_context_tm"), wordCountValueFormat));
-        }
-
-        if (data.inludeMtColumn)
-        {
-            col++;
-            p_sheet.addCell(new Label(col, 3, "MT", wordCountValueFormat));
-        }
-
-        if (useDefaultContext || useInContext)
-            col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_total"),
-                wordCountValueRightFormat));
-
-        if (data.inludeMtColumn)
-        {
-            col++;
-            p_sheet.addCell(new Label(col, 2, bundle
-                    .getString("lb_tm_mt_confidence_score"),
-                    wordCountValueFormat));
-            p_sheet.mergeCells(col, 2, col, 3);
-            p_sheet.setColumnView(col, 20);
-        }
     }
 
     /**
@@ -843,66 +1243,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             csvWriter.write(bundle.getString("lb_tm_mt_confidence_score"));
         }
         csvWriter.endRecord();
-    }
-
-    /**
-     * Gets the jobs and outputs workflow information.
-     * 
-     * @exception Exception
-     */
-    private void addJobsForXls(ArrayList<Job> p_jobs,
-            List<GlobalSightLocale> p_targetLocales) throws Exception
-    {
-        WritableSheet sheet = m_workbook.createSheet(
-                m_bundle.getString("jobinfo.tradosmatches"), 0);
-
-        // sort jobs by job name
-        SortUtil.sort(p_jobs, new JobComparator(Locale.US));
-
-        getUseInContextInfos(p_jobs, data.wantsAllLocales, data.trgLocaleList);
-
-        addHeaderForXls(sheet, m_bundle);
-
-        IntHolder row = new IntHolder(4);
-        int finishedJobNum = 0;
-        for (Job j : p_jobs)
-        {
-            // Cancel generate reports.
-            if (isCancelled())
-            {
-                m_workbook = null;
-                printMsg("Cancelled Report Generator. " + j);
-                return;
-            }
-
-            // Sets Reports Percent.
-            setPercent(++finishedJobNum);
-
-            for (Workflow w : j.getWorkflows())
-            {
-                String state = w.getState();
-                // skip certain workflow whose target locale is not selected
-                if (!p_targetLocales.contains(w.getTargetLocale()))
-                {
-                    continue;
-                }
-                // if (data.workflowStateList.contains(state))
-                if (Workflow.DISPATCHED.equals(state)
-                        || Workflow.READY_TO_BE_DISPATCHED.equals(state)
-                        || Workflow.PENDING.equals(state)
-                        || Workflow.EXPORTED.equals(state)
-                        || Workflow.EXPORT_FAILED.equals(state)
-                        || Workflow.ARCHIVED.equals(state)
-                        || Workflow.LOCALIZED.equals(state))
-                {
-                    addWorkflowForXls(sheet, j, w, row);
-                }
-            }
-            printMsg("Finished Job: " + j);
-        }
-
-        row.inc();
-        addTotals(sheet, row, m_bundle);
     }
 
     /**
@@ -958,93 +1298,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         }
     }
 
-    /**
-     * Add totals for Excel File
-     * 
-     * @param p_sheet
-     * @param p_row
-     * @param bundle
-     * @throws Exception
-     */
-    private void addTotals(WritableSheet p_sheet, IntHolder p_row,
-            ResourceBundle bundle) throws Exception
-    {
-        int row = p_row.getValue() + 1; // skip a row
-        WritableFont subTotalFont = new WritableFont(WritableFont.ARIAL, 10,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-
-        WritableCellFormat subTotalFormat = new WritableCellFormat(subTotalFont);
-        subTotalFormat.setWrap(true);
-        subTotalFormat.setShrinkToFit(false);
-        subTotalFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        subTotalFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        String title = bundle.getString("lb_totals");
-        subTotalFormat.setBackground(jxl.format.Colour.GRAY_25);
-
-        // For "Add Job Id into online job report" issue
-        char sumStartCellCol = 'H';
-        int c = 7;
-        p_sheet.addCell(new Label(0, row, title, subTotalFormat));
-        p_sheet.mergeCells(0, row, sumStartCellCol - 'B', row);
-        int lastRow = p_row.getValue() - 1;
-
-        // add in word count totals
-        // word counts
-
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
-                + sumStartCellCol + lastRow + ")", subTotalFormat)); // 100%
-        // Matches
-        sumStartCellCol++;
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
-                + sumStartCellCol + lastRow + ")", subTotalFormat)); // 95-99%
-        sumStartCellCol++;
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
-                + sumStartCellCol + lastRow + ")", subTotalFormat)); // 85-94%
-        sumStartCellCol++;
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
-                + sumStartCellCol + lastRow + ")", subTotalFormat)); // 75-84%*
-        sumStartCellCol++;
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
-                + sumStartCellCol + lastRow + ")", subTotalFormat)); // No Match
-        sumStartCellCol++;
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
-                + sumStartCellCol + lastRow + ")", subTotalFormat)); // Repetitions
-        sumStartCellCol++;
-        if (useDefaultContext)
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol
-                    + "5:" + sumStartCellCol + lastRow + ")", subTotalFormat));
-            sumStartCellCol++;
-        }
-
-        if (useInContext)
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol
-                    + "5:" + sumStartCellCol + lastRow + ")", subTotalFormat));
-            sumStartCellCol++;
-        }
-
-        if (data.inludeMtColumn)
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol
-                    + "5:" + sumStartCellCol + lastRow + ")", subTotalFormat)); // MT
-            sumStartCellCol++;
-        }
-
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
-                + sumStartCellCol + lastRow + ")", subTotalFormat)); // Total
-        sumStartCellCol++;
-
-        // Add empty black sum line for MT Confidence Score.
-        if (data.inludeMtColumn)
-        {
-            p_sheet.addCell(new jxl.write.Blank(c++, row, subTotalFormat));
-            sumStartCellCol++;
-        }
-    }
 
     /**
      * Get use In context info
@@ -1117,61 +1370,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     }
 
     /**
-     * Gets the task for the workflow and outputs page information.
-     * 
-     * @exception Exception
-     */
-    private void addWorkflowForXls(WritableSheet p_sheet, Job p_job,
-            Workflow p_workflow, IntHolder p_row) throws Exception
-    {
-        int threshold = p_job.getLeverageMatchThreshold();
-        int mtConfidenceScore = p_workflow.getMtConfidenceScore();
-        // write word count and file info
-        for (TargetPage tg : p_workflow.getTargetPages())
-        {
-            // write job id, job name, description, creation date, creation
-            // time, language
-            p_sheet.addCell(new Label(0, p_row.value, "" + p_job.getId())); // job
-                                                                            // id
-            p_sheet.addCell(new Label(1, p_row.value, p_job.getJobName())); // job
-                                                                            // name
-
-            // file path 2 & file name 3
-            try
-            {
-                String[] pathName = getFilePathName(tg);
-                p_sheet.addCell(new Label(2, p_row.value, pathName[0]));
-                p_sheet.addCell(new Label(3, p_row.value, pathName[1]));
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            // p_sheet.addCell(new Label(4, p_row.value, p_job.getL10nProfile()
-            // .getName())); // getL10nProfile
-            // p_sheet.addCell(new Label(5, p_row.value,
-            // getFileProfileNameForDisplay(tg)));
-            p_sheet.addCell(new Label(4, p_row.value, getProjectDesc(p_job))); // description
-            p_sheet.addCell(new Label(5, p_row.value, dateFormat.format(p_job
-                    .getCreateDate()))); // creation date
-            p_sheet.addCell(new Label(6, p_row.value, p_workflow
-                    .getTargetLocale().toString())); // language
-
-            try
-            {
-                addWordCountForXls(tg, p_row, p_sheet, threshold,
-                        mtConfidenceScore);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            p_row.inc();
-        }
-    }
-
-    /**
      * Gets the task for the workflow and outputs page information for CSV File.
      * 
      * @exception Exception
@@ -1236,153 +1434,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         filePathName[1] = fileName;
 
         return filePathName;
-    }
-
-    /**
-     * Add word count for Excel File
-     */
-    private int addWordCountForXls(TargetPage tg, IntHolder p_row,
-            WritableSheet p_sheet, int threshold, int mtConfidenceScore)
-            throws Exception
-    {
-        boolean isInContextMatch = PageHandler.isInContextMatch(tg
-                .getSourcePage().getRequest().getJob());
-        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(tg
-                .getSourcePage().getRequest().getJob());
-        boolean isUseDefaultContextMatch = PageHandler
-                .isDefaultContextMatch(tg);
-        PageWordCounts pageWC = tg.getWordCount();
-
-        // 100% match
-        int _100MatchWordCount = 0;
-        // in context word match
-        int inContextWordCount = 0;
-        // Context match
-        int contextMatchWC = pageWC.getContextMatchWordCount();
-        if (isInContextMatch)
-        {
-            inContextWordCount = pageWC.getInContextWordCount();
-            _100MatchWordCount = pageWC.getSegmentTmWordCount();
-            contextMatchWC = 0;
-        }
-        else
-        {
-            if (isUseDefaultContextMatch)
-            {
-                _100MatchWordCount = pageWC.getTotalExactMatchWordCount()
-                        - contextMatchWC;
-            }
-            else
-            {
-                _100MatchWordCount = pageWC.getTotalExactMatchWordCount();
-                contextMatchWC = 0;
-            }
-        }
-
-        int hiFuzzyWordCount = pageWC.getThresholdHiFuzzyWordCount();
-        int medHiFuzzyWordCount = pageWC.getThresholdMedHiFuzzyWordCount();
-        int medFuzzyWordCount = pageWC.getThresholdMedFuzzyWordCount();
-        int lowFuzzyWordCount = pageWC.getThresholdLowFuzzyWordCount();
-        int noMatchWordCount = pageWC.getThresholdNoMatchWordCount();
-        int repetitionsWordCount = pageWC.getRepetitionWordCount();
-        int totalWords = pageWC.getTotalWordCount();
-        // MT
-        int mtTotalWordCount = pageWC.getMtTotalWordCount();
-        int mtExactMatchWordCount = pageWC.getMtExactMatchWordCount();
-        int mtFuzzyNoMatchWordCount = pageWC.getMtFuzzyNoMatchWordCount();
-        int mtRepetitionsWordCount = pageWC.getMtRepetitionsWordCount();
-
-        int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
-        // If include MT column, need adjust word count according to threshold
-        // and MT confidence score.
-        if (data.inludeMtColumn)
-        {
-            if (mtConfidenceScore == 100)
-            {
-                _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
-            }
-            else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
-            {
-                if (mtConfidenceScore >= 95)
-                {
-                    hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
-                {
-                    medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
-                {
-                    medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 75)
-                {
-                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                }
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
-            else if (mtConfidenceScore < threshold)
-            {
-                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
-        }
-
-        // write the information of word count
-        int cursor = wordCountCol;
-        p_sheet.addCell(new Number(cursor, p_row.value, _100MatchWordCount)); // 100%
-        p_sheet.addCell(new Number(++cursor, p_row.value, hiFuzzyWordCount)); // 95-99%
-        p_sheet.addCell(new Number(++cursor, p_row.value, medHiFuzzyWordCount)); // 85-94%
-        p_sheet.addCell(new Number(++cursor, p_row.value, medFuzzyWordCount)); // 75-84%
-        p_sheet.addCell(new Number(++cursor, p_row.value,
-                noMatchWorcCountForDisplay)); // no match + low fuzzy
-        p_sheet.addCell(new Number(++cursor, p_row.value, repetitionsWordCount)); // repetitions
-        cursor++;
-        if (useDefaultContext)
-        {
-            if (isDefaultContextMatch)
-            {
-                p_sheet.addCell(new Number(cursor, p_row.value, contextMatchWC));
-            }
-            else
-            {
-                p_sheet.addCell(new Number(cursor, p_row.value, 0));
-            }
-        }
-        if (useInContext)
-        {
-            if (useDefaultContext)
-                cursor++;
-
-            if (isInContextMatch)
-            {
-                p_sheet.addCell(new Number(cursor, p_row.value,
-                        inContextWordCount));
-            }
-            else
-            {
-                p_sheet.addCell(new Number(cursor, p_row.value, 0));
-            }
-        }
-
-        if (data.inludeMtColumn)
-        {
-            cursor++;
-            p_sheet.addCell(new Number(cursor, p_row.value, mtTotalWordCount));
-        }
-
-        if (useDefaultContext || useInContext)
-            cursor++;
-
-        p_sheet.addCell(new Number(cursor, p_row.value, totalWords));
-
-        if (data.inludeMtColumn)
-        {
-            cursor++;
-            p_sheet.addCell(new Number(cursor, p_row.value, mtConfidenceScore));
-        }
-
-        return totalWords;
     }
 
     private void addWordCountForCsv(TargetPage tg, int threshold,
@@ -1520,7 +1571,106 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             csvWriter.write(String.valueOf(mtConfidenceScore));
         }
     }
+    
+    private void setAllCellStyleNull()
+    {
+        this.contentStyle = null;
+    }
+    
+    private CellStyle getHeaderStyle(Workbook p_workbook){
+    	if(headerStyle == null){
+    		Font headerFont = p_workbook.createFont();
+    		headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    		headerFont.setColor(IndexedColors.BLACK.getIndex());
+    		headerFont.setUnderline(Font.U_NONE);
+    		headerFont.setFontName("Arial");
+    		headerFont.setFontHeightInPoints((short) 9);
+    		
+    		CellStyle cs = p_workbook.createCellStyle();
+    		cs.setFont(headerFont);
+    		cs.setWrapText(true);
+    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+    		cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+    		cs.setBorderTop(CellStyle.BORDER_THIN);
+    		cs.setBorderRight(CellStyle.BORDER_THIN);
+    		cs.setBorderBottom(CellStyle.BORDER_THIN);
+    		cs.setBorderLeft(CellStyle.BORDER_THIN);
+    		
+    		headerStyle = cs;
+    	}
+        
+        return headerStyle;
+    }
+    
+    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
+    {
+        if (contentStyle == null)
+        {
+            CellStyle style = p_workbook.createCellStyle();
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
 
+            contentStyle = style;
+        }
+
+        return contentStyle;
+    }
+    
+    private CellStyle getSubTotalStyle(Workbook p_workbook) throws Exception
+    {
+        if (subTotalStyle == null)
+        {
+        	Font subTotalFont = p_workbook.createFont();
+            subTotalFont.setUnderline(Font.U_NONE);
+            subTotalFont.setFontName("Arial");
+            subTotalFont.setFontHeightInPoints((short) 10);
+            subTotalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(subTotalFont);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+
+            subTotalStyle = cs;
+        }
+
+        return subTotalStyle;
+    }
+    
+    public void setRegionStyle(Sheet sheet, CellRangeAddress cellRangeAddress,
+    		CellStyle cs) {
+    		for (int i = cellRangeAddress.getFirstRow(); i <= cellRangeAddress.getLastRow();
+    			i++) {
+    			Row row = getRow(sheet, i);
+    			for (int j = cellRangeAddress.getFirstColumn(); 
+    				j <= cellRangeAddress.getLastColumn(); j++) {
+    				Cell cell = getCell(row, j);
+    				cell.setCellStyle(cs);
+    			}
+    	  }
+    }
+
+    private Row getRow(Sheet p_sheet, int p_col)
+    {
+        Row row = p_sheet.getRow(p_col);
+        if (row == null)
+            row = p_sheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
+    }
+    
     @Override
     public void setPercent(int p_finishedJobNum)
     {
@@ -1538,35 +1688,5 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     private void printMsg(String p_msg)
     {
         // logger.info(p_msg);
-    }
-
-    private String getFileProfileNameForDisplay(TargetPage targetPage)
-    {
-        FileProfile fp = null;
-
-        try
-        {
-            long fpId = targetPage.getSourcePage().getRequest()
-                    .getFileProfileId();
-            FileProfilePersistenceManager fpManager = ServerProxy
-                    .getFileProfilePersistenceManager();
-            fp = fpManager.readFileProfile(fpId);
-            boolean isRef = fpManager
-                    .isXlzReferenceXlfFileProfile(fp.getName());
-            if (isRef)
-            {
-                String tmp = fp.getName().substring(0,
-                        fp.getName().length() - 4);
-                fp = fpManager.getFileProfileByName(tmp);// active
-                if (fp == null)
-                    fp = fpManager.getFileProfileByName(tmp, false);// inactive
-            }
-        }
-        catch (Exception e)
-        {
-
-        }
-
-        return (fp == null ? "" : fp.getName());
     }
 }

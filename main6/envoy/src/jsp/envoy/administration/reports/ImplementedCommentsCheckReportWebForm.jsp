@@ -93,7 +93,7 @@ function submitForm()
         {
             for (GlobalSightLocale gsl : targetLocales)
             {
-%>              <option VALUE="<%=gsl.getDisplayName(uiLocale)%>"><%=gsl.getDisplayName(uiLocale)%></option><%
+%>              <option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option><%
             }
         }
 %>

@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
@@ -321,7 +320,7 @@ public class CustomizeReportsGenerator
             {
                 isValidTargetLocale = isValidTargetLocale ||
                     ((String)targetLocales.get(i))
-                        .equals(p_workflow.getTargetLocale().toString());
+                        .equals(Long.toString(p_workflow.getTargetLocale().getId()));
                 
             }
         }

@@ -135,11 +135,11 @@ public class WordRepairer extends OfficeRepairer
 
         forHyperlinkInWr(element);
         forHyperlinkInWt(element);
-        forNodesInWt(element);
         forWtNotInWr(element);
         forTextInWr(element);
         forWrInWr(element);
         forTextInWp(element);
+        forNodesInWt(element);
 
         Writer fileWriter = new OutputStreamWriter(new FileOutputStream(f),
                 "UTF-8");
@@ -335,13 +335,13 @@ public class WordRepairer extends OfficeRepairer
 
             if (!wt.isTextOnly())
             {
-                // String text = wt.getStringValue();
-                // for (Element e : es)
-                // {
-                // wt.remove(e);
-                // }
-                //
-                // wt.setText(text);
+                 String text = wt.getStringValue();
+                 for (Element e : es)
+                 {
+                     wt.remove(e);
+                 }
+                
+                 wt.setText(text);
             }
         }
     }
@@ -485,6 +485,12 @@ public class WordRepairer extends OfficeRepairer
             }
 
             Element wr = t.getParent();
+            
+            if (wr == null)
+            {
+            	continue;
+            }
+            
             List<?> els = wr.content();
 
             StringBuffer sb = new StringBuffer();

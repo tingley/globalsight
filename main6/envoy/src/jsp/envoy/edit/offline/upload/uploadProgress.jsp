@@ -1,7 +1,21 @@
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="java.util.*,com.globalsight.everest.webapp.webnavigation.LinkHelper,com.globalsight.util.progress.IProcessStatusListener,com.globalsight.util.progress.ProcessStatus,com.globalsight.everest.edit.offline.OfflineEditManager,com.globalsight.everest.edit.offline.OfflineEditManagerLocal,com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,com.globalsight.everest.edit.offline.OEMProcessStatus,java.util.ResourceBundle,java.text.MessageFormat,com.globalsight.util.edit.EditUtil,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.taskmanager.Task,java.io.IOException"
+    import="java.util.*,
+			    com.globalsight.everest.webapp.webnavigation.LinkHelper,
+			    com.globalsight.util.progress.IProcessStatusListener,
+			    com.globalsight.util.progress.ProcessStatus,
+			    com.globalsight.everest.edit.offline.OfflineEditManager,
+			    com.globalsight.everest.edit.offline.OfflineEditManagerLocal,
+			    com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
+			    com.globalsight.everest.edit.offline.OEMProcessStatus,java.util.ResourceBundle,
+			    java.text.MessageFormat,
+			    com.globalsight.util.edit.EditUtil,
+			    com.globalsight.everest.webapp.pagehandler.PageHandler,
+			    com.globalsight.everest.webapp.WebAppConstants,
+			    com.globalsight.everest.servlet.util.SessionManager,
+			    com.globalsight.everest.taskmanager.Task,
+			    java.io.IOException"
     session="true"
 %>
 <%@ include file="/envoy/common/header.jspIncl" %>
@@ -41,7 +55,6 @@
     boolean fromTaskUpload = WebAppConstants.UPLOAD_FROMTASKUPLOAD
             .equals(sessionMgr
                     .getAttribute(WebAppConstants.UPLOAD_ORIGIN));
-
     Task task = null;
     String url = done.getPageURL();
     StringBuffer urlDone = new StringBuffer();
@@ -64,7 +77,6 @@
         urlDone.append(EQUAL);
         urlDone.append(task.getState());
     }
-
     String urlCancel = cancel.getPageURL() + "&"
             + WebAppConstants.UPLOAD_ACTION + "="
             + WebAppConstants.UPLOAD_ACTION_CANCEL;
@@ -84,12 +96,15 @@
             + WebAppConstants.UPLOAD_ACTION + "="
             + WebAppConstants.UPLOAD_ACTION_CONFIRM_CONTINUE;
     String errorPageUrl = errorPage.getPageURL();
-
+	String translatedTextUrl = refresh.getPageURL() + "&" 
+    		+WebAppConstants.UPLOAD_ACTION + "=" 
+			+WebAppConstants.TASK_ACTION_TRANSLATED_TEXT_RETRIEVE;
     OEMProcessStatus status = (OEMProcessStatus) sessionMgr
             .getAttribute(WebAppConstants.UPLOAD_STATUS);
     int counter = 0;
     int percentage = 0;
     ArrayList messages = null;
+    Set<Long> taskIdsSet = null;
     if (status != null)
     {
         counter = status.getCounter();
@@ -116,7 +131,9 @@
                  position: absolute; top: 42; left: 20; width: 0; height: 15;}
 #idProgress    { text-align: center; z-index: 2; font-weight: bold; }
 #idMessagesHeader { top: 72; left: 20; font-weight: bold;}
+#translationStatus { left: 20; font-weight: bold;}
 #idMessages    { overflow: auto; z-index: 0; top: 102; left: 20;}
+#translateds { overflow: auto; z-index: 0; left: 20;}
 #idLinks       { left: 20; top: 414; z-index: 1; }
 #idCancel      { position: absolute; left: 20; top: 414; z-index: 1; }
 #passMsg  { color: green;  }
@@ -399,6 +416,59 @@ function doOnLoad()
   callServer("<%=urlProgress%>");
 }
 
+
+function translatedText(taskIds){
+	if(taskIds != null){
+		var translationStatus = document.getElementById("translationStatus");
+		if(taskIds != null && taskIds != ""){
+			translationStatus.style.display = "block";
+			for (var i = 0; i < taskIds.length; i++){
+				var urlJSON = "<%= translatedTextUrl%>";
+				urlJSON += "&taskParam="+taskIds[i];
+				callBack(urlJSON);
+		  	}
+		}
+	}
+}	
+
+function callBack(urlJSON){
+	$.getJSON(urlJSON,function(data){
+		 if(data != null){
+			 var jobId = data.jobId;
+			 var jobName = data.jobName;
+			 var filePercents = data.taskId;
+			 var outDiv = document.createElement("DIV");
+			 var outContent = "<SPAN class=standardText style='font-weight:600;'>JobId :"+jobId+"</SPAN><br/>";
+			 outContent += "<SPAN class=standardText style='font-weight:600;'>JobName :"+jobName+"</SPAN><br/>";
+			 outDiv.innerHTML = outContent;
+			 translateds.appendChild(outDiv);
+			 outDiv.scrollIntoView(false); 
+			var filePercentsArr = filePercents.substring(0, filePercents.length-2);
+			var filePercentArr = filePercentsArr.split("||");
+			for(var i = 0; i < filePercentArr.length;i++){
+			    var insideDiv = document.createElement("DIV");
+			    var namePerc = filePercentArr[i];
+			    var namePercArr = namePerc.split("<>");
+				var content = "";
+				if(namePercArr[1] <100){
+				     content += "<SPAN class=standardText style='color:red'>"+namePercArr[0]+"</SPAN>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp";
+					 content += "<SPAN class=standardText style='color:red'>("+namePercArr[1]+"%)</SPAN><br/>";
+				}else{
+					 content += "<SPAN class=standardText style='color:black'>"+namePercArr[0]+"</SPAN>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp";
+					 content += "<SPAN class=standardText style='color:black'>("+namePercArr[1]+"%)</SPAN><br/>";
+				}
+				 insideDiv.innerHTML = content;
+				translateds.appendChild(insideDiv);
+				insideDiv.scrollIntoView(false); 
+			 }
+		 }
+		 var div = document.createElement("DIV");
+		 var content="<br/>";
+		 div.innerHTML = content;
+		translateds.appendChild(div);
+		div.scrollIntoView(false); 
+	});
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0"
@@ -419,12 +489,27 @@ function doOnLoad()
 	<table cellspacing=0 cellpadding=0 border=0 class=standardText>
 	<tr>
 		<td>
-			<DIV id="idMessagesHeader" class="header"><%=lb_messages%></DIV>
+			<DIV id="warningDiv" style = "display:none;color:red">Offline uploading is in progress, please do not close this page or browser...</DIV>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<DIV id="idMessagesHeader" class="header"><br/><%=lb_messages%></DIV>
 		</td>
 	</tr>
 	<tr>
 		<td>
 			<DIV id="idMessages"></DIV>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<DIV id="translationStatus" class = "header" style = "display:none">Translation Status</DIV>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<DIV id="translateds"></DIV>
 		</td>
 	</tr>
 	<tr>
@@ -492,6 +577,8 @@ function callServer(url)
 
 function updatePage() 
 {
+	 var warningDiv = document.getElementById("warningDiv");
+	 warningDiv.style.display = "block";
 	if (xmlHttp.readyState == 4) 
   	{
    		if (xmlHttp.status == 200) 
@@ -512,6 +599,7 @@ function updatePage()
             	if(percentage >= 100)
             	{
             		var msg = result.msg;
+            		var taskIds = result.taskIdsSet;
             		if (msg != null){
             			for (var i = 0; i < msg.length; i++)
                        	{
@@ -526,7 +614,11 @@ function updatePage()
 						message = result.errMsg;
 						upldState = 3;
 					}
+					else{
+               			translatedText(taskIds);
+					}
                		done(upldState, message);
+               		warningDiv.style.display = "none";
             	}
             	else
             	{

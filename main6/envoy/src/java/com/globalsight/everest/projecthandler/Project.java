@@ -255,4 +255,17 @@ public interface Project
     public boolean getAutoAcceptPMTask();
 
     public void setAutoAcceptPMTask(boolean autoAcceptPMTask);
+
+    public boolean getSaveTranslationsEditReport();
+
+    public void setSaveTranslationsEditReport(boolean saveTranslationsEditReport);
+
+    public boolean getSaveReviewersCommentsReport();
+
+    public void setSaveReviewersCommentsReport(
+            boolean saveReviewersCommentsReport);
+
+    public boolean getSaveOfflineFiles();
+
+    public void setSaveOfflineFiles(boolean saveOfflineFiles);
 }

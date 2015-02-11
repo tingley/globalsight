@@ -61,7 +61,10 @@ public class ServerUtil
                 if (f2.exists())
                 {
                     Hotfix h = XmlUtil.load(Hotfix.class, f2.getAbsolutePath());
-                    if (h.getVersion().equals(getVersion()) && h.getInstalled())
+                    String version = getVersion();
+                    version = version.trim();
+                    version = version.split(" ")[0];
+                    if (h.getVersion().equals(version) && h.getInstalled())
                     {
                         hs.add(h);
                     }

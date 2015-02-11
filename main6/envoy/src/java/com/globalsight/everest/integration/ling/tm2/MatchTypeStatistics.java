@@ -101,8 +101,8 @@ public class MatchTypeStatistics
                 lingManagerMatchType, p_matchState, isMtTranslation);
 
         // Set SID
-        String sid = TmUtil.getSidForTuv(match.getTmId(),
-                match.getMatchedTuvId());
+        String sid = match.getSid();
+        // TmUtil.getSidForTuv(match.getTmId(), match.getMatchedTuvId());
         types.setSid(sid);
 
         m_matchTypes.put(key, types);

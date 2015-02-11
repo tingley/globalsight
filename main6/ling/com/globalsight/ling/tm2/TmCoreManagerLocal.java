@@ -754,9 +754,11 @@ public class TmCoreManagerLocal implements TmCoreManager
      */
     @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter) throws RemoteException, LingManagerException
+            String createdAfter, Connection conn) throws RemoteException,
+            LingManagerException
     {
-        return getInfo(tm).getAllSegments(tm, createdBefore, createdAfter);
+        return getInfo(tm)
+                .getAllSegments(tm, createdBefore, createdAfter, conn);
     }
 
     /**
@@ -766,11 +768,11 @@ public class TmCoreManagerLocal implements TmCoreManager
      */
     @Override
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException
+            String createdBefore, String createdAfter, Connection conn)
+            throws RemoteException, LingManagerException
     {
         return getInfo(tm).getSegmentsByLocale(tm, locale, createdBefore,
-                createdAfter);
+                createdAfter, conn);
     }
 
     /**
@@ -780,11 +782,11 @@ public class TmCoreManagerLocal implements TmCoreManager
      */
     @Override
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException
+            String createdBefore, String createdAfter, Connection conn)
+            throws RemoteException, LingManagerException
     {
         return getInfo(tm).getSegmentsByProjectName(tm, projectName,
-                createdBefore, createdAfter);
+                createdBefore, createdAfter, conn);
     }
 
     @Override

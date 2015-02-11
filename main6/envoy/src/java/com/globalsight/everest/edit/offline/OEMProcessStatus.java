@@ -19,9 +19,11 @@ package com.globalsight.everest.edit.offline;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.upload.CheckResult;
@@ -50,7 +52,17 @@ public class OEMProcessStatus
     private Boolean isContinue = null;
     private CheckResult checkResult = null;
     private CheckResult checkResultCopy = null;
+    private Set<Long> taskIds = new HashSet<Long>();
     
+    public void addTaskId(Long taskId)
+    {
+    	taskIds.add(taskId);
+    }
+    
+    public Set<Long> getTaskIds()
+    {
+    	return taskIds;
+    }
 
     /** Creates a new instance of OEMProcessStatus. */
     public OEMProcessStatus()
@@ -290,14 +302,14 @@ public class OEMProcessStatus
 
             if (isOmegaT)
             {
-                // mt files and tmx penalty files
+                // mt files, tmx penalty files, 
                 if (p_params.isConsolidateTmxFiles())
                 {
-                    count += (1 * 2);
+                    count += (1 * 3);
                 }
                 else
                 {
-                    count += (extractFileNumber * 2);
+                    count += (extractFileNumber * 3);
                 }
             }
         }

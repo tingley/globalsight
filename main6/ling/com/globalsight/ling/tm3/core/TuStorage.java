@@ -37,6 +37,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
+import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -47,6 +48,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 abstract class TuStorage<T extends TM3Data>
 {
     private static Logger logger = Logger.getLogger(TuStorage.class);
+
+    private Tm3SegmentTmInfo tm3SegmentTmInfo = new Tm3SegmentTmInfo();
 
     private StorageInfo<T> storage;
 
@@ -295,26 +298,28 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    public List<TM3Tu<T>> getTu(Connection conn, List<Long> ids, boolean locking)
-            throws SQLException
+    public List<TM3Tu<T>> getTu(Connection conn, List<Long> tuIds,
+            boolean locking) throws SQLException
     {
-        if (ids.size() == 0)
+        if (tuIds.size() == 0)
         {
             return Collections.emptyList();
         }
-        List<TuData<T>> tuDatas = getTuData(conn, ids, locking);
+        List<TuData<T>> tuDatas = getTuData(conn, tuIds, locking);
 
         // Now fetch TUVs
-        loadTuvs(conn, ids, tuDatas, locking);
+        loadTuvs(conn, tuIds, tuDatas, locking);
 
         // I could proxy attrs, but it could produce n+1 query problems.
         // For now, just load them immediately until we know it's a problem.
-        loadAttrs(conn, ids, tuDatas, locking);
+        loadAttrs(conn, tuIds, tuDatas, locking);
 
         List<TM3Tu<T>> tus = new ArrayList<TM3Tu<T>>();
         for (TuData<T> data : tuDatas)
         {
-            TM3Tu<T> tu = new TM3Tu<T>(storage.getTm(), this, data.srcTuv,
+            @SuppressWarnings("unchecked")
+            BaseTm<T> currTm = (BaseTm<T>) tm3SegmentTmInfo.getTM3Tm(data.tmId);
+            TM3Tu<T> tu = new TM3Tu<T>(currTm, this, data.srcTuv,
                     data.tgtTuvs, data.attrs);
             tu.setId(data.id);
             tus.add(tu);
@@ -378,7 +383,7 @@ abstract class TuStorage<T extends TM3Data>
             boolean locking) throws SQLException
     {
         StatementBuilder sb = new StatementBuilder("SELECT ")
-                .append("id, srcLocaleId");
+                .append("tmId, id, srcLocaleId");
         for (TM3Attribute attr : getStorage().getInlineAttributes())
         {
             sb.append(", ").append(attr.getColumnName());
@@ -396,9 +401,10 @@ abstract class TuStorage<T extends TM3Data>
             while (rs.next())
             {
                 TuData<T> tu = new TuData<T>();
-                tu.id = rs.getLong(1);
-                tu.srcLocaleId = rs.getLong(2);
-                int pos = 3;
+                tu.tmId = rs.getLong(1);
+                tu.id = rs.getLong(2);
+                tu.srcLocaleId = rs.getLong(3);
+                int pos = 4;
                 for (TM3Attribute attr : getStorage().getInlineAttributes())
                 {
                     Object val = rs.getObject(pos++);
@@ -419,7 +425,7 @@ abstract class TuStorage<T extends TM3Data>
     }
 
     private void loadTuvs(Connection conn, List<Long> tuIds,
-            List<TuData<T>> data, boolean locking) throws SQLException
+            List<TuData<T>> tuDatas, boolean locking) throws SQLException
     {
         StatementBuilder sb = new StatementBuilder("SELECT ")
                 .append("tuId, id, localeId, fingerprint, content, firstEventId, lastEventId")
@@ -444,7 +450,7 @@ abstract class TuStorage<T extends TM3Data>
             }
             ps.close();
 
-            Iterator<TuData<T>> tus = data.iterator();
+            Iterator<TuData<T>> tus = tuDatas.iterator();
             TuData<T> current = null;
             for (TuvData<T> rawTuv : rawTuvs)
             {
@@ -456,7 +462,7 @@ abstract class TuStorage<T extends TM3Data>
                 }
                 // "tuId, id, localeId, fingerprint, content";
                 TM3Tuv<T> tuv = createTuv(rawTuv);
-                tuv.setStorage(this);
+                tuv.setStorage(getTuStorage(current.tmId));
                 if (tuv.getLocale().getId() == current.srcLocaleId)
                 {
                     current.srcTuv = tuv;
@@ -515,7 +521,7 @@ abstract class TuStorage<T extends TM3Data>
 
     protected TM3Attribute getAttributeById(long id)
     {
-        return (TM3Attribute) HibernateUtil.get(TM3Attribute.class, id);
+        return (TM3Attribute) HibernateUtil.get(TM3Attribute.class, id, false);
     }
 
     protected TM3Tuv<T> createTuv(TuvData<T> rawData)
@@ -532,14 +538,14 @@ abstract class TuStorage<T extends TM3Data>
         if (rawData.firstEventId > 0)
         { // Check for null value
             firstEvent = (TM3Event) HibernateUtil.get(TM3Event.class,
-                    rawData.firstEventId);
+                    rawData.firstEventId, false);
         }
         tuv.setFirstEvent(firstEvent);
         TM3Event latestEvent = null;
         if (rawData.lastEventId > 0)
         { // Check for null value
             latestEvent = (TM3Event) HibernateUtil.get(TM3Event.class,
-                    rawData.lastEventId);
+                    rawData.lastEventId, false);
         }
         tuv.setLatestEvent(latestEvent);
         return tuv;
@@ -565,6 +571,7 @@ abstract class TuStorage<T extends TM3Data>
 
     static class TuData<T extends TM3Data>
     {
+        long tmId;
         long id;
         long srcLocaleId;
         TM3Tuv<T> srcTuv;
@@ -609,7 +616,6 @@ abstract class TuStorage<T extends TM3Data>
                 tm3TmIds);
     }
 
-    @SuppressWarnings("unchecked")
     public List<TM3Tuv<T>> getExactMatches(Connection conn, T key,
             TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
             Map<TM3Attribute, Object> inlineAttributes,
@@ -619,7 +625,7 @@ abstract class TuStorage<T extends TM3Data>
         // avoid an awkward case in getExactMatchStatement
         if (targetLocales != null && targetLocales.isEmpty())
         {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         StatementBuilder sb = getExactMatchStatement(key, sourceLocale,
                 targetLocales, inlineAttributes, lookupTarget, tm3TmIds);
@@ -837,5 +843,13 @@ abstract class TuStorage<T extends TM3Data>
         {
             throw new SQLException(e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private TuStorage<T> getTuStorage(Long tm3TmId)
+    {
+        BaseTm<T> currentBaseTm = (BaseTm<T>) tm3SegmentTmInfo
+                .getTM3Tm(tm3TmId);
+        return currentBaseTm.getStorageInfo().getTuStorage();
     }
 }

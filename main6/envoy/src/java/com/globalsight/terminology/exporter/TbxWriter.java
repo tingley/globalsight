@@ -36,13 +36,12 @@ import com.globalsight.exporter.IWriter;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.SessionInfo;
 
-public class TbxWriter implements IWriter, TermbaseExceptionMessages {
-	
-	private static final Logger CATEGORY =
-        Logger.getLogger(
-        		TbxWriter.class);
+public class TbxWriter implements IWriter, TermbaseExceptionMessages
+{
+    private static final Logger CATEGORY = Logger.getLogger(TbxWriter.class);
 
     //
     // Private Member Variables
@@ -106,9 +105,10 @@ public class TbxWriter implements IWriter, TermbaseExceptionMessages {
 
         new File(filename).delete();
 
-        m_output = new PrintWriter(new BufferedWriter(
-            new OutputStreamWriter(new FileOutputStream(filename), encoding)));
-        
+        FileOutputStream fos = new FileOutputStream(filename);
+        FileUtil.writeBom(fos, ianaEncoding);
+        m_output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(
+                fos, encoding)));
         m_output.print("<?xml version=\"1.0\" encoding=\"");
         m_output.print(ianaEncoding);
         m_output.println("\" ?>");

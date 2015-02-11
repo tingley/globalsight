@@ -26,338 +26,288 @@ import java.util.Map;
  * @author Leon
  * 
  */
-public class CompanyConfiguration
-{
-    private String company = "";
-    private String baseDir = "";
-    private String inbox = "";
-    
+public class CompanyConfiguration {
+	private String company = "";
+	private String baseDir = "";
+	private String inbox = "";
 
-    private String inbox4XLZ = "";
-    private String jobCreatingBox4XLZ = "";
-   
+	private String inbox4XLZ = "";
+	private String jobCreatingBox4XLZ = "";
 
-    private String outbox = "";
-    private String jobCreatingBox = "";
-    private String jobCreateSuccessfulBox = "";
-    private String failedBox = "";
-    private String tempBox = "";
+	private String outbox = "";
+	private String jobCreatingBox = "";
+	private String jobCreateSuccessfulBox = "";
+	private String failedBox = "";
+	private String tempBox = "";
 
-    private String preProcessClass = "";
-    private String postProcessClass = "";
+	private String preProcessClass = "";
+	private String postProcessClass = "";
 
-    private String host = "";
-    private String port = "";
-    private String https = "off";
-    private String username = "";
-    private String password = "";
+	private String host = "";
+	private String port = "";
+	private String https = "off";
+	private String username = "";
+	private String password = "";
 
-    // Time to check InBox folder to create job
-    private long fileCheckToCreateJobTime;
-    // Time to check job status(Exported) to download
-    private long downloadCheckTime;
+	// Time to check InBox folder to create job
+	private long fileCheckToCreateJobTime;
+	// Time to check job status(Exported) to download
+	private long downloadCheckTime;
 
-    private String sourceLocale = "";
-    private String targetLocale = "";
+	private String sourceLocale = "";
+	private String targetLocale = "";
 
-    private FTPConfiguration ftpConfig = null;
+	private FTPConfiguration ftpConfig = null;
 
-    private SMBConfiguration smbConfig = null;
+	private SMBConfiguration smbConfig = null;
 
-    // File Profile
-    private Map<String, String> extension2fp = new HashMap<String, String>();
+	// File Profile
+	private Map<String, String> extension2fp = new HashMap<String, String>();
 
-    // Time to check job status(successful)
-    private final long jobSuccessfulCheckTime = 30000;
+	// Time to check job status(successful)
+	private final long jobSuccessfulCheckTime = 30000;
 
-    public CompanyConfiguration(String company, String baseDir, String inbox,String inbox4XLZ,String jobCreatingBox4XLZ,
-            String outbox, String jobCreatingBox,
-            String jobCreateSuccessfulBox, String failedBox, String tempBox,
-            String preProcessClass, String postProcessClass, String host,
-            String port, String https, String username, String password,
-            long fileCheckToCreateJobTime, long downloadCheckTime,
-            String sourceLocale, String targetLocale,
-            Map<String, String> extension2fp, FTPConfiguration ftpConfig,
-            SMBConfiguration smbConfig)
-    {
-        this.company = company;
-        this.baseDir = baseDir;
-        this.inbox = inbox;
-        this.inbox4XLZ = inbox4XLZ;
-        this.jobCreatingBox4XLZ=jobCreatingBox4XLZ;
-        this.outbox = outbox;
-        this.jobCreatingBox = jobCreatingBox;
-        this.jobCreateSuccessfulBox = jobCreateSuccessfulBox;
-        this.failedBox = failedBox;
-        this.tempBox = tempBox;
-        this.preProcessClass = preProcessClass;
-        this.postProcessClass = postProcessClass;
-        this.host = host;
-        this.port = port;
-        this.https = https;
-        this.username = username;
-        this.password = password;
-        this.fileCheckToCreateJobTime = fileCheckToCreateJobTime;
-        this.downloadCheckTime = downloadCheckTime;
-        this.extension2fp = extension2fp;
-        this.sourceLocale = sourceLocale;
-        this.targetLocale = targetLocale;
-        this.ftpConfig = ftpConfig;
-        this.smbConfig = smbConfig;
-    }
-    public String getJobCreatingBox4XLZ()
-    {
-        return jobCreatingBox4XLZ;
-    }
-    public void setJobCreatingBox4XLZ(String jobCreatingBox4XLZ)
-    {
-        this.jobCreatingBox4XLZ = jobCreatingBox4XLZ;
-    }
-    public String getInbox4XLZ()
-    {
-        return inbox4XLZ;
-    }
+	public CompanyConfiguration(String company, String baseDir, String inbox, String inbox4XLZ,
+			String jobCreatingBox4XLZ, String outbox, String jobCreatingBox, String jobCreateSuccessfulBox,
+			String failedBox, String tempBox, String preProcessClass, String postProcessClass, String host,
+			String port, String https, String username, String password, long fileCheckToCreateJobTime,
+			long downloadCheckTime, String sourceLocale, String targetLocale, Map<String, String> extension2fp,
+			FTPConfiguration ftpConfig, SMBConfiguration smbConfig) {
+		this.company = company;
+		this.baseDir = baseDir;
+		this.inbox = inbox;
+		this.inbox4XLZ = inbox4XLZ;
+		this.jobCreatingBox4XLZ = jobCreatingBox4XLZ;
+		this.outbox = outbox;
+		this.jobCreatingBox = jobCreatingBox;
+		this.jobCreateSuccessfulBox = jobCreateSuccessfulBox;
+		this.failedBox = failedBox;
+		this.tempBox = tempBox;
+		this.preProcessClass = preProcessClass;
+		this.postProcessClass = postProcessClass;
+		this.host = host;
+		this.port = port;
+		this.https = https;
+		this.username = username;
+		this.password = password;
+		this.fileCheckToCreateJobTime = fileCheckToCreateJobTime;
+		this.downloadCheckTime = downloadCheckTime;
+		this.extension2fp = extension2fp;
+		this.sourceLocale = sourceLocale;
+		this.targetLocale = targetLocale;
+		this.ftpConfig = ftpConfig;
+		this.smbConfig = smbConfig;
+	}
 
-    public void setInbox4XLZ(String inbox4xlz)
-    {
-        inbox4XLZ = inbox4xlz;
-    }
-    public String getCompany()
-    {
-        return company;
-    }
+	public CompanyConfiguration() {
+	}
 
-    public void setCompany(String company)
-    {
-        this.company = company;
-    }
+	public String getJobCreatingBox4XLZ() {
+		return jobCreatingBox4XLZ;
+	}
 
-    public String getBaseDir()
-    {
-        return baseDir;
-    }
+	public void setJobCreatingBox4XLZ(String jobCreatingBox4XLZ) {
+		this.jobCreatingBox4XLZ = jobCreatingBox4XLZ;
+	}
 
-    public void setBaseDir(String baseDir)
-    {
-        this.baseDir = baseDir;
-    }
+	public String getInbox4XLZ() {
+		return inbox4XLZ;
+	}
 
-    public String getInbox()
-    {
-        return inbox;
-    }
+	public void setInbox4XLZ(String inbox4xlz) {
+		inbox4XLZ = inbox4xlz;
+	}
 
-    public void setInbox(String inbox)
-    {
-        this.inbox = inbox;
-    }
+	public String getCompany() {
+		return company;
+	}
 
-    public String getOutbox()
-    {
-        return outbox;
-    }
+	public void setCompany(String company) {
+		this.company = company;
+	}
 
-    public void setOutbox(String outbox)
-    {
-        this.outbox = outbox;
-    }
+	public String getBaseDir() {
+		return baseDir;
+	}
 
-    public String getJobCreatingBox()
-    {
-        return jobCreatingBox;
-    }
+	public void setBaseDir(String baseDir) {
+		this.baseDir = baseDir;
+	}
 
-    public void setJobCreatingBox(String jobCreatingBox)
-    {
-        this.jobCreatingBox = jobCreatingBox;
-    }
+	public String getInbox() {
+		return inbox;
+	}
 
-    public String getJobCreateSuccessfulBox()
-    {
-        return jobCreateSuccessfulBox;
-    }
+	public void setInbox(String inbox) {
+		this.inbox = inbox;
+	}
 
-    public void setJobCreateSuccessfulBox(String jobCreateSuccessfulBox)
-    {
-        this.jobCreateSuccessfulBox = jobCreateSuccessfulBox;
-    }
+	public String getOutbox() {
+		return outbox;
+	}
 
-    public String getFailedBox()
-    {
-        return failedBox;
-    }
+	public void setOutbox(String outbox) {
+		this.outbox = outbox;
+	}
 
-    public void setFailedBox(String failedBox)
-    {
-        this.failedBox = failedBox;
-    }
+	public String getJobCreatingBox() {
+		return jobCreatingBox;
+	}
 
-    public String getTempBox()
-    {
-        return tempBox;
-    }
+	public void setJobCreatingBox(String jobCreatingBox) {
+		this.jobCreatingBox = jobCreatingBox;
+	}
 
-    public void setTempBox(String tempBox)
-    {
-        this.tempBox = tempBox;
-    }
+	public String getJobCreateSuccessfulBox() {
+		return jobCreateSuccessfulBox;
+	}
 
-    public String getPreProcessClass()
-    {
-        return preProcessClass;
-    }
+	public void setJobCreateSuccessfulBox(String jobCreateSuccessfulBox) {
+		this.jobCreateSuccessfulBox = jobCreateSuccessfulBox;
+	}
 
-    public void setPreProcessClass(String preProcessClass)
-    {
-        this.preProcessClass = preProcessClass;
-    }
-    
-    // Get the ProcessCase value.
-    public String getProcessCase()
-    {
-        if(preProcessClass != null && preProcessClass.indexOf(".") > 0)
-        {
-            int start = preProcessClass.lastIndexOf(".") + 1;
-            int end = preProcessClass.indexOf("PreProcess");
-            if(end > start)
-                return preProcessClass.substring(start, end);
-        }
-        
-        return "Can't Find ProcessCase";
-    }
+	public String getFailedBox() {
+		return failedBox;
+	}
 
-    public String getPostProcessClass()
-    {
-        return postProcessClass;
-    }
+	public void setFailedBox(String failedBox) {
+		this.failedBox = failedBox;
+	}
 
-    public void setPostProcessClass(String postProcessClass)
-    {
-        this.postProcessClass = postProcessClass;
-    }
+	public String getTempBox() {
+		return tempBox;
+	}
 
-    public String getHost()
-    {
-        return host;
-    }
+	public void setTempBox(String tempBox) {
+		this.tempBox = tempBox;
+	}
 
-    public void setHost(String host)
-    {
-        this.host = host;
-    }
+	public String getPreProcessClass() {
+		return preProcessClass;
+	}
 
-    public String getPort()
-    {
-        return port;
-    }
+	public void setPreProcessClass(String preProcessClass) {
+		this.preProcessClass = preProcessClass;
+	}
 
-    public void setPort(String port)
-    {
-        this.port = port;
-    }
+	// Get the ProcessCase value.
+	public String getProcessCase() {
+		if ((preProcessClass != null) && (preProcessClass.indexOf(".") > 0)) {
+			int start = preProcessClass.lastIndexOf(".") + 1;
+			int end = preProcessClass.indexOf("PreProcess");
+			if (end > start) {
+				return preProcessClass.substring(start, end);
+			}
+		}
 
-    public String getHttps()
-    {
-        return https;
-    }
+		return "Can't Find ProcessCase";
+	}
 
-    public void setHttps(String https)
-    {
-        this.https = https;
-    }
+	public String getPostProcessClass() {
+		return postProcessClass;
+	}
 
-    public String getUsername()
-    {
-        return username;
-    }
+	public void setPostProcessClass(String postProcessClass) {
+		this.postProcessClass = postProcessClass;
+	}
 
-    public void setUsername(String username)
-    {
-        this.username = username;
-    }
+	public String getHost() {
+		return host;
+	}
 
-    public String getPassword()
-    {
-        return password;
-    }
+	public void setHost(String host) {
+		this.host = host;
+	}
 
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
+	public String getPort() {
+		return port;
+	}
 
-    public long getFileCheckToCreateJobTime()
-    {
-        return fileCheckToCreateJobTime;
-    }
+	public void setPort(String port) {
+		this.port = port;
+	}
 
-    public void setFileCheckToCreateJobTime(long fileCheckToCreateJobTime)
-    {
-        this.fileCheckToCreateJobTime = fileCheckToCreateJobTime;
-    }
+	public String getHttps() {
+		return https;
+	}
 
-    public long getDownloadCheckTime()
-    {
-        return downloadCheckTime;
-    }
+	public void setHttps(String https) {
+		this.https = https;
+	}
 
-    public void setDownloadCheckTime(long downloadCheckTime)
-    {
-        this.downloadCheckTime = downloadCheckTime;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public long getJobSuccessfulCheckTime()
-    {
-        return jobSuccessfulCheckTime;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public String getSourceLocale()
-    {
-        return sourceLocale;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public void setSourceLocale(String sourceLocale)
-    {
-        this.sourceLocale = sourceLocale;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public String getTargetLocale()
-    {
-        return targetLocale;
-    }
+	public long getFileCheckToCreateJobTime() {
+		return fileCheckToCreateJobTime;
+	}
 
-    public void setTargetLocale(String targetLocale)
-    {
-        this.targetLocale = targetLocale;
-    }
+	public void setFileCheckToCreateJobTime(long fileCheckToCreateJobTime) {
+		this.fileCheckToCreateJobTime = fileCheckToCreateJobTime;
+	}
 
-    public Map<String, String> getExtension2fp()
-    {
-        return extension2fp;
-    }
+	public long getDownloadCheckTime() {
+		return downloadCheckTime;
+	}
 
-    public void setExtension2fp(Map<String, String> extension2fp)
-    {
-        this.extension2fp = extension2fp;
-    }
+	public void setDownloadCheckTime(long downloadCheckTime) {
+		this.downloadCheckTime = downloadCheckTime;
+	}
 
-    public FTPConfiguration getFtpConfig()
-    {
-        return ftpConfig;
-    }
+	public long getJobSuccessfulCheckTime() {
+		return jobSuccessfulCheckTime;
+	}
 
-    public void setFtpConfig(FTPConfiguration ftpConfig)
-    {
-        this.ftpConfig = ftpConfig;
-    }
+	public String getSourceLocale() {
+		return sourceLocale;
+	}
 
-    public SMBConfiguration getSmbConfig()
-    {
-        return smbConfig;
-    }
+	public void setSourceLocale(String sourceLocale) {
+		this.sourceLocale = sourceLocale;
+	}
 
-    public void setSmbConfig(SMBConfiguration smbConfig)
-    {
-        this.smbConfig = smbConfig;
-    }
+	public String getTargetLocale() {
+		return targetLocale;
+	}
+
+	public void setTargetLocale(String targetLocale) {
+		this.targetLocale = targetLocale;
+	}
+
+	public Map<String, String> getExtension2fp() {
+		return extension2fp;
+	}
+
+	public void setExtension2fp(Map<String, String> extension2fp) {
+		this.extension2fp = extension2fp;
+	}
+
+	public FTPConfiguration getFtpConfig() {
+		return ftpConfig;
+	}
+
+	public void setFtpConfig(FTPConfiguration ftpConfig) {
+		this.ftpConfig = ftpConfig;
+	}
+
+	public SMBConfiguration getSmbConfig() {
+		return smbConfig;
+	}
+
+	public void setSmbConfig(SMBConfiguration smbConfig) {
+		this.smbConfig = smbConfig;
+	}
 }

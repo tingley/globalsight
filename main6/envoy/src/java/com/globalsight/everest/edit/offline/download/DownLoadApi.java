@@ -408,7 +408,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         m_zipper.writePath(parentPath + OmegaTConst.omegat_foldername);
         m_zipper.writePath(parentPath + OmegaTConst.dictionary_foldername);
         m_zipper.writePath(parentPath + OmegaTConst.target_foldername);
-        m_zipper.writePath(parentPath + "tmx/");
+        m_zipper.writePath(parentPath + "tm/");
         m_zipper.writePath(parentPath + "terminology/");
 
         String srcLocale = toOmegaTLocale(m_downloadParams.getSourceLocale());
@@ -1116,7 +1116,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             }
             else
             {
-                addTmxFile(consolidate(datas), m_downloadParams);
+                addTmxFile(consolidate(datas, true), m_downloadParams);
             }
 
             // Adds terminology files.
@@ -1126,7 +1126,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 {
                     if (!datas.isEmpty())
                     {
-                        addTermFile(consolidate(datas), m_downloadParams);
+                        addTermFile(consolidate(datas, false), m_downloadParams);
                     }
                 }
                 else
@@ -1197,12 +1197,14 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         return result;
     }
 
-    private OfflinePageData consolidate(List<OfflinePageData> datas)
+    private OfflinePageData consolidate(List<OfflinePageData> datas, boolean forTMX)
     {
         OfflinePageData consolidatedData = new OfflinePageData();
         consolidatedData.setPageName(m_downloadParams.getFullJobName());
         HashSet<OfflineSegmentData> allDatas = new HashSet<OfflineSegmentData>();
         boolean inited = false;
+        
+        Vector<OfflineSegmentData> segmentsUnmerged = new Vector<OfflineSegmentData>();
 
         for (OfflinePageData data : datas)
         {
@@ -1216,6 +1218,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             }
 
             allDatas.addAll(data.getSegmentList());
+            
+            if (forTMX)
+            {
+                segmentsUnmerged.addAll(data.getSegmentList());
+            }
         }
 
         Vector<OfflineSegmentData> segments = new Vector<OfflineSegmentData>();
@@ -1233,6 +1240,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         });
 
         consolidatedData.setSegmentList(segments);
+        
+        if(forTMX)
+        {
+            consolidatedData.setSegmentListUnmerged(segmentsUnmerged);
+        }
 
         return consolidatedData;
     }
@@ -1363,6 +1375,15 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
     /** ***** Begin zipper methods ******/
 
+    /**
+     * OmegaT : auto for TM ice match, non_ice_match.tmx for TM non ice, penalty-xx for TM+MT
+     * Others : 
+     * @param p_page
+     * @param p_downloadParams
+     * @throws IOException
+     * @throws JobException
+     * @throws GeneralException
+     */
     private void addTmxFile(OfflinePageData p_page,
             DownloadParams p_downloadParams) throws IOException, JobException,
             GeneralException
@@ -1416,7 +1437,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
             if (seperateMT)
             {
-                mode = TmxUtil.TMX_MODE_TM_ONLY;
+                mode = TmxUtil.TMX_MODE_NON_ICE;
             }
 
             if (full14bPath != null)
@@ -1433,102 +1454,112 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         TmxUtil.TMX_LEVEL_ONE, convertLF, mode);
             }
 
-            if (seperateMT)
+            if (seperateMT && full14bPath != null)
             {
+                // add ice files
+                mode = TmxUtil.TMX_MODE_ICE_ONLY;
+                String icePath = DownloadHelper
+                        .makeTmxAutoParentPath(m_downloadParams);
+                icePath = icePath + fname;
+                sb = new StringBuffer();
+                sb.append(m_resource.getString("msg_dnld_adding_file"));
+                sb.append("/auto/");
+                sb.append(fname);
+                m_pageCounter++;
+                m_status.speak(m_pageCounter, sb.toString());
+
+                m_zipper.writePath(icePath);
+                m_zipper.writeTmxPage(p_page, p_downloadParams,
+                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+
+                // add mt files
                 mode = TmxUtil.TMX_MODE_MT_ONLY;
+                String mtPath = DownloadHelper
+                        .makeMt14bParentPath(m_downloadParams);
+                mtPath = mtPath + fname;
+                sb = new StringBuffer();
+                sb.append(m_resource.getString("msg_dnld_adding_file"));
+                sb.append("/mt/");
+                sb.append(fname);
+                m_pageCounter++;
+                m_status.speak(m_pageCounter, sb.toString());
 
-                if (full14bPath != null)
+                m_zipper.writePath(mtPath);
+                m_zipper.writeTmxPage(p_page, p_downloadParams,
+                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+
+                // GBS-3163 : change this to /tm/mt
+                String tmxPenalty = DownloadHelper
+                        .makeTmxParentPath(m_downloadParams);
+                Job j = m_downloadParams.getRightJob();
+                int mtConfidenceScore = 100;
+                boolean useMT = true;
+                try
                 {
-                    // add mt files
-                    String mtPath = DownloadHelper
-                            .makeMt14bParentPath(m_downloadParams);
-                    mtPath = mtPath + fname;
-
-                    // add status
-                    sb = new StringBuffer();
-                    sb.append(m_resource.getString("msg_dnld_adding_file"));
-                    sb.append("/mt/");
-                    sb.append(fname);
-                    m_pageCounter++;
-                    m_status.speak(m_pageCounter, sb.toString());
-
-                    m_zipper.writePath(mtPath);
-                    m_zipper.writeTmxPage(p_page, p_downloadParams,
-                            TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
-                    
-                    // add /tmx/penalty-39/ files
-                    String tmxPenalty = DownloadHelper
-                            .makeTmxParentPath(m_downloadParams);
-                    Job j = m_downloadParams.getRightJob();
-                    int mtConfidenceScore = 100;
-                    boolean useMT = true;
-                    try
-                    {
-                        if (j != null)
-                        {
-                            j = ServerProxy.getJobHandler().getJobById(
-                                    j.getId());
-                        }
-                        else
-                        {
-                            j = ServerProxy.getJobHandler().getJobByJobName(
-                                    m_downloadParams.getFullJobName());
-                        }
-                    }
-                    catch (NamingException e)
-                    {
-                        j = null;
-                    }
-                    
                     if (j != null)
                     {
-                        Collection<Workflow> wfs = j.getWorkflows();
-                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs
-                                .iterator() : null;
-
-                        while (wfsIt.hasNext())
-                        {
-                            Workflow wf = wfsIt.next();
-                            if (wf.getTargetLocale().getId() == m_downloadParams
-                                    .getTargetLocale().getId())
-                            {
-                                mtConfidenceScore = wf.getMtConfidenceScore();
-                                useMT = wf.getUseMT();
-                                break;
-                            }
-                        }
-                    }
-                    String penaltyDir = "penalty-" + (100 - mtConfidenceScore)
-                            + "/";
-                    tmxPenalty = tmxPenalty + penaltyDir + fname;
-
-                    sb = new StringBuffer();
-                    if (useMT)
-                    {
-                        sb.append(m_resource.getString("msg_dnld_adding_file"));
-                        sb.append("/tmx/");
-                        sb.append(penaltyDir);
-                        sb.append(fname);
+                        j = ServerProxy.getJobHandler().getJobById(j.getId());
                     }
                     else
                     {
-                        sb.append("/tmx/");
-                        sb.append(penaltyDir);
-                        sb.append(fname);
-                        sb.append(" ");
-                        sb.append(m_resource.getString("msg_job_create_empty_file"));
-                    }
-                    m_pageCounter++;
-                    m_status.speak(m_pageCounter, sb.toString());
-
-                    if (useMT)
-                    {
-                        m_zipper.writePath(tmxPenalty);
-                        m_zipper.writeTmxPage(p_page, p_downloadParams,
-                                TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                        j = ServerProxy.getJobHandler().getJobByJobName(
+                                m_downloadParams.getFullJobName());
                     }
                 }
+                catch (NamingException e)
+                {
+                    j = null;
+                }
+
+                if (j != null)
+                {
+                    Collection<Workflow> wfs = j.getWorkflows();
+                    Iterator<Workflow> wfsIt = (wfs != null) ? wfs.iterator()
+                            : null;
+
+                    while (wfsIt.hasNext())
+                    {
+                        Workflow wf = wfsIt.next();
+                        if (wf.getTargetLocale().getId() == m_downloadParams
+                                .getTargetLocale().getId())
+                        {
+                            mtConfidenceScore = wf.getMtConfidenceScore();
+                            useMT = wf.getUseMT();
+                            break;
+                        }
+                    }
+                }
+                // GBS-3163 : change this to /tm/mt
+                String penaltyDir = "mt/";
+                tmxPenalty = tmxPenalty + penaltyDir + fname;
+
+                sb = new StringBuffer();
+                if (useMT)
+                {
+                    sb.append(m_resource.getString("msg_dnld_adding_file"));
+                    sb.append("/tm/");
+                    sb.append(penaltyDir);
+                    sb.append(fname);
+                }
+                else
+                {
+                    sb.append("/tm/");
+                    sb.append(penaltyDir);
+                    sb.append(fname);
+                    sb.append(" ");
+                    sb.append(m_resource.getString("msg_job_create_empty_file"));
+                }
+                m_pageCounter++;
+                m_status.speak(m_pageCounter, sb.toString());
+
+                if (useMT)
+                {
+                    m_zipper.writePath(tmxPenalty);
+                    m_zipper.writeTmxPage(p_page, p_downloadParams,
+                            TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                }
             }
+
         }
     }
 

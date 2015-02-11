@@ -21,6 +21,12 @@
 	String urlCancel = cancel.getPageURL();
 
 	String lb_title = bundle.getString("lb_reindex_tm");
+    String allTmsLabel = "lb_all_tms_accessible";
+    if (isSuperAdmin) {
+        allTmsLabel = "lb_all_tms";
+    } else if(isAdmin) {
+        allTmsLabel = "lb_all_tms_company";
+    }
 %>
 <HTML XMLNS:gs>
 <HEAD>
@@ -60,21 +66,15 @@ function doNext()
 
 function initSelection()
 {
-<%
-  if ("".equals(tmName))
-  {
-%>
-  oForm.oTm[1].checked = true;
-  oForm.oTm[0].disabled = true;
-<%
-  }
-  else
-  {
-%>
-  oForm.oTm[0].checked = true;
-<%
-  }
-%>
+    oTmAll = document.getElementById("idAllTms");
+    oTmSelected = document.getElementById("idSelectedTm");
+<%  if ("".equals(tmName)) { %>
+        oTmAll.checked = true;
+        oTmSelected.disabled = true;
+<%  } else { %>
+        oTmSelected.checked = true;
+<%  } %>
+
 }
 
 
@@ -93,45 +93,46 @@ function doOnLoad()
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
-<DIV ID="contentLayer"
- STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
-<DIV CLASS="mainHeading" ID="idHeading"><%=lb_title%></DIV>
-<BR>
+<DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
+    <DIV CLASS="mainHeading" ID="idHeading"><%=lb_title%></DIV>
+    <BR>
 
 <FORM NAME="oForm" ACTION="" METHOD="post">
 
 <div style="margin-bottom:10px">
-<%=bundle.getString("lb_select_tm_to_reindex")%>:<BR>
-<div style="margin-left: 40px">
-<input type="radio" name="oTm" id="idSelectedTm" value="idSelectedTm">
-  <label for="idSelectedTm"><%=bundle.getString("lb_selected_tm") + " " + ("".equals(tmName)?"null":tmName)%></label>
-</input>
-<br>
-<input type="radio" name="oTm" id="idAllTms" value="idAllTms"> <label
-	for="idAllTms"> 
-	<%
- 	String label = "lb_all_tms_accessible";
- 	if (isSuperAdmin) {
- 		label = "lb_all_tms";
- 	}
- 	else if(isAdmin)
- 	{
- 	    label = "lb_all_tms_company";
- 	}
- 	%> 
- 	<%=bundle.getString(label)%> </label> 
-</input>
-</div>
+    <%=bundle.getString("lb_select_tm_to_reindex")%>:
+    <BR>
+    <div style="margin-left: 40px">
+        <TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="">
+            <tr>
+                <td>
+                    <input type="radio" name="oTm" id="idAllTms" value="idAllTms"/>        
+                </td>
+                <td colspan="2">
+                    <label for="idAllTms"><%=bundle.getString(allTmsLabel)%> </label>
+                </td>
+            </tr>
+            <tr>
+                <td valign="top"><input type="radio" name="oTm" id="idSelectedTm" value="idSelectedTm"/></td>
+                <td valign="top"><label for="idSelectedTm">Selected TM(s):</label></td>
+                <td><%="".equals(tmName)?"null":tmName%></td>
+            </tr>
+            <tr>
+                <td><input type="checkbox" name="indexTarget" id="idIndexTarget"></td>
+                <td colspan="2">Index Target</td>
+            </tr>
+        </TABLE>
+    </div>
 </div>
 
 <BR>
 
-<DIV id="idButtons" align="left">
-<button TABINDEX="0" onclick="doCancel();"><%=bundle.getString("lb_cancel")%></button>&nbsp;
-<button TABINDEX="0" onclick="doNext();"><%=bundle.getString("lb_next")%></button>
-</DIV>
+    <DIV id="idButtons" align="left">
+        <button TABINDEX="0" onclick="doCancel();"><%=bundle.getString("lb_cancel")%></button>&nbsp;
+        <button TABINDEX="0" onclick="doNext();"><%=bundle.getString("lb_next")%></button>
+    </DIV>
 
 </FORM>
-
+</DIV>
 </BODY>
 </HTML>

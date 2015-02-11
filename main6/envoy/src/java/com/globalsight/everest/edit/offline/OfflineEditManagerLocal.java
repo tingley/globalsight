@@ -64,6 +64,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.TuImpl;
@@ -90,6 +91,8 @@ import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
@@ -295,8 +298,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     m_status.speak(0, m_resource
                             .getString("msg_dnld_create_omegat_package"));
 
-                    downloadApi.makeOmegaTPackage(p_params,
-                            m_status);
+                    downloadApi.makeOmegaTPackage(p_params, m_status);
                 }
                 else
                 {
@@ -505,14 +507,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             XmlDtdManager.validateTargetPage(page,
                     XmlDtdManager.OFF_LINE_IMPORT);
         }
-        
-        try
-        {
-            p_tmpFile.deleteOnExit();
-        }
-        catch (Exception e)
-        {
-        }
     }
 
     /**
@@ -529,7 +523,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             Task p_task, String p_fileName)
     {
         OfflineFileUploadStatus status = OfflineFileUploadStatus.getInstance();
-        
+
         setUILocaleResources(GlobalSightLocale.makeLocaleFromString(p_user
                 .getDefaultUILocale()));
 
@@ -543,12 +537,11 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            s_category.error(e.getMessage(), e);
         }
         long taskId = p_task == null ? -1 : p_task.getId();
         long oriTaskId = taskId;
-        
+
         p_task = TaskHelper.getTask(taskId);
 
         // if user have the permission, he could upload any files within
@@ -687,6 +680,12 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                         errorString = api.doUnextractedFileUpload(p_tmpFile,
                                 p_user, taskId, p_fileName);
                         m_status.setResults(errorString);
+                        String unextractedFileTaskId = api
+                                .getUnextractedFileTaskId();
+                        if (unextractedFileTaskId != null)
+                        {
+                            taskId = Long.parseLong(unextractedFileTaskId);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -707,27 +706,26 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 detect.m_reader.close();
             }
 
-            OfflineEditHelper.deleteFile(p_tmpFile);
-
             OfflinePageData data = api.getUploadPageData();
             if (data != null)
             {
                 taskId = Long.valueOf(data.getTaskId());
+                m_status.addTaskId(taskId);
                 String pageId = data.getPageId();
-                if (!data.isConsolated() && pageId != null 
+                if (!data.isConsolated() && pageId != null
                         && pageId.contains(","))
                 {
                     data.setConsolated(true);
                 }
-                
-                if (data.isConsolated() 
+
+                if (data.isConsolated()
                         && (pageId == null || pageId.length() == 0))
                 {
                     data.setConsolated(false);
                 }
-                
+
                 status.addFileState(taskId, p_fileName, "Handled");
-                
+
                 if (data.isConsolated())
                 {
                     // multiple file to one xliff
@@ -743,11 +741,13 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                                 data.getTargetLocaleName());
                     }
                 }
-            } else {
+            }
+            else
+            {
                 status.addFileState(p_task.getId(), p_fileName,
                         "Failed. Error:Cannot generate offline page data successfully.");
             }
-            
+
             return null;
         }
         catch (Exception ex)
@@ -757,6 +757,22 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             s_category.error("processUploadSingleFile error", ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR, ex);
+        }
+        finally
+        {
+            try
+            {
+                if (taskId != -1)
+                {
+                    Task task = TaskHelper.getTask(taskId);
+                    saveUploadedFile(p_tmpFile, task, p_fileName, null);
+                }
+                OfflineEditHelper.deleteFile(p_tmpFile);
+            }
+            catch (Exception e)
+            {
+                s_category.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -869,7 +885,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             m_status.speak(0, "Format: " + extension);
             m_status.speak(0,
                     m_resource.getString("msg_upld_errchk_in_progress"));
-
+            m_status.addTaskId(p_task.getId());
+            
             if (p_reportName.equals(WebAppConstants.TRANSLATION_EDIT)
                     || WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
             {
@@ -882,8 +899,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             errorString = api.processReport(p_tmpFile, p_user, p_task,
                     p_fileName, JmsHelper.JMS_UPLOAD_QUEUE, p_reportName);
 
-            OfflineEditHelper.deleteFile(p_tmpFile);
-
             m_status.setResults(errorString);
             m_status.setCounter(1);
             m_status.setPercentage(100);
@@ -893,6 +908,72 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR, ex);
         }
+        finally
+        {
+            try
+            {
+                saveUploadedFile(p_tmpFile, p_task, p_fileName, p_reportName);
+                OfflineEditHelper.deleteFile(p_tmpFile);
+            }
+            catch (Exception e)
+            {
+                s_category.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Saves uploaded file into file storage.
+     * <p>
+     * For GBS-3115.
+     */
+    private void saveUploadedFile(File p_tmpFile, Task p_task,
+            String p_fileName, String p_reportName) throws Exception
+    {
+        // refresh the task to avoid the
+        // "could not initialize proxy - no Session" error
+        Task task = TaskHelper.getTask(p_task.getId());
+        Project project = ServerProxy.getProjectHandler()
+                .getProjectByNameAndCompanyId(task.getProjectName(),
+                        task.getCompanyId());
+        File uploadDir = AmbFileStoragePathUtils.getUploadDir();
+        StringBuilder uploadedFilePath = new StringBuilder(uploadDir.getPath());
+        uploadedFilePath.append(File.separator);
+        uploadedFilePath.append(task.getJobId());
+        uploadedFilePath.append(File.separator);
+        uploadedFilePath.append(task.getTargetLocale().toString());
+        uploadedFilePath.append(File.separator);
+        if (p_reportName != null)
+        {
+            if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName))
+            {
+                if (!project.getSaveTranslationsEditReport())
+                {
+                    return;
+                }
+                uploadedFilePath.append("Translations Edit Report");
+            }
+            else if (WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
+            {
+                if (!project.getSaveReviewersCommentsReport())
+                {
+                    return;
+                }
+                uploadedFilePath.append("Reviewers Comments Report");
+            }
+        }
+        else
+        {
+            if (!project.getSaveOfflineFiles())
+            {
+                return;
+            }
+            uploadedFilePath.append("Offline Files");
+        }
+        uploadedFilePath.append(File.separator);
+        uploadedFilePath.append(p_fileName);
+
+        FileUtil.copyFile(p_tmpFile, new File(uploadedFilePath.toString()));
     }
 
     /****** END: PROCESS UPLOAD REPORT PAGE ******/

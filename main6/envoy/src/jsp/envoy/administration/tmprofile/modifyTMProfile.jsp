@@ -406,7 +406,14 @@
    {
 	   autoRepairChecked = "CHECKED";
    }
-   
+
+   String isUniqueFromMultTrans = new Boolean(tmProfile.isUniqueFromMultipleTranslation()).toString();
+   String uniqueFromMultTransChecked = "";
+   if ("true".equalsIgnoreCase(isUniqueFromMultTrans))
+   {
+       uniqueFromMultTransChecked = "CHECKED";
+   }
+
    String multipleExactMatches = tmProfile.getMultipleExactMatches();
    String isLatestChecked = "";
    String isOldestChecked = "";
@@ -561,11 +568,9 @@ function checkIsVaildPercent(percent){
 }
 
 function setDefaultPercent(percentObject){
-    if(percentObject.isRefTm.checked==true){
-	    if(percentObject.refTmPenalty.value==null||percentObject.refTmPenalty.value.length<=0){
-            percentObject.refTmPenalty.value="0";
-		}	    
-	}
+    if(percentObject.refTmPenalty.value==null||percentObject.refTmPenalty.value.length<=0){
+           percentObject.refTmPenalty.value="0";
+	}	    
 }
 
 function initRefTms(){
@@ -713,48 +718,50 @@ function submitForm(formAction, confirmUpdate)
 	         if (result.error == 0)
 	           {
 	              basicTMProfileForm.<%=WebAppConstants.TM_TM_NAME%>.disabled = false;
-	         // Prepare the leveragedLocales param
-	          var options_string = "";
-	          var options_string1 = "";
-	          var the_select = basicTMProfileForm.leveragePTM;
-	          for (loop=0; loop < the_select.options.length; loop++)
-	          {
-	              if (the_select.options[loop].selected == true)
-	              {
-	                   options_string += the_select.options[loop].value + ",";
-	                   options_string1 += loop + ",";
-	              }
-	          }
-	          basicTMProfileForm.leveragedProjects.value = options_string;
-	          document.all.penaltyTypeSensitive.disabled=false;
-	          document.all.penaltyCaseSensitive.disabled=false;
-	          document.all.penaltyWhiteSpaceSensitive.disabled=false;
-	          document.all.penaltyCodeSensitive.disabled=false;
-	          document.all.penaltyTypeSensitiveReimp.disabled=false;
-	          document.all.penaltyMultipleMatches.disabled=false;
-	          basicTMProfileForm.action += "&indexes=" + options_string1;
-			  
-			  var options_string2 = "";
-	              var options_string3 = "";
-	              var the_select2 = basicTMProfileForm.selectleveragedRefProjects;
-	              for (var loop2=0; loop2 < the_select2.options.length; loop2++)
-	              {
-	                  if (the_select2.options[loop2].selected == true)
-	                  {
-	                      options_string2 += the_select2.options[loop2].value + ",";
-	                      options_string3 += loop + ",";				  
-	                  }
-	              }
-				   
-		          basicTMProfileForm.leveragedRefProjects.value = options_string2;
-			  
-			      setDefaultPercent(basicTMProfileForm);
-			  	  
-			  	  if(!checkRefTms(options_string,the_select2)){			     
-					 alert("<%=bundle.getString("msg_tm_reference_tm_above") %>");
-		             return false;
+		         // Prepare the leveragedLocales param
+		          var options_string = "";
+		          var options_string1 = "";
+		          var the_select = basicTMProfileForm.leveragePTM;
+		          for (loop=0; loop < the_select.options.length; loop++)
+		          {
+		              if (the_select.options[loop].selected == true)
+		              {
+		                   options_string += the_select.options[loop].value + ",";
+		                   options_string1 += loop + ",";
+		              }
 		          }
-		
+		          basicTMProfileForm.leveragedProjects.value = options_string;
+		          document.all.penaltyTypeSensitive.disabled=false;
+		          document.all.penaltyCaseSensitive.disabled=false;
+		          document.all.penaltyWhiteSpaceSensitive.disabled=false;
+		          document.all.penaltyCodeSensitive.disabled=false;
+		          document.all.penaltyTypeSensitiveReimp.disabled=false;
+		          document.all.penaltyMultipleMatches.disabled=false;
+		          basicTMProfileForm.action += "&indexes=" + options_string1;
+				  
+				  var options_string2 = "";
+	              var options_string3 = "";
+	              if(basicTMProfileForm.isRefTm.checked==true){
+	            	  var the_select2 = basicTMProfileForm.selectleveragedRefProjects;
+		              for (var loop2=0; loop2 < the_select2.options.length; loop2++)
+		              {
+		                  if (the_select2.options[loop2].selected == true)
+		                  {
+		                      options_string2 += the_select2.options[loop2].value + ",";
+		                      options_string3 += loop + ",";				  
+		                  }
+		              }
+					   
+			          basicTMProfileForm.leveragedRefProjects.value = options_string2;
+				  
+				      setDefaultPercent(basicTMProfileForm);
+				  	  
+				  	  if(!checkRefTms(options_string,the_select2)){			     
+						 alert("<%=bundle.getString("msg_tm_reference_tm_above") %>");
+			             return false;
+			          }
+	              }
+	              
 			  	  // attributes
 			  	  setTMPAttributes();
 			  
@@ -1625,6 +1632,10 @@ function doOnLoad()
                            </TD>
                         </TR>
                         <TR>
+                           <TD ALIGN="LEFT" STYLE="vertical-align: middle">Get Unique from Multiple Exact Matches:</TD>
+                           <TD><INPUT TYPE="checkbox" NAME="uniqueFromMultTrans" VALUE="true" <%=uniqueFromMultTransChecked%>/></TD>
+                        </TR>
+                        <TR>
                            <TD ALIGN="LEFT"  valign="top">
                               <%=lbmultExactMatches%>:
                            </TD>
@@ -1764,7 +1775,7 @@ function doOnLoad()
         </div>
 			<div id="div_button_arrangeTm" style="float:left;margin-left:100px;margin-top:20px;margin-bottom:20px">
 			<center><input type='submit' value='<%=bundle.getString("lb_yes") %>' onclick="submitForm('save','confirmChange')"/>
-			<input id='exit' style='margin-left:5px; width:32px' type='submit' value='<%=bundle.getString("lb_no") %>' onclick="closeConfirmChangePopupDialog();submitForm('cancel')"/>
+			<input id='exit' style='margin-left:5px; width:32px' type='submit' value='<%=bundle.getString("lb_no") %>' onclick="closeConfirmChangePopupDialog()"/>
 			</center>
 			</div>
 		</div>

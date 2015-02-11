@@ -1,0 +1,483 @@
+<%@ page contentType="text/html; charset=UTF-8"
+         errorPage="/envoy/common/activityError.jsp"
+         import="java.util.*, 
+         	     com.globalsight.everest.jobhandler.Job,
+                 com.globalsight.everest.projecthandler.Project,
+                 com.globalsight.everest.foundation.SearchCriteriaParameters,
+                 com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants, 
+                 com.globalsight.everest.webapp.WebAppConstants,
+                 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
+                 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
+                 com.globalsight.everest.webapp.pagehandler.PageHandler,
+                 com.globalsight.util.edit.EditUtil,
+                 com.globalsight.util.GlobalSightLocale,
+                 java.util.Locale,
+                 java.util.ResourceBundle"
+          session="true"
+%>
+<%
+    Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+    if (uiLocale == null)
+    {
+    	uiLocale = Locale.ENGLISH;
+    }
+    ResourceBundle bundle = PageHandler.getBundle(session);
+    
+   	List<ReportJobInfo> jobList = (ArrayList<ReportJobInfo>)
+   	     request.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
+   	List<Project> projectList = (ArrayList<Project>)
+   	     request.getAttribute(ReportConstants.PROJECT_LIST);
+    List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
+         request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
+
+    String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS";
+    String formAction = basicAction + "&action=" + ReportConstants.GENERATE_REPORTS;
+    
+    String creationStart = JobSearchConstants.CREATION_START;
+    String creationStartOptions = JobSearchConstants.CREATION_START_OPTIONS;
+    String creationEnd = JobSearchConstants.CREATION_END;
+    String creationEndOptions = JobSearchConstants.CREATION_END_OPTIONS;
+    
+%>
+<html>
+<!-- This JSP is: /envoy/administration/reports/LisaQACommentsAnalysisReportWebForm.jsp-->
+<head>
+<title><%=bundle.getString("comments_analysis_report_web_form")%></title>
+<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript">
+// Set the ReportJobInfo datas to the JS(jobInfos) 
+var jobInfos = new Array();
+<%
+for(int i=0; i<jobList.size(); i++)  
+{
+    ReportJobInfo j = jobList.get(i);
+%>
+	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=EditUtil.encodeTohtml(j.getJobName())%>", 
+		<%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
+<%
+}
+%>
+// Finished Set the ReportJobInfo datas to the JS.
+
+function setDisableTRWrapper(trid)
+{
+	if(trid == "idTRJobIds")
+	{
+		setDisableTR("idTRJobIds", true);
+		setDisableTR("idTRJobNames", false);
+		setDisableTR("idTRProject", false);
+		setDisableTR("idTRJobStatus", false);
+		filterJob();
+	}
+	else if(trid == "idTRJobNames")
+	{
+		setDisableTR("idTRJobIds", false);
+		setDisableTR("idTRJobNames", true);
+		setDisableTR("idTRProject", true);
+		setDisableTR("idTRJobStatus", true);
+	}	
+}
+
+function checkNow(field, text)
+{
+    if (field.options[1].selected)
+        text.value = "";
+}
+
+function isInteger(value)
+{
+    if (value == "") return true;
+    return (parseInt(value) == value);
+}
+
+
+
+function validateForm(){
+	if ((-1 != lisaQAForm.<%=creationStartOptions%>.value) &&
+	        (lisaQAForm.<%=creationStart%>.value == ""))
+	        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	    if ((-1 != lisaQAForm.<%=creationEndOptions%>.value) &&
+	        ("<%=SearchCriteriaParameters.NOW%>" != lisaQAForm.<%=creationEndOptions%>.value) &&
+	        (lisaQAForm.<%=creationEnd%>.value == ""))
+	        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	    if (!isInteger(lisaQAForm.<%=creationStart%>.value))
+	        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	    if (!isInteger(lisaQAForm.<%=creationEnd%>.value))
+	        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	    return "";
+}
+
+function defautSelect(){
+	var jobIdsval;
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		jobIdsval=$("#jobIds").val();
+	}else{
+		jobIdsval=$("#jobNameList").val();
+	}
+	if(jobIdsval)return;
+	 $("#idTRJobNamesRadio").trigger("click");
+     var ops=$("#jobNameList").children();
+     if(ops.length==0){
+      return ('No job name(s) is(are) selected.');
+     }else{
+      ops.attr("selected", true);
+     }
+}
+
+function dataSelectAll(){
+	var startVal=lisaQAForm.<%=creationStart%>.value;
+	  if (startVal&&isInteger(startVal)){
+		  if(-1== lisaQAForm.<%=creationStartOptions%>.value){
+			  return ('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+		  }else{
+			  defautSelect();
+			  return ""; 
+		  }
+	  }
+	  var endVal=lisaQAForm.<%=creationEnd%>.value;
+	  if (endVal&&isInteger(endVal)){
+          if(-1== lisaQAForm.<%=creationEndOptions%>.value){
+              return ('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+          }else{
+        	  defautSelect();
+              return ""; 
+          }
+      }
+	  return "";
+}
+
+function doSubmit()
+{
+	var msg = validateForm();
+   if (msg != "")
+   {
+    alert(msg);
+    return;
+   }
+   
+   var msg =  dataSelectAll();
+   if (msg != "")
+   {
+    alert(msg);
+    return;
+   }
+   
+	var jobIDArr = new Array();
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		var jobIDText = document.getElementById("jobIds").value;
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
+			alert('<%=bundle.getString("lb_invalid_jobid")%>');
+			return;
+		}
+		jobIDArr = jobIDText.split(",");
+		if(!validateIDS(jobIDArr, jobInfos))
+        {
+			alert('<%=bundle.getString("lb_invalid_jobid")%>');
+			return;
+        }
+	}
+	else
+	{
+		var selObj = document.getElementById("jobNameList");
+		for (i=0; i<selObj.options.length; i++) 
+		{
+			if (selObj.options[i].selected) 
+			{
+				jobIDArr.push(selObj.options[i].value);
+			}
+		}
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+	    {
+			alert('<%=bundle.getString("msg_invalid_jobName")%>');
+			return;
+	    }
+	}
+	jobIDArr.sort(sortNumber);
+
+	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+	{
+		alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
+		return;
+	}
+	var dataoptions;
+	if((-1 == lisaQAForm.<%=creationStartOptions%>.value) &&(-1 == lisaQAForm.<%=creationEndOptions%>.value))
+	{
+		$("#dateRange").val("N")
+		dataoptions={'inputJobIDS': jobIDArr.toString(),
+				   'targetLocalesList': getSelValueArr("targetLocalesList").toString(),
+				   'reportType': $("input[name='reportType']").val()}
+	}else{
+		$("#dateRange").val("Y")
+		dataoptions={'inputJobIDS': jobIDArr.toString(),
+			   'targetLocalesList': getSelValueArr("targetLocalesList").toString(),
+			   'reportType': $("input[name='reportType']").val(),
+			   'dateRange':'Y',
+			   'csf':$("#csf").val(),
+			   'cso':$("#cso").val(),
+			   'cef':$("#cef").val(),
+			   'ceo':$("#ceo").val()}
+	}
+
+	document.getElementById("inputJobIDS").value = jobIDArr.toString();
+	//check if selected jobs are using same source locale.
+    //If not, not allow to continue to generate report. 
+	var differentSource = false;
+	if(document.getElementsByName("combineAllJobs")[0].checked)
+	{
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_CHECK_SOURCE_LOCALE%>',
+			data: dataoptions,
+			success: function(data) {
+						if(data.differentSource)
+						{
+							alert(data.info);
+							differentSource = true;
+						}
+	    			 },
+			dataType: 'json'
+		});
+	}
+	if(differentSource)
+	{
+		return;
+	}
+	
+	// Submit the Form, if possible(No report is generating.)
+	$.ajax({
+		type: 'POST',
+		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+		data: dataoptions,
+		success: function(data) {
+					if(data == null || data.status != "inProgress")
+					{
+						$("form[name='lisaQAForm']").submit();
+					}else{
+						if(data.info){
+							//alert(data.info);
+							alert("No specified job in this date range, please reset.");
+						}
+					}
+    			 },
+		dataType: 'json'
+	});
+}
+
+function filterJob()
+{
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		return;
+	}
+	
+	var jobNameList = document.getElementById("jobNameList");
+	var projectNameList = document.getElementById("projectNameList");
+	var jobStatus = document.getElementById("jobStatus");
+	var targetLocalesList = document.getElementById("targetLocalesList");
+	
+	// selected project 
+	var currSelectValueProject = new Array();
+	for(i=0;i<projectNameList.length;i++)
+	{
+		var op= projectNameList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueProject.push(op.value);
+		}
+	}
+	   
+	// selected job status 
+	var currSelectValueJobStatus = new Array();
+	for(i=0;i<jobStatus.length;i++)
+	{
+		var op= jobStatus.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueJobStatus.push(op.value);
+		}
+	} 
+	   
+	// selected target locales 
+	var currSelectValueTargetLocale = new Array();
+	for(i=0;i<targetLocalesList.length;i++)
+	{
+		var op= targetLocalesList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueTargetLocale.push(op.value);
+		}
+	}
+	
+	jobNameList.options.length=0;
+	
+	// Insert jobNameList select options 
+	for(var i=0; i<jobInfos.length; i++)
+	{
+		if(contains(currSelectValueProject, jobInfos[i].projectId)
+			&& contains(currSelectValueJobStatus, jobInfos[i].jobStatus)
+			&& containsArray(currSelectValueTargetLocale, jobInfos[i].targetLocals))
+		{
+			addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
+		}
+	}
+}
+
+function doOnload()
+{
+	// Initial jobNameList select options 
+	for(var i=0; i<jobInfos.length; i++)
+	{
+		addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
+	}
+	
+	// Set the jobIds as default check. 
+	setDisableTRWrapper("idTRJobNames");
+}
+
+function sortNumber(a,b) 
+{ 
+	return a - b 
+} 
+</script>
+</head>
+<body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY" onLoad="doOnload()">
+<TABLE WIDTH="100%" BGCOLOR="WHITE">
+    <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
+</TABLE><BR>
+<span class="mainHeading"><B><%=bundle.getString("comments_analysis_report_web_form")%></B></span>
+<BR><BR>
+<TABLE WIDTH="80%">
+    <TR><TD><SPAN CLASS="smallText"><%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN></TD></TR>
+</TABLE>
+<p/><p/>
+
+<form name="lisaQAForm" method="post" action="<%=formAction%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.COMMENTS_ANALYSIS_REPORT%>">
+<input type="hidden" id="inputJobIDS" name="inputJobIDS">
+<input type="hidden" id="dateRange" name="dateRange">
+<table border="0" cellspacing="2" cellpadding="2" class="standardText">
+    <tr>
+        <td class="standardText"><%=bundle.getString("lb_report_on")%></td>
+        <td class="standardText" VALIGN="BOTTOM">
+            <table cellspacing=0>
+                <tr id="idTRJobIds">
+                    <td><input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/><%=bundle.getString("lb_job_ids")%></td>
+                    <td><input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%></td>
+                </tr>
+                <tr id="idTRJobNames">
+                    <td><input type="radio" id="idTRJobNamesRadio" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:</td>
+                    <td class="standardText" VALIGN="BOTTOM"><select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;"></select></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <tr id="idTRProject">
+        <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select id="projectNameList" name="projectNameList" MULTIPLE size="4" onChange="filterJob()">
+            <option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<%
+            for (Project p : projectList)
+            {
+%>       		<option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
+<%          }
+%>
+        </select>
+        </td>
+    </tr>
+
+    <tr id="idTRJobStatus">
+        <td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select id="jobStatus" name="jobStatus" MULTIPLE size="4" onChange="filterJob()">
+            <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+            <option VALUE="<%=Job.READY_TO_BE_DISPATCHED%>"><%=bundle.getString("lb_ready")%></OPTION>
+            <option VALUE="<%=Job.DISPATCHED%>"><%=bundle.getString("lb_inprogress")%></OPTION>
+            <option VALUE="<%=Job.LOCALIZED%>"><%=bundle.getString("lb_localized")%></OPTION>
+            <option VALUE="<%=Job.EXPORTED%>"><%=bundle.getString("lb_exported")%></OPTION>
+            <option VALUE="<%=Job.EXPORT_FAIL%>"><%=bundle.getString("lb_exported_failed")%></OPTION>
+            <option VALUE="<%=Job.ARCHIVED%>"><%=bundle.getString("lb_archived")%></OPTION>
+        </select>
+    </tr>
+
+    <tr>
+        <td class="standardText"><%=bundle.getString("lb_target_locales")%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select name="targetLocalesList" id="targetLocalesList" MULTIPLE size="4" onChange="filterJob()">
+            <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<%
+            for (GlobalSightLocale gsl : targetLocales)
+            {
+%>    		<option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option>
+<%          }
+%>
+        </select>
+        </td>
+    </tr>
+
+    <tr><td class="standardText" colspan=2><%=bundle.getString("lb_creation_date_range")%>:</td></tr>
+
+    <tr>
+        <td class="standardText" style="padding-left:70px" colspan=2 VALIGN="BOTTOM">
+            <%=bundle.getString("lb_starts")%>:
+            <input type="text" name="<%=creationStart%>" size="3" maxlength="9" id="csf">
+            <select name="<%=creationStartOptions%>" id="cso">
+                <option value='-1'></option>
+                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+            </select>
+            <%=bundle.getString("lb_ends")%>:
+            <input type="text" name="<%=creationEnd%>" size="3" maxlength="9" id="cef">
+            <select name="<%=creationEndOptions%>" onChange="checkNow(this, lisaQAForm.<%=creationEnd%>)" id="ceo">
+                <option value='-1'></option>
+                <option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
+                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+            </select>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="standardText"><%=bundle.getString("date_display_format")%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select name="dateFormat">
+<%
+            String dateFormats[] = new String[4];
+            int i=0;
+            dateFormats[i++] = "MM/dd/yy hh:mm:ss a z";
+            dateFormats[i++] = "MM/dd/yy HH:mm:ss z";
+            dateFormats[i++] = "yyyy/MM/dd HH:mm:ss z";
+            dateFormats[i++] = "yyyy/MM/dd hh:mm:ss a z";
+            for (i=0;i<dateFormats.length;i++) {
+ %>
+            <OPTION VALUE="<%=dateFormats[i]%>"><%=dateFormats[i]%></OPTION>
+<%          }%>
+        </select>
+        </td>
+    </tr>
+   
+    <tr>
+        <td class="standardText"><%=bundle.getString("combine_all_jobs")%>:</td>
+        <td><input id="combineAllJobs" name="combineAllJobs" type="checkbox"></td>
+    </tr>
+
+    <tr style="height: 20px;"></tr>
+    <tr>
+        <td><input type="button" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>
+        <td><input type="button" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close();"></TD>
+    </tr>
+</table>
+</form>
+<BODY>
+</HTML>

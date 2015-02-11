@@ -149,13 +149,13 @@ public class AddSourceFileMDB extends GenericQueueMDB
             }
 
             String username = job.getCreateUser().getUserName();
+            String jobName = job.getName();
 
             Vector result = FileSystemUtil.execScript(files, fileProfiles,
-                    locales);
+                    locales, jobId, jobName);
             Vector sFiles = (Vector) result.get(0);
             Vector exitValues = (Vector) result.get(3);
 
-            String jobName = job.getName();
             int addedCount = job.getRequestSet().size();
             int pageCount = sFiles.size();
 

@@ -159,7 +159,7 @@ public class PtagPageGenerator
             PTagData.setAddables( p_OSD.getDisplaySegmentFormat() );
 
             // Preserve the source GXML - reused in fuzzy conversions below.
-            String srcGxml = p_OSD.getDisplaySourceText();
+//            String srcGxml = p_OSD.getDisplaySourceText();
 
             // convert the current source text and
             // set the native map to represent source tags
@@ -209,8 +209,7 @@ public class PtagPageGenerator
 				p_OSD.setDisplayTargetText(PTagData.getPTagSourceString());
 			}
 
-
-            // Convert all gxml fuzzy matches to ptag
+            // Convert all GXML fuzzy matches to ptag
             List orgList = p_OSD.getOriginalFuzzyLeverageMatchList();
             if (orgList != null)
             {
@@ -219,7 +218,7 @@ public class PtagPageGenerator
 
                 while (orgListIterator.hasNext())
                 {
-                    LeverageMatch lm = (LeverageMatch)orgListIterator.next();
+                    LeverageMatch lm = (LeverageMatch) orgListIterator.next();
 
                     try
                     {
@@ -228,21 +227,43 @@ public class PtagPageGenerator
                     }
                     catch (Exception ex)
                     {
-                        CATEGORY.warn("unable to get/convert Fuzzy match", ex);
+                        CATEGORY.warn("unable to get/convert Fuzzy match : "
+                                + getMsg(p_OSD), ex);
                         ptagFuzzyMatchList.add("warn: unable to get/convert fuzzy match. " +
-                            "(See Ambassador.log.)");
+                            "(See GlobalSight.log.)");
                     }
                 }
 
                 p_OSD.setDisplayFuzzyList(ptagFuzzyMatchList);
             }
         }
-        catch (DiplomatBasicParserException ex)
+        catch (Exception ex)
         {
+            CATEGORY.error(getMsg(p_OSD), ex);
             throw new AmbassadorDwUpException(
-                AmbassadorDwUpExceptionConstants.INVALID_GXML, ex +
-                "\n\nSEGMENT ID for above exception: " +
-                p_OSD.getDisplaySegmentID());
+                    AmbassadorDwUpExceptionConstants.INVALID_GXML, ex
+                            + "\n\nSEGMENT ID for above exception: "
+                            + getMsg(p_OSD));
         }
+    }
+
+    private String getMsg(OfflineSegmentData p_OSD)
+    {
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SegmentID is ")
+                    .append(p_OSD.getDisplaySegmentID())
+                    .append("; source TUV ID is ")
+                    .append(p_OSD.getSourceTuv().getId())
+                    .append("; target TUV ID is ")
+                    .append(p_OSD.getTrgTuvId());
+            return sb.toString();
+        }
+        catch (Exception e)
+        {
+        }
+
+        return "";
     }
 }

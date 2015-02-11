@@ -124,6 +124,8 @@
         <property name="isDefaultContextMatch"
             column="IS_DEFAULT_CONTEXT_MATCH" type="yes_no"
             not-null="false" unique="false" />
+        <property name="companyId" column="COMPANY_ID" length="20"
+            type="long" not-null="false" unique="false" />
         <many-to-one name="sourcePage" column="SOURCE_PAGE_ID"
             class="com.globalsight.everest.page.SourcePage"
             not-null="true" lazy="false"/>

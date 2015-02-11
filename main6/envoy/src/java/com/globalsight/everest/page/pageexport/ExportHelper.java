@@ -1426,7 +1426,7 @@ public class ExportHelper
         }
 
         s_logger.debug("Populating template with target segments.");
-        // Using cloned "template" to avoid avoid adding extra spaces into TM.
+        // Using cloned "template" to avoid adding extra spaces into TM.
         PageTemplate innerTemplate = new PageTemplate(p_template);
         populateTemplateWithUpdatedSegments(innerTemplate, p_segments,
                 p_targetLocale, p_isPreview, p_tuvIds, targetCorpusSegments,
@@ -1550,38 +1550,28 @@ public class ExportHelper
     {
         boolean changeFont = determineIfNeedFontChange(p_locale);
 
-        if (p_restoreSpacesForJavaProerties)
+        try
         {
-            try
-            {
-                String eventFlowXml = m_sourcePage.getRequest()
-                        .getEventFlowXml();
-                EventFlowXmlParser parser = new EventFlowXmlParser(eventFlowXml);
-                parser.parse();
-                m_format = parser.getSourceFormatType();
+            String eventFlowXml = m_sourcePage.getRequest().getEventFlowXml();
+            EventFlowXmlParser parser = new EventFlowXmlParser(eventFlowXml);
+            parser.parse();
 
-                long fileProfileId = parser.getFileProfileId();
-                // Preserve trailing spaces?
-                m_fp = ServerProxy.getFileProfilePersistenceManager()
-                        .getFileProfileById(fileProfileId, false);
-                long l10nprofileId = m_fp.getL10nProfileId();
-                L10nProfile l10nprofile = ServerProxy.getProjectHandler()
-                        .getL10nProfile(l10nprofileId);
-                m_tmp = l10nprofile.getTranslationMemoryProfile();
-            }
-            catch (Exception ex)
-            {
-            }
+            m_format = parser.getSourceFormatType();
+
+            long fileProfileId = parser.getFileProfileId();
+            m_fp = ServerProxy.getFileProfilePersistenceManager()
+                    .getFileProfileById(fileProfileId, false);
+
+            long l10nprofileId = m_fp.getL10nProfileId();
+            L10nProfile l10nprofile = ServerProxy.getProjectHandler()
+                    .getL10nProfile(l10nprofileId);
+            m_tmp = l10nprofile.getTranslationMemoryProfile();
         }
-
-        if (s_logger.isDebugEnabled())
+        catch (Exception ex)
         {
-            s_logger.debug("There are " + p_segments.size()
-                    + " segments in the template.");
         }
 
         boolean needToAddGsColor = needToAddColorTag(p_isPreview);
-
         if (needToAddGsColor)
         {
             needToAddGsColor = initGsColor();
@@ -1601,10 +1591,20 @@ public class ExportHelper
                             .getSourcePage().getCompanyId());
                 }
 
+                // When export,revert white spaces for java property files.
+                // Is properties file?
+                boolean isJavaProperties = m_format.toLowerCase().endsWith(
+                        "javaprop");
+                if (p_restoreSpacesForJavaProerties && isJavaProperties)
+                {
+                    revertWhiteSpacesForJavaProperty(segment, m_fp.getId(),
+                            m_format);
+                }
+
                 boolean isLocalizable = (element == GxmlElement.LOCALIZABLE);
                 updateSegValue(p_template, segment, p_isPreview,
                         needToAddGsColor, p_tuvIds, p_corpusSegments,
-                        isLocalizable, p_restoreSpacesForJavaProerties);
+                        isLocalizable);
             }
         }
 
@@ -2328,20 +2328,13 @@ public class ExportHelper
     @SuppressWarnings("rawtypes")
     private void updateSegValue(PageTemplate p_template, Tuv p_segment,
             boolean p_isPreview, boolean p_needToAddGsColor, List p_tuvIds,
-            Map p_targetCorpusMappings, boolean p_isLocalizable,
-            boolean p_restoreSpacesForJavaProerties)
+            Map p_targetCorpusMappings, boolean p_isLocalizable)
     {
         SourcePage sp = p_template.getSourcePage();
         long companyId = sp != null ? sp.getCompanyId() : Long
                 .parseLong(CompanyWrapper.getCurrentCompanyId());
         String tuvContent = null;
         Long tuId = p_segment.getTu(companyId).getIdAsLong();
-
-        // When export,revert white spaces for java property files.
-        if (p_restoreSpacesForJavaProerties)
-        {
-            revertWhiteSpacesForJavaProperty(p_segment);
-        }
 
         if (p_isPreview && p_tuvIds != null)
         {
@@ -2385,20 +2378,13 @@ public class ExportHelper
 
                         if (tu.hasRemovedTags())
                         {
-                            StyleUtil util = null;
-                            if (isDocx())
-                            {
-                                util = StyleFactory
-                                        .getStyleUtil(StyleFactory.DOCX);
-                                content = util.preHandle(content);
-                            }
-                            else if (isPptx())
-                            {
-                                util = StyleFactory
-                                        .getStyleUtil(StyleFactory.PPTX);
-                                content = util.preHandle(content);
-                            }
+                            StyleUtil util = getStyleUtil();
 
+                            if (util != null)
+                            {
+                                content = util.preHandle(content);
+                            }
+                            
                             String oriContent = content;
                             content = addRemovedTags(content,
                                     tu.getRemovedTag());
@@ -2439,6 +2425,28 @@ public class ExportHelper
         }
 
         p_template.insertTuvContent(tuId, tuvContent);
+    }
+    
+    private StyleUtil getStyleUtil()
+    {
+    	StyleUtil util = null;
+    	if (isDocx())
+        {
+            util = StyleFactory
+                    .getStyleUtil(StyleFactory.DOCX);
+        }
+        else if (isPptx())
+        {
+            util = StyleFactory
+                    .getStyleUtil(StyleFactory.PPTX);
+        }
+        else if (isXlsx())
+        {
+            util = StyleFactory
+                    .getStyleUtil(StyleFactory.XLSX);
+        }
+    	
+    	return util;
     }
 
     @SuppressWarnings(
@@ -2700,18 +2708,14 @@ public class ExportHelper
         return false;
     }
 
-    private void revertWhiteSpacesForJavaProperty(Tuv p_segment)
+    private void revertWhiteSpacesForJavaProperty(Tuv p_segment, long fpId,
+            String format)
     {
         try
         {
-            String eventFlowXml = m_sourcePage.getRequest().getEventFlowXml();
-            EventFlowXmlParser parser = new EventFlowXmlParser(eventFlowXml);
-            parser.parse();
-            long fileProfileId = parser.getFileProfileId();
-            String format = parser.getSourceFormatType();
             // Preserve trailing spaces?
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                    .getFileProfileById(fileProfileId, false);
+                    .getFileProfileById(fpId, false);
             long companyId = fp != null ? fp.getCompanyId() : Long
                     .parseLong(CompanyWrapper.getCurrentCompanyId());
             boolean isPreserveTrailingSpace = fp.getPreserveSpaces();
@@ -2833,6 +2837,29 @@ public class ExportHelper
 
         return false;
     }
+    
+    /**
+     * Checks the page type is docx or not.
+     * 
+     * @return
+     */
+    private boolean isXlsx()
+    {
+        if (m_page != null)
+        {
+            String page = m_page.getExternalPageId();
+            if (page != null)
+            {
+                String path = page.toLowerCase();
+                if (path.endsWith(".xlsx"))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Checks the page type is docx or not.
@@ -2868,14 +2895,37 @@ public class ExportHelper
      */
     private String addRemovedTags(String s, RemovedTag removedTag)
     {
-        if (s.trim().length() == 0)
+        if (isIdml())
         {
-            return s;
+            if (s.length() == 0)
+            {
+                return s;
+            }
+        }
+        else
+        {
+            if (s.trim().length() == 0)
+            {
+                return s;
+            }
         }
 
         if (isIdml())
         {
-            // for [it]
+            // for [it] start
+            Pattern pItStart = Pattern.compile(REGEX_IT_START);
+            Matcher mItStart = pItStart.matcher(s);
+
+            if (mItStart.find())
+            {
+                String all = mItStart.group();
+                int index = s.indexOf(all);
+                String s1 = s.substring(0, index);
+                String s2 = s.substring(index);
+                return addRemovedTags(s1, removedTag) + s2;
+            }
+            
+            // for other [it]
             Pattern pIt = Pattern.compile(REGEX_IT);
             Matcher mIt = pIt.matcher(s);
 

@@ -51,6 +51,7 @@
       com.globalsight.util.date.DateHelper,
       com.globalsight.util.edit.EditUtil,
       java.util.*,
+      java.lang.StringBuffer,
       javax.servlet.jsp.JspWriter,
       java.text.MessageFormat,
       java.text.NumberFormat,
@@ -106,6 +107,7 @@
 <jsp:useBean id="updateLeverage" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%!
+
 private String getMainFileName(String p_filename)
 {
   int index = p_filename.indexOf(")");
@@ -148,12 +150,13 @@ private String getFileName(String p_page)
 }
 
 // Prints file name with full path
-private void printPageLink(JspWriter out, String p_page, String p_url, boolean hasEditPerm)
+private String printPageLink(JspWriter out, String p_page, String p_url, boolean hasEditPerm)
   throws IOException
 {
   // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
   // show them last so the main file names are grouped together
-
+//text=en_US\182\endpoint\ch01.htm|sourcePageId=752|targetPageId=3864|taskId=4601?
+	
   String pageName = getMainFileName(p_page);
   String subName = getSubFileName(p_page);
 
@@ -161,7 +164,7 @@ private void printPageLink(JspWriter out, String p_page, String p_url, boolean h
   {
     pageName = pageName + " " + subName;
   }
-
+   StringBuffer treeParam=new StringBuffer();
   if (hasEditPerm) {
     out.print("<a href='#'");
     out.print(" onclick=\"openEditorWindow('");
@@ -179,14 +182,17 @@ private void printPageLink(JspWriter out, String p_page, String p_url, boolean h
     out.print(pageName);
     out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>");
     out.print("</a>");
+    treeParam.append("text="+pageName).append(p_url.replaceAll("&", "|")).append("|title="+pageName);
   }
   else {
     out.print(pageName);
   }
+ 
+  return treeParam.toString();
 }
 
 // Prints short file name with full path in tooltip
-private void printPageLinkShort(JspWriter out, String p_page, String p_url, boolean hasEditPerm)
+private String printPageLinkShort(JspWriter out, String p_page, String p_url, boolean hasEditPerm)
   throws IOException
 {
   // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
@@ -212,7 +218,7 @@ private void printPageLinkShort(JspWriter out, String p_page, String p_url, bool
     pageName = pageName + " " + subName;
     shortName = shortName + " " + subName;
   }
-
+  StringBuffer treeParam=new StringBuffer();
   if (hasEditPerm)
   {
     out.print("<a href='#'");
@@ -231,9 +237,13 @@ private void printPageLinkShort(JspWriter out, String p_page, String p_url, bool
     out.print("'>");
     out.print(shortName);
     out.print("</a>");
+    treeParam.append("text="+shortName.replace("\'", "&apos;")).append(p_url.replaceAll("&", "|")).append("|title="+pageName);
   } else {
     out.print(pageName);
   }
+
+ 
+  return treeParam.toString();
 }
 %><%
     String thisFileSearch = (String) request.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
@@ -424,7 +434,10 @@ private void printPageLinkShort(JspWriter out, String p_page, String p_url, bool
     String translatedTextUrl = detail.getPageURL() +
         "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_TRANSLATED_TEXT_RETRIEVE;
-
+   /* String approveTextUrl = detail.getPageURL().replaceAll("&", "#") +
+            "#" + WebAppConstants.TASK_ACTION +
+            "=" + WebAppConstants.TASK_ACTION_APPROVE_TUV;*/
+   // treeLink.append("&ajaxUrl="+approveTextUrl.replaceAll("&", "#")+"&tfilePath=");
     String detailUrl = detail.getPageURL() +
         "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_RETRIEVE +
@@ -534,6 +547,7 @@ private void printPageLinkShort(JspWriter out, String p_page, String p_url, bool
             break;
         case Task.STATE_FINISHING:
             status = labelFinishing;
+            isPageDetailOne = false;
             disableButtons = true;
             break;
         default:
@@ -748,6 +762,10 @@ var conditionUrls = new Array();
 var openIssuesDom = XmlDocument.create();
 var taskId = <%=task_id%>;
 
+var isFF=navigator.userAgent.indexOf("Firefox") >= 0?true:false;
+var tfilePath="";
+
+
 function cancelEvent(e)
 {
     var eobj = (window.event)?(window.event):e;
@@ -775,7 +793,7 @@ function hideContextMenu()
 
 function contextForPage(url, e)
 {
-    if(navigator.userAgent.indexOf("MSIE")==-1)
+    if(e instanceof Object)
     {
     e.preventDefault();
     e.stopPropagation();
@@ -833,7 +851,7 @@ function openParaEditor(url, e)
     {
       //window.location.href = ("<%=editorParaUrl%>" + url);
       // For issue "(AMB-115) Toolbar behaviour for the Inline editor" to resolve the problem which the scroll jump up fist (no good UE) after closed inline editor
-      var inlineUrl =  "<%=editorParaUrl%>" + url;
+      var inlineUrl =  "<%=editorParaUrl%>" + url+tfilePath;
       window.open(inlineUrl, 'topFrame',
           'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
           ',width=' + (screen.availWidth - 20));
@@ -990,8 +1008,11 @@ function recreateGSEdition(urlSent) {
     location.replace(urlSent);
 }
 
-$(function () {
-    $("#dialog-complActivity").dialog({
+var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","<%=labelFinishWarning%>"];
+var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-complActivity"]
+var popDiv="<div style='display:none' class='detailText'></div>";
+var popArray=new Array();
+var dialogParam={
         modal: true,
 		autoOpen: false,
 		width: 500,
@@ -1005,7 +1026,41 @@ $(function () {
 				$(this).dialog("close");
             }
         }
-    });
+    };
+var dialogParam1={
+        modal: true,
+		autoOpen: false,
+		width: 500,
+		minHeight: 110,
+        buttons: {
+        	Close: function () {
+				$(this).dialog("close");
+            }
+        }
+    }
+$(function () {
+	/*
+	$(".filelist a").find('script').remove();
+	$(".filelist a").each(function(){
+		var str=$(this).attr("oncontextmenu");
+		var i=str.indexOf("'");
+		var j=str.lastIndexOf("'");
+		str=str.substring(i+1,j).replace(/&/g,'|');
+		var node=$(this);
+		if(isFF){
+			node=$(this).find("div");
+		}
+		var t="text="+$.trim(node.html()+str)+"?";
+		//tfilePath+=t
+	})
+	*/
+	for(var i=0;i<popDialogId.length;i++){
+		var temp=$(popDiv).clone(true);
+		temp.attr("id",popDialogId[i]);
+		temp.attr("title",popTile[i]);
+		temp.dialog(dialogParam1);
+	}
+	temp.dialog(dialogParam);
 });
 
 /**
@@ -1096,12 +1151,26 @@ function doFinished(urlSent) {
 			    } else if(stfStatusMessage == "failed") {
 			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
 			    }
+			 	
+			 	if(warningMessage){
+			 		$("#dialog-fileState").html(warningMessage);
+					$("#dialog-fileState").prop("urlSent", urlSent);
+					$("#dialog-fileState").dialog("open").height("auto");
+					return;
+			 	}
 			    
 			    // Check un-translated Segments Page Array
 			    pagesArr = data.pagesWithUnTranslatedSeg;
 			    tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
 				warningMessage += getScrollableDiv(tempMsg, pagesArr);
 			    
+				if(warningMessage){
+			 		$("#dialog-unTranslated").html(warningMessage);
+					$("#dialog-unTranslated").prop("urlSent", urlSent);
+					$("#dialog-unTranslated").dialog("open").height("auto");
+					return;
+			 	}
+				
 			 	// Check un-closed Comments Page Array
 			    pagesArr = data.pagesWithUnClosedComment;
 				tempMsg = '<%=bundle.getString("msg_task_finish_warning_unClosedComment")%>';
@@ -1289,6 +1358,7 @@ function doOnload()
 {
   ContextMenu.intializeContextMenu();
   loadGuides();
+  translatedText();
 }
 
 function checkDelayTime()
@@ -1438,13 +1508,13 @@ function checkDownloadDelayTime()
             <TD style="width:150px"><B><%= labelJobName %></B></TD>
             <TD style="word-wrap:break-word;word-break:break-all;width:200px">
             <SCRIPT LANGUAGE = "JavaScript">
-            if (navigator.userAgent.indexOf("Firefox") >= 0){
+            if (){
             	document.write("<DIV style=\'width:200px\'>");
             }
 			</SCRIPT>
             <%= jobName %>
             <SCRIPT LANGUAGE = "JavaScript">
-            if (navigator.userAgent.indexOf("Firefox") >= 0){
+            if (isFF){
             	document.write("</DIV>")
             }</SCRIPT>
             </TD>
@@ -1737,7 +1807,7 @@ function checkDownloadDelayTime()
     }
     %>
     
-    <div class="tableContainer" id="data" style="height:200px">
+    <div class="tableContainer" id="data" style="border:solid 1px slategray;height:200px;zoom:1;">
     <%
     if (task_type.equals(Task.TYPE_TRANSLATION))
     {
@@ -1749,10 +1819,10 @@ function checkDownloadDelayTime()
             <%=labelContentItem%>
             <SPAN CLASS="smallWhiteItalic">
             (<%=labelClickToOpen%>)</SPAN></A><%=pageNameSortArrow%></TD>
-            <TD WIDTH="20%" style="padding-left: 8px; padding-top: 2px; padding-bottom: 2px">&nbsp;</TD>
-            <TD style="padding-left: 8px; padding-top: 2px; padding-bottom: 2px"> <A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.WORD_COUNT%>">
-            <%=labelWordCount%></A><%=wordCountSortArrow%></TD>
-            <TD style="padding-left: 8px; padding-top: 2px; padding-bottom: 2px"><%=bundle.getString("lb_source")%></TD>
+            <TD WIDTH="10%" style="padding-top:2px;padding-bottom: 2px">&nbsp;</TD>
+            <TD ALIGN="CENTER" WIDTH="100px" style="padding-top: 2px; padding-bottom: 2px"> <span style="word-break:keep-all;white-space:nowrap;"><A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.WORD_COUNT%>">
+            <%=labelWordCount%></A><%=wordCountSortArrow%></span></TD>
+            <TD style="padding-left: 28px;padding-right: 28px; padding-top: 2px; padding-bottom: 2px"><%=bundle.getString("lb_source")%></TD>
             <TD>
             <INPUT type='BUTTON' onclick='translatedText();' style="width:110px;height:27px" value='<%=bundle.getString("lb_task_translated_text")%>'></TD>
         </TR>
@@ -1760,6 +1830,7 @@ function checkDownloadDelayTime()
     <tbody>
 
         <%
+StringBuffer treeLink=new StringBuffer();
         boolean hasEditPerm = perms.getPermissionFor(Permission.ACTIVITIES_FILES_EDIT);
         int targetPgsSize = targetPgs == null ? 0 : targetPgs.size();
         if (targetPgsSize > 0)
@@ -1795,7 +1866,7 @@ function checkDownloadDelayTime()
                 {
                     UnextractedFile unextractedFile =
 		              (UnextractedFile)tPage.getPrimaryFile();
-                    pageName = unextractedFile.getStoragePath();
+                    pageName = unextractedFile.getStoragePath().replace("\\", "/");
                     pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +
                       pageName;
                     modifiedBy = unextractedFile.getLastModifiedBy();
@@ -1820,26 +1891,28 @@ function checkDownloadDelayTime()
                 </TD>
                 <%
 
+                String treeParam="";
                 if (isExtracted)
                 {
-                    out.print("<TD style='word-wrap : break-word;word-break:break-all; width:70%'>");
-
+                    out.print("<TD class='filelist' style='word-wrap : break-word;word-break:break-all; width:70%'>");
                     // print page name and editor link
                     if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_FULL))
                     {
-                      printPageLink(out, pageName, pageUrl, hasEditPerm);
+                    	treeParam= printPageLink(out, pageName, pageUrl, hasEditPerm);
                     }
                     else if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_SHORT))
                     {
-                      printPageLinkShort(out, pageName, pageUrl, hasEditPerm);
+                    	treeParam=printPageLinkShort(out, pageName, pageUrl, hasEditPerm);
                     }
-
+                   
+                    treeLink.append(treeParam+"?");
                     out.print("</TD>");
                 }
                 else
                 {
+                	
                 %>
-                    <TD CLASS="standardText" style="word-break : break-all; overflow:hidden; ">
+                    <TD CLASS="standardText filelist" style="word-break : break-all; overflow:hidden; ">
                     <A CLASS="standardHREF" HREF="<%=pageUrl%>" target="_blank"><%=pageName%>
                     </A>
                     <BR>
@@ -1852,7 +1925,7 @@ function checkDownloadDelayTime()
                 <%
                 }
                 %>
-                    <TD WIDTH="20%">&nbsp;</TD>
+                	<TD WIDTH="10%">&nbsp;</TD>
                     <TD ALIGN="CENTER"><SPAN CLASS="standardText"><%=tPage.getWordCount().getTotalWordCount()%></SPAN></TD>
                     <TD ALIGN="CENTER">
                     <%
@@ -1867,13 +1940,17 @@ function checkDownloadDelayTime()
                         sourcefilePath = sourcefilePath.replace("%2F", "/");
                     %>
                     <A CLASS="standardHREF" HREF="<%=sourcefilePath%>" target="_blank"><%=bundle.getString("lb_click_to_view")%></A></TD>
-                    <TD ALIGN="CENTER"><SPAN CLASS="standardText"><P ID="<%="oPara" + i%>"></P></SPAN></TD>
+                    <TD ALIGN="CENTER"><SPAN CLASS="standardText" ID="<%="oPara" + i%>" style = "font-weight:600"></SPAN></TD>
             <%
+           
             }
             if(tarPageIds.length() != 0)
             {
+              
                translatedTextUrl = translatedTextUrl + "&" + TaskDetailHandler.TASK_PAGE_IDS + "=" + tarPageIds.toString();
             }
+            sessionMgr.setAttribute("treeLink", treeLink.toString().replaceAll("\\\\", "<"));
+            sessionMgr.setAttribute("ajaxUrl",detail.getPageURL());
         }
         %>
         </TR>
@@ -1960,7 +2037,9 @@ function checkDownloadDelayTime()
 </amb:permission>
 <P>
 <amb:permission name="<%=Permission.ACTIVITIES_FILES_VIEW%>" >
-<INPUT type=BUTTON onclick='submitForm("wordcounts");' value='<%= labelWordCounts %>...'>
+<INPUT type=BUTTON style="float:left" onclick='submitForm("wordcounts");' value='<%= labelWordCounts %>...'>
+<INPUT type=BUTTON style="float:right" onclick="location.href='${detail.pageURL}&taskId=<%= task_id %>&<%= WebAppConstants.TASK_ACTION %>=<%= WebAppConstants.TASK_ACTION_DOWNLOAD_SOURCEPAGES %>'" 
+	value="<%=bundle.getString("lb_download_files_in_task_detail")%>"/>
 </amb:permission>
 <!-- End Pages table -->
 
@@ -2166,7 +2245,7 @@ if(je != null) {
             SourcePage sp = (SourcePage)unExtractedSrcs.get(i);
 
             UnextractedFile unextractedSrc = (UnextractedFile)sp.getPrimaryFile();
-            String spName = unextractedSrc.getStoragePath();
+            String spName = unextractedSrc.getStoragePath().replace("\\", "/");
             String spUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +
                            spName;
             spUrl = URLEncoder.encodeUrlStr(spUrl);
@@ -2359,8 +2438,6 @@ path = URLEncoder.encodeUrlStr(path);
 </DIV>
 
 <!--// Task Completed Dialog  -->
-<div id="dialog-complActivity" title="<%=labelFinishWarning%>" style="display:none" class="detailText">
-</div>
 </BODY>
 </HTML>
 <SCRIPT LANGUAGE = "JavaScript">
@@ -2401,13 +2478,18 @@ function updatePage()
             {
                 var objName = "oPara" + i;
                 var obj = document.getElementById(objName);
-                obj.innerHTML = "(" + translatedVar[i] + "%)";
+                if(translatedVar[i] < 100){
+                	obj.style.color = "red";
+                	obj.innerHTML = "(" + translatedVar[i] + "%)";
+                }else{
+                	obj.style.color = "black";
+                	obj.innerHTML = "(" + translatedVar[i] + "%)";
+                }
             }
        }
     }
   }
 }
-
 function translatedText()
 {
    callServer("<%=translatedTextUrl%>");

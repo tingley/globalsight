@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
@@ -39,11 +38,13 @@ public class JobDataMigration
             + "SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, MATCHED_TEXT_STRING, MATCHED_TEXT_CLOB, "
             + "TARGET_LOCALE_ID, MATCH_TYPE, ORDER_NUM, SCORE_NUM, MATCHED_TUV_ID, "
             + "MATCHED_TABLE_TYPE, PROJECT_TM_INDEX, TM_ID, TM_PROFILE_ID, MT_NAME, "
-            + "MATCHED_ORIGINAL_SOURCE, JOB_DATA_TU_ID) "
+            + "MATCHED_ORIGINAL_SOURCE, JOB_DATA_TU_ID, SID, CREATION_USER, CREATION_DATE, "
+            + "MODIFY_USER, MODIFY_DATE) "
             + "SELECT lm.SOURCE_PAGE_ID, lm.ORIGINAL_SOURCE_TUV_ID, lm.SUB_ID, lm.MATCHED_TEXT_STRING, lm.MATCHED_TEXT_CLOB, "
             + "lm.TARGET_LOCALE_ID, lm.MATCH_TYPE, lm.ORDER_NUM, lm.SCORE_NUM, lm.MATCHED_TUV_ID, "
             + "lm.MATCHED_TABLE_TYPE, lm.PROJECT_TM_INDEX, lm.TM_ID, lm.TM_PROFILE_ID, lm.MT_NAME, "
-            + "lm.MATCHED_ORIGINAL_SOURCE, lm.JOB_DATA_TU_ID "
+            + "lm.MATCHED_ORIGINAL_SOURCE, lm.JOB_DATA_TU_ID, lm.SID, lm.CREATION_USER, lm.CREATION_DATE, "
+            + "lm.MODIFY_USER, lm.MODIFY_DATE "
             + "FROM " + TuvQueryConstants.LM_TABLE_PLACEHOLDER + " lm, request req "
             + "WHERE lm.source_page_id = req.PAGE_ID "
             + "AND req.JOB_ID = ?";
@@ -279,6 +280,11 @@ public class JobDataMigration
         sb.append(" MT_NAME VARCHAR(40), ");
         sb.append(" MATCHED_ORIGINAL_SOURCE MEDIUMTEXT, ");
         sb.append(" JOB_DATA_TU_ID BIGINT DEFAULT '-1', ");
+        sb.append(" SID VARCHAR(255) DEFAULT NULL, ");
+        sb.append(" CREATION_USER VARCHAR(80) DEFAULT NULL, ");
+        sb.append(" CREATION_DATE DATETIME NULL, ");
+        sb.append(" MODIFY_USER VARCHAR(80) DEFAULT NULL, ");
+        sb.append(" MODIFY_DATE DATETIME NULL, ");
         sb.append(" PRIMARY KEY (ORIGINAL_SOURCE_TUV_ID, SUB_ID, TARGET_LOCALE_ID, ORDER_NUM) ");
         sb.append(");");
         String sql2 = sb.toString();

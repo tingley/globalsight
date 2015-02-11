@@ -295,7 +295,7 @@ function addOption(box, name, value, className)
 			         {
 			             GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales.get(i);
 			%>
-			<option VALUE="<%=gsLocale.toString()%>" selected><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
+			<option VALUE="<%=gsLocale.getId()%>" selected><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
 			<%
 			         }
 			%>

@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -44,9 +43,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
-
-import jxl.Sheet;
-import jxl.Workbook;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -154,16 +150,15 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
     private String SECONDARY_TYPE = "S";
 
-    // For uploading report
-    private Map segId2RequiredTranslation = null;
+    private Map<Long, String> segId2RequiredTranslation = null;
 
     private Map<Long, String> segId2Comment = null;
 
-    private Map segId2PageId = null;
+    private Map<Long, Long> segId2PageId = null;
 
-    private Map segId2FailureType = null;
+    private Map<Long, String> segId2FailureType = null;
 
-    private Map segId2CommentStatus = null;
+    private Map<Long, String> segId2CommentStatus = null;
 
     private long reportTargetLocaleId = -1;
 
@@ -198,8 +193,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     public static int COMMENT = 20;
 
     private boolean cancel = false;
-    
-    private static String GS_TOOLKIT_FORMAT = XliffConstants.WARN_SIGN + XliffConstants.GS_TOOLKIT_FORMAT;
+
+    private static String GS_TOOLKIT_FORMAT = XliffConstants.WARN_SIGN
+            + XliffConstants.GS_TOOLKIT_FORMAT;
 
     public OEMProcessStatus getStatus()
     {
@@ -311,7 +307,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
                 return errPage;
             }
-            
+
             OfflineFileUploadStatus status = OfflineFileUploadStatus
                     .getInstance();
 
@@ -331,10 +327,10 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         HibernateUtil.update(isUploadingTask);
                         isUploadingTasks.add(isUploadingTask);
 
-                        status.addFileState(isUploadingTaskId,
-                                p_fileName, "Running");
+                        status.addFileState(isUploadingTaskId, p_fileName,
+                                "Running");
                     }
-                    
+
                 }
             }
             else
@@ -343,11 +339,10 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 Task isUploadingTask = getTask(isUploadingTaskId);
                 isUploadingTask.setIsUploading('Y');
                 HibernateUtil.update(isUploadingTask);
-                
+
                 isUploadingTasks.add(isUploadingTask);
-                
-                status.addFileState(isUploadingTaskId,
-                        p_fileName, "Running");
+
+                status.addFileState(isUploadingTaskId, p_fileName, "Running");
             }
 
             // Fix for GBS-2191
@@ -356,7 +351,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 String ownerTaskId = taskIds != null ? taskIds[0] : taskId;
                 p_ownerTaskId = Long.parseLong(ownerTaskId);
                 m_uploadPageData.setTaskId(ownerTaskId);
-                
+
                 Task task = getTask(p_ownerTaskId);
                 if ((errPage = checkTask(p_user, task, p_fileName)) != null)
                 {
@@ -364,7 +359,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 }
                 p_excludedItemTypes = getExcludedItemTypes(task);
             }
-            
+
             // check all tasks for combined download files
             if (isUploadingTasks != null)
             {
@@ -398,7 +393,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 return errPage;
             }
-            
+
             // do not save page if iscontinue = n for internal tag error
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
@@ -488,7 +483,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             isUploadingTask = getTask(isUploadingTaskId);
             isUploadingTask.setIsUploading('Y');
             HibernateUtil.update(isUploadingTask);
-            
+
             OfflineFileUploadStatus status = OfflineFileUploadStatus
                     .getInstance();
             status.addFileState(isUploadingTaskId, p_fileName, "Running");
@@ -522,7 +517,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 return errPage;
             }
-            
+
             // do not save page if iscontinue = n for internal tag error
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
@@ -610,17 +605,15 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         status.updateProcess(n);
     }
 
-    @SuppressWarnings("unchecked")
     private String loadReportData(File p_tempFile, String p_fileName,
             long p_taskId, String p_reportName)
     {
-
         if (cancel)
             return null;
-        
+
         File tmpFile = null;
         FileInputStream fis = null;
-        
+
         try
         {
             m_errWriter.setFileName(p_fileName);
@@ -631,24 +624,24 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                                 + "\r\nPlease make sure it is correct and upload again.");
                 return m_errWriter.buildReportErroPage().toString();
             }
-            
+
             String fileSuff = p_fileName.substring(p_fileName.lastIndexOf("."));
             /**
              * Create a temporary file to get data from excel
              */
-            tmpFile = p_tempFile.createTempFile("RI_", fileSuff);
+            tmpFile = File.createTempFile("RI_", fileSuff);
             FileUtils.copyFile(p_tempFile, tmpFile);
             fis = new FileInputStream(tmpFile);
-            
+
             Task task = ServerProxy.getTaskManager().getTask(p_taskId);
             long companyId = task != null ? task.getCompanyId() : Long
                     .parseLong(CompanyWrapper.getCurrentCompanyId());
             long jobId = task.getJobId();
-            
+
             org.apache.poi.ss.usermodel.Workbook workbook = ExcelUtil
                     .getWorkbook(tmpFile.getAbsolutePath(), fis);
             org.apache.poi.ss.usermodel.Sheet sheet = null;
-            
+
             if (WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
             {
                 String sheetName = task.getTargetLocale().toString();
@@ -656,7 +649,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
             if (sheet == null)
                 sheet = ExcelUtil.getDefaultSheet(workbook);
-            
+
             if (sheet == null)
             {
                 m_errWriter.addFileErrorMsg("No Sheet detected.");
@@ -678,7 +671,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
             }
 
-            String targetLanguage = sheet.getRow(languageInfoRow).getCell(1).toString(); 
+            String targetLanguage = sheet.getRow(languageInfoRow).getCell(1)
+                    .toString();
             if (StringUtil.isEmpty(targetLanguage))
             {
                 m_errWriter
@@ -734,24 +728,21 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             updateProcess(5);
             Set<String> jobIds = new HashSet<String>();
 
-            String value = "";
             if (p_reportName.equals(WebAppConstants.TRANSLATION_EDIT))
             {
-                value = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 0);
-                if (!ExcelUtil.getCellValue(sheet, segmentHeaderRow, 0)
+                if (!ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10)
                         .equalsIgnoreCase("Job id")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 1)
+                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11)
                                 .equalsIgnoreCase("Segment id")
+                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 12)
+                                .equalsIgnoreCase("Page name")
                         || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2)
-                                .equalsIgnoreCase("TargetPage id")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8)
-                                .startsWith("Required translation"))
+                                .startsWith("Modify the translation here"))
                 {
-                    // Added for parsing report from 8.2.2 release.
-                    if (ExcelUtil.getCellValue(sheet, segmentHeaderRow, 7)
-                            .startsWith("Required translation"))
+                    // Added for parsing report from 8.5.0.1 release.
+                    if (sheet.getSheetName().equals("TER"))
                     {
-                        return loadTranslateReportDate822(sheet, task, tLocale);
+                        return loadTranslateReportDate8501(sheet, task, tLocale);
                     }
 
                     m_errWriter
@@ -764,11 +755,11 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 }
                 else
                 {
-                    segId2RequiredTranslation = new HashMap();
-                    segId2PageId = new HashMap();
-                    segId2FailureType = new HashMap();
+                    segId2RequiredTranslation = new HashMap<Long, String>();
+                    segId2PageId = new HashMap<Long, Long>();
+                    segId2FailureType = new HashMap<Long, String>();
                     segId2Comment = new HashMap<Long, String>();
-                    segId2CommentStatus = new HashMap();
+                    segId2CommentStatus = new HashMap<Long, String>();
 
                     String segmentId = null;
                     long segIdLong;
@@ -776,7 +767,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     String jobIdText = null;
                     String comment = null;
                     String requiredComment = null;
-                    String failureType = null;
                     String commentStatus = null;
                     boolean hasSegmentIdErro = false;
 
@@ -791,23 +781,22 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         int x = j * m / row;
                         updateProcess(n + x);
 
-                        segmentId = ExcelUtil.getCellValue(sheet, j, 1);
-                        if(StringUtil.isEmpty(segmentId))
+                        segmentId = ExcelUtil.getCellValue(sheet, j, 11);
+                        if (StringUtil.isEmpty(segmentId))
                         {
                             break;
                         }
                         segIdLong = new Long(Long.parseLong(segmentId));
 
-                        updatedText = ExcelUtil.getCellValue(sheet, j, 8);
-                        comment = ExcelUtil.getCellValue(sheet, j, 9);
-                        requiredComment = ExcelUtil.getCellValue(sheet, j, 10);
-                        failureType = ExcelUtil.getCellValue(sheet, j, 11);
-                        commentStatus = ExcelUtil.getCellValue(sheet, j, 12);
+                        updatedText = ExcelUtil.getCellValue(sheet, j, 2);
+                        comment = ExcelUtil.getCellValue(sheet, j, 3);
+                        requiredComment = ExcelUtil.getCellValue(sheet, j, 4);
+                        commentStatus = ExcelUtil.getCellValue(sheet, j, 6);
 
                         if (EditUtil.isRTLLocale(tLocale))
                             updatedText = EditUtil.removeU200F(updatedText);
 
-                        jobIdText = ExcelUtil.getCellValue(sheet, j, 0);
+                        jobIdText = ExcelUtil.getCellValue(sheet, j, 10);
                         jobIds.add(jobIdText);
                         if (segmentId != null && !segmentId.equals(""))
                         {
@@ -816,33 +805,27 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                                 segId2RequiredTranslation.put(segIdLong,
                                         updatedText);
                             }
-                            if (requiredComment != null
-                                    && !requiredComment.equals(""))
+                            if(comment != null && !comment.equals(""))
                             {
-
-                                segId2Comment.put(segIdLong, requiredComment);
-                                if ("".equals(comment))
+                            	if (requiredComment != null
+                                        && !requiredComment.equals("")
+                                        && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
                                 {
-                                    // New added comment, the status must be
-                                    // query
-                                    segId2CommentStatus.put(segIdLong, "query");
-                                }
-                                else
-                                {
-                                    segId2CommentStatus.put(segIdLong,
-                                            commentStatus);
-                                }
-
+                            		segId2Comment.put(segIdLong, requiredComment);
+                                }       	 
+	                        	segId2CommentStatus.put(segIdLong,
+	                        			commentStatus);
                             }
-                            else
+                            else 
                             {
-                                if (comment != null && !comment.equals(""))
+                            	if (requiredComment != null
+                                        && !requiredComment.equals("")
+                                        && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
                                 {
-                                    segId2Comment.put(segIdLong, comment);
-                                    segId2CommentStatus.put(segIdLong,
-                                            commentStatus);
+                            		segId2Comment.put(segIdLong, requiredComment);
+                            		segId2CommentStatus.put(segIdLong, "query");
                                 }
-                            }
+							}
                         }
                         else
                         {
@@ -885,22 +868,24 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
             else if (p_reportName.equals(WebAppConstants.LANGUAGE_SIGN_OFF))
             {
-                if (!ExcelUtil.getCellValue(sheet, segmentHeaderRow, 0)
+                if (!ExcelUtil.getCellValue(sheet, segmentHeaderRow, 9)
                         .equalsIgnoreCase("Job id")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 1)
+                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10)
                                 .equalsIgnoreCase("Segment id")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2)
+                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11)
                                 .equalsIgnoreCase("Page name")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8)
+                        || !ExcelUtil
+                                .getCellValue(sheet, segmentHeaderRow, 3)
                                 .equalsIgnoreCase(
-                                        bundle.getString("lb_comment_free")))
+                                        bundle.getString("reviewers_comments_header")))
                 {
-                    // Added for parsing report from 8.2.2 release.
-                    if (ExcelUtil.getCellValue(sheet, segmentHeaderRow, 6)
+                    // Added for parsing report from 8.5.0.1 release.
+                    if (ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8)
                             .equalsIgnoreCase(
                                     bundle.getString("lb_comment_free")))
                     {
-                        return loadReviewReportDate822(sheet, task, tLocale);
+                        return loadReviewReportDate8501(sheet, task, tLocale,
+                                bundle);
                     }
 
                     m_errWriter
@@ -913,13 +898,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 }
                 else
                 {
-                    segId2Comment = new HashMap();
-                    segId2PageId = new HashMap();
-                    segId2FailureType = new HashMap();
-                    segId2CommentStatus = new HashMap();
+                    segId2Comment = new HashMap<Long, String>();
+                    segId2PageId = new HashMap<Long, Long>();
+                    segId2FailureType = new HashMap<Long, String>();
+                    segId2CommentStatus = new HashMap<Long, String>();
                     String segmentId = null;
                     String pageId = null;
-                    String comment = null;
+                    String reviewerComment = null;
                     Long segIdLong = null;
                     String jobIdText = null;
                     String failureType = null;
@@ -930,7 +915,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         if (cancel)
                             return null;
 
-                        segmentId = ExcelUtil.getCellValue(sheet, k, 1);
+                        segmentId = ExcelUtil.getCellValue(sheet, k, 10);
                         if (segmentId == null || segmentId.trim().length() == 0)
                         {
                             break;
@@ -939,30 +924,31 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         Tu tu = ServerProxy.getTuvManager()
                                 .getTuForSegmentEditor(segIdLong, companyId);
                         TuImpl tuImpl = (TuImpl) tu;
-                        Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, companyId);
+                        Tuv tuv = tuImpl
+                                .getTuv(reportTargetLocaleId, companyId);
                         TuvImpl tuvImpl = (TuvImpl) tuv;
                         TargetPage targetPage = tuvImpl
                                 .getTargetPage(companyId);
                         pageId = new String(String.valueOf(targetPage.getId()));
 
-                        comment = ExcelUtil.getCellValue(sheet, k, 8);
+                        reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
                         if (EditUtil.isRTLLocale(tLocale))
-                            comment = EditUtil.removeU200F(comment);
+                            reviewerComment = EditUtil.removeU200F(reviewerComment);
 
-                        failureType = ExcelUtil.getCellValue(sheet, k, 9);
-                        commentStatus = ExcelUtil.getCellValue(sheet, k, 10);
-                        jobIdText = ExcelUtil.getCellValue(sheet, k, 0);
+                        failureType = ExcelUtil.getCellValue(sheet, k, 4);
+                        commentStatus = ExcelUtil.getCellValue(sheet, k, 5);
+                        jobIdText = ExcelUtil.getCellValue(sheet, k, 9);
 
                         jobIds.add(jobIdText);
 
-                        if (comment != null && !comment.equals(""))
+                        if (StringUtil.isNotEmpty(reviewerComment) || checkCommentStatus(sheet, k))
                         {
                             if (segmentId != null && !segmentId.equals("")
                                     && pageId != null && !pageId.equals(""))
                             {
                                 segId2PageId.put(segIdLong,
                                         new Long(Long.parseLong(pageId)));
-                                segId2Comment.put(segIdLong, comment);
+                                segId2Comment.put(segIdLong, reviewerComment);
                                 segId2FailureType.put(segIdLong, failureType);
                                 segId2CommentStatus.put(segIdLong,
                                         commentStatus);
@@ -1050,15 +1036,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
     }
 
-    // Due modify Translations Edit Report column in 8.2.3, there need a
-    // function for old report from 8.2.2.
-    private String loadTranslateReportDate822(org.apache.poi.ss.usermodel.Sheet p_sheet, Task p_task,
+    // Due modify Translations Edit Report column in 8.5.1, there need a
+    // function for old report from 8.5.0.1.
+    private String loadTranslateReportDate8501(
+            org.apache.poi.ss.usermodel.Sheet p_sheet, Task p_task,
             GlobalSightLocale p_tLocale) throws TuvException, RemoteException,
             GeneralException
     {
-        long companyId = p_task != null ? p_task.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-
         int segmentHeaderRow = ReviewerLisaQAXlsReportHelper.SEGMENT_HEADER_ROW;
         int segmentStartRow = ReviewerLisaQAXlsReportHelper.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
@@ -1068,7 +1052,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         .equalsIgnoreCase("Segment id")
                 || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 2)
                         .equalsIgnoreCase("TargetPage id")
-                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 7)
+                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 8)
                         .startsWith("Required translation"))
         {
             m_errWriter
@@ -1081,41 +1065,43 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         }
         else
         {
-            segId2RequiredTranslation = new HashMap();
-            segId2PageId = new HashMap();
-            segId2FailureType = new HashMap();
+            segId2RequiredTranslation = new HashMap<Long, String>();
+            segId2PageId = new HashMap<Long, Long>();
+            segId2FailureType = new HashMap<Long, String>();
             segId2Comment = new HashMap<Long, String>();
-            segId2CommentStatus = new HashMap();
+            segId2CommentStatus = new HashMap<Long, String>();
 
             String segmentId = null;
             long segIdLong;
-            String pageId = null;
             String updatedText = null;
             String jobIdText = null;
             String comment = null;
             String requiredComment = null;
-            String failureType = null;
             String commentStatus = null;
             boolean hasSegmentIdErro = false;
 
+            int n = 5;
+            int m = LOAD_DATA - n;
+
             for (int j = segmentStartRow, row = p_sheet.getLastRowNum(); j <= row; j++)
             {
+                if (cancel)
+                    return null;
+
+                int x = j * m / row;
+                updateProcess(n + x);
+
                 segmentId = ExcelUtil.getCellValue(p_sheet, j, 1);
+                if (StringUtil.isEmpty(segmentId))
+                {
+                    break;
+                }
                 segIdLong = new Long(Long.parseLong(segmentId));
 
-                Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
-                        segIdLong, companyId);
-                TuImpl tuImpl = (TuImpl) tu;
-                Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, companyId);
-                TuvImpl tuvImpl = (TuvImpl) tuv;
-                TargetPage targetPage = tuvImpl.getTargetPage(companyId);
-                pageId = new String(String.valueOf(targetPage.getId()));
-
-                updatedText = ExcelUtil.getCellValue(p_sheet, j, 7);
-                comment = ExcelUtil.getCellValue(p_sheet, j, 8);
-                requiredComment = ExcelUtil.getCellValue(p_sheet, j, 9);
-                failureType = ExcelUtil.getCellValue(p_sheet, j, 10);
-                commentStatus = ExcelUtil.getCellValue(p_sheet, j, 11);
+                updatedText = ExcelUtil.getCellValue(p_sheet, j, 8);
+                comment = ExcelUtil.getCellValue(p_sheet, j, 9);
+                requiredComment = ExcelUtil.getCellValue(p_sheet, j, 10);
+                commentStatus = ExcelUtil.getCellValue(p_sheet, j, 12);
 
                 if (EditUtil.isRTLLocale(p_tLocale))
                     updatedText = EditUtil.removeU200F(updatedText);
@@ -1128,34 +1114,27 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     {
                         segId2RequiredTranslation.put(segIdLong, updatedText);
                     }
-                    if (requiredComment != null && !requiredComment.equals(""))
+                    if(comment != null && !comment.equals(""))
                     {
-
-                        segId2PageId.put(segIdLong,
-                                new Long(Long.parseLong(pageId)));
-                        segId2Comment.put(segIdLong, requiredComment);
-                        if ("".equals(comment))
+                    	if (requiredComment != null
+                                && !requiredComment.equals("")
+                                && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
                         {
-                            // New added comment, the status must be
-                            // query
-                            segId2CommentStatus.put(segIdLong, "query");
-                        }
-                        else
-                        {
-                            segId2CommentStatus.put(segIdLong, commentStatus);
-                        }
-
+                    		segId2Comment.put(segIdLong, requiredComment);
+                        }       	 
+                    	segId2CommentStatus.put(segIdLong,
+                    			commentStatus);
                     }
-                    else
+                    else 
                     {
-                        if (comment != null && !comment.equals(""))
+                    	if (requiredComment != null
+                                && !requiredComment.equals("")
+                                && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
                         {
-                            segId2PageId.put(segIdLong,
-                                    new Long(Long.parseLong(pageId)));
-                            segId2Comment.put(segIdLong, comment);
-                            segId2CommentStatus.put(segIdLong, commentStatus);
+                    		segId2Comment.put(segIdLong, requiredComment);
+                    		segId2CommentStatus.put(segIdLong, "query");
                         }
-                    }
+					}
                 }
                 else
                 {
@@ -1196,11 +1175,12 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return null;
     }
 
-    // Due modify Reviewer Comments Report column in 8.2.3, there need a
-    // function for old report from 8.2.2.
-    private String loadReviewReportDate822(org.apache.poi.ss.usermodel.Sheet p_sheet, Task p_task,
-            GlobalSightLocale p_tLocale) throws TuvException, RemoteException,
-            GeneralException
+    // Due modify Reviewer Comments Report column in 8.5.1, there need a
+    // function for old report from 8.5.0.1.
+    private String loadReviewReportDate8501(
+            org.apache.poi.ss.usermodel.Sheet p_sheet, Task p_task,
+            GlobalSightLocale p_tLocale, ResourceBundle bundle)
+            throws TuvException, RemoteException, GeneralException
     {
         long companyId = p_task != null ? p_task.getCompanyId() : Long
                 .parseLong(CompanyWrapper.getCurrentCompanyId());
@@ -1214,8 +1194,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         .equalsIgnoreCase("Segment id")
                 || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 2)
                         .equalsIgnoreCase("Page name")
-                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 6)
-                        .startsWith("Comment"))
+                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 8)
+                        .equalsIgnoreCase(bundle.getString("lb_comment_free")))
         {
             m_errWriter
                     .addFileErrorMsg("The file you are uploading does not keep the report's correct format."
@@ -1228,12 +1208,12 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         else
         {
             segId2Comment = new HashMap<Long, String>();
-            segId2PageId = new HashMap();
-            segId2FailureType = new HashMap();
-            segId2CommentStatus = new HashMap();
+            segId2PageId = new HashMap<Long, Long>();
+            segId2FailureType = new HashMap<Long, String>();
+            segId2CommentStatus = new HashMap<Long, String>();
             String segmentId = null;
             String pageId = null;
-            String comment = null;
+            String reviewerComment = null;
             Long segIdLong = null;
             String jobIdText = null;
             String failureType = null;
@@ -1241,7 +1221,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             boolean hasIdErro = false;
             for (int k = segmentStartRow, row = p_sheet.getLastRowNum(); k <= row; k++)
             {
+                if (cancel)
+                    return null;
+
                 segmentId = ExcelUtil.getCellValue(p_sheet, k, 1);
+                if (segmentId == null || segmentId.trim().length() == 0)
+                {
+                    break;
+                }
                 segIdLong = new Long(Long.parseLong(segmentId));
                 Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
                         segIdLong, companyId);
@@ -1251,24 +1238,24 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 TargetPage targetPage = tuvImpl.getTargetPage(companyId);
                 pageId = new String(String.valueOf(targetPage.getId()));
 
-                comment = ExcelUtil.getCellValue(p_sheet, k, 6);
+                reviewerComment = ExcelUtil.getCellValue(p_sheet, k, 8);
                 if (EditUtil.isRTLLocale(p_tLocale))
-                    comment = EditUtil.removeU200F(comment);
+                    reviewerComment = EditUtil.removeU200F(reviewerComment);
 
-                failureType = ExcelUtil.getCellValue(p_sheet, k, 7);
-                commentStatus = ExcelUtil.getCellValue(p_sheet, k, 8);
+                failureType = ExcelUtil.getCellValue(p_sheet, k, 9);
+                commentStatus = ExcelUtil.getCellValue(p_sheet, k, 10);
                 jobIdText = ExcelUtil.getCellValue(p_sheet, k, 0);
 
                 jobIds.add(jobIdText);
 
-                if (comment != null && !comment.equals(""))
+                if (StringUtil.isNotEmpty(reviewerComment))
                 {
                     if (segmentId != null && !segmentId.equals("")
                             && pageId != null && !pageId.equals(""))
                     {
                         segId2PageId.put(segIdLong,
                                 new Long(Long.parseLong(pageId)));
-                        segId2Comment.put(segIdLong, comment);
+                        segId2Comment.put(segIdLong, reviewerComment);
                         segId2FailureType.put(segIdLong, failureType);
                         segId2CommentStatus.put(segIdLong, commentStatus);
                     }
@@ -1314,107 +1301,32 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
         return null;
     }
-
-    /**
-     * Adds Function to operate Reviewers Comments Report from 8.2.1 Release
-     * Server. See details in GBS-2252.
-     */
-    /*
-     * private String loadReportData821(Sheet p_sheet, Task p_task) { int
-     * segmentHeaderRowRCR = 3;
-     * 
-     * try { long jobId = p_task.getJobId(); String targetLanguage =
-     * p_task.getTargetLocale().getDisplayName();
-     * 
-     * if (targetLanguage == null || targetLanguage.equals("")) { m_errWriter
-     * .addFileErrorMsg("No language information detected."); return
-     * m_errWriter.buildReportErroPage().toString(); } else if
-     * (targetLanguage.indexOf('[') < 0 || targetLanguage.indexOf(']') < 0) {
-     * m_errWriter
-     * .addFileErrorMsg("Target language format is not correct.\r\nIt should " +
-     * "contain a portion which is a locale code encolsed by [ ] such as [zh_CN]"
-     * ); return m_errWriter.buildReportErroPage().toString(); }
-     * reportTargetLocaleId = getLocaleId(targetLanguage); GlobalSightLocale
-     * tLocale = HibernateUtil.get(GlobalSightLocale.class,
-     * reportTargetLocaleId);
-     * 
-     * Set<String> jobIds = new HashSet<String>();
-     * 
-     * if (!p_sheet.getCell(0, segmentHeaderRowRCR).getContents()
-     * .equalsIgnoreCase("Job id") || !p_sheet.getCell(1,
-     * segmentHeaderRowRCR).getContents() .equalsIgnoreCase("Segment id") ||
-     * !p_sheet.getCell(2, segmentHeaderRowRCR).getContents()
-     * .equalsIgnoreCase("Page name") || !p_sheet.getCell(8,
-     * segmentHeaderRowRCR).getContents() .startsWith("Comment")) { m_errWriter
-     * .addFileErrorMsg(
-     * "The file you are uploading does not keep the report's correct format." +
-     * "\r\nMaybe you have changed some column header signature or orders." +
-     * "\r\nThe following column header signatrues and orders should keep the source report's format."
-     * + "\r\nJob id, Segment id, Page name, Comment(free hand your comments)."
-     * + "\r\nPlease make sure they are correct and upload again."); return
-     * m_errWriter.buildReportErroPage().toString(); } else { segId2Comment =
-     * new HashMap(); segId2PageId = new HashMap(); segId2FailureType = new
-     * HashMap(); segId2CommentStatus = new HashMap(); String segmentId = null;
-     * String pageId = null; String comment = null; Long segIdLong = null;
-     * String jobIdText = null; String targetLang = null; String failureType =
-     * null; boolean hasIdErro = false; for (int k = segmentHeaderRowRCR + 1,
-     * row = p_sheet.getRows(); k < row; k++) { jobIdText = p_sheet.getCell(0,
-     * k).getContents(); targetLang = p_sheet.getCell(5, k).getContents(); if
-     * (!(String.valueOf(jobId).equals(jobIdText) &&
-     * targetLanguage.equals(targetLang))) { continue; }
-     * 
-     * segmentId = p_sheet.getCell(1, k).getContents(); Tu tu =
-     * ServerProxy.getTuvManager().getTuForSegmentEditor(
-     * Long.parseLong(segmentId)); TuImpl tuImpl = (TuImpl) tu; Tuv tuv =
-     * tuImpl.getTuv(reportTargetLocaleId); TuvImpl tuvImpl = (TuvImpl) tuv;
-     * TargetPage targetPage = tuvImpl.getTargetPage(); pageId = new
-     * String(String.valueOf(targetPage.getId()));
-     * 
-     * comment = p_sheet.getCell(8, k).getContents(); if
-     * (EditUtil.isRTLLocale(tLocale)) comment = EditUtil.removeU200F(comment);
-     * 
-     * failureType = p_sheet.getCell(9, k).getContents();
-     * 
-     * jobIds.add(jobIdText); segIdLong = new Long(Long.parseLong(segmentId));
-     * segId2FailureType.put(segIdLong, failureType);
-     * 
-     * if (comment != null && !comment.equals("")) { if (segmentId != null &&
-     * !segmentId.equals("") && pageId != null && !pageId.equals("")) {
-     * segId2PageId.put(segIdLong, new Long(Long.parseLong(pageId)));
-     * segId2Comment.put(segIdLong, comment); } else { m_errWriter
-     * .addFileErrorMsg("Segment or Page id is lost in row " + (k + 1) +
-     * "\r\n"); hasIdErro = true; }
-     * 
-     * }
-     * 
-     * } if (hasIdErro) { return m_errWriter.buildReportErroPage().toString(); }
-     * 
-     * if (jobIds.size() == 0) { m_errWriter
-     * .addFileErrorMsg("No matched job detected." +
-     * "\r\nPlease make sure they are correct and upload again."); return
-     * m_errWriter.buildReportErroPage().toString(); } }
-     * 
-     * } catch (Throwable ex) { String args[] = {
-     * EditUtil.encodeHtmlEntities(ex.getMessage()) }; String errMsg =
-     * MessageFormat.format(m_messages .getString("FormatTwoLoadError"),
-     * (Object[]) args);
-     * 
-     * CATEGORY.error(errMsg);
-     * 
-     * m_errWriter.addFileErrorMsg(errMsg); return
-     * m_errWriter.buildReportErroPage().toString(); }
-     * 
-     * return null;
-     * 
-     * }
-     */
-
-    private void uploadComments(User p_user, boolean onlyComment,
-            long companyId) throws Exception
+    
+    // Check comment status for upload(ReviewersCommentsReport).
+    private boolean checkCommentStatus(org.apache.poi.ss.usermodel.Sheet p_sheet, int p_row)
+    {
+        String translatorComment = ExcelUtil.getCellValue(p_sheet, p_row, 2);
+        String commentStatus = ExcelUtil.getCellValue(p_sheet, p_row, 5);
+        if (StringUtil.isNotEmpty(commentStatus) && StringUtil.isNotEmpty(translatorComment))
+            return true;
+        
+        return false;
+    }
+    
+    // Updated comment status.
+    private void updateCommentStatus(Issue p_issue, String commentStatus)
+    {
+        IssueImpl issue = HibernateUtil.get(IssueImpl.class, p_issue.getId());
+        issue.setStatus(commentStatus);
+        HibernateUtil.update(issue);
+    }
+    
+    private void uploadComments(User p_user, boolean onlyComment, long companyId)
+            throws Exception
     {
         CommentManager commentManager = ServerProxy.getCommentManager();
 
-        Set<Long> tuIds = segId2Comment.keySet();
+        Set<Long> tuIds = segId2CommentStatus.keySet();
         Iterator<Long> tuIdIterator = tuIds.iterator();
         long tuId = -1;
         long tuvId = -1;
@@ -1472,71 +1384,73 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 // comment status error
                 commentStatusError = true;
             }
-            if (comment != null && comment != "")
+            
+            Long targetPageId = (Long) segId2PageId.get(tuIdLong);
+            if (targetPageId == null)
             {
-                Long targetPageId = (Long) segId2PageId.get(tuIdLong);
-                if (targetPageId == null)
+                TargetPage targetPage = ((TuvImpl) tuv)
+                        .getTargetPage(companyId);
+                targetPageId = targetPage.getId();
+            }
+            // has NOT been cached
+            if (!cachedTargetPageIds.contains(targetPageId))
+            {
+                List<IssueImpl> tpIssues = commentManager.getIssues(
+                        Issue.TYPE_SEGMENT, targetPageId);
+                cachedTargetPageIds.add(targetPageId);
+                for (IssueImpl issue : tpIssues)
                 {
-                    TargetPage targetPage = ((TuvImpl) tuv)
-                            .getTargetPage(companyId);
-                    targetPageId = targetPage.getId();
-                }
-                // has NOT been cached
-                if (!cachedTargetPageIds.contains(targetPageId))
-                {
-                    List<IssueImpl> tpIssues = commentManager.getIssues(
-                            Issue.TYPE_SEGMENT, targetPageId);
-                    cachedTargetPageIds.add(targetPageId);
-                    for (IssueImpl issue : tpIssues)
+                    int index = issue.getLogicalKey().lastIndexOf("_");
+                    String tpId_tuId_tuvId = issue.getLogicalKey()
+                            .substring(0, index + 1);
+                    ArrayList<IssueImpl> issues = cachedIssues
+                            .get(tpId_tuId_tuvId);
+                    if (issues == null)
                     {
-                        int index = issue.getLogicalKey().lastIndexOf("_");
-                        String tpId_tuId_tuvId = issue.getLogicalKey()
-                                .substring(0, index + 1);
-                        ArrayList<IssueImpl> issues = cachedIssues
-                                .get(tpId_tuId_tuvId);
-                        if (issues == null)
-                        {
-                            issues = new ArrayList<IssueImpl>();
-                        }
-                        issues.add(issue);
-                        cachedIssues.put(tpId_tuId_tuvId, issues);
+                        issues = new ArrayList<IssueImpl>();
                     }
+                    issues.add(issue);
+                    cachedIssues.put(tpId_tuId_tuvId, issues);
                 }
+            }
 
-                existIssues = cachedIssues.get(targetPageId + "_" + tuId + "_" + tuvId + "_");
-                if (existIssues == null || existIssues.size() == 0)
+            existIssues = cachedIssues.get(targetPageId + "_" + tuId + "_"
+                    + tuvId + "_");
+            if (existIssues == null || existIssues.size() == 0)
+            {
+                failureType = failureTypeError ? "" : failureType;
+                commentStatus = commentStatusError ? Issue.STATUS_OPEN
+                        : commentStatus;
+                IssueImpl issue = new IssueImpl(Issue.TYPE_SEGMENT, tuvId,
+                        "Comment by LSO", Issue.PRI_MEDIUM, commentStatus,
+                        failureType.trim(), p_user.getUserId(), comment,
+                        CommentHelper.makeLogicalKey(targetPageId, tuId,
+                                tuvId, 0));
+                issue.setShare(false);
+                issue.setOverwrite(false);
+                newIssues.add(issue);
+            }
+            else
+            {
+                List histories = null;
+
+                for (int i = 0; i < existIssues.size(); i++)
                 {
-                    failureType = failureTypeError ? "" : failureType;
-                    commentStatus = commentStatusError ? Issue.STATUS_OPEN
+                    Issue issue = (Issue) existIssues.get(i);
+                    histories = issue.getHistory();
+
+                    commentStatus = commentStatusError ? issue.getStatus()
                             : commentStatus;
-                    IssueImpl issue = new IssueImpl(Issue.TYPE_SEGMENT, tuvId,
-                            "Comment by LSO", Issue.PRI_MEDIUM, commentStatus,
-                            failureType.trim(), p_user.getUserId(), comment,
-                            CommentHelper.makeLogicalKey(targetPageId, tuId,
-                                    tuvId, 0));
-                    issue.setShare(false);
-                    issue.setOverwrite(false);
-                    newIssues.add(issue);
-                }
-                else
-                {
-                    List histories = null;
-
-                    for (int i = 0; i < existIssues.size(); i++)
+                    failureType = failureTypeError ? issue.getCategory()
+                            : failureType;
+                    if (histories != null && histories.size() > 0)
                     {
-                        Issue issue = (Issue) existIssues.get(i);
-                        histories = issue.getHistory();
+                        IssueHistory history = (IssueHistory) histories
+                                .get(0);
 
-                        commentStatus = commentStatusError ? issue.getStatus()
-                                : commentStatus;
-                        failureType = failureTypeError ? issue.getCategory()
-                                : failureType;
-                        if (histories != null && histories.size() > 0)
+                        if (history.reportedBy().equals(p_user.getUserId()))
                         {
-                            IssueHistory history = (IssueHistory) histories
-                                    .get(0);
-
-                            if (history.reportedBy().equals(p_user.getUserId()))
+                            if (StringUtil.isNotEmpty(comment))
                             {
                                 IssuesVo vo = new IssuesVo();
                                 issuesVos.add(vo);
@@ -1550,22 +1464,34 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                             }
                             else
                             {
-                                // commentManager.replyToIssue(issue.getId(),
-                                // "Comment by LSO",
-                                // Issue.PRI_MEDIUM, Issue.STATUS_OPEN,
-                                // Issue.CATEGORY_TYPE01, p_userId,
-                                // comment);
-                                commentManager.replyToIssue(issue.getId(),
-                                        issue.getTitle(), issue.getPriority(),
-                                        commentStatus, failureType.trim(),
-                                        p_user.getUserId(), comment);
+                                updateCommentStatus(issue, commentStatus);
                             }
                         }
+                        else
+                        {
+                            // commentManager.replyToIssue(issue.getId(),
+                            // "Comment by LSO",
+                            // Issue.PRI_MEDIUM, Issue.STATUS_OPEN,
+                            // Issue.CATEGORY_TYPE01, p_userId,
+                            // comment);
+                        	if(comment != null && !comment.equals(""))
+                        	{                    		
+                        		commentManager.replyToIssue(issue.getId(),
+                        				issue.getTitle(), issue.getPriority(),
+                        				commentStatus, failureType.trim(),
+                        				p_user.getUserId(), comment);
+                        	}
+                        	else 
+                        	{                		
+                        		issue.setStatus(commentStatus);
+                        		HibernateUtil.saveOrUpdate(issue);
+							}
+                        }
                     }
-
                 }
 
             }
+            
         }
 
         if (newIssues.size() > 0)
@@ -1746,7 +1672,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
                 return errPage;
             }
-            
+
             OfflineFileUploadStatus status = OfflineFileUploadStatus
                     .getInstance();
 
@@ -1765,7 +1691,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         isUploadingTask.setIsUploading('Y');
                         HibernateUtil.update(isUploadingTask);
                         isUploadingTasks.add(isUploadingTask);
-                        
+
                         status.addFileState(isUploadingTaskId, p_fileName,
                                 "Running");
                     }
@@ -1777,7 +1703,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 Task isUploadingTask = getTask(isUploadingTaskId);
                 isUploadingTask.setIsUploading('Y');
                 HibernateUtil.update(isUploadingTask);
-                
+
                 isUploadingTasks.add(isUploadingTask);
                 status.addFileState(isUploadingTaskId, p_fileName, "Running");
             }
@@ -1788,7 +1714,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 String ownerTaskId = taskIds != null ? taskIds[0] : taskId;
                 p_ownerTaskId = Long.parseLong(ownerTaskId);
                 m_uploadPageData.setTaskId(ownerTaskId);
-                
+
                 Task task = getTask(p_ownerTaskId);
                 if ((errPage = checkTask(p_user, task, p_fileName)) != null)
                 {
@@ -1796,7 +1722,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 }
                 p_excludedItemTypes = getExcludedItemTypes(task);
             }
-            
+
             // check all tasks for combined download files
             if (isUploadingTasks != null)
             {
@@ -1830,7 +1756,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 return errPage;
             }
-            
+
             // do not save page if iscontinue = n for internal tag error
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
@@ -1919,7 +1845,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 p_ownerTaskId = Long.parseLong(m_unextractedFileTaskId);
             }
-            
+
             OfflineFileUploadStatus status = OfflineFileUploadStatus
                     .getInstance();
             status.addFileState(p_ownerTaskId, p_fileName, "Running");
@@ -2099,7 +2025,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         {
             return errPage;
         }
-        
+
         // filter some text
         Reader new_reader = null;
         try
@@ -2119,7 +2045,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 {
                     content.append(line).append("\r\n");
                 }
-                
+
                 // check if it is omegat
                 if (ignoreThisLine && line.startsWith(GS_TOOLKIT_FORMAT))
                 {
@@ -2131,9 +2057,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
                 line = br.readLine();
             }
-            
+
             new_reader = new StringReader(content.toString());
-            
+
             br.close();
         }
         catch (Exception e)
@@ -2867,7 +2793,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 errPage = m_errWriter.buildPage().toString();
             }
         }
-        
+
         if (errPage != null)
         {
             if (CATEGORY.isDebugEnabled())
@@ -3014,6 +2940,11 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return m_uploadPageData;
     }
 
+    public String getUnextractedFileTaskId()
+    {
+        return m_unextractedFileTaskId;
+    }
+
     /**
      * Check the task state(Task.STATE_ACCEPTED) and task acceptor, fix for
      * GBS-2191
@@ -3145,17 +3076,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         List p_excludedItemTypes = l10nProfile.getTranslationMemoryProfile()
                 .getJobExcludeTuTypes();
         return p_excludedItemTypes;
-    }
-
-    private Sheet getSheet(Workbook p_workbook, Task p_task, String p_reportName)
-    {
-        if (WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
-        {
-            String sheetName = p_task.getTargetLocale().toString();
-            Sheet sheet = p_workbook.getSheet(sheetName);
-            return sheet == null ? p_workbook.getSheet(0) : sheet;
-        }
-        return p_workbook.getSheet(0);
     }
 
     @Override

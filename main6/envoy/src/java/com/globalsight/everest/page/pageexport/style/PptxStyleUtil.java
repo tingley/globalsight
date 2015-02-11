@@ -47,7 +47,6 @@ import com.globalsight.everest.page.pageexport.style.pptx.ItalicStyle;
 import com.globalsight.everest.page.pageexport.style.pptx.Style;
 import com.globalsight.everest.page.pageexport.style.pptx.SubscriptStyle;
 import com.globalsight.everest.page.pageexport.style.pptx.SuperscriptStyle;
-import com.globalsight.everest.page.pageexport.style.pptx.TagUtil;
 import com.globalsight.everest.page.pageexport.style.pptx.UnderlineStyle;
 import com.globalsight.util.FileUtil;
 
@@ -72,51 +71,19 @@ public class PptxStyleUtil extends StyleUtil
             .getLogger(PptxStyleUtil.class);
 
     /**
-     * Gets all regular expressions that should be replaced by random strings.
-     * 
-     * @see styles
-     * @return all regular expressions.
-     */
-    private List<String> getRegexs()
-    {
-        List<String> regexs = new ArrayList<String>();
-        // b
-        regexs.add("<bpt i=\"[^\"]*\" type=\"bold\" erasable=\"yes\"\\s*>&lt;b&gt;</bpt>");
-        regexs.add("<ept i=\"[^\"]*\"\\s*>&lt;/b&gt;</ept>");
-
-        // i
-        regexs.add("<bpt i=\"[^\"]*\" type=\"italic\" erasable=\"yes\"\\s*>&lt;i&gt;</bpt>");
-        regexs.add("<ept i=\"[^\"]*\"\\s*>&lt;/i&gt;</ept>");
-
-        // u
-        regexs.add("<bpt i=\"[^\"]*\" type=\"ulined\" erasable=\"yes\"\\s*>&lt;u&gt;</bpt>");
-        regexs.add("<ept i=\"[^\"]*\"\\s*>&lt;/u&gt;</ept>");
-
-        // sub
-        regexs.add("<bpt i=\"[^\"]*\" type=\"office-sub\" erasable=\"yes\"\\s*>&lt;sub&gt;</bpt>");
-        regexs.add("<ept i=\"[^\"]*\"\\s*>&lt;/sub&gt;</ept>");
-
-        // sup
-        regexs.add("<bpt i=\"[^\"]*\" type=\"office-sup\" erasable=\"yes\"\\s*>&lt;sup&gt;</bpt>");
-        regexs.add("<ept i=\"[^\"]*\"\\s*>&lt;/sup&gt;</ept>");
-
-        return regexs;
-    }
-
-    /**
      * @see com.globalsight.everest.page.pageexport.style.StyleUtil#preHandle(java.lang.String)
      */
     @Override
     public String preHandle(String content)
     {
-        TagUtil util = new TagUtil();
+    	OfficeTagUtil util = new OfficeTagUtil();
         content = util.handleString(content);
 
         List<String> bs = new ArrayList<String>();
 
-        for (String regex : getRegexs())
+        for (Pattern p : OFFICE_PATTERNS)
         {
-            bs.addAll(getAllString(regex, content));
+            bs.addAll(getAllString(p, content));
         }
 
         for (String b : bs)
@@ -270,31 +237,6 @@ public class PptxStyleUtil extends StyleUtil
 		{
 			s_logger.error(e);
 		}
-    }
-    
-    private void repairAttributeValue(String filePath)
-    {
-    	try
-        {
-    		String s = FileUtil.readFile(new File(filePath), "utf-8");
-    		Pattern p = Pattern.compile("(<[^<]*=\")([^\"]*<[^\">]*>[^\"]*)(\"[^>]*>)");
-    		Matcher m = p.matcher(s);
-    		while (m.find())
-    		{
-    			String s1 = m.group();
-    			String s2 = m.group(2);
-    			String newS2 = s2.replaceAll("<[^>]*>", "");
-    			String newS1 = m.group(1) + newS2 + m.group(3);
-    			s = s.replace(s1, newS1);
-    			m = p.matcher(s);
-    		}
-    		
-    		FileUtil.writeFile(new File(filePath), s, "utf-8");
-        }
-        catch (Exception e)
-        {
-            s_logger.error(e);
-        }
     }
     
     /**

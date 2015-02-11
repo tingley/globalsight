@@ -562,9 +562,9 @@ public class TermLeverageResult
      * DO NOT call this method when dealing with large data because it
      * will become huge.
      */
-    public ArrayList toTermLeverageMatchResult()
+    public ArrayList<TermLeverageMatchResult> toTermLeverageMatchResult()
     {
-        ArrayList result = new ArrayList();
+        ArrayList<TermLeverageMatchResult> result = new ArrayList<TermLeverageMatchResult>();
 
         // Copy the compact in-memory representation into the object
         // that the editor expects.
@@ -572,7 +572,7 @@ public class TermLeverageResult
         {
             // Write out the priority in increasing order but spread it
             // across all target locales: [en]0,1[fr]2,3[en]4,5[fr]6,7.
-            int priority = 0;
+//            int priority = 0;
 
             ArrayList records = (ArrayList)it.next();
             for (int ii = 0, maxi = records.size(); ii < maxi; ii++)

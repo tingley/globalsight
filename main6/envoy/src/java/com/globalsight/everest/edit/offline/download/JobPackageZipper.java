@@ -54,6 +54,7 @@ import com.globalsight.everest.edit.offline.xliff.ListViewWorkXLIFFWriter;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -215,8 +216,9 @@ public class JobPackageZipper
 
             try
             {
+                FileUtil.writeBom(m_zipOutputStream, FileUtil.UTF8);
                 OutputStreamWriter write = new OutputStreamWriter(
-                        m_zipOutputStream, "utf-8");
+                        m_zipOutputStream, FileUtil.UTF8);
                 write.write(content);
                 write.flush();
                 m_zipOutputStream.closeEntry();

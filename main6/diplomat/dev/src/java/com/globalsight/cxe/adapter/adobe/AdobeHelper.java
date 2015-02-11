@@ -27,9 +27,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,6 +60,8 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.Replacer;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.file.FileWaiter;
 
 public class AdobeHelper
@@ -119,6 +123,19 @@ public class AdobeHelper
     static private Hashtable s_exportBatches = new Hashtable();
 
     public static final String XMP_DISPLAY_NAME_PREFIX = "(Adobe file information) ";
+    
+    // [contents-contents-contents]xxxxxx[/contents-contents-contents]LINE_BREAK
+    private static Pattern LINK_PATTERN = Pattern
+            .compile("\\[([^/-]+-[^-]+-[^\\]]+)\\]([^\\[]*)\\[/(\\1)\\]"
+                    + LINE_BREAK);
+    
+    // LINE_BREAK[contents-contents-contents]xxxxxx[/contents-contents-contents]
+    private static Pattern LINK_BREAK_PATTERN = Pattern.compile(LINE_BREAK
+            + "\\[([^/-]+-[^-]+-[^\\]]+)\\]([^\\[]*)\\[/(\\1)\\]");
+    
+    // [contents-contents-contents]xxxxxx[/contents-contents-contents]
+    private static Pattern P1 = Pattern
+            .compile("\\[([^/-]+-[^-]+-[^\\]]+)\\]([^\\[]*)\\[/(\\1)\\]");
 
     private void checkIsInstalled() throws AdobeAdapterException
     {
@@ -860,44 +877,45 @@ public class AdobeHelper
      */
     public static String recoverLineBreak(String content)
     {
-        // [contents-contents-contents]xxxxxx[/contents-contents-contents]LINE_BREAK
-        Pattern p = Pattern
-                .compile("\\[([^/-]+-[^-]+-[^\\]]+)\\]([^\\[]*)\\[/(\\1)\\]"
-                        + LINE_BREAK);
-        Matcher m = p.matcher(content);
-        while (m.find())
+        content = StringUtil.replaceWithRE(content, LINK_PATTERN, new Replacer() 
         {
-            String group2 = m.group(2);
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            sb.append(m.group(1));
-            sb.append("]");
-            sb.append(group2);
-            sb.append(LINE_BREAK);
-            sb.append("[/");
-            sb.append(m.group(3));
-            sb.append("]");
-            content = content.replace(m.group(), sb.toString());
-        }
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+	            String group2 = m.group(2);
+	            StringBuilder sb = new StringBuilder();
+	            sb.append("[");
+	            sb.append(m.group(1));
+	            sb.append("]");
+	            sb.append(group2);
+	            sb.append(LINE_BREAK);
+	            sb.append("[/");
+	            sb.append(m.group(3));
+	            sb.append("]");
+	            
+				return sb.toString();
+			}
+		});
 
-        // LINE_BREAK[contents-contents-contents]xxxxxx[/contents-contents-contents]
-        p = Pattern.compile(LINE_BREAK
-                + "\\[([^/-]+-[^-]+-[^\\]]+)\\]([^\\[]*)\\[/(\\1)\\]");
-        m = p.matcher(content);
-        while (m.find())
+        content = StringUtil.replaceWithRE(content, LINK_BREAK_PATTERN, new Replacer() 
         {
-            String group2 = m.group(2);
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            sb.append(m.group(1));
-            sb.append("]");
-            sb.append(LINE_BREAK);
-            sb.append(group2);
-            sb.append("[/");
-            sb.append(m.group(3));
-            sb.append("]");
-            content = content.replace(m.group(), sb.toString());
-        }
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+		         String group2 = m.group(2);
+		         StringBuilder sb = new StringBuilder();
+		         sb.append("[");
+		         sb.append(m.group(1));
+		         sb.append("]");
+		         sb.append(LINE_BREAK);
+		         sb.append(group2);
+		         sb.append("[/");
+		         sb.append(m.group(3));
+		         sb.append("]");
+	            
+				return sb.toString();
+			}
+		});
 
         return content;
     }
@@ -907,74 +925,79 @@ public class AdobeHelper
      */
     private String convertLineBreakToTag(String content)
     {
-        // [contents-contents-contents]xxxxxx[/contents-contents-contents]
-        Pattern p = Pattern
-                .compile("\\[([^/-]+-[^-]+-[^\\]]+)\\]([^\\[]*)\\[/(\\1)\\]");
-        Matcher m = p.matcher(content);
-        while (m.find())
+    	content = StringUtil.replaceWithRE(content, P1, new Replacer() 
         {
-            String group2 = m.group(2);
-            // 1. move LINE_BREAK in front of the start tag
-            if (group2.trim().startsWith(LINE_BREAK))
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.append(MARK_LF_IDML);
-                sb.append("[");
-                sb.append(m.group(1));
-                sb.append("]");
-                sb.append(removeLineBreak(group2));
-                sb.append("[/");
-                sb.append(m.group(3));
-                sb.append("]");
-                content = content.replace(m.group(), sb.toString());
-            }
-            // 2. move LINE_BREAK after the end tag
-            else if (group2.trim().endsWith(LINE_BREAK))
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.append("[");
-                sb.append(m.group(1));
-                sb.append("]");
-                sb.append(removeLineBreak(group2));
-                sb.append("[/");
-                sb.append(m.group(3));
-                sb.append("]");
-                sb.append(MARK_LF_IDML);
-                content = content.replace(m.group(), sb.toString());
-            }
-            // 3. LINE_BREAK is in the middle of the tag text
-            else if (group2.contains(LINE_BREAK))
-            {
-                int index = group2.indexOf(LINE_BREAK);
-                String before = group2.substring(0, index);
-                String after = group2.substring(index + LINE_BREAK.length());
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+				String group2 = m.group(2);
+	            // 1. move LINE_BREAK in front of the start tag
+	            if (group2.trim().startsWith(LINE_BREAK))
+	            {
+	                StringBuilder sb = new StringBuilder();
+	                sb.append(MARK_LF_IDML);
+	                sb.append("[");
+	                sb.append(m.group(1));
+	                sb.append("]");
+	                sb.append(removeLineBreak(group2));
+	                sb.append("[/");
+	                sb.append(m.group(3));
+	                sb.append("]");
+	                
+	                return sb.toString();
+	            }
+	            // 2. move LINE_BREAK after the end tag
+	            else if (group2.trim().endsWith(LINE_BREAK))
+	            {
+	                StringBuilder sb = new StringBuilder();
+	                sb.append("[");
+	                sb.append(m.group(1));
+	                sb.append("]");
+	                sb.append(removeLineBreak(group2));
+	                sb.append("[/");
+	                sb.append(m.group(3));
+	                sb.append("]");
+	                sb.append(MARK_LF_IDML);
+	                
+	                return sb.toString();
+	            }
+	            // 3. LINE_BREAK is in the middle of the tag text
+	            else if (group2.contains(LINE_BREAK))
+	            {
+	                int index = group2.indexOf(LINE_BREAK);
+	                String before = group2.substring(0, index);
+	                String after = group2.substring(index + LINE_BREAK.length());
 
-                StringBuilder sb = new StringBuilder();
-                sb.append("[");
-                sb.append(m.group(1));
-                sb.append("]");
-                sb.append(before);
-                sb.append("[/");
-                sb.append(m.group(3));
-                sb.append("]");
-                sb.append(MARK_LF_IDML);
-                sb.append("[");
-                sb.append(m.group(1));
-                sb.append("]");
-                sb.append(after);
-                sb.append("[/");
-                sb.append(m.group(3));
-                sb.append("]");
-                content = content.replace(m.group(), sb.toString());
-            }
-        }
-
-        return content.replace(LINE_BREAK, MARK_LF_IDML);
+	                StringBuilder sb = new StringBuilder();
+	                sb.append("[");
+	                sb.append(m.group(1));
+	                sb.append("]");
+	                sb.append(before);
+	                sb.append("[/");
+	                sb.append(m.group(3));
+	                sb.append("]");
+	                sb.append(MARK_LF_IDML);
+	                sb.append("[");
+	                sb.append(m.group(1));
+	                sb.append("]");
+	                sb.append(after);
+	                sb.append("[/");
+	                sb.append(m.group(3));
+	                sb.append("]");
+	                
+	                return sb.toString();
+	            }
+	            
+				return m.group();
+			}
+		});
+    	
+        return StringUtil.replace(content, LINE_BREAK, MARK_LF_IDML);
     }
 
     private String removeLineBreak(String content)
     {
-        return content.replace(LINE_BREAK, "");
+        return StringUtil.replace(content, LINE_BREAK, "");
     }
 
     private boolean extractLineBreak()
@@ -1144,16 +1167,15 @@ public class AdobeHelper
             throws IOException
     {
         String l10nProfileId = m_eventFlow.getBatchInfo().getL10nProfileId();
-        ArrayList targetLocales = findTargetLocales(l10nProfileId);
+        Set<String> targetLocales = findTargetLocales(l10nProfileId);
         String splitChar = File.separator;
         if ("\\".equalsIgnoreCase(splitChar))
         {
             splitChar = "\\\\";
         }
         String[] srcDisplayName = m_eventFlow.getDisplayName().split(splitChar);
-        for (int i = 0; i < targetLocales.size(); i++)
+        for (String locale : targetLocales)
         {
-            String locale = (String) targetLocales.get(i);
             StringBuffer tarDir = new StringBuffer(AmbFileStoragePathUtils
                     .getPdfPreviewDir().getAbsolutePath());
             tarDir.append(File.separator).append(locale);
@@ -1282,9 +1304,9 @@ public class AdobeHelper
         }
     }
 
-    private ArrayList findTargetLocales(String p_l10nProfileId)
+    private Set<String> findTargetLocales(String p_l10nProfileId)
     {
-        ArrayList targetLocales = new ArrayList();
+        Set<String> targetLocales = new HashSet<String>();
 
         if (p_l10nProfileId == null || p_l10nProfileId.equals("null"))
         {
@@ -1312,10 +1334,7 @@ public class AdobeHelper
                 String lang = results.getString(1);
                 String country = results.getString(2);
                 String locale = lang + "_" + country;
-                if (!targetLocales.contains(locale))
-                {
-                    targetLocales.add(locale);
-                }
+                targetLocales.add(locale);
             }
         }
         catch (Exception e)

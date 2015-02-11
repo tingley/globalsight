@@ -177,10 +177,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         private TargetPage m_targetPage = null;
 
         public Object m_tusLock = new Object();
-        private Collection m_tus = null;
+        private Collection<TuImpl> m_tus = null;
+        private Map<Long, TuImpl> m_tusInMap = null;
 
         public Object m_sourceTuvsLock = new Object();
-        private ArrayList m_sourceTuvs = null;
+        private ArrayList<Tuv> m_sourceTuvs = null;
         private SegmentRepetitions m_repetitions = null;
 
         public Object m_targetTuvsLock = new Object();
@@ -216,6 +217,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_sourcePage = null;
             m_targetPage = null;
             m_tus = null;
+            m_tusInMap = null;
             m_sourceTuvs = null;
             m_targetTuvs = null;
             m_repetitions = null;
@@ -288,28 +290,28 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_targetPage = p_page;
         }
 
-        public Collection getTus()
+        public Collection<TuImpl> getTus()
         {
             return m_tus;
         }
 
-        public void setTus(Collection p_tus)
+        public void setTus(Collection<TuImpl> p_tus)
         {
             m_tus = p_tus;
         }
 
-        public ArrayList getSourceTuvs()
+        public ArrayList<Tuv> getSourceTuvs()
         {
             return m_sourceTuvs;
         }
 
-        public void setSourceTuvs(ArrayList p_tuvs)
+        public void setSourceTuvs(ArrayList<Tuv> p_tuvs)
         {
             m_sourceTuvs = p_tuvs;
             m_repetitions = new SegmentRepetitions(m_sourceTuvs);
         }
 
-        public List getTargetTuvs()
+        public List<Tuv> getTargetTuvs()
         {
             return m_targetTuvs;
         }
@@ -685,7 +687,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             }
 
             // get the Tuvs in the page
-            ArrayList tuvs = getPageTuvs(srcPage);
+            List<Tuv> tuvs = getPageTuvs(srcPage);
 
             // inject them into the template
             for (int i = 0, max = tuvs.size(); i < max; i++)
@@ -1011,7 +1013,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 }
             }
 
-            ArrayList<Tuv> sourceTuvs = getPageTuvs(sourcePage);
+            List<Tuv> sourceTuvs = getPageTuvs(sourcePage);
             ArrayList imageMaps = getImageMaps(targetPage);
             ArrayList<Issue> comments = null;
             SegmentRepetitions repetitions = getRepetitions(sourcePage);
@@ -2570,15 +2572,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             LeverageOptions leverageOptions = m_inprogressTmManager
                     .getLeverageOptions(sourcePage, p_targetLocale);
-            Collection<Long> tms = leverageOptions.getTmsToLeverageFrom();
-            long[] tmIds = new long[tms.size()];
-            Iterator<Long> it = tms.iterator();
-            int index = 0;
-            while (it.hasNext())
-            {
-                tmIds[index] = it.next();
-                index++;
-            }
 
             boolean isTmProcedence = leverageOptions.isTmProcedence();
 
@@ -2695,6 +2688,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 matchResult.setMatchedTuvBasicInfo(match
                         .getMatchedTuvBasicInfo());
                 matchResult.setMatchedTuvJobName(match.getMatchedTuvJobName());
+                matchResult.setSid(match.getSid());
                 matchResults.add(matchResult);
             }
 
@@ -5495,26 +5489,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     private TargetPage getTargetPage(long p_trgPageId) throws GeneralException,
             RemoteException
     {
-
         TargetPage result = m_pageManager.getTargetPage(p_trgPageId);
         result.setGlobalSightLocale(result.getGlobalSightLocale());
         m_pageCache.setTargetPage(result);
 
-        /*
-         * synchronized (m_pageCache.m_pageLock) { result =
-         * m_pageCache.getTargetPage();
-         * 
-         * if (result == null || result.getId() != p_trgPageId) { result =
-         * m_pageManager.getTargetPage(p_trgPageId); Long id =
-         * result.getSourcePage().getIdAsLong(); SourcePage sPage = (SourcePage)
-         * HibernateUtil.get( SourcePage.class, id);
-         * result.setSourcePage(sPage); id =
-         * result.getGlobalSightLocale().getIdAsLong(); GlobalSightLocale locale
-         * = (GlobalSightLocale) HibernateUtil .get(GlobalSightLocale.class,
-         * id); result.setGlobalSightLocale(locale);
-         * 
-         * m_pageCache.setTargetPage(result); } }
-         */
         return result;
     }
 
@@ -5530,10 +5508,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
-    private Collection getPageTus(SourcePage p_page) throws GeneralException,
-            RemoteException
+    private Collection<TuImpl> getPageTus(SourcePage p_page)
+            throws GeneralException, RemoteException
     {
-        Collection result;
+        Collection<TuImpl> result;
 
         synchronized (m_pageCache.m_tusLock)
         {
@@ -5544,14 +5522,21 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 m_pageCache.setTus(m_tuvManager.getTus(p_page.getIdAsLong()));
 
                 result = m_pageCache.getTus();
+                if (m_pageCache.m_tusInMap == null)
+                {
+                    m_pageCache.m_tusInMap = new HashMap<Long, TuImpl>();
+                }
+                for (TuImpl tu : result)
+                {
+                    m_pageCache.m_tusInMap.put(tu.getIdAsLong(), tu);
+                }
             }
         }
 
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    private ArrayList<Tuv> getPageTuvs(SourcePage p_page)
+    private List<Tuv> getPageTuvs(SourcePage p_page)
             throws GeneralException, RemoteException
     {
         ArrayList<Tuv> result;
@@ -5562,9 +5547,20 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             if (result == null)
             {
-                try {
+                try
+                {
                     m_pageCache.setSourceTuvs(SegmentTuvUtil.getSourceTuvs(p_page));
                     result = m_pageCache.getSourceTuvs();
+
+                    for (Tuv srcTuv : result)
+                    {
+                        TuImpl myTu = m_pageCache.m_tusInMap.get(srcTuv.getTuId());
+                        if (myTu != null)
+                        {
+                            srcTuv.setTu(myTu);
+                            myTu.addTuv(srcTuv);
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
@@ -5576,7 +5572,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     private List<Tuv> getPageTuvs(TargetPage p_page) throws GeneralException,
             RemoteException
     {
@@ -5588,13 +5583,19 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             if (result == null)
             {
-                // TODO: make TuvManager return ArrayList or Vector.
-
-                // CATEGORY.warn("Using getTargetTuvsForStatistics(). FIXME");
-                m_pageCache.setTargetTuvs(new ArrayList(m_tuvManager
+                m_pageCache.setTargetTuvs(new ArrayList<Tuv>(m_tuvManager
                         .getTargetTuvsForStatistics(p_page)));
 
                 result = m_pageCache.getTargetTuvs();
+                for (Tuv trgTuv : result)
+                {
+                    TuImpl myTu = m_pageCache.m_tusInMap.get(trgTuv.getTuId());
+                    if (myTu != null)
+                    {
+                        trgTuv.setTu(myTu);
+                        myTu.addTuv(trgTuv);
+                    }
+                }
             }
         }
 

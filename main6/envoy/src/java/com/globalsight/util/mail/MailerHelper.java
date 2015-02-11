@@ -32,12 +32,19 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.Replacer;
+import com.globalsight.util.StringUtil;
 
 // Mail Help Class
 public class MailerHelper
 {
     private static final Logger s_logger = Logger.getLogger(MailerHelper.class
             .getName());
+    
+    private static final String URL_REGEX = "((http|https)://([\\w-]+\\.)+[\\w-]+[:\\d]*(/[\\w- ./?%&=]*)?)";
+    private static final String REGEX = "<a href=\"" + URL_REGEX + "\" target=\"_blank\">"
+            + URL_REGEX + "</a>";
+    private static Pattern PATTERN = Pattern.compile(REGEX);
 
     MailerHelper()
     {
@@ -58,7 +65,7 @@ public class MailerHelper
                 .append("table, th, td {border: 1px solid black; padding:3px;}")
                 .append("</style>")
                 .append("</head><body>")
-                .append(p_message.replace("\r\n", "<br/>").replace("\n",
+                .append(StringUtil.replace(StringUtil.replace(p_message,"\r\n", "<br/>"),"\n",
                         "<br/>")).append("</body></html>");
 
         return result.toString();
@@ -69,8 +76,8 @@ public class MailerHelper
      */
     public static String getTextContext(String p_message)
     {
-        String result = p_message.replace("<span class=\"classBold\">", "")
-                .replace("</span>", "");
+        String result = StringUtil.replace(p_message, "<span class=\"classBold\">", "");
+        result = StringUtil.replace(result, "</span>", "");
         result = replaceURL(result);
         return result;
     }
@@ -83,18 +90,19 @@ public class MailerHelper
      */
     public static String replaceURL(String p_message)
     {
-        String urlRegex = "((http|https)://([\\w-]+\\.)+[\\w-]+[:\\d]*(/[\\w- ./?%&=]*)?)";
-        String regex = "<a href=\"" + urlRegex + "\" target=\"_blank\">"
-                + urlRegex + "</a>";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher m = pattern.matcher(p_message);
-        while (m.find())
+    	p_message = StringUtil.replaceWithRE(p_message, PATTERN, new Replacer() 
         {
-            if (m.group(1).equals(m.group(5)))
-            {
-                p_message = p_message.replace(m.group(), m.group(1));
-            }
-        }
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+				if (m.group(1).equals(m.group(5)))
+	            {
+	                return m.group(1);
+	            };
+	            
+	            return m.group();
+			}
+		});
 
         return p_message;
     }

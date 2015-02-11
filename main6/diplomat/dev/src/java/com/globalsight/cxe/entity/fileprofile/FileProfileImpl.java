@@ -132,7 +132,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     {
         m_knownFormatTypeId = o.getKnownFormatTypeId();
         m_l10nProfileId = o.getL10nProfileId();
-        m_xmlRuleFileId = new Long(o.getXmlRuleFileId());
+        m_xmlRuleFileId = ((FileProfileImpl) o).getXmlRuleFileId();
         m_name = o.getName();
         m_description = o.getDescription();
         m_companyId = o.getCompanyId();
@@ -263,41 +263,21 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     }
 
     /**
-     * Return the id of the XML Rule File
+     * @deprecated Only used by Hibernate.
      * 
-     * @return XML Rule File id
+     *             Call {@link #getXmlRuleId()} instead.
      */
-    public long getXmlRuleFileId()
+    long getXmlRuleFileId()
     {
 
-        if (filterId > -2)
+        // The former logic.
+        if (m_xmlRuleFileId == null)
         {
-            // The filter have been take effect.
-            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, m_companyId);
-            Filter filter = FilterHelper.getFilterById(filters, filterId);
-            if (filter == null)
-            {
-                return 0;
-            }
-            else
-            {
-                return (filter instanceof XMLRuleFilter) ? ((XMLRuleFilter) filter)
-                        .getXmlRuleId() : 0;
-            }
+            return 0;
         }
         else
         {
-            // The former logic.
-            if (m_xmlRuleFileId == null)
-            {
-                Long Ltmp = new Long(0);
-                return Ltmp.longValue();
-            }
-            else
-            {
-                return m_xmlRuleFileId.longValue();
-            }
+            return m_xmlRuleFileId.longValue();
         }
 
     }
@@ -509,7 +489,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         this.m_code_set = m_code_set;
     }
 
-    public Long getXmlRuleId()
+    public long getXmlRuleId()
     {
         if (filterId > -2)
         {
@@ -518,7 +498,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
-                return null;
+                return 0;
             }
 
             if (filter instanceof XMLRuleFilter)
@@ -528,10 +508,10 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                     return xmlRuleId;
             }
 
-            return null;
+            return 0;
         }
 
-        return m_xmlRuleFileId;
+        return getXmlRuleFileId();
     }
 
     public void setXmlRuleId(Long xmlRuleId)
@@ -539,7 +519,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         this.m_xmlRuleFileId = xmlRuleId;
     }
 
-    public boolean getHeaderTranslate()
+    public boolean translateHeader()
     {
 
         if (filterId > -2)
@@ -561,8 +541,17 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         else
         {
             // The former logic
-            return headerTranslate;
+            return getHeaderTranslate();
         }
+    }
+
+    /**
+     * @deprecated Only used by hibernate. Use
+     *             {@link FileProfileImpl#translateHeader()} instead.
+     */
+    boolean getHeaderTranslate()
+    {
+        return headerTranslate;
     }
 
     public void setHeaderTranslate(Boolean headerTranslate)
@@ -577,7 +566,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         }
     }
 
-    public boolean getSupportSid()
+    public boolean supportsSid()
     {
         if (filterId > -2)
         {
@@ -598,8 +587,18 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         else
         {
             // The former logic
-            return supportSid;
+            return getSupportSid();
         }
+    }
+
+    /**
+     * @deprecated Only used for Hibernate.
+     * 
+     *             Use {{@link #supportsSid()} instead.
+     */
+    boolean getSupportSid()
+    {
+        return supportSid;
     }
 
     public void setSupportSid(Boolean supportSid)
@@ -614,7 +613,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         }
     }
 
-    public boolean getUnicodeEscape()
+    public boolean supportsUnicodeEscape()
     {
         if (filterId > -2)
         {
@@ -642,9 +641,18 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         else
         {
             // The former logic
-            return unicodeEscape;
+            return getUnicodeEscape();
         }
+    }
 
+    /**
+     * @deprecated Only used for Hibernate
+     * 
+     *             Use {@link FileProfileImpl#supportsUnicodeEscape()} instead.
+     */
+    boolean getUnicodeEscape()
+    {
+        return unicodeEscape;
     }
 
     public void setUnicodeEscape(Boolean unicodeEscape)
@@ -659,6 +667,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         }
     }
 
+    // This one is not mapped by Hibernate, so it doesn't matter
+    // that it calls the database.
     public boolean getEntityEscape()
     {
         if (filterId > -2)
@@ -697,7 +707,16 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         }
     }
 
-    public String getJsFilterRegex()
+    /**
+     * @deprecated Only used for Hibernate Use
+     *             {@link #getJavascriptFilterRegex()} instead.
+     */
+    String getJsFilterRegex()
+    {
+        return jsFilterRegex;
+    }
+
+    public String getJavascriptFilterRegex()
     {
 
         if (filterId > -2)
@@ -719,7 +738,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         else
         {
             // The former logic
-            return jsFilterRegex;
+            return getJsFilterRegex();
         }
     }
 

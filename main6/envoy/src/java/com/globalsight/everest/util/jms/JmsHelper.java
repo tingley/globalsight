@@ -74,7 +74,6 @@ public class JmsHelper
     public static final String JMS_NEW_COMPANY_QUEUE = "com.globalsight.everest.jms.NewCompany";
     public static final String JMS_CANCEL_JOB_QUEUE = "com.globalsight.everest.jms.JobCancel";
     public static final String JMS_CANCEL_WORKFLOW_QUEUE = "com.globalsight.everest.jms.WorkflowCancel";
-    public static final String JMS_UPDATE_lEVERAGE_MATCH_QUEUE = "com.globalsight.everest.jms.UpdateLeverageMatchMDB";
     public static final String JMS_ADD_SOURCE_FILE_QUEUE = "com.globalsight.everest.jms.AddSourceFile";
 
     private static AppServerWrapper s_appServer = AppServerWrapperFactory

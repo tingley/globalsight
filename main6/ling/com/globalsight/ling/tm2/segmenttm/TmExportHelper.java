@@ -4,9 +4,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.tm.Tm;
@@ -22,7 +26,7 @@ import com.globalsight.terminology.util.SqlUtil;
 public class TmExportHelper {
     static private final Logger CATEGORY = Logger
                 .getLogger(TmExportHelper.class);
-    
+    static private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     /**
      * Get the count of all TUs in the TM.
      */
@@ -539,14 +543,17 @@ public class TmExportHelper {
             String createdBefore)
     {
         StringBuffer result = new StringBuffer();
-        if (isSet(createdAfter))
+
+        if (StringUtils.isNotBlank(createdAfter))
         {
+            createdAfter = format.format(new Date(createdAfter));
             result.append(" and ");
             result.append(p_table).append(".CREATION_DATE >= '");
             result.append(createdAfter).append("'");
         }
-        if (isSet(createdBefore))
+        if (StringUtils.isNotBlank(createdBefore))
         {
+            createdBefore = format.format(new Date(createdBefore));
             result.append(" and ");
             result.append(p_table).append(".CREATION_DATE <= '");
             result.append(createdBefore).append("'");
@@ -557,19 +564,5 @@ public class TmExportHelper {
     }
 
 
-    //
-    // Database Helpers
-    //
-
-
-    private static boolean isSet(String p_arg)
-    {
-        if (p_arg != null && p_arg.length() > 0)
-        {
-            return true;
-        }
-
-        return false;
-    }
 
 }

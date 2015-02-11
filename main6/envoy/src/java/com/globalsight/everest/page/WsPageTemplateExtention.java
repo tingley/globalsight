@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
+import org.dom4j.io.SAXReader;
+
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.xliff.ListViewWorkXLIFFWriter;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
@@ -162,6 +164,7 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
         {
             LeverageMatch.orderMatchResult(p_list);
 
+            SAXReader reader = new SAXReader();
             for (int i = 0; i < p_list.size(); i++)
             {
                 LeverageMatch leverageMatch = p_list.get(i);
@@ -170,7 +173,7 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
                 {
                     altStr = altStr
                             + lvwx.getAltByMatch(leverageMatch, null,
-                                    p_companyId);
+                                    p_companyId, reader);
                 }
             }
         }
@@ -211,12 +214,12 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
                     lm.getOriginalSourceTuvId(), companyId);
             Tuv targetTuv = sourceTuv.getTu(companyId).getTuv(
                     lm.getTargetLocaleId(), sp.getCompanyId());
-//            boolean isWSXlf = false;
-//            if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(sourceTuv.getTu(
-//                    companyId).getGenerateFrom()))
-//            {
-//                isWSXlf = true;
-//            }
+            // boolean isWSXlf = false;
+            // if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(sourceTuv.getTu(
+            // companyId).getGenerateFrom()))
+            // {
+            // isWSXlf = true;
+            // }
 
             String targetContent = targetTuv.getGxml();
             String originalTarget = sourceTuv.getTu(companyId)

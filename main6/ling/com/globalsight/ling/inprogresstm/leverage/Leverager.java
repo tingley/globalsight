@@ -265,6 +265,7 @@ public class Leverager
             leveragedSegment.setTmIndex(projectTmIndex);
             leveragedSegment.setMatchedTuvBasicInfo(matchedTuvBasicInfo);
             leveragedSegment.setMatchedTuvJobName(job.getJobName());
+            leveragedSegment.setSid(trgTuv.getSid());
             dynamicLeverageResults.add(leveragedSegment);
         }
 

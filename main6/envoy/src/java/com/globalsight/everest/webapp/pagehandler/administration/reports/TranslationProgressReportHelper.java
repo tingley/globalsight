@@ -19,10 +19,8 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 import java.rmi.RemoteException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,57 +28,51 @@ import java.util.ResourceBundle;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.Alignment;
-import jxl.format.UnderlineStyle;
-import jxl.format.VerticalAlignment;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.costing.BigDecimalHelper;
-import com.globalsight.everest.edit.online.OnlineEditorManagerLocal;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
-import com.globalsight.everest.integration.ling.LingServerProxy;
-import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.PageManager;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 
 public class TranslationProgressReportHelper
 {
-	private static Logger s_logger = Logger
-			.getLogger("Reports");
+    private static Logger s_logger = Logger.getLogger("Reports");
+
+	private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
 	
-	public WritableWorkbook m_workbook = null;
+	private ResourceBundle bundle = null;
 
 	public static String JOB_ID = "jobId";
 
@@ -90,7 +82,9 @@ public class TranslationProgressReportHelper
 
 	public static String TARGET_LOCALES = "targetLocalesList";
 
-	private WritableCellFormat contentFormat = null;
+	private CellStyle contentStyle = null;
+	
+	private CellStyle headerStyle = null;
 
 	private GlobalSightLocale m_sourceLocale = null;
 
@@ -122,16 +116,14 @@ public class TranslationProgressReportHelper
 		HttpSession session = p_request.getSession();
 		percent = NumberFormat.getPercentInstance((Locale) session
 				.getAttribute(WebAppConstants.UILOCALE));
-		WorkbookSettings settings = new WorkbookSettings();
-		settings.setSuppressWarnings(true);
-		settings.setEncoding("UTF-8");
-		m_workbook = Workbook.createWorkbook(p_response.getOutputStream(),
-				settings);
-		addJobs(p_request, p_response);
-        if (m_workbook != null)
+		
+		Workbook p_workbook = new SXSSFWorkbook();
+		addJobs(p_workbook, p_request, p_response);
+        if (p_workbook != null)
         {
-            m_workbook.write();
-            m_workbook.close();
+        	ServletOutputStream out = p_response.getOutputStream();
+            p_workbook.write(out);
+            out.close();
         }
 	}
 
@@ -140,45 +132,41 @@ public class TranslationProgressReportHelper
 	 * 
 	 * @exception Exception
 	 */
-    private void addJobs(HttpServletRequest p_request,
+    private void addJobs(Workbook p_workbook, HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
     {
 	    String userId = (String) p_request.getSession().getAttribute(
                 WebAppConstants.USER_NAME);
-	    ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
+	    bundle = PageHandler.getBundle(p_request.getSession());
 		// print out the request parameters
 		String[] paramJobId = p_request.getParameterValues(JOB_ID);
 		String[] paramTargetLocales = p_request
 				.getParameterValues(TARGET_LOCALES);
 		String[] paramSourceLocales = p_request
 				.getParameterValues(SOURCE_LOCALES);
-		WritableSheet sheet = m_workbook.createSheet(bundle.getString("lb_lisa_qa"), 0);
-		// *******
-		// add header
-		// *******
-		addHeader(sheet, bundle);
-		// *******
-		// add srcLocale and tgtLocale
-		// *******
-        Locale uiLocale = (Locale) p_request.getSession().getAttribute(
-                WebAppConstants.UILOCALE);
-		sheet.addCell(new Label(0, 4, m_sourceLocale.getDisplayName(uiLocale),
-				getContentFormat()));
-		sheet.addCell(new Label(1, 4, m_targetLocale.getDisplayName(uiLocale),
-				getContentFormat()));
-		// *******
+		Sheet sheet = p_workbook.createSheet(bundle.getString("lb_lisa_qa"));
+		
+		addTitle(p_workbook, sheet);
+		
+		addLanguageHeader(p_workbook, sheet);
+		
+		addSegmentHeader(p_workbook, sheet);
+		
+		Locale uiLocale = (Locale) p_request.getSession().getAttribute(
+				WebAppConstants.UILOCALE);
+		String srcLang = m_sourceLocale.getDisplayName(uiLocale);
+		String trgLang = m_targetLocale.getDisplayName(uiLocale);
+		writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
+
 		// get jobs
-		// *******
-		ArrayList jobs = new ArrayList();
+		ArrayList<Job> jobs = new ArrayList<Job>();
 		if (paramJobId != null && "*".equals(paramJobId[0]))
 		{
-			// do a search based on the params
 			JobSearchParameters searchParams = getSearchParams(p_request);
 			jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
 		}
 		else
 		{
-			// get choosed jobs
 			for (int i = 0; i < paramJobId.length; i++)
 			{
 				if ("*".equals(paramJobId[i]) == false)
@@ -195,57 +183,213 @@ public class TranslationProgressReportHelper
         if (ReportHelper.checkReportsDataInProgressStatus(userId,
                 reportJobIDS, getReportType()))
         {
-            m_workbook = null;
-            p_response.sendError(p_response.SC_NO_CONTENT);
+            p_workbook = null;
+            p_response.sendError(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
         // Set ReportsData.
         ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
                 0, ReportsData.STATUS_INPROGRESS);
         
-		// *******
-		// seperate jobs by Division
-		// *******
-		Hashtable projects = new Hashtable();
-		for (Iterator iterator = jobs.iterator(); iterator.hasNext();)
+		// Separate jobs by Division
+		Hashtable<String, List<Job>> projects = new Hashtable<String, List<Job>>();
+		for (Job job : jobs)
 		{
-			Job job = (Job) iterator.next();
 			String projectName = job.getL10nProfile().getProject().getName();
-			ArrayList jobList = null;
+			List<Job> jobList = null;
 			if (projects.containsKey(projectName))
 			{
-				jobList = (ArrayList) projects.get(projectName);
+				jobList = projects.get(projectName);
 			}
 			else
 			{
-				jobList = new ArrayList();
+				jobList = new ArrayList<Job>();
 				projects.put(projectName, jobList);
 			}
 			jobList.add(job);
 		}
-		// *******
+
 		// add jobs into sheet
-		// *******
 		IntHolder row = new IntHolder(7);
-		for (Enumeration e = projects.keys(); e.hasMoreElements();)
+		for (Enumeration<String> e = projects.keys(); e.hasMoreElements();)
 		{
 			String projectName = (String) e.nextElement();
-			sheet.addCell(new Label(0, row.value, projectName,
-					getContentFormat()));
-			ArrayList jobList = (ArrayList) projects.get(projectName);
-			for (Iterator iterator = jobList.iterator(); iterator.hasNext();)
+			Cell cell_A_ProjectName = getCell(getRow(sheet, row.value), 0);
+			cell_A_ProjectName.setCellValue(projectName);
+			cell_A_ProjectName.setCellStyle(getContentStyle(p_workbook));
+			List<Job> jobList = projects.get(projectName);
+			for (Job job : jobList)
 			{
-				Job job = (Job) iterator.next();
-				addJobPages(sheet, job, row, paramSourceLocales,
+				addJobPages(p_workbook, sheet, job, row, paramSourceLocales,
 						paramTargetLocales);
 			}
 		}
-		
+
 		// Set ReportsData.
 		ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
 		                100, ReportsData.STATUS_FINISHED);
 	}
+    
+    private void addTitle(Workbook p_workbook, Sheet p_sheet) throws Exception
+    {
+    	// title font is black bold on white
+		// String EMEA = CompanyWrapper.getCurrentCompanyName();
+		Font titleFont = p_workbook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Times");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        titleFont.setColor(IndexedColors.BLACK.getIndex());
+        CellStyle titleStyle = p_workbook.createCellStyle();
+        titleStyle.setWrapText(false);
+        titleStyle.setFont(titleFont);
 
+        Row titleRow = getRow(p_sheet, 0);
+        Cell cell_A_Title = getCell(titleRow, 0);
+        cell_A_Title.setCellValue(bundle
+        		.getString("review_translation_progress_report"));
+        cell_A_Title.setCellStyle(titleStyle);
+		p_sheet.setColumnWidth(0, 22 * 256);
+    }
+    
+    private void addLanguageHeader(Workbook p_workbook, Sheet p_sheet) throws Exception
+    {
+    	int col = 0;
+		int row = 3;
+		Row headerRow = getRow(p_sheet, row);
+		Cell cell_SourceLang = getCell(headerRow, col++);
+		cell_SourceLang.setCellValue(bundle
+        		.getString("lb_source_language"));
+		cell_SourceLang.setCellStyle(getHeaderStyle(p_workbook));
+		p_sheet.setColumnWidth(col - 1, 27 * 256);
+		
+		Cell cell_TargetLang = getCell(headerRow, col++);
+		cell_TargetLang.setCellValue(bundle
+        		.getString("lb_target_language"));
+		cell_TargetLang.setCellStyle(getHeaderStyle(p_workbook));
+		p_sheet.setColumnWidth(col - 1, 27 * 256);
+    }
+    
+    /**
+	 * Adds the table header to the sheet
+	 * 
+	 * @param p_sheet
+	 */
+    private void addSegmentHeader(Workbook p_workbook, Sheet p_sheet)
+            throws Exception
+	{ 		
+		int col = 0;
+		int row = 6;
+		Row secHeaderRow = getRow(p_sheet, row);
+		Cell cell_A = getCell(secHeaderRow, col++);
+        cell_A.setCellValue(bundle
+        		.getString("lb_project"));
+        cell_A.setCellStyle(getHeaderStyle(p_workbook));
+		p_sheet.setColumnWidth(col - 1, 27 * 256);
+		
+		Cell cell_B = getCell(secHeaderRow, col++);
+		cell_B.setCellValue(bundle
+        		.getString("lb_job_id_report"));
+		cell_B.setCellStyle(getHeaderStyle(p_workbook));
+		p_sheet.setColumnWidth(col - 1, 27 * 256);
+		
+		Cell cell_C = getCell(secHeaderRow, col++);
+		cell_C.setCellValue(bundle
+        		.getString("lb_job_name"));
+		cell_C.setCellStyle(getHeaderStyle(p_workbook));
+		p_sheet.setColumnWidth(col - 1, 30 * 256);
+		
+		Cell cell_D = getCell(secHeaderRow, col++);
+		cell_D.setCellValue(bundle
+        		.getString("lb_document_name"));
+		cell_D.setCellStyle(getHeaderStyle(p_workbook));
+		p_sheet.setColumnWidth(col - 1, 40 * 256);
+		
+		Cell cell_E = getCell(secHeaderRow, col++);
+		cell_E.setCellValue(bundle
+        		.getString("lb_total_translated_text"));
+		cell_E.setCellStyle(getHeaderStyle(p_workbook));
+		p_sheet.setColumnWidth(col - 1, 20 * 256);
+	}
+
+	private void writeLanguageInfo(Workbook p_workbook, Sheet sheet,
+			String srcLang, String trgLang) throws Exception
+	{
+		Row localeRow = getRow(sheet, 4);
+        Cell cell_A = getCell(localeRow, 0);
+        cell_A.setCellValue(srcLang);
+        cell_A.setCellStyle(getContentStyle(p_workbook));
+        Cell cell_B = getCell(localeRow, 1);
+        cell_B.setCellValue(trgLang);
+        cell_B.setCellStyle(getContentStyle(p_workbook));
+	}
+	
+	/**
+	 * add pages in a job
+	 * 
+	 * @param sheet
+	 * @param job
+	 * @param row
+	 * @param paramSourceLocales
+	 * @param paramTargetLocales
+	 * @throws Exception
+	 */
+    private void addJobPages(Workbook p_workbook, Sheet p_sheet, Job job,
+            IntHolder row, String[] paramSourceLocales,
+            String[] paramTargetLocales) throws Exception
+	{
+		// return if source locale are not selected
+		GlobalSightLocale gsl = job.getSourceLocale();
+        if (!(Long.toString(gsl.getId())).equals(paramSourceLocales[0]))
+            return;
+
+        // get basic parameters
+		String jobName = job.getJobName();
+		long jobId = job.getId();
+		Workflow selectedWF = null;
+		String tLocale = paramTargetLocales[0];
+		for (Workflow wf : job.getWorkflows())
+		{
+			String wfLocale = Long.toString(wf.getTargetLocale().getId());
+			if (wfLocale.equals(tLocale))
+			{
+				selectedWF = wf;
+				break;
+			}
+		}
+
+		if (selectedWF != null)
+		{
+			Vector<TargetPage> targetPages = selectedWF.getTargetPages();
+			for (TargetPage tp : targetPages)
+			{
+				int c = 1;
+				// 8.2 Job id
+				Row tehRow = getRow(p_sheet, row.value);
+				Cell cell_B = getCell(tehRow, c++);
+				cell_B.setCellValue(jobId);
+				cell_B.setCellStyle(getContentStyle(p_workbook));
+				// 8.2 job name
+				Cell cell_C = getCell(tehRow, c++);
+				cell_C.setCellValue(jobName);
+				cell_C.setCellStyle(getContentStyle(p_workbook));
+				// 8.3 document name
+				String fileName = tp.getSourcePage().getExternalPageId();
+                // fileName = SourcePage.filtSpecialFile(fileName);
+				Cell cell_D = getCell(tehRow, c++);
+				cell_D.setCellValue(fileName);
+				cell_D.setCellStyle(getContentStyle(p_workbook));
+				// 8.4 total translated text
+                double p = Integer.parseInt(SegmentTuvUtil
+                        .getTranslatedPercentage(tp.getId())) / 100.0;
+				Cell cell_E = getCell(tehRow, c++);
+				cell_E.setCellValue(percent.format(p));
+				cell_E.setCellStyle(getContentStyle(p_workbook));
+				row.inc();
+			}
+		}
+	}
+	
 	/**
 	 * Returns search params used to find the in progress jobs for all PMs
 	 * 
@@ -276,7 +420,7 @@ public class TranslationProgressReportHelper
 		sp.setTargetLocale(m_targetLocale);
 
 		// search by project
-		ArrayList projectIdList = new ArrayList();
+		ArrayList<Long> projectIdList = new ArrayList<Long>();
 		boolean wantsAllProjects = false;
 		for (int i = 0; i < paramProjectIds.length; i++)
 		{
@@ -335,238 +479,80 @@ public class TranslationProgressReportHelper
 
 		if (paramSourceLocales != null && !"*".equals(paramSourceLocales[0]))
 		{
-			m_sourceLocale = ServerProxy.getLocaleManager().getLocaleByString(
-					paramSourceLocales[0]);
+			m_sourceLocale = ServerProxy.getLocaleManager().getLocaleById(
+					Long.valueOf(paramSourceLocales[0]));
 		}
 
 		if (paramTargetLocales != null && !"*".equals(paramTargetLocales[0]))
 		{
-			m_targetLocale = ServerProxy.getLocaleManager().getLocaleByString(
-					paramTargetLocales[0]);
+			m_targetLocale = ServerProxy.getLocaleManager().getLocaleById(
+					Long.valueOf(paramTargetLocales[0]));
 		}
 	}
 
-	/**
-	 * Adds the table header to the sheet
-	 * 
-	 * @param p_sheet
-	 */
-	private void addHeader(WritableSheet p_sheet, ResourceBundle bundle) throws Exception
-	{
-		// title font is black bold on white
-		// String EMEA = CompanyWrapper.getCurrentCompanyName();
-		WritableFont titleFont = new WritableFont(WritableFont.TIMES, 14,
-				WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-				jxl.format.Colour.BLACK);
-		WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-		titleFormat.setWrap(false);
-		titleFormat.setShrinkToFit(false);
-		p_sheet.addCell(new Label(0, 0, bundle.getString("review_translation_progress_report"),
-				titleFormat));
-		p_sheet.setColumnView(0, 22);
-
-		// headerFont is black bold on light grey
-		WritableFont headerFont = new WritableFont(WritableFont.TIMES, 11,
-				WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-				jxl.format.Colour.BLACK);
-		WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-		headerFormat.setWrap(true);
-		headerFormat.setBackground(jxl.format.Colour.GRAY_25);
-		headerFormat.setShrinkToFit(false);
-		headerFormat.setBorder(jxl.format.Border.ALL,
-				jxl.format.BorderLineStyle.THIN, jxl.format.Colour.BLACK);
-		int col = 0;
-		int row = 3;
-		p_sheet.addCell(new Label(col++, row, bundle.getString("lb_source_language"), headerFormat));
-		p_sheet.setColumnView(col - 1, 27);
-		p_sheet.addCell(new Label(col++, row, bundle.getString("lb_target_language"), headerFormat));
-		p_sheet.setColumnView(col - 1, 27);
-		col = 0;
-		row = 6;
-		p_sheet.addCell(new Label(col++, row, bundle.getString("lb_project"), headerFormat));
-		p_sheet.setColumnView(col - 1, 27);
-		p_sheet.addCell(new Label(col++, row, bundle.getString("lb_job_id_report"), headerFormat));
-		p_sheet.setColumnView(col - 1, 27);
-		p_sheet.addCell(new Label(col++, row, bundle.getString("lb_job_name"), headerFormat));
-		p_sheet.setColumnView(col - 1, 30);
-		p_sheet.addCell(new Label(col++, row, bundle.getString("lb_document_name"), headerFormat));
-		p_sheet.setColumnView(col - 1, 40);
-		p_sheet.addCell(new Label(col++, row, bundle.getString("lb_total_translated_text"),
-				headerFormat));
-		p_sheet.setColumnView(col - 1, 15);
-	}
-
-	/**
-	 * add pages in a job
-	 * 
-	 * @param sheet
-	 * @param job
-	 * @param row
-	 * @param paramSourceLocales
-	 * @param paramTargetLocales
-	 * @throws Exception
-	 */
-	private void addJobPages(WritableSheet sheet, Job job, IntHolder row,
-			String[] paramSourceLocales, String[] paramTargetLocales)
-			throws Exception
-	{
-		// return if source locale are not selected
-		GlobalSightLocale gsl = job.getSourceLocale();
-		if (!gsl.toString().equals(paramSourceLocales[0])) return;
-		// get basic parameters
-		String jobName = job.getJobName();
-		long jobId = job.getId();
-		Collection workflows = job.getWorkflows();
-		Workflow selectedWF = null;
-		String tLocale = paramTargetLocales[0];
-		for (Iterator iterator = workflows.iterator(); iterator.hasNext();)
-		{
-			Workflow wf = (Workflow) iterator.next();
-			String wfLocale = wf.getTargetLocale().toString();
-			if (wfLocale.equals(tLocale))
-			{
-				selectedWF = wf;
-				break;
-			}
-		}
-
-		if (selectedWF != null)
-		{
-			Vector targetPages = selectedWF.getTargetPages();
-			for (Iterator iterator = targetPages.iterator(); iterator.hasNext();)
-			{
-				TargetPage tp = (TargetPage) iterator.next();
-				int c = 1;
-				// 8.2 Job id
-				sheet.addCell(new Number(c++, row.value, jobId,
-						getContentFormat()));
-				// 8.2 job name
-				sheet.addCell(new Label(c++, row.value, jobName,
-						getContentFormat()));
-				// 8.3 document name
-				String fileName = tp.getSourcePage().getExternalPageId();
-                // fileName = SourcePage.filtSpecialFile(fileName);
-				sheet.addCell(new Label(c++, row.value, fileName,
-						getContentFormat()));
-				// 8.4 total translated text
-				double p = Integer.parseInt(getTranslatedPercentage(""
-						+ tp.getId())) / 100.0;
-				sheet.addCell(new Label(c++, row.value, percent.format(p),
-						getContentFormat()));
-				row.inc();
-			}
-		}
-	}
-
-	/**
-	 * 
-	 * @return format of the report content
-	 * @throws Exception
-	 */
-	private WritableCellFormat getContentFormat() throws Exception
-	{
-		if (contentFormat == null)
-		{
-			WritableCellFormat format = new WritableCellFormat();
-			format.setWrap(true);
-			format.setShrinkToFit(false);
-			format.setAlignment(Alignment.LEFT);
-			format.setVerticalAlignment(VerticalAlignment.CENTRE);
-
-			contentFormat = format;
-		}
-
-		return contentFormat;
-	}
-
-	/**
-	 * Gets the translated percentage
-	 * 
-	 * @param trgPageId
-	 *            target page Id
-	 * @return translated percentage
-	 * @throws Exception
-	 */
-	public static String getTranslatedPercentage(String trgPageId)
-			throws EnvoyServletException
-	{
-		int classTotal = 0;
-		int translatedCounts = 0;
-		long p_trgPageId = Long.parseLong(trgPageId);
-		PageManager m_pageManager = ServerProxy.getPageManager();
-		LeverageMatchLingManager m_lingManager = LingServerProxy
-				.getLeverageMatchLingManager();
-		TuvManager m_tuvManager = ServerProxy.getTuvManager();
-		TargetPage targetPage = null;
-
-		try
-		{
-			targetPage = m_pageManager.getTargetPage(p_trgPageId);
-			SourcePage sourcePage = targetPage.getSourcePage();
-			ArrayList targetTuvs = new ArrayList(m_tuvManager
-					.getTargetTuvsForStatistics(targetPage));
-			ArrayList sourceTuvs = new ArrayList(m_tuvManager
-					.getSourceTuvsForStatistics(sourcePage));
-			Long targetLocaleId = targetPage.getGlobalSightLocale()
-					.getIdAsLong();
-			
-			m_lingManager.setIncludeMtMatches(true);
-			MatchTypeStatistics tuvMatchTypes = m_lingManager
-					.getMatchTypesForStatistics(sourcePage.getIdAsLong(),
-							targetLocaleId, 0);
-
-			for (int i = 0; i < targetTuvs.size(); i++)
-			{
-				Tuv sourceTuv = (Tuv) sourceTuvs.get(i);
-				Tuv targetTuv = (Tuv) targetTuvs.get(i);
-
-				if (targetTuv.isLocalized())
-				{
-					translatedCounts++;
-				}
-				else
-				{
-					int state2 = tuvMatchTypes.getLingManagerMatchType(
-							sourceTuv.getId(),
-							OnlineEditorManagerLocal.DUMMY_SUBID);
-
-					switch (state2)
-					{
-						case LeverageMatchLingManager.EXACT:
-							translatedCounts++;
-							break;
-						case LeverageMatchLingManager.UNVERIFIED:
-							translatedCounts++;
-							break;
-					}
-
-				}
-
-				classTotal++;
-			}
-		}
-		catch (EnvoyServletException e)
-		{
-			throw new EnvoyServletException(e);
-		}
-		catch (RemoteException e)
-		{
-			throw new EnvoyServletException(e);
-		}
-
-		int translatedPercentage = 100;
-		if (classTotal != 0)
-		{
-			translatedPercentage = Math.round(BigDecimalHelper.divide(
-					translatedCounts * 100, classTotal));
-		}
-
-		return String.valueOf(translatedPercentage);
-	}
-	
 	public String getReportType()
     {
         return ReportConstants.TRANSLATION_PROGRESS_REPORT;
     }
+	
+	private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
+    {
+        if (headerStyle == null)
+        {
+            Font font = p_workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            font.setColor(IndexedColors.BLACK.getIndex());
+            font.setUnderline(Font.U_NONE);
+            font.setFontName("Times");
+            font.setFontHeightInPoints((short) 11);
 
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(font);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderRight(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setBorderLeft(CellStyle.BORDER_THIN);
+
+            headerStyle = cs;
+        }
+
+        return headerStyle;
+    }
+
+	private CellStyle getContentStyle(Workbook p_workbook) throws Exception
+    {
+        if (contentStyle == null)
+        {
+            CellStyle style = p_workbook.createCellStyle();
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+
+            contentStyle = style;
+        }
+
+        return contentStyle;
+    }
+	
+	private Row getRow(Sheet p_sheet, int p_col)
+    {
+        Row row = p_sheet.getRow(p_col);
+        if (row == null)
+            row = p_sheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
+    }
 }

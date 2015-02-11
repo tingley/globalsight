@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 
-import jxl.write.WritableSheet;
+import org.apache.poi.ss.usermodel.Sheet;
 
 public class XlsReportData
 {
@@ -43,9 +43,9 @@ public class XlsReportData
     
     public SimpleDateFormat dateFormat = null;
     
-    public WritableSheet generalSheet = null;
-    public WritableSheet dellSheet = null;
-    public WritableSheet tradosSheet = null;
+    public Sheet generalSheet = null;
+    public Sheet dellSheet = null;
+    public Sheet tradosSheet = null;
     
     public HashMap projectMap = new HashMap();
     

@@ -53,6 +53,7 @@
 | To use getXHTML you need to include the files stringbuilder as well as the  |
 | file getxhtml.js before this file. These can be found at WebFX.             |
 \----------------------------------------------------------------------------*/
+var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 function initRichEdit(el)
 {
     // needs an id to be accessible in the frames collection
@@ -201,7 +202,7 @@ function initRichEdit(el)
 
         el.surroundSelection = function(sBefore, sAfter) {
             var r = this.getRange();
-            if (r != null && document.recalc)
+            if (isIE)
             {
 				r.pasteHTML(sBefore + r.htmlText + sAfter);
             }
@@ -215,7 +216,7 @@ function initRichEdit(el)
 
         el.getRange = function () {
             el.focus();
-            if(document.recalc)
+            if(isIE)
 			{
 				var doc = this.frameWindow.document;
 			}
@@ -231,10 +232,11 @@ function initRichEdit(el)
 			{
 				var selection = document.getElementById(el.id).contentWindow.getSelection().getRangeAt(0);
 			}
-            if (document.recalc && doc.body.contains(r.parentElement()))
-                return r;
-			if (!document.recalc)
-				return selection;
+            if (isIE){
+            	return r;
+            }else{
+            	return selection;
+            }
             // can happen in IE55+
             return null;
         };

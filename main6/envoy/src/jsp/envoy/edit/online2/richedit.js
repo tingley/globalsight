@@ -53,6 +53,7 @@
 | To use getXHTML you need to include the files stringbuilder as well as the  |
 | file getxhtml.js before this file. These can be found at WebFX.             |
 \----------------------------------------------------------------------------*/
+var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 function initRichEdit(el)
 {  
     // needs an id to be accessible in the frames collection
@@ -175,7 +176,7 @@ function initRichEdit(el)
             el.value = sText.replace(/\&/g, "&amp;").replace(/\</g, "&lt;").replace(/\>/g, "&gt;").replace(/\n/g, "<br>");
             initRichEdit(el);
         }
-
+        
         el.getText = function () {
             // notice that IE4 cannot get the document.documentElement
             // so we'll use the body
@@ -198,28 +199,29 @@ function initRichEdit(el)
 
         el.surroundSelection = function(sBefore, sAfter) {
             var r = this.getRange();
-            if (r != null && document.recalc)
+            if(isIE)
             {
-				r.pasteHTML(sBefore + r.htmlText + sAfter);
+     			r.pasteHTML(sBefore + r.htmlText + sAfter);
             }
-			else
-			{
-				var oFragment = r.createContextualFragment(sBefore + r + sAfter); 
+            else
+            {
+            	var oFragment = r.createContextualFragment(sBefore + r + sAfter); 
 				r.deleteContents();
 				r.insertNode(oFragment); 
-			}
+            }
         };
 
         el.getRange = function () {
             el.focus();
-            if(document.recalc)
-			{
-				var doc = this.frameWindow.document;
-			}
+            if(isIE)
+            {
+                var doc = this.frameWindow.document;
+            }
             else
-			{
+            {
 				var doc = document.getElementById(el.id).contentWindow.document;
-			}
+            }
+            
             if(doc.selection)
 			{
 				var r = doc.selection.createRange();
@@ -228,10 +230,15 @@ function initRichEdit(el)
 			{
 				var selection = document.getElementById(el.id).contentWindow.getSelection().getRangeAt(0);
 			}
-            if (document.recalc && doc.body.contains(r.parentElement()))
-                return r;
-			if (!document.recalc)
-				return selection;
+            
+            if(isIE)
+            {
+             	return r;
+            }            		
+           else
+           {
+           		return selection;
+           }
             // can happen in IE55+
             return null;
         };
@@ -450,7 +457,6 @@ function initRichEdit(el)
 			}
             var doc = document.getElementById(el.id).contentWindow.document;
             var key = event.keyCode;
-            //alert(key);
 
             if (event.ctrlKey && !event.altKey)
             {

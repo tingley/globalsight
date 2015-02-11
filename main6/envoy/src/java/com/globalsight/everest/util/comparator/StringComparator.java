@@ -19,14 +19,14 @@ package com.globalsight.everest.util.comparator;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.text.CollationKey;
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
 
 /**
-* This class can be used to compare String objects in a
-* locale sensitive way.
-*/
+ * This class can be used to compare String objects in a locale sensitive way.
+ */
 public class StringComparator implements Comparator<Object>, Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -35,8 +35,9 @@ public class StringComparator implements Comparator<Object>, Serializable
     protected Locale m_locale;
     private transient Collator m_collator;
 
-    protected void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
+    protected void readObject(ObjectInputStream in) throws IOException,
+            ClassNotFoundException
+    {
         in.defaultReadObject();
         m_collator = Collator.getInstance(m_locale);
     }
@@ -51,8 +52,7 @@ public class StringComparator implements Comparator<Object>, Serializable
     }
 
     /**
-     * Creates a StringComparator with the given locale
-     * and column to sort on.
+     * Creates a StringComparator with the given locale and column to sort on.
      */
     public StringComparator(int p_type, Locale p_locale)
     {
@@ -86,8 +86,7 @@ public class StringComparator implements Comparator<Object>, Serializable
     {
         String a = p_A == null ? "" : p_A;
         String b = p_B == null ? "" : p_B;
-        return m_collator.getCollationKey(a).compareTo(
-            m_collator.getCollationKey(b));
+        return getCollationKey(a).compareTo(getCollationKey(b));
     }
 
     /**
@@ -132,5 +131,10 @@ public class StringComparator implements Comparator<Object>, Serializable
         }
 
         return "";
+    }
+
+    protected CollationKey getCollationKey(String s)
+    {
+        return m_collator.getCollationKey(s);
     }
 }

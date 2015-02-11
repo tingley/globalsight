@@ -49,14 +49,20 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobHandlerLocal;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
 
 public class CVSUtil
 {
     private static final Logger logger = Logger.getLogger(CVSUtil.class);
 
     private static PrintWriter out = null;
+    
+    private static final String[] bashFileType = new String[]
+    { "exe", "docx", "pptx", "xlsx", "doc", "xls", "ppt", "zip", "xlz", "jpeg",
+            "gif", "ico", "jpg", "sql" };
 
     public static String getBaseDocRoot()
     {
@@ -346,9 +352,9 @@ public class CVSUtil
         sb.append(File.separator);
         sb.append(p_sourceLocale);
         sb.append(File.separator);
-        sb.append(sdf.format(p_uploadDate));
-        sb.append("_");
         sb.append(p_jobName);
+        sb.append("_");
+        sb.append(sdf.format(p_uploadDate));
         return sb.toString();
     }
 
@@ -559,17 +565,37 @@ public class CVSUtil
         infos.put("targetLocale", targetLocale);
         tmp = tmp.substring(targetLocale.length());
         tmp = tmp.substring(1);
-        String jobName = tmp.substring(0, tmp.indexOf(File.separator));
+        String jobIdOrName = tmp.substring(0, tmp.indexOf(File.separator));
+        String jobId = "";
+        String jobName = "";
+        Job job = null;
+        try
+        {
+            job = ServerProxy.getJobHandler().getJobById(Long.parseLong(jobIdOrName));
+        }
+        catch (Exception e)
+        {
+            logger.info("Current job [" + jobIdOrName + "] was created by old version.");
+            try
+            {
+                job = ServerProxy.getJobHandler().getJobByJobName(jobIdOrName);
+            }
+            catch (Exception e1)
+            {
+                logger.error("Cannot get job info.", e1);
+            }
+        }
+        if (job != null) {
+            jobId = String.valueOf(job.getJobId());
+            jobName = job.getJobName();
+        }
+        infos.put("jobId", jobId);
         infos.put("jobName", jobName);
         String moduleName = "";
-        if (jobName.length() + 1 < tmp.lastIndexOf(File.separator))
+        if ((jobIdOrName.length() + 1) < tmp.lastIndexOf(File.separator))
         {
-            moduleName = tmp.substring(jobName.length() + 1,
+            moduleName = tmp.substring(jobIdOrName.length() + 1,
                     tmp.lastIndexOf(File.separator));
-        }
-        else
-        {
-            moduleName = "";
         }
         String fileName = tmp.substring(tmp.lastIndexOf(File.separator) + 1);
         infos.put("sourceModulePath", moduleName);
@@ -579,19 +605,20 @@ public class CVSUtil
         return infos;
     }
 
-    public static long getCVSJobModuleId(String p_jobName)
+    public static long getCVSJobModuleId(String jobId)
     {
-        if (p_jobName == null || p_jobName.trim().equals(""))
+        if (StringUtil.isEmpty(jobId))
             return -1L;
+        
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try
         {
             conn = ConnectionPool.getConnection();
-            String sql = "select * from cvs_source_files where status=2 and job_name=?";
+            String sql = "select * from cvs_source_files where status=2 and job_id=?";
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, p_jobName);
+            pstmt.setString(1, jobId);
             rs = pstmt.executeQuery();
             if (rs.next())
                 return rs.getLong("module_id");
@@ -616,10 +643,11 @@ public class CVSUtil
         }
     }
 
-    private static String getCVSJobNote(String p_jobName)
+    private static String getCVSJobNote(String jobId)
     {
-        if (p_jobName == null || p_jobName.trim().equals(""))
+        if (StringUtil.isEmpty(jobId))
             return "";
+        
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -627,9 +655,9 @@ public class CVSUtil
         try
         {
             conn = ConnectionPool.getConnection();
-            String sql = "select * from cvs_source_files where status=2 and job_name=?";
+            String sql = "select * from cvs_source_files where status=2 and job_id=?";
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, p_jobName);
+            pstmt.setString(1, jobId);
             rs = pstmt.executeQuery();
             if (rs.next())
                 jobNotes = rs.getString("JOB_NOTES");
@@ -653,9 +681,9 @@ public class CVSUtil
         }
     }
 
-    public static boolean isCVSJob(String p_jobName)
+    public static boolean isCVSJob(String jobId)
     {
-        long result = getCVSJobModuleId(p_jobName);
+        long result = getCVSJobModuleId(jobId);
         logger.debug("isCVSJob===" + result);
         return result > 0;
     }
@@ -665,11 +693,16 @@ public class CVSUtil
     {
         try
         {
-            if (infos == null)
+            if (infos == null || p_srcLocale == null)
                 return;
 
+            if (p_srcLocale.indexOf("(") == 0) {
+                p_srcLocale = p_srcLocale.substring(
+                        p_srcLocale.indexOf(") ") + 2);
+            }
             String sourceLocale = p_srcLocale;
             String targetLocale = infos.get("targetLocale");
+            String jobId = infos.get("jobId");
             String jobName = infos.get("jobName");
             String sourceFile = infos.get("source");
             String sourceModule = infos.get("sourceModule");
@@ -696,8 +729,8 @@ public class CVSUtil
                 companyId = CompanyWrapper.getCurrentCompanyIdAsLong();
             }
 
-            long moduleId = getCVSJobModuleId(jobName);
-            String jobNotes = getCVSJobNote(jobName);
+            long moduleId = getCVSJobModuleId(jobId);
+            String jobNotes = getCVSJobNote(jobId);
 
             ModuleMappingHelper helper = new ModuleMappingHelper();
             HashMap result = helper.getTargetModuleMapping(companyId,
@@ -784,42 +817,52 @@ public class CVSUtil
                         workDir.lastIndexOf(File.separator));
 
             String[] cmd = null;
-
-            // When commit back files, cvsroot can't be specified,otherwise
-            // there will be
-            // "'Update-to-date' check failed for 'xxx'" error.
-            if (isNoMapping)
+            synchronized (workDirFile)
             {
-                // Need to add target locale folder first
-                logger.info("No module mapping found! workDir == " + workDir);
-                cmd = new String[]
-                { "cvs", "-d", cvsRoot, "add", targetLocale };
-                exeCVSCmd(cmd, workDir);
-                cmd = new String[]
-                { "cvs", "ci", "-m", "\"" + jobNotes + "\"", targetLocale };
-                exeCVSCmd(cmd, workDir);
-                workDir += File.separator + targetLocale;
+                // When commit back files, cvsroot can't be specified,otherwise
+                // there will be
+                // "'Update-to-date' check failed for 'xxx'" error.
+                if (isNoMapping)
+                {
+                    // Need to add target locale folder first
+                    logger.info("No module mapping found! workDir == "
+                            + workDir);
+                    cmd = new String[]
+                    { "cvs", "-d", cvsRoot, "add", targetLocale };
+                    exeCVSCmd(cmd, workDir);
+                    cmd = new String[]
+                    { "cvs", "ci", "-m", "\"" + jobNotes + "\"", targetLocale };
+                    exeCVSCmd(cmd, workDir);
+                    workDir += File.separator + targetLocale;
 
-                cmd = new String[]
-                { "cvs", "-d", cvsRoot, "add", filename };
-                exeCVSCmd(cmd, workDir);
-                cmd = new String[]
-                { "cvs", "ci", "-m", "\"" + jobNotes + "\"", filename };
-                exeCVSCmd(cmd, workDir);
+                    if (isBashFileType(filename))
+                        cmd = new String[]
+                        { "cvs", "-d", cvsRoot, "add", "-kb", filename };
+                    else
+                        cmd = new String[]
+                        { "cvs", "-d", cvsRoot, "add", filename };
+                    exeCVSCmd(cmd, workDir);
+                    cmd = new String[]
+                    { "cvs", "ci", "-m", "\"" + jobNotes + "\"", filename };
+                    exeCVSCmd(cmd, workDir);
+                }
+                else
+                {
+                    workDir = targetFile.substring(0,
+                            targetFile.lastIndexOf(File.separator));
+                    logger.info("Found module mapping. WorkDir == " + workDir);
+                    if (isBashFileType(filename))
+                        cmd = new String[]
+                        { "cvs", "-d", cvsRoot, "add", "-kb", filename };
+                    else
+                        cmd = new String[]
+                        { "cvs", "-d", cvsRoot, "add", filename };
+                    exeCVSCmd(cmd, workDir);
+                    cmd = new String[]
+                    { "cvs", "ci", "-m", "\"" + jobNotes + "\"", filename };
+                    exeCVSCmd(cmd, workDir);
+                }
             }
-            else
-            {
-                workDir = targetFile.substring(0,
-                        targetFile.lastIndexOf(File.separator));
-                logger.info("Found module mapping. WorkDir == " + workDir);
-                cmd = new String[]
-                { "cvs", "-d", cvsRoot, "add", filename };
-                exeCVSCmd(cmd, workDir);
-                cmd = new String[]
-                { "cvs", "ci", "-m", "\"" + jobNotes + "\"", filename };
-                exeCVSCmd(cmd, workDir);
-            }
-
         }
         catch (Exception e)
         {
@@ -827,6 +870,20 @@ public class CVSUtil
         }
     }
 
+    private static boolean isBashFileType(String filename) {
+        if (StringUtil.isEmpty(filename))
+            return false;
+        String extension = filename.substring(filename.lastIndexOf(".") + 1);
+        if (StringUtil.isEmpty(extension))
+            return false;
+        
+        for (String ext : bashFileType) {
+            if (ext.equalsIgnoreCase(extension))
+                return true;
+        }
+        return false;
+    }
+    
     private static String getMappingRename(ModuleMapping p_mm,
             String p_filename, String p_flag)
     {

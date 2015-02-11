@@ -354,7 +354,7 @@ public class SegmentTmPersistence
     {
         // change tu_id in index table
         if (p_translatable
-                && (p_sourceLocale || TmSegmentIndexer.indexesTargetSegments()))
+                && (p_sourceLocale || TmSegmentIndexer.indexesTargetSegments(p_tmId)))
         {
             LuceneIndexWriter indexWriter = new LuceneIndexWriter(p_tmId,
                     p_locale);
@@ -476,7 +476,7 @@ public class SegmentTmPersistence
             throws Exception
     {
         if (p_translatable
-                && (p_sourceLocale || TmSegmentIndexer.indexesTargetSegments()))
+                && (p_sourceLocale || TmSegmentIndexer.indexesTargetSegments(p_tmId)))
         {
             // reindexes segments
             LuceneIndexWriter indexWriter = new LuceneIndexWriter(p_tmId,

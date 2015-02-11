@@ -16,21 +16,20 @@
  */
 package com.globalsight.everest.util.comparator;
 
-import com.globalsight.ling.tm.TuvLing;
-
 import java.util.Date;
 import java.util.Locale;
 
+import com.globalsight.ling.tm.TuvLing;
+
 /**
- * This class compares TUV objects derived from TuvLing by their exact
- * match key.  These classes, TuvImpl and TuvImplVo, do not
- * overwrite equals() like the BaseTmTuv - AbstractTmTuv -
- * SegmentTmTuv classes from the tm2 package do.
+ * This class compares TUV objects derived from TuvLing by their exact match
+ * key. These classes, TuvImpl and TuvImplVo, do not overwrite equals() like the
+ * BaseTmTuv - AbstractTmTuv - SegmentTmTuv classes from the tm2 package do.
  */
-public class TuvComparator extends StringComparator
+public class TuvComparator extends CachingStringComparator
 {
     private static final long serialVersionUID = -3512515336271113942L;
-    
+
     public static final int EXACT_MATCH_FORMAT = 0;
     public static final int LAST_MODIFIED = 1;
 
@@ -40,7 +39,7 @@ public class TuvComparator extends StringComparator
         // equals() semantics, not collation.
         super(Locale.US);
     }
-    
+
     public TuvComparator(int p_type, Locale p_locale)
     {
         super(p_type, p_locale);
@@ -51,8 +50,8 @@ public class TuvComparator extends StringComparator
      */
     public int compare(Object p_A, Object p_B)
     {
-        TuvLing a = (TuvLing)p_A;
-        TuvLing b = (TuvLing)p_B;
+        TuvLing a = (TuvLing) p_A;
+        TuvLing b = (TuvLing) p_B;
 
         int rv;
         switch (m_type)
@@ -60,11 +59,16 @@ public class TuvComparator extends StringComparator
             case LAST_MODIFIED:
                 Date aDate = a.getLastModified();
                 Date bDate = b.getLastModified();
-                if (aDate != null && bDate == null) {
+                if (aDate != null && bDate == null)
+                {
                     rv = 1;
-                } else if (aDate == null && bDate != null) {
+                }
+                else if (aDate == null && bDate != null)
+                {
                     rv = -1;
-                } else {
+                }
+                else
+                {
                     if (aDate.after(bDate))
                         rv = 1;
                     else if (aDate.equals(bDate))
@@ -72,8 +76,8 @@ public class TuvComparator extends StringComparator
                     else
                         rv = -1;
                 }
-            break;
-            
+                break;
+
             default:
                 String aValue = a.getExactMatchFormat();
                 String bValue = b.getExactMatchFormat();

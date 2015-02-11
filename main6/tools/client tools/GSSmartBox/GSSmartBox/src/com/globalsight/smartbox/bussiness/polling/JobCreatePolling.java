@@ -95,6 +95,13 @@ public class JobCreatePolling implements Polling
         };
         thread = new Thread(runnable);
         thread.setName("JobCreateSuccessfulPolling: " + companyName);
+        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
+        {
+            public void uncaughtException(Thread t, Throwable e)
+            {
+                new JobCreatePolling(cpConfig).start();
+            }
+        });
         thread.start();
     }
 
@@ -151,7 +158,7 @@ public class JobCreatePolling implements Polling
             while (raf.getFilePointer() < raf.length())
             {
                 String record = raf.readLine();
-                String[] jobRecord = record.split(",");
+                String[] jobRecord = record.split(",", 2);
                 JobInfo jobInfo = new JobInfo();
                 jobInfo.setJobName(jobRecord[0]);
                 jobInfo.setOriginFile(jobRecord[1]);

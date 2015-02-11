@@ -634,6 +634,20 @@
       	<PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
       </WebPage>
     </WebActivity>
+    <WebActivity webActivityName="createZipJobs">
+      <WebPage pageName="CZJ" isDefault="true" jspName="/envoy/administration/createjob/createZipJobs.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler">
+        <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
+        <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>
+        <PageLink linkName="jobAttributes" destinationPageName="JA"></PageLink>
+      </WebPage>
+      <WebPage pageName="SF" isDefault="false" jspName="/envoy/administration/createjob/selectUploadedFiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.SelectRecentFiles">
+      </WebPage>
+      <WebPage pageName="JA" isDefault="false" jspName="/envoy/administration/createjob/jobAttributes.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.JobAttributeHandler">
+      </WebPage>
+      <WebPage pageName="SJA" isDefault="false" jspName="/envoy/administration/createjob/jobAttributes.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.SetAttributeHandler">
+      	<PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
+      </WebPage>
+    </WebActivity>
     <WebActivity webActivityName="fileprofiles">
       <WebPage pageName="FP1" isDefault="true" jspName="/envoy/administration/fileprofile/fileprofileMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileMainHandler">
         <PageLink linkName="self" destinationPageName="FP1"></PageLink>
@@ -1634,6 +1648,7 @@
         <PageLink linkName="splitmerge" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="refresh" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="search" destinationPageName="EDN2Search"></PageLink>
+         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
       </WebPage>
       <WebPage pageName="EDN2Search" isDefault="false" jspName="/envoy/edit/online2/search.jsp" 
          pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online2.EditorPageHandler"> 
@@ -2274,9 +2289,6 @@
     </WebActivity>
     <WebActivity webActivityName="xlsReportActivityDuration">
       <WebPage pageName="ACTIVITYDURATION" isDefault="true" jspName="/envoy/administration/reports/activityDurationReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
-    </WebActivity>           
-    <WebActivity webActivityName="xlsReportPendingRev">
-      <WebPage pageName="PENDINGREV" isDefault="true" jspName="/envoy/administration/reports/pendingReviewXlsReport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportJobStatus">
       <WebPage pageName="JOBSTATUS" isDefault="true" jspName="/envoy/administration/reports/jobStatusXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
@@ -2329,11 +2341,11 @@
     <WebActivity webActivityName="xlsReportCharacterCount">
       <WebPage pageName="CharacterCount" isDefault="true" jspName="/envoy/administration/reports/characterCountReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
-    <WebActivity webActivityName="xlsWordCount">
-      <WebPage pageName="WordCount" isDefault="true" jspName="/envoy/administration/reports/wordCountReportForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
-    </WebActivity>
     <WebActivity webActivityName="jobAttributeReport">
       <WebPage pageName="JobAttributeReport" isDefault="true" jspName="/envoy/administration/reports/JobAttributeReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.JobAttributeReportHandler"></WebPage>
+    </WebActivity>
+    <WebActivity webActivityName="recentReports">
+      <WebPage pageName="recentReports" isDefault="true" jspName="/envoy/administration/reports/recentReports.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.RecentReportsHandler"></WebPage>
     </WebActivity>
   </WebModule>
   

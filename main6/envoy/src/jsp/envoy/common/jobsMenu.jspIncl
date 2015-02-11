@@ -3,6 +3,8 @@
         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper,
         com.globalsight.everest.servlet.util.SessionManager,
         com.globalsight.everest.jobhandler.Job,
+        com.globalsight.everest.servlet.util.ServerProxy,
+        com.globalsight.everest.jobhandler.JobHandlerLocal,
         com.globalsight.ling.common.URLDecoder,
 	java.util.ArrayList,
 	java.util.StringTokenizer,
@@ -130,6 +132,10 @@ try
             String mrujob = (String)mruJobs.get(i);
             int idx = mrujob.indexOf(":");
             String jobid = mrujob.substring(0, idx);
+            long theMruJobId = Long.parseLong(jobid);
+            Job theMruJob = ServerProxy.getJobHandler().getJobById(theMruJobId);
+            if(theMruJob == null)
+            	continue;
             String jobname = mrujob.substring(idx+1);
             String label = jobname + " (" + jobid + ")";
             String jurl = new String("/globalsight/ControlServlet?linkName=jobDetails&pageName=DTLS&jobId=" + jobid);

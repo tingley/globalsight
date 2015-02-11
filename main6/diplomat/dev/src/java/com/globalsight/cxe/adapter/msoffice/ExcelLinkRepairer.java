@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class ExcelLinkRepairer
 {
@@ -39,6 +40,15 @@ public class ExcelLinkRepairer
     private static final String WORK_BOOK = "/xl/workbook.xml";
     private static final String ROOT_SHEETS = "/xl/worksheets";
     private static final String ROOT_DRAWINGS_RELS = "/xl/drawings/_rels";
+    private static Pattern SHEET_NAME = Pattern.compile("<sheet name=\"([^\"]{32,})\" ");
+    private static Pattern C_PATTERN = Pattern
+            .compile("(<c [^>]*><f>')([^']*)('[^<]*</f><v>[^<]*</v></c>)");
+    private static Pattern C2_PATTERN = Pattern
+            .compile("(<c [^>]*><f>)&apos;([^<]*)&apos;([^<]*</f><v>[^<]*</v></c>)");
+    private static Pattern HYPERLINK = Pattern
+            .compile("(<hyperlink ref=\"[^\"]*\" location=\")([^!\"]*)(![^\"]*\" [^/]*/>)");
+    private static Pattern RELATION_SHIP = Pattern
+            .compile("(<Relationship Id=\"[^\"]*\" Type=\"[^\"]*\" Target=\")([^!\"]*)(![^\"]*\"[^/]*/>)");
 
     public String getSourceRoot()
     {
@@ -59,19 +69,22 @@ public class ExcelLinkRepairer
     {
         this.targetRoot = targetRoot;
     }
-
+    
     private void repairWorkBook(File workbook) throws Exception
     {
-        HashMap<String, String> sheetNames = new HashMap<String, String>();
-
         String content = FileUtil.readFile(workbook, "utf-8");
-        Pattern p = Pattern.compile("<sheet name=\"([^\"]{32,})\" ");
-        Matcher m = p.matcher(content);
+        Matcher m = SHEET_NAME.matcher(content);
 
+        int index = 0;
+        StringBuilder sb = new StringBuilder();
+        
         while (m.find())
         {
             // sheet name
             String s = m.group(1);
+            //remove the style in name. removed style:  b i u sub sup
+            s = StringUtil.replaceWithRE(s, "<[/]{0,1}[bius][u]{0,1}[bp]{0,1}>", "");
+            
             String sheetname = m_xmlEntityConverter.decodeStringBasic(s);
             if (sheetname.length() > 31)
             {
@@ -79,12 +92,20 @@ public class ExcelLinkRepairer
                 // because excel can not show that full name
                 String ss = sheetname.substring(0, 31);
                 ss = m_xmlEntityConverter.encodeStringBasic(ss);
-                String newS = "<sheet name=\"" + ss + "\" ";
-                content = content.replace(m.group(), newS);
+                ss = StringUtil.replace(ss, "/", "");
+                
+                sb.append(content.substring(index, m.start()));
+                sb.append("<sheet name=\"");
+                sb.append(ss);
+                sb.append("\" ");
+                
+                index = m.end();
             }
         }
+        
+        sb.append(content.substring(index));
 
-        FileUtil.writeFile(workbook, content, "utf-8");
+        FileUtil.writeFile(workbook, sb.toString(), "utf-8");
     }
 
     public void repair() throws Exception
@@ -164,9 +185,11 @@ public class ExcelLinkRepairer
             Map<String, String> newNames) throws Exception
     {
         String content = FileUtil.readFile(f, "utf-8");
-        Pattern p = Pattern
-                .compile("(<c [^>]*><f>')([^']*)('[^<]*</f><v>[^<]*</v></c>)");
-        Matcher m = p.matcher(content);
+        Matcher m = C_PATTERN.matcher(content);
+        
+        int index = 0;
+        StringBuilder sb = new StringBuilder();
+        
         while (m.find())
         {
             String name = m.group(2);
@@ -186,13 +209,19 @@ public class ExcelLinkRepairer
 
                 String newLink = m.group(1) + newNames.get(key) + m.group(3);
 
-                content = content.replace(m.group(), newLink);
+                sb.append(content.substring(index, m.start()));
+                sb.append(newLink);                
+                index = m.end();
             }
         }
+        
+        sb.append(content.substring(index));
+        content = sb.toString();
+        
+        index = 0;
+        sb = new StringBuilder();
 
-        p = Pattern
-                .compile("(<c [^>]*><f>)&apos;([^<]*)&apos;([^<]*</f><v>[^<]*</v></c>)");
-        m = p.matcher(content);
+        m = C2_PATTERN.matcher(content);
         while (m.find())
         {
             String name = m.group(2);
@@ -213,11 +242,15 @@ public class ExcelLinkRepairer
                 String newLink = m.group(1) + "'" + newNames.get(key) + "'"
                         + m.group(3);
 
-                content = content.replace(m.group(), newLink);
+                sb.append(content.substring(index, m.start()));
+                sb.append(newLink);                
+                index = m.end();
             }
         }
+        
+        sb.append(content.substring(index));
 
-        FileUtil.writeFile(f, content, "utf-8");
+        FileUtil.writeFile(f, sb.toString(), "utf-8");
     }
 
     private void repairLinkForTexts(File f, Map<String, String> oldNames,
@@ -225,9 +258,10 @@ public class ExcelLinkRepairer
     {
         String content = FileUtil.readFile(f, "utf-8");
 
-        Pattern p = Pattern
-                .compile("(<hyperlink ref=\"[^\"]*\" location=\")([^!\"]*)(![^\"]*\" [^/]*/>)");
-        Matcher m = p.matcher(content);
+        Matcher m = HYPERLINK.matcher(content);
+        int index = 0;
+        StringBuilder sb = new StringBuilder();
+        
         while (m.find())
         {
             String name = m.group(2);
@@ -252,7 +286,7 @@ public class ExcelLinkRepairer
                     }
                 }
 
-                String value = newNames.get(key).replace("&apos;", "''");
+                String value = StringUtil.replace(newNames.get(key), "&apos;", "''");
                 if (removedApos)
                 {
                     value = "'" + value + "'";
@@ -260,11 +294,15 @@ public class ExcelLinkRepairer
 
                 String newLink = m.group(1) + value + m.group(3);
 
-                content = content.replace(m.group(), newLink);
+      		    sb.append(content.substring(index, m.start()));
+                sb.append(newLink);                
+                index = m.end();
             }
         }
 
-        FileUtil.writeFile(f, content, "utf-8");
+		sb.append(content.substring(index));
+		
+        FileUtil.writeFile(f, sb.toString(), "utf-8");
     }
 
     private void repairLinkForDrawings(File f, Map<String, String> oldNames,
@@ -272,9 +310,10 @@ public class ExcelLinkRepairer
     {
         String content = FileUtil.readFile(f, "utf-8");
 
-        Pattern p = Pattern
-                .compile("(<Relationship Id=\"[^\"]*\" Type=\"[^\"]*\" Target=\")([^!\"]*)(![^\"]*\"[^/]*/>)");
-        Matcher m = p.matcher(content);
+        Matcher m = RELATION_SHIP.matcher(content);
+        int index = 0;
+        StringBuilder sb = new StringBuilder();
+        
         while (m.find())
         {
             String name = m.group(2);
@@ -299,18 +338,20 @@ public class ExcelLinkRepairer
                     }
                 }
 
-                String value = newNames.get(key).replace("&apos;", "''");
+                String value = StringUtil.replace(newNames.get(key),"&apos;", "''");
                 if (removedApos)
                 {
                     value = "#'" + value + "'";
                 }
 
                 String newLink = m.group(1) + value + m.group(3);
-
-                content = content.replace(m.group(), newLink);
+      		    sb.append(content.substring(index, m.start()));
+                sb.append(newLink);                
+                index = m.end();
             }
         }
 
-        FileUtil.writeFile(f, content, "utf-8");
+        sb.append(content.substring(index));
+        FileUtil.writeFile(f, sb.toString(), "utf-8");
     }
 }

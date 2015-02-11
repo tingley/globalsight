@@ -88,8 +88,12 @@
     
     String checkOrNot = "checked";
     String reviewOnlyAAChecked = "", reviewOnlyASChecked = "";
+    String reviewReportIncludeCompactTags = "";
     String autoAcceptPMTaskChecked = "";	
     String checkUnTransSeg = "";
+    String saveTranslationsEditReport = "";
+    String saveReviewersCommentsReport = "";
+    String saveOfflineFiles = "";
     if (project != null)
     {
         projectName = project.getName()==null?projectName:project.getName();
@@ -113,8 +117,12 @@
         
         reviewOnlyAAChecked = project.getReviewOnlyAutoAccept()? "checked" : "";
         reviewOnlyASChecked = project.getReviewOnlyAutoSend()? "checked" : "";
+        reviewReportIncludeCompactTags = project.isReviewReportIncludeCompactTags() ? "checked" : "";
         autoAcceptPMTaskChecked = project.getAutoAcceptPMTask()? "checked" : "";
         checkUnTransSeg = project.isCheckUnTranslatedSegments()? "checked" : "";
+        saveTranslationsEditReport = project.getSaveTranslationsEditReport() ? "checked" : "";
+        saveReviewersCommentsReport = project.getSaveReviewersCommentsReport() ? "checked" : "";
+        saveOfflineFiles = project.getSaveOfflineFiles() ? "checked" : "";
     }
     
 
@@ -155,11 +163,7 @@
     Integer sortChoice = (Integer)sessionManager.getAttribute("sorting");
 
     ArrayList<String> addedUsersIds = (ArrayList<String>)request.getAttribute("addedUsersIds");
-    ArrayList possibleUsers = (ArrayList)request.getAttribute("possibleUsers");
-    
-    
-    
-    
+    ArrayList possibleUsers = (ArrayList)request.getAttribute("possibleUsers"); 
     
     if(request.getAttribute("fileProfileTermList") != null) {
         fileProfileTermList = (ArrayList)request.getAttribute("fileProfileTermList"); 
@@ -190,9 +194,70 @@ var guideNode="projects";
 var helpFile = "<%=bundle.getString("help_projects_edit")%>";
 var reviewOnlyAAChecked = "<%=reviewOnlyAAChecked%>";
 
+$(document).ready(function() {
+	// Inital value for Auto Accept Elements.
+	if("checked" == reviewOnlyAAChecked)
+	{
+		setDisableTR('reviewOnlyASTRID', false);
+	}
+	else
+	{
+		setDisableTR('reviewOnlyASTRID', true);
+	}
+	
+	if("checked" == "<%=reviewOnlyASChecked%>")
+	{
+		setDisableTR('reviewReportIncludeCompactTagsTD', false);
+	}
+	else
+	{
+		setDisableTR('reviewReportIncludeCompactTagsTD', true);
+	}
+	
+	/** 
+	 * If click the checkbox "Auto-accept Review Task", 
+	 * then the "Auto-send Reviewers Comments Report" TD should be editable. 
+	 */
+	$("#reviewOnlyAA").click(function(){
+		if(this.checked)
+		{
+			setDisableTR('reviewOnlyASTRID', false);
+		}
+		else
+		{
+			setDisableTR('reviewOnlyASTRID', true);
+			$("#reviewOnlyAS").attr("checked",false);
+			setDisableTR('reviewReportIncludeCompactTagsTD', true);
+			$("#reviewReportIncludeCompactTags").attr("checked",false);
+		}
+	});
+	
+	// For "Include compact tags" checkbox
+	$("#reviewOnlyAS").click(function(){
+		if(this.checked)
+		{
+			setDisableTR('reviewReportIncludeCompactTagsTD', false);
+		}
+		else
+		{
+			setDisableTR('reviewReportIncludeCompactTagsTD', true);
+			$("#reviewReportIncludeCompactTags").attr("checked",false);
+		}
+	});
+	
+	$("#autoAcceptPMTask").click(function(){
+		if(this.checked)
+		{
+			if(!confirm("<%=bundle.getString("jsmsg_project_autoSend")%>"))
+			{
+				$(this).attr("checked",false);
+			}
+		}
+	});
+});
+
 function submitForm(formAction)
 {
-   
     if (formAction == "cancel")
     {
             projectForm.action = "<%=cancelURL%>";
@@ -316,9 +381,6 @@ if ('<%=pmId%>' != projectForm.pmField.value &&
  return true;
 }
 
-
-
-
 /**
  * Disable/Enable TR element
  * 
@@ -352,39 +414,6 @@ function setDisableTR(trId, isDisabled)
 		}
 	}
 }
-
-$(document).ready(function() {
-	if("checked" == reviewOnlyAAChecked)
-	{
-		setDisableTR('reviewOnlyASTRID', false);
-	}
-	else
-	{
-		setDisableTR('reviewOnlyASTRID', true);
-	}
-	
-	$("#reviewOnlyAA").click(function(){
-		if(this.checked)
-		{
-			setDisableTR('reviewOnlyASTRID', false);
-		}
-		else
-		{
-			setDisableTR('reviewOnlyASTRID', true);
-			$("#reviewOnlyAS").attr("checked",false);
-		}
-	});
-	
-	$("#autoAcceptPMTask").click(function(){
-		if(this.checked)
-		{
-			if(!confirm("<%=bundle.getString("jsmsg_project_autoSend")%>"))
-			{
-				$(this).attr("checked",false);
-			}
-		}
-	});
-});
 
 var first = true;
 function addUser()
@@ -494,7 +523,6 @@ function changeSelectWidth(selected){
     else selected.style.width=200;
 }
 </script>
-
 <style type="text/css">
 @import url(/globalsight/includes/attribute.css);
 </style>
@@ -671,6 +699,12 @@ function changeSelectWidth(selected){
           	<INPUT TYPE=checkbox id="reviewOnlyAS" name="reviewOnlyAS" <%=reviewOnlyASChecked%> >
         </td>
     </tr>
+    <tr id="reviewReportIncludeCompactTagsTD">
+        <td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          	<%=bundle.getString("with_compact_tags")%>:
+          	<INPUT TYPE=checkbox id="reviewReportIncludeCompactTags" name="reviewReportIncludeCompactTags" <%=reviewReportIncludeCompactTags%>>
+        </td>
+    </tr>
     <tr>
         <td><%=bundle.getString("lb_project_AutoAcceptPMTask")%>:</td>
         <td><INPUT TYPE=checkbox id="autoAcceptPMTask" name="autoAcceptPMTask" <%=autoAcceptPMTaskChecked%> ></td>
@@ -678,6 +712,21 @@ function changeSelectWidth(selected){
     <tr>
         <td><%=bundle.getString("lb_project_checkUnTransSeg")%>:</td>
         <td><INPUT TYPE=checkbox id="checkUnTransSeg" name="checkUnTransSeg" <%=checkUnTransSeg%> >
+        </td>
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_project_saveTranslationsEditReport")%>:</td>
+        <td><INPUT TYPE=checkbox id="saveTranslationsEditReport" name="saveTranslationsEditReport" <%=saveTranslationsEditReport%> >
+        </td>
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_project_saveReviewersCommentsReport")%>:</td>
+        <td><INPUT TYPE=checkbox id="saveReviewersCommentsReport" name="saveReviewersCommentsReport" <%=saveReviewersCommentsReport%> >
+        </td>
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_project_saveOfflineFiles")%>:</td>
+        <td><INPUT TYPE=checkbox id="saveOfflineFiles" name="saveOfflineFiles" <%=saveOfflineFiles%> >
         </td>
     </tr>
 </table>

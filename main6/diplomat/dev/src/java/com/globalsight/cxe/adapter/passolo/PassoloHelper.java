@@ -48,6 +48,8 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.Replacer;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.file.FileWaiter;
 
 public class PassoloHelper
@@ -88,6 +90,8 @@ public class PassoloHelper
             + FileUtil.lineSeparator;
 
     private static Vector<String> PROCESS_FILES = new Vector<String>();
+    private static Pattern P1 = Pattern.compile("([^\\\\])\\\\[\\d](.{2,2})");
+    private static Pattern P2 = Pattern.compile("&#x([^;]{1,3});");
 
     public PassoloHelper(CxeMessage p_cxeMessage)
     {
@@ -167,7 +171,7 @@ public class PassoloHelper
         String docHome = SystemConfiguration.getInstance().getStringParameter(
                 SystemConfigParamNames.CXE_DOCS_DIR);
         String displayName = m_eventFlow.getDisplayName();
-        String temp = displayName.toLowerCase().replace("\\", "/");
+        String temp = StringUtil.replace(displayName.toLowerCase(), "\\", "/");
 
         String sourceFile = fileName;
         if (temp.lastIndexOf((".lpu/")) > 0)
@@ -229,7 +233,7 @@ public class PassoloHelper
             String name = (String) params.get("TargetFileName");
             if (name != null)
             {
-                String tempFileName = saveFileName.replace("\\", "/");
+                String tempFileName = StringUtil.replace(saveFileName, "\\", "/");
                 int index = tempFileName.indexOf(fileName);
                 String suffex = tempFileName.substring(index);
                 int index2 = suffex.indexOf("/", 1);
@@ -434,8 +438,8 @@ public class PassoloHelper
     {
         String locales = m_eventFlow.getTargetLocale();
         String orgLocales = locales;
-        locales = locales.replace("_", "-");
-        locales = locales.replace(",", "|");
+        locales = StringUtil.replace(locales, "_", "-");
+        locales = StringUtil.replace(locales, ",", "|");
 
         String[] ls = orgLocales.split(",");
         for (String l : ls)
@@ -532,45 +536,42 @@ public class PassoloHelper
 
     private String decodingForPassolo(String content)
     {
-        Pattern p = Pattern.compile("([^\\\\])\\\\[\\d](.{2,2})");
-        Matcher m = p.matcher(content);
-
-        while (m.find())
+        content = StringUtil.replaceWithRE(content, P1, new Replacer() 
         {
-            String a = m.group();
-            String s = m.group(1);
-            String n = m.group(2);
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+				String s = m.group(1);
+	            String n = m.group(2);
 
-            while (n.startsWith("0"))
-            {
-                n = n.substring(1);
-            }
-
-            content = content.replace(a, s + "&#x" + n + ";");
-
-            m = p.matcher(content);
-        }
+	            while (n.startsWith("0"))
+	            {
+	                n = n.substring(1);
+	            }
+	            
+				return s + "&#x" + n + ";";
+			}
+		});
 
         return content;
     }
 
     private String encodingForPassolo(String content)
     {
-        Pattern p = Pattern.compile("&#x([^;]{1,3});");
-        Matcher m = p.matcher(content);
-
-        while (m.find())
+        content = StringUtil.replaceWithRE(content, P2, new Replacer() 
         {
-            String s = m.group();
-            String n = m.group(1);
-            for (int i = 0; i < 4 - n.length(); i++)
-            {
-                n = "0" + n;
-            }
-
-            content = content.replace(s, "\\" + n);
-        }
-
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+				String n = m.group(1);
+	            for (int i = 0; i < 4 - n.length(); i++)
+	            {
+	                n = "0" + n;
+	            }
+	            
+				return "\\" + n;
+			}
+		});
         return content;
     }
 
@@ -716,7 +717,7 @@ public class PassoloHelper
         List<File> fs = FileUtil.getAllFiles(target);
         for (File f : fs)
         {
-            String path = f.getAbsolutePath().replace("\\", "/");
+            String path = StringUtil.replace(f.getAbsolutePath(), "\\", "/");
 
             File source = new File(path);
             if (source.exists())
@@ -769,7 +770,7 @@ public class PassoloHelper
 
                 File f = fs.get(i);
                 String path = f.getAbsolutePath();
-                path = path.replace(root, "");
+                path = StringUtil.replace(path, root, "");
 
                 map.put(path, d);
             }

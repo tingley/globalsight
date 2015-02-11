@@ -182,6 +182,7 @@
                    if(curDoc.getName().equals(fileName))
                    {
                        fileList.add(curDoc);
+                       break;
                    }
                  }
             }

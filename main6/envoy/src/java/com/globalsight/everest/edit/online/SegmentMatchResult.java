@@ -98,12 +98,12 @@ public class SegmentMatchResult
     
     public String getSid()
     {
-        if (sid == null && mayHaveSid)
-        {
-            sid = TmUtil.getSidForTuv(m_tmId, m_tuvId);
-        }
-        
         return sid;
+    }
+    
+    public void setSid(String s)
+    {
+        sid = s;
     }
 
     public TuvBasicInfo getMatchedTuvBasicInfo()

@@ -1131,6 +1131,20 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 
         return m_type == p_type;
     }
+    
+    public boolean isReviewOnly()
+    {
+        try
+        {
+            Activity a = ServerProxy.getJobHandler().getActivity(getName());
+            return TYPE_REVIEW == a.getType() && !a.getIsEditable();
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+
+    }
 
     /**
      * @see Type.getType()

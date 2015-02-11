@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.globalsight.ling.tm.TuvBasicInfo;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.leverage.SidComparable;
 import com.globalsight.util.GlobalSightLocale;
@@ -166,16 +165,13 @@ public class DynamicLeveragedSegment implements Serializable, SidComparable
         return m_matchedTuvId;
     }
 
+    public void setModifyDate(Date d)
+    {
+        modifyDate = d;
+    }
+    
     public Date getModifyDate()
     {
-        if (modifyDate == null)
-        {
-            if (m_matchCategory == FROM_GOLD_TM)
-            {
-                modifyDate = TmUtil.getModifyDateForTuv(m_tmId,
-                        getMatchedTuvId());
-            }
-        }
         return modifyDate;
     }
 
@@ -245,12 +241,12 @@ public class DynamicLeveragedSegment implements Serializable, SidComparable
 
     public String getSid()
     {
-        if (sid == null)
-        {
-            sid = TmUtil.getSidForTuv(m_tmId, getMatchedTuvId());
-        }
-
         return sid;
+    }
+    
+    public void setSid(String s)
+    {
+        sid = s;
     }
 
     public String getOrgSid(long companyId)

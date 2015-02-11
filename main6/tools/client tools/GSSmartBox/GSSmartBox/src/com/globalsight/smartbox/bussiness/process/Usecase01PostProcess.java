@@ -27,6 +27,7 @@ import com.globalsight.smartbox.util.ZipUtil;
 
 /**
  * Special downloading/post process for "Use case 01"
+ * The job info(jobName, fpName, targetLocales) comes from ZIP file.
  * 
  * @author Leon
  * 

@@ -55,7 +55,7 @@ public class BoxUtil
         {
             moveFiles(cpConfig.getJobCreatingBox4XLZ(), inBox4XLZ, filesJobCreating);
         }
-         return filesJobCreating;
+        return filesJobCreating;
     }
 
     private static void moveFiles(String jobCreatingBox, String inBox,
@@ -145,34 +145,47 @@ public class BoxUtil
     {
         String smbInbox = smbConfig.getSMBInbox();
         copySMBFile(cpConfig.getInbox(), smbInbox);
-        String inbox4XLZ=cpConfig.getInbox4XLZ();
-        if(null!=inbox4XLZ&&!"".equals(inbox4XLZ)){
-            String rootDir=smbInbox.substring(0, smbInbox.lastIndexOf("/"));
-            String sbmInbox4XLZ=rootDir + inbox4XLZ.substring(inbox4XLZ.lastIndexOf(File.separator));
-            copySMBFile( inbox4XLZ,sbmInbox4XLZ);
+        String inbox4XLZ = cpConfig.getInbox4XLZ();
+        if (null != inbox4XLZ && !"".equals(inbox4XLZ))
+        {
+            String rootDir = smbInbox.substring(0, smbInbox.length() - 2);
+            rootDir = rootDir.substring(0, rootDir.lastIndexOf("/") + 1);
+            String sbmInbox4XLZ = rootDir + inbox4XLZ.substring(inbox4XLZ.lastIndexOf(File.separator) + 1) + "/";
+            copySMBFile(inbox4XLZ, sbmInbox4XLZ);
         }
     }
 
-    private static void copySMBFile(String inBox, String smbInbox)
+    /**
+     * Copy SMB File to Locale.
+     * 
+     * @param localeDir
+     *            Locale File Directory
+     * @param smbURL
+     *            SMB File Directory
+     */
+    private static void copySMBFile(String localeDir, String smbURL)
     {
         try
         {
-            SmbFile smbDir = new SmbFile(smbInbox);
-            SmbFile[] files = smbDir.listFiles();
-            for (SmbFile sf : files)
+            SmbFile smbDir = new SmbFile(smbURL);
+            if (smbDir.exists())
             {
-                if (sf.isDirectory())
+                SmbFile[] files = smbDir.listFiles();
+                for (SmbFile sf : files)
                 {
-                    continue;
+                    if (sf.isDirectory())
+                    {
+                        continue;
+                    }
+                    SMBHelper.copyFileFromSmbToLocal(sf, localeDir);
+                    sf.delete();
                 }
-                SMBHelper.copyFileFromSmbToLocal(sf, inBox);
-                sf.delete();
             }
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            String message = "Failed to Copy SMB Files:" + smbURL;
+            LogUtil.fail(message, e);
         }
     }
 

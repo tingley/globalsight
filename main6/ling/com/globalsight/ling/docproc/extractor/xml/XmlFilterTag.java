@@ -17,6 +17,7 @@
 package com.globalsight.ling.docproc.extractor.xml;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.xalan.xpath.MutableNodeListImpl;
@@ -32,7 +33,7 @@ public class XmlFilterTag
     private List<String> m_transAttributesEmbed = null;
     private List<String> m_transAttributesSepa = null;
     private boolean m_contentInclude = true;
-    
+
     public XmlFilterTag()
     {
         m_attributes = new ArrayList<XmlFilterAttribute>();
@@ -42,20 +43,25 @@ public class XmlFilterTag
 
     public XmlFilterTag(Element tagElement)
     {
-        Node tagNameElement = tagElement.getElementsByTagName("tagName").item(0);
+        Node tagNameElement = tagElement.getElementsByTagName("tagName")
+                .item(0);
         m_tagName = tagNameElement.getFirstChild().getNodeValue();
 
         NodeList attributeNodes = tagElement.getElementsByTagName("attributes");
         m_attributes = buildAttributes(attributeNodes);
-        
-        NodeList contentInclTypeNodes = tagElement.getElementsByTagName("inclType");
-        if (contentInclTypeNodes != null && contentInclTypeNodes.getLength() > 0)
+
+        NodeList contentInclTypeNodes = tagElement
+                .getElementsByTagName("inclType");
+        if (contentInclTypeNodes != null
+                && contentInclTypeNodes.getLength() > 0)
         {
-            m_contentInclude = "1".equals(contentInclTypeNodes.item(0).getFirstChild().getNodeValue());
+            m_contentInclude = "1".equals(contentInclTypeNodes.item(0)
+                    .getFirstChild().getNodeValue());
         }
-        
+
         String transAttrSegRule = getTransAttrSegRule(tagElement);
-        NodeList transAttributeNodes = tagElement.getElementsByTagName("transAttributes");
+        NodeList transAttributeNodes = tagElement
+                .getElementsByTagName("transAttributes");
         buildTransAttributes(transAttributeNodes, transAttrSegRule);
     }
 
@@ -65,34 +71,36 @@ public class XmlFilterTag
         {
             return new ArrayList<Node>();
         }
-        
-        String xpath = "//*[name()=\"" + m_tagName + "\"] | //*[local-name()=\"" + m_tagName + "\"]";
-        NodeList affectedNodes = XPathAPI.selectNodeList(p_doc.getDocumentElement(), xpath);
-        
-        if (affectedNodes == null || affectedNodes.getLength() == 0)
-        {
-            affectedNodes = selectNodeListUseMatch(p_doc.getDocumentElement(), m_tagName);
-        }
 
         List<Node> nodes = new ArrayList<Node>();
-
-        if (affectedNodes != null && affectedNodes.getLength() > 0)
+        // for GBS-3290
+        traverse(p_doc.getDocumentElement(), m_tagName, nodes);
+        // get node list in another way
+        if (nodes.size() == 0)
         {
+            NodeList affectedNodes = selectNodeListUseMatch(
+                    p_doc.getDocumentElement(), m_tagName);
             for (int i = 0; i < affectedNodes.getLength(); i++)
             {
                 Node node = affectedNodes.item(i);
-                if (isAttributesMatch(node))
-                {
-                    nodes.add(node);
-                }
+                nodes.add(node);
+            }
+        }
+
+        for (Iterator<Node> it = nodes.iterator(); it.hasNext();)
+        {
+            if (!isAttributesMatch(it.next()))
+            {
+                it.remove();
             }
         }
 
         return nodes;
     }
-    
+
     /**
      * 0 for non-extract, 1 for embed, 2 for separate
+     * 
      * @param attrName
      * @return
      */
@@ -100,41 +108,43 @@ public class XmlFilterTag
     {
         String nodeName = node.getNodeName();
         String localName = node.getLocalName();
-        
-        if (m_transAttributesEmbed.contains(nodeName) || m_transAttributesEmbed.contains(localName))
+
+        if (m_transAttributesEmbed.contains(nodeName)
+                || m_transAttributesEmbed.contains(localName))
         {
             return 1;
         }
-        
-        if (m_transAttributesSepa.contains(nodeName) || m_transAttributesSepa.contains(localName))
+
+        if (m_transAttributesSepa.contains(nodeName)
+                || m_transAttributesSepa.contains(localName))
         {
             return 2;
         }
-        
+
         return 0;
     }
-    
+
     public boolean isContentInclude()
     {
         return m_contentInclude;
     }
-    
+
     @Override
     public String toString()
     {
         return m_tagName;
     }
-    
+
     public void setTagName(String tagName)
     {
         m_tagName = tagName;
     }
-    
+
     public void setContentInclude(boolean contentInclude)
     {
         m_contentInclude = contentInclude;
     }
-    
+
     public void setAttributes(List<XmlFilterAttribute> attributes)
     {
         m_attributes = attributes;
@@ -142,22 +152,24 @@ public class XmlFilterTag
 
     private String getTransAttrSegRule(Element tagElement)
     {
-        NodeList ruleElements = tagElement.getElementsByTagName("transAttrSegRule");
-        
+        NodeList ruleElements = tagElement
+                .getElementsByTagName("transAttrSegRule");
+
         if (ruleElements != null && ruleElements.getLength() > 0)
         {
             Node ele = ruleElements.item(0);
             return ele.getFirstChild().getNodeValue();
         }
-        
+
         return "1";
     }
 
-    private void buildTransAttributes(NodeList transAttributeNodes, String transAttrSegRule)
+    private void buildTransAttributes(NodeList transAttributeNodes,
+            String transAttrSegRule)
     {
         m_transAttributesEmbed = new ArrayList<String>();
         m_transAttributesSepa = new ArrayList<String>();
-        
+
         if (transAttributeNodes != null && transAttributeNodes.getLength() > 0)
         {
             int length = transAttributeNodes.getLength();
@@ -167,11 +179,12 @@ public class XmlFilterTag
                 if (node.getNodeType() == Node.ELEMENT_NODE)
                 {
                     Element el = (Element) node;
-                    String attrName = el.getElementsByTagName("aName").item(0).getFirstChild()
-                            .getNodeValue();
-//                    String transAttrSegRule = el.getElementsByTagName("transAttrSegRule").item(0).getFirstChild()
-//                            .getNodeValue();
-                    
+                    String attrName = el.getElementsByTagName("aName").item(0)
+                            .getFirstChild().getNodeValue();
+                    // String transAttrSegRule =
+                    // el.getElementsByTagName("transAttrSegRule").item(0).getFirstChild()
+                    // .getNodeValue();
+
                     // transAttrSegRule 1 emb 2 sepa
                     if ("2".equals(transAttrSegRule))
                     {
@@ -198,13 +211,14 @@ public class XmlFilterTag
                 if (node.getNodeType() == Node.ELEMENT_NODE)
                 {
                     Element el = (Element) node;
-                    String attrName = el.getElementsByTagName("aName").item(0).getFirstChild()
-                            .getNodeValue();
-                    String operator = el.getElementsByTagName("aOp").item(0).getFirstChild()
-                            .getNodeValue();
-                    String attrValue = el.getElementsByTagName("aValue").item(0).getFirstChild()
-                            .getNodeValue();
-                    XmlFilterAttribute xa = new XmlFilterAttribute(attrName, operator, attrValue);
+                    String attrName = el.getElementsByTagName("aName").item(0)
+                            .getFirstChild().getNodeValue();
+                    String operator = el.getElementsByTagName("aOp").item(0)
+                            .getFirstChild().getNodeValue();
+                    String attrValue = el.getElementsByTagName("aValue")
+                            .item(0).getFirstChild().getNodeValue();
+                    XmlFilterAttribute xa = new XmlFilterAttribute(attrName,
+                            operator, attrValue);
                     ret.add(xa);
                 }
             }
@@ -217,11 +231,12 @@ public class XmlFilterTag
     {
         MutableNodeListImpl nodeList = new MutableNodeListImpl();
         addMatchedNode(nodeList, node, tagNameRE);
-        
+
         return nodeList;
     }
 
-    private static void addMatchedNode(MutableNodeListImpl nodeList, Node node, String tagNameRE)
+    private static void addMatchedNode(MutableNodeListImpl nodeList, Node node,
+            String tagNameRE)
     {
         if (node.getNodeType() == Node.ELEMENT_NODE)
         {
@@ -239,9 +254,9 @@ public class XmlFilterTag
                 }
             }
         }
-        
+
         NodeList childs = node.getChildNodes();
-        
+
         if (childs != null && childs.getLength() != 0)
         {
             for (int i = 0; i < childs.getLength(); i++)
@@ -270,9 +285,21 @@ public class XmlFilterTag
         return true;
     }
 
-    private boolean isTagNameMatch(Node p_node)
+    /**
+     * A basic DOM node traversal that checks the name of every node.
+     */
+    void traverse(Node node, String localName, List<Node> matching)
     {
-        // TODO Auto-generated method stub
-        return false;
+        if (localName.equals(node.getNodeName()))
+        {
+            matching.add(node);
+        }
+        NodeList children = node.getChildNodes();
+        int len = children.getLength();
+        for (int i = 0; i < len; i++)
+        {
+            Node child = children.item(i);
+            traverse(child, localName, matching);
+        }
     }
 }

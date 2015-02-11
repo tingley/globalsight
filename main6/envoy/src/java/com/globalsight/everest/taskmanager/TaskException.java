@@ -70,7 +70,8 @@ public class TaskException extends GeneralException
     // Args: 1 - workflow id
     public static final String MSG_FAILED_TO_GET_TASKS_FOR_RATING = 
         "failedToGetTasksForRating";
-
+    public static final String MSG_FAILED_TO_GET_TRANSLATE_TEXT =
+            "failedToGetTranslatedText";
 
     /**
      * @see GeneralException#GeneralException(Exception)

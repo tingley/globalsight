@@ -301,8 +301,34 @@ to the above mentioned property files.</P>
 <td colspan="1" rowspan="1" width="13.703%" class="whs18">
 <p>Optional</td></tr>
 
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs16">
+<p>movable </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs17">
+<P>This attribute specifies whether these tags can be moved around in the editor.</P>
+</td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs18">
+<p>Optional</td></tr>
 
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs16">
+<p>erasable </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs17">
+<P>This attribute specifies whether these tags can be deleted in the editor.</P>
+</td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs18">
+<p>Optional</td></tr>
 
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs16">
+<p>priority </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs17">
+<P>If there are more than one rule that refer to the same element in the xml file, 
+this attribute specifies a priority on the translate rule or dont-translate rule.</P>
+<P>A smaller value will have a higher priority. The default value is <B>10</B> and <B>negative</B> can be used.</P>
+</td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs18">
+<p>Optional</td></tr>
 
 <script language='JavaScript'><!--
 if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
@@ -344,6 +370,209 @@ if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) 
  to be extracted for localization.</td>
 <td width="13.703%" class="whs12">
 <p>Yes</td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs16">
+<p>inline </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs17">
+<p>This attribute specifies if the elements specified by path attribute 
+ break a segment. If an element breaks a segment, the element tag is not 
+ included in the extracted data. If an element doesn’t break a segment 
+ (if the tag is in-line), the element tag is included in the extracted 
+ data. The possible values for the attribute are “yes” or “no”. “yes” means 
+ the tag doesn’t break segments. “no” means the tag breaks segments. The 
+ default value is “no”. &nbsp;For 
+ example, if an element appears in the middle of a sentence it should be 
+ marked “yes” – otherwise the sentence would be broken into two pieces, 
+ split by the element, which would be linguistically incorrect. </td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs18">
+<p>Optional</td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs16">
+<p>priority </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs17">
+<P>If there are more than one rule that refer to the same element in the xml file, 
+this attribute specifies a priority on the translate rule or dont-translate rule.</P>
+<P>A smaller value will have a higher priority. The default value is <B>10</B> and <B>negative</B> can be used.</P>
+</td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs18">
+<p>Optional</td></tr>
+
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
+//--></script>
+</table>
+
+<p>&nbsp;</p>
+
+<h3>&lt;dont-count&gt; element</h3>
+
+<p>The &lt;dont-count&gt; element specifies elements or attributes 
+ that are not to be extracted or counted. Use this element on any items extracted 
+ by default that are not to be translated or counted.</p>
+
+<p>&nbsp;</p>
+
+<!--(Table)=========================================================-->
+<table x-use-null-cells cellspacing="0" width="100%" class="whs1">
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table><table x-use-null-cells cellspacing='0' width='100%' border='1' bordercolor='black' bordercolorlight='black' bordercolordark='black'>");
+//--></script>
+<col class="whs2">
+<col class="whs3">
+<col class="whs4">
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs6">
+<p class="whs7">Attribute </td>
+<td width="72.302%" class="whs8">
+<p class="whs7">Description </td>
+<td width="13.703%" class="whs9">
+<p class="whs7">Required</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>path </td>
+<td width="72.302%" class="whs11">
+<p>XPath expression to address the elements and attributes that are not 
+ to be extracted for localization.</td>
+<td width="13.703%" class="whs12">
+<p>Yes</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>words </td>
+<td width="72.302%" class="whs11">
+<p>This attribute specifies the words that are not to be extracted or counted.</td>
+<td width="13.703%" class="whs12">
+<p>Yes</td></tr>
+
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
+//--></script>
+</table>
+
+<p>&nbsp;</p>
+
+<h3>&lt;sid&gt; element</h3>
+
+<p>The &lt;sid&gt; element specifies elements or attributes that are to be set as sid.</p>
+
+<p>&nbsp;</p>
+
+<!--(Table)=========================================================-->
+<table x-use-null-cells cellspacing="0" width="100%" class="whs1">
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table><table x-use-null-cells cellspacing='0' width='100%' border='1' bordercolor='black' bordercolorlight='black' bordercolordark='black'>");
+//--></script>
+<col class="whs2">
+<col class="whs3">
+<col class="whs4">
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs6">
+<p class="whs7">Attribute </td>
+<td width="72.302%" class="whs8">
+<p class="whs7">Description </td>
+<td width="13.703%" class="whs9">
+<p class="whs7">Required</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>path </td>
+<td width="72.302%" class="whs11">
+<p>XPath expression to address the elements and attributes that are not 
+ to be extracted for localization.</td>
+<td width="13.703%" class="whs12">
+<p>Yes</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>name </td>
+<td width="72.302%" class="whs11">
+<p>This attribute specifies the sid name.</td>
+<td width="13.703%" class="whs12">
+<p>Optional</td></tr>
+
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
+//--></script>
+</table>
+
+<p>&nbsp;</p>
+
+<h3>&lt;internal&gt; element</h3>
+
+<p>The &lt;internal&gt; element specifies elements or attributes that are to be protected as internal text.</p>
+
+<p>&nbsp;</p>
+
+<!--(Table)=========================================================-->
+<table x-use-null-cells cellspacing="0" width="100%" class="whs1">
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table><table x-use-null-cells cellspacing='0' width='100%' border='1' bordercolor='black' bordercolorlight='black' bordercolordark='black'>");
+//--></script>
+<col class="whs2">
+<col class="whs3">
+<col class="whs4">
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs6">
+<p class="whs7">Attribute </td>
+<td width="72.302%" class="whs8">
+<p class="whs7">Description </td>
+<td width="13.703%" class="whs9">
+<p class="whs7">Required</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>path </td>
+<td width="72.302%" class="whs11">
+<p>XPath expression to address the elements and attributes that are not 
+ to be extracted for localization.</td>
+<td width="13.703%" class="whs12">
+<p>Yes</td></tr>
+
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
+//--></script>
+</table>
+
+<p>&nbsp;</p>
+
+<h3>&lt;comment&gt; element</h3>
+
+<p>The &lt;comment&gt; element specifies elements or attributes that are to be set as source comments.</p>
+
+<p>&nbsp;</p>
+
+<!--(Table)=========================================================-->
+<table x-use-null-cells cellspacing="0" width="100%" class="whs1">
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table><table x-use-null-cells cellspacing='0' width='100%' border='1' bordercolor='black' bordercolorlight='black' bordercolordark='black'>");
+//--></script>
+<col class="whs2">
+<col class="whs3">
+<col class="whs4">
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs6">
+<p class="whs7">Attribute </td>
+<td width="72.302%" class="whs8">
+<p class="whs7">Description </td>
+<td width="13.703%" class="whs9">
+<p class="whs7">Required</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>path </td>
+<td width="72.302%" class="whs11">
+<p>XPath expression to address the elements and attributes that are not 
+ to be extracted for localization.</td>
+<td width="13.703%" class="whs12">
+<p>Yes</td></tr>
+
 <script language='JavaScript'><!--
 if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
 //--></script>
@@ -351,8 +580,7 @@ if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) 
 
 <h3>XPath</h3>
 
-<p>The “path” attribute in &lt;translate&gt; and &lt;dont-translate&gt; 
- element uses XPath expression. XPath is a language for addressing parts 
+<p>The “path” attribute in above elements uses XPath expression. XPath is a language for addressing parts 
  of an XML document. It is a W3C Recommendation. This document doesn’t 
  discuss the specification of the language other than showing a couple 
  of examples. The W3C Recommendation can be found at <a href="http://www.w3.org/TR/xpath.html"
@@ -368,7 +596,7 @@ if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) 
 
 <ul type="disc" class="whs19">
 	
-	<li class=kadov-p><p>Contents of all the elements are extracted as 
+	<li class=kadov-p><p>Contents of all the elements are extracted and counted as 
  translatable.</p></li>
 	
 	<li class=kadov-p><p>All the element tags break segments. In other 
@@ -473,49 +701,276 @@ XML Rule:</font></span></h2>
 
 <p>&nbsp;</p>
 
-<h2>DTD Used For XML Rules Files</h2>
+<h2>RELAX NG schema Used For XML Rule Files</h2>
 
-<p class=code>&lt;!-- schemarules.dtd created on Aug 31, 2000 version 1.0 
- --&gt;</p>
+<p class=code>&lt;!-- RELAX NG schema for XML rule file --&gt;</p>
 
-<p class=code>&lt;!-- Document root --&gt;</p>
+<p>&nbsp;</p>
 
-<p class=code>&lt;!ELEMENT schemarules (ruleset)+&gt;</p>
+<p class=code>&lt;grammar</p>
+<p class=code>&nbsp;&nbsp;xmlns=&quot;http://relaxng.org/ns/structure/1.0&quot;</p>
+<p class=code>&nbsp;&nbsp;xmlns:c=&quot;http://globalsight.com/comment&quot;&gt;</p>
+  
+<p>&nbsp;</p>
 
-<p class=code>&lt;!-- One ruleset element for each document type. --&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;start&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;schemarules&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/start&gt;</p>
 
-<p class=code>&lt;!-- There can be multiple ruleset elements --&gt;</p>
+<p>&nbsp;</p>
 
-<p class=code>&lt;!ELEMENT ruleset (translate|dont-translate)+&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; ------------   Element definition   --------------------&lt;/c:c&gt;</p>
 
-<p class=code>&lt;!ATTLIST ruleset</p>
+<p>&nbsp;</p>
 
-<p class=code>schema &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA 
- #REQUIRED&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Document root &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;schemarules&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;element name=&quot;schemarules&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;use-empty-tag&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;oneOrMore&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;ruleset&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/oneOrMore&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/element&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
 
-<p class=code>&lt;!-- Specify an element that is to be translated --&gt;</p>
+<p>&nbsp;</p>
 
-<p class=code>&lt;!ELEMENT translate EMPTY&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;One ruleset element for each XML instance. There can be multiple </p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ruleset elements in a rule file.</p>
+<p class=code>&nbsp;&nbsp;&lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;ruleset&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;element name=&quot;ruleset&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;schema&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;oneOrMore&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;translate&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;dont-translate&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;dont-count&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;sid&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;internal&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;comment&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/oneOrMore&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/element&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
 
-<p class=code>&lt;!ATTLIST translate</p>
+<p>&nbsp;</p>
 
-<p class=code>path CDATA #REQUIRED</p>
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Specify an element that is comment tag &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;comment&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;element name=&quot;comment&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;path&quot;/&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;c:c&gt; Mandatory attribute &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/element&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
 
-<p class=code>loctype (translatable|localizable) &quot;translatable&quot;</p>
+<p>&nbsp;</p>
 
-<p class=code>datatype CDATA #IMPLIED</p>
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Specify an element that is internal text &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;internal&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;element name=&quot;internal&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;path&quot;/&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;c:c&gt; Mandatory attribute &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/element&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
 
-<p class=code>type CDATA #IMPLIED</p>
+<p>&nbsp;</p>
 
-<p class=code>inline (yes|no) &quot;no&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Specify an element that is to be translated &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;translate&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;element name=&quot;translate&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;path&quot;/&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;c:c&gt; Mandatory attribute &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;loctype&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;datatype&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;type&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;inline&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;containedInHtml&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;movable&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;erasable&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;priority&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/element&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
 
-<p class=code>&lt;!-- Specify an element that is not to be translated --&gt;</p>
+<p>&nbsp;</p>
 
-<p class=code>&lt;!ELEMENT dont-translate EMPTY&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Specify an element that is not to be translated &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;dont-translate&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;element name=&quot;dont-translate&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;path&quot;/&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;c:c&gt; Mandatory attribute &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;inline&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;priority&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/element&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
 
-<p class=code>&lt;!ATTLIST dont-translate</p>
+<p>&nbsp;</p>
 
-<p class=code>path CDATA #REQUIRED&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Specify an element that is sid &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;sid&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;element name=&quot;sid&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;path&quot;/&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;c:c&gt; Mandatory attribute &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;name&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/optional&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/element&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Specify an element with words that are not to be extracted or counted &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;dont-count&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;element name=&quot;dont-count&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;path&quot;/&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;c:c&gt; Mandatory attribute &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ref name=&quot;words&quot;/&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;c:c&gt; Mandatory attribute &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/element&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; ------------   Attribute definition   --------------------&lt;/c:c&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;use-empty-tag&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;use-empty-tag&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;true&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;false&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/attribute&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; XPath expression to select parts of XML documents &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;path&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;path&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; name: specify the sid name &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;name&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;name&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; words: specify the words that not to be extracted or counted &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;words&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;words&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Localization Type: &quot;translatable&quot; or &quot;localizable&quot; &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;loctype&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;loctype&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;translatable&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;localizable&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/attribute&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Datatype: extraction format of the selected parts (html,</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;javascript, xml, etc). Note that the values are in lower case.</p>
+<p class=code>&nbsp;&nbsp;&lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;datatype&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;datatype&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type: type of the segment. e.g. link, abbr, font-name,</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;etc. Default is text.</p>
+<p class=code>&nbsp;&nbsp;&lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;type&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;type&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Inline: segment breaking tag or not &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;inline&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;inline&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;yes&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;no&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/attribute&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; ContainedInHtml: HTML tag surrounded by xml &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;containedInHtml&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;containedInHtml&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;yes&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;no&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/attribute&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Movable: movable tag or not &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;movable&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;movable&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;yes&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;no&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/attribute&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; Erasable: erasable tag or not &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;erasable&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;erasable&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;yes&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;no&lt;/value&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/choice&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/attribute&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&nbsp;&nbsp;&lt;c:c&gt; priority: specify the priority on the rule &lt;/c:c&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;define name=&quot;priority&quot;&gt;</p>
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;priority&quot;/&gt;</p>
+<p class=code>&nbsp;&nbsp;&lt;/define&gt;</p>
+
+<p>&nbsp;</p>
+
+<p class=code>&lt;/grammar&gt;</p>
 
 <script type="text/javascript" language="javascript1.2">
 <!--

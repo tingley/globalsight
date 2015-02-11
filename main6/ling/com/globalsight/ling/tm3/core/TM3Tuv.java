@@ -14,7 +14,7 @@ public class TM3Tuv<T extends TM3Data> {
     private Long id;
     private TM3Locale locale;
     private String serializedData;
-    private long fingerprint;
+    private Long fingerprint;
     private TM3Tu<T> tu;
     private TM3Event firstEvent, latestEvent;
 
@@ -57,9 +57,17 @@ public class TM3Tuv<T extends TM3Data> {
     }
     
     public long getFingerprint() {
+        if (fingerprint == null)
+        {
+            calculateFingerprint();
+        }
         return fingerprint;
     }
-    
+
+    private void calculateFingerprint() {
+        fingerprint = data.getFingerprint();
+    }
+
     protected void setFingerprint(long fingerprint) {
         this.fingerprint = fingerprint;
     }
@@ -84,9 +92,10 @@ public class TM3Tuv<T extends TM3Data> {
         this.data = data;
         // Update the fields that are persisted into the DB
         this.serializedData = data.getSerializedForm();
-        this.fingerprint = data.getFingerprint();
+        // Compute the fingerprint lazily
+        this.fingerprint = null;
     }
-    
+
     public TM3Event getFirstEvent() {
         return firstEvent;
     }

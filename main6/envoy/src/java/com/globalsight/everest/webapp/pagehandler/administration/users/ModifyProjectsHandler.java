@@ -134,7 +134,7 @@ public class ModifyProjectsHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
 
-        List projects = null;
+        List<Project> projects = null;
         if (!isSuperPM)
         {
             projects = UserHandlerHelper.getProjectsManagedByUser(user);
@@ -164,10 +164,10 @@ public class ModifyProjectsHandler extends PageHandler
         }
         else
         {
-            projects = new ArrayList(ProjectHandlerHelper.getAllProjects());
+            projects = (List<Project>) ProjectHandlerHelper.getAllProjects();
         }
 
-        ArrayList availableProjects = (ArrayList) new ArrayList(projects);
+        ArrayList availableProjects = new ArrayList(projects);
 
         List defaultProjects = UserHandlerHelper.setProjectsForEdit(
                 availableProjects, addedProjects, wrapper.isInAllProjects(),

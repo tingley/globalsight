@@ -30,11 +30,13 @@ import java.util.Vector;
 
 import org.dom4j.Document;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfo;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.WorkflowInfos;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.exporter.ExporterException;
@@ -243,7 +245,8 @@ public interface ProjectHandler
      *                System or network related exception.
      * @exception ProjectHandlerException
      */
-    Collection getAllProjects() throws RemoteException, ProjectHandlerException;
+    Collection<Project> getAllProjects() throws RemoteException,
+            ProjectHandlerException;
 
     /**
      * Returns all the project infos for GUI in the system.
@@ -256,9 +259,11 @@ public interface ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    List getAllProjectInfosForGUI() throws RemoteException, ProjectHandlerException;
-    List getAllProjectInfosForGUIbyCondition(String condition) throws RemoteException,
-    ProjectHandlerException;
+    List<ProjectInfo> getAllProjectInfosForGUI() throws RemoteException,
+            ProjectHandlerException;
+
+    List<ProjectInfo> getAllProjectInfosForGUIbyCondition(String condition)
+            throws RemoteException, ProjectHandlerException;
 
     /**
      * Get the names (and primary keys) of all the projects. The key in the
@@ -353,8 +358,8 @@ public interface ProjectHandler
      * @throws RemoteException
      * @throws ProjectHandlerException
      */
-    Collection getProjectsByProjectManager(User p_user) throws RemoteException,
-            ProjectHandlerException;
+    Collection<Project> getProjectsByProjectManager(User p_user)
+            throws RemoteException, ProjectHandlerException;
 
     /**
      * Get the projects that the specified user manages for the module
@@ -371,19 +376,19 @@ public interface ProjectHandler
      *
      * @return All projects that the specific user manages, or empty if none.
      */
-    List getProjectsManagedByUser(User p_user, String p_module)
+    List<Project> getProjectsManagedByUser(User p_user, String p_module)
             throws RemoteException, ProjectHandlerException;
 
     /**
      * Get the project info of the projects this user is part of.
      */
-    List getProjectInfosByUser(String p_userId) throws RemoteException,
-            ProjectHandlerException;
+    List<Project> getProjectInfosByUser(String p_userId)
+            throws RemoteException, ProjectHandlerException;
 
     /**
      * Get the projects this user is part of.
      */
-    List getProjectsByUser(String p_userId) throws RemoteException,
+    List<Project> getProjectsByUser(String p_userId) throws RemoteException,
             ProjectHandlerException;
 
     /**
@@ -449,8 +454,8 @@ public interface ProjectHandler
      * Return the list of basic information about all users that are associated
      * with projects that the specified user manages.
      */
-    List getAllPossibleUserInfos(User p_manager) throws RemoteException,
-            ProjectHandlerException;
+    List<UserInfo> getAllPossibleUserInfos(User p_manager)
+            throws RemoteException, ProjectHandlerException;
 
     /**
      * Returns a list of all distinct usernames that are in the same projects
@@ -475,8 +480,9 @@ public interface ProjectHandler
      *            Collection of Projects.
      * @returns List of L10nProfiles associated with the Projects.
      */
-    public Collection getL10nProfiles(Collection p_projects)
-            throws RemoteException, ProjectHandlerException;
+    public Collection<L10nProfile> getL10nProfiles(
+            Collection<Project> p_projects) throws RemoteException,
+            ProjectHandlerException;
 
     /**
      * Allocates a helper object to import project-related data into the
@@ -647,8 +653,8 @@ public interface ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    Collection getAllWorkflowTemplateInfos() throws RemoteException,
-            ProjectHandlerException;
+    Collection<WorkflowTemplateInfo> getAllWorkflowTemplateInfos()
+            throws RemoteException, ProjectHandlerException;
 
     /**
      * Get a collection of all active workflow template infos with a particular
@@ -728,7 +734,7 @@ public interface ProjectHandler
      * @param companyId
      * @return
      */
-    public List getProjectsByCompanyId(long companyId);
+    public List<Project> getProjectsByCompanyId(long companyId);
 
     /**
      * Create the Translation Memory Profile
@@ -915,7 +921,7 @@ public interface ProjectHandler
     public HashSet getFileProfilesByProject(Project project)
             throws RemoteException, ProjectHandlerException;
 
-    public ArrayList fileProfileListTerminology(Project project)
+    public ArrayList<FileProfile> fileProfileListTerminology(Project project)
             throws RemoteException, ProjectHandlerException;
 
     public List getProjectsByTermbaseDepended(String termbaseName);

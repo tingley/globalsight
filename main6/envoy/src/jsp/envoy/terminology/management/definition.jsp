@@ -98,7 +98,7 @@ function doCancel()
 function doOK()
 {  
     var result = buildDefinition();
-    
+     
     var isDuplicated = checkDuplicated();
 
     if ( isDuplicated==true )
@@ -120,7 +120,7 @@ function doOK()
                 {
                 sendTermbaseManagementRequest(
                   "<%=WebAppConstants.TERMBASE_ACTION_MODIFY%>", tbid,
-                  oDefinition.XMLDocument.xml);
+                  result.dom.xml);
                 }
                 else
                 {
@@ -144,7 +144,7 @@ function doOK()
                 {
                 sendTermbaseManagementRequest(
                   "<%=WebAppConstants.TERMBASE_ACTION_NEW%>", -1, 
-                  oDefinition.XMLDocument.xml);
+                  result.dom.xml);
                 }
                 else
                 {
@@ -220,7 +220,10 @@ function buildDefinition()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oDefinition.XMLDocument;
+      //dom = oDefinition.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 
@@ -455,7 +458,10 @@ function parseDefinition()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oDefinition.XMLDocument;
+      //dom = oDefinition.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 
@@ -504,7 +510,10 @@ function doOnLoad()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oDefinition.XMLDocument;
+      //dom = oDefinition.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 

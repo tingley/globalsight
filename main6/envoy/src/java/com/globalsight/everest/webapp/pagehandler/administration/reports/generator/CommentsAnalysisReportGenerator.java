@@ -22,6 +22,7 @@ import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,6 +88,7 @@ import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageSegment;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -100,6 +102,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 {
     private static final Logger logger = Logger
             .getLogger(CommentsAnalysisReportGenerator.class);
+    final String TAG_COMBINED = "-combined";
     private HttpServletRequest request = null;
     private ResourceBundle bundle = null;
 
@@ -243,6 +246,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         String dateFormat = request.getParameter(WebAppConstants.DATE_FORMAT);
         Workbook combinedWorkBook = new SXSSFWorkbook();
         List<Job> jobsList = new ArrayList<Job>();
+        Set<String> stateSet = new HashSet<String>();
+        Set<String> projectSet = new HashSet<String>();
         if (dateFormat == null)
         {
             dateFormat = DEFAULT_DATE_FORMAT;
@@ -259,6 +264,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             if (job == null || !stateList.contains(job.getState()))
                 continue;
 
+            stateSet.add(job.getDisplayState());
+            projectSet.add(job.getProject().getName());
             if(isCombineAllJobs)
             {
             	jobsList.add(job);
@@ -267,10 +274,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             else 
             {
                 setAllCellStyleNull();
-            	File file = ReportHelper.getXLSReportFile(reportType, job);
                 Workbook workBook = new SXSSFWorkbook();
                 createReport(workBook, job, p_targetLocales, dateFormat);
-                
+                File file = getFile(reportType, job, workBook);
                 FileOutputStream out = new FileOutputStream(file);
                 workBook.write(out);
                 out.close();
@@ -280,17 +286,18 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             // Sets Reports Percent.
             setPercent(++finishedJobNum);
         }
+        
         if(isCombineAllJobs)
         {
-        	addCriteriaSheet(combinedWorkBook, jobsList);
-        	File file = ReportHelper.getXLSReportFile(reportType, null);
+        	File file = getFile(reportType + TAG_COMBINED, null, combinedWorkBook);
+        	addCriteriaSheet(combinedWorkBook, jobsList, stateSet, projectSet);
             FileOutputStream out = new FileOutputStream(file);
             combinedWorkBook.write(out);
             out.close();
             workBooks.add(file);
         }
 
-        return workBooks.toArray(new File[workBooks.size()]);
+        return ReportHelper.moveReports(workBooks, m_userId);
     }
 
     /**
@@ -577,8 +584,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             TermLeverageManager termLeverageManager = ServerProxy
                     .getTermLeverageManager();
             Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = termLeverageManager
-                    .getTermMatchesForPages(
-                            new HashSet<SourcePage>(p_job.getSourcePages()),
+                    .getTermMatchesForPages(p_job.getSourcePages(),
                             p_targetLocale);
 
             TargetPage targetPage = null;
@@ -801,7 +807,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         return p_row;
     }
 
-    private void addCriteriaSheet(Workbook p_workbook, List<Job> p_jobsList)
+    private void addCriteriaSheet(Workbook p_workbook, List<Job> p_jobsList,
+    		Set<String> stateSet, Set<String> projectSet) throws Exception
     {
         Sheet sheet = p_workbook.createSheet(bundle.getString("lb_criteria"));
         StringBuffer temp = new StringBuffer();
@@ -810,22 +817,34 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         int valueColumn = 2;
 
         Row targetLocalesRow = getRow(sheet, row++);
+        Row statusRow = getRow(sheet, row++);
+        Row projectRow = getRow(sheet, row++);
         Row dateRangeRow = getRow(sheet, row++);
         Row jobsRow = getRow(sheet, row);
 
         Cell cell_TargetLocales = getCell(targetLocalesRow, headerColumn);
-        cell_TargetLocales.setCellValue("Target Locales:");
+        cell_TargetLocales.setCellValue(bundle.
+        		getString("lb_report_target_locales"));
         cell_TargetLocales.setCellStyle(getContentStyle(p_workbook));
         sheet.setColumnWidth(headerColumn, 20 * 256);
+        
+        Cell cell_Status = getCell(statusRow, headerColumn);
+        cell_Status.setCellValue(bundle.getString("job_status"));
+        cell_Status.setCellStyle(getContentStyle(p_workbook));
+        
+        Cell cell_Project = getCell(projectRow, headerColumn);
+        cell_Project.setCellValue(bundle.getString("lb_report_project"));
+        cell_Project.setCellStyle(getContentStyle(p_workbook));
 
         Cell cell_DateRange = getCell(dateRangeRow, headerColumn);
-        cell_DateRange.setCellValue("Date Range:");
+        cell_DateRange.setCellValue(bundle.getString("lb_report_date_range"));
         cell_DateRange.setCellStyle(getContentStyle(p_workbook));
 
         Cell cell_Jobs = getCell(jobsRow, headerColumn);
-        cell_Jobs.setCellValue("Jobs:");
+        cell_Jobs.setCellValue(bundle.getString("lb_jobs"));
         cell_Jobs.setCellStyle(getContentStyle(p_workbook));
 
+        //locale
         Set<String> localeSet = rowsMap.keySet();
         for (String locale : localeSet)
         {
@@ -836,7 +855,30 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 temp.length() - 1));
         cell_TargetLocalesValue.setCellStyle(getContentStyle(p_workbook));
         sheet.setColumnWidth(valueColumn, 45 * 256);
+        
+        //status
+        temp.setLength(0);
+        for(String status: stateSet)
+        {
+        	temp.append(status + "\n");
+        }
+        Cell cell_StatusValue = getCell(statusRow, valueColumn);
+        cell_StatusValue.setCellValue(temp.substring(0,
+                temp.length() - 1));
+        cell_StatusValue.setCellStyle(getContentStyle(p_workbook));
+        
+     	//project
+        temp.setLength(0);
+        for(String status: projectSet)
+        {
+        	temp.append(status + "\n");
+        }
+        Cell cell_ProjectValue = getCell(projectRow, valueColumn);
+        cell_ProjectValue.setCellValue(temp.substring(0,
+                temp.length() - 1));
+        cell_ProjectValue.setCellStyle(getContentStyle(p_workbook));
 
+        //date range
         temp.setLength(0);
         String startCount = request
                 .getParameter(JobSearchConstants.CREATION_START);
@@ -860,7 +902,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         cell_DateRangeValue.setCellValue(temp.toString());
         cell_DateRangeValue.setCellStyle(getContentStyle(p_workbook));
 
-        int jobRowNum = 2;
+        //jobs
+        int jobRowNum = 4;
         for (Job job : p_jobsList)
         {
             Cell cell_JobValue = getCell(getRow(sheet, jobRowNum++),
@@ -1353,5 +1396,85 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             }
         }
         return previousSegments;
+    }
+    
+    /**
+     * Create Report File 
+     * If the Workbook only have one sheet, the report name should contain language pair info,
+     * such as CommentsAnalysisReport-(301Hero004_1_605766536)(1753)-EN_ZH.xlsx.
+     * Otherwise use ReportHelper.getXLSReportFile() to create report file.
+     */
+    protected File getFile(String p_reportType, Job p_job, Workbook p_workBook)
+    {
+        if(p_workBook != null && p_workBook.getNumberOfSheets() == 1)
+        {
+            StringBuffer fileName = new StringBuffer();
+            Sheet sheet = p_workBook.getSheetAt(0);
+//            int maxLen = 50;  
+            String srcLang = null, trgLang = null;
+            
+            fileName.append(AmbFileStoragePathUtils.getFileStorageDirPath(1)).append(File.separator);
+            fileName.append(ReportConstants.REPORTS_SUB_DIR).append(File.separator);
+            new File(fileName.toString()).mkdirs();
+            // Report Name Part 1: Report Type
+            fileName.append(p_reportType);
+            // Report Name Part 2: Job Info
+            if (p_job != null)
+            {
+                String jobName = p_job.getJobName();
+//                if (jobName != null && jobName.length() > maxLen)
+//                {
+//                    jobName = jobName.substring(0, maxLen);
+//                }
+                fileName.append("-(").append(jobName).append(")(")
+                      .append(p_job.getJobId()).append(")");
+                srcLang = p_job.getSourceLocale().toString();
+            }
+            // Report Name Part 3: Language Pair
+            if (srcLang == null)
+            {
+                Row languageInfoRow = sheet.getRow(LANGUAGE_INFO_ROW);
+                if (languageInfoRow != null)
+                {
+                    srcLang = languageInfoRow.getCell(0).getStringCellValue();
+                    srcLang = srcLang.substring(srcLang.indexOf("[") + 1, srcLang.indexOf("]"));
+                    trgLang = languageInfoRow.getCell(1).getStringCellValue();
+                    trgLang = trgLang.substring(trgLang.indexOf("[") + 1, trgLang.indexOf("]"));
+                }
+                else
+                {
+                    Row dataRow = sheet.getRow(sheet.getLastRowNum());
+                    if (dataRow != null)
+                    {
+                        try
+                        {
+                            long jobId = (long) dataRow.getCell(0).getNumericCellValue();
+                            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+                            srcLang = job.getSourceLocale().toString();
+                        }
+                        catch (Exception e)
+                        {
+                        }
+
+                    }
+                }
+            }
+            if(trgLang == null)
+            {
+                trgLang = sheet.getSheetName();
+            }
+            if(srcLang != null && trgLang != null)
+            {
+                fileName.append("-").append(srcLang.toUpperCase()).append("_").append(trgLang.toUpperCase());
+            }     
+            // Report Name Part 4: Timestamp
+            fileName.append("-").append(new SimpleDateFormat("yyyyMMdd HHmmss").format(new Date()));
+            // Report Name Part 5: File Extension
+            fileName.append(ReportConstants.EXTENSION_XLSX);
+
+            return new File(fileName.toString());
+        }
+        
+        return ReportHelper.getXLSReportFile(p_reportType, p_job);
     }
 }

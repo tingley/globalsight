@@ -47,6 +47,7 @@ import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.customAttribute.TMAttribute;
 import com.globalsight.cxe.entity.databaseprofile.DatabaseProfileImpl;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
@@ -75,11 +76,11 @@ import com.globalsight.everest.persistence.l10nprofile.WorkflowTemplateInfoDescr
 import com.globalsight.everest.persistence.project.ProjectDescriptorModifier;
 import com.globalsight.everest.persistence.project.ProjectQueryResultHandler;
 import com.globalsight.everest.persistence.project.ProjectUnnamedQueries;
-import com.globalsight.everest.persistence.project.TranslationMemoryProfileDescriptorModifier;
 import com.globalsight.everest.projecthandler.exporter.ExportManager;
 import com.globalsight.everest.projecthandler.importer.ImportManager;
 import com.globalsight.everest.request.WorkflowRequest;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.jms.JmsHelper;
@@ -122,6 +123,12 @@ public class ProjectHandlerLocal implements ProjectHandler
 {
     private static final Logger c_category = Logger
             .getLogger(ProjectHandlerLocal.class);
+
+    public static final String ALL_TM_PROFILES_SQL = " select * from tm_profile "
+            + " where company_id >= :"
+            + CompanyWrapper.COPMANY_ID_START_ARG
+            + " and company_id <= :" + CompanyWrapper.COPMANY_ID_END_ARG;
+
     private ResourceBundle p_resourceBundle = null;
 
     public ProjectHandlerLocal() throws ProjectHandlerException
@@ -544,6 +551,9 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
     }
 
+    /**
+     * Get both active and inactive L10nProfiles for current company.
+     */
     public Collection getAllL10nProfilesData() throws RemoteException,
             ProjectHandlerException
     {
@@ -893,8 +903,15 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setReviewOnlyAutoAccept(originalProject
                     .getReviewOnlyAutoAccept());
             clone.setReviewOnlyAutoSend(originalProject.getReviewOnlyAutoSend());
+            clone.setReviewReportIncludeCompactTags(originalProject.isReviewReportIncludeCompactTags());
             clone.setAutoAcceptPMTask(originalProject.getAutoAcceptPMTask());
-            clone.setCheckUnTranslatedSegments(originalProject.isCheckUnTranslatedSegments());
+            clone.setCheckUnTranslatedSegments(originalProject
+                    .isCheckUnTranslatedSegments());
+            clone.setSaveTranslationsEditReport(originalProject
+                    .getSaveTranslationsEditReport());
+            clone.setSaveReviewersCommentsReport(originalProject
+                    .getSaveReviewersCommentsReport());
+            clone.setSaveOfflineFiles(originalProject.getSaveOfflineFiles());
 
             String quotePersonId = originalProject.getQuotePersonId();
             if (quotePersonId != null && !"".equals(quotePersonId))
@@ -1026,7 +1043,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    public Collection getAllProjects() throws RemoteException,
+    public Collection<Project> getAllProjects() throws RemoteException,
             ProjectHandlerException
     {
         try
@@ -1102,14 +1119,14 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.getAllProjectInfosForGUI.
      */
-    public List getAllProjectInfosForGUI() throws RemoteException,
+    public List<ProjectInfo> getAllProjectInfosForGUI() throws RemoteException,
             ProjectHandlerException
     {
         return getAllProjectInfosForGUIbyCondition("");
     }
 
-    public List getAllProjectInfosForGUIbyCondition(String condition)
-            throws RemoteException, ProjectHandlerException
+    public List<ProjectInfo> getAllProjectInfosForGUIbyCondition(
+            String condition) throws RemoteException, ProjectHandlerException
     {
         try
         {
@@ -1125,10 +1142,10 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             hql += condition;
 
-            List queryResult = session.createQuery(hql).list();
-            List projectInfos = new ArrayList();
+            List<ProjectInfo> queryResult = session.createQuery(hql).list();
+            List<ProjectInfo> projectInfos = new ArrayList<ProjectInfo>();
             List allUsers = (List) lookupUserManager().getUsers();
-            HashMap<String, String> idViewName = new HashMap();
+            HashMap<String, String> idViewName = new HashMap<String, String>();
             for (Iterator iter = allUsers.iterator(); iter.hasNext();)
             {
                 User user = (User) iter.next();
@@ -1391,9 +1408,10 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @param companyId
      * @return
      */
-    public List getProjectsByCompanyId(long companyId)
+    @SuppressWarnings("unchecked")
+    public List<Project> getProjectsByCompanyId(long companyId)
     {
-        List projects = new ArrayList();
+        List<Project> projects = new ArrayList<Project>();
 
         try
         {
@@ -1404,7 +1422,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 hsql += " and p.companyId =" + companyId;
             }
 
-            projects = HibernateUtil.search(hsql);
+            projects = (List<Project>) HibernateUtil.search(hsql);
             return projects;
         }
         catch (Exception e)
@@ -1623,10 +1641,10 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @see ProjectHandler.getProjectsManagedByUser(User, String)
      */
     @SuppressWarnings("unchecked")
-    public List getProjectsManagedByUser(User p_user, String p_module)
+    public List<Project> getProjectsManagedByUser(User p_user, String p_module)
             throws RemoteException, ProjectHandlerException
     {
-        List projects = new ArrayList();
+        List<Project> projects = new ArrayList<Project>();
         PermissionSet userPerms = null;
         try
         {
@@ -1705,8 +1723,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.getProjectsByUser(String)
      */
-    public List getProjectsByUser(String p_userId) throws RemoteException,
-            ProjectHandlerException
+    public List<Project> getProjectsByUser(String p_userId)
+            throws RemoteException, ProjectHandlerException
     {
         try
         {
@@ -1902,7 +1920,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                System or network related exception.
      * @exception ProjectHandlerException
      */
-    public Collection getProjectsByWorkflowInstanceId(
+    public Collection<Project> getProjectsByWorkflowInstanceId(
             long[] p_workflowInstanceIds) throws RemoteException,
             ProjectHandlerException
     {
@@ -2160,8 +2178,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.getAllPossibleUserInfos(User)
      */
-    public List getAllPossibleUserInfos(User p_manager) throws RemoteException,
-            ProjectHandlerException
+    public List<UserInfo> getAllPossibleUserInfos(User p_manager)
+            throws RemoteException, ProjectHandlerException
     {
         ArrayList userInfos = new ArrayList();
         try
@@ -2277,8 +2295,9 @@ public class ProjectHandlerLocal implements ProjectHandler
      *            Collection of Projects.
      * @returns List of L10nProfiles associated with the Projects.
      */
-    public Collection getL10nProfiles(Collection p_projects)
-            throws RemoteException, ProjectHandlerException
+    public Collection<L10nProfile> getL10nProfiles(
+            Collection<Project> p_projects) throws RemoteException,
+            ProjectHandlerException
     {
         // This should be implemented with a query, not this way.
         Collection l10nProfiles = getAllL10nProfiles();
@@ -2356,7 +2375,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                System or network related exception.
      * @exception ProjectHandlerException
      */
-    public Collection getProjectsByProjectManager(User p_user)
+    public Collection<Project> getProjectsByProjectManager(User p_user)
             throws RemoteException, ProjectHandlerException
     {
         try
@@ -2885,8 +2904,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public Collection getAllWorkflowTemplateInfos() throws RemoteException,
-            ProjectHandlerException
+    public Collection<WorkflowTemplateInfo> getAllWorkflowTemplateInfos()
+            throws RemoteException, ProjectHandlerException
     {
         try
         {
@@ -3563,11 +3582,10 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         try
         {
-            String sql = TranslationMemoryProfileDescriptorModifier.ALL_TM_PROFILES_SQL;
             HashMap map = CompanyWrapper.addCompanyIdBoundArgs(
                     CompanyWrapper.COPMANY_ID_START_ARG,
                     CompanyWrapper.COPMANY_ID_END_ARG);
-            tmProfiles = HibernateUtil.searchWithSql(sql, map,
+            tmProfiles = HibernateUtil.searchWithSql(ALL_TM_PROFILES_SQL, map,
                     TranslationMemoryProfile.class);
         }
         catch (Exception e)
@@ -3755,6 +3773,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setOrganization(p_projectTM.getOrganization());
             clone.setCreationDate(p_projectTM.getCreationDate());
             clone.setCompanyId(p_projectTM.getCompanyId());
+            clone.setIndexTarget(p_projectTM.isIndexTarget());
             clone.setIsRemoteTm(p_projectTM.getIsRemoteTm());
             clone.setGsEditionId(p_projectTM.getGsEditionId());
             clone.setRemoteTmProfileId(p_projectTM.getRemoteTmProfileId());
@@ -4023,7 +4042,14 @@ public class ProjectHandlerLocal implements ProjectHandler
         return allProfileOfProject;
     }
 
-    public ArrayList fileProfileListTerminology(Project project)
+    /**
+     * Get FileProfiles whose "Terminology Approval" is "Yes" for specified
+     * project.
+     * 
+     * @param project
+     *            -- Project object.
+     */
+    public ArrayList<FileProfile> fileProfileListTerminology(Project project)
             throws RemoteException, ProjectHandlerException
     {
         HashSet allProfileOfProject = getFileProfilesByProject(project);

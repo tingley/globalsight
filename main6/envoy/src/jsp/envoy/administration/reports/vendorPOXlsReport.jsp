@@ -6,10 +6,11 @@
 				com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
 				com.globalsight.everest.webapp.WebAppConstants" session="true" 
 %><%
-response.setHeader("Content-Disposition","attachment; filename=VendorPO.xls" );
+response.setHeader("Content-Disposition","attachment; filename=VendorPO.xlsx" );
 response.setHeader("Expires", "0");
 response.setHeader("Cache-Control","must-revalidate, post-check=0,pre-check=0");
 response.setHeader("Pragma","public");
+response.setContentType("application/x-excel");
 HttpSession userSession = request.getSession(false);
 String companyName = (String)userSession.getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
 if (UserUtil.isBlank(companyName))

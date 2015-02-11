@@ -277,8 +277,7 @@ public class JobSourceFilesHandler extends PageHandler implements
         if (sourcePage.getPrimaryFileType() == PrimaryFile.UNEXTRACTED_FILE)
         {
             UnextractedFile uf = (UnextractedFile) sourcePage.getPrimaryFile();
-            pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING
-                    + uf.getStoragePath();
+            pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +  uf.getStoragePath().replace("\\", "/");
         }
         else
         {
@@ -424,7 +423,8 @@ public class JobSourceFilesHandler extends PageHandler implements
 
         Iterator it = sourcePages.iterator();
         String m_cxeDocsDir = SystemConfiguration.getInstance()
-                .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR);
+                .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR,
+                		String.valueOf(p_job.getCompanyId()));
         ArrayList<String> fileNames = new ArrayList<String>();
         ArrayList<String> filePaths = new ArrayList<String>();
         Map<String, String> mapOfNamePath = new HashMap<String, String>();
@@ -519,15 +519,8 @@ public class JobSourceFilesHandler extends PageHandler implements
                 {
                     input = new FileInputStream(file);
 
-                    if (input == null)
-                    {
-                        CATEGORY.warn("Could not locate comment file: " + file);
-                    }
-                    else
-                    {
-                        m_zipper.writePath(filePaths.get(i));
-                        m_zipper.writeFile(input);
-                    }
+                    m_zipper.writePath(filePaths.get(i));
+                    m_zipper.writeFile(input);
                     input.close();
                 }
                 catch (IOException ex)

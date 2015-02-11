@@ -133,7 +133,7 @@
         }
         filterId = fp.getFilterId();
         encoding = fp.getCodeSet();
-        xmlRule = fp.getXmlRuleFileId();
+        xmlRule = fp.getXmlRuleId();
         xmlDtdId = fp.getXmlDtdId();
         Vector extensionList = fp.getFileExtensionIds();
         for (int i = 0; i < extensionList.size(); i++)
@@ -144,10 +144,10 @@
         export = fp.byDefaultExportStf();
         scriptOnImport = fp.getScriptOnImport() == null ? "" : fp.getScriptOnImport();
         scriptOnExport = fp.getScriptOnExport() == null ? "" : fp.getScriptOnExport();
-        isSupportSid = fp.getSupportSid() ? "checked" : "";
-        isUnicodeEscape = fp.getUnicodeEscape() ? "checked" : "";
-        isHeaderTranslate = fp.getHeaderTranslate() ? "checked" : "";
-        jsFilter = fp.getJsFilterRegex() == null ? "" : fp.getJsFilterRegex();
+        isSupportSid = fp.supportsSid() ? "checked" : "";
+        isUnicodeEscape = fp.supportsUnicodeEscape() ? "checked" : "";
+        isHeaderTranslate = fp.translateHeader() ? "checked" : "";
+        jsFilter = fp.getJavascriptFilterRegex() == null ? "" : fp.getJavascriptFilterRegex();
         
         //Check whether XSL exists    	
        String docRoot = AmbFileStoragePathUtils.getXslDir().getPath();

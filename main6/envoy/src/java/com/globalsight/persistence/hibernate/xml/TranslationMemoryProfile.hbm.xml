@@ -110,9 +110,12 @@
         <property name="refTMsToLeverageFrom" length="160"
             column="REF_TMS" type="string" not-null="false"
             unique="false" />
+        <property name="uniqueFromMultipleTranslation"
+            column="GET_UNIQUE_FROM_MULT_TRANS" type="yes_no"
+            not-null="false" unique="false" />
+        <property name="companyId" length="20" column="COMPANY_ID"
+            type="long" not-null="false" />
 
-       
-    
         <set name="projectTMsToLeverageFromSet"
             table="TM_PROFILE_PROJECT_TM_INFO" cascade="save-update"
             inverse="true">

@@ -220,6 +220,7 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
                     WorkflowImpl.class, p_workflow.getIdAsLong());
             wfClone.setState(Workflow.EXPORTED);
             wfClone.setExportDate(new Date());
+            WorkflowPersistenceAccessor.updateWorkflowState(p_workflow);
             possiblyUpdateJobForExport(wfClone, Workflow.EXPORTED);
 
             // re-index the new added entry

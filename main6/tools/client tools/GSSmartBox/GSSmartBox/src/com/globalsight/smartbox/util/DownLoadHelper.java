@@ -31,102 +31,79 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 
-public class DownLoadHelper
-{
-    public static File downloadHttps(String downloadURL, String basePath,
-            String commonPathURL) throws Exception
-    {
-        enableHttpsConnection();
+public class DownLoadHelper {
+	public static File downloadHttps(String downloadURL, String basePath, String commonPathURL) throws Exception {
+		enableHttpsConnection();
 
-        String urlDecode = URLDecoder.decode(downloadURL, "UTF-8")
-                .replaceAll("\\\\", "/").replace(" ", "%20");
+		String urlDecode = URLDecoder.decode(downloadURL, "UTF-8").replaceAll("\\\\", "/").replace(" ", "%20");
 
-        URL url = new URL(urlDecode);
-        HttpsURLConnection hurl = (HttpsURLConnection) url.openConnection();
-        hurl.connect();
-        InputStream is = hurl.getInputStream();
+		URL url = new URL(urlDecode);
+		HttpsURLConnection hurl = (HttpsURLConnection) url.openConnection();
+		hurl.connect();
+		InputStream is = hurl.getInputStream();
 
-        String realPath = URLDecoder.decode(commonPathURL, "UTF-8")
-                .replaceAll("\\\\", "/").replace(" ", "%20");
-        realPath = realPath.replace("%20", " ");
-        String fullPath = getFileName(realPath, basePath);
+		String realPath = URLDecoder.decode(commonPathURL, "UTF-8").replaceAll("\\\\", "/").replace(" ", "%20");
+		realPath = realPath.replace("%20", " ");
+		String fullPath = getFileName(realPath, basePath);
 
-        File file = new File(fullPath);
-        saveFile(is, file);
-        return file;
-    }
+		File file = new File(fullPath);
+		saveFile(is, file);
+		return file;
+	}
 
-    public static void enableHttpsConnection() throws NoSuchAlgorithmException,
-            KeyManagementException
-    {
-        MyX509TrustManager xtm = new MyX509TrustManager();
-        MyHostnameVerifier hnv = new MyHostnameVerifier();
-        SSLContext sslContext = null;
-        sslContext = SSLContext.getInstance("TLS");
-        X509TrustManager[] xtmArray = new X509TrustManager[]
-        { xtm };
-        sslContext.init(null, xtmArray, new java.security.SecureRandom());
-        if (sslContext != null)
-        {
-            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext
-                    .getSocketFactory());
-        }
-        HttpsURLConnection.setDefaultHostnameVerifier(hnv);
-    }
+	public static void enableHttpsConnection() throws NoSuchAlgorithmException, KeyManagementException {
+		MyX509TrustManager xtm = new MyX509TrustManager();
+		MyHostnameVerifier hnv = new MyHostnameVerifier();
+		SSLContext sslContext = null;
+		sslContext = SSLContext.getInstance("TLS");
+		X509TrustManager[] xtmArray = new X509TrustManager[] { xtm };
+		sslContext.init(null, xtmArray, new java.security.SecureRandom());
+		HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+		HttpsURLConnection.setDefaultHostnameVerifier(hnv);
+	}
 
-    public static File downloadHttp(String downloadURL, String basePath,
-            String commonPathURL) throws Exception
-    {
-        String urlDecode = URLDecoder.decode(downloadURL, "UTF-8").replaceAll(
-                "\\\\", "/");
-        urlDecode = urlDecode.replace(" ", "%20");
+	public static File downloadHttp(String downloadURL, String basePath, String commonPathURL) throws Exception {
+		String urlDecode = URLDecoder.decode(downloadURL, "UTF-8").replaceAll("\\\\", "/");
+		urlDecode = urlDecode.replace(" ", "%20");
 
-        URL url = new URL(urlDecode);
-        HttpURLConnection hurl = (HttpURLConnection) url.openConnection();
-        hurl.connect();
-        InputStream is = hurl.getInputStream();
+		URL url = new URL(urlDecode);
+		HttpURLConnection hurl = (HttpURLConnection) url.openConnection();
+		hurl.connect();
+		InputStream is = hurl.getInputStream();
 
-        String realPath = URLDecoder.decode(commonPathURL, "UTF-8")
-                .replaceAll("\\\\", "/").replace(" ", "%20");
-        realPath = realPath.replace("%20", " ");
+		String realPath = URLDecoder.decode(commonPathURL, "UTF-8").replaceAll("\\\\", "/").replace(" ", "%20");
+		realPath = realPath.replace("%20", " ");
 
-        String fullPath = getFileName(realPath, basePath);
-        File file = new File(fullPath);
-        saveFile(is, file);
+		String fullPath = getFileName(realPath, basePath);
+		File file = new File(fullPath);
+		saveFile(is, file);
 
-        return file;
-    }
+		return file;
+	}
 
-    private static void saveFile(InputStream is, File file) throws IOException,
-            FileNotFoundException
-    {
-        file.getParentFile().mkdirs();
-        file.createNewFile();
-        FileOutputStream outstream = new FileOutputStream(file);
-        int c;
-        while ((c = is.read()) != -1)
-        {
-            outstream.write(c);
-        }
-        outstream.close();
-        is.close();
-        if (file.length() == 0)
-        {
-            file.delete();
-        }
-    }
+	private static void saveFile(InputStream is, File file) throws IOException, FileNotFoundException {
+		file.getParentFile().mkdirs();
+		file.createNewFile();
+		FileOutputStream outstream = new FileOutputStream(file);
+		int c;
+		while ((c = is.read()) != -1) {
+			outstream.write(c);
+		}
+		outstream.close();
+		is.close();
+		if (file.length() == 0) {
+			file.delete();
+		}
+	}
 
-    private static String getFileName(String url, String basePath)
-            throws Exception
-    {
-        String[] url1 = url.split("cxedocs");
-        String after = url1[1];
-        String before = basePath;
-        if (before == null)
-        {
-            before = new File(".").getAbsolutePath();
-        }
-        String fileName = before + after;
-        return fileName;
-    }
+	private static String getFileName(String url, String basePath) throws Exception {
+		String[] url1 = url.split("cxedocs");
+		String after = url1[1];
+		String before = basePath;
+		if (before == null) {
+			before = new File(".").getAbsolutePath();
+		}
+		String fileName = before + after;
+		return fileName;
+	}
 }

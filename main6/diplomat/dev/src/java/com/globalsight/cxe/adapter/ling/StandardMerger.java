@@ -64,6 +64,8 @@ import com.globalsight.ling.docproc.merger.paginated.PaginatedMerger;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.Replacer;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
@@ -93,10 +95,11 @@ public class StandardMerger implements IFormatNames
     private String m_fileProfile = null;
     private boolean m_isPreview = false;
 
-    private static final String CONFIG_FILE = "/properties/LingAdapter.properties";
-
     private long filterId;
     private String filterTableName;
+
+    private static final String CONFIG_FILE = "/properties/LingAdapter.properties";
+    private static Pattern SPAN_PATTERN = Pattern.compile("(<span [^<>]+lastCR[^<>]+>)[\\r\\n]</span>", Pattern.DOTALL);
 
     /**
      * Creates a StandardMerger object
@@ -172,12 +175,12 @@ public class StandardMerger implements IFormatNames
         try
         {
             // the DiplomatAPI should be changed at some point to take in a
-            // filename
-            // of GXML and return a filename or inputstream to the content
-            // because this might be too big to hold in memory
+            // filename of GXML and return a filename or inputstream to the
+            // content because this might be too big to hold in memory.
             String gxml = readGxml();
+
             gxml = ExportUtil.replaceWhitespace(gxml, m_targetLocale);
-            
+
             m_logger.info("Merging: " + m_fileName + ", size: "
                     + m_cxeMessage.getMessageData().getSize());
             byte[] mergeResult = null;
@@ -191,25 +194,8 @@ public class StandardMerger implements IFormatNames
             Logger.writeDebugFile("lam_merge.txt", mergeResult);
 
             String s = new String(mergeResult, m_targetEncoding);
-            
-            /**
-             * GBS-2134, Vincent Yan, 2011/11/28
-             * Add changing of return method to target file according with the same 
-             * as source file
-             */
-            File cxeBaseDir = AmbFileStoragePathUtils.getCxeDocDir();
-            File sourceFile = new File(cxeBaseDir, m_fileName);
-            boolean isWindowsReturnMethod = FileUtil.isWindowsReturnMethod(sourceFile.getAbsolutePath());
-            if (s.indexOf("\r\n") != -1) {
-                //Merge result content is in Windows return method
-                if (!isWindowsReturnMethod)
-                    s = s.replace("\r\n", "\n");
-            } else {
-                //Merge result content is in Unix return method
-                int len = s.indexOf("\n");
-                if (isWindowsReturnMethod)
-                    s = s.replace("\n", "\r\n");
-            }
+
+            s = handleReturns(s);
             
             if (FORMAT_XML.equals(m_formatType) 
                     && filterId != -1 
@@ -300,7 +286,7 @@ public class StandardMerger implements IFormatNames
                 {
                     int lengthOfEndTag = "</title>".length();
                     String titleText = p_mergeResult.substring(startIndex, endIndex + lengthOfEndTag);
-                    p_mergeResult = p_mergeResult.replace(titleText, "");
+                    p_mergeResult = StringUtil.replace(p_mergeResult, titleText, "");
                 }
                 
                 // remove PicExportError in list-style-image:url("PicExportError");
@@ -315,7 +301,7 @@ public class StandardMerger implements IFormatNames
                     {
                         String before = p_mergeResult.substring(0, startIndex);
                         String end = p_mergeResult.substring(endIndex);
-                        headString = headString.replace(
+                        headString = StringUtil.replace(headString, 
                                 "list-style-image:url(\"PicExportError\");",
                                 "list-style-image:url(\"\");");
                         p_mergeResult = before + headString + end;
@@ -353,27 +339,14 @@ public class StandardMerger implements IFormatNames
         {
             return p_mergeResult;
         }
-
-        StringBuffer result = new StringBuffer();
-        Pattern p = Pattern.compile("(<span [^<>]+lastCR[^<>]+>)[\\r\\n]</span>", Pattern.DOTALL);
-        Matcher m = p.matcher(p_mergeResult);
-
-        while (m.find())
+        
+        p_mergeResult = StringUtil.replaceWithRE(p_mergeResult, SPAN_PATTERN, new Replacer() 
         {
-            String spanPair = m.group();
-            String g1 = m.group(1);
-            int index = p_mergeResult.indexOf(spanPair);
-            String before = p_mergeResult.substring(0, index);
-            String after = p_mergeResult.substring(index + spanPair.length());
-            result.append(before);
-            result.append(g1);
-            result.append("&#13;</span>");
-            result.append(after);
-
-            p_mergeResult = result.toString();
-            result.delete(0, result.length());
-            m = p.matcher(p_mergeResult);
-        }
+			@Override
+			public String getReplaceString(Matcher m) {
+				return m.group(1) + "&#13;</span>";
+			}
+		});
 
         return p_mergeResult;
     }
@@ -590,8 +563,8 @@ public class StandardMerger implements IFormatNames
                     String ex1 = "<" + tag + ">";
                     String regex2 = "\\&lt;/" + tag + "\\&gt;";
                     String ex2 = "</" + tag + ">";
-                    result = result.replaceAll(regex1, ex1).replaceAll(regex2,
-                            ex2);
+                    result = StringUtil.replaceWithRE(result, regex1, ex1);
+                    result = StringUtil.replaceWithRE(result, regex2, ex2);
                 }
 
                 // <br/> <hr /> ... can be recoverd here
@@ -604,8 +577,8 @@ public class StandardMerger implements IFormatNames
                     String regex2 = "\\&lt;" + tag + "\\ /&gt;";
                     String ex2 = "<" + tag + " />";
 
-                    result = result.replaceAll(regex1, ex1).replaceAll(regex2,
-                            ex2);
+                    result = StringUtil.replaceWithRE(result, regex1, ex1);
+                    result = StringUtil.replaceWithRE(result, regex2, ex2);
                 }
 
                 // <a href="www.Welocalize.com" href="_blank">Welocalize</a>
@@ -726,8 +699,8 @@ public class StandardMerger implements IFormatNames
 
                     if (isPairedTagHtml)
                     {
-                        result = result.replaceAll("\\&lt;/" + tag + "\\&gt;",
-                                "</" + tag + ">");
+						result = StringUtil.replaceWithRE(result, "\\&lt;/"
+								+ tag + "\\&gt;", "</" + tag + ">");
                     }
                 }
             }
@@ -972,13 +945,32 @@ public class StandardMerger implements IFormatNames
         {
             ConnectionPool.silentClose(results);
             ConnectionPool.silentClose(query);
-            try
-            {
-                ConnectionPool.returnConnection(connection);
-            }
-            catch (ConnectionPoolException cpe)
-            {
-            }
+            ConnectionPool.silentReturnConnection(connection);
         }
+    }
+
+    /**
+     * Ensure the target content has same return with that in source file.
+     * 
+     * @since 2011/11/28 (GBS-2134; version: 8.2.2)
+     * @author Vincent.Yan
+     */
+    private String handleReturns(String s)
+    {
+        File cxeBaseDir = AmbFileStoragePathUtils.getCxeDocDir();
+        File sourceFile = new File(cxeBaseDir, m_fileName);
+        boolean isWindowsReturnMethod = FileUtil
+                .isWindowsReturnMethod(sourceFile.getAbsolutePath());
+        if (s.indexOf("\r\n") != -1) {
+            //Merge result content is in Windows return method
+            if (!isWindowsReturnMethod)
+                s = StringUtil.replace(s, "\r\n", "\n");
+        } else {
+            //Merge result content is in Unix return method
+            if (isWindowsReturnMethod)
+                s = StringUtil.replace(s, "\n", "\r\n");
+        }
+
+        return s;
     }
 }

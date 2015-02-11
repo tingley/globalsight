@@ -36,6 +36,8 @@ import com.globalsight.ling.tm2.leverage.LeverageMatchResults;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.segmenttm.TMidTUid;
+import com.globalsight.ling.tm2.segmenttm.Tm2SegmentTmInfo;
+import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
@@ -43,6 +45,9 @@ import com.globalsight.util.progress.ProgressReporter;
 /**
  * Interface to abstract out the details of a segment TM implementation (tm2 vs
  * tm3).
+ * 
+ * @see     Tm2SegmentTmInfo
+ * @see     Tm3SegmentTmInfo
  */
 public interface SegmentTmInfo
 {
@@ -121,17 +126,17 @@ public interface SegmentTmInfo
             throws LingManagerException;
 
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter) throws LingManagerException;
+            String createdAfter, Connection conn) throws LingManagerException;
 
-    public SegmentResultSet getAllSegments(Tm tm, long startTUId)
-            throws LingManagerException;
+    public SegmentResultSet getAllSegments(Tm tm, long startTUId,
+            Connection conn) throws LingManagerException;
 
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
-            String createdBefore, String createdAfter)
+            String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException;
 
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter)
+            String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException;
 
     public int getAllSegmentsCount(Tm tm, String createdBefore,
@@ -172,9 +177,11 @@ public interface SegmentTmInfo
      * @param reindexer
      *            Reindexer object for updating reindex count using calls to
      *            incrementCounter()
+     * @param indexTarget
+     *            whether create lucene index for target.
      * @return true if reindexing was successful
      */
-    public boolean reindexTm(Tm tm, Reindexer reindexer);
+    public boolean reindexTm(Tm tm, Reindexer reindexer, boolean indexTarget);
 
     /**
      * Gross hacks in support of prior legacy hacks. See

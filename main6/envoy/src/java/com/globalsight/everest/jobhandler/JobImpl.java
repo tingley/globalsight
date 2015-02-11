@@ -659,11 +659,15 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
             defaultName = "Exporting";
             propertyKey = "lb_state_exporting";
         }
-        else if ((m_state.equals(Job.EXPORTED))
-                || (m_state.equals(Job.EXPORT_FAIL)))
+        else if (m_state.equals(Job.EXPORTED))
         {
             defaultName = "Exported";
             propertyKey = "lb_exported";
+        }
+        else if(m_state.equals(Job.EXPORT_FAIL))
+        {
+        	defaultName = "Export Failed";
+            propertyKey = "lb_exported_failed";
         }
         else if (m_state.equals(Job.UPLOADING))
         {

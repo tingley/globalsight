@@ -424,9 +424,6 @@
                     <jms-queue name="queue/com.globalsight.everest.jms.WorkflowCancel">
 					    <entry name="queue/com.globalsight.everest.jms.WorkflowCancel"/>
                     </jms-queue>
-                    <jms-queue name="queue/com.globalsight.everest.jms.UpdateLeverageMatchMDB">
-					    <entry name="queue/com.globalsight.everest.jms.UpdateLeverageMatchMDB"/>
-                    </jms-queue>
                     <jms-queue name="queue/com.globalsight.everest.jms.AddSourceFile">
 					    <entry name="queue/com.globalsight.everest.jms.AddSourceFile"/>
                     </jms-queue>

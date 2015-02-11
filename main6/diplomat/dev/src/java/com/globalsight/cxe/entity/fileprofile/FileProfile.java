@@ -97,7 +97,7 @@ public interface FileProfile
      * 
      * @return XML Rule File id
      */
-    public long getXmlRuleFileId();
+    public long getXmlRuleId();
 
     /**
      * Return the id of the xml DTD
@@ -194,11 +194,11 @@ public interface FileProfile
      */
     public void setXmlRuleFileId(long p_xmlRuleFileId);
 
-    public boolean getSupportSid();
+    public boolean supportsSid();
 
     public void setSupportSid(Boolean supportSid);
 
-    public boolean getUnicodeEscape();
+    public boolean supportsUnicodeEscape();
 
     public void setUnicodeEscape(Boolean unicodeEscape);
 
@@ -208,9 +208,9 @@ public interface FileProfile
 
     void setHeaderTranslate(Boolean headerTranslate);
 
-    boolean getHeaderTranslate();
+    boolean translateHeader();
 
-    public String getJsFilterRegex();
+    public String getJavascriptFilterRegex();
 
     public void setJsFilterRegex(String jsFilterRegex);
 

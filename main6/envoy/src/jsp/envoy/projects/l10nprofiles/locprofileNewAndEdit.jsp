@@ -148,10 +148,8 @@ function generateTargetLocalesWorkflowsHtml(targetLocalesArr) {
 	}
 }
 
-
 function generateMtOption(targetLocaleWorkflowsArr){
-	var optionHtml;
-	optionHtml += "<option value='-1'>";
+	var optionHtml = "<option value='-1'>";
 	optionHtml += optionNone;
 	optionHtml += "</option>";
 	for(var i=0;i<targetLocaleWorkflowsArr.length;i++){
@@ -163,9 +161,9 @@ function generateMtOption(targetLocaleWorkflowsArr){
 	}
 	return optionHtml;
 }
+
 function generateTargetLocaleWorkflowsOption(targetLocaleWorkflowsArr){
-	var optionHtml;
-	optionHtml += "<option value='-1'>";
+	var optionHtml = "<option value='-1'>";
 	optionHtml += optionNone;
 	optionHtml += "</option>";
 	for(var i=0;i<targetLocaleWorkflowsArr.length;i++){

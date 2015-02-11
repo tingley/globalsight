@@ -87,6 +87,8 @@ public class AmbFileStoragePathUtils
 
     private static Map<String, File> corpusDirs = new HashMap<String, File>();
 
+    private static Map<String, File> m_uploadDir = new HashMap<String, File>();
+
     public final static String INDEX_SUB_DIR = "GlobalSight/Indexes";
 
     public final static String TEMPFILE_SUB_DIRECTORY = "GlobalSight/CXE";
@@ -136,12 +138,14 @@ public class AmbFileStoragePathUtils
     public final static String CONV_DIR_OPENOFFICE = "OpenOffice-Conv";
 
     public final static String FRAMEMAKER9_CONV_DIR = "FrameMaker9";
-    
+
     public final static String OFFLINE_FILE_DOWNLOAD_DIR = "workOfflineDownload";
-    
+
     public final static String WEBSERVICE_DIR = "webservice";
-    
+
     public final static String CORPUS_DIR = "GlobalSight/Corpus";
+
+    public final static String DIR_UPLOAD = "GlobalSight/Upload";
 
     public static File getTempFileDir()
     {
@@ -666,7 +670,7 @@ public class AmbFileStoragePathUtils
 
     public static File getCorpusDir(String p_company_id)
     {
-        if (corpusDirs .get(p_company_id) == null)
+        if (corpusDirs.get(p_company_id) == null)
         {
             File corpusDir = new File(getFileStorageDirPath(p_company_id),
                     CORPUS_DIR);
@@ -827,5 +831,29 @@ public class AmbFileStoragePathUtils
     public static String getWindowsPeConversionPath()
     {
         return sc.getStringParameter(SystemConfigParamNames.WINDOWS_PE_DIR);
+    }
+
+    /**
+     * Gets the upload directory.
+     * <p>
+     * For GBS-3115.
+     */
+    public static File getUploadDir()
+    {
+        String companyId = CompanyThreadLocal.getInstance().getValue();
+        return getUploadDir(companyId);
+    }
+
+    public static File getUploadDir(String p_companyId)
+    {
+        if (m_uploadDir.get(p_companyId) == null)
+        {
+            File uploadDir = new File(getFileStorageDirPath(p_companyId),
+                    DIR_UPLOAD);
+            uploadDir.mkdirs();
+            m_uploadDir.put(p_companyId, uploadDir);
+        }
+
+        return (File) m_uploadDir.get(p_companyId);
     }
 }

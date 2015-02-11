@@ -278,6 +278,8 @@ public class Leverager
                     trgTuv.getScore(), matchCategory, tmId, trgTuv.getId());
             leveragedSegment.setTmIndex(projectTmIndex);
             leveragedSegment.setMatchedTuvBasicInfo(tuvBasicInfo);
+            leveragedSegment.setModifyDate(trgTuv.getModifyDate());
+            leveragedSegment.setSid(trgTuv.getSid());
             dynamicLeverageResults.add(leveragedSegment);
 
         }

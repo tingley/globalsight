@@ -259,6 +259,22 @@ public abstract class AbstractTargetPagePersistence implements
                         unAppliedTus, appliedTuTuvMap);
             }
 
+            /****** For entire internal text segment(GBS-3279) ******/
+            unAppliedTus.removeAll(appliedTuTuvMap.keySet());
+            for (Iterator<Tu> it = unAppliedTus.iterator(); it.hasNext();)
+            {
+                TuImpl tu = (TuImpl) it.next();
+                Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(tu);
+                if (GxmlUtil.isEntireInternalText(sourceTuv.getGxmlElement()))
+                {
+                    Tuv targetTuv = getTuvManager().cloneToTarget(sourceTuv,
+                            p_targetLocale);
+                    targetTuv.setState(TuvState.DO_NOT_TRANSLATE);
+                    tu.addTuv(targetTuv);
+                    appliedTuTuvMap.put(tu, targetTuv);
+                }
+            }
+
             /****** Priority 2 : Handle local TM matches ******/
             unAppliedTus.removeAll(appliedTuTuvMap.keySet());
             appliedTuTuvMap = applyLocalTmMatches(p_sourcePage, p_sourceTuvMap,
@@ -318,13 +334,13 @@ public abstract class AbstractTargetPagePersistence implements
                 {
                     TuImpl tu = (TuImpl) it.next();
                     Tuv tuv = (Tuv) p_sourceTuvMap.get(tu);
-                    if (InternalTextUtil.isInternalText(tuv.getGxmlExcludeTopTags()))
+                    if (InternalTextUtil.isInternalText(tuv.getGxmlExcludeTopTags())
+                            && !GxmlUtil.isEntireInternalText(tuv.getGxmlElement()))
                     {
                         internalTextTus.add(tu);
                     }
                 }
             }
-            
             if (internalTextTus.size() > 0)
             {
                 for (Iterator it = internalTextTus.iterator(); it.hasNext();)
@@ -360,7 +376,7 @@ public abstract class AbstractTargetPagePersistence implements
                 }
             }
 
-            /****** Priority 6 : add source comment ******/
+            /****** Priority 7 : add source comment ******/
             Iterator iter = p_sourceTuvMap.entrySet().iterator();
             iter = p_sourceTuvMap.entrySet().iterator();
             while (iter.hasNext())
@@ -383,6 +399,10 @@ public abstract class AbstractTargetPagePersistence implements
         {
             throw new PageException(e);
         }
+        finally {
+            unAppliedTus = null;
+            appliedTuTuvMap = null;
+        }
 
         if (s_logger.isDebugEnabled())
         {
@@ -391,8 +411,6 @@ public abstract class AbstractTargetPagePersistence implements
 
         return result;
     }
-
-
 
     private IXliffProcessor xliffProFactory(SourcePage p_sourcePage)
     {
@@ -548,6 +566,11 @@ public abstract class AbstractTargetPagePersistence implements
                         lm.setTmId(0);
                         lm.setTmProfileId(tmProfile.getIdAsLong());
                         lm.setMtName(null);
+
+                        lm.setSid(sourceTuv.getSid());
+                        lm.setCreationUser(sourceTuv.getCreatedUser());
+                        lm.setCreationDate(sourceTuv.getLastModified());
+                        lm.setModifyDate(sourceTuv.getLastModified());
 
                         lmCollection.add(lm);
 
@@ -900,6 +923,11 @@ public abstract class AbstractTargetPagePersistence implements
                         lm.setMtName(null);
                         lm.setMatchedOriginalSource(tdaResult.getSourceText());
 
+                        lm.setSid(sourceTuv.getSid());
+                        lm.setCreationUser(sourceTuv.getCreatedUser());
+                        lm.setCreationDate(sourceTuv.getLastModified());
+                        lm.setModifyDate(sourceTuv.getLastModified());
+
                         lmCollection.add(lm);
 
                         newTuv.setMatchType(MatchState.TDA_MATCH.getName());
@@ -1098,6 +1126,12 @@ public abstract class AbstractTargetPagePersistence implements
                 lm.setTmProfileId(tmProfile.getIdAsLong());
                 lm.setMtName(machineTranslator.getEngineName() + "_MT");
                 lm.setMatchedOriginalSource(sourceTuv.getGxml());
+
+                lm.setSid(sourceTuv.getSid());
+                lm.setCreationUser(machineTranslator.getEngineName());
+                lm.setCreationDate(sourceTuv.getLastModified());
+                lm.setModifyDate(sourceTuv.getLastModified());
+
                 lmCollection.add(lm);
             }
 
@@ -1165,6 +1199,12 @@ public abstract class AbstractTargetPagePersistence implements
                     lm.setTmProfileId(tmProfile.getIdAsLong());
                     lm.setMtName(machineTranslator.getEngineName() + "_MT");
                     lm.setMatchedOriginalSource(sourceTuv.getGxml());
+
+                    lm.setSid(sourceTuv.getSid());
+                    lm.setCreationUser(machineTranslator.getEngineName());
+                    lm.setCreationDate(sourceTuv.getLastModified());
+                    lm.setModifyDate(sourceTuv.getLastModified());
+
                     lmCollection.add(lm);
                 }
             }

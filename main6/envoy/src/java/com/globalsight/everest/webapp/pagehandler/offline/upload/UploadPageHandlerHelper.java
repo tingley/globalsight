@@ -3,6 +3,7 @@ package com.globalsight.everest.webapp.pagehandler.offline.upload;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -10,23 +11,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskBO;
+import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
@@ -184,6 +185,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
             map.put("percentage", percentage);
             map.put("counter", status.getCounter());
             map.put("msg", status.giveMessages());
+            map.put("taskIdsSet", status.getTaskIds());
             map.put("errMsg", errorMsg);
             if (status.getCheckResult() != null)
             {
@@ -199,6 +201,47 @@ public class UploadPageHandlerHelper implements WebAppConstants
         }
     }
 
+    public void translatedText(HttpServletRequest p_request, 
+    		HttpServletResponse p_response)throws IOException
+    {
+    	String parameter = p_request.getParameter("taskParam");
+    	long taskId = TaskHelper.getLong(parameter);
+        Task task = null;
+        try
+        {
+            task = TaskHelper.getTask(taskId);
+        }
+        catch(Exception e){
+        	throw new TaskException(
+                    TaskException.MSG_FAILED_TO_GET_TRANSLATE_TEXT,null, e);
+        }
+        List<TargetPage> targetPages = task.getTargetPages();
+        List<Long> targetPageIds = new ArrayList<Long>();
+        List<String> targetPageNames = new ArrayList<String>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        Long jobId = task.getJobId();
+        String jobName = task.getJobName();
+        for (TargetPage tp : targetPages)
+        {
+            targetPageIds.add(tp.getIdAsLong());
+            targetPageNames.add(tp.getExternalPageId());
+        }
+        StringBuffer buffer = new StringBuffer();
+        for(int i = 0 ; i < targetPageIds.size();i++)
+        {
+            String percent = SegmentTuvUtil
+                    .getTranslatedPercentage(targetPageIds.get(i));
+        	String pageNames = targetPageNames.get(i);
+        	buffer.append(pageNames).append("<>").append(percent).append("||");
+        }
+        map.put("jobId", jobId);
+        map.put("jobName", jobName);
+        map.put("taskId", buffer.toString());
+        PrintWriter out = p_response.getWriter();
+        out.write(JsonUtil.toJson(map));
+        out.close();
+    }
+    
     // process uploaded file
     public void processRequest(HttpServletRequest p_request,
             OEMProcessStatus p_status) throws EnvoyServletException

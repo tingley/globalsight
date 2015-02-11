@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +34,7 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
+import com.globalsight.cxe.adapter.ling.ExtractRule;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
@@ -162,6 +164,8 @@ public class DiplomatAPI implements IFormatNames
 {
     private static final Logger logger =
             Logger.getLogger(DiplomatAPI.class.getName());
+    
+    private List<ExtractRule> rules = new ArrayList<ExtractRule>();
 
     /**
      * Diplomat Extractor Options.
@@ -210,8 +214,6 @@ public class DiplomatAPI implements IFormatNames
          * are not counted.
          */
         public int m_localizableWordCount = 1;
-
-        // TODO: flag for inserting reference to system dtd.
 
         public Options()
         {
@@ -1065,6 +1067,11 @@ public class DiplomatAPI implements IFormatNames
                 xmlExtractor.setIsIdmlXml(IdmlHelper.isIdmlFileProfile(Long
                         .parseLong(fileProfileId)));
             }
+            
+            for (ExtractRule r : rules)
+            {
+                xmlExtractor.addExtractRule(r);
+            }
         }
         
         extractor.extract();
@@ -1780,4 +1787,13 @@ public class DiplomatAPI implements IFormatNames
     {
         this.isPreview = isPreview;
     }
+    
+    /**
+     * @see com.globalsight.cxe.adapter.ling.HasExtractRule#addExtractRule()
+     */
+    public void addExtractRule(ExtractRule rule)
+    {
+        rules.add(rule);
+    }
+
 }

@@ -24,6 +24,7 @@ public class StyleFactory
     public static String DOCX = "docx";
     public static String MIF = "mif";
     public static String PPTX = "pptx";
+    public static String XLSX = "xlsx";
     
     /**
      * Gets the style class according to the type.
@@ -46,6 +47,9 @@ public class StyleFactory
         
         if (PPTX.equals(type))
         	return new PptxStyleUtil();
+        
+        if (XLSX.equals(type))
+        	return new ExcelStyleUtil();
 
         return null;
     }

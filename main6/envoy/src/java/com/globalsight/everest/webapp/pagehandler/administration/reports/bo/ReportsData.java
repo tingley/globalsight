@@ -18,9 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.bo;
 
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class ReportsData
 {
     String userId;                      // Reports operator
@@ -28,11 +25,13 @@ public class ReportsData
     List<String> reportTypeList;        // Reports type list
     double percent;                     // Reports percent
     String status;                      // Reports status
+    String reportJobIDString;           // Reports job id list String
+    String reportTypeString;            // Reports type list String
 
     // Reports status constants
-    public static final String STATUS_INPROGRESS = "inProgress";
-    public static final String STATUS_CANCEL = "cancel";
-    public static final String STATUS_FINISHED = "finished";
+    public static final String STATUS_INPROGRESS = "In Progress";
+    public static final String STATUS_CANCEL = "Cancel";
+    public static final String STATUS_FINISHED = "Finished";
 
     
     public ReportsData(String userID, List<Long> reportJobIDS, List<String> reportTypeList, 
@@ -115,15 +114,55 @@ public class ReportsData
     {
         return STATUS_INPROGRESS.equals(status);
     }
+    
+    public String getReportJobIDString()
+    {
+        return reportJobIDString;
+    }
+
+    public void setReportJobIDString(String reportJobIDString)
+    {
+        this.reportJobIDString = reportJobIDString;
+    }
+
+    public String getReportTypeString()
+    {
+        return reportTypeString;
+    }
+
+    public void setReportTypeString(String reportTypeString)
+    {
+        this.reportTypeString = reportTypeString;
+    }
 
     /**
      * Return JOSN string for JS.
      * Remove user object for not using.
      */
-    public String toJSON() throws JSONException
+    public String toJSON()
     {
-        JSONObject jsonObj = new JSONObject(this);        
-        return jsonObj.toString();
+        StringBuilder json = new StringBuilder("{");
+        json.append("\"userId\":\"").append(getUserId()).append("\",")
+            .append("\"percent\":").append(getPercent()).append(",")
+            .append("\"status\":\"").append(getStatus()).append("\",");
+        
+        // Report Job ID List JSON
+        String reportJobIdString = getReportJobIDString();
+        if(reportJobIdString == null && reportJobIDS != null)
+        {
+            reportJobIdString = getReportJobIDS().toString();
+        }
+        json.append("\"reportJobIDS\":\"").append(reportJobIdString).append("\",");
+        
+        // Report Type List JSON
+        String reportTypeListString = getReportTypeString();
+        if(reportTypeListString == null && reportTypeList != null)
+        {
+            reportTypeListString = getReportTypeList().toString();
+        }
+        json.append("\"reportTypeList\":\"").append(reportTypeListString).append("\"");
+        
+        return json.append("}").toString();
     }
     
     @Override
@@ -133,5 +172,4 @@ public class ReportsData
                 + reportTypeList + ", userId=" + userId + ", percent=" + percent
                 + ", status=" + status + "}@ReportsData";
     }
-
 }

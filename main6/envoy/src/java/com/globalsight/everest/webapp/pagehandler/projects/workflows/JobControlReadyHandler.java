@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
@@ -30,6 +31,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.hibernate.HibernateException;
 
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
@@ -42,6 +45,7 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoReadySearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class JobControlReadyHandler extends JobManagementHandler
@@ -102,6 +106,61 @@ public class JobControlReadyHandler extends JobManagementHandler
                 out.close();
             }
 
+            return;
+        }
+        else if ("validateBeforeRename"
+                .equals(p_request.getParameter("action")))
+        {
+            String id = p_request.getParameter("jobId");
+            HttpSession session = p_request.getSession(false);
+            Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
+            StringBuffer jobName = new StringBuffer();
+            JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(id));
+            for (Workflow wf : job.getWorkflows())
+            {
+                String wfState = wf.getState();
+                // return only workflows that can be exported
+                if (wfState.equals(Workflow.DISPATCHED)
+                        || wfState.equals(Workflow.ARCHIVED)
+                        || wfState.equals(Workflow.EXPORT_FAILED)
+                        || wfState.equals(Workflow.EXPORTED)
+                        || wfState.equals(Workflow.LOCALIZED))
+                {
+                    jobName.append("\r\n"
+                            + wf.getTargetLocale().getDisplayName(uiLocale));
+                }
+            }
+
+            if (jobName.length() > 0)
+            {
+                ResourceBundle bundle = PageHandler.getBundle(p_request
+                        .getSession());
+                ServletOutputStream out = p_response.getOutputStream();
+                out.write(bundle.getString("msg_unable_rename_job").getBytes());
+                out.flush();
+                out.close();
+            }
+
+            return;
+        }
+        else if ("renameJobSummary".equals(p_request.getParameter("action")))
+        {
+
+            String id = p_request.getParameter("jobId");
+            String jobName = p_request.getParameter("jobName");
+            JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(id));
+            job.setJobName(jobName);
+            try
+            {
+                HibernateUtil.merge(job);
+            }
+            catch (HibernateException e)
+            {
+                ServletOutputStream out = p_response.getOutputStream();
+                out.write((e.getMessage()).getBytes());
+                out.flush();
+                out.close();
+            }
             return;
         }
         else

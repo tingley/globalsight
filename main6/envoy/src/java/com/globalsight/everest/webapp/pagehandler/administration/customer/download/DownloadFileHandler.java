@@ -38,6 +38,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -291,14 +292,25 @@ public class DownloadFileHandler extends PageHandler
                                 if (file.isFile())
                                 {
                                     String fileName = file.getName();
-                                    if (scriptedFolderName.equals(fileName
-                                            .substring(0,
+                                    String scriptedFolderNamePrefix = FileSystemUtil
+                                			.getScriptedFolderNamePrefixByJob(job_id);
+                                    String folderName = scriptedFolderNamePrefix + "_" 
+                                    		+ fileName.substring(0, fileName.lastIndexOf(".")) + "_"
+                                    		+ fileName.substring(fileName.lastIndexOf(".") + 1);
+                                    if (scriptedFolderName.equals(folderName) ||
+                                    		scriptedFolderName.equals(fileName
+                                    			.substring(0,
                                                     fileName.lastIndexOf("."))))
                                     {
                                         // re-set the externalPageId to the
                                         // reverted file name.
                                         externalPageId = targetFolder
                                                 + File.separator + fileName;
+                                        
+                                        externalPageId = externalPageId.replace('\\', '/');
+                                        if (fullPageList.contains(externalPageId))
+                                            continue;
+                                        
                                         break;
                                     }
                                 }

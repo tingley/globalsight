@@ -17,6 +17,7 @@ public class OnlineEditorConstants
     public static final String SEGMENT_FILTER_COMMENTED = "segFilterCommented";
     public static final String SEGMENT_FILTER_MACHINETRANSLATION = "segFilterMT";
     public static final String SEGMENT_FILTER_NO_TRANSLATED = "segFilterNoTrans";
+    public static final String SEGMENT_FILTER_APPROVED = "segFilterApproved";
     
     public static List<String> SEGMENT_FILTERS;
     static
@@ -32,6 +33,7 @@ public class OnlineEditorConstants
         SEGMENT_FILTERS.add(SEGMENT_FILTER_REPETITIONS);
         SEGMENT_FILTERS.add(SEGMENT_FILTER_MODIFIED);
         SEGMENT_FILTERS.add(SEGMENT_FILTER_NO_TRANSLATED);
+        SEGMENT_FILTERS.add(SEGMENT_FILTER_APPROVED);
         SEGMENT_FILTERS.add(SEGMENT_FILTER_COMMENTED);
     }
 }

@@ -2,17 +2,25 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 public interface ReportConstants
 {
-    public static final String REPORTS_SUB_DIR = "GlobalSight/Reports";
+    public static final String EXTENSION_XLSX = ".xlsx";
+    public static final String REPORTS_SUB_DIR = "Reports";
     public static final String REPORTS_NAME = "GSReports";
     public static final String GENERATE_REPORT = "generateReport";
     public static final String GENERATE_REPORTS = "generateReports";
     public static final String GET_REPORT = "getReport";
+    public static final String PARENT_NODE = "parentNode";
+    
     public static final String ACTION_GET_PERCENT = "getPercent";
     public static final String ACTION_GET_REPORTSDATA = "getReportsData";
+    public static final String ACTION_CHECK_SOURCE_LOCALE = "checkSourceLocale";
     public static final String ACTION_CANCEL_REPORTS = "cancelReports";
     public static final String ACTION_CANCEL_REPORT = "cancelReport";
     public static final String ACTION_REFRESH_PROGRESS = "refreshProgress";
     public static final String ACTION_GENERATE_SUMMARY_PERCENT = "generateSummaryReport";
+    
+    public static final String ACTION_VIEW = "view";
+    public static final String ACTION_DELETE = "delete";
+    public static final String ACTION_DOWNLOAD = "download";
     
     // Reports Type
     public static final String ONLINE_JOBS_REPORT = "OnlineJobsReport";
@@ -25,7 +33,7 @@ public interface ReportConstants
     
     public static final String COMMENTS_REPORT = "Comments";
     public static final String JOB_STATUS_REPORT = "jobStatusReport"; 
-    public static final String ACTIVITY_DURATION_REPORT = "ActivityDuration";
+    public static final String ACTIVITY_DURATION_REPORT = "ActivityDurationReport";
     public static final String ONLINE_REVIEW_STATUS_REPORT = "OnlineReviewStatus"; 
     public static final String VENDOR_PO_REPORT = "VendorPO"; 
     public static final String REVIEWER_VENDOR_PO_REPORT = "ReviewerVendorPO";
@@ -42,6 +50,7 @@ public interface ReportConstants
     public static final String TARGETLOCALE_LIST = "targetLocalesList";
     public static final String PROJECT_LIST = "reportsProjectList";
     public static final String L10N_PROFILES = "l10nProfiles";
+    public static final String SUB_DIR = "subDir";
     
     // Excel parameter name
     public static final String CATEGORY_LIST = "categoryList";

@@ -28,7 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -65,6 +67,7 @@ import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -264,6 +267,34 @@ public class TaskListHandler extends PageHandler
             p_response.getWriter().write(result);
             return;
         }
+        else if(TASK_ACTION_TRANSLATED_TEXT_RETRIEVE.equals(action))
+        {
+        	String result = "";
+    		try 
+    		{
+    			Map<Long, List<Long>> map = getTaskFiles(p_request);
+    			Set<Entry<Long, List<Long>>> entries  = map.entrySet();
+    			String percentage = null;
+    			StringBuffer buffer = new StringBuffer();
+    			for (Entry<Long, List<Long>> entry : entries)
+    			{
+    			    long taskId = entry.getKey();
+    			    List<Long> trgPageIds = entry.getValue();
+                    percentage = SegmentTuvUtil
+                            .getTranslatedPercentage(trgPageIds);
+                    buffer.append(taskId).append("_").append(percentage)
+                            .append(",");
+    			}
+        		result = "{\"progress\":\""  + buffer.toString() + "\"}";
+        		p_response.getWriter().write(result);
+			}
+    		catch (Exception e) 
+    		{
+                throw new TaskException(
+                        TaskException.MSG_FAILED_TO_GET_TRANSLATE_TEXT, null, e);
+			}
+        	return;
+        }
 
         try
         {
@@ -285,6 +316,52 @@ public class TaskListHandler extends PageHandler
         myInvokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
+    /**
+     * Get the task of all the files
+     * 
+     * @param p_request
+     * @return map
+     * */
+    private Map<Long, List<Long>> getTaskFiles(HttpServletRequest p_request)
+    {
+        Map<Long, List<Long>> map = new HashMap<Long, List<Long>>();
+
+        String taskIds = p_request.getParameter("taskParam");
+        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        try
+        {
+        	while (tokenizer.hasMoreTokens()) 
+        	{
+                String taskIdParam = tokenizer.nextToken();
+                long taskId = TaskHelper.getLong(taskIdParam);
+                Task task = null;
+                try
+                {
+                    task = TaskHelper.getTask(taskId);
+                }
+                catch (Exception e)
+                {
+                    throw new TaskException(
+                            TaskException.MSG_FAILED_TO_GET_TRANSLATE_TEXT,
+                            null, e);
+                }
+                List<TargetPage> targetPages = task.getTargetPages();
+                List<Long> targetPageIds = new ArrayList<Long>();
+                for (TargetPage tp : targetPages)
+                {
+                    targetPageIds.add(tp.getIdAsLong());
+                }
+                map.put(taskId, targetPageIds);
+            }
+        } 
+        catch (Exception e)
+        {
+            throw new TaskException(
+                    TaskException.MSG_FAILED_TO_GET_TRANSLATE_TEXT, null, e);
+        }
+    	return map;
+    }
+    
     private String refineErrorMsg(Exception oriExp)
     {
         String oriMsg = oriExp.toString();
@@ -1079,7 +1156,7 @@ public class TaskListHandler extends PageHandler
             }
 
             // JSON Array for Pages included Un-translated Segments
-            if (proj.isCheckUnTranslatedSegments())
+            if (proj.isCheckUnTranslatedSegments() && !p_task.isReviewOnly())
             {
                 List<TargetPage> unTransTps = ServerProxy
                         .getPageManager()
@@ -1171,6 +1248,8 @@ public class TaskListHandler extends PageHandler
         StringTokenizer tokenizer = new StringTokenizer(taskIds);
         StringBuffer isFinishedTaskId = new StringBuffer();
         StringBuffer isUploadingJobName = new StringBuffer();
+        String percentage = null;
+
         try
         {
             while (tokenizer.hasMoreTokens())
@@ -1189,7 +1268,30 @@ public class TaskListHandler extends PageHandler
                     }
                     else
                     {
-                        isFinishedTaskId.append(taskId).append(" ");
+                        ProjectImpl project = (ProjectImpl) task.getWorkflow()
+                                .getJob().getProject();
+                        boolean isCheckUnTranslatedSegments = project
+                                .isCheckUnTranslatedSegments();
+                        boolean isReviewOnly = task.isReviewOnly();
+                        if (isCheckUnTranslatedSegments && !isReviewOnly)
+                        {
+                            List<TargetPage> targetPages = task.getTargetPages();
+                            List<Long> targetPageIds = new ArrayList<Long>();
+                            for (TargetPage tp : targetPages)
+                            {
+                                targetPageIds.add(tp.getIdAsLong());
+                            }
+                            percentage = SegmentTuvUtil
+                                    .getTranslatedPercentage(targetPageIds);
+                            if ("100".equals(percentage))
+                            {
+                                isFinishedTaskId.append(taskId).append(" ");
+                            }
+                        }
+                        else
+                        {
+                            isFinishedTaskId.append(taskId).append(" ");
+                        }
                     }
                 }
             }
@@ -1443,7 +1545,7 @@ public class TaskListHandler extends PageHandler
         // - and finally, this **IS** the same column and screen as before
         if (sortAsc != null && request_sortAsc != null
                 && !sortAsc.toString().equals(request_sortAsc)
-                && previousSortColumn != null && previousTaskState != null
+                && previousSortColumn != null
                 && isRefresh != 1 && isPaging == null
                 && sortColumn == previousSortColumn.intValue()
                 && taskState == previousTaskState.intValue())
@@ -2298,7 +2400,7 @@ public class TaskListHandler extends PageHandler
         // - and finally, this **IS** the same column and screen as before
         if (sortAsc != null && request_sortAsc != null
                 && !sortAsc.toString().equals(request_sortAsc)
-                && previousSortColumn != null && previousTaskState != null
+                && previousSortColumn != null
                 && isRefresh != 1 && isPaging == null
                 && sortColumn == previousSortColumn.intValue()
                 && taskState == previousTaskState.intValue())
@@ -2644,7 +2746,6 @@ public class TaskListHandler extends PageHandler
     {
         String taskIds = p_request.getParameter("taskParam");
         List<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
-
         TaskManager taskManager = ServerProxy.getTaskManager();
         for (Iterator<Long> it = selectedTaskIds.iterator(); it.hasNext();)
         {

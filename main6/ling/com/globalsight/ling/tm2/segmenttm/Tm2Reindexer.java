@@ -44,7 +44,26 @@ public class Tm2Reindexer
 
     private static final String SORT_BY_LOCALE = "order by tuv.locale_id";
 
-    public boolean reindexTm(Tm tm, Reindexer reindexer) throws Exception
+    /**
+     * Reindex project TM data for TM2.
+     * <p>
+     * Whether indexing target is determined by parameter "indexTarget".
+     * </p>
+     * <p>
+     * For performance purpose, when import TM or populate TM, whether indexing
+     * target is determined by current TM's "Index Target" option, default
+     * unchecked; When reindex, set this to true manually for multilingual
+     * leverage purpose.
+     * </p>
+     * 
+     * @param projectTm
+     * @param reindexer
+     * @param indexTarget
+     * @return success or not.
+     * @throws Exception
+     */
+    public boolean reindexTm(Tm tm, Reindexer reindexer, boolean indexTarget)
+            throws Exception
     {
         Connection conn = null;
         LuceneReindexer luceneReindexer = null;
@@ -55,10 +74,10 @@ public class Tm2Reindexer
             conn = DbUtil.getConnection();
             boolean success = true;
             String query = GET_SEGMENTS;
-            if (!TmSegmentIndexer.indexesTargetSegments())
-            {
-                query += SOURCE_ONLY;
-            }
+//            if (!indexTarget)
+//            {
+//                query += SOURCE_ONLY;
+//            }
             query += SORT_BY_LOCALE;
             stmt = conn.prepareStatement(query);
             stmt.setLong(1, tm.getId());
@@ -67,6 +86,7 @@ public class Tm2Reindexer
             while (rs.next())
             {
                 long locale_id = rs.getLong("locale_id");
+                long source_locale_id = rs.getLong("source_locale_id");
                 if (curr_locale_id != locale_id)
                 {
                     curr_locale_id = locale_id;
@@ -77,10 +97,17 @@ public class Tm2Reindexer
                     }
                     luceneReindexer = new LuceneReindexer(tm.getId(), locale);
                 }
-                SegmentTmTuv tuv = getSegment(rs, luceneReindexer.getLocale(),
-                        tm.getId());
-                luceneReindexer.index(tuv);
+
+                // always index source; only index target when "indexTarget" is true.
+                if (locale_id == source_locale_id || indexTarget)
+                {
+                    SegmentTmTuv tuv = getSegment(rs,
+                            luceneReindexer.getLocale(), tm.getId());
+                    luceneReindexer.index(tuv);                    
+                }
+
                 reindexer.incrementCounter(1);
+
                 synchronized (reindexer)
                 {
                     if (reindexer.getInterrupted())

@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,6 +66,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.DtdException;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.ling.common.MapOfHtmlEntity;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -72,6 +74,8 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.ProcessRunner;
+import com.globalsight.util.Replacer;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.file.XliffFileUtil;
 
 /**
@@ -79,6 +83,9 @@ import com.globalsight.util.file.XliffFileUtil;
  */
 public class Exporter
 {
+	private static Pattern FILE_PATTERN = Pattern.compile("<file[^>]*(target-language=[\"']([^\"']*?)[\"'])[^>]*>");
+	private static Pattern UNIT_PATTERN = Pattern.compile("<trans-unit[\\s\\S]*?(<target[^>]*xml:lang=[\"']([^\"']*?)[\"'][\\s\\S]*?</target>)[\\s\\S]*?</trans-unit>");
+	
     private String m_cxeDocsDir;
     private CxeMessage m_cxeMessage;
     private org.apache.log4j.Logger m_logger;
@@ -240,7 +247,7 @@ public class Exporter
                 targetEncoding = targetEncoding.toLowerCase();
 
                 // At this moment,only extended characters are unicode escaped
-                if (!fp.getUnicodeEscape())
+                if (!fp.supportsUnicodeEscape())
                 {
                     Object unicodeEscape = m_cxeMessage.getParameters().get(
                             "UnicodeEscape");
@@ -401,10 +408,13 @@ public class Exporter
                     try
                     {
                         // Copy the original source files to target folder.
-                        copyOriFilesToTargetFolder(targetFolder, companyId);
+                        copyOriFilesToTargetFolder(targetFolder, companyId,
+                        	finalFileName.substring(finalFileName.lastIndexOf(File.separator) + 1));
                         // execute script
+                        // TODO: Need to remove the "PostProcessed" parameter,
+                        // it is useless and harmless.
                         String cmd = "cmd.exe /c " + scriptOnExport + " \""
-                                + targetFolder + "\" -r";
+                                + targetFolder + "\" \"PostProcessed\" -r";
                         ProcessRunner pr = new ProcessRunner(cmd);
                         Thread t = new Thread(pr);
                         t.start();
@@ -417,7 +427,6 @@ public class Exporter
                         }
                         m_logger.info("Script on Export " + scriptOnExport
                                 + " is called to handle " + targetFolder);
-
                     }
                     catch (Exception e)
                     {
@@ -444,7 +453,7 @@ public class Exporter
             // Added by Vincent Yan
             HashMap<String, String> infos = CVSUtil.seperateFileInfo(
                     finalFile.getAbsolutePath(), m_exportLocation);
-            if (infos != null && CVSUtil.isCVSJob(infos.get("jobName")))
+            if (infos != null && CVSUtil.isCVSJob(infos.get("jobId")))
             {
                 CVSUtil.saveCVSFile(
                         infos,
@@ -452,6 +461,14 @@ public class Exporter
                                 m_displayName.indexOf(File.separator)));
             }
 
+            XmlDtd xmlDtd = getXmlDtd();
+            Set<TargetPage> ps = null;
+            Iterator<TargetPage> tpIt = null;
+            if (xmlDtd == null && m_sourceFileName != null && wf != null)
+            {
+                ps = ((WorkflowImpl) wf).getTargetPagesSet();
+                tpIt = ps.iterator();
+            }
             synchronized (FILE_STATES)
             {
                 m_batchId = (String) m_cxeMessage.getParameters().get(
@@ -461,18 +478,18 @@ public class Exporter
                 m_pageNumber = (Integer) m_cxeMessage.getParameters().get(
                         "PageNum");
 
-                XmlDtd xmlDtd = getXmlDtd();
+                
                 if (xmlDtd == null)
                 {
                     if (m_sourceFileName != null && wf != null)
                     {
-                        Vector<TargetPage> ps = wf.getAllTargetPages();
                         if (ps != null)
                         {
                             int n = 0;
-                            for (TargetPage p : ps)
+                            while (tpIt.hasNext())
                             {
-                                String s = p.getExternalPageId();
+                                TargetPage tp = tpIt.next();
+                                String s = tp.getExternalPageId();
                                 if (s.endsWith(m_sourceFileName))
                                 {
                                     n++;
@@ -551,26 +568,28 @@ public class Exporter
 
     private String replaceFileLocale(String content, String targetLocale)
     {
-        String regex = "<file[^>]*(target-language=[\"']([^\"']*?)[\"'])[^>]*>";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher m = pattern.matcher(content);
-        while (m.find())
+        content = StringUtil.replaceWithRE(content, FILE_PATTERN, new Replacer(targetLocale) 
         {
-            String f = m.group();
-            String target = m.group(1);
-            String locale = m.group(2);
-            String rTarget = target.replace(locale, targetLocale);
-            String rf = f.replace(target, rTarget);
-            content = content.replace(f, rf);
-        }
-
+			
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+	            String f = m.group();
+	            String target = m.group(1);
+	            String locale = m.group(2);
+	            String rTarget = StringUtil.replace(target, locale, r1);
+	            String rf = StringUtil.replace(f,target, rTarget);
+				return rf;
+			}
+		});
+        
         return content;
     }
 
     private void changeTargetLocale(String targetLocale, File xliffFile,
             String encoding)
     {
-        targetLocale = targetLocale.replace("_", "-");
+        targetLocale =  StringUtil.replace(targetLocale,"_", "-");
         try
         {
             String content = FileUtil.readFile(xliffFile, encoding);
@@ -587,18 +606,19 @@ public class Exporter
 
     private String replaceTransUnit(String content, String targetLocale)
     {
-        String regex = "<trans-unit[\\s\\S]*?(<target[^>]*xml:lang=[\"']([^\"']*?)[\"'][\\s\\S]*?</target>)[\\s\\S]*?</trans-unit>";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher m = pattern.matcher(content);
-        while (m.find())
+        content = StringUtil.replaceWithRE(content, UNIT_PATTERN, new Replacer(targetLocale) 
         {
-            String f = m.group();
-            String target = m.group(1);
-            String locale = m.group(2);
-            String rTarget = target.replace(locale, targetLocale);
-            String rf = f.replace(target, rTarget);
-            content = content.replace(f, rf);
-        }
+			@Override
+			public String getReplaceString(Matcher m) 
+			{
+	            String f = m.group();
+	            String target = m.group(1);
+	            String locale = m.group(2);
+	            String rTarget = StringUtil.replace(target, locale, r1);
+	            String rf = StringUtil.replace(f,target, rTarget);
+				return rf;
+			}
+		});
 
         return content;
     }
@@ -1071,26 +1091,32 @@ public class Exporter
     // ////////////////////////////////////
 
     private void copyOriFilesToTargetFolder(String p_targetFolder,
-            String p_companyId)
+            String p_companyId, String fileName)
     {
         String sourceFolder = determineSourceFolder(p_companyId);
         File targetFile = new File(p_targetFolder).getParentFile();
         File sourceFile = new File(sourceFolder).getParentFile();
-        final String fileName = new File(sourceFolder).getName();
         File[] fs = sourceFile.listFiles(new FileFilter()
         {
             public boolean accept(File pathname)
             {
-                return pathname.isFile()
-                        && FileUtils.getBaseName(pathname.getName())
-                                .startsWith(fileName + ".");
+                return pathname.isFile();
             }
         });
         for (int i = 0; i < fs.length; i++)
         {
             File file = fs[i];
-            FileCopier.copyFile(file, targetFile);
+            if(!isFileExist(file, targetFile) && file.getName().equals(fileName))
+            {
+            	FileCopier.copyFile(file, targetFile);
+            }
         }
+    }
+    
+    private boolean isFileExist(File file, File targetFile)
+    {
+    	File destFile = new File(targetFile, file.getName());
+    	return destFile.exists();
     }
 
     private boolean readyForScript(String p_targetFolder, String p_companyId)
@@ -1347,7 +1373,7 @@ public class Exporter
     {
         if ("passolo".equals(m_formatType))
         {
-            String name = m_sourceFileName.replace("\\", "/");
+            String name = StringUtil.replace(m_sourceFileName,"\\", "/");
             return m_exportLocation + "/passolo"
                     + name.substring(name.indexOf("/"));
         }

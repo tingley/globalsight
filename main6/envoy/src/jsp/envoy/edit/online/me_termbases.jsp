@@ -63,7 +63,10 @@ function doLoad()
   var dom ;
   if(window.navigator.userAgent.indexOf("MSIE")>0)
   {
-    dom = oTermbases.XMLDocument;
+    //dom = oTermbases.XMLDocument;
+	  dom=new ActiveXObject("Microsoft.XMLDOM");
+      dom.async="false";
+      dom.loadXML(xmlTermbases);
   }
   else if(window.DOMParser)
   { 

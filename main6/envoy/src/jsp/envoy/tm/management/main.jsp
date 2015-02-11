@@ -180,7 +180,7 @@ function enableButtons()
 
 	var flag = false;
 	var flagTm3 = false;
-	var canReindex = false;
+	var disableReindex = false;
 	var canRemove = false;
 
 	var tmpId = "";
@@ -190,13 +190,15 @@ function enableButtons()
 	if (selectMode == "single")
 	{
 		tmpId = "," + id + ",";
+        if (remoteTms2.indexOf(tmpId) > -1) {
+            disableReindex = true;
+        }
 		if (tm3tms2.indexOf(tmpId) > -1 || remoteTms2.indexOf(tmpId) > -1) {
 			flagTm3 = true;
-			canReindex = true;
 		}
 		if (convertingTms2.indexOf(tmpId) > -1) {
 			flag = true;
-			canReindex = true;
+			disableReindex = true;
 		}
 		if ($.trim($("#tmversion"+id).text()) == "2")
 			flagTm3 = true;
@@ -205,15 +207,13 @@ function enableButtons()
 	{
 		flag = true;
 		flagTm3 = true;
-		canReindex = true;
 		if (selectMode == "none")
 		{
 	        canRemove = true;
-	        canReindex = false;
 		}
 	}
 
-	setButtonStatus(flag, flagTm3, canReindex);
+	setButtonStatus(flag, flagTm3, disableReindex);
 
 	$("#deleteBtn").attr("disabled", canRemove);
 	
@@ -230,7 +230,7 @@ function enableButtons()
 	%>
 }
 
-function setButtonStatus(flag, flagTm3, canReindex) {
+function setButtonStatus(flag, flagTm3, disableReindex) {
 	$(":button[id='statBtn']").each(function(){
 		$(this).attr("disabled", flag);
 	});
@@ -253,16 +253,16 @@ function setButtonStatus(flag, flagTm3, canReindex) {
 		$(this).attr("disabled", flagTm3);
 	});
 	$(":button[id='reindexBtn']").each(function(){
-		$(this).attr("disabled", canReindex);
+		$(this).attr("disabled", disableReindex);
 	});
 }
 
 function findSelectedRadioButton() {
     var id = "";
-	$("#TMForm :checkbox:checked:not('#showTM3')").each(function (){
+    $('input[type="checkbox"][name="TMId"]:checked').each(function (){
 	    id += $(this).val() + ",";
 	});
-	if (id != "")
+    if (id != "")
 	  id = id.substring(0, id.length - 1);
 	return id;
 }
@@ -321,8 +321,8 @@ function exportTM() {
 
 function reindexTM() {
 	var id = findSelectedRadioButton();
-    $("#TMForm").attr("action", '<%=urlReindex + "&" + WebAppConstants.TM_ACTION + "=" + WebAppConstants.TM_ACTION_REINDEX%>')
-                .submit();
+    var url = '<%=urlReindex%>&<%=WebAppConstants.TM_ACTION%>=<%=WebAppConstants.TM_ACTION_REINDEX%>&TMId=' + id;
+    $("#TMForm").attr("action", url).submit();
 }
 
 function showStatistics() {

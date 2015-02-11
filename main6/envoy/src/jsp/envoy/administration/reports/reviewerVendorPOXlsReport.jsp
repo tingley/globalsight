@@ -9,10 +9,11 @@
 %><%!
     public ReviewerVendorPoXlsReportHelper reviewerVendorPoXlsReportHelper = null;
 %><%
-response.setHeader("Content-Disposition","attachment; filename=ReviewerVendorPO.xls" );
+response.setHeader("Content-Disposition","attachment; filename=ReviewerVendorPO.xlsx" );
 response.setHeader("Expires", "0");
 response.setHeader("Cache-Control","must-revalidate, post-check=0,pre-check=0");
 response.setHeader("Pragma","public");
+response.setContentType("application/x-excel");
 //Multi-Company: get current user's company from the session
 HttpSession userSession = request.getSession(false);
 String companyName = (String)userSession.getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);

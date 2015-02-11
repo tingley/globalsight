@@ -478,6 +478,7 @@ public class ImportUtil
                 }
                 boolean isRemoved = false;
                 int count = 0;
+                SAXReader reader = new SAXReader();
                 while (s != null)
                 {
                     if (status.isCanceled())
@@ -534,7 +535,7 @@ public class ImportUtil
                         try
                         {
                             /* verify the content */
-                            new SAXReader().read(new StringReader(content));
+                            reader.read(new StringReader(content));
 
                             // Saves the tu if no exception happen.
                             out.write(content);
@@ -765,6 +766,7 @@ public class ImportUtil
                 }
                 boolean isRemoved = false;
                 int count = 0;
+                SAXReader reader = new SAXReader();
                 while (s != null)
                 {
                     if (isHeaderStart(s) && isTradosFontTableStart(s)
@@ -814,7 +816,7 @@ public class ImportUtil
                         try
                         {
                             /* verify the content */
-                            new SAXReader().read(new StringReader(content));
+                            reader.read(new StringReader(content));
 
                             // Saves the tu if no exception happen.
                             out.write(content);

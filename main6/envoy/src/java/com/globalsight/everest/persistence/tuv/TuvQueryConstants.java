@@ -29,10 +29,12 @@ public interface TuvQueryConstants
     public static final String TU_TABLE_PLACEHOLDER = "\uE000" + "_TRANSLATION_UNIT_TABLE_" + "\uE000";
     public static final String TUV_TABLE_PLACEHOLDER = "\uE000" + "_TRANSLATION_UNIT_VARIANT_TABLE_" + "\uE000";
     public static final String LM_TABLE_PLACEHOLDER = "\uE000" + "_LEVERAGE_MATCH_TABLE_" + "\uE000";
+    public static final String TEMPLATE_PART_TABLE_PLACEHOLDER = "\uE000" + "_TEMPLATE_PART_TABLE_" + "\uE000";
 
     public static final String TRANSLATION_UNIT_TABLE = "TRANSLATION_UNIT";
     public static final String TRANSLATION_UNIT_VARIANT_TABLE = "TRANSLATION_UNIT_VARIANT";
     public static final String LEVERAGE_MATCH_TABLE = "LEVERAGE_MATCH";
+    public static final String TEMPLATE_PART_TABLE = "TEMPLATE_PART";
 
     // TU
 

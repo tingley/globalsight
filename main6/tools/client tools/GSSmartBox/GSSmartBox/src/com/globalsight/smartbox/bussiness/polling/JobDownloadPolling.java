@@ -107,6 +107,13 @@ public class JobDownloadPolling implements Polling
         };
         thread = new Thread(runnable);
         thread.setName("JobDownloadPolling: " + companyName);
+        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
+        {
+            public void uncaughtException(Thread t, Throwable e)
+            {
+                new JobDownloadPolling(cpConfig).start();
+            }
+        });
         thread.start();
     }
 

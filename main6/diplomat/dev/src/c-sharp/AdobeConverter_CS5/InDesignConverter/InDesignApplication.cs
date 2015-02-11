@@ -371,6 +371,13 @@ namespace GlobalSight.InDesignConverter
                 Logger.LogError("[Indesign]: InDesign Conversion Failed", e);
                 throw e;
             }
+            finally
+            {
+                //SaveDocument(p_idmlFileName);
+
+                m_inDesignDoc.Close(InDesign.idSaveOptions.idNo, p_idmlFileName, m_versionComments, m_forceSave);
+                m_openedFileNumber--;
+            }
         }
 
         /// <summary>

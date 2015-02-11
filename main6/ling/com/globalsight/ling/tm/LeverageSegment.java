@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.ModifyDateComparable;
 import com.globalsight.ling.tm2.leverage.SidComparable;
 
@@ -65,9 +64,6 @@ public class LeverageSegment implements Serializable, SidComparable,
 
     public String getSid()
     {
-        if (sid == null) {
-            sid = TmUtil.getSidForTuv(tmId, matchedTuvId);
-        }
         return sid;
     }
 
@@ -108,14 +104,6 @@ public class LeverageSegment implements Serializable, SidComparable,
 
     public Timestamp getModifyDate()
     {
-        if (modifyDate == null)
-        {
-            Date modifyDate = TmUtil.getModifyDateForTuv(tmId, matchedTuvId);
-            if (modifyDate != null)
-            {
-                this.modifyDate = new Timestamp(modifyDate.getTime());
-            }
-        }
         return modifyDate;
     }
 

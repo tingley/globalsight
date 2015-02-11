@@ -470,7 +470,7 @@ function openViewerWindow(url)
 
 function contextForPage(url, e)
 {
-    if(navigator.userAgent.indexOf("MSIE")==-1)
+    if(e instanceof Object)
     {
 	    e.preventDefault();
 	    e.stopPropagation();
@@ -536,7 +536,7 @@ function addSourceFiles()
 
 function openAddSourceFilesWindow()
 {
-	$("#addSourceDiv").dialog({width: 930, height: 500, resizable:false});
+	$("#addSourceDiv").dialog({width: "auto", resizable:false});
 	document.getElementById('addSourceDiv').parentNode.style.display = "inline";
 	document.getElementById('addSourceDiv').style.display = "inline";
 	document.getElementById('appletDiv').innerHTML = '<%=appletcontent.toString()%>';

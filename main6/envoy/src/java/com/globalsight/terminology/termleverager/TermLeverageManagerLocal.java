@@ -48,13 +48,13 @@ public final class TermLeverageManagerLocal
 
     private class TermListGenerator
     {
-        private ArrayList m_termList = new ArrayList();
+        private ArrayList<TermLeverageMatchResult> m_termList = new ArrayList<TermLeverageMatchResult>();
         private long m_prevSourceTermId = -1;
         private TermLeverageMatchResult m_matchResult = null;
 
         void init()
         {
-            m_termList = new ArrayList();
+            m_termList = new ArrayList<TermLeverageMatchResult>();
             m_prevSourceTermId = -1;
             m_matchResult = null;
         }
@@ -83,7 +83,7 @@ public final class TermLeverageManagerLocal
                 p_targetTermId, p_score, "");
         }
 
-        ArrayList getTermList()
+        ArrayList<TermLeverageMatchResult> getTermList()
         {
             // add the last TermLeverageMatchResult to the list
             if (m_matchResult != null)
@@ -164,7 +164,8 @@ public final class TermLeverageManagerLocal
 
                 if (tuvId != prevTuvId)
                 {
-                    ArrayList termList = termListGenerator.getTermList();
+                    ArrayList<TermLeverageMatchResult> termList = termListGenerator
+                            .getTermList();
 
                     if (termList != null)
                     {
@@ -233,8 +234,9 @@ public final class TermLeverageManagerLocal
      * Added for get Term Match Result for report.
      */
     public Map<Long, Set<TermLeverageMatch>> getTermMatchesForPages(
-        Set<SourcePage> p_sourcePages, GlobalSightLocale p_targetPageLocale)
-        throws GeneralException, RemoteException
+            Collection<SourcePage> p_sourcePages,
+            GlobalSightLocale p_targetPageLocale) throws GeneralException,
+            RemoteException
     {
         Connection conn = null;
         TermLeverageMatchDbAccessor.SelectResult selectResult = null;
@@ -302,9 +304,9 @@ public final class TermLeverageManagerLocal
     /**
      * Retrieves the TermLeverageMatchResult for a single source TuvId.
      */
-    public ArrayList getTermMatchesForSegment(long p_srcTuvId, long p_subId,
-        GlobalSightLocale p_targetPageLocale)
-        throws GeneralException, RemoteException
+    public ArrayList<TermLeverageMatchResult> getTermMatchesForSegment(
+            long p_srcTuvId, long p_subId, GlobalSightLocale p_targetPageLocale)
+            throws GeneralException, RemoteException
     {
         Connection conn = null;
         TermLeverageMatchDbAccessor.SelectResult selectResult = null;

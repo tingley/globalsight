@@ -21,6 +21,7 @@ package com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -198,10 +199,12 @@ public class LocProfileNewAndEditHandler extends PageHandler implements
                         "mtProfiles",
                         getJSONEachMt(sourcelocale, targetlocale, mtSupport,
                                 mtNotSure));
-                jsonTargetLocaleObj.put(
-                        "targetLocaleWorkflows",
-                        getJSONEachWorkflow(targetLocaleIdLong,
-                                sourceLocaleIdLong, locProfileProjectIdLong));
+                JSONArray trgLocaleWfs = getJSONEachWorkflow(targetLocaleIdLong,
+                        sourceLocaleIdLong, locProfileProjectIdLong);
+                if (trgLocaleWfs != null)
+                {
+                    jsonTargetLocaleObj.put("targetLocaleWorkflows", trgLocaleWfs);
+                }
                 jsonArr.put(jsonTargetLocaleObj);
             }
             jsonObj.put("targetLocalesWorkflows", jsonArr);
@@ -249,33 +252,31 @@ public class LocProfileNewAndEditHandler extends PageHandler implements
     private JSONArray getJSONEachWorkflow(long targetLocaleId,
             long sourceLocaleId, long locProfileProjectId) throws JSONException
     {
-        List targetLocaleWorkflows;
+        Collection<WorkflowTemplateInfo> targetLocaleWorkflows = null;
         JSONArray jsonWorkflowsArr = new JSONArray();
         try
         {
-            targetLocaleWorkflows = new ArrayList(ServerProxy
-                    .getProjectHandler()
+            targetLocaleWorkflows = ServerProxy.getProjectHandler()
                     .getAllWorkflowTemplateInfosByParameters(sourceLocaleId,
-                            targetLocaleId, locProfileProjectId));
+                            targetLocaleId, locProfileProjectId);
         }
         catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
-        for (int i = 0; i < targetLocaleWorkflows.size(); i++)
+        if (targetLocaleWorkflows != null && targetLocaleWorkflows.size() > 0)
         {
-            WorkflowTemplateInfo wft = (WorkflowTemplateInfo) targetLocaleWorkflows
-                    .get(i);
-            // wft.getSourceLocale(),wft.gett
-            JSONObject jsonWorkflowsObj = new JSONObject();
-            jsonWorkflowsObj.put("workflowId", wft.getId());
-            jsonWorkflowsObj.put("workflowName", wft.getName());
-            jsonWorkflowsArr.put(jsonWorkflowsObj);
+            for (WorkflowTemplateInfo wft : targetLocaleWorkflows)
+            {
+                JSONObject jsonWorkflowsObj = new JSONObject();
+                jsonWorkflowsObj.put("workflowId", wft.getId());
+                jsonWorkflowsObj.put("workflowName", wft.getName());
+                jsonWorkflowsArr.put(jsonWorkflowsObj);
+            }
+            return jsonWorkflowsArr;
         }
-        WorkflowTemplateInfo wft = (WorkflowTemplateInfo) targetLocaleWorkflows
-                .get(0);
 
-        return jsonWorkflowsArr;
+        return null;
     }
 
     // create hashtable of target locale names and ids according project

@@ -63,10 +63,16 @@ public class ProjectImpl extends PersistentObject implements Project,
     private int poRequired = 1;
 
     // Auto-accept task and Auto-send report options.
-    private boolean reviewOnlyAutoAccept = false;
-    private boolean reviewOnlyAutoSend = false;
-    private boolean autoAcceptPMTask = false;
+    private boolean reviewOnlyAutoAccept = false;           // Auto-accept Review Task
+    private boolean reviewOnlyAutoSend = false;             // Auto-send Reviewers Comments Report
+    private boolean reviewReportIncludeCompactTags = false; // Reviewers Comments Report include Compact Tags
+    private boolean autoAcceptPMTask = false;               // Auto-accept PM Task
+    
     private boolean checkUnTranslatedSegments = false;
+    // GBS-3115
+    private boolean saveTranslationsEditReport = true;
+    private boolean saveReviewersCommentsReport = true;
+    private boolean saveOfflineFiles = true;
 
     /**
      * Constructor.
@@ -570,5 +576,44 @@ public class ProjectImpl extends PersistentObject implements Project,
         this.checkUnTranslatedSegments = p_checkUnTranslatedSegments;
     }
 
+    public boolean getSaveTranslationsEditReport()
+    {
+        return saveTranslationsEditReport;
+    }
 
+    public void setSaveTranslationsEditReport(boolean saveTranslationsEditReport)
+    {
+        this.saveTranslationsEditReport = saveTranslationsEditReport;
+    }
+
+    public boolean getSaveReviewersCommentsReport()
+    {
+        return saveReviewersCommentsReport;
+    }
+
+    public void setSaveReviewersCommentsReport(
+            boolean saveReviewersCommentsReport)
+    {
+        this.saveReviewersCommentsReport = saveReviewersCommentsReport;
+    }
+
+    public boolean getSaveOfflineFiles()
+    {
+        return saveOfflineFiles;
+    }
+
+    public void setSaveOfflineFiles(boolean saveOfflineFiles)
+    {
+        this.saveOfflineFiles = saveOfflineFiles;
+    }
+
+    public boolean isReviewReportIncludeCompactTags()
+    {
+        return reviewReportIncludeCompactTags;
+    }
+
+    public void setReviewReportIncludeCompactTags(boolean reviewReportIncludeCompactTags)
+    {
+        this.reviewReportIncludeCompactTags = reviewReportIncludeCompactTags;
+    }
 }

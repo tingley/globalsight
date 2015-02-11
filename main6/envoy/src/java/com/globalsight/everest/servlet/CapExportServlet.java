@@ -27,12 +27,8 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
@@ -45,8 +41,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.adapter.filesystem.Exporter;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
@@ -55,25 +49,17 @@ import com.globalsight.everest.page.pageexport.ExportBatchEvent;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
-import com.globalsight.everest.permission.Permission;
-import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
-import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.everest.workflow.WorkflowMailerConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.mail.MailerConstants;
-
 
 /**
  * <P>
@@ -89,9 +75,10 @@ import com.globalsight.util.mail.MailerConstants;
  * purposes.
  * </P>
  */
-public class CapExportServlet
-    extends HttpServlet
+public class CapExportServlet extends HttpServlet
 {
+    private static final long serialVersionUID = 3601378874412599201L;
+
     private static final Logger c_logger =
         Logger.getLogger(
             CapExportServlet.class.getName());
@@ -165,10 +152,9 @@ public class CapExportServlet
      * </P>
      * @param p_request The HttpServletRequest.
      * @param p_response The HttpServletResponse.
-     * @exception IOException - Signals that an I/O related error has
-     * occured.
-     * @exception ServletException - Defines a general exception a
-     * servlet can throw when it encounters difficulty.
+     * @exception IOException - Signals that an I/O related error has occurred.
+     * @exception ServletException - Defines a general exception a servlet can
+     * throw when it encounters difficulty.
      */
     public void doPost(HttpServletRequest p_request,
         HttpServletResponse p_response)
@@ -264,7 +250,7 @@ public class CapExportServlet
                 p_request.getParameterValues(ExportConstants.TUV_ID);
             // Page Manager expects a List of tuvIds as Long objects
             int size = tuvIdValues.length;
-            List tuvIds = new ArrayList();
+            List<Long> tuvIds = new ArrayList<Long>();
 
             for (int i = 0; i < size; i++)
             {
@@ -329,8 +315,8 @@ public class CapExportServlet
                 p_pageId.longValue());
 
             Workflow wf = targetPage.getWorkflowInstance();
-            List ids = new ArrayList();
-            Iterator target_it = wf.getTargetPages().iterator();
+            // TODO: empty list?
+            List<Long> ids = new ArrayList<Long>();
             boolean isTargetPage = true;
 
             // Register export event
@@ -344,21 +330,20 @@ public class CapExportServlet
                     p_pageId.longValue(), wf.getIdAsLong(), null, exportType);
              
             ServerProxy.getPageManager().exportPage(
-                new ExportParameters(targetPage), ids, isTargetPage, exportBatchId);
+                    new ExportParameters(targetPage), ids, isTargetPage,
+                    exportBatchId);
 
-            Collection tuvCollect = ServerProxy.getTuvManager().
+            Collection<Tuv> tuvCollect = ServerProxy.getTuvManager().
                 getTargetTuvsForStatistics(targetPage);
-
-            List tuvIds = new ArrayList();
-            for (Iterator it = tuvCollect.iterator(); it.hasNext(); )
+            List<Long> tuvIds = new ArrayList<Long>();
+            for (Tuv tuv : tuvCollect)
             {
-                Tuv tuv = (Tuv)it.next();
                 tuvIds.add(tuv.getIdAsLong());
             }
 
-            Vector targetTuvs = new Vector(tuvCollect);
             String uiLocale = p_request.getParameter(ExportConstants.UI_LOCALE);
-            String line = ServerProxy.getPageManager().exportForPreview(p_pageId.longValue(), tuvIds, uiLocale);
+            String line = ServerProxy.getPageManager().exportForPreview(
+                    p_pageId.longValue(), tuvIds, uiLocale);
 
             p_response.setContentType("text/html");
             PrintWriter out = p_response.getWriter();
@@ -590,31 +575,6 @@ public class CapExportServlet
         ServerProxy.getWorkflowServer().advanceWorkFlowNotification(
                 targetPage.getWorkflowInstance().getId() + job.getJobName(),
                 state);
-    }
-
-    private Collection<? extends User> getWorkflowManagers(TargetPage targetPage)
-    {
-        List wfManagerIds = targetPage.getWorkflowInstance()
-                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER);
-        int size = wfManagerIds.size();
-
-        Set<User> users = new HashSet<User>();
-
-        // notify all workflow managers (if any)
-        for (int i = 0; i < size; i++)
-        {
-            try
-            {
-                User user = ServerProxy.getUserManager().getUser(
-                        (String) wfManagerIds.get(i));
-                users.add(user);
-            }
-            catch (Exception e)
-            {
-                c_logger.error(e.getMessage(), e);
-            }
-        }
-        return users;
     }
 
     // Let the export event observer set the state of the exported page to either

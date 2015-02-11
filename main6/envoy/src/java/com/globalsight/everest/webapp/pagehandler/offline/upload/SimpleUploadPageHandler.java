@@ -81,6 +81,11 @@ public class SimpleUploadPageHandler extends PageHandler
                         sessionMgr, status);
                 return;
             }
+            else if(action.equals(TASK_ACTION_TRANSLATED_TEXT_RETRIEVE))
+			{
+				uploadPageHandlerHelper.translatedText(p_request,p_response);
+				return;
+			}
             else if (action.equals(UPLOAD_ACTION_CANCE_PROGRESS))
             {
                 uploadPageHandlerHelper.cancelProcess(p_request, p_response, sessionMgr);

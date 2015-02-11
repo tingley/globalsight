@@ -81,17 +81,18 @@ public final class TermLeverageManagerWLImpl extends RemoteServer implements
                 p_targetPageLocale);
     }
 
-    public ArrayList getTermMatchesForSegment(long p_srcTuvId, long p_subId,
-            GlobalSightLocale p_targetPageLocale) throws GeneralException,
-            RemoteException
+    public ArrayList<TermLeverageMatchResult> getTermMatchesForSegment(
+            long p_srcTuvId, long p_subId, GlobalSightLocale p_targetPageLocale)
+            throws GeneralException, RemoteException
     {
         return m_termLeverageManagerLocal.getTermMatchesForSegment(p_srcTuvId,
                 p_subId, p_targetPageLocale);
     }
     
     public Map<Long, Set<TermLeverageMatch>> getTermMatchesForPages(
-            Set<SourcePage> p_sourcePages, GlobalSightLocale p_targetPageLocale)
-            throws GeneralException, RemoteException
+            Collection<SourcePage> p_sourcePages,
+            GlobalSightLocale p_targetPageLocale) throws GeneralException,
+            RemoteException
     {
         return m_termLeverageManagerLocal.getTermMatchesForPages(p_sourcePages,
                 p_targetPageLocale);

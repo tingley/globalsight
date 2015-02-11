@@ -17,6 +17,7 @@
 package com.globalsight.ling.tm2;
 
 import java.rmi.RemoteException;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -296,27 +297,29 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
 
     @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter) throws RemoteException, LingManagerException
+            String createdAfter, Connection conn) throws RemoteException,
+            LingManagerException
     {
-        return m_localInstance.getAllSegments(tm, createdBefore, createdAfter);
+        return m_localInstance.getAllSegments(tm, createdBefore, createdAfter,
+                conn);
     }
 
     @Override
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException
+            String createdBefore, String createdAfter, Connection conn)
+            throws RemoteException, LingManagerException
     {
         return m_localInstance.getSegmentsByLocale(tm, locale, createdBefore,
-                createdAfter);
+                createdAfter, conn);
     }
 
     @Override
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException
+            String createdBefore, String createdAfter, Connection conn)
+            throws RemoteException, LingManagerException
     {
         return m_localInstance.getSegmentsByProjectName(tm, projectName,
-                createdBefore, createdAfter);
+                createdBefore, createdAfter, conn);
     }
 
     @Override

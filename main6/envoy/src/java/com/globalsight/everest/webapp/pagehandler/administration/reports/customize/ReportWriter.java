@@ -19,13 +19,15 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.custom
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.ServletOutputStream;
+
 public interface ReportWriter 
 {
     public int createSheet(String sheetName);
     
     public void setSheet(int sheetId);
     
-    public void setColumnView(int beginIndex, int endIndex);
+    public void setColumnWidth(int beginIndex, int endIndex);
     
     public void addTitleCell(int column, int row, String label) 
     throws IOException;
@@ -45,5 +47,5 @@ public interface ReportWriter
                            int endRow) 
     throws IOException;
     
-    public void commit() throws IOException;
+    public void commit(ServletOutputStream outputStream) throws IOException;
 }

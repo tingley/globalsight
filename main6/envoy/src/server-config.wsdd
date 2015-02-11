@@ -51,6 +51,12 @@
   <parameter name="scope" value="application"/>
   <namespace>http://www.globalsight.com/webservices/</namespace>  
  </service>
+ <service name="Ambassador4Falcon" provider="java:RPC">
+  <parameter name="allowedMethods" value="*"/>
+  <parameter name="className" value="com.globalsight.webservices.Ambassador4Falcon"/>
+  <parameter name="scope" value="application"/>
+  <namespace>http://www.globalsight.com/webservices/</namespace>  
+ </service>
  <service name="VendorManagementWebService" provider="java:RPC">
   <parameter name="allowedMethods" value="*"/>
   <parameter name="className" value="com.globalsight.webservices.vendormanagement.VendorManagement"/>

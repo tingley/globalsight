@@ -1195,12 +1195,12 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
         this.sid = sid;
     }
 
-    public Set getXliffAlt(boolean p_loadDataFromDB)
+    public Set<XliffAlt> getXliffAlt(boolean p_loadDataFromDB)
     {
         return null;
     }
 
-    public void setXliffAlt(Set p_alt)
+    public void setXliffAlt(Set<XliffAlt> p_alt)
     {
     }
 

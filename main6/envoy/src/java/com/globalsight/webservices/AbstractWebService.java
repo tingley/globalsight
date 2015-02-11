@@ -30,6 +30,8 @@ import org.apache.log4j.Logger;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.ServerProxy;
 
 /**
@@ -318,10 +320,42 @@ public abstract class AbstractWebService
     protected String accessCurrentCompanyId(String p_accessToken)
             throws WebServiceException
     {
-        String userName = this.getUsernameFromSession(p_accessToken);
+        String userName = getUsernameFromSession(p_accessToken);
         String companyName = this.getUser(userName).getCompanyName();
         CompanyThreadLocal.getInstance().setValue(companyName);
 
         return CompanyThreadLocal.getInstance().getValue();
+    }
+
+    /**
+     * Check if current user has the specified permission
+     * 
+     * @param accessToken
+     * @param permission
+     *            Permission information
+     * @throws WebServiceException
+     */
+    protected void checkPermission(String accessToken, String permission)
+            throws WebServiceException
+    {
+        try
+        {
+            User user = ServerProxy.getUserManager().getUserByName(
+                    getUsernameFromSession(accessToken));
+            PermissionSet ps = Permission.getPermissionManager()
+                    .getPermissionSetForUser(user.getUserId());
+
+            if (!ps.getPermissionFor(permission))
+            {
+                String msg = "User " + user.getUserName()
+                        + " does not have enough permission";
+                throw new WebServiceException(msg);
+            }
+        }
+        catch (Exception e)
+        {
+            s_logger.error(e.getMessage(), e);
+            throw new WebServiceException(e.getMessage());
+        }
     }
 }

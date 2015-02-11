@@ -62,7 +62,6 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
@@ -93,6 +92,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     static private final String PHASE = "<phase-group>\r\n"
             + "<phase phase-name=\"{0}\" process-name=\"{1}\"/>\r\n"
             + "</phase-group>\r\n";
+
+    private static SAXReader reader = null;
 
     public ListViewWorkXLIFFWriter()
     {
@@ -132,12 +133,11 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         writeTerminology(p_osd);
     }
 
-    private String repairForAltTrans(String segment)
+    private String repairForAltTrans(String segment, SAXReader reader)
     {
         try
         {
-            new SAXReader().read(new StringReader("<target>" + segment
-                    + "</target>"));
+            reader.read(new StringReader("<target>" + segment + "</target>"));
         }
         catch (DocumentException e)
         {
@@ -167,7 +167,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
      * writing leverage match results into exported xliff file
      */
     public String getAltByMatch(LeverageMatch leverageMatch,
-            OfflineSegmentData osd, long p_companyId)
+            OfflineSegmentData osd, long p_companyId, SAXReader reader)
     {
         String altTrans = new String();
 
@@ -277,9 +277,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 }
                 else
                 {
-                    String srcTmTuvString = TmUtil.getSourceTextForTuv(
-                            leverageMatch.getTmId(), matchedTmTuvId,
-                            sourceTuv.getLocaleId());
+                    String srcTmTuvString = leverageMatch.getMatchedOriginalSource();
+                    // TmUtil.getSourceTextForTuv(  leverageMatch.getTmId(), matchedTmTuvId, sourceTuv.getLocaleId());
                     sourceStr = GxmlUtil.stripRootTag(srcTmTuvString);
                 }
             }
@@ -290,14 +289,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             if (osd == null)
             {
                 altTrans = MessageFormat.format(TM_PATTERN1, score,
-                        repairForAltTrans(sourceStr),
-                        repairForAltTrans(targetStr));
+                        repairForAltTrans(sourceStr, reader),
+                        repairForAltTrans(targetStr, reader));
             }
             else
             {
                 altTrans = MessageFormat.format(TM_PATTERN, score,
-                        repairForAltTrans(sourceStr),
-                        repairForAltTrans(targetStr));
+                        repairForAltTrans(sourceStr, reader),
+                        repairForAltTrans(targetStr, reader));
             }
 
             // If target TUV is never changed, adjust the "origin".
@@ -415,7 +414,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             {
                 LeverageMatch leverageMatch = list2.get(i);
                 m_outputStream.write(getAltByMatch(leverageMatch, p_osd,
-                        p_companyId));
+                        p_companyId, getSAXReader()));
             }
         }
     }
@@ -433,7 +432,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             while (tag != null)
             {
                 String altTrans = MessageFormat.format(TERMINOLOGY_PATTERN,
-                        repairForAltTrans(src), repairForAltTrans(tag));
+                        repairForAltTrans(src, getSAXReader()),
+                        repairForAltTrans(tag, getSAXReader()));
                 m_outputStream.write(altTrans);
                 tag = result.getNextTargetTerm();
             }
@@ -455,7 +455,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     {
         return "Context Exact Match".equals(data.getDisplayMatchType());
     }
-    
+
     private boolean isExtractMatch2(OfflineSegmentData data)
     {
         String mtype = data.getDisplayMatchType();
@@ -573,28 +573,33 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             m_outputStream.write(str2DoubleQuotation(String.valueOf(p_osd
                     .getDisplaySegmentID())));
             m_outputStream.write(" translate=");
-            
-            //Handle edit type
-            if (TMEditType != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH) {
-                if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100 && isInContextMatch(p_osd))
+
+            // Handle edit type
+            if (TMEditType != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH)
+            {
+                if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100
+                        && isInContextMatch(p_osd))
                     m_outputStream.write(str2DoubleQuotation("no"));
-                else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE && isExtractMatch(p_osd))
+                else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
+                        && isExtractMatch(p_osd))
                     m_outputStream.write(str2DoubleQuotation("no"));
-                else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY 
-                		&& (isExtractMatch(p_osd) || isInContextMatch(p_osd)))
-                	m_outputStream.write(str2DoubleQuotation("no"));
+                else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
+                        && (isExtractMatch(p_osd) || isInContextMatch(p_osd)))
+                    m_outputStream.write(str2DoubleQuotation("no"));
                 else
                     m_outputStream.write(str2DoubleQuotation("yes"));
-            } else
+            }
+            else
                 m_outputStream.write(str2DoubleQuotation("yes"));
-//            if (!editAll && (isInContextMatch(p_osd) || isExtractMatch(p_osd)))
-//            {
-//                m_outputStream.write(str2DoubleQuotation("no"));
-//            }
-//            else
-//            {
-//                m_outputStream.write(str2DoubleQuotation("yes"));
-//            }
+            // if (!editAll && (isInContextMatch(p_osd) ||
+            // isExtractMatch(p_osd)))
+            // {
+            // m_outputStream.write(str2DoubleQuotation("no"));
+            // }
+            // else
+            // {
+            // m_outputStream.write(str2DoubleQuotation("yes"));
+            // }
 
             m_outputStream.write(">");
             m_outputStream.write(m_strEOL);
@@ -835,12 +840,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         m_outputStream.write("No Match word count:");
         m_outputStream.write(m_page.getNoMatchWordCountAsString());
         m_outputStream.write(m_strEOL);
-        
+
         // Server Instance ID
         if (m_page.getServerInstanceID() != null)
         {
             m_outputStream.write(XliffConstants.HASH_MARK);
-            m_outputStream.write(AmbassadorDwUpConstants.LABEL_SERVER_INSTANCEID + ":");
+            m_outputStream
+                    .write(AmbassadorDwUpConstants.LABEL_SERVER_INSTANCEID
+                            + ":");
             m_outputStream.write(m_page.getServerInstanceID());
             m_outputStream.write(m_strEOL);
         }
@@ -877,12 +884,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                     .getProject().getTermbaseName());
             m_outputStream.write(m_strEOL);
         }
-        
+
         if (p_downloadParams.getFileFormatId() != -1)
         {
             m_outputStream.write(XliffConstants.HASH_MARK);
             m_outputStream.write(XliffConstants.GS_TOOLKIT_FORMAT);
-            m_outputStream.write(p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ? "OmegaT" : "Xliff");
+            m_outputStream
+                    .write(p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ? "OmegaT"
+                            : "Xliff");
             m_outputStream.write(m_strEOL);
         }
 
@@ -972,5 +981,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     {
         // TODO Auto-generated method stub
 
+    }
+
+    private static SAXReader getSAXReader()
+    {
+        if (reader == null)
+        {
+            reader = new SAXReader();
+        }
+        return reader;
     }
 }

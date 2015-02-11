@@ -818,7 +818,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
         Iterator it = sourcePages.iterator();
         String m_cxeDocsDir = SystemConfiguration.getInstance()
-                .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR);
+                .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR,
+                		String.valueOf(p_job.getCompanyId()));
         ArrayList<String> fileNames = new ArrayList<String>();
         ArrayList<String> filePaths = new ArrayList<String>();
         Map<String, String> mapOfNamePath = new HashMap<String, String>();

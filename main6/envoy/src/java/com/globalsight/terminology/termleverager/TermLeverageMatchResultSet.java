@@ -18,8 +18,8 @@
 package com.globalsight.terminology.termleverager;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 import java.io.Serializable;
 
 /**
@@ -28,13 +28,13 @@ import java.io.Serializable;
  * class provides methods to retrieve a list of
  * TermLeverageMatchResult depending on source tuv id and its sub id.
  */
-public class TermLeverageMatchResultSet
-    implements Serializable
+public class TermLeverageMatchResultSet implements Serializable
 {
+    private static final long serialVersionUID = -8647154251162713683L;
+
     // Key:   Source TUV id
     // Value: collection of TermLeverageMatchResult
-    private HashMap m_tuvMatchesMapping = new HashMap();
-
+    private HashMap<Long, List<TermLeverageMatchResult>> m_tuvMatchesMapping = new HashMap<Long, List<TermLeverageMatchResult>>();
 
     /**
      * Set a collection of TermLeverageMatchResult grouped by TUV id
@@ -46,12 +46,11 @@ public class TermLeverageMatchResultSet
      * @param p_leverageMatches a collection of TermLeverageMatchResult.
      */
     public void setLeverageMatches(long p_sourceTuvId, long p_subId,
-        ArrayList p_leverageMatches)
+        ArrayList<TermLeverageMatchResult> p_leverageMatches)
     {
         // sub id is not used in this release (4.2).
         m_tuvMatchesMapping.put(new Long(p_sourceTuvId), p_leverageMatches);
     }
-
 
     /**
      * Get a collection of TermLeverageMatchResult grouped by TUV id
@@ -61,9 +60,11 @@ public class TermLeverageMatchResultSet
      * @param p_subId The id of a subflow within the source TUV or 0
      * for parent segment.
      */
-    public ArrayList getLeverageMatches(long p_sourceTuvId, long p_subId)
+    public ArrayList<TermLeverageMatchResult> getLeverageMatches(
+            long p_sourceTuvId, long p_subId)
     {
         // sub id is not used in this release (4.2).
-        return (ArrayList)m_tuvMatchesMapping.get(new Long(p_sourceTuvId));
+        return (ArrayList<TermLeverageMatchResult>) m_tuvMatchesMapping
+                .get(new Long(p_sourceTuvId));
     }
 }

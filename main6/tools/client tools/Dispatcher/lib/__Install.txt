@@ -1,0 +1,11 @@
+## This folder contains all third part library, need manually install into Maven repository.
+## Maven commond for install third library.
+mvn install:install-file -Dfile=D:/workspace/gs_Dispatcher/lib/msTranslatorPublicUtil.jar -DgroupId=com.welocalize -DartifactId=MT-msTranslatorPublicUtil -Dversion=8.5.1 -Dpackaging=jar  -DgeneratePom=true
+mvn install:install-file -Dfile=D:/workspace/gs_Dispatcher/lib/AOAPI.jar -DgroupId=com.welocalize -DartifactId=MT-asiaOnline -Dversion=8.5.1 -Dpackaging=jar  -DgeneratePom=true
+mvn install:install-file -Dfile=D:/workspace/gs_Dispatcher/lib/safaba-emtglobal-api-2013.07.17.jar -DgroupId=com.welocalize -DartifactId=MT-safaba -Dversion=8.5.1 -Dpackaging=jar  -DgeneratePom=true
+mvn install:install-file -Dfile=D:/workspace/gs_Dispatcher/lib/promtUtil.jar -DgroupId=com.welocalize -DartifactId=MT-promt -Dversion=8.5.1 -Dpackaging=jar  -DgeneratePom=true
+mvn install:install-file -Dfile=D:/workspace/gs_Dispatcher/lib/jboss-jaxrpc-api_1.1_spec-1.0.0.Final.jar -DgroupId=com.welocalize -DartifactId=jaxrpc -Dversion=1.0.0.Final -Dpackaging=jar  -DgeneratePom=true
+mvn install:install-file -Dfile=D:/workspace/gs_Dispatcher/lib/log4j-1.2.16.jar -DgroupId=org.apache.log4j -DartifactId=log4j -Dversion=1.2.16 -Dpackaging=jar  -DgeneratePom=true
+mvn install:install-file -Dfile=D:/workspace/gs_Dispatcher/lib/globalsight.jar -DgroupId=com.welocalize -DartifactId=globalsight -Dversion=8.5.1 -Dpackaging=jar  -DgeneratePom=true
+
+

@@ -99,6 +99,13 @@ public class InboxPolling implements Polling
         
         thread = new Thread(runnable);
         thread.setName("InboxPolling: " + companyName);
+        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
+        {
+            public void uncaughtException(Thread t, Throwable e)
+            {
+                new InboxPolling(cpConfig).start();
+            }
+        });
         thread.start();
     }
 

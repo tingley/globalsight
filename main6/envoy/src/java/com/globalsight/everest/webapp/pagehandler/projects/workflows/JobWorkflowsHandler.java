@@ -1141,6 +1141,9 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             Hashtable taskUserHash = (Hashtable) p_sessionMgr
                     .getAttribute("taskUserHash");
             String wfId = (String) p_sessionMgr.getAttribute("wfId");
+            // If "F5" to refresh, wfId is null.
+            if (wfId == null)
+                return;
 
             Enumeration keys = taskUserHash.keys();
             HashMap roleMap = new HashMap();

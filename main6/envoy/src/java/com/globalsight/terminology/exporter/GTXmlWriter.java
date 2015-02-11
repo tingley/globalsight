@@ -30,6 +30,7 @@ import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.SessionInfo;
 
 
@@ -45,9 +46,7 @@ import java.io.*;
 public class GTXmlWriter
     implements IWriter, TermbaseExceptionMessages
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            GTXmlWriter.class);
+    private static final Logger CATEGORY = Logger.getLogger(GTXmlWriter.class);
 
     //
     // Private Member Variables
@@ -121,8 +120,10 @@ public class GTXmlWriter
 
         new File(filename).delete();
 
-        m_output = new PrintWriter(new BufferedWriter(
-            new OutputStreamWriter(new FileOutputStream(filename), encoding)));
+        FileOutputStream fos = new FileOutputStream(filename);
+        FileUtil.writeBom(fos, ianaEncoding);
+        m_output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(
+                fos, encoding)));
 
         m_output.print("<?xml version=\"1.0\" encoding=\"");
         m_output.print(ianaEncoding);

@@ -59,15 +59,15 @@ ContextMenu.display=function(popupoptions, e)
     ContextMenu.showPopup();
     ContextMenu.fixSize(popupoptions.length);
     ContextMenu.fixPos(x,y);
-    if(!isIE)
+    if(eobj instanceof Object)
     {
-    eobj.preventDefault();
-    eobj.stopPropagation();
+	    eobj.preventDefault();
+	    eobj.stopPropagation();
     }
     else
     {
-    eobj.returnValue  = false;
-    eobj.cancelBubble = true
+	    eobj.returnValue  = false;
+	    eobj.cancelBubble = true
     }
 }
 

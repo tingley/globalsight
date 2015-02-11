@@ -355,6 +355,17 @@ function parseDefinition()
 	var desc = $xml.find("tm > description").text().replace(new RegExp("<br/>","gm"),"\n");
     form.<%=WebAppConstants.TM_TM_DESCRIPTION%>.value = desc;
 
+    var indexTarget = $xml.find("tm > indexTarget").text();
+    var objIndexTarget = document.getElementById('idIndexTarget');
+    if (indexTarget == "true")
+    {
+    	objIndexTarget.checked = true;
+    }
+    else
+   	{
+    	objIndexTarget.checked = false;
+   	}
+    
     var isRemoteTm = $xml.find("tm > isRemoteTm").text();
     var objIsRemoteTm = document.getElementById('idRemoteTm');
 	var divRemoteTmSetting = document.getElementById('idRemoteTmSetting');
@@ -532,6 +543,10 @@ function getAllRemoteTmProfiles(data)
       COLS="40" ROWS="3"></TEXTAREA></TD>
   </TR>
   <TR>
+    <TD CLASS="standardText">Index Target:</TD>
+    <TD CLASS="standardText"><input type="checkbox" ID="idIndexTarget" NAME="indexTarget"/></TD>
+  </TR>
+  <TR>
     <TD CLASS="standardText"><%=bundle.getString("lb_tm_remote_tm")%></TD>
     <TD CLASS="standardText">
         <input type="checkbox" id="idRemoteTm" NAME="<%=WebAppConstants.TM_TM_REMOTE_TM%>" onclick="showOrHideEditions(this)"/>
@@ -563,9 +578,6 @@ function getAllRemoteTmProfiles(data)
   </TR>
  </amb:permission>
 </TABLE>
-
-
-
 
 <div id="idRemoteTmSetting" style="display:none;">
 <p>

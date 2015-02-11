@@ -168,7 +168,7 @@ function submitForm()
 					GlobalSightLocale gsLocale = (GlobalSightLocale) sourceLocales
 							.get(i);
 			%>
-			<option VALUE="<%=gsLocale.toString()%>" <%=(i==0)?"SELECTED":"" %>><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
+			<option VALUE="<%=gsLocale.getId()%>" <%=(i==0)?"SELECTED":"" %>><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
 			<%
 				}
 			%>
@@ -184,7 +184,7 @@ function submitForm()
 				{
 					GlobalSightLocale gsLocale = targetLocales.get(i);
 			%>
-			<option VALUE="<%=gsLocale.toString()%>" <%=(i==0)?"SELECTED":"" %>><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
+			<option VALUE="<%=gsLocale.getId()%>" <%=(i==0)?"SELECTED":"" %>><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
 			<%
 				}
 			%>

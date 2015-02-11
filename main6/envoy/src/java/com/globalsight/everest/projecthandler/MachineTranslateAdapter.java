@@ -47,12 +47,9 @@ import com.globalsight.machineTranslation.asiaOnline.AsiaOnlineMtInvoker;
 import com.globalsight.machineTranslation.asiaOnline.DomainCombination;
 import com.globalsight.machineTranslation.iptranslator.IPTranslatorUtil;
 import com.globalsight.machineTranslation.mstranslator.MSMTUtil;
-import com.globalsight.machineTranslation.mstranslator.MSTranslatorInvoker;
 import com.globalsight.machineTranslation.promt.ProMtInvoker;
 import com.globalsight.machineTranslation.promt.ProMtPts9Invoker;
 import com.globalsight.machineTranslation.safaba.SafabaTranslateUtil;
-import com.microsoft.schemas.MSNSearch._2005._09.fex.LanguagePair;
-import com.microsoft.schemas.MSNSearch._2005._09.fex.TranslationRequest;
 import com.microsofttranslator.api.V2.LanguageService;
 
 public class MachineTranslateAdapter
@@ -357,52 +354,36 @@ public class MachineTranslateAdapter
 
         try
         {
-            // If it works, it should be "internal" URL
-            String msMTEndpoint = mtProfile.getUrl();
-            MSTranslatorInvoker ms_mt = new MSTranslatorInvoker(msMTEndpoint);
-
-            TranslationRequest transRequest = new TranslationRequest();
-            LanguagePair lp = new LanguagePair("en", "fr");
-            transRequest.setLangPair(lp);
-            String[] texts =
-            { "hello world", "I love this game" };
-            transRequest.setTexts(texts);
-            ms_mt.translate(transRequest);
+            // Test if it is "public" URL
+            String msMtUrl = mtProfile.getUrl();
+            SoapService soap = new SoapServiceLocator(msMtUrl);
+            String accessToken = MSMTUtil.getAccessToken(clientId,
+                    clientSecret);
+            LanguageService service = soap
+                    .getBasicHttpBinding_LanguageService();
+            service.translate(accessToken, "hello world", "en", "fr",
+                    MSMT_CONTENT_TYPE, category);
         }
-        catch (Exception ex)
+        catch (Exception exx)
         {
-            try
-            {
-                // Test if it is "public" URL
-                String msMtUrl = mtProfile.getUrl();
-                SoapService soap = new SoapServiceLocator(msMtUrl);
-                String accessToken = MSMTUtil.getAccessToken(clientId,
-                        clientSecret);
-                LanguageService service = soap
-                        .getBasicHttpBinding_LanguageService();
-                service.translate(accessToken, "hello world", "en", "fr",
-                        MSMT_CONTENT_TYPE, category);
-            }
-            catch (Exception exx)
-            {
-                String exceptionInfo2 = exx.getMessage();
+            String exceptionInfo2 = exx.getMessage();
 
-                if (exceptionInfo2.indexOf("InaccessibleWSDLException") != -1
-                        || exceptionInfo2.indexOf("XML reader error") != -1)
-                {
-                    exceptionInfo2 = "Could not access MS Translator URL.";
-                }
-                else if (exceptionInfo2.indexOf("ArgumentOutOfRangeException") != -1
-                        || exceptionInfo2.indexOf("ArgumentException") != -1)
-                {
-                    exceptionInfo2 = "ArgumentException: invalid Parameter.";
-                }
-                JSONObject jso = new JSONObject();
-                jso.put("ExceptionInfo", exceptionInfo2);
-                writer.write(jso.toString());
-                return false;
+            if (exceptionInfo2.indexOf("InaccessibleWSDLException") != -1
+                    || exceptionInfo2.indexOf("XML reader error") != -1)
+            {
+                exceptionInfo2 = "Could not access MS Translator URL.";
             }
+            else if (exceptionInfo2.indexOf("ArgumentOutOfRangeException") != -1
+                    || exceptionInfo2.indexOf("ArgumentException") != -1)
+            {
+                exceptionInfo2 = "ArgumentException: invalid Parameter.";
+            }
+            JSONObject jso = new JSONObject();
+            jso.put("ExceptionInfo", exceptionInfo2);
+            writer.write(jso.toString());
+            return false;
         }
+
         return true;
     }
 

@@ -17,6 +17,7 @@
 package com.globalsight.ling.tm2;
 
 import java.rmi.RemoteException;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -337,7 +338,8 @@ public interface TmCoreManager
      * @return Iterator of segments
      */
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter) throws RemoteException, LingManagerException;
+            String createdAfter, Connection conn) throws RemoteException,
+            LingManagerException;
 
     /**
      * Return the count of the number of segments that would be returned to a
@@ -383,8 +385,8 @@ public interface TmCoreManager
      * @return Iterator of segments
      */
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException;
+            String createdBefore, String createdAfter, Connection conn)
+            throws RemoteException, LingManagerException;
 
     /**
      * Return the count of the number of segments that would be returned to a
@@ -436,8 +438,8 @@ public interface TmCoreManager
      * @return Iterator of segments
      */
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException;
+            String createdBefore, String createdAfter, Connection conn)
+            throws RemoteException, LingManagerException;
 
     /**
      * Return the count of the number of segments that would be returned to a

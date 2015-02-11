@@ -132,13 +132,13 @@ public class ProjectTMTBUsers
      * @author Leon Song
      * @since 8.0
      */
-    public List getTList(String userId, String type)
+    public List<?> getTList(String userId, String type)
     {
         String sql = "select TM_TB_ID from TM_TB_USERS where USER_ID=:userId and T_TYPE=:type";
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put("userId", userId);
         params.put("type", type);
-        List list = HibernateUtil.searchWithSql(sql, params);
+        List<?> list = HibernateUtil.searchWithSql(sql, params);
         return list;
     }
 

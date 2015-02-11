@@ -85,6 +85,8 @@ public class CostingEngineLocal implements CostingEngine
 
     // holds the collection of iso currency codes
     private Vector m_isoCurrencies = new Vector(180);
+    
+    private static final Object LOCK = new Object();
 
     /**
      * @see CostingEngine.getIsoCurrencies
@@ -2486,22 +2488,25 @@ public class CostingEngineLocal implements CostingEngine
             map.put("oId", objectId);
             map.put("costRateType", costType);
             // get the cost of this costable object
-            Iterator costI = HibernateUtil.searchWithSql(sql, map, Cost.class)
-                    .iterator();
-
-            if (costI.hasNext())
+            synchronized (LOCK)
             {
-                c = (Cost) costI.next();
-            }
-            else
-            // create one if it doesn't exist - using the system currency
-            {
-                String companyId = CompanyThreadLocal.getInstance().getValue();
-                Currency privot = (Currency) Currency.getPivotCurrencies().get(
-                        Long.parseLong(companyId));
-                c = new Cost(p_obj, Cost.ZERO_COST, Cost.ZERO_COST,
-                        Cost.ZERO_COST, privot, p_costType);
-                HibernateUtil.save(c);
+            	Iterator costI = HibernateUtil.searchWithSql(sql, map, Cost.class)
+	                    .iterator();
+	
+	            if (costI.hasNext())
+	            {
+	                c = (Cost) costI.next();
+	            }
+	            else
+	            // create one if it doesn't exist - using the system currency
+	            {
+	                String companyId = CompanyThreadLocal.getInstance().getValue();
+	                Currency privot = (Currency) Currency.getPivotCurrencies().get(
+	                        Long.parseLong(companyId));
+	                c = new Cost(p_obj, Cost.ZERO_COST, Cost.ZERO_COST,
+	                        Cost.ZERO_COST, privot, p_costType);
+	                HibernateUtil.save(c);
+	            }
             }
         }
         catch (Exception pe)

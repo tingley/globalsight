@@ -108,7 +108,7 @@ function doSubmit()
             </select>
         </td>
     </tr>
-
+	<!--
     <tr>
         <td class="standardText"><%=bundle.getString("date_display_format")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
@@ -127,6 +127,7 @@ function doSubmit()
 %>          </select>
         </td>
     </tr>
+    -->
     <tr>
         <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></TD>
         <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>

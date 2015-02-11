@@ -112,9 +112,6 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
             // Save all target TUVs
             tuvs = SegmentTuTuvPersistence.saveTargetTuvs(companyId, tuvs);
 
-            // Delete XLF ALT data from source TUVs (don't need this any more)
-            // deleteXlfAltFromSourceTuvs(session, p_sourcePage);
-
             // Add source comment
             String jobUid = getJobUid(p_sourcePage);
             for (Iterator iterator = tuvs.iterator(); iterator.hasNext();)
@@ -233,36 +230,6 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
         }
 
         return result;
-    }
-
-    /**
-     * Delete XLF ALT data attached to source TUVs which were saved into DB when
-     * save source TUVs. They have been moved to target TUVs, it is time to
-     * delete them now.
-     *
-     * @param p_session
-     *            -- Hibernate session which is used to control transaction.
-     * @param p_sourcePage
-     */
-    private void deleteXlfAltFromSourceTuvs(Session p_session,
-            SourcePage p_sourcePage)
-    {
-        HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(p_sourcePage);
-        Iterator iter = sourceTuvMap.values().iterator();
-        while (iter.hasNext())
-        {
-            Tuv sourceTuv = (Tuv) iter.next();
-            Set xlfAlts = sourceTuv.getXliffAlt(true);
-            if (xlfAlts != null && xlfAlts.size() > 0)
-            {
-                for (Iterator xlfAltIter = xlfAlts.iterator(); xlfAltIter
-                        .hasNext();)
-                {
-                    XliffAlt xalt = (XliffAlt) xlfAltIter.next();
-                    p_session.delete(xalt);
-                }
-            }
-        }
     }
 
     private String getJobUid(SourcePage p_sourcePage)

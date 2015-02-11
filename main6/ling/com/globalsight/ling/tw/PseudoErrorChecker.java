@@ -32,6 +32,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
+import com.globalsight.util.Replacer;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
@@ -45,12 +47,14 @@ public class PseudoErrorChecker implements PseudoBaseHandler
     private boolean m_isSource = false;
     private String m_mockSource = "";
     private String m_mockTarget = "";
+    private HashMap<String, String> m_InternalTags = null;
     private String m_oriMockTarget = "";
     private Vector m_targetTexts = new Vector();
     private String m_newTarget = "";
     private Vector m_TrgTagList = new Vector();
     private String m_strErrMsg = "";
     private String m_strInternalErrMsg = "";
+    private boolean m_escapeResult = false;
     private ResourceBundle m_resources = null;
     private Locale m_locale = null;
     private static final String RESPATH = "com.globalsight.ling.tw.ErrorChecker";
@@ -79,6 +83,8 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
     private String styles;
     private SegmentUtil segmentUtil;
+    
+    private static Pattern P1 = Pattern.compile("\\[([^/][^\\[]*)\\]");
 
     /**
      * Constructor - uses default locale for error messages.
@@ -1166,9 +1172,11 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         {
             return false;
         }
+        
+        m_InternalTags = new HashMap<String, String>();
 
-        m_mockSource = fixMockSegment(m_mockSource);
-        m_mockTarget = fixMockSegment(m_mockTarget);
+        m_mockSource = fixMockSegment(m_mockSource, true);
+        m_mockTarget = fixMockSegment(m_mockTarget, false);
         m_oriMockTarget = new String(m_mockTarget);
 
         if (!m_mockSource.contains("T") && m_mockTarget.contains("T"))
@@ -1277,34 +1285,131 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
         if (isTagMoved)
         {
+            String tagName = firstMovedTag;
+            if (m_InternalTags != null
+                    && m_InternalTags.containsKey(firstMovedTag))
+            {
+                tagName = m_InternalTags.get(firstMovedTag);
+                if (m_escapeResult)
+                {
+                    tagName = escapeString(tagName);
+                }
+            }
+
             m_strErrMsg = MessageFormat.format(
-                    m_resources.getString("ErrorTagMoved"), firstMovedTag);
+                    m_resources.getString("ErrorTagMoved"), tagName);
         }
 
         return isTagMoved;
     }
-
-    private String fixMockSegment(String ori)
+    
+    private String getInternalText(String tag)
     {
-        Pattern p = Pattern.compile("\\[([^/][^\\[]*)\\]");
-        Matcher m = p.matcher(ori);
+        String key1 = "[" + tag + "]";
+        if (m_PseudoData.getInternalTexts().containsKey(key1))
+        {
+            return m_PseudoData.getInternalTexts().get(key1);
+        }
 
+        String key2 = "[" + escapeString(tag) + "]";
+        if (m_PseudoData.getInternalTexts().containsKey(key2))
+        {
+            return m_PseudoData.getInternalTexts().get(key2);
+        }
+
+        return null;
+    }
+    
+    private int getInternalIndex(String tag)
+    {
+        boolean addPrefix = true;
+        if (tag != null && tag.startsWith("[") && tag.endsWith("]"))
+        {
+            addPrefix = false;
+        }
+        
+        String key1 = addPrefix ? "[" + tag + "]" : tag;
+        if (m_PseudoData.getInternalTexts().containsKey(key1))
+        {
+            Iterator<String> keys = m_PseudoData.getInternalTexts().keySet()
+                    .iterator();
+            int index = 0;
+            while (keys.hasNext())
+            {
+
+                if (key1.equals(keys.next()))
+                {
+                    return index;
+                }
+
+                index++;
+            }
+        }
+
+        String key2 = addPrefix ? "[" + escapeString(tag) + "]" : escapeString(tag);
+        if (m_PseudoData.getInternalTexts().containsKey(key2))
+        {
+            Iterator<String> keys = m_PseudoData.getInternalTexts().keySet()
+                    .iterator();
+            int index = 0;
+            while (keys.hasNext())
+            {
+                if (key2.equals(keys.next()))
+                {
+                    return index;
+                }
+
+                index++;
+            }
+        }
+
+        return -1;
+    }
+
+    private String fixMockSegment(String ori, boolean isSource)
+    {
+        Matcher m = P1.matcher(ori);
         while (m.find())
         {
             String tag = m.group(1);
             String tmx = (String) m_PseudoData.m_hPseudo2TmxMap.get(tag);
+            String itext = null;
             if (tmx != null && tmx.contains("erasable=\"yes\""))
             {
-                ori = ori.replace("[" + tag + "]", "");
-                ori = ori.replace("[/" + tag + "]", "");
+                ori = StringUtil.replace(ori, "[" + tag + "]", "");
+                ori = StringUtil.replace(ori, "[/" + tag + "]", "");
             }
-            else if (tmx == null && m_PseudoData.getInternalTexts().containsKey("[" + tag + "]"))
+            else if (tmx == null
+                    && ((itext = getInternalText(tag)) != null))
             {
-            	ori = ori.replace("[" + tag + "]", "");
+                // check if it is removed from target
+                String key = "[" + escapeString(tag)  + "]";
+                if (m_strInternalErrMsg != null
+                        && m_strInternalErrMsg.contains(key))
+                {
+                    ori = StringUtil.replace(ori, "[" + tag + "]", "");
+                }
+                // is internal text, check contain tag (like w:t ...) or not
+                else if (containTag(itext))
+                {
+                    int itextIndex = getInternalIndex(tag);
+                    String ttt = "[gi"
+                            + itextIndex + "]";
+                    ori = StringUtil.replace(ori, "[" + tag + "]", ttt);
+                    
+                    if (isSource)
+                    {
+                        m_InternalTags.put(ttt, "[" + tag + "]");
+                    }
+                }
+                else
+                {
+                    ori = StringUtil.replace(ori, "[" + tag + "]", "");
+                }
             }
         }
 
-        String newstr = ori.replaceAll("[TE]+", "T");
+        String newstr = StringUtil.replaceWithRE(ori, "[TE]+", "T");
 
         if (newstr.startsWith("["))
         {
@@ -1317,6 +1422,32 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         }
 
         return newstr;
+    }
+
+    private boolean containTag(String itext)
+    {
+        StringBuffer sb = new StringBuffer(itext);
+        if (itext.contains("<ept ") && itext.contains("</ept>"))
+        {
+            StringIndex si = StringIndex.getValueBetween(sb, 0, "<ept ", "</ept>");
+            
+            if (si != null && si.value.contains("&lt;") && si.value.contains("&gt;"))
+            {
+               return true;
+            }
+        }
+        
+        if (itext.contains("<bpt ") && itext.contains("</bpt>"))
+        {
+            StringIndex si = StringIndex.getValueBetween(sb, 0, "<bpt ", "</bpt>");
+            
+            if (si != null && si.value.contains("&lt;") && si.value.contains("&gt;"))
+            {
+               return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
@@ -1454,4 +1585,14 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 	public void setStrInternalErrMsg(String m_strInternalErrMsg) {
 		this.m_strInternalErrMsg = m_strInternalErrMsg;
 	}
+	
+	public void setEscapeResult(boolean vv)
+	{
+	    m_escapeResult = vv;
+	}
+	
+	public boolean getEscapeResult()
+    {
+        return m_escapeResult;
+    }
 }

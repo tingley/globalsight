@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -37,17 +38,18 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.projecthandler.ProjectHandler;
+import com.globalsight.everest.projecthandler.ProjectHandlerException;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.tm2.indexer.Reindexer;
+import com.globalsight.util.StringUtil;
 
 /**
  * <p>
@@ -128,10 +130,8 @@ public class TmReindexHandler extends PageHandler implements WebAppConstants
 
         try
         {
-            if (action.equals(TM_ACTION_REINDEX))
+            if (TM_ACTION_REINDEX.equals(action))
             {
-                String tmid = (String) p_request.getParameter(RADIO_TM_ID);
-                String tmName = "";
                 if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
                 {
                     p_response
@@ -139,132 +139,45 @@ public class TmReindexHandler extends PageHandler implements WebAppConstants
                     return;
                 }
 
-                if (tmid != null)
+                String tmids = (String) p_request.getParameter(RADIO_TM_ID);
+                String selectedTmNames = "";
+                if (tmids != null && tmids.trim().length() > 0)
                 {
-                    Tm tm = s_manager.getProjectTMById(Long.parseLong(tmid),
-                            false);
-                    tmName = tm.getName();
-                    sessionMgr.setAttribute(TM_TM_ID, tmid);
+                    StringBuilder tmNames = new StringBuilder();
+                    String[] ids = tmids.trim().split(",");
+                    for (int i = 0; i < ids.length; i++)
+                    {
+                        ProjectTM tm = s_manager.getProjectTMById(
+                                Long.parseLong(ids[i]), false);
+                        tmNames.append(tm.getName()).append("<br>");
+                    }
+                    if (tmNames.length() > 0)
+                    {
+                        selectedTmNames = tmNames.toString();
+                    }
+                    sessionMgr.setAttribute(TM_TM_ID, tmids);
                 }
-                sessionMgr.setAttribute(TM_TM_NAME, tmName);
-
+                sessionMgr.setAttribute(TM_TM_NAME, selectedTmNames);
             }
-            else if (action.equals(TM_ACTION_REINDEX_START))
+            else if (TM_ACTION_REINDEX_START.equals(action))
             {
-                // initialize with -1 (reindex all tms)
-                long tmId = -1;
+                Collection<ProjectTM> tms = getProjectTMsToReindex(p_request,
+                        enableTMAccessControl, isAdmin, isSuperAdmin,
+                        isSuperPM, userId, currentCompanyId);
 
-                String tmChoice = (String) p_request.getParameter(TM_TM_CHOICE);
-                if (tmChoice.equals("idSelectedTm"))
-                {
-                    String tmIdStr = (String) sessionMgr.getAttribute(TM_TM_ID);
-                    tmId = Long.parseLong(tmIdStr);
-                }
-
-                if (CATEGORY.isDebugEnabled())
-                {
-                    CATEGORY.debug("Reindex TM (tm id = " + tmId + ")");
-                }
-
-                // Start reindex in a separate thread.
-                Collection<ProjectTM> tms = new ArrayList<ProjectTM>();
-                if (tmId == -1)
-                {
-                    if (enableTMAccessControl)
-                    {
-                        /**
-                         * Enable TM Access Control for administrator, get all
-                         * the TMs except(TM3 and Remote TM) for others, get the
-                         * TMs he can access, except(TM3 and Remote TM)
-                         * 
-                         */
-                        if (isAdmin || isSuperAdmin)
-                        {
-                            Collection<ProjectTM> allTMs = ServerProxy
-                                    .getProjectHandler().getAllProjectTMs();
-                            Iterator it = allTMs.iterator();
-                            while (it.hasNext())
-                            {
-                                ProjectTM tm = (ProjectTM) it.next();
-                                if (tm.getTm3Id() != null || tm.getIsRemoteTm())
-                                {
-                                    continue;
-                                }
-                                tms.add(tm);
-                            }
-
-                        }
-                        else
-                        {
-                            ProjectTMTBUsers ptUsers = new ProjectTMTBUsers();
-                            List tmIdList = ptUsers.getTList(userId, "TM");
-                            Iterator it = tmIdList.iterator();
-                            while (it.hasNext())
-                            {
-                                ProjectTM tm = null;
-                                try
-                                {
-                                    tm = ServerProxy
-                                            .getProjectHandler()
-                                            .getProjectTMById(
-                                                    ((BigInteger) it.next())
-                                                            .longValue(),
-                                                    false);
-                                    if (tm.getTm3Id() != null
-                                            || tm.getIsRemoteTm())
-                                        continue;
-                                }
-                                catch (Exception e)
-                                {
-                                    throw new EnvoyServletException(e);
-                                }
-                                if (isSuperPM)
-                                {
-                                    if (String.valueOf(tm.getCompanyId())
-                                            .equals(currentCompanyId))
-                                    {
-                                        tms.add(tm);
-                                    }
-                                }
-                                else
-                                {
-                                    tms.add(tm);
-                                }
-                            }
-
-                        }
-                    }
-                    else
-                    {
-                        // disable TM access control
-                        Collection<ProjectTM> allTMs = ServerProxy
-                                .getProjectHandler().getAllProjectTMs();
-                        Iterator it = allTMs.iterator();
-                        while (it.hasNext())
-                        {
-                            ProjectTM tm = (ProjectTM) it.next();
-                            if (tm.getTm3Id() != null || tm.getIsRemoteTm())
-                            {
-                                continue;
-                            }
-                            tms.add(tm);
-                        }
-                    }
-                }
-                else
-                {
-                    tms.add(ServerProxy.getProjectHandler().getProjectTMById(
-                            tmId, false));
-                }
                 Reindexer reindexer = LingServerProxy.getTmCoreManager()
                         .getReindexer(tms);
                 reindexer.setResourceBundle(getBundle(session));
                 reindexer.initReplacingMessage();
+                String indexTarget = (String) p_request
+                        .getParameter("indexTarget");
+                reindexer.setIndexTarget("on".equals(indexTarget) ? true
+                        : false);
                 sessionMgr.setAttribute(TM_REINDEXER, reindexer);
 
                 reindexer.start();
             }
-            else if (action.equals(TM_ACTION_CANCEL_REINDEX))
+            else if (TM_ACTION_CANCEL_REINDEX.equals(action))
             {
                 Reindexer reindexer = (Reindexer) sessionMgr
                         .getAttribute(TM_REINDEXER);
@@ -280,5 +193,111 @@ public class TmReindexHandler extends PageHandler implements WebAppConstants
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
+    }
+
+    /**
+     * Determine projectTMs to reindex.
+     */
+    private Collection<ProjectTM> getProjectTMsToReindex(
+            HttpServletRequest p_request, boolean enableTMAccessControl,
+            boolean isAdmin, boolean isSuperAdmin, boolean isSuperPM,
+            String userId, String currentCompanyId)
+            throws ProjectHandlerException, RemoteException
+    {
+        Collection<ProjectTM> tms = new ArrayList<ProjectTM>();
+
+        String tmIdsStr = null;
+        String tmChoice = (String) p_request.getParameter(TM_TM_CHOICE);
+        if ("idSelectedTm".equals(tmChoice))
+        {
+            HttpSession session = p_request.getSession();
+            SessionManager sessionMgr = (SessionManager) session
+                    .getAttribute(SESSION_MANAGER);
+            tmIdsStr = (String) sessionMgr.getAttribute(TM_TM_ID);
+        }
+
+        // Index all TMs
+        if (StringUtil.isEmpty(tmIdsStr))
+        {
+            if (enableTMAccessControl)
+            {
+                /**
+                 * Enable TM Access Control for administrator, get all the TMs
+                 * except(TM3 and Remote TM) for others, get the TMs he can
+                 * access, except(TM3 and Remote TM)
+                 */
+                if (isAdmin || isSuperAdmin)
+                {
+                    Collection<ProjectTM> allTMs = s_manager.getAllProjectTMs();
+                    for (ProjectTM tm : allTMs)
+                    {
+                        if (tm.getIsRemoteTm())
+                        {
+                            continue;
+                        }
+                        tms.add(tm);
+                    }
+                }
+                else
+                {
+                    ProjectTMTBUsers ptUsers = new ProjectTMTBUsers();
+                    List tmIdList = ptUsers.getTList(userId, "TM");
+                    Iterator it = tmIdList.iterator();
+                    while (it.hasNext())
+                    {
+                        ProjectTM tm = null;
+                        try
+                        {
+                            tm = s_manager
+                                    .getProjectTMById(((BigInteger) it.next())
+                                            .longValue(), false);
+                            if (tm.getIsRemoteTm())
+                                continue;
+                        }
+                        catch (Exception e)
+                        {
+                            throw new EnvoyServletException(e);
+                        }
+                        if (isSuperPM)
+                        {
+                            if (String.valueOf(tm.getCompanyId()).equals(
+                                    currentCompanyId))
+                            {
+                                tms.add(tm);
+                            }
+                        }
+                        else
+                        {
+                            tms.add(tm);
+                        }
+                    }
+
+                }
+            }
+            else
+            {
+                // When TM access control is disabled.
+                Collection<ProjectTM> allTMs = s_manager.getAllProjectTMs();
+                for (ProjectTM tm : allTMs)
+                {
+                    if (tm.getIsRemoteTm())
+                    {
+                        continue;
+                    }
+                    tms.add(tm);
+                }
+            }
+        }
+        else
+        {
+            String[] tmIds = tmIdsStr.split(",");
+            for (int i = 0; i < tmIds.length; i++)
+            {
+                long tmId = Long.parseLong(tmIds[i]);
+                tms.add(s_manager.getProjectTMById(tmId, false));
+            }
+        }
+
+        return tms;
     }
 }

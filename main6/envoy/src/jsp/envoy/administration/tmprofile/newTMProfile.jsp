@@ -359,26 +359,29 @@ function submitForm(formAction)
                    options_string1 += loop + ",";
                 }
                }
-			   
+              basicTMProfileForm.leveragedProjects.value = options_string;
+	          basicTMProfileForm.action += "&indexes=" + options_string1;
+	          
 			  var options_string2 = "";
               var options_string3 = "";
-              var the_select2 = basicTMProfileForm.selectleveragedRefProjects;
-              for (var loop2=0; loop2 < the_select2.options.length; loop2++)
-               {
-                if (the_select2.options[loop2].selected == true)
-                {
-                   options_string2 += the_select2.options[loop2].value + ",";
-                   options_string3 += loop + ",";
-                }
-               }
-			   
-	      basicTMProfileForm.leveragedRefProjects.value = options_string2;
-          basicTMProfileForm.leveragedProjects.value = options_string;
-          basicTMProfileForm.action += "&indexes=" + options_string1;
-		  if(!checkRefTms(options_string,the_select2)){
-			  alert("<%=bundle.getString("msg_tm_reference_tm_above") %>");
-			  return false;
-	      }
+              if(basicTMProfileForm.isRefTm.checked==true){
+	              var the_select2 = basicTMProfileForm.selectleveragedRefProjects;
+	              for (var loop2=0; loop2 < the_select2.options.length; loop2++)
+	              {
+	                if (the_select2.options[loop2].selected == true)
+	                {
+	                   options_string2 += the_select2.options[loop2].value + ",";
+	                   options_string3 += loop + ",";
+	                }
+	              }
+			      
+			      basicTMProfileForm.leveragedRefProjects.value = options_string2;
+          
+        	      if(!checkRefTms(options_string,the_select2)){
+    			     alert("<%=bundle.getString("msg_tm_reference_tm_above") %>");
+    			     return false;
+    	          }
+             }
 		  
 		  // attributes
 		  setTMPAttributes();
@@ -1191,9 +1194,8 @@ function doOnLoad()
 
                                 </SELECT>
                               </TD>
-							  
                         </TR>
-							
+
                         <TR ALIGN="LEFT">
                             <TD ALIGN="LEFT" STYLE="vertical-align: middle">
                             <%=lbmultLingLeveraging%>:</TD>
@@ -1207,6 +1209,10 @@ function doOnLoad()
                            <TD>
                               <INPUT TYPE="checkbox" NAME="<%=autoRepair%>" VALUE="true" checked>
                            </TD>
+                        </TR>
+                        <TR>
+                           <TD ALIGN="LEFT" STYLE="vertical-align: middle">Get Unique from Multiple Exact Matches:</TD>
+                           <TD><INPUT TYPE="checkbox" NAME="uniqueFromMultTrans" VALUE="true"/></TD>
                         </TR>
                         <TR ALIGN="LEFT">
                             <TD ALIGN="LEFT" valign="top">

@@ -53,6 +53,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class IdmlHelper
 {
@@ -1079,54 +1080,6 @@ public class IdmlHelper
         return false;
     }
 
-    /**
-     * Removes space if it is not in content tag.
-     * 
-     * @param s
-     * @return
-     */
-    private static String trimSpace(String s)
-    {
-        StringBuffer temp = new StringBuffer(s);
-
-        Pattern p = Pattern.compile("<[^>]*?>[\\t\\n]+?<");
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            String content = m.group();
-            if (content.startsWith("<Content>"))
-            {
-                continue;
-            }
-
-            int index = -1;
-            while (true)
-            {
-                index = temp.indexOf(content, index + 1);
-                if (index < 0)
-                {
-                    break;
-                }
-
-                for (int i = index + content.length() - 2; i >= 0; i--)
-                {
-                    if ("\n\t".indexOf(temp.charAt(i)) > -1)
-                    {
-                        temp.deleteCharAt(i);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-
-            m = p.matcher(temp);
-        }
-
-        return temp.toString();
-    }
-
     private int getIndexOfParaStart(StringBuffer s, int index)
     {
         int n = s.indexOf(PARAGRAPH_START, index + 1);
@@ -1159,7 +1112,7 @@ public class IdmlHelper
             }
 
             String content = temp.substring(index, n2 + parL);
-            String temContent = content.replaceAll(
+            String temContent = StringUtil.replaceWithRE(content,
                     "<ParagraphStyleRange[^>]*/>", "");
 
             while (temContent.split(PARAGRAPH_START).length != temContent
@@ -1170,8 +1123,8 @@ public class IdmlHelper
                     break;
 
                 content = temp.substring(index, n2 + parL);
-                temContent = content.replaceAll("<ParagraphStyleRange[^>]*/>",
-                        "");
+                temContent = StringUtil.replaceWithRE(content,
+                        "<ParagraphStyleRange[^>]*/>", "");
             }
 
             String content2 = trimSpace(content);
@@ -1197,76 +1150,125 @@ public class IdmlHelper
         s = removeSpaceAfterTags(s, "[^>]*?&lt;/CharacterStyleRange&gt;[^>]*?");
         return s;
     }
+    
+    /**
+     * Removes space if it is not in content tag.
+     * <p>
+     * GBS-3168
+     */
+    private String trimSpace(String s)
+    {
+        StringBuilder output = new StringBuilder();
+        Pattern p = Pattern.compile("<[^>]*?>([\\t\\n]+?)<");
+        Matcher m = p.matcher(s);
+
+        int start = 0;
+        while (m.find(start))
+        {
+            String content = m.group();
+            if (!content.startsWith("<Content>"))
+            {
+                // Copy everything from starting point to the start of the
+                // captured whitespace group. Don't write out the trailing
+                // '<' yet, as it will be picked up in the next search.
+                output.append(s.substring(start, m.start(1)));
+            }
+            else
+            {
+                // Otherwise, copy everything except the trailing '<'
+                output.append(s.substring(start, m.end() - 1));
+            }
+            // Back up one character so we include the '<' we stopped on
+            // in our next search
+            start = m.end() - 1;
+        }
+        // Write out the leftovers
+        output.append(s.substring(start));
+
+        return output.toString();
+    }
 
     private static String trimSpaceBeforeTag(String s, String tagRegex)
     {
-        StringBuffer temp = new StringBuffer(s);
-
+        StringBuilder output = new StringBuilder();
         Pattern p = Pattern.compile(tagRegex);
         Matcher m = p.matcher(s);
-        while (m.find())
+
+        int start = 0;
+        while (m.find(start))
         {
             String content = m.group();
-            int index = -1;
-            while (true)
-            {
-                index = temp.indexOf(content, index + 1);
-                if (index < 0)
-                {
-                    break;
-                }
 
-                for (int i = index - 1; i >= 0; i--)
+            // no string before this tag
+            if (m.start() == 0)
+            {
+                output.append(s.substring(start, m.end()));
+            }
+            else
+            {
+                // check if there is \n\t before this tag
+                char cc = s.charAt(m.start() - 1);
+                if (cc == '\n' || cc == '\t')
                 {
-                    if ("\n\t".indexOf(temp.charAt(i)) > -1)
-                    {
-                        temp.deleteCharAt(i);
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    // append content before \n\t
+                    output.append(s.substring(start, m.start() - 1));
+                    // append content after \n\t
+                    // output.append(s.substring(m.start(), m.end()));
+                    output.append(content);
+                }
+                else
+                {
+                    // append all content
+                    output.append(s.substring(start, m.end()));
                 }
             }
-        }
 
-        return temp.toString();
+            start = m.end();
+        }
+        // Write out the leftovers
+        if (start < s.length())
+        {
+            output.append(s.substring(start));
+        }
+        
+        return output.toString();
     }
 
     private static String trimSpaceAfterTags(String s, String tagRegex)
     {
-        StringBuffer temp = new StringBuffer(s);
-
+        StringBuilder output = new StringBuilder();
         Pattern p = Pattern.compile(tagRegex);
         Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            String content = m.group();
-            int index = -1;
-            while (true)
-            {
-                index = temp.indexOf(content, index + 1);
-                if (index < 0)
-                {
-                    break;
-                }
 
-                int i = index + content.length();
-                while (i < temp.length())
+        int start = 0;
+        while (m.find(start))
+        {
+            output.append(s.substring(start, m.end()));
+            if (m.end() == s.length())
+            {
+                start = m.end();
+            }
+            else
+            {
+                // check if there is \n\t before this tag
+                char cc = s.charAt(m.end());
+                if (cc == '\n' || cc == '\t')
                 {
-                    if ("\n\t".indexOf(temp.charAt(i)) > -1)
-                    {
-                        temp.deleteCharAt(i);
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    start = m.end() + 1;
+                }
+                else
+                {
+                    start = m.end();
                 }
             }
         }
+        // Write out the leftovers
+        if (start < s.length())
+        {
+            output.append(s.substring(start));
+        }
 
-        return temp.toString();
+        return output.toString();
     }
 
     private static String removeSpaceBeforeTag(String s, String tagRegex)

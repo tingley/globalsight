@@ -21,9 +21,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,12 +39,15 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuImpl;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHelper;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTuv;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
@@ -61,6 +66,7 @@ import com.globalsight.ling.tm2.leverage.LeveragedSegmentTuv;
 import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
+import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -75,13 +81,16 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     static private final Logger c_logger = Logger
             .getLogger(LeverageMatchLingManagerLocal.class);
 
+    private static Set<String> differentCases = null;
+
     private static final String LM_TABLE_NAME_PLACE_HOLDER = TuvQueryConstants.LM_TABLE_PLACEHOLDER;
 
     private static final String SELECT_COLUMNS = "SELECT "
             + " SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, MATCHED_TEXT_STRING, "
             + " TARGET_LOCALE_ID, MATCH_TYPE, ORDER_NUM, SCORE_NUM, MATCHED_TUV_ID, "
             + " MATCHED_TABLE_TYPE, PROJECT_TM_INDEX, TM_ID, TM_PROFILE_ID, MT_NAME, "
-            + " MATCHED_ORIGINAL_SOURCE, JOB_DATA_TU_ID FROM ";
+            + " MATCHED_ORIGINAL_SOURCE, JOB_DATA_TU_ID, SID, CREATION_USER, CREATION_DATE, "
+            + " MODIFY_USER, MODIFY_DATE FROM ";
 
     /**
      * Used to get all exact matches despite of where they come from.
@@ -136,8 +145,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             + " (SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, MATCHED_TEXT_STRING, TARGET_LOCALE_ID, "
             + "  MATCH_TYPE, ORDER_NUM, SCORE_NUM, MATCHED_TUV_ID, MATCHED_TABLE_TYPE, "
             + "  PROJECT_TM_INDEX, TM_ID, TM_PROFILE_ID, MT_NAME, MATCHED_ORIGINAL_SOURCE, "
-            + "  JOB_DATA_TU_ID) "
-            + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "  JOB_DATA_TU_ID, SID, CREATION_USER, CREATION_DATE, MODIFY_USER, MODIFY_DATE) "
+            + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String DELETE_LM_BY_SOURCE_PAGE_ID = "delete from "
             + LM_TABLE_NAME_PLACE_HOLDER + " WHERE source_page_id = ? ";
@@ -483,6 +492,9 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                                 null, rootLm.getMatchedTuvId(),
                                 rootLm.getTmId());
                         ls.setOrgSid(rootLm.getOrgSid(companyId));
+                        Date d = rootLm.getModifyDate() == null ? new Date() : rootLm.getModifyDate();
+                        ls.setModifyDate(new Timestamp(d.getTime()));
+                        ls.setSid(rootLm.getSid());
                         ArrayList<LeverageSegment> l = (ArrayList<LeverageSegment>) result
                                 .get(new Long(rootLm.getOriginalSourceTuvId()));
                         if (l != null && l.size() != 0)
@@ -528,6 +540,9 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     LeverageDataCenter.getTuvState(lm.getMatchType()), null,
                     lm.getProjectTmIndex(), null, lm.getMatchedTuvId(),
                     lm.getTmId());
+            Date d = lm.getModifyDate() == null ? new Date() : lm.getModifyDate();
+            ls.setModifyDate(new Timestamp(d.getTime()));
+            ls.setSid(lm.getSid());
             result.put(new Long(lm.getOriginalSourceTuvId()), ls);
         }
 
@@ -629,6 +644,10 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         HashMap<String, LeverageMatch> leveragematchesMap = new HashMap<String, LeverageMatch>();
         try
         {
+            // touch to load into cache for performance.
+            SegmentTuUtil.getTusBySourcePageId(p_sourcePageId);
+            SegmentTuvUtil.getSourceTuvs(ServerProxy.getPageManager()
+                    .getSourcePage(p_sourcePageId));
             // remove lower score_num record
             for (LeverageMatch match : leverageMatches)
             {
@@ -641,10 +660,9 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 {
                     try
                     {
-                        TuImpl tu = (TuImpl) ServerProxy
-                                .getTuvManager()
-                                .getTuvForSegmentEditor(originalSourceTuvId,
-                                        companyId).getTu(companyId);
+                        TuImpl tu = (TuImpl) SegmentTuvUtil.getTuvById(
+                                originalSourceTuvId, companyId)
+                                .getTu(companyId);
                         String translationType = tu.getXliffTranslationType();
                         float tm_score = Float.parseFloat(tu.getIwsScore());
                         if (Extractor.IWS_TRANSLATION_MANUAL
@@ -705,15 +723,15 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         // set the match type with the found leverage matches
         Collection<LeverageMatch> leverageMatches2 = leveragematchesMap
                 .values();
-        List<String> list = new ArrayList<String>();
+        Set<String> keys = new HashSet<String>();
         for (LeverageMatch match : leverageMatches2)
         {
             String key = MatchTypeStatistics.makeKey(
                     match.getOriginalSourceTuvId(), match.getSubId());
-            if (!list.contains(key))
+            if (!keys.contains(key))
             {
                 result.addMatchType(match);
-                list.add(key);
+                keys.add(key);
             }
         }
 
@@ -952,6 +970,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             throw new LingManagerException(e);
         }
 
+        Map<Long, String> srcTuvId2SidMap = getTuvId2SidMap(p_sourcePage);
+
         while (itLeverageMatches != null && itLeverageMatches.hasNext())
         {
             LeverageMatches levMatches = (LeverageMatches) itLeverageMatches
@@ -970,7 +990,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     // walk through all matches in the locale
                     Collection<LeverageMatch> subNonClobMatches = getNonClobMatches(
                             p_connection, levMatches, targetLocale,
-                            leverageOptions, p_sourcePage, null);
+                            leverageOptions, p_sourcePage, null,
+                            srcTuvId2SidMap);
                     nonClobMatches.addAll(subNonClobMatches);
                 }
                 catch (Exception e)
@@ -997,9 +1018,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         Set<LeverageMatch> nonClobMatches = new HashSet<LeverageMatch>();
 
         SourcePage sp = null;
+        Map<Long, String> srcTuvId2SidMap = null;
         try
         {
             sp = ServerProxy.getPageManager().getSourcePage(p_sourcePageId);
+            srcTuvId2SidMap = getTuvId2SidMap(sp);
         }
         catch (Exception e)
         {
@@ -1017,7 +1040,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             {
                 Collection<LeverageMatch> matches = getNonClobMatches(
                         p_connection, levMatches, p_targetLocale,
-                        p_leverageOptions, sp, originalSourceTuvId);
+                        p_leverageOptions, sp, originalSourceTuvId,
+                        srcTuvId2SidMap);
                 nonClobMatches.addAll(matches);
             }
             catch (Exception e)
@@ -1116,6 +1140,16 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
                     ps.setLong(16, lm.getJobDataTuId());
 
+                    ps.setString(17, lm.getSid());
+                    ps.setString(18, lm.getCreationUser());
+                    // creation date
+                    Date creationDate = lm.getCreationDate() == null ? new Date() : lm.getCreationDate();
+                    ps.setTimestamp(19, new java.sql.Timestamp(creationDate.getTime()));
+                    ps.setString(20, lm.getModifyUser());
+                    // modify date
+                    Date modifyDate = lm.getModifyDate() == null ? new Date() : lm.getModifyDate();
+                    ps.setTimestamp(21,  new java.sql.Timestamp(modifyDate.getTime()));
+
                     ps.addBatch();
                 }
 
@@ -1188,14 +1222,15 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * be "LevereageInProgressTuv"(from in progress TM).
      * 
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes"})
     private Collection<LeverageMatch> getNonClobMatches(
             Connection p_connection, LeverageMatches p_levMatches,
             GlobalSightLocale p_targetLocale,
             LeverageOptions p_leverageOptions, SourcePage p_sourcePage,
-            Long p_originalSourceTuvId) throws Exception
+            Long p_originalSourceTuvId, Map<Long, String> p_srcTuvId2SidMap)
+            throws Exception
     {
-        Collection<LeverageMatch> results = new ArrayList<LeverageMatch>();
+        Collection<LeverageMatch> allLeverageMatches = new ArrayList<LeverageMatch>();
 
         Iterator itMatch = p_levMatches.matchIterator(p_targetLocale,
                 String.valueOf(p_sourcePage.getCompanyId()));
@@ -1286,11 +1321,259 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                         .getSegment();
                 lm.setMatchedOriginalSource(matchedOriginalSource);
 
-                results.add(lm);
+                // 15,16,17,18,19
+                lm.setSid(matchedTuv.getSid());
+                lm.setCreationUser(matchedTuv.getCreationUser());
+                lm.setCreationDate(matchedTuv.getCreationDate());
+                lm.setModifyUser(matchedTuv.getModifyUser());
+                lm.setModifyDate(matchedTuv.getModifyDate());
+
+                allLeverageMatches.add(lm);
             }
         }
 
+        Collection<LeverageMatch> results = new ArrayList<LeverageMatch>();
+        // If "Get Unique from Multiple Exact Matches" is checked in TM profile...
+        if (p_leverageOptions.getUniqueFromMultipleTranslation())
+        {
+            int mode = UpdateLeverageHelper.getMode(p_leverageOptions
+                    .getTmProfile());
+            boolean isTmProcedence = p_leverageOptions.getTmProfile()
+                    .isTmProcendence();
+            filterMatchesForMultipleTranslations(results, allLeverageMatches,
+                    p_srcTuvId2SidMap, isTmProcedence, mode);
+        }
+        else
+        {
+            results = allLeverageMatches;
+        }
+
         return results;
+    }
+
+    /**
+     * If "Get Unique from Multiple Exact Matches" is checked in TM profile,
+     * only returns one exact match for every segment.
+     * 
+     * @param results
+     * @param allLeverageMatches
+     * @param mode
+     */
+    @SuppressWarnings("unchecked")
+    private void filterMatchesForMultipleTranslations(
+            Collection<LeverageMatch> results,
+            Collection<LeverageMatch> allLeverageMatches, 
+            Map<Long, String> p_srcTuvId2SidMap, boolean isTmProcedence,
+            int mode)
+    {
+        // SourceTuvId_subId : List<LeverageMatch>
+        Map<String, List<LeverageMatch>> map = new HashMap<String, List<LeverageMatch>>();
+        for (LeverageMatch lm : allLeverageMatches)
+        {
+            // All fuzzy matches will be stored into DB.
+            if (lm.getScoreNum() < 100)
+            {
+                results.add(lm);
+            }
+            else
+            {
+                // Put all 100% matches into map first.
+                String key = lm.getOriginalSourceTuvId() + "_" + lm.getSubId();
+                List<LeverageMatch> listForOne = map.get(key);
+                if (listForOne == null)
+                {
+                    listForOne = new ArrayList<LeverageMatch>();
+                    map.put(key, listForOne);
+                }
+                listForOne.add(lm);
+            }
+        }
+
+        // Handle all 100% matches.
+        Collection<List<LeverageMatch>> lmGroups = map.values();
+        for (List<LeverageMatch> listForOne : lmGroups)
+        {
+            if (listForOne.size() <= 1)
+            {
+                results.addAll(listForOne);
+            }
+            else
+            {
+                // Divide "XX_DIFFERENT" matches into "backup". 
+                List<LeverageMatch> backup = new ArrayList<LeverageMatch>();
+                Set<String> differentCases = getDifferentCases();
+                for (Iterator<LeverageMatch> it = listForOne.iterator(); it.hasNext();)
+                {
+                    LeverageMatch lm = it.next();
+                    if (differentCases.contains(lm.getMatchType()))
+                    {
+                        backup.add(lm);
+                        it.remove();
+                    }
+                }
+
+                // if no other matches, keep all "different" matches.
+                if (listForOne.size() == 0)
+                {
+                    results.addAll(backup);
+                }
+                // if only one, this is wanted.
+                else if (listForOne.size() == 1)
+                {
+                    results.add(listForOne.get(0));
+                }
+                // if multiple, sort and get first.
+                else
+                {
+                    // Sort by reference TM sequence, latest/oldest, order-num,
+                    // then pick up the FIRST.
+                    SortUtil.sort(listForOne, new LeverageMatchComparator(
+                            isTmProcedence, mode));
+
+                    // Check to see if there is SID matched leverage match.
+                    LeverageMatch sidMatchedLM = null;
+                    String tuvSID = p_srcTuvId2SidMap.get(
+                            listForOne.get(0).getOriginalSourceTuvId());
+                    if (tuvSID != null)
+                    {
+                        sidMatchedLM = getSidMatchedLeverageMatchData(tuvSID,
+                                listForOne);
+                    }
+
+                    if (sidMatchedLM != null)
+                    {
+                        sidMatchedLM
+                                .setMatchType(MatchState.SEGMENT_TM_EXACT_MATCH
+                                        .getName());
+                        results.add(sidMatchedLM);
+                    }
+                    else
+                    {
+                        LeverageMatch firstLM = listForOne.get(0);
+                        firstLM.setMatchType(MatchState.SEGMENT_TM_EXACT_MATCH
+                                .getName());
+                        results.add(firstLM);                        
+                    }
+                }
+            }
+        }
+    }
+
+    private Set<String> getDifferentCases()
+    {
+        if (differentCases == null)
+        {
+            differentCases = new HashSet<String>();
+            differentCases.add(MatchState.CODE_DIFFERENT.getName());
+            differentCases.add(MatchState.WHITESPACE_DIFFERENT.getName());
+            differentCases.add(MatchState.CASE_DIFFERENT.getName());
+            differentCases.add(MatchState.TYPE_DIFFERENT.getName());
+        }
+
+        return differentCases;
+    }
+    
+    // Sort by reference TM sequence, latest/oldest, order-num, then pick up the
+    // first (GBS-3073)
+    @SuppressWarnings("rawtypes")
+    private class LeverageMatchComparator implements Comparator
+    {
+        private boolean isTmProcedence = false;
+        private int mode = LeverageOptions.PICK_LATEST;
+
+        public LeverageMatchComparator(boolean p_isTmProcedence, int p_mode)
+        {
+            this.isTmProcedence = p_isTmProcedence;
+            this.mode = p_mode;
+        }
+
+        public int compare(Object p_A, Object p_B)
+        {
+            LeverageMatch a = (LeverageMatch) p_A;
+            LeverageMatch b = (LeverageMatch) p_B;
+
+            int result = 0;
+            // Compare project TM index
+            if (isTmProcedence)
+            {
+                result = a.getProjectTmIndex() - b.getProjectTmIndex();;
+                if (result != 0)
+                {
+                    return result;
+                }                
+            }
+
+            // Compare modified date
+            Date aDate = a.getModifyDate();
+            Date bDate = b.getModifyDate();
+            if (aDate != null && bDate != null)
+            {
+                result = aDate.compareTo(bDate);
+                if (mode == LeverageOptions.PICK_LATEST)
+                {
+                    result = -result;
+                }
+            }
+            if (result != 0)
+            {
+                return result;
+            }
+
+            // Compare order NUM
+            result = a.getOrderNum() - b.getOrderNum();
+
+            return result;
+        }
+    }
+
+    private Map<Long, String> getTuvId2SidMap(SourcePage p_sourcePage)
+    {
+        Map<Long, String> srcTuvId2SidMap = new HashMap<Long, String>();
+        try
+        {
+            ArrayList<Tuv> tuvs = SegmentTuvUtil.getSourceTuvs(p_sourcePage,
+                    false);
+            for (Tuv srcTuv : tuvs)
+            {
+                if (srcTuv.getSid() != null)
+                {
+                    srcTuvId2SidMap.put(srcTuv.getIdAsLong(), srcTuv.getSid());
+                }
+            }            
+        }
+        catch (Exception e)
+        {
+            
+        }
+        return srcTuvId2SidMap;
+    }
+
+    /**
+     * Return the first leverage match which SID is matched with TUV SID.
+     * 
+     * @param p_tuvSID -- Segment SID from TUV.
+     * @param lms
+     * @return LeverageMatch object.
+     */
+    private LeverageMatch getSidMatchedLeverageMatchData(String p_tuvSID,
+            List<LeverageMatch> lms)
+    {
+        if (p_tuvSID == null)
+        {
+            return null;
+        }
+
+        LeverageMatch result = null;
+        for (LeverageMatch lm : lms)
+        {
+            if (p_tuvSID.equals(lm.getSid()))
+            {
+                result = lm;
+                break;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -1509,6 +1792,25 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             lm.setMtName(rs.getString(14));
             lm.setMatchedOriginalSource(rs.getString(15));
             lm.setJobDataTuId(rs.getLong(16));
+            lm.setSid(rs.getString(17));
+            lm.setCreationUser(rs.getString(18));
+            try
+            {
+                lm.setCreationDate(new Date(rs.getTimestamp(19).getTime()));
+            }
+            catch (Exception e)
+            {
+                lm.setCreationDate(null);
+            }
+            lm.setModifyUser(rs.getString(20));
+            try
+            {
+                lm.setModifyDate(new Date(rs.getTimestamp(21).getTime()));
+            }
+            catch (Exception e)
+            {
+                lm.setModifyDate(null);
+            }
 
             leverageMatches.add(lm);
         }

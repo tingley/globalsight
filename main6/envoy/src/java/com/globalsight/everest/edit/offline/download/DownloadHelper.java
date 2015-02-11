@@ -86,24 +86,36 @@ public class DownloadHelper implements AmbassadorDwUpConstants
 
     static public String makeTmxParentPath(DownloadParams p_downloadParams)
     {
+        boolean isOmegaT = (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT);
         return p_downloadParams.getTruncatedJobName() + FILE_NAME_BREAK
-                + getTargetLocaleCode(p_downloadParams) + "/tmx/";
+                + getTargetLocaleCode(p_downloadParams)
+                + (isOmegaT ? "/tm/" : "/tmx/");
     }
 
     static public String makeTmxPlainParentPath(DownloadParams p_downloadParams)
     {
+        boolean isOmegaT = (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT);
         return p_downloadParams.getTruncatedJobName() + FILE_NAME_BREAK
-                + getTargetLocaleCode(p_downloadParams) + "/tmx/plain text/";
+                + getTargetLocaleCode(p_downloadParams)
+                + (isOmegaT ? "/tm" : "/tmx") + "/plain text/";
     }
 
     static public String makeTmx14bParentPath(DownloadParams p_downloadParams)
     {
         boolean isOmegaT = (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT);
         return p_downloadParams.getTruncatedJobName() + FILE_NAME_BREAK
-                + getTargetLocaleCode(p_downloadParams) + "/tmx"
-                + (isOmegaT ? "/auto" : "") + "/1.4b/";
+                + getTargetLocaleCode(p_downloadParams)
+                + (isOmegaT ? "/tm" : "/tmx") + (isOmegaT ? "/" : "/1.4b/");
     }
-    
+
+    static public String makeTmxAutoParentPath(DownloadParams p_downloadParams)
+    {
+        boolean isOmegaT = (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT);
+        return p_downloadParams.getTruncatedJobName() + FILE_NAME_BREAK
+                + getTargetLocaleCode(p_downloadParams)
+                + (isOmegaT ? "/tm" : "/tmx") + "/auto/";
+    }
+
     static public String makeMt14bParentPath(DownloadParams p_downloadParams)
     {
         boolean isOmegaT = (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT);

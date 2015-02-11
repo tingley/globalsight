@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.TMPAttributeManager;
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -107,6 +108,8 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             if (tmProfile == null)
             {
                 tmProfile = parseHTTPRequest(p_request, "NEW");
+                String companyId = CompanyThreadLocal.getInstance().getValue();
+                tmProfile.setCompanyId(Long.parseLong(companyId));
 
                 // Check if the TM profile with the same name has existed,
                 // otherwise do not save it.
@@ -123,35 +126,10 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             else
             {
                 tmProfile = parseHTTPRequest(p_request, "MODIFY");
-//                boolean orderchanged = tmProfile.tmOrderChanged();
                 String tmpAttributes = p_request.getParameter("tmpAttributes");
                 TMPAttributeManager.setTMPAttributes(tmProfile, tmpAttributes);
                 TMProfileHandlerHelper.saveTMProfile(tmProfile);
                 clearSessionExceptTableInfo(sess, TMP_KEY);
-//                if (orderchanged)
-//                {
-//                    ArrayList msg = new ArrayList();
-//                    msg.add(tmProfile.getProjectTMsToLeverageFrom());
-//                    msg.add(Long.toString(tmProfile.getId()));
-//                    String currentCompanyId = CompanyThreadLocal.getInstance()
-//                            .getValue();
-//                    msg.add(currentCompanyId);
-//                    try
-//                    {
-//                        JmsHelper.sendMessageToQueue(msg,
-//                                JmsHelper.JMS_UPDATE_lEVERAGE_MATCH_QUEUE);
-//                    }
-//                    catch (JMSException e)
-//                    {
-//                        CATEGORY.error(e.getMessage(), e);
-//                        throw new EnvoyServletException(e);
-//                    }
-//                    catch (NamingException e)
-//                    {
-//                        CATEGORY.error(e.getMessage(), e);
-//                        throw new EnvoyServletException(e);
-//                    }
-//                }
 
                 saveRelationShipWithSR(p_request, tmProfile);
             }
@@ -511,38 +489,29 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         // 10 &11
         String typeSensitiveLeveraging = p_request
                 .getParameter(TMProfileConstants.TYPE_SENSITIVE_LEVERAGING);
+        boolean isTypeSensitive = "true"
+                .equalsIgnoreCase(typeSensitiveLeveraging);
+        tmProfile.setIsTypeSensitiveLeveraging(isTypeSensitive);
+
         String typeDiffP = p_request
                 .getParameter(TMProfileConstants.TYPE_DIFFERENCE_PENALTY);
-        long typeDiffPenalty = -1;
+        long typeDiffPenalty = 0;
         if (typeDiffP != null && typeDiffP.length() > 0)
         {
             typeDiffPenalty = Long.parseLong(typeDiffP);
-        }
-        if (typeSensitiveLeveraging == null)
-        {
-            tmProfile.setIsTypeSensitiveLeveraging(false);
-        }
-        else if (typeSensitiveLeveraging.equals("true"))
-        {
-            tmProfile.setIsTypeSensitiveLeveraging(true);
         }
         tmProfile.setTypeDifferencePenalty(typeDiffPenalty);
 
         //
         String isRefTm = p_request.getParameter("isRefTm");
+        boolean isRefTmBool = "true".equalsIgnoreCase(isRefTm);
+        tmProfile.setSelectRefTm(isRefTmBool);
+
         String refTmP = p_request.getParameter("refTmPenalty");
-        long refTmPenalty = -1;
+        long refTmPenalty = 0;
         if (refTmP != null && refTmP.trim().length() != 0)
         {
             refTmPenalty = Long.parseLong(refTmP);
-        }
-        if (isRefTm == null)
-        {
-            tmProfile.setSelectRefTm(false);
-        }
-        else if (isRefTm.equals("true"))
-        {
-            tmProfile.setSelectRefTm(true);
         }
         tmProfile.setRefTmPenalty(refTmPenalty);
 
@@ -552,57 +521,46 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         // 12 and 13
         String caseSensitiveLeveraging = p_request
                 .getParameter("caseSensitiveLeveraging");
+        boolean isCaseSensitive = "true".equalsIgnoreCase(caseSensitiveLeveraging);
+        tmProfile.setIsCaseSensitiveLeveraging(isCaseSensitive);
+
         String caseDiffP = p_request.getParameter("caseDiffPenalty");
-        long caseDiffPenalty = -1;
+        long caseDiffPenalty = 0;
         if (caseDiffP != null && caseDiffP.length() > 0)
         {
             caseDiffPenalty = Long.parseLong(caseDiffP);
         }
-        if (caseSensitiveLeveraging == null)
-        {
-            tmProfile.setIsCaseSensitiveLeveraging(false);
-        }
-        else if (caseSensitiveLeveraging.equals("true"))
-        {
-            tmProfile.setIsCaseSensitiveLeveraging(true);
-        }
         tmProfile.setCaseDifferencePenalty(caseDiffPenalty);
+
         // 14 & 15
         String whitespaceSensitiveLeveraging = p_request
                 .getParameter("whitespaceSensitiveLeveraging");
+        boolean isWsSensitive = "true".equalsIgnoreCase(whitespaceSensitiveLeveraging);
+        tmProfile.setIsWhiteSpaceSensitiveLeveraging(isWsSensitive);
+
         String whiteDiffP = p_request.getParameter("whiteDiffPenalty");
-        long whiteDiffPenalty = -1;
+        long whiteDiffPenalty = 0;
         if (whiteDiffP != null && whiteDiffP.length() > 0)
         {
             whiteDiffPenalty = Long.parseLong(whiteDiffP);
         }
-        if (whitespaceSensitiveLeveraging == null)
-        {
-            tmProfile.setIsWhiteSpaceSensitiveLeveraging(false);
-        }
-        else if (whitespaceSensitiveLeveraging.equals("true"))
-        {
-            tmProfile.setIsWhiteSpaceSensitiveLeveraging(true);
-        }
         tmProfile.setWhiteSpaceDifferencePenalty(whiteDiffPenalty);
+
         // 16 & 17
         String codeSensitiveLeveraging = p_request
                 .getParameter("codeSensitiveLeveraging");
+        boolean isCodeSensitive = "true"
+                .equalsIgnoreCase(codeSensitiveLeveraging);
+        tmProfile.setIsCodeSensitiveLeveraging(isCodeSensitive);
+
         String codeDiffP = p_request.getParameter("codeDiffPenalty");
-        long codeDiffPenalty = -1;
+        long codeDiffPenalty = 0;
         if (codeDiffP != null && codeDiffP.length() > 0)
         {
             codeDiffPenalty = Long.parseLong(codeDiffP);
         }
-        if (codeSensitiveLeveraging == null)
-        {
-            tmProfile.setIsCodeSensitiveLeveraging(false);
-        }
-        else if (codeSensitiveLeveraging.equals("true"))
-        {
-            tmProfile.setIsCodeSensitiveLeveraging(true);
-        }
         tmProfile.setCodeDifferencePenalty(codeDiffPenalty);
+
         // 18
         String multiLingualLeveraging = p_request
                 .getParameter("multiLingualLeveraging");
@@ -772,11 +730,16 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             tmProfile.setTmProcendence(true);
         }
 
-
         // set auto repair placeholder
         String autoRepair = p_request
                 .getParameter(TMProfileConstants.AUTO_REPAIR);
         tmProfile.setAutoRepair("true".equalsIgnoreCase(autoRepair));
+
+        // Get Unique From Multiple Exact Matches
+        String isUniqueFromMultTrans = p_request
+                .getParameter("uniqueFromMultTrans");
+        tmProfile.setUniqueFromMultipleTranslation("true"
+                .equalsIgnoreCase(isUniqueFromMultTrans));
 
         return tmProfile;
     }

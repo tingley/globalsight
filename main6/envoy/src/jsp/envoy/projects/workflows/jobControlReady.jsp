@@ -110,19 +110,160 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/jQueryUI.redmond.css"/>
 <%@ include file="/envoy/projects/workflows/myJobContextMenu.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/jquery/jquery-latest.min.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript" src="/globalsight/includes/modalDialog.js"></script>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "";
 var guideNode = "myJobs";
 var helpFile = "<%=bundle.getString("help_workflow_ready_tab")%>";
+var ajaxUrl="<%=refreshUrl%>";
+var confirmInfo="<%=bundle.getString("jsmsg_admin_system_parameters")%>";
+var unableInfo="<%=bundle.getString("msg_unable_rename_job")%>";
+var checkedId;
+var random;
+var renaming=false;
+var jabname;
+var node;
+$(
+	function (){
+	var dialog=$("#dialog-complActivity").dialog({
+        modal: true,
+		autoOpen: false,
+		width: 500,
+		minHeight: 110,
+        buttons: {
+            Save: function () {
+            	changed();
+                $(this).dialog("close");
+            },
+			Cancel: function () {
+				$(this).dialog("close");
+            }
+        }
+    });
+	
+})
 
+function isInteger(str){  
+      var regu = /^[-]{0,1}[0-9]{1,}$/; 
+      return regu.test(str); 
+} 
+
+function rename(){
+	
+	var f=jabname.lastIndexOf("_");
+	random=jabname.substring(f+1);
+	if(isInteger(random)){
+		jabname=jabname.substring(0,f);
+	}
+	node=$("<input type='text' style='width:460px' maxlength='120'/>").val(jabname);
+	//$(checkedId).empty();
+	//$(checkedId).append(node).append(btn);
+	$("#dialog-complActivity").html(node);
+	$("#dialog-complActivity").dialog("open").height("auto");
+}
+
+var pjinfo="<%=bundle.getString("jsmsg_customer_job_name")%>";
+var chinfo="<%=bundle.getString("jsmsg_invalid_job_name_1")%>";
+function invalidJobName(newvl){
+	 // validation of job name
+    newvl = $.trim(newvl);
+    if (!newvl)
+    {
+        alert(pjinfo);// Please enter a Job Name.
+        return true;
+    }
+    var jobNameRegex = /[\\/:;\*\?\|\"<>&%]/;
+    if (jobNameRegex.test(newvl))
+    {
+        alert(chinfo);
+        return true;
+    }
+    return false;
+}
+
+function changed(){
+		var newvl=$.trim(node.val());
+		if(invalidJobName(newvl))return;
+		if(isInteger(random)){
+			newvl=newvl+"_"+random;
+		}
+		$.ajax({
+			  type: 'GET',
+			  dataType: "text",
+			  url: ajaxUrl+"&action=renameJobSummary&jobId="+ transSelectedIds()+"&jobName="+newvl,
+			  success: function(data)
+		        {
+				  
+		            if (data==""||data.length>900)
+		            {
+		            	
+		            	$(checkedId+" a").text(newvl);
+		            }
+		            else
+		            {
+		            	alert(unableInfo);
+		            }
+		            renaming=false;
+		        },
+			  error:function(error)
+		        {
+				  window.location.reload();
+		        }
+			});
+}	
+
+
+function vilidateRename(){
+	checkedId=".name"+transSelectedIds();
+	jabname=$(checkedId+" a").text();
+	if(!jabname){
+		jabname=$.trim($(checkedId).text());
+	}
+	if(!jabname){
+		return;
+	}
+	$.ajax({
+		  type: 'GET',
+		  dataType: "text",
+		  url: ajaxUrl+"&action=validateBeforeRename&jobId="+ transSelectedIds(),
+		  success: function(data)
+	        {
+	            if (data=="")
+	            {
+	            	renaming=true;
+	            	rename();
+	            }
+	            else
+	            {
+	               alert(data);               
+	            }
+	        },
+		  error:function(error)
+	        {
+	            alert(error.message);
+	        }
+		});
+}
+
+function getParameterValues(){
+	var prams="";
+	var selectIds=transSelectedIds();
+	for(i in selectIds){
+		prams+="&ids="+selectIds[i];
+	}
+	return prams;
+}
+	
 function dispatch()
 {
 	var obj = {
@@ -134,27 +275,27 @@ function dispatch()
 		return;
     }
 	
-	dojo.xhrPost(
-    {
-        url:"<%=refreshUrl%>&action=validateBeforeDispatch",
-        handleAs: "text", 
-        content:obj,
-        load:function(data)
-        {
-            if (data=="")
-            {
-            	submitForm('Dispatch');
-            }
-            else
-            {
-                alert(data);               
-            }
-        },
-        error:function(error)
-        {
-            alert(error.message);
-        }
-    });
+	$.ajax({
+		  type: 'GET',
+		  dataType: "text",
+		  url: "<%=refreshUrl%>&action=validateBeforeDispatch"+ getParameterValues(),
+		  success: function(data)
+	        {
+	            if (data=="")
+	            {
+	            	submitForm('Dispatch');
+	            }
+	            else
+	            {
+	                alert(data);               
+	            }
+	        },
+		  error:function(error)
+	        {
+	            alert(error.message);
+	        }
+		});
+	
 }
 
 function loadPage() 
@@ -242,10 +383,14 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
   if (transSelectedIndex.length == 0 && dtpSelectedIndex.length == 1 || transSelectedIndex.length == 1 && dtpSelectedIndex.length == 0)
   {
      document.JobForm.ChangeWFMgr.disabled = false;
+     document.JobForm.Rename.disabled = false;
+    
+    
   }
   else
   {
      document.JobForm.ChangeWFMgr.disabled = true;
+     document.JobForm.Rename.disabled = true;
   }
 }
 
@@ -488,18 +633,13 @@ is defined in header.jspIncl which must be included in the body.
     <TD><INPUT onclick="setButtonState()" TYPE=checkbox NAME=transCheckbox VALUE="jobId=${jobVo.id}&jobState=${jobVo.statues}"></TD>
 	<TD CLASS=standardText >${jobVo.priority}</TD>
 	<TD CLASS=standardText >${jobVo.id}</TD>
-	<TD CLASS=standardText width="210px" style="word-wrap:break-word;word-break:break-all" >	
-	    <SCRIPT language="javascript">
-	    if (navigator.userAgent.indexOf('Firefox') >= 0){
-		    document.write("<DIV style='width:200px'>");
-		    }</SCRIPT>
+	<TD CLASS="standardText name${jobVo.id}" width="210px" style="word-wrap:break-word;word-break:break-all" >	
 		    <c:choose>
 		    <c:when  test="${jobVo.hasDetail}">
 		<B><A  CLASS="${jobVo.textType.replace("Text","HREF")}"  HREF="/globalsight/ControlServlet?linkName=jobDetails&pageName=ALLS&jobId=${jobVo.id}&fromJobs=true" oncontextmenu="contextForTab('${jobVo.id}',event)">${jobVo.name}</A></B>
 		    </c:when >
 		    <c:otherwise>${jobVo.name}</c:otherwise>
 		    </c:choose>
-		<SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("</DIV>")}</SCRIPT></TD>	 
 	<TD CLASS=${jobVo.textType} >${jobVo.project}</TD>
 	<TD CLASS=${jobVo.textType} >${jobVo.sourceLocale}</TD>
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.wordcount}</TD>
@@ -538,20 +678,25 @@ is defined in header.jspIncl which must be included in the body.
 
 <TR><TD>            
 <DIV ID="ButtonLayer" ALIGN="RIGHT" STYLE="visibility: hidden">
+ 	<amb:permission name="<%=Permission.JOBS_DISCARD%>" >
+        <INPUT TYPE="BUTTON" NAME=Discard VALUE="<%=bundle.getString("lb_discard")%>" onClick="submitForm('Discard');">
+     </amb:permission>
+	<amb:permission name="<%=Permission.JOB_CHANGE_NAME%>" >
+ 	<INPUT TYPE="BUTTON" NAME=Rename VALUE="<%=bundle.getString("lb_rename")%>" onClick="vilidateRename();">
+ 	  </amb:permission>
+
 <% if (b_searchEnabled) { %>
         <amb:permission name="<%=Permission.JOBS_SEARCH_REPLACE%>" >
         <INPUT TYPE="BUTTON" NAME=search VALUE="<%=bundle.getString("lb_search_replace")%>..." onClick="submitForm('search');">
         </amb:permission>
 <% } %>
+        
         <amb:permission name="<%=Permission.JOBS_CHANGE_WFM%>" >
         <INPUT TYPE="BUTTON" NAME=ChangeWFMgr VALUE="<%=bundle.getString("lb_change_workflow_manager")%>..." onClick="submitForm('changeWFMgr');">
         </amb:permission>
-        <amb:permission name="<%=Permission.JOBS_DISCARD%>" >
-        <INPUT TYPE="BUTTON" NAME=Discard VALUE="<%=bundle.getString("lb_discard")%>" onClick="submitForm('Discard');">
-        </amb:permission>
         <amb:permission name="<%=Permission.JOBS_DISPATCH%>" >
-        <INPUT TYPE="BUTTON" NAME=Dispatch VALUE="<%=bundle.getString("action_dispatch")%>" onClick="dispatch();">
-        </amb:permission>
+       <INPUT TYPE="BUTTON" NAME=Dispatch VALUE="<%=bundle.getString("action_dispatch")%>" onClick="dispatch();">
+    </amb:permission>
 </DIV>
 </TD></TR>
 </TABLE>
@@ -559,6 +704,7 @@ is defined in header.jspIncl which must be included in the body.
 </FORM>
 
 </DIV>
+<div id="dialog-complActivity" title="<%=bundle.getString("lb_rename")%>" style="display:none" class="detailText"/>
 </BODY>
 </HTML>
 

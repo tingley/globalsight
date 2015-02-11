@@ -52,6 +52,8 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.Replacer;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.file.FileWaiter;
 
 /**
@@ -79,6 +81,8 @@ public class MicrosoftWordHelper implements IConverterHelper2
     static private final String TEMP_DIR_SUFFIX_2000 = "_files";
     static private final String TEMP_DIR_SUFFIX_2003 = ".files";
     private String m_tempDirSuffix = TEMP_DIR_SUFFIX_2003;
+    
+    private static Pattern SPAN_PATTERN = Pattern.compile("(<span[^>]*>)[\\r\\n](</span>)");
 
     //
     // Supported extensions for MS Office
@@ -785,17 +789,14 @@ public class MicrosoftWordHelper implements IConverterHelper2
     private void repairPPTX(File f) throws Exception
     {
         String content = FileUtil.readFile(f, "utf-8");
-        String regex = "(<span[^>]*>)[\\r\\n](</span>)";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(content);
-        while (m.find())
+        
+        content = StringUtil.replaceWithRE(content, SPAN_PATTERN, new Replacer() 
         {
-            String all = m.group();
-            String start = m.group(1);
-            String end = m.group(2);
-
-            content = content.replace(all, start + "&#13;" + end);
-        }
+			@Override
+			public String getReplaceString(Matcher m) {
+				return m.group(1) + "&#13;" + m.group(2);
+			}
+		});
 
         FileUtil.writeFile(f, content, "utf-8");
     }
@@ -1084,7 +1085,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
                 if ("header".equalsIgnoreCase(fileName) && m_type == MS_DOC
                         && fileProfileId != 0)
                 {
-                    if (fileProfile.getHeaderTranslate())
+                    if (fileProfile.translateHeader())
                     {
                         p_filesToImport.add(p_file);
                     }

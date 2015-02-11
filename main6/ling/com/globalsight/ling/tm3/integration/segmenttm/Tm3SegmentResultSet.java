@@ -40,7 +40,7 @@ import com.globalsight.ling.tm3.core.TM3Tuv;
 import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.util.GlobalSightLocale;
 
-class Tm3SegmentResultSet implements SegmentResultSet
+public class Tm3SegmentResultSet implements SegmentResultSet
 {
     private Tm tm;
     private TM3Tm<GSTuvData> tm3tm;
@@ -88,6 +88,15 @@ class Tm3SegmentResultSet implements SegmentResultSet
             return null;
         }
         return convertTu(inner.next());
+    }
+    
+    public TM3Tu<GSTuvData> nextTm3tu()
+    {
+        if (!inner.hasNext())
+        {
+            return null;
+        }
+        return inner.next();
     }
 
     @Override

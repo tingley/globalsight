@@ -48,8 +48,6 @@ public class GlobalSightLocale
     // create from the language and country
     private Locale m_locale = null;
 
-    public boolean useActive = false;
-    
     /**
      * Constructor
      */

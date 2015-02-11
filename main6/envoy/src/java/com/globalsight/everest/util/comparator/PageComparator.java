@@ -16,24 +16,23 @@
  */
 package com.globalsight.everest.util.comparator;
 
-import java.util.Comparator;
-import com.globalsight.everest.page.Page;
 import java.util.Locale;
 
+import com.globalsight.everest.page.Page;
+
 /**
- * This class can be used to compare Page objects by their external
- * page id (page name).
+ * This class can be used to compare Page objects by their external page id
+ * (page name).
  */
-public class PageComparator
-    extends StringComparator
+public class PageComparator extends CachingStringComparator
 {
-    //types of comparison
+    // types of comparison
     public static final int EXTERNAL_PAGE_ID = 0;
 
     /**
-     * Creates a PageComparator with the given type and locale.
-     * If the type is not a valid type, then the default comparison
-     * is done by external page id.
+     * Creates a PageComparator with the given type and locale. If the type is
+     * not a valid type, then the default comparison is done by external page
+     * id.
      */
     public PageComparator(int p_type, Locale p_locale)
     {
@@ -56,33 +55,33 @@ public class PageComparator
 
         switch (m_type)
         {
-        case EXTERNAL_PAGE_ID:
-            aMainName = this.getMainFileName(a.getExternalPageId());
-            aSubName = this.getSubFileName(a.getExternalPageId());
-            bMainName = this.getMainFileName(b.getExternalPageId());
-            bSubName = this.getSubFileName(b.getExternalPageId());
+            case EXTERNAL_PAGE_ID:
+                aMainName = this.getMainFileName(a.getExternalPageId());
+                aSubName = this.getSubFileName(a.getExternalPageId());
+                bMainName = this.getMainFileName(b.getExternalPageId());
+                bSubName = this.getSubFileName(b.getExternalPageId());
 
-            rv = this.compareStrings(aMainName, bMainName);
-            if (rv == 0)
-            {
-                rv = this.compareStrings(aSubName, bSubName);
-            }
+                rv = this.compareStrings(aMainName, bMainName);
+                if (rv == 0)
+                {
+                    rv = this.compareStrings(aSubName, bSubName);
+                }
 
-            break;
+                break;
 
-        default:
-            aMainName = getMainFileName(a.getExternalPageId());
-            aSubName = getSubFileName(a.getExternalPageId());
-            bMainName = getMainFileName(b.getExternalPageId());
-            bSubName = getSubFileName(b.getExternalPageId());
+            default:
+                aMainName = getMainFileName(a.getExternalPageId());
+                aSubName = getSubFileName(a.getExternalPageId());
+                bMainName = getMainFileName(b.getExternalPageId());
+                bSubName = getSubFileName(b.getExternalPageId());
 
-            rv = this.compareStrings(aMainName, bMainName);
-            if (rv == 0)
-            {
-                rv = this.compareStrings(aSubName, bSubName);
-            }
+                rv = this.compareStrings(aMainName, bMainName);
+                if (rv == 0)
+                {
+                    rv = this.compareStrings(aSubName, bSubName);
+                }
 
-            break;
+                break;
         }
 
         return rv;

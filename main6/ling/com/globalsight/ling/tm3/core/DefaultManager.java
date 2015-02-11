@@ -71,7 +71,8 @@ public class DefaultManager implements TM3Manager
     {
         try
         {
-            BaseTm<T> tm = (BaseTm<T>) HibernateUtil.get(BaseTm.class, id);
+            BaseTm<T> tm = (BaseTm<T>) HibernateUtil.get(BaseTm.class, id,
+                    false);
             if (tm != null)
             {
                 injectTm(tm, factory);
@@ -84,7 +85,6 @@ public class DefaultManager implements TM3Manager
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends TM3Data> TM3BilingualTm<T> getBilingualTm(
             TM3DataFactory<T> factory, long id) throws TM3Exception
     {

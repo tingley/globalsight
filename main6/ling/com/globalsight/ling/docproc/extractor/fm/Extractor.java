@@ -660,10 +660,10 @@ public class Extractor extends AbstractExtractor
             {
                 exposeDef(lineWithWhiteSpace, output, "text");
             }
-            // else if (line.startsWith(Tag.PGF_NUMBER_STRING)) // <PgfNumString
-            // {
-            // handleNumString(line, output);
-            // }
+            else if (lineWithoutWhiteSpace.startsWith(Tag.PGF_NUMBER_STRING)) // <PgfNumString
+            {
+                handleNumString(lineWithWhiteSpace, output);
+            }
             else if (translatable
                     && lineWithoutWhiteSpace.equals(Tag.CONDITIONAL_END)) // > #
             // end of
@@ -1889,41 +1889,51 @@ public class Extractor extends AbstractExtractor
      * charactors. After this, check whether the content contains meaningful
      * charactors. If true, add the content to translatable, else add the
      * content to skeleton.
-     * 
-     * @param line
-     * @param output
+     * <p>
+     * Because of GBS-3209, we found "&lt;PgfNumString `string'&gt;" needs to be
+     * changed to "&lt;Pgf &lt;PgfNumFormat `string'&gt; &gt; # end of Pgf" so
+     * that the translation can be updated to exported mif or fm file.
      */
     private void handleNumString(String line, Output output)
     {
         String content = Parser.getStringContent(line);
         int start = line.indexOf("`");
         int end = line.indexOf("'");
+        boolean transform = false;
         if (start != -1 && end != -1)
         {
             String head = line.substring(0, start + 1);
             String tail = line.substring(end);
 
-            this.addSkeleton(output, head, NO_RETURN);// add head as skeleton,
-                                                      // with no return
             if (content.length() > 0)
             {
                 String tmp = getContentsBetweenPh(replaceSpecialCharactor(
                         content, false));
                 if (tmp.trim().matches("\\W*"))
                 {
+                    this.addSkeleton(output, head, NO_RETURN);
                     // add content as skeleton, with no return
                     this.addSkeleton(output, content, NO_RETURN);
                 }
                 else
                 {
+                    transform = true;
+                    this.addSkeleton(output, Tag.PGF_HEAD, WITH_RETURN);
+                    this.addSkeleton(output, Tag.PGF_NUMBER_FORMAT + " `",
+                            NO_RETURN);
                     this.addTranslatable(content);
                 }
             }
             else
             {
+                this.addSkeleton(output, head, NO_RETURN);
                 this.addSkeleton(output, content, NO_RETURN);
             }
-            addSkeleton(output, tail, WITH_RETURN);// add tail as skeleton
+            addSkeleton(output, tail, WITH_RETURN);
+            if (transform)
+            {
+                addSkeleton(output, Tag.PGF_END, WITH_RETURN);
+            }
         }
     }
 

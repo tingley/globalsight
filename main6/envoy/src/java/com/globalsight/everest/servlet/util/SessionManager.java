@@ -19,6 +19,9 @@ package com.globalsight.everest.servlet.util;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -28,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * SessionManager manages the session's activites in terms of storing/removing
@@ -160,6 +164,10 @@ public class SessionManager implements HttpSessionBindingListener, Serializable
     public void setAttribute(String p_key, Object p_value)
     {
         m_hashMap.put(p_key, p_value);
+        if (CATEGORY.isDebugEnabled())
+        {
+            logSessionObjects(m_hashMap);            
+        }
     }
 
     /**
@@ -241,6 +249,10 @@ public class SessionManager implements HttpSessionBindingListener, Serializable
     public void setReportAttribute(String p_key, Object p_value)
     {
         r_hashMap.put(p_key, p_value);
+        if (CATEGORY.isDebugEnabled())
+        {
+            logSessionObjects(r_hashMap);            
+        }
     }
 
     /**
@@ -274,6 +286,63 @@ public class SessionManager implements HttpSessionBindingListener, Serializable
     public void removeElementOfReportMap(String p_key)
     {
         r_hashMap.remove(p_key);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void logSessionObjects(HashMap p_hashMap)
+    {
+        CATEGORY.info("================= SEPARATOR ===================");
+        CATEGORY.info("Session's userId :: " + getUid());
+        Iterator iter = p_hashMap.entrySet().iterator();
+        while (iter.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+            String key = (String) entry.getKey();
+            Object val = entry.getValue();
+
+            StringBuilder strs = new StringBuilder(key);
+            strs.append(" = ");
+            if (val == null)
+            {
+                strs.append("null");
+            }
+            else
+            {
+                strs.append(val.getClass().getName()).append(" :: ");
+
+                if (val instanceof List && ((List) val).size() > 0)
+                {
+                    String className = ((List) val).iterator().next()
+                            .getClass().getSimpleName();
+                    strs.append("Value is a ").append(className)
+                            .append(" list, its size is ")
+                            .append(((List) val).size());
+                }
+                else if (val instanceof Map && ((Map) val).size() > 0)
+                {
+                    String className = ((Map) val).values().iterator().next()
+                            .getClass().getSimpleName();
+                    strs.append("Value is a ").append(className)
+                            .append(" Map, its size is ")
+                            .append(((Map) val).size());
+                }
+                else
+                {
+                    String str = "";
+                    try
+                    {
+                        str = EditUtil.encodeHtmlEntities(val.toString());
+                    }
+                    catch (Exception e)
+                    {
+                        str = "Cannot be displayed!!!";
+                    }
+                    strs.append(str);
+                }
+            }
+
+            CATEGORY.info(strs.toString());
+        }
     }
 
 }

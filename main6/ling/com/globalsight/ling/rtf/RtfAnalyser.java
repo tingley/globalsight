@@ -2755,7 +2755,6 @@ public class RtfAnalyser
         catch (Throwable t)
         {
             warn("Error in ANSI conversion: " + t);
-            t.printStackTrace();
         }
 
         return result;

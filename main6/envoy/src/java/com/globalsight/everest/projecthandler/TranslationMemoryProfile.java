@@ -40,9 +40,12 @@ public class TranslationMemoryProfile extends PersistentObject
 
     private static final long serialVersionUID = -3548514967241450885L;
 
-    // separator used between TU types to exclude - for parsing the
-    // string
+    // separator used between TU types to exclude - for parsing the string.
     public static final String EXCLUDE_TU_TYPE_DELIMITER = "|";
+
+    public static final String LATEST_EXACT_MATCH = "LATEST";
+    public static final String OLDEST_EXACT_MATCH = "OLDEST";
+    public static final String DEMOTED_EXACT_MATCH = "DEMOTED";
 
     // 1 back pointer to L10nProfile
     private L10nProfile m_l10nProfile = null;
@@ -146,19 +149,17 @@ public class TranslationMemoryProfile extends PersistentObject
     private long m_refTmPenalty = -1;
     private String m_refTMsToLeverageFrom;
 
-    public static final String LATEST_EXACT_MATCH = "LATEST";
+    private boolean isMatchPercentage = true;
 
-    public static final String OLDEST_EXACT_MATCH = "OLDEST";
-
-    public static final String DEMOTED_EXACT_MATCH = "DEMOTED";
-
-    public boolean isMatchPercentage = true;
-
-    public boolean isTmProcendence = false;
+    private boolean isTmProcendence = false;
 
     private boolean autoRepair = true;
     
     private TDATM tdatm;
+
+    private boolean uniqueFromMultipleTranslation = false;
+
+    private long m_companyId = -1;
 
     public TranslationMemoryProfile()
     {
@@ -230,17 +231,18 @@ public class TranslationMemoryProfile extends PersistentObject
         m_projectTMsToLeverageFrom.add(p_leverageProjectTM);
     }
 
-    public void setAllLeverageProjectTMs(Vector p_projectTMsToLeverageFrom)
+    public void setAllLeverageProjectTMs(
+            Vector<LeverageProjectTM> p_projectTMsToLeverageFrom)
     {
         m_projectTMsToLeverageFrom = p_projectTMsToLeverageFrom;
     }
 
-    public void setNewProjectTMs(Vector p_newProjectTMs)
+    public void setNewProjectTMs(Vector<LeverageProjectTM> p_newProjectTMs)
     {
         m_newProjectTMsToLeverageFrom = p_newProjectTMs;
     }
 
-    public Vector getNewProjectTMs()
+    public Vector<LeverageProjectTM> getNewProjectTMs()
     {
         return m_newProjectTMsToLeverageFrom;
     }
@@ -396,7 +398,7 @@ public class TranslationMemoryProfile extends PersistentObject
         return m_isLeverageLocalizable;
     }
 
-    public Vector getProjectTMsToLeverageFrom()
+    public Vector<LeverageProjectTM> getProjectTMsToLeverageFrom()
     {
         return m_projectTMsToLeverageFrom;
     }
@@ -692,19 +694,21 @@ public class TranslationMemoryProfile extends PersistentObject
         return m_isMultipleMatchesForReimp;
     }
 
-    public Set getProjectTMsToLeverageFromSet()
+    public Set<LeverageProjectTM> getProjectTMsToLeverageFromSet()
     {
-        HashSet set = new HashSet();
+        HashSet<LeverageProjectTM> set = new HashSet<LeverageProjectTM>();
         if (m_projectTMsToLeverageFrom != null)
         {
-            set = new HashSet(m_projectTMsToLeverageFrom);
+            set = new HashSet<LeverageProjectTM>(m_projectTMsToLeverageFrom);
         }
         return set;
     }
 
-    public void setProjectTMsToLeverageFromSet(Set projectTMsToLeverageFromSet)
+    public void setProjectTMsToLeverageFromSet(
+            Set<LeverageProjectTM> projectTMsToLeverageFromSet)
     {
-        setAllLeverageProjectTMs(new Vector(projectTMsToLeverageFromSet));
+        setAllLeverageProjectTMs(new Vector<LeverageProjectTM>(
+                projectTMsToLeverageFromSet));
     }
 
     public boolean getIsContextMatchLeveraging()
@@ -887,7 +891,17 @@ public class TranslationMemoryProfile extends PersistentObject
         this.attributes = attributes;
     }
 
-	/**
+    public long getCompanyId()
+    {
+        return m_companyId;
+    }
+
+    public void setCompanyId(long p_companyId)
+    {
+        m_companyId = p_companyId;
+    }
+
+    /**
 	 * Get all reference TMs' names in order to display on TM profile main list
 	 * UI for "Reference TM(s)" column.
 	 */
@@ -929,10 +943,21 @@ public class TranslationMemoryProfile extends PersistentObject
 				result.append("<br/>").append(tmName);
 			} else {
 				result.append(tmName);
-			}			
+			}
 		}
 
 		return result.toString();
+    }
+
+    public boolean isUniqueFromMultipleTranslation()
+    {
+        return uniqueFromMultipleTranslation;
+    }
+
+    public void setUniqueFromMultipleTranslation(
+            boolean uniqueFromMultipleTranslation)
+    {
+        this.uniqueFromMultipleTranslation = uniqueFromMultipleTranslation;
     }
 
 }

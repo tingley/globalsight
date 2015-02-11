@@ -16,8 +16,12 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.createJobs;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
@@ -35,10 +39,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -48,6 +55,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParameterImpl;
+import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
@@ -63,11 +71,13 @@ import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.glossaries.GlossaryException;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
@@ -82,6 +92,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -110,8 +121,13 @@ public class CreateJobsMainHandler extends PageHandler
     private static final String DISABLED = "disabled";
     private static final String SELECTED = "selected";
     private static final String SELECTED_FOLDER = "selected_folder_path_in_create_job";
+    private static final String CREATING_JOBS_NUM_SQL = "select count(ID) from JobImpl "
+    	+ " where STATE in ('" + Job.UPLOADING + "', '" + Job.IN_QUEUE
+    	+ "', '" + Job.EXTRACTING + "', '" + Job.LEVERAGING + "', '"
+    	+ Job.CALCULATING_WORD_COUNTS + "', '" + Job.PROCESSING + "')";
     private static final int SUCCEED = 0;
     private static final int FAIL = 1;
+    private final static int MAX_LINE_LENGTH = 4096;
     private Map<String, List<FileProfileImpl>> extensionToFileProfileMap;
     private Map<String, String> l10NToTargetLocalesMap;
     private Map<String, String> l10NToJobAttributeMap;
@@ -175,12 +191,60 @@ public class CreateJobsMainHandler extends PageHandler
                 this.getUploadedFiles(request, response);
                 return;
             }
+            else if(action.equals("getCreatingJobsNum"))
+            {
+            	Integer creatingJobsNum = getCreatingJobsNum();
+            	PrintWriter writer = response.getWriter();
+            	writer.write(creatingJobsNum.toString());
+            	return;
+            }
+            else if(action.equals("uploadSelectedFile"))
+            {
+            	String tempFolder = request.getParameter("tempFolder");
+            	String type = request.getParameter("type");
+            	try 
+            	{
+            		File uploadedFile = uploadSelectedFile(request, tempFolder, type);
+            		response.setContentType("text/html;charset=UTF-8");
+            		if(type.equals("0"))//source files
+            		{           			
+            			StringBuffer ret = new StringBuffer("[");
+            			if (CreateJobUtil.isZipFile(uploadedFile))
+            			{
+            				ret.append(addZipFile(uploadedFile));
+            			}
+            			else
+            			{
+            				ret.append(addCommonFile(uploadedFile));
+            			}
+            			ret.append("]");
+            			PrintWriter writer = response.getWriter();
+            			writer.write("<script type='text/javascript'>window.parent.addDivForNewFile(" + ret.toString() + ")</script>;");
+            			if (CreateJobUtil.isZipFile(uploadedFile))
+            			{
+            				uploadedFile.delete();
+            			}
+            		}
+            		else if(type.endsWith("1"))//job comment file
+            		{
+            			PrintWriter writer = response.getWriter();
+            			writer.write("<script type='text/javascript'>window.parent.addAttachment('" + uploadedFile.getName() + "')</script>;");
+            		}
+				} 
+            	catch (Exception e) 
+            	{
+					e.printStackTrace();
+				}
+            	return;
+            }
             else if (action.equals("createJob"))
             {
                 final Map<Object, Object> dataMap = prepareDataForJob(request,
                         currentCompanyId, user);
                 this.setPageParameter(request, bundle, user, session,
                         currentCompanyId);
+                request.setAttribute("create_result",
+                        bundle.getString("msg_job_create_successful"));
                 Runnable runnable = new Runnable()
                 {
                     public void run()
@@ -190,8 +254,6 @@ public class CreateJobsMainHandler extends PageHandler
                 };
                 Thread t = new MultiCompanySupportedThread(runnable);
                 t.start();
-                request.setAttribute("create_result",
-                        bundle.getString("msg_job_create_successful"));
             }
         }
         if (!"createJob".equals(action))
@@ -199,7 +261,27 @@ public class CreateJobsMainHandler extends PageHandler
             this.setPageParameter(request, bundle, user, session,
                     currentCompanyId);
         }
+        
+        // how many jobs are being created
+        Integer creatingJobsNum = getCreatingJobsNum();
+        request.setAttribute("creatingJobsNum", creatingJobsNum);
+        
         super.invokePageHandler(pageDescriptor, request, response, context);
+    }
+    
+    public Integer getCreatingJobsNum()
+    {
+    	Integer creatingJobsNum = null;
+    	try
+        {
+    		creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL);
+        }
+        catch (Exception e)
+        {
+        	logger.error("Failed to get createingJobsNum.", e);
+            // not blocking the following processes.
+        }
+        return creatingJobsNum;
     }
 
     private Map<Object, Object> prepareDataForJob(HttpServletRequest request,
@@ -538,6 +620,11 @@ public class CreateJobsMainHandler extends PageHandler
             {
                 FileUtil.deleteFile(new File(uploadPath));
             }
+            else if (filePath.contains(folder))
+            {
+            	File file = new File(filePath);
+            	file.delete();
+            }
             else
             {
                 filePath = convertFilePath(filePath);
@@ -702,7 +789,7 @@ public class CreateJobsMainHandler extends PageHandler
                     l10nAndfileProfiles, l10Profile, tmpFolderName, job,
                     isSwitched, sourceFilesList, fileProfileList);
             Map<String, long[]> filesToFpId = excuteScriptOfFileProfile(
-                    descList, fpIdList, fileProfileList);
+                    descList, fpIdList, fileProfileList, job);
             Set<String> fileNames = filesToFpId.keySet();
             Integer pageCount = new Integer(fileNames.size());
             String jobUuid = uuid == null ? ((JobImpl) job).getUuid() : uuid;
@@ -895,7 +982,7 @@ public class CreateJobsMainHandler extends PageHandler
      */
     private Map<String, long[]> excuteScriptOfFileProfile(
             List<String> descList, List<String> fpIdList,
-            List<FileProfile> fileProfileList)
+            List<FileProfile> fileProfileList, Job p_job)
     {
         Map<String, long[]> filesToFpId = new HashMap<String, long[]>();
 
@@ -907,9 +994,24 @@ public class CreateJobsMainHandler extends PageHandler
             String scriptOnImport = fp.getScriptOnImport();
             long exitValue = 0;
             if (StringUtils.isNotEmpty(scriptOnImport))
-            {
-                String scriptedDir = fileName.substring(0,
+            {           
+            	String oldScriptedDir = fileName.substring(0,
                         fileName.lastIndexOf("."));
+                String oldScriptedFolderPath = AmbFileStoragePathUtils
+		                .getCxeDocDirPath(fp.getCompanyId())
+		                + File.separator
+		                + oldScriptedDir;
+                File oldScriptedFolder = new File(oldScriptedFolderPath);
+            	
+                String scriptedFolderNamePrefix= FileSystemUtil.
+                		getScriptedFolderNamePrefixByJob(p_job.getId());
+                String name = fileName.substring(fileName
+                		.lastIndexOf(File.separator) + 1,fileName.lastIndexOf("."));
+                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+                
+                String scriptedDir = fileName.substring(0,fileName.lastIndexOf(File.separator))
+                		+ File.separator + scriptedFolderNamePrefix + "_" 
+                		+ name + "_" + extension;
                 String scriptedFolderPath = AmbFileStoragePathUtils
                         .getCxeDocDirPath(fp.getCompanyId())
                         + File.separator
@@ -919,21 +1021,20 @@ public class CreateJobsMainHandler extends PageHandler
                 {
                     File file = new File(fileName);
                     String filePath = AmbFileStoragePathUtils
-                            .getCxeDocDirPath()
+                            .getCxeDocDirPath(fp.getCompanyId())
                             + File.separator
                             + file.getParent();
                     // Call the script on import to convert the file
                     try
                     {
                         String cmd = "cmd.exe /c " + scriptOnImport + " \""
-                                + filePath + "\"";
-                        // If the script is Lexmark tool, another parameter
-                        // -encoding is passed.
-                        if ("lexmarktool.bat".equalsIgnoreCase(new File(
-                                scriptOnImport).getName()))
-                        {
-                            cmd += " \"-encoding " + fp.getCodeSet() + "\"";
-                        }
+                                + filePath + "\" \"" + scriptedFolderNamePrefix + "\"";
+                        // If the script is Lexmark tool, another parameter -encoding is passed.
+                		if ("lexmarktool.bat".equalsIgnoreCase(new File(
+								scriptOnImport).getName()))
+						{
+							cmd += " \"-encoding " + fp.getCodeSet() + "\"";
+						}
                         ProcessRunner pr = new ProcessRunner(cmd);
                         Thread t = new Thread(pr);
                         t.start();
@@ -956,17 +1057,40 @@ public class CreateJobsMainHandler extends PageHandler
 
                 // Iterator the files converted by the script and import
                 // each one of them.
-                if (scriptedFolder.exists())
+                if (scriptedFolder.exists() || oldScriptedFolder.exists())
                 {
-                    String scriptedFiles[] = scriptedFolder.list();
+                    String scriptedFiles[];
+                    if(scriptedFolder.exists())
+                    {
+                    	scriptedFiles = scriptedFolder.list();
+                    }
+                    else 
+                    {
+                    	scriptedFiles = oldScriptedFolder.list();
+					}
                     if (scriptedFiles != null && scriptedFiles.length > 0)
                     {
                         for (int j = 0; j < scriptedFiles.length; j++)
                         {
                             String scriptedFileName = scriptedFiles[j];
+                            String oldName = fileName.substring(fileName
+                            			.lastIndexOf(File.separator) + 1);
+                            if(!oldName.equals(scriptedFileName))
+                            {
+                            	continue;
+                            }
                             long fileProfileId = fp.getId();
-                            String key_fileName = scriptedDir + File.separator
-                                    + scriptedFileName;
+                            String key_fileName;
+                            if(scriptedFolder.exists())
+                            {                           	
+                            	key_fileName = scriptedDir + File.separator
+                            		+ scriptedFileName;
+                            }
+                            else
+                            {
+                            	key_fileName = oldScriptedDir + File.separator
+                        		+ scriptedFileName;
+                            }
                             filesToFpId.put(key_fileName, new long[]
                             { fileProfileId, exitValue });
                         }
@@ -1105,6 +1229,10 @@ public class CreateJobsMainHandler extends PageHandler
         for (int i = 0; i < filePaths.length; i++)
         {
             String filePath = convertFilePath(filePaths[i]);
+            if(filePath.contains(tmpFolderName))
+            {
+            	filePath = filePath.substring(filePath.indexOf(tmpFolderName) + tmpFolderName.length());
+            }
             String fileProfileId = l10nAndfileProfiles[i].split(",")[1];
 
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
@@ -1463,6 +1591,7 @@ public class CreateJobsMainHandler extends PageHandler
         setLableToJsp(request, bundle, "lb_file_profile");// file profile
         setLableToJsp(request, bundle, "lb_target_locales");// target locales
         setLableToJsp(request, bundle, "lb_create_job");// create job
+        setLableToJsp(request, bundle, "lb_create_zip_job");// create job(zip only)
         setLableToJsp(request, bundle, "lb_add_files");// add files
         setLableToJsp(request, bundle, "lb_browse");// Browse
         setLableToJsp(request, bundle, "lb_cancel");// Cancel
@@ -1498,6 +1627,8 @@ public class CreateJobsMainHandler extends PageHandler
         setLableToJsp(request, bundle, "lb_create_job_clean_map_tip");
         setLableToJsp(request, bundle, "lb_create_job_add_file_tip");
         setLableToJsp(request, bundle, "lb_create_job_browse_tip");
+        setLableToJsp(request, bundle, "lb_job_creation_queue");
+        setLableToJsp(request, bundle, "lb_jobs_creating");
         setLableToJsp(request, bundle, "lb_job_attributes");
     }
 
@@ -1703,6 +1834,386 @@ public class CreateJobsMainHandler extends PageHandler
     {
         return input.replace("<", "&lt;").replace(">", "&gt;")
                 .replace("\"", "&quot;");
+    }
+    
+    private File uploadSelectedFile(HttpServletRequest request, 
+    		String tempFolder, String type) throws Exception
+    {
+    	File parentFile = null;
+    	if(type.equals("0"))//source files
+    	{   		
+    		File saveDir =  AmbFileStoragePathUtils.getCxeDocDir();
+    		String baseTmpDir = saveDir + File.separator + TMP_FOLDER_NAME;
+    		parentFile = new File(baseTmpDir + File.separator + tempFolder);
+    		parentFile.mkdirs();
+    	}
+    	else if(type.equals("1"))//comment file
+    	{
+    		File saveDir =  AmbFileStoragePathUtils.getCommentReferenceDir();
+    		parentFile = new File(saveDir + File.separator + "tmp" 
+    				+ File.separator + tempFolder);
+    		parentFile.mkdirs();
+    	}
+    	String fileName = uploadFile(request, parentFile);
+    	File uploadedFile = new File(fileName);
+    	if(type.equals("0"))
+    	{   		
+    		if(CreateJobUtil.isZipFile(uploadedFile))
+    		{
+    			unZip(fileName);
+    		}
+    	}
+    	return uploadedFile;
+    }
+    
+	private String uploadFile(HttpServletRequest p_request, File parentFile)
+			throws GlossaryException, IOException
+	{
+		byte[] inBuf = new byte[MAX_LINE_LENGTH];
+		int bytesRead;
+		ServletInputStream in;
+		String contentType;
+		String boundary;
+		String filePath = "";
+		
+		// Let's make sure that we have the right type of content
+		//
+		contentType = p_request.getContentType();
+		if (contentType == null
+				|| !contentType.toLowerCase().startsWith("multipart/form-data"))
+		{
+			String[] arg = { "form did not use ENCTYPE=multipart/form-data but `"
+					+ contentType + "'" };
+		
+			throw new GlossaryException(
+					GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+		}
+		
+		// Extract the boundary string in this request. The
+		// boundary string is part of the content type string
+		//
+		int bi = contentType.indexOf("boundary=");
+		if (bi == -1)
+		{
+			String[] arg = { "no boundary string found in request" };
+
+			throw new GlossaryException(
+					GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+		}
+		else
+		{
+			// 9 := len("boundary=")
+			boundary = contentType.substring(bi + 9);
+
+			// The real boundary has additional two dashes in
+			// front
+			//
+			boundary = "--" + boundary;
+		}
+		
+		in = p_request.getInputStream();
+		bytesRead = in.readLine(inBuf, 0, inBuf.length);
+		
+		if (bytesRead < 3)
+		{
+			String[] arg = { "incomplete request (not enough data)" };
+		
+			// Not enough content was send as part of the post
+			throw new GlossaryException(
+					GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+		}
+		
+		while (bytesRead != -1)
+		{
+			String lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+			if (lineRead.startsWith("Content-Disposition: form-data; name=\""))
+			{
+				if (lineRead.indexOf("filename=\"") != -1)
+				{		
+					// Get file name
+					String fileName = getFilename(lineRead.substring(0, lineRead.length() - 2));
+					
+					// Get content type line
+					bytesRead = in.readLine(inBuf, 0, inBuf.length);
+					lineRead = new String(inBuf, 0, bytesRead - 2, "utf-8");
+		
+					// Read and ignore the blank line
+					bytesRead = in.readLine(inBuf, 0, inBuf.length);
+		
+					// Create a temporary file to store the
+					// contents in it for now. We might not have
+					// additional information, such as TUV id for
+					// building the complete file path. We will
+					// save the contents in this file for now and
+					// finally rename it to correct file name.
+					//
+			        filePath = parentFile.getPath() + File.separator + fileName;
+					File m_tempFile = new File(filePath);
+					FileOutputStream fos = new FileOutputStream(m_tempFile);
+					BufferedOutputStream bos = new BufferedOutputStream(fos,
+							MAX_LINE_LENGTH * 4);
+		
+					// Read through the file contents and write
+					// it out to a local temp file.
+					boolean writeRN = false;
+					while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
+					{
+						// Let's first check if we are already on
+						// boundary line
+						if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
+						{
+							lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+							if (lineRead.startsWith(boundary))
+							{
+								break;
+							}
+						}
+		
+						// Write out carriage-return, new-line
+						// pair which might have been left over
+						// from last write.
+						//
+						if (writeRN)
+						{
+							bos.write(new byte[] { (byte) '\r', (byte) '\n' });
+							writeRN = false;
+						}
+		
+						// The ServletInputStream.readline() adds
+						// "\r\n" bytes for the last line of the
+						// file contents. If we find these pair
+						// as the last bytes we need to delay
+						// writing it until the next go, since it
+						// could very well be the last line of
+						// file content.
+						//
+						if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
+								&& inBuf[bytesRead - 1] == '\n')
+						{
+							bos.write(inBuf, 0, bytesRead - 2);
+							writeRN = true;
+						}
+						else
+						{
+							bos.write(inBuf, 0, bytesRead);
+						}
+					}
+		
+					bos.flush();
+					bos.close();
+					fos.close();
+				}
+				else
+				{
+					// This is the field part
+		
+					// First get the field name
+		
+					int start = lineRead.indexOf("name=\"");
+					int end = lineRead.indexOf("\"", start + 7);
+					String fieldName = lineRead.substring(start + 6, end);
+		
+					// Read and ignore the blank line
+					bytesRead = in.readLine(inBuf, 0, inBuf.length);
+		
+					// String Buffer to keep the field value
+					//
+					StringBuffer fieldValue = new StringBuffer();
+		
+					boolean writeRN = false;
+					while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
+					{
+						lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+		
+						// Let's first check if we are already on
+						// boundary line
+						//
+						if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
+						{
+							if (lineRead.startsWith(boundary))
+							{
+								break;
+							}
+						}
+		
+						// Write out carriage-return, new-line
+						// pair which might have been left over
+						// from last write.
+						//
+						if (writeRN)
+						{
+							fieldValue.append("\r\n");
+							writeRN = false;
+						}
+		
+						// The ServletInputStream.readline() adds
+						// "\r\n" bytes for the last line of the
+						// field value. If we find these pair as
+						// the last bytes we need to delay
+						// writing it until the next go, since it
+						// could very well be the last line of
+						// field value.
+						//
+						if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
+								&& inBuf[bytesRead - 1] == '\n')
+						{
+							fieldValue.append(lineRead.substring(0, lineRead
+									.length() - 2));
+							writeRN = true;
+						}
+						else
+						{
+							fieldValue.append(lineRead);
+						}
+					}
+				}
+			}
+		
+			bytesRead = in.readLine(inBuf, 0, inBuf.length);
+		}
+		
+		return filePath;
+	}
+	
+	private String getFilename(String p_filenameLine)
+	{
+		int start = 0;
+
+		if (p_filenameLine != null
+				&& (start = p_filenameLine.indexOf("filename=\"")) != -1)
+		{
+			String filepath = p_filenameLine.substring(start + 10,
+					p_filenameLine.length() - 1);
+
+			// Handle Windows v/s Unix file path
+			if ((start = filepath.lastIndexOf('\\')) > -1)
+			{
+				return filepath.substring(start + 1);
+			}
+			else if ((start = filepath.lastIndexOf('/')) > -1)
+			{
+				return  filepath.substring(start + 1);
+			}
+			else
+			{
+				return  filepath;
+			}
+		}
+		return null;
+	}
+	
+	private void unZip(String path)   
+    {  
+        int count = -1;
+          
+        String savepath = path.substring(0,path.lastIndexOf(".")); 
+  
+        try   
+        {  
+            BufferedOutputStream bos = null;  
+            ZipEntry entry = null;  
+            FileInputStream fis = new FileInputStream(path);   
+            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));  
+              
+            while((entry = zis.getNextEntry()) != null)   
+            {
+                byte data[] = new byte[MAX_LINE_LENGTH];
+  
+                String temp = entry.getName();
+                temp = savepath + File.separator + temp; 
+     
+                if(temp.endsWith("/"))
+                {
+                	continue;
+                }
+                
+                File f = new File(temp);
+                f.getParentFile().mkdirs();
+                f.createNewFile();
+  
+                FileOutputStream fos = new FileOutputStream(f);  
+                bos = new BufferedOutputStream(fos, MAX_LINE_LENGTH);  
+                  
+                while((count = zis.read(data, 0, MAX_LINE_LENGTH)) != -1)   
+                {  
+                    bos.write(data, 0, count);  
+                }  
+  
+                bos.flush();  
+                bos.close();  
+            }
+            zis.close();  
+  
+        } catch (Exception e) {  
+            e.printStackTrace();  
+        }  
+    }
+	
+    /**
+     * Add a progress bar for each files within a zip file.
+     * @param file
+     */
+    private String addZipFile(File file)
+    {
+        String zipFileFullPath = file.getPath();
+        String zipFilePath = zipFileFullPath.substring(0,
+                zipFileFullPath.indexOf(file.getName()));
+        
+        List<ZipEntry> entriesInZip = CreateJobUtil.getFilesInZipFile(file);
+        
+        StringBuffer ret = new StringBuffer("");
+        for (ZipEntry entry : entriesInZip)
+        {
+            if (ret.length() > 0)
+            {
+                ret.append(",");
+            }
+            String zipEntryName = entry.getName();
+            /*
+             * The unzipped files are in folders named by the zip file name
+             */
+            String unzippedFileFullPath = zipFilePath
+                    + file.getName().substring(0,
+                            file.getName().lastIndexOf(".")) + File.separator
+                    + zipEntryName;
+            // if zip file contains subfolders, entry name will contains "/" or "\"
+            if (zipEntryName.indexOf("/") != 0)
+            {
+                zipEntryName = zipEntryName.substring(zipEntryName
+                        .lastIndexOf("/") + 1);
+            }
+            else if (zipEntryName.indexOf("\\") != 0)
+            {
+                zipEntryName = zipEntryName.substring(zipEntryName
+                        .lastIndexOf("\\") + 1);
+            }
+            String id = CreateJobUtil.getFileId(unzippedFileFullPath);
+            ret.append("{id:'")
+                    .append(id)
+                    .append("',zipName:'")
+                    .append(file.getName().replace("'", "\\'"))
+                    .append("',path:'")
+                    .append(unzippedFileFullPath.replace("\\", File.separator)
+                            .replace("/", File.separator).replace("\\", "\\\\").replace("'", "\\'"))
+                    .append("',name:'").append(zipEntryName.replace("'", "\\'")).append("',size:'")
+                    .append(entry.getSize()).append("'}");
+        }
+        return ret.toString();
+    }
+    
+    /**
+     * Add a progress bar for a common file.
+     * @param file
+     */
+    private String addCommonFile(File file)
+    {
+        String id = CreateJobUtil.getFileId(file.getPath());
+        StringBuffer ret = new StringBuffer("");
+        ret.append("{id:'").append(id).append("',zipName:'").append(file.getName().replace("'", "\\'"))
+                .append("',path:'").append(file.getPath().replace("\\", "\\\\").replace("'", "\\'"))
+                .append("',name:'").append(file.getName().replace("'", "\\'")).append("',size:'")
+                .append(file.length()).append("'}");
+        return ret.toString();
     }
 
 }

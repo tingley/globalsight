@@ -71,6 +71,7 @@
 <html>
 <head>
 <title><%=bundle.getString("lb_workflows")%></title>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script SRC="/globalsight/includes/setStyleSheet.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -215,11 +216,11 @@
 	</table>
 	<div id="workflowButton" style="padding-top:5px;min-width:1024px;width:80%">
 	<c:if test="${!isSuperAdmin}">
-		<c:if test="${isCustomerAccessGroupInstalled}">
-			<amb:permission  name="<%=Permission.JOB_WORKFLOWS_REASSIGN%>" >
-	    		<input id="ReAssign" class="standardText radioButton" type="button" name="ReAssign" value="<%=bundle.getString("lb_reassign")%>" onclick="submitForm('ReAssign');"/>
-			</amb:permission>				
-		</c:if>
+			<c:if test="${isCustomerAccessGroupInstalled}">
+				<amb:permission  name="<%=Permission.JOB_WORKFLOWS_REASSIGN%>" >
+		    		<input id="ReAssign" class="standardText radioButton" type="button" name="ReAssign" value="<%=bundle.getString("lb_reassign")%>" onclick="submitForm('ReAssign');"/>
+				</amb:permission>				
+			 </c:if>
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_DISCARD%>" >
                 <input id="Discard" class="standardText" type="button" name="Discard" value="<%=bundle.getString("lb_discard")%>" onclick="submitForm('Discard');"/>
            </amb:permission>
@@ -249,6 +250,7 @@
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_EXPORT%>" >
                 <input id="Export" class="standardText" type="button" name="Export" value="<%=bundle.getString("lb_export")%>..." onclick="submitForm('Export');"/>
            </amb:permission>
+           
            <c:if test="${reimportOption == 0 || reimportOption == 1}">
             <amb:permission  name="<%=Permission.JOB_WORKFLOWS_ADD%>" >
                  <input id="Add" class="standardText" type="button" name="Add" value="<%=bundle.getString("lb_add")%>..." onclick="submitForm('AddWF');"/>
@@ -260,29 +262,21 @@
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_DISPATCH%>" >
                 <input id="Dispatch" class="standardText" type="button" name="Dispatch" value="<%=bundle.getString("lb_dispatch")%>" onclick="submitForm('Dispatch');"/>
            </amb:permission>
-           <amb:permission  name="<%=Permission.JOB_WORKFLOWS_SKIP%>" >
-               <input id="skip" class="standardText" type="button" name="skip" value="<%=bundle.getString("lb_skip_activity")%>" onClick="submitForm('skip');"/>
-           </amb:permission>
            <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
                <input id="Download" class="standardText radioButton" type="button" name="Download" value="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');"/>
+           </amb:permission>
+           <amb:permission  name="<%=Permission.JOB_WORKFLOWS_SKIP%>" >
+               <input id="skip" class="standardText" type="button" name="skip" value="<%=bundle.getString("lb_skip_activity")%>" onClick="submitForm('skip');"/>
            </amb:permission>
            <c:if test="${sending_back_edition}">
            	   <input class="standardText" type="button" name="ReSendingBack" value="<%=bundle.getString("lb_resendingback_edition_job")%>" onclick="submitForm('sendingbackEditionJob');"/>
            </c:if>
-<input class="standardText" type="button" id="Previous" name="Previous" value="<%=bundle.getString("lb_previous")%>"
-<% if (request.getParameter("fromImpErr") != null) { %>
-	onclick="submitForm('Pending')">
-<% } else if (request.getParameter("fromJobs") != null) { %>
-	onclick="history.go(-1)">
-<% } else { %>
-	disabled="disabled">
-<% } %>
 	</div>
 	</c:if>
 </div>
 </amb:permission>
 </div>
-<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+
 <script src="/globalsight/jquery/jquery.progressbar.js"></script>
 <script src="/globalsight/envoy/projects/workflows/jobDetails.js"></script>
 <script type="text/javascript">

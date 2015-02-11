@@ -312,18 +312,24 @@ class SegmentTmExactLeveragerStoredProcCaller implements
             all_locales.add(locale.getIdAsLong());
         }
         all_locales.add(new Long(p_sourceLocaleId));
-        String query = " SELECT  tmp.org_tuv_id org_tuv_id, "
+        String query = " SELECT tmp.org_tuv_id org_tuv_id, "
                 + "tmp.org_sub_id org_sub_id, "
                 + "tu.id tu_id, tu.tm_id tm_id, tu.format format, "
                 + "tu.type type, tuv.id tuv_id, tuv.segment_string segment_string, "
                 + "tuv.segment_clob segment_clob, "
+                + "tuv.creation_date creation_date, tuv.creation_user creation_user, "
+                + "tuv.modify_date modify_date, tuv.modify_user modify_user, "
                 + "tuv.exact_match_key exact_match_key, tuv.locale_id locale_id, "
-                + "tuv.modify_date modify_date, 100 score, tuv.sid " + " FROM "
-                + tu_table_name + " tu, " + tuv_table_name + " tuv, "
-                + tableName + " tmp " + " WHERE tmp.tu_id = tu.id "
-                + "AND tu.id = tuv.tu_id " + "AND tmp.tu_id = tuv.tu_id "
+                + "100 score, tuv.sid "
+                + "FROM "
+                + tu_table_name + " tu, "
+                + tuv_table_name + " tuv, "
+                + tableName + " tmp "
+                + "WHERE tmp.tu_id = tu.id "
+                + "AND tu.id = tuv.tu_id "
+                + "AND tmp.tu_id = tuv.tu_id "
                 + "AND tuv.locale_id IN " + "(:all_locales) "
-                + " ORDER BY tmp.org_tuv_id, tmp.org_sub_id, tu.id ";
+                + "ORDER BY tmp.org_tuv_id, tmp.org_sub_id, tu.id ";
 
         query = query.replaceAll(":all_locales", StoredProcCaller
                 .convertCollectionToSql(all_locales, null));

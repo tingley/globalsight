@@ -29,13 +29,14 @@ import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultText;
 
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.everest.page.pageexport.style.StyleFactory;
+import com.globalsight.everest.page.pageexport.style.StyleUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
 
 public class ExcelRepairer extends OfficeRepairer 
 {
-
 	public ExcelRepairer(String path) 
 	{
 		super(path);
@@ -71,12 +72,29 @@ public class ExcelRepairer extends OfficeRepairer
         });
 	}
 	
-	@Override
-	protected void repair() throws Exception 
-	{
-		repairExcelSharedStrings();
-		repairExcelStyle();
+    private List<File> getAllFiles()
+    {
+        File root = new File(path + "/xl");
 
+        return FileUtil.getAllFiles(root, new FileFilter()
+        {
+            @Override
+            public boolean accept(File pathname)
+            {
+                if (pathname.isFile())
+                {
+                    String name = pathname.getName();
+                    if (name.endsWith(".xml") || name.endsWith(".xml.rels"))
+                        return true;
+                }
+
+                return false;
+            }
+        });
+    }
+    
+    private void repairWt() throws Exception 
+    {
         List<File> fs = getExcelRepairFiles();
         
         for (File f : fs)
@@ -88,7 +106,7 @@ public class ExcelRepairer extends OfficeRepairer
             Element element = document.getRootElement();
             
             @SuppressWarnings("unchecked")
-            List<Element> wts = element.selectNodes("//a:t");
+            List<Element> wts = element.selectNodes("//t");
             
             for (Element wt : wts)
             {
@@ -114,6 +132,38 @@ public class ExcelRepairer extends OfficeRepairer
             xmlWriter.write(document);
             xmlWriter.close();
         }
+    }
+	
+    private void updateStyle()
+    {
+    	ExcelStylerEpairer r = new ExcelStylerEpairer(path);
+    	try 
+    	{
+			r.updateShareString();
+		} 
+    	catch (Exception e) 
+    	{
+			//e.printStackTrace();
+		}
+    	
+        StyleUtil util = StyleFactory.getStyleUtil(StyleFactory.XLSX);
+        List<File> fs = getAllFiles();
+        
+        for (File f : fs) 
+        {
+        	util.updateBeforeExport(f.getAbsolutePath());
+        }
+    }
+    
+    
+	@Override
+	protected void repair() throws Exception 
+	{
+		updateStyle();
+		repairExcelSharedStrings();
+		repairExcelStyle();
+		repairWt();
+        
 	}
 	
 	private static List<Element> getElementByName(Element root, String name)
@@ -186,6 +236,10 @@ public class ExcelRepairer extends OfficeRepairer
 				if (el instanceof DefaultText)
                 {
 					DefaultText text = (DefaultText) el;
+					String s = text.getStringValue();
+					if ("\n".equals(s))
+						continue;
+					
 					texts.add(text);
 					sb.append(text.getStringValue());
                 }

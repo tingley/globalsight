@@ -152,7 +152,7 @@ function submitForm()
             <OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%          for (GlobalSightLocale gsl : targetLocales)
             {
-%>          <option VALUE="<%=gsl.toString()%>"><%=gsl.getDisplayName(uiLocale)%></OPTION><%
+%>          <option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></OPTION><%
 		    }
 %>
         </select>

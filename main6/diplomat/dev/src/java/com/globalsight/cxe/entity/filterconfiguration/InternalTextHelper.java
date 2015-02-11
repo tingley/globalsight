@@ -21,6 +21,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -743,14 +744,11 @@ public class InternalTextHelper
         }
 
         List<String> internalTexts = new ArrayList<String>();
-        List<String> ids = new ArrayList<String>();
-        ids.addAll(InternalTextUtil.getInternalIndex(src));
-
-        for (int i = 0; i < ids.size(); i++)
+        List<Integer> ids = getInternalIndex(src);
+        for (int id : ids)
         {
-            String id = (String) ids.get(i);
             Object[] ob =
-            { id };
+            { Integer.toString(id) };
             String regex = MessageFormat.format(REGEX_ALL, ob);
             Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
             Matcher matcher = pattern.matcher(src);
@@ -780,6 +778,19 @@ public class InternalTextHelper
         }
 
         return internalTexts;
+    }
+
+    private static List<Integer> getInternalIndex(String src)
+    {
+        List<Integer> ids = new ArrayList<Integer>();
+        Set<String> set = InternalTextUtil.getInternalIndex(src);
+        for (String id : set)
+        {
+            ids.add(Integer.parseInt(id));
+        }
+
+        SortUtil.sort(ids);
+        return ids;
     }
 
     public static void handleOutput(Output p_output, Filter mFilter,

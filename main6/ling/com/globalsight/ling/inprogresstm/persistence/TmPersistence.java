@@ -19,14 +19,19 @@ package com.globalsight.ling.inprogresstm.persistence;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTu;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTuv;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -139,11 +144,11 @@ public class TmPersistence
      */
     public Collection leverageLocalizable(GlobalSightLocale p_sourceLocale,
             GlobalSightLocale p_targetLocale, long p_exactMatchKey,
-            long p_jobId, Set p_tmIds) throws Exception
+            long p_jobId, Set<Long> p_tmIds) throws Exception
     {
-        HashSet<Long> jobIds = new HashSet();
+        HashSet<Long> jobIds = new HashSet<Long>();
         jobIds.add(p_jobId);
-        
+
         return leverageLocalizable(p_sourceLocale, p_targetLocale,
                 p_exactMatchKey, jobIds, p_tmIds);
     }
@@ -166,7 +171,7 @@ public class TmPersistence
      */
     public Collection leverageLocalizable(GlobalSightLocale p_sourceLocale,
             GlobalSightLocale p_targetLocale, long p_exactMatchKey,
-            Set<Long> p_jobIds, Set p_tmIds) throws Exception
+            Set<Long> p_jobIds, Set<Long> p_tmIds) throws Exception
     {
         // In general, jobIds can't be empty.If empty, return null regardless
         // what p_tmIds are.
@@ -588,18 +593,22 @@ public class TmPersistence
     // /// private methods ////////
 
     // create Collection of LeveragedInProgressTu objects
-    private Collection createLeveragedTus(ResultSet p_rs,
-            GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale,
-            boolean p_translatable) throws Exception
+    private Collection<LeveragedInProgressTu> createLeveragedTus(
+            ResultSet p_rs, GlobalSightLocale p_sourceLocale,
+            GlobalSightLocale p_targetLocale, boolean p_translatable)
+            throws Exception
     {
-        ArrayList matches = new ArrayList();
+        ArrayList<LeveragedInProgressTu> matches = new ArrayList<LeveragedInProgressTu>();
         long currentSrcId = 0;
         LeveragedInProgressTu currentTu = null;
 
         while (p_rs.next())
         {
-            long srcId = p_rs.getLong(1); // src.id
+            long jobId = p_rs.getLong(2); // src.job_id
+            long tuId = p_rs.getLong(9); // trg.tu_id
+            HashMap<Long, CreationModifyUserDateHolder> cmInfos = getCreationModifyInfo(jobId, tuId);
 
+            long srcId = p_rs.getLong(1); // src.id
             if (srcId != currentSrcId)
             {
                 currentSrcId = srcId;
@@ -611,12 +620,14 @@ public class TmPersistence
 
                 // create Src TUV
                 LeveragedInProgressTuv srcTuv = createSrcTuv(srcId, p_rs,
-                        p_sourceLocale);
+                        p_sourceLocale,
+                        cmInfos.get(p_sourceLocale.getIdAsLong()));
                 currentTu.addTuv(srcTuv);
             }
 
             // create trg TUV
-            LeveragedInProgressTuv trgTuv = createTrgTuv(p_rs, p_targetLocale);
+            LeveragedInProgressTuv trgTuv = createTrgTuv(p_rs, p_targetLocale,
+                    cmInfos.get(p_targetLocale.getIdAsLong()));
             currentTu.addTuv(trgTuv);
         }
 
@@ -637,22 +648,41 @@ public class TmPersistence
     }
 
     private LeveragedInProgressTuv createSrcTuv(long p_id, ResultSet p_rs,
-            GlobalSightLocale p_sourceLocale) throws Exception
+            GlobalSightLocale p_sourceLocale,
+            CreationModifyUserDateHolder cmInfo) throws Exception
     {
         String segment = getSrcTuvSegment(p_rs);
-        return new LeveragedInProgressTuv(p_id, segment, p_sourceLocale);
+        LeveragedInProgressTuv ipTuv = new LeveragedInProgressTuv(p_id,
+                segment, p_sourceLocale);
+        if (cmInfo != null)
+        {
+            ipTuv.setCreationUser(cmInfo.getCreationUser());
+            ipTuv.setCreationDate(cmInfo.getCreationDate());
+            ipTuv.setModifyUser(cmInfo.getModifyUser());
+            ipTuv.setModifyDate(cmInfo.getModifyDate());
+        }
+        return ipTuv;
     }
 
     private LeveragedInProgressTuv createTrgTuv(ResultSet p_rs,
-            GlobalSightLocale p_targetLocale) throws Exception
+            GlobalSightLocale p_targetLocale,
+            CreationModifyUserDateHolder cmInfo) throws Exception
     {
         long id = p_rs.getLong(6); // trg.id
         long tuId = p_rs.getLong(9); // trg.tu_id
         String segment = getTrgTuvSegment(p_rs);
-        LeveragedInProgressTuv tuv = new LeveragedInProgressTuv(id, segment,
+        LeveragedInProgressTuv ipTuv = new LeveragedInProgressTuv(id, segment,
                 p_targetLocale);
-        tuv.setJobDataTuId(tuId);
-        return tuv;
+        ipTuv.setJobDataTuId(tuId);
+        if (cmInfo != null)
+        {
+            ipTuv.setCreationUser(cmInfo.getCreationUser());
+            ipTuv.setCreationDate(cmInfo.getCreationDate());
+            ipTuv.setModifyUser(cmInfo.getModifyUser());
+            ipTuv.setModifyDate(cmInfo.getModifyDate());
+        }
+
+        return ipTuv;
     }
 
     private String getSrcTuvSegment(ResultSet p_rs) throws Exception
@@ -721,6 +751,89 @@ public class TmPersistence
             {
                 ps.close();
             }
+        }
+    }
+
+    private HashMap<Long, CreationModifyUserDateHolder> getCreationModifyInfo(
+            long jobId, long tuId)
+    {
+        HashMap<Long, CreationModifyUserDateHolder> result = new HashMap<Long, CreationModifyUserDateHolder>();
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            con = DbUtil.getConnection();
+            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            String tuvTableName = SegmentTuTuvCacheManager
+                    .getTuvTableNameJobDataIn(job.getCompanyId(),
+                            job.isMigrated());
+            String query = "SELECT tuv.locale_id, tuv.creation_user, tuv.creation_date, tuv.modify_user, tuv.last_modified FROM "
+                    + tuvTableName + " tuv "
+                    + "WHERE tu_id = ? "
+                    + "AND state != 'OUT_OF_DATE'";
+            ps = con.prepareStatement(query);
+            ps.setLong(1, tuId);
+            rs = ps.executeQuery();
+            while (rs.next())
+            {
+                CreationModifyUserDateHolder holder = new CreationModifyUserDateHolder(
+                        rs.getString(2), rs.getTimestamp(3), rs.getString(4),
+                        rs.getTimestamp(5));
+                result.put(rs.getLong(1), holder);
+            }
+        }
+        catch (Exception e)
+        {
+            c_logger.warn(
+                    "Error happens when fetch creation/modify user-date info for job "
+                            + jobId + " and tuId " + tuId, e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(con);
+        }
+
+        return result;
+    }
+
+    private class CreationModifyUserDateHolder
+    {
+        String creationUser = null;
+        String modifyUser = null;
+        Timestamp creationDate = null;
+        Timestamp modifyDate = null;
+
+        CreationModifyUserDateHolder(String creationUser,
+                Timestamp creationDate, String modifyUser, Timestamp modifyDate)
+        {
+            this.creationUser = creationUser;
+            this.creationDate = creationDate;
+            this.modifyUser = modifyUser;
+            this.modifyDate = modifyDate;
+        }
+
+        String getCreationUser()
+        {
+            return this.creationUser;
+        }
+
+        Timestamp getCreationDate()
+        {
+            return this.creationDate;
+        }
+
+        String getModifyUser()
+        {
+            return this.modifyUser;
+        }
+
+        Timestamp getModifyDate()
+        {
+            return this.modifyDate;
         }
     }
 }

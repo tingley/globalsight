@@ -17,8 +17,11 @@
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
@@ -39,24 +42,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.UnderlineStyle;
-import jxl.write.Blank;
-import jxl.write.DateFormats;
-import jxl.write.DateTime;
-import jxl.write.Formula;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.NumberFormat;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableImage;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
-
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.ss.usermodel.Drawing;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
@@ -84,7 +82,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.XlsReports;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
@@ -101,32 +98,23 @@ import com.globalsight.util.SortUtil;
  * 
  * @Date Feb 14, 2012
  */
-public class OnlineJobsReportGenerator extends XlsReports implements
+public class OnlineJobsReportGenerator implements
         ReportGenerator
 {
     private static Logger logger = Logger
             .getLogger(OnlineJobsReportGenerator.class.getName());
-
     // defines a 0 format for a 3 decimal precision point BigDecimal
     private static final String BIG_DECIMAL_ZERO_STRING = "0.000";
-
     // For "Dell Review Report Issue".
     private static String DELL_REVIEW = "Dell_Review";
-
-    private static ResourceBundle m_bundle;
-
+    private static ResourceBundle m_bundle = null;
     private static final int MONTH_SHEET = 0;
-
     private static final int MONTH_REVIEW_SHEET = 1;
-
-    // For "Add Job Id into online job report" issue
-    private boolean isJobIdVisible = true;
-
     // the big decimal scale to use for internal math
     private static int SCALE = 3;
-
+    // For "Add Job Id into online job report" issue
+    private boolean isJobIdVisible = true;
     private Calendar m_calendar = Calendar.getInstance();
-
     /* The symbol of the currency from the request */
     private String symbol = null;
 
@@ -136,8 +124,20 @@ public class OnlineJobsReportGenerator extends XlsReports implements
     static final String SEPARATOR = "!!gs";
     private MyData m_data;
     private HttpServletRequest m_request = null;
-    private String m_companyName;
-    String m_userId;
+    private CellStyle headerStyle = null;
+    private CellStyle contentStyle = null;
+    private CellStyle redCellStyle = null;
+    private CellStyle moneyStyle = null;
+    private CellStyle failedDateStyle = null;
+    private CellStyle failedTimeStyle = null;
+    private CellStyle failedMoneyStyle = null;
+    private CellStyle wrongJobStyle = null;
+    private CellStyle subTotalStyle = null;
+    private CellStyle totalMoneyStyle = null;
+    private SimpleDateFormat dateFormat = null;
+    private SimpleDateFormat timeFormat = null;
+    private String m_companyName = null;
+    private String m_userId = null;
 
     public OnlineJobsReportGenerator(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
@@ -153,13 +153,13 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         symbol = ReportUtil.getCurrencySymbol(m_data.getCurrency());
         m_data.setTradosStyle(p_request.getParameter("reportStyle"));
         m_data.setDateFormatString(p_request.getParameter("dateFormat"));
-        setProjectIdList(p_request, m_data);
-        setLocpIdList(p_request, m_data);
-        setTargetLocales(p_request, m_data);
+        setProjectIdList(p_request);
+        setLocpIdList(p_request);
+        setTargetLocales(p_request);
         // get all the jobs that were originally imported with the wrong project
         // the users want to pretend that these jobs are in this project
         if (p_request.getParameterValues("status") != null)
-            getJobsInWrongProject(m_data);
+            getJobsInWrongProject();
     }
 
     public void sendReports(List<Long> p_jobIDS,
@@ -181,9 +181,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         }
 
         File file = ReportHelper.getXLSReportFile(getReportType(), null);
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setSuppressWarnings(true);
-        WritableWorkbook workbook = Workbook.createWorkbook(file, settings);
+        Workbook workbook = new SXSSFWorkbook();
         HashSet<Job> jobs = new HashSet<Job>(
                 ReportHelper.getJobListByIDS(p_jobIDS));
         m_data.wantsAllLocales = true;
@@ -196,10 +194,12 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         {
             // Create sheets in Workbook.
             createSheets(workbook, projectMap, false);
-            workbook.write();
-            workbook.close();
-            return new File[]
-            { file };
+            FileOutputStream out = new FileOutputStream(file);
+            workbook.write(out);
+            out.close();
+            List<File> workBooks = new ArrayList<File>();
+            workBooks.add(file);
+            return ReportHelper.moveReports(workBooks, m_userId);
         }
         else
         {
@@ -218,11 +218,9 @@ public class OnlineJobsReportGenerator extends XlsReports implements
     private File[] generateReport(HttpServletRequest p_request)
             throws Exception
     {
-        String[] months = getMonths(m_bundle);
+        String[] months = getMonths();
         File file = ReportHelper.getXLSReportFile(getReportType(), null);
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setSuppressWarnings(true);
-        WritableWorkbook workbook = Workbook.createWorkbook(file, settings);
+        Workbook p_workbook = new SXSSFWorkbook();
         int currentMonth = m_calendar.get(Calendar.MONTH);
         int year;
         if (p_request.getParameter("year") != null)
@@ -284,20 +282,20 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                     // sheets[MONTH_SHEET], the original monthSheet.
                     // sheets[MONTH_REVIEW_SHEET], new monthly Dell_Review
                     // sheet.
-                    WritableSheet[] sheets = new WritableSheet[2];
+                    Sheet[] sheets = new Sheet[2];
                     IntHolder[] rows = new IntHolder[2];
 
                     String sheetTitle = months[i] + " " + year;
-                    sheets[MONTH_SHEET] = workbook.createSheet(sheetTitle, i);
+                    sheets[MONTH_SHEET] = p_workbook.createSheet(sheetTitle);
                     if (m_data.isTradosStyle())
                     {
-                        addHeaderTradosStyle(sheets[MONTH_SHEET], MONTH_SHEET,
-                                m_data, m_bundle);
+                    	addTitle(p_workbook, sheets[MONTH_SHEET]);
+                        addHeaderTradosStyle(p_workbook, sheets[MONTH_SHEET], MONTH_SHEET);
                     }
                     else
                     {
-                        addHeader(sheets[MONTH_SHEET], MONTH_SHEET, m_data,
-                                m_bundle);
+                    	addTitle(p_workbook, sheets[MONTH_SHEET]);
+                        addHeader(p_workbook, sheets[MONTH_SHEET], MONTH_SHEET);
                     }
 
                     rows[MONTH_SHEET] = new IntHolder(4);
@@ -310,30 +308,32 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                                 + months[i]
                                 + " "
                                 + year;
-                        sheets[MONTH_REVIEW_SHEET] = workbook.createSheet(
-                                sheetReviewTitle, i);
+                        sheets[MONTH_REVIEW_SHEET] = p_workbook.createSheet(
+                                sheetReviewTitle);
                         if (m_data.isTradosStyle())
                         {
-                            addHeaderTradosStyle(sheets[MONTH_REVIEW_SHEET],
-                                    MONTH_REVIEW_SHEET, m_data, m_bundle);
+                        	addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
+                            addHeaderTradosStyle(p_workbook, sheets[MONTH_REVIEW_SHEET],
+                                    MONTH_REVIEW_SHEET);
                         }
                         else
                         {
-                            addHeader(sheets[MONTH_REVIEW_SHEET],
-                                    MONTH_REVIEW_SHEET, m_data, m_bundle);
+                        	addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
+                            addHeader(p_workbook, sheets[MONTH_REVIEW_SHEET],
+                                    MONTH_REVIEW_SHEET);
                         }
                         rows[MONTH_REVIEW_SHEET] = new IntHolder(4);
                     }
 
                     if (m_data.isTradosStyle())
                     {
-                        writeProjectDataTradosStyle(projectMap, sheets,
-                                includeExReview, rows, m_data, m_bundle);
+                        writeProjectDataTradosStyle(projectMap,p_workbook, sheets,
+                                includeExReview, rows);
                     }
                     else
                     {
-                        writeProjectData(projectMap, sheets, includeExReview,
-                                rows, m_data, m_bundle);
+                        writeProjectData(projectMap,p_workbook, sheets, includeExReview,
+                                rows);
                     }
                     wroteSomething = true;
                 }
@@ -344,77 +344,45 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 // just write out the first sheet to avoid Excel problems
                 i = 0;
                 String sheetTitle = months[currentMonth] + " " + year;
-                WritableSheet monthSheet = workbook.createSheet(sheetTitle, 0);
-                addHeader(monthSheet, m_data, m_bundle);
+                Sheet monthSheet = p_workbook.createSheet(sheetTitle);
+                if (m_data.isTradosStyle())
+                {
+                	addTitle(p_workbook, monthSheet);
+                    addHeaderTradosStyle(p_workbook, monthSheet, MONTH_SHEET);
+                }
+                else
+                {
+                	addTitle(p_workbook, monthSheet);
+                    addHeader(p_workbook, monthSheet, MONTH_SHEET);
+                }
 
                 if (includeExReview)
                 {
                     String sheetReviewTitle = "Review " + months[currentMonth]
                             + " " + year;
-                    WritableSheet monthReviewSheet = workbook.createSheet(
-                            sheetReviewTitle, 1);
+                    Sheet monthReviewSheet = p_workbook.createSheet(
+                            sheetReviewTitle);
                     if (m_data.isTradosStyle())
                     {
-                        addHeaderTradosStyle(monthReviewSheet,
-                                MONTH_REVIEW_SHEET, m_data, m_bundle);
+                    	addTitle(p_workbook, monthReviewSheet);
+                        addHeaderTradosStyle(p_workbook, monthReviewSheet,
+                                MONTH_REVIEW_SHEET);
                     }
                     else
                     {
-                        addHeader(monthReviewSheet, MONTH_REVIEW_SHEET, m_data,
-                                m_bundle);
+                    	addTitle(p_workbook, monthReviewSheet);
+                        addHeader(p_workbook, monthReviewSheet, MONTH_REVIEW_SHEET);
                     }
                 }
             }
 
-            WritableSheet paramsSheet = workbook.createSheet(
-                    m_bundle.getString("lb_criteria"), ++i);
-            paramsSheet.addCell(new Label(0, 0, m_bundle
-                    .getString("lb_report_criteria")));
-            paramsSheet.setColumnView(0, 50);
+            // Create "Criteria" Sheet
+            addParamsSheet(p_workbook,(String) p_request
+                    .getParameter("year") , recalculateFinishedWorkflow);
 
-            if (m_data.wantsAllProjects)
-            {
-                paramsSheet.addCell(new Label(0, 1, m_bundle
-                        .getString("lb_selected_projects")
-                        + " "
-                        + m_bundle.getString("all")));
-            }
-            else
-            {
-                paramsSheet.addCell(new Label(0, 1, m_bundle
-                        .getString("lb_selected_projects")));
-                Iterator<Long> iter = m_data.projectIdList.iterator();
-                int r = 3;
-                while (iter.hasNext())
-                {
-                    Long pid = (Long) iter.next();
-                    String projectName = "??";
-                    try
-                    {
-                        Project p = ServerProxy.getProjectHandler()
-                                .getProjectById(pid.longValue());
-                        projectName = p.getName();
-                    }
-                    catch (Exception e)
-                    {
-                    }
-                    paramsSheet.addCell(new Label(0, r, projectName));
-                    paramsSheet.addCell(new Label(1, r, m_bundle
-                            .getString("lb_id") + "=" + pid.toString()));
-                    r++;
-                }
-            }
-
-            paramsSheet.addCell(new Label(2, 0, m_bundle.getString("lb_Year")));
-            paramsSheet.addCell(new Label(2, 1, (String) p_request
-                    .getParameter("year")));
-            paramsSheet.addCell(new Label(3, 0, m_bundle
-                    .getString("lb_re_cost_jobs")));
-            paramsSheet.addCell(new Label(3, 1, java.lang.Boolean
-                    .toString(recalculateFinishedWorkflow)));
-
-            workbook.write();
-            workbook.close();
+            FileOutputStream out = new FileOutputStream(file);
+            p_workbook.write(out);
+            out.close();
         }
         // Generate Report by Creation Date Range.
         else if (isReportForDetail != null && isReportForDetail.endsWith("on"))
@@ -429,62 +397,20 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 return new File[0];
 
             // Create sheets in Workbook.
-            createSheets(workbook, projectMap, includeExReview);
+            createSheets(p_workbook, projectMap, includeExReview);
 
             // Create "Criteria" Sheet
-            WritableSheet paramsSheet = workbook.createSheet(
-                    m_bundle.getString("lb_criteria"), 1);
-            paramsSheet.addCell(new Label(0, 0, m_bundle
-                    .getString("lb_report_criteria")));
-            paramsSheet.setColumnView(0, 50);
-
-            if (m_data.wantsAllProjects)
-            {
-                paramsSheet.addCell(new Label(0, 1, m_bundle
-                        .getString("lb_selected_projects")
-                        + " "
-                        + m_bundle.getString("all")));
-            }
-            else
-            {
-                paramsSheet.addCell(new Label(0, 1, m_bundle
-                        .getString("lb_selected_projects")));
-                Iterator<Long> iter = m_data.projectIdList.iterator();
-                int r = 3;
-                while (iter.hasNext())
-                {
-                    Long pid = (Long) iter.next();
-                    String projectName = "??";
-                    try
-                    {
-                        Project p = ServerProxy.getProjectHandler()
-                                .getProjectById(pid.longValue());
-                        projectName = p.getName();
-                    }
-                    catch (Exception e)
-                    {
-                    }
-                    paramsSheet.addCell(new Label(0, r, projectName));
-                    paramsSheet.addCell(new Label(1, r, m_bundle
-                            .getString("lb_id") + "=" + pid.toString()));
-                    r++;
-                }
-            }
-
-            paramsSheet.addCell(new Label(2, 0, m_bundle.getString("lb_Year")));
-            paramsSheet.addCell(new Label(2, 1, (String) p_request
-                    .getParameter("year")));
-            paramsSheet.addCell(new Label(3, 0, m_bundle
-                    .getString("lb_re_cost_jobs")));
-            paramsSheet.addCell(new Label(3, 1, java.lang.Boolean
-                    .toString(recalculateFinishedWorkflow)));
-
-            workbook.write();
-            workbook.close();
+            addParamsSheet(p_workbook, (String) p_request
+                    .getParameter("year"), recalculateFinishedWorkflow);
+            
+            FileOutputStream out = new FileOutputStream(file);
+            p_workbook.write(out);
+            out.close();
         }
 
-        return new File[]
-        { file };
+        List<File> workBooks = new ArrayList<File>();
+        workBooks.add(file);
+        return ReportHelper.moveReports(workBooks, m_userId);
     }
 
     /**
@@ -492,7 +418,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
      * sheets are the original month Sheet("Detail Report") and monthly
      * Dell_Review sheet("Review Detail Report").
      */
-    private void createSheets(WritableWorkbook p_workbook,
+    private void createSheets(Workbook p_workbook,
             HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap,
             boolean p_includeExReview) throws Exception
     {
@@ -502,19 +428,20 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             // sheets[MONTH_SHEET], the original month Sheet("Detail Report").
             // sheets[MONTH_REVIEW_SHEET], new monthly Dell_Review
             // sheet("Review Detail Report").
-            WritableSheet[] sheets = new WritableSheet[2];
+            Sheet[] sheets = new Sheet[2];
             IntHolder[] rows = new IntHolder[2];
 
             String sheetTitle = m_bundle.getString("lb_detail_report");
-            sheets[MONTH_SHEET] = p_workbook.createSheet(sheetTitle, 0);
+            sheets[MONTH_SHEET] = p_workbook.createSheet(sheetTitle);
             if (m_data.isTradosStyle())
             {
-                addHeaderTradosStyle(sheets[MONTH_SHEET], MONTH_SHEET, m_data,
-                        m_bundle);
+            	addTitle(p_workbook, sheets[MONTH_SHEET]);
+                addHeaderTradosStyle(p_workbook, sheets[MONTH_SHEET], MONTH_SHEET);
             }
             else
             {
-                addHeader(sheets[MONTH_SHEET], MONTH_SHEET, m_data, m_bundle);
+            	addTitle(p_workbook, sheets[MONTH_SHEET]);
+                addHeader(p_workbook, sheets[MONTH_SHEET], MONTH_SHEET);
             }
 
             rows[MONTH_SHEET] = new IntHolder(4);
@@ -524,16 +451,17 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 String sheetReviewTitle = m_bundle
                         .getString("lb_review_detail_report");
                 sheets[MONTH_REVIEW_SHEET] = p_workbook.createSheet(
-                        sheetReviewTitle, 0);
+                        sheetReviewTitle);
                 if (m_data.isTradosStyle())
                 {
-                    addHeaderTradosStyle(sheets[MONTH_REVIEW_SHEET],
-                            MONTH_REVIEW_SHEET, m_data, m_bundle);
+                	addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
+                    addHeaderTradosStyle(p_workbook, sheets[MONTH_REVIEW_SHEET],
+                            MONTH_REVIEW_SHEET);
                 }
                 else
                 {
-                    addHeader(sheets[MONTH_REVIEW_SHEET], MONTH_REVIEW_SHEET,
-                            m_data, m_bundle);
+                	addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
+                    addHeader(p_workbook, sheets[MONTH_REVIEW_SHEET], MONTH_REVIEW_SHEET);
                 }
 
                 rows[MONTH_REVIEW_SHEET] = new IntHolder(4);
@@ -541,17 +469,2385 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
             if (m_data.isTradosStyle())
             {
-                writeProjectDataTradosStyle(p_projectMap, sheets,
-                        p_includeExReview, rows, m_data, m_bundle);
+                writeProjectDataTradosStyle(p_projectMap,p_workbook,  sheets,
+                        p_includeExReview, rows);
             }
             else
             {
-                writeProjectData(p_projectMap, sheets, p_includeExReview, rows,
-                        m_data, m_bundle);
+                writeProjectData(p_projectMap,p_workbook,  sheets, p_includeExReview, rows);
             }
         }
     }
+    
+    private void addTitle(Workbook p_workbook,
+    		Sheet p_sheet) throws Exception
+	{
+    	String EMEA = CompanyWrapper.getCurrentCompanyName();
+        Font titleFont = p_workbook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Arial");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        CellStyle titleStyle = p_workbook.createCellStyle();
+        titleStyle.setWrapText(false);
+        titleStyle.setFont(titleFont);
+        
+        Row firRow = getRow(p_sheet, 0);
+        Cell titleCell = getCell(firRow, 0);
+        titleCell.setCellValue(EMEA + " "
+                + m_bundle.getString("lb_online"));
+        titleCell.setCellStyle(titleStyle);
+        p_sheet.setColumnWidth(0, 20 * 256);
+	}
 
+    private void addHeader(Workbook p_workbook, Sheet p_sheet, 
+    		final int p_sheetCategory) throws Exception
+    {
+    	String EMEA = CompanyWrapper.getCurrentCompanyName();
+        int col = -1;
+        Row thirRow = getRow(p_sheet, 2);
+        Row fourRow = getRow(p_sheet, 3);
+        // Company Name
+        Cell cell_A = getCell(thirRow, ++col);
+        cell_A.setCellValue(m_bundle.getString("lb_company_name"));
+        cell_A.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+        // Project Description
+        Cell cell_B = getCell(thirRow, ++col);
+        cell_B.setCellValue(m_bundle.getString("lb_project"));
+        cell_B.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+
+        // For "Add Job Id into online job report" issue
+        if (isJobIdVisible)
+        {
+        	Cell cell_C = getCell(thirRow, ++col);
+            cell_C.setCellValue(m_bundle.getString("lb_job_id"));
+            cell_C.setCellStyle(getHeaderStyle(p_workbook));
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+            		getHeaderStyle(p_workbook));
+        }
+
+        Cell cell_CorD = getCell(thirRow, ++col);
+        cell_CorD.setCellValue(m_bundle.getString("lb_job_name"));
+        cell_CorD.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_DorE = getCell(thirRow, ++col);
+        cell_DorE.setCellValue(m_bundle.getString("lb_source_file_format"));
+        cell_DorE.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_EorF = getCell(thirRow, ++col);
+        cell_EorF.setCellValue(m_bundle.getString("lb_loc_profile"));
+        cell_EorF.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+
+        Cell cell_ForG = getCell(thirRow, ++col);
+        cell_ForG.setCellValue(m_bundle.getString("lb_file_profiles"));
+        cell_ForG.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+
+        Cell cell_GorH = getCell(thirRow, ++col);
+        cell_GorH.setCellValue(m_bundle.getString("lb_creation_date"));
+        cell_GorH.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+
+        Cell cell_HorI = getCell(thirRow, ++col);
+        cell_HorI.setCellValue(m_bundle.getString("lb_creation_time"));
+        cell_HorI.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_IorJ = getCell(thirRow, ++col);
+        cell_IorJ.setCellValue(m_bundle.getString("lb_export_date"));
+        cell_IorJ.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_JorK = getCell(thirRow, ++col);
+        cell_JorK.setCellValue(m_bundle.getString("lb_export_time"));
+        cell_JorK.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_KorL = getCell(thirRow, ++col);
+        cell_KorL.setCellValue(m_bundle.getString("lb_status"));
+        cell_KorL.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_LorM = getCell(thirRow, ++col);
+        cell_LorM.setCellValue(m_bundle.getString("lb_lang"));
+        cell_LorM.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_MorN_Header = getCell(thirRow, ++col);
+        cell_MorN_Header.setCellValue(m_bundle.getString("lb_word_counts"));
+        cell_MorN_Header.setCellStyle(getHeaderStyle(p_workbook));
+        
+        if (m_data.useInContext && m_data.useDefaultContext)
+        {
+        	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6), 
+            		getHeaderStyle(p_workbook));
+        }
+        else
+        {
+            if (m_data.useInContext)
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 5));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 5), 
+                		getHeaderStyle(p_workbook));
+            }
+            else if (m_data.useDefaultContext)
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 5));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 5), 
+                		getHeaderStyle(p_workbook));
+            }
+            else
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 4));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 4), 
+                		getHeaderStyle(p_workbook));
+            }
+        }
+        Cell cell_MorN = getCell(fourRow, col);
+        cell_MorN.setCellValue(m_bundle
+        		.getString("jobinfo.tmmatches.wordcounts.internalreps"));
+        cell_MorN.setCellStyle(getHeaderStyle(p_workbook));
+        
+        col++;
+        Cell cell_NorO = getCell(fourRow, col);
+        cell_NorO.setCellValue(m_bundle.getString("lb_100_exact_matches"));
+        cell_NorO.setCellStyle(getHeaderStyle(p_workbook));
+
+        if (m_data.useInContext)
+        {
+            col++;
+            Cell cell_InContext = getCell(fourRow, col);
+            cell_InContext.setCellValue(m_bundle
+                   .getString("lb_in_context_tm"));
+            cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+        }
+
+        if (m_data.useDefaultContext)
+        {
+            col++;
+            Cell cell_Content = getCell(fourRow, col);
+            cell_Content.setCellValue(m_bundle
+                   .getString("lb_context_tm"));
+            cell_Content.setCellStyle(getHeaderStyle(p_workbook));
+        }
+
+        col++;
+        Cell cell_FuzzyMatches = getCell(fourRow, col);
+        cell_FuzzyMatches.setCellValue(m_bundle
+               .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
+        cell_FuzzyMatches.setCellStyle(getHeaderStyle(p_workbook));
+
+        col++;
+        Cell cell_NewWords = getCell(fourRow, col);
+        cell_NewWords.setCellValue(m_bundle
+               .getString("jobinfo.tmmatches.wordcounts.newwords"));
+        cell_NewWords.setCellStyle(getHeaderStyle(p_workbook));
+
+        col++;
+        Cell cell_Total = getCell(fourRow, col);
+        cell_Total.setCellValue(m_bundle
+               .getString("lb_total_source_word_count"));
+        cell_Total.setCellStyle(getHeaderStyle(p_workbook));
+
+        col++;
+        Cell cell_Invoice = getCell(thirRow, col);
+        cell_Invoice.setCellValue(m_bundle
+               .getString("jobinfo.tmmatches.invoice"));
+        cell_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+
+        if (p_sheetCategory == MONTH_SHEET)
+        {
+            if (m_data.useInContext && m_data.useDefaultContext)
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
+                		getHeaderStyle(p_workbook));
+            }
+            else
+            {
+                if (m_data.useInContext || m_data.useDefaultContext)
+                {
+                	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+                    setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
+                    		getHeaderStyle(p_workbook));
+                }
+                else
+                {
+                	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
+                    setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6),
+                    		getHeaderStyle(p_workbook));
+                }
+            }
+            Cell cell_InternalReps = getCell(fourRow, col);
+            cell_InternalReps.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.invoice.internalreps"));
+            cell_InternalReps.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_ExactMatches = getCell(fourRow, col);
+            cell_ExactMatches.setCellValue(m_bundle
+                   .getString("lb_100_exact_matches"));
+            cell_ExactMatches.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            if (m_data.useInContext)
+            {
+            	Cell cell_InContext = getCell(fourRow, col);
+                cell_InContext.setCellValue(m_bundle
+                       .getString("lb_in_context_tm"));
+                cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+                col++;
+            }
+            if (m_data.useDefaultContext)
+            {
+            	Cell cell_Context = getCell(fourRow, col);
+                cell_Context.setCellValue(m_bundle
+                       .getString("lb_context_tm"));
+                cell_Context.setCellStyle(getHeaderStyle(p_workbook));
+                col++;
+
+            }
+            Cell cell_FM_Invoice = getCell(fourRow, col);
+            cell_FM_Invoice.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
+            cell_FM_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_NW_Invoice = getCell(fourRow, col);
+            cell_NW_Invoice.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.wordcounts.newwords"));
+            cell_NW_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_Total_Invoice = getCell(fourRow, col);
+            cell_Total_Invoice.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.wordcounts.total"));
+            cell_Total_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+
+            Cell cell_AdditionalCharges = getCell(fourRow, col);
+            cell_AdditionalCharges.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.invoice.additionalCharges"));
+            cell_AdditionalCharges.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+
+            Cell cell_JobTotal = getCell(fourRow, col);
+            cell_JobTotal.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.invoice.jobtotal"));
+            cell_JobTotal.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+
+            Cell cell_Tracking = getCell(thirRow, col);
+            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking")
+                    + " " + EMEA + " " + m_bundle.getString("lb_use") + ")");
+            cell_Tracking.setCellStyle(getHeaderStyle(p_workbook));
+            
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+            		getHeaderStyle(p_workbook));
+
+        }
+        else if (p_sheetCategory == MONTH_REVIEW_SHEET)
+        {
+            if (m_data.useInContext && m_data.useDefaultContext)
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
+                		getHeaderStyle(p_workbook));
+            }
+            else
+            {
+                if (m_data.useInContext || m_data.useDefaultContext)
+                {
+                	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+                    setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
+                    		getHeaderStyle(p_workbook));
+                }
+                else
+                {
+                	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
+                    setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6),
+                    		getHeaderStyle(p_workbook));
+                }
+            }
+            Cell cell_InternalReps = getCell(fourRow, col);
+            cell_InternalReps.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.wordcounts.internalreps"));
+            cell_InternalReps.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_ExactMatches = getCell(fourRow, col);
+            cell_ExactMatches.setCellValue(m_bundle
+                   .getString("lb_100_exact_matches"));
+            cell_ExactMatches.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            if (m_data.useInContext)
+            {
+            	Cell cell_InContext = getCell(fourRow, col);
+            	cell_InContext.setCellValue(m_bundle
+                       .getString("lb_in_context_tm"));
+            	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+                col++;
+            }
+            if (m_data.useDefaultContext)
+            {
+            	Cell cell_Context = getCell(fourRow, col);
+            	cell_Context.setCellValue(m_bundle
+                       .getString("lb_context_tm"));
+            	cell_Context.setCellStyle(getHeaderStyle(p_workbook));
+                col++;
+            }
+
+            Cell cell_FM_Invoice = getCell(fourRow, col);
+            cell_FM_Invoice.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
+            cell_FM_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_NW_Invoice = getCell(fourRow, col);
+            cell_NW_Invoice.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.wordcounts.newwords"));
+            cell_NW_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_Total_Invoice = getCell(fourRow, col);
+            cell_Total_Invoice.setCellValue(m_bundle
+                   .getString("lb_translation_total"));
+            cell_Total_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_Review = getCell(fourRow, col);
+            cell_Review.setCellValue(m_bundle
+                   .getString("lb_review"));
+            cell_Review.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_JobTotal = getCell(fourRow, col);
+            cell_JobTotal.setCellValue(m_bundle
+                   .getString("jobinfo.tmmatches.invoice.jobtotal"));
+            cell_JobTotal.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_Tracking = getCell(thirRow, col);
+            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking")
+                    + " " + EMEA + " " + m_bundle.getString("lb_use") + ")");
+            cell_Tracking.setCellStyle(getHeaderStyle(p_workbook));
+            
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+            		getHeaderStyle(p_workbook));
+        }
+        else
+        {
+            // Should never go here.
+        }
+    }
+
+    /**
+     * For trados style
+     * 
+     * @param p_sheet
+     * @param p_sheetCategory
+     * @param p_data
+     * @param bundle
+     * @throws Exception
+     */
+    private void addHeaderTradosStyle(Workbook p_workbook, Sheet p_sheet,
+            final int p_sheetCategory)
+            throws Exception
+    {
+        String EMEA = CompanyWrapper.getCurrentCompanyName();
+        
+        Row secRow = getRow(p_sheet, 1);
+        Cell cell_Ldfl = getCell(secRow, 0);
+        cell_Ldfl.setCellValue(m_bundle.getString("lb_desp_file_list"));
+        cell_Ldfl.setCellStyle(getContentStyle(p_workbook));
+        
+        int col = -1;
+        Row thirRow = getRow(p_sheet, 2);
+        Row fourRow = getRow(p_sheet, 3);
+        // Company Name
+        Cell cell_A = getCell(thirRow, ++col);
+        cell_A.setCellValue(m_bundle.getString("lb_company_name"));
+        cell_A.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+
+        // Project Description
+        Cell cell_B = getCell(thirRow, ++col);
+        cell_B.setCellValue(m_bundle.getString("lb_project"));
+        cell_B.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+
+        if (isJobIdVisible)
+        {
+        	Cell cell_C = getCell(thirRow, ++col);
+            cell_C.setCellValue(m_bundle.getString("lb_job_id"));
+            cell_C.setCellStyle(getHeaderStyle(p_workbook));
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+            		getHeaderStyle(p_workbook));
+        }
+        
+        Cell cell_CorD = getCell(thirRow, ++col);
+        cell_CorD.setCellValue(m_bundle.getString("lb_job_name"));
+        cell_CorD.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+
+        Cell cell_DorE = getCell(thirRow, ++col);
+        cell_DorE.setCellValue(m_bundle.getString("lb_source_file_format"));
+        cell_DorE.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+
+        Cell cell_EorF = getCell(thirRow, ++col);
+        cell_EorF.setCellValue(m_bundle.getString("lb_loc_profile"));
+        cell_EorF.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_ForG = getCell(thirRow, ++col);
+        cell_ForG.setCellValue(m_bundle.getString("lb_file_profiles"));
+        cell_ForG.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+
+        Cell cell_GorH = getCell(thirRow, ++col);
+        cell_GorH.setCellValue(m_bundle.getString("lb_creation_date"));
+        cell_GorH.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+
+        Cell cell_HorI = getCell(thirRow, ++col);
+        cell_HorI.setCellValue(m_bundle.getString("lb_creation_time"));
+        cell_HorI.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_IorJ = getCell(thirRow, ++col);
+        cell_IorJ.setCellValue(m_bundle.getString("lb_export_date"));
+        cell_IorJ.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_JorK = getCell(thirRow, ++col);
+        cell_JorK.setCellValue(m_bundle.getString("lb_export_time"));
+        cell_JorK.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_KorL = getCell(thirRow, ++col);
+        cell_KorL.setCellValue(m_bundle.getString("lb_status"));
+        cell_KorL.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_LorM = getCell(thirRow, ++col);
+        cell_LorM.setCellValue(m_bundle.getString("lb_lang"));
+        cell_LorM.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+        		getHeaderStyle(p_workbook));
+        
+        Cell cell_MorN_Header = getCell(thirRow, ++col);
+        cell_MorN_Header.setCellValue(m_bundle.getString("lb_word_counts"));
+        cell_MorN_Header.setCellStyle(getHeaderStyle(p_workbook));
+
+        if (m_data.useInContext && m_data.useDefaultContext)
+        {
+        	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
+            		getHeaderStyle(p_workbook));
+        }
+        else
+        {
+            if (m_data.useInContext)
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7), 
+                		getHeaderStyle(p_workbook));
+            }
+            else if (m_data.useDefaultContext)
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
+                		getHeaderStyle(p_workbook));
+            }
+            else
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6), 
+                		getHeaderStyle(p_workbook));
+            }
+        }
+
+        Cell cell_MorN = getCell(fourRow, col);
+        cell_MorN.setCellValue(m_bundle.getString("jobinfo.tradosmatches.invoice.per100matches"));
+        cell_MorN.setCellStyle(getHeaderStyle(p_workbook));
+
+        col++;
+        Cell cell_NorO = getCell(fourRow, col);
+        cell_NorO.setCellValue(m_bundle.getString("lb_95_99"));
+        cell_NorO.setCellStyle(getHeaderStyle(p_workbook));
+
+        col++;
+        Cell cell_OorP = getCell(fourRow, col);
+        cell_OorP.setCellValue(m_bundle.getString("lb_85_94"));
+        cell_OorP.setCellStyle(getHeaderStyle(p_workbook));
+
+        col++;
+        Cell cell_PorQ = getCell(fourRow, col);
+        cell_PorQ.setCellValue(m_bundle.getString("lb_75_84") + "*");
+        cell_PorQ.setCellStyle(getHeaderStyle(p_workbook));
+
+        col++;
+        Cell cell_QorR = getCell(fourRow, col);
+        cell_QorR.setCellValue(m_bundle.getString("lb_no_match"));
+        cell_QorR.setCellStyle(getHeaderStyle(p_workbook));
+        
+        col++;
+        Cell cell_RorS = getCell(fourRow, col);
+        cell_RorS.setCellValue(m_bundle.getString("lb_repetition_word_cnt"));
+        cell_RorS.setCellStyle(getHeaderStyle(p_workbook));
+
+        if (m_data.useInContext)
+        {
+            col++;
+            Cell cell_InContext = getCell(fourRow, col);
+            cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+            cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+        }
+
+        if (m_data.useDefaultContext)
+        {
+            col++;
+            Cell cell_Context = getCell(fourRow, col);
+            cell_Context.setCellValue(m_bundle.getString("lb_context_tm"));
+            cell_Context.setCellStyle(getHeaderStyle(p_workbook));
+        }
+
+        col++;
+        Cell cell_Total = getCell(fourRow, col);
+        cell_Total.setCellValue(m_bundle.getString("lb_total"));
+        cell_Total.setCellStyle(getHeaderStyle(p_workbook));
+
+        col++;
+        Cell cell_Invoice = getCell(thirRow, col);
+        cell_Invoice.setCellValue(m_bundle.getString("jobinfo.tmmatches.invoice"));
+        cell_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+
+        if (p_sheetCategory == MONTH_SHEET)
+        {
+            if (m_data.useInContext && m_data.useDefaultContext)
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 10));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 10),
+                		getHeaderStyle(p_workbook));
+            }
+            else
+            {
+                if (m_data.useInContext || m_data.useDefaultContext)
+                {
+                	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 9));
+                    setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 9),
+                    		getHeaderStyle(p_workbook));
+                }
+                else
+                {
+                	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
+                    setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
+                    		getHeaderStyle(p_workbook));
+                }
+            }
+
+            Cell cell_Per100Matches = getCell(fourRow, col);
+            cell_Per100Matches.setCellValue(m_bundle
+            		.getString("jobinfo.tradosmatches.invoice.per100matches"));
+            cell_Per100Matches.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            Cell cell_95_99 = getCell(fourRow, col);
+            cell_95_99.setCellValue(m_bundle.getString("lb_95_99"));
+            cell_95_99.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            Cell cell_85_94 = getCell(fourRow, col);
+            cell_85_94.setCellValue(m_bundle.getString("lb_85_94"));
+            cell_85_94.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            Cell cell_75_84 = getCell(fourRow, col);
+            cell_75_84.setCellValue(m_bundle.getString("lb_75_84") + "*");
+            cell_75_84.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            Cell cell_NoMatch = getCell(fourRow, col);
+            cell_NoMatch.setCellValue(m_bundle.getString("lb_no_match"));
+            cell_NoMatch.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            Cell cell_WordCount = getCell(fourRow, col);
+            cell_WordCount.setCellValue(m_bundle.getString("lb_repetition_word_cnt"));
+            cell_WordCount.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            if (m_data.useInContext)
+            {
+            	Cell cell_InContext = getCell(fourRow, col);
+            	cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+            	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+                col++;
+            }
+            if (m_data.useDefaultContext)
+            {
+            	Cell cell_Context = getCell(fourRow, col);
+            	cell_Context.setCellValue(m_bundle.getString("lb_context_tm"));
+            	cell_Context.setCellStyle(getHeaderStyle(p_workbook));
+                col++;
+
+            }
+
+            Cell cell_Total_Invoice = getCell(fourRow, col);
+            cell_Total_Invoice.setCellValue(m_bundle
+                    .getString("jobinfo.tmmatches.wordcounts.total"));
+            cell_Total_Invoice.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+
+            Cell cell_AdditionalCharges = getCell(fourRow, col);
+            cell_AdditionalCharges.setCellValue(m_bundle
+                    .getString("jobinfo.tmmatches.invoice.additionalCharges"));
+            cell_AdditionalCharges.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+
+            Cell cell_JobTotal = getCell(fourRow, col);
+            cell_JobTotal.setCellValue(m_bundle
+                    .getString("jobinfo.tmmatches.invoice.jobtotal"));
+            cell_JobTotal.setCellStyle(getHeaderStyle(p_workbook));
+            col++;
+            
+            Cell cell_Tracking = getCell(thirRow, col);
+            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking")
+                    + " " + EMEA + " " + m_bundle.getString("lb_use") + ")");
+            cell_Tracking.setCellStyle(getHeaderStyle(p_workbook));
+            
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+            		getHeaderStyle(p_workbook));
+
+        }
+        else if (p_sheetCategory == MONTH_REVIEW_SHEET)
+        {
+            if (m_data.useInContext && m_data.useDefaultContext)
+            {
+            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 10));
+                setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 10),
+                		getHeaderStyle(p_workbook));
+            }
+            else
+            {
+                if (m_data.useInContext || m_data.useDefaultContext)
+                {
+                	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 9));
+                    setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 9),
+                    		getHeaderStyle(p_workbook));
+                }
+                else
+                {
+                	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+                    setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
+                    		getHeaderStyle(p_workbook));
+                }
+            }
+
+            Cell cell_Per100Matches = getCell(fourRow, col);
+            cell_Per100Matches.setCellValue(m_bundle
+                    .getString("jobinfo.tradosmatches.invoice.per100matches"));
+            cell_Per100Matches.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            Cell cell_95_99 = getCell(fourRow, col);
+            cell_95_99.setCellValue(m_bundle.getString("lb_95_99"));
+            cell_95_99.setCellStyle(getHeaderStyle(p_workbook));
+            
+            col++;
+            Cell cell_85_94 = getCell(fourRow, col);
+            cell_85_94.setCellValue(m_bundle.getString("lb_85_94"));
+            cell_85_94.setCellStyle(getHeaderStyle(p_workbook));
+            
+            col++;
+            Cell cell_75_84 = getCell(fourRow, col);
+            cell_75_84.setCellValue(m_bundle.getString("lb_75_84"));
+            cell_75_84.setCellStyle(getHeaderStyle(p_workbook));
+            
+            col++;
+            Cell cell_NoMatch = getCell(fourRow, col);
+            cell_NoMatch.setCellValue(m_bundle.getString("lb_no_match"));
+            cell_NoMatch.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            Cell cell_WoerCount = getCell(fourRow, col);
+            cell_WoerCount.setCellValue(m_bundle.getString("lb_repetition_word_cnt"));
+            cell_WoerCount.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            if (m_data.useInContext)
+            {
+            	Cell cell_InContext = getCell(fourRow, col);
+            	cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+            	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+                col++;
+            }
+            if (m_data.useDefaultContext)
+            {
+            	Cell cell_Context = getCell(fourRow, col);
+            	cell_Context.setCellValue(m_bundle.getString("lb_context_tm"));
+            	cell_Context.setCellStyle(getHeaderStyle(p_workbook));
+                col++;
+            }
+
+            Cell cell_TranTotal = getCell(fourRow, col);
+            cell_TranTotal.setCellValue(m_bundle.getString("lb_translation_total"));
+            cell_TranTotal.setCellStyle(getHeaderStyle(p_workbook));
+            
+            col++;
+            Cell cell_Review = getCell(fourRow, col);
+            cell_Review.setCellValue(m_bundle.getString("lb_review"));
+            cell_Review.setCellStyle(getHeaderStyle(p_workbook));
+            
+            col++;
+            Cell cell_JobTotal = getCell(fourRow, col);
+            cell_JobTotal.setCellValue(m_bundle
+            		.getString("jobinfo.tmmatches.invoice.jobtotal"));
+            cell_JobTotal.setCellStyle(getHeaderStyle(p_workbook));
+
+            col++;
+            Cell cell_Tracking = getCell(thirRow, col);
+            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking")
+                    + " " + EMEA + " " + m_bundle.getString("lb_use") + ")");
+            cell_Tracking.setCellStyle(getHeaderStyle(p_workbook));
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
+            		getHeaderStyle(p_workbook));
+        }
+        else
+        {
+            // Should never go here.
+        }
+    }
+
+    /*
+     * public void writeProjectData( HashMap<String, HashMap<String,
+     * ProjectWorkflowData>> p_projectMap, WritableSheet p_sheet, IntHolder
+     * p_row, MyData p_data, ResourceBundle bundle) throws Exception {
+     * WritableSheet[] sheets = new WritableSheet[2]; sheets[MONTH_SHEET] =
+     * p_sheet; sheets[MONTH_REVIEW_SHEET] = null;
+     * 
+     * IntHolder[] rows = new IntHolder[2]; rows[MONTH_SHEET] = p_row;
+     * rows[MONTH_REVIEW_SHEET] = null;
+     * 
+     * writeProjectData(p_projectMap, sheets, false, rows, p_data, bundle); }
+     */
+
+    private void writeProjectData(
+            HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap,
+            Workbook p_workbook, Sheet[] p_sheets, boolean p_includeExReview,
+            IntHolder[] p_rows)
+            throws Exception
+    {
+        ArrayList<String> keys = new ArrayList<String>(p_projectMap.keySet());
+        SortUtil.sort(keys);
+        Iterator<String> keysIter = keys.iterator();
+
+        totalCost.clear();
+        totalCostDate.clear();
+        int finishedJobNum = 0;
+
+        while (keysIter.hasNext())
+        {
+            // Cancel generate reports.
+            if (isCancelled())
+                return;
+            // Sets Reports Percent.
+            setPercent(++finishedJobNum);
+            String key = keysIter.next();
+            String jobId = getJobIdFromMapKey(key);
+            boolean isWrongJob = m_data.wrongJobNames.contains(jobId);
+            HashMap<String, ProjectWorkflowData> localeMap = p_projectMap
+                    .get(key);
+            ArrayList<String> locales = new ArrayList<String>(
+                    localeMap.keySet());
+            SortUtil.sort(locales);
+            Iterator<String> localeIter = locales.iterator();
+            BigDecimal projectTotalWordCountCost = new BigDecimal(
+                    BIG_DECIMAL_ZERO_STRING);
+            BigDecimal reviewTotalWordCountCost = new BigDecimal(
+                    BIG_DECIMAL_ZERO_STRING);
+
+            // Counts the review costing total and the translation costing
+            // total.
+            String localeName = null;
+            ProjectWorkflowData data = null;
+
+            // Marks whether needs to add a blank line.
+            boolean containsDellReview = false;
+
+            while (localeIter.hasNext())
+            {
+                int col = 0;
+                localeName = (String) localeIter.next();
+                data = (ProjectWorkflowData) localeMap.get(localeName);
+
+                int row = p_rows[MONTH_SHEET].getValue();
+                Row theRow = getRow(p_sheets[MONTH_SHEET], row);
+
+                CellStyle temp_moneyStyle = getMoneyStyle(p_workbook);
+                CellStyle temp_normalStyle = getContentStyle(p_workbook);
+
+                if (data.wasExportFailed)
+                {
+                	temp_moneyStyle = getFailedMoneyStyle(p_workbook);
+                	temp_normalStyle =  getRedCellStyle(p_workbook);
+                }
+
+                // Company Name
+                Cell cell_A = getCell(theRow, col++);
+                cell_A.setCellValue(data.companyName);
+                cell_A.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+
+                // Project Description
+                Cell cell_B = getCell(theRow, col++);
+                cell_B.setCellValue(data.projectDesc);
+                cell_B.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 22 * 256);
+
+                if (isWrongJob)
+                {
+                    // For "Add Job Id into online job report" issue
+                    if (isJobIdVisible)
+                    {
+                    	Cell cell_C = getCell(theRow, col++);
+                        cell_C.setCellValue(jobId);
+                        cell_C.setCellStyle(getWrongJobStyle(p_workbook));
+                    }
+
+                    Cell cell_CorD = getCell(theRow, col++);
+                    cell_CorD.setCellValue(data.jobName);
+                    cell_CorD.setCellStyle(getWrongJobStyle(p_workbook));
+                }
+                else
+                {
+                    // For "Add Job Id into online job report" issue
+                    if (isJobIdVisible)
+                    {
+                    	Cell cell_C = getCell(theRow, col++);
+                    	cell_C.setCellValue(jobId);
+                    	cell_C.setCellStyle(temp_normalStyle);
+                    }
+                    Cell cell_CorD = getCell(theRow, col++);
+                    cell_CorD.setCellValue(data.jobName);
+                    cell_CorD.setCellStyle(temp_normalStyle);
+                }
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 50 * 256);
+
+                Cell cell_DorE = getCell(theRow, col++);
+                cell_DorE.setCellValue(getAllSouceFileFormats(data.allFileProfiles));
+                cell_DorE.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 20 * 256);
+
+                Cell cell_EorF = getCell(theRow, col++);
+                cell_EorF.setCellValue(data.l10nProfileName);
+                cell_EorF.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 25 * 256);
+
+                Cell cell_ForG = getCell(theRow, col++);
+                cell_ForG.setCellValue(data.fileProfileNames);
+                cell_ForG.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 20 * 256);
+
+                if (data.wasExportFailed)
+                {
+                	Cell cell_GorH = getCell(theRow, col++);
+                	cell_GorH.setCellValue(data.creationDate);
+                	cell_GorH.setCellStyle(getFailedDateStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+                    Cell cell_HorI = getCell(theRow, col++);
+                    cell_HorI.setCellValue(data.creationDate);
+                    cell_HorI.setCellStyle(getFailedTimeStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
+                    Cell cell_IorJ = getCell(theRow, col++);
+                    cell_IorJ.setCellValue("");
+                    cell_IorJ.setCellStyle(getFailedDateStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+                    Cell cell_JorK = getCell(theRow, col++);
+                    cell_JorK.setCellValue("");
+                    cell_JorK.setCellStyle(getFailedTimeStyle(p_workbook));
+                }
+                else
+                {
+                	Cell cell_GorH = getCell(theRow, col++);
+                	cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
+                	cell_GorH.setCellStyle(getContentStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+                    Cell cell_HorI = getCell(theRow, col++);
+                    cell_HorI.setCellValue(getTimeFormat().format(data.creationDate));
+                    cell_HorI.setCellStyle(getContentStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
+                    String labelExportDate = "";
+                    if (data.wasExported)
+                    {
+                        labelExportDate = getExportDateStr(getDateFormat(),
+                                data.exportDate);
+                    }
+                    Cell cell_IorJ = getCell(theRow, col++);
+                    cell_IorJ.setCellValue(labelExportDate);
+                    cell_IorJ.setCellStyle(getContentStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+                    String labelExportTime = "";
+                    if (data.wasExported)
+                    {
+                        labelExportTime = getExportDateStr(getTimeFormat(),
+                                data.exportDate);
+                    }
+                    Cell cell_JorK = getCell(theRow, col++);
+                    cell_JorK.setCellValue(labelExportTime);
+                    cell_JorK.setCellStyle(getContentStyle(p_workbook));
+
+                }
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
+
+                // Status
+                Cell cell_KorL = getCell(theRow, col++);
+                cell_KorL.setCellValue(data.status);
+                cell_KorL.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
+                // Language
+                Cell cell_LorM = getCell(theRow, col++);
+                cell_LorM.setCellValue(data.targetLang);
+                cell_LorM.setCellStyle(temp_normalStyle);
+                int numwidth = 10;
+                // Summary Start Collumn
+                m_data.initSumStartCol(col);
+                Cell cell_MorN = getCell(theRow, col++);
+                cell_MorN.setCellValue(data.repetitionWordCount);
+                cell_MorN.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
+                Cell cell_NorO = getCell(theRow, col++);
+                cell_NorO.setCellValue(data.segmentTmWordCount);
+                cell_NorO.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
+                if (m_data.useInContext)
+                {
+                	Cell cell_InContext = getCell(theRow, col++);
+                	cell_InContext.setCellValue(data.inContextMatchWordCount);
+                	cell_InContext.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                }
+
+                if (m_data.useDefaultContext)
+                {
+                	Cell cell_Context = getCell(theRow, col++);
+                	cell_Context.setCellValue(data.contextMatchWordCount);
+                	cell_Context.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                }
+
+                Cell cell_FuzzyMatch = getCell(theRow, col++);
+                cell_FuzzyMatch.setCellValue(data.fuzzyMatchWordCount);
+                cell_FuzzyMatch.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
+                Cell cell_NoMatch = getCell(theRow, col++);
+                cell_NoMatch.setCellValue(data.noMatchWordCount);
+                cell_NoMatch.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                
+                Cell cell_TotalWordCount = getCell(theRow, col++);
+                cell_TotalWordCount.setCellValue(data.totalWordCount);
+                cell_TotalWordCount.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
+                int moneywidth = 12;
+                Cell cell_RepetitionWordCountCost = getCell(theRow, col++);
+                cell_RepetitionWordCountCost.setCellValue(asDouble(data.repetitionWordCountCost));
+                cell_RepetitionWordCountCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                
+                Cell cell_SegmentTmWordCountCost = getCell(theRow, col++);
+                cell_SegmentTmWordCountCost.setCellValue(asDouble(data.segmentTmWordCountCost));
+                cell_SegmentTmWordCountCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                if (m_data.useInContext)
+                {
+                	Cell cell_InContext = getCell(theRow, col++);
+                    cell_InContext.setCellValue(asDouble(data.inContextMatchWordCountCost));
+                    cell_InContext.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                }
+                if (m_data.useDefaultContext)
+                {
+                	Cell cell_Context = getCell(theRow, col++);
+                    cell_Context.setCellValue(asDouble(data.contextMatchWordCountCost));
+                    cell_Context.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                }
+                
+                Cell cell_FuzzyMatchCost = getCell(theRow, col++);
+                cell_FuzzyMatchCost.setCellValue(asDouble(data.fuzzyMatchWordCountCost));
+                cell_FuzzyMatchCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+
+                Cell cell_NoMatchCost = getCell(theRow, col++);
+                cell_NoMatchCost.setCellValue(asDouble(data.noMatchWordCountCost));
+                cell_NoMatchCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                if (totalCol == null)
+                {
+                    totalCol = ReportUtil.toChar(col);
+                }
+                Cell cell_TotalCost = getCell(theRow, col++);
+                cell_TotalCost.setCellValue(asDouble(data.totalWordCountCost));
+                cell_TotalCost.setCellStyle(temp_moneyStyle);
+
+                // Show total additional charges
+                // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
+                // p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
+                // asDouble(data.totalAdditionalCost), temp_moneyFormat));
+
+                // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
+                projectTotalWordCountCost = projectTotalWordCountCost
+                        .add(data.totalWordCountCost);
+
+                List<Integer> indexs = totalCost.get(data.targetLang);
+                if (indexs == null)
+                {
+                    indexs = new ArrayList<Integer>();
+                    totalCost.put(data.targetLang, indexs);
+                }
+                indexs.add(row + 1);
+
+                Double value = totalCostDate.get(data.targetLang);
+                if (value == null)
+                {
+                    value = 0.0;
+                }
+                value += asDouble(data.totalWordCountCost);
+                totalCostDate.put(data.targetLang, value);
+
+                // add a "project total" summary cost over the locales
+                // map(1,moneyFormat)
+                if (localeIter.hasNext() == false)
+                {
+                	Cell cell_TotalAdditionalCost = getCell(theRow, col++);
+                	cell_TotalAdditionalCost.setCellValue(asDouble(data.totalAdditionalCost));
+                	cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+
+                    Cell cell_ProjectTotalCost = getCell(theRow, col++);
+                    cell_ProjectTotalCost.setCellValue(asDouble(projectTotalWordCountCost)
+                            + asDouble(data.totalAdditionalCost));
+                    cell_ProjectTotalCost.setCellStyle(temp_moneyStyle);
+                }
+                else
+                {
+                	Cell cell_TotalAdditionalCost = getCell(theRow, col++);
+                	cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+
+                    Cell cell_ProjectTotalCost = getCell(theRow, col++);
+                    cell_ProjectTotalCost.setCellStyle(temp_moneyStyle);
+                }
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                p_rows[MONTH_SHEET].inc();
+
+                // Write data into MONTH_REVIEW_SHEET
+                if (p_includeExReview && data.containsDellReview)
+                {
+                    containsDellReview = true;
+
+                    row = p_rows[MONTH_REVIEW_SHEET].getValue();
+                    theRow = getRow(p_sheets[MONTH_REVIEW_SHEET], row);
+                    col = 0;
+                    
+                    // Company Name
+                    Cell cell_A_Review = getCell(theRow, col++);
+                    cell_A_Review.setCellValue(data.companyName);
+                    cell_A_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+
+                    // Project Description
+                    Cell cell_B_Review = getCell(theRow, col++);
+                    cell_B_Review.setCellValue(data.projectDesc);
+                    cell_B_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 22 * 256);
+
+                    if (isWrongJob)
+                    {
+                        // For "Job id not showing in external review tabs"
+                        // Issue
+                        if (isJobIdVisible)
+                        {
+                        	Cell cell_C_Review = getCell(theRow, col++);
+                            cell_C_Review.setCellValue(data.jobId);
+                            cell_C_Review.setCellStyle(getWrongJobStyle(p_workbook));
+                        }
+                        Cell cell_CorD_Review = getCell(theRow, col++);
+                        cell_CorD_Review.setCellValue(data.jobName);
+                        cell_CorD_Review.setCellStyle(getWrongJobStyle(p_workbook));
+                    }
+                    else
+                    {
+                        // For "Job id not showing in external review tabs"
+                        // Issue
+                        if (isJobIdVisible)
+                        {
+                        	Cell cell_C_Review = getCell(theRow, col++);
+                        	cell_C_Review.setCellValue(data.jobId);
+                        	cell_C_Review.setCellStyle(temp_normalStyle);
+                        }
+                        Cell cell_CorD_Review = getCell(theRow, col++);
+                        cell_CorD_Review.setCellValue(data.jobName);
+                        cell_CorD_Review.setCellStyle(temp_normalStyle);
+                    }
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 50 * 256);
+                    Cell cell_DorE_Review = getCell(theRow, col++);
+                    cell_DorE_Review.setCellValue(data.projectDesc);
+                    cell_DorE_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 22 * 256);
+
+                    if (data.wasExportFailed)
+                    {
+                        /*
+                         * p_sheets[MONTH_SHEET].addCell(new DateTime(col++,
+                         * row, data.creationDate, failed_dateFormat));
+                         */
+                    	Cell cell_EorF_Review = getCell(theRow, col++);
+                    	cell_EorF_Review.setCellValue(data.creationDate);
+                    	cell_EorF_Review.setCellStyle(getFailedDateStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+                        Cell cell_ForG_Review = getCell(theRow, col++);
+                        cell_ForG_Review.setCellValue(data.creationDate);
+                        cell_ForG_Review.setCellStyle(getFailedTimeStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 18 * 256);
+                        Cell cell_GorH_Review = getCell(theRow, col++);
+                        cell_GorH_Review.setCellValue("");
+                        cell_GorH_Review.setCellStyle(getFailedDateStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+                        Cell cell_HorI_Review = getCell(theRow, col++);
+                        cell_HorI_Review.setCellValue("");
+                        cell_HorI_Review.setCellStyle(getFailedTimeStyle(p_workbook));
+                    }
+                    else
+                    {
+                        /*
+                         * p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
+                         * dateFormat.format(data.creationDate)));
+                         */
+                    	Cell cell_EorF_Review = getCell(theRow, col++);
+                    	cell_EorF_Review.setCellValue(getDateFormat().format(data.creationDate));
+                    	cell_EorF_Review.setCellStyle(getContentStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+                        Cell cell_ForG_Review = getCell(theRow, col++);
+                        cell_ForG_Review.setCellValue(getTimeFormat().format(data.creationDate));
+                        cell_ForG_Review.setCellStyle(getContentStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 18 * 256);
+                        String labelExportDate = "";
+                        if (data.wasExported)
+                        {
+                            labelExportDate = getExportDateStr(getDateFormat(),
+                                    data.exportDate);
+                        }
+                        Cell cell_GorH_Review = getCell(theRow, col++);
+                        cell_GorH_Review.setCellValue(labelExportDate);
+                        cell_GorH_Review.setCellStyle(getContentStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+                        String labelExportTime = "";
+                        if (data.wasExported)
+                        {
+                            labelExportTime = getExportDateStr(getTimeFormat(),
+                                    data.exportDate);
+                        }
+                        Cell cell_HorI_Review = getCell(theRow, col++);
+                        cell_HorI_Review.setCellValue(labelExportTime);
+                        cell_HorI_Review.setCellStyle(getContentStyle(p_workbook));
+
+                    }
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 18 * 256);
+                    Cell cell_IorJ_Review = getCell(theRow, col++);
+                    cell_IorJ_Review.setCellValue(data.targetLang);
+                    cell_IorJ_Review.setCellStyle(temp_normalStyle);
+                    
+                    Cell cell_JorK_Review = getCell(theRow, col++);
+                    cell_JorK_Review.setCellValue(data.repetitionWordCount);
+                    cell_JorK_Review.setCellStyle(temp_normalStyle);
+
+                    numwidth = 10;
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+                    Cell cell_KorL_Review = getCell(theRow, col++);
+                    cell_KorL_Review.setCellValue(data.segmentTmWordCount);
+                    cell_KorL_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+
+                    if (m_data.useInContext)
+                    {
+                    	Cell cell_InContext = getCell(theRow, col++);
+                    	cell_InContext.setCellValue(data.inContextMatchWordCount);
+                    	cell_InContext.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                                numwidth * 256);
+                    }
+                    if (m_data.useDefaultContext)
+                    {
+                    	Cell cell_Context = getCell(theRow, col++);
+                    	cell_Context.setCellValue(data.contextMatchWordCount);
+                    	cell_Context.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                                numwidth * 256);
+                    }
+
+                    Cell cell_FuzzyMatch_Review = getCell(theRow, col++);
+                    cell_FuzzyMatch_Review.setCellValue(data.fuzzyMatchWordCount);
+                    cell_FuzzyMatch_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+
+                    Cell cell_NoMatch_Review = getCell(theRow, col++);
+                    cell_NoMatch_Review.setCellValue(data.noMatchWordCount);
+                    cell_NoMatch_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+                    
+                    Cell cell_Total_Review = getCell(theRow, col++);
+                    cell_Total_Review.setCellValue(data.totalWordCount);
+                    cell_Total_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+
+                    moneywidth = 12;
+                    Cell cell_RepetitionCost_Review = getCell(theRow, col++);
+                    cell_RepetitionCost_Review
+                    	.setCellValue(asDouble(data.repetitionWordCountCostForDellReview));
+                    cell_RepetitionCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+                    Cell cell_SegmentCost_Review = getCell(theRow, col++);
+                    cell_SegmentCost_Review
+                    	.setCellValue(asDouble(data.segmentTmWordCountCostForDellReview));
+                    cell_SegmentCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+
+                    if (m_data.useInContext)
+                    {
+                    	Cell cell_InContext = getCell(theRow, col++);
+                    	cell_InContext.setCellValue(asDouble(data
+                    			.inContextMatchWordCountCostForDellReview));
+                    	cell_InContext.setCellStyle(temp_moneyStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                                moneywidth * 256);
+                    }
+
+                    if (m_data.useDefaultContext)
+                    {
+                    	Cell cell_Context = getCell(theRow, col++);
+                    	cell_Context.setCellValue(asDouble(data
+                    			.contextMatchWordCountCostForDellReview));
+                    	cell_Context.setCellStyle(temp_moneyStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                                moneywidth * 256);
+                    }
+
+                    Cell cell_FuzzyMatchCost_Review = getCell(theRow, col++);
+                    cell_FuzzyMatchCost_Review.setCellValue(asDouble(data
+                    		.fuzzyMatchWordCountCostForDellReview));
+                    cell_FuzzyMatchCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+
+                    Cell cell_NoMatchCost_Review = getCell(theRow, col++);
+                    cell_NoMatchCost_Review.setCellValue(asDouble(data
+                    		.noMatchWordCountCostForDellReview));
+                    cell_NoMatchCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+
+                    reviewTotalWordCountCost = reviewTotalWordCountCost
+                            .add(data.totalWordCountCostForDellReview);
+
+                    // Writes the "Translation Total" column.
+                    Cell cell_TotalCost_Review = getCell(theRow, col++);
+                    cell_TotalCost_Review.setCellValue(asDouble(data.totalWordCountCost));
+                    cell_TotalCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+                    // Writes the "Review" column.
+                    Cell cell_Review = getCell(theRow, col++);
+                    cell_Review.setCellValue(asDouble(data.totalWordCountCostForDellReview));
+                    cell_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+
+                    // add "job total" cost over the locales
+                    if (localeIter.hasNext() == false)
+                    {
+                    	Cell cell_JobTotal = getCell(theRow, col++);
+                    	cell_JobTotal.setCellValue(asDouble(projectTotalWordCountCost
+                                .add(reviewTotalWordCountCost)));
+                    	cell_JobTotal.setCellStyle(temp_moneyStyle);
+                    }
+                    else
+                    {
+                    	Cell cell_JobTotal = getCell(theRow, col++);
+                    	cell_JobTotal.setCellStyle(temp_moneyStyle);
+                    }
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+                    p_rows[MONTH_REVIEW_SHEET].inc();
+                }// End if (p_includeExReview && data.containsDellReview)
+            }// End loop while (localeIter.hasNext())
+
+            p_rows[MONTH_SHEET].inc();
+            if (p_includeExReview && containsDellReview)
+            {
+                p_rows[MONTH_REVIEW_SHEET].inc();
+            }
+
+        }// End loop while (projectIter.hasNext())
+
+        p_rows[MONTH_SHEET].inc();
+        addTotals(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET, p_rows[MONTH_SHEET]);
+
+        if (p_includeExReview)
+        {
+            p_rows[MONTH_REVIEW_SHEET].inc();
+            addTotals(p_workbook, p_sheets[MONTH_REVIEW_SHEET], MONTH_REVIEW_SHEET,
+                    p_rows[MONTH_REVIEW_SHEET]);
+        }
+
+        if (totalCol != null)
+        {
+            addTotalsPerLang(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET,
+                    p_rows[MONTH_SHEET]);
+        }
+    }
+
+    /**
+     * For Trados Style
+     * 
+     * @param p_projectMap
+     * @param p_sheets
+     * @param p_includeExReview
+     * @param p_rows
+     * @param p_data
+     * @param bundle
+     * @throws Exception
+     */
+    private void writeProjectDataTradosStyle(
+            HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap,
+            Workbook p_workbook, Sheet[] p_sheets, boolean p_includeExReview,
+            IntHolder[] p_rows)
+            throws Exception
+    {
+        ArrayList<String> keys = new ArrayList<String>(p_projectMap.keySet());
+        SortUtil.sort(keys);
+        Iterator<String> keysIter = keys.iterator();
+
+        totalCost.clear();
+        totalCostDate.clear();
+        int finishedJobNum = 0;
+        while (keysIter.hasNext())
+        {
+            // Cancel generate reports.
+            if (isCancelled())
+                return;
+            // Sets Reports Percent.
+            setPercent(++finishedJobNum);
+
+            String key = keysIter.next();
+            String jobId = getJobIdFromMapKey(key);
+            boolean isWrongJob = m_data.wrongJobNames.contains(jobId);
+            HashMap<String, ProjectWorkflowData> localeMap = p_projectMap
+                    .get(key);
+            ArrayList<String> locales = new ArrayList<String>(
+                    localeMap.keySet());
+            SortUtil.sort(locales);
+            Iterator<String> localeIter = locales.iterator();
+            BigDecimal projectTotalWordCountCost = new BigDecimal(
+                    BIG_DECIMAL_ZERO_STRING);
+            BigDecimal reviewTotalWordCountCost = new BigDecimal(
+                    BIG_DECIMAL_ZERO_STRING);
+
+            // Counts the review costing total and the translation costing
+            // total.
+            String localeName = null;
+            ProjectWorkflowData data = null;
+
+            // Marks whether needs to add a blank line.
+            boolean containsDellReview = false;
+
+            while (localeIter.hasNext())
+            {
+                int col = 0;
+                localeName = (String) localeIter.next();
+                data = (ProjectWorkflowData) localeMap.get(localeName);
+
+                int row = p_rows[MONTH_SHEET].getValue();
+                Row theRow = getRow(p_sheets[MONTH_SHEET], row);
+                
+                CellStyle temp_moneyStyle = getMoneyStyle(p_workbook);
+                CellStyle temp_normalStyle = getContentStyle(p_workbook);
+
+                if (data.wasExportFailed)
+                {
+                	temp_moneyStyle = getFailedMoneyStyle(p_workbook);
+                	temp_normalStyle =  getRedCellStyle(p_workbook);
+                }
+
+                // Company Name
+                Cell cell_A = getCell(theRow, col++);
+                cell_A.setCellValue(data.companyName);
+                cell_A.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+
+                // Project Description
+                Cell cell_B = getCell(theRow, col++);
+                cell_B.setCellValue(data.projectDesc);
+                cell_B.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 22 * 256);
+
+                if (isWrongJob)
+                {
+                    // For "Add Job Id into online job report" issue
+                    if (isJobIdVisible)
+                    {
+                    	Cell cell_C = getCell(theRow, col++);
+                        cell_C.setCellValue(jobId);
+                        cell_C.setCellStyle(getWrongJobStyle(p_workbook));
+                    }
+
+                    Cell cell_CorD = getCell(theRow, col++);
+                    cell_CorD.setCellValue(data.jobName);
+                    cell_CorD.setCellStyle(getWrongJobStyle(p_workbook));
+                }
+                else
+                {
+                    // For "Add Job Id into online job report" issue
+                    if (isJobIdVisible)
+                    {
+                    	Cell cell_C = getCell(theRow, col++);
+                    	cell_C.setCellValue(jobId);
+                    	cell_C.setCellStyle(temp_normalStyle);
+                    }
+                    Cell cell_CorD = getCell(theRow, col++);
+                    cell_CorD.setCellValue(data.jobName);
+                    cell_CorD.setCellStyle(temp_normalStyle);
+                }
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 50 * 256);
+                
+                Cell cell_DorE = getCell(theRow, col++);
+                cell_DorE.setCellValue(getAllSouceFileFormats(data.allFileProfiles));
+                cell_DorE.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 20 * 256);
+                
+                Cell cell_EorF = getCell(theRow, col++);
+                cell_EorF.setCellValue(data.l10nProfileName);
+                cell_EorF.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 20 * 256);
+                
+                Cell cell_ForG = getCell(theRow, col++);
+                cell_ForG.setCellValue(data.fileProfileNames);
+                cell_ForG.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 20 * 256);
+
+                if (data.wasExportFailed)
+                {
+                	Cell cell_GorH = getCell(theRow, col++);
+                	cell_GorH.setCellValue(data.creationDate);
+                	cell_GorH.setCellStyle(getFailedDateStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+                    
+                    Cell cell_HorI = getCell(theRow, col++);
+                    cell_HorI.setCellValue(data.creationDate);
+                    cell_HorI.setCellStyle(getFailedTimeStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
+                    
+                    Cell cell_IorJ = getCell(theRow, col++);
+                    cell_IorJ.setCellValue("");
+                    cell_IorJ.setCellStyle(getFailedDateStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+                    
+                    Cell cell_JorK = getCell(theRow, col++);
+                    cell_JorK.setCellValue("");
+                    cell_JorK.setCellStyle(getFailedTimeStyle(p_workbook));
+                }
+                else
+                {
+                	Cell cell_GorH = getCell(theRow, col++);
+                	cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
+                	cell_GorH.setCellStyle(getContentStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+                    
+                    Cell cell_HorI = getCell(theRow, col++);
+                    cell_HorI.setCellValue(getTimeFormat().format(data.creationDate));
+                    cell_HorI.setCellStyle(getContentStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
+                    
+                    String labelExportDate = "";
+                    if (data.wasExported)
+                    {
+                        labelExportDate = getExportDateStr(getDateFormat(),
+                                data.exportDate);
+                    }
+                    Cell cell_IorJ = getCell(theRow, col++);
+                    cell_IorJ.setCellValue(labelExportDate);
+                    cell_IorJ.setCellStyle(getContentStyle(p_workbook));
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
+                    
+                    String labelExportTime = "";
+                    if (data.wasExported)
+                    {
+                        labelExportTime = getExportDateStr(getTimeFormat(),
+                                data.exportDate);
+                    }
+                    Cell cell_JorK = getCell(theRow, col++);
+                    cell_JorK.setCellValue(labelExportTime);
+                    cell_JorK.setCellStyle(getContentStyle(p_workbook));
+
+                }
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
+
+                // Status
+                Cell cell_KorL = getCell(theRow, col++);
+                cell_KorL.setCellValue(data.status);
+                cell_KorL.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
+                // Language
+                Cell cell_LorM = getCell(theRow, col++);
+                cell_LorM.setCellValue(data.targetLang);
+                cell_LorM.setCellStyle(temp_normalStyle);
+
+                int numwidth = 10;
+
+                // Summary Start Column
+                m_data.initSumStartCol(col);
+                
+                Cell cell_MorN = getCell(theRow, col++);
+                cell_MorN.setCellValue(data.segmentTmWordCount);
+                cell_MorN.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                
+                Cell cell_NorO = getCell(theRow, col++);
+                cell_NorO.setCellValue(data.hiFuzzyMatchWordCount);
+                cell_NorO.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
+                Cell cell_OorP = getCell(theRow, col++);
+                cell_OorP.setCellValue(data.medHiFuzzyMatchWordCount);
+                cell_OorP.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
+                Cell cell_PorQ = getCell(theRow, col++);
+                cell_PorQ.setCellValue(data.medFuzzyMatchWordCount);
+                cell_PorQ.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                
+                Cell cell_QorR = getCell(theRow, col++);
+                cell_QorR.setCellValue(data.noMatchWordCount);
+                cell_QorR.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
+                Cell cell_RorS = getCell(theRow, col++);
+                cell_RorS.setCellValue(data.repetitionWordCount);
+                cell_RorS.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                
+                if (m_data.useInContext)
+                {
+                	Cell cell_InContext = getCell(theRow, col++);
+                    cell_InContext.setCellValue(data.inContextMatchWordCount);
+                    cell_InContext.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                }
+
+                if (m_data.useDefaultContext)
+                {
+                	Cell cell_Context = getCell(theRow, col++);
+                	cell_Context.setCellValue(data.contextMatchWordCount);
+                	cell_Context.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                }
+                
+                Cell cell_Total = getCell(theRow, col++);
+                cell_Total.setCellValue(data.totalWordCount);
+                cell_Total.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
+                int moneywidth = 12;
+
+                Cell cell_SegmentCost = getCell(theRow, col++);
+                cell_SegmentCost.setCellValue(asDouble(data.segmentTmWordCountCost));
+                cell_SegmentCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                
+                Cell cell_HiFuzzyMatchCost = getCell(theRow, col++);
+                cell_HiFuzzyMatchCost.setCellValue(asDouble(data
+                		.hiFuzzyMatchWordCountCost));
+                cell_HiFuzzyMatchCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                
+                Cell cell_MedHiFuzzyMatchCost = getCell(theRow, col++);
+                cell_MedHiFuzzyMatchCost.setCellValue(asDouble(data
+                		.medHiFuzzyMatchWordCountCost));
+                cell_MedHiFuzzyMatchCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+
+                Cell cell_MedFuzzyMatchCost = getCell(theRow, col++);
+                cell_MedFuzzyMatchCost.setCellValue(asDouble(data.medFuzzyMatchWordCountCost));
+                cell_MedFuzzyMatchCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                
+                Cell cell_NoMatchCost = getCell(theRow, col++);
+                cell_NoMatchCost.setCellValue(asDouble(data.noMatchWordCountCost));
+                cell_NoMatchCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+
+                Cell cell_RepetitionCost = getCell(theRow, col++);
+                cell_RepetitionCost.setCellValue(asDouble(data.repetitionWordCountCost));
+                cell_RepetitionCost.setCellStyle(temp_moneyStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+
+                if (m_data.useInContext)
+                {           	
+                	Cell cell_InContextCost = getCell(theRow, col++);
+                	cell_InContextCost.setCellValue(asDouble(data.inContextMatchWordCountCost));
+                	cell_InContextCost.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                }
+                if (m_data.useDefaultContext)
+                {
+                	Cell cell_ContextCost = getCell(theRow, col++);
+                	cell_ContextCost.setCellValue(asDouble(data.contextMatchWordCountCost));
+                	cell_ContextCost.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                }
+
+                if (totalCol == null)
+                {
+                    totalCol = ReportUtil.toChar(col);
+                }
+                Cell cell_TotalCost = getCell(theRow, col++);
+                cell_TotalCost.setCellValue(asDouble(data.totalWordCountCost));
+                cell_TotalCost.setCellStyle(temp_moneyStyle);
+
+                // Show total additional charges
+                // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
+                // p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
+                // asDouble(data.totalAdditionalCost), temp_moneyFormat));
+
+                // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
+                projectTotalWordCountCost = projectTotalWordCountCost
+                        .add(data.totalWordCountCost);
+
+                List<Integer> indexs = totalCost.get(data.targetLang);
+                if (indexs == null)
+                {
+                    indexs = new ArrayList<Integer>();
+                    totalCost.put(data.targetLang, indexs);
+                }
+                indexs.add(row + 1);
+
+                Double value = totalCostDate.get(data.targetLang);
+                if (value == null)
+                {
+                    value = 0.0;
+                }
+                value += asDouble(data.totalWordCountCost);
+                totalCostDate.put(data.targetLang, value);
+
+                // add a "project total" summary cost over the locales
+                // map(1,moneyFormat)
+                if (localeIter.hasNext() == false)
+                {
+                	Cell cell_TotalAdditionalCost = getCell(theRow, col++);
+                	cell_TotalAdditionalCost.setCellValue(asDouble(data.totalAdditionalCost));
+                	cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+
+                    Cell cell_ProjectTotalCost = getCell(theRow, col++);
+                    cell_ProjectTotalCost.setCellValue(asDouble(projectTotalWordCountCost)
+                            + asDouble(data.totalAdditionalCost));
+                    cell_ProjectTotalCost.setCellStyle(temp_moneyStyle);
+                }
+                else
+                {
+                	Cell cell_TotalAdditionalCost = getCell(theRow, col++);
+                	cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+
+                    Cell cell_ProjectTotalCost = getCell(theRow, col++);
+                    cell_ProjectTotalCost.setCellStyle(temp_moneyStyle);
+                }
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
+                p_rows[MONTH_SHEET].inc();
+
+                // Write data into MONTH_REVIEW_SHEET
+                if (p_includeExReview && data.containsDellReview)
+                {
+                    containsDellReview = true;
+
+                    row = p_rows[MONTH_REVIEW_SHEET].getValue();
+                    col = 0;
+
+                    // Company Name
+                    Cell cell_A_Review = getCell(theRow, col++);
+                    cell_A_Review.setCellValue(data.companyName);
+                    cell_A_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+
+                    // Project Description
+                    Cell cell_B_Review = getCell(theRow, col++);
+                    cell_B_Review.setCellValue(data.projectDesc);
+                    cell_B_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 22 * 256);
+                    
+                    if (isWrongJob)
+                    {
+                        // For "Job id not showing in external review tabs"
+                        // Issue
+                        if (isJobIdVisible)
+                        {
+                        	Cell cell_C_Review = getCell(theRow, col++);
+                        	cell_C_Review.setCellValue(data.jobId);
+                        	cell_C_Review.setCellStyle(getWrongJobStyle(p_workbook));
+                        }
+                        Cell cell_CorD_Review = getCell(theRow, col++);
+                        cell_CorD_Review.setCellValue(data.jobName);
+                        cell_CorD_Review.setCellStyle(getWrongJobStyle(p_workbook));
+                    }
+                    else
+                    {
+                        // For "Job id not showing in external review tabs"
+                        // Issue
+                        if (isJobIdVisible)
+                        {
+                        	Cell cell_C_Review = getCell(theRow, col++);
+                        	cell_C_Review.setCellValue(data.jobId);
+                        	cell_C_Review.setCellStyle(temp_normalStyle);
+                        }
+                        Cell cell_CorD_Review = getCell(theRow, col++);
+                        cell_CorD_Review.setCellValue(data.jobName);
+                        cell_CorD_Review.setCellStyle(temp_normalStyle);
+                    }
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 50 * 256);
+                    Cell cell_DorE_Review = getCell(theRow, col++);
+                    cell_DorE_Review.setCellValue(data.projectDesc);
+                    cell_DorE_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 22 * 256);
+
+                    if (data.wasExportFailed)
+                    {
+                        /*
+                         * p_sheets[MONTH_SHEET].addCell(new DateTime(col++,
+                         * row, data.creationDate, failed_dateFormat));
+                         */
+                    	Cell cell_EorF_Review = getCell(theRow, col++);
+                    	cell_EorF_Review.setCellValue(data.creationDate);
+                    	cell_EorF_Review.setCellStyle(getFailedDateStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+                        
+                        Cell cell_ForG_Review = getCell(theRow, col++);
+                        cell_ForG_Review.setCellValue(data.creationDate);
+                        cell_ForG_Review.setCellStyle(getFailedTimeStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 18 * 256);
+                        
+                        Cell cell_GorH_Review = getCell(theRow, col++);
+                        cell_GorH_Review.setCellValue("");
+                        cell_GorH_Review.setCellStyle(getFailedDateStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+                        
+                        Cell cell_HorI_Review = getCell(theRow, col++);
+                        cell_HorI_Review.setCellValue("");
+                        cell_HorI_Review.setCellStyle(getFailedTimeStyle(p_workbook));
+                    }
+                    else
+                    {
+                        /*
+                         * p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
+                         * dateFormat.format(data.creationDate)));
+                         */
+                    	Cell cell_EorF_Review = getCell(theRow, col++);
+                    	cell_EorF_Review.setCellValue(getDateFormat().format(data.creationDate));
+                        cell_EorF_Review.setCellStyle(getContentStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+                        
+                        Cell cell_ForG_Review = getCell(theRow, col++);
+                        cell_ForG_Review.setCellValue(getTimeFormat().format(data.creationDate));
+                        cell_ForG_Review.setCellStyle(getContentStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 18 * 256);
+                        
+                        String labelExportDate = "";
+                        if (data.wasExported)
+                        {
+                            labelExportDate = getExportDateStr(getDateFormat(),
+                                    data.exportDate);
+                        }
+                        Cell cell_GorH_Review = getCell(theRow, col++);
+                        cell_GorH_Review.setCellValue(labelExportDate);
+                        cell_GorH_Review.setCellStyle(getContentStyle(p_workbook));
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
+                        
+                        String labelExportTime = "";
+                        if (data.wasExported)
+                        {
+                            labelExportTime = getExportDateStr(getTimeFormat(),
+                                    data.exportDate);
+                        }
+                        Cell cell_HorI_Review = getCell(theRow, col++);
+                        cell_HorI_Review.setCellValue(labelExportTime);
+                        cell_HorI_Review.setCellStyle(getContentStyle(p_workbook));
+
+                    }
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 18 * 256);
+                    Cell cell_IorJ_Review = getCell(theRow, col++);
+                    cell_IorJ_Review.setCellValue(data.targetLang);
+                    cell_IorJ_Review.setCellStyle(temp_normalStyle);
+                    
+                    Cell cell_JorK_Review = getCell(theRow, col++);
+                    cell_JorK_Review.setCellValue(data.repetitionWordCount);
+                    cell_JorK_Review.setCellStyle(temp_normalStyle);
+
+                    numwidth = 10;
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+                    Cell cell_KorL_Review = getCell(theRow, col++);
+                    cell_KorL_Review.setCellValue(data.segmentTmWordCount);
+                    cell_KorL_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+
+                    if (m_data.useInContext)
+                    {
+                    	Cell cell_InContext = getCell(theRow, col++);
+                    	cell_InContext.setCellValue(data.inContextMatchWordCount);
+                    	cell_InContext.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                                numwidth * 256);
+                    }
+                    if (m_data.useDefaultContext)
+                    {
+                    	Cell cell_Context = getCell(theRow, col++);
+                    	cell_Context.setCellValue(data.contextMatchWordCount);
+                    	cell_Context.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                                numwidth * 256);
+                    }
+                    
+                    Cell cell_FuzzyMatch_Review = getCell(theRow, col++);
+                    cell_FuzzyMatch_Review.setCellValue(data.fuzzyMatchWordCount);
+                    cell_FuzzyMatch_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+
+                    Cell cell_NoMatch_Review = getCell(theRow, col++);
+                    cell_NoMatch_Review.setCellValue(data.noMatchWordCount);
+                    cell_NoMatch_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+                    
+                    Cell cell_Total_Review = getCell(theRow, col++);
+                    cell_Total_Review.setCellValue(data.totalWordCount);
+                    cell_Total_Review.setCellStyle(temp_normalStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            numwidth * 256);
+
+                    moneywidth = 12;
+                    Cell cell_RepetitionCost_Review = getCell(theRow, col++);
+                    cell_RepetitionCost_Review.setCellValue(asDouble(data
+                    		.repetitionWordCountCostForDellReview));
+                    cell_RepetitionCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+                    Cell cell_SegmentCost_Review = getCell(theRow, col++);
+                    cell_SegmentCost_Review.setCellValue(asDouble(data
+                    		.segmentTmWordCountCostForDellReview));
+                    cell_SegmentCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+
+                    if (m_data.useInContext)
+                    {
+                    	Cell cell_InContext = getCell(theRow, col++);
+                    	cell_InContext.setCellValue(asDouble(data
+                    			.inContextMatchWordCountCostForDellReview));
+                    	cell_InContext.setCellStyle(temp_moneyStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                                moneywidth * 256);
+                    }
+
+                    if (m_data.useDefaultContext)
+                    {
+                    	Cell cell_Context = getCell(theRow, col++);
+                    	cell_Context.setCellValue(asDouble(data
+                    			.contextMatchWordCountCostForDellReview));
+                    	cell_Context.setCellStyle(temp_moneyStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                                moneywidth * 256);
+                    }
+                    
+                    Cell cell_FuzzyMatchCost_Review = getCell(theRow, col++);
+                    cell_FuzzyMatchCost_Review.setCellValue(asDouble(data
+                    		.fuzzyMatchWordCountCostForDellReview));
+                    cell_FuzzyMatchCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+
+                    Cell cell_NoMatchCost_Review = getCell(theRow, col++);
+                    cell_NoMatchCost_Review.setCellValue(asDouble(data
+                    		.noMatchWordCountCostForDellReview));
+                    cell_NoMatchCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+
+                    reviewTotalWordCountCost = reviewTotalWordCountCost
+                            .add(data.totalWordCountCostForDellReview);
+
+                    // Writes the "Translation Total" column.
+                    Cell cell_TotalCost_Review = getCell(theRow, col++);
+                    cell_TotalCost_Review.setCellValue(asDouble(data.totalWordCountCost));
+                    cell_TotalCost_Review.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+                    // Writes the "Review" column.
+                    Cell cell_Rview = getCell(theRow, col++);
+                    cell_Rview.setCellValue(asDouble(data.totalWordCountCostForDellReview));
+                    cell_Rview.setCellStyle(temp_moneyStyle);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+
+                    // add "job total" cost over the locales
+                    if (localeIter.hasNext() == false)
+                    {
+                    	Cell cell_JobTotal = getCell(theRow, col++);
+                    	cell_JobTotal.setCellValue(asDouble(projectTotalWordCountCost
+                                .add(reviewTotalWordCountCost)));
+                    	cell_JobTotal.setCellStyle(temp_moneyStyle);
+                    }
+                    else
+                    {
+                    	Cell cell_JobTotal = getCell(theRow, col++);
+                    	cell_JobTotal.setCellStyle(temp_moneyStyle);;
+                    }
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                            moneywidth * 256);
+                    p_rows[MONTH_REVIEW_SHEET].inc();
+                }// End if (p_includeExReview && data.containsDellReview)
+            }// End loop while (localeIter.hasNext())
+
+            p_rows[MONTH_SHEET].inc();
+            if (p_includeExReview && containsDellReview)
+            {
+                p_rows[MONTH_REVIEW_SHEET].inc();
+            }
+
+        }// End loop while (projectIter.hasNext())
+
+        p_rows[MONTH_SHEET].inc();
+        addTotals(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET, p_rows[MONTH_SHEET]);
+
+        if (p_includeExReview)
+        {
+            p_rows[MONTH_REVIEW_SHEET].inc();
+            addTotals(p_workbook, p_sheets[MONTH_REVIEW_SHEET], MONTH_REVIEW_SHEET,
+                    p_rows[MONTH_REVIEW_SHEET]);
+        }
+
+        if (totalCol != null)
+        {
+            addTotalsPerLang(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET,
+                    p_rows[MONTH_SHEET]);
+        }
+    }
+
+    private void addTotalsPerLang(Workbook p_workbook, Sheet p_sheet,
+            final int p_sheetCategory, IntHolder p_row) throws Exception
+    {
+    	Font subTotalFont = p_workbook.createFont();
+    	subTotalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    	subTotalFont.setColor(IndexedColors.BLACK.getIndex());
+    	subTotalFont.setUnderline(Font.U_NONE);
+    	subTotalFont.setFontName("Arial");
+    	subTotalFont.setFontHeightInPoints((short) 10);
+    	
+        CellStyle subTotalStyle = p_workbook.createCellStyle();
+        subTotalStyle.setFont(subTotalFont);
+        
+        String title = m_bundle.getString("lb_total_cost_per_lang");
+        int row = p_row.getValue() + 4; // skip a row
+        ArrayList<String> locales = new ArrayList<String>(totalCost.keySet());
+        SortUtil.sort(locales);
+
+        int col = m_data.getSumStartCol();
+        Row theRow = getRow(p_sheet, row);
+        
+        Cell cell_Title = getCell(theRow, col - 3);
+        cell_Title.setCellValue(title);
+        cell_Title.setCellStyle(subTotalStyle);
+
+        File imgFile = File.createTempFile("GSJobChart", ".png");
+        JfreeCharUtil.drawPieChart2D("", totalCostDate, imgFile);
+        Drawing patriarch = p_sheet.createDrawingPatriarch();
+        XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, 15, row - 1, 22, row + 24);      
+        ByteArrayOutputStream img_bytes = new ByteArrayOutputStream();
+        InputStream is = imgFile.toURI().toURL().openStream();
+        int b;
+        while ((b = is.read()) != -1){
+            img_bytes.write(b);
+        }
+        is.close();
+        int i = p_workbook.addPicture(img_bytes.toByteArray(), SXSSFWorkbook.PICTURE_TYPE_PNG);
+        patriarch.createPicture(anchor, i);
+        for (String locale : locales)
+        {
+            List<Integer> indexs = totalCost.get(locale);
+            StringBuffer values = new StringBuffer();
+            for (Integer index : indexs)
+            {
+                if (values.length() == 0)
+                {
+                    values.append("SUM(");
+                }
+                else
+                {
+                    values.append("+");
+                }
+
+                values.append(totalCol).append(index);
+            }
+            values.append(")");
+
+            Row perRow = getRow(p_sheet, row);
+            
+            Cell cell_Locale = getCell(perRow, col - 1);
+            cell_Locale.setCellValue(locale);
+            cell_Locale.setCellStyle(getContentStyle(p_workbook));
+            Cell cell_Total = getCell(perRow, col);
+            cell_Total.setCellFormula(values.toString());
+            cell_Total.setCellStyle(getMoneyStyle(p_workbook));
+            row++;
+        }
+
+        // Reset total column number for every sheet.
+        totalCol = null;
+    }
+
+    /**
+     * Add totals row
+     * 
+     * @param p_sheet
+     * @param p_sheetCategory
+     * @param p_row
+     * @param p_data
+     * @param bundle
+     * @throws Exception
+     */
+    private void addTotals(Workbook p_workbook, Sheet p_sheet, final int p_sheetCategory,
+            IntHolder p_row)
+            throws Exception
+    {
+        int row = p_row.getValue() + 1; // skip a row
+
+        String title = m_bundle.getString("lb_totals");
+        java.text.NumberFormat.getCurrencyInstance(Locale.US);
+        // Get Summary Start Column
+        int c = m_data.getSumStartCol();
+        String sumStartCol = getColumnName(c);
+        Row theRow = getRow(p_sheet, row);
+
+        Cell cell_A = getCell(theRow, 0);
+        cell_A.setCellValue(title);
+        cell_A.setCellStyle(getSubTotalStyle(p_workbook));
+        // modify the number 3 to "sumStartCellCol-B" for "Add Job Id into
+        // online job report" issue
+        p_sheet.addMergedRegion(new CellRangeAddress(row, row, 0, sumStartCol.charAt(0) - 'B'));
+        setRegionStyle(p_sheet, new CellRangeAddress(row, row, 0, sumStartCol.charAt(0) - 'B'),
+        		getSubTotalStyle(p_workbook));
+        int lastRow = p_row.getValue() - 2;
+
+        // add in word count totals
+        // word counts
+        Cell cell_B = getCell(theRow, c++);
+        cell_B.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_B.setCellStyle(getSubTotalStyle(p_workbook));
+        
+        sumStartCol = getColumnName(c);
+        Cell cell_C = getCell(theRow, c++);
+        cell_C.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_C.setCellStyle(getSubTotalStyle(p_workbook));
+        
+        sumStartCol = getColumnName(c);
+        Cell cell_D = getCell(theRow, c++);
+        cell_D.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_D.setCellStyle(getSubTotalStyle(p_workbook));
+        
+        sumStartCol = getColumnName(c);
+        Cell cell_E = getCell(theRow, c++);
+        cell_E.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_E.setCellStyle(getSubTotalStyle(p_workbook));
+        
+        sumStartCol = getColumnName(c);
+        Cell cell_F = getCell(theRow, c++);
+        cell_F.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_F.setCellStyle(getSubTotalStyle(p_workbook));
+        
+        sumStartCol = getColumnName(c);
+        if (m_data.isTradosStyle())
+        {
+        	Cell cell_G = getCell(theRow, c++);
+            cell_G.setCellFormula("SUM(" + sumStartCol + "5:"
+                    + sumStartCol + lastRow + ")");
+            cell_G.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+            
+            Cell cell_H = getCell(theRow, c++);
+            cell_H.setCellFormula("SUM(" + sumStartCol + "5:"
+                    + sumStartCol + lastRow + ")");
+            cell_H.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+        }
+
+        if (m_data.useInContext)
+        {
+        	Cell cell_InContext = getCell(theRow, c++);
+        	cell_InContext.setCellFormula("SUM(" + sumStartCol + "5:"
+                    + sumStartCol + lastRow + ")");
+        	cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+        }
+        if (m_data.useDefaultContext)
+        {
+        	Cell cell_Context = getCell(theRow, c++);
+            cell_Context.setCellFormula("SUM(" + sumStartCol + "5:"
+                    + sumStartCol + lastRow + ")");
+            cell_Context.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+        }
+
+        // word count costs
+        Cell cell_K = getCell(theRow, c++);
+        cell_K.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_K.setCellStyle(getTotalMoneyStyle(p_workbook));
+        sumStartCol = getColumnName(c);
+        
+        Cell cell_L = getCell(theRow, c++);
+        cell_L.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_L.setCellStyle(getTotalMoneyStyle(p_workbook));
+        sumStartCol = getColumnName(c);
+        
+        Cell cell_M = getCell(theRow, c++);
+        cell_M.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_M.setCellStyle(getTotalMoneyStyle(p_workbook));
+        sumStartCol = getColumnName(c);
+        
+        Cell cell_N = getCell(theRow, c++);
+        cell_N.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_N.setCellStyle(getTotalMoneyStyle(p_workbook));
+        sumStartCol = getColumnName(c);
+        
+        Cell cell_O = getCell(theRow, c++);
+        cell_O.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
+        sumStartCol = getColumnName(c);
+        
+        Cell cell_P = getCell(theRow, c++);
+        cell_P.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
+        sumStartCol = getColumnName(c);
+        
+        Cell cell_Q = getCell(theRow, c++);
+        cell_Q.setCellFormula("SUM(" + sumStartCol + "5:"
+                + sumStartCol + lastRow + ")");
+        cell_Q.setCellStyle(getTotalMoneyStyle(p_workbook));
+        sumStartCol = getColumnName(c);
+
+        if (m_data.isTradosStyle())
+        {
+        	Cell cell_R = getCell(theRow, c++);
+            cell_R.setCellFormula("SUM(" + sumStartCol + "5:"
+                    + sumStartCol + lastRow + ")");
+            cell_R.setCellStyle(getTotalMoneyStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+            
+            Cell cell_S = getCell(theRow, c++);
+            cell_S.setCellFormula("SUM(" + sumStartCol + "5:"
+                    + sumStartCol + lastRow + ")");
+            cell_S.setCellStyle(getTotalMoneyStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+        }
+
+        if (m_data.useInContext)
+        {
+        	Cell cell_InContext = getCell(theRow, c++);
+            cell_InContext.setCellFormula("SUM(" + sumStartCol + "5:"
+                    + sumStartCol + lastRow + ")");
+            cell_InContext.setCellStyle(getTotalMoneyStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+        }
+        if (m_data.useDefaultContext)
+        {
+        	Cell cell_Context = getCell(theRow, c++);
+            cell_Context.setCellFormula("SUM(" + sumStartCol + "5:"
+                    + sumStartCol + lastRow + ")");
+            cell_Context.setCellStyle(getTotalMoneyStyle(p_workbook));
+            sumStartCol = getColumnName(c);
+        }
+
+        /*
+         * Canceled useless column in "Review Detail report" Sheet. if
+         * (p_sheetCategory == MONTH_REVIEW_SHEET) { // For
+         * "Job id not showing in external review tabs" Issue
+         * p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" +
+         * ":" + sumStartCol + lastRow + ")", moneyFormat)); }
+         */
+
+        // add an extra column for Dell Tracking Use
+        Cell cell_V = getCell(theRow, c++);
+        cell_V.setCellValue("");
+        cell_V.setCellStyle(getTotalMoneyStyle(p_workbook));
+    }
+    
+    private void addParamsSheet(Workbook p_workbook, String year,
+    		boolean recalculateFinishedWorkflow) throws Exception
+    {
+    	Sheet paramsSheet = p_workbook.createSheet(
+                m_bundle.getString("lb_criteria"));
+        Row firRow = getRow(paramsSheet, 0);
+        Cell cell_A_Header = getCell(firRow, 0);
+        cell_A_Header.setCellValue(m_bundle
+                .getString("lb_report_criteria"));
+        cell_A_Header.setCellStyle(getContentStyle(p_workbook));
+        paramsSheet.setColumnWidth(0, 50 * 256);
+
+        Row secRow = getRow(paramsSheet, 1);
+        Cell cell_A_Project = getCell(secRow, 0);
+        if (m_data.wantsAllProjects)
+        {
+        	cell_A_Project.setCellValue(m_bundle
+                    .getString("lb_selected_projects")
+                    + " "
+                    + m_bundle.getString("all"));
+        	cell_A_Project.setCellStyle(getContentStyle(p_workbook));
+        }
+        else
+        {
+        	cell_A_Project.setCellValue(m_bundle
+                    .getString("lb_selected_projects"));
+        	cell_A_Project.setCellStyle(getContentStyle(p_workbook));
+            Iterator<Long> iter = m_data.projectIdList.iterator();
+            int r = 3;
+            while (iter.hasNext())
+            {
+                Long pid = (Long) iter.next();
+                String projectName = "??";
+                try
+                {
+                    Project p = ServerProxy.getProjectHandler()
+                            .getProjectById(pid.longValue());
+                    projectName = p.getName();
+                }
+                catch (Exception e)
+                {
+                }
+                Row row = getRow(paramsSheet, r);
+                Cell cell_A = getCell(row, 0);
+                cell_A.setCellValue(projectName);
+                cell_A.setCellStyle(getContentStyle(p_workbook));
+                
+                Cell cell_B = getCell(row, 1);
+                cell_B.setCellValue(m_bundle
+                        .getString("lb_id") + "=" + pid.toString());
+                cell_B.setCellStyle(getContentStyle(p_workbook));
+                r++;
+            }
+        }
+
+        Cell cell_C_Header = getCell(firRow, 2);
+        cell_C_Header.setCellValue(m_bundle
+                .getString("lb_Year"));
+        cell_C_Header.setCellStyle(getContentStyle(p_workbook));
+        
+        Cell cell_C = getCell(secRow, 2);
+        cell_C.setCellValue(year);
+        cell_C.setCellStyle(getContentStyle(p_workbook));
+        
+        Cell cell_D_Header = getCell(firRow, 3);
+        cell_D_Header.setCellValue(m_bundle
+                .getString("lb_re_cost_jobs"));
+        cell_D_Header.setCellStyle(getContentStyle(p_workbook));
+        
+        Cell cell_D = getCell(secRow, 3);
+        cell_D.setCellValue(java.lang.Boolean
+                .toString(recalculateFinishedWorkflow));
+        cell_D.setCellStyle(getContentStyle(p_workbook));
+    }
+    
     /**
      * For "Dell Review Report Issue" Add a new parameter "includeExReview" to
      * the signature.
@@ -566,7 +2862,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         JobSearchParameters searchParams = new JobSearchParameters();
         if (isReportForYear != null && isReportForYear.equals("on"))
         {
-            searchParams = getSearchParams(p_request, p_month, m_data);
+            searchParams = getSearchParams(p_request, p_month);
         }
         if (isReportForDetail != null && isReportForDetail.endsWith("on"))
         {
@@ -656,8 +2952,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 : new ArrayList<Job>(ServerProxy.getJobHandler().getJobs(
                         searchParams));
         int year = Integer.parseInt(p_request.getParameter("year"));
-        ArrayList<Job> wrongJobsThisMonth = getWrongJobsForThisMonth(m_data,
-                p_month, year);
+        ArrayList<Job> wrongJobsThisMonth = getWrongJobsForThisMonth(p_month, year);
         // now create a Set of all the jobs
         HashSet<Job> jobs = new HashSet<Job>();
         jobs.addAll(queriedJobs);
@@ -705,7 +3000,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             String l10nProfileName = l10nprofile.getName();
             String fileProfileNames = j.getFProfileNames();
 
-            String projectDesc = getProjectDesc(m_data, j);
+            String projectDesc = getProjectDesc(j);
             String jobId = Long.toString(j.getId());
             String jobName = j.getJobName();
             String companyId = String.valueOf(j.getCompanyId());
@@ -780,7 +3075,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 {
                     continue;
                 }
-                String targetLang = w.getTargetLocale().toString();
+                String targetLang = Long.toString(w.getTargetLocale().getId());
                 if (!m_data.wantsAllLocales
                         && !m_data.trgLocaleList.contains(targetLang))
                 {
@@ -806,19 +3101,21 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 // the property is as same as jobName one to one
                 data.l10nProfileName = l10nProfileName;
                 data.fileProfileNames = fileProfileNames;
-                data.targetLang = targetLang;
+                data.targetLang = w.getTargetLocale().toString();
                 data.creationDate = j.getCreateDate();
                 data.status = j.getDisplayState();
                 if (Workflow.EXPORTED.equals(state))
                 {
                     data.wasExported = true;
-                    data.exportDate = getExportDate(targetLang, jobName);
+                    data.exportDate = getExportDate(w.getTargetLocale().toString(), 
+                    		jobName ,jobId);
                 }
                 if (Workflow.EXPORT_FAILED.equals(state))
                 {
                     // if the workflow is EXPORT_FAILED, color the line in red
                     data.wasExportFailed = true;
-                    data.exportDate = getExportDate(targetLang, jobName);
+                    data.exportDate = getExportDate(w.getTargetLocale().toString(), 
+                    		jobName ,jobId);
                 }
 
                 // now add or amend the data in the ProjectWorkflowData based on
@@ -1084,26 +3381,26 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 + SEPARATOR.length());
     }
 
-    private String[] getMonths(ResourceBundle bundle)
+    private String[] getMonths()
     {
         String[] months = new String[12];
-        months[0] = bundle.getString("lb_january");
-        months[1] = bundle.getString("lb_february");
-        months[2] = bundle.getString("lb_march");
-        months[3] = bundle.getString("lb_april");
-        months[4] = bundle.getString("lb_may");
-        months[5] = bundle.getString("lb_june");
-        months[6] = bundle.getString("lb_july");
-        months[7] = bundle.getString("lb_august");
-        months[8] = bundle.getString("lb_september");
-        months[9] = bundle.getString("lb_october");
-        months[10] = bundle.getString("lb_november");
-        months[11] = bundle.getString("lb_december");
+        months[0] = m_bundle.getString("lb_january");
+        months[1] = m_bundle.getString("lb_february");
+        months[2] = m_bundle.getString("lb_march");
+        months[3] = m_bundle.getString("lb_april");
+        months[4] = m_bundle.getString("lb_may");
+        months[5] = m_bundle.getString("lb_june");
+        months[6] = m_bundle.getString("lb_july");
+        months[7] = m_bundle.getString("lb_august");
+        months[8] = m_bundle.getString("lb_september");
+        months[9] = m_bundle.getString("lb_october");
+        months[10] = m_bundle.getString("lb_november");
+        months[11] = m_bundle.getString("lb_december");
 
         return months;
     }
 
-    private Date getExportDate(String targetLang, String jobName)
+    private Date getExportDate(String targetLang, String jobName, String jobId)
     {
         String cxePath = AmbFileStoragePathUtils.getCxeDocDirPath();
         String path = cxePath + "/" + targetLang + "/" + jobName;
@@ -1115,6 +3412,20 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                     + jobName;
             file = new File(newPath);
         }
+        
+        if (!file.exists())
+        {
+            String newPath =cxePath + "/" + targetLang + "/" + jobId;
+            file = new File(newPath);
+        }
+        
+        if (!file.exists())
+        {
+            String newPath = cxePath + "/" + targetLang + "/webservice/"
+                    + jobId;
+            file = new File(newPath);
+        }
+        
 
         if (file.exists() && file.isDirectory())
         {
@@ -1372,7 +3683,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         this.m_data = m_data;
     }
 
-    private void setProjectIdList(HttpServletRequest p_request, MyData p_data)
+    private void setProjectIdList(HttpServletRequest p_request)
     {
         // set the project Id
         String[] projectIds = p_request.getParameterValues("projectId");
@@ -1384,18 +3695,18 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 String id = projectIds[i];
                 if (id.equals("*") == false)
                 {
-                    p_data.projectIdList.add(new Long(id));
+                    m_data.projectIdList.add(new Long(id));
                 }
                 else
                 {
-                    p_data.wantsAllProjects = true;
+                    m_data.wantsAllProjects = true;
                     break;
                 }
             }
         }
     }
 
-    private void setLocpIdList(HttpServletRequest p_request, MyData p_data)
+    private void setLocpIdList(HttpServletRequest p_request)
     {
         // set the project Id
         String[] locprofiles = p_request.getParameterValues("locprofile");
@@ -1416,7 +3727,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                     for (int j = 0; j < locproids.length; j++)
                     {
                         String id = locproids[j];
-                        p_data.locProfileIdList.add(new Long(id));
+                        m_data.locProfileIdList.add(new Long(id));
                     }
 
                 }
@@ -1424,7 +3735,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         }
     }
 
-    private void setTargetLocales(HttpServletRequest p_request, MyData p_data)
+    private void setTargetLocales(HttpServletRequest p_request)
     {
         String[] paramTrgLocales = p_request
                 .getParameterValues(ReportConstants.TARGETLOCALE_LIST);
@@ -1434,12 +3745,12 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             {
                 if ("*".equals(paramTrgLocales[i]))
                 {
-                    p_data.wantsAllLocales = true;
+                    m_data.wantsAllLocales = true;
                     break;
                 }
                 else
                 {
-                    p_data.trgLocaleList.add(paramTrgLocales[i]);
+                    m_data.trgLocaleList.add(paramTrgLocales[i]);
                 }
             }
         }
@@ -1453,12 +3764,12 @@ public class OnlineJobsReportGenerator extends XlsReports implements
      * @return JobSearchParams
      */
     private JobSearchParameters getSearchParams(HttpServletRequest p_request,
-            int p_month, MyData p_data)
+            int p_month)
     {
         JobSearchParameters sp = new JobSearchParameters();
-        if (p_data.wantsAllProjects == false)
+        if (m_data.wantsAllProjects == false)
         {
-            sp.setProjectId(p_data.projectIdList);
+            sp.setProjectId(m_data.projectIdList);
         }
 
         // job state EXPORTED,DISPATCHED,LOCALIZED
@@ -1486,2193 +3797,6 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         return sp;
     }
 
-    /**
-     * Adds the table header to the sheet
-     * 
-     * @param p_sheet
-     */
-    private void addHeader(WritableSheet p_sheet, MyData p_data,
-            ResourceBundle bundle) throws Exception
-    {
-        if (p_data.isTradosStyle())
-        {
-            addHeaderTradosStyle(p_sheet, MONTH_SHEET, p_data, bundle);
-        }
-        else
-        {
-            addHeader(p_sheet, MONTH_SHEET, p_data, bundle);
-        }
-    }
-
-    private void addHeader(WritableSheet p_sheet, final int p_sheetCategory,
-            MyData p_data, ResourceBundle bundle) throws Exception
-    {
-        // title font is black bold on white
-        String EMEA = CompanyWrapper.getCurrentCompanyName();
-        WritableFont titleFont = new WritableFont(WritableFont.ARIAL, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
-
-        p_sheet.addCell(new Label(0, 0, EMEA + " "
-                + bundle.getString("lb_online"), titleFormat));
-        p_sheet.setColumnView(0, 20);
-
-        // headerFont is black bold on light grey
-        WritableFont headerFont = new WritableFont(WritableFont.ARIAL, 9,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-        headerFormat.setWrap(true);
-        headerFormat.setBackground(jxl.format.Colour.GRAY_25);
-        headerFormat.setShrinkToFit(false);
-        headerFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THIN);
-
-        WritableCellFormat langFormat = new WritableCellFormat(headerFont);
-        langFormat.setWrap(true);
-        langFormat.setBackground(jxl.format.Colour.GRAY_25);
-        langFormat.setShrinkToFit(false);
-        langFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableCellFormat wordCountFormat = new WritableCellFormat(headerFont);
-        wordCountFormat.setWrap(true);
-        wordCountFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountFormat.setShrinkToFit(false);
-        wordCountFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableCellFormat wordCountValueFormat = new WritableCellFormat(
-                headerFont);
-        wordCountValueFormat.setWrap(true);
-        wordCountValueFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountValueFormat.setShrinkToFit(false);
-        wordCountValueFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountValueFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THIN);
-
-        WritableCellFormat wordCountValueRightFormat = new WritableCellFormat(
-                headerFont);
-        wordCountValueRightFormat.setWrap(true);
-        wordCountValueRightFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountValueRightFormat.setShrinkToFit(false);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        int col = -1;
-        // Company Name
-        p_sheet.addCell(new Label(++col, 2,
-                bundle.getString("lb_company_name"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        // Project Description
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_project"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        // For "Add Job Id into online job report" issue
-        if (isJobIdVisible)
-        {
-            p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_job_id"),
-                    headerFormat));
-            p_sheet.mergeCells(col, 2, col, 3);
-        }
-
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_job_name"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle
-                .getString("lb_source_file_format"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_loc_profile"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        p_sheet.addCell(new Label(++col, 2, bundle
-                .getString("lb_file_profiles"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        p_sheet.addCell(new Label(++col, 2, bundle
-                .getString("lb_creation_date"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle
-                .getString("lb_creation_time"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_export_date"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_export_time"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_status"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_lang"),
-                langFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_word_counts"),
-                wordCountFormat));
-        if (p_data.useInContext && p_data.useDefaultContext)
-        {
-            p_sheet.mergeCells(col, 2, col + 6, 2);
-        }
-        else
-        {
-            if (p_data.useInContext)
-            {
-                p_sheet.mergeCells(col, 2, col + 5, 2);
-            }
-            else if (p_data.useDefaultContext)
-            {
-                p_sheet.mergeCells(col, 2, col + 5, 2);
-            }
-            else
-            {
-                p_sheet.mergeCells(col, 2, col + 4, 2);
-            }
-        }
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("jobinfo.tmmatches.wordcounts.internalreps"),
-                wordCountValueFormat));
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("lb_100_exact_matches"), wordCountValueFormat));
-
-        if (p_data.useInContext)
-        {
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_in_context_tm"), wordCountValueFormat));
-        }
-
-        if (p_data.useDefaultContext)
-        {
-            col++;
-            p_sheet.addCell(new Label(col, 3,
-                    bundle.getString("lb_context_tm"), wordCountValueFormat));
-        }
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"),
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("jobinfo.tmmatches.wordcounts.newwords"),
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("lb_total_source_word_count"),
-                wordCountValueRightFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 2, bundle
-                .getString("jobinfo.tmmatches.invoice"), wordCountFormat));
-
-        if (p_sheetCategory == MONTH_SHEET)
-        {
-            if (p_data.useInContext && p_data.useDefaultContext)
-            {
-                p_sheet.mergeCells(col, 2, col + 8, 2);
-            }
-            else
-            {
-                if (p_data.useInContext || p_data.useDefaultContext)
-                {
-                    p_sheet.mergeCells(col, 2, col + 7, 2);
-                }
-                else
-                {
-                    p_sheet.mergeCells(col, 2, col + 6, 2);
-                }
-            }
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.invoice.internalreps"),
-                    wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_100_exact_matches"), wordCountValueFormat));
-            col++;
-            if (p_data.useInContext)
-            {
-                p_sheet.addCell(new Label(col, 3, bundle
-                        .getString("lb_in_context_tm"), wordCountValueFormat));
-                col++;
-            }
-            if (p_data.useDefaultContext)
-            {
-                p_sheet.addCell(new Label(col, 3, bundle
-                        .getString("lb_context_tm"), wordCountValueFormat));
-                col++;
-
-            }
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"),
-                    wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.wordcounts.newwords"),
-                    wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.wordcounts.total"),
-                    wordCountValueFormat));
-            col++;
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.invoice.additionalCharges"),
-                    wordCountValueRightFormat));
-            col++;
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.invoice.jobtotal"),
-                    wordCountValueRightFormat));
-            col++;
-
-            p_sheet.addCell(new Label(col, 2, bundle.getString("lb_tracking")
-                    + " " + EMEA + " " + bundle.getString("lb_use") + ")",
-                    headerFormat));
-            p_sheet.mergeCells(col, 2, col, 3);
-
-        }
-        else if (p_sheetCategory == MONTH_REVIEW_SHEET)
-        {
-            if (p_data.useInContext && p_data.useDefaultContext)
-            {
-                p_sheet.mergeCells(col, 2, col + 8, 2);
-            }
-            else
-            {
-                if (p_data.useInContext || p_data.useDefaultContext)
-                {
-                    p_sheet.mergeCells(col, 2, col + 7, 2);
-                }
-                else
-                {
-                    p_sheet.mergeCells(col, 2, col + 6, 2);
-                }
-            }
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.wordcounts.internalreps"),
-                    wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_100_exact_matches"), wordCountValueFormat));
-            col++;
-            if (p_data.useInContext)
-            {
-                p_sheet.addCell(new Label(col, 3, bundle
-                        .getString("lb_in_context_tm"), wordCountValueFormat));
-                col++;
-            }
-            if (p_data.useDefaultContext)
-            {
-                p_sheet.addCell(new Label(col, 3, bundle
-                        .getString("lb_context_tm"), wordCountValueFormat));
-                col++;
-            }
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"),
-                    wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.wordcounts.newwords"),
-                    wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_translation_total"), wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_review"),
-                    wordCountValueRightFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.invoice.jobtotal"),
-                    wordCountValueRightFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 2, bundle.getString("lb_tracking")
-                    + " " + EMEA + " " + bundle.getString("lb_use") + ")",
-                    headerFormat));
-            p_sheet.mergeCells(col, 2, col, 3);
-        }
-        else
-        {
-            // Should never go here.
-        }
-    }
-
-    /**
-     * For trados style
-     * 
-     * @param p_sheet
-     * @param p_sheetCategory
-     * @param p_data
-     * @param bundle
-     * @throws Exception
-     */
-    private void addHeaderTradosStyle(WritableSheet p_sheet,
-            final int p_sheetCategory, MyData p_data, ResourceBundle bundle)
-            throws Exception
-    {
-        // title font is black bold on white
-        String EMEA = CompanyWrapper.getCurrentCompanyName();
-        WritableFont titleFont = new WritableFont(WritableFont.ARIAL, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
-
-        p_sheet.addCell(new Label(0, 0, EMEA + " "
-                + bundle.getString("lb_online"), titleFormat));
-        p_sheet.setColumnView(0, 20);
-        p_sheet.addCell(new Label(0, 1, bundle.getString("lb_desp_file_list")));
-
-        // headerFont is black bold on light grey
-        WritableFont headerFont = new WritableFont(WritableFont.ARIAL, 9,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-        headerFormat.setWrap(true);
-        headerFormat.setBackground(jxl.format.Colour.GRAY_25);
-        headerFormat.setShrinkToFit(false);
-        headerFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THIN);
-
-        WritableCellFormat langFormat = new WritableCellFormat(headerFont);
-        langFormat.setWrap(true);
-        langFormat.setBackground(jxl.format.Colour.GRAY_25);
-        langFormat.setShrinkToFit(false);
-        langFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        langFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableCellFormat wordCountFormat = new WritableCellFormat(headerFont);
-        wordCountFormat.setWrap(true);
-        wordCountFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountFormat.setShrinkToFit(false);
-        wordCountFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableCellFormat wordCountValueFormat = new WritableCellFormat(
-                headerFont);
-        wordCountValueFormat.setWrap(true);
-        wordCountValueFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountValueFormat.setShrinkToFit(false);
-        wordCountValueFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountValueFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THIN);
-
-        WritableCellFormat wordCountValueRightFormat = new WritableCellFormat(
-                headerFont);
-        wordCountValueRightFormat.setWrap(true);
-        wordCountValueRightFormat.setBackground(jxl.format.Colour.GRAY_25);
-        wordCountValueRightFormat.setShrinkToFit(false);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THICK);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        int col = -1;
-
-        // Company Name
-        p_sheet.addCell(new Label(++col, 2,
-                bundle.getString("lb_company_name"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        // Project Description
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_project"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        if (isJobIdVisible)
-        {
-            p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_job_id"),
-                    headerFormat));
-            p_sheet.mergeCells(col, 2, col, 3);
-        }
-
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_job_name"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        p_sheet.addCell(new Label(++col, 2, bundle
-                .getString("lb_source_file_format"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_loc_profile"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        p_sheet.addCell(new Label(++col, 2, bundle
-                .getString("lb_file_profiles"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-
-        p_sheet.addCell(new Label(++col, 2, bundle
-                .getString("lb_creation_date"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle
-                .getString("lb_creation_time"), headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_export_date"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_export_time"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_status"),
-                headerFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_lang"),
-                langFormat));
-        p_sheet.mergeCells(col, 2, col, 3);
-        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_word_counts"),
-                wordCountFormat));
-        if (p_data.useInContext && p_data.useDefaultContext)
-        {
-            p_sheet.mergeCells(col, 2, col + 8, 2);
-        }
-        else
-        {
-            if (p_data.useInContext)
-            {
-                p_sheet.mergeCells(col, 2, col + 7, 2);
-            }
-            else if (p_data.useDefaultContext)
-            {
-                p_sheet.mergeCells(col, 2, col + 7, 2);
-            }
-            else
-            {
-                p_sheet.mergeCells(col, 2, col + 6, 2);
-            }
-        }
-
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("jobinfo.tradosmatches.invoice.per100matches"),
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_95_99"),
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_85_94"),
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_75_84") + "*",
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_no_match"),
-                wordCountValueFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle
-                .getString("lb_repetition_word_cnt"), wordCountValueFormat));
-
-        if (p_data.useInContext)
-        {
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_in_context_tm"), wordCountValueFormat));
-        }
-
-        if (p_data.useDefaultContext)
-        {
-            col++;
-            p_sheet.addCell(new Label(col, 3,
-                    bundle.getString("lb_context_tm"), wordCountValueFormat));
-        }
-
-        col++;
-        p_sheet.addCell(new Label(col, 3, bundle.getString("lb_total"),
-                wordCountValueRightFormat));
-
-        col++;
-        p_sheet.addCell(new Label(col, 2, bundle
-                .getString("jobinfo.tmmatches.invoice"), wordCountFormat));
-
-        if (p_sheetCategory == MONTH_SHEET)
-        {
-            if (p_data.useInContext && p_data.useDefaultContext)
-            {
-                p_sheet.mergeCells(col, 2, col + 10, 2);
-            }
-            else
-            {
-                if (p_data.useInContext || p_data.useDefaultContext)
-                {
-                    p_sheet.mergeCells(col, 2, col + 9, 2);
-                }
-                else
-                {
-                    p_sheet.mergeCells(col, 2, col + 8, 2);
-                }
-            }
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tradosmatches.invoice.per100matches"),
-                    wordCountValueFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_95_99"),
-                    wordCountValueFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_85_94"),
-                    wordCountValueFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_75_84")
-                    + "*", wordCountValueFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_no_match"),
-                    wordCountValueFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_repetition_word_cnt"), wordCountValueFormat));
-
-            col++;
-            if (p_data.useInContext)
-            {
-                p_sheet.addCell(new Label(col, 3, bundle
-                        .getString("lb_in_context_tm"), wordCountValueFormat));
-                col++;
-            }
-            if (p_data.useDefaultContext)
-            {
-                p_sheet.addCell(new Label(col, 3, bundle
-                        .getString("lb_context_tm"), wordCountValueFormat));
-                col++;
-
-            }
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.wordcounts.total"),
-                    wordCountValueFormat));
-            col++;
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.invoice.additionalCharges"),
-                    wordCountValueRightFormat));
-            col++;
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.invoice.jobtotal"),
-                    wordCountValueRightFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 2, bundle.getString("lb_tracking")
-                    + " " + EMEA + " " + bundle.getString("lb_use") + ")",
-                    headerFormat));
-            p_sheet.mergeCells(col, 2, col, 3);
-
-        }
-        else if (p_sheetCategory == MONTH_REVIEW_SHEET)
-        {
-            if (p_data.useInContext && p_data.useDefaultContext)
-            {
-                p_sheet.mergeCells(col, 2, col + 10, 2);
-            }
-            else
-            {
-                if (p_data.useInContext || p_data.useDefaultContext)
-                {
-                    p_sheet.mergeCells(col, 2, col + 9, 2);
-                }
-                else
-                {
-                    p_sheet.mergeCells(col, 2, col + 7, 2);
-                }
-            }
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tradosmatches.invoice.per100matches"),
-                    wordCountValueFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_95_99"),
-                    wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_85_94"),
-                    wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_75_84")
-                    + "*", wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_no_match"),
-                    wordCountValueFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_repetition_word_cnt"), wordCountValueFormat));
-
-            col++;
-            if (p_data.useInContext)
-            {
-                p_sheet.addCell(new Label(col, 3, bundle
-                        .getString("lb_in_context_tm"), wordCountValueFormat));
-                col++;
-            }
-            if (p_data.useDefaultContext)
-            {
-                p_sheet.addCell(new Label(col, 3, bundle
-                        .getString("lb_context_tm"), wordCountValueFormat));
-                col++;
-            }
-
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("lb_translation_total"), wordCountValueFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle.getString("lb_review"),
-                    wordCountValueRightFormat));
-            col++;
-            p_sheet.addCell(new Label(col, 3, bundle
-                    .getString("jobinfo.tmmatches.invoice.jobtotal"),
-                    wordCountValueRightFormat));
-
-            col++;
-            p_sheet.addCell(new Label(col, 2, bundle.getString("lb_tracking")
-                    + " " + EMEA + " " + bundle.getString("lb_use") + ")",
-                    headerFormat));
-            p_sheet.mergeCells(col, 2, col, 3);
-        }
-        else
-        {
-            // Should never go here.
-        }
-    }
-
-    /*
-     * public void writeProjectData( HashMap<String, HashMap<String,
-     * ProjectWorkflowData>> p_projectMap, WritableSheet p_sheet, IntHolder
-     * p_row, MyData p_data, ResourceBundle bundle) throws Exception {
-     * WritableSheet[] sheets = new WritableSheet[2]; sheets[MONTH_SHEET] =
-     * p_sheet; sheets[MONTH_REVIEW_SHEET] = null;
-     * 
-     * IntHolder[] rows = new IntHolder[2]; rows[MONTH_SHEET] = p_row;
-     * rows[MONTH_REVIEW_SHEET] = null;
-     * 
-     * writeProjectData(p_projectMap, sheets, false, rows, p_data, bundle); }
-     */
-
-    public void writeProjectData(
-            HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap,
-            WritableSheet[] p_sheets, boolean p_includeExReview,
-            IntHolder[] p_rows, MyData p_data, ResourceBundle bundle)
-            throws Exception
-    {
-        ArrayList<String> keys = new ArrayList<String>(p_projectMap.keySet());
-        SortUtil.sort(keys);
-        Iterator<String> keysIter = keys.iterator();
-
-        String datetimeFormatString = p_data.getDateFormatString();
-        String dateFormatString = datetimeFormatString.substring(0,
-                datetimeFormatString.indexOf(" ") - 1);
-        String timeFormatString = datetimeFormatString.substring(
-                datetimeFormatString.indexOf(" ") + 1,
-                datetimeFormatString.length());
-        SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatString);
-        SimpleDateFormat timeFormat = new SimpleDateFormat(timeFormatString);
-
-        String euroJavaNumberFormat = getCurrencyNumberFormat();
-        NumberFormat euroNumberFormat = new NumberFormat(euroJavaNumberFormat);
-        WritableCellFormat moneyFormat = new WritableCellFormat(
-                euroNumberFormat);
-        moneyFormat.setWrap(false);
-        moneyFormat.setShrinkToFit(false);
-
-        WritableCellFormat wordCountValueRightFormat = new WritableCellFormat();
-        wordCountValueRightFormat.setWrap(true);
-        wordCountValueRightFormat.setShrinkToFit(false);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        jxl.format.CellFormat normalFormat = getNormalFormat();
-        jxl.format.CellFormat failedNormalFormat = getRedColorFormat();
-
-        WritableCellFormat failed_dateFormat = new WritableCellFormat(
-                DateFormats.DEFAULT);
-        failed_dateFormat.setWrap(false);
-        failed_dateFormat.setShrinkToFit(false);
-
-        WritableCellFormat failed_timeFormat = new WritableCellFormat(
-                DateFormats.FORMAT6);
-        failed_dateFormat.setWrap(false);
-        failed_dateFormat.setShrinkToFit(false);
-
-        WritableCellFormat failed_moneyFormat = new WritableCellFormat(
-                euroNumberFormat);
-        failed_moneyFormat.setWrap(false);
-        failed_moneyFormat.setShrinkToFit(false);
-
-        WritableCellFormat failed_wordCountValueRightFormat = new WritableCellFormat();
-        failed_wordCountValueRightFormat.setWrap(true);
-        failed_wordCountValueRightFormat.setShrinkToFit(false);
-        failed_wordCountValueRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        failed_dateFormat.setBackground(jxl.format.Colour.RED);
-        failed_moneyFormat.setBackground(jxl.format.Colour.RED);
-        failed_timeFormat.setBackground(jxl.format.Colour.RED);
-        failed_wordCountValueRightFormat.setBackground(jxl.format.Colour.RED);
-
-        WritableCellFormat moneyRightFormat = new WritableCellFormat(
-                moneyFormat);
-        moneyRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableCellFormat langFormat = new WritableCellFormat();
-        langFormat.setWrap(true);
-        langFormat.setShrinkToFit(false);
-        langFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableFont wrongJobFont = new WritableFont(WritableFont.TIMES, 11,
-                WritableFont.NO_BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.GRAY_50);
-
-        WritableCellFormat wrongJobFormat = new WritableCellFormat(wrongJobFont);
-
-        totalCost.clear();
-        totalCostDate.clear();
-        int finishedJobNum = 0;
-
-        while (keysIter.hasNext())
-        {
-            // Cancel generate reports.
-            if (isCancelled())
-                return;
-            // Sets Reports Percent.
-            setPercent(++finishedJobNum);
-            String key = keysIter.next();
-            String jobId = getJobIdFromMapKey(key);
-            boolean isWrongJob = p_data.wrongJobNames.contains(jobId);
-            HashMap<String, ProjectWorkflowData> localeMap = p_projectMap
-                    .get(key);
-            ArrayList<String> locales = new ArrayList<String>(
-                    localeMap.keySet());
-            SortUtil.sort(locales);
-            Iterator<String> localeIter = locales.iterator();
-            BigDecimal projectTotalWordCountCost = new BigDecimal(
-                    BIG_DECIMAL_ZERO_STRING);
-            BigDecimal reviewTotalWordCountCost = new BigDecimal(
-                    BIG_DECIMAL_ZERO_STRING);
-
-            // Counts the review costing total and the translation costing
-            // total.
-            String localeName = null;
-            ProjectWorkflowData data = null;
-
-            // Marks whether needs to add a blank line.
-            boolean containsDellReview = false;
-
-            while (localeIter.hasNext())
-            {
-                int col = 0;
-                localeName = (String) localeIter.next();
-                data = (ProjectWorkflowData) localeMap.get(localeName);
-
-                int row = p_rows[MONTH_SHEET].getValue();
-
-                WritableCellFormat temp_moneyFormat = moneyFormat;
-                jxl.format.CellFormat temp_normalFormat = normalFormat;
-
-                if (data.wasExportFailed)
-                {
-                    temp_moneyFormat = failed_moneyFormat;
-                    temp_normalFormat = failedNormalFormat;
-                }
-
-                // Company Name
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.companyName, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-
-                // Project Description
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.projectDesc, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 22);
-
-                if (isWrongJob)
-                {
-                    // For "Add Job Id into online job report" issue
-                    if (isJobIdVisible)
-                    {
-                        p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                                jobId, wrongJobFormat));
-                    }
-
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            data.jobName, wrongJobFormat));
-                }
-                else
-                {
-                    // For "Add Job Id into online job report" issue
-                    if (isJobIdVisible)
-                    {
-                        p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                                jobId, temp_normalFormat));
-                    }
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            data.jobName, temp_normalFormat));
-                }
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 50);
-
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        getAllSouceFileFormats(data.allFileProfiles),
-                        temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
-
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.l10nProfileName, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 25);
-
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.fileProfileNames, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
-
-                if (data.wasExportFailed)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new DateTime(col++, row,
-                            data.creationDate, failed_dateFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-                    p_sheets[MONTH_SHEET].addCell(new DateTime(col++, row,
-                            data.creationDate, failed_timeFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 18);
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row, "",
-                            failed_dateFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row, "",
-                            failed_timeFormat));
-                }
-                else
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            dateFormat.format(data.creationDate)));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            timeFormat.format(data.creationDate)));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 18);
-                    String labelExportDate = "";
-                    if (data.wasExported)
-                    {
-                        labelExportDate = getExportDateStr(dateFormat,
-                                data.exportDate);
-                    }
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            labelExportDate));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-                    String labelExportTime = "";
-                    if (data.wasExported)
-                    {
-                        labelExportTime = getExportDateStr(timeFormat,
-                                data.exportDate);
-                    }
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            labelExportTime));
-
-                }
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 18);
-
-                // Status
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.status, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 18);
-                // Language
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.targetLang, temp_normalFormat));
-                int numwidth = 10;
-                // Summary Start Column
-                p_data.initSumStartCol(col);
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.repetitionWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.segmentTmWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                if (p_data.useInContext)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            data.inContextMatchWordCount, temp_normalFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-                }
-
-                if (p_data.useDefaultContext)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            data.contextMatchWordCount, temp_normalFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-                }
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.fuzzyMatchWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.noMatchWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.totalWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                int moneywidth = 12;
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.repetitionWordCountCost),
-                        temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                p_sheets[MONTH_SHEET]
-                        .addCell(new Number(col++, row,
-                                asDouble(data.segmentTmWordCountCost),
-                                temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                if (p_data.useInContext)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.inContextMatchWordCountCost),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                }
-                if (p_data.useDefaultContext)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.contextMatchWordCountCost),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                }
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.fuzzyMatchWordCountCost),
-                        temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.noMatchWordCountCost), temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                if (totalCol == null)
-                {
-                    totalCol = ReportUtil.toChar(col);
-                }
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.totalWordCountCost), temp_moneyFormat));
-
-                // Show total additional charges
-                // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                // p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                // asDouble(data.totalAdditionalCost), temp_moneyFormat));
-
-                // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                projectTotalWordCountCost = projectTotalWordCountCost
-                        .add(data.totalWordCountCost);
-
-                List<Integer> indexs = totalCost.get(data.targetLang);
-                if (indexs == null)
-                {
-                    indexs = new ArrayList<Integer>();
-                    totalCost.put(data.targetLang, indexs);
-                }
-                indexs.add(row + 1);
-
-                Double value = totalCostDate.get(data.targetLang);
-                if (value == null)
-                {
-                    value = 0.0;
-                }
-                value += asDouble(data.totalWordCountCost);
-                totalCostDate.put(data.targetLang, value);
-
-                // add a "project total" summary cost over the locales
-                // map(1,moneyFormat)
-                if (localeIter.hasNext() == false)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.totalAdditionalCost),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            asDouble(projectTotalWordCountCost)
-                                    + asDouble(data.totalAdditionalCost),
-                            temp_moneyFormat));
-                }
-                else
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Blank(col++, row,
-                            temp_moneyFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                    p_sheets[MONTH_SHEET].addCell(new Blank(col++, row,
-                            temp_moneyFormat));
-                }
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                p_rows[MONTH_SHEET].inc();
-
-                // Write data into MONTH_REVIEW_SHEET
-                if (p_includeExReview && data.containsDellReview)
-                {
-                    containsDellReview = true;
-
-                    row = p_rows[MONTH_REVIEW_SHEET].getValue();
-                    col = 0;
-
-                    if (isWrongJob)
-                    {
-                        // For "Job id not showing in external review tabs"
-                        // Issue
-                        if (isJobIdVisible)
-                        {
-                            p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(
-                                    col++, row, data.jobId, wrongJobFormat));
-                        }
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, data.jobName, wrongJobFormat));
-                    }
-                    else
-                    {
-                        // For "Job id not showing in external review tabs"
-                        // Issue
-                        if (isJobIdVisible)
-                        {
-                            p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(
-                                    col++, row, data.jobId, temp_normalFormat));
-                        }
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, data.jobName, temp_normalFormat));
-                    }
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 50);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++, row,
-                            data.projectDesc, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 22);
-
-                    if (data.wasExportFailed)
-                    {
-                        /*
-                         * p_sheets[MONTH_SHEET].addCell(new DateTime(col++,
-                         * row, data.creationDate, failed_dateFormat));
-                         */
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new DateTime(
-                                col++, row, data.creationDate,
-                                failed_dateFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 15);
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new DateTime(
-                                col++, row, data.creationDate,
-                                failed_timeFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 18);
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, "", failed_dateFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 15);
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, "", failed_timeFormat));
-                    }
-                    else
-                    {
-                        /*
-                         * p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                         * dateFormat.format(data.creationDate)));
-                         */
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, dateFormat.format(data.creationDate)));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 15);
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, timeFormat.format(data.creationDate)));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 18);
-                        String labelExportDate = "";
-                        if (data.wasExported)
-                        {
-                            labelExportDate = getExportDateStr(dateFormat,
-                                    data.exportDate);
-                        }
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, labelExportDate));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 15);
-                        String labelExportTime = "";
-                        if (data.wasExported)
-                        {
-                            labelExportTime = getExportDateStr(timeFormat,
-                                    data.exportDate);
-                        }
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, labelExportTime));
-
-                    }
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 18);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++, row,
-                            data.targetLang, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.repetitionWordCount, temp_normalFormat));
-
-                    numwidth = 10;
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.segmentTmWordCount, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-
-                    if (p_data.useInContext)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++,
-                                row, data.inContextMatchWordCount,
-                                temp_normalFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                                numwidth);
-                    }
-                    if (p_data.useDefaultContext)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++,
-                                row, data.contextMatchWordCount,
-                                temp_normalFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                                numwidth);
-                    }
-
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.fuzzyMatchWordCount, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.noMatchWordCount, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.totalWordCount, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-
-                    moneywidth = 12;
-                    p_sheets[MONTH_REVIEW_SHEET]
-                            .addCell(new Number(
-                                    col++,
-                                    row,
-                                    asDouble(data.repetitionWordCountCostForDellReview),
-                                    temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.segmentTmWordCountCostForDellReview),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-
-                    if (p_data.useInContext)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET]
-                                .addCell(new Number(
-                                        col++,
-                                        row,
-                                        asDouble(data.inContextMatchWordCountCostForDellReview),
-                                        temp_moneyFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                                moneywidth);
-                    }
-
-                    if (p_data.useDefaultContext)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET]
-                                .addCell(new Number(
-                                        col++,
-                                        row,
-                                        asDouble(data.contextMatchWordCountCostForDellReview),
-                                        temp_moneyFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                                moneywidth);
-                    }
-
-                    p_sheets[MONTH_REVIEW_SHEET]
-                            .addCell(new Number(
-                                    col++,
-                                    row,
-                                    asDouble(data.fuzzyMatchWordCountCostForDellReview),
-                                    temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.noMatchWordCountCostForDellReview),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-
-                    reviewTotalWordCountCost = reviewTotalWordCountCost
-                            .add(data.totalWordCountCostForDellReview);
-
-                    // Writes the "Translation Total" column.
-                    p_sheets[MONTH_REVIEW_SHEET]
-                            .addCell(new Number(col++, row,
-                                    asDouble(data.totalWordCountCost),
-                                    temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-                    // Writes the "Review" column.
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.totalWordCountCostForDellReview),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-
-                    // add "job total" cost over the locales
-                    if (localeIter.hasNext() == false)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++,
-                                row, asDouble(projectTotalWordCountCost
-                                        .add(reviewTotalWordCountCost)),
-                                temp_moneyFormat));
-                    }
-                    else
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Blank(col++,
-                                row, temp_moneyFormat));
-                    }
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-                    p_rows[MONTH_REVIEW_SHEET].inc();
-                }// End if (p_includeExReview && data.containsDellReview)
-            }// End loop while (localeIter.hasNext())
-
-            p_rows[MONTH_SHEET].inc();
-            if (p_includeExReview && containsDellReview)
-            {
-                p_rows[MONTH_REVIEW_SHEET].inc();
-            }
-
-        }// End loop while (projectIter.hasNext())
-
-        p_rows[MONTH_SHEET].inc();
-        addTotals(p_sheets[MONTH_SHEET], MONTH_SHEET, p_rows[MONTH_SHEET],
-                p_data, bundle);
-
-        if (p_includeExReview)
-        {
-            p_rows[MONTH_REVIEW_SHEET].inc();
-            addTotals(p_sheets[MONTH_REVIEW_SHEET], MONTH_REVIEW_SHEET,
-                    p_rows[MONTH_REVIEW_SHEET], p_data, bundle);
-        }
-
-        if (totalCol != null)
-        {
-            addTotalsPerLang(p_sheets[MONTH_SHEET], MONTH_SHEET,
-                    p_rows[MONTH_SHEET], p_data, bundle);
-        }
-    }
-
-    /**
-     * For Trados Style
-     * 
-     * @param p_projectMap
-     * @param p_sheets
-     * @param p_includeExReview
-     * @param p_rows
-     * @param p_data
-     * @param bundle
-     * @throws Exception
-     */
-    public void writeProjectDataTradosStyle(
-            HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap,
-            WritableSheet[] p_sheets, boolean p_includeExReview,
-            IntHolder[] p_rows, MyData p_data, ResourceBundle bundle)
-            throws Exception
-    {
-        ArrayList<String> keys = new ArrayList<String>(p_projectMap.keySet());
-        SortUtil.sort(keys);
-        Iterator<String> keysIter = keys.iterator();
-
-        String datetimeFormatString = p_data.getDateFormatString();
-        String dateFormatString = datetimeFormatString.substring(0,
-                datetimeFormatString.indexOf(" ") - 1);
-        String timeFormatString = datetimeFormatString.substring(
-                datetimeFormatString.indexOf(" ") + 1,
-                datetimeFormatString.length());
-        SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatString);
-        SimpleDateFormat timeFormat = new SimpleDateFormat(timeFormatString);
-
-        String euroJavaNumberFormat = getCurrencyNumberFormat();
-        NumberFormat euroNumberFormat = new NumberFormat(euroJavaNumberFormat);
-        WritableCellFormat moneyFormat = new WritableCellFormat(
-                euroNumberFormat);
-        moneyFormat.setWrap(false);
-        moneyFormat.setShrinkToFit(false);
-
-        WritableCellFormat wordCountValueRightFormat = new WritableCellFormat();
-        wordCountValueRightFormat.setWrap(true);
-        wordCountValueRightFormat.setShrinkToFit(false);
-        wordCountValueRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        jxl.format.CellFormat normalFormat = getNormalFormat();
-        jxl.format.CellFormat failedNormalFormat = getRedColorFormat();
-
-        WritableCellFormat failed_dateFormat = new WritableCellFormat(
-                DateFormats.DEFAULT);
-        failed_dateFormat.setWrap(false);
-        failed_dateFormat.setShrinkToFit(false);
-
-        WritableCellFormat failed_timeFormat = new WritableCellFormat(
-                DateFormats.FORMAT6);
-        failed_dateFormat.setWrap(false);
-        failed_dateFormat.setShrinkToFit(false);
-
-        WritableCellFormat failed_moneyFormat = new WritableCellFormat(
-                euroNumberFormat);
-        failed_moneyFormat.setWrap(false);
-        failed_moneyFormat.setShrinkToFit(false);
-
-        WritableCellFormat failed_wordCountValueRightFormat = new WritableCellFormat();
-        failed_wordCountValueRightFormat.setWrap(true);
-        failed_wordCountValueRightFormat.setShrinkToFit(false);
-        failed_wordCountValueRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        failed_dateFormat.setBackground(jxl.format.Colour.RED);
-        failed_moneyFormat.setBackground(jxl.format.Colour.RED);
-        failed_timeFormat.setBackground(jxl.format.Colour.RED);
-        failed_wordCountValueRightFormat.setBackground(jxl.format.Colour.RED);
-
-        WritableCellFormat moneyRightFormat = new WritableCellFormat(
-                moneyFormat);
-        moneyRightFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableCellFormat langFormat = new WritableCellFormat();
-        langFormat.setWrap(true);
-        langFormat.setShrinkToFit(false);
-        langFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THICK);
-
-        WritableFont wrongJobFont = new WritableFont(WritableFont.TIMES, 11,
-                WritableFont.NO_BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.GRAY_50);
-        WritableCellFormat wrongJobFormat = new WritableCellFormat(wrongJobFont);
-
-        totalCost.clear();
-        totalCostDate.clear();
-        int finishedJobNum = 0;
-        while (keysIter.hasNext())
-        {
-            // Cancel generate reports.
-            if (isCancelled())
-                return;
-            // Sets Reports Percent.
-            setPercent(++finishedJobNum);
-
-            String key = keysIter.next();
-            String jobId = getJobIdFromMapKey(key);
-            boolean isWrongJob = p_data.wrongJobNames.contains(jobId);
-            HashMap<String, ProjectWorkflowData> localeMap = p_projectMap
-                    .get(key);
-            ArrayList<String> locales = new ArrayList<String>(
-                    localeMap.keySet());
-            SortUtil.sort(locales);
-            Iterator<String> localeIter = locales.iterator();
-            BigDecimal projectTotalWordCountCost = new BigDecimal(
-                    BIG_DECIMAL_ZERO_STRING);
-            BigDecimal reviewTotalWordCountCost = new BigDecimal(
-                    BIG_DECIMAL_ZERO_STRING);
-
-            // Counts the review costing total and the translation costing
-            // total.
-            String localeName = null;
-            ProjectWorkflowData data = null;
-
-            // Marks whether needs to add a blank line.
-            boolean containsDellReview = false;
-
-            while (localeIter.hasNext())
-            {
-                int col = 0;
-                localeName = (String) localeIter.next();
-                data = (ProjectWorkflowData) localeMap.get(localeName);
-
-                int row = p_rows[MONTH_SHEET].getValue();
-
-                WritableCellFormat temp_moneyFormat = moneyFormat;
-                jxl.format.CellFormat temp_normalFormat = normalFormat;
-
-                if (data.wasExportFailed)
-                {
-                    temp_moneyFormat = failed_moneyFormat;
-                    temp_normalFormat = failedNormalFormat;
-                }
-
-                // Company Name
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.companyName, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-
-                // Project Description
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.projectDesc, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 22);
-
-                if (isWrongJob)
-                {
-                    // For "Add Job Id into online job report" issue
-                    if (isJobIdVisible)
-                    {
-                        p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                                jobId, wrongJobFormat));
-                    }
-
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            data.jobName, wrongJobFormat));
-                }
-                else
-                {
-                    // For "Add Job Id into online job report" issue
-                    if (isJobIdVisible)
-                    {
-                        p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                                jobId, temp_normalFormat));
-                    }
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            data.jobName, temp_normalFormat));
-                }
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 50);
-
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        getAllSouceFileFormats(data.allFileProfiles),
-                        temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
-
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.l10nProfileName, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
-
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.fileProfileNames, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
-
-                if (data.wasExportFailed)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new DateTime(col++, row,
-                            data.creationDate, failed_dateFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-                    p_sheets[MONTH_SHEET].addCell(new DateTime(col++, row,
-                            data.creationDate, failed_timeFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 18);
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row, "",
-                            failed_dateFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row, "",
-                            failed_timeFormat));
-                }
-                else
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            dateFormat.format(data.creationDate)));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            timeFormat.format(data.creationDate)));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 18);
-                    String labelExportDate = "";
-                    if (data.wasExported)
-                    {
-                        labelExportDate = getExportDateStr(dateFormat,
-                                data.exportDate);
-                    }
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            labelExportDate));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, 15);
-                    String labelExportTime = "";
-                    if (data.wasExported)
-                    {
-                        labelExportTime = getExportDateStr(timeFormat,
-                                data.exportDate);
-                    }
-                    p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                            labelExportTime));
-
-                }
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 18);
-
-                // Status
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.status, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, 18);
-                // Language
-                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.targetLang, temp_normalFormat));
-
-                int numwidth = 10;
-
-                // Summary Start Column
-                p_data.initSumStartCol(col);
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.segmentTmWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.hiFuzzyMatchWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.medHiFuzzyMatchWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.medFuzzyMatchWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.noMatchWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.repetitionWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                if (p_data.useInContext)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            data.inContextMatchWordCount, temp_normalFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-                }
-
-                if (p_data.useDefaultContext)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            data.contextMatchWordCount, temp_normalFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-                }
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        data.totalWordCount, temp_normalFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, numwidth);
-
-                int moneywidth = 12;
-
-                p_sheets[MONTH_SHEET]
-                        .addCell(new Number(col++, row,
-                                asDouble(data.segmentTmWordCountCost),
-                                temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.hiFuzzyMatchWordCountCost),
-                        temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.medHiFuzzyMatchWordCountCost),
-                        temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.medFuzzyMatchWordCountCost),
-                        temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.noMatchWordCountCost), temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.repetitionWordCountCost),
-                        temp_moneyFormat));
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                if (p_data.useInContext)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.inContextMatchWordCountCost),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                }
-                if (p_data.useDefaultContext)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.contextMatchWordCountCost),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                }
-
-                if (totalCol == null)
-                {
-                    totalCol = ReportUtil.toChar(col);
-                }
-                p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                        asDouble(data.totalWordCountCost), temp_moneyFormat));
-
-                // Show total additional charges
-                // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                // p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                // asDouble(data.totalAdditionalCost), temp_moneyFormat));
-
-                // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                projectTotalWordCountCost = projectTotalWordCountCost
-                        .add(data.totalWordCountCost);
-
-                List<Integer> indexs = totalCost.get(data.targetLang);
-                if (indexs == null)
-                {
-                    indexs = new ArrayList<Integer>();
-                    totalCost.put(data.targetLang, indexs);
-                }
-                indexs.add(row + 1);
-
-                Double value = totalCostDate.get(data.targetLang);
-                if (value == null)
-                {
-                    value = 0.0;
-                }
-                value += asDouble(data.totalWordCountCost);
-                totalCostDate.put(data.targetLang, value);
-
-                // add a "project total" summary cost over the locales
-                // map(1,moneyFormat)
-                if (localeIter.hasNext() == false)
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.totalAdditionalCost),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                    p_sheets[MONTH_SHEET].addCell(new Number(col++, row,
-                            asDouble(projectTotalWordCountCost)
-                                    + asDouble(data.totalAdditionalCost),
-                            temp_moneyFormat));
-                }
-                else
-                {
-                    p_sheets[MONTH_SHEET].addCell(new Blank(col++, row,
-                            temp_moneyFormat));
-                    p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-
-                    p_sheets[MONTH_SHEET].addCell(new Blank(col++, row,
-                            temp_moneyFormat));
-                }
-                p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                p_rows[MONTH_SHEET].inc();
-
-                // Write data into MONTH_REVIEW_SHEET
-                if (p_includeExReview && data.containsDellReview)
-                {
-                    containsDellReview = true;
-
-                    row = p_rows[MONTH_REVIEW_SHEET].getValue();
-                    col = 0;
-
-                    if (isWrongJob)
-                    {
-                        // For "Job id not showing in external review tabs"
-                        // Issue
-                        if (isJobIdVisible)
-                        {
-                            p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(
-                                    col++, row, data.jobId, wrongJobFormat));
-                        }
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, data.jobName, wrongJobFormat));
-                    }
-                    else
-                    {
-                        // For "Job id not showing in external review tabs"
-                        // Issue
-                        if (isJobIdVisible)
-                        {
-                            p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(
-                                    col++, row, data.jobId, temp_normalFormat));
-                        }
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, data.jobName, temp_normalFormat));
-                    }
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 50);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++, row,
-                            data.projectDesc, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 22);
-
-                    if (data.wasExportFailed)
-                    {
-                        /*
-                         * p_sheets[MONTH_SHEET].addCell(new DateTime(col++,
-                         * row, data.creationDate, failed_dateFormat));
-                         */
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new DateTime(
-                                col++, row, data.creationDate,
-                                failed_dateFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 15);
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new DateTime(
-                                col++, row, data.creationDate,
-                                failed_timeFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 18);
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, "", failed_dateFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 15);
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, "", failed_timeFormat));
-                    }
-                    else
-                    {
-                        /*
-                         * p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                         * dateFormat.format(data.creationDate)));
-                         */
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, dateFormat.format(data.creationDate)));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 15);
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, timeFormat.format(data.creationDate)));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 18);
-                        String labelExportDate = "";
-                        if (data.wasExported)
-                        {
-                            labelExportDate = getExportDateStr(dateFormat,
-                                    data.exportDate);
-                        }
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, labelExportDate));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 15);
-                        String labelExportTime = "";
-                        if (data.wasExported)
-                        {
-                            labelExportTime = getExportDateStr(timeFormat,
-                                    data.exportDate);
-                        }
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++,
-                                row, labelExportTime));
-
-                    }
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1, 18);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Label(col++, row,
-                            data.targetLang, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.repetitionWordCount, temp_normalFormat));
-
-                    numwidth = 10;
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.segmentTmWordCount, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-
-                    if (p_data.useInContext)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++,
-                                row, data.inContextMatchWordCount,
-                                temp_normalFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                                numwidth);
-                    }
-                    if (p_data.useDefaultContext)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++,
-                                row, data.contextMatchWordCount,
-                                temp_normalFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                                numwidth);
-                    }
-
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.fuzzyMatchWordCount, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.noMatchWordCount, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            data.totalWordCount, temp_normalFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            numwidth);
-
-                    moneywidth = 12;
-                    p_sheets[MONTH_REVIEW_SHEET]
-                            .addCell(new Number(
-                                    col++,
-                                    row,
-                                    asDouble(data.repetitionWordCountCostForDellReview),
-                                    temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.segmentTmWordCountCostForDellReview),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-
-                    if (p_data.useInContext)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET]
-                                .addCell(new Number(
-                                        col++,
-                                        row,
-                                        asDouble(data.inContextMatchWordCountCostForDellReview),
-                                        temp_moneyFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                                moneywidth);
-                    }
-
-                    if (p_data.useDefaultContext)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET]
-                                .addCell(new Number(
-                                        col++,
-                                        row,
-                                        asDouble(data.contextMatchWordCountCostForDellReview),
-                                        temp_moneyFormat));
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                                moneywidth);
-                    }
-
-                    p_sheets[MONTH_REVIEW_SHEET]
-                            .addCell(new Number(
-                                    col++,
-                                    row,
-                                    asDouble(data.fuzzyMatchWordCountCostForDellReview),
-                                    temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.noMatchWordCountCostForDellReview),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-
-                    reviewTotalWordCountCost = reviewTotalWordCountCost
-                            .add(data.totalWordCountCostForDellReview);
-
-                    // Writes the "Translation Total" column.
-                    p_sheets[MONTH_REVIEW_SHEET]
-                            .addCell(new Number(col++, row,
-                                    asDouble(data.totalWordCountCost),
-                                    temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-                    // Writes the "Review" column.
-                    p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++, row,
-                            asDouble(data.totalWordCountCostForDellReview),
-                            temp_moneyFormat));
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-
-                    // add "job total" cost over the locales
-                    if (localeIter.hasNext() == false)
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Number(col++,
-                                row, asDouble(projectTotalWordCountCost
-                                        .add(reviewTotalWordCountCost)),
-                                temp_moneyFormat));
-                    }
-                    else
-                    {
-                        p_sheets[MONTH_REVIEW_SHEET].addCell(new Blank(col++,
-                                row, temp_moneyFormat));
-                    }
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnView(col - 1,
-                            moneywidth);
-                    p_rows[MONTH_REVIEW_SHEET].inc();
-                }// End if (p_includeExReview && data.containsDellReview)
-            }// End loop while (localeIter.hasNext())
-
-            p_rows[MONTH_SHEET].inc();
-            if (p_includeExReview && containsDellReview)
-            {
-                p_rows[MONTH_REVIEW_SHEET].inc();
-            }
-
-        }// End loop while (projectIter.hasNext())
-
-        p_rows[MONTH_SHEET].inc();
-        addTotals(p_sheets[MONTH_SHEET], MONTH_SHEET, p_rows[MONTH_SHEET],
-                p_data, bundle);
-
-        if (p_includeExReview)
-        {
-            p_rows[MONTH_REVIEW_SHEET].inc();
-            addTotals(p_sheets[MONTH_REVIEW_SHEET], MONTH_REVIEW_SHEET,
-                    p_rows[MONTH_REVIEW_SHEET], p_data, bundle);
-        }
-
-        if (totalCol != null)
-        {
-            addTotalsPerLang(p_sheets[MONTH_SHEET], MONTH_SHEET,
-                    p_rows[MONTH_SHEET], p_data, bundle);
-        }
-    }
-
-    private void addTotalsPerLang(WritableSheet p_sheet,
-            final int p_sheetCategory, IntHolder p_row, MyData p_data,
-            ResourceBundle bundle) throws Exception
-    {
-        WritableFont subTotalFont = new WritableFont(WritableFont.ARIAL, 10,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat subTotalFormat = new WritableCellFormat(subTotalFont);
-        subTotalFormat.setShrinkToFit(false);
-        String title = bundle.getString("lb_total_cost_per_lang");
-
-        int row = p_row.getValue() + 4; // skip a row
-        ArrayList<String> locales = new ArrayList<String>(totalCost.keySet());
-        SortUtil.sort(locales);
-
-        int col = p_data.getSumStartCol();
-        p_sheet.addCell(new Label(col - 3, row, title, subTotalFormat));
-
-        File imgFile = File.createTempFile("GSJobChart", ".png");
-        JfreeCharUtil.drawPieChart2D("", totalCostDate, imgFile);
-        WritableImage img = new WritableImage(15, row - 1, 7, 25, imgFile);
-        p_sheet.addImage(img);
-
-        WritableCellFormat moneyFormat = getMoneyFormat();
-
-        for (String locale : locales)
-        {
-            List<Integer> indexs = totalCost.get(locale);
-            StringBuffer values = new StringBuffer();
-            for (Integer index : indexs)
-            {
-                if (values.length() == 0)
-                {
-                    values.append("SUM(");
-                }
-                else
-                {
-                    values.append("+");
-                }
-
-                values.append(totalCol).append(index);
-            }
-            values.append(")");
-
-            p_sheet.addCell(new Label(col - 1, row, locale));
-            p_sheet.addCell(new Formula(col, row++, values.toString(),
-                    moneyFormat));
-        }
-
-        // Reset total column number for every sheet.
-        totalCol = null;
-    }
-
-    private WritableCellFormat getMoneyFormat() throws WriteException
-    {
-        String euroJavaNumberFormat = getCurrencyNumberFormat();
-        NumberFormat euroNumberFormat = new NumberFormat(euroJavaNumberFormat);
-
-        WritableCellFormat moneyFormat = new WritableCellFormat(
-                euroNumberFormat);
-        moneyFormat.setWrap(false);
-        moneyFormat.setShrinkToFit(false);
-
-        return moneyFormat;
-    }
-
-    /**
-     * Add totals row
-     * 
-     * @param p_sheet
-     * @param p_sheetCategory
-     * @param p_row
-     * @param p_data
-     * @param bundle
-     * @throws Exception
-     */
-    private void addTotals(WritableSheet p_sheet, final int p_sheetCategory,
-            IntHolder p_row, MyData p_data, ResourceBundle bundle)
-            throws Exception
-    {
-        int row = p_row.getValue() + 1; // skip a row
-        WritableFont subTotalFont = new WritableFont(WritableFont.ARIAL, 10,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-
-        WritableCellFormat subTotalFormat = new WritableCellFormat(subTotalFont);
-        subTotalFormat.setWrap(true);
-        subTotalFormat.setShrinkToFit(false);
-        subTotalFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        subTotalFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        String title = bundle.getString("lb_totals");
-
-        subTotalFormat.setBackground(jxl.format.Colour.GRAY_25);
-
-        // java.text.DecimalFormat dformat = (java.text.DecimalFormat)
-        java.text.NumberFormat.getCurrencyInstance(Locale.US);
-
-        WritableCellFormat moneyFormat = getMoneyFormat();
-        moneyFormat.setBackground(jxl.format.Colour.GRAY_25);
-        moneyFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        moneyFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-
-        // Get Summary Start Column
-        int c = p_data.getSumStartCol();
-        String sumStartCol = getColumnName(c);
-
-        p_sheet.addCell(new Label(0, row, title, subTotalFormat));
-        // modify the number 3 to "sumStartCellCol-B" for "Add Job Id into
-        // online job report" issue
-        p_sheet.mergeCells(0, row, sumStartCol.charAt(0) - 'B', row);
-        int lastRow = p_row.getValue() - 2;
-
-        // add in word count totals
-        // word counts
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")", subTotalFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")", subTotalFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")", subTotalFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")", subTotalFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")", subTotalFormat));
-        sumStartCol = getColumnName(c);
-        if (p_data.isTradosStyle())
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")", subTotalFormat));
-            sumStartCol = getColumnName(c);
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")", subTotalFormat));
-            sumStartCol = getColumnName(c);
-        }
-
-        if (p_data.useInContext)
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")", subTotalFormat));
-            sumStartCol = getColumnName(c);
-        }
-        if (p_data.useDefaultContext)
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")", subTotalFormat));
-            sumStartCol = getColumnName(c);
-        }
-
-        // word count costs
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" + ":"
-                + sumStartCol + lastRow + ")", moneyFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" + ":"
-                + sumStartCol + lastRow + ")", moneyFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" + ":"
-                + sumStartCol + lastRow + ")", moneyFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" + ":"
-                + sumStartCol + lastRow + ")", moneyFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" + ":"
-                + sumStartCol + lastRow + ")", moneyFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" + ":"
-                + sumStartCol + lastRow + ")", moneyFormat));
-        sumStartCol = getColumnName(c);
-        p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" + ":"
-                + sumStartCol + lastRow + ")", moneyFormat));
-        sumStartCol = getColumnName(c);
-
-        if (p_data.isTradosStyle())
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5"
-                    + ":" + sumStartCol + lastRow + ")", moneyFormat));
-            sumStartCol = getColumnName(c);
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5"
-                    + ":" + sumStartCol + lastRow + ")", moneyFormat));
-            sumStartCol = getColumnName(c);
-        }
-
-        if (p_data.useInContext)
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5"
-                    + ":" + sumStartCol + lastRow + ")", moneyFormat));
-            sumStartCol = getColumnName(c);
-        }
-        if (p_data.useDefaultContext)
-        {
-            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5"
-                    + ":" + sumStartCol + lastRow + ")", moneyFormat));
-            sumStartCol = getColumnName(c);
-        }
-
-        /*
-         * Canceled useless column in "Review Detail report" Sheet. if
-         * (p_sheetCategory == MONTH_REVIEW_SHEET) { // For
-         * "Job id not showing in external review tabs" Issue
-         * p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCol + "5" +
-         * ":" + sumStartCol + lastRow + ")", moneyFormat)); }
-         */
-
-        // add an extra column for Dell Tracking Use
-        p_sheet.addCell(new Label(c++, row, "", moneyFormat));
-    }
-
     private double asDouble(BigDecimal d)
     {
         // BigDecimal v = d.setScale(SCALE_EXCEL,BigDecimal.ROUND_HALF_UP);
@@ -3697,17 +3821,15 @@ public class OnlineJobsReportGenerator extends XlsReports implements
      * Returns a list of jobs that are in a different project but should be
      * treated as if they're in this project.
      */
-    private void getJobsInWrongProject(MyData p_data)
+    private void getJobsInWrongProject()
     {
         try
         {
-            p_data.wrongJobs.addAll(readJobNames(p_data));
-            Iterator<Job> iter = p_data.wrongJobs.iterator();
-            while (iter.hasNext())
+            m_data.wrongJobs.addAll(readJobNames());
+            for(Job j: m_data.wrongJobs)
             {
-                Job j = (Job) iter.next();
                 // p_data.wrongJobNames.add(j.getJobName());
-                p_data.wrongJobNames.add(Long.toString(j.getId()));
+                m_data.wrongJobNames.add(Long.toString(j.getId()));
             }
         }
         catch (Exception e)
@@ -3721,7 +3843,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
      * Opens up the file "jobsInWrongDivision.txt" and returns only the jobs
      * that should be mapped to the requested projects
      */
-    private ArrayList<Job> readJobNames(MyData p_data) throws Exception
+    private ArrayList<Job> readJobNames() throws Exception
     {
         ArrayList<Job> wrongJobs = new ArrayList<Job>();
         SystemConfiguration sc = SystemConfiguration.getInstance();
@@ -3732,10 +3854,10 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         File f = new File(mapFile.toString());
         if (f.exists() == false)
         {
-            if (p_data.warnedAboutMissingWrongJobsFile == false)
+            if (m_data.warnedAboutMissingWrongJobsFile == false)
             {
                 logger.info("jobsInWrongDivision.txt file not found.");
-                p_data.warnedAboutMissingWrongJobsFile = true;
+                m_data.warnedAboutMissingWrongJobsFile = true;
             }
             return wrongJobs;
         }
@@ -3764,10 +3886,10 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                         .getJobHandler().getJobs(sp));
                 Job j = (Job) jobs.get(0);
 
-                if (p_data.wantsAllProjects == false
-                        && p_data.projectIdList.contains(newProjectId) == false)
+                if (m_data.wantsAllProjects == false
+                        && m_data.projectIdList.contains(newProjectId) == false)
                 {
-                    p_data.ignoreJobs.add(j);
+                	m_data.ignoreJobs.add(j);
                     continue;
                 }
 
@@ -3777,17 +3899,17 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 // new project
                 Long oldProjectId = j.getL10nProfile().getProject()
                         .getIdAsLong();
-                if (p_data.projectIdList.contains(oldProjectId)
-                        && !p_data.projectIdList.contains(newProjectId))
+                if (m_data.projectIdList.contains(oldProjectId)
+                        && !m_data.projectIdList.contains(newProjectId))
                 {
-                    p_data.ignoreJobs.add(j);
+                	m_data.ignoreJobs.add(j);
                     continue;
                 }
 
                 // add the Job to the job list, and add the mapping for job id
                 // to project
                 wrongJobs.add(j);
-                p_data.wrongJobMap.put(new Long(j.getId()), p);
+                m_data.wrongJobMap.put(new Long(j.getId()), p);
             }
             catch (Exception e)
             {
@@ -3804,9 +3926,9 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
     // see if the job is in the wrong job list, if so, use it's new project
     // and not the original one
-    private String getProjectDesc(MyData p_data, Job p_job)
+    private String getProjectDesc(Job p_job)
     {
-        Project p = (Project) p_data.wrongJobMap.get(new Long(p_job.getId()));
+        Project p = (Project) m_data.wrongJobMap.get(new Long(p_job.getId()));
         if (p == null)
             p = p_job.getL10nProfile().getProject();
         String d = p.getDescription();
@@ -3818,15 +3940,13 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         return desc;
     }
 
-    private ArrayList<Job> getWrongJobsForThisMonth(MyData p_data, int p_month,
+    private ArrayList<Job> getWrongJobsForThisMonth(int p_month,
             int p_year)
     {
         ArrayList<Job> wrongJobsThisMonth = new ArrayList<Job>();
-        Iterator<?> iter = p_data.wrongJobs.iterator();
         Calendar cal = Calendar.getInstance();
-        while (iter.hasNext())
+        for(Job j: m_data.wrongJobs)
         {
-            Job j = (Job) iter.next();
             cal.setTime(j.getCreateDate());
             if (p_month == cal.get(Calendar.MONTH)
                     && p_year == cal.get(Calendar.YEAR))
@@ -3974,5 +4094,253 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         {
             return sdf.format(exportDate);
         }
+    }
+    
+    private CellStyle getHeaderStyle(Workbook p_workbook){
+    	if (headerStyle == null)
+        { 
+	    	Font headerFont = p_workbook.createFont();
+	        headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+	        headerFont.setColor(IndexedColors.BLACK.getIndex());
+	        headerFont.setUnderline(Font.U_NONE);
+	        headerFont.setFontName("Arial");
+	        headerFont.setFontHeightInPoints((short) 9);
+	    	
+	        CellStyle cs = p_workbook.createCellStyle();
+	        cs.setFont(headerFont);
+	        cs.setWrapText(true);
+	        cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+	        cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	        cs.setBorderTop(CellStyle.BORDER_THIN);
+	        cs.setBorderRight(CellStyle.BORDER_THIN);
+	        cs.setBorderBottom(CellStyle.BORDER_THIN);
+	        cs.setBorderLeft(CellStyle.BORDER_THIN);
+	        
+	        headerStyle = cs;
+        }
+        
+        return headerStyle;
+    }
+    
+    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
+    {
+        if (contentStyle == null)
+        {
+            CellStyle style = p_workbook.createCellStyle();
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
+
+            contentStyle = style;
+        }
+
+        return contentStyle;
+    }
+    
+    private CellStyle getMoneyStyle(Workbook p_workbook) throws Exception
+    {
+    	if(moneyStyle == null){  		
+    		String euroJavaNumberFormat = getCurrencyNumberFormat();
+    		DataFormat euroNumberFormat = p_workbook.createDataFormat();
+    		
+    		CellStyle cs = p_workbook.createCellStyle();
+    		cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
+    		cs.setWrapText(false);
+    		
+    		moneyStyle = cs;
+    	}
+
+        return moneyStyle;
+    }
+    
+    private CellStyle getRedCellStyle(Workbook p_workbook) throws Exception
+    {
+    	if(redCellStyle == null)
+    	{   		
+    		Font redFont = p_workbook.createFont();
+    		redFont.setFontName("Arial");
+    		redFont.setUnderline(Font.U_NONE);
+    		redFont.setFontHeightInPoints((short) 10);
+	    	
+	    	CellStyle cs = p_workbook.createCellStyle();
+	    	cs.setFont(redFont);
+	    	cs.setWrapText(true);
+	    	cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+	    	cs.setFillForegroundColor(IndexedColors.RED.getIndex());
+            
+            redCellStyle = cs;
+    	}
+    	return redCellStyle;
+    }
+    
+    private CellStyle getFailedDateStyle(Workbook p_workbook) throws Exception
+    {
+    	if(failedDateStyle == null)
+    	{
+    		DataFormat dataFormat = p_workbook.createDataFormat();
+    		
+    		CellStyle cs = p_workbook.createCellStyle();
+    		cs.setWrapText(false);
+    		cs.setDataFormat(dataFormat.getFormat("M/d/yy"));
+    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+    		cs.setFillForegroundColor(IndexedColors.RED.getIndex()); 
+    		failedDateStyle = cs;
+    	}
+        return failedDateStyle;
+    }
+    
+    private CellStyle getFailedTimeStyle(Workbook p_workbook) throws Exception
+    {
+    	if(failedTimeStyle == null)
+    	{
+    		DataFormat dataFormat = p_workbook.createDataFormat();
+    		
+    		CellStyle cs = p_workbook.createCellStyle();
+    		cs.setWrapText(false);
+    		cs.setDataFormat(dataFormat.getFormat("h:mm:ss AM/PM"));
+    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+    		cs.setFillForegroundColor(IndexedColors.RED.getIndex()); 
+    		failedTimeStyle = cs;
+    	}
+        return failedTimeStyle;
+    }
+    
+    private CellStyle getFailedMoneyStyle(Workbook p_workbook) throws Exception
+    {
+    	if(failedMoneyStyle == null)
+    	{
+    		String euroJavaNumberFormat = getCurrencyNumberFormat();
+    		DataFormat euroNumberFormat = p_workbook.createDataFormat();
+    		
+    		CellStyle cs = p_workbook.createCellStyle();
+    		cs.setWrapText(false);
+    		cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
+    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+    		cs.setFillForegroundColor(IndexedColors.RED.getIndex()); 
+    		failedMoneyStyle = cs;
+    	}
+        return failedMoneyStyle;
+    }
+    
+    private CellStyle getWrongJobStyle(Workbook p_workbook) throws Exception
+    {
+    	if(wrongJobStyle == null)
+    	{
+    		Font wrongJobFont = p_workbook.createFont();
+            wrongJobFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            wrongJobFont.setColor(IndexedColors.GREY_50_PERCENT.getIndex());
+            wrongJobFont.setUnderline(Font.U_NONE);
+            wrongJobFont.setFontName("Times");
+            wrongJobFont.setFontHeightInPoints((short) 11);
+            
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(wrongJobFont);
+            
+            wrongJobStyle = cs;
+    	}
+        return wrongJobStyle;
+    }
+    
+    private CellStyle getSubTotalStyle(Workbook p_workbook) throws Exception
+    {
+    	if(subTotalStyle == null)
+    	{
+    		Font subTotalFont = p_workbook.createFont();
+        	subTotalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        	subTotalFont.setColor(IndexedColors.BLACK.getIndex());
+        	subTotalFont.setUnderline(Font.U_NONE);
+        	subTotalFont.setFontName("Arial");
+        	subTotalFont.setFontHeightInPoints((short) 10);
+        	
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(subTotalFont);
+            cs.setWrapText(true);
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            
+            subTotalStyle = cs;
+    	}
+        return subTotalStyle;
+    }
+    
+    private CellStyle getTotalMoneyStyle(Workbook p_workbook) throws Exception
+    {
+    	if(totalMoneyStyle == null)
+    	{
+    		String euroJavaNumberFormat = getCurrencyNumberFormat();
+    		DataFormat euroNumberFormat = p_workbook.createDataFormat();
+    		
+    		CellStyle cs = p_workbook.createCellStyle();
+    		cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
+    		cs.setWrapText(false);
+    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            
+            totalMoneyStyle = cs;
+    	}
+        return totalMoneyStyle;
+    }
+ 
+    public void setRegionStyle(Sheet sheet, CellRangeAddress cellRangeAddress,
+    		CellStyle cs) {
+    		for (int i = cellRangeAddress.getFirstRow(); i <= cellRangeAddress.getLastRow();
+    			i++) {
+    			Row row = getRow(sheet, i);
+    			for (int j = cellRangeAddress.getFirstColumn(); 
+    				j <= cellRangeAddress.getLastColumn(); j++) {
+    				Cell cell = getCell(row, j);
+    				cell.setCellStyle(cs);
+    			}
+    	  }
+    }
+    
+    private Row getRow(Sheet p_sheet, int p_col)
+    {
+        Row row = p_sheet.getRow(p_col);
+        if (row == null)
+            row = p_sheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
+    }
+    
+    private SimpleDateFormat getDateFormat()
+    {
+    	if(dateFormat == null)
+    	{
+	    	String datetimeFormatString = m_data.getDateFormatString();
+	        String dateFormatString = datetimeFormatString.substring(0,
+	                datetimeFormatString.indexOf(" ") - 1);
+	        SimpleDateFormat format = new SimpleDateFormat(dateFormatString);
+	        
+	        dateFormat = format;
+    	}
+    	return dateFormat;
+    }
+    
+    private SimpleDateFormat getTimeFormat()
+    {
+    	if(timeFormat == null)
+    	{
+    		String datetimeFormatString = m_data.getDateFormatString();
+    		String timeFormatString = datetimeFormatString.substring(
+    				datetimeFormatString.indexOf(" ") + 1,
+    				datetimeFormatString.length());
+    		SimpleDateFormat format = new SimpleDateFormat(timeFormatString);
+    		
+    		timeFormat = format;
+    	}
+    	return timeFormat;
     }
 }

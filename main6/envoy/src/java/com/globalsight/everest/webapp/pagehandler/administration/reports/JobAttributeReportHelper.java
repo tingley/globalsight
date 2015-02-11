@@ -22,27 +22,24 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.UnderlineStyle;
-import jxl.write.Formula;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -69,8 +66,11 @@ public class JobAttributeReportHelper
 
     private HttpServletRequest request = null;
     private HttpServletResponse response = null;
-    private WritableWorkbook workbook = null;
-    private WritableSheet sheet;
+    private Workbook workbook = null;
+    private Sheet sheet;
+    private CellStyle contentStyle = null;
+    private CellStyle headerStyle = null;
+    private CellStyle headerStyleSuper = null;
     private ResourceBundle bundle;
 
     private Date startDate;
@@ -254,7 +254,7 @@ public class JobAttributeReportHelper
             boolean found = false;
             for (Workflow w : job.getWorkflows())
             {
-                String targetLang = w.getTargetLocale().toString();
+                String targetLang = Long.toString(w.getTargetLocale().getId());
                 if (trgLocaleList.contains(targetLang))
                 {
                     found = true;
@@ -351,11 +351,26 @@ public class JobAttributeReportHelper
     {
         initDate();
 
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setSuppressWarnings(true);
-        workbook = Workbook
-                .createWorkbook(response.getOutputStream(), settings);
-        sheet = workbook.createSheet(bundle.getString("lb_job_attributes"), 0);
+        workbook = new SXSSFWorkbook();
+        sheet = workbook.createSheet(bundle.getString("lb_job_attributes"));
+    }
+    
+    private void addTitle() throws Exception
+    {
+    	// title font is black bold on white
+    	Font titleFont = workbook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Arial");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        CellStyle titleStyle = workbook.createCellStyle();
+        titleStyle.setFont(titleFont);
+    	
+        Row titleRow = getRow(0);
+        Cell cell_A = getCell(titleRow, 0);
+        cell_A.setCellValue(bundle.getString("lb_job_attributes"));
+        cell_A.setCellStyle(titleStyle);
+        sheet.setColumnWidth(0, 20 * 256);
     }
 
     /**
@@ -364,115 +379,86 @@ public class JobAttributeReportHelper
      */
     private void addHeader() throws Exception
     {
-        // title font is black bold on white
-        WritableFont titleFont = new WritableFont(WritableFont.ARIAL, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
-
-        sheet.addCell(new Label(0, 0, bundle.getString("lb_job_attributes"),
-                titleFormat));
-        sheet.setColumnView(0, 20);
-
-        // headerFont is black bold on light grey
-        WritableFont headerFont = new WritableFont(WritableFont.ARIAL, 9,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableFont headerFontSuper = new WritableFont(WritableFont.ARIAL, 9,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.ORANGE);
-        WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-        WritableCellFormat headerFormatSuper = new WritableCellFormat(
-                headerFontSuper);
-
-        headerFormat.setWrap(true);
-        headerFormat.setBackground(jxl.format.Colour.GRAY_25);
-        headerFormat.setShrinkToFit(false);
-        headerFormat.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormat.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THIN);
-
-        headerFormatSuper.setWrap(true);
-        headerFormatSuper.setBackground(jxl.format.Colour.GRAY_25);
-        headerFormatSuper.setShrinkToFit(false);
-        headerFormatSuper.setBorder(jxl.format.Border.TOP,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormatSuper.setBorder(jxl.format.Border.BOTTOM,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormatSuper.setBorder(jxl.format.Border.LEFT,
-                jxl.format.BorderLineStyle.THIN);
-        headerFormatSuper.setBorder(jxl.format.Border.RIGHT,
-                jxl.format.BorderLineStyle.THIN);
-
         int c = 0;
+        Row headerRow = getRow(2);
         for (String header : getHeaders())
         {
-            sheet.addCell(new Label(c, 2, header, headerFormat));
-            sheet.mergeCells(c, 2, c, 3);
-            sheet.setColumnView(c, 17);
+        	Cell cell_Header = getCell(headerRow, c);
+        	cell_Header.setCellValue(header);
+        	cell_Header.setCellStyle(getHeaderStyle(false));
+        	sheet.addMergedRegion(new CellRangeAddress(2, 3, c, c));
+            setRegionStyle(new CellRangeAddress(2, 3, c, c), headerStyle);
+            sheet.setColumnWidth(c, 17 * 256);
             c++;
         }
 
         for (AttributeItem item : attriutes)
         {
-            WritableCellFormat format = item.isFromSuper() ? headerFormatSuper
-                    : headerFormat;
-            sheet.addCell(new Label(c, 2, item.getName(), format));
-            sheet.mergeCells(c, 2, c, 3);
-            sheet.setColumnView(c, 25);
+            CellStyle style = item.isFromSuper() ? getHeaderStyle(true)
+                    : getHeaderStyle(false);
+            Cell cell_Attriutes = getCell(headerRow, c);
+            cell_Attriutes.setCellValue(item.getName());
+            cell_Attriutes.setCellStyle(style);
+        	sheet.addMergedRegion(new CellRangeAddress(2, 3, c, c));
+            setRegionStyle(new CellRangeAddress(2, 3, c, c), style);
+            sheet.setColumnWidth(c, 25 * 256);
             c++;
         }
     }
 
     private void writeData() throws Exception
     {
-        WritableCellFormat format = new WritableCellFormat();
-        format.setWrap(true);
-
         for (JobImpl job : jobAttributes)
         {
             int col = 0;
+            Row theRow = getRow(row);
 
             // Job Id
-            sheet.addCell(new Number(col++, row, job.getId()));
+            Cell cell_A = getCell(theRow, col++);
+            cell_A.setCellValue(job.getId());
+            cell_A.setCellStyle(getContentStyle());
 
             // Job Name
-            sheet.addCell(new Label(col++, row, job.getName(), format));
+            Cell cell_B = getCell(theRow, col++);
+            cell_B.setCellValue(job.getName());
+            cell_B.setCellStyle(getContentStyle());
 
             // Number of Languages
-            sheet.addCell(new Number(col++, row, job.getWorkflows().size()));
+            Cell cell_C = getCell(theRow, col++);
+            cell_C.setCellValue(job.getWorkflows().size());
+            cell_C.setCellStyle(getContentStyle());
 
             // Submitter
-            sheet.addCell(new Label(col++, row, UserHandlerHelper.getUser(
-                    job.getCreateUserId()).getUserName(), format));
+            Cell cell_D = getCell(theRow, col++);
+            cell_D.setCellValue(UserHandlerHelper.getUser(
+                    job.getCreateUserId()).getUserName());
+            cell_D.setCellStyle(getContentStyle());
 
             // Project
-            sheet.addCell(new Label(col++, row, job.getL10nProfile()
-                    .getProject().getName(), format));
+            Cell cell_E = getCell(theRow, col++);
+            cell_E.setCellValue(job.getL10nProfile()
+                    .getProject().getName());
+            cell_E.setCellStyle(getContentStyle());
 
             for (AttributeItem item : attriutes)
             {
                 JobAttribute jobAtt = getJobAttributeValue(item.getName(), job,
                         item.isFromSuper());
 
+                Cell cell = getCell(theRow, col++);
                 if (jobAtt == null)
                 {
-                    sheet.addCell(new Label(col++, row, bundle
-                            .getString("lb_na")));
+                	cell.setCellValue(bundle
+                            .getString("lb_na"));
+                	cell.setCellStyle(getContentStyle());
                 }
                 else
                 {
                     Object ob = jobAtt.getValue();
                     if (ob == null)
                     {
-                        sheet.addCell(new Label(col++, row, ""));
+                    	cell.setCellValue("");
+                    	cell.setCellStyle(getContentStyle());
                     }
                     else
                     {
@@ -481,7 +467,8 @@ public class JobAttributeReportHelper
                         {
                             double value = Double.parseDouble(jobAtt
                                     .getFloatValue().toString());
-                            sheet.addCell(new Number(col++, row, value));
+                            cell.setCellValue(value);
+                            cell.setCellStyle(getContentStyle());
                             if (item.isTotal())
                             {
                                 addTotalCell(col, row);
@@ -489,8 +476,9 @@ public class JobAttributeReportHelper
                         }
                         else if (Attribute.TYPE_INTEGER.equals(type))
                         {
-                            sheet.addCell(new Number(col++, row, jobAtt
-                                    .getIntegerValue()));
+                        	cell.setCellValue(jobAtt
+                                    .getIntegerValue());
+                        	cell.setCellStyle(getContentStyle());
                             if (item.isTotal())
                             {
                                 addTotalCell(col, row);
@@ -498,8 +486,8 @@ public class JobAttributeReportHelper
                         }
                         else
                         {
-                            sheet.addCell(new Label(col++, row,
-                                    getAttributeValueString(jobAtt), format));
+                        	cell.setCellValue(getAttributeValueString(jobAtt));
+                        	cell.setCellStyle(getContentStyle());
                         }
                     }
                 }
@@ -511,29 +499,36 @@ public class JobAttributeReportHelper
 
     private void writeTotal() throws Exception
     {
-        WritableFont headerFont = new WritableFont(WritableFont.ARIAL, 9,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
+    	Font totalFont = workbook.createFont();
+    	totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    	totalFont.setColor(IndexedColors.BLACK.getIndex());
+    	totalFont.setUnderline(Font.U_NONE);
+    	totalFont.setFontName("Arial");
+    	totalFont.setFontHeightInPoints((short) 9);
+    	
+        CellStyle totalStyle = workbook.createCellStyle();
+        totalStyle.setFont(totalFont);
 
         Set<Integer> keys = totalCells.keySet();
-
+        
         if (keys.size() > 0)
         {
             row++;
-            sheet.addCell(new Label(1, row, bundle.getString("lb_total"),
-                    headerFormat));
+            Cell cell_B = getCell(getRow(row), 1);
+            cell_B.setCellValue(bundle.getString("lb_total"));
+            cell_B.setCellStyle(totalStyle);
 
             for (Integer key : keys)
             {
-                Formula f = getTotalFormula(key, totalCells.get(key));
-                f.setCellFormat(headerFormat);
-                sheet.addCell(f);
+            	Cell cell = getCell(getRow(row), key - 1);
+            	cell.setCellFormula(
+                		getTotalFormula(key, totalCells.get(key)));
+            	cell.setCellStyle(totalStyle);
             }
         }
     }
 
-    private Formula getTotalFormula(int x, List<Integer> ys)
+    private String getTotalFormula(int x, List<Integer> ys)
     {
         StringBuffer result = new StringBuffer("SUM(");
         for (int i = 0; i < ys.size(); i++)
@@ -545,8 +540,7 @@ public class JobAttributeReportHelper
             result.append(toChar(x - 1)).append(ys.get(i) + 1);
         }
         result.append(")");
-        Formula formula = new Formula(x - 1, row, result.toString());
-        return formula;
+        return result.toString();
     }
 
     private String toChar(int i)
@@ -627,9 +621,9 @@ public class JobAttributeReportHelper
     {
         if (workbook != null)
         {
-            workbook.write();
-            workbook.close();
-            response.getOutputStream().close();
+        	ServletOutputStream out = response.getOutputStream();
+            workbook.write(out);
+            out.close();
         }
     }
 
@@ -671,6 +665,7 @@ public class JobAttributeReportHelper
         ReportHelper.setReportsData(userId, reportJobIDS, getReportType(), 
                 0, ReportsData.STATUS_INPROGRESS);
 
+        addTitle();
         addHeader();
         writeData();
         writeTotal();
@@ -679,6 +674,95 @@ public class JobAttributeReportHelper
         ReportHelper.setReportsData(userId, reportJobIDS, getReportType(), 
                 100, ReportsData.STATUS_FINISHED);
         end();
+    }
+    
+    public void setRegionStyle(CellRangeAddress cellRangeAddress,
+    		CellStyle cs) {
+    		for (int i = cellRangeAddress.getFirstRow(); i <= cellRangeAddress.getLastRow();
+    			i++) {
+    			Row row = getRow(i);
+    			for (int j = cellRangeAddress.getFirstColumn(); 
+    				j <= cellRangeAddress.getLastColumn(); j++) {
+    				Cell cell = getCell(row, j);
+    				cell.setCellStyle(cs);
+    			}
+    	  }
+    }
+    
+    private CellStyle getHeaderStyle(Boolean isSuper) throws Exception
+    {
+    	if(isSuper && headerStyleSuper != null){
+    		return headerStyleSuper;
+    	}
+    	
+    	if(!isSuper && headerStyle != null){
+    		return headerStyle;
+    	}
+    	
+	    Font font = workbook.createFont();
+	    font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+	    if(isSuper){	    	
+	    	font.setColor(IndexedColors.ORANGE.getIndex());
+	    }
+	    else {
+	    	font.setColor(IndexedColors.BLACK.getIndex());
+		}
+	    font.setUnderline(Font.U_NONE);
+	    font.setFontName("Arial");
+	    font.setFontHeightInPoints((short) 9);
+	
+	    CellStyle cs = workbook.createCellStyle();
+	    cs.setFont(font);
+	    cs.setWrapText(true);
+	    cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+	    cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	    cs.setBorderTop(CellStyle.BORDER_THIN);
+	    cs.setBorderRight(CellStyle.BORDER_THIN);
+	    cs.setBorderBottom(CellStyle.BORDER_THIN);
+	    cs.setBorderLeft(CellStyle.BORDER_THIN);
+	    
+	    if(isSuper){
+	    	headerStyleSuper = cs;
+	    	return headerStyleSuper;
+	    }else{
+	    	headerStyle = cs;
+	    	return headerStyle;
+	    }	    
+    }
+    
+    private CellStyle getContentStyle() throws Exception
+    {
+        if (contentStyle == null)
+        {
+            CellStyle style = workbook.createCellStyle();
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+            Font font = workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
+
+            contentStyle = style;
+        }
+
+        return contentStyle;
+    }
+    
+    private Row getRow(int p_col)
+    {
+        Row row = sheet.getRow(p_col);
+        if (row == null)
+            row = sheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
     }
     
     public String getReportType()

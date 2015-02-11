@@ -214,6 +214,7 @@ public class Permission
     static public final String JOBS_VIEW = "jobs.view";
     static public final String JOBS_SEARCH_REPLACE = "jobs.searchreplace";
     static public final String JOBS_CHANGE_WFM = "jobs.changewfm";
+    static public final String JOB_CHANGE_NAME = "job.changename";
     static public final String JOBS_DISCARD = "jobs.discard";
     static public final String JOBS_CLEAR_ERRORS = "jobs.clearerrors";
     static public final String JOBS_DISPATCH = "jobs.dispatch";
@@ -499,6 +500,7 @@ public class Permission
 
     // For Job creation
     static public final String CREATE_JOB = "createjob";
+    static public final String CREATE_JOB_NO_APPLET = "createJobNoApplet";
     // Limit the range of global LP permissions,super LocalizationParticipant
     // user can only edit below permissions.
     static public final String[] GLOBAL_LP_PERMS =
@@ -1017,7 +1019,11 @@ public class Permission
         added = addPermission(389, MTP_NEW) || added;
         added = addPermission(390, MTP_EDIT) || added;
         added = addPermission(391, MTP_REMOVE) || added;
-
+        added = addPermission(392, JOB_CHANGE_NAME) || added;
+        
+        // For GBS-3339, New CreateJob feature that does not use Java applet
+        added = addPermission(393, CREATE_JOB_NO_APPLET) || added;
+        
         return added;
     }
 

@@ -22,6 +22,7 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TRANSLATABLE;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -45,6 +46,7 @@ import com.globalsight.everest.webapp.pagehandler.tm.management.Tm3ConvertProces
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.BaseTm;
 import com.globalsight.ling.tm3.core.DefaultManager;
 import com.globalsight.ling.tm3.core.TM3Attribute;
@@ -89,6 +91,7 @@ public class Tm3Migrator
      */
     public ProjectTM migrate(ProgressReporter progress)
     {
+        Connection conn = null;
         try
         {
             // Now make sure we can find a name for the new TM
@@ -100,9 +103,10 @@ public class Tm3Migrator
                 return null;
             }
 
+            conn = DbUtil.getConnection();
             TM3Manager manager = DefaultManager.create();
             SegmentResultSet segments = oldTm.getSegmentTmInfo()
-                    .getAllSegments(oldTm, null, null);
+                    .getAllSegments(oldTm, null, null, conn);
 
             // XXX It would be nice to be able to ensure that the shared storage
             // for this company actually existed first.
@@ -309,6 +313,10 @@ public class Tm3Migrator
             logger.error(e.getMessage(), e);
             return null;
         }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
     }
 
     /**
@@ -321,8 +329,10 @@ public class Tm3Migrator
      */
     public ProjectTM migrate()
     {
+        Connection conn = null;
         try
         {
+            conn = DbUtil.getConnection();
             // Change the status to "Converting" first !!!
             convertProcess.setStatus(WebAppConstants.TM_STATUS_CONVERTING);
 
@@ -427,7 +437,7 @@ public class Tm3Migrator
             TM3Attribute fromWsAttr = TM3Util.getAttr(tm3tm, FROM_WORLDSERVER);
 
             SegmentResultSet segments = oldTm.getSegmentTmInfo()
-                    .getAllSegments(oldTm, lastTUId);
+                    .getAllSegments(oldTm, lastTUId, conn);
 
             // In order to calculate completion percentage, we need to see how
             // big the old TM was
@@ -600,6 +610,10 @@ public class Tm3Migrator
             logger.error(e.getMessage(), e);
             return null;
         }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
     }
 
     private void addUsersToTmAccessControl()
@@ -684,14 +698,15 @@ public class Tm3Migrator
         this.convertProcess.setStatus("Cancelling");
         try
         {
-            ProjectTM tm3Tm = ServerProxy.getProjectHandler()
-                    .getProjectTMById(convertingTm.getId(), false);
+            ProjectTM tm3Tm = ServerProxy.getProjectHandler().getProjectTMById(
+                    convertingTm.getId(), false);
             tm3Tm.setStatus("Cancelling");
             HibernateUtil.update(tm3Tm);
         }
         catch (Exception e)
         {
-            logger.error("Error when update project TM status to 'Cancelling'.", e);
+            logger.error(
+                    "Error when update project TM status to 'Cancelling'.", e);
         }
     }
 

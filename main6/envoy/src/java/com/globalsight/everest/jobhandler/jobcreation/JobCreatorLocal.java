@@ -479,9 +479,14 @@ public class JobCreatorLocal implements JobCreator
      * Return an appropriate existing job, or create a new one if none exists.
      * This method uses a try-finally (no catch required) block to ensure that
      * all waiting threads are notified when the method is finished.
+     * 
+     * [York] When add many files via "Add Files", there will be deadlock(since
+     * GBS-3042). As this method is seldom used, an easy fix is adding
+     * "synchronized" to this.A possible better fix is to put the jobId in if
+     * the job has been existed, but that need more test too.
      */
-    private Job availableJob(Request p_request, BatchMonitor p_monitor,
-            boolean p_isBatch, HashMap p_targetPages)
+    private synchronized Job availableJob(Request p_request,
+            BatchMonitor p_monitor, boolean p_isBatch, HashMap p_targetPages)
             throws JobCreationException
     {
         JobImpl job = null;

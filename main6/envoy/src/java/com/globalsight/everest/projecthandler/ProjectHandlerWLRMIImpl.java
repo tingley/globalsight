@@ -30,11 +30,13 @@ import java.util.Vector;
 
 import org.dom4j.Document;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfo;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.WorkflowInfos;
 import com.globalsight.everest.workflow.WorkflowTemplate;
@@ -157,7 +159,7 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
         m_localReference.deleteProject(p_project);
     }
 
-    public Collection getAllProjects() throws RemoteException,
+    public Collection<Project> getAllProjects() throws RemoteException,
             ProjectHandlerException
     {
         return m_localReference.getAllProjects();
@@ -267,8 +269,8 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
     /**
      * @see ProjectHandler.getAllPossibleUserInfos(User)
      */
-    public List getAllPossibleUserInfos(User p_manager) throws RemoteException,
-            ProjectHandlerException
+    public List<UserInfo> getAllPossibleUserInfos(User p_manager)
+            throws RemoteException, ProjectHandlerException
     {
         return m_localReference.getAllPossibleUserInfos(p_manager);
     }
@@ -298,20 +300,21 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
      *            Collection of Projects.
      * @returns List of L10nProfiles associated with the Projects.
      */
-    public Collection getL10nProfiles(Collection p_projects)
-            throws RemoteException, ProjectHandlerException
+    public Collection<L10nProfile> getL10nProfiles(
+            Collection<Project> p_projects) throws RemoteException,
+            ProjectHandlerException
     {
         return m_localReference.getL10nProfiles(p_projects);
     }
 
-    public List getAllProjectInfosForGUI() throws RemoteException,
+    public List<ProjectInfo> getAllProjectInfosForGUI() throws RemoteException,
             ProjectHandlerException
     {
         return m_localReference.getAllProjectInfosForGUI();
     }
 
-	public List getAllProjectInfosForGUIbyCondition(String condition)
-			throws RemoteException, ProjectHandlerException
+    public List<ProjectInfo> getAllProjectInfosForGUIbyCondition(
+            String condition) throws RemoteException, ProjectHandlerException
 	{
 		return m_localReference.getAllProjectInfosForGUIbyCondition(condition);
 	}
@@ -473,8 +476,8 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public Collection getAllWorkflowTemplateInfos() throws RemoteException,
-            ProjectHandlerException
+    public Collection<WorkflowTemplateInfo> getAllWorkflowTemplateInfos()
+            throws RemoteException, ProjectHandlerException
     {
         return m_localReference.getAllWorkflowTemplateInfos();
     }
@@ -676,7 +679,7 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getFileProfilesByProject(project);
     }
 
-    public ArrayList fileProfileListTerminology(Project project)
+    public ArrayList<FileProfile> fileProfileListTerminology(Project project)
             throws RemoteException, ProjectHandlerException
     {
         return m_localReference.fileProfileListTerminology(project);
@@ -695,7 +698,7 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
     }
 
     @Override
-    public List getProjectsByCompanyId(long companyId)
+    public List<Project> getProjectsByCompanyId(long companyId)
     {
         return m_localReference.getProjectsByCompanyId(companyId);
     }

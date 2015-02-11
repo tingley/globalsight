@@ -14,6 +14,7 @@ import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
@@ -243,7 +244,16 @@ public class SegmentFilter
         }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED))
         {
-            return p_trgTuv.isNotLocalized();
+            boolean isApproved = p_trgTuv.getState().getName()
+                    .equals(TuvState.APPROVED.getName());
+            boolean isDoNotTranslate = p_trgTuv.getState().getName()
+                    .equals(TuvState.DO_NOT_TRANSLATE.getName());
+            return p_trgTuv.isNotLocalized() && !isApproved
+                    && !isDoNotTranslate;
+        }
+        else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_APPROVED))
+        {
+            return TuvState.APPROVED.equals(p_trgTuv.getState());
         }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_COMMENTED))
         {

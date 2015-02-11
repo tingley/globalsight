@@ -17,9 +17,8 @@
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -29,24 +28,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.Alignment;
-import jxl.format.CellFormat;
-import jxl.format.UnderlineStyle;
-import jxl.format.VerticalAlignment;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
@@ -64,15 +60,15 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class CharacterCountReportGenerator implements ReportGenerator
 {
-    protected ResourceBundle m_bundle = null;
+	private HttpServletRequest request = null;
     protected Locale m_uiLocale = null;
     protected String m_companyName = "";
     protected List<Long> m_jobIDS = new ArrayList<Long>();
     protected List<GlobalSightLocale> m_targetLocales = new ArrayList<GlobalSightLocale>();
     String m_userId;
 
-    protected WritableCellFormat m_contentFormat = null;
-    protected WritableCellFormat m_headerFormat = null;
+    private CellStyle contentStyle = null;
+    private CellStyle headerStyle = null;
 
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
@@ -91,9 +87,9 @@ public class CharacterCountReportGenerator implements ReportGenerator
     public CharacterCountReportGenerator(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
     {
+    	request = p_request;
         HttpSession session = p_request.getSession();
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
-        m_bundle = PageHandler.getBundle(p_request.getSession());
         m_uiLocale = (Locale) p_request.getSession().getAttribute(
                 WebAppConstants.UILOCALE);
         if (m_uiLocale == null)
@@ -171,11 +167,9 @@ public class CharacterCountReportGenerator implements ReportGenerator
             m_jobIDS = p_jobIDS;
         }
         List<File> workBooks = new ArrayList<File>();
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setSuppressWarnings(true);
         int finishedJobNum = 0;
         for (long jobID : p_jobIDS)
-        {
+        {               
             // Cancel generate reports.
             if (isCancelled())
                 return null;
@@ -183,20 +177,22 @@ public class CharacterCountReportGenerator implements ReportGenerator
             Job job = ServerProxy.getJobHandler().getJobById(jobID);
             if (job == null)
                 continue;
-
+            setAllCellStyleNull();
+            
             File file = ReportHelper.getXLSReportFile(getReportType(), job);
-            WritableWorkbook workbook = Workbook.createWorkbook(file, settings);
-            m_contentFormat = m_headerFormat = null;
-            createReport(workbook, job, p_targetLocales);
-            workbook.write();
-            workbook.close();
+            Workbook workBook = new SXSSFWorkbook();
+            createReport(workBook, job, p_targetLocales);
+            
+            FileOutputStream out = new FileOutputStream(file);
+            workBook.write(out);
+            out.close();
             workBooks.add(file);
 
             // Sets Reports Percent.
             setPercent(++finishedJobNum);
         }
 
-        return workBooks.toArray(new File[workBooks.size()]);
+        return ReportHelper.moveReports(workBooks, m_userId);
     }
 
     /**
@@ -211,218 +207,206 @@ public class CharacterCountReportGenerator implements ReportGenerator
      *            target language id list
      * @throws Exception
      */
-    private void createReport(WritableWorkbook p_workbook, Job p_job,
+    private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLangIDS) throws Exception
     {
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
-        for (GlobalSightLocale tgtL : p_targetLangIDS)
+        for (GlobalSightLocale trgLocale : p_targetLangIDS)
         {
-            if (!jobTL.contains(tgtL))
+            if (!jobTL.contains(trgLocale))
                 continue;
-            WritableSheet sheet = p_workbook.createSheet(tgtL.toString(),
-                    p_workbook.getNumberOfSheets());
-            // Write Header
-            addHeader(sheet);
+            
+            // Create One Report Sheet/Tab
+            Sheet sheet = p_workbook.createSheet(trgLocale.toString());
+            
+            // add title
+            addTitle(p_workbook, sheet);
+            
+            // Add Locale Pair Header
+            addLanguageHeader(p_workbook, sheet);
+            
+            // Add Segment Header
+            addSegmentHeader(p_workbook, sheet);
+            
             // Write Language Information
-            writeLanguageInfo(sheet, p_job, tgtL.getDisplayName(m_uiLocale));
+            String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
+            String trgLang = trgLocale.getDisplayName(m_uiLocale);
+            writeLanguageInfo(p_workbook, sheet, srcLang, trgLang, p_job);
+            
             // Write Segments Information
-            writeCharacterCountSegmentInfo(sheet, p_job, tgtL.getDisplayName(),
-                    "");
+            writeCharacterCountSegmentInfo(p_workbook, sheet, p_job, trgLang, "",
+                    SEGMENT_START_ROW);
         }
     }
 
     /**
-     * Add header to the sheet
+     * Add title to the sheet
      * 
+     * @param p_workBook
      * @param p_sheet
      *            the sheet
      * @throws Exception
      */
-    private void addHeader(WritableSheet p_sheet) throws Exception
-    {
-        // add title
-        addTitle(p_sheet, m_bundle.getString("character_count_report"));
-        // add job header
-        addLanguageHeader(p_sheet);
-        // add segment info header
-        addSegmentHeader(p_sheet);
-    }
-
-    private void addTitle(WritableSheet p_sheet, String p_title)
+    private void addTitle(Workbook p_workBook, Sheet p_sheet)
             throws Exception
     {
-        // Title font is black bold on white
-        WritableFont titleFont = new WritableFont(WritableFont.TIMES, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
-        p_sheet.addCell(new Label(0, 0, p_title, titleFormat));
-        p_sheet.setColumnView(0, 40);
+    	ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+    	// Title font is black bold on white
+        Font titleFont = p_workBook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Times");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        CellStyle cs = p_workBook.createCellStyle();
+        cs.setFont(titleFont);
+        
+        Row titleRow = getRow(p_sheet, 0);
+        Cell titleCell = getCell(titleRow, 0);
+        titleCell.setCellValue(bundle.getString("character_count_report"));
+        titleCell.setCellStyle(cs);
     }
 
     /**
      * Add job header to the sheet
      * 
+     * @param p_workBook
      * @param p_sheet
      *            the sheet
      * @throws Exception
      */
-    private void addLanguageHeader(WritableSheet p_sheet) throws Exception
+    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
+    	ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+    	
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_source_language"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_target_language"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("jobinfo.jobid"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
+        
+        Row langRow = getRow(p_sheet, row);
+        Cell srcLangCell = getCell(langRow, col);
+        srcLangCell.setCellValue(bundle.getString("lb_source_language"));
+        srcLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell trgLangCell = getCell(langRow, col);
+        trgLangCell.setCellValue(bundle.getString("lb_target_language"));
+        trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell jobIdCell = getCell(langRow, col);
+        jobIdCell.setCellValue(bundle.getString("jobinfo.jobid"));
+        jobIdCell.setCellStyle(getHeaderStyle(p_workBook));
     }
 
     /**
      * Add segment header to the sheet
      * 
+     * @param p_workBook
      * @param p_sheet
      *            the sheet
      * @throws Exception
      */
-    private void addSegmentHeader(WritableSheet p_sheet) throws Exception
+    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
+    	ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         int col = 0;
         int row = SEGMENT_HEADER_ROW;
+        Row segHeaderRow = getRow(p_sheet, row);
 
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_segment_id"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 20);
+        Cell cell_A = getCell(segHeaderRow, col);
+        cell_A.setCellValue(bundle.getString("lb_segment_id"));
+        cell_A.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 20 * 256);
+        col++;
+        
+        Cell cell_B = getCell(segHeaderRow, col);
+        cell_B.setCellValue(bundle.getString("lb_source_segment"));
+        cell_B.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+        
+        Cell cell_C = getCell(segHeaderRow, col);
+        cell_C.setCellValue(bundle.getString("lb_source_character_count"));
+        cell_C.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 30 * 256);
+        col++;
 
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_source_segment"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_source_character_count"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_target_segment"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_target_character_count"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-    }
-
-    /**
-     * 
-     * @return format of the sheet header
-     * @throws Exception
-     */
-    private CellFormat getHeaderFormat() throws Exception
-    {
-        if (m_headerFormat == null)
-        {
-            WritableFont headerFont = new WritableFont(WritableFont.TIMES, 11,
-                    WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                    jxl.format.Colour.BLACK);
-            WritableCellFormat format = new WritableCellFormat(headerFont);
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setBackground(jxl.format.Colour.GRAY_25);
-            format.setBorder(jxl.format.Border.ALL,
-                    jxl.format.BorderLineStyle.THIN, jxl.format.Colour.BLACK);
-
-            m_headerFormat = format;
-        }
-        return m_headerFormat;
+        Cell cell_D = getCell(segHeaderRow, col);
+        cell_D.setCellValue(bundle.getString("lb_target_segment"));
+        cell_D.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+        
+        Cell cell_E = getCell(segHeaderRow, col);
+        cell_E.setCellValue(bundle.getString("lb_target_character_count"));
+        cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 30 * 256);
     }
 
     /**
      * Write the Job information into the header
      * 
+     * @param p_workbook
+     *            workbook
      * @param p_sheet
-     *            the sheet
-     * @param p_jobId
-     *            the job id
+     *            sheet
+     * @param p_sourceLang
+     *            the displayed source language
      * @param p_targetLang
      *            the displayed target language
-     * @param p_dateFormat
-     *            the date format
+     * @param p_job
+     * 			  the job
      * @throws Exception
      */
-    private void writeLanguageInfo(WritableSheet p_sheet, Job p_job,
-            String p_targetLang) throws Exception
+    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet,
+            String p_sourceLang, String p_targetLang, Job p_job) throws Exception
     {
-        int col = 0;
+    	int col = 0;
         int row = LANGUAGE_INFO_ROW;
-
-        // Write Source Language into the sheet
-        p_sheet.addCell(new Label(col++, row, p_job.getSourceLocale()
-                .getDisplayName(m_uiLocale), getContentFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-
-        // Write Target Language into the sheet
-        p_sheet.addCell(new Label(col++, row, p_targetLang, getContentFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-
-        // Write Job ID into the sheet
-        p_sheet.addCell(new Label(col++, row, String.valueOf(p_job.getId()),
-                getContentFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-    }
-
-    /**
-     * 
-     * @return format of the report content
-     * @throws Exception
-     */
-    private WritableCellFormat getContentFormat() throws Exception
-    {
-        if (m_contentFormat == null)
-        {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.LEFT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
-
-            m_contentFormat = format;
-        }
-        return m_contentFormat;
+        Row langInfoRow = getRow(p_sheet, row);
+        
+        // Source Language
+        Cell srcLangCell = getCell(langInfoRow, col++);
+        srcLangCell.setCellValue(p_sourceLang);
+        srcLangCell.setCellStyle(getContentStyle(p_workbook));
+        
+        // Target Language
+        Cell trgLangCell = getCell(langInfoRow, col++);
+        trgLangCell.setCellValue(p_targetLang);
+        trgLangCell.setCellStyle(getContentStyle(p_workbook));
+        
+        // Job ID
+        Cell jobIdCell = getCell(langInfoRow, col++);
+        jobIdCell.setCellValue(p_job.getId());
+        jobIdCell.setCellStyle(getContentStyle(p_workbook));
     }
 
     /**
      * Write segment information into each row of the sheet
      * 
+     * @param p_workBook
+     *            the workBook
      * @param p_sheet
      *            the sheet
-     * @param p_jobId
-     *            the job id
+     * @param p_job
+     *            the job data for report
      * @param p_targetLang
-     *            the displayed target language
+     *            the target language
      * @param p_srcPageId
-     *            the source page id
+     * 			  the source page id
+     * @param p_row
+     *            the segment row in sheet
      * @throws Exception
      */
-    private void writeCharacterCountSegmentInfo(WritableSheet p_sheet,
-            Job p_job, String p_targetLang, String p_srcPageId)
+    private void writeCharacterCountSegmentInfo(Workbook p_workBook, Sheet p_sheet,
+    		Job p_job, String p_targetLang, String p_srcPageId, int p_row)
             throws Exception
     {
-        Collection wfs = p_job.getWorkflows();
-        Iterator it = wfs.iterator();
-        Vector targetPages = new Vector();
+        Vector<TargetPage> targetPages = new Vector<TargetPage>();
 
         long companyId = p_job.getCompanyId();
 
-        while (it.hasNext())
+        for (Workflow workflow : p_job.getWorkflows())
         {
-            Workflow workflow = (Workflow) it.next();
-
             if (Workflow.PENDING.equals(workflow.getState())
                     || Workflow.CANCELLED.equals(workflow.getState())
                     || Workflow.EXPORT_FAILED.equals(workflow.getState())
@@ -436,14 +420,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
                 targetPages = workflow.getTargetPages();
             }
         }
-        if (targetPages.isEmpty())
+        if (!targetPages.isEmpty())
         {
-            // If no corresponding target page exists, set the cell blank
-            // writeCommentsAnalysisBlank(p_sheet);
-        }
-        else
-        {
-            int row = SEGMENT_START_ROW;
             String sourceSegmentString = null;
             String targetSegmentString = null;
 
@@ -462,8 +440,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
                 }
 
                 SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
-                List sourceTuvs = getPageTuvs(sourcePage);
-                List targetTuvs = getPageTuvs(targetPage);
+                List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
+                List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
 
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
@@ -474,89 +452,111 @@ public class CharacterCountReportGenerator implements ReportGenerator
                             .getTextValue();
                     targetSegmentString = targetTuv.getGxmlElement()
                             .getTextValue();
-
+                    
+                    CellStyle contentStyle = getContentStyle(p_workBook);
+                    Row currentRow = getRow(p_sheet, p_row);
+                    
                     // Segment id
-                    p_sheet.addCell(new Number(col++, row, sourceTuv.getTu(
-                            companyId).getId(), getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 20);
+                    Cell cell_A = getCell(currentRow, col);
+                    cell_A.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_A.setCellStyle(contentStyle);
+                    col++;
 
                     // Source segment
-                    p_sheet.addCell(new Label(col++, row, sourceSegmentString,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 40);
+                    Cell cell_B = getCell(currentRow, col);
+                    cell_B.setCellValue(sourceSegmentString);
+                    cell_B.setCellStyle(contentStyle);
+                    col++;;
 
                     // Source Character count
-                    p_sheet.addCell(new Label(col++, row, String
-                            .valueOf(sourceSegmentString.length()),
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 30);
+                    Cell cell_C = getCell(currentRow, col);
+                    cell_C.setCellValue(String.valueOf(sourceSegmentString.length()));
+                    cell_C.setCellStyle(contentStyle);
+                    col++;
 
                     // Target segment
-                    p_sheet.addCell(new Label(col++, row, targetSegmentString,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 40);
+                    Cell cell_D = getCell(currentRow, col);
+                    cell_D.setCellValue(targetSegmentString);
+                    cell_D.setCellStyle(contentStyle);
+                    col++;
 
                     // Target Character count
-                    p_sheet.addCell(new Label(col++, row, String
-                            .valueOf(targetSegmentString.length()),
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 30);
-                    row++;
+                    Cell cell_E = getCell(currentRow, col);
+                    cell_E.setCellValue(String.valueOf(targetSegmentString.length()));
+                    cell_E.setCellStyle(contentStyle);
+                    
+                    p_row++;
                 }
             }
         }
     }
 
-    /**
-     * Set the cell blank
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @throws Exception
-     */
-    private void writeCommentsAnalysisBlank(WritableSheet p_sheet)
-            throws Exception
+    private void setAllCellStyleNull()
     {
-        int col = 0;
-        int row = 7;
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
+        this.headerStyle = null;
+        this.contentStyle = null;
+    }
+    
+    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
+    {
+        if (headerStyle == null)
+        {
+            Font font = p_workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            font.setColor(IndexedColors.BLACK.getIndex());
+            font.setUnderline(Font.U_NONE);
+            font.setFontName("Times");
+            font.setFontHeightInPoints((short) 11);
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(font);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderRight(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setBorderLeft(CellStyle.BORDER_THIN);
+
+            headerStyle = cs;
+        }
+
+        return headerStyle;
     }
 
-    /**
-     * Get tuvs of source page from database. Return a list
-     * 
-     * @param p_sourcePage
-     *            source page
-     * @throws Exception
-     */
-    private List getPageTuvs(SourcePage p_sourcePage) throws Exception
+    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
     {
-        return new ArrayList(ServerProxy.getTuvManager()
-                .getSourceTuvsForStatistics(p_sourcePage));
+        if (contentStyle == null)
+        {
+            CellStyle style = p_workbook.createCellStyle();
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
+
+            contentStyle = style;
+        }
+
+        return contentStyle;
     }
 
-    /**
-     * Get tuvs of target page from database. Return a list
-     * 
-     * @param p_targetPage
-     *            target page
-     * @throws Exception
-     */
-    private List getPageTuvs(TargetPage p_targetPage) throws Exception
+    private Row getRow(Sheet p_sheet, int p_col)
     {
-        return new ArrayList(ServerProxy.getTuvManager()
-                .getTargetTuvsForStatistics(p_targetPage));
+        Row row = p_sheet.getRow(p_col);
+        if (row == null)
+            row = p_sheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
     }
 
     @Override

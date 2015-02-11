@@ -372,9 +372,9 @@ public interface Tuv
 
     public void setSid(String sid);
 
-    public Set getXliffAlt(boolean p_loadDataFromDB);
+    public Set<XliffAlt> getXliffAlt(boolean p_loadDataFromDB);
 
-    public void setXliffAlt(Set p_alt);
+    public void setXliffAlt(Set<XliffAlt> p_alt);
 
     public void addXliffAlt(XliffAlt alt);
 

@@ -300,8 +300,8 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
         	m_outputStream.write("<ut DisplayText=\"");
         	m_outputStream.write(TTXConstants.GS_LOCKED_SEGMENT);
         	m_outputStream.write("\">");
-        	//String trgSegment2 = handleTagsInSegment(trgSegment);
-	        m_outputStream.write(trgSegment);
+            //String trgSegment2 = handleTagsInSegment(trgSegment);
+            m_outputStream.write(trgSegment);
         	m_outputStream.write("</ut>");
         }
         

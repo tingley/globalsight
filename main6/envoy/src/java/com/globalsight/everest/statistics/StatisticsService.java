@@ -41,6 +41,7 @@ import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -84,25 +85,17 @@ public class StatisticsService
         try
         {
             List<TargetPage> targetPages = getAllTargetPagesForWorkflow(p_workflow);
-            Map<SegmentTmTuv, List<SegmentTmTuv>> m_uniqueSegments = new HashMap<SegmentTmTuv, List<SegmentTmTuv>>();
+            Map<SegmentTmTuv, List<SegmentTmTuv>> uniqueSegments = new HashMap<SegmentTmTuv, List<SegmentTmTuv>>();
             Map uniqueSegments2 = new HashMap();
             int threshold = p_workflow.getJob().getLeverageMatchThreshold();
-
-            // Touch every page's TUs to load them to improve performance.
-            for (TargetPage targetPage : targetPages)
-            {
-                if (targetPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE)
-                {
-                    SegmentTuUtil.getTusBySourcePageId(targetPage
-                            .getSourcePage().getId());
-                }
-            }
 
             for (TargetPage targetPage : targetPages)
             {
                 if (targetPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE)
                 {
                     SourcePage sourcePage = targetPage.getSourcePage();
+                    SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
+
                     // As here don't need XliffAlt data, don't load them to
                     // improve performance.
                     boolean needLoadExtraInfo = false;
@@ -150,7 +143,7 @@ public class StatisticsService
                     {
                         targetPageWordCounts = calculateTargetPageWordCounts(
                                 splittedTuvs, matches, p_excludedTuTypes,
-                                m_uniqueSegments);
+                                uniqueSegments);
                         targetPage.setWordCount(targetPageWordCounts);
                     }
 
@@ -166,13 +159,21 @@ public class StatisticsService
                     SegmentTuvUtil.getTargetTuvs(targetPage);
                     updateRepetitionInfoToTu(splittedTuvs, matches,
                             uniqueSegments2, cachedTus,
-                            sourcePage.getCompanyId(), targetLocaleId);
+                            sourcePage.getCompanyId(), targetLocaleId); 
                 }
             }
+            uniqueSegments.clear();
+            uniqueSegments = null;
+            uniqueSegments2.clear();
+            uniqueSegments2 = null;
         }
         catch (Exception e)
         {
             c_logger.error(e.getMessage(), e);
+        }
+        finally
+        {
+            SegmentTuTuvCacheManager.clearCache();
         }
     }
 
@@ -523,12 +524,11 @@ public class StatisticsService
         int thresholdLowFuzzyWordCount = 0;
         int thresholdNoMatchWordCount = 0;
 
-        Map<SegmentTmTuv, List<SegmentTmTuv>> tmp = new HashMap<SegmentTmTuv, List<SegmentTmTuv>>();
-        tmp.putAll(m_uniqueSegments);
-
         Iterator<BaseTmTuv> si = sTuvs.iterator();
         while (si.hasNext())
         {
+	        boolean isUniqueFlag = true;
+
             SegmentTmTuv tuv = (SegmentTmTuv) si.next();
             int wordCount = tuv.getWordCount();
 
@@ -577,6 +577,7 @@ public class StatisticsService
                     }
                     else
                     {
+                        isUniqueFlag = false;
                         lowFuzzyRepetitionWordCount += wordCount;
                         if (isMtTranslation)
                             mtRepetitionsWordCount += wordCount;
@@ -596,6 +597,7 @@ public class StatisticsService
                     }
                     else
                     {
+                        isUniqueFlag = false;
                         medFuzzyRepetitionWordCount += wordCount;
                         if (isMtTranslation)
                             mtRepetitionsWordCount += wordCount;
@@ -615,6 +617,7 @@ public class StatisticsService
                     }
                     else
                     {
+                        isUniqueFlag = false;
                         medHighFuzzyRepetionWordCount += wordCount;
                         if (isMtTranslation)
                             mtRepetitionsWordCount += wordCount;
@@ -634,6 +637,7 @@ public class StatisticsService
                     }
                     else
                     {
+                        isUniqueFlag = false;
                         highFuzzyRepetionWordCount += wordCount;
                         if (isMtTranslation)
                             mtRepetitionsWordCount += wordCount;
@@ -656,6 +660,7 @@ public class StatisticsService
                     }
                     else
                     {
+                        isUniqueFlag = false;
                         noMatchRepetitionWordCount += wordCount;
                         if (isMtTranslation)
                             mtRepetitionsWordCount += wordCount;
@@ -676,61 +681,36 @@ public class StatisticsService
                 statisticsMatchTypeByThreshold = types
                         .getStatisticsMatchTypeByThreshold();
             }
-            ArrayList<SegmentTmTuv> identicalSegmentsOfThreshold = null;
+
             switch (statisticsMatchTypeByThreshold)
             {
                 case MatchTypeStatistics.THRESHOLD_HI_FUZZY:
-                    identicalSegmentsOfThreshold = (ArrayList<SegmentTmTuv>) tmp
-                            .get(tuv);
-                    if (identicalSegmentsOfThreshold == null)
+                    if (isUniqueFlag)
                     {
-                        identicalSegmentsOfThreshold = new ArrayList<SegmentTmTuv>();
-                        tmp.put(tuv, identicalSegmentsOfThreshold);
-                        identicalSegmentsOfThreshold.add(tuv);
                         thresholdHiFuzzyWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.THRESHOLD_MED_HI_FUZZY:
-                    identicalSegmentsOfThreshold = (ArrayList<SegmentTmTuv>) tmp
-                            .get(tuv);
-                    if (identicalSegmentsOfThreshold == null)
+                    if (isUniqueFlag)
                     {
-                        identicalSegmentsOfThreshold = new ArrayList<SegmentTmTuv>();
-                        tmp.put(tuv, identicalSegmentsOfThreshold);
-                        identicalSegmentsOfThreshold.add(tuv);
                         thresholdMedHiFuzzyWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.THRESHOLD_MED_FUZZY:
-                    identicalSegmentsOfThreshold = (ArrayList<SegmentTmTuv>) tmp
-                            .get(tuv);
-                    if (identicalSegmentsOfThreshold == null)
+                    if (isUniqueFlag)
                     {
-                        identicalSegmentsOfThreshold = new ArrayList<SegmentTmTuv>();
-                        tmp.put(tuv, identicalSegmentsOfThreshold);
-                        identicalSegmentsOfThreshold.add(tuv);
                         thresholdMedFuzzyWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.THRESHOLD_LOW_FUZZY:
-                    identicalSegmentsOfThreshold = (ArrayList<SegmentTmTuv>) tmp
-                            .get(tuv);
-                    if (identicalSegmentsOfThreshold == null)
+                    if (isUniqueFlag)
                     {
-                        identicalSegmentsOfThreshold = new ArrayList<SegmentTmTuv>();
-                        tmp.put(tuv, identicalSegmentsOfThreshold);
-                        identicalSegmentsOfThreshold.add(tuv);
                         thresholdLowFuzzyWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.THRESHOLD_NO_MATCH:
-                    identicalSegmentsOfThreshold = (ArrayList<SegmentTmTuv>) tmp
-                            .get(tuv);
-                    if (identicalSegmentsOfThreshold == null)
+                    if (isUniqueFlag)
                     {
-                        identicalSegmentsOfThreshold = new ArrayList<SegmentTmTuv>();
-                        tmp.put(tuv, identicalSegmentsOfThreshold);
-                        identicalSegmentsOfThreshold.add(tuv);
                         thresholdNoMatchWordCount += wordCount;
                     }
                     break;

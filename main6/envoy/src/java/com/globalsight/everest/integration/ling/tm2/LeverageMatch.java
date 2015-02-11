@@ -38,6 +38,7 @@ import com.globalsight.ling.tm2.leverage.SidComparable;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 
+@SuppressWarnings("rawtypes")
 public class LeverageMatch extends PersistentObject implements Comparable,
         SidComparable
 {
@@ -86,13 +87,17 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     private int m_projectTmIndex = -1;
     private long m_tmId = 0;
     private long m_tmProfileId = 0;
-    private String sid = null;
     private String orgSid = null;
-    private Date modifyDate = null;
     // if the match data is from MT,then use this to save MT name
     private String mtName = null;
     private String matchedOriginalSource;
     private long jobDataTuId = 0;
+    private String sid;
+
+    private String creationUser;
+    private Date creationDate;
+    private String modifyUser;
+    private Date modifyDate;
 
     // Helper object - still necessary?
     // private SegmentTagsAligner m_tagAligner;
@@ -126,10 +131,13 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         m_tmProfileId = p_other.m_tmProfileId;
         sid = p_other.sid;
         orgSid = p_other.orgSid;
-        modifyDate = p_other.modifyDate;
         mtName = p_other.mtName;
         matchedOriginalSource = p_other.matchedOriginalSource;
         jobDataTuId = p_other.jobDataTuId;
+        creationUser = p_other.creationUser;
+        creationDate = p_other.creationDate;
+        modifyUser = p_other.modifyUser;
+        modifyDate = p_other.modifyDate;
     }
 
     public long getTmProfileId()
@@ -289,6 +297,26 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     public void setSubId(String subId)
     {
         m_subid = subId;
+    }
+    
+    public String getCreationUser()
+    {
+        return creationUser;
+    }
+
+    public void setCreationUser(String creationUser)
+    {
+        this.creationUser = creationUser;
+    }
+
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate)
+    {
+        this.creationDate = creationDate;
     }
 
     public boolean isExactMatch()
@@ -452,16 +480,32 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 
     public Date getModifyDate()
     {
-        if (modifyDate == null)
-        {
-            modifyDate = TmUtil.getModifyDateForTuv(m_tmId, getMatchedTuvId());
-        }
         return modifyDate;
+    }
+
+    public void setModifyDate(Date d)
+    {
+        modifyDate = d;
+    }
+
+    public String getModifyUser()
+    {
+        return this.modifyUser;
+    }
+
+    public void setModifyUser(String modifyUser)
+    {
+        this.modifyUser = modifyUser;
     }
 
     public String getSid()
     {
-        return getMatchedSid();
+        return sid;
+    }
+    
+    public void setSid(String s)
+    {
+        sid = s;
     }
 
     public void setMtName(String p_mtName)

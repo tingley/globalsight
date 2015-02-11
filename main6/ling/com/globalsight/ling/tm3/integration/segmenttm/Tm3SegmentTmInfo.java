@@ -42,6 +42,7 @@ import com.globalsight.cxe.entity.customAttribute.TMAttributeManager;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.util.comparator.ComparatorByTmOrder;
@@ -117,23 +118,9 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     private static final Logger LOGGER = Logger
             .getLogger(Tm3SegmentTmInfo.class);
 
-    public static List<TM3Tu<GSTuvData>> tusRemove = new ArrayList<TM3Tu<GSTuvData>>();
     private TM3Manager manager = DefaultManager.create();
-    private boolean indexTarget;
-    {
-        try
-        {
-            // Fix for GBS-2448
-            // indexTarget =
-            // SystemConfiguration.getInstance().getBooleanParameter("leverager.targetIndexing");
-            indexTarget = true;
 
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
+    public static List<TM3Tu<GSTuvData>> tusRemove = new ArrayList<TM3Tu<GSTuvData>>();
 
     protected TM3Tm<GSTuvData> getTM3Tm(Tm tm)
     {
@@ -144,7 +131,23 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             throw new IllegalArgumentException("Non-existent tm3 tm: "
                     + tm.getTm3Id());
         }
-        tm3tm.setIndexTarget(indexTarget);
+        // always calculate fingerprints for target locales(in
+        // "tm3_index_shared_[companyID]_[tm3TmId]" table).
+        tm3tm.setIndexTarget(true);
+        return tm3tm;
+    }
+
+    public TM3Tm<GSTuvData> getTM3Tm(Long tm3TmId)
+    {
+        TM3Tm<GSTuvData> tm3tm = manager.getTm(new GSDataFactory(), tm3TmId);
+        if (tm3tm == null)
+        {
+            throw new IllegalArgumentException("Non-existent tm3 tm: "
+                    + tm3TmId);
+        }
+        // always calculate fingerprints for target locales(in
+        // "tm3_index_shared_[companyID]_[tm3TmId]" table).
+        tm3tm.setIndexTarget(true);
         return tm3tm;
     }
 
@@ -305,7 +308,10 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 }
                 // SID changed from TM Search Edit Entry page
                 TM3Attribute sidAttr = TM3Util.getAttr(tm, SID);
-                tu.setAttribute(sidAttr, stu.getSID());
+                if (StringUtil.isNotEmpty(stu.getSID()))
+                {
+                    tu.setAttribute(sidAttr, stu.getSID());
+                }
                 // Now find the relevant TUV
                 for (TM3Tuv<GSTuvData> tm3tuv : tu.getAllTuv())
                 {
@@ -392,8 +398,16 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
+    // For now, this API is never used in system.
+    public SegmentResultSet getAllSegments(Tm tm, long startTUId,
+            Connection conn) throws LingManagerException
+    {
+        return getAllSegments(tm, null, null, null);
+    }
+
+    @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter) throws LingManagerException
+            String createdAfter, Connection conn) throws LingManagerException
     {
         try
         {
@@ -410,6 +424,12 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         {
             throw new LingManagerException(e);
         }
+    }
+
+    @Override
+    public int getSegmentCountForReindex(Tm tm)
+    {
+        return getAllSegmentsCount(tm, null, null);
     }
 
     @Override
@@ -435,7 +455,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
     @Override
     public SegmentResultSet getSegmentsByLocale(Tm tm, String localeCode,
-            String createdBefore, String createdAfter)
+            String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException
     {
         try
@@ -463,7 +483,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         try
         {
             TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsByLocale(" + localeCode + "): "
+            LOGGER.info("getSegmentsCountByLocale(" + localeCode + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
             GlobalSightLocale locale = GSDataFactory.localeFromCode(localeCode);
@@ -479,7 +499,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
     @Override
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter)
+            String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException
     {
         try
@@ -916,26 +936,9 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // Use the first TU's filename/username info for the even, on the
             // assumption that they are all the same.
             BaseTmTu firstTu = pSegmentsToSave.iterator().next();
-            BaseTmTuv firstTuv = firstTu.getFirstTuv(pSourceLocale);
-            EventProducer sourceEvents = null;
-            EventProducer targetEvents = null;
-            if (pFromTmImport)
-            {
-                sourceEvents = new MultiUserEventProducer(tm,
-                        EventType.TM_IMPORT, firstTu.getSourceTmName());
-                targetEvents = sourceEvents;
-            }
-            else
-            {
-                // Completed translations being saved or from TM Search. Events
-                // here are more complex because we have a source creator and
-                // one or more target creators.
-                TM3Event sourceTuvEvent = addSaveEvent(tm,
-                        firstTuv.getCreationUser(),
-                        firstTuv.getUpdatedProject());
-                sourceEvents = new SingleEventProducer(sourceTuvEvent);
-                targetEvents = new MultiUserEventProducer(tm, sourceTuvEvent);
-            }
+            EventProducer sourceEvents = new MultiUserEventProducer(tm,
+                    EventType.TM_IMPORT, firstTu.getSourceTmName());
+            EventProducer targetEvents = sourceEvents;
 
             // pTargetLocales is just the set of all locales for which there is
             // a
@@ -1195,19 +1198,58 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
 
-    @Override
-    public int getSegmentCountForReindex(Tm tm)
-    {
-        return getAllSegmentsCount(tm, null, null);
-    }
-
     /**
      * TM3 reindexing doesn't currently do anything.
      */
     @Override
-    public boolean reindexTm(Tm tm, Reindexer reindexer)
+    public boolean reindexTm(Tm tm, Reindexer reindexer, boolean indexTarget)
     {
-        reindexer.incrementCounter(getSegmentCountForReindex(tm));
+        long tmId = tm.getId();
+        Tm3SegmentResultSet segments = (Tm3SegmentResultSet) getAllSegments(tm,
+                null, null, null);
+
+        // index per 1000 tu
+        int count = 0;
+        int max = 1000;
+        Collection<TM3Tu<GSTuvData>> tus = new ArrayList<TM3Tu<GSTuvData>>(max);
+        while (segments.hasNext())
+        {
+            if (count == max)
+            {
+                try
+                {
+                    luceneIndexTus(tmId, tus, indexTarget);
+                    reindexer.incrementCounter(max);
+                }
+                catch (Exception e)
+                {
+                    LOGGER.error(
+                            "Fail to create lucene index for " + tus.size()
+                                    + "tus in TM " + tmId, e);
+                }
+                count = 0;
+                tus.clear();
+            }
+
+            TM3Tu<GSTuvData> tu = segments.nextTm3tu();
+            tus.add(tu);
+            count++;
+        }
+
+        if (tus.size() > 0)
+        {
+            try
+            {
+                luceneIndexTus(tmId, tus, indexTarget);
+                reindexer.incrementCounter(tus.size());
+            }
+            catch (Exception e)
+            {
+                LOGGER.error("Fail to create lucene index for " + tus.size()
+                        + "tus in TM " + tmId, e);
+            }
+        }
+
         return true;
     }
 
@@ -1323,7 +1365,21 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     public void luceneIndexTus(long tmId, Collection<TM3Tu<GSTuvData>> tus)
             throws Exception
     {
-        Map<TM3Locale, List<TM3Tuv<GSTuvData>>> sourceTuvs = new HashMap<TM3Locale, List<TM3Tuv<GSTuvData>>>(), targetTuvs = new HashMap<TM3Locale, List<TM3Tuv<GSTuvData>>>();
+        boolean indexTarget = false;
+        try {
+            indexTarget = ServerProxy.getProjectHandler()
+                    .getProjectTMById(tmId, false).isIndexTarget();
+        } catch (Exception e) {
+        }
+
+        luceneIndexTus(tmId, tus, indexTarget);
+    }
+
+    public void luceneIndexTus(long tmId, Collection<TM3Tu<GSTuvData>> tus,
+            boolean p_indexTarget) throws Exception
+    {
+        Map<TM3Locale, List<TM3Tuv<GSTuvData>>> sourceTuvs = new HashMap<TM3Locale, List<TM3Tuv<GSTuvData>>>();
+        Map<TM3Locale, List<TM3Tuv<GSTuvData>>> targetTuvs = new HashMap<TM3Locale, List<TM3Tuv<GSTuvData>>>();
         for (TM3Tu<GSTuvData> tu : tus)
         {
             TM3Tuv<GSTuvData> srcTuv = tu.getSourceTuv();
@@ -1333,7 +1389,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                         new ArrayList<TM3Tuv<GSTuvData>>());
             }
             sourceTuvs.get(srcTuv.getLocale()).add(srcTuv);
-            if (indexTarget)
+            if (p_indexTarget)
             {
                 for (TM3Tuv<GSTuvData> tuv : (List<TM3Tuv<GSTuvData>>) tu
                         .getTargetTuvs())
@@ -1361,21 +1417,21 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 indexWriter.close();
             }
         }
-        for (Map.Entry<TM3Locale, List<TM3Tuv<GSTuvData>>> e : targetTuvs
-                .entrySet())
+        if (p_indexTarget)
         {
-            LuceneIndexWriter indexWriter = new LuceneIndexWriter(tmId,
-                    (GlobalSightLocale) e.getKey());
-            try
+            for (Map.Entry<TM3Locale, List<TM3Tuv<GSTuvData>>> e : targetTuvs
+                    .entrySet())
             {
-                if (indexTarget)
+                LuceneIndexWriter indexWriter = new LuceneIndexWriter(tmId,
+                        (GlobalSightLocale) e.getKey());
+                try
                 {
                     indexWriter.index(e.getValue(), false, true);
                 }
-            }
-            finally
-            {
-                indexWriter.close();
+                finally
+                {
+                    indexWriter.close();
+                }
             }
         }
     }
@@ -1489,18 +1545,34 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         @Override
         public TM3Event getEventForTuv(BaseTmTuv tuv)
         {
+            String key = null;
+
             String user = tuv.getModifyUser();
             if (user == null)
             {
                 user = tuv.getCreationUser();
             }
-            if (map.containsKey(user))
-            {
-                return map.get(user);
+
+            Date modifyDate = tuv.getModifyDate();
+            if (modifyDate == null) {
+                modifyDate = tuv.getCreationDate();
             }
+            if (modifyDate == null) {
+                modifyDate = new Date();
+                key = user + "_SYSDATE";
+            } else {
+                key = user + "_" + modifyDate.getTime();
+            }
+
+            if (map.containsKey(key))
+            {
+                return map.get(key);
+            }
+
             TM3Event event = TM3ImportHelper.createTM3Event(tm, user,
-                    eventType, attr);
-            map.put(user, event);
+                    eventType, attr, modifyDate);
+            map.put(key, event);
+
             return event;
         }
     }
@@ -1551,13 +1623,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     public Job getJob()
     {
         return m_job;
-    }
-
-    @Override
-    public SegmentResultSet getAllSegments(Tm tm, long startTUId)
-            throws LingManagerException
-    {
-        return getAllSegments(tm, null, null);
     }
 
     @Override

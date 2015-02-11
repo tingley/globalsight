@@ -24,25 +24,22 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.UnderlineStyle;
-import jxl.write.Formula;
-import jxl.write.Label;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.Issue;
@@ -74,12 +71,11 @@ public class CommentXlsReportHelper
     private static Logger s_logger = Logger
             .getLogger(CommentXlsReportHelper.class);
 
-    private WritableWorkbook m_workbook = null;
     private TargetPage targetPageVar = null;
     private boolean oneSheet = true;
     private boolean showPriority = false;
     private boolean showCategory = false;
-    private boolean showStatus = true;
+    private boolean showStatus = false;
     private ArrayList statusList = new ArrayList();
     private ArrayList langList = new ArrayList();
     private boolean showAllLang = false;
@@ -88,11 +84,15 @@ public class CommentXlsReportHelper
     private String pageUrl = null;
     private HashMap commentTargetPageMap = new HashMap();
     private Locale uiLocale = null;
+    private ResourceBundle bundle = null;
+    private String userId = null;
+    private CellStyle contentStyle = null;
+    private CellStyle headerStyle = null;
 
     private final int JOB_FLAG = 1;
     private final int TASK_FLAG = 2;
     private final int SEGMENT_FLAG = 3;
-
+    
     /**
      * Generates the Excel report and spits it to the outputstream The report
      * consists of all in progress workflows that are currently at a reviewOnly
@@ -106,23 +106,634 @@ public class CommentXlsReportHelper
     {
         uiLocale = (Locale) p_request.getSession().getAttribute(
                 WebAppConstants.UILOCALE);
+        bundle = PageHandler.getBundle(p_request.getSession());
+        userId = (String) p_request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
         String companyId = (String) p_request.getSession().getAttribute(
                 "current_company_id");
         CompanyThreadLocal.getInstance().setIdValue(companyId);
-
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setSuppressWarnings(true);
-
-        m_workbook = Workbook.createWorkbook(p_response.getOutputStream(),
-                settings);
-
-        addComments(p_request, p_response);
-
-        if (m_workbook != null)
-        {
-            m_workbook.write();
-            m_workbook.close();
+        // show Priority or not
+        setShowPriority(p_request);
+        s_logger.debug("showPriority:" + showPriority);
+        // show Category or not
+        setShowCategory(p_request);
+        setStatus(p_request);
+        
+        Workbook p_workbook = new SXSSFWorkbook();     
+        createSheets(p_request, p_workbook, p_response);
+        
+        if(p_workbook != null){
+	    	ServletOutputStream out = p_response.getOutputStream();
+	        p_workbook.write(out);
+	        out.close();
         }
+    }
+    
+    private void createSheets(HttpServletRequest p_request, Workbook p_workbook,
+    		HttpServletResponse p_response) throws Exception
+    {
+    	Sheet segmentSheet = null;
+        Sheet jobSheet = null;
+        Sheet taskSheet = null;
+    	
+        HashMap<String, Sheet> sheetMap = new HashMap<String, Sheet>();
+        String[] paramCommentTypeJob = p_request
+                .getParameterValues("commentType_Job");
+        String[] paramCommentTypeTask = p_request
+                .getParameterValues("commentType_Activity");
+        segmentSheet = p_workbook.createSheet(bundle.getString("segment_comments"));
+        addTitle(p_workbook, segmentSheet, bundle.getString("segment_comments"));
+        addHeader(p_workbook, segmentSheet);
+        sheetMap.put("segmentSheet", segmentSheet);
+        if ((paramCommentTypeJob != null)
+                && ("Job".equals(paramCommentTypeJob[0]) == true))
+        {
+            if (oneSheet == true)
+            {
+                jobSheet = segmentSheet;
+            }
+            else
+            {
+            	jobSheet = p_workbook.createSheet(bundle.getString("job_comments"));
+            	addTitle(p_workbook, jobSheet, bundle.getString("job_comments"));
+                addHeader(p_workbook, jobSheet);
+            }
+            sheetMap.put("jobSheet", jobSheet);
+        }
+        if ((paramCommentTypeTask != null)
+                && ("Activity".equals(paramCommentTypeTask[0]) == true))
+        {
+            if (oneSheet == true)
+            {
+                taskSheet = segmentSheet;
+            }
+            else
+            {
+            	taskSheet = p_workbook.createSheet(bundle.getString("activity_comments"));
+            	addTitle(p_workbook, taskSheet, bundle.getString("activity_comments"));
+                addHeader(p_workbook, taskSheet);
+            }
+            sheetMap.put("taskSheet", taskSheet);
+        }
+
+        addComments(p_workbook, p_request, sheetMap, p_response);
+    }
+    
+    private void addTitle(Workbook p_workbook, Sheet p_sheet,
+    		String sheetTitle)throws Exception
+	{
+    	// title font is black bold on white
+    	Font titleFont = p_workbook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Times");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        CellStyle titileCs = p_workbook.createCellStyle();
+        titileCs.setWrapText(false);
+        titileCs.setFont(titleFont);
+        
+        Row titleRow = getRow(p_sheet, 0);
+        Cell titleCell = getCell(titleRow, 0);
+        titleCell.setCellValue(sheetTitle);
+        titleCell.setCellStyle(titileCs);
+        p_sheet.setColumnWidth(0, 22 * 256);
+	}
+    
+    /**
+     * Adds the table header to the sheet
+     * 
+     * @param p_sheet
+     */
+    private void addHeader(Workbook p_workbook, Sheet p_sheet) throws Exception
+    {     
+        int col = 0;
+        
+        Row headerRow = getRow(p_sheet, 3);
+        Cell cell_A = getCell(headerRow, col++);
+        cell_A.setCellValue(bundle.getString("job_id"));
+        cell_A.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 10 * 256);
+        
+        Cell cell_B = getCell(headerRow, col++);
+        cell_B.setCellValue(bundle.getString("job_name"));
+        cell_B.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 15 * 256);
+        
+        Cell cell_C = getCell(headerRow, col++);
+        cell_C.setCellValue(bundle.getString("language"));
+        cell_C.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 10 * 256);
+        
+        Cell cell_D = getCell(headerRow, col++);
+        cell_D.setCellValue(bundle.getString("segment_number"));
+        cell_D.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 20 * 256);
+        
+        Cell cell_E = getCell(headerRow, col++);
+        cell_E.setCellValue(bundle.getString("by_who"));
+        cell_E.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 15 * 256);
+        
+        Cell cell_F = getCell(headerRow, col++);
+        cell_F.setCellValue(bundle.getString("on_date"));
+        cell_F.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+
+        if (showStatus)
+        {
+        	Cell cell_Status = getCell(headerRow, col++);
+        	cell_Status.setCellValue(bundle.getString("status"));
+        	cell_Status.setCellStyle(getHeaderStyle(p_workbook));
+        }
+        p_sheet.setColumnWidth(col - 1, 10 * 256);
+        if (showPriority)
+        {
+        	Cell cell_Priority = getCell(headerRow, col++);
+        	cell_Priority.setCellValue(bundle.getString("priority"));
+        	cell_Priority.setCellStyle(getHeaderStyle(p_workbook));
+        }
+        if (showCategory)
+        {
+        	Cell cell_Category = getCell(headerRow, col++);
+        	cell_Category.setCellValue(bundle.getString("category"));
+        	cell_Category.setCellStyle(getHeaderStyle(p_workbook));
+        }
+        p_sheet.setColumnWidth(col - 1, 10 * 256);
+        
+        Cell cell_CommentHeader = getCell(headerRow, col++);
+        cell_CommentHeader.setCellValue(bundle.getString("comment_header"));
+        cell_CommentHeader.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 20 * 256);
+        
+        Cell cell_CommentBody = getCell(headerRow, col++);
+        cell_CommentBody.setCellValue(bundle.getString("comment_body"));
+        cell_CommentBody.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_Link = getCell(headerRow, col++);
+        cell_Link.setCellValue(bundle.getString("link"));
+        cell_Link.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 20 * 256);
+    }
+    
+    /**
+     * Gets the jobs and outputs workflow information.
+     * 
+     * @exception Exception
+     */
+    private void addComments(Workbook p_workbook, HttpServletRequest p_request,
+            HashMap sheetMap, HttpServletResponse p_response) throws Exception
+    {
+        // print out the request parameters
+        setLang(p_request);
+
+        s_logger.debug("status:" + statusList);
+        
+        Sheet jobSheet = (Sheet) sheetMap.get("jobSheet");
+        Sheet taskSheet = (Sheet) sheetMap.get("taskSheet");
+        Sheet segmentSheet = (Sheet) sheetMap.get("segmentSheet");
+
+        ArrayList<Job> jobs = new ArrayList<Job>();
+        searchJob(jobs, p_request);
+        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataInProgressStatus(userId, reportJobIDS, getReportType()))
+        {
+            String message = "Cancel the request, due the report is generating, userID/reportTypeList/reportJobIDS:"
+                    + userId + ", " + "Comments Report" + ", " + reportJobIDS;
+            s_logger.debug(message);
+            p_workbook = null;
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
+        s_logger.debug("test");
+        s_logger.debug("jobs " + jobs.size());
+        s_logger.debug("jobSheet " + jobSheet);
+        if (oneSheet == true)
+        {
+            IntHolder row = new IntHolder(4);
+            IntHolder jobSheetRow = row;
+            IntHolder taskSheetRow = row;
+            IntHolder segmentSheetRow = row;
+            for (Job j: jobs)
+            {
+                addSegmentComment(p_request, j, p_workbook, segmentSheet, segmentSheetRow);
+            }
+            for (Job j: jobs)
+            {
+                addTaskComment(p_request, j, p_workbook, taskSheet, taskSheetRow);
+            }
+            for (Job j: jobs)
+            {
+                addJobComment(p_request, j, p_workbook, jobSheet, jobSheetRow);
+            }
+        }
+        else
+        {
+            IntHolder jobSheetRow = new IntHolder(4);
+            IntHolder taskSheetRow = new IntHolder(4);
+            IntHolder segmentSheetRow = new IntHolder(4);
+
+            for (Job j: jobs)
+            {
+                addJobComment(p_request, j, p_workbook, jobSheet, jobSheetRow);
+                addTaskComment(p_request, j, p_workbook, taskSheet, taskSheetRow);
+                addSegmentComment(p_request, j, p_workbook, segmentSheet, segmentSheetRow);
+            }
+        }
+
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                100, ReportsData.STATUS_FINISHED);
+    }
+
+    /**
+     * Gets Job comment.
+     * 
+     */
+    private void addJobComment(HttpServletRequest p_request, Job j,
+            Workbook p_workbook, Sheet jobSheet, IntHolder row) throws Exception
+    {
+        if (null == jobSheet)
+        {
+            return;
+        }
+
+        List jobComments = j.getJobComments();
+        s_logger.debug("jobComments" + jobComments.size());
+        int flag = JOB_FLAG;
+        sortComment(jobComments, p_request);
+        addSegmentCommentFilter(p_request, j, p_workbook, jobSheet, row, jobComments, flag);
+
+    }
+
+    /**
+     * Gets Task comment.
+     * 
+     */
+    private void addTaskComment(HttpServletRequest p_request, Job j,
+            Workbook p_workbook, Sheet taskSheet, IntHolder row) throws Exception
+    {
+        if (null == taskSheet)
+            return;
+
+        Collection c = j.getWorkflows();
+        ArrayList list = new ArrayList();
+        for (Iterator it = c.iterator(); it.hasNext();)
+        {
+            Workflow wf = (Workflow) it.next();
+
+            if (checkLang(wf) != true)
+            {
+                continue;
+            }
+
+            Hashtable tasks = wf.getTasks();
+            for (Iterator i = tasks.values().iterator(); i.hasNext();)
+            {
+                Task t = (Task) i.next();
+                List commentList = t.getTaskComments();
+                list.addAll(commentList);
+            }
+        }
+        int flag = TASK_FLAG;
+        sortComment(list, p_request);
+        addSegmentCommentFilter(p_request, j, p_workbook, taskSheet, row, list, flag);
+        // only coment with target locale need to print target language
+        curLocale = null;
+    }
+    
+    /**
+     * Gets Segment comment.
+     */
+    private void addSegmentComment(HttpServletRequest p_request, Job j,
+            Workbook p_workbook, Sheet segmentSheet, IntHolder row) throws Exception
+    {
+        if (null == segmentSheet)
+        {
+            return;
+        }
+
+        ArrayList<IssueImpl> comments = new ArrayList<IssueImpl>();
+        for (Workflow wf : j.getWorkflows())
+        {
+            // target locale filter;
+            if (checkLang(wf) == false)
+            {
+                continue;
+            }
+
+            for (TargetPage t : wf.getTargetPages())
+            {
+                // used to SetPageURL;
+                targetPageVar = t;
+                List<IssueImpl> commentList = ServerProxy.getCommentManager()
+                        .getIssues(Issue.TYPE_SEGMENT, t.getId());
+
+                setCommentTargetPage(commentList, t);
+                comments.addAll(commentList);
+            }
+
+        }
+
+        int flag = SEGMENT_FLAG;
+        sortCommentBySegmentNumber(comments, p_request);
+        addSegmentCommentFilter(p_request, j, p_workbook, segmentSheet, row, comments, flag);
+
+        // only comment with target locale need to print target language
+        curLocale = null;
+        targetPageVar = null;
+    }
+    
+    /**
+     * Gets Segment comment helper.
+     * 
+     */
+    private void addSegmentCommentFilter(HttpServletRequest p_request, Job j,
+            Workbook p_workbook, Sheet segmentSheet, IntHolder row,
+            List comments, int flag) throws Exception
+    {
+        // sortComment(comments, p_request);
+        for (Iterator it = comments.iterator(); it.hasNext();)
+        {
+            Comment comment = (Comment) it.next();
+            if (SEGMENT_FLAG == flag)
+            {
+                if (showStatus == true)
+                {
+                    if (statusList.contains(((Issue) comment).getStatus()) == false)
+                    {
+                        s_logger.debug("ignore status:"
+                                + ((Issue) comment).getStatus());
+                        continue;
+                    }
+                }
+                setPageURL(p_request, comment, j.getId());
+
+                // get the comment body of each segment comment
+                List list = ((Issue) comment).getHistory();
+                // Sort them by date
+                sortCommentByIssueHistoryDate(list, p_request);
+                for (Iterator iterator = list.iterator(); iterator.hasNext();)
+                {
+                    IssueHistory issueHistory = (IssueHistory) iterator.next();
+                    addCommentHistory(p_request, j, p_workbook, segmentSheet, row, comment,
+                            issueHistory, flag);
+                }
+
+            }
+            else
+            {
+                addComment(p_request, j, p_workbook, segmentSheet, row, comment, flag);
+            }
+        }
+    }
+    
+    /**
+     * add Comment for each row of each sheet
+     * 
+     * @exception Exception
+     */
+    private void addComment(HttpServletRequest p_request, Job j,
+            Workbook p_workbook, Sheet p_sheet, IntHolder row, Comment comment,
+            int flag) throws Exception
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                p_request.getParameter("dateFormat"));
+
+        String jobPrefix = "Job Comment ";
+        String taskPrefix = "Activity Comment ";
+        int c = 0;
+        int r = row.getValue();
+        
+        Row p_row = getRow(p_sheet, r);
+        // 2.3 Job ID column. Insert GlobalSight job number here.
+        Cell cell_A = getCell(p_row, c++);
+        cell_A.setCellValue(Long.toString(j.getJobId()));
+        cell_A.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.4 Job: Insert Job name here.
+        Cell cell_B = getCell(p_row, c++);
+        cell_B.setCellValue(j.getJobName());
+        cell_B.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.5 Lang: Insert each target language identifier for each workflow
+        // in the retrieved Job on a different row.
+        Cell cell_C = getCell(p_row, c++);
+        if ((this.targetPageVar != null)
+                && (this.targetPageVar.getGlobalSightLocale() != null))
+        {
+            cell_C.setCellValue(this.targetPageVar
+                    .getGlobalSightLocale().getDisplayName(uiLocale));
+            cell_C.setCellStyle(getContentStyle(p_workbook));
+        }
+        else
+        {
+            cell_C.setCellValue("");
+            cell_C.setCellStyle(getContentStyle(p_workbook));
+        }
+
+        // 2.6 Word count: Insert Segement Number for the job.
+        Cell cell_D = getCell(p_row, c++);
+        if (JOB_FLAG == flag)
+        {
+        	cell_D.setCellValue(jobPrefix + comment.getId());
+        	cell_D.setCellStyle(getContentStyle(p_workbook));
+        }
+        else if (TASK_FLAG == flag)
+        {
+        	cell_D.setCellValue(taskPrefix + comment.getId());
+        	cell_D.setCellStyle(getContentStyle(p_workbook));
+        }
+        else if (SEGMENT_FLAG == flag)
+        {
+        	cell_D.setCellValue(CommentComparator
+                    .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey()));
+        	cell_D.setCellStyle(getContentStyle(p_workbook));
+        }
+
+        // by who
+        Cell cell_E = getCell(p_row, c++);
+    	cell_E.setCellValue(UserUtil.getUserNameById(comment
+                .getCreatorId()));
+    	cell_E.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.7 Comment create date: Insert Comment creation date.
+    	Cell cell_F = getCell(p_row, c++);
+    	cell_F.setCellValue(dateFormat.format(comment
+                .getCreatedDateAsDate()));
+    	cell_F.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.8 add Comment Status
+        if (showStatus)
+        {
+        	Cell cell_Status = getCell(p_row, c++);
+            if (SEGMENT_FLAG == flag)
+            {
+            	cell_Status.setCellValue(((Issue) comment).getStatus());
+            	cell_Status.setCellStyle(getContentStyle(p_workbook));
+            }
+            else
+            {
+            	cell_Status.setCellValue("");
+            	cell_Status.setCellStyle(getContentStyle(p_workbook));
+            }
+        }
+        // 2.9 add Comment priority
+        if (showPriority)
+        {
+        	Cell cell_Priority = getCell(p_row, c++);
+            if (SEGMENT_FLAG == flag)
+            {
+            	cell_Priority.setCellValue(((Issue) comment).getPriority());
+            	cell_Priority.setCellStyle(getContentStyle(p_workbook));
+            }
+            else
+            {
+            	cell_Priority.setCellValue("");
+            	cell_Priority.setCellStyle(getContentStyle(p_workbook));
+            }
+        }
+
+        // 2.10 add Comment Category
+        if (showCategory)
+        {
+        	Cell cell_Category = getCell(p_row, c++);
+            if (SEGMENT_FLAG == flag)
+            {
+            	cell_Category.setCellValue(((Issue) comment).getCategory());
+            	cell_Category.setCellStyle(getContentStyle(p_workbook));
+            }
+            else
+            {
+            	cell_Category.setCellValue("");
+            	cell_Category.setCellStyle(getContentStyle(p_workbook));
+            }
+        }
+
+        // 2.11 add Comment comment
+        Cell cell_CommentHeader = getCell(p_row, c++);
+        cell_CommentHeader.setCellValue(comment.getComment());
+        cell_CommentHeader.setCellStyle(getContentStyle(p_workbook));
+
+        Cell cell_CommentBody = getCell(p_row, c++);
+        cell_CommentBody.setCellValue("");
+        cell_CommentBody.setCellStyle(getContentStyle(p_workbook));
+        
+    	Cell cell_Link = getCell(p_row, c++);
+    	if (flag != SEGMENT_FLAG)
+    	{
+    		cell_Link.setCellValue("");
+    	}else{
+    		cell_Link.setCellFormula("HYPERLINK(\"" + pageUrl
+    				+ "\",\"" + externalPageId + "\")");
+    	}
+    	cell_Link.setCellStyle(getContentStyle(p_workbook));
+
+        row.inc();
+
+    }
+
+    /**
+     * add Comment for each row, for segment comment usage, each row contains a
+     * comment history
+     * 
+     * @exception Exception
+     */
+    private void addCommentHistory(HttpServletRequest p_request, Job j,	
+            Workbook p_workbook, Sheet p_sheet, IntHolder row, Comment comment,
+            IssueHistory issueHistory, int flag) throws Exception
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                p_request.getParameter("dateFormat"));
+        int c = 0;
+        int r = row.getValue();
+        // 2.3.2 Job ID column. Insert GlobalSight job number here.
+        Row p_row = getRow(p_sheet, r);
+        Cell cell_A = getCell(p_row, c++);
+        cell_A.setCellValue(Long.toString(j.getJobId()));
+        cell_A.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.4.2 Job: Insert Job name here.
+        Cell cell_B = getCell(p_row, c++);
+        cell_B.setCellValue( j.getJobName());
+        cell_B.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.5.2 Lang: Insert each target language identifier for each workflow
+        // in the retrieved Job on a different row.
+        Cell cell_C = getCell(p_row, c++);
+        if ((this.targetPageVar != null)
+                && (this.targetPageVar.getGlobalSightLocale() != null))
+        {
+            cell_C.setCellValue(this.targetPageVar
+                    .getGlobalSightLocale().getDisplayName(uiLocale));
+            cell_C.setCellStyle(getContentStyle(p_workbook));
+        }
+        else
+        {
+            cell_C.setCellValue("");
+            cell_C.setCellStyle(getContentStyle(p_workbook));
+        }
+
+        // 2.6.2 Insert Segement Number for the job.
+        Cell cell_D = getCell(p_row, c++);
+        cell_D.setCellValue(CommentComparator
+                .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey()));
+        cell_D.setCellStyle(getContentStyle(p_workbook));
+
+        // by who
+        Cell cell_E = getCell(p_row, c++);
+        cell_E.setCellValue(UserUtil.getUserNameById(issueHistory.reportedBy()));
+        cell_E.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.7.2 Comment create date: Insert Comment creation date.\
+        Cell cell_F = getCell(p_row, c++);
+        cell_F.setCellValue(dateFormat.format(issueHistory.dateReportedAsDate()));
+        cell_F.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.8.2 add Comment Status
+        if (showStatus)
+        {
+        	Cell cell_Status = getCell(p_row, c++);
+        	cell_Status.setCellValue(((Issue) comment).getStatus());
+        	cell_Status.setCellStyle(getContentStyle(p_workbook));
+        }
+        // 2.9.2 add Comment priority
+        if (showPriority)
+        {
+        	Cell cell_Priority = getCell(p_row, c++);
+        	cell_Priority.setCellValue(((Issue) comment).getPriority());
+        	cell_Priority.setCellStyle(getContentStyle(p_workbook));
+        }
+
+        // 2.10.2 add Comment Category
+        if (showCategory)
+        {
+        	Cell cell_Category = getCell(p_row, c++);
+        	cell_Category.setCellValue(((Issue) comment).getCategory());
+        	cell_Category.setCellStyle(getContentStyle(p_workbook));
+        }
+
+        // 2.11.2 add comment header
+        Cell cell_CommentHeader = getCell(p_row, c++);
+        cell_CommentHeader.setCellValue(comment.getComment());
+        cell_CommentHeader.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.12.2 add comment body
+        Cell cell_CommentBody = getCell(p_row, c++);
+        cell_CommentBody.setCellValue(issueHistory.getComment());
+        cell_CommentBody.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.13.2 add link
+        Cell cell_Link = getCell(p_row, c++);
+        cell_Link.setCellFormula("HYPERLINK(\"" + pageUrl + "\",\""
+                + externalPageId + "\")");
+        cell_Link.setCellStyle(getContentStyle(p_workbook));
+
+        row.inc();
     }
 
     /**
@@ -212,116 +823,6 @@ public class CommentXlsReportHelper
         }
 
         return sp;
-    }
-
-    /**
-     * Adds the table header for the job Comment sheet
-     * 
-     * @param p_sheet
-     */
-    private void addJobCommentHeader(WritableSheet p_sheet,
-            ResourceBundle bundle) throws Exception
-    {
-        addHeader(p_sheet, bundle.getString("job_comments"), bundle);
-    }
-
-    /**
-     * Adds the table header for the task Comment sheet
-     * 
-     * @param p_sheet
-     */
-    private void addTaskCommentHeader(WritableSheet p_sheet,
-            ResourceBundle bundle) throws Exception
-    {
-        addHeader(p_sheet, bundle.getString("activity_comments"), bundle);
-    }
-
-    /**
-     * Adds the table header for the segemnt Comment sheet
-     * 
-     * @param p_sheet
-     */
-    private void addSegmentCommentHeader(WritableSheet p_sheet,
-            ResourceBundle bundle) throws Exception
-    {
-        addHeader(p_sheet, bundle.getString("segment_comments"), bundle);
-    }
-
-    /**
-     * Adds the table header to the sheet
-     * 
-     * @param p_sheet
-     */
-    private void addHeader(WritableSheet p_sheet, String sheetTitle,
-            ResourceBundle bundle) throws Exception
-    {
-        // title font is black bold on white
-        WritableFont titleFont = new WritableFont(WritableFont.TIMES, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
-        p_sheet.addCell(new Label(0, 0, sheetTitle, titleFormat));
-        p_sheet.setColumnView(0, 22);
-
-        // headerFont is black bold on light grey
-        WritableFont headerFont = new WritableFont(WritableFont.TIMES, 11,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-        headerFormat.setWrap(true);
-        headerFormat.setBackground(jxl.format.Colour.GRAY_25);
-        headerFormat.setShrinkToFit(false);
-        headerFormat.setBorder(jxl.format.Border.ALL,
-                jxl.format.BorderLineStyle.THICK, jxl.format.Colour.BLACK);
-        int col = 0;
-        int row = 3;
-        p_sheet.addCell(new Label(col++, row, bundle.getString("job_id"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 10);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("job_name"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 10);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("language"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 10);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("segment_number"), headerFormat));
-        p_sheet.setColumnView(col - 1, 20);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("by_who"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 15);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("on_date"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-
-        if (showStatus == true)
-        {
-            p_sheet.addCell(new Label(col++, row, bundle.getString("status"),
-                    headerFormat));
-        }
-        p_sheet.setColumnView(col - 1, 10);
-        if (true == showPriority)
-        {
-            p_sheet.addCell(new Label(col++, row, bundle.getString("priority"),
-                    headerFormat));
-        }
-        if (showCategory)
-        {
-            p_sheet.addCell(new Label(col++, row, bundle.getString("category"),
-                    headerFormat));
-        }
-        p_sheet.setColumnView(col - 1, 10);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("comment_header"), headerFormat));
-        p_sheet.setColumnView(col - 1, 20);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("comment_body"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("link"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 20);
     }
 
     /**
@@ -514,7 +1015,7 @@ public class CommentXlsReportHelper
             return true;
         }
 
-        return langList.contains(curLocale.toString());
+        return langList.contains(Long.toString(curLocale.getId()));
     }
 
     /**
@@ -543,209 +1044,6 @@ public class CommentXlsReportHelper
         pageUrl = editorReviewUrl + url;
         externalPageId = targetPageVar.getExternalPageId();
         s_logger.debug("externalPageId: " + externalPageId);
-    }
-
-    /**
-     * Add sheet header.
-     * 
-     */
-    private HashMap addAllHeader(HttpServletRequest p_request,
-            WritableSheet jobSheet, WritableSheet taskSheet,
-            WritableSheet segmentSheet) throws Exception
-    {
-        HashMap sheetMap = new HashMap();
-        String[] paramCommentTypeJob = p_request
-                .getParameterValues("commentType_Job");
-        String[] paramCommentTypeTask = p_request
-                .getParameterValues("commentType_Activity");
-        ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
-        segmentSheet = m_workbook.createSheet(
-                bundle.getString("segment_comments"), 0);
-        addSegmentCommentHeader(segmentSheet, bundle);
-        sheetMap.put("segmentSheet", segmentSheet);
-        if ((paramCommentTypeJob != null)
-                && ("Job".equals(paramCommentTypeJob[0]) == true))
-        {
-            if (oneSheet == true)
-            {
-                jobSheet = segmentSheet;
-            }
-            else
-            {
-                jobSheet = m_workbook.createSheet(
-                        bundle.getString("job_comments"), 1);
-                addJobCommentHeader(jobSheet, bundle);
-            }
-            sheetMap.put("jobSheet", jobSheet);
-        }
-        if ((paramCommentTypeTask != null)
-                && ("Activity".equals(paramCommentTypeTask[0]) == true))
-        {
-            if (oneSheet == true)
-            {
-                taskSheet = segmentSheet;
-            }
-            else
-            {
-                taskSheet = m_workbook.createSheet(
-                        bundle.getString("activity_comments"), 2);
-                addTaskCommentHeader(taskSheet, bundle);
-            }
-            sheetMap.put("taskSheet", taskSheet);
-        }
-
-        return sheetMap;
-    }
-
-    /**
-     * Gets the jobs and outputs workflow information.
-     * 
-     * @exception Exception
-     */
-    private void addComments(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
-    {
-        String userId = (String) p_request.getSession().getAttribute(
-                WebAppConstants.USER_NAME);
-        // print out the request parameters
-        // show Priority or not
-        setShowPriority(p_request);
-        s_logger.debug("showPriority:" + showPriority);
-        // show Category or not
-        setShowCategory(p_request);
-        setStatus(p_request);
-        setLang(p_request);
-
-        s_logger.debug("status:" + statusList);
-
-        WritableSheet jobSheet = null;
-        WritableSheet taskSheet = null;
-        WritableSheet segmentSheet = null;
-
-        HashMap sheetMap = addAllHeader(p_request, jobSheet, taskSheet,
-                segmentSheet);
-        jobSheet = (WritableSheet) sheetMap.get("jobSheet");
-        taskSheet = (WritableSheet) sheetMap.get("taskSheet");
-        segmentSheet = (WritableSheet) sheetMap.get("segmentSheet");
-
-        ArrayList jobs = new ArrayList();
-        searchJob(jobs, p_request);
-        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
-        // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataInProgressStatus(userId, reportJobIDS, getReportType()))
-        {
-            String message = "Cancel the request, due the report is generating, userID/reportTypeList/reportJobIDS:"
-                    + userId + ", " + "Comments Report" + ", " + reportJobIDS;
-            s_logger.debug(message);
-            m_workbook = null;
-            p_response.sendError(p_response.SC_NO_CONTENT);
-            return;
-        }
-        // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
-                0, ReportsData.STATUS_INPROGRESS);
-        s_logger.debug("test");
-        s_logger.debug("jobs " + jobs.size());
-        s_logger.debug("jobSheet " + jobSheet);
-        Iterator jobIter = jobs.iterator();
-        if (oneSheet == true)
-        {
-            IntHolder row = new IntHolder(4);
-            IntHolder jobSheetRow = row;
-            IntHolder taskSheetRow = row;
-            IntHolder segmentSheetRow = row;
-            while (jobIter.hasNext())
-            {
-                Job j = (Job) jobIter.next();
-                addSegmentComment(p_request, j, segmentSheet, segmentSheetRow);
-            }
-            jobIter = jobs.iterator();
-            while (jobIter.hasNext())
-            {
-                Job j = (Job) jobIter.next();
-                addTaskComment(p_request, j, taskSheet, taskSheetRow);
-            }
-            jobIter = jobs.iterator();
-            while (jobIter.hasNext())
-            {
-                Job j = (Job) jobIter.next();
-                addJobComment(p_request, j, jobSheet, jobSheetRow);
-            }
-        }
-        else
-        {
-            IntHolder jobSheetRow = new IntHolder(4);
-            IntHolder taskSheetRow = new IntHolder(4);
-            IntHolder segmentSheetRow = new IntHolder(4);
-
-            while (jobIter.hasNext())
-            {
-                Job j = (Job) jobIter.next();
-                addJobComment(p_request, j, jobSheet, jobSheetRow);
-                addTaskComment(p_request, j, taskSheet, taskSheetRow);
-                addSegmentComment(p_request, j, segmentSheet, segmentSheetRow);
-            }
-        }
-
-        // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
-                100, ReportsData.STATUS_FINISHED);
-    }
-
-    /**
-     * Gets Job comment.
-     * 
-     */
-    private void addJobComment(HttpServletRequest p_request, Job j,
-            WritableSheet jobSheet, IntHolder row) throws Exception
-    {
-        if (null == jobSheet)
-        {
-            return;
-        }
-
-        List jobComments = j.getJobComments();
-        s_logger.debug("jobComments" + jobComments.size());
-        int flag = JOB_FLAG;
-        sortComment(jobComments, p_request);
-        addSegmentCommentFilter(p_request, j, jobSheet, row, jobComments, flag);
-
-    }
-
-    /**
-     * Gets Task comment.
-     * 
-     */
-    private void addTaskComment(HttpServletRequest p_request, Job j,
-            WritableSheet taskSheet, IntHolder row) throws Exception
-    {
-        if (null == taskSheet)
-            return;
-
-        Collection c = j.getWorkflows();
-        ArrayList list = new ArrayList();
-        for (Iterator it = c.iterator(); it.hasNext();)
-        {
-            Workflow wf = (Workflow) it.next();
-
-            if (checkLang(wf) != true)
-            {
-                continue;
-            }
-
-            Hashtable tasks = wf.getTasks();
-            for (Iterator i = tasks.values().iterator(); i.hasNext();)
-            {
-                Task t = (Task) i.next();
-                List commentList = t.getTaskComments();
-                list.addAll(commentList);
-            }
-        }
-        int flag = TASK_FLAG;
-        sortComment(list, p_request);
-        addSegmentCommentFilter(p_request, j, taskSheet, row, list, flag);
-        // only coment with target locale need to print target language
-        curLocale = null;
     }
 
     /**
@@ -797,92 +1095,6 @@ public class CommentXlsReportHelper
     }
 
     /**
-     * Gets Segment comment helper.
-     * 
-     */
-    private void addSegmentCommentFilter(HttpServletRequest p_request, Job j,
-            WritableSheet segmentSheet, IntHolder row, List comments, int flag)
-            throws Exception
-    {
-        // sortComment(comments, p_request);
-        for (Iterator it = comments.iterator(); it.hasNext();)
-        {
-            Comment comment = (Comment) it.next();
-            if (SEGMENT_FLAG == flag)
-            {
-                if (showStatus == true)
-                {
-                    if (statusList.contains(((Issue) comment).getStatus()) == false)
-                    {
-                        s_logger.debug("ignore status:"
-                                + ((Issue) comment).getStatus());
-                        continue;
-                    }
-                }
-                setPageURL(p_request, comment, j.getId());
-
-                // get the comment body of each segment comment
-                List list = ((Issue) comment).getHistory();
-                // Sort them by date
-                sortCommentByIssueHistoryDate(list, p_request);
-                for (Iterator iterator = list.iterator(); iterator.hasNext();)
-                {
-                    IssueHistory issueHistory = (IssueHistory) iterator.next();
-                    addCommentHistory(p_request, j, segmentSheet, row, comment,
-                            issueHistory, flag);
-                }
-
-            }
-            else
-            {
-                addComment(p_request, j, segmentSheet, row, comment, flag);
-            }
-        }
-    }
-
-    /**
-     * Gets Segment comment.
-     */
-    private void addSegmentComment(HttpServletRequest p_request, Job j,
-            WritableSheet segmentSheet, IntHolder row) throws Exception
-    {
-        if (null == segmentSheet)
-        {
-            return;
-        }
-
-        ArrayList<IssueImpl> comments = new ArrayList<IssueImpl>();
-        for (Workflow wf : j.getWorkflows())
-        {
-            // target locale filter;
-            if (checkLang(wf) == false)
-            {
-                continue;
-            }
-
-            for (TargetPage t : wf.getTargetPages())
-            {
-                // used to SetPageURL;
-                targetPageVar = t;
-                List<IssueImpl> commentList = ServerProxy.getCommentManager()
-                        .getIssues(Issue.TYPE_SEGMENT, t.getId());
-
-                setCommentTargetPage(commentList, t);
-                comments.addAll(commentList);
-            }
-
-        }
-
-        int flag = SEGMENT_FLAG;
-        sortCommentBySegmentNumber(comments, p_request);
-        addSegmentCommentFilter(p_request, j, segmentSheet, row, comments, flag);
-
-        // only comment with target locale need to print target language
-        curLocale = null;
-        targetPageVar = null;
-    }
-
-    /**
      * Set TargetLocale for each comment, used in get URL
      * 
      */
@@ -894,202 +1106,64 @@ public class CommentXlsReportHelper
             commentTargetPageMap.put(new Long(c.getId()), t);
         }
     }
-
-    /**
-     * add Comment for each row of each sheet
-     * 
-     * @exception Exception
-     */
-    private void addComment(HttpServletRequest p_request, Job j,
-            WritableSheet sheet, IntHolder row, Comment comment, int flag)
-            throws Exception
+    
+    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                p_request.getParameter("dateFormat"));
+        if (headerStyle == null)
+        {      	
+            Font font = p_workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            font.setColor(IndexedColors.BLACK.getIndex());
+            font.setUnderline(Font.U_NONE);
+            font.setFontName("Times");
+            font.setFontHeightInPoints((short) 11);
 
-        HttpSession session = p_request.getSession();
-        String jobPrefix = "Job Comment ";
-        String taskPrefix = "Activity Comment ";
-        int c = 0;
-        int r = row.getValue();
-        // 2.3 Job ID column. Insert GlobalSight job number here.
-        sheet.addCell(new Label(c++, r, Long.toString(j.getJobId())));
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(font);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderRight(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setBorderLeft(CellStyle.BORDER_THIN);
 
-        // 2.4 Job: Insert Job name here.
-        sheet.addCell(new Label(c++, r, j.getJobName()));
-
-        // 2.5 Lang: Insert each target language identifier for each workflow
-        // in the retrieved Job on a different row.
-        if ((this.targetPageVar != null)
-                && (this.targetPageVar.getGlobalSightLocale() != null))
-        {
-            sheet.addCell(new Label(c++, r, this.targetPageVar
-                    .getGlobalSightLocale().getDisplayName(uiLocale)));
-        }
-        else
-        {
-            sheet.addCell(new Label(c++, r, ""));
+            headerStyle = cs;
         }
 
-        // 2.6 Word count: Insert Segement Number for the job.
-        if (JOB_FLAG == flag)
+        return headerStyle;
+    }
+    
+    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
+    {
+        if (contentStyle == null)
         {
-            sheet.addCell(new Label(c++, r, jobPrefix + comment.getId()));
-        }
-        else if (TASK_FLAG == flag)
-        {
-            sheet.addCell(new Label(c++, r, taskPrefix + comment.getId()));
-        }
-        else if (SEGMENT_FLAG == flag)
-        {
-            sheet.addCell(new Label(c++, r, CommentComparator
-                    .getSegmentIdFromLogicalKey(((Issue) comment)
-                            .getLogicalKey())));
-        }
+            CellStyle style = p_workbook.createCellStyle();
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
 
-        // by who
-        sheet.addCell(new Label(c++, r, UserUtil.getUserNameById(comment
-                .getCreatorId())));
-
-        // 2.7 Comment create date: Insert Comment creation date.
-        sheet.addCell(new Label(c++, r, dateFormat.format(comment
-                .getCreatedDateAsDate())));
-
-        // 2.8 add Comment Status
-        if (showStatus == true)
-        {
-            if (SEGMENT_FLAG == flag)
-            {
-                sheet.addCell(new Label(c++, r, ((Issue) comment).getStatus()));
-            }
-            else
-            {
-                sheet.addCell(new Label(c++, r, " "));
-            }
-        }
-        // 2.9 add Comment priority
-        if (true == showPriority)
-        {
-            if (SEGMENT_FLAG == flag)
-            {
-                sheet.addCell(new Label(c++, r, ((Issue) comment).getPriority()));
-            }
-            else
-            {
-                sheet.addCell(new Label(c++, r, " "));
-            }
+            contentStyle = style;
         }
 
-        // 2.10 add Comment Category
-        if (showCategory)
-        {
-            if (SEGMENT_FLAG == flag)
-            {
-                sheet.addCell(new Label(c++, r, ((Issue) comment).getCategory()));
-            }
-            else
-            {
-                sheet.addCell(new Label(c++, r, " "));
-            }
-        }
-
-        // 2.11 add Comment comment
-        sheet.addCell(new Label(c++, r, comment.getComment()));
-
-        if (flag != SEGMENT_FLAG)
-        {
-            sheet.addCell(new Label(c++, r, ""));
-            sheet.addCell(new Label(c++, r, ""));
-            row.inc();
-            return;
-        }
-
-        if (true)
-        {
-            sheet.addCell(new Label(c++, r, ""));
-            sheet.addCell(new Formula(c++, r, "HYPERLINK(\"" + pageUrl
-                    + "\",\"" + externalPageId + "\")"));
-        }
-
-        row.inc();
-
+        return contentStyle;
+    }
+    
+    private Row getRow(Sheet p_sheet, int p_col)
+    {
+        Row row = p_sheet.getRow(p_col);
+        if (row == null)
+            row = p_sheet.createRow(p_col);
+        return row;
     }
 
-    /**
-     * add Comment for each row, for segment comment usage, each row contains a
-     * comment history
-     * 
-     * @exception Exception
-     */
-    private void addCommentHistory(HttpServletRequest p_request, Job j,
-            WritableSheet sheet, IntHolder row, Comment comment,
-            IssueHistory issueHistory, int flag) throws Exception
+    private Cell getCell(Row p_row, int index)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                p_request.getParameter("dateFormat"));
-        HttpSession session = p_request.getSession();
-        int c = 0;
-        int r = row.getValue();
-        // 2.3.2 Job ID column. Insert GlobalSight job number here.
-        sheet.addCell(new Label(c++, r, Long.toString(j.getJobId())));
-
-        // 2.4.2 Job: Insert Job name here.
-        sheet.addCell(new Label(c++, r, j.getJobName()));
-
-        // 2.5.2 Lang: Insert each target language identifier for each workflow
-        // in the retrieved Job on a different row.
-        if ((this.targetPageVar != null)
-                && (this.targetPageVar.getGlobalSightLocale() != null))
-        {
-            sheet.addCell(new Label(c++, r, this.targetPageVar
-                    .getGlobalSightLocale().getDisplayName(uiLocale)));
-        }
-        else
-        {
-            sheet.addCell(new Label(c++, r, ""));
-        }
-
-        // 2.6.2 Insert Segement Number for the job.
-        sheet.addCell(new Label(c++, r, CommentComparator
-                .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey())));
-
-        // by who
-        sheet.addCell(new Label(c++, r, UserUtil.getUserNameById(issueHistory
-                .reportedBy())));
-
-        // 2.7.2 Comment create date: Insert Comment creation date.
-        sheet.addCell(new Label(c++, r, dateFormat.format(issueHistory
-                .dateReportedAsDate())));
-
-        // 2.8.2 add Comment Status
-        if (showStatus == true)
-        {
-            sheet.addCell(new Label(c++, r, ((Issue) comment).getStatus()));
-        }
-        // 2.9.2 add Comment priority
-        if (true == showPriority)
-        {
-            sheet.addCell(new Label(c++, r, ((Issue) comment).getPriority()));
-        }
-
-        // 2.10.2 add Comment Category
-        if (showCategory)
-        {
-            sheet.addCell(new Label(c++, r, ((Issue) comment).getCategory()));
-        }
-
-        // 2.11.2 add comment header
-        sheet.addCell(new Label(c++, r, comment.getComment()));
-
-        // 2.12.2 add comment body
-        sheet.addCell(new Label(c++, r, issueHistory.getComment()));
-
-        // 2.13.2 add link
-        sheet.addCell(new Formula(c++, r, "HYPERLINK(\"" + pageUrl + "\",\""
-                + externalPageId + "\")"));
-
-        row.inc();
-
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
     }
     
     public String getReportType()

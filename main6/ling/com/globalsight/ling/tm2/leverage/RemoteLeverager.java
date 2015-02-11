@@ -20,6 +20,7 @@ import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,9 +35,11 @@ import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
@@ -305,6 +308,7 @@ public class RemoteLeverager
                     Map.Entry entry2 = (Map.Entry) iter2.next();
                     long originalTuvId = ((Long) entry2.getKey()).longValue();// originalTuvId
                     HashMap localesMatchesMap = (HashMap) entry2.getValue();
+                    TuvImpl oriTuv = SegmentTuvUtil.getTuvById(originalTuvId, p_sourcePage.getCompanyId());
 
                     // for one target locale
                     Iterator iter3 = null;
@@ -369,6 +373,13 @@ public class RemoteLeverager
                                 lm.setTmProfileId(p_leverageOptions
                                         .getTmProfileId());
                                 lm.setMtName(null);
+
+                                lm.setSid(oriTuv.getSid());
+                                lm.setCreationUser(oriTuv.getCreatedUser());
+                                lm.setCreationDate(oriTuv.getCreatedDate());
+                                lm.setModifyUser(oriTuv.getLastModifiedUser());
+                                lm.setModifyDate(oriTuv.getLastModified());
+                                
                                 c.add(lm);
                             }
                             // save to leverage_match

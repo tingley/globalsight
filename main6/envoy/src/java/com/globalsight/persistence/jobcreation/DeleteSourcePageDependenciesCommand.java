@@ -24,6 +24,8 @@ import java.sql.ResultSet;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.persistence.PersistenceCommand;
 
 
@@ -36,8 +38,8 @@ import com.globalsight.persistence.PersistenceCommand;
  * has not been through any of the translation process.  This is to be
  * used right after importing.
  */
-public class DeleteSourcePageDependenciesCommand
-	extends PersistenceCommand
+public class DeleteSourcePageDependenciesCommand extends PersistenceCommand
+        implements TuvQueryConstants
 {
     private static Logger c_logger =
         Logger.getLogger(
@@ -45,20 +47,20 @@ public class DeleteSourcePageDependenciesCommand
                             
     // query for all the TU ids associated with a source page
     private static final String QUERY_TU_IDS_SQL = 
-            "select id from translation_unit where leverage_group_id in " +
-                "(select lg_id from source_page_leverage_group where sp_id = ?)";
+            "select id from " + TU_TABLE_PLACEHOLDER + 
+             " where leverage_group_id in (select lg_id from source_page_leverage_group where sp_id = ?)";
 
     // delete the leverage matches associated with this source page
     private static final String DELETE_LEVERAGE_MATCH_SQL = 
-        "delete from leverage_match where source_page_id = ?";
+        "delete from " + LM_TABLE_PLACEHOLDER + " where source_page_id = ?";
 
     // delete all the TUVs associated with the source and all target pages
     private static final String DELETE_TUVS_SQL = 
-        "delete from translation_unit_variant where tu_id in ( :tuIds )";
+        "delete from " + TUV_TABLE_PLACEHOLDER + " where tu_id in ( :tuIds )";
 
     // delete all TUs associated with the source (and all target pages)
     private static final String DELETE_TUS_SQL =
-        "delete from translation_unit where id in ( :tuIds )";
+        "delete from " + TU_TABLE_PLACEHOLDER + " where id in ( :tuIds )";
 
     // delete the target page association to the page's leverage group
     private static final String DELETE_TP_LG_ASSOCIATION_SQL =
@@ -79,8 +81,8 @@ public class DeleteSourcePageDependenciesCommand
 
     // delete template parts
     private static final String DELETE_TEMPLATE_PARTS_SQL = 
-        "delete from template_part where template_id in " + 
-            "(select id from template where source_page_id = ?)";
+        "delete from " + TEMPLATE_PART_TABLE_PLACEHOLDER + 
+        " where template_id in (select id from template where source_page_id = ?)";
 
     // delete templates
     private static final String DELETE_TEMPLATES_SQL = 
@@ -145,42 +147,61 @@ public class DeleteSourcePageDependenciesCommand
     public void createPreparedStatement(Connection p_connection) 
 		throws Exception 
     {   
+        String tuTableName = SegmentTuTuvCacheManager
+                .getTuTableNameJobDataIn(m_sourcePageId);
+        String tuvTableName = SegmentTuTuvCacheManager
+                .getTuvTableNameJobDataIn(m_sourcePageId);
+        String lmTableName = SegmentTuTuvCacheManager
+                .getLMTableNameJobDataIn(m_sourcePageId);
+        String tpTableName = SegmentTuTuvCacheManager
+                .getTemplatePartTableNameJobDataIn(m_sourcePageId);
+
         m_psTargetPages = p_connection.prepareStatement(DELETE_TARGET_PAGES_SQL);
-        m_psLeverageMatches = p_connection.prepareStatement(DELETE_LEVERAGE_MATCH_SQL);
-        
-        m_psTuIds = p_connection.prepareStatement(QUERY_TU_IDS_SQL);
+
+        m_psLeverageMatches = p_connection
+                .prepareStatement(DELETE_LEVERAGE_MATCH_SQL.replace(
+                        LM_TABLE_PLACEHOLDER, lmTableName));
+
+        String sql1 = QUERY_TU_IDS_SQL.replace(TU_TABLE_PLACEHOLDER, tuTableName);
+        m_psTuIds = p_connection.prepareStatement(sql1);
         m_psTuIds.setLong(1, m_sourcePageId);
         ResultSet rs = m_psTuIds.executeQuery();
         StringBuilder ids = new StringBuilder();
         ids.append("''");
-        
+
         while (rs.next()) {
         	ids.append(", '" + rs.getLong(1) + "'");
         }
-        
-        m_psTuvs = p_connection.prepareStatement(DELETE_TUVS_SQL.replaceAll(":tuIds", ids.toString()));
-        m_psTus = p_connection.prepareStatement(DELETE_TUS_SQL.replaceAll(":tuIds", ids.toString()));
+
+        String sql2 = DELETE_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
+                tuvTableName).replaceAll(":tuIds", ids.toString());
+        m_psTuvs = p_connection.prepareStatement(sql2);
+
+        String sql3 = DELETE_TUS_SQL.replace(TU_TABLE_PLACEHOLDER, tuTableName)
+                .replaceAll(":tuIds", ids.toString());
+        m_psTus = p_connection.prepareStatement(sql3);
         
         m_psSourceLGs = p_connection.prepareStatement(DELETE_SP_LG_ASSOCIATION_SQL);
         m_psTargetLGs = p_connection.prepareStatement(DELETE_TP_LG_ASSOCIATION_SQL);
 
-        m_psTemplateParts = p_connection.prepareStatement(DELETE_TEMPLATE_PARTS_SQL);
+        m_psTemplateParts = p_connection
+                .prepareStatement(DELETE_TEMPLATE_PARTS_SQL.replace(
+                        TEMPLATE_PART_TABLE_PLACEHOLDER, tpTableName));
         m_psTemplates = p_connection.prepareStatement(DELETE_TEMPLATES_SQL);
     }
 
     /**
      * Set the data in all the SQL prepared statements.
      */
-    public void setData() 
-		throws Exception                                      
+    public void setData() throws Exception
     {
-        m_psTargetPages.setLong(1, m_sourcePageId);    
+        m_psTargetPages.setLong(1, m_sourcePageId);
         m_psLeverageMatches.setLong(1, m_sourcePageId);
         m_psTargetLGs.setLong(1, m_sourcePageId);
         m_psSourceLGs.setLong(1, m_sourcePageId);
-        
+
         m_psTemplateParts.setLong(1, m_sourcePageId);
-        m_psTemplates.setLong(1, m_sourcePageId);    
+        m_psTemplates.setLong(1, m_sourcePageId);
     }
 
     /**

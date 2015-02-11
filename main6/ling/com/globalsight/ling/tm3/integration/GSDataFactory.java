@@ -64,7 +64,8 @@ public class GSDataFactory implements TM3DataFactory<GSTuvData>
     @Override
     public TM3Locale getLocaleById(long id)
     {
-        return (TM3Locale) HibernateUtil.get(GlobalSightLocale.class, id);
+        return (TM3Locale) HibernateUtil
+                .get(GlobalSightLocale.class, id, false);
     }
 
     @Override

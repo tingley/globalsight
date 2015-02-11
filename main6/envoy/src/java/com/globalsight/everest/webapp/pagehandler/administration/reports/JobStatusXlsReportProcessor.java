@@ -16,9 +16,11 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,27 +30,20 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.Border;
-import jxl.format.BorderLineStyle;
-import jxl.format.CellFormat;
-import jxl.format.Colour;
-import jxl.format.UnderlineStyle;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCell;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -71,8 +66,10 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * Process the Job status excel report.
@@ -83,8 +80,19 @@ import com.globalsight.util.SortUtil;
 public class JobStatusXlsReportProcessor implements ReportsProcessor
 {
     private static Logger s_logger = Logger.getLogger(REPORTS);
-    private WritableWorkbook m_workbook = null;
-    private Locale uiLocale = null;
+//    private static Map<String, ReportsData> m_reportsDataMap = new ConcurrentHashMap<String, ReportsData>();
+    private Locale uiLocale = Locale.US;
+    private ResourceBundle bundle = null;
+    private String userId = null;
+
+    private CellStyle titleStyle = null;
+    private CellStyle headerStyle = null;
+    private CellStyle contentStyle = null;
+    private CellStyle redStyle = null;
+    private CellStyle rejectedStyle = null;
+    private CellStyle wrapStyle = null;
+
+    SimpleDateFormat dateFormat = null;
 
     public JobStatusXlsReportProcessor()
     {
@@ -98,24 +106,138 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
     public void generateReport(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
     {
+        dateFormat = new SimpleDateFormat(
+                p_request.getParameter(PARAM_DATE_FORMAT));
         uiLocale = (Locale) p_request.getSession().getAttribute(
                 WebAppConstants.UILOCALE);
+        bundle = PageHandler.getBundle(p_request.getSession());
+        userId = (String) p_request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
         String companyName = UserUtil.getCurrentCompanyName(p_request);
         if (!UserUtil.isBlank(companyName))
         {
             CompanyThreadLocal.getInstance().setValue(companyName);
         }
 
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setSuppressWarnings(true);
-        m_workbook = Workbook.createWorkbook(p_response.getOutputStream(),
-                settings);
-        addJobs(p_request, p_response);
-        if (m_workbook != null)
+        Workbook p_workbook = new SXSSFWorkbook();
+        Sheet sheet = p_workbook.createSheet(bundle.getString("lb_job_status"));
+
+        // Add Title
+        addTitle(p_workbook, sheet);
+
+        // add header
+        addHeader(p_workbook, sheet);
+
+        //
+        addJobs(p_workbook, sheet, p_request, p_response);
+
+        if (p_workbook != null)
         {
-            m_workbook.write();
-            m_workbook.close();
+            ServletOutputStream out = p_response.getOutputStream();
+            p_workbook.write(out);
+            out.close();
         }
+    }
+
+    private void addTitle(Workbook p_workbook, Sheet p_sheet)
+    {
+        String EMEA = CompanyWrapper.getCurrentCompanyName();
+        Row titleRow = getRow(p_sheet, 0);
+        Cell titleCell = getCell(titleRow, 0);
+        titleCell.setCellValue(EMEA + " " + bundle.getString("lb_job_status"));
+        titleCell.setCellStyle(getTitleStyle(p_workbook));
+        p_sheet.setColumnWidth(0, 22 * 256);
+    }
+
+    /**
+     * Adds the table header to the sheet
+     * 
+     * @param p_sheet
+     *            the sheet to be created in the report
+     * 
+     * @throws Exception
+     */
+    private void addHeader(Workbook p_workbook, Sheet p_sheet)throws Exception
+    {
+        CellStyle headerCs = getHeaderStyle(p_workbook);
+
+        int col = 0;
+        Row headerRow = getRow(p_sheet, 3);
+        
+        Cell cell_A = getCell(headerRow, col++);
+        cell_A.setCellValue(bundle.getString("jobinfo.jobid"));
+        cell_A.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 10 * 256);
+        
+        Cell cell_B = getCell(headerRow, col++);
+        cell_B.setCellValue(bundle.getString("lb_job"));
+        cell_B.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 50 * 256);
+        
+        Cell cell_C = getCell(headerRow, col++);
+        cell_C.setCellValue(bundle.getString("lb_lang"));
+        cell_C.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_D = getCell(headerRow, col++);
+        cell_D.setCellValue(bundle.getString("lb_word_count"));
+        cell_D.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 20 * 256);
+        
+        Cell cell_E = getCell(headerRow, col++);
+        cell_E.setCellValue(bundle.getString("lb_job_kickoff_date"));
+        cell_E.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_F = getCell(headerRow, col++);
+        cell_F.setCellValue(bundle.getString("lb_date_due_to_review"));
+        cell_F.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+
+        Cell cell_G = getCell(headerRow, col++);
+        cell_G.setCellValue(bundle.getString("lb_actual_date_to_review"));
+        cell_G.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_H = getCell(headerRow, col++);
+        cell_H.setCellValue(bundle.getString("lb_current_activity"));
+        cell_H.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 20 * 256);
+        
+        Cell cell_I = getCell(headerRow, col++);
+        cell_I.setCellValue(bundle.getString("lb_reviewer_accepted"));
+        cell_I.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_J = getCell(headerRow, col++);
+        cell_J.setCellValue(bundle.getString("lb_reviewer_name"));
+        cell_J.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 20 * 256);
+        
+        Cell cell_K = getCell(headerRow, col++);
+        cell_K.setCellValue(bundle.getString("lb_Due_reviewer_complete"));
+        cell_K.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_L = getCell(headerRow, col++);
+        cell_L.setCellValue(bundle.getString("lb_actual_reviewer_complete"));
+        cell_L.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_M = getCell(headerRow, col++);
+        cell_M.setCellValue(bundle.getString("jobinfo.status.estimatedjobcompletion"));
+        cell_M.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_N = getCell(headerRow, col++);
+        cell_N.setCellValue(bundle.getString("jobinfo.status.actualjobcompletion"));
+        cell_N.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
+        Cell cell_O = getCell(headerRow, col++);
+        cell_O.setCellValue(bundle.getString("lb_pm"));
+        cell_O.setCellStyle(headerCs);
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
     }
 
     /**
@@ -123,18 +245,12 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
      * 
      * @throws Exception
      */
-    private void addJobs(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    private void addJobs(Workbook p_workbook, Sheet p_sheet,
+            HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
-        String userId = (String) p_request.getSession().getAttribute(
-                WebAppConstants.USER_NAME);
-        ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
-        WritableSheet sheet = m_workbook.createSheet(
-                bundle.getString("lb_job_status"), 0);
-        addHeader(sheet, bundle);
-
         String[] jobIds = p_request.getParameterValues(PARAM_JOB_ID);
-        List jobList = new ArrayList();
+        List<Job> jobList = new ArrayList<Job>();
 
         if (jobIds != null && PARAM_SELECTED_ALL.equals(jobIds[0]))
         {
@@ -146,7 +262,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         }
         else
         {
-            // just get the chosen jobs
+            // just get the selected jobs
             for (int i = 0; i < jobIds.length; i++)
             {
                 Job j = ServerProxy.getJobHandler().getJobById(
@@ -158,7 +274,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         String[] trgLocales = p_request
                 .getParameterValues(PARAM_TARGET_LOCALES_LIST);
         boolean wantsAllLocales = false;
-        Set trgLocaleList = new HashSet();
+        Set<String> trgLocaleList = new HashSet<String>();
         if (trgLocales != null && !PARAM_SELECTED_ALL.equals(trgLocales[0]))
         {
             for (int i = 0; i < trgLocales.length; i++)
@@ -176,26 +292,22 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         if (ReportHelper.checkReportsDataInProgressStatus(userId,
                 reportJobIDS, getReportType()))
         {
-            m_workbook = null;
-            p_response.sendError(p_response.SC_NO_CONTENT);
+            p_workbook = null;
+            p_response.sendError(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
         // Set m_reportsDataMap.
         ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
                 0, ReportsData.STATUS_INPROGRESS);
-        Iterator jobIter = jobList.iterator();
+
         IntHolder row = new IntHolder(4);
-        while (jobIter.hasNext())
+        for (Job j : jobList)
         {
-            Job j = (Job) jobIter.next();
-            Collection c = j.getWorkflows();
-            Iterator wfIter = c.iterator();
-            while (wfIter.hasNext())
+            for (Workflow w : j.getWorkflows())
             {
-                Workflow w = (Workflow) wfIter.next();
                 String state = w.getState();
                 // skip certain workflow whose target locale is not selected
-                String trgLocale = w.getTargetLocale().toString();
+                String trgLocale = Long.toString(w.getTargetLocale().getId());
                 if (!wantsAllLocales && !trgLocaleList.contains(trgLocale))
                 {
                     continue;
@@ -207,7 +319,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
                         || Workflow.EXPORT_FAILED.equals(state)
                         || Workflow.ARCHIVED.equals(state))
                 {
-                    addWorkflow(p_request, sheet, j, w, row, bundle);
+                    addWorkflow(p_request, p_workbook, p_sheet, j, w, row, bundle);
                 }
             }
         }
@@ -229,61 +341,58 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
      * @throws Exception
      */
     private void addWorkflow(HttpServletRequest p_request,
-            WritableSheet p_sheet, Job p_job, Workflow p_workflow,
+            Workbook p_workbook, Sheet p_sheet, Job p_job, Workflow p_workflow,
             IntHolder p_row, ResourceBundle bundle) throws Exception
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                p_request.getParameter(PARAM_DATE_FORMAT));
-
         int c = 0;
-        int r = p_row.getValue();
+        Row row = getRow(p_sheet, p_row.getValue());
 
         // Job ID column
-        p_sheet.addCell(new Label(c++, r, Long.toString(p_job.getJobId())));
+        Cell cell_A = getCell(row, c++);
+        cell_A.setCellValue(Long.toString(p_job.getJobId()));
+        cell_A.setCellStyle(getContentStyle(p_workbook));
 
         // Job Name column
-        p_sheet.addCell(new Label(c++, r, p_job.getJobName()));
+        Cell cell_B = getCell(row, c++);
+        cell_B.setCellValue(p_job.getJobName());
+        cell_B.setCellStyle(getContentStyle(p_workbook));
 
         // Target Language column
-        p_sheet.addCell(new Label(c++, r, p_workflow.getTargetLocale()
-                .getDisplayName(uiLocale)));
+        Cell cell_C = getCell(row, c++);
+        cell_C.setCellValue(p_workflow.getTargetLocale()
+                .getDisplayName(uiLocale));
+        cell_C.setCellStyle(getContentStyle(p_workbook));
 
         // Word Count column
-        p_sheet.addCell(new Number(c++, r, p_workflow.getTotalWordCount()));
+        Cell cell_D = getCell(row, c++);
+        cell_D.setCellValue(p_workflow.getTotalWordCount());
+        cell_D.setCellStyle(getContentStyle(p_workbook));
 
         // Job Kick off date column
-        p_sheet.addCell(new Label(c++, r, dateFormat.format(p_job
-                .getCreateDate())));
+        Cell cell_E = getCell(row, c++);
+        cell_E.setCellValue(dateFormat.format(p_job.getCreateDate()));
+        cell_E.setCellStyle(getContentStyle(p_workbook));
 
         // Date due to review column -- For the current workflow, find the
-        // activity
-        // called "Dell_Review", then insert the Estimated Completion Date (and
-        // time)
-        // for the activity prior to the "Dell_Review" activity.
-        List taskInfos = ServerProxy.getWorkflowManager()
-                .getTaskInfosInDefaultPath(p_workflow);
-        if (taskInfos == null)
-            taskInfos = new ArrayList();
-
-        Iterator taskIter = taskInfos.iterator();
-
+        // activity called "Dell_Review", then insert the Estimated Completion
+        // Date (and time) for the activity prior to the "Dell_Review" activity.
         Task priorTask = null;
         Task revTask = null;
         TaskInfo priorTaskInfo = null;
         TaskInfo revTaskInfo = null;
-
-        while (taskIter.hasNext())
+        List<TaskInfo> taskInfos = ServerProxy.getWorkflowManager()
+                .getTaskInfosInDefaultPath(p_workflow);
+        if (taskInfos == null)
+            taskInfos = new ArrayList<TaskInfo>();
+        for (TaskInfo ti : taskInfos)
         {
-            TaskInfo ti = (TaskInfo) taskIter.next();
             if (ti.getType() == Task.TYPE_REVIEW)
             {
                 revTaskInfo = ti;
-                revTask = ServerProxy.getTaskManager().getTask(
-                        revTaskInfo.getId());
-
+                revTask = (Task) p_workflow.getTasks().get(revTaskInfo.getId());
                 if (priorTaskInfo != null)
                 {
-                    priorTask = ServerProxy.getTaskManager().getTask(
+                    priorTask = (Task) p_workflow.getTasks().get(
                             priorTaskInfo.getId());
                 }
                 break;
@@ -294,37 +403,57 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
             }
         }
 
+        Cell cell_F = getCell(row, c++);;
+        Cell cell_G = getCell(row, c++);;
         if (revTask == null)
         {
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_no_review")));
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_no_review")));
+            cell_F.setCellValue(bundle.getString("lb_no_review"));
+            cell_F.setCellStyle(getContentStyle(p_workbook));
+
+            cell_G.setCellValue(bundle.getString("lb_no_review"));
+            cell_G.setCellStyle(getContentStyle(p_workbook));
         }
         else if (priorTaskInfo != null && priorTask != null)
         {
             if (priorTaskInfo.getCompleteByDate() != null)
-                p_sheet.addCell(new Label(c++, r, dateFormat
-                        .format(priorTaskInfo.getCompleteByDate())));
+            {
+                cell_F.setCellValue(dateFormat
+                        .format(priorTaskInfo.getCompleteByDate()));
+                cell_F.setCellStyle(getContentStyle(p_workbook));
+            }
             else
-                p_sheet.addCell(new Label(c++, r, bundle.getString("lb_na")));
+            {
+                cell_F.setCellValue(bundle.getString("lb_na"));
+                cell_F.setCellStyle(getContentStyle(p_workbook));
+            }
 
             // Actual date to Review column: Insert the date (and time) the
             // "Dell_Review"
             // activity became available for acceptance in the current workflow.
             if (priorTask.getCompletedDate() != null)
-                p_sheet.addCell(new Label(c++, r, dateFormat.format(priorTask
-                        .getCompletedDate())));
+            {
+                cell_G.setCellValue(dateFormat.format(priorTask
+                        .getCompletedDate()));
+                cell_G.setCellStyle(getContentStyle(p_workbook));
+            }
             else
-                p_sheet.addCell(new Label(c++, r, bundle.getString("lb_na")));
+            {
+            	cell_G.setCellValue(bundle.getString("lb_na"));
+            	cell_G.setCellStyle(getContentStyle(p_workbook));
+            }
         }
         else
         {
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_na")));
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_na")));
+            cell_F.setCellValue(bundle.getString("lb_na"));
+            cell_F.setCellStyle(getContentStyle(p_workbook));
+
+            cell_G.setCellValue(bundle.getString("lb_na"));
+            cell_G.setCellStyle(getContentStyle(p_workbook));
         }
 
         // Current Activity column: Currently active activity in the current
         // workflow.
-        Map activeTasks = null;
+        Map<Long, WorkflowTaskInstance> activeTasks = null;
         try
         {
             activeTasks = ServerProxy.getWorkflowServer()
@@ -344,48 +473,51 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         Object[] tasks = (activeTasks == null) ? null : activeTasks.values()
                 .toArray();
         WorkflowTaskInstance activeTask = null;
+
+        Cell cell_H = getCell(row, c++);
         if (tasks != null && tasks.length > 0)
         {
             // assume just one active task for now
             activeTask = (WorkflowTaskInstance) tasks[0];
             // only write out if the Activity type is review only
             Activity a = activeTask.getActivity();
-            p_sheet.addCell(new Label(c++, r, a.getDisplayName()));
+            cell_H.setCellValue(a.getDisplayName());
+            cell_H.setCellStyle(getContentStyle(p_workbook));
         }
         else
         {
             String state = p_workflow.getState();
             if (Workflow.LOCALIZED.equals(state))
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_localized")));
+            	cell_H.setCellValue(bundle.getString("lb_localized"));
+            	cell_H.setCellStyle(getContentStyle(p_workbook));
             }
             else if (Workflow.EXPORTED.equals(state))
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_exported")));
+                cell_H.setCellValue(bundle.getString("lb_exported"));
+                cell_H.setCellStyle(getContentStyle(p_workbook));
             }
             else if (Workflow.EXPORT_FAILED.equals(state))
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_exported_failed")));
+                cell_H.setCellValue(bundle.getString("lb_exported_failed"));
+                cell_H.setCellStyle(getContentStyle(p_workbook));
                 // if the workflow is EXPORT_FAILED, color the line in red
                 wasExportFailed = true;
             }
             else if (Workflow.READY_TO_BE_DISPATCHED.equals(state))
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_not_yet_dispatched")));
+            	cell_H.setCellValue(bundle.getString("lb_not_yet_dispatched"));
+            	cell_H.setCellStyle(getContentStyle(p_workbook));
             }
             else if (Workflow.ARCHIVED.equals(state))
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_archived")));
+            	cell_H.setCellValue(bundle.getString("lb_archived"));
+            	cell_H.setCellStyle(getContentStyle(p_workbook));
             }
             else
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_unknown")));
+            	cell_H.setCellValue(bundle.getString("lb_unknown"));
+            	cell_H.setCellStyle(getContentStyle(p_workbook));
             }
         }
 
@@ -393,9 +525,9 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         String rejectorName = null;
         boolean revAccepted = false;
         // Reviewer accepted column: If the "Dell_Review" activity has been
-        // accepted,
-        // insert the date (and time) it was accepted. If not accepted yet,
-        // put "not accepted yet".
+        // accepted, insert the date (and time) it was accepted. If not accepted
+        // yet, put "not accepted yet".
+        Cell cell_I = getCell(row, c++);
         if (revTask != null)
         {
             if (revTask.getAcceptor() != null)
@@ -403,12 +535,14 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
                 revAccepted = true;
                 if (revTask.getAcceptedDate() != null)
                 {
-                    p_sheet.addCell(new Label(c++, r, dateFormat.format(revTask
-                            .getAcceptedDate())));
+                	cell_I.setCellValue(dateFormat.format(revTask
+                            .getAcceptedDate()));
+                	cell_I.setCellStyle(getContentStyle(p_workbook));
                 }
                 else
                 {
-                    p_sheet.addCell(new Label(c++, r, bundle.getString("lb_na")));
+                	cell_I.setCellValue(bundle.getString("lb_na"));
+                	cell_I.setCellStyle(getContentStyle(p_workbook));
                 }
             }
             else
@@ -433,234 +567,292 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
                 }
                 if (wasRejected)
                 {
-                    p_sheet.addCell(new Label(c++, r, bundle
-                            .getString("lb_rejected_by") + " " + rejectorName,
-                            rejectedFormat()));
+                	cell_I.setCellValue(bundle
+                            .getString("lb_rejected_by") + " " + rejectorName);
+                	cell_I.setCellStyle(getRejectedStyle(p_workbook));
                 }
                 else
                 {
-                    p_sheet.addCell(new Label(c++, r, bundle
-                            .getString("lb_not_accepted_yet")));
+                	cell_I.setCellValue(bundle
+                            .getString("lb_not_accepted_yet"));
+                	cell_I.setCellStyle(getContentStyle(p_workbook));
                 }
             }
         }
         else
         {
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_no_review")));
+        	cell_I.setCellValue(bundle.getString("lb_no_review"));
+        	cell_I.setCellStyle(getContentStyle(p_workbook));
         }
+
         // Reviewer name column: If not accepted, Insert all assignee(s)
         // assigned to the Dell_Review activity in the current workflow,
         // delimited by commas; add multiple names if there are multiple
         // assignees, until reaching 10 (cut it off at 10 names).
         // If activity is accepted, put in name of accepter.
+        Cell cell_J = getCell(row, c++);
         if (revTask == null)
         {
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_no_review")));
+            cell_J.setCellValue(bundle.getString("lb_no_review"));
+            cell_J.setCellStyle(getContentStyle(p_workbook));
         }
         else if (revAccepted)
         {
             // get accepter somehow
-            p_sheet.addCell(new Label(c++, r, UserUtil.getUserNameById(revTask
-                    .getAcceptor())));
+        	cell_J.setCellValue(UserUtil.getUserNameById(revTask.getAcceptor()));
+        	cell_J.setCellStyle(getContentStyle(p_workbook));
         }
         else
         {
-            // get assignees
-            List assigneeList = null;
-            if (revTaskInfo != null)
-            {
-                assigneeList = revTaskInfo.getTaskAssignees();
-            }
-            if (assigneeList == null)
-            {
-                assigneeList = new ArrayList();
-            }
-
-            StringBuffer assignees = new StringBuffer();
-            int count = 0;
-            Iterator iter = assigneeList.iterator();
-            while (iter.hasNext())
-            {
-                TaskAssignee assignee = (TaskAssignee) iter.next();
-                assignees
-                        .append(UserUtil.getUserNameById(assignee.getUserId()));
-                if (count++ == 10)
-                {
-                    break;
-                }
-                else
-                {
-                    if (iter.hasNext())
-                        assignees.append(",");
-                }
-            }
-
-            p_sheet.addCell(new Label(c++, r, assignees.toString()));
+            String reviewerName = getReviewerName(revTaskInfo); 
+            cell_J.setCellValue(reviewerName);
+            cell_J.setCellStyle(getContentStyle(p_workbook));
         }
 
         // Due reviewer complete column: Insert the Estimated Completion Date
         // (and time) for the "Dell_Review" activity.
+        Cell cell_K = getCell(row, c++);
         if (revTask != null && revTask.getEstimatedCompletionDate() != null)
-            p_sheet.addCell(new Label(c++, r, dateFormat.format(revTask
-                    .getEstimatedCompletionDate())));
+        {
+            cell_K.setCellValue(dateFormat.format(revTask
+                    .getEstimatedCompletionDate()));
+            cell_K.setCellStyle(getContentStyle(p_workbook));
+        }
         else if (revTask != null)
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_na")));
+        {
+        	cell_K.setCellValue(bundle.getString("lb_na"));
+        	cell_K.setCellStyle(getContentStyle(p_workbook));
+        }
         else
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_no_review")));
+        {
+        	cell_K.setCellValue(bundle.getString("lb_no_review"));
+        	cell_K.setCellStyle(getContentStyle(p_workbook));
+        }
 
         // Actual reviewer complete column: Insert the Actual Completion Date
         // (and time)
         // for the "Dell_Review" activity.
+        Cell cell_L = getCell(row, c++);
         if (revTask != null && revTask.getCompletedDate() != null)
         {
-            p_sheet.addCell(new Label(c++, r, dateFormat.format(revTask
-                    .getCompletedDate())));
+            cell_L.setCellValue(dateFormat.format(revTask
+                    .getCompletedDate()));
+            cell_L.setCellStyle(getContentStyle(p_workbook));
         }
         else if (revTask != null)
         {
             if (wasRejected)
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_rejected_by") + " " + rejectorName,
-                        rejectedFormat()));
+            	cell_L.setCellValue(bundle
+                        .getString("lb_rejected_by") + " " + rejectorName);
+            	cell_L.setCellStyle(getRejectedStyle(p_workbook));
             }
             else
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_not_yet_completed")));
+            	cell_L.setCellValue(bundle.getString("lb_not_yet_completed"));
+            	cell_L.setCellStyle(getContentStyle(p_workbook));
             }
         }
         else
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_no_review")));
+        {
+        	cell_L.setCellValue(bundle.getString("lb_no_review"));
+        	cell_L.setCellStyle(getContentStyle(p_workbook));
+        }
 
         // Estimated job completion column: Insert the estimated completion date
-        // (and time)
-        // for each workflow.
+        // (and time) for each workflow.
+        Cell cell_M = getCell(row, c++);
         if (p_workflow.getEstimatedCompletionDate() != null)
-            p_sheet.addCell(new Label(c++, r, dateFormat.format(p_workflow
-                    .getEstimatedCompletionDate())));
+        {
+            cell_M.setCellValue(dateFormat.format(p_workflow
+        			.getEstimatedCompletionDate()));
+            cell_M.setCellStyle(getContentStyle(p_workbook));
+        }
         else
-            p_sheet.addCell(new Label(c++, r, bundle.getString("lb_na")));
+        {
+        	cell_M.setCellValue(bundle.getString("lb_na"));
+        	cell_M.setCellStyle(getContentStyle(p_workbook));
+        }
 
         // Actual job completion column: Insert the date (and time) the workflow
         // was exported.
+        Cell cell_N = getCell(row, c++);
         if (p_workflow.getCompletedDate() != null)
         {
-            p_sheet.addCell(new Label(c++, r, dateFormat.format(p_workflow
-                    .getCompletedDate())));
+            cell_N.setCellValue(dateFormat.format(p_workflow
+                    .getCompletedDate()));
+            cell_N.setCellStyle(getContentStyle(p_workbook));
         }
         else
         {
             if (wasRejected)
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_rejected_by") + " " + rejectorName,
-                        rejectedFormat()));
+            	cell_N.setCellValue(bundle
+                        .getString("lb_rejected_by") + " " + rejectorName);
+            	cell_N.setCellStyle(getRejectedStyle(p_workbook));
             }
             else
             {
-                p_sheet.addCell(new Label(c++, r, bundle
-                        .getString("lb_not_yet_completed")));
+            	cell_N.setCellValue(bundle.getString("lb_not_yet_completed"));
+            	cell_N.setCellStyle(getContentStyle(p_workbook));
             }
         }
 
-        // Dell PM column. Insert the DELL PM name for the workflow.
-        // These users are listed as Workflow Managers in each Workflow
-        // Template.
-        // So look up the workflow template used to create the desired workflow
-        // instance
-        // in the job being queried. Then find and retrieve the Workflow Manager
-        // users
-        // in that workflow template whose user profile contains the value of
-        // "Dell PM"
-        // in the Company field. If there are more than one, delimit by comma up
-        // to 10 names.
-        List workflowOwners = p_workflow.getWorkflowOwners();
-        String currentCompanyName = CompanyWrapper.getCurrentCompanyName();
-        if (workflowOwners != null && workflowOwners.size() > 0
-                && currentCompanyName != null)
+        // Dell PM column
+        Cell cell_O = getCell(row, c++);
+        String pmString = getPMColumnString(p_workflow);
+        if (!StringUtil.isEmpty(pmString))
         {
-            Iterator ownerIter = workflowOwners.iterator();
-            StringBuffer owners = new StringBuffer();
-            boolean addedFirst = false;
-            while (ownerIter.hasNext())
-            {
-                WorkflowOwner owner = (WorkflowOwner) ownerIter.next();
-                User user = ServerProxy.getUserManager().getUser(
-                        owner.getOwnerId());
-                if (currentCompanyName.equals(user.getCompanyName()))
-                {
-                    if (addedFirst == false)
-                    {
-                        owners.append(UserUtil.getUserNameById(owner
-                                .getOwnerId()));
-                        addedFirst = true;
-                    }
-                    else
-                    {
-                        owners.append(",").append(
-                                UserUtil.getUserNameById(owner.getOwnerId()));
-                    }
-                }
-            }
-
-            p_sheet.addCell(new Label(c, r, owners.toString(), wrapFormat()));
+            cell_O.setCellValue(pmString);
+            cell_O.setCellStyle(getWrapStyle(p_workbook));
         }
         else
         {
-            p_sheet.addCell(new Label(c, r, bundle.getString("lb_na")));
+        	cell_O.setCellValue(bundle.getString("lb_na"));
+        	cell_O.setCellStyle(getContentStyle(p_workbook));
         }
 
         p_row.inc();
 
+        // Rewrite current row in "RED" style.
         if (wasExportFailed)
         {
-            WritableCell wc = null;
-            for (int i = 0; i <= c; i++)
+            Cell cell = null;
+            for (int i = 0; i < c; i++)
             {
-                wc = p_sheet.getWritableCell(i, r);
+                cell = getCell(row, i);
                 if (i == 3)
-                    p_sheet.addCell(new Number(i, r, new Double(wc
-                            .getContents()).doubleValue(), redFormat()));
+                {
+                    cell.setCellValue(cell.getNumericCellValue());
+                    cell.setCellStyle(getRedStyle(p_workbook));
+                }
                 else
-                    p_sheet.addCell(new Label(i, r, wc.getContents(),
-                            redFormat()));
+                {
+                    cell.setCellValue(cell.getStringCellValue());
+                    cell.setCellStyle(getRedStyle(p_workbook));
+                }
             }
         }
     }
 
-    private CellFormat rejectedFormat() throws Exception
-    {
-        WritableFont rejectedFont = new WritableFont(WritableFont.TIMES, 11,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                Colour.RED);
-        WritableCellFormat rejectedFormat = new WritableCellFormat(rejectedFont);
-        rejectedFormat.setWrap(true);
-
-        return rejectedFormat;
-    }
-
-    private CellFormat redFormat() throws Exception
-    {
-        WritableFont redFont = new WritableFont(WritableFont.ARIAL, 10,
-                WritableFont.NO_BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                Colour.BLACK);
-        WritableCellFormat redFormat = new WritableCellFormat(redFont);
-        redFormat.setBackground(Colour.RED);
-        redFormat.setWrap(true);
-
-        return redFormat;
-    }
-
     /**
-     * Returns a cell format that the wrap has been set to true.
+     * Get current active activity display name for specified workflow.
+     * @param p_workflowId
+     * @return
      */
-    private CellFormat wrapFormat() throws Exception
+    private String getActiveActivityName(long p_workflowId)
     {
-        WritableCellFormat wrapFormat = new WritableCellFormat();
-        wrapFormat.setWrap(true);
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            con = DbUtil.getConnection();
+            String sql = " SELECT a.display_name "
+                       + " FROM activity a, " 
+                       + " (SELECT ti.name FROM task_info ti WHERE ti.workflow_ID = ? AND ti.state = 'ACTIVE') AS b "
+                       + " WHERE a.name = b.name";
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, p_workflowId);
+            rs = ps.executeQuery();
+            if (rs == null)
+                return null;
+            if (rs.next())
+            {
+                return rs.getString(1);
+            }
+        }
+        catch (Exception e)
+        {
+            s_logger.error("Fail to get active activity name for workflowId "
+                    + p_workflowId, e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(con);
+        }
 
-        return wrapFormat;
+        return null;
+    }
+
+    // For "Reviewer Name" column (index : J)
+    private String getReviewerName(TaskInfo ti)
+    {
+        if (ti == null)
+            return "";
+
+        List<TaskAssignee> assigneeList = ti.getTaskAssignees();
+        if (assigneeList == null) {
+            assigneeList = new ArrayList<TaskAssignee>();
+        }
+
+        StringBuffer assignees = new StringBuffer();
+        int count = 0;
+        Iterator iter = assigneeList.iterator();
+        while (iter.hasNext())
+        {
+            TaskAssignee assignee = (TaskAssignee) iter.next();
+            assignees.append(UserUtil.getUserNameById(assignee.getUserId()));
+            if (count++ == 10)
+            {
+                break;
+            }
+            else
+            {
+                if (iter.hasNext())
+                    assignees.append(",");
+            }
+        }
+
+        return assignees.toString();
+    }
+
+    // For "PM" column (index: O)
+    private String getPMColumnString(Workflow p_workflow)
+    {
+        StringBuffer owners = new StringBuffer();
+
+        try
+        {
+            String currentCompanyName = CompanyWrapper.getCurrentCompanyName();
+            List workflowOwners = p_workflow.getWorkflowOwners();
+            if (workflowOwners != null && workflowOwners.size() > 0
+                    && currentCompanyName != null)
+            {
+                Iterator ownerIter = workflowOwners.iterator();
+                boolean addedFirst = false;
+                while (ownerIter.hasNext())
+                {
+                    WorkflowOwner owner = (WorkflowOwner) ownerIter.next();
+                    User user = ServerProxy.getUserManager().getUser(
+                            owner.getOwnerId());
+                    if (currentCompanyName.equals(user.getCompanyName()))
+                    {
+                        if (addedFirst == false)
+                        {
+                            owners.append(UserUtil.getUserNameById(owner
+                                    .getOwnerId()));
+                            addedFirst = true;
+                        }
+                        else
+                        {
+                            owners.append(",")
+                                    .append(UserUtil.getUserNameById(owner
+                                            .getOwnerId()));
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ignore)
+        {
+            // this should not break the report generating for other jobs.
+            return null;
+        }
+
+        return owners.toString();
     }
 
     /**
@@ -674,7 +866,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 
         String[] status = p_request.getParameterValues(PARAM_STATUS);
         // search by statusList
-        List statusList = new ArrayList();
+        List<String> statusList = new ArrayList<String>();
         if (status != null && !PARAM_SELECTED_ALL.equals(status[0]))
         {
             for (int i = 0; i < status.length; i++)
@@ -697,7 +889,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 
         String[] projectIds = p_request.getParameterValues(PARAM_PROJECT_ID);
         // search by project
-        List projectIdList = new ArrayList();
+        List<Long> projectIdList = new ArrayList<Long>();
 
         if (projectIds != null && !PARAM_SELECTED_ALL.equals(projectIds[0]))
         {
@@ -736,88 +928,139 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         return sp;
     }
 
-    /**
-     * Adds the table header to the sheet
-     * 
-     * @param p_sheet
-     *            the sheet to be created in the report
-     * 
-     * @throws Exception
-     */
-    private void addHeader(WritableSheet p_sheet, ResourceBundle bundle)
-            throws Exception
+    private CellStyle getTitleStyle(Workbook p_workbook)
     {
-        String EMEA = CompanyWrapper.getCurrentCompanyName();
-        // title font is set black bold on white
-        WritableFont titleFont = new WritableFont(WritableFont.TIMES, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
+        if (titleStyle == null)
+        {
+            Font titleFont = p_workbook.createFont();
+            titleFont.setUnderline(Font.U_NONE);
+            titleFont.setFontName("Times");
+            titleFont.setFontHeightInPoints((short) 14);
+            titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
 
-        p_sheet.addCell(new Label(0, 0, EMEA + " "
-                + bundle.getString("lb_job_status"), titleFormat));
-        p_sheet.setColumnView(0, 22);
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(titleFont);
 
-        // headerFont is set black bold on light grey
-        WritableFont headerFont = new WritableFont(WritableFont.TIMES, 11,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                Colour.BLACK);
-        WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-        headerFormat.setWrap(true);
-        headerFormat.setBackground(Colour.GRAY_25);
-        headerFormat.setShrinkToFit(false);
-        headerFormat.setBorder(Border.ALL, BorderLineStyle.THICK, Colour.BLACK);
+            titleStyle = cs;
+        }
 
-        int col = 0;
-        int row = 3;
-        p_sheet.addCell(new Label(col++, row,
-                bundle.getString("jobinfo.jobid"), headerFormat));
-        p_sheet.setColumnView(col - 1, 10);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("lb_job"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 50);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("lb_lang"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row,
-                bundle.getString("lb_word_count"), headerFormat));
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("lb_job_kickoff_date"), headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
+        return titleStyle;
+    }
 
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("lb_date_due_to_review"), headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("lb_actual_date_to_review"), headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("lb_current_activity"), headerFormat));
-        p_sheet.setColumnView(col - 1, 20);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("lb_reviewer_accepted"), headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("lb_reviewer_name"), headerFormat));
-        p_sheet.setColumnView(col - 1, 20);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("lb_Due_reviewer_complete"), headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("lb_actual_reviewer_complete"), headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("jobinfo.status.estimatedjobcompletion"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row, bundle
-                .getString("jobinfo.status.actualjobcompletion"), headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
-        p_sheet.addCell(new Label(col++, row, bundle.getString("lb_pm"),
-                headerFormat));
-        p_sheet.setColumnView(col - 1, 25);
+    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
+    {
+        if (headerStyle == null)
+        {
+            Font font = p_workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            font.setColor(IndexedColors.BLACK.getIndex());
+            font.setUnderline(Font.U_NONE);
+            font.setFontName("Times");
+            font.setFontHeightInPoints((short) 11);
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(font);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderRight(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setBorderLeft(CellStyle.BORDER_THIN);
+
+            headerStyle = cs;
+        }
+
+        return headerStyle;
+    }
+
+    private CellStyle getRejectedStyle(Workbook p_workbook) throws Exception
+    {
+    	if(rejectedStyle == null)
+    	{
+	    	Font rejectedFont = p_workbook.createFont();
+	    	rejectedFont.setFontName("Times");
+	    	rejectedFont.setUnderline(Font.U_NONE);
+	    	rejectedFont.setFontHeightInPoints((short) 11);
+	    	rejectedFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+	    	rejectedFont.setColor(IndexedColors.RED.getIndex());
+	    	
+	    	CellStyle style = p_workbook.createCellStyle();
+            style.setFont(rejectedFont);
+            style.setWrapText(true);
+            
+            rejectedStyle = style;
+    	}
+    	
+        return rejectedStyle;
+    }
+
+    private CellStyle getRedStyle(Workbook p_workbook) throws Exception
+    {
+    	if(redStyle == null)
+    	{   		
+    		Font redFont = p_workbook.createFont();
+    		redFont.setFontName("Arial");
+    		redFont.setUnderline(Font.U_NONE);
+    		redFont.setFontHeightInPoints((short) 10);
+	    	
+	    	CellStyle style = p_workbook.createCellStyle();
+            style.setFont(redFont);
+            style.setWrapText(true);
+            style.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            style.setFillForegroundColor(IndexedColors.RED.getIndex());
+
+            redStyle = style;
+    	}
+
+        return redStyle;
+    }
+
+    /**
+     * Returns a cell format that the wrap has been set to true.
+     */
+    private CellStyle getWrapStyle(Workbook p_workbook) throws Exception
+    {
+    	if(wrapStyle == null)
+    	{
+    		CellStyle style = p_workbook.createCellStyle();
+    		style.setWrapText(true);
+    		wrapStyle = style;
+    	}
+
+        return wrapStyle;
+    }
+    
+    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
+    {
+        if (contentStyle == null)
+        {
+            CellStyle style = p_workbook.createCellStyle();
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
+
+            contentStyle = style;
+        }
+
+        return contentStyle;
+    }
+    
+    private Row getRow(Sheet p_sheet, int p_col)
+    {
+        Row row = p_sheet.getRow(p_col);
+        if (row == null)
+            row = p_sheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
     }
     
     public String getReportType()

@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.util.CxeProxy;
@@ -439,6 +440,13 @@ public class SelectFileHandler extends PageHandler
                     oldFolderName, String.valueOf(job.getId()));
             mappedFiles.put(fileName, fp);
         }
+        if (jobType != null && "cvsJob".equalsIgnoreCase(jobType)) {
+            //To remove old source folder which is used job name as path
+            File baseDocDir = AmbFileStoragePathUtils.getCxeDocDir();
+            File tmpDir = new File(baseDocDir, sourceLocaleName + File.separator + oldFolderName);
+            if (tmpDir.exists() && tmpDir.isDirectory())
+                FileUtil.deleteFile(tmpDir);
+        }
         sessionMgr.setAttribute(MapFileProfileToFileHandler.MAPPINGS,
                 mappedFiles);
 
@@ -486,7 +494,7 @@ public class SelectFileHandler extends PageHandler
                     + destinationLocation);
 
             FileUtil.copyFile(sourceFile, descFile);
-            // sourceFile.delete();
+            
             return destinationLocation;
         }
         catch (Exception e)
@@ -523,71 +531,113 @@ public class SelectFileHandler extends PageHandler
                 // job.
                 String scriptOnImport = fp.getScriptOnImport();
                 int exitValue = 0;
+                
                 if (scriptOnImport != null && scriptOnImport.length() > 0)
-                {
-                    String scriptedDir = fileName.substring(0,
+                {                 
+                	String oldScriptedDir = fileName.substring(0,
                             fileName.lastIndexOf("."));
-                    String scriptedFolderPath = AmbFileStoragePathUtils
-                            .getCxeDocDirPath(fp.getCompanyId())
-                            + File.separator + scriptedDir;
-                    File scriptedFolder = new File(scriptedFolderPath);
+                    String oldScriptedFolderPath = AmbFileStoragePathUtils
+    		                .getCxeDocDirPath(fp.getCompanyId())
+    		                + File.separator
+    		                + oldScriptedDir;
+                    File oldScriptedFolder = new File(oldScriptedFolderPath);
+                	
+                    String scriptedFolderNamePrefix= FileSystemUtil.
+                    		getScriptedFolderNamePrefixByJob(p_jobId);
+                    String name = fileName.substring(fileName
+                    		.lastIndexOf(File.separator) + 1,fileName.lastIndexOf("."));
+                    String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+                    
+                    String scriptedDir = fileName.substring(0,fileName.lastIndexOf(File.separator))
+    		        		+ File.separator + scriptedFolderNamePrefix + "_" 
+    		        		+ name + "_" + extension;
+    		        String scriptedFolderPath = AmbFileStoragePathUtils
+    		                .getCxeDocDirPath(fp.getCompanyId())
+    		                + File.separator
+    		                + scriptedDir;
+    		        File scriptedFolder = new File(scriptedFolderPath); 
                     if (!scriptedFolder.exists())
                     {
-                        File file = new File(fileName);
-                        String filePath = AmbFileStoragePathUtils
-                                .getCxeDocDirPath()
-                                + File.separator
-                                + file.getParent();
-                        // Call the script on import to convert the file
-                        try
-                        {
-                            String cmd = "cmd.exe /c " + scriptOnImport + " \""
-                                    + filePath + "\"";
-                            // If the script is Lexmark tool, another parameter
-                            // -encoding is passed.
-                            if ("lexmarktool.bat".equalsIgnoreCase(new File(
-                                    scriptOnImport).getName()))
-                            {
-                                cmd += " \"-encoding " + fp.getCodeSet() + "\"";
-                            }
-                            ProcessRunner pr = new ProcessRunner(cmd);
-                            Thread t = new Thread(pr);
-                            t.start();
-                            try
-                            {
-                                t.join();
-                            }
-                            catch (InterruptedException ie)
-                            {
-                            }
-                            CATEGORY.info("Script on Import " + scriptOnImport
-                                    + " is called to handle " + filePath);
-                        }
-                        catch (Exception e)
-                        {
-                            // Set exitValue to 1 if the file was not scripted
-                            // correctly.
-                            exitValue = 1;
-                            CATEGORY.error("The script on import was not executed successfully.");
-                        }
-                    }
+		                File file = new File(fileName);
+		                String filePath = AmbFileStoragePathUtils
+		                        .getCxeDocDirPath()
+		                        + File.separator
+		                        + file.getParent();
+		                // Call the script on import to convert the file
+		                try
+		                {
+		                	String cmd = "cmd.exe /c " + scriptOnImport + " \""
+		                    	+ filePath + "\" \"" + scriptedFolderNamePrefix + "\"";
+		                    // If the script is Lexmark tool, another parameter
+		                    // -encoding is passed.
+		                    if ("lexmarktool.bat".equalsIgnoreCase(new File(
+		                            scriptOnImport).getName()))
+		                    {
+		                        cmd += " \"-encoding " + fp.getCodeSet() + "\"";
+		                    }
+		                    ProcessRunner pr = new ProcessRunner(cmd);
+		                    Thread t = new Thread(pr);
+		                    t.start();
+		                    try
+		                    {
+		                        t.join();
+		                    }
+		                    catch (InterruptedException ie)
+		                    {
+		                    }
+		                    CATEGORY.info("Script on Import " + scriptOnImport
+		                            + " is called to handle " + filePath);
+		                }
+		                catch (Exception e)
+		                {
+		                    // Set exitValue to 1 if the file was not scripted
+		                    // correctly.
+		                    exitValue = 1;
+		                    CATEGORY.error("The script on import was not executed successfully.");
+		                }
+                    }                   
                     // Iterator the files converted by the script and import
                     // each one of them.
-                    if (scriptedFolder.exists())
+                    if (scriptedFolder.exists() || oldScriptedFolder.exists())
                     {
-                        String scriptedFiles[] = scriptedFolder.list();
+                    	
+                        String scriptedFiles[];
+                        if(scriptedFolder.exists())
+                        {
+                        	scriptedFiles = scriptedFolder.list();
+                        }
+                        else
+                        {
+                        	scriptedFiles = oldScriptedFolder.list();
+						}
                         if (scriptedFiles != null && scriptedFiles.length > 0)
                         {
                             for (int j = 0; j < scriptedFiles.length; j++)
                             {
                                 String scriptedFileName = scriptedFiles[j];
-                                String fileProfileId = Long
-                                        .toString(fp.getId());
-                                String key_fileName = scriptedDir
-                                        + File.separator + scriptedFileName;
-                                files2FpId.put(key_fileName, fileProfileId);
-                                files2ExitValue.put(key_fileName, new Integer(
-                                        exitValue));
+                                String oldName = fileName.substring(fileName
+                            			.lastIndexOf(File.separator) + 1);
+	                            if(!oldName.equals(scriptedFileName))
+	                            {
+	                            	continue;
+	                            }
+                            	String fileProfileId = Long
+                            			.toString(fp.getId());
+                            	String key_fileName;
+                            	if (scriptedFolder.exists())
+                            	{
+                            		key_fileName = scriptedDir
+                            			+ File.separator + scriptedFileName;
+                            	}
+                            	else 
+                            	{
+                            		key_fileName = oldScriptedDir
+                        				+ File.separator + scriptedFileName;
+								}
+                            	files2FpId.put(key_fileName, fileProfileId);
+                            	files2ExitValue.put(key_fileName, new Integer(
+                            			exitValue));
+                                
                             }
                         }
                         else

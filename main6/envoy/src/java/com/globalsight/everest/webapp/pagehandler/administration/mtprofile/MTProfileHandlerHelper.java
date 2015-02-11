@@ -131,7 +131,7 @@ public class MTProfileHandlerHelper
         HibernateUtil.saveOrUpdate(mtProfile);
     }
 
-    public static boolean isExite(MachineTranslationProfile mtProfile)
+    public static boolean isMtProfileExisted(MachineTranslationProfile mtProfile)
     {
         String condition = " AND mtp.MT_PROFILE_NAME ='"
                 + mtProfile.getMtProfileName() + "' AND mtp.ID !="
@@ -151,16 +151,13 @@ public class MTProfileHandlerHelper
         }
         catch (ProjectHandlerException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         catch (RemoteException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return true;
-
     }
 
     public static List<MachineTranslationProfile> getMTProfilesByEngine(

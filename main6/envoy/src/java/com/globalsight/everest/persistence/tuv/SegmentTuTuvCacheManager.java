@@ -105,7 +105,7 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
     	return map;
     }
     
-    private static ConcurrentHashMap<Long, Set<String>> getTuvExtarDataCache()
+    private static ConcurrentHashMap<Long, Set<String>> getTuvExtraDataCache()
     {
     	ConcurrentHashMap<Long, Set<String>> map = TUV_EXTAR_DATA_CACHE.get();
     	if (map == null)
@@ -213,7 +213,7 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
     public static void removeTuvFromCache(long p_tuvId)
     {
     	ConcurrentHashMap<Long, TuvImpl> tuvCache = getTuvCache();
-    	ConcurrentHashMap<Long, Set<String>> tuvExtraDataCache = getTuvExtarDataCache();
+    	ConcurrentHashMap<Long, Set<String>> tuvExtraDataCache = getTuvExtraDataCache();
     	
         tuvCache.remove(p_tuvId);
         tuvExtraDataCache.remove(p_tuvId);
@@ -249,7 +249,7 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
     public static void recordWhichTuvExtraDataAlreadyLoaded(Long p_tuvId,
             String p_extraInfoName)
     {
-    	ConcurrentHashMap<Long, Set<String>> tuvExtraDataCache = getTuvExtarDataCache();
+    	ConcurrentHashMap<Long, Set<String>> tuvExtraDataCache = getTuvExtraDataCache();
     	
         Set<String> whatHaveLoaded = tuvExtraDataCache.get(p_tuvId);
         if (whatHaveLoaded == null)
@@ -272,7 +272,7 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
     public static boolean isTuvExtraDataLoaded(Long p_tuvId,
             String p_extraInfoName)
     {
-    	ConcurrentHashMap<Long, Set<String>> tuvExtraDataCache = getTuvExtarDataCache();
+    	ConcurrentHashMap<Long, Set<String>> tuvExtraDataCache = getTuvExtraDataCache();
     	
         Set<String> whatHaveLoaded = tuvExtraDataCache.get(p_tuvId);
         if (whatHaveLoaded == null || whatHaveLoaded.size() == 0)
@@ -326,7 +326,7 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
     {
     	getTuCache().clear();
     	getTuvCache().clear();
-    	getTuvExtarDataCache().clear();
+    	getTuvExtraDataCache().clear();
     }
 
     public static String getTuWorkingTableName(String p_companyId)
@@ -617,6 +617,18 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
         return workingTableName;
     }
 
+    public static String getTemplatePartTableNameJobDataIn(long p_sourcePageId)
+            throws Exception
+    {
+        String templatePartTableName = TEMPLATE_PART_TABLE;
+
+        if (isJobDataMigrated(p_sourcePageId))
+        {
+            templatePartTableName += "_ARCHIVED";
+        }
+
+        return templatePartTableName;
+    }
 
     /**
      * Get companyId by source page ID.

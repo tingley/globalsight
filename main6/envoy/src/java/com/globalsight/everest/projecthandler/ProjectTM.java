@@ -31,6 +31,8 @@ import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 
 public class ProjectTM extends PersistentObject implements Tm
 {
+    private static final long serialVersionUID = 6667987349894911360L;
+
     private String m_name = "";
     // id of the company which this activity belong to
     private long m_companyId;
@@ -48,8 +50,9 @@ public class ProjectTM extends PersistentObject implements Tm
     private long m_lastTUId = -1;
     private long m_convertedTM3Id = -1;
     private String m_status = "";
-    
+
     private boolean isFirstImporting = false;
+    private boolean indexTarget = false;
 
     public String getStatus()
     {
@@ -288,5 +291,15 @@ public class ProjectTM extends PersistentObject implements Tm
     public boolean isFirstImporting()
     {
         return this.isFirstImporting;
+    }
+
+    public boolean isIndexTarget()
+    {
+        return indexTarget;
+    }
+
+    public void setIndexTarget(boolean p_indexTarget)
+    {
+        this.indexTarget = p_indexTarget;
     }
 }

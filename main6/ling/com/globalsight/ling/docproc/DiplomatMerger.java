@@ -48,6 +48,7 @@ import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper
 import com.globalsight.ling.docproc.extractor.xliff.WSConstants;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.worldserver.WsSkeletonDispose;
+import com.globalsight.util.StringUtil;
 
 /**
  * <p>
@@ -614,8 +615,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 tmp = encode(tmp);
             }
 
-            if (isContent() && !format.equals("xlf")
-                    && !FORMAT_PO.equals(mainFormat))
+            if (isContent() && !FORMAT_XLIFF.equals(format)
+                    && !FORMAT_PO.equals(mainFormat)
+                    && !FORMAT_HTML.equals(mainFormat))
             {
                 tmp = applyNativeEncoding(tmp, format, type,
                         m_l10nContent.getLastChar());
@@ -855,11 +857,13 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     // For GBS-2955, idml/indd is actually xml format
                     if (IFormatNames.FORMAT_XML.equals(srcDataType))
                     {
-                        if (IdmlHelper.MARK_LF_IDML.equals(tmp))
+                        if (tmp.contains(IdmlHelper.MARK_LF_IDML))
                         {
                             // change MARK_LF_IDML back to LINE_BREAK during
                             // export
-                            tmp = IdmlHelper.LINE_BREAK;
+                            tmp = StringUtil.replace(tmp,
+                                    IdmlHelper.MARK_LF_IDML,
+                                    IdmlHelper.LINE_BREAK);
                         }
                     }
 

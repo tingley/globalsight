@@ -50,15 +50,19 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 			+ "tuv.is_indexed is_indexed, tuv.segment_clob segment_clob, "
 			+ "tuv.segment_string segment_string, tuv.word_count word_count, "
 			+ "tuv.exact_match_key exact_match_key, tuv.state state, "
-			+ "tuv.merge_state merge_state, tuv.last_modified last_modified, "
-	        + "tuv.timestamp timestamp, tuv.modify_user, tuv.sid, tuv.repetition_of_id, tuv.is_repeated ";
+			+ "tuv.merge_state merge_state, tuv.timestamp timestamp, "
+			+ "tuv.creation_user creation_user, tuv.creation_date creation_date, "
+	        + "tuv.modify_user modify_user, tuv.last_modified last_modified, "
+			+ "tuv.updated_by_project, tuv.sid, tuv.repetition_of_id, tuv.is_repeated ";
 
 	private static final String CONDITION_BY_SOURCE_PAGE_AND_LOCALE = "FROM "
 	        + TU_TABLE_PLACEHOLDER + " tu, "
 	        + TUV_TABLE_PLACEHOLDER + " tuv, "
 			+ "source_page_leverage_group splg "
-			+ "WHERE tuv.state != 'OUT_OF_DATE' AND tuv.tu_id = tu.id "
-			+ "AND tu.leverage_group_id = splg.lg_id AND splg.sp_id = ? "
+			+ "WHERE tuv.state != 'OUT_OF_DATE' "
+			+ "AND tuv.tu_id = tu.id "
+			+ "AND tu.leverage_group_id = splg.lg_id "
+			+ "AND splg.sp_id = ? "
 			+ "AND tuv.locale_id in ";
 
 	private static final String ORDER_BY_TU_ORDER = " order by tu.order_num asc ";
@@ -176,9 +180,12 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 		tuv.setExactMatchKey(p_rs.getLong("exact_match_key"));
 		tuv.setStateName(p_rs.getString("state"));
 		tuv.setMergeState(p_rs.getString("merge_state"));
-		tuv.setLastModified(p_rs.getDate("last_modified"));
+		tuv.setCreatedUser(p_rs.getString("creation_user"));
+		tuv.setCreatedDate(p_rs.getTimestamp("creation_date"));
+		tuv.setLastModified(p_rs.getTimestamp("last_modified"));
 		tuv.setLastModifiedUser(p_rs.getString("modify_user"));
 		tuv.setTimestamp(p_rs.getTimestamp("timestamp"));
+		tuv.setUpdatedProject(p_rs.getString("updated_by_project"));
 		tuv.setSid(p_rs.getString("sid"));
 		tuv.setRepetitionOfId(p_rs.getLong("repetition_of_id"));
 		String isRepeated = p_rs.getString("is_repeated");

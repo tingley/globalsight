@@ -163,14 +163,6 @@ public class NativeFileManagerLocal implements NativeFileManager
                             + originalAbsouluteStoragePath.toString());
                 }
             }
-
-            try
-            {
-                p_tmpFile.delete();
-            }
-            catch (Exception e)
-            { /* ignore */
-            }
         }
         catch (Exception e)
         {
@@ -182,16 +174,6 @@ public class NativeFileManagerLocal implements NativeFileManager
         }
         finally
         {
-            try
-            {
-                if (p_tmpFile.exists())
-                {
-                    p_tmpFile.deleteOnExit();
-                }
-            }
-            catch (Exception e)
-            { /* ignore */
-            }
             if (nfme != null)
                 throw nfme;
         }
@@ -215,14 +197,6 @@ public class NativeFileManagerLocal implements NativeFileManager
             p_unextractedFile.setLastModifiedDate(newFile.lastModified());
             p_unextractedFile.setLastModifiedBy(p_user != null ? p_user
                     .getUserId() : "Unknown");
-
-            try
-            {
-                p_tmpFile.delete();
-            }
-            catch (Exception e)
-            {/* ignore */
-            }
         }
         catch (Exception e)
         {
@@ -234,16 +208,6 @@ public class NativeFileManagerLocal implements NativeFileManager
         }
         finally
         {
-            try
-            {
-                if (p_tmpFile.exists())
-                {
-                    p_tmpFile.deleteOnExit();
-                }
-            }
-            catch (Exception e)
-            { /* ignore */
-            }
             if (nfme != null)
                 throw nfme;
         }
@@ -570,7 +534,7 @@ public class NativeFileManagerLocal implements NativeFileManager
                     // What is the purpose?
                     if (p_removeOriginal)
                     {
-//                        inputFile.delete();
+                        // inputFile.delete();
                     }
                 }
                 else

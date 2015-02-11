@@ -4,8 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
@@ -158,7 +160,7 @@ public class JobSummaryHelper
     private int getSegmentCommentsCount(Job job, HttpSession session,
             List<String> states) throws EnvoyServletException
     {
-        List<Long> targetPageIds = getTargetPageIdsByJob(job.getId());
+        Set<Long> targetPageIds = getTargetPageIdsByJob(job.getId());
         if (targetPageIds.size() == 0)
         {
             return 0;
@@ -167,8 +169,8 @@ public class JobSummaryHelper
         try
         {
             CommentManager manager = ServerProxy.getCommentManager();
-            return manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds,
-                    states);
+            return manager.getIssueCount(Issue.TYPE_SEGMENT,
+                    new ArrayList<Long>(targetPageIds), states);
         }
         catch (Exception ex)
         {
@@ -179,15 +181,15 @@ public class JobSummaryHelper
     /**
      * Get all target page IDs for all workflows in current job.
      */
-    private List<Long> getTargetPageIdsByJob(long jobId)
+    private Set<Long> getTargetPageIdsByJob(long jobId)
     {
-        List<Long> targetPageIds = new ArrayList<Long>();
+        Set<Long> targetPageIds = new HashSet<Long>();
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try
         {
-            String sql = "SELECT tp.ID FROM target_page tp, workflow wf "
+            String sql = "SELECT DISTINCT tp.ID FROM target_page tp, workflow wf "
                         + " WHERE wf.IFLOW_INSTANCE_ID = tp.WORKFLOW_IFLOW_INSTANCE_ID "
                         + " AND wf.STATE != 'CANCELLED' "
                         + " AND tp.STATE != 'IMPORT_FAIL' "
@@ -199,10 +201,7 @@ public class JobSummaryHelper
             while (rs != null && rs.next())
             {
                 long tpId = rs.getLong(1);
-                if (!targetPageIds.contains(tpId))
-                {
-                    targetPageIds.add(rs.getLong(1));                    
-                }
+                targetPageIds.add(tpId);
             }
         }
         catch (Exception e)

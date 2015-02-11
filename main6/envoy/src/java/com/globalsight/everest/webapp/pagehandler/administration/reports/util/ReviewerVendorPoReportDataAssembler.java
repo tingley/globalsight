@@ -244,7 +244,7 @@ public class ReviewerVendorPoReportDataAssembler
                 }
 
                 // skip workflows without special target lang
-                String targetLang = w.getTargetLocale().toString();
+                String targetLang = Long.toString(w.getTargetLocale().getId());
                 if (!(reportData.wantsAllTargetLangs || reportData.targetLangList
                         .contains(targetLang)))
                 {
@@ -292,7 +292,7 @@ public class ReviewerVendorPoReportDataAssembler
                         data.jobName = j.getJobName();
                         data.jobId = jobId;
                         data.projectDesc = getProjectDesc(j);
-                        data.targetLang = targetLang;
+                        data.targetLang = w.getTargetLocale().toString();
                         data.creationDate = j.getCreateDate();
                         data.dellReviewActivityState = dellReviewActivity
                                 .getState();
@@ -725,11 +725,13 @@ public class ReviewerVendorPoReportDataAssembler
         }
 
         // job state EXPORTED,DISPATCHED,LOCALIZED
-        ArrayList list = new ArrayList();
+        ArrayList<String> list = new ArrayList<String>();
         list.add(Job.READY_TO_BE_DISPATCHED);
         list.add(Job.DISPATCHED);
         list.add(Job.LOCALIZED);
         list.add(Job.EXPORTED);
+        list.add(Job.EXPORT_FAIL);
+        list.add(Job.ARCHIVED);
         sp.setJobState(list);
 
         String paramCreateDateStartCount = request

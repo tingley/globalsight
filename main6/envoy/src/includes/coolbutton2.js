@@ -26,11 +26,11 @@ if (window.moz) {
     extendEventObject();
 }
 /* end Mozilla specific emulation initiation */
-
+var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 function createButton(el) {
-
-    
-    if (document.recalc) {
+    //"attachEvent" Method for processing an event attach other events. (Not supported Mozilla Series);
+	//If the Mozilla family, does not support this method, you need to use the "addEventListener" method
+    if (isIE) {
         el.attachEvent("onmouseover", createButton.overCoolButton);
         el.attachEvent("onmouseout", createButton.outCoolButton);
         el.attachEvent("onmousedown", createButton.downCoolButton);
@@ -82,7 +82,7 @@ createButton.LEFT = window.moz ? 0 : 1;
 /* event listeners */
 
 createButton.overCoolButton = function () {
-	if(document.recalc)
+	if(isIE)
 	{
 		var toEl = createButton.getParentCoolButton(window.event.toElement);
     	var fromEl = createButton.getParentCoolButton(window.event.fromElement);
@@ -102,7 +102,7 @@ createButton.overCoolButton = function () {
 };
 
 createButton.outCoolButton = function () {
-	if(document.recalc)
+	if(isIE)
 	{
 		var toEl = createButton.getParentCoolButton(window.event.toElement);
     	var fromEl = createButton.getParentCoolButton(window.event.fromElement);
@@ -125,7 +125,7 @@ createButton.outCoolButton = function () {
 createButton.downCoolButton = function () {
     if (getEvent().button != createButton.LEFT) return;
 
-    if(document.recalc)
+    if(isIE)
 	{
 		var el = createButton.getParentCoolButton(window.event.srcElement);
 	}
@@ -146,7 +146,7 @@ createButton.downCoolButton = function () {
 createButton.upCoolButton = function () {
     if (getEvent().button  != createButton.LEFT) return;
 
-    if(document.recalc)
+    if(isIE)
 	{
 		var el = createButton.getParentCoolButton(window.event.srcElement);
 	}
@@ -167,7 +167,7 @@ createButton.upCoolButton = function () {
 };
 
 createButton.clickCoolButton = function () {
-	if(document.recalc)
+	if(isIE)
 	{
 		var el = createButton.getParentCoolButton(window.event.srcElement);
 	}
@@ -185,7 +185,7 @@ createButton.clickCoolButton = function () {
 };
 
 createButton.keypressCoolButton = function () {
-	if(document.recalc)
+	if(isIE)
 	{
 		var el = createButton.getParentCoolButton(window.event.srcElement);
 	}
@@ -206,7 +206,7 @@ createButton.keypressCoolButton = function () {
 };
 
 createButton.keydownCoolButton = function () {
-	if(document.recalc)
+	if(isIE)
 	{
 		 var el = createButton.getParentCoolButton(window.event.srcElement);
 	}
@@ -219,7 +219,7 @@ createButton.keydownCoolButton = function () {
 };
 
 createButton.keyupCoolButton = function () {
-	if(document.recalc)
+	if(isIE)
 	{
 		var el = createButton.getParentCoolButton(window.event.srcElement);
 	}
@@ -242,7 +242,7 @@ createButton.keyupCoolButton = function () {
 };
 
 createButton.focusCoolButton = function () {
-	if(document.recalc)
+	if(isIE)
 	{
 		var el = createButton.getParentCoolButton(window.event.srcElement);
 	}
@@ -255,7 +255,7 @@ createButton.focusCoolButton = function () {
 };
 
 createButton.blurCoolButton = function () {
-	if(document.recalc)
+	if(isIE)
 	{
 		var el = createButton.getParentCoolButton(window.event.srcElement);
 	}

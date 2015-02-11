@@ -182,8 +182,6 @@ public interface MTProfileConstants
     public static final String MT_MS_GET_ACCESS_TOKEN_URL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
     public static final String MT_MS_CATEGORY = "ms_mt_category";
     public static final String MT_MS_URL_FLAG = "ms_mt_url_flag";
-    public static final String MT_MS_URL_FLAG_INTERNAL = "0";
-    public static final String MT_MS_URL_FLAG_PUBLIC = "1";
     public static final int MT_MS_MAX_CHARACTER_NUM = 1000;
     
     public static final String MT_AO_URL = "ao_mt_url";

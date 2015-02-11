@@ -67,16 +67,12 @@ public class FileUploadThread extends Thread
             {
                 files.add(file.getPath());
             }
-            // 10%
-            startProgressBar(files, 10);
-            // 20%
-            startProgressBar(files, 20);
+            // 15%
+            startProgressBar(files, 15);
             // 30%
             startProgressBar(files, 30);
-            // 40%
-            startProgressBar(files, 40);
-            // 50%
-            startProgressBar(files, 50);
+            // 45%
+            startProgressBar(files, 45);
             // 60%
             startProgressBar(files, 60);
             try
@@ -86,11 +82,11 @@ public class FileUploadThread extends Thread
                 this.uploadFile();
 
                 // 70%
-                startProgressBar(files, 70);
+//                startProgressBar(files, 70);
                 // 80%
-                startProgressBar(files, 80);
+//                startProgressBar(files, 80);
                 // 90%
-                startProgressBar(files, 90);
+//                startProgressBar(files, 90);
                 // 100%
                 startProgressBar(files, 100);
             }

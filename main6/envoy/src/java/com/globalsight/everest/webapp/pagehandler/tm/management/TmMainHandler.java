@@ -269,6 +269,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                         .getParameter(TM_TM_ORGANIZATION));
                 String description = EditUtil.utf8ToUnicode((String) p_request
                         .getParameter(TM_TM_DESCRIPTION));
+                String indexTarget = EditUtil.utf8ToUnicode((String) p_request
+                        .getParameter("indexTarget"));
                 String isRemoteTm = EditUtil.utf8ToUnicode((String) p_request
                         .getParameter(TM_TM_REMOTE_TM));
                 String tmAttributes = (String) p_request
@@ -282,6 +284,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     tm.setDomain(domain);
                     tm.setOrganization(organization);
                     tm.setDescription(description);
+                    tm.setIndexTarget("on".equals(indexTarget) ? true : false);
                     tm.setCreationUser(userId);
                     tm.setCreationDate(new Date());
                     tm.setCompanyId(Long.parseLong(CompanyThreadLocal
@@ -667,11 +670,17 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
         if (p_tm == null)
         {
-            result.append(
-                    "<tm><name></name><domain></domain><organization></organization>")
-                    .append("<description></description><isRemoteTm>false</isRemoteTm>")
-                    .append("<gsEditionId></gsEditionId><remoteTmProfileId></remoteTmProfileId>")
-                    .append("<remoteTmProfileName></remoteTmProfileName></tm>");
+            result.append("<tm>")
+                    .append("<name></name>")
+                    .append("<domain></domain>")
+                    .append("<organization></organization>")
+                    .append("<description></description>")
+                    .append("<indexTarget>false</indexTarget>")
+                    .append("<isRemoteTm>false</isRemoteTm>")
+                    .append("<gsEditionId></gsEditionId>")
+                    .append("<remoteTmProfileId></remoteTmProfileId>")
+                    .append("<remoteTmProfileName></remoteTmProfileName>")
+                    .append("</tm>");
         }
         else
         {
@@ -698,14 +707,16 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
             result.append(EditUtil.encodeXmlEntities(p_tm.getOrganization()));
             result.append("</organization>");
             result.append("<description>");
-
             // for bug GBS-2547,by fan
             String desc1 = EditUtil.encodeXmlEntities(p_tm.getDescription())
                     .replaceAll("\r\n", "&lt;br/&gt;"); // for windows
             String desc2 = desc1.replaceAll("\n", "&lt;br/&gt;"); // for unix
             result.append(desc2);
-
             result.append("</description>");
+            result.append("<indexTarget>");
+            result.append(EditUtil.encodeXmlEntities(p_tm
+                    .isIndexTarget() == true ? "true" : "false"));
+            result.append("</indexTarget>");
             result.append("<isRemoteTm>");
             result.append(EditUtil
                     .encodeXmlEntities(p_tm.getIsRemoteTm() == true ? "true"

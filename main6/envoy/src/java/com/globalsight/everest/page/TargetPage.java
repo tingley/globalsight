@@ -59,6 +59,8 @@ public class TargetPage
     private String m_CVSTargetModule = null;
     private String m_CVSTargetFilename = null;
     private boolean isDefaultContextMatch = false;
+    private long m_companyId;
+
     public boolean getIsDefaultContextMatch()
     {
         return isDefaultContextMatch;
@@ -94,6 +96,7 @@ public class TargetPage
         m_globalSightLocale = p_locale;
         m_sourcePage = p_sourcePage;
         m_wordCount = new PageWordCounts();
+        m_companyId = p_sourcePage.getCompanyId();
 
         // copy the base href's for the target page to start out with
         if (p_sourcePage.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
@@ -404,5 +407,14 @@ public class TargetPage
     public String getCVSTargetFilename() {
     	return m_CVSTargetFilename == null ? "" : m_CVSTargetFilename;
     }
-}
 
+    public long getCompanyId()
+    {
+        return this.m_companyId;
+    }
+
+    public void setCompanyId(long p_companyId)
+    {
+        this.m_companyId = p_companyId;
+    }
+}

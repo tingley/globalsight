@@ -57,7 +57,7 @@ String str_userId =
 SegmentView view =
   (SegmentView)sessionMgr.getAttribute(WebAppConstants.SEGMENTVIEW);
 String pagePath = view.getPagePath().toLowerCase();
-boolean isWord = pagePath.endsWith(".docx") || pagePath.endsWith(".pptx");
+boolean isOffice = pagePath.endsWith(".docx") || pagePath.endsWith(".pptx") || pagePath.endsWith(".xlsx");
 
 String url_topMenu       = topMenu.getPageURL();
 String url_bottomMenu    = bottomMenu.getPageURL();
@@ -578,7 +578,7 @@ function IsWhitePreserving()
 // Formatting tags are B/I/U
 function HasFormattingTags()
 {
-  if (<%=isWord%> || datatype == "mif")
+  if (<%=isOffice%> || datatype == "mif")
   {
 	  return true;
   }
@@ -593,7 +593,7 @@ function HasFormattingTags()
 
 function HasOfficeTags()
 {
-	return <%=isWord%> || datatype == "mif";
+	return <%=isOffice%> || datatype == "mif";
 }
 
 function openPtags()

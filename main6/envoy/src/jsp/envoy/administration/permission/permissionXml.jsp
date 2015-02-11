@@ -358,6 +358,7 @@
  <permission id="<%=Permission.CVS_OPERATE%>"/>
  <permission id="<%=Permission.RSS_READER%>"/>
  <permission id="<%=Permission.CREATE_JOB%>"/>
+ <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
 </category>
 <category id="lb_job_scope">
   <permission id="<%=Permission.JOB_SCOPE_ALL%>"/>
@@ -368,6 +369,7 @@
       <% if (b_searchEnabled) { %>
       <permission id="<%=Permission.JOBS_SEARCH_REPLACE%>"/>
       <% } %>
+      <permission id="<%=Permission.JOB_CHANGE_NAME%>"/>
       <permission id="<%=Permission.JOBS_CHANGE_WFM%>"/>
       <permission id="<%=Permission.JOBS_DISCARD%>"/>
       <permission id="<%=Permission.JOB_UPDATE_LEVERAGE%>"/>

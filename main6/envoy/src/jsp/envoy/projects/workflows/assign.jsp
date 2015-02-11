@@ -220,14 +220,7 @@ function saveChangedUser()
 	var active = document.getElementById('active');
 	var aid;
 	
-	if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-		aid = active.activeId;
-	} 
-	else
-	{
-	  	aid = parseInt(active.getAttribute("activeId"));
-	}
+	aid = parseInt(active.getAttribute("activeId"));
 	
 	if (aid != -1)
 	{
@@ -271,35 +264,22 @@ function changeActive(currentActive)
 	var currentUsers = getUsersByActivityId(currentActive.id);
 	var originalID,originalDiv;
 	
-	if(isIE)
+	originalID = users.getAttribute("originalID");
+	if(originalID != "")
 	{
-		users.innerHTML = currentUsers.innerHTML;
+		originalDiv = getUsersByActivityId(originalID);
+		originalDiv.innerHTML = users.innerHTML;
+		fnTransportSelectedValue(originalDiv,users);
 	}
-	else
-	{
-		originalID = users.getAttribute("originalID");
-		if(originalID != "")
-		{
-			originalDiv = getUsersByActivityId(originalID);
-			originalDiv.innerHTML = users.innerHTML;
-			fnTransportSelectedValue(originalDiv,users);
-		}
-		users.setAttribute("originalID", currentActive.id);
-		users.innerHTML = currentUsers.innerHTML;
-		fnTransportSelectedValue(users,currentUsers);
-		currentUsers.innerHTML = "";
-	}
+	users.setAttribute("originalID", currentActive.id);
+	users.innerHTML = currentUsers.innerHTML;
+	fnTransportSelectedValue(users,currentUsers);
+	currentUsers.innerHTML = "";
 	
 	var active = document.getElementById('active');
 	var aid;
-	if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-		aid = active.activeId;
-	} 
-	else
-	{
-	  	aid = parseInt(active.getAttribute("activeId"));
-	}
+	
+	aid = parseInt(active.getAttribute("activeId"));
 	
 	if (aid != -1)
 	{
@@ -311,15 +291,8 @@ function changeActive(currentActive)
 	currentActive.className = "selected";
 	currentActive.selected = true;
 	
-	if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-		active.activeId = currentActive.id;
-	} 
-	else
-	{
-	  	var attrActiveId = active.getAttribute("activeId");
-	  	attrActiveId = "" + currentActive.id;
-	}
+  	var attrActiveId = active.getAttribute("activeId");
+  	attrActiveId = "" + currentActive.id;
 }
 
 function disable(name, isDisable)

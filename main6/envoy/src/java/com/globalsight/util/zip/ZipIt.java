@@ -28,7 +28,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 
@@ -144,6 +146,20 @@ public class ZipIt implements Serializable
         }
         // close zos
         zos.close();
+    }
+    
+    public static void addEntriesToZipFile(File p_zipFile, Set<File> entryFiles,
+            boolean donotIncludePath, String comment)
+            throws FileNotFoundException, IOException
+    {
+        File[] files = new File[entryFiles.size()];
+        Iterator<File> it = entryFiles.iterator();
+        for (int i = 0; i < files.length; i++)
+        {
+            files[i] = it.next();
+        }
+        
+        addEntriesToZipFile(p_zipFile, files, donotIncludePath,  comment);
     }
 
     /**

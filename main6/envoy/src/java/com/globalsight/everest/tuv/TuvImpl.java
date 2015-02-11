@@ -837,12 +837,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     {
         boolean b = (!m_state.equals(TuvState.LOCALIZED.getName())
                 && !m_state.equals(TuvState.EXACT_MATCH_LOCALIZED.getName())
-                && !m_state
-                        .equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
-                                .getName())
+                && !m_state.equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED.getName())
                 && !m_state.equals(TuvState.COMPLETE.getName())
-                && !m_state.equals(TuvState.ALIGNMENT_LOCALIZED.getName()) && !m_state
-                .equals(TuvState.UNVERIFIED_EXACT_MATCH));
+                && !m_state.equals(TuvState.ALIGNMENT_LOCALIZED.getName())
+                && !m_state.equals(TuvState.UNVERIFIED_EXACT_MATCH.getName()));
         return b;
     }
 
@@ -1475,8 +1473,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         return xliff_alt;
     }
 
-    @SuppressWarnings("unchecked")
-    public void setXliffAlt(Set p_alt)
+    public void setXliffAlt(Set<XliffAlt> p_alt)
     {
         this.xliff_alt = p_alt;
     }

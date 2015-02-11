@@ -13,7 +13,7 @@ FMFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId)
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:150' maxlength='"+maxFilterNameLength+"' id='fmFilterName' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<td><input type='text' style='width:150' maxlength='"+maxFilterNameLength+"' id='fmFilterName' value='" + this.filter.filterName + "'></input>");
 	str.append("<br/></td></tr>");
 	str.append("<tr><td><label style='width:40' class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
@@ -135,24 +135,17 @@ function saveFMFilter()
         alert(exceedFilterName + maxFilterNameLength);
         return;
     }
-	
+	var isNew = (saveFMFilter.edit) ? "false" : "true";
 	var filterDesc = document.getElementById("fmDesc").value;
 	//var checkFootNote = document.getElementById("checkFootNote").checked;
 	var checkLeftMasterPage = document.getElementById("checkLeftMasterPage").checked;
 	var checkRightMasterPage = document.getElementById("checkRightMasterPage").checked;
 	var checkOtherMasterPage = document.getElementById("checkOtherMasterPage").checked;
-	var obj = {filterId : saveFMFilter.filterId, filterTableName:"frame_maker_filter", filterName:filterName, 
+	var obj = {isNew : isNew, filterId : saveFMFilter.filterId, filterTableName:"frame_maker_filter", filterName:filterName, 
 			filterDesc:filterDesc, isExposeFootNote:true, isExposeLeftMasterPage:checkLeftMasterPage, 
 			isExposeRightMasterPage:checkRightMasterPage, isExposeOtherMasterPage:checkOtherMasterPage, companyId:companyId};
-	if(saveFMFilter.edit)
-	{
-		closePopupDialog("fmFilterDialog");
-		sendAjax(obj, "updateFMFilter", "updateFMFilterCallback");
-	}
-	else
-	{
-		sendAjax(obj, "checkExist", "checkExistFMFilterCallback");
-	}
+		
+	sendAjax(obj, "checkExist", "checkExistFMFilterCallback");
 	
 	checkExistFMFilterCallback.obj = obj;
 }
@@ -185,11 +178,18 @@ function checkExistFMFilterCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("fmFilterDialog");
-		sendAjax(checkExistFMFilterCallback.obj, "saveFMFilter", "saveFMFilterCallback");
+		if(saveFMFilter.edit)
+		{
+			sendAjax(checkExistFMFilterCallback.obj, "updateFMFilter", "updateFMFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistFMFilterCallback.obj, "saveFMFilter", "saveFMFilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistFMFilterCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 

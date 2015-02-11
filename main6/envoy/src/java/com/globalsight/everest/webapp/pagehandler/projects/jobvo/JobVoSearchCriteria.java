@@ -154,12 +154,12 @@ public class JobVoSearchCriteria
                     userExpression(keys[i], criteria);
                     break;
 
-                // Job est completion start date
+                // Job export start date
                 case JobSearchParameters.EXPORT_DATE_START:
                     exportStartExpression(keys[i], criteria);
                     break;
 
-                // Job creation end date
+                // Job export end date
                 case JobSearchParameters.EXPORT_DATE_END:
                     exportEndExpression(keys[i], criteria);
                     break;

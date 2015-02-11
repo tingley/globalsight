@@ -170,6 +170,13 @@ public class XmlUtil
         return document;
 	}
 	
+	public Document newDocument() throws Exception 
+	{
+	    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        return db.newDocument();
+	}
+	
 	public Document getDocument(Reader r)
 	{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -227,6 +234,26 @@ public class XmlUtil
 		{
 			s_logger.error(e);
 		}
+    }
+    
+    public void saveToFileNoFormat(Document document, String path)
+    {
+        try 
+        {
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            DOMSource source = new DOMSource(document);
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty(OutputKeys.INDENT, "no");
+            OutputStreamWriter ou = new OutputStreamWriter(
+                    new FileOutputStream(path), "UTF-8");
+            StreamResult result = new StreamResult(ou);
+            transformer.transform(source, result);
+        } 
+        catch (Exception e) 
+        {
+            s_logger.error(e);
+        }
     }
     
     public void getXmlString(Node node, StringBuilder sb)

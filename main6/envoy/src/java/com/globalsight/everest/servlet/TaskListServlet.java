@@ -355,6 +355,48 @@ public class TaskListServlet extends HttpServlet
             sp.setSortType(params.isAscSort());
             HashMap<String,String> filters = params.getFilters();
             String tmp = "";
+            
+            tmp = filters.get("acceptanceStartFilter");
+            if(StringUtil.isNotEmpty(tmp)){
+            	sp.setAcceptanceStart(new Integer(tmp));
+            	sp.setAcceptanceStartCondition(filters.get("acceptanceStartOptionsFilter"));
+            }
+            
+            tmp = filters.get("acceptanceEndFilter");
+            if(StringUtil.isNotEmpty(tmp)){
+            	sp.setAcceptanceEnd(new Integer(tmp));
+            	sp.setAcceptanceEndCondition(filters.get("acceptanceEndOptionsFilter"));
+            }
+            else if(SearchCriteriaParameters.NOW.equals(filters.get("acceptanceEndOptionsFilter")))
+            {
+            	sp.setAcceptanceEndCondition(filters.get("acceptanceEndOptionsFilter"));
+            }
+            
+            tmp = filters.get("completionStartFilter");
+            if(StringUtil.isNotEmpty(tmp)){
+            	sp.setEstCompletionStart(new Integer(tmp));
+            	sp.setEstCompletionStartCondition(filters.get("completionStartOptionsFilter"));
+            }
+            
+            tmp = filters.get("completionEndFilter");
+            if(StringUtil.isNotEmpty(tmp)){
+            	sp.setEstCompletionEnd(new Integer(tmp));
+            	sp.setEstCompletionEndCondition(filters.get("completionEndOptionsFilter"));
+            }
+            else if(SearchCriteriaParameters.NOW.equals(filters.get("completionEndOptionsFilter")))
+            {
+            	sp.setEstCompletionEndCondition(filters.get("completionEndOptionsFilter"));
+            }
+            
+            
+            tmp = filters.get("priorityFilter");
+            if(StringUtil.isNotEmpty(tmp)){
+            	sp.setPriority(tmp);
+            }
+            tmp = filters.get("priorityFilter");
+            if(StringUtil.isNotEmpty(tmp)){
+            	sp.setPriority(tmp);
+            }
             tmp = filters.get("jobIdFilter");
             if (StringUtil.isNotEmpty(tmp)) {
                 sp.setJobId(tmp);
@@ -522,9 +564,29 @@ public class TaskListServlet extends HttpServlet
         }
         listParams.setTaskState(state);
 
+        String tempSearchType = "false";
+        if(listParams.getFilters().get("advancedSearch") != null)
+        	tempSearchType = listParams.getFilters().get("advancedSearch");
+        HashMap<String, String> filters = new HashMap<String, String>();
+        String advancedSearch = request.getParameter("advancedSearch");
+        if(advancedSearch == null)
+        	advancedSearch = tempSearchType;
+		if(advancedSearch.equals("true"))
+			setFilterValue(filters, "advancedSearch", "fasle");
+		else
+			setFilterValue(filters, "advancedSearch", "true");
+    	
         if("true".equals(getFilterFromRequest))
         {     	
-        	HashMap<String, String> filters = new HashMap<String, String>();
+        	setFilterValue(filters, "acceptanceStartFilter", request.getParameter("acceptanceStartFilter"));
+        	setFilterValue(filters, "acceptanceStartOptionsFilter", request.getParameter("acceptanceStartOptionsFilter"));
+        	setFilterValue(filters, "acceptanceEndFilter", request.getParameter("acceptanceEndFilter"));
+        	setFilterValue(filters, "acceptanceEndOptionsFilter", request.getParameter("acceptanceEndOptionsFilter"));
+        	setFilterValue(filters, "completionStartFilter", request.getParameter("completionStartFilter"));
+        	setFilterValue(filters, "completionStartOptionsFilter", request.getParameter("completionStartOptionsFilter"));
+        	setFilterValue(filters, "completionEndFilter", request.getParameter("completionEndFilter"));
+        	setFilterValue(filters, "completionEndOptionsFilter", request.getParameter("completionEndOptionsFilter"));
+        	setFilterValue(filters, "priorityFilter", request.getParameter("priorityFilter"));
         	setFilterValue(filters, "jobIdOption", request.getParameter("jobIdOption"));
         	setFilterValue(filters, "jobIdFilter", request.getParameter("jobIdFilter"));
         	setFilterValue(filters, "jobNameFilter", request.getParameter("jobNameFilter"));

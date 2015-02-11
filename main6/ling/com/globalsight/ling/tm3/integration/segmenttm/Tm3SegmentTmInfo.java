@@ -952,7 +952,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
             TM3Tm<GSTuvData> tm = getTM3Tm(pTm);
             tm.setConnection(connection);
-            tm.setFirstImporting(pTm.isFirstImporting());
 
             UniqueSegmentRepositoryForCorpus usr = getUniqueRepository(
                     pSourceLocale, pSegmentsToSave);
@@ -1122,7 +1121,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 // newTus.add(saved);
                 // }
             }
-            saver.setFromTmImport(pFromTmImport);
+
             boolean indexTarget = (projectTM == null ? false : projectTM
                     .isIndexTarget());
             List<TM3Tu<GSTuvData>> savedTus = saver

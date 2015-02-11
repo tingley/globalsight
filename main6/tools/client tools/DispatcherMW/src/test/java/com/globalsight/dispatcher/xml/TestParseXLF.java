@@ -8,8 +8,11 @@ import java.util.List;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 
 import com.globalsight.dispatcher.bo.JobBO;
 import com.globalsight.dispatcher.controller.TranslateXLFController;
@@ -18,11 +21,11 @@ public class TestParseXLF extends TranslateXLFController
 {
     public static void main(String[] args)
     {
-        String fileName = "./testFile/test.xlf";
-//        parseXLFWrapper(fileName);
+        String fileName = "test.xlf";
+        parseXLFWrapper(fileName);
         
-//        fileName = "./testFile/c_changing_networking_configuration.html.xlf";
-//        parseXLFWrapper(fileName);
+        fileName = "cont39_040c-fr-FR_small.xlf";
+        parseXLFWrapper(fileName);
 //        
 //        fileName = "./testFile/tasks_itunes_Rent_Movie_14023_es_ES_xliff_small.xlf";
 //        parseXLFWrapper(fileName);
@@ -36,8 +39,8 @@ public class TestParseXLF extends TranslateXLFController
 //        fileName = "test.xlf";
 //        parseXLFWrapper(fileName);
         
-        fileName = "./testFile/c_changing_networking_configuration.html-update4.xlf";
-        parseXLFWrapper(fileName);
+//        fileName = "./testFile/c_changing_networking_configuration.html-update4.xlf";
+//        parseXLFWrapper(fileName);
         
 //        fileName = "./testFile/test6.xlf";
 //        testInnerXML(fileName);
@@ -56,8 +59,13 @@ public class TestParseXLF extends TranslateXLFController
             Element root = read_doc.getRootElement();
             Namespace namespace = root.getNamespace();
             Element fileElem = root.getChild("file", namespace);
-
-            List<?> list = fileElem.getChild("body", namespace).getChildren("trans-unit", namespace);
+            
+            XPathFactory xFactory = XPathFactory.instance();// trans-unit
+            XPathExpression<Element> expr = xFactory.compile("//source", Filters.element(), null, namespace);
+            List<?> list = expr.evaluate(read_doc);
+            System.out.println("List size: " + list == null ? 0 : list.size());
+            
+//            List<?> list = fileElem.getChild("body", namespace).getChildren("trans-unit", namespace);
             for (int i = 0; i < list.size(); i++)
             {
                 Element tuElem = (Element) list.get(i);
@@ -92,16 +100,19 @@ public class TestParseXLF extends TranslateXLFController
         System.out.println("Target Language: \t" + job.getTargetLanguage());
         System.out.println("SourceSegments Size: \t" + (job.getSourceSegments() == null ? 0 : job.getSourceSegments().length));
         
-        for (int i = 0; i < job.getSourceSegments().length; i++)
+        if (job.getSourceSegments() != null)
         {
-            System.out.println("SourceSegments[" + i + "]: \t" + job.getSourceSegments()[i]);
+            for (int i = 0; i < job.getSourceSegments().length; i++)
+            {
+                System.out.println("SourceSegments[" + i + "]: \t" + job.getSourceSegments()[i]);
+            }
         }
     }
     
-    private static void parseXLF(JobBO p_job, File p_srcFile)
+    private static String parseXLF(JobBO p_job, File p_srcFile)
     {
         if (p_srcFile == null || !p_srcFile.exists())
-            return;
+            return "File not exits.";
 
         String srcLang, trgLang;
         List<String> srcSegments = new ArrayList<String>();
@@ -114,26 +125,19 @@ public class TestParseXLF extends TranslateXLFController
             Element root = read_doc.getRootElement();
             Namespace namespace = root.getNamespace();
             Element fileElem = root.getChild("file", namespace);
-//            System.out.println(root.getName() + "\t" + root.getNamespace() + "\t" + root.getText());
-            
-//            for(Element elem :root.getChildren()){
-//                System.out.println(elem.getName() + "\t" + elem.getNamespace() + "\t" + elem.getText());
-//            }
-            
-//            if(fileElem == null){
-//                System.out.println("Can not find file element.");
-//                return;
-//            }
-            
             // Get Source/Target Language
             srcLang = fileElem.getAttributeValue(XLF_SOURCE_LANGUAGE);
             trgLang = fileElem.getAttributeValue(XLF_TARGET_LANGUAGE);
-            List<?> list = fileElem.getChild("body", namespace).getChildren("trans-unit", namespace);
+            
+            XPathFactory xFactory = XPathFactory.instance();
+            XPathExpression<Element> expr = xFactory.compile("//trans-unit", Filters.element(), null, namespace);
+            List<Element> list = expr.evaluate(fileElem.getChild("body", namespace));
+            
+//            List<?> list = fileElem.getChild("body", namespace).getChildren("trans-unit", namespace);
             for (int i = 0; i < list.size(); i++)
             {
                 Element tuElem = (Element) list.get(i);
                 Element srcElem = tuElem.getChild("source", namespace);
-//                printElement(srcElem);
                 // Get Source Segment 
                 if (srcElem != null && srcElem.getContentSize() > 0)
                 {
@@ -148,9 +152,12 @@ public class TestParseXLF extends TranslateXLFController
         }
         catch (Exception e)
         {
-//            logger.error("Parse XLF file error: ", e);
-            System.out.println("Parse XLF file error: " + e);
+            String msg = "Parse XLIFF file error.";
+            System.out.println(msg + "\n" + e);
+            return msg;
         }
+        
+        return null;
     }
     
     private static void printElement(Element p_elem)

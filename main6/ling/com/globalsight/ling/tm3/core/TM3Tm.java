@@ -329,10 +329,6 @@ public interface TM3Tm<T extends TM3Data> {
     public void setConnection(Connection connection);
     
     public Connection getConnection();
-    
-    public boolean isFirstImporting();
-
-    public void setFirstImporting(boolean firstImporting);
 
     /**
      * Recreate fuzzy index data for specified tm3 tuvs.

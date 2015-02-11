@@ -430,6 +430,18 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         is = new ByteArrayInputStream(projectInfo.getBytes("UTF-8"));
         m_zipper.writeFile(is);
         is.close();
+        
+
+        //write OmegaT_Quick_Start.pdf to omegaT kit root folder.
+		String docRoot = null;
+		docRoot = SystemConfiguration.getInstance().getStringParameter(
+				SystemConfigParamNames.WEB_SERVER_DOC_ROOT);
+		File globalsight_ear = (new File(docRoot)).getParentFile();
+		String OmegaTQuickStart = globalsight_ear.getPath()
+				+ "/lib/classes/resources/" + OmegaTConst.OMEGAT_QUICK_START;
+		OmegaTQuickStart = OmegaTQuickStart.replace("\\", "/").replace("/", File.separator);
+        addStaticResourceFile(new File(OmegaTQuickStart),
+                parentPath.substring(0, parentPath.length() - 1));
     }
 
     private String toOmegaTLocale(GlobalSightLocale gslocale)
@@ -2453,17 +2465,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         try
         {
             input = new FileInputStream(p_file);
-
-            if (input == null)
-            {
-                CATEGORY.warn("Could not locate static resource: " + p_file);
-                // not fatal to offline job
-            }
-            else
-            {
-                m_zipper.writePath(p_toPath + "/" + p_file.getName());
-                m_zipper.writeFile(input);
-            }
+            m_zipper.writePath(p_toPath + "/" + p_file.getName());
+            m_zipper.writeFile(input);
 
         }
         catch (Exception ex)

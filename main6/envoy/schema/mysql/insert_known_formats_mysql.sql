@@ -252,7 +252,7 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
 );
 
 INSERT INTO KNOWN_FORMAT_TYPE VALUES (
-43, 'Office2010 document','Microsoft Office 2010 document','office-xml',
+43, 'Office 2010 Extractor v1.0','Microsoft Office 2010 document','office-xml',
    'MSOFFICE_IMPORTED_EVENT',
    'XML_LOCALIZED_EVENT'
 );
@@ -312,7 +312,7 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
 );
 
 INSERT INTO KNOWN_FORMAT_TYPE VALUES (
-54, '(Beta) New Office 2010 Filter','Microsoft Office 2010 document','office-xml',
+54, 'Office 2010 Extractor v2.0','Microsoft Office 2010 document','office-xml',
    'MSOFFICE_IMPORTED_EVENT',
    'XML_LOCALIZED_EVENT'
 );

@@ -250,13 +250,13 @@ public class DocxStyleUtil extends StyleUtil
     {
         try
         {
-            // GBS-2941
             File f = new File(filePath);
             String content = FileUtil.readFile(f, "utf-8");
             if (content.contains(OfficeXmlHelper.NUMBERING_TAG_ADDED_START))
             {
                 forNumberingStyles(f);
             }
+            forHiddenStyles(filePath);
             repairAttributeValue(filePath);
             forStylesInWt(filePath);
             forStylesNotInWt(filePath);
@@ -268,10 +268,31 @@ public class DocxStyleUtil extends StyleUtil
     }
 
     /**
+     * Removes the hidden mark in document xml if have.
+     * 
+     * @since GBS-3240
+     */
+    private void forHiddenStyles(String filePath) throws Exception
+    {
+        if (!filePath.endsWith("document.xml"))
+        {
+            return;
+        }
+        File f = new File(filePath);
+        String content = FileUtil.readFile(f, "utf-8");
+        if (content.contains(OfficeXmlHelper.HIDDEN_MARK))
+        {
+            content = StringUtil.replace(content, OfficeXmlHelper.HIDDEN_MARK,
+                    "");
+            FileUtil.writeFile(f, content, "utf-8");
+        }
+    }
+
+    /**
      * Updates the numbering translation to its native place and also deletes
      * the added tag.
-     * <p>
-     * For GBS-2941
+     * 
+     * @since GBS-2941
      */
     private static void forNumberingStyles(File f) throws Exception
     {

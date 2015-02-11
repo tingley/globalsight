@@ -984,6 +984,9 @@ void MemberExpression() :
       t="."            { m_handler.handleOperator(t.image); } ( W() )*
       PrimaryExpression()
     |
+      t="+"            { m_handler.handleOperator(t.image); } ( W() )*
+      PrimaryExpression()
+    |
       t="["            { m_handler.handleOperator(t.image); } ( W() )*
       Expression()
       t="]"            { m_handler.handleOperator(t.image); }
@@ -1024,6 +1027,11 @@ void PrimaryExpression() :
     t=<IDENTIFIER> {m_handler.handleLiteral(t.image); m_handler.handlerFunctionName(t.image);}
     ( LOOKAHEAD(1) W() )*
   |
+    t=<INTEGER_LITERAL> {m_handler.handleLiteral(t.image); }
+    ( LOOKAHEAD(1) W() )*
+  |
+    t=<MINUS> {m_handler.handleLiteral(t.image); }
+    ( W() )*
     t=<INTEGER_LITERAL> {m_handler.handleLiteral(t.image); }
     ( LOOKAHEAD(1) W() )*
   |

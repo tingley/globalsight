@@ -59,7 +59,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     private TM3Manager manager;
     private TM3DataFactory<T> factory;
     private Connection connection = null;
-    private boolean isFirstImporting = false;
 
     // Transient
     private StorageInfo<T> storage;
@@ -520,13 +519,10 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             {
                 Map<TM3Attribute, Object> inlineAttributes = getInlineAttributes(tuData.attrs);
                 Map<TM3Attribute, String> customAttributes = getCustomAttributes(tuData.attrs);
-                TM3Tu<T> tu = null;
-                if (isFirstImporting())
-                {
-                    tu = findTuForSave(conn, tuData.srcTuv.content,
-                            tuData.srcTuv.locale, inlineAttributes,
-                            customAttributes);
-                }
+                // Always check duplicate in DB
+                TM3Tu<T> tu = findTuForSave(conn, tuData.srcTuv.content,
+                        tuData.srcTuv.locale, inlineAttributes,
+                        customAttributes);
                 if (tu == null)
                 {
                     tu = tuStorage.createTu(tuData.srcTuv.locale,
@@ -1256,16 +1252,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     public Connection getConnection()
     {
         return this.connection;
-    }
-
-    public boolean isFirstImporting()
-    {
-        return isFirstImporting;
-    }
-
-    public void setFirstImporting(boolean isFirstImporting)
-    {
-        this.isFirstImporting = isFirstImporting;
     }
 
     public void recreateFuzzyIndex(List<TM3Tuv<T>> tuvs)

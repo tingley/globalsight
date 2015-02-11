@@ -38,6 +38,8 @@ public interface LocalePairConstants
     public static final String CREATE_LOCALE = "createLocale";
     public static final String DEPENDENCIES = "dependencies";
     public static final String REMOVE = "remove";
+    public static final String EXPORT = "export";
+    public static final String IMPORT = "import";
 
     // Filter Names
     public static final String FILTER_COMPANY = "lpCompanyFilter";

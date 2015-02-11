@@ -49,7 +49,7 @@ OpenOfficeFilter.prototype.edit = function(filterId, color, specialFilters, topF
 	var str = new StringBuffer("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label>");
-	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' id='ooFilterName' value='" + this.filter.filterName + "' disabled>");
+	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' id='ooFilterName' value='" + this.filter.filterName + "' >");
 	str.append("<br/>");
 	str.append("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
@@ -998,6 +998,7 @@ OpenOfficeFilter.prototype.getXmlFilterSelect = function (filter)
 function saveOpenOfficeDocFilter()
 {
 	var check = new Validate();
+	var isNew = (saveOpenOfficeDocFilter.edit) ? "false" : "true";
 	var filterName = document.getElementById("ooFilterName").value;
 	if(check.isEmptyStr(filterName))
 	{
@@ -1015,7 +1016,8 @@ function saveOpenOfficeDocFilter()
         alert(exceedFilterName + maxFilterNameLength);
         return;
     }
-	
+    
+	var filterId = saveOpenOfficeDocFilter.filterId;
 	var filterDesc = document.getElementById("ooFilterDesc").value;
 	var headerTranslate = document.getElementById("headerTranslate").checked;
 	var xmlFilterIdAndTableName = document.getElementById("xmlFilterSelect").value;
@@ -1024,6 +1026,8 @@ function saveOpenOfficeDocFilter()
 	
 	var obj = {
 			filterTableName:"openoffice_filter",
+			isNew:isNew,
+			filterId:filterId,
 			filterName:filterName,
 			filterDesc:filterDesc,
 			headerTranslate:headerTranslate,
@@ -1034,18 +1038,10 @@ function saveOpenOfficeDocFilter()
 			allCharacterStyles:openofficeDocFilter.allSelectTagsOption[openofficeDocFilter.characterStyles],
 			companyId:companyId
 			};
-	
-	if(saveOpenOfficeDocFilter.edit)
-	{
-		closePopupDialog("openofficeFilterDialog");
-		sendAjax(obj, "updateOpenOfficeFilter", "updateOpenOfficeFilterCallback");
-	}
-	else
-	{
+
 		sendAjax(obj, "checkExist", "checkExistOpenOfficeFilterCallback");
-	}
 	
-	checkExistOpenOfficeFilterCallback.obj = obj;
+		checkExistOpenOfficeFilterCallback.obj = obj;
 }
 
 function checkExistOpenOfficeFilterCallback(data)
@@ -1053,11 +1049,18 @@ function checkExistOpenOfficeFilterCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("openofficeFilterDialog");
-		sendAjax(checkExistOpenOfficeFilterCallback.obj, "saveOpenOfficeFilter", "saveOpenOfficeFilterCallback");
+		if(saveOpenOfficeDocFilter.edit)
+		{
+			sendAjax(checkExistOpenOfficeFilterCallback.obj, "updateOpenOfficeFilter", "updateOpenOfficeFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistOpenOfficeFilterCallback.obj, "saveOpenOfficeFilter", "saveOpenOfficeFilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistOpenOfficeFilterCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 

@@ -49,7 +49,7 @@ public class FileUtil
             .getProperty("java.io.tmpdir");
     
     public static String lineSeparator;
-    {
+    static {
     	if (isInLinux())
     	{
     		lineSeparator = "\n";

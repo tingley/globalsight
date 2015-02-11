@@ -107,6 +107,10 @@ public class AmbFileStoragePathUtils
 
     public final static String TM_INDEX_FILE_SUB_DIR = "GlobalSight/TmIndexFiles";
 
+    public final static String TM_IMPORT_FILE_SUB_DIR = "GlobalSight/TmImport";
+
+    public final static String TM_EXPORT_FILE_SUB_DIR = "GlobalSight/TmExport";
+
     public final static String GOLD_TM_INDEX_SUB_DIR = "GlobalSight/GoldTmIndex";
 
     public final static String ALIGNER_PACKAGE_SUB_DIRECTORY = "GlobalSight/AlignerPackages";

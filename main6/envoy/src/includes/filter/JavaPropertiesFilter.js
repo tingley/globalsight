@@ -80,7 +80,7 @@ JavaPropertiesFilter.prototype.edit = function(filterId, color, specialFilters, 
 	var str = new StringBuffer("<table border=0 width='100%'>");
 	str.append("<tr>");
 	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");
-	str.append("<td ><input type='text' maxlength='"+maxFilterNameLength+"' style='width:100%' id='javaPropertiesFilterName' value='" + this.filter.filterName + "' disabled></input></td>");
+	str.append("<td ><input type='text' maxlength='"+maxFilterNameLength+"' style='width:100%' id='javaPropertiesFilterName' value='" + this.filter.filterName + "'></input></td>");
 	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
 	str.append("</tr>");
 	str.append("<td class='specialFilter_dialog_label' VALIGN='bottom'>" + jsFilterDesc + ":</td>");
@@ -850,7 +850,8 @@ function saveJavaProperties()
         alert(exceedFilterName + maxFilterNameLength);
         return;
     }
-	
+	var isNew = (saveJavaProperties.edit) ? "false" : "true";
+	var filterId = saveJavaProperties.filterId;
 	var filterDesc = document.getElementById("javaPropertiesDesc").value;
 	var isSupportSid = document.getElementById("isSupportSid").checked;
 	var isUnicodeEscape = document.getElementById("isUnicodeEscape").checked;
@@ -877,7 +878,9 @@ function saveJavaProperties()
 	alertUserBaseFilter(baseFilterId);
 	
 	var obj = {
-			filterTableName:"java_properties_filter", 
+			isNew : isNew,
+			filterTableName:"java_properties_filter",
+			filterId:filterId,
 			filterName:filterName, filterDesc:filterDesc, 
 			isSupportSid:isSupportSid, isUnicodeEscape:isUnicodeEscape, 
 			isPreserveSpaces:isPreserveSpaces, 
@@ -887,15 +890,8 @@ function saveJavaProperties()
 			"internalTexts":JSON.stringify(internalTexts),
 			baseFilterId:baseFilterId
 			};
-	if(saveJavaProperties.edit)
-	{
-		closePopupDialog("javaPropertiesFilterDialog");
-		sendAjax(obj, "updateJavaPropertiesFilter", "updateJavaPropertiesFilterCallback");
-	}
-	else
-	{
-		sendAjax(obj, "checkExist", "checkExistJavaPropertiesCallback");
-	}
+
+	sendAjax(obj, "checkExist", "checkExistJavaPropertiesCallback");
 	
 	checkExistJavaPropertiesCallback.obj = obj;
 }
@@ -931,7 +927,14 @@ function checkExistJavaPropertiesCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("javaPropertiesFilterDialog");
-		sendAjax(checkExistJavaPropertiesCallback.obj, "saveJavaPropertiesFilter", "saveJavaPropertiesFilterCallback");
+		if(saveJavaProperties.edit)
+		{
+			sendAjax(checkExistJavaPropertiesCallback.obj, "updateJavaPropertiesFilter", "updateJavaPropertiesFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistJavaPropertiesCallback.obj, "saveJavaPropertiesFilter", "saveJavaPropertiesFilterCallback");
+		}
 	}
 	else
 	{

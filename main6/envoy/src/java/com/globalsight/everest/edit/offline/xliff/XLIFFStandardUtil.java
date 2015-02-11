@@ -18,7 +18,6 @@ package com.globalsight.everest.edit.offline.xliff;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.openoffice.StringIndex;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 
 /**
@@ -152,7 +151,7 @@ public class XLIFFStandardUtil
             String oriSeg = si.allValue;
             String newSeg = oriSeg;
             if (oriAttSt != null && newAttSt != null
-                    && !oriSeg.contains(" " + newAttSt))
+                    && !oriSeg.contains(newAttSt))
             {
                 StringBuffer oriB = new StringBuffer(oriSeg);
                 StringIndex siB = StringIndex.getValueBetween(oriB, 0,

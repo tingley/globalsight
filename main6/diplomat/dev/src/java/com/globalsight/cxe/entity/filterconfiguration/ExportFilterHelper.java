@@ -469,6 +469,41 @@ public class ExportFilterHelper
 										}
 									}
 								}
+								List<String> list = xmlFilterConfigParser
+										.getPostFilterIdAndName();
+								if (list != null && list.size() > 0)
+								{
+									for (int i = 0; i < list.size(); i++)
+									{
+										String postFilterIdAndName = list.get(i);
+										String[] postFilterIdAndNameArr = postFilterIdAndName
+												.split(",");
+										String postFilterId = postFilterIdAndNameArr[0];
+										String postFilterName = postFilterIdAndNameArr[1];
+										filterSet.add(postFilterName + "."
+												+ postFilterId);
+
+										if (postFilterName
+												.equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
+										{
+											// Judge whether the html_filter
+											// reference base_filter
+											BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
+													postFilterName,
+													Long.parseLong(postFilterId));
+
+											if (bfm != null)
+											{
+												filterSet.add("base_filter_mapping"
+														+ "." + bfm.getId());
+												filterSet
+														.add(FilterConstants.BASE_TABLENAME
+																+ "."
+																+ bfm.getBaseFilterId());
+											}
+										}
+									}
+								}
 							}
 							catch (Exception e)
 							{
@@ -557,6 +592,41 @@ public class ExportFilterHelper
 											.add(FilterConstants.BASE_TABLENAME
 													+ "."
 													+ bfm.getBaseFilterId());
+								}
+							}
+						}
+						List<String> list = xmlFilterConfigParser
+								.getPostFilterIdAndName();
+						if (list != null && list.size() > 0)
+						{
+							for (int i = 0; i < list.size(); i++)
+							{
+								String postFilterIdAndName = list.get(i);
+								String[] postFilterIdAndNameArr = postFilterIdAndName
+										.split(",");
+								String postFilterId = postFilterIdAndNameArr[0];
+								String postFilterName = postFilterIdAndNameArr[1];
+								filterSet.add(postFilterName + "."
+										+ postFilterId);
+
+								if (postFilterName
+										.equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
+								{
+									// Judge whether the html_filter
+									// reference base_filter
+									BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
+											postFilterName,
+											Long.parseLong(postFilterId));
+
+									if (bfm != null)
+									{
+										filterSet.add("base_filter_mapping"
+												+ "." + bfm.getId());
+										filterSet
+												.add(FilterConstants.BASE_TABLENAME
+														+ "."
+														+ bfm.getBaseFilterId());
+									}
 								}
 							}
 						}

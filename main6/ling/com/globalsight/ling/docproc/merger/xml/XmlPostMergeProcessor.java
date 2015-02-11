@@ -23,34 +23,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
-import com.globalsight.ling.docproc.extractor.xml.GsDOMParser;
-import com.globalsight.ling.docproc.extractor.xml.XmlFilterChecker;
-import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
-import com.globalsight.ling.docproc.merger.PostMergeProcessor;
-import com.globalsight.ling.docproc.DiplomatMergerException;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
+import com.globalsight.ling.docproc.DiplomatMergerException;
+import com.globalsight.ling.docproc.extractor.xml.XmlFilterChecker;
+import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
+import com.globalsight.ling.docproc.merger.PostMergeProcessor;
 
 /**
  * This class post processes a merged XML document.
  */
-public class XmlPostMergeProcessor
-    implements PostMergeProcessor
+public class XmlPostMergeProcessor implements PostMergeProcessor
 {
-    private static Logger c_category =
-        Logger.getLogger(
-            XmlPostMergeProcessor.class.getName());
-    
+    private static Logger c_category = Logger
+            .getLogger(XmlPostMergeProcessor.class.getName());
+
     private boolean generateLang = false;
     private boolean generateEncoding = false;
     private Locale locale = null;
@@ -70,16 +64,16 @@ public class XmlPostMergeProcessor
     {
         this.locale = locale;
     }
-    
+
     public void setXmlFilterHelper(XmlFilterHelper p_xmlFilterHelper)
     {
         this.xmlFilterHelper = p_xmlFilterHelper;
     }
-    
+
     private String localeToString(Locale locale)
     {
         String st = locale.toString();
-        
+
         if (st != null)
         {
             return st.replaceAll("_", "-");
@@ -91,10 +85,11 @@ public class XmlPostMergeProcessor
     }
 
     /**
-     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String, java.lang.String)
+     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String,
+     *      java.lang.String)
      */
     public String process(String p_content, String p_IanaEncoding)
-        throws DiplomatMergerException
+            throws DiplomatMergerException
     {
         String processed = null;
         try
@@ -105,13 +100,12 @@ public class XmlPostMergeProcessor
             {
                 String langStr = "xml:lang=\"" + localeToString(locale) + "\"";
 
-
                 // add xml:lang to existed nodes
                 try
                 {
-                    String langRE = "<[^<>]+(\\s+xml:lang\\s*=\\s*['\"][^'\"]*['\"])[^<>]*>";        
+                    String langRE = "<[^<>]+(\\s+xml:lang\\s*=\\s*['\"][^'\"]*['\"])[^<>]*>";
                     int matchFlags = Pattern.MULTILINE;
-                    Pattern pattern =  Pattern.compile(langRE, matchFlags);
+                    Pattern pattern = Pattern.compile(langRE, matchFlags);
                     Matcher matcher = pattern.matcher(content);
                     if (matcher.find())
                     {
@@ -127,7 +121,7 @@ public class XmlPostMergeProcessor
                             part2 = content.substring(end);
                             part0 = content.substring(lastEnd, start);
                             lastEnd = end;
-    
+
                             String sub = matcher.group();
                             boolean isExclude = false;
                             int indexOfSpace = sub.indexOf(" ");
@@ -135,27 +129,35 @@ public class XmlPostMergeProcessor
                             {
                                 String tagName = sub.substring(1, indexOfSpace);
                                 String cloaseTagRE = "<.+/\\s*>";
-                                Pattern closeTagPattern =  Pattern.compile(cloaseTagRE, Pattern.MULTILINE | Pattern.DOTALL);
-                                Matcher closeTagMatcher = closeTagPattern.matcher(sub);
-                                boolean isClosedTag = closeTagMatcher.find(); 
-                                String tempXml = isClosedTag ? sub : sub + "</" + tagName + ">";
+                                Pattern closeTagPattern = Pattern.compile(
+                                        cloaseTagRE, Pattern.MULTILINE
+                                                | Pattern.DOTALL);
+                                Matcher closeTagMatcher = closeTagPattern
+                                        .matcher(sub);
+                                boolean isClosedTag = closeTagMatcher.find();
+                                String tempXml = isClosedTag ? sub : sub + "</"
+                                        + tagName + ">";
                                 Node rootNode = getRootNode(tempXml);
-                                
-                                isExclude = (xmlFilterHelper != null)? xmlFilterHelper.isExclude(rootNode) : false;
+
+                                isExclude = (xmlFilterHelper != null) ? xmlFilterHelper
+                                        .isExclude(rootNode) : false;
                             }
-                            
-                            String subNew = isExclude ? sub : sub.replaceAll("(xml:lang\\s*=\\s*['\"][^'\"]*['\"])", langStr);
+
+                            String subNew = isExclude ? sub : sub.replaceAll(
+                                    "(xml:lang\\s*=\\s*['\"][^'\"]*['\"])",
+                                    langStr);
                             buffer.append(part0);
                             buffer.append(subNew);
                         } while (matcher.find());
-    
+
                         buffer.append(part2);
                         content = buffer.toString();
                     }
                 }
                 catch (Exception e)
                 {
-                    c_category.error("Generate xml:lang to root element failed. ");
+                    c_category
+                            .error("Generate xml:lang to root element failed. ");
                     throw new DiplomatMergerException(e);
                 }
 
@@ -163,23 +165,26 @@ public class XmlPostMergeProcessor
                 try
                 {
                     Node rootNode = getRootNode(content);
-                    
+
                     if (rootNode != null)
                     {
                         String rootName = rootNode.getNodeName();
-                        RegExMatchInterface rootMatch = RegEx.matchSubstring(content, ".*(<" + rootName
-                                + "[^>]*>).*");
+                        RegExMatchInterface rootMatch = RegEx.matchSubstring(
+                                content, ".*(<" + rootName + "[^>]*>).*");
 
                         if (rootMatch != null)
                         {
                             int rootSt = rootMatch.beginOffset(1);
                             int rootEn = rootMatch.endOffset(1);
-                            StringBuffer rootStr = new StringBuffer(rootMatch.group(1));
+                            StringBuffer rootStr = new StringBuffer(
+                                    rootMatch.group(1));
                             if (rootStr.indexOf(" xml:lang=") == -1)
                             {
                                 int insertIndex = ("<" + rootName).length();
-                                String newRootStr = rootStr.insert(insertIndex, " " + langStr).toString();
-                                content = content.substring(0, rootSt) + newRootStr
+                                String newRootStr = rootStr.insert(insertIndex,
+                                        " " + langStr).toString();
+                                content = content.substring(0, rootSt)
+                                        + newRootStr
                                         + content.substring(rootEn);
                             }
                         }
@@ -187,21 +192,23 @@ public class XmlPostMergeProcessor
                 }
                 catch (Exception e)
                 {
-                    c_category.error("Generate xml:lang to root element failed. ");
+                    c_category
+                            .error("Generate xml:lang to root element failed. ");
                     throw new DiplomatMergerException(e);
                 }
             }
-            
+
             // add encoding if needed.
             String encodingStr = " encoding=\"" + p_IanaEncoding + "\"";
-            RegExMatchInterface match =
-                RegEx.matchSubstring(content,
-                                     "<\\?xml(\\s+version\\s*=\\s*['\"][^'\"]*['\"])(\\s+encoding\\s*=\\s*['\"][^'\"]*['\"])?([^>]*)\\?>");
-            
+            RegExMatchInterface match = RegEx
+                    .matchSubstring(
+                            content,
+                            "<\\?xml(\\s+version\\s*=\\s*['\"][^'\"]*['\"])(\\s+encoding\\s*=\\s*['\"][^'\"]*['\"])?([^>]*)\\?>");
+
             // add XML declaration if there isn't one.
-            if(match == null)
+            if (match == null)
             {
-				processed = content;
+                processed = content;
             }
             else
             {
@@ -209,12 +216,12 @@ public class XmlPostMergeProcessor
                 String version = match.group(1);
                 String encoding = match.group(2);
                 String rest = match.group(3);
-				String replacement = (encoding == null) ? "<?xml" + version
-						+ rest + "?>" : "<?xml" + version + encodingStr + rest
-						+ "?>";
+                String replacement = (encoding == null) ? "<?xml" + version
+                        + rest + "?>" : "<?xml" + version + encodingStr + rest
+                        + "?>";
 
-				processed = RegEx.substituteAll(content, "<\\?xml\\s[^>]+\\?>",
-						replacement);
+                processed = RegEx.substituteAll(content, "<\\?xml\\s[^>]+\\?>",
+                        replacement);
             }
         }
         catch (RegExException e)
@@ -233,7 +240,7 @@ public class XmlPostMergeProcessor
         DOMParser parser = new DOMParser();
         parser.setEntityResolver(checker);
         parser.setErrorHandler(checker);
-        
+
         parser.parse(new InputSource(new StringReader(content)));
 
         Node doc = parser.getDocument();
@@ -250,6 +257,5 @@ public class XmlPostMergeProcessor
         }
         return rootNode;
     }
-    
 
 }

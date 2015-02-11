@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -104,6 +105,10 @@ public class ImportUtil
 
     static private final String UTF16 = "UTF-16";
 
+    static private String[] encodingCheckFirst = {"UTF-8", "UTF-16", };
+    
+    static private Pattern pattern_encoding = Pattern.compile("encoding=\"([^\"]*?)\"");
+    
     //
     // Constructors
     //
@@ -414,7 +419,11 @@ public class ImportUtil
                 File logFile = getLogFile(newFile);
 
                 encoding = getEncodingOfXml(file);
-                outEncoding = encoding;
+                // GBS-2932 : UTF-8 by default
+                if (encoding == null)
+                {
+                    encoding = "UTF-8";
+                }
 
                 // Initialize IO.
                 FileInputStream fIn = new FileInputStream(file);
@@ -440,6 +449,8 @@ public class ImportUtil
 
                 // It must be <?xml ...
                 s = in.readLine();
+                s = changeXmlEncodingDec(s, outEncoding);
+                
                 status.addSize(s.getBytes(encoding).length);
                 if (CATEGORY.isDebugEnabled())
                 {
@@ -667,6 +678,27 @@ public class ImportUtil
         status.setTotalTus(Integer.toString(totalCount));
     }
 
+    private String changeXmlEncodingDec(String s, String newEncoding)
+    {
+        if (s.indexOf("<?xml ") > -1)
+        {
+            // If the file has assigned the encoding, return the
+            // assigned recoding.
+            Matcher matcher = pattern_encoding.matcher(s);
+            if (matcher.find())
+            {
+                String foundEncoding = matcher.group(1);
+                String foundAll = matcher.group();
+                if (!foundEncoding.equalsIgnoreCase(newEncoding))
+                {
+                    String newAll = foundAll.replace(foundEncoding, newEncoding);
+                    s = s.replace(foundAll, newAll);
+                }
+            }
+        }
+        return s;
+    }
+
     /**
      * Saves a TM file with sample validation.
      * 
@@ -707,7 +739,11 @@ public class ImportUtil
                 File logFile = getLogFile(newFile);
 
                 encoding = getEncodingOfXml(file);
-                outEncoding = encoding;
+                // GBS-2932 : UTF-8 by default
+                if (encoding == null)
+                {
+                    encoding = "UTF-8";
+                }
 
                 // Initialize IO.
                 FileInputStream fIn = new FileInputStream(file);
@@ -733,6 +769,8 @@ public class ImportUtil
 
                 // It must be <?xml ...
                 s = in.readLine();
+                s = changeXmlEncodingDec(s, outEncoding);
+                
                 if (CATEGORY.isDebugEnabled())
                 {
                     CATEGORY.debug("The content of in.readLine for encoding is "
@@ -1017,7 +1055,7 @@ public class ImportUtil
      * @return The encoding, may be null.
      * @throws IOException
      */
-    public static String guessEncoding(File file) throws IOException
+    public static String guessEncodingByBom(File file) throws IOException
     {
         byte[] b = readFile(file, 3);
         String guess = null;
@@ -1079,7 +1117,7 @@ public class ImportUtil
                         file);
                 if (preFile.getAbsolutePath().endsWith(".xml"))
                 {
-                    String originalEncode = guessEncoding(preFile);
+                    String originalEncode = guessEncodingByBom(preFile);
                     if (originalEncode == null)
                     {
                         originalEncode = FileUtil.getEncodingOfXml(preFile);
@@ -1148,7 +1186,7 @@ public class ImportUtil
         // File file = new File("D:/source patch/DITA dtd
         // files/sectional_review/2sectional_review_orig.xml");
         File file = new File("D:/a.txt");
-        String encode = ImportUtil.guessEncoding(file);
+        String encode = ImportUtil.guessEncodingByBom(file);
         if (encode == null)
         {
             encode = "utf-8";
@@ -1200,49 +1238,87 @@ public class ImportUtil
             CATEGORY.debug("Got encoding... ");
         }
 
-        byte[] bs = readFile(file, 150);
-        String encoding = "utf-8";
+        // http://tracker.welocalize.com/browse/GBS-2932 : Note that utf-16
+        // should have a Byte order mark at the start of the file according to
+        // xml standard. utf-8 may or may not have a BOM. we should prioritise
+        // the BOM over the xml encoding info in the file - default to utf-8 if
+        // non.
 
-        Map chars = Charset.availableCharsets();
-        Set keys = chars.keySet();
-        Iterator iterator = keys.iterator();
-
-        Pattern pattern = Pattern.compile("encoding=\"([^\"]*?)\"");
-
-        while (iterator.hasNext())
+        // 1 get encoding by file BOM
+        String guessedEncoding = guessEncodingByBom(file);
+        if (guessedEncoding != null)
         {
-            encoding = (String) iterator.next();
-            String s = new String(bs, encoding);
+            return guessedEncoding;
+        }
 
-            // If "<?xml " can be recognized.
-            if (s.indexOf("<?xml ") > -1)
+        // 2 get encoding by XML file info
+        String foundEncoding = getXmlEncodingByDeclaration(file);
+        return foundEncoding;
+    }
+
+    public static String getXmlEncodingByDeclaration(File file)
+            throws IOException, UnsupportedEncodingException
+    {
+        byte[] bs = readFile(file, 160);
+
+        
+        String foundEncoding = null;
+        for (String enc : encodingCheckFirst)
+        {
+            foundEncoding = checkEncoding(bs, enc, pattern_encoding, file);
+
+            if (foundEncoding != null)
             {
-                // If the file has assigned the encoding, return the
-                // assigned recoding.
-                Matcher matcher = pattern.matcher(s);
-                if (matcher.find())
-                {
-                    encoding = matcher.group(1);
-                }
-                else
-                {
-                    String guessedEncoding = guessEncoding(file);
-                    if (guessedEncoding != null)
-                    {
-                        encoding = guessedEncoding;
-                    }
-                }
-
-                if (CATEGORY.isDebugEnabled())
-                {
-                    CATEGORY.debug("Read content: " + s);
-                }
-
                 break;
             }
         }
+        
+        if (foundEncoding == null)
+        {
+            String encoding = "utf-8";
+            Map chars = Charset.availableCharsets();
+            Set keys = chars.keySet();
+            Iterator iterator = keys.iterator();
+            
+            while (iterator.hasNext())
+            {
+                encoding = (String) iterator.next();
+                foundEncoding = checkEncoding(bs, encoding, pattern_encoding, file);
 
-        return encoding;
+                if (foundEncoding != null)
+                {
+                    break;
+                }
+            }
+        }
+
+        return foundEncoding;
+    }
+
+    private static String checkEncoding(byte[] bs, String encoding,
+            Pattern pattern, File file) throws UnsupportedEncodingException,
+            IOException
+    {
+        String s = new String(bs, encoding);
+        String foundEncoding = null;
+
+        // If "<?xml " can be recognized.
+        if (s.indexOf("<?xml ") > -1)
+        {
+            // If the file has assigned the encoding, return the
+            // assigned recoding.
+            Matcher matcher = pattern.matcher(s);
+            if (matcher.find())
+            {
+                foundEncoding = matcher.group(1);
+            }
+
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Read content: " + s);
+            }
+        }
+        return foundEncoding;
     }
 
     public static void writeHead(OutputStreamWriter writer) throws IOException

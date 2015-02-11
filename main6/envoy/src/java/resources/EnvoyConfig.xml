@@ -107,6 +107,15 @@
         <PageLink linkName="newLocale" destinationPageName="NEWLOCALE"></PageLink>
         <PageLink linkName="remove" destinationPageName="LPR"></PageLink>
         <PageLink linkName="self" destinationPageName="LPR"></PageLink>
+        <PageLink linkName="export" destinationPageName="LPR"></PageLink>
+        <PageLink linkName="localePairsimport" destinationPageName="LOCALEPAIRSIMPORT"></PageLink>
+      </WebPage>
+      <WebPage pageName="LOCALEPAIRSIMPORT" isDefault="false" jspName="/envoy/administration/localepairs/import.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairImportHandler">
+      	 <PageLink linkName="startUpload" destinationPageName="LOCALEPAIRSIMPORT_PROGRESS"></PageLink>
+      </WebPage>
+      <WebPage pageName="LOCALEPAIRSIMPORT_PROGRESS" isDefault="false" jspName="/envoy/administration/localepairs/import_progress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairImportHandler">
+        <PageLink linkName="refresh" destinationPageName="LOCALEPAIRSIMPORT_PROGRESS"/>
+        <PageLink linkName="done" destinationPageName="LPR"/>
       </WebPage>
       <WebPage pageName="NEWLP" isDefault="false" jspName="/envoy/administration/localepairs/localePairBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairBasicHandler">
         <PageLink linkName="save" destinationPageName="LPR"></PageLink>

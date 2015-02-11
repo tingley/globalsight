@@ -66,6 +66,7 @@ public class ExcelExtractor extends AbstractExtractor
 	private Map<String, List<String>> atts = null;
 	private List<String> unSis = null;
 	private List<String> unNumStyleIds = null;
+	private List<String> unCell = null;
 	
 	private static Pattern PATTERN_URL = Pattern.compile("https?://(\\w+(-\\w+)*)(\\.(\\w+(-\\w+)*))*((:\\d+)?)(/(\\w+(-\\w+)*))*(\\.?(\\w)*)(\\?)?(((\\w*%)*(\\w*\\?)*(\\w*:)*(\\w*\\+)*(\\w*\\.)*(\\w*&)*(\\w*-)*(\\w*=)*(\\w*%)*(\\w*\\?)*(\\w*:)*(\\w*\\+)*(\\w*\\.)*(\\w*&)*(\\w*-)*(\\w*=)*)*(\\w*)*)",Pattern.CASE_INSENSITIVE );
 	
@@ -703,14 +704,27 @@ public class ExcelExtractor extends AbstractExtractor
     	                .toList(options.get("m_xlsx_unextractableCellStyles"));
     		 
     		 unSis.addAll(ids);
-//	        for (String idstr : ids)
-//	        {
-//	            int id = Integer.parseInt(idstr) + 1;
-//	            unSis.add(Integer.toString(id));
-//	        }
     	}
 		
 		return unSis;
+    }
+    
+    private List<String> getUnCell()
+    {
+        if (unCell == null)
+        {
+            String hiddenSharedSI = options.get("m_xlsx_sheetHiddenCell");
+            if (hiddenSharedSI != null)
+            {
+                unCell = MSOffice2010Filter.toList(hiddenSharedSI);
+            }
+            else
+            {
+                unCell = new ArrayList<String>();
+            }
+        }
+        
+        return unCell;
     }
     
     private List<String> getUnNumStyleIds()
@@ -828,6 +842,14 @@ public class ExcelExtractor extends AbstractExtractor
     	    String v = n.getNodeValue();
             if ("s".equals(v) || "str".equals(v))
                 return true;
+    	}
+    	
+    	Node r = util.getAttribute(node, "r");
+    	if (r != null)
+    	{
+    	    String v = r.getNodeValue();
+    	    if (getUnCell().contains(v))
+    	        return true;
     	}
     	
     	Node s = util.getAttribute(node, "s");

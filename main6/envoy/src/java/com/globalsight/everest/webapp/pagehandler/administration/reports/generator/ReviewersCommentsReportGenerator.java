@@ -71,6 +71,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportC
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
@@ -86,6 +87,9 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -572,8 +576,6 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
             String category = null;
             PseudoData pData = new PseudoData();
             pData.setMode(PseudoConstants.PSEUDO_COMPACT);
-            String sourceSegmentString = null;
-            String targetSegmentString = null;
             String sid = null;
             for (int i = 0; i < targetPages.size(); i++)
             {
@@ -636,13 +638,6 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                         lastComment = issueHistory.getComment();
                     }
 
-                    // Source segment and Target segment
-                    sourceSegmentString = sourceTuv.getGxmlElement()
-                            .getTextValue();
-                    sid = sourceTuv.getSid();
-                    targetSegmentString = targetTuv.getGxmlElement()
-                            .getTextValue();
-
                     // TM Match
                     StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
                             tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
@@ -672,7 +667,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                             : contentStyle;
                     Cell cell_A = getCell(currentRow, col);
                     cell_A.setCellValue(getSegment(pData, sourceTuv, companyId,
-                    		sourceSegmentString, m_rtlSourceLocale));
+                            m_rtlSourceLocale));
                     cell_A.setCellStyle(srcStyle);
                     col++;
                     
@@ -681,7 +676,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                             : contentStyle; 
                     Cell cell_B = getCell(currentRow, col);
                     cell_B.setCellValue(getSegment(pData, targetTuv, companyId,
-                    		targetSegmentString, m_rtlTargetLocale));
+                            m_rtlTargetLocale));
                     cell_B.setCellStyle(trgStyle);
                     col++;
                     
@@ -1243,31 +1238,84 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
     }
     
     private String getSegment(PseudoData pData, Tuv tuv, long companyId,
-    		String segmentString, boolean m_rtlLocale)
+            boolean m_rtlLocale)
     {
-    	String content = "";
-    	if(isIncludeCompactTags)
+        String result = null;
+        StringBuffer content = new StringBuffer();
+        List subFlows = tuv.getSubflowsAsGxmlElements();
+        long tuId = tuv.getTuId();
+        if(isIncludeCompactTags)
         {
-        	try {
-            	pData.setAddables(tuv.getDataType(companyId));
-                TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(),
-                        pData);
-                content = pData.getPTagSourceString();
-        	} catch (Exception e) {
+            String dataType = null;
+            try
+            {
+                dataType = tuv.getDataType(companyId);
+                pData.setAddables(dataType);
+                TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+                content.append(pData.getPTagSourceString());
+
+                if (subFlows != null && subFlows.size() > 0)
+                {
+                    for (int i = 0; i < subFlows.size(); i++)
+                    {
+                        GxmlElement sub = (GxmlElement) subFlows.get(i);
+                        String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                        content.append("\r\n#").append(tuId).append(":")
+                                .append(subId).append("\n")
+                                .append(getCompactPtagString(sub, dataType));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
                 logger.error(tuv.getId(), e);
             }
-        	if (m_rtlLocale)
+        }
+        else
+        {
+            String mainSeg = tuv.getGxmlElement().getTextValue();
+            content.append(mainSeg);
+
+            if (subFlows != null && subFlows.size() > 0)
             {
-            	content = EditUtil.toRtlString(content);
+                for (int i = 0; i < subFlows.size(); i++)
+                {
+                    GxmlElement sub = (GxmlElement) subFlows.get(i);
+                    String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                    content.append("\r\n#").append(tuId).append(":")
+                            .append(subId).append("\n")
+                            .append(sub.getTextValue());
+                }
             }
         }
-        else 
-        {                  	
-        	content = m_rtlLocale ? EditUtil
-        			.toRtlString(segmentString)
-        			: segmentString;
-		}
-        return content;
+
+        result = content.toString();
+        if (m_rtlLocale)
+        {
+            result = EditUtil.toRtlString(result);
+        }
+
+        return result;
+    }
+
+    private String getCompactPtagString(GxmlElement p_gxmlElement,
+            String p_dataType)
+    {
+        String compactPtags = null;
+        OnlineTagHelper applet = new OnlineTagHelper();
+        try
+        {
+            String seg = GxmlUtil.getInnerXml(p_gxmlElement);
+            applet.setDataType(p_dataType);
+            applet.setInputSegment(seg, "", p_dataType);
+            compactPtags = applet.getCompact();
+        }
+        catch (Exception e)
+        {
+            logger.info("getCompactPtagString Error.", e);
+        }
+
+        return compactPtags;
     }
     
     /**

@@ -131,10 +131,23 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * Get max order_num by tuvId, targetLocaleId and subId.
      */
     private static final String MAX_ORDER_NUM = "select max(order_num) from "
-            + LM_TABLE_NAME_PLACE_HOLDER + " WHERE ORDER_NUM > 0 "
+            + LM_TABLE_NAME_PLACE_HOLDER
+            + " WHERE ORDER_NUM > 0 "
             + " AND ORDER_NUM < " + TmCoreManager.LM_ORDER_NUM_START_REMOTE_TM
-            + " AND ORIGINAL_SOURCE_TUV_ID = ? " + " AND TARGET_LOCALE_ID = ? "
+            + " AND ORIGINAL_SOURCE_TUV_ID = ? "
+            + " AND TARGET_LOCALE_ID = ? "
             + " AND SUB_ID = ? ";
+
+    /**
+     * Get all order_num existed in DB by sourceTuvId, targetLocaleId and subId.
+     */
+    private static final String GET_ALL_ORDER_NUMS =
+            "SELECT order_num FROM " + LM_TABLE_NAME_PLACE_HOLDER
+            + " WHERE ORIGINAL_SOURCE_TUV_ID = ? "
+            + " AND TARGET_LOCALE_ID = ? "
+            + " AND SUB_ID = ? "
+            + " AND ORDER_NUM > 0 "
+            + " AND ORDER_NUM < " + TmCoreManager.LM_ORDER_NUM_START_REMOTE_TM;
 
     private static final String BEST_MATCH_SCORE = "select max(score_num) from "
             + LM_TABLE_NAME_PLACE_HOLDER
@@ -1099,12 +1112,14 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             {
                 p_connection.setAutoCommit(false);
 
-                Map.Entry<Long, List<LeverageMatch>> entry = (Map.Entry<Long, List<LeverageMatch>>) it
-                        .next();
+                Map.Entry<Long, List<LeverageMatch>> entry =
+                        (Map.Entry<Long, List<LeverageMatch>>) it.next();
                 long companyId = (Long) entry.getKey();
-                List<LeverageMatch> lms = (List<LeverageMatch>) entry
-                        .getValue();
+                List<LeverageMatch> lms = (List<LeverageMatch>) entry.getValue();
 
+                // Check to avoid possible duplicate primary key error for LM table.
+                checkOrderNumUnique(p_connection, lms, companyId);
+                
                 String lmTableName = SegmentTuTuvCacheManager
                         .getLeverageMatchWorkingTableName(companyId);
                 String insertSql = INSERT_INTO_LEVERAGE_MATCH_SQL.replace(
@@ -1120,18 +1135,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     ps.setLong(5, lm.getTargetLocaleId());
 
                     ps.setString(6, lm.getMatchType());
-                    int maxOrderNum = getMaxOrderNum(p_connection,
-                            lm.getOriginalSourceTuvId(),
-                            lm.getTargetLocaleId(), lm.getSubId(), companyId);
-                    if (lm.getOrderNum() > 0
-                            && lm.getOrderNum() < TmCoreManager.LM_ORDER_NUM_START_REMOTE_TM)
-                    {
-                        ps.setShort(7, (short) (maxOrderNum + lm.getOrderNum()));
-                    }
-                    else
-                    {
-                        ps.setShort(7, lm.getOrderNum());
-                    }
+                    ps.setShort(7, lm.getOrderNum());
 
                     ps.setFloat(8, lm.getScoreNum());
                     ps.setLong(9, lm.getMatchedTuvId());
@@ -1157,7 +1161,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
                     ps.addBatch();
                     count ++;
-                    if(count == max){
+                    if(count == max)
+                    {
                     	ps.executeBatch();
                         p_connection.commit();
                         ps.clearBatch();
@@ -1165,7 +1170,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     }
                 }
                 
-                if(count  > 0){
+                if(count  > 0)
+                {
                 	ps.executeBatch();
                     p_connection.commit();
                 }
@@ -1284,12 +1290,9 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 lm.setTargetLocale(p_targetLocale);
                 // 6.match_type
                 lm.setMatchType(matchedTuv.getMatchState().getName());
-                // 7.order_num
-                int maxOrderNum = getMaxOrderNum(p_connection,
-                        originalSourceTuv.getId(), p_targetLocale.getId(),
-                        originalTu.getSubId(), p_sourcePage.getCompanyId());
-                int orderNum = maxOrderNum + matchedTuv.getOrder();
-                lm.setOrderNum((short) orderNum);
+                // 7.order_num (We don't ensure the order_num unique here, the
+                // check happens when save into DB)
+                lm.setOrderNum((short) matchedTuv.getOrder());
                 // 8.score_num
                 lm.setScoreNum(matchedTuv.getScore());
                 // 9.matched_table_type
@@ -1373,7 +1376,6 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * @param allLeverageMatches
      * @param mode
      */
-    @SuppressWarnings("unchecked")
     private void filterMatchesForMultipleTranslations(
             Collection<LeverageMatch> results,
             Collection<LeverageMatch> allLeverageMatches, 
@@ -1659,6 +1661,105 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
 
         return maxOrderNum;
+    }
+
+    /**
+     * Check to ensure "order_num" unique for
+     * "sourceTuvId, targetLocaleId, subId, orderNum" primary key in leverage
+     * match table.
+     */
+    private void checkOrderNumUnique(Connection p_connection,
+            List<LeverageMatch> lms, long companyId)
+    {
+        HashMap<String, Set<Integer>> cachedOrderNums = new HashMap<String, Set<Integer>>();
+
+        long srcTuvId, trgLocaleId;
+        String subId = null;
+        for (LeverageMatch lm : lms)
+        {
+            srcTuvId = lm.getOriginalSourceTuvId();
+            trgLocaleId = lm.getTargetLocaleId();
+            subId = lm.getSubId();
+
+            Set<Integer> existedOrderNums = getExistedOrderNums(p_connection,
+                    srcTuvId, trgLocaleId, subId, companyId);
+            String key = srcTuvId + "-" + trgLocaleId + "-" + subId;
+            Set<Integer> orderNums = cachedOrderNums.get(key);
+            if (orderNums != null)
+            {
+                orderNums.addAll(existedOrderNums);
+            }
+            else
+            {
+                cachedOrderNums.put(key, existedOrderNums);
+            }
+
+            orderNums = cachedOrderNums.get(key);
+            int orderNum = determineOrderNum(orderNums, lm.getOrderNum());
+            orderNums.add(orderNum);
+            lm.setOrderNum((short) orderNum);
+        }
+    }
+
+    private int determineOrderNum(Set<Integer> existedOrderNums,
+            int suggestedOrderNum)
+    {
+        if (existedOrderNums == null
+                || !existedOrderNums.contains(suggestedOrderNum))
+            return suggestedOrderNum;
+
+        int orderNum = 1;
+        for (int i = 1; i <= 100; i++)
+        {
+            if (!existedOrderNums.contains(i))
+            {
+                orderNum = i;
+                break;
+            }
+        }
+
+        return orderNum;
+    }
+
+    private Set<Integer> getExistedOrderNums(Connection p_connection,
+            long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
+            long p_companyId)
+    {
+        Set<Integer> orderNums = new HashSet<Integer>();
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            String lmTableName = SegmentTuTuvCacheManager
+                    .getLeverageMatchWorkingTableName(p_companyId);
+            String sql = GET_ALL_ORDER_NUMS.replace(LM_TABLE_NAME_PLACE_HOLDER,
+                    lmTableName);
+            ps = p_connection.prepareStatement(sql);
+
+            ps.setLong(1, p_originalSourceTuvId);
+            ps.setLong(2, p_targetLocaleId);
+            ps.setString(3, p_subId);
+
+            rs = ps.executeQuery();
+            while (rs.next())
+            {
+                orderNums.add(rs.getInt(1));
+            }
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Failed to getOrderNums by originalSourceTuvId "
+                    + p_originalSourceTuvId + ", subId : " + p_subId
+                    + ", targetLocaleId : " + p_targetLocaleId, e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+        }
+
+        return orderNums;
     }
 
     public float getBestMatchScore(Connection p_connection,

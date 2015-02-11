@@ -20,7 +20,7 @@ InddFilter.prototype.edit = function(filterId, color, specialFilters,
 	str.append("<input type='text' style='' id='inddFilterName' maxlength='"
 					+ maxFilterNameLength
 					+ "' value='"
-					+ this.filter.filterName + "' disabled></input>");
+					+ this.filter.filterName + "'></input>");
 	str.append("<br/>");
 
 	str.append("<label class='specialFilter_dialog_label'>");
@@ -197,9 +197,9 @@ function saveInddFilter() {
 		alert(exceedFilterName + maxFilterNameLength);
 		return;
 	}
-
+	var isNew = (saveInddFilter.edit) ? "false" : "true";
+	var filterId = saveInddFilter.filterId;
 	var filterDesc = document.getElementById("inddFilterDesc").value;
-
 	var translateHiddenLayer = document.getElementById("transInddHiddenLayer").checked;
 	var translateMasterLayer = document.getElementById("transInddMasterLayer").checked;
 	var translateFileInfo = document.getElementById("transInddFileInfo").checked;
@@ -207,7 +207,9 @@ function saveInddFilter() {
 	var extractLineBreak = document.getElementById("ignoreLineBreak").checked ? false : true;
 	var replaceNonbreakingSpace = document.getElementById("replaceNonbreakingSpace").checked;
 	var obj = {
+		isNew : isNew,
 		filterTableName : "indd_filter",
+		filterId : filterId,
 		filterName : filterName,
 		filterDesc : filterDesc,
 		companyId : companyId,
@@ -218,22 +220,28 @@ function saveInddFilter() {
 		extractLineBreak : extractLineBreak,
 		replaceNonbreakingSpace : replaceNonbreakingSpace
 	};
-	if (saveInddFilter.edit) {
-		closePopupDialog("inddFilterDialog");
-		sendAjax(obj, "updateInddFilter", "updateInddFilterCallback");
-	} else {
-		sendAjax(obj, "checkExist", "checkExistInddFilterCallback");
-	}
+
+	sendAjax(obj, "checkExist", "checkExistInddFilterCallback");
 
 	checkExistInddFilterCallback.obj = obj;
 }
 
-function checkExistInddFilterCallback(data) {
-	if (data == 'false') {
+function checkExistInddFilterCallback(data) 
+{
+	if (data == 'false') 
+	{
 		closePopupDialog("inddFilterDialog");
-		sendAjax(checkExistInddFilterCallback.obj, "saveInddFilter",
-				"saveInddFilterCallback");
-	} else {
+		if (saveInddFilter.edit) 
+		{
+			sendAjax(checkExistInddFilterCallback.obj, "updateInddFilter", "updateInddFilterCallback");
+		} 
+		else 
+		{
+			sendAjax(checkExistInddFilterCallback.obj, "saveInddFilter", "saveInddFilterCallback");
+		}
+	} 
+	else 
+	{
 		alert(existFilterName);
 	}
 }

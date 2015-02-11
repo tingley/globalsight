@@ -326,7 +326,7 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
                         .equalsIgnoreCase(dataType);
                 boolean isIdml = (IFormatNames.FORMAT_XML
                         .equalsIgnoreCase(dataType) && sp.getExternalPageId()
-                        .endsWith(".idml"));
+                        .toLowerCase().endsWith(".idml"));
                 if (isOffice2010 || isOpenOffice || isIdml)
                 {
                     return true;

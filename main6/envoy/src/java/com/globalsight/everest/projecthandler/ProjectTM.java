@@ -51,7 +51,6 @@ public class ProjectTM extends PersistentObject implements Tm
     private long m_convertedTM3Id = -1;
     private String m_status = "";
 
-    private boolean isFirstImporting = false;
     private boolean indexTarget = false;
 
     public String getStatus()
@@ -279,18 +278,6 @@ public class ProjectTM extends PersistentObject implements Tm
     public void setConvertedTM3Id(long m_convertedTM3Id)
     {
         this.m_convertedTM3Id = m_convertedTM3Id;
-    }
-
-    @Override
-    public void setFirstImporting(boolean isFirstImporting)
-    {
-        this.isFirstImporting = isFirstImporting;
-    }
-
-    @Override
-    public boolean isFirstImporting()
-    {
-        return this.isFirstImporting;
     }
 
     public boolean isIndexTarget()

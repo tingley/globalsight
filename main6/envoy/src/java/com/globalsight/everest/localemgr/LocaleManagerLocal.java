@@ -442,14 +442,15 @@ public class LocaleManagerLocal implements LocaleManager
      *            The source locale
      * @param p_target
      *            The target locale
+     * @param companyId
      * @exception LocaleManagerException
      *                Specifies the error, probably persistence exception
      * @exception RemoteException
      *                System or network related exception
      */
     public void addSourceTargetLocalePair(GlobalSightLocale p_source,
-            GlobalSightLocale p_target) throws LocaleManagerException,
-            RemoteException
+            GlobalSightLocale p_target, long companyId)
+            throws LocaleManagerException, RemoteException
     {
         Session session = null;
         Transaction transaction = null;
@@ -458,14 +459,12 @@ public class LocaleManagerLocal implements LocaleManager
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            String companyId = CompanyThreadLocal.getInstance().getValue();
             String hql = "from LocalePair l where l.source.id = :sId "
                     + "and l.target.id = :tId and l.companyId = :cId";
             Map map = new HashMap();
-            long cId = Long.parseLong(companyId);
             map.put("sId", p_source.getIdAsLong());
             map.put("tId", p_target.getIdAsLong());
-            map.put("cId", cId);
+            map.put("cId", companyId);
             List result = HibernateUtil.search(hql, map);
             LocalePair lp;
             if (result != null && result.size() > 0)
@@ -475,7 +474,7 @@ public class LocaleManagerLocal implements LocaleManager
             }
             else
             {
-                lp = new LocalePair(p_source, p_target, cId);
+                lp = new LocalePair(p_source, p_target, companyId);
             }
 
             session.saveOrUpdate(lp);

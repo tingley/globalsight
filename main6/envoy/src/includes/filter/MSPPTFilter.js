@@ -18,7 +18,7 @@ MSPPTFilter.prototype.edit = function(filterId, color, specialFilters, topFilter
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:450px' maxlength='"+maxFilterNameLength+"' id='"+this.filterNameId+"' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<td><input type='text' style='width:450px' maxlength='"+maxFilterNameLength+"' id='"+this.filterNameId+"' value='" + this.filter.filterName + "'></input>");
 	str.append("</td></tr>");
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
@@ -140,6 +140,7 @@ function saveMSPPTFilter()
 {
 	var check = new Validate();
 	MSPPTFilter();
+	var isNew = (saveMSPPTFilter.edit) ? "false" : "true";
 	var filterName = document.getElementById(this.filterNameId).value;
 	if(check.isEmptyStr(filterName))
 	{
@@ -158,6 +159,7 @@ function saveMSPPTFilter()
         return;
     }
 	
+	var filterId = saveMSPPTFilter.filterId;
 	var filterDesc = document.getElementById(this.filterDesId).value;
 	var altTranslate = document.getElementById("pptAltTranslate").checked;
 	var notesTranslate = document.getElementById("pptNotesTranslate").checked;
@@ -177,6 +179,8 @@ function saveMSPPTFilter()
 	
 	var obj = {
 		filterTableName : this.filterTableName,
+		isNew : isNew,
+		filterId : filterId,
 		filterName : filterName,
 		filterDesc : filterDesc,
 		companyId : companyId,
@@ -186,16 +190,7 @@ function saveMSPPTFilter()
 		contentPostFilterTableName : contentPostFilterTableName,
 		baseFilterId:baseFilterId
 	};
-	
-	if(saveMSPPTFilter.edit)
-	{
-		closePopupDialog(this.filterDialogId);
-		sendAjax(obj, "updateMSOfficePPTFilter", "updatePPTFilterCallback");
-	}
-	else
-	{
-		sendAjax(obj, "checkExist", "checkExistPPTCallback");
-	}
+	sendAjax(obj, "checkExist", "checkExistPPTCallback");
 	
 	checkExistPPTCallback.obj = obj;
 }
@@ -230,11 +225,18 @@ function checkExistPPTCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog(this.filterDialogId);
-		sendAjax(checkExistPPTCallback.obj, "saveMSOfficePPTFilter", "saveMSOfficePPTFilterCallback");
+		if(saveMSPPTFilter.edit)
+		{
+			sendAjax(checkExistPPTCallback.obj, "updateMSOfficePPTFilter", "updatePPTFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistPPTCallback.obj, "saveMSOfficePPTFilter", "saveMSOfficePPTFilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistPPTCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 

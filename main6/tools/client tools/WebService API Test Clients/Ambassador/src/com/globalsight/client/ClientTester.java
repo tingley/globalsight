@@ -27,7 +27,7 @@ public class ClientTester
 	private static int MAX_SEND_SIZE = 5 * 1000 * 1024;//5M
 	private static String HOST_NAME = "localhost";
 	private static String HOST_PORT = "8080";
-	private static String userName = "easyadmin";
+	private static String userName = "allieadmin";
 	private static String password = "password";
 
     public static Ambassador getAmbassador() throws Exception
@@ -46,22 +46,51 @@ public class ClientTester
     }
 	
     public static void main(String[] args)
-    {
-    	try 
-    	{
-        	Ambassador ambassador = getAmbassador(userName, password);
-        	String fullAccessToken = ambassador.login(userName, password);
-        	System.out.println("fullAccessToken : " + fullAccessToken);
+	{
+		try
+		{
+			Ambassador ambassador = getAmbassador(userName, password);
+			String fullAccessToken = ambassador.login(userName, password);
+			System.out.println("fullAccessToken : " + fullAccessToken);
 
-//        	testGetDownloadableJobs(ambassador, fullAccessToken);
-        	
-        	testArchiveJobs(ambassador, fullAccessToken);
-    	}
-    	catch (Exception ex)
-    	{
-    		ex.printStackTrace();
-    	}
-    }
+			// testGetDownloadableJobs(ambassador, fullAccessToken);
+			// testArchiveJobs(ambassador, fullAccessToken);
+
+			testGetTasksInJob(ambassador, fullAccessToken);
+			testAcceptTask(ambassador, fullAccessToken);
+			testCompleteTask(ambassador, fullAccessToken);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	private static void testGetTasksInJob(Ambassador ambassador,
+			String accessToken) throws Exception
+	{
+		String jobId = "394";
+		String xml = ambassador.getTasksInJobs(accessToken, jobId, null);
+		System.out.println(xml);
+	}
+
+	private static void testAcceptTask(Ambassador ambassador, String accessToken)
+			throws Exception
+	{
+		String taskId = "7679";
+		String result = ambassador.acceptTask(accessToken, taskId);
+		System.out.println(result);
+	}
+
+	private static void testCompleteTask(Ambassador ambassador,
+			String accessToken) throws Exception
+	{
+		String taskId = "7679";
+		String destinationArrow = "Action3";
+		String result = ambassador.completeTask(accessToken, taskId,
+				destinationArrow);
+		System.out.println(result);
+	}
 
     private static void testGetDownloadableJobs(Ambassador ambassador,
             String accessToken) throws Exception

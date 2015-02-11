@@ -171,10 +171,6 @@ public interface Tm
 
     public void setConvertedTM3Id(long convertedTm3Id);
 
-    public void setFirstImporting(boolean isFirstImporting);
-    
-    public boolean isFirstImporting();
-
     public boolean isIndexTarget();
 
     public void setIndexTarget(boolean p_indexTarget);

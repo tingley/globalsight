@@ -603,6 +603,25 @@ public class IdmlHelper
                 if (!textFrameIds.contains(id))
                 {
                     textFrameIds.add(id);
+
+                    // 2.2 find all TextFrame from story
+                    String storyFile = dir + File.separator + "Stories/Story_"
+                            + id + ".xml";
+                    File sfile = new File(storyFile);
+                    if (sfile.exists())
+                    {
+                        String storyContent = FileUtil.readFile(sfile, "utf-8");
+                        Matcher storyTextFrame = pTextFrame.matcher(storyContent);
+                        
+                        while(storyTextFrame.find())
+                        {
+                            String sssid = storyTextFrame.group(1);
+                            if (!textFrameIds.contains(sssid))
+                            {
+                                textFrameIds.add(sssid);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -629,7 +648,7 @@ public class IdmlHelper
         // sort them
         List<String> storySrcSorted = new ArrayList<String>();
         if (textFrameIds == null || textFrameIds.size() == 0
-                || textFrameIds.size() != storySrc.size())
+                || textFrameIds.size() < storySrc.size())
         {
             // sort all stories by Document StoryList attributes
             Pattern pDocument = Pattern

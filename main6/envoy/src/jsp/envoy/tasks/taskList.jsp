@@ -6,6 +6,7 @@
                 com.globalsight.everest.permission.PermissionSet,
                 com.globalsight.everest.servlet.util.SessionManager,
                 com.globalsight.everest.foundation.SearchCriteriaParameters,
+                com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
                 com.globalsight.everest.taskmanager.Task,
                 com.globalsight.everest.webapp.WebAppConstants,
                 com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
@@ -42,6 +43,14 @@
     //Labels of the page components
     String title = bundle.getString("lb_my_activities");
     String errorMessage = (String) sessionManager.getAttribute("taskList_errorMsg");
+    String acceptanceStart = JobSearchConstants.ACCEPTANCE_START;
+    String acceptanceStartOptions = JobSearchConstants.ACCEPTANCE_START_OPTIONS;
+    String acceptanceEnd = JobSearchConstants.ACCEPTANCE_END;
+    String acceptanceEndOptions = JobSearchConstants.ACCEPTANCE_END_OPTIONS;
+    String completionStart = JobSearchConstants.EST_COMPLETION_START;
+    String completionStartOptions = JobSearchConstants.EST_COMPLETION_START_OPTIONS;
+    String completionEnd = JobSearchConstants.EST_COMPLETION_END;
+    String completionEndOptions = JobSearchConstants.EST_COMPLETION_END_OPTIONS;
 
     String helpText = "";
     String helpFile = "";
@@ -109,6 +118,33 @@
     boolean isAscSort = taskListParams.isAscSort();
     String sortType = isAscSort ? "asc": "desc";
     HashMap<String,String> filters = taskListParams.getFilters();
+    String acceptanceStartFilter = filters.get("acceptanceStartFilter");
+    if(StringUtil.isEmpty(acceptanceStartFilter))
+    	acceptanceStartFilter = "";
+    String acceptanceStartOptionsFilter = filters.get("acceptanceStartOptionsFilter");
+    if(StringUtil.isEmpty(acceptanceStartOptionsFilter))
+    	acceptanceStartOptionsFilter = "";
+    String acceptanceEndFilter = filters.get("acceptanceEndFilter");
+    if(StringUtil.isEmpty(acceptanceEndFilter))
+    	acceptanceEndFilter = "";
+    String acceptanceEndOptionsFilter = filters.get("acceptanceEndOptionsFilter");
+    if(StringUtil.isEmpty(acceptanceEndOptionsFilter))
+    	acceptanceEndOptionsFilter = "";
+    String completionStartFilter = filters.get("completionStartFilter");
+    if(StringUtil.isEmpty(completionStartFilter))
+    	completionStartFilter = "";
+    String completionStartOptionsFilter = filters.get("completionStartOptionsFilter");
+    if(StringUtil.isEmpty(completionStartOptionsFilter))
+    	completionStartOptionsFilter = "";
+    String completionEndFilter = filters.get("completionEndFilter");
+    if(StringUtil.isEmpty(completionEndFilter))
+    	completionEndFilter = "";
+    String completionEndOptionsFilter = filters.get("completionEndOptionsFilter");
+    if(StringUtil.isEmpty(completionEndOptionsFilter))
+    	completionEndOptionsFilter = "";
+    String priorityFilter = filters.get("priorityFilter");
+    if(StringUtil.isEmpty(priorityFilter))
+    	priorityFilter = "";
     String jobIdFilter = filters.get("jobIdFilter");
     if(StringUtil.isEmpty(jobIdFilter))
     	jobIdFilter = "";
@@ -133,6 +169,9 @@
     String companyFilter = filters.get("companyFilter");
     if(StringUtil.isEmpty(companyFilter))
     	companyFilter = "";
+    String advancedSearch = filters.get("advancedSearch");
+    if(StringUtil.isEmpty(advancedSearch))
+    	advancedSearch = "false";
     
     Date today = new Date();
     
@@ -195,12 +234,23 @@
     var sourceLocale = "<%=sourceLocaleFilter%>";
     var targetLocale = "<%=targetLocaleFilter%>";
     var company = "<%=companyFilter%>";
+    var advancedSearch = "<%=advancedSearch%>";
+    var showDateForm = false;
     $(document).ready(function() {
     	$("#jobIdOption").val("<%=jobIdOption%>");
 		$("#jobIdFilter").val("<%=jobIdFilter%>");
     	$("#jobNameFilter").val("<%=jobNameFilter%>");
     	$("#activityNameFilter").val("<%=activityNameFilter%>");
     	$("#assigneesNameFilter").val("<%=assigneesNameFilter%>");
+    	$("#priorityFilter").val("<%=priorityFilter%>");
+    	$("#acceptanceStartFilter").val("<%=acceptanceStartFilter%>");
+    	$("#acceptanceStartOptionsFilter").val("<%=acceptanceStartOptionsFilter%>");
+    	$("#acceptanceEndFilter").val("<%=acceptanceEndFilter%>");
+    	$("#acceptanceEndOptionsFilter").val("<%=acceptanceEndOptionsFilter%>");
+    	$("#completionStartFilter").val("<%=completionStartFilter%>");
+    	$("#completionStartOptionsFilter").val("<%=completionStartOptionsFilter%>");
+    	$("#completionEndFilter").val("<%=completionEndFilter%>");
+    	$("#completionEndOptionsFilter").val("<%=completionEndOptionsFilter%>");
     	rmoveSortImg();
     	var sortColumnString = sortColumn;
     	if(isDateSort)
@@ -209,7 +259,45 @@
 			$("#"+sortColumnString+"Sort").html($ascImg);
 		 else 
 			$("#"+sortColumnString+"Sort").html($descImg);
-    }); 
+		changeSearchType();
+    });
+
+    function checkNow(field, text)
+    {
+        if (field.options[1].selected)
+            text.value = "";
+    }
+	
+    function changeSearchType()
+    {
+		if(advancedSearch == "true")
+		{
+			$("#dateForm").show();
+			showDateForm = true;
+			$("#searchTaskAdvanced").hide();
+			$("#advanced").hide();
+			$("#simple").show();
+			advancedSearch = "false";
+		}
+		else
+		{
+			$("#dateForm").hide();
+			showDateForm = false;
+			$("#searchTaskAdvanced").show();
+			$("#advanced").show();
+			$("#simple").hide();
+			$("#acceptanceStartFilter").val("");
+	    	$("#acceptanceStartOptionsFilter").val("");
+	    	$("#acceptanceEndFilter").val("");
+	    	$("#acceptanceEndOptionsFilter").val("");
+	    	$("#completionStartFilter").val("");
+	    	$("#completionStartOptionsFilter").val("");
+	    	$("#completionEndFilter").val("");
+	    	$("#completionEndOptionsFilter").val("");
+			advancedSearch = "true";
+		}
+    }
+
     </script>
 </head>
 <body>
@@ -240,12 +328,85 @@
     </div>
     <div class="standardText" id="helpText" style="padding-top:10px;"></div>
     <div class="standardText" style="padding-top:10px;color:red"><%=badresults%></div>
-    <br>
     <!-- Current task state -->
-    <div class="standardText">
-        <%=bundle.getString("lb_task_status") %>: <select id="taskStates"></select> <input id="searchTask" type="button" value="Search"/>
+    <div class="standardText" style="margin-bottom:5px;margin-top:7px;">
+        <%=bundle.getString("lb_task_status") %>: <select id="taskStates"></select> <input id="searchTaskAdvanced" class="searchTask" type="button" value="Search"/>
+        <a id="advanced" class="link" href="#" onclick="changeSearchType()">Advanced...</a>
+		<a id="simple" class="link" href="#" onclick="changeSearchType()">Simple...</a>
+        <form id="dateForm" name="dateForm" method="post" action="">
+        <table style="margin-top:5px;">
+        	<tr>
+	          <td class="standardText" >
+	            <%=bundle.getString("lb_acceptance_date_range")%>:
+	          </td>
+	          <td class="standardText"  nowrap>
+	            <%=bundle.getString("lb_starts")%>:
+	            <input type="text" id="acceptanceStartFilter" name="<%=acceptanceStart%>" size="3" maxlength="9">
+	            <select id="acceptanceStartOptionsFilter" name="<%=acceptanceStartOptions%>">
+	                <option value=''></option>
+	                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.HOURS_FROM_NOW%>'><%=bundle.getString("lb_hours_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.DAYS_FROM_NOW%>'><%=bundle.getString("lb_days_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.WEEKS_FROM_NOW%>'><%=bundle.getString("lb_weeks_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.MONTHS_FROM_NOW%>'><%=bundle.getString("lb_months_from_now")%></option>
+	            </select>
+	            <%=bundle.getString("lb_ends")%>:
+	            <input type="text" id="acceptanceEndFilter" name="<%=acceptanceEnd%>" size="3" maxlength="9">
+	            <select id="acceptanceEndOptionsFilter" name="<%=acceptanceEndOptions%>" onChange="checkNow(this, dateForm.<%=acceptanceEnd%>)">
+	                <option value=''></option>
+	                <option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.HOURS_FROM_NOW%>'><%=bundle.getString("lb_hours_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.DAYS_FROM_NOW%>'><%=bundle.getString("lb_days_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.WEEKS_FROM_NOW%>'><%=bundle.getString("lb_weeks_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.MONTHS_FROM_NOW%>'><%=bundle.getString("lb_months_from_now")%></option>
+	            </select>
+	          </td>
+	          </tr>
+	          <tr>
+	          <td class="standardText" >
+	            <%=bundle.getString("lb_estimated_completion_date")%>&nbsp;<%=bundle.getString("lb_range")%>:
+	          </td>
+	          <td class="standardText"  nowrap>
+	            <%=bundle.getString("lb_starts")%>:
+	            <input type="text" id="completionStartFilter" name="<%=completionStart%>" size="3" maxlength="9">
+	            <select id="completionStartOptionsFilter" name="<%=completionStartOptions%>">
+	                <option value=''></option>
+	                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.HOURS_FROM_NOW%>'><%=bundle.getString("lb_hours_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.DAYS_FROM_NOW%>'><%=bundle.getString("lb_days_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.WEEKS_FROM_NOW%>'><%=bundle.getString("lb_weeks_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.MONTHS_FROM_NOW%>'><%=bundle.getString("lb_months_from_now")%></option>
+	            </select>
+	            <%=bundle.getString("lb_ends")%>:
+	            <input type="text" id="completionEndFilter" name="<%=completionEnd%>" size="3" maxlength="9">
+	            <select id="completionEndOptionsFilter" name="<%=completionEndOptions%>" onChange="checkNow(this, dateForm.<%=completionEnd%>)">
+	                <option value=''></option>
+	                <option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+	                <option value='<%=SearchCriteriaParameters.HOURS_FROM_NOW%>'><%=bundle.getString("lb_hours_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.DAYS_FROM_NOW%>'><%=bundle.getString("lb_days_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.WEEKS_FROM_NOW%>'><%=bundle.getString("lb_weeks_from_now")%></option>
+	                <option value='<%=SearchCriteriaParameters.MONTHS_FROM_NOW%>'><%=bundle.getString("lb_months_from_now")%></option>
+	            </select>
+	          </td>
+	          <td><input id="searchTaskSimple" class="searchTask" type="button" value="Search"/></td>
+        	</tr>
+        </table>
+        </form>
     </div>
-    <br>
     <!-- Page bar -->
     <div class="pagebar">
         <div align="right" class="standardText pageNavBar">
@@ -277,7 +438,16 @@
                     </tr>
                     <tr class="tableHeadingFilter">
                         <th class="smallCell">&nbsp;</th>
-                        <th class="smallCell">&nbsp;</th>
+                        <th class="smallCell">
+                       		<select id="priorityFilter" class="filterSelect">
+		                        <option value=''></option>
+				                <option value='1'>1</option>
+				                <option value='2'>2</option>
+				                <option value='3'>3</option>
+				                <option value='4'>4</option>
+				                <option value='5'>5</option>
+	                        </select>
+                        </th>
                         <th class="smallCell">&nbsp;</th>
                         <th class="jobIdItem" nowrap>
 	                        <select id="jobIdOption">

@@ -61,6 +61,7 @@ import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.ConditionNodeTargetInfo;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowProcessAdapter;
@@ -121,11 +122,21 @@ public class AmbassadorHelper extends AbstractWebService
             + " AND jd.classname_ = 'com.globalsight.everest.workflow.WorkflowAssignment'";
 
 
-    private static String QUERY_TASK_ISSKIP_SQL=
-    	"SELECT instance.id_ FROM jbpm_task jt, jbpm_taskinstance instance"
-    	+ " WHERE jt.id_ = instance.task_ "
-    	+ " AND jt.tasknode_ = ";
+	private static String QUERY_TASK_ISSKIP_SQL = "SELECT instance.id_ FROM jbpm_task jt, jbpm_taskinstance instance"
+			+ " WHERE jt.id_ = instance.task_ " + " AND jt.tasknode_ = ";
 
+	private static String QUERY_PROCESSDEFINITION_SQL = "SELECT DISTINCT node.processdefinition_ FROM workflow wf, task_info ti, jbpm_node node "
+			+ "WHERE wf.job_id = ? AND wf.iflow_instance_id = ti.workflow_id AND ti.task_id = node.id_ ";
+
+	private static String QUERY_JBPM_NODE_SQL = "SELECT node.ID_,node.CLASS_,node.NAME_,node.PROCESSDEFINITION_  "
+			+ "FROM jbpm_node node WHERE node.processdefinition_ IN ";
+
+	private static String QUERY_JBPM_TRANSITION_SQL = "SELECT tran.NAME_,tran.FROM_,tran.TO_,tran.PROCESSDEFINITION_ " 
+			+ "FROM jbpm_transition tran WHERE tran.processdefinition_ IN ";
+
+	private static String QUERY_WORKFLOW_NAME_SQL = "SELECT DISTINCT wf.IFLOW_INSTANCE_ID, def.name_ AS workflowName "
+			+ "FROM workflow wf, task_info ti, jbpm_node node, jbpm_processdefinition def WHERE wf.iflow_instance_id = ti.workflow_id AND ti.task_id = node.id_ AND node.PROCESSDEFINITION_ = def.id_ AND wf.job_id = ?";
+	
     protected static boolean isSkippedTask(long taskId)
     {
         Connection con = null;
@@ -292,6 +303,224 @@ public class AmbassadorHelper extends AbstractWebService
         return availablTaskAssigneeMap;
     }
 
+	protected static List<Long> getProcessdefintion(long jobId)
+	{
+		List<Long> returnList = new ArrayList<Long>();
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try
+		{
+			con = DbUtil.getConnection();
+			ps = con.prepareStatement(QUERY_PROCESSDEFINITION_SQL);
+			ps.setLong(1, jobId);
+			rs = ps.executeQuery();
+
+			if (rs == null)
+			{
+				return returnList;
+			}
+			while (rs.next())
+			{
+				returnList.add(rs.getLong(1));
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Error when get processdefintion.", e);
+		}
+		finally
+		{
+			DbUtil.silentClose(rs);
+			DbUtil.silentClose(ps);
+			DbUtil.silentReturnConnection(con);
+		}
+		return returnList;
+	}
+	
+	protected static Map<Long,TaskJbpmNode> getTaskJbpmNode(
+			List<Long> processdefinitionList)
+	{
+		Map<Long, TaskJbpmNode> jbpmNodeMap = new HashMap<Long, TaskJbpmNode>();
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try
+		{
+			String sql = QUERY_JBPM_NODE_SQL
+					+ toInClause(processdefinitionList);
+			con = DbUtil.getConnection();
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+
+			if (rs == null)
+			{
+				return null;
+			}
+			while (rs.next())
+			{
+				TaskJbpmNode node = new TaskJbpmNode();
+				node.setNodeId(rs.getLong(1));
+				node.setNodeClass(rs.getString(2));
+				node.setNodeName(rs.getString(3));
+				node.setProcessDefinition(rs.getLong(4));
+				jbpmNodeMap.put(node.getNodeId(), node);
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Error when get processdefintion.", e);
+		}
+		finally
+		{
+			DbUtil.silentClose(rs);
+			DbUtil.silentClose(ps);
+			DbUtil.silentReturnConnection(con);
+		}
+
+		return jbpmNodeMap;
+	}
+	
+	protected static Map<Long,List<TaskJbpmTransition>> getTaskJbpmTransition(
+			List<Long> processdefinitionList)
+	{
+		List<TaskJbpmTransition> jbpmTranList = new ArrayList<TaskJbpmTransition>();
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try
+		{
+			String sql = QUERY_JBPM_TRANSITION_SQL
+					+ toInClause(processdefinitionList);
+			con = DbUtil.getConnection();
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+
+			if (rs == null)
+			{
+				return null;
+			}
+			while (rs.next())
+			{
+				TaskJbpmTransition tran = new TaskJbpmTransition();
+				tran.setName(rs.getString(1));
+				tran.setFrom(rs.getLong(2));
+				tran.setTo(rs.getLong(3));
+				tran.setProcessDefinition(rs.getLong(4));
+				jbpmTranList.add(tran);
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Error when get processdefintion.", e);
+		}
+		finally
+		{
+			DbUtil.silentClose(rs);
+			DbUtil.silentClose(ps);
+			DbUtil.silentReturnConnection(con);
+		}
+
+		Map<Long, List<TaskJbpmTransition>> map = new HashMap<Long, List<TaskJbpmTransition>>();
+		for (int i = 0; i < jbpmTranList.size(); i++)
+		{
+			List<TaskJbpmTransition> tranList = new ArrayList<TaskJbpmTransition>();
+			long from = jbpmTranList.get(i).getFrom();
+			if (map.containsKey(from))
+			{
+				tranList = map.get(from);
+				tranList.add(jbpmTranList.get(i));
+				map.put(from, tranList);
+			}
+			else
+			{
+				tranList.add(jbpmTranList.get(i));
+				map.put(from, tranList);
+			}
+		}
+		return map;
+	}
+	
+	protected static List<ConditionNodeTargetInfo> getConditionNodeTargetInfo(
+			long toParam, Map<Long, TaskJbpmNode> nodeMap,
+			Map<Long, List<TaskJbpmTransition>> tranMap,
+			List<ConditionNodeTargetInfo> conList)
+	{
+		List<TaskJbpmTransition> toList = new ArrayList<TaskJbpmTransition>();
+		// get 'from' and 'to' value
+		if (tranMap.containsKey(toParam))
+		{
+			toList = tranMap.get(toParam);
+		}
+
+		for (int i = 0; i < toList.size(); i++)
+		{
+			String arrowName = toList.get(i).getName();
+			long to = toList.get(i).getTo();
+			// According 'to' judge this node
+			if (nodeMap.containsKey(to))
+			{
+				TaskJbpmNode node = nodeMap.get(to);
+				String nodeClass = node.getNodeClass();
+				String name = node.getNodeName();
+				// Node
+				if (nodeClass.equals("K"))
+				{
+					name = subString(name);
+					conList.add(new ConditionNodeTargetInfo(arrowName, name));
+				}
+				// Condition Node
+				else if (nodeClass.equals("D"))
+				{
+					conList = getConditionNodeTargetInfo(to, nodeMap, tranMap,
+							conList);
+				}
+				// Exit
+				else if (nodeClass.equals("E"))
+				{
+					name = "Exit";
+					conList.add(new ConditionNodeTargetInfo(arrowName, name));
+				}
+				// Start
+				else if (nodeClass.equals("R"))
+				{
+				}
+			}
+		}
+		return conList;
+	}
+	
+	protected static Map<Long, String> getWorkflowName(long jobId)
+	{
+		Map<Long, String> map = new HashMap<Long, String>();
+
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try
+		{
+			con = DbUtil.getConnection();
+			ps = con.prepareStatement(QUERY_WORKFLOW_NAME_SQL);
+			ps.setLong(1, jobId);
+			rs = ps.executeQuery();
+
+			while (rs.next())
+			{
+				map.put(rs.getLong(1), rs.getString(2));
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Error when get processdefintion.", e);
+		}
+		finally
+		{
+			DbUtil.silentClose(rs);
+			DbUtil.silentClose(ps);
+			DbUtil.silentReturnConnection(con);
+		}
+		return map;
+	}
     /**
      * For "jbpm_delegation" table "configuration_" column "sequence",
      * "activity" and "role_name" tags.
@@ -448,7 +677,111 @@ public class AmbassadorHelper extends AbstractWebService
             this.configuration = configuration;
         }
     }
+   
+	static class TaskJbpmNode
+	{
+		private long nodeId = -1;
+		private String nodeClass = null;
+		private String nodeName = null;
+		private long processDefinition = -1;
 
+		public long getNodeId()
+		{
+			return nodeId;
+		}
+
+		public void setNodeId(long nodeId)
+		{
+			this.nodeId = nodeId;
+		}
+
+		public String getNodeClass()
+		{
+			return nodeClass;
+		}
+
+		public void setNodeClass(String nodeClass)
+		{
+			this.nodeClass = nodeClass;
+		}
+
+		public String getNodeName()
+		{
+			return nodeName;
+		}
+
+		public void setNodeName(String nodeName)
+		{
+			this.nodeName = nodeName;
+		}
+
+		public long getProcessDefinition()
+		{
+			return processDefinition;
+		}
+
+		public void setProcessDefinition(long processDefinition)
+		{
+			this.processDefinition = processDefinition;
+		}
+	}
+	
+	static class TaskJbpmTransition{
+		private long id = -1;
+		private String name = null;
+		private long processDefinition = -1;
+		private long from = -1;
+		private long to = -1;
+		private long fromIndex = -1;
+		public long getId()
+		{
+			return id;
+		}
+		public void setId(long id)
+		{
+			this.id = id;
+		}
+		public String getName()
+		{
+			return name;
+		}
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+		public long getProcessDefinition()
+		{
+			return processDefinition;
+		}
+		public void setProcessDefinition(long processDefinition)
+		{
+			this.processDefinition = processDefinition;
+		}
+		public long getFrom()
+		{
+			return from;
+		}
+		public void setFrom(long from)
+		{
+			this.from = from;
+		}
+		public long getTo()
+		{
+			return to;
+		}
+		public void setTo(long to)
+		{
+			this.to = to;
+		}
+		public long getFromIndex()
+		{
+			return fromIndex;
+		}
+		public void setFromIndex(long fromIndex)
+		{
+			this.fromIndex = fromIndex;
+		}
+	}
     /**
      * Create new user
      * 
@@ -1527,4 +1860,69 @@ public class AmbassadorHelper extends AbstractWebService
         // do nothing
     }
 
+    private static String subString(String name)
+    {
+    	if(name == null)
+    		return null;
+    	
+    	String[] nameStr = name.split("_");
+    	StringBuffer buffer = new StringBuffer();
+    	for(int i=2;i<nameStr.length;i++){
+    		buffer.append(nameStr[i]);
+    		buffer.append("_");
+    	}
+    	String returnStr = null;
+    	if(buffer.toString().endsWith("_")){
+    		returnStr = buffer.toString().substring(0, buffer.toString().lastIndexOf("_"));
+    	}
+    	return returnStr;
+    }
+
+    private static String toInClause(List<?> list)
+    {
+        StringBuilder in = new StringBuilder();
+        if (list.size() == 0)
+            return "(0)";
+        
+        in.append("(");
+        for (Object o : list)
+        {
+            if (o instanceof List)
+            {
+                if (((List) o).size() == 0)
+                    continue;
+                
+                for (Object id : (List<?>) o)
+                {
+                    if (id instanceof String)
+                    {
+                        in.append("'");
+                        in.append(((String) id).replace("\'", "\\\'"));
+                        in.append("'");
+                    }
+                    else
+                    {
+                        in.append(id);
+                    }
+                    in.append(",");
+                }
+            }
+            else if (o instanceof String)
+            {
+                in.append("'");
+                in.append(((String) o).replace("\'", "\\\'"));
+                in.append("'");
+                in.append(",");
+            }
+            else
+            {
+                in.append(o);
+                in.append(",");
+            }
+        }
+        in.deleteCharAt(in.length() - 1);
+        in.append(")");
+
+        return in.toString();
+    }
 }

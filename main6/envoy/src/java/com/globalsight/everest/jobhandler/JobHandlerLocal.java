@@ -2719,7 +2719,8 @@ public class JobHandlerLocal implements JobHandler
     {
         if (StringUtil.isEmpty(p_companyId))
             return null;
-        p_offset = p_offset < 1 ? 0 : p_offset - 1;
+        if(p_offset < 1)
+        	p_offset = 0;
         p_count = p_count <= 0 ? 1 : p_count;
 
         Collection<JobImpl> results = null;
@@ -2771,7 +2772,8 @@ public class JobHandlerLocal implements JobHandler
     {
         if (StringUtil.isEmpty(p_companyId))
             return null;
-        p_offset = p_offset < 1 ? 0 : p_offset - 1;
+        if(p_offset < 1)
+        	p_offset = 0;
         p_count = p_count <= 0 ? 1 : p_count;
 
         Collection<JobImpl> results = null;
@@ -2790,6 +2792,61 @@ public class JobHandlerLocal implements JobHandler
             {
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(Long.parseLong(p_companyId));
+            }
+            sb.append(" ORDER BY j.ID");
+            if (p_isDescOrder)
+                sb.append(" DESC");
+            else
+                sb.append(" ASC");
+
+            sb.append(" LIMIT ").append(p_offset).append(",").append(p_count);
+            c_category.debug("The query is " + sb.toString());
+
+            results = HibernateUtil.searchWithSql(JobImpl.class, sb.toString());
+
+            if (results != null && results.size() > 0)
+            {
+                ids = new String[results.size()];
+                int index = 0;
+                for (JobImpl job : results)
+                {
+                    ids[index++] = String.valueOf(job.getId());
+                }
+            }
+
+            return ids;
+        }
+        catch (Exception e)
+        {
+            c_category.error(e.getMessage(), e);
+            throw new JobException(e);
+        }
+    }
+    
+    public String[] getJobIdsByCreator(long p_companyId, String p_creatorUserId,
+            int p_offset, int p_count, boolean p_isDescOrder)
+            throws RemoteException, JobException
+    {
+        if(p_offset < 1)
+        	p_offset = 0;
+        p_count = p_count <= 0 ? 1 : p_count;
+
+        Collection<JobImpl> results = null;
+        String[] ids = null;
+
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT j.* FROM Job j WHERE 1=1");
+            if (!StringUtil.isEmpty(p_creatorUserId))
+            {
+                sb.append(" AND j.CREATE_USER_ID = ('").append(p_creatorUserId)
+                        .append("')");
+            }
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(p_companyId)))
+            {
+                sb.append(" AND j.COMPANY_ID = ");
+                sb.append(p_companyId);
             }
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)

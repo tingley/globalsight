@@ -147,10 +147,28 @@ function buttonManagement()
     if (count == 1)
     {
         $("#idRemove").attr("disabled", false);
+        $("#idStatistics").attr("disabled", false);
+        $("#idIndexes").attr("disabled", false);
+        $("#idClone").attr("disabled", false);
+        $("#idBrowse").attr("disabled", false);
+        $("#idImport").attr("disabled", false); 
+        $("#idExport").attr("disabled", false); 
+        $("#idMaintenance").attr("disabled", false); 
+        $("#idInputModels").attr("disabled", false); 
+        $("#idUsers").attr("disabled", false); 
     }
     else
     {
         $("#idRemove").attr("disabled", true);
+        $("#idStatistics").attr("disabled", true);
+        $("#idIndexes").attr("disabled", true);
+        $("#idClone").attr("disabled", true);
+        $("#idBrowse").attr("disabled", true);
+        $("#idImport").attr("disabled", true); 
+        $("#idExport").attr("disabled", true); 
+        $("#idMaintenance").attr("disabled", true); 
+        $("#idInputModels").attr("disabled", true); 
+        $("#idUsers").attr("disabled", true); 
     }
 }
 

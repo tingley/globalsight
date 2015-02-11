@@ -79,7 +79,15 @@ public class WorksheetUtil
 	
 	private boolean canMergeAsSame(Node node1, Node node2)
 	{
-		if (!node2.equals(node1.getNextSibling()))
+	    Node next = node1;
+        while(true)
+        {
+            next = next.getNextSibling();
+            if (next == null || next.getNodeType() != Node.TEXT_NODE)
+                break;
+        }
+        
+		if (!node2.equals(next))
 			return false;
 		
 		Node n1 = util.getNode(node1, "rPr", false);
@@ -114,7 +122,15 @@ public class WorksheetUtil
 	
 	private boolean canMerge(Node n1, Node n2)
 	{
-		if (!n2.equals(n1.getNextSibling()))
+	    Node next = n1;
+	    while(true)
+	    {
+	        next = next.getNextSibling();
+	        if (next == null || next.getNodeType() != Node.TEXT_NODE)
+	            break;
+	    }
+	    
+		if (!n2.equals(next))
 			return false;
 		
 		return isSameAtt(n1, n2);
@@ -256,16 +272,6 @@ public class WorksheetUtil
 			    if (style != null){
 			        continue;
 			    }
-			    
-			    // record the order of the attribute.
-			    Element attce = (Element) attc;
-			    Node previous = attce.getPreviousSibling();
-			    String pName = previous == null ? "null" : previous.getNodeName();
-			    attce.setAttribute("gs-Previous", pName);
-			    
-			    Node next = attce.getNextSibling();
-                String pName2 = next == null ? "null" : next.getNodeName();
-                attce.setAttribute("gs-next", pName2);
 			    
 				ec.appendChild(attc);
 			}

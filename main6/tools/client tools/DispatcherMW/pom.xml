@@ -141,6 +141,11 @@
     		<artifactId>jdom2</artifactId>
     		<version>2.0.5</version>
 		</dependency>
+		<dependency>										<!-- jdom2 Dependency -->
+			<groupId>jaxen</groupId>
+			<artifactId>jaxen</artifactId>
+			<version>1.1.6</version>
+		</dependency>
 		<dependency>										<!-- dom4j -->
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>

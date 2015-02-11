@@ -1132,6 +1132,12 @@ public class WordExtractor extends AbstractExtractor
     	if (!"w:r".equals(node.getNodeName()))
     		return false;
     	
+    	//w:webHidden
+        if (util.getNode(node, "gs-hidden-mark", false) != null)
+        {
+            return true;
+        }
+    	
 		Node rPr = util.getNode(node, "w:rPr", false);
 		if (rPr != null)
 		{
@@ -1142,12 +1148,12 @@ public class WordExtractor extends AbstractExtractor
 			}
 			
 			// w:vanish
-			if (!isHiddenTextTranslate())
-			{
-				Node vanish = util.getNode(rPr, "w:vanish", false);
-				if (vanish != null)
-					return true;
-			}
+//			if (!isHiddenTextTranslate())
+//			{
+//				Node vanish = util.getNode(rPr, "w:vanish", false);
+//				if (vanish != null)
+//					return true;
+//			}
 			
 			// unCharStyles
 			List<String> unchar = getUnchars();

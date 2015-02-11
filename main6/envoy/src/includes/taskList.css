@@ -19,6 +19,7 @@
 .sourceLocaleItem, .targetLocaleItem {text-align:left;cursor:pointer}
 .activityItem{text-align:left;cursor:pointer}
 .assigneeItem,.taskStatusItem,.companyItem {width:100px;text-align:left;}
+.assigneesField{padding-bottom: 5px; padding-top: 5px;}
 .ecdItem {text-align:left;}
 .list table {border:0px; color: #0c1476; }
 .smallCell {text-align: center; padding-left: 3px; padding-right: 3px}

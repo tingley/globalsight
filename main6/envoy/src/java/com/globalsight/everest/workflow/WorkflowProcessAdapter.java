@@ -1890,7 +1890,8 @@ public class WorkflowProcessAdapter extends WorkflowHelper
             Transition transition = new Transition(name);
             transition.setFrom(p_sourceNode);
             transition.setTo(p_targetNode);
-
+            transition.setProcessDefinition(p_targetNode.getProcessDefinition());
+            
             p_sourceNode.addLeavingTransition(transition);
             p_targetNode.addArrivingTransition(transition);
 

@@ -13,7 +13,7 @@ JSPFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:150' maxlength='"+maxFilterNameLength+"' id='jspFilterName' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<td><input type='text' style='width:150' maxlength='"+maxFilterNameLength+"' id='jspFilterName' value='" + this.filter.filterName + "'></input>");
 	str.append("<br/></td></tr>");
 	str.append("<tr><td><label style='width:40' class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
@@ -105,6 +105,7 @@ JSPFilter.prototype.showDialog = function ()
 function saveJSPFilter()
 {
 	var check = new Validate();
+	var isNew = (saveJSPFilter.edit) ? "false" : "true";
 	var filterName = document.getElementById("jspFilterName").value;
 	if(check.isEmptyStr(filterName))
 	{
@@ -126,16 +127,9 @@ function saveJSPFilter()
 	var filterDesc = document.getElementById("jspDesc").value;
 	var addAdditionalHead = document.getElementById("addAdditionalHead").checked;
 	var isEscapeEntity = document.getElementById("isEscapeEntity").checked;
-	var obj = {filterId : saveJSPFilter.filterId, filterTableName:"jsp_filter", filterName:filterName, filterDesc:filterDesc, isAdditionalHeadAdded:addAdditionalHead, isEscapeEntity:isEscapeEntity, companyId:companyId};
-	if(saveJSPFilter.edit)
-	{
-		closePopupDialog("jspFilterDialog");
-		sendAjax(obj, "updateJSPFilter", "updateJSPFilterCallback");
-	}
-	else
-	{
-		sendAjax(obj, "checkExist", "checkExistJSPFilterCallback");
-	}
+	var obj = {isNew : isNew, filterId : saveJSPFilter.filterId, filterTableName:"jsp_filter", filterName:filterName, filterDesc:filterDesc, isAdditionalHeadAdded:addAdditionalHead, isEscapeEntity:isEscapeEntity, companyId:companyId};
+
+	sendAjax(obj, "checkExist", "checkExistJSPFilterCallback");
 	
 	checkExistJSPFilterCallback.obj = obj;
 }
@@ -166,11 +160,18 @@ function checkExistJSPFilterCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("jspFilterDialog");
-		sendAjax(checkExistJSPFilterCallback.obj, "saveJSPFilter", "saveJSPFilterCallback");
+		if(saveJSPFilter.edit)
+		{
+			sendAjax(checkExistJSPFilterCallback.obj, "updateJSPFilter", "updateJSPFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistJSPFilterCallback.obj, "saveJSPFilter", "saveJSPFilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistJSPFilterCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 function saveJSPFilterCallback(data)

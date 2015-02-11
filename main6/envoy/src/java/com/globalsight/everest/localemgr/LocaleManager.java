@@ -67,8 +67,8 @@ public interface LocaleManager
      *                System or network related exception
      */
     void addSourceTargetLocalePair(GlobalSightLocale p_source,
-            GlobalSightLocale p_target) throws LocaleManagerException,
-            RemoteException;
+            GlobalSightLocale p_target, long companyId)
+            throws LocaleManagerException, RemoteException;
 
     /**
      * Get all the locales which are the source locale in all the source/target

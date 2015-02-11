@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -342,15 +343,17 @@ public class StandardExtractor
 
         return e;
     }
-    
+
     private ExcelExtractor createExcelExtractor()
     {
         ExcelExtractor e = new ExcelExtractor();
         e.addOptions("m_xlsx_numStyleIds", m_xlsx_numStyleIds);
         e.addOptions("m_xlsx_hiddenSharedSI", m_xlsx_hiddenSharedSI);
-        e.addOptions("m_xlsx_unextractableCellStyles", m_xlsx_unextractableCellStyles);
+        e.addOptions("m_xlsx_unextractableCellStyles",
+                m_xlsx_unextractableCellStyles);
         e.addOptions("isHeaderFooterTranslate", m_isHeaderFooterTranslate);
-        
+        e.addOptions("m_xlsx_sheetHiddenCell", m_xlsx_sheetHiddenCell);
+
         return e;
     }
 
@@ -452,6 +455,13 @@ public class StandardExtractor
                 ExcelExtractor extractor = createExcelExtractor();
                 diplomat.setExtractor(extractor);
             }
+        }
+
+        // For "indd", "inx" and "idml" files, use original xml "Extractor".
+        if (fp != null && getKnowFormatTypeIdsForIndd().contains(fp.getKnownFormatTypeId()))
+        {
+            AbstractExtractor extractor = new com.globalsight.ling.docproc.extractor.xml.Extractor();
+            diplomat.setExtractor(extractor);
         }
 
         if (m_ruleFile != null)
@@ -1015,7 +1025,6 @@ public class StandardExtractor
             String numRule = createRuleForExcelNumber();
             String headerFooterRule = createRuleForHeaderFooter();
             String toolTipsRule = createRuleForToolTips();
-            String hiddenTextRule = createRuleForHiddenText();
             String unextractableExcelCellStyleTextRule = createRuleForUnextractableExcelCell();
             String tableOfContentRule = createRuleForTableOfContent();
 
@@ -1025,7 +1034,6 @@ public class StandardExtractor
             result.append(headerFooterRule != null ? headerFooterRule : "");
             result.append(toolTipsRule != null ? toolTipsRule : "");
             result.append(tableOfContentRule != null ? tableOfContentRule : "");
-            result.append(hiddenTextRule != null ? hiddenTextRule : "");
             result.append(unextractableExcelCellStyleTextRule != null ? unextractableExcelCellStyleTextRule
                     : "");
 
@@ -1397,39 +1405,6 @@ public class StandardExtractor
             rule.append("\r\n");
             rule.append("</ruleset>");
             rule.append("\r\n");
-        }
-
-        return rule.toString();
-    }
-
-    /**
-     * Creates rules for docx 2010 and excel 2010 not to extract hidden text.
-     * <p>
-     * for GBS-2554
-     */
-    private String createRuleForHiddenText()
-    {
-        StringBuffer rule = new StringBuffer();
-        if (m_isHiddenTextTranslate != null
-                && !Boolean.parseBoolean(m_isHiddenTextTranslate))
-        {
-            // this is rule for docx hidden text
-            rule.append("\r\n");
-            rule.append("<ruleset schema=\"w:document\">");
-            rule.append("\r\n");
-            rule.append("<dont-translate path='//w:vanish/ancestor::w:r'/>");
-            rule.append("\r\n");
-            rule.append("<dont-translate path='//w:vanish/ancestor::w:r//*'/>");
-            rule.append("\r\n");
-            rule.append("</ruleset>");
-            rule.append("\r\n");
-            // this is rule for excel hidden text
-            // String ruleForExcelCell = createRuleForExcelHiddenSheetCell();
-            // rule.append(ruleForExcelCell != null ? ruleForExcelCell : "");
-            // String ruleForExcelSharedXml =
-            // createRuleForExcelHiddenSharedXml();
-            // rule.append(ruleForExcelSharedXml != null ? ruleForExcelSharedXml
-            // : "");
         }
 
         return rule.toString();
@@ -2094,4 +2069,25 @@ public class StandardExtractor
         return pStr;
     }
 
+    /**
+     * "indd", "inx" and "idml" should use original "Extractor" for XML-based
+     * files.
+     */
+    private static Set<Long> getKnowFormatTypeIdsForIndd()
+    {
+        Set<Long> ids = new HashSet<Long>();
+
+        ids.add(31L);//INDD (CS2)
+        ids.add(32L);//Illustrator
+        ids.add(36L);//INDD (CS3)
+        ids.add(37L);//INX (CS2)
+        ids.add(38L);//INX (CS3)
+        ids.add(40L);//INDD (CS4)
+        ids.add(47L);//INDD (CS5)
+        ids.add(52L);//INDD (CS5.5)
+
+        ids.add(46L);//InDesign Markup (IDML)
+
+        return ids;
+    }
 }

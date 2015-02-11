@@ -41,6 +41,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterMapping;
@@ -941,7 +943,7 @@ public class FilterConfigurationImportHandler extends PageHandler
 									.parseLong(postFilterTableID)))
 					{
 						String newconfigXmlStr = xmlFilterConfigParser
-								.documentToStr("elementPostFilterId", String
+								.getNewConfigXmlStr("elementPostFilterId", String
 										.valueOf(htmlFilterIdMap.get(Long
 												.parseLong(postFilterTableID))));
 						xmlRuleFilter.setConfigXml(newconfigXmlStr);
@@ -953,7 +955,7 @@ public class FilterConfigurationImportHandler extends PageHandler
 									.parseLong(postFilterTableID)))
 					{
 						String newconfigXmlStr = xmlFilterConfigParser
-								.documentToStr("elementPostFilterId", String
+								.getNewConfigXmlStr("elementPostFilterId", String
 										.valueOf(javaScriptFilterIdMap.get(Long
 												.parseLong(postFilterTableID))));
 						xmlRuleFilter.setConfigXml(newconfigXmlStr);
@@ -971,7 +973,7 @@ public class FilterConfigurationImportHandler extends PageHandler
 									.parseLong(cdataPostFilterID)))
 					{
 						String newconfigXmlStr = xmlFilterConfigParser
-								.documentToStr("cdataPostFilterId", String
+								.getNewConfigXmlStr("cdataPostFilterId", String
 										.valueOf(htmlFilterIdMap.get(Long
 												.parseLong(cdataPostFilterID))));
 						xmlRuleFilter.setConfigXml(newconfigXmlStr);
@@ -983,12 +985,16 @@ public class FilterConfigurationImportHandler extends PageHandler
 									.parseLong(cdataPostFilterID)))
 					{
 						String newconfigXmlStr = xmlFilterConfigParser
-								.documentToStr("cdataPostFilterId", String
+								.getNewConfigXmlStr("cdataPostFilterId", String
 										.valueOf(javaScriptFilterIdMap.get(Long
 												.parseLong(cdataPostFilterID))));
 						xmlRuleFilter.setConfigXml(newconfigXmlStr);
 					}
-
+					
+					//cdataPostfilterTags
+					String newConfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(htmlFilterIdMap);
+					xmlRuleFilter.setConfigXml(newConfigXmlStr);
+					
 					// store data to database
 					HibernateUtil.save(xmlRuleFilter);
 					addMessage("<b>" + newFilterName

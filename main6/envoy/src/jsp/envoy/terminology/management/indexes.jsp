@@ -374,7 +374,7 @@ function parseDefinition()
     isIndexing = true;
   }
 
-  idTermbaseName.innerHTML = termbaseName;
+  idTermbaseName.innerHTML = "<%=str_tbname%>";
   idIndexingStatus.innerHTML = isIndexing ? "<%=bundle.getString("lb_building")%>" : "<%=bundle.getString("lb_built")%>";
   
   // Read languages from the database definition

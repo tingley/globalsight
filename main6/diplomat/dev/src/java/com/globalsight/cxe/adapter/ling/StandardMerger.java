@@ -229,98 +229,18 @@ public class StandardMerger implements IFormatNames
 
     private String fixGxml(String p_mergeResult) throws Exception
     {
-        boolean isXmlLoc = m_cxeMessage.getMessageType().getValue() == CxeMessageType.XML_LOCALIZED_EVENT;
+        // Do not fix GXML for HTML, this is because if we replace consecutive
+        // "&nbsp;" with " ", it will cause HTML formatting error.
         if (m_cxeMessage.getMessageType().getValue() != CxeMessageType.HTML_LOCALIZED_EVENT)
         {
-            // GlobalSight doesn't process "&nbsp;" and "&nbsp" which will cause
-            // XML displaying error.
-            // Accordingly replace "&nbsp;" and "&nbsp" with " ".
-            // Note here if we replace consecutive "&nbsp;" with " ", it will
-            // cause HTML formatting error.
-            StringBuffer sb = new StringBuffer(p_mergeResult);
-            int pos1 = 0;
-            while (pos1 >= 0)
-            {
-                pos1 = sb.indexOf("&nbsp;", pos1);
-                if (m_logger.isDebugEnabled())
-                {
-                    m_logger.debug("The position of the &nbsp; in lam_merge.txt is: "
-                            + pos1);
-                }
-                if (pos1 > 0)
-                {
-                    if (isXmlLoc && isInXmlCdata(sb, pos1))
-                    {
-                        pos1 = pos1 + 1;
-                        continue;
-                    }
-
-                    sb.replace(pos1, pos1 + 6, " ");
-                }
-            }
-            int pos2 = 0;
-            while (pos2 >= 0)
-            {
-                pos2 = sb.indexOf("&nbsp", pos2);
-                if (m_logger.isDebugEnabled())
-                {
-                    m_logger.debug("The position of the &nbsp in lam_merge.txt is: "
-                            + pos2);                    
-                }
-                if (pos2 > 0)
-                {
-                    if (isXmlLoc && isInXmlCdata(sb, pos2))
-                    {
-                        pos2 = pos2 + 1;
-                        continue;
-                    }
-
-                    sb.replace(pos2, pos2 + 5, " ");
-                }
-            }
-            p_mergeResult = sb.toString();
+            // this follows the original logic.
+            p_mergeResult = fixGxml(p_mergeResult, "&nbsp;", " ");
+            p_mergeResult = fixGxml(p_mergeResult, "&nbsp", " ");
         }
-        if (m_formatType.equals(DiplomatAPI.FORMAT_WORD_HTML))
+
+        if (isWordHtml())
         {
-            if (p_mergeResult != null && !"".equals(p_mergeResult.trim()))
-            {
-                // Remove the tag <title>XX</title> in the gxml to resolve the
-                // Fragmented markup in RTF document results in empty export
-                // issue.
-                int startIndex = p_mergeResult.indexOf("<title>");
-                int endIndex = p_mergeResult.indexOf("</title>");
-
-                if (startIndex != -1 && endIndex != -1)
-                {
-                    int lengthOfEndTag = "</title>".length();
-                    String titleText = p_mergeResult.substring(startIndex,
-                            endIndex + lengthOfEndTag);
-                    p_mergeResult = StringUtil.replace(p_mergeResult,
-                            titleText, "");
-                }
-
-                // remove PicExportError in
-                // list-style-image:url("PicExportError");
-                startIndex = p_mergeResult.indexOf("<head>");
-                endIndex = p_mergeResult.indexOf("</head>");
-
-                if (startIndex != -1 && endIndex != -1)
-                {
-                    String headString = p_mergeResult.substring(startIndex,
-                            endIndex);
-
-                    if (headString
-                            .contains("list-style-image:url(\"PicExportError\");"))
-                    {
-                        String before = p_mergeResult.substring(0, startIndex);
-                        String end = p_mergeResult.substring(endIndex);
-                        headString = StringUtil.replace(headString,
-                                "list-style-image:url(\"PicExportError\");",
-                                "list-style-image:url(\"\");");
-                        p_mergeResult = before + headString + end;
-                    }
-                }
-            }
+            p_mergeResult = fixWordHtml(p_mergeResult);
         }
         if (isPowerPointHtml())
         {
@@ -334,12 +254,85 @@ public class StandardMerger implements IFormatNames
         {
             p_mergeResult = fixOfficeXml(p_mergeResult);
         }
+
         if (isRestoreInvalidUnicodeChar())
         {
             p_mergeResult = SegmentUtil
                     .restoreInvalidUnicodeChar(p_mergeResult);
         }
 
+        return p_mergeResult;
+    }
+
+    private String fixGxml(String p_mergeResult, String oldStr, String newStr)
+    {
+        StringBuffer sb = new StringBuffer(p_mergeResult);
+        int pos1 = 0;
+        while (pos1 >= 0)
+        {
+            pos1 = sb.indexOf(oldStr, pos1);
+
+            if (pos1 > 0)
+            {
+                // Do not change CDATA content in XML.
+                if (isXmlLocalizationEvent() && isInXmlCdata(sb, pos1))
+                {
+                    pos1 = pos1 + 1;
+                    continue;
+                }
+
+                sb.replace(pos1, pos1 + oldStr.length(), newStr);
+            }
+        }
+        return sb.toString();
+    }
+
+    private boolean isXmlLocalizationEvent()
+    {
+        return (m_cxeMessage.getMessageType().getValue() == CxeMessageType.XML_LOCALIZED_EVENT);
+    }
+
+    private String fixWordHtml(String p_mergeResult) throws Exception
+    {
+        if (p_mergeResult != null && !"".equals(p_mergeResult.trim()))
+        {
+            // Remove the tag <title>XX</title> in the gxml to resolve the
+            // Fragmented markup in RTF document results in empty export
+            // issue.
+            int startIndex = p_mergeResult.indexOf("<title>");
+            int endIndex = p_mergeResult.indexOf("</title>");
+
+            if (startIndex != -1 && endIndex != -1)
+            {
+                int lengthOfEndTag = "</title>".length();
+                String titleText = p_mergeResult.substring(startIndex, endIndex
+                        + lengthOfEndTag);
+                p_mergeResult = StringUtil
+                        .replace(p_mergeResult, titleText, "");
+            }
+
+            // remove PicExportError in
+            // list-style-image:url("PicExportError");
+            startIndex = p_mergeResult.indexOf("<head>");
+            endIndex = p_mergeResult.indexOf("</head>");
+
+            if (startIndex != -1 && endIndex != -1)
+            {
+                String headString = p_mergeResult.substring(startIndex,
+                        endIndex);
+
+                if (headString
+                        .contains("list-style-image:url(\"PicExportError\");"))
+                {
+                    String before = p_mergeResult.substring(0, startIndex);
+                    String end = p_mergeResult.substring(endIndex);
+                    headString = StringUtil.replace(headString,
+                            "list-style-image:url(\"PicExportError\");",
+                            "list-style-image:url(\"\");");
+                    p_mergeResult = before + headString + end;
+                }
+            }
+        }
         return p_mergeResult;
     }
 
@@ -883,6 +876,11 @@ public class StandardMerger implements IFormatNames
                 sr.close();
             }
         }
+    }
+
+    private boolean isWordHtml()
+    {
+        return FORMAT_WORD_HTML.equals(m_formatType);
     }
 
     private boolean isPowerPointHtml()

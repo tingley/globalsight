@@ -249,6 +249,10 @@ public class TTXParser
                 
                 String utTextNodeValue = utEle.getStringValue();
                 int index = utTextNodeValue.lastIndexOf(":");
+                if(index == -1)
+                {
+                	continue;
+                }
                 String utName = utTextNodeValue.substring(0, index).trim();
                 String utValue = utTextNodeValue.substring(index + 1).trim();
                 if (TTXConstants.GS_ENCODING.equalsIgnoreCase(attValue)

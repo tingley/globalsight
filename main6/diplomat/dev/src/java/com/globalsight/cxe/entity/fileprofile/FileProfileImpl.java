@@ -673,26 +673,19 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     {
         if (filterId < 1)
         {
-            return true;
+            return false;
         }
 
         try
         {
+            // TODO: Only "javaProperties" and "PO" filters are using secondary
+            // filter, and we should re-coding to use post filter way instead of
+            // this.
             Filter filter = FilterHelper.getFilter(filterTableName, filterId);
-
-            if (filter instanceof MSOfficeExcelFilter)
+            if (filter instanceof JavaPropertiesFilter
+                    || filter instanceof POFilter)
             {
-                return false;
-            }
-
-            if (filter instanceof MSOfficeDocFilter)
-            {
-                return false;
-            }
-
-            if (filter instanceof MSOfficePPTFilter)
-            {
-                return false;
+                return true;                
             }
         }
         catch (Exception e)
@@ -700,7 +693,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             s_logger.error(e.getMessage(), e);
         }
 
-        return true;
+        return false;
     }
 
     /**

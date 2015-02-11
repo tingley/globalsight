@@ -90,10 +90,20 @@ public class XMLRuleFilter implements Filter
         this.secondFilterTableName = secondFilterTableName;
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from XMLRuleFilter xr where xr.filterName =:filterName and xr.companyId=:companyId";
         Map map = new HashMap();
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from XMLRuleFilter xr where xr.id<>:filterId and xr.filterName =:filterName and xr.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
         map.put("filterName", filterName);
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;

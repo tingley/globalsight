@@ -22,7 +22,7 @@ PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFi
 	var str = new StringBuffer("<table border=0 width='400px'>");
 	str.append("<tr>");
 	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
-	str.append("<td><input type='text' style='width:100%' id='plaintextFilterName' maxlength='"+maxFilterNameLength+"' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<td><input type='text' style='width:100%' id='plaintextFilterName' maxlength='"+maxFilterNameLength+"' value='" + this.filter.filterName + "'></input>");
 	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
 	str.append("</tr>");
 	
@@ -106,6 +106,7 @@ PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 function savePlainTextFilter()
 {
 	var validate = new Validate();
+	var filterId = savePlainTextFilter.filterId;
 	var filterName = document.getElementById("plaintextFilterName").value;
 	if(validate.isEmptyStr(filterName))
 	{
@@ -135,12 +136,14 @@ function savePlainTextFilter()
 	var obj = {
 		isNew : isNew,
 		filterTableName : "plain_text_filter",
+		filterId : filterId,
 		filterName : filterName,
 		filterDesc : filterDesc,
 		filterId : savePlainTextFilter.filterId,
 		companyId : companyId,
 		baseFilterId : baseFilterId
 	};
+
 	// send for check
 	sendAjax(obj, "isFilterValid", "isPlainTextFilterValidCallback");
 	

@@ -30,7 +30,9 @@ public interface Filter
 
     String toJSON(long companyId);
 
-    boolean checkExists(String filterName, long companyId);
+    boolean checkExistsNew(String filterName, long companyId);
+    
+    boolean checkExistsEdit(long filterId, String filterName, long companyId);
 
     String getFilterTableName();
 

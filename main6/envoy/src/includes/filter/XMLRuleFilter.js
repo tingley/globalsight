@@ -192,7 +192,7 @@ XMLRuleFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	str.append(jsFilterName + ":");
 	str.append("</label>");
 	
-	str.append("<input type='text' style='width:340px' id='xmlRuleFilterName' maxlength='"+maxFilterNameLength+"' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<input type='text' style='width:340px' id='xmlRuleFilterName' maxlength='"+maxFilterNameLength+"' value='" + this.filter.filterName + "'></input>");
 	str.append("<br/>");
 	
 	str.append("<label class='specialFilter_dialog_label'>");
@@ -593,13 +593,9 @@ function isFilterValidCallback(data)
 			sendAjax(isFilterValidCallback.obj, "saveXmlRuleFilter", "saveXmlRuleFilterCallback");
 		}
 	}
-	else if (data == 'name_exists')
-	{
-		alert(existFilterName);
-	}
 	else
 	{
-		alert(data);
+		alert(existFilterName);
 	}
 }
 

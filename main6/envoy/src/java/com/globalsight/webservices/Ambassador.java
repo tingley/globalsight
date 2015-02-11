@@ -205,6 +205,7 @@ import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
 import com.globalsight.everest.workflowmanager.WorkflowPersistenceAccessor;
 import com.globalsight.importer.IImportManager;
 import com.globalsight.ling.common.URLEncoder;
+import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
@@ -252,6 +253,9 @@ import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.zip.ZipIt;
+import com.globalsight.everest.workflow.ConditionNodeTargetInfo;
+import com.globalsight.webservices.AmbassadorHelper.TaskJbpmNode;
+import com.globalsight.webservices.AmbassadorHelper.TaskJbpmTransition;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 import com.globalsight.webservices.attribute.AttributeUtil;
 import com.globalsight.webservices.attribute.Attributes;
@@ -405,6 +409,7 @@ public class Ambassador extends AbstractWebService
     // Whether the web service is installed
     private static boolean isWebServiceInstalled = false;
 
+    private XmlEntities xmlEncoder = new XmlEntities();
     /**
      * Check if the installation key for the WebService is correct
      * 
@@ -1435,6 +1440,19 @@ public class Ambassador extends AbstractWebService
         Vector targetLocales = (Vector) args.get("targetLocales");
         String priority = (String) args.get("priority");
         String attributesXml = (String) args.get("attributes");
+        if (filePaths != null && filePaths.size() > 0)
+        {
+            for (int i = 0; i < filePaths.size(); i++)
+            {
+                String filePath = (String) filePaths.get(i);
+                String extensionMsg = checkExtensionExisted(filePath);
+                if (extensionMsg != null)
+                {
+                    throw new WebServiceException(makeErrorXml(
+                            "createJobOnInitial", extensionMsg));
+                }
+            }
+        }
 
         FileProfilePersistenceManager fppm = null;
         String fpId = "";
@@ -1799,7 +1817,7 @@ public class Ambassador extends AbstractWebService
         String originalEncode = "";
         try
         {
-            originalEncode = ImportUtil.guessEncoding(file);
+            originalEncode = ImportUtil.guessEncodingByBom(file);
         }
         catch (IOException e)
         {
@@ -1867,6 +1885,41 @@ public class Ambassador extends AbstractWebService
         }
 
         return null;
+    }
+
+    private String checkExtensionExisted(String p_filePath)
+    {
+        if (p_filePath == null || p_filePath.trim().length() == 0)
+            return "filePath is null or empty";
+
+        try
+        {
+            String fileName = null;
+            String path = p_filePath.replace("\\", "/");
+            int index = path.lastIndexOf("/");
+            if (index > -1)
+            {
+                fileName = path.substring(index + 1);
+            }
+            else
+            {
+                fileName = path;
+            }
+
+            index = fileName.lastIndexOf(".");
+            if (index > -1)
+            {
+                String extension = fileName.substring(index + 1);
+                if (extension != null && extension.trim().length() > 0)
+                    return null;
+            }
+        }
+        catch (Exception ignore)
+        {
+            return null;
+        }
+
+        return "The file " + p_filePath + " has no extension.";
     }
 
     /**
@@ -2006,7 +2059,12 @@ public class Ambassador extends AbstractWebService
                 throw new WebServiceException(makeErrorXml("uploadFileForInitial",
                         jobNameValidation));
             }
-
+            String extensionMsg = checkExtensionExisted(filePath);
+            if (extensionMsg != null)
+            {
+                throw new WebServiceException(makeErrorXml("uploadFileForInitial",
+                        extensionMsg));
+            }
             String userName = this.getUsernameFromSession(accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
@@ -2336,6 +2394,8 @@ public class Ambassador extends AbstractWebService
                     .append(EditUtil.encodeXmlEntities(job.getJobName()))
                     .append("</name>\r\n");
             xml.append("\t<status>").append(status).append("</status>\r\n");
+			xml.append("\t<creator>").append(job.getCreateUser().getUserName())
+					.append("</creator>\r\n");
             xml.append("\t<createDate>").append(job.getCreateDate().toString())
                     .append("</createDate>\r\n");
             xml.append("\t<priority>").append(job.getPriority())
@@ -4159,6 +4219,12 @@ public class Ambassador extends AbstractWebService
                     p_jobId);
             Map<Long, String> taskAssignees = AmbassadorHelper
                     .getTaskAssigneesByJob(p_jobId);
+            List<Long> processdefintionList = AmbassadorHelper
+					.getProcessdefintion(p_jobId);
+            Map<Long,TaskJbpmNode>  jbpmNodeMap = AmbassadorHelper
+					.getTaskJbpmNode(processdefintionList);
+			Map<Long,List<TaskJbpmTransition>> jbpmTranMap = AmbassadorHelper
+					.getTaskJbpmTransition(processdefintionList);
             Object[] tasks = taskInfos == null ? null : taskInfos.toArray();
             int size = tasks == null ? -1 : tasks.length;
 
@@ -4166,9 +4232,14 @@ public class Ambassador extends AbstractWebService
 
             for (int i = 0; i < size; i++)
             {
+            	 List<ConditionNodeTargetInfo> conList = new ArrayList<ConditionNodeTargetInfo>();
                 Task ti = (Task) tasks[i];
                 String assignees = taskAssignees.get(ti.getId());
-                buildXmlForTask(xml, ti, "\t", connection, assignees);
+
+                conList = AmbassadorHelper
+						.getConditionNodeTargetInfo(ti.getId(),
+								jbpmNodeMap, jbpmTranMap,conList);
+                buildXmlForTask(xml, ti, "\t", connection, assignees,conList);
             }
             xml.append("</tasksInJob>\r\n");
             return xml.toString();
@@ -4294,19 +4365,30 @@ public class Ambassador extends AbstractWebService
                                 p_taskName, jobId, isReturnAssignees);
                         Map<Long, String> taskAssignees = AmbassadorHelper
                                 .getTaskAssigneesByJob(jobId);
+						List<Long> processdefintionList = AmbassadorHelper
+								.getProcessdefintion(jobId);
+						Map<Long,TaskJbpmNode>  jbpmNodeMap = AmbassadorHelper
+								.getTaskJbpmNode(processdefintionList);
+						Map<Long,List<TaskJbpmTransition>> jbpmTranMap = AmbassadorHelper
+								.getTaskJbpmTransition(processdefintionList);
                         Object[] tasks = taskInfos == null ? null : taskInfos
                                 .toArray();
                         int size = tasks == null ? -1 : tasks.length;
 
                         for (int i = 0; i < size; i++)
-                        {
-                            Task ti = (Task) tasks[i];
-                            String wfState = ti.getWorkflow().getState();
-                            if (Workflow.CANCELLED.equals(wfState))
-                                continue;
-                            String assignees = taskAssignees.get(ti.getId());
-                            buildXmlForTask(subXml, ti, "\t\t", connection, assignees);
-                        }
+						{
+							Task ti = (Task) tasks[i];
+							List<ConditionNodeTargetInfo> conList = new ArrayList<ConditionNodeTargetInfo>();
+							String wfState = ti.getWorkflow().getState();
+							if (Workflow.CANCELLED.equals(wfState))
+								continue;
+							conList = AmbassadorHelper
+									.getConditionNodeTargetInfo(ti.getId(),
+											jbpmNodeMap, jbpmTranMap, conList);
+							String assignees = taskAssignees.get(ti.getId());
+							buildXmlForTask(subXml, ti, "\t\t", connection,
+									assignees, conList);
+						}
 
                         subXml.append("\t</job>\r\n");
                     }
@@ -4497,7 +4579,26 @@ public class Ambassador extends AbstractWebService
                             + userName
                             + "' is not an available assignee for current task "
                             + p_taskId;
-                    logger.error(message);
+                    logger.warn(message);
+                    message = makeErrorXml("completeTask", message);
+                    throw new WebServiceException(message);
+                }
+            }
+
+            Vector conditionNodes = wfTask.getConditionNodeTargetInfos();
+            if (conditionNodes != null && conditionNodes.size() > 0)
+            {
+                HashSet<String> arrowNames = new HashSet<String>();
+                for (int i = 0; i < conditionNodes.size(); i++)
+                {
+                    ConditionNodeTargetInfo info = (ConditionNodeTargetInfo) conditionNodes.get(i);
+                    arrowNames.add(info.getArrowName());
+                }
+
+                if (!arrowNames.contains(p_destinationArrow))
+                {
+                    String message = "\"" + p_destinationArrow + "\" is not a valid outgoing arrow name.";
+                    logger.warn(message);
                     message = makeErrorXml("completeTask", message);
                     throw new WebServiceException(message);
                 }
@@ -4510,9 +4611,8 @@ public class Ambassador extends AbstractWebService
             }
             else
             {
-                rtnStr = "Can't complete this task as it is not in 'ACCEPTED' state";
+                rtnStr = "Cannot complete this task as it is not in 'ACCEPTED' state";
             }
-
         }
         catch (Exception ex)
         {
@@ -4524,7 +4624,6 @@ public class Ambassador extends AbstractWebService
         }
         finally
         {
-
             if (activityStart != null)
             {
                 activityStart.end();
@@ -6153,9 +6252,10 @@ public class Ambassador extends AbstractWebService
      *            Task object
      * @throws WebServiceException
      */
-    private void buildXmlForTask(StringBuilder xml, Task t, String tab,
-            Connection connection, String assignees) throws WebServiceException
-    {
+	private void buildXmlForTask(StringBuilder xml, Task t, String tab,
+			Connection connection, String assignees,
+			List<ConditionNodeTargetInfo> conList) throws WebServiceException
+	{
         xml.append(tab).append("<task>\r\n");
         xml.append(tab).append("\t<id>").append(t.getId()).append("</id>\r\n");
         xml.append(tab).append("\t<workflowId>")
@@ -6221,6 +6321,25 @@ public class Ambassador extends AbstractWebService
     	xml.append(tab).append("\t<isSkipped>")
         		.append(AmbassadorHelper.isSkippedTask(t.getId()))
         		.append("</isSkipped>\r\n");
+    	
+		if (conList != null && conList.size() > 0)
+		{
+			for (int i = 0; i < conList.size(); i++)
+			{
+				ConditionNodeTargetInfo cti = (ConditionNodeTargetInfo) conList
+						.get(i);
+				String arrowName = xmlEncoder.encodeStringBasic(cti
+						.getArrowName());
+				String pointTo = cti.getTargetNodeName();
+				xml.append(tab).append("\t<outgoing>\r\n");
+				xml.append(tab).append("\t\t<arrowName>").append(arrowName)
+						.append("</arrowName>\r\n");
+				xml.append(tab).append("\t\t<pointTo>").append(pointTo)
+						.append("</pointTo>\r\n");
+				xml.append(tab).append("\t</outgoing>\r\n");
+			}
+		}
+
         	
         xml.append(tab).append("</task>\r\n");
     }
@@ -13409,8 +13528,7 @@ public class Ambassador extends AbstractWebService
                             activityArgs);
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
 
-            String userId = getUsernameFromSession(p_accessToken);
-            Company company = getCompanyInfo(userId);
+            Company company = getCompanyInfo(userName);
             if (company != null)
             {
                 String[] ids = jobHandler.getJobIdsByState(
@@ -13430,6 +13548,106 @@ public class Ambassador extends AbstractWebService
             logger.error(e.getMessage(), e);
             String message = makeErrorXml("fetchJobsByState", e.getMessage());
             throw new WebServiceException(message);
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+
+        }
+    }
+    
+    /**
+     * Get jobs according with special creator userName, offset and count of fetching
+     * records in current company
+     * 
+     * @param p_accessToken
+     *            Access token
+     * @param p_creatorUserName
+     *            Creator userName of job.
+     * @param p_offset
+     *            Begin index of records
+     * @param p_count
+     *            Number count of fetching records
+     * @return xml string
+     * @throws WebServiceException
+     */
+    public String fetchJobsByCreator(String p_accessToken,
+    		String p_creatorUserName,int p_offset, int p_count,
+    		boolean p_isDescOrder) throws WebServiceException
+    {
+        try
+        {
+            Assert.assertNotEmpty(p_accessToken, "Access token");
+            Assert.assertNotEmpty(p_creatorUserName, "Creator userName");
+            p_offset = p_offset < 1 ? 0 : p_offset - 1;
+            p_count = p_count <= 0 ? 1 : p_count;
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            return makeErrorXml("fetchJobsByCreator", e.getMessage());
+        }
+
+        String result = null;
+        ActivityLog.Start activityStart = null;
+
+        try
+        {
+            String userName = this.getUsernameFromSession(p_accessToken);
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", userName);
+            activityArgs.put("creatorUserName", p_creatorUserName);
+            activityArgs.put("offset", p_count);
+            activityArgs.put("count", p_count);
+            activityArgs.put("isDescOrder", p_isDescOrder);
+            activityStart = ActivityLog
+                    .start(Ambassador.class,
+                            "fetchJobsByCreator(p_accessToken," +
+                            " p_creatorUserName, p_offset, " +
+                            "p_count, p_isDescOrder)",
+                            activityArgs);
+            JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
+            String creatorUserId =  UserUtil.getUserIdByName(p_creatorUserName);
+            if(creatorUserId == null)
+            {
+            	return makeErrorXml("fetchJobsByCreator", "Creator username " 
+            			+ p_creatorUserName + " does not exist.");
+            }
+
+            Company company = getCompanyInfo(userName);
+            Long companyId = company.getIdAsLong();
+            if(company != null &&  
+            		!CompanyWrapper.isSuperCompany(companyId.toString()))
+            {
+            	Company tempCompany = getCompanyInfo(p_creatorUserName);
+                Long tempCompanyId = tempCompany.getIdAsLong();
+                if(companyId != tempCompanyId && 
+                		!CompanyWrapper.isSuperCompany(tempCompanyId.toString()))
+                {
+                	return makeErrorXml("fetchJobsByCreator", 
+                			"Can't fetch jobs by creator in other company.");
+                }
+            }
+            if (company != null)
+            {
+                String[] ids = jobHandler.getJobIdsByCreator(
+                        company.getId(), creatorUserId,p_offset, p_count, p_isDescOrder);
+                if (ids != null && ids.length > 0)
+                {
+                    result = fetchJobsPerCompany(p_accessToken, ids, true,
+                            true, false);
+                }
+            }
+
+            return result;
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            return makeErrorXml("fetchJobsByCreator", e.getMessage());
         }
         finally
         {
@@ -13472,8 +13690,8 @@ public class Ambassador extends AbstractWebService
         {
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
 
-            String userId = getUsernameFromSession(p_accessToken);
-            Company company = getCompanyInfo(userId);
+            String userName = getUsernameFromSession(p_accessToken);
+            Company company = getCompanyInfo(userName);
             if (company != null)
             {
                 counts = jobHandler.getCountsByJobState(String.valueOf(company
@@ -13788,6 +14006,11 @@ public class Ambassador extends AbstractWebService
             // Priority
             subXML.append("\t\t<priority>").append(p_job.getPriority())
                     .append("</priority>\r\n");
+            
+			// Creator
+			subXML.append("\t\t<creator>")
+					.append(p_job.getCreateUser().getUserName())
+					.append("</creator>\r\n");
 
             // Create date
             subXML.append("\t\t<createDate>")
@@ -13917,21 +14140,30 @@ public class Ambassador extends AbstractWebService
                     tmpXml.append("\t\t<workflows>\r\n");
                     Collection wfs = p_job.getWorkflows();
                     if (wfs != null && wfs.size() > 0)
-                    {
-                        Iterator it = wfs.iterator();
-                        while (it.hasNext())
-                        {
-                            tmpXml.append("\t\t\t<workflow>\r\n");
-                            Workflow wf = (Workflow) it.next();
-                            tmpXml.append("\t\t\t\t<wfId>").append(wf.getId())
-                                    .append("</wfId>\r\n");
-                            String targetLang = wf.getTargetLocale().getLanguage()
-                                    + "_" + wf.getTargetLocale().getCountry();
-                            tmpXml.append("\t\t\t\t<targetLang>")
-                                    .append(targetLang).append("</targetLang>\r\n");
-                            tmpXml.append("\t\t\t</workflow>\n");
-                        }
-                    }
+					{
+						Map<Long, String> workflowNameMap = AmbassadorHelper
+								.getWorkflowName(p_job.getId());
+						Iterator it = wfs.iterator();
+						while (it.hasNext())
+						{
+							tmpXml.append("\t\t\t<workflow>\r\n");
+							Workflow wf = (Workflow) it.next();
+							tmpXml.append("\t\t\t\t<wfId>").append(wf.getId())
+									.append("</wfId>\r\n");
+							String workflowName = workflowNameMap.get(wf
+									.getId());
+							tmpXml.append("\t\t\t\t<workflowName>").append(workflowName)
+							.append("</workflowName>\r\n");
+							String targetLang = wf.getTargetLocale()
+									.getLanguage()
+									+ "_"
+									+ wf.getTargetLocale().getCountry();
+							tmpXml.append("\t\t\t\t<targetLang>")
+									.append(targetLang)
+									.append("</targetLang>\r\n");
+							tmpXml.append("\t\t\t</workflow>\n");
+						}
+					}
                     tmpXml.append("\t\t</workflows>\r\n");
 
                     subXML.append(tmpXml.toString());
@@ -14990,16 +15222,16 @@ public class Ambassador extends AbstractWebService
         ActivityLog.Start activityStart = null;
         try
         {
-            String userId = super.getUsernameFromSession(p_accessToken);
+            String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", userId);
+            activityArgs.put("loggedUserName", userName);
             activityArgs.put("commentObjectType", p_commentObjectType);
             activityArgs.put("jobOrTaskId", p_jobOrTaskId);
             activityStart = ActivityLog
                     .start(Ambassador.class,
                             "getCommentFiles(p_accessToken, p_commentObjectType,p_jobOrTaskId)",
                             activityArgs);
-            User user = ServerProxy.getUserManager().getUser(userId);
+            User user = ServerProxy.getUserManager().getUserByName(userName);
             companyName = user.getCompanyName();
             companyId = ServerProxy.getJobHandler().getCompany(companyName)
                     .getId();
@@ -15223,6 +15455,8 @@ public class Ambassador extends AbstractWebService
      *            Access token
      * @param p_fileName
      *            File name which will be uploaded to server.
+     * @param p_tmName
+     *            Project TM name to import TMX files into.
      * @param p_contentsInBytes
      *            TMX file contents in byte[].
      * 
@@ -15252,13 +15486,16 @@ public class Ambassador extends AbstractWebService
             checkPermission(p_accessToken,
                     Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
-            StringBuffer realPathName = new StringBuffer(webServerDocRoot);
-            realPathName.append("_Imports_").append(File.separator)
-                    .append("TMX").append(File.separator)
+            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
+                    .getInstance().getStringParameter(
+                            SystemConfigParamNames.FILE_STORAGE_DIR));
+            fileStorageRoot = fileStorageRoot.append(File.separator)
+            		.append(WebAppConstants.VIRTUALDIR_TOPLEVEL).append(File.separator)
+                    .append("TmImport").append(File.separator)
                     .append(p_tmName.trim()).append(File.separator)
                     .append("tmp").append(File.separator).append(p_fileName);
 
-            writeFileToLocale(realPathName.toString(), p_contentsInBytes);
+            writeFileToLocale(fileStorageRoot.toString(), p_contentsInBytes);
 
             return null;
         }
@@ -15342,14 +15579,17 @@ public class Ambassador extends AbstractWebService
             IImportManager importer = TmManagerLocal
                     .getProjectTmImporter(p_tmName);
             /** import tmx files one by one */
-            StringBuffer tmxFilePath = new StringBuffer(webServerDocRoot);
-            tmxFilePath.append("_Imports_").append(File.separator)
-                    .append("TMX").append(File.separator)
-                    .append(p_tmName.trim());
+            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
+                    .getInstance().getStringParameter(
+                            SystemConfigParamNames.FILE_STORAGE_DIR));
+            fileStorageRoot = fileStorageRoot.append(File.separator)
+                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                    .append(File.separator).append("TmImport")
+                    .append(File.separator).append(p_tmName.trim());
             // saved tmx file directory
-            String savedTmxFilePath = tmxFilePath.toString();
+            String savedTmxFilePath = fileStorageRoot.toString();
             // tmp tmx file directory
-            String tmpTmxFilePath = tmxFilePath.append(File.separator)
+            String tmpTmxFilePath = fileStorageRoot.append(File.separator)
                     .append("tmp").toString();
             File tmxFileDir = new File(tmpTmxFilePath);
             if (tmxFileDir.exists() && tmxFileDir.isDirectory())
@@ -16327,6 +16567,10 @@ public class Ambassador extends AbstractWebService
             // job state
             xml.append("\t\t<state>").append(job.getState())
                     .append("</state>\r\n");
+			// job creator
+			xml.append("\t\t<creator>")
+					.append(job.getCreateUser().getUserName())
+					.append("</creator>\r\n");
             // job create date
             xml.append("\t\t<create_date>")
                     .append(DateHelper.getFormattedDateAndTime(
@@ -16858,17 +17102,14 @@ public class Ambassador extends AbstractWebService
             // Generate offline page data to file
             workflowManager.downloadOfflineFiles(task, job, null);
 
-            // Copy offline file from $WebRoot$\_Exports_\QA\ to
+            // Copy offline file from $FileStorageDir$\GlobalSight\TmExport to
             // $DocDir$\download\
             // Filename is like test2_589424576_en_US_de_DE.zip
             String directory = ExportUtil.getExportDirectory();
-            String companyId = CompanyThreadLocal.getInstance().getValue();
-            String companyName = ServerProxy.getJobHandler()
-                    .getCompanyById(Long.parseLong(companyId)).getName();
             String filename = job.getJobName() + "_" + task.getSourceLocale()
                     + "_" + task.getTargetLocale() + ".zip";
-
-            File temp = new File(directory + companyName, filename);
+            
+            File temp = new File(directory, filename);
             File targetFile = new File(
                     AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator
                             + AmbFileStoragePathUtils.OFFLINE_FILE_DOWNLOAD_DIR

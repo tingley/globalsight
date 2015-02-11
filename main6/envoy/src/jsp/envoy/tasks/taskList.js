@@ -75,10 +75,6 @@ $(function () {
 });
 
 function initSortActions() {
-	$("#priorityItem").bind("click", function() {
-		sortSearch("priority",false);
-	});
-	
 	$("#jobIdItem").bind("click", function() {
 		sortSearch("jobId",false);
 	});
@@ -148,6 +144,13 @@ function rmoveSortImg()
 function initFilterOptions() {
     //Set up source locale and target locale according with locale pairs
 	var tmp = "";
+	$("#prioityFilter").bind("keydown", function(e) {
+		if (e.which == 13) {
+			pageNumber = 1;
+			submitSearch();
+		}
+	});
+	
 	$("#jobIdFilter").bind("keydown", function(e) {
 		if (e.which == 13) {
 			pageNumber = 1;
@@ -273,6 +276,98 @@ function checkFilters()
 	} else 
 		$("#assigneesNameFilter").val(tmp);
 	
+	if(showDateForm)
+	{
+    	tmp = ATrim($("#acceptanceStartFilter").val());
+    	if (tmp != "") 
+        {
+        	if(!isAllDigits(tmp))
+        	{
+	    		alert("The Date Range Starts and Ends values must be integers.");
+	            return false;
+        	}
+        	
+        	if($("#acceptanceStartOptionsFilter").val() == "")
+        	{
+        		alert('If you enter a value for a Date Range, you must also select the duration, such as "hours ago"');
+	            return false;
+        	}
+        	
+        	if(ATrim($("#acceptanceEndFilter").val()) == "" &&
+        			$("#acceptanceEndOptionsFilter").val() != "NOW")
+        	{
+        		alert("If you enter a start value for a Date Range, you must also enter an end value and vice versa.");
+	            return false;
+        	}
+    	}
+
+    	tmp = ATrim($("#acceptanceEndFilter").val());
+    	if (tmp != "") 
+        {
+        	if(!isAllDigits(tmp))
+        	{
+	    		alert("The Date Range Starts and Ends values must be integers.");
+	            return false;
+        	}
+        	
+        	if($("#acceptanceEndOptionsFilter").val() == "")
+        	{
+        		alert('If you enter a value for a Date Range, you must also select the duration, such as "hours ago"');
+	            return false;
+        	}
+        	
+        	if(ATrim($("#acceptanceStartFilter").val()) == "")
+        	{
+        		alert("If you enter a start value for a Date Range, you must also enter an end value and vice versa.");
+	            return false;
+        	}
+    	}
+
+    	tmp = ATrim($("#completionStartFilter").val());
+    	if (tmp != "") 
+        {
+        	if(!isAllDigits(tmp))
+        	{
+	    		alert("The Date Range Starts and Ends values must be integers.");
+	            return false;
+        	}
+        	
+        	if($("#completionStartOptionsFilter").val() == "")
+        	{
+        		alert('If you enter a value for a Date Range, you must also select the duration, such as "hours ago"');
+	            return false;
+        	}
+        	
+        	if(ATrim($("#completionEndFilter").val()) == "" &&
+        			$("#completionEndOptionsFilter").val() != "NOW")
+        	{
+        		alert("If you enter a start value for a Date Range, you must also enter an end value and vice versa.");
+	            return false;
+        	}
+    	}
+
+    	tmp = ATrim($("#completionEndFilter").val());
+    	if (tmp != "") 
+        {
+        	if(!isAllDigits(tmp))
+        	{
+	    		alert("The Date Range Starts and Ends values must be integers.");
+	            return false;
+        	}
+        	
+        	if($("#completionEndOptionsFilter").val() == "")
+        	{
+        		alert('If you enter a value for a Date Range, you must also select the duration, such as "hours ago"');
+	            return false;
+        	}
+        	
+        	if(ATrim($("#completionStartFilter").val()) == "")
+        	{
+        		alert("If you enter a start value for a Date Range, you must also enter an end value and vice versa.");
+	            return false;
+        	}
+    	}
+	}
 	return true;
 }
 
@@ -289,11 +384,12 @@ function initTaskStateSelect() {
             $("#taskStates").append("<option value='" + taskStatesValue[index] + "'>" + taskStates[index] + "</option>");
         }
     }
-    $("#searchTask").click(function () {
+    $(".searchTask").click(function () {
     	getFilterFromRequest = true;
     	if(currentTaskState != $("#taskStates").val())
     	{  	
     		getFilterFromRequest = false;
+    		$("#piorityFilter").val("");
 	    	$("#jobIdFilter").val("");
 	    	$("#jobNameFilter").val("");
 	    	$("#activityNameFilter").val("");
@@ -415,7 +511,7 @@ function initButtonActions() {
                     $.post(selfUrl, {
                         state:currentTaskState,
                         taskAction:"completeActivity",
-                        taskParam:taskIds
+                        taskParam:data.isFinishedTaskId
                     }, function(data) {
                         submitSearch();
                     });
@@ -457,7 +553,7 @@ function initButtonActions() {
                     $.post(selfUrl, {
                         state:currentTaskState,
                         taskAction:"completeWorkflow",
-                        taskParam:taskIds
+                        taskParam:data.isFinishedTaskId
                     }, function(data) {
                         submitSearch();
                     });
@@ -709,6 +805,15 @@ function getTaskList(state, pagenum, rowsperpage, sortcolumn, sorttype) {
 	$("#list tbody").empty();
 	$("#list tbody").append("<tr><td colspan=20 align='center'><img src='/globalsight/includes/tasksloading.gif'/></td></tr>");
 	$("#taskStates").attr("disabled", true);
+	var acceptanceStartFilter = $("#acceptanceStartFilter").val();
+	var acceptanceStartOptionsFilter = $("#acceptanceStartOptionsFilter").val();
+	var acceptanceEndFilter = $("#acceptanceEndFilter").val();
+	var acceptanceEndOptionsFilter = $("#acceptanceEndOptionsFilter").val();
+	var completionStartFilter = $("#completionStartFilter").val();
+	var completionStartOptionsFilter = $("#completionStartOptionsFilter").val();
+	var completionEndFilter = $("#completionEndFilter").val();
+	var completionEndOptionsFilter = $("#completionEndOptionsFilter").val();
+	var priorityFilter = $("#priorityFilter").val();
 	var jobIdOption = $("#jobIdOption").val();
     var jobIdFilter = $("#jobIdFilter").val();
     var jobNameFilter = $("#jobNameFilter").val();
@@ -735,6 +840,16 @@ function getTaskList(state, pagenum, rowsperpage, sortcolumn, sorttype) {
             rowsPerPage:rowsperpage,
 			sortColumn:sortcolumn,
 			sortType:sorttype,
+			advancedSearch:advancedSearch,
+			acceptanceStartFilter:acceptanceStartFilter,
+			acceptanceStartOptionsFilter:acceptanceStartOptionsFilter,
+			acceptanceEndFilter:acceptanceEndFilter,
+			acceptanceEndOptionsFilter:acceptanceEndOptionsFilter,
+			completionStartFilter:completionStartFilter,
+			completionStartOptionsFilter:completionStartOptionsFilter,
+			completionEndFilter:completionEndFilter,
+			completionEndOptionsFilter:completionEndOptionsFilter,
+			priorityFilter:priorityFilter,
 			jobIdOption:jobIdOption,
             jobIdFilter:jobIdFilter,
             jobNameFilter:jobNameFilter,
@@ -828,7 +943,10 @@ function getTaskList(state, pagenum, rowsperpage, sortcolumn, sorttype) {
 				}
 				
 				setListStyle();
-				updateButtonState(state,pagenum,rowsperpage,sortcolumn,sorttype,jobIdFilter,jobNameFilter,activityNameFilter,assigneesNameFilter,sourceLocaleFilter,targetLocaleFilter,companyFilter,jobIdOption);
+				updateButtonState(state,pagenum,rowsperpage,sortcolumn,sorttype,jobIdFilter,jobNameFilter,activityNameFilter,assigneesNameFilter,
+								sourceLocaleFilter,targetLocaleFilter,companyFilter,jobIdOption,priorityFilter,
+								acceptanceStartFilter,acceptanceStartOptionsFilter,acceptanceEndFilter,acceptanceEndOptionsFilter,
+								completionStartFilter,completionStartOptionsFilter,completionEndFilter,completionEndOptionsFilter,advancedSearch);
 				
 				$("#taskStates").attr("disabled", false);
 			}
@@ -903,7 +1021,10 @@ function showButton(button, isShow) {
         $("#" + button).hide();
 }
 
-function updateButtonState(state,pagenum,rowsperpage,sortcolumn,sorttype,jobIdFilter,jobNameFilter,activityNameFilter,assigneesNameFilter,sourceLocaleFilter,targetLocaleFilter,companyFilter,jobIdOption) {
+function updateButtonState(state,pagenum,rowsperpage,sortcolumn,sorttype,jobIdFilter,jobNameFilter,activityNameFilter,assigneesNameFilter,
+						sourceLocaleFilter,targetLocaleFilter,companyFilter,jobIdOption,priorityFilter,
+						acceptanceStartFilter,acceptanceStartOptionsFilter,acceptanceEndFilter,acceptanceEndOptionsFilter,
+						completionStartFilter,completionStartOptionsFilter,completionEndFilter,completionEndOptionsFilter,advancedSearch) {
 		var random = Math.random();
 		$.getJSON("/globalsight/TaskListServlet?random="+Math.random(), {
             action:"getButtonStatus",

@@ -695,7 +695,7 @@ function updateSpecialFilter(specialFilters, filter)
 	for(var i = 0; i < specialFilters.length; i++)
 	{
 		var specialFilter = specialFilters[i];
-		if(specialFilter.filterName == filter.filterName)
+		if(specialFilter.id == filter.id)
 		{
 			specialFilters[i] = filter;
 		}

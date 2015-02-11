@@ -395,6 +395,15 @@ public class JobHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getJobIdsByState(p_companyId, p_state,
                 p_offset, p_count, p_isDescOrder);
     }
+    
+    @Override
+    public String[] getJobIdsByCreator(long p_companyId, String p_creatorUserId,
+            int p_offset, int p_count, boolean p_isDescOrder)
+            throws RemoteException, JobException
+    {
+        return m_localReference.getJobIdsByCreator(p_companyId, p_creatorUserId,
+                p_offset, p_count, p_isDescOrder);
+    }
 
     public HashMap<String, Integer> getCountsByJobState(String p_companyId)
             throws RemoteException, JobException

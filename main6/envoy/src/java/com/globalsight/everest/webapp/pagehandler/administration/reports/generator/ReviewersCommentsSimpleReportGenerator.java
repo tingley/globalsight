@@ -34,15 +34,24 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
@@ -56,10 +65,12 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
@@ -75,6 +86,9 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -87,6 +101,8 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
 {
     static private final Logger logger = Logger
             .getLogger(ReviewersCommentsSimpleReportGenerator.class);
+    
+    private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
 
     private CellStyle contentStyle = null;
     private CellStyle iceContentStyle = null;
@@ -114,10 +130,8 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
     public static final int LANGUAGE_INFO_ROW = 4;
     public static final int SEGMENT_HEADER_ROW = 6;
     public static final int SEGMENT_START_ROW = 7;
-    // "E" column, index 4
-    public static final int CATEGORY_FAILURE_COLUMN = 4;
-    // "F" column, index 5
-    public static final int COMMENT_STATUS_COLUMN = 5;
+    // "D" column, index 4
+    public static final int CATEGORY_FAILURE_COLUMN = 3;
 
     private Locale m_uiLocale = Locale.US;
     String m_userId;
@@ -294,6 +308,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat)
             throws Exception
     {
+    	boolean categoryFailureDropDownAdded = false;
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
         for (GlobalSightLocale trgLocale : p_targetLocales)
         {
@@ -315,6 +330,13 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
 
             // Add Segment Header
             addSegmentHeader(p_workbook, sheet);
+            
+            // Create Name Areas for drop down list.
+            if (!categoryFailureDropDownAdded)
+            {
+                createCategoryFailureNameArea(p_workbook);
+                categoryFailureDropDownAdded = true;
+            }
 
             // Insert Language Data
             String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
@@ -411,44 +433,50 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
         col++;
         
         Cell cell_D = getCell(segHeaderRow, col);
-        cell_D.setCellValue(m_bundle.getString("lb_approved_glossary_source"));
+        cell_D.setCellValue(m_bundle.getString("lb_category_failure"));
         cell_D.setCellStyle(headerStyle);
-        p_sheet.setColumnWidth(col, 30 * 256);
+        p_sheet.setColumnWidth(col, 40 * 256);
         col++;
-
+        
         Cell cell_E = getCell(segHeaderRow, col);
-        cell_E.setCellValue(m_bundle.getString("lb_approved_glossary_target"));
+        cell_E.setCellValue(m_bundle.getString("lb_approved_glossary_source"));
         cell_E.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
-        
+
         Cell cell_F = getCell(segHeaderRow, col);
-        cell_F.setCellValue(m_bundle.getString("lb_tm_match_original"));
+        cell_F.setCellValue(m_bundle.getString("lb_approved_glossary_target"));
         cell_F.setCellStyle(headerStyle);
-        p_sheet.setColumnWidth(col, 20 * 256);
+        p_sheet.setColumnWidth(col, 30 * 256);
         col++;
         
         Cell cell_G = getCell(segHeaderRow, col);
-        cell_G.setCellValue(m_bundle.getString("lb_job_id_report"));
+        cell_G.setCellValue(m_bundle.getString("lb_tm_match_original"));
         cell_G.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 20 * 256);
+        col++;
+        
+        Cell cell_H = getCell(segHeaderRow, col);
+        cell_H.setCellValue(m_bundle.getString("lb_job_id_report"));
+        cell_H.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;    
 
-        Cell cell_H = getCell(segHeaderRow, col);
-        cell_H.setCellValue(m_bundle.getString("lb_segment_id"));
-        cell_H.setCellStyle(headerStyle);
+        Cell cell_I = getCell(segHeaderRow, col);
+        cell_I.setCellValue(m_bundle.getString("lb_segment_id"));
+        cell_I.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
         
-        Cell cell_I = getCell(segHeaderRow, col);
-        cell_I.setCellValue(m_bundle.getString("lb_page_name"));
-        cell_I.setCellStyle(headerStyle);
+        Cell cell_J = getCell(segHeaderRow, col);
+        cell_J.setCellValue(m_bundle.getString("lb_page_name"));
+        cell_J.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
         
-        Cell cell_J = getCell(segHeaderRow, col);
-        cell_J.setCellValue(m_bundle.getString("lb_sid"));
-        cell_J.setCellStyle(headerStyle);
+        Cell cell_K = getCell(segHeaderRow, col);
+        cell_K.setCellValue(m_bundle.getString("lb_sid"));
+        cell_K.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
     }
@@ -541,8 +569,6 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
             String category = null;
             PseudoData pData = new PseudoData();
             pData.setMode(PseudoConstants.PSEUDO_COMPACT);
-            String sourceSegmentString = null;
-            String targetSegmentString = null;
             String sid = null;
             for (int i = 0; i < targetPages.size(); i++)
             {
@@ -567,6 +593,9 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                         .isRTLLocale(sourcePageLocale.toString());
                 boolean m_rtlTargetLocale = EditUtil
                         .isRTLLocale(targetPageLocale.toString());
+                // Find segment all comments belong to this target page
+                Map<Long, IssueImpl> issuesMap = CommentHelper
+                        .getIssuesMap(targetPage.getId());
 
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
@@ -581,13 +610,14 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     {
                         continue;
                     }
-
-                    // Source segment and Target segment
-                    sourceSegmentString = sourceTuv.getGxmlElement()
-                            .getTextValue();
-                    sid = sourceTuv.getSid();
-                    targetSegmentString = targetTuv.getGxmlElement()
-                            .getTextValue();
+                    
+                    // Comment
+                    String failure = "";
+                    Issue issue = issuesMap.get(targetTuv.getId());
+                    if (issue != null)
+                    {
+                        failure = issue.getCategory();
+                    }
 
                     // TM Match
                     StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
@@ -637,7 +667,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     }
                     Cell cell_A = getCell(currentRow, col);
                     cell_A.setCellValue(getSegment(pData, sourceTuv, companyId,
-                    		sourceSegmentString, m_rtlSourceLocale));
+                            m_rtlSourceLocale));
                     cell_A.setCellStyle(srcStyle);
                     col++;
                     
@@ -658,7 +688,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     }
                     Cell cell_B = getCell(currentRow, col);
                     cell_B.setCellValue(getSegment(pData, targetTuv, companyId,
-                    		targetSegmentString, m_rtlTargetLocale));
+                            m_rtlTargetLocale));
                     cell_B.setCellStyle(trgStyle);
                     col++;
                     
@@ -687,34 +717,40 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     cell_C.setCellStyle(reviewersCommentStyle);
                     col++;
                     
-                    // Glossary source
+                    // Category failure
                     Cell cell_D = getCell(currentRow, col);
-                    cell_D.setCellValue(sourceTerms);
-                    cell_D.setCellStyle(contentStyle);
+                    cell_D.setCellValue(failure);
+                    cell_D.setCellStyle(reviewersCommentStyle);
+                    col++;
+                    
+                    // Glossary source
+                    Cell cell_E = getCell(currentRow, col);
+                    cell_E.setCellValue(sourceTerms);
+                    cell_E.setCellStyle(contentStyle);
                     col++;
 
                     // Glossary target
-                    Cell cell_E = getCell(currentRow, col);
-                    cell_E.setCellValue(targetTerms);
-                    cell_E.setCellStyle(contentStyle);
-                    col++;
-                    
-                    // TM match
                     Cell cell_F = getCell(currentRow, col);
-                    cell_F.setCellValue(matches.toString());
+                    cell_F.setCellValue(targetTerms);
                     cell_F.setCellStyle(contentStyle);
                     col++;
                     
-                    // Job id
+                    // TM match
                     Cell cell_G = getCell(currentRow, col);
-                    cell_G.setCellValue(p_job.getId());
+                    cell_G.setCellValue(matches.toString());
                     cell_G.setCellStyle(contentStyle);
+                    col++;
+                    
+                    // Job id
+                    Cell cell_H = getCell(currentRow, col);
+                    cell_H.setCellValue(p_job.getId());
+                    cell_H.setCellStyle(contentStyle);
                     col++;
 
                     // SID// Segment id
-                    Cell cell_H = getCell(currentRow, col);
-                    cell_H.setCellValue(sourceTuv.getTu(companyId).getId());
-                    cell_H.setCellStyle(contentStyle);
+                    Cell cell_I = getCell(currentRow, col);
+                    cell_I.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_I.setCellStyle(contentStyle);
                     col++;
                     
                     // Fix for GBS-1484
@@ -729,26 +765,29 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                         name = name + detailName + ")";
                     }
                     // Page Name
-                    Cell cell_I = getCell(currentRow, col);
-                    cell_I.setCellValue(name);
-                    cell_I.setCellStyle(contentStyle);
+                    Cell cell_J = getCell(currentRow, col);
+                    cell_J.setCellValue(name);
+                    cell_J.setCellStyle(contentStyle);
                     col++;
 
                     // SID
-                    Cell cell_J = getCell(currentRow, col);
-                    cell_J.setCellValue(sid);
-                    cell_J.setCellStyle(contentStyle);
+                    Cell cell_K = getCell(currentRow, col);
+                    cell_K.setCellValue(sid);
+                    cell_K.setCellStyle(contentStyle);
                     col++; 
 
                     p_row++;
                 }
             }
+            // Add category failure drop down list here.
+            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row,
+                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
         }
         
-        p_sheet.setColumnHidden(6, true);
         p_sheet.setColumnHidden(7, true);
         p_sheet.setColumnHidden(8, true);
         p_sheet.setColumnHidden(9, true);
+        p_sheet.setColumnHidden(10, true);
 
         return p_row;
     }
@@ -1227,6 +1266,91 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
             cell = p_row.createCell(index);
         return cell;
     }
+    
+    /**
+     * Create workbook name areas for category failure drop down list, it is
+     * from "AA8" to "AAn".
+     * <P>
+     * Only write the data of drop down list into the first sheet as it can be
+     * referenced from all sheets.
+     * </P>
+     * <P>
+     * The formula is like
+     * "[sheetName]!$AA$[startRow]:$AA$[endRow]",i.e."TER!$AA$8:$AA$32".
+     * </P>
+     */
+    private void createCategoryFailureNameArea(Workbook p_workbook)
+    {
+        try
+        {
+            Sheet firstSheet = getSheet(p_workbook, 0);
+            List<String> categories = getFailureCategoriesList();
+            // Set the categories in "AA" column, starts with row 8.
+            int col = 26;
+            for (int i = 0; i < categories.size(); i++)
+            {
+                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
+                Cell cell = getCell(row, col);
+                cell.setCellValue(categories.get(i));
+            }
+
+            String formula = firstSheet.getSheetName() + "!$AA$"
+                    + (SEGMENT_START_ROW + 1) + ":$AA$"
+                    + (SEGMENT_START_ROW + categories.size());
+            Name name = p_workbook.createName();
+            name.setRefersToFormula(formula);
+            name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
+
+            // Hide "AA" column
+            firstSheet.setColumnHidden(26, true);
+        }
+        catch (Exception e)
+        {
+            logger.error(
+                    "Error when create hidden area for category failures.", e);
+        }
+    }
+
+    private List<String> getFailureCategoriesList()
+    {
+        List<String> result = new ArrayList<String>();
+
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        List failureCategories = IssueOptions.getAllCategories(m_bundle,
+                currentCompanyId);
+        for (int i = 0; i < failureCategories.size(); i++)
+        {
+            Select aCategory = (Select) failureCategories.get(i);
+            String cat = aCategory.getValue();
+            result.add(cat);
+        }
+        return result;
+    }
+    
+    /**
+     * Add category failure drop down list.
+     * 
+     * @param p_sheet
+     * @param startRow
+     * @param lastRow
+     * @param startColumn
+     * @param lastColumn
+     */
+    private void addCategoryFailureValidation(Sheet p_sheet, int startRow,
+            int lastRow, int startColumn, int lastColumn)
+    {
+        // Add category failure drop down list here.
+        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
+        DataValidationConstraint dvConstraint = dvHelper
+                .createFormulaListConstraint(CATEGORY_FAILURE_DROP_DOWN_LIST);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
+                lastRow, startColumn, lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint,
+                addressList);
+        validation.setSuppressDropDownArrow(true);
+        validation.setShowErrorBox(true);
+        p_sheet.addValidationData(validation);
+    }
 
     /**
      * Get TM matches.
@@ -1331,31 +1455,84 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
     }
     
     private String getSegment(PseudoData pData, Tuv tuv, long companyId,
-    		String segmentString, boolean m_rtlLocale)
+            boolean m_rtlLocale)
     {
-    	String content = "";
-    	if(isIncludeCompactTags)
+        String result = null;
+        StringBuffer content = new StringBuffer();
+        List subFlows = tuv.getSubflowsAsGxmlElements();
+        long tuId = tuv.getTuId();
+        if(isIncludeCompactTags)
         {
-        	try {
-            	pData.setAddables(tuv.getDataType(companyId));
-                TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(),
-                        pData);
-                content = pData.getPTagSourceString();
-        	} catch (Exception e) {
+            String dataType = null;
+            try
+            {
+                dataType = tuv.getDataType(companyId);
+                pData.setAddables(dataType);
+                TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+                content.append(pData.getPTagSourceString());
+
+                if (subFlows != null && subFlows.size() > 0)
+                {
+                    for (int i = 0; i < subFlows.size(); i++)
+                    {
+                        GxmlElement sub = (GxmlElement) subFlows.get(i);
+                        String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                        content.append("\r\n#").append(tuId).append(":")
+                                .append(subId).append("\n")
+                                .append(getCompactPtagString(sub, dataType));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
                 logger.error(tuv.getId(), e);
             }
-        	if (m_rtlLocale)
+        }
+        else
+        {
+            String mainSeg = tuv.getGxmlElement().getTextValue();
+            content.append(mainSeg);
+
+            if (subFlows != null && subFlows.size() > 0)
             {
-            	content = EditUtil.toRtlString(content);
+                for (int i = 0; i < subFlows.size(); i++)
+                {
+                    GxmlElement sub = (GxmlElement) subFlows.get(i);
+                    String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                    content.append("\r\n#").append(tuId).append(":")
+                            .append(subId).append("\n")
+                            .append(sub.getTextValue());
+                }
             }
         }
-        else 
-        {                  	
-        	content = m_rtlLocale ? EditUtil
-        			.toRtlString(segmentString)
-        			: segmentString;
-		}
-        return content;
+
+        result = content.toString();
+        if (m_rtlLocale)
+        {
+            result = EditUtil.toRtlString(result);
+        }
+
+        return result;
+    }
+
+    private String getCompactPtagString(GxmlElement p_gxmlElement,
+            String p_dataType)
+    {
+        String compactPtags = null;
+        OnlineTagHelper applet = new OnlineTagHelper();
+        try
+        {
+            String seg = GxmlUtil.getInnerXml(p_gxmlElement);
+            applet.setDataType(p_dataType);
+            applet.setInputSegment(seg, "", p_dataType);
+            compactPtags = applet.getCompact();
+        }
+        catch (Exception e)
+        {
+            logger.info("getCompactPtagString Error.", e);
+        }
+
+        return compactPtags;
     }
     
     /**

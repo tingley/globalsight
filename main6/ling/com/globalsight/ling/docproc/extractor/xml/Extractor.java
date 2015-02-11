@@ -384,6 +384,10 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
             m_useEmptyTag = m_rules.usesEmptyTag();
             m_useEmptyTag = m_xmlFilterHelper.usesEmptyTag();
+            if (m_isOfficeXml)
+            {
+                m_useEmptyTag = true;
+            }
 
             // traverse the DOM tree
             domNodeVisitor(document, false, true, false);

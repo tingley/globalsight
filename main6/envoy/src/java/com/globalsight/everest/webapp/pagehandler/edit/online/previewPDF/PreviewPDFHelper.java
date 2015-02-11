@@ -121,10 +121,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         for (SourcePage sp : (Collection<SourcePage>) p_job.getSourcePages())
         {
             String spPath = sp.getExternalPageId();
-            String extension = spPath.substring(spPath.lastIndexOf("."));
-            if (extensionSet.contains(extension.toLowerCase()))
+            int index = spPath.lastIndexOf(".");
+            if (index > -1)
             {
-                return true;
+                String extension = spPath.substring(index);
+                if (extensionSet.contains(extension.toLowerCase()))
+                {
+                    return true;
+                }
             }
         }
 
@@ -136,10 +140,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         for (SourcePage sp : (Collection<SourcePage>) p_task.getSourcePages())
         {
             String spPath = sp.getExternalPageId();
-            String extension = spPath.substring(spPath.lastIndexOf("."));
-            if (extensionSet.contains(extension.toLowerCase()))
+            int index = spPath.lastIndexOf(".");
+            if (index > -1)
             {
-                return true;
+                String extension = spPath.substring(index);
+                if (extensionSet.contains(extension.toLowerCase()))
+                {
+                    return true;
+                }                
             }
         }
 

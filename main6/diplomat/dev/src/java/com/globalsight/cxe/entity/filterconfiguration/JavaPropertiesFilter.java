@@ -182,7 +182,7 @@ public class JavaPropertiesFilter implements Filter
         return this.secondFilterTableName;
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from JavaPropertiesFilter jp where jp.filterName =:filterName and jp.companyId=:companyId";
         Map map = new HashMap();
@@ -191,6 +191,16 @@ public class JavaPropertiesFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from JavaPropertiesFilter jp where jp.id<>:filterId and jp.filterName =:filterName and jp.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
     public String getInternalText()
     {
         return internalText;

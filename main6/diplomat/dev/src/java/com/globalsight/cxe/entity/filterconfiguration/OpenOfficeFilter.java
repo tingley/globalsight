@@ -45,7 +45,7 @@ public class OpenOfficeFilter implements Filter
         allCharacterStyles.add("tw4winInternal");
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from OpenOfficeFilter oof where oof.filterName =:filterName and oof.companyId=:companyId";
         Map map = new HashMap();
@@ -54,6 +54,16 @@ public class OpenOfficeFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from OpenOfficeFilter oof where oof.id<>:filterId and oof.filterName =:filterName and oof.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
     public String getParagraphStyles()
     {
         return buildToXml(unextractableWordParagraphStyles, allParagraphStyles);

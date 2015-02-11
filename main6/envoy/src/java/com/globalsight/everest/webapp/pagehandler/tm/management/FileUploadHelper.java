@@ -42,6 +42,7 @@ import com.globalsight.everest.tm.importer.ImportUtil;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.progress.TmProcessStatus;
 
@@ -315,14 +316,11 @@ public class FileUploadHelper implements Runnable
         //
         if (outFile != null && outFile.exists())
         {
-            // First, define and create image upload directory
-            // structure, if not already done so
-            File savedDir = new File(DOCROOT + FILE_UPLOAD_DIR + "/");
-            savedDir.mkdirs();
-
-            // Create a destination file and rename/move the file
-            // from temporary location to upload directory
-            File savedFile = new File(savedDir, getFilename());
+			String fsDirPath = AmbFileStoragePathUtils.getFileStorageDirPath();
+            File savedDir = new File(fsDirPath,
+                    AmbFileStoragePathUtils.TM_IMPORT_FILE_SUB_DIR);
+			savedDir.mkdirs();
+			File savedFile = new File(savedDir, getFilename());
 
             try
             {

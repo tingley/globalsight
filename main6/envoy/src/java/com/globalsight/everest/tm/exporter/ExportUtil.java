@@ -24,47 +24,13 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.exporter.IExportManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 
 public class ExportUtil
 {
     private static final Logger CATEGORY = Logger.getLogger(ExportUtil.class);
-
-    public static String EXPORT_BASE_DIRECTORY = "/";
-    static
-    {
-        try
-        {
-            SystemConfiguration sc = SystemConfiguration.getInstance();
-
-            String root = sc
-                    .getStringParameter(SystemConfiguration.WEB_SERVER_DOC_ROOT);
-
-            if (!(root.endsWith("/") || root.endsWith("\\")))
-            {
-                root = root + "/";
-            }
-
-            EXPORT_BASE_DIRECTORY = root + IExportManager.EXPORT_DIRECTORY;
-
-            if (!(EXPORT_BASE_DIRECTORY.endsWith("/") || EXPORT_BASE_DIRECTORY
-                    .endsWith("\\")))
-            {
-                EXPORT_BASE_DIRECTORY = EXPORT_BASE_DIRECTORY + "/";
-            }
-
-            File temp = new File(EXPORT_BASE_DIRECTORY);
-            temp.mkdirs();
-        }
-        catch (Throwable e)
-        {
-            CATEGORY.error("cannot create directory " + EXPORT_BASE_DIRECTORY,
-                    e);
-        }
-    }
 
     /** Cache of GlobalSightLocale and locale string and map. */
     static private Hashtable s_locale2name = new Hashtable();
@@ -74,13 +40,23 @@ public class ExportUtil
     {
     }
 
-    //
-    // Public Methods
-    //
-
-    static public String getExportDirectory()
+    public static  String getExportDirectory()
     {
-        return EXPORT_BASE_DIRECTORY;
+        String exportDir = "";
+        try
+        {
+            String fsDirPath = AmbFileStoragePathUtils.getFileStorageDirPath();
+            exportDir = fsDirPath + File.separator
+                    + AmbFileStoragePathUtils.TM_EXPORT_FILE_SUB_DIR;
+            exportDir = exportDir.replace("\\", "/").replace("/",
+                    File.separator);
+        }
+        catch (Throwable e)
+        {
+            CATEGORY.error("cannot create directory " + exportDir, e);
+        }
+
+        return exportDir;
     }
 
     /**

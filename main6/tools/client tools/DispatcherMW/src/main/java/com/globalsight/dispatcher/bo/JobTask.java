@@ -31,9 +31,12 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 
 import com.globalsight.dispatcher.controller.TranslateXLFController;
 import com.globalsight.dispatcher.dao.CommonDAO;
@@ -149,7 +152,9 @@ public class JobTask implements Callable<JobBO>
             Element root = doc.getRootElement(); // Get root element
             Namespace namespace = root.getNamespace();
             Element fileElem = root.getChild("file", namespace);
-            List<?> tuList = fileElem.getChild("body", namespace).getChildren("trans-unit", namespace);
+            XPathFactory xFactory = XPathFactory.instance();
+            XPathExpression<Element> expr = xFactory.compile("//trans-unit", Filters.element(), null, namespace);
+            List<Element> tuList = expr.evaluate(fileElem.getChild("body", namespace));
             for (int tuIndex = 0, trgIndex = 0; tuIndex < tuList.size() && trgIndex < p_targetSegments.length; tuIndex++, trgIndex++)
             {
                 if (p_targetSegments[trgIndex] == null)

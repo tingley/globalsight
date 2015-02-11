@@ -31,7 +31,6 @@ import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.XmlEntities;
 import com.globalsight.ling.tw.Tmx2HtmlPreviewHandler;
-import com.globalsight.util.edit.GxmlUtil;
 
 /**
  * Provides access to PTag API for the editor(Copy of "OnlineApplet.java").
@@ -528,20 +527,37 @@ public class OnlineTagHelper implements PseudoBaseHandler
         }
     }
     
-    public static void main(String[] args){
-        try {
-            String p_gxml = "<segment segmentId=\"1\" wordcount=\"6\">1 L = 10<ph type=\"superscript\" id=\"674\" x=\"1\">&lt;FPosition FSuperscript&gt;"
-                    + "</ph>3<ph type=\"text\" id=\"677\" x=\"2\"># end of Font</ph> mL = 10<ph type=\"superscript\" id=\"680\" x=\"3\">FSuperscript</ph>6"
-                    + "<ph type=\"text\" id=\"683\" x=\"4\">String</ph> µL</segment>";
-            OnlineTagHelper targetTagHelper = new OnlineTagHelper();
-            targetTagHelper.setInputSegment(GxmlUtil.stripRootTag(p_gxml), "", "text");
-            String compact = targetTagHelper.getCompact();
-            System.out.println("compact :: " + compact);  
-            String verbose = targetTagHelper.getVerbose();
+    public static void main(String[] args)
+    {
+        try
+        {
+            String p_gxml = "<bpt erasable=\"yes\" i=\"1\" type=\"bold\" x=\"1\">&lt;b&gt;</bpt>Welocalize - About Us<ept i=\"1\">&lt;/b&gt;</ept>";
+            String target = "[u]Welocalize - About Us test[/u]";
+
+            OnlineTagHelper helper = new OnlineTagHelper();
+            helper.setInputSegment(p_gxml, "", "html");
+
+            String compact = helper.getCompact();
+            System.out.println("compact :: " + compact);
+            String compactColoredTags = helper.makeCompactColoredPtags(p_gxml);
+            System.out.println("compactColoredTags :: " + compactColoredTags);
+
+            String verbose = helper.getVerbose();
             System.out.println("verbose :: " + verbose);
-            String aa = targetTagHelper.getPtagToNativeMappingTable();
+            String verboseColoredPtags = helper.makeVerboseColoredPtags(p_gxml);
+            System.out.println("verboseColoredPtags :: " + verboseColoredPtags);
+
+            String aa = helper.getPtagToNativeMappingTable();
             System.out.println("detailed :: " + aa);
-        } catch (Exception e){
+
+            String trgGxml = helper.getTargetDiplomat(target);
+            System.out.println("trgGxml :: " + trgGxml);
+
+            String ptagString = helper.getPtagString();
+            System.out.println("ptagString :: " + ptagString);
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
     }

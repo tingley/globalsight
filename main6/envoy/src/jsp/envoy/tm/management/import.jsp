@@ -460,7 +460,7 @@ function doOnLoad()
 
 <%-- We wrap the form around the file only. --%>
 <FORM NAME="oForm" ACTION="" ENCTYPE="multipart/form-data" METHOD="post">
-
+<INPUT TYPE="hidden" NAME="importoptions" VALUE="ImportOptions XML goes here" />
 <DIV style="margin-bottom: 12px"><%=bundle.getString("lb_select_import_file")%><BR>
 <INPUT TYPE="file" NAME="filename" id="idFilename"
  onchange="checkExtension(this.value)" SIZE=40></INPUT>
@@ -472,9 +472,6 @@ function doOnLoad()
 <BR><BR>
 </DIV>
 
-
-<INPUT TYPE="hidden" NAME="importoptions"
- VALUE="ImportOptions XML goes here"></INPUT>
 </FORM>
 
 <FORM NAME="oDummyForm">

@@ -39,8 +39,6 @@ import org.dom4j.Node;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.page.TmxUtil;
 import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.Tm;
@@ -130,17 +128,10 @@ public class TmxWriter implements IWriter
     public void writeHeader(SessionInfo p_session) throws IOException
     {
         m_filename = m_options.getFileName();
-        String companyId = CompanyThreadLocal.getInstance().getValue();
         String directory = ExportUtil.getExportDirectory();
+        new File(directory).mkdirs();
 
-        if (!companyId.equals(CompanyWrapper.SUPER_COMPANY_ID))
-        {
-            directory = directory
-                    + CompanyWrapper.getCompanyNameById(companyId);
-            new File(directory).mkdir();
-        }
         String encoding = m_options.getJavaEncoding();
-
         if (encoding == null || encoding.length() == 0)
         {
             throw new IOException("invalid encoding " + m_options.getEncoding());

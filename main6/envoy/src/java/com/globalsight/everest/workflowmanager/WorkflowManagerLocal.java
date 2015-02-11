@@ -1251,20 +1251,11 @@ public class WorkflowManagerLocal implements WorkflowManager
         downloadParams.setAutoActionNodeEmail(p_nodeEmail);
 
         String directory = ExportUtil.getExportDirectory();
-        String companyId = CompanyThreadLocal.getInstance().getValue();
-        String companyName = ServerProxy.getJobHandler()
-                .getCompanyById(Long.parseLong(companyId)).getName();
+        new File(directory).mkdirs();
 
-        File filePath = new File(directory + companyName);
-
-        if (!filePath.exists())
-        {
-            filePath.mkdir();
-        }
-
-        File temp = new File(directory + companyName + "\\\\",
-                p_job.getJobName() + "_" + task.getSourceLocale() + "_"
-                        + task.getTargetLocale() + ".zip");
+		File temp = new File(directory + "\\\\", p_job.getJobName() + "_"
+				+ task.getSourceLocale() + "_" + task.getTargetLocale()
+				+ ".zip");
 
         JobPackageZipper zipper = new JobPackageZipper();
         zipper.createZipFile(temp);

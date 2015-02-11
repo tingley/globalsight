@@ -72,6 +72,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
@@ -87,6 +88,9 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -1173,7 +1177,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
             DataValidationConstraint dvConstraint,
             CellRangeAddressList addressList)
     {
-        if (addressList == null || addressList.getSize() == 0)
+        if (addressList == null || addressList.countRanges() == 0)
             return;
 
         DataValidation validationOne = dvHelper.createValidation(dvConstraint,
@@ -1274,25 +1278,66 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
     }
     
     private String getSegment(PseudoData pData, Tuv tuv, long companyId,
-    		 boolean m_rtlLocale)
+            boolean m_rtlLocale)
     {
-    	String content = "";
-    	try{
-        	pData.setAddables(tuv.getDataType(companyId));
-        	TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(),
-        			pData);
-        	content = pData.getPTagSourceString();            	
-        }catch (Exception e) {
+        StringBuffer content = new StringBuffer();
+        String dataType = null;
+        try
+        {
+            dataType = tuv.getDataType(companyId);
+            pData.setAddables(dataType);
+            TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+            content.append(pData.getPTagSourceString());
+
+            // If there are subflows, output them too.
+            List subFlows = tuv.getSubflowsAsGxmlElements();
+            if (subFlows != null && subFlows.size() > 0)
+            {
+                long tuId = tuv.getTuId();
+                for (int i = 0; i < subFlows.size(); i++)
+                {
+                    GxmlElement sub = (GxmlElement) subFlows.get(i);
+                    String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                    content.append("\r\n#").append(tuId).append(":")
+                            .append(subId).append("\n")
+                            .append(getCompactPtagString(sub, dataType));
+                }
+            }
+        }
+        catch (Exception e)
+        {
             logger.error(tuv.getId(), e);
         }
+
+        String result = content.toString();
         if (m_rtlLocale)
         {
-        	content = EditUtil.toRtlString(content);
+            result = EditUtil.toRtlString(result);
         }
-        return content;
+        return result;
     }
 
-    /**
+   private String getCompactPtagString(GxmlElement p_gxmlElement,
+           String p_dataType)
+   {
+       String compactPtags = null;
+       OnlineTagHelper applet = new OnlineTagHelper();
+       try
+       {
+           String seg = GxmlUtil.getInnerXml(p_gxmlElement);
+           applet.setDataType(p_dataType);
+           applet.setInputSegment(seg, "", p_dataType);
+           compactPtags = applet.getCompact();
+       }
+       catch (Exception e)
+       {
+           logger.info("getCompactPtagString Error.", e);
+       }
+
+       return compactPtags;
+   }
+
+   /**
      * Create Report File.
      */
     protected File getFile(String p_reportType, Job p_job, Workbook p_workBook)

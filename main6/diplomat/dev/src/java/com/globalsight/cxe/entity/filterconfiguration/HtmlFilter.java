@@ -369,7 +369,7 @@ public class HtmlFilter implements Filter
         return FilterConstants.HTML_TABLENAME;
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from HtmlFilter hf where hf.filterName =:filterName and hf.companyId=:companyId";
         Map map = new HashMap();
@@ -378,6 +378,16 @@ public class HtmlFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from HtmlFilter hf where hf.id<>:filterId and hf.filterName =:filterName and hf.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
     public ArrayList<Filter> getFilters(long companyId)
     {
         ArrayList<Filter> filters = null;

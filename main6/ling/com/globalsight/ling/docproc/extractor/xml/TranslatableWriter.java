@@ -67,8 +67,22 @@ class TranslatableWriter extends OutputWriter
             }
             else
             {
-                output.addTranslatableTmx(toAdd, getSid(),
+                // For prefix and suffix spaces, output them to skeleton so that
+                // there will be no line break or space in translatable segment.
+                String preBlank = getPrefixBlank(toAdd);
+                String sufBlank = getSuffixBlank(toAdd);
+                if (preBlank != null && preBlank.length() > 0)
+                {
+                    output.addSkeleton(preBlank);
+                }
+
+                output.addTranslatableTmx(toAdd.trim(), getSid(),
                         isPreserveWhiteSpace(), output.getDataFormat());
+
+                if (sufBlank != null && sufBlank.length() > 0)
+                {
+                    output.addSkeleton(sufBlank);
+                }
             }
         }
     }

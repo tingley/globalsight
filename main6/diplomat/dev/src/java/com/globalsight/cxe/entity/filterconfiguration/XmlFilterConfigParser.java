@@ -19,10 +19,12 @@ package com.globalsight.cxe.entity.filterconfiguration;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -199,10 +201,50 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 		m_rootElement = m_document.getDocumentElement();
 	}
 
-	public String documentToStr(String p_elementName, String p_value)
+	public String getNewConfigXmlStr(String p_elementName, String p_value)
 			throws Exception
 	{
 		setSingleElementValue(p_elementName, p_value);
+		String newConfigXmlStr = documentToStr();
+		return newConfigXmlStr;
+	}
+
+	public String getNewConfigXmlStr(Map<Long, Long> htmlFilterIdMap)
+			throws Exception
+	{
+		Element cdataPostfilterTagsNode = getSingleElement(NODE_CDATA_POST_FILTER_TAGS);
+		NodeList arrayNodes = cdataPostfilterTagsNode.getChildNodes();
+		for (int i = 0; i < arrayNodes.getLength(); i++)
+		{
+			Element arrayElement = (Element) arrayNodes.item(i);
+			NodeList list = arrayElement.getElementsByTagName("postFilterId");
+			if (list != null && list.getLength() > 0)
+			{
+				Element postFilterIdElement = (Element) list.item(0);
+				if (postFilterIdElement != null
+						|| postFilterIdElement.getFirstChild() != null)
+				{
+					String postFilterId = postFilterIdElement.getFirstChild()
+							.getNodeValue();
+					if (htmlFilterIdMap.containsKey(Long
+							.parseLong(postFilterId)))
+					{
+						String newId = String.valueOf(htmlFilterIdMap.get(Long
+								.parseLong(postFilterId)));
+						postFilterIdElement.getFirstChild().setNodeValue(newId);
+					}
+				}
+			}
+		}
+		String newConfigXmlStr = documentToStr();
+		if(newConfigXmlStr == null)
+			return null;
+		
+		return newConfigXmlStr;
+	}
+
+	public String documentToStr() throws Exception
+	{
 		String returnStr = null;
 		StringWriter strWtr = new StringWriter();
 		StreamResult strResult = new StreamResult(strWtr);
@@ -223,7 +265,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 		}
 		return returnStr;
 	}
-
+	
 	public String getExtendedWhiteSpaceChars()
 	{
 		if (m_extendedWhiteSpaceChars == null)
@@ -426,6 +468,23 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 		}
 
 		return "true".equalsIgnoreCase(m_isGerateLangInfo);
+	}
+	
+	public List<String> getPostFilterIdAndName()
+	{
+		List<String> returnList = new ArrayList<String>();
+		Element cdataPostfilterTagsNode = getSingleElement(NODE_CDATA_POST_FILTER_TAGS);
+		NodeList arrayNodes = cdataPostfilterTagsNode.getChildNodes();
+		for (int i = 0; i < arrayNodes.getLength(); i++)
+		{
+			Element arrayElement = (Element) arrayNodes.item(i);
+			String postFilterId = getSingleElementValue(arrayElement,
+					"postFilterId");
+			String postFilterTableName = getSingleElementValue(arrayElement,
+					"postFilterTableName");
+			returnList.add(postFilterId + "," + postFilterTableName);
+		}
+		return returnList;
 	}
 
 	public String getWhiteSpacePreserveTagsJson()

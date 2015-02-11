@@ -101,7 +101,8 @@ function submitForm(action)
     $("#selectedFileList").val(selectedFiles);
  
     // Go to the Download Applet screen
-    downloadFilesForm.action = "<%=downloadAppletURL%>" + "&action=download&taskId="+<%=taskId%>+"&state="+<%=taskState%>;
+	var isChecked = $("#includeLocaleCheckbox").is(":checked"); 
+    downloadFilesForm.action = "<%=downloadAppletURL%>" + "&action=download&taskId="+<%=taskId%>+"&state="+<%=taskState%>+"&isChecked="+isChecked;
     downloadFilesForm.submit();
 }
 
@@ -208,6 +209,12 @@ function cancelButton(){
 	<td style="width:1px"></td>
 	<td style="border:1px solid black;background-color:#738eb5;">
 		<input type="button" id="collapseBtn" class="button_out" style="background-image:url('/globalsight/includes/dtree_checkbox/img/collapse_all.gif')" title="Collapse All">
+	</td>
+	<td style="width:6px"></td>
+		<td align="center">
+		<input type="checkbox" id="includeLocaleCheckbox" >
+	</td>
+	<td CLASS=standardText><%=bundle.getString("lb_include_language_when_download")%>
 	</td>
 </tr>
 <tr><td style="height:3px" colspan="7"></td></tr>

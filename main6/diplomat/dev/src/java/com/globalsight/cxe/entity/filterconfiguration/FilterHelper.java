@@ -110,12 +110,20 @@ public class FilterHelper
 		return sb.toString();
 	}
 
-	public static boolean checkExist(String filterTableName, String filterName,
+	public static boolean checkExistNew(String filterTableName, String filterName,
 			long companyId)
 	{
 		Filter filter = MapOfTableNameAndSpecialFilter
 				.getFilterInstance(filterTableName);
-		return filter.checkExists(filterName, companyId);
+		return filter.checkExistsNew(filterName, companyId);
+	}
+	
+	public static boolean checkExistEdit(long filterId, String filterTableName, String filterName,
+			long companyId)
+	{
+		Filter filter = MapOfTableNameAndSpecialFilter
+				.getFilterInstance(filterTableName);
+		return filter.checkExistsEdit(filterId, filterName, companyId);
 	}
 
 	public static long saveJavaPropertiesFilter(String filterName,
@@ -138,14 +146,14 @@ public class FilterHelper
 		return filter.getId();
 	}
 
-	public static long updateJavaPropertiesFilter(String filterName,
+	public static long updateJavaPropertiesFilter(long fId, String filterName,
 			String filterDesc, boolean isSupportSid, boolean isUnicodeEscape,
 			boolean isPreserveSpaces, long companyId, long secondFilterId,
 			String secondFilterTableName, JSONArray internalTexts)
 	{
 		JavaPropertiesFilter filter = null;
-		String hql = "from JavaPropertiesFilter jp where jp.filterName='"
-				+ filterName + "'";
+		String hql = "from JavaPropertiesFilter jp where jp.id='"
+				+ fId + "'";
 		if (HibernateUtil.search(hql).size() > 0)
 		{
 			filter = (JavaPropertiesFilter) HibernateUtil.search(hql).get(0);
@@ -183,13 +191,13 @@ public class FilterHelper
 		return filter.getId();
 	}
 
-	public static long updateMSOfficeExcelFilter(String filterName,
+	public static long updateMSOfficeExcelFilter(long fId, String filterName,
 			String filterDesc, long companyId, boolean altTranslate,
 			boolean tabNamesTranslate, long contentPostFilterId,
 			String contentPostFilterTableName)
 	{
-		String hql = "from MSOfficeExcelFilter me where me.filterName='"
-				+ filterName + "'";
+		String hql = "from MSOfficeExcelFilter me where me.id='"
+				+ fId + "'";
 		if (HibernateUtil.search(hql).size() > 0)
 		{
 			MSOfficeExcelFilter filter = (MSOfficeExcelFilter) HibernateUtil
@@ -221,12 +229,12 @@ public class FilterHelper
 		return filter.getId();
 	}
 
-	public static void updateJavaScriptFilter(String filterName,
+	public static void updateJavaScriptFilter(long filterId, String filterName,
 			String filterDesc, String jsFunctionText, long companyId,
 			boolean enableUnicodeEscape)
 	{
-		String hql = "from JavaScriptFilter js where js.filterName='"
-				+ filterName + "'";
+		String hql = "from JavaScriptFilter js where js.id='"
+				+ filterId + "'";
 		if (HibernateUtil.search(hql).size() > 0)
 		{
 			JavaScriptFilter filter = (JavaScriptFilter) HibernateUtil.search(

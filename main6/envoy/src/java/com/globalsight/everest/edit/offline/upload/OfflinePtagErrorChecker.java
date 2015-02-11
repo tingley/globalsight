@@ -49,14 +49,11 @@ import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.PageData;
 import com.globalsight.everest.edit.offline.page.UploadIssue;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
@@ -68,8 +65,10 @@ import com.globalsight.ling.tw.PseudoErrorChecker;
 import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.edit.SegmentUtil;
 import com.globalsight.util.edit.SegmentUtil2;
+import com.globalsight.util.gxml.GxmlElement;
 
 public class OfflinePtagErrorChecker implements Cancelable
 {
@@ -168,16 +167,17 @@ public class OfflinePtagErrorChecker implements Cancelable
     /**
      * Offline report file error checker.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public String checkAndSave(Map p_idSegmentMap, boolean p_adjustWS,
             long p_localeId, long companyId, User p_user) throws Exception
     {
-        TuvManager tuvManager = ServerProxy.getTuvManager();
         List tuvs = new ArrayList<Tuv>();
         Set tuIds = p_idSegmentMap.keySet();
         Iterator tuIdIterator = tuIds.iterator();
         long tuId = -1;
         Long tuIdLong = null;
         String segment = null;
+        boolean isChanged = false;
         PseudoData pTagData = new PseudoData();
         pTagData.setMode(PseudoConstants.PSEUDO_COMPACT);
         PseudoErrorChecker errorChecker = new PseudoErrorChecker();
@@ -201,87 +201,103 @@ public class OfflinePtagErrorChecker implements Cancelable
                 };
         		return null;
         	}
-        		
         	
             i++;
             updateProcess(n + m * i / size);
 
             tuIdLong = (Long) tuIdIterator.next();
             tuId = tuIdLong.longValue();
-            Tuv tuv = SegmentTuvUtil.getTuvByTuIdLocaleId(tuId, p_localeId,
+            Tuv trgTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(tuId, p_localeId,
                     companyId);
-            if (tuv.getDataType(companyId).toLowerCase().equals("html"))
+            TuImpl tu = (TuImpl) trgTuv.getTu(companyId);
+            Tuv srcTuv = tu.getSourceTuv(companyId);
+            String dataType = trgTuv.getDataType(companyId);
+            pTagData.setAddables(dataType);
+            // special treatment for html
+            if ("html".equalsIgnoreCase(dataType)
+                    && !"text".equalsIgnoreCase(tu.getTuType()))
             {
-                // sepecial treatment for html
-                pTagData.setAddables(tuv.getTu(companyId).getTuType()
-                        .equals("text") ? tuv.getDataType(companyId) : tuv
-                        .getTu(companyId).getTuType());
+                pTagData.setAddables(tu.getTuType());
             }
-            else
-            {
-                // all other non-html formats
-            	long leverageGroupId = tuv.getTu(companyId).getLeverageGroupId();
-	           	 SourcePage sp = ServerProxy.getPageManager()
-	                        .getSourcePageByLeverageGroupId(leverageGroupId);
-	           	 String path = sp.getExternalPageId().toLowerCase();
-	           	 if ("office-xml".equals(tuv.getDataType(companyId)))
-	           	 {
-	           		 pTagData.setAddables("office-xml");
-	           	 }
-	           	 else
-	           	 {
-	           		// all other non-html formats
-	                 pTagData.setAddables(tuv.getDataType(companyId));
-	           	 }
-            }
-            TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pTagData);
 
-            segment = (String) p_idSegmentMap.get(tuIdLong);
+            HashMap<String, String> allSrcGxmls = null;
+            HashMap<String, String> allTrgGxmls = null;
+            HashMap<String, String> allTrgCompactTrans = null;
 
             String errMsg = null;
+            segment = (String) p_idSegmentMap.get(tuIdLong);
             if (segment != null && segment != "")
             {
-                if (!pTagData.getPTagSourceString().equals(segment))
+                isChanged = false;
+                allTrgCompactTrans = splitSegFromTERWithSubs(segment, tuId, trgTuv);
+                allSrcGxmls = getAllGxmls(srcTuv);
+                allTrgGxmls = getAllGxmls(trgTuv);
+
+                // Keep compatible with old report, loose the check
+                if (allSrcGxmls.size() != allTrgCompactTrans.size()
+                        && allTrgCompactTrans.size() > 1)
                 {
-                	String content = tuv.getGxmlExcludeTopTags();
-                	TuImpl tu = (TuImpl) tuv.getTu(companyId);
-                	if (tu != null)
-                	{
-                		Tuv stuv = tu.getSourceTuv(companyId);
-                		if (stuv != null)
-                		{
-                			content = stuv.getGxmlExcludeTopTags();
-                		}
-                	}
-                	
-                	TmxPseudo.tmx2Pseudo(content, pTagData);
-                	
-                    pTagData.setPTagTargetString(segment);
-                    pTagData.setDataType(tuv.getDataType(companyId));
-                    if ((errMsg = errorChecker.check(pTagData, "",
-                            m_maxLengthGxml, m_gxmlEncoding,
-                            m_maxLengthNativeContent, m_nativeContentEncoding)) != null)
+                    hasError = true;
+                    m_errWriter.addSegmentErrorMsg(String.valueOf(tuId),
+                            "Missing main or sub translations");
+                    continue;
+                }
+
+                for (int j = 0; j < allTrgCompactTrans.size(); j++)
+                {
+                    String key = String.valueOf(j);
+                    String compactTrans = allTrgCompactTrans.get(key);
+                    String sourceGxml = allSrcGxmls.get(key);
+                    String targetGxml = allTrgGxmls.get(key);
+                    TmxPseudo.tmx2Pseudo(targetGxml, pTagData);
+                    // Compare original target and translation from TER report.
+                    if (compactTrans != null
+                            && !pTagData.getPTagSourceString().equals(compactTrans))
                     {
-                        hasError = true;
-                        m_errWriter.addSegmentErrorMsg(String.valueOf(tuId),
-                                errMsg.trim());
-                    }
-                    else
-                    {
-                        if (errorChecker.geStrInternalErrMsg().length() > 0)
+                        isChanged = true;
+                        TmxPseudo.tmx2Pseudo(sourceGxml, pTagData);
+                        pTagData.setPTagTargetString(compactTrans);
+                        pTagData.setDataType(dataType);
+                        // Tag check (TER translation VS source)
+                        if ((errMsg = errorChecker.check(pTagData, "",
+                                m_maxLengthGxml, m_gxmlEncoding,
+                                m_maxLengthNativeContent, m_nativeContentEncoding)) != null)
                         {
-                            List<String> seg = new ArrayList<String>();
-                            seg.add(tuIdLong.toString());
-                            seg.add(errorChecker.geStrInternalErrMsg());
-                            errorInternalList.add(seg);
+                            hasError = true;
+                            m_errWriter.addSegmentErrorMsg(String.valueOf(tuId),
+                                    errMsg.trim());
                         }
-                        
-                    	tuv.setGxmlExcludeTopTags(TmxPseudo.pseudo2Tmx(pTagData),
-                                companyId);
-                        tuv.setLastModifiedUser(p_user.getUserId());
-                        tuv.setState(TuvState.LOCALIZED);
-                        tuvs.add(tuv);
+                        else
+                        {
+                            if (errorChecker.geStrInternalErrMsg().length() > 0)
+                            {
+                                List<String> seg = new ArrayList<String>();
+                                seg.add(tuIdLong.toString());
+                                seg.add(errorChecker.geStrInternalErrMsg());
+                                errorInternalList.add(seg);
+                            }
+
+                            if (j == 0)//master segment
+                            {
+                                // Set changed master segment
+                                trgTuv.setGxmlExcludeTopTagsIgnoreSubflows(
+                                        TmxPseudo.pseudo2Tmx(pTagData), companyId);
+                                trgTuv.setLastModifiedUser(p_user.getUserId());
+                                trgTuv.setState(TuvState.LOCALIZED);
+                            }
+                            pTagData.reset();
+                        }
                     }
+                }
+                if (isChanged && !hasError && allTrgCompactTrans.size() > 1)
+                {
+                    allTrgCompactTrans.remove("0");
+                    // Set sub segments
+                    trgTuv.setSubflowsGxml(allTrgCompactTrans);
+                }
+                if (isChanged && !hasError)
+                {
+                    tuvs.add(trgTuv);
                 }
             }
         }
@@ -1166,6 +1182,85 @@ public class OfflinePtagErrorChecker implements Cancelable
             return;
 
         status.updateProcess(n);
+    }
+
+    private HashMap<String, String> getAllGxmls(Tuv tuv)
+    {
+        HashMap<String, String> allGxmls = new HashMap<String, String>();
+        allGxmls.put("0", tuv.getGxmlExcludeTopTags());
+        List subFlows = tuv.getSubflowsAsGxmlElements();
+        if (subFlows != null && subFlows.size() > 0)
+        {
+            for (int j = 0; j < subFlows.size(); j++)
+            {
+                GxmlElement ele = (GxmlElement) subFlows.get(j);
+                allGxmls.put(String.valueOf(j + 1), GxmlUtil.getInnerXml(ele));
+            }
+        }
+
+        return allGxmls;
+    }
+
+    /**
+     * For segment with subs, its content in COMPACT mode from TER report is like:
+     * [g1]this is the master content[/g1]
+     * 
+     * #66524:1
+     * Content for sub 1
+     * 
+     * #66524:2
+     * Content for sub 2
+     * 
+     */
+    private HashMap<String, String> splitSegFromTERWithSubs(String segment,
+            long tuId, Tuv tuv)
+    {
+        if (segment == null || tuv == null)
+            return null;
+
+        HashMap<String, String> results = new HashMap<String, String>();
+
+        int index = -1;
+        String tmp = segment;
+        List subFlows = tuv.getSubflowsAsGxmlElements();
+        if (subFlows != null && subFlows.size() > 0)
+        {
+            for (int i = 0; i < subFlows.size(); i++)
+            {
+                String key = "#" + tuId + ":" + (i+1);
+                index = tmp.indexOf(key);
+                if (index > -1)
+                {
+                    String str1 = tmp.substring(0, index);
+                    str1 = str1 == null ? "" : str1.trim();
+                    // We assume the main segment is always there.
+                    if (results.get("0") == null)
+                    {
+                        results.put("0", str1);
+                    }
+                    else
+                    {
+                        results.put(String.valueOf(i), str1);
+                    }
+                    tmp = tmp.substring(index + key.length());
+                }
+            }
+            if (segment.equals(tmp))
+            {
+                results.put("0", segment);
+            }
+            else
+            {
+                // the last sub segment
+                results.put(String.valueOf(subFlows.size()), tmp.trim());                
+            }
+        }
+        else
+        {
+            results.put("0", segment);
+        }
+
+        return results;
     }
 
     public OEMProcessStatus getStatus()

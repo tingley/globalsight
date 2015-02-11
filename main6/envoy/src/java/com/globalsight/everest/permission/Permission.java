@@ -55,6 +55,8 @@ public class Permission
     static public final String LOCALE_PAIRS_VIEW = "localePairs.view";
     static public final String LOCALE_PAIRS_REMOVE = "localePairs.remove";
     static public final String LOCALE_PAIRS_NEW = "localePairs.new";
+    static public final String LOCALE_PAIRS_EXPORT = "localePairs.export";
+    static public final String LOCALE_PAIRS_IMPORT = "localePairs.import";
     static public final String LOCALE_NEW = "locale.new";
     static public final String ACTIVITY_TYPES_VIEW = "activityTypes.view";
     static public final String ACTIVITY_TYPES_REMOVE = "activityTypes.remove";
@@ -1035,6 +1037,10 @@ public class Permission
         
         added = addPermission(397, REPORTS_LANGUAGE_SIGN_OFF_SIMPLE) || added;
 
+        //Export/Import Locale Pairs from server to server.
+        added = addPermission(398, LOCALE_PAIRS_EXPORT) || added;
+        added = addPermission(399, LOCALE_PAIRS_IMPORT) || added;
+        
         return added;
     }
 

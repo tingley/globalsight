@@ -55,6 +55,8 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
  */
 public class SaveAsFileServlet extends HttpServlet
 {
+    private static final long serialVersionUID = 1322251918171863486L;
+
     static public final int BUFSIZE = 4096;
 
     /**
@@ -72,8 +74,10 @@ public class SaveAsFileServlet extends HttpServlet
         String docHome = getInitParameter("docHome");
         String currentCompany = UserUtil.getCurrentCompanyName(p_request);
         String fileName = p_request.getParameter("file");
-        
-        if(p_request.getParameter("xliff") != null) {
+        String fileType = p_request.getParameter("fileType");
+
+        if(p_request.getParameter("xliff") != null)
+        {
             String DOCROOT = "/";
             SystemConfiguration sc = SystemConfiguration.getInstance();
 
@@ -88,9 +92,9 @@ public class SaveAsFileServlet extends HttpServlet
              
             String companyName = p_request.getParameter("companyName");
             docHome = DOCROOT + "/" + companyName;  
-
         }
-        else {
+        else
+        {
             CompanyThreadLocal.getInstance().setValue(currentCompany);
 
             // Security consideration. This servlet returns a file only in
@@ -105,17 +109,26 @@ public class SaveAsFileServlet extends HttpServlet
             {
         	    docHome = 
         		    AmbFileStoragePathUtils.getAlignerPackageDir().getAbsolutePath();
-            }else if (p_request.getServletPath().equals("/downloadresource")) {
+            }
+            else if (p_request.getServletPath().equals("/downloadresource"))
+            {
                 // do nothing
-            }else {
-                if(!CompanyWrapper.getCompanyIdByName(currentCompany).
-            	    equals(CompanyWrapper.SUPER_COMPANY_ID))
-                {
-            	   docHome = docHome + "/" + currentCompany;
-                }
+            }
+            else if("tm".equalsIgnoreCase(fileType))
+            {
+                String companyId = CompanyWrapper.getCompanyIdByName(currentCompany);
+                docHome = AmbFileStoragePathUtils.getFileStorageDirPath(companyId);
+                docHome += File.separator + AmbFileStoragePathUtils.TM_EXPORT_FILE_SUB_DIR;
+            }
+            else 
+            {
+            	if(!CompanyWrapper.getCompanyIdByName(currentCompany).
+            			equals(CompanyWrapper.SUPER_COMPANY_ID))
+            	{
+            		docHome = docHome + "/" + currentCompany;
+            	}
             }
         }
-
         File file = new File(docHome, fileName);
 
         String zipParam = p_request.getParameter("zip");

@@ -1859,26 +1859,31 @@ public abstract class JobManagementHandler extends PageHandler
     		{      	
     			sessionMgr.setMyjobsAttribute("jobIdFilter", jobIdFilter);
     		}
+    		
     		String jobIdOption = p_request.getParameter("io");
     		if(jobIdOption != null)
     		{      	
     			sessionMgr.setMyjobsAttribute("jobIdOption", jobIdOption);
     		}
+    		
     		String jobNameFilter = p_request.getParameter("nf");
     		if(jobNameFilter != null)
     		{       	
     			sessionMgr.setMyjobsAttribute("jobNameFilter", jobNameFilter);
     		}
+    		
     		String jobProjectFilter = p_request.getParameter("po");
     		if(jobProjectFilter != null)
     		{
     			sessionMgr.setMyjobsAttribute("jobProjectFilter", jobProjectFilter);
     		}
+    		
     		String sourceLocaleFilter = p_request.getParameter("sl");
     		if(sourceLocaleFilter != null)
     		{
     			sessionMgr.setMyjobsAttribute("sourceLocaleFilter", sourceLocaleFilter);
     		}
+    		
     		String npp = p_request.getParameter("npp");
     		boolean isNewNpp = false;
     		if(npp != null)
@@ -1891,12 +1896,19 @@ public abstract class JobManagementHandler extends PageHandler
     			}
     			sessionMgr.setMyjobsAttribute("numPerPage", Integer.valueOf(npp));
     		}
+    		
     		String jobListStart = p_request.getParameter("jobListStart");
     		if(isNewNpp)
     			jobListStart = "0";
     		if(jobListStart != null)
     		{
     			sessionMgr.setMyjobsAttribute("jobListStart", jobListStart);
+    		}
+    		
+    		String priorityFilter = p_request.getParameter("pro");
+    		if(priorityFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("priorityFilter", priorityFilter);
     		}
     	}
     	else 
@@ -1910,8 +1922,75 @@ public abstract class JobManagementHandler extends PageHandler
     			sessionMgr.setMyjobsAttribute("jobProjectFilter", "-1");
     			sessionMgr.setMyjobsAttribute("sourceLocaleFilter", "-1");
     			sessionMgr.setMyjobsAttribute("jobListStart", "0");
+    			sessionMgr.setMyjobsAttribute("priorityFilter", "");
+    			sessionMgr.setMyjobsAttribute("creationStartFilter", "");
+    			sessionMgr.setMyjobsAttribute("creationStartOptionsFilter", "-1");
+    			sessionMgr.setMyjobsAttribute("creationEndFilter", "");
+    			sessionMgr.setMyjobsAttribute("creationEndOptionsFilter", "-1");
+    			sessionMgr.setMyjobsAttribute("completionStartFilter", "");
+    			sessionMgr.setMyjobsAttribute("completionStartOptionsFilter", "-1");
+    			sessionMgr.setMyjobsAttribute("completionEndFilter", "");
+    			sessionMgr.setMyjobsAttribute("completionEndOptionsFilter", "-1");
+    			sessionMgr.setMyjobsAttribute("exportDateStartFilter", "");
+    			sessionMgr.setMyjobsAttribute("exportDateStartOptionsFilter", "-1");
+    			sessionMgr.setMyjobsAttribute("exportDateEndFilter", "");
+    			sessionMgr.setMyjobsAttribute("exportDateEndOptionsFilter", "-1");
     		}
 		}
+    	
+    	if(p_request.getParameter("fromRequest") != null)
+    	{
+    		String creationStartFilter = p_request.getParameter("csf");
+    		if(creationStartFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("creationStartFilter", creationStartFilter);
+    			sessionMgr.setMyjobsAttribute("creationStartOptionsFilter", p_request.getParameter("cso"));
+    		}
+    		
+    		String creationEndOptionsFilter = p_request.getParameter("ceo");
+    		if(creationEndOptionsFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("creationEndFilter", p_request.getParameter("cef"));
+    			sessionMgr.setMyjobsAttribute("creationEndOptionsFilter", creationEndOptionsFilter);
+    		}
+    		
+    		String completionStartFilter = p_request.getParameter("esf");
+    		if(completionStartFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("completionStartFilter", completionStartFilter);
+    			sessionMgr.setMyjobsAttribute("completionStartOptionsFilter", p_request.getParameter("eso"));
+    		}
+    		
+    		String completionEndOptionsFilter = p_request.getParameter("eeo");
+    		if(completionEndOptionsFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("completionEndFilter", p_request.getParameter("eef"));
+    			sessionMgr.setMyjobsAttribute("completionEndOptionsFilter", completionEndOptionsFilter);
+    		}
+    		
+    		String exportDateStartFilter = p_request.getParameter("edss");
+    		if(exportDateStartFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("exportDateStartFilter", exportDateStartFilter);
+    			sessionMgr.setMyjobsAttribute("exportDateStartOptionsFilter", p_request.getParameter("edso"));
+    		}
+    		
+    		String exportDateEndOptionsFilter = p_request.getParameter("edes");
+    		if(exportDateEndOptionsFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("exportDateEndFilter", p_request.getParameter("edee"));
+    			sessionMgr.setMyjobsAttribute("exportDateEndOptionsFilter", exportDateEndOptionsFilter);
+    		}
+    	}
+    	
+    	String advancedSearch = p_request.getParameter("advancedSearch");
+    	if(advancedSearch != null)
+    	{
+    		if(advancedSearch.equals("true"))
+    			sessionMgr.setMyjobsAttribute("advancedSearch", "false");
+    		else
+    			sessionMgr.setMyjobsAttribute("advancedSearch", "true");
+    	}
     }
     
     protected void setJobProjectsLocales(SessionManager sessionMgr, HttpSession session)

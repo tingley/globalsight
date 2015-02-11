@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.io.BufferedReader;
@@ -17,7 +33,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -30,6 +45,7 @@ import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -248,7 +264,7 @@ public class JobSummaryHelper
     private int getPageCount(String safeBaseFilename, String soureLocale,
             String fileType)
     {
-        File appXmlFile = getOffice2010AppXmlFile(safeBaseFilename, soureLocale);
+        File appXmlFile = getOffice2010AppXmlFile(safeBaseFilename, soureLocale,fileType);
 
         String appXmlFileContent = readOffice2010AppXmlFile(appXmlFile);
 
@@ -262,7 +278,7 @@ public class JobSummaryHelper
 	 * @return File
 	 */
     private File getOffice2010AppXmlFile(String safeBaseFileName,
-            String soureLocale)
+            String soureLocale,String fileType)
     {
         StringBuffer soureLocalePath = new StringBuffer();
         // Get the storage dir for company base on the parameter p_companyId
@@ -273,19 +289,28 @@ public class JobSummaryHelper
                 .append(File.separator);
 
         StringBuffer appXmlPath = new StringBuffer();
-        File file = null;
-        for (int suffix = 0;; suffix++)
+        StringBuilder path = new StringBuilder();
+        path.append(soureLocalePath.toString());
+        path.append(safeBaseFileName);
+        path.append(".");
+        if ("docx".equals(fileType))
         {
-            StringBuffer path = new StringBuffer();
-            path.append(soureLocalePath.toString());
-            path.append(safeBaseFileName + "." + suffix);
-            file = new File(path.toString());
-            if (file.exists() && file.isDirectory())
-            {
-                appXmlPath.append(path);
-                break;
-            }
+           path.append(OfficeXmlHelper.OFFICE_DOCX);
         }
+        else if ("pptx".equals(fileType))
+        {
+           path.append(OfficeXmlHelper.OFFICE_PPTX);
+        }
+        File file = new File(path.toString());
+        if (file.exists() && file.isDirectory())
+        {
+            appXmlPath.append(path);
+        }
+        else
+        {
+            return null;
+        }
+
         appXmlPath.append(File.separator).append("docProps")
                 .append(File.separator).append("app.xml");
         File appXmlFile = new File(appXmlPath.toString());
@@ -324,6 +349,8 @@ public class JobSummaryHelper
     {
         try
         {
+        	if(appXml == null)
+        		return 0;
             StringReader sr = new StringReader(appXml);
             InputSource is = new InputSource(sr);
             DOMParser parser = new DOMParser();

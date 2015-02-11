@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.msoffice.ExcelFileManager;
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlRepairer;
 import com.globalsight.cxe.adapter.msoffice.PptxFileManager;
@@ -234,6 +235,12 @@ public class PreviewPageHandler extends PageHandler
                             {
                                 PptxFileManager m = new PptxFileManager();
                                 m.splitFile(zipDir.getPath());
+                            }
+                            else if (odFile.getPath().toLowerCase()
+                                    .endsWith(".xlsx"))
+                            {
+                                ExcelFileManager m = new ExcelFileManager();
+                                m.mergeSortSegments(zipDir.getPath());
                             }
                             
                             writeXMLFileForOffice(p_request, userid, state);

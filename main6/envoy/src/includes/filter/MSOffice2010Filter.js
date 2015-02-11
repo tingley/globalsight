@@ -8,6 +8,7 @@ function MSOffice2010Filter()
 	this.characterStyles = "unextractableWordCharacterStyles";
 	this.excelCellStyles = "unextractableExcelCellStyles";
 	this.internalTextStyles = "selectedInternalTextStyles";
+	this.excelOrder = "n";
 	
 	this.defaultUnextractableWordParagraphStyles = "DONOTTRANSLATE_para,tw4winExternal";
 	this.defaultUnextractableWordCharacterStyles = "DONOTTRANSLATE_char,tw4winInternal";
@@ -66,7 +67,7 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	var str = new StringBuffer("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label>");
-	str.append("<input type='text' style='width:340px' maxlength='"+maxFilterNameLength+"' id='o2010FilterName' value='" + this.filter.filterName + "' disabled>");
+	str.append("<input type='text' style='width:340px' maxlength='"+maxFilterNameLength+"' id='o2010FilterName' value='" + this.filter.filterName + "' >");
 	str.append("<br/>");
 	str.append("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
@@ -180,6 +181,11 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	str.append("</tr>");
 	
 	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsExcelOrder + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateExcelOrder(this.filter) + "</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>");
 	str.append(jsContentPostFilter);
 	str.append("</td>");
@@ -255,6 +261,21 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	saveMSOffice2010DocFilter.topFilterId = topFilterId;
 	
 	this.setDeleteButtonStyle();
+}
+
+MSOffice2010Filter.prototype.generateExcelOrder = function (filter)
+{
+	var str = new StringBuffer("");
+		
+	str.append("<nobr><input value='n' type='radio' name='excelOrder'" + ((filter) ? (( filter.excelOrder == "n") ? " checked" : "") : " checked") + ">" 
+				+ fontTagS + jsExcelOrderNo +fontTagE);
+	str.append("&nbsp;&nbsp;");
+	str.append("<nobr><input value='r' type='radio' name='excelOrder'" + ((filter && filter.excelOrder == "r") ? " checked" : "") + ">" 
+				+ fontTagS + jsExcelOrderRow +fontTagE);
+	str.append("&nbsp;&nbsp;");
+	str.append("<nobr><input value='c' type='radio' name='excelOrder'" + ((filter && filter.excelOrder == "c") ? " checked" : "") + ">" 
+				+ fontTagS + jsExcelOrderColumn +fontTagE);
+	return str.toString();
 }
 
 MSOffice2010Filter.prototype.setPageValue = function()
@@ -372,6 +393,11 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	str.append("</tr>");
 	
 	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsExcelOrder + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateExcelOrder(this.filter) + "</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>");
 	str.append(jsContentPostFilter);
 	str.append("</td>");
@@ -379,6 +405,7 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	str.append(this.generateContentPostFilter(filter));
 	str.append("</td>");
 	str.append("</tr>");
+	
 	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>");
@@ -1307,7 +1334,8 @@ function saveMSOffice2010DocFilter()
         alert(exceedFilterName + maxFilterNameLength);
         return;
     }
-	
+    var isNew = (saveMSOffice2010DocFilter.edit) ? "false" : "true";
+	var filterId = saveMSOffice2010DocFilter.filterId;
 	var filterDesc = document.getElementById("o2010FilterDesc").value;
 	var headerTranslate = document.getElementById("headerTranslate").checked;
 	var footendnoteTranslate = document.getElementById("footendnoteTranslate").checked;
@@ -1324,6 +1352,7 @@ function saveMSOffice2010DocFilter()
 	var xmlFilterIdAndTableName = document.getElementById("xmlFilterSelect").value;
 	var splitedXmlIdTable = splitByFirstIndex(xmlFilterIdAndTableName, "-");
 	var xmlFilterId = (splitedXmlIdTable) ? splitedXmlIdTable[0] : -2;
+	var excelOrder = getRadioValue(fpForm.excelOrder);
 	var contentPostFilterIdAndTableName = document.getElementById("office2010ContentPostFilterSelect").value;
 	var contentPostFilterIndex = contentPostFilterIdAndTableName.indexOf("-");
 	var contentPostFilterId = -2;
@@ -1338,7 +1367,9 @@ function saveMSOffice2010DocFilter()
 	alertUserBaseFilter(baseFilterId);
 	
 	var obj = {
+			isNew : isNew,
 			filterTableName:"office2010_filter",
+			filterId:filterId,
 			filterName:filterName,
 			filterDesc:filterDesc,
 			headerTranslate:headerTranslate,
@@ -1354,6 +1385,7 @@ function saveMSOffice2010DocFilter()
 			urlTranslate:urlTranslate,
 			tableOfContentTranslate:tableOfContentTranslate,
 			xmlFilterId:-2,
+			excelOrder:excelOrder,
 			unextractableWordParagraphStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.paragraphStyles],
 			unextractableWordCharacterStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.characterStyles],
 			unextractableExcelCellStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelCellStyles],
@@ -1368,17 +1400,9 @@ function saveMSOffice2010DocFilter()
 			baseFilterId:baseFilterId
 			};
 	
-	if(saveMSOffice2010DocFilter.edit)
-	{
-		closePopupDialog("msoffice2010FilterDialog");
-		sendAjax(obj, "updateMSOffice2010Filter", "updateMSOffice2010FilterCallback");
-	}
-	else
-	{
 		sendAjax(obj, "checkExist", "checkExistMSOffice2010FilterCallback");
-	}
 	
-	checkExistMSOffice2010FilterCallback.obj = obj;
+		checkExistMSOffice2010FilterCallback.obj = obj;
 }
 
 function checkExistMSOffice2010FilterCallback(data)
@@ -1386,11 +1410,18 @@ function checkExistMSOffice2010FilterCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("msoffice2010FilterDialog");
-		sendAjax(checkExistMSOffice2010FilterCallback.obj, "saveMSOffice2010Filter", "saveMSOffice2010FilterCallback");
+		if(saveMSOffice2010DocFilter.edit)
+		{
+			sendAjax(checkExistMSOffice2010FilterCallback.obj, "updateMSOffice2010Filter", "updateMSOffice2010FilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistMSOffice2010FilterCallback.obj, "saveMSOffice2010Filter", "saveMSOffice2010FilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistMSOffice2010FilterCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 
@@ -1432,6 +1463,7 @@ function updateMSOffice2010FilterCallback(data)
 		jpFilter.contentPostFilterId = checkExistMSOffice2010FilterCallback.obj.contentPostFilterId;
 		jpFilter.contentPostFilterTableName = checkExistMSOffice2010FilterCallback.obj.contentPostFilterTableName;
 		jpFilter.baseFilterId = checkExistMSOffice2010FilterCallback.obj.baseFilterId;
+		jpFilter.excelOrder = checkExistMSOffice2010FilterCallback.obj.excelOrder;
 
 		var specialFilters = updateSpecialFilter(saveMSOffice2010DocFilter.specialFilters, jpFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
@@ -1475,6 +1507,8 @@ function saveMSOffice2010FilterCallback(data)
 		jpFilter.contentPostFilterId = checkExistMSOffice2010FilterCallback.obj.contentPostFilterId;
 		jpFilter.contentPostFilterTableName = checkExistMSOffice2010FilterCallback.obj.contentPostFilterTableName;
 		jpFilter.baseFilterId = checkExistMSOffice2010FilterCallback.obj.baseFilterId;
+		jpFilter.excelOrder = checkExistMSOffice2010FilterCallback.obj.excelOrder;
+		
 		filter.specialFilters.push(jpFilter);
 	    reGenerateFilterList(topFilterId, filter.specialFilters, color);
 	}

@@ -1157,7 +1157,7 @@ HtmlFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 	var str = new StringBuffer("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label>");
-	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' style='width:345px' id='htmlFilterName' value='"+this.filter.filterName+"' disabled></input>");
+	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' style='width:345px' id='htmlFilterName' value='"+this.filter.filterName+"'></input>");
 	str.append("<br>");
 	
 	str.append("<label class='specialFilter_dialog_label'>");
@@ -1318,7 +1318,8 @@ function saveHtmlFilter()
 	    alert(exceedFilterName + maxFilterNameLength);
 	    return;
 	}
-	
+	var isNew = (saveHtmlFilter.edit) ? "false" : "true";
+	var filterId = saveHtmlFilter.filterId;
 	var filterDesc = document.getElementById("htmlFilterDesc").value;
 	var convertHtmlEntry = document.getElementById("convertHtmlEntry").checked;
 	var ignoreInvalideHtmlTags = document.getElementById("ignoreInvalideHtmlTags").checked;
@@ -1330,7 +1331,8 @@ function saveHtmlFilter()
 	//alertUserBaseFilter(baseFilterId);
 	
 	var obj = {
-		filterId : saveHtmlFilter.filterId,
+		isNew : isNew,
+		filterId : filterId,
 		filterTableName : "html_filter",
 		filterName : filterName,
 		filterDesc : filterDesc,
@@ -1366,15 +1368,7 @@ function saveHtmlFilter()
 		return;
 	}
 
-	if(saveHtmlFilter.edit)
-	{
-		closePopupDialog("htmlFilterDialog");
-		sendAjax(obj, "updateHtmlFilter", "updateHtmlFilterCallback")
-	}
-	else
-	{
-		sendAjax(obj, "checkExist", "checkExistHtmlFilterCallback");
-	}
+	sendAjax(obj, "checkExist", "checkExistHtmlFilterCallback");
 	
 	checkExistHtmlFilterCallback.obj = obj;
 
@@ -1385,7 +1379,14 @@ function checkExistHtmlFilterCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("htmlFilterDialog");
-		sendAjax(checkExistHtmlFilterCallback.obj, "saveHtmlFilter", "saveHtmlFilterCallback");
+		if(saveHtmlFilter.edit)
+		{
+			sendAjax(checkExistHtmlFilterCallback.obj, "updateHtmlFilter", "updateHtmlFilterCallback")
+		}
+		else
+		{
+			sendAjax(checkExistHtmlFilterCallback.obj, "saveHtmlFilter", "saveHtmlFilterCallback");
+		}
 	}
 	else
 	{

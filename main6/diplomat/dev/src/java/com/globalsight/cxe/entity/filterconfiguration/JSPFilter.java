@@ -108,7 +108,7 @@ public class JSPFilter implements Filter
         this.enableEscapeEntity = enableEscapeEntity;
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from JSPFilter jsp where jsp.filterName =:filterName and jsp.companyId=:companyId";
         Map map = new HashMap();
@@ -117,6 +117,16 @@ public class JSPFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from JSPFilter jsp where jsp.id<>:filterId and jsp.filterName =:filterName and jsp.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
     public String getFilterTableName()
     {
         return FilterConstants.JSP_TABLENAME;

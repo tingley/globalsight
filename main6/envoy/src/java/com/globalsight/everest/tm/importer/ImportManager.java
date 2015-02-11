@@ -38,7 +38,6 @@ import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.persistence.error.BatchException;
 import com.globalsight.ling.tm2.persistence.error.ErrorRecorder;
-import com.globalsight.ling.tm3.core.TM3ImportHelper;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.SessionInfo;
@@ -124,7 +123,6 @@ public class ImportManager extends IImportManagerImpl implements Serializable
 
         try
         {
-            tm.setFirstImporting(TM3ImportHelper.isFirstImporting(tm));
             while (m_reader.hasNext())
             {
                 result = m_reader.next();
@@ -269,7 +267,6 @@ public class ImportManager extends IImportManagerImpl implements Serializable
                 showStatus(counter, expectedEntries, message);
             }
 
-            tm.setFirstImporting(false);
             LOGGER.info("Done importing TM file " + getFileName());
         }
         catch (IOException ignore)

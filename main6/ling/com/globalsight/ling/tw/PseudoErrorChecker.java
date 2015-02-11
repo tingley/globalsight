@@ -280,7 +280,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
         try
         {
-            // level #1 - Check madatory and invalid tags
+            // level #1 - Check mandatory and invalid tags
             if (!isTrgTagListValid())
             {
                 return m_strErrMsg;
@@ -689,31 +689,34 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                 }
                 
                 // make i1 == i, nbsp1 == nbsp
-                if (!isEquals && strTrgTagName.startsWith(srcItemTag))
-                {
-                    String temp = strTrgTagName.substring(srcItemTag.length());
-                    try
-                    {
-                        long tt = Long.parseLong(temp);
-                        isEquals = true;
-                    }
-                    catch (Exception e)
-                    {
-                        isEquals = false;
-                    }
-                }
-                if (!isEquals && srcItemTag.startsWith(strTrgTagName))
-                {
-                    String temp = srcItemTag.substring(strTrgTagName.length());
-                    try
-                    {
-                        long tt = Long.parseLong(temp);
-                        isEquals = true;
-                    }
-                    catch (Exception e)
-                    {
-                        isEquals = false;
-                    }
+                if(checkTagName(srcItemTag, strTrgTagName))
+                {      	
+                	if (!isEquals && strTrgTagName.startsWith(srcItemTag))
+                	{
+                		String temp = strTrgTagName.substring(srcItemTag.length());
+                		try
+                		{
+                			long tt = Long.parseLong(temp);
+                			isEquals = true;
+                		}
+                		catch (Exception e)
+                		{
+                			isEquals = false;
+                		}
+                	}
+                	if (!isEquals && srcItemTag.startsWith(strTrgTagName))
+                	{
+                		String temp = srcItemTag.substring(strTrgTagName.length());
+                		try
+                		{
+                			long tt = Long.parseLong(temp);
+                			isEquals = true;
+                		}
+                		catch (Exception e)
+                		{
+                			isEquals = false;
+                		}
+                	}
                 }
 
                 if (isEquals)
@@ -942,6 +945,24 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
         m_PseudoData.resetAllSourceListNodes();
         return true;
+    }
+    
+    //check if the srcTag and trgTag are start with "i" or "nbsp".
+    private boolean checkTagName(String srcItemTag, String strTrgTagName)
+    {
+    	if(srcItemTag.startsWith("i") && 
+    			strTrgTagName.startsWith("i"))
+    	{
+    		return true;
+    	}
+    	
+    	if(srcItemTag.startsWith("nbsp") && 
+    			strTrgTagName.startsWith("nbsp"))
+    	{
+    		return true;
+    	}
+    	
+    	return false;
     }
 
     /**
@@ -1211,6 +1232,29 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         if (dataType.equals("office-xml"))
         {
             return true;
+        }
+        
+        // check if it is idml
+        if (dataType.equals("xml"))
+        {
+            if (m_PseudoData.m_hPseudo2TmxMap == null
+                    || m_PseudoData.m_hPseudo2TmxMap.size() == 0)
+            {
+                return false;
+            }
+            
+            java.util.Collection tags = m_PseudoData.m_hPseudo2TmxMap.values();
+            for (Object object : tags)
+            {
+                String tag = object.toString();
+                if (tag.contains("&lt;Content&gt;") || 
+                        tag.contains("&lt;CharacterStyleRange ") || 
+                        tag.contains("&lt;/Content&gt;") ||
+                        tag.contains("&lt;/CharacterStyleRange&gt;"))
+                {
+                    return true;
+                }
+            }
         }
 
         return false;

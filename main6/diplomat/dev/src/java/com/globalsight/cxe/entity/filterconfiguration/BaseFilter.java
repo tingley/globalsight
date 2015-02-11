@@ -51,7 +51,7 @@ public class BaseFilter implements Filter
         this.id = id;
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from BaseFilter bf where bf.filterName =:filterName and bf.companyId=:companyId";
         Map map = new HashMap();
@@ -60,6 +60,16 @@ public class BaseFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from BaseFilter bf where bf.id<>:filterId and bf.filterName =:filterName and bf.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
     public String getFilterTableName()
     {
         return FilterConstants.BASE_TABLENAME;

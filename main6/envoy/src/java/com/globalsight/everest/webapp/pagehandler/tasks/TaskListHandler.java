@@ -220,7 +220,9 @@ public class TaskListHandler extends PageHandler
         {
             if (getState && state != listParams.getTaskState())
             {
-                listParams.setFilters(new HashMap<String, String>());
+            	HashMap<String, String> filters = new HashMap<String, String>();
+            	filters.put("advancedSearch", listParams.getFilters().get("advancedSearch"));
+                listParams.setFilters(filters);
                 listParams.setPageNumber(1);
                 listParams.setSortColumn("jobId");
                 listParams.setAscSort(false);

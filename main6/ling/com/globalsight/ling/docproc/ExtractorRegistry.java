@@ -36,7 +36,7 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.extractor.java.Extractor",
         "com.globalsight.ling.docproc.extractor.css.Extractor",
         "com.globalsight.ling.docproc.extractor.css.StyleExtractor",
-        "com.globalsight.ling.docproc.extractor.xml.Extractor",             // for xml
+        "com.globalsight.ling.docproc.extractor.xml.XmlExtractor",             // for xml
         "com.globalsight.ling.docproc.extractor.xml.Extractor",             // for xsl
         "com.globalsight.ling.docproc.extractor.javaprop.Extractor",        // JavaProperties
         "com.globalsight.ling.docproc.extractor.javaprop.HtmlExtractor",
@@ -64,7 +64,7 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.extractor.po.Extractor",              // PO [29]
         "com.globalsight.ling.docproc.extractor.msoffice.OfficeXmlExtractor",
         "com.globalsight.ling.docproc.extractor.rc.Extractor",
-        "com.globalsight.ling.docproc.extractor.xml.Extractor",             // for resx
+        "com.globalsight.ling.docproc.extractor.xml.XmlExtractor",         // for RESX
         "com.globalsight.ling.docproc.extractor.idml.IdmlExtractor",             // IDML
         "com.globalsight.ling.docproc.extractor.fm.Extractor",               // for mif
         "com.globalsight.ling.docproc.extractor.passolo.PassoloExtractor",

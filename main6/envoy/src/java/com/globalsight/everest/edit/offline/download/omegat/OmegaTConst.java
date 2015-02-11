@@ -64,6 +64,7 @@ public class OmegaTConst
             
     public static String filter_xml = "";
 
+    public static String OMEGAT_QUICK_START = "OmegaT_Quick_Start.pdf";
     static
     {
         String fileName = "/properties/omegat_filters.xml.properties";

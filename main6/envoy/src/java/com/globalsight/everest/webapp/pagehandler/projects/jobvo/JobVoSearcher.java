@@ -408,6 +408,91 @@ public abstract class JobVoSearcher implements WebAppConstants
                 sp.setSourceLocale(ServerProxy.getLocaleManager()
                         .getLocaleById(Long.parseLong(buf)));
             }
+            
+            //piority
+            buf = (String) request.getParameter(JobSearchConstants.PRIORITY_OPTIONS);
+            if (buf != null && !buf.equals("null") && !buf.equals("-1"))
+            {
+            	sp.setPriority(buf);
+            }
+            
+            // Creation Date start num and condition
+            buf = (String) request
+                    .getParameter(JobSearchConstants.CREATION_START);
+            if (buf.trim().length() != 0)
+            {
+                sp.setCreationStart(new Integer(buf));
+                sp.setCreationStartCondition(request
+                        .getParameter(JobSearchConstants.CREATION_START_OPTIONS));
+            }
+
+            // Creation Date end num
+            buf = (String) request
+                    .getParameter(JobSearchConstants.CREATION_END);
+            if (buf.trim().length() != 0)
+            {
+                sp.setCreationEnd(new Integer(buf));
+            }
+
+            // Creation Date end condition
+            buf = (String) request
+                    .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
+            if (!buf.equals("-1"))
+            {
+                sp.setCreationEndCondition(buf);
+            }
+
+            // Completion Date start num and condition
+            buf = (String) request
+                    .getParameter(JobSearchConstants.EST_COMPLETION_START);
+            if (buf.trim().length() != 0)
+            {
+                sp.setEstCompletionStart(new Integer(buf));
+                sp.setEstCompletionStartCondition(request
+                        .getParameter(JobSearchConstants.EST_COMPLETION_START_OPTIONS));
+            }
+
+            // Completion Date end num
+            buf = (String) request
+                    .getParameter(JobSearchConstants.EST_COMPLETION_END);
+            if (buf.trim().length() != 0)
+            {
+                sp.setEstCompletionEnd(new Integer(buf));
+            }
+
+            // Completion Date end condition
+            buf = (String) request
+                    .getParameter(JobSearchConstants.EST_COMPLETION_END_OPTIONS);
+            if (!buf.equals("-1"))
+            {
+                sp.setEstCompletionEndCondition(buf);
+            }
+
+            // Export Date start num and condition
+            buf = (String) request
+                    .getParameter(JobSearchConstants.EXPORT_DATE_START);
+            if (buf.trim().length() != 0)
+            {
+                sp.setExportDateStart(new Integer(buf));
+                sp.setExportDateStartOptions(request
+                        .getParameter(JobSearchConstants.EXPORT_DATE_START_OPTIONS));
+            }
+
+            // Export Date end num
+            buf = (String) request
+                    .getParameter(JobSearchConstants.EXPORT_DATE_END);
+            if (buf.trim().length() != 0)
+            {
+                sp.setExportDateEnd(new Integer(buf));
+            }
+
+            // Export Date end condition
+            buf = (String) request
+                    .getParameter(JobSearchConstants.EXPORT_DATE_END_OPTIONS);
+            if (!buf.equals("-1"))
+            {
+                sp.setExportDateEndOptions(buf);
+            }
         }
         catch (Exception e)
         {
@@ -489,7 +574,73 @@ public abstract class JobVoSearcher implements WebAppConstants
                 sp.setSourceLocale(ServerProxy.getLocaleManager()
                         .getLocaleById(Long.parseLong(temp)));
             }
-
+            
+            temp = (String) sessionMgr.getMyjobsAttribute("creationStartFilter");
+            if (!temp.equals(""))
+            {
+                sp.setCreationStart(new Integer(temp));
+                sp.setCreationStartCondition((String) 
+                		sessionMgr.getMyjobsAttribute("creationStartOptionsFilter"));
+            }
+            
+            temp = (String) sessionMgr.getMyjobsAttribute("creationEndFilter");
+            if (!temp.equals(""))
+            {
+            	sp.setCreationEnd(new Integer(temp));
+                sp.setCreationEndCondition((String) 
+                		sessionMgr.getMyjobsAttribute("creationEndOptionsFilter"));
+            }
+            else if(SearchCriteriaParameters.NOW.equals((String) 
+                		sessionMgr.getMyjobsAttribute("creationEndOptionsFilter")))
+    		{
+            	sp.setCreationEndCondition((String) 
+                		sessionMgr.getMyjobsAttribute("creationEndOptionsFilter"));
+    		}
+            
+            temp = (String) sessionMgr.getMyjobsAttribute("completionStartFilter");
+            if (!temp.equals(""))
+            {
+                sp.setEstCompletionStart(new Integer(temp));
+                sp.setEstCompletionStartCondition((String) 
+                		sessionMgr.getMyjobsAttribute("completionStartOptionsFilter"));
+            }
+            
+            temp = (String) sessionMgr.getMyjobsAttribute("completionEndFilter");
+            if (!temp.equals(""))
+            {
+            	sp.setEstCompletionEnd(new Integer(temp));
+                sp.setEstCompletionEndCondition((String) 
+                		sessionMgr.getMyjobsAttribute("completionEndOptionsFilter"));
+            }
+            else if(SearchCriteriaParameters.NOW.equals((String) 
+                		sessionMgr.getMyjobsAttribute("completionEndOptionsFilter")))
+    		{
+            	sp.setEstCompletionEndCondition((String) 
+                		sessionMgr.getMyjobsAttribute("completionEndOptionsFilter"));
+    		}
+            
+            temp = (String) sessionMgr.getMyjobsAttribute("exportDateStartFilter");
+            if (!temp.equals(""))
+            {
+                sp.setExportDateStart(new Integer(temp));
+                sp.setExportDateStartOptions((String) 
+                		sessionMgr.getMyjobsAttribute("exportDateStartOptionsFilter"));
+            }
+            
+            temp = (String) sessionMgr.getMyjobsAttribute("exportDateEndFilter");
+            if (!temp.equals(""))
+            {
+            	sp.setExportDateEnd(new Integer(temp));
+                sp.setExportDateEndOptions((String) 
+                		sessionMgr.getMyjobsAttribute("exportDateEndOptionsFilter"));
+            }
+            else if(SearchCriteriaParameters.NOW.equals((String) 
+                		sessionMgr.getMyjobsAttribute("exportDateEndOptionsFilter")))
+    		{
+            	sp.setExportDateEndOptions((String) 
+                		sessionMgr.getMyjobsAttribute("exportDateEndOptionsFilter"));
+    		}
+            
             return sp;
         }
         catch (Exception e)

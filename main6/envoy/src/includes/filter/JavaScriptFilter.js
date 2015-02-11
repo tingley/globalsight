@@ -20,7 +20,7 @@ JavaScriptFilter.prototype.edit = function(filterId, color, specialFilters, topF
 	str.append(jsFilterName + ":");
 	str.append("</label>");
 	
-	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' class='filterName_small_dialog' id='javaScriptFilterName' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' class='filterName_small_dialog' id='javaScriptFilterName' value='" + this.filter.filterName + "'></input>");
 	str.append("<br/>");
 	
 	str.append("<label class='specialFilter_dialog_label'>");
@@ -91,6 +91,8 @@ JavaScriptFilter.prototype.generateDiv = function(topFilterId, color)
 function saveJavaScript()
 {
 	var validate = new Validate();
+	var isNew = (saveJavaScript.edit) ? "false" : "true";
+	var filterId = saveJavaScript.filterId;
 	var filterName = document.getElementById("javaScriptFilterName").value;
 	if(validate.isEmptyStr(filterName))
 	{
@@ -123,16 +125,9 @@ function saveJavaScript()
         return;
     }  
 	var enableUnicodeEscape = document.getElementById("enableUnicodeEscape").checked;
-	var obj = {filterTableName:"java_script_filter", filterName:filterName, filterDesc:filterDesc, jsFunctionText:jsFunctionText, companyId:companyId, enableUnicodeEscape:enableUnicodeEscape};
-	if(saveJavaScript.edit)
-	{
-		closePopupDialog("javaScriptFilterDialog");
-		sendAjax(obj, "updateJavaScriptFilter", "updateJavaScriptFilterCallback");
-	}
-	else
-	{
-		sendAjax(obj, "checkExist", "checkExistJavaScriptCallback");
-	}
+	var obj = {isNew:isNew, filterTableName:"java_script_filter", filterId:filterId, filterName:filterName, filterDesc:filterDesc, jsFunctionText:jsFunctionText, companyId:companyId, enableUnicodeEscape:enableUnicodeEscape};
+
+	sendAjax(obj, "checkExist", "checkExistJavaScriptCallback");
 	
 	checkExistJavaScriptCallback.obj = obj;
 }
@@ -142,11 +137,18 @@ function checkExistJavaScriptCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("javaScriptFilterDialog");
-		sendAjax(checkExistJavaScriptCallback.obj, "saveJavaScriptFilter", "saveJavaScriptFilterCallback");
+		if(saveJavaScript.edit)
+		{
+			sendAjax(checkExistJavaScriptCallback.obj, "updateJavaScriptFilter", "updateJavaScriptFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistJavaScriptCallback.obj, "saveJavaScriptFilter", "saveJavaScriptFilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistJavaScriptCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 

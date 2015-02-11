@@ -1,6 +1,7 @@
 <%@ page import='com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
           com.globalsight.everest.servlet.util.SessionManager,
           com.globalsight.everest.jobhandler.Job,
+          com.globalsight.util.StringUtil,
           com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper' %>
 
 <jsp:useBean id="miniSearch" scope="request"
@@ -22,6 +23,19 @@
     String nameField = JobSearchConstants.NAME_FIELD;
     String nameOptions = JobSearchConstants.NAME_OPTIONS;
     String statusOptions = JobSearchConstants.STATUS_OPTIONS;
+    
+    String creationStart = JobSearchConstants.CREATION_START;
+    String creationStartOptions = JobSearchConstants.CREATION_START_OPTIONS;
+    String creationEnd = JobSearchConstants.CREATION_END;
+    String creationEndOptions = JobSearchConstants.CREATION_END_OPTIONS;
+    String completionStart = JobSearchConstants.EST_COMPLETION_START;
+    String completionStartOptions = JobSearchConstants.EST_COMPLETION_START_OPTIONS;
+    String completionEnd = JobSearchConstants.EST_COMPLETION_END;
+    String completionEndOptions = JobSearchConstants.EST_COMPLETION_END_OPTIONS;
+    String exportDateStart = JobSearchConstants.EXPORT_DATE_START;
+    String exportDateStartOptions = JobSearchConstants.EXPORT_DATE_START_OPTIONS;
+    String exportDateEnd = JobSearchConstants.EXPORT_DATE_END;
+    String exportDateEndOptions = JobSearchConstants.EXPORT_DATE_END_OPTIONS;
 
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     List projects = (List)sessionManager.getMyjobsAttribute("projects");
@@ -31,6 +45,22 @@
     String jobNameFilter = (String)sessionManager.getMyjobsAttribute("jobNameFilter");
     String jobProjectFilter = (String)sessionManager.getMyjobsAttribute("jobProjectFilter");
     String sourceLocaleFilter = (String)sessionManager.getMyjobsAttribute("sourceLocaleFilter");
+    String priorityFilter = (String)sessionManager.getMyjobsAttribute("priorityFilter");
+    String creationStartFilter = (String)sessionManager.getMyjobsAttribute("creationStartFilter");
+    String creationStartOptionsFilter = (String)sessionManager.getMyjobsAttribute("creationStartOptionsFilter");
+    String creationEndFilter = (String)sessionManager.getMyjobsAttribute("creationEndFilter");			
+    String creationEndOptionsFilter = (String)sessionManager.getMyjobsAttribute("creationEndOptionsFilter");	
+    String completionStartFilter = (String)sessionManager.getMyjobsAttribute("completionStartFilter");
+    String completionStartOptionsFilter = (String)sessionManager.getMyjobsAttribute("completionStartOptionsFilter");
+    String completionEndFilter = (String)sessionManager.getMyjobsAttribute("completionEndFilter");
+    String completionEndOptionsFilter = (String)sessionManager.getMyjobsAttribute("completionEndOptionsFilter");
+    String exportDateStartFilter = (String)sessionManager.getMyjobsAttribute("exportDateStartFilter");
+    String exportDateStartOptionsFilter = (String)sessionManager.getMyjobsAttribute("exportDateStartOptionsFilter");
+    String exportDateEndFilter = (String)sessionManager.getMyjobsAttribute("exportDateEndFilter");
+    String exportDateEndOptionsFilter = (String)sessionManager.getMyjobsAttribute("exportDateEndOptionsFilter");
+    String advancedSearch = (String)sessionManager.getMyjobsAttribute("advancedSearch");
+    if(StringUtil.isEmpty(advancedSearch))
+    	advancedSearch = "false";
     int numPerPage = 20;
     if(sessionManager.getMyjobsAttribute("numPerPage") != null)
     	numPerPage = (Integer)sessionManager.getMyjobsAttribute("numPerPage");
@@ -39,37 +69,127 @@
 <p>
 
 <form name="searchForm" method="post" action="<%=miniSearchURL%>" style="margin:0px;padding:0px" >
-<table>
-    <tr>
-        <td class="standardText" style="padding-bottom: 2px">
-            <%=bundle.getString("lb_status")%>:
-        </td>
-        <td>
-            <select name="<%=statusOptions%>" id="<%=statusOptions%>">
-                <option value='<%=Job.PENDING%>'><%= bundle.getString("lb_pending") %></option>
-                <option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
-                <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
-                <option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
-                <option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
-                <option value='<%=Job.ARCHIVED%>'><%= bundle.getString("lb_archived") %></option>
-                <option value='<%=Job.ALLSTATUS%>'><%= bundle.getString("lb_all_status") %></option>
-            </select>
-        </td>
-        <td>
-            <input type="button" name="<%=bundle.getString("lb_search")%>"
-                    value="<%=bundle.getString("lb_search")%>"
-                    onclick='submitSearch()'>
-        </td>
-    </tr>
+    <div class="standardText" style="padding-bottom:2px">
+        <%=bundle.getString("lb_status")%>:
+        <select name="<%=statusOptions%>" id="<%=statusOptions%>">
+            <option value='<%=Job.PENDING%>'><%= bundle.getString("lb_pending") %></option>
+            <option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
+            <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
+            <option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
+            <option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
+            <option value='<%=Job.ARCHIVED%>'><%= bundle.getString("lb_archived") %></option>
+            <option value='<%=Job.ALLSTATUS%>'><%= bundle.getString("lb_all_status") %></option>
+        </select>
+        <input type="button" id="simpleSearchButton" name="<%=bundle.getString("lb_search")%>"
+                value="<%=bundle.getString("lb_search")%>"
+                onclick='submitSearch()'>
+        <a id="advanced" class="link" href="#" onclick="changeSearchType()">Advanced...</a>
+		<a id="simple" class="link" href="#" onclick="changeSearchType()">Simple...</a>
+    </div>
+<table id="badDate">
+	<tr>
+		<td class="standardText">
+			<%=bundle.getString("lb_creation_date_range")%>:
+		</td>
+		<td class="standardText">
+			<%=bundle.getString("lb_starts")%>:
+			<input type="text" id="creationStartFilter" name="<%=creationStart%>" size="3" maxlength="9">
+			<select id="creationStartOptionsFilter" name="<%=creationStartOptions%>" style="width:130px">
+			<option value='-1'></option>
+			<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+			</select>
+			<%=bundle.getString("lb_ends")%>:
+			<input type="text" id="creationEndFilter" name="<%=creationEnd%>" size="3" maxlength="9">
+			<select id="creationEndOptionsFilter" name="<%=creationEndOptions%>" onChange="checkNow(this, searchForm.<%=creationEnd%>)" style="width:130px">
+			<option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
+			<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+			</select>
+			<input type="button" id="creationDateSearchButton" name="<%=bundle.getString("lb_search")%>"
+                value="<%=bundle.getString("lb_search")%>"
+                onclick='submitSearch()'>
+		</td>
+	</tr>
+	<tr id="completionDate">
+		<td class="standardText">
+			<%=bundle.getString("lb_estimated_completion_date")%>&nbsp;<%=bundle.getString("lb_range")%>:
+		</td>
+		<td class="standardText">
+			<%=bundle.getString("lb_starts")%>:
+			<input type="text" id="completionStartFilter" name="<%=completionStart%>" size="3" maxlength="9">
+			<select id="completionStartOptionsFilter" name="<%=completionStartOptions%>" style="width:130px">
+			<option value='-1'></option>
+			<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.HOURS_FROM_NOW%>'><%=bundle.getString("lb_hours_from_now")%></option>
+			<option value='<%=SearchCriteriaParameters.DAYS_FROM_NOW%>'><%=bundle.getString("lb_days_from_now")%></option>
+			<option value='<%=SearchCriteriaParameters.WEEKS_FROM_NOW%>'><%=bundle.getString("lb_weeks_from_now")%></option>
+			<option value='<%=SearchCriteriaParameters.MONTHS_FROM_NOW%>'><%=bundle.getString("lb_months_from_now")%></option>
+			</select>
+			<%=bundle.getString("lb_ends")%>:
+			<input type="text" id="completionEndFilter" name="<%=completionEnd%>" size="3" maxlength="9">
+			<select id="completionEndOptionsFilter" name="<%=completionEndOptions%>" onChange="checkNow(this, searchForm.<%=completionEnd%>)" style="width:130px">
+			<option value='-1'></option>
+			<option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
+			<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.HOURS_FROM_NOW%>'><%=bundle.getString("lb_hours_from_now")%></option>
+			<option value='<%=SearchCriteriaParameters.DAYS_FROM_NOW%>'><%=bundle.getString("lb_days_from_now")%></option>
+			<option value='<%=SearchCriteriaParameters.WEEKS_FROM_NOW%>'><%=bundle.getString("lb_weeks_from_now")%></option>
+			<option value='<%=SearchCriteriaParameters.MONTHS_FROM_NOW%>'><%=bundle.getString("lb_months_from_now")%></option>
+			</select>
+			<input type="button" id="completionDateSearchButton" name="<%=bundle.getString("lb_search")%>"
+                value="<%=bundle.getString("lb_search")%>"
+                onclick='submitSearch()'>
+		</td>
+	</tr>
+	<tr id="exportDate">
+		<td class="standardText">
+			<%=bundle.getString("lb_export_date_range")%>:
+		</td>
+		<td class="standardText">
+			<%=bundle.getString("lb_starts")%>:
+			<input type="text" id="exportDateStartFilter" name="<%=exportDateStart %>" size="3" maxlength="9">
+			<select id="exportDateStartOptionsFilter" name="<%=exportDateStartOptions %>" style="width:130px">
+			<option value='-1'></option>
+			<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+			</select>
+			<%=bundle.getString("lb_ends")%>:
+			<input type="text" id="exportDateEndFilter" name="<%=exportDateEnd %>" size="3" maxlength="9">
+			<select id="exportDateEndOptionsFilter" name="<%=exportDateEndOptions %>" onChange="checkNow(this, searchForm.<%=exportDateEnd %>)" style="width:130px">
+			<option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
+			<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+			<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+			</select>
+			<input type="button" id="exportDateSearchButton" name="<%=bundle.getString("lb_search")%>"
+                value="<%=bundle.getString("lb_search")%>"
+                onclick='submitSearch()'>
+		</td>
+	</tr>
 </table>
 </form>
 <script>
+var advancedSearch = "<%=advancedSearch%>";
 $("#sto").val("<%=status%>");
 function submitSearch()
 {
     if(checkFilters())
     {
-    	searchJob();
+    	searchJob(true);
     }
 }
 
@@ -78,12 +198,25 @@ $(function(){
 	$("#jobProjectFilter").val(<%=jobProjectFilter%>);
 	$("#sourceLocaleFilter").val(<%=sourceLocaleFilter%>);
 	$("#numPerPage").val(<%=numPerPage%>);
+	$("#priorityFilter").val(<%=priorityFilter%>);
+	$("#creationStartFilter").val(<%=creationStartFilter%>);
+	$("#creationStartOptionsFilter").val("<%=creationStartOptionsFilter%>");
+    $("#creationEndFilter").val(<%=creationEndFilter%>);
+    $("#creationEndOptionsFilter").val("<%=creationEndOptionsFilter%>");			
+    $("#completionStartFilter").val(<%=completionStartFilter%>);	
+  	$("#completionStartOptionsFilter").val("<%=completionStartOptionsFilter%>");
+    $("#completionEndFilter").val(<%=completionEndFilter%>);
+    $("#completionEndOptionsFilter").val("<%=completionEndOptionsFilter%>");
+   	$("#exportDateStartFilter").val(<%=exportDateStartFilter%>);
+    $("#exportDateStartOptionsFilter").val("<%=exportDateStartOptionsFilter%>");
+    $("#exportDateEndFilter").val(<%=exportDateEndFilter%>);
+    $("#exportDateEndOptionsFilter").val("<%=exportDateEndOptionsFilter%>");
 
 	$("#jobIdFilter").bind("keydown", function(e) {
 		if (e.which == 13) {
 			if(checkFilters())
 			{
-				searchJob();
+				searchJob(false);
 			}
 		}
 	});
@@ -92,15 +225,19 @@ $(function(){
 		if (e.which == 13) {
 			if(checkFilters())
 			{
-				searchJob();
+				searchJob(false);
 			}
 		}
+	});
+	
+	$("#sto").bind("change", function(){
+		checkAdvancedSearch();
 	});
 
 	$(".filterSelect").bind("change", function() {
 		if(checkFilters())
 		{
-			searchJob();
+			searchJob(false);
 		}
 		else
 		{
@@ -131,8 +268,129 @@ $(function(){
 
 	clearAll('JobForm');
 	setButtonState();
+	changeSearchType();
 });
 
+function changeSearchType()
+{
+	if(advancedSearch == "true")
+	{
+		$("#badDate").show();
+		$("#advanced").hide();
+		$("#simple").show();
+		$("#simpleSearchButton").hide();
+		if($("#sto").val() == "<%=Job.PENDING%>")
+		{
+			$("#completionDate").hide();
+			$("#completionStartFilter").val("");
+		    $("#completionStartOptionsFilter").val("-1");
+		    $("#completionEndFilter").val("");
+		    $("#completionEndOptionsFilter").val("-1");
+		}
+		else
+		{
+			$("#completionDate").show();
+		}
+		
+		if($("#sto").val() == "<%=Job.EXPORTED%>")
+		{
+			$("#exportDate").show();
+		}
+		else
+		{
+			$("#exportDate").hide();
+			$("#exportDateStartFilter").val("");
+		    $("#exportDateStartOptionsFilter").val("-1");
+		    $("#exportDateEndFilter").val("");
+		    $("#exportDateEndOptionsFilter").val("-1");
+		}
+		
+		if(($("#sto").val() == "<%=Job.EXPORTED%>"))
+		{
+			$("#creationDateSearchButton").hide();
+			$("#completionDateSearchButton").hide();
+			$("#exportDateSearchButton").show();
+		}
+		else if($("#sto").val() == "<%=Job.PENDING%>")
+		{
+			$("#creationDateSearchButton").show();
+		}
+		else
+		{
+			$("#creationDateSearchButton").hide();
+			$("#completionDateSearchButton").show();
+		}
+		advancedSearch = "false";
+	}
+	else
+	{
+		$("#badDate").hide();
+		$("#advanced").show();
+		$("#simple").hide();
+		$("#simpleSearchButton").show();
+		$("#creationStartFilter").val("");
+		$("#creationStartOptionsFilter").val("-1");
+	    $("#creationEndFilter").val("");
+	    $("#creationEndOptionsFilter").val("-1");			
+	    $("#completionStartFilter").val("");	
+	  	$("#completionStartOptionsFilter").val("-1");
+	    $("#completionEndFilter").val("");
+	    $("#completionEndOptionsFilter").val("-1");
+	   	$("#exportDateStartFilter").val("");
+	    $("#exportDateStartOptionsFilter").val("-1");
+	    $("#exportDateEndFilter").val("");
+	    $("#exportDateEndOptionsFilter").val("-1");
+		advancedSearch = "true";
+	}
+}
+
+function checkAdvancedSearch()
+{
+	if(advancedSearch == "false")
+	{
+		if($("#sto").val() == "<%=Job.PENDING%>")
+		{
+			$("#completionDate").hide();
+			$("#completionStartFilter").val("");
+		    $("#completionStartOptionsFilter").val("-1");
+		    $("#completionEndFilter").val("");
+		    $("#completionEndOptionsFilter").val("-1");
+		}
+		else
+		{
+			$("#completionDate").show();
+		}
+		
+		if($("#sto").val() == "<%=Job.EXPORTED%>")
+		{
+			$("#exportDate").show();
+		}
+		else
+		{
+			$("#exportDate").hide();
+			$("#exportDateStartFilter").val("");
+		    $("#exportDateStartOptionsFilter").val("-1");
+		    $("#exportDateEndFilter").val("");
+		    $("#exportDateEndOptionsFilter").val("-1");
+		}
+		
+		if(($("#sto").val() == "<%=Job.EXPORTED%>"))
+		{
+			$("#creationDateSearchButton").hide();
+			$("#completionDateSearchButton").hide();
+			$("#exportDateSearchButton").show();
+		}
+		else if($("#sto").val() == "<%=Job.PENDING%>")
+		{
+			$("#creationDateSearchButton").show();
+		}
+		else
+		{
+			$("#creationDateSearchButton").hide();
+			$("#completionDateSearchButton").show();
+		}
+	}
+}
 
 function addFilters(obj)
 {
@@ -140,7 +398,14 @@ function addFilters(obj)
 		return false;
 	obj.href += "&fromRequest=true&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
 		+"&idf="+$("#jobIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
-		+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val();
+		+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val()+"&pro="+$("#priorityFilter").val()
+		+"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
+		+"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
+		+"&esf="+$("#completionStartFilter").val()+"&eso="+$("#completionStartOptionsFilter").val()
+		+"&eef="+$("#completionEndFilter").val()+"&eeo="+$("#completionEndOptionsFilter").val()
+		+"&edss="+$("#exportDateStartFilter").val()+"&edso="+$("#exportDateStartOptionsFilter").val()
+		+"&edee="+$("#exportDateEndFilter").val()+"&edes="+$("#exportDateEndOptionsFilter").val()
+		+"&advancedSearch="+advancedSearch;
 }
 
 function checkFilters()
@@ -159,6 +424,147 @@ function checkFilters()
 		return false;
 	}
 	
+	if(advancedSearch == "false")
+	{
+		if (!isInteger(searchForm.<%=creationStart%>.value))
+		{
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	        return false;
+		}
+	    if (!isInteger(searchForm.<%=creationEnd%>.value))
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	        return false;
+		}
+	    if (!isInteger(searchForm.<%=completionStart%>.value))
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	        return false;
+		}
+	    if (!isInteger(searchForm.<%=completionEnd%>.value))
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	        return false;
+		}
+	    if (!isInteger(searchForm.<%=exportDateStart%>.value) &&
+	    		$("#sto").val() == "<%=Job.EXPORTED%>")
+	   	{
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	        return false;
+		}
+	    if (!isInteger(searchForm.<%=exportDateEnd%>.value) &&
+	    		$("#sto").val() == "<%=Job.EXPORTED%>")
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+	        return false;
+		}
+	    if (searchForm.<%=creationStart%>.value != "" &&
+	             getOption(searchForm.<%=creationStartOptions%>) == -1)
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+	        return false;
+		}
+	    if (searchForm.<%=creationEnd%>.value != "" &&
+	             getOption(searchForm.<%=creationEndOptions%>) == -1)
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+	        return false;
+		}
+	    if (searchForm.<%=completionStart%>.value != "" &&
+	             getOption(searchForm.<%=completionStartOptions%>) == -1)
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+	        return false;
+		}
+	    if (searchForm.<%=completionEnd%>.value != "" &&
+	             getOption(searchForm.<%=completionEndOptions%>) == -1)
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+	        return false;
+		}
+	    if (searchForm.<%=exportDateStart%>.value != "" &&
+	            getOption(searchForm.<%=exportDateStartOptions%>) == -1 &&
+	            $("#sto").val() == "<%=Job.EXPORTED%>")
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+	        return false;
+		}
+	   	if (searchForm.<%=exportDateEnd%>.value != "" &&
+	            getOption(searchForm.<%=exportDateEndOptions%>) == -1 &&
+	            $("#sto").val() == "<%=Job.EXPORTED%>")
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+	        return false;
+		}
+	    if (searchForm.<%=creationStart%>.value != "" &&
+	             searchForm.<%=creationEnd%>.value == "" &&
+	             getOption(searchForm.<%=creationEndOptions%>) !=
+	             '<%=SearchCriteriaParameters.NOW%>')
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
+	        return false;
+		}
+	    if (searchForm.<%=creationEnd%>.value != "" &&
+	             searchForm.<%=creationStart%>.value == "")
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
+	        return false;
+		}
+	    if (searchForm.<%=completionStart%>.value != "" &&
+	             searchForm.<%=completionEnd%>.value == "" &&
+	             getOption(searchForm.<%=completionEndOptions%>) !=
+	             '<%=SearchCriteriaParameters.NOW%>')
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
+	        return false;
+		}
+	    if (searchForm.<%=completionEnd%>.value != "" &&
+	             searchForm.<%=completionStart%>.value == "")
+	    {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
+	        return false;
+		}
+	    if (searchForm.<%=exportDateStart%>.value != "" &&
+	            searchForm.<%=exportDateEnd%>.value == "" &&
+	            getOption(searchForm.<%=exportDateEndOptions%>) !=
+	            '<%=SearchCriteriaParameters.NOW%>' &&
+	            $("#sto").val() == "<%=Job.EXPORTED%>")
+	   {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
+	        return false;
+		};
+	   if (searchForm.<%=exportDateEnd%>.value != "" &&
+	            searchForm.<%=exportDateStart%>.value == "" &&
+	            $("#sto").val() == "<%=Job.EXPORTED%>")
+	   {
+	        alert('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
+	        return false;
+		}
+	}	
 	return true;
+}
+
+function checkNow(field, text)
+{
+    if (field.options[1].selected)
+        text.value = "";
+}
+
+function getOption(field)
+{
+    for (var i=0; i < field.length; i++)
+    {
+        if (field.options[i].selected)
+        {
+            return field.options[i].value;
+        }
+    }
+    return "";
+}
+
+function isInteger(value)
+{
+    if (value == "") return true;
+    return (parseInt(value) == value);
 }
 </script>

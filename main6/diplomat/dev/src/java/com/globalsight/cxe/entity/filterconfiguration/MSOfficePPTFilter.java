@@ -55,7 +55,7 @@ public class MSOfficePPTFilter implements Filter
         return filters;
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from MSOfficePPTFilter jp "
                 + "where jp.filterName =:filterName "
@@ -66,6 +66,19 @@ public class MSOfficePPTFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from MSOfficePPTFilter jp "
+        		+ "where jp.id<>:filterId "
+                + "and jp.filterName =:filterName "
+                + "and jp.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
     public String getFilterTableName()
     {
         return FilterConstants.MSOFFICEPPT_TABLENAME;

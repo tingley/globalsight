@@ -342,7 +342,7 @@ public class TaskSearchUtil
 
             Calendar now = Calendar.getInstance();
             int negativeAmount = (int) 0 - accAmount.intValue();
-
+            int positiveAmount = accAmount.intValue();
             if (condition.equals(SearchCriteriaParameters.MONTHS_AGO))
             {
                 now.add(Calendar.MONTH, negativeAmount);
@@ -354,6 +354,26 @@ public class TaskSearchUtil
             else if (condition.equals(SearchCriteriaParameters.DAYS_AGO))
             {
                 now.add(Calendar.DATE, negativeAmount);
+            }
+            else if (condition
+                    .equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
+            {
+                now.add(Calendar.MONTH, positiveAmount);
+            }
+            else if (condition
+                    .equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
+            {
+                now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
+            }
+            else if (condition
+                    .equals(SearchCriteriaParameters.DAYS_FROM_NOW))
+            {
+                now.add(Calendar.DATE, positiveAmount);
+            }
+            else if (condition
+                    .equals(SearchCriteriaParameters.HOURS_FROM_NOW))
+            {
+                now.add(Calendar.HOUR_OF_DAY, positiveAmount);
             }
             else
             {
@@ -373,26 +393,44 @@ public class TaskSearchUtil
                     TaskSearchParameters.ACCEPTANCE_END_CONDITION));
 
             Calendar now = Calendar.getInstance();
-            if (!condition.equals(SearchCriteriaParameters.NOW))
+            int negativeAmount = (int) 0 - endAmount.intValue();
+            int positiveAmount = endAmount.intValue();
+            if (condition.equals(SearchCriteriaParameters.MONTHS_AGO))
             {
-                int negativeAmount = (int) 0 - endAmount.intValue();
-                if (condition.equals(SearchCriteriaParameters.MONTHS_AGO))
-                {
-                    now.add(Calendar.MONTH, negativeAmount);
-                }
-                else if (condition.equals(SearchCriteriaParameters.WEEKS_AGO))
-                {
-                    now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
-                }
-                else if (condition.equals(SearchCriteriaParameters.DAYS_AGO))
-                {
-                    now.add(Calendar.DATE, negativeAmount);
-                }
-                else
-                {
-                    // assume SearchCriteriaParameters.HOURS_AGO
-                    now.add(Calendar.HOUR_OF_DAY, negativeAmount);
-                }
+                now.add(Calendar.MONTH, negativeAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.WEEKS_AGO))
+            {
+                now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.DAYS_AGO))
+            {
+                now.add(Calendar.DATE, negativeAmount);
+            }
+            else if (condition
+                    .equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
+            {
+                now.add(Calendar.MONTH, positiveAmount);
+            }
+            else if (condition
+                    .equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
+            {
+                now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
+            }
+            else if (condition
+                    .equals(SearchCriteriaParameters.DAYS_FROM_NOW))
+            {
+                now.add(Calendar.DATE, positiveAmount);
+            }
+            else if (condition
+                    .equals(SearchCriteriaParameters.HOURS_FROM_NOW))
+            {
+                now.add(Calendar.HOUR_OF_DAY, positiveAmount);
+            }
+            else
+            {
+                // assume SearchCriteriaParameters.HOURS_AGO
+                now.add(Calendar.HOUR_OF_DAY, negativeAmount);
             }
 
             sql.append(" and t.ACCEPTED_DATE <= :acceptedEndDate ");

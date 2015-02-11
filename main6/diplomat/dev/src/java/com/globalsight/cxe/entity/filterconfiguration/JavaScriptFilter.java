@@ -18,10 +18,20 @@ public class JavaScriptFilter implements Filter
     private long companyId;
     private boolean enableUnicodeEscape = false;
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from JavaScriptFilter js where js.filterName =:filterName and js.companyId=:companyId";
         Map map = new HashMap();
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from JavaScriptFilter js where js.id<>:filterId and js.filterName =:filterName and js.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
         map.put("filterName", filterName);
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;

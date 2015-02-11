@@ -57,6 +57,8 @@
   <permission id="<%=Permission.LOCALE_PAIRS_VIEW%>">
      <permission id="<%=Permission.LOCALE_PAIRS_REMOVE%>"/>
      <permission id="<%=Permission.LOCALE_PAIRS_NEW%>"/>
+     <permission id="<%=Permission.LOCALE_PAIRS_EXPORT%>"/>
+     <permission id="<%=Permission.LOCALE_PAIRS_IMPORT%>"/>
 <% if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId)) { %>
      <permission id="<%=Permission.LOCALE_NEW%>"/>
 <% } %>

@@ -146,7 +146,8 @@ public class LocaleManagerLocalTest extends TestCase
         sl.setId(2);
         GlobalSightLocale tl = new GlobalSightLocale();
         tl.setId(2);
-        local.addSourceTargetLocalePair(sl, tl);
+        String compayId = "1";
+        local.addSourceTargetLocalePair(sl, tl,compayId);
     }
     
     public void testGetAllCodeSets() throws LocaleManagerException, RemoteException

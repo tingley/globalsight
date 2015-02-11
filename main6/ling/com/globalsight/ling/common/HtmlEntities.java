@@ -170,25 +170,25 @@ public class HtmlEntities
      * character reference
      * @param c a character to be encoded
      * @param entity <tt>c</tt> will be encoded as a HTML character
-     * entity if <tt>entiry</tt> is <tt>true</tt>, otherwise
+     * entity if <tt>entity</tt> is <tt>true</tt>, otherwise
      * <tt>c</tt> will be a numeric character reference. If
      * <tt>entity</tt> is true and the corresponding entity can not be
      * found, the function returns a numeric character reference. The
      * Fundamental four characters (&lt;, &gt;, &amp; and &quot;) are
-     * always converted to the coresponding entities even if
+     * always converted to the corresponding entities even if
      * <tt>entity</tt> is <tt>false</tt>.
-     * @return the result of encode. If it's a nemeirc character
+     * @return the result of encode. If it's a numeric character
      * reference, it takes hex form.
      */
     final public String encode(char c, boolean entity)
     {
         Character cc = new Character(c);
 
-        String s = (String)mDefaultCharToEntity.get(cc);
+        String s = (String) mDefaultCharToEntity.get(cc);
 
         if (s == null && entity)
         {
-            s = (String)mHtmlCharToEntity.get(cc);
+            s = (String) mHtmlCharToEntity.get(cc);
         }
 
         if (s == null)
@@ -622,6 +622,7 @@ public class HtmlEntities
         h.put(new Character('>'), "&gt;");
         h.put(new Character('&'), "&amp;");
         h.put(new Character('"'), "&quot;");
+        h.put(new Character('\''), "&apos;");
         return h;
     }
 
@@ -632,10 +633,12 @@ public class HtmlEntities
         h.put("&gt;", new Character('>'));
         h.put("&amp;", new Character('&'));
         h.put("&quot;", new Character('"'));
+        h.put("&apos;", new Character('\''));
         h.put("&LT;", new Character('<'));
         h.put("&GT;", new Character('>'));
         h.put("&AMP;", new Character('&'));
         h.put("&QUOT;", new Character('"'));
+        h.put("&APOS;", new Character('\''));
         return h;
     }
 

@@ -13,7 +13,7 @@ MSExcelFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:450px' maxlength='" + maxFilterNameLength + "' id='excelFilterName' value='" + this.filter.filterName + "' disabled />");
+	str.append("<td><input type='text' style='width:450px' maxlength='" + maxFilterNameLength + "' id='excelFilterName' value='" + this.filter.filterName + "'  />");
 	str.append("</td></tr>");
 	
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
@@ -137,6 +137,7 @@ MSExcelFilter.prototype.showDialog = function ()
 function saveMsOfficeExcelFilter()
 {
 	var check = new Validate();
+	var isNew = (saveMsOfficeExcelFilter.edit) ? "false" : "true";
 	var filterName = document.getElementById("excelFilterName").value;
 	if(check.isEmptyStr(filterName))
 	{
@@ -154,7 +155,7 @@ function saveMsOfficeExcelFilter()
         alert(exceedFilterName + maxFilterNameLength);
         return;
     }
-	
+	var filterId = saveMsOfficeExcelFilter.filterId;
 	var filterDesc = document.getElementById("excelDesc").value;
 	var altTranslate = document.getElementById("excelAltTranslate").checked;
 	var tabNamesTranslate = document.getElementById("excelTabNamesTranslate").checked;
@@ -174,6 +175,8 @@ function saveMsOfficeExcelFilter()
 	
 	var obj = {
 			filterTableName:"ms_office_excel_filter", 
+			isNew:isNew,
+			filterId:filterId,
 			filterName:filterName, 
 			filterDesc:filterDesc, 
 			companyId:companyId,
@@ -183,17 +186,10 @@ function saveMsOfficeExcelFilter()
 			contentPostFilterTableName:contentPostFilterTableName,
 			baseFilterId:baseFilterId
 			};
-	if(saveMsOfficeExcelFilter.edit)
-	{
-		closePopupDialog("msOfficeExcelFilterDialog");
-		sendAjax(obj, "updateMSOfficeExcelFilter", "updateExcelFilterCallback");
-	}
-	else
-	{
-		sendAjax(obj, "checkExist", "checkExistExcelCallback");
-	}
 	
-	checkExistExcelCallback.obj = obj;
+		sendAjax(obj, "checkExist", "checkExistExcelCallback");
+	
+		checkExistExcelCallback.obj = obj;
 }
 
 function updateExcelFilterCallback(data)
@@ -226,11 +222,18 @@ function checkExistExcelCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("msOfficeExcelFilterDialog");
-		sendAjax(checkExistExcelCallback.obj, "saveMSOfficeExcelFilter", "saveExcelFilterCallback");
+		if(saveMsOfficeExcelFilter.edit)
+		{
+			sendAjax(checkExistExcelCallback.obj, "updateMSOfficeExcelFilter", "updateExcelFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistExcelCallback.obj, "saveMSOfficeExcelFilter", "saveExcelFilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistExcelCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 function saveExcelFilterCallback(data)

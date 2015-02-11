@@ -64,6 +64,7 @@ public class DiplomatWordCounter
     private DiplomatReader m_diplomatReader = null;
     private Output m_output = null;
     private Locale m_locale = null;
+    private boolean isCJK = false;
     private GlobalsightBreakIterator m_si = null;
 
     private int m_totalWordCount = 0;
@@ -208,6 +209,8 @@ public class DiplomatWordCounter
             m_locale = getLocale();
             m_si = GlobalsightRuleBasedBreakIterator.getWordInstance(m_locale);
         }
+        
+        isCJK = DiplomatWordCountUtil.isCJKLocale(m_locale);
 
         switch (p_de.type())
         {
@@ -259,6 +262,7 @@ public class DiplomatWordCounter
 
         m_output = p_diplomat;
         m_locale = getLocale();
+        isCJK = DiplomatWordCountUtil.isCJKLocale(m_locale);
 
         m_si = GlobalsightRuleBasedBreakIterator.getWordInstance(m_locale);
 
@@ -281,6 +285,7 @@ public class DiplomatWordCounter
 
         convertToOutput(p_diplomat);
         m_locale = getLocale();
+        isCJK = DiplomatWordCountUtil.isCJKLocale(m_locale);
 
         m_si = GlobalsightRuleBasedBreakIterator.getWordInstance(m_locale);
 
@@ -711,6 +716,12 @@ public class DiplomatWordCounter
                     else
                     {
                         words++;
+                    }
+                    
+                    if (isCJK && DiplomatWordCountUtil.isCJKChar(ch))
+                    {
+                        int len = iEnd - iStart;
+                        words = words + (len - 1);
                     }
                 }
                 // Or with a digit when Trados compatible

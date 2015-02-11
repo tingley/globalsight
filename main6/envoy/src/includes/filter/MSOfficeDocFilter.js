@@ -56,7 +56,7 @@ MSOfficeDocFilter.prototype.edit = function(filterId, color, specialFilters, top
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:450px' maxlength='" + maxFilterNameLength + "' id='docFilterName' value='" + this.filter.filterName + "' disabled />");
+	str.append("<td><input type='text' style='width:450px' maxlength='" + maxFilterNameLength + "' id='docFilterName' value='" + this.filter.filterName + "'/>");
 	str.append("</td></tr>");
 	
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
@@ -1049,7 +1049,8 @@ function saveMsOfficeDocFilter()
         alert(exceedFilterName + maxFilterNameLength);
         return;
     }
-
+    var isNew = (saveMsOfficeDocFilter.edit) ? "false" : "true";
+	var filterId = saveMsOfficeDocFilter.filterId;
 	var filterDesc = document.getElementById("docDesc").value;
 	var headerTranslate = document.getElementById("docHeaderTranslate").checked;
 	var altTranslate = document.getElementById("docAltTranslate").checked;
@@ -1068,7 +1069,9 @@ function saveMsOfficeDocFilter()
 	alertUserBaseFilter(baseFilterId);
 	
 	var obj = {
+			isNew:isNew,
 			filterTableName:"ms_office_doc_filter", 
+			filterId:filterId,
 			filterName:filterName, 
 			filterDesc:filterDesc, 
 			headerTranslate:headerTranslate,
@@ -1085,18 +1088,9 @@ function saveMsOfficeDocFilter()
 			contentPostFilterTableName:contentPostFilterTableName,
 			baseFilterId:baseFilterId
 			};
-	
-	if(saveMsOfficeDocFilter.edit)
-	{
-		closePopupDialog("msOfficeDocFilterDialog");
-		sendAjax(obj, "updateMSOfficeDocFilter", "updateMSOfficeDocFilterCallback");
-	}
-	else
-	{
 		sendAjax(obj, "checkExist", "checkExistMSOfficeDocFilterCallback");
-	}
 	
-	checkExistMSOfficeDocFilterCallback.obj = obj;
+		checkExistMSOfficeDocFilterCallback.obj = obj;
 }
 
 function checkExistMSOfficeDocFilterCallback(data)
@@ -1104,11 +1098,18 @@ function checkExistMSOfficeDocFilterCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog("msOfficeDocFilterDialog");
-		sendAjax(checkExistMSOfficeDocFilterCallback.obj, "saveMSOfficeDocFilter", "saveMSOfficeDocFilterCallback");
+		if(saveMsOfficeDocFilter.edit)
+		{
+			sendAjax(checkExistMSOfficeDocFilterCallback.obj, "updateMSOfficeDocFilter", "updateMSOfficeDocFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistMSOfficeDocFilterCallback.obj, "saveMSOfficeDocFilter", "saveMSOfficeDocFilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistMSOfficeDocFilterCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 

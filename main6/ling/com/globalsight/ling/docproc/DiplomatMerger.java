@@ -252,6 +252,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         map.putAll(HtmlEntities.mHtmlEntityToChar);
         map.putAll(HtmlEntities.mDefaultEntityToChar);
         map.remove("&nbsp");
+        map.remove("&nbsp;");
         for (String key : map.keySet())
         {
             String value = map.get(key).toString();
@@ -705,8 +706,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             // encode again to transform them all to entity.
             // This will affect javaProperties,XML,and excel source files with
             // secondary filter settings.
+            // TODO :: for now, only "javaProperties" and "PO" filters are using
+            // secondary filter, XML filter has abandoned this. Need refactor to
+            // use post filter way. [York 2014-05-27]
             if (this.isUseSecondaryFilter
-                    && this.convertHtmlEntryFromSecondFilter)
+                    && this.convertHtmlEntryFromSecondFilter
+                    && !ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format))
             {
                 char[] specXmlEncodeChar =
                 { '<', '>', '&', '"' };

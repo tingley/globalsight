@@ -407,7 +407,7 @@ function confirmForm()
         }
     }
     
-    if (isSpecialFormat("XML"))
+    if (isSpecialFormat("XML") || isSpecialFormat("RESX"))
     {
         toUploadXsl = false;
         var fileBox = document.getElementById('xslFile');
@@ -853,7 +853,7 @@ function thisFormatMustUseUTF8(format)
         return true;
     }
 
-    if (format.indexOf("New Office 2010") >= 0)
+    if (format.indexOf("Office 2010") >= 0)
     {
         return true;
     }
@@ -915,7 +915,8 @@ function isOpenOffice(format)
 
 function isOffice2010(format)
 {
-    if (format == "Office2010 document" || format.indexOf("New Office 2010") >= 0)
+    
+    if (format == "Office2010 document" || format.indexOf("Office 2010") >= 0)
     {
         return true;
     }
@@ -1100,7 +1101,7 @@ function isSupportSid()
 
 function isSupportXsl()
 {
-	if (isSpecialFormat("XML"))
+	if (isSpecialFormat("XML") || isSpecialFormat("RESX"))
 	{
 	  document.getElementById("lb_isSupportXsl").style.display = "block";
 	  document.getElementById("td_isSupportXsl").style.display = "block";

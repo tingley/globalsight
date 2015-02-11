@@ -38,8 +38,11 @@ import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -293,7 +296,9 @@ public class TranslateXLFController implements AppConstants
             // Get Source/Target Language
             srcLang = fileElem.getAttributeValue(XLF_SOURCE_LANGUAGE);
             trgLang = fileElem.getAttributeValue(XLF_TARGET_LANGUAGE);
-            List<?> list = fileElem.getChild("body", namespace).getChildren("trans-unit", namespace);
+            XPathFactory xFactory = XPathFactory.instance();
+            XPathExpression<Element> expr = xFactory.compile("//trans-unit", Filters.element(), null, namespace);
+            List<Element> list = expr.evaluate(fileElem.getChild("body", namespace));
             for (int i = 0; i < list.size(); i++)
             {
                 Element tuElem = (Element) list.get(i);

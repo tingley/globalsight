@@ -853,20 +853,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
                     jsonObj.put("IncomingArrows", inArrows.toString());
 
                     StringBuffer outArrows = new StringBuffer();
-                    Vector outgoingArrows = wfTask.getOutgoingArrows();
-                    if (outgoingArrows != null && outgoingArrows.size() > 0)
+                    getOutgoingArrows(outArrows, wfTask);
+                    String outArrowNames = outArrows.toString();
+                    if (outArrowNames.length() > 0 && outArrowNames.endsWith(","))
                     {
-                        for (int i = 0; i < outgoingArrows.size(); i++)
-                        {
-                            WorkflowArrow arrow = (WorkflowArrow) outgoingArrows.get(i);
-                            outArrows.append(arrow.getName());
-                            if (i + 1 < outgoingArrows.size())
-                            {
-                                outArrows.append(",");
-                            }
-                        }
+                        outArrowNames = outArrowNames.substring(0, outArrowNames.length() - 1);
                     }
-                    jsonObj.put("OutgoingArrows", outArrows.toString());
+                    jsonObj.put("OutgoingArrows", outArrowNames);
                     array.put(jsonObj);
                 }
             }
@@ -889,6 +882,34 @@ public class Ambassador4Falcon extends JsonTypeWebService
         }
 
         return json;
+    }
+
+    /**
+     * Get the outgoing arrow names comma separated. If the arrow points to a
+     * condition node, then the condition node's outgoing arrows are wanted.
+     * 
+     * @param buf
+     * @param wfTask
+     */
+    private void getOutgoingArrows(StringBuffer buf, WorkflowTask wfTask)
+    {
+        Vector outgoingArrows = wfTask.getOutgoingArrows();
+        if (outgoingArrows != null && outgoingArrows.size() > 0)
+        {
+            for (int i = 0; i < outgoingArrows.size(); i++)
+            {
+                WorkflowArrow arrow = (WorkflowArrow) outgoingArrows.get(i);
+                WorkflowTask targetWfTask = arrow.getTargetNode();
+                if ("Condition Node".equalsIgnoreCase(targetWfTask.getName()))
+                {
+                    getOutgoingArrows(buf, targetWfTask);
+                }
+                else
+                {
+                    buf.append(arrow.getName()).append(",");
+                }
+            }
+        }
     }
 
     /**

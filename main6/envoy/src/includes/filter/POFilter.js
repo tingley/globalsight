@@ -18,7 +18,7 @@ POFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId)
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:"+this.textWidth+"' maxlength='"+maxFilterNameLength+"' id='"+this.filterNameId+"' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<td><input type='text' style='width:"+this.textWidth+"' maxlength='"+maxFilterNameLength+"' id='"+this.filterNameId+"' value='" + this.filter.filterName + "'></input>");
 	str.append("</td></tr>");
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
@@ -82,6 +82,7 @@ function savePOFilter()
 {
 	var check = new Validate();
 	POFilter();
+	var isNew = (savePOFilter.edit) ? "false" : "true";
 	var filterName = document.getElementById(this.filterNameId).value;
 	if(check.isEmptyStr(filterName))
 	{
@@ -99,7 +100,7 @@ function savePOFilter()
         alert(exceedFilterName + maxFilterNameLength);
         return;
     }
-	
+	var filterId = savePOFilter.filterId;
 	var filterDesc = document.getElementById(this.filterDesId).value;
 	
 	var secondaryFilterIdAndTableName = document.getElementById("secondaryFilterSelect").value;
@@ -112,16 +113,9 @@ function savePOFilter()
 		secondFilterTableName = secondaryFilterIdAndTableName.substring(index+1);
 	}
 	
-	var obj = {filterTableName:this.filterTableName, filterName:filterName, filterDesc:filterDesc, companyId:companyId, secondFilterId:secondFilterId, secondFilterTableName:secondFilterTableName};
-	if(savePOFilter.edit)
-	{
-		closePopupDialog(this.filterDialogId);
-		sendAjax(obj, "updatePOFilter", "updatePOFilterCallback");
-	}
-	else
-	{
-		sendAjax(obj, "checkExist", "checkExistPOFilterCallback");
-	}
+	var obj = {filterTableName:this.filterTableName, isNew:isNew, filterName:filterName, filterId:filterId, filterDesc:filterDesc, companyId:companyId, secondFilterId:secondFilterId, secondFilterTableName:secondFilterTableName};
+
+	sendAjax(obj, "checkExist", "checkExistPOFilterCallback");
 	
 	checkExistPOFilterCallback.obj = obj;
 }
@@ -152,11 +146,18 @@ function checkExistPOFilterCallback(data)
 	if(data == 'false')
 	{
 		closePopupDialog(this.filterDialogId);
-		sendAjax(checkExistPOFilterCallback.obj, "savePOFilter", "savePOFilterCallback");
+		if(savePOFilter.edit)
+		{
+			sendAjax(checkExistPOFilterCallback.obj, "updatePOFilter", "updatePOFilterCallback");
+		}
+		else
+		{
+			sendAjax(checkExistPOFilterCallback.obj, "savePOFilter", "savePOFilterCallback");
+		}
 	}
 	else
 	{
-		alert(existFilterName + checkExistPOFilterCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 

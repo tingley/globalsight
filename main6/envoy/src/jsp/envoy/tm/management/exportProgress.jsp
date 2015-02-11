@@ -150,13 +150,13 @@ function parseExportOptions()
   var $xml = $( $.parseXML( xmlExportOptions ) );
   g_filename = $xml.find("exportOptions > fileOptions > fileName").text();
   document.getElementById("idExportfile").href =
-    "/globalsight/exports?file=" + g_filename;
+    "/globalsight/exports?file=" + g_filename + "&fileType=tm ";
 }
 
 function downloadFile()
 {
   document.getElementById("idDownload").src = 
-	  '/globalsight/exports?file=' + g_filename +'&zip=true';
+	  '/globalsight/exports?file=' + g_filename + '&fileType=tm' + '&zip=true';
 }
 
 function showResources()

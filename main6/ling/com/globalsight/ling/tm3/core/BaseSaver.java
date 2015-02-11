@@ -38,10 +38,6 @@ class BaseSaver<T extends TM3Data> extends TM3Saver<T> {
     public List<TM3Tu<T>> save(TM3SaveMode mode, boolean indexTarget)
             throws TM3Exception
     {
-        if (!isFromTmImport())
-        {
-            tm.setFirstImporting(true);
-        }
         return tm.save(this, mode, indexTarget);
     }
 }

@@ -52,6 +52,7 @@ public class MSOffice2010Filter implements Filter
     private long xmlFilterId = -2;
     private long contentPostFilterId = -2;
     private String contentPostFilterTableName = null;
+    private String excelOrder = "n";
 
     private List<String> unextractableWordParagraphStyles = new ArrayList<String>();
     private List<String> unextractableWordCharacterStyles = new ArrayList<String>();
@@ -81,7 +82,7 @@ public class MSOffice2010Filter implements Filter
         allExcelCellStyles.add("tw4winExternal");
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from MSOffice2010Filter oof where oof.filterName =:filterName and oof.companyId=:companyId";
         Map map = new HashMap();
@@ -90,6 +91,16 @@ public class MSOffice2010Filter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from MSOffice2010Filter oof where oof.id<>:filterId and oof.filterName =:filterName and oof.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
     public String getParagraphStyles()
     {
         return buildToXml(unextractableWordParagraphStyles, allParagraphStyles);
@@ -320,6 +331,9 @@ public class MSOffice2010Filter implements Filter
         sb.append("\"contentPostFilterTableName\":").append("\"")
                 .append(FilterHelper.escape(contentPostFilterTableName))
                 .append("\",");
+        sb.append("\"excelOrder\":").append("\"")
+        .append(FilterHelper.escape(excelOrder))
+        .append("\",");
         sb.append("\"baseFilterId\":")
                 .append("\"")
                 .append(BaseFilterManager.getBaseFilterIdByMapping(id,
@@ -591,5 +605,15 @@ public class MSOffice2010Filter implements Filter
     public String getFilterTableName()
     {
         return FilterConstants.OFFICE2010_TABLENAME;
+    }
+
+    public String getExcelOrder()
+    {
+        return excelOrder;
+    }
+
+    public void setExcelOrder(String excelOrder)
+    {
+        this.excelOrder = excelOrder;
     }
 }

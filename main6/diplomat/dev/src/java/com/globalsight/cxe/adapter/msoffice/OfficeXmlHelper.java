@@ -151,6 +151,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     public static final String XLSX_SHEETS_DIR = "xl/worksheets";
     public static final String XLSX_RELS_DIR = "xl/worksheets/_rels";
     public static final String PPTX_SLIDES_DIR = "ppt/slides";
+    public static final String PPTX_SLIDES_RELS_DIR = "ppt/slides/_rels";
     public static final String PPTX_SLIDE_MASTER_DIR = "ppt/slideMasters";
     public static final String PPTX_SLIDE_LAYOUT_DIR = "ppt/slideLayouts";
     public static final String PPTX_SLIDE_NOTES_DIR = "ppt/notesSlides";
@@ -158,6 +159,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     public static final String PPTX_SLIDE_HANDOUTMASTER_DIR = "ppt/handoutMasters";
     public static final String PPTX_PRESENTATION_XML = "ppt/presentation.xml";
     public static final String PPTX_DIAGRAMS_DIR = "ppt/diagrams";
+    public static final String PPTX_DIAGRAMS_RELS_DIR = "ppt/diagrams/_rels";
     public static final String PPTX_CHART_DIR = "ppt/charts";
 
     public static final String DNAME_PRE_DOCX_COMMENT = "(comments) ";
@@ -169,6 +171,9 @@ public class OfficeXmlHelper implements IConverterHelper2
     public static final String DNAME_PRE_PPTX_LAYOUT = "(slide layout";
     public static final String DNAME_PRE_PPTX_NOTEMASTER = "(note master";
     public static final String DNAME_PRE_PPTX_HANDOUTMASTER = "(handout master";
+    public static final String DNAME_PRE_PPTX_SLIDE = "(slide";
+
+    public static final String DNAME_PRE_HYPERLINK = "hyperlinks";
 
     private static final String[] prefix_slide =
     { "slide" };
@@ -176,6 +181,8 @@ public class OfficeXmlHelper implements IConverterHelper2
     { "notesSlide" };
     private static final String[] prefix_sheet =
     { "sheet" };
+    private static final String[] prefix_sort_sheet =
+    { "sortsheet" };
     private static final String[] prefix_header =
     { "header", "footer" };
     private static final String[] prefix_footendnotes =
@@ -191,22 +198,35 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private static final String numbers = "0123456789";
 
-    // for GBS-2554
+    // for GBS-2554 & GBS-3240
     private static final String W_VANISH = "<w:vanish/>";
-    private static final String W_VANISH0 = "<w:vanish w:val=\"0\"/>";
+    private static final String W_VANISH_WITH_ATTR = "<w:vanish w:val=\"0\"/>";
+    private static final Pattern W_TBL = Pattern
+            .compile("(<w:tbl[^>]*>)([\\d\\D]*?)(</w:tbl>)");
+    private static final Pattern W_TBLPR = Pattern
+            .compile("(<w:tblPr>)([\\d\\D]*?)(</w:tblPr>)");
+    private static final Pattern W_TBLSTYLE = Pattern
+            .compile("<w:tblStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
     private static final Pattern WP = Pattern
-            .compile("(<w:p[^>]*>)([\\d\\D]*?)(</w:p>)");
-    private static final String RE_STYLE = "<w:style[^>]*w:styleId=\"{0}\"[^>]*>([\\d\\D]*?)</w:style>";
-    private static final Pattern RPR = Pattern
-            .compile("(<w:rPr>)([\\d\\D]*?)(</w:rPr>)");
-    private static final Pattern PPR = Pattern
+            .compile("(<w:p>)([\\d\\D]*?)(</w:p>)");
+    private static final Pattern WP2 = Pattern
+            .compile("(<w:p [^>]*>)([\\d\\D]*?)(</w:p>)");
+    private static final Pattern W_PPR = Pattern
             .compile("(<w:pPr>)([\\d\\D]*?)(</w:pPr>)");
-    private static final Pattern WR = Pattern
-            .compile("(<w:r[^>]*>)([\\d\\D]*?)(</w:r>)");
-    private static final Pattern RSTYLE = Pattern
-            .compile("<w:rStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
-    private static final Pattern PSTYLE = Pattern
+    private static final Pattern W_PSTYLE = Pattern
             .compile("<w:pStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
+    private static final Pattern WR = Pattern
+            .compile("(<w:r>)([\\d\\D]*?)(</w:r>)");
+    private static final Pattern WR2 = Pattern
+            .compile("(<w:r [^>]*>)([\\d\\D]*?)(</w:r>)");
+    private static final Pattern W_RPR = Pattern
+            .compile("(<w:rPr>)([\\d\\D]*?)(</w:rPr>)");
+    private static final Pattern W_RSTYLE = Pattern
+            .compile("<w:rStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
+    private static final String W_STYLE = "<w:style[^>]*w:styleId=\"{0}\"[^>]*>([\\d\\D]*?)</w:style>";
+    private static final Pattern W_BASEDON = Pattern
+            .compile("<w:basedOn[^>]*w:val=\"([^\"]*)\"[^>]*/>");
+    public static final String HIDDEN_MARK = "<gs-hidden-mark/>";
 
     // for xlsx repeated strings shared in sharedStrings.xml
     private static final Pattern SI = Pattern.compile("<si>([\\d\\D]*?)</si>");
@@ -254,6 +274,21 @@ public class OfficeXmlHelper implements IConverterHelper2
         m.mergeFile(dir);
     }
 
+    private void sortSegments(String dir, List<String> hIds, String excelOrder)
+    {
+        if ("n".equalsIgnoreCase(excelOrder))
+            return;
+
+        ExcelFileManager m = new ExcelFileManager();
+        m.sortSegments(dir, hIds, excelOrder, m_hideCellMap);
+    }
+
+    private void mergeSortSegments(String dir)
+    {
+        ExcelFileManager m = new ExcelFileManager();
+        m.mergeSortSegments(dir);
+    }
+
     /**
      * Perform conversion
      * 
@@ -283,8 +318,46 @@ public class OfficeXmlHelper implements IConverterHelper2
             {
                 mergePages(dir);
             }
+            preHandleHiddenTextInDocx(dir);
+            preHandleTextInSharedStringsXml(dir);
+            handleExcelStyleIds(dir);
+            handleExcelHidden(dir);
 
-            String[] xmlFiles = getLocalizeXmlFiles(dir, useNewExtractor);
+            MSOffice2010Filter msf = getMainFilter();
+            if (msf == null)
+            {
+                msf = new MSOffice2010Filter();
+            }
+
+            String[] xmlFiles;
+            if (m_type == OFFICE_XLSX && useNewExtractor
+                    && !"n".equalsIgnoreCase(msf.getExcelOrder()))
+            {
+                List<String> hidden = new ArrayList<String>();
+                hidden.addAll(m_unextractableExcelCellStyles);
+                if (m_hiddenSharedId != null && m_hiddenSharedId.length() > 0)
+                {
+                    hidden.addAll(MSOffice2010Filter.toList(m_hiddenSharedId));
+                }
+
+                sortSegments(dir, hidden, msf.getExcelOrder());
+                List<String> list = new ArrayList<String>();
+                getNewLocalizedXmlFilesXLSX(dir, list);
+
+                if (list.isEmpty())
+                {
+                    xmlFiles = new String[0];
+                }
+                else
+                {
+                    String[] result = new String[list.size()];
+                    xmlFiles = list.toArray(result);
+                }
+            }
+            else
+            {
+                xmlFiles = getLocalizeXmlFiles(dir, useNewExtractor);
+            }
 
             // 5 merge tags
 
@@ -301,10 +374,6 @@ public class OfficeXmlHelper implements IConverterHelper2
                 gcCounter = 0;
             }
 
-            preHandleHiddenTextInDocx(dir);
-
-            preHandleTextInSharedStringsXml(dir);
-
             MessageData[] messageData = readXmlOutput(filename, xmlFiles);
             CxeMessage[] msgs = new CxeMessage[messageData.length];
             String basename = FileUtils.getBaseName(filename);
@@ -318,9 +387,6 @@ public class OfficeXmlHelper implements IConverterHelper2
                     STYLE_TYPE_CHARACTER);
             String internalCharStyles = getStyleIds(dir,
                     STYLE_CATEGORY_CHARACTER_INTERNAL, STYLE_TYPE_CHARACTER);
-
-            handleExcelStyleIds(dir);
-            handleExcelHidden(dir);
 
             List<CxeMessage> slides = new ArrayList<CxeMessage>();
             List<CxeMessage> notes = new ArrayList<CxeMessage>();
@@ -917,6 +983,10 @@ public class OfficeXmlHelper implements IConverterHelper2
             {
                 splitFiles(dirName);
             }
+            else if (m_type == OFFICE_XLSX)
+            {
+                mergeSortSegments(dirName);
+            }
 
             String filename = getCategory().getDiplomatAttribute(
                     "safeBaseFileName").getValue();
@@ -986,7 +1056,15 @@ public class OfficeXmlHelper implements IConverterHelper2
             if ("000".equals(fileNumber))
                 fileNumber = "";
 
-            if (fileNamePrefix.startsWith("data"))
+            // from file data1.xml.rels, fileNamePrefix is data1.xml
+            if (fileNamePrefix.startsWith("data")
+                    && fileNamePrefix.endsWith(".xml"))
+            {
+                newDisplayName = DNAME_PRE_PPTX_DIAGRAM
+                        + FileUtils.getPrefix(fileNamePrefix) + " "
+                        + DNAME_PRE_HYPERLINK + ") " + m_oriDisplayName;
+            }
+            else if (fileNamePrefix.startsWith("data"))
             {
                 newDisplayName = DNAME_PRE_PPTX_DIAGRAM + fileNamePrefix + ") "
                         + m_oriDisplayName;
@@ -1024,9 +1102,17 @@ public class OfficeXmlHelper implements IConverterHelper2
                 newDisplayName = DNAME_PRE_PPTX_HANDOUTMASTER + fileNumber
                         + ") " + m_oriDisplayName;
             }
+            // from file slide1.xml.rels, fileNamePrefix is slide1.xml
+            else if (fileNamePrefix.startsWith("slide")
+                    && fileNamePrefix.endsWith(".xml"))
+            {
+                fileNumber = getPageNumber(FileUtils.getPrefix(fileNamePrefix));
+                newDisplayName = DNAME_PRE_PPTX_SLIDE + fileNumber + " "
+                        + DNAME_PRE_HYPERLINK + ") " + m_oriDisplayName;
+            }
             else if (fileNamePrefix.startsWith("slide"))
             {
-                newDisplayName = "(slide" + fileNumber + ") "
+                newDisplayName = DNAME_PRE_PPTX_SLIDE + fileNumber + ") "
                         + m_oriDisplayName;
             }
             else
@@ -1037,9 +1123,21 @@ public class OfficeXmlHelper implements IConverterHelper2
 
         if (m_type == OFFICE_XLSX)
         {
-            if (fileNamePrefix.startsWith("sheet"))
+            if (fileNamePrefix.startsWith("sheet")
+                    && fileNamePrefix.endsWith(".xml"))
+            {
+                String sheet = FileUtils.getPrefix(fileNamePrefix);
+                newDisplayName = "(" + sheet + " " + DNAME_PRE_HYPERLINK + ") "
+                        + m_oriDisplayName;
+            }
+            else if (fileNamePrefix.startsWith("sheet"))
             {
                 newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
+            }
+            if (fileNamePrefix.startsWith("sortsheet"))
+            {
+                newDisplayName = "(" + fileNamePrefix.substring(4) + ") "
+                        + m_oriDisplayName;
             }
             else if (fileNamePrefix.startsWith("drawing"))
             {
@@ -1083,6 +1181,11 @@ public class OfficeXmlHelper implements IConverterHelper2
             {
                 newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
             }
+            else if (fileNamePrefix.startsWith("document.xml"))
+            {
+                newDisplayName = "(" + DNAME_PRE_HYPERLINK + ") "
+                        + m_oriDisplayName;
+            }
         }
 
         if (m_isHeaderTranslate)
@@ -1100,14 +1203,6 @@ public class OfficeXmlHelper implements IConverterHelper2
                     || fileNamePrefix.startsWith("endnotes"))
             {
                 newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
-            }
-        }
-
-        if (m_isURLTranslate)
-        {
-            if (fileNamePrefix.startsWith("document.xml"))
-            {
-                newDisplayName = "(Hyperlinks) " + m_oriDisplayName;
             }
         }
 
@@ -1351,22 +1446,8 @@ public class OfficeXmlHelper implements IConverterHelper2
         m_eventFlow.setDocPageNumber(p_docPageNum);
 
         // modify display name
-        String newDisplayName = null;
-        if (m_type == OFFICE_XLSX && m_isURLTranslate)
-        {
-            String name = FileUtils.getBaseName(p_xmlFilename);
-            if (name.endsWith(".xml.rels"))
-            {
-                name = name.substring(0, name.length() - ".xml.rels".length());
-                newDisplayName = "(" + name + " Hyperlinks)" + m_oriDisplayName;
-            }
-        }
-
-        if (newDisplayName == null)
-        {
-            String number = getPageNumber(fileNamePrefix);
-            newDisplayName = getNewDisplayName(fileNamePrefix, number);
-        }
+        String number = getPageNumber(fileNamePrefix);
+        String newDisplayName = getNewDisplayName(fileNamePrefix, number);
 
         m_eventFlow.setDisplayName(newDisplayName);
     }
@@ -1527,9 +1608,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             if (docxmlRels.exists())
             {
                 String keyText = " TargetMode=\"External\"";
-                String keyText2 = "/hyperlink\"";
-                if (isFileContains(docxmlRels, keyText, true)
-                        && isFileContains(docxmlRels, keyText2, true))
+                if (isFileContains(docxmlRels, keyText, true))
                     list.add(docxmlRels.getPath());
             }
         }
@@ -1625,7 +1704,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                     // updated to w:lvlText w:val attribute at export stage
                     String newString = m.group() + NUMBERING_TAG_ADDED_START
                             + text + NUMBERING_TAG_ADDED_END;
-                    ns = ns.replace(m.group(), newString);
+                    ns = StringUtil.replace(ns, m.group(), newString);
                     FileUtil.writeFile(numbering, ns, "utf-8");
                 }
             }
@@ -1755,10 +1834,9 @@ public class OfficeXmlHelper implements IConverterHelper2
     }
 
     /**
-     * Finds hidden texts in document.xml and adds tag "<w:vanish/>" to mark
-     * them specially.
-     * <p>
-     * For GBS-2554.
+     * Handles the texts with hidden styles in document xml.
+     * 
+     * @since GBS-2554, GBS-3240
      */
     private void preHandleHiddenTextInDocx(String dir)
     {
@@ -1766,196 +1844,283 @@ public class OfficeXmlHelper implements IConverterHelper2
         {
             return;
         }
-
         try
         {
             File document = new File(dir, DOCX_CONTENT_XML);
             File style = new File(dir, DOCX_STYLE_XML);
             String documentContent = FileUtil.readFile(document, "utf-8");
             String styleContent = FileUtil.readFile(style, "utf-8");
-
-            // "<w:pPr><w:pStyle"
-            Matcher m = WP.matcher(documentContent);
-            while (m.find())
-            {
-                Matcher m1 = PPR.matcher(m.group(2));
-                if (m1.find())
-                {
-                    String wppr = m1.group(2);
-                    Matcher m2 = PSTYLE.matcher(wppr);
-                    if (m2.find())
-                    {
-                        Pattern p3 = Pattern.compile(MessageFormat.format(
-                                RE_STYLE, m2.group(1)));
-                        Matcher m3 = p3.matcher(styleContent);
-                        if (m3.find())
-                        {
-                            Matcher m31 = RPR.matcher(m3.group(1));
-                            if (m31.find())
-                            {
-                                if (!m31.group(2).contains(W_VANISH))
-                                {
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                // no <w:rPr>, so no "<w:vanish/>"
-                                continue;
-                            }
-                            // found "<w:vanish/>", indicating the style is
-                            // hidden
-                            String wp = m.group(2);
-                            Matcher m4 = WR.matcher(wp);
-                            while (m4.find())
-                            {
-                                String wr = m4.group(2);
-                                if (wr.contains("<w:t"))
-                                {
-                                    Matcher m41 = RPR.matcher(wr);
-                                    if (m41.find())
-                                    {
-                                        String wrpr = m41.group(2);
-                                        if (!wrpr.contains(W_VANISH0))
-                                        {
-                                            // add "<w:vanish/>" since it is in
-                                            // hidden style
-                                            if (!wrpr.contains(W_VANISH))
-                                            {
-                                                wrpr = W_VANISH + wrpr;
-                                                wr = StringUtil.replace(wr,
-                                                        m41.group(),
-                                                        m41.group(1) + wrpr
-                                                                + m41.group(3));
-                                            }
-                                        }
-                                        else
-                                        {
-                                            // remove "<w:vanish w:val=\"0\"/>"
-                                            // since the text with it is not
-                                            // hidden
-                                            wrpr = StringUtil.replace(wrpr,
-                                                    W_VANISH0, "");
-                                            if (wrpr.trim().isEmpty())
-                                            {
-                                                wr = StringUtil.replace(wr,
-                                                        m41.group(), "");
-                                            }
-                                            else
-                                            {
-                                                wr = StringUtil.replace(wr,
-                                                        m41.group(),
-                                                        m41.group(1) + wrpr
-                                                                + m41.group(3));
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // add "<w:vanish/>" since it is in
-                                        // hidden style
-                                        wr = "<w:rPr><w:vanish/></w:rPr>" + wr;
-                                    }
-                                }
-
-                                wp = StringUtil.replace(wp, m4.group(),
-                                        m4.group(1) + wr + m4.group(3));
-                            }
-
-                            String newContent = m.group(1) + wp + m.group(3);
-                            documentContent = StringUtil.replace(
-                                    documentContent, m.group(), newContent);
-                        }
-                    }
-                }
-            }
-            // "<w:rPr><w:rStyle"
-            m = WR.matcher(documentContent);
-            while (m.find())
-            {
-                Matcher m1 = RPR.matcher(m.group(2));
-                if (m1.find())
-                {
-                    String wrpr = m1.group(2);
-                    Matcher m2 = RSTYLE.matcher(wrpr);
-                    if (m2.find())
-                    {
-                        Pattern p3 = Pattern.compile(MessageFormat.format(
-                                RE_STYLE, m2.group(1)));
-                        Matcher m3 = p3.matcher(styleContent);
-
-                        if (m3.find())
-                        {
-                            Matcher m21 = RPR.matcher(m3.group(1));
-                            if (m21.find())
-                            {
-                                if (!m21.group(2).contains(W_VANISH))
-                                {
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                // no <w:rPr>, so no "<w:vanish/>"
-                                continue;
-                            }
-                            // found "<w:vanish/>", indicating the style is
-                            // hidden
-                            String wr = m.group(2);
-                            if (wr.contains("<w:t"))
-                            {
-                                if (!wrpr.contains(W_VANISH0))
-                                {
-                                    // add "<w:vanish/>" since it is in hidden
-                                    // style
-                                    if (!wrpr.contains(W_VANISH))
-                                    {
-                                        wrpr = W_VANISH + wrpr;
-                                        wr = StringUtil.replace(
-                                                wr,
-                                                m1.group(),
-                                                m1.group(1) + wrpr
-                                                        + m1.group(3));
-                                    }
-                                }
-                                else
-                                {
-                                    // remove "<w:vanish w:val=\"0\"/>"
-                                    // since the text with it is not
-                                    // hidden
-                                    wrpr = StringUtil.replace(wrpr, W_VANISH0,
-                                            "");
-                                    if (wrpr.trim().isEmpty())
-                                    {
-                                        wr = StringUtil.replace(wr, m1.group(),
-                                                "");
-                                    }
-                                    else
-                                    {
-                                        wr = StringUtil.replace(
-                                                wr,
-                                                m1.group(),
-                                                m1.group(1) + wrpr
-                                                        + m1.group(3));
-                                    }
-                                }
-
-                                String newContent = m.group(1) + wr
-                                        + m.group(3);
-                                documentContent = StringUtil.replace(
-                                        documentContent, m.group(), newContent);
-                            }
-                        }
-                    }
-                }
-            }
-
+            documentContent = processHiddenStyles(documentContent, styleContent);
             FileUtil.writeFile(document, documentContent, "utf-8");
         }
         catch (Exception e)
         {
             m_logger.error("Pre-handle hidden text error in docx.", e);
         }
+    }
+
+    /**
+     * Processes the hidden styles on document xml.
+     * 
+     * @return modified document xml content.
+     * @since GBS-3240
+     */
+    private String processHiddenStyles(String documentContent,
+            String styleContent)
+    {
+        // process table style
+        Matcher m_wtbl = W_TBL.matcher(documentContent);
+        while (m_wtbl.find())
+        {
+            String wtbl = m_wtbl.group(2);
+            wtbl = processHiddenStylesOnTable(wtbl, styleContent);
+            documentContent = StringUtil.replace(documentContent,
+                    m_wtbl.group(), m_wtbl.group(1) + wtbl + m_wtbl.group(3));
+        }
+        // process paragraph style without a table
+        Matcher m_wp = WP.matcher(documentContent);
+        while (m_wp.find())
+        {
+            String wp = m_wp.group(2);
+            wp = processHiddenStylesOnParagraph(wp, styleContent, false);
+            documentContent = StringUtil.replace(documentContent, m_wp.group(),
+                    m_wp.group(1) + wp + m_wp.group(3));
+        }
+        m_wp = WP2.matcher(documentContent);
+        while (m_wp.find())
+        {
+            String wp = m_wp.group(2);
+            wp = processHiddenStylesOnParagraph(wp, styleContent, false);
+            documentContent = StringUtil.replace(documentContent, m_wp.group(),
+                    m_wp.group(1) + wp + m_wp.group(3));
+        }
+        // process character style without a paragraph
+        // this case may not exist in actual document, leave it commented
+        // Matcher m_wr = WR.matcher(documentContent);
+        // while (m_wr.find())
+        // {
+        // String wr = m_wr.group(2);
+        // wr = processHiddenStylesOnCharacter(wr, styleContent, false, false);
+        // documentContent = StringUtil.replace(documentContent, m_wr.group(),
+        // m_wr.group(1) + wr + m_wr.group(3));
+        // }
+        // m_wr = WR2.matcher(documentContent);
+        // while (m_wr.find())
+        // {
+        // String wr = m_wr.group(2);
+        // wr = processHiddenStylesOnCharacter(wr, styleContent, false, false);
+        // documentContent = StringUtil.replace(documentContent, m_wr.group(),
+        // m_wr.group(1) + wr + m_wr.group(3));
+        // }
+
+        return documentContent;
+    }
+
+    /**
+     * Processes hidden styles on w:tbl string text.
+     * 
+     * @return modified w:tbl string.
+     */
+    private String processHiddenStylesOnTable(String wtbl, String styleContent)
+    {
+        boolean isTableStyleHidden = false;
+        Matcher m_wtblpr = W_TBLPR.matcher(wtbl);
+        if (m_wtblpr.find())
+        {
+            String wtblpr = m_wtblpr.group(2);
+            Matcher m_wtblstyle = W_TBLSTYLE.matcher(wtblpr);
+            if (m_wtblstyle.find())
+            {
+                String styleId = m_wtblstyle.group(1);
+                if (isHiddenStyle(styleId, styleContent))
+                {
+                    isTableStyleHidden = true;
+                }
+            }
+        }
+        // process paragraph style in a table
+        Matcher m_wp = WP.matcher(wtbl);
+        while (m_wp.find())
+        {
+            String wp = m_wp.group(2);
+            wp = processHiddenStylesOnParagraph(wp, styleContent,
+                    isTableStyleHidden);
+            wtbl = StringUtil.replace(wtbl, m_wp.group(), m_wp.group(1) + wp
+                    + m_wp.group(3));
+        }
+        m_wp = WP2.matcher(wtbl);
+        while (m_wp.find())
+        {
+            String wp = m_wp.group(2);
+            wp = processHiddenStylesOnParagraph(wp, styleContent,
+                    isTableStyleHidden);
+            wtbl = StringUtil.replace(wtbl, m_wp.group(), m_wp.group(1) + wp
+                    + m_wp.group(3));
+        }
+        // process character style without a paragraph
+        // this case may not exist in actual document, leave it commented
+        // Matcher m_wr = WR.matcher(wtbl);
+        // while (m_wr.find())
+        // {
+        // String wr = m_wr.group(2);
+        // wr = processHiddenStylesOnCharacter(wr, styleContent,
+        // isTableStyleHidden, false);
+        // wtbl = StringUtil.replace(wtbl, m_wr.group(), m_wr.group(1)
+        // + wr + m_wr.group(3));
+        // }
+        // m_wr = WR2.matcher(wtbl);
+        // while (m_wr.find())
+        // {
+        // String wr = m_wr.group(2);
+        // wr = processHiddenStylesOnCharacter(wr, styleContent,
+        // isTableStyleHidden, false);
+        // wtbl = StringUtil.replace(wtbl, m_wr.group(), m_wr.group(1)
+        // + wr + m_wr.group(3));
+        // }
+        return wtbl;
+    }
+
+    /**
+     * Processes hidden styles on w:p string text.
+     * 
+     * @return modified w:p string.
+     */
+    private String processHiddenStylesOnParagraph(String wp,
+            String styleContent, boolean isTableStyleHidden)
+    {
+        boolean isParagraphStyleHidden = false;
+        Matcher m_wppr = W_PPR.matcher(wp);
+        if (m_wppr.find())
+        {
+            String wppr = m_wppr.group(2);
+            Matcher m_wpstyle = W_PSTYLE.matcher(wppr);
+            if (m_wpstyle.find())
+            {
+                String styleId = m_wpstyle.group(1);
+                if (isHiddenStyle(styleId, styleContent))
+                {
+                    isParagraphStyleHidden = true;
+                }
+            }
+        }
+        // process character style in a paragraph
+        Matcher m_wr = WR.matcher(wp);
+        while (m_wr.find())
+        {
+            String wr = m_wr.group(2);
+            wr = processHiddenStylesOnCharacter(wr, styleContent,
+                    isTableStyleHidden, isParagraphStyleHidden);
+            wp = StringUtil.replace(wp, m_wr.group(),
+                    m_wr.group(1) + wr + m_wr.group(3));
+        }
+        m_wr = WR2.matcher(wp);
+        while (m_wr.find())
+        {
+            String wr = m_wr.group(2);
+            wr = processHiddenStylesOnCharacter(wr, styleContent,
+                    isTableStyleHidden, isParagraphStyleHidden);
+            wp = StringUtil.replace(wp, m_wr.group(),
+                    m_wr.group(1) + wr + m_wr.group(3));
+        }
+        return wp;
+    }
+
+    /**
+     * Processes hidden styles on w:r string text.
+     * 
+     * @return modified w:r string.
+     */
+    private String processHiddenStylesOnCharacter(String wr,
+            String styleContent, boolean isTableStyleHidden,
+            boolean isParagraphStyleHidden)
+    {
+        boolean isCharacterStyleHidden = false;
+        String wrpr = "";
+        Matcher m_rpr = W_RPR.matcher(wr);
+        if (m_rpr.find())
+        {
+            wrpr = m_rpr.group(2);
+            Matcher m_rstyle = W_RSTYLE.matcher(wrpr);
+            if (m_rstyle.find())
+            {
+                String styleId = m_rstyle.group(1);
+                if (isHiddenStyle(styleId, styleContent))
+                {
+                    isCharacterStyleHidden = true;
+                }
+            }
+        }
+        if (wr.contains("<w:t") && !wr.contains(HIDDEN_MARK))
+        {
+            if (isTableStyleHidden ^ isParagraphStyleHidden
+                    ^ isCharacterStyleHidden)
+            {
+                // the basic logic is the final hidden style for a text is
+                // calculated by exclusive OR (XOR) of table style, paragraph
+                // style and character style
+                if (!wrpr.contains(W_VANISH_WITH_ATTR))
+                {
+                    wr = HIDDEN_MARK + wr;
+                }
+            }
+            else if (wrpr.contains(W_VANISH))
+            {
+                // attribute "<w:vanish/>" indicates this is a hidden text
+                wr = HIDDEN_MARK + wr;
+            }
+        }
+        return wr;
+    }
+
+    /**
+     * Checks if the given style is hidden or not.
+     */
+    public static boolean isHiddenStyle(String styleId, String styleContent)
+    {
+        boolean isHidden = false;
+        Pattern p_wstyle = Pattern.compile(MessageFormat.format(W_STYLE,
+                styleId));
+        Matcher m_wstyle = p_wstyle.matcher(styleContent);
+        if (m_wstyle.find())
+        {
+            String style = m_wstyle.group(1);
+            Matcher m_wrpr = W_RPR.matcher(style);
+            if (m_wrpr.find())
+            {
+                String rpr = m_wrpr.group(2);
+                if (rpr.contains(W_VANISH))
+                {
+                    return true;
+                }
+                else if (rpr.contains(W_VANISH_WITH_ATTR))
+                {
+                    // just return false if found <w:vanish w:val=\"0\"/>
+                    return false;
+                }
+                else
+                {
+                    isHidden = false;
+                }
+            }
+            else
+            {
+                // no <w:rPr>, so no "<w:vanish/>"
+                isHidden = false;
+            }
+
+            if (!isHidden)
+            {
+                // recursively looking for the "<w:vanish/>" attribute according
+                // to its based-on style id <w:basedOn w:val="xxxx"/>
+                Matcher m_basedon = W_BASEDON.matcher(style);
+                if (m_basedon.find())
+                {
+                    styleId = m_basedon.group(1);
+                    return isHiddenStyle(styleId, styleContent);
+                }
+            }
+        }
+        return isHidden;
     }
 
     private void getDrawingFiles(String dir, List<String> list)
@@ -2066,7 +2231,83 @@ public class OfficeXmlHelper implements IConverterHelper2
         }
     }
 
-    private void getUrlFiles(String dir, List<String> list)
+    private void getUrlFilesForPptx(String dir, List<String> list)
+    {
+        if (m_isURLTranslate)
+        {
+            File root = new File(dir, PPTX_SLIDES_RELS_DIR);
+            if (root.exists())
+            {
+                List<File> fs = FileUtil.getAllFiles(root, new FileFilter()
+                {
+                    @Override
+                    public boolean accept(File arg0)
+                    {
+                        String name = arg0.getName();
+                        if (name.endsWith(".rels"))
+                        {
+                            try
+                            {
+                                String text = FileUtils.read(arg0, "UTF-8");
+                                if (text.contains(" TargetMode=\"External\""))
+                                    return true;
+
+                                return false;
+                            }
+                            catch (IOException e)
+                            {
+                                // ignore
+                                logException(e);
+                            }
+                        }
+                        return false;
+                    }
+                });
+
+                for (File f : fs)
+                {
+                    list.add(f.getAbsolutePath());
+                }
+            }
+
+            File root2 = new File(dir, PPTX_DIAGRAMS_RELS_DIR);
+            if (root2.exists())
+            {
+                List<File> fs = FileUtil.getAllFiles(root2, new FileFilter()
+                {
+                    @Override
+                    public boolean accept(File arg0)
+                    {
+                        String name = arg0.getName();
+                        if (name.startsWith("data") && name.endsWith(".rels"))
+                        {
+                            try
+                            {
+                                String text = FileUtils.read(arg0, "UTF-8");
+                                if (text.contains(" TargetMode=\"External\""))
+                                    return true;
+
+                                return false;
+                            }
+                            catch (IOException e)
+                            {
+                                // ignore
+                                logException(e);
+                            }
+                        }
+                        return false;
+                    }
+                });
+
+                for (File f : fs)
+                {
+                    list.add(f.getAbsolutePath());
+                }
+            }
+        }
+    }
+
+    private void getUrlFilesForXlsx(String dir, List<String> list)
     {
         if (m_isURLTranslate)
         {
@@ -2084,8 +2325,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                             try
                             {
                                 String text = FileUtils.read(arg0, "UTF-8");
-                                if (text.contains(" TargetMode=\"External\"")
-                                        && text.contains("/hyperlink\""))
+                                if (text.contains(" TargetMode=\"External\""))
                                     return true;
 
                                 return false;
@@ -2096,7 +2336,6 @@ public class OfficeXmlHelper implements IConverterHelper2
                                 logException(e);
                             }
                         }
-
                         return false;
                     }
                 });
@@ -2169,7 +2408,7 @@ public class OfficeXmlHelper implements IConverterHelper2
         getDrawingFiles(dir, list);
         getDiagramsFiles(dir, list);
         getChartsFiles(dir, list);
-        getUrlFiles(dir, list);
+        getUrlFilesForXlsx(dir, list);
 
         File sheetsDir = new File(dir, XLSX_SHEETS_DIR);
         // get sheets
@@ -2209,6 +2448,54 @@ public class OfficeXmlHelper implements IConverterHelper2
                 if (list.size() == 0 && sheets.length > 0)
                 {
                     list.add(sheets[0].getPath());
+                }
+            }
+        }
+    }
+
+    private void getNewLocalizedXmlFilesXLSX(String dir, List<String> list)
+    {
+        // get sheet name
+        String sheetnameXml = FileUtils.concatPath(dir, XLSX_SHEET_NAME);
+
+        if (m_isExcelTabNamesTranslate)
+        {
+            list.add(sheetnameXml);
+        }
+
+        List<String> hiddenSheetIds = getExcelHiddenSheetId(sheetnameXml);
+
+        getDrawingFiles(dir, list);
+        getDiagramsFiles(dir, list);
+        getChartsFiles(dir, list);
+        getUrlFilesForXlsx(dir, list);
+
+        File sheetsDir = new File(dir, XLSX_SHEETS_DIR);
+        // get sheets
+        if (sheetsDir.isDirectory())
+        {
+
+            File[] sheets = getSortSheetFiles(sheetsDir);
+
+            if (sheets != null && sheets.length >= 0)
+            {
+                // get each sheet and check if it is empty
+                for (int i = 0; i < sheets.length; i++)
+                {
+                    File f = sheets[i];
+                    String fbasename = FileUtils.getPrefix(FileUtils
+                            .getBaseName(f.getPath()));
+                    String fid = fbasename.substring(9);
+
+                    if (!hiddenSheetIds.contains(fid))
+                        list.add(f.getPath());
+                }
+
+                if (list.size() == 0)
+                {
+                    File[] sheet2s = getSheetFiles(sheetsDir);
+                    if (sheet2s.length > 0)
+                        list.add(sheet2s[0].getPath());
                 }
             }
         }
@@ -2425,6 +2712,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
         }
 
+        getUrlFilesForPptx(dir, list);
     }
 
     private void getNewLocalizedXmlFilesPPTX(String dir, List<String> list)
@@ -2526,6 +2814,8 @@ public class OfficeXmlHelper implements IConverterHelper2
                 list.add(handoutMaster.getPath());
             }
         }
+
+        getUrlFilesForPptx(dir, list);
     }
 
     private boolean isFileExists(String xmlFile)
@@ -2602,6 +2892,12 @@ public class OfficeXmlHelper implements IConverterHelper2
         return files;
     }
 
+    private File[] getSortSheetFiles(File sheetsDir)
+    {
+        File[] sheets = listAcceptFiles(sheetsDir, prefix_sort_sheet);
+        return sheets;
+    }
+
     private File[] getSheetFiles(File sheetsDir)
     {
         File[] sheets = listAcceptFiles(sheetsDir, prefix_sheet);
@@ -2645,6 +2941,9 @@ public class OfficeXmlHelper implements IConverterHelper2
     private List<String> getExcelHiddenSheetId(String sheetnameXml)
     {
         List<String> result = new ArrayList<String>();
+        if (m_isHiddenTextTranslate)
+            return result;
+        
         try
         {
             String xpath = "//*[local-name()=\"sheet\"][@state=\"hidden\"]";

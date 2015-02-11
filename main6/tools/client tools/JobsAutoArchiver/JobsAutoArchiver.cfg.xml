@@ -2,15 +2,41 @@
 <Configuration>
 	<!-- GlobalSight host, port, https(true, false), username, password -->
 	<server>
-		<host>localhost</host>
+		<host>host1</host>
 		<port>8080</port>
 		<https>false</https>
-		<username>demoadmin</username>
-		<password>password</password>
+		<users>
+			<user>
+				<username>username1</username>
+				<password>password</password>
+			</user>
+			<user>
+				<username>username2</username>
+				<password>password</password>
+			</user>
+		</users>
+		<!-- After a job is exported, need an interval time before really archive it. In HOURS, default 24*7*4 (4 weeks). -->
+		<intervalTimeForArchive>672</intervalTimeForArchive>
+	</server>
+	<server>
+		<host>host2</host>
+		<port>8080</port>
+		<https>false</https>
+		<users>
+			<user>
+				<username>username1</username>
+				<password>password</password>
+			</user>
+			<user>
+				<username>username2</username>
+				<password>password</password>
+			</user>
+		</users>
+		<intervalTimeForArchive>672</intervalTimeForArchive>
 	</server>
 
-    <!-- After a job is exported, need an interval time before really archive it. In HOURS, default 24*7*4 (4 weeks). -->
-	<intervalTimeForArchive>672</intervalTimeForArchive>
+	<!-- runOnce(yes, no), if runOnce is yes, next time not to check exported jobs to archive, or to check -->
+	<runOnce>yes</runOnce>
 	<!-- The interval time before next time to check exported jobs to archive. In HOURS, default 24 hours -->
 	<intervalTime>24</intervalTime>
 

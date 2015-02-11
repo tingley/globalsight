@@ -325,7 +325,7 @@ function handleSelectAll() {
 	}
 }
 
-function searchJob()
+function searchJob(fromRequest)
 {
 	var baseUrl = "";
 	var state = $("#sto").val();
@@ -343,10 +343,31 @@ function searchJob()
 		baseUrl = "<%=archivedURL%>" + "&fromRequest=true";
 	else if(state =="ALL_STATUS")
 		baseUrl = "<%=allStatusURL%>";
-	window.location = baseUrl
-		+ "&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
-		+"&idf="+$("#jobIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
-		+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val();
+	if(fromRequest && state != "ARCHIVED")
+	{
+		window.location = baseUrl+"&fromRequest=true"+"&sto="+$("#sto").val()
+		+"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
+		+"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
+		+"&esf="+$("#completionStartFilter").val()+"&eso="+$("#completionStartOptionsFilter").val()
+		+"&eef="+$("#completionEndFilter").val()+"&eeo="+$("#completionEndOptionsFilter").val()
+		+"&edss="+$("#exportDateStartFilter").val()+"&edso="+$("#exportDateStartOptionsFilter").val()
+		+"&edee="+$("#exportDateEndFilter").val()+"&edes="+$("#exportDateEndOptionsFilter").val()
+		+"&advancedSearch="+advancedSearch;
+	}
+	else
+	{
+		window.location = baseUrl
+			+ "&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
+			+"&idf="+$("#jobIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
+			+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val()+"&pro="+$("#priorityFilter").val()
+			+"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
+			+"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
+			+"&esf="+$("#completionStartFilter").val()+"&eso="+$("#completionStartOptionsFilter").val()
+			+"&eef="+$("#completionEndFilter").val()+"&eeo="+$("#completionEndOptionsFilter").val()
+			+"&edss="+$("#exportDateStartFilter").val()+"&edso="+$("#exportDateStartOptionsFilter").val()
+			+"&edee="+$("#exportDateEndFilter").val()+"&edes="+$("#exportDateEndOptionsFilter").val()
+			+"&advancedSaerch="+advancedSearch;
+	}
 }
 </SCRIPT>
 
@@ -424,7 +445,16 @@ function searchJob()
 </TR>
 <TR CLASS="tableHeadingFilter" VALIGN="BOTTOM">
     <TD CLASS="headerCell">&nbsp;</TD>
-    <TD CLASS="headerCell">&nbsp;</TD>
+    <TD CLASS="headerCell">
+    	<select id="priorityFilter" class="filterSelect">
+	        <option value='-1'></option>
+	        <option value='1'>1</option>
+	        <option value='2'>2</option>
+	        <option value='3'>3</option>
+	        <option value='4'>4</option>
+	        <option value='5'>5</option>
+        </select>
+    </TD>
     <TD CLASS="headerCell"  style="width:150px" nowrap>
     	<select id="jobIdOption">
 	        <option value='<%=SearchCriteriaParameters.EQUALS%>'>=</option>

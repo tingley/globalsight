@@ -171,12 +171,25 @@ public class MSOfficeExcelFilter implements Filter
         return this.contentPostFilterTableName;
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from MSOfficeExcelFilter jp "
                 + "where jp.filterName =:filterName "
                 + "and jp.companyId=:companyId";
         Map map = new HashMap();
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from MSOfficeExcelFilter jp "
+        		 + "where jp.id <>:filterId "
+                + " and jp.filterName =:filterName "
+                + "and jp.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
         map.put("filterName", filterName);
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;

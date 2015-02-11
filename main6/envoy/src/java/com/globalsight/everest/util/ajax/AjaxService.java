@@ -166,13 +166,34 @@ public class AjaxService extends HttpServlet
         // writer = response.getWriter();
         String filterName = request.getParameter("filterName");
         String filterTableName = request.getParameter("filterTableName");
-        if (FilterHelper.checkExist(filterTableName, filterName, companyId))
+        boolean isNew = Boolean.parseBoolean(request.getParameter("isNew"));
+        //check if name exists when new and edit
+        if (isNew)
         {
-            writer.write("true");
+        	if(FilterHelper.checkExistNew(filterTableName, filterName, companyId))
+        	{
+        		writer.write("true");
+                return;
+        	}
+        	else
+        	{
+        		writer.write("false");
+        	    return;
+        	}
         }
         else
         {
-            writer.write("false");
+        	long filterId = Long.parseLong(request.getParameter("filterId"));
+        	if(FilterHelper.checkExistEdit(filterId, filterTableName, filterName, companyId))
+        	{
+        		writer.write("true");
+        		return;
+        	}
+        	else
+        	{
+        		writer.write("false");
+        	    return;
+        	}
         }
     }
 
@@ -219,7 +240,7 @@ public class AjaxService extends HttpServlet
 
     public void updateJavaPropertiesFilter()
     {
-
+    	long fId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         boolean isSupportSid = Boolean.parseBoolean(request
@@ -251,7 +272,7 @@ public class AjaxService extends HttpServlet
             CATEGORY.error("Update java properties filter with error:", e);
         }
         long filterId = FilterHelper
-                .updateJavaPropertiesFilter(filterName, filterDesc,
+                .updateJavaPropertiesFilter(fId, filterName, filterDesc,
                         isSupportSid, isUnicodeEscape, isPreserveSpaces,
                         companyId, secondFilterId, secondFilterTableName,
                         internalTexts);
@@ -295,6 +316,7 @@ public class AjaxService extends HttpServlet
 
     public void updateMSOfficeExcelFilter()
     {
+    	long fId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         boolean altTranslate = Boolean.parseBoolean(request
@@ -314,7 +336,7 @@ public class AjaxService extends HttpServlet
         String contentPostFilterTableName = request
                 .getParameter("contentPostFilterTableName");
 
-        long filterId = FilterHelper.updateMSOfficeExcelFilter(filterName,
+        long filterId = FilterHelper.updateMSOfficeExcelFilter(fId, filterName,
                 filterDesc, companyId, altTranslate, tabNamesTranslate,
                 contentPostFilterId, contentPostFilterTableName);
         if (filterId > 0)
@@ -340,12 +362,12 @@ public class AjaxService extends HttpServlet
 
     public void updateMSOfficePPTFilter()
     {
-        String filterName = request.getParameter("filterName");
+    	long filterId = Long.parseLong(request.getParameter("filterId"));
 
-        String hql = "from MSOfficePPTFilter ms where ms.filterName=:name "
+        String hql = "from MSOfficePPTFilter ms where ms.id=:filterId "
                 + "and ms.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", filterName);
+        map.put("filterId", filterId);
         map.put("companyId", companyId);
         MSOfficePPTFilter filter = (MSOfficePPTFilter) HibernateUtil.getFirst(
                 hql, map);
@@ -361,6 +383,7 @@ public class AjaxService extends HttpServlet
 
     private void loadPPTFilterParameter(MSOfficePPTFilter filter)
     {
+        String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         boolean altTranslate = Boolean.parseBoolean(request
                 .getParameter("altTranslate"));
@@ -380,6 +403,7 @@ public class AjaxService extends HttpServlet
         String contentPostFilterTableName = request
                 .getParameter("contentPostFilterTableName");
 
+        filter.setFilterName(filterName);
         filter.setFilterDescription(filterDesc);
         filter.setContentPostFilterId(contentPostFilterId);
         filter.setContentPostFilterTableName(contentPostFilterTableName);
@@ -401,12 +425,12 @@ public class AjaxService extends HttpServlet
 
     public void updatePOFilter()
     {
-        String filterName = request.getParameter("filterName");
+    	long filterId = Long.parseLong(request.getParameter("filterId"));
 
-        String hql = "from POFilter f where f.filterName=:name "
+        String hql = "from POFilter f where f.id=:filterId "
                 + "and f.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", filterName);
+        map.put("filterId", filterId);
         map.put("companyId", companyId);
         POFilter filter = (POFilter) HibernateUtil.getFirst(hql, map);
 
@@ -419,6 +443,7 @@ public class AjaxService extends HttpServlet
 
     private void loadPOFilterParameter(POFilter filter)
     {
+    	String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
 
         long secondFilterId = -2;
@@ -433,7 +458,8 @@ public class AjaxService extends HttpServlet
 
         String secondFilterTableName = request
                 .getParameter("secondFilterTableName");
-
+        
+        filter.setFilterName(filterName);
         filter.setFilterDescription(filterDesc);
         filter.setSecondFilterId(secondFilterId);
         filter.setSecondFilterTableName(secondFilterTableName);
@@ -453,12 +479,13 @@ public class AjaxService extends HttpServlet
 
     public void updateJavaScriptFilter()
     {
+    	long filterId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         String jsFunctionText = request.getParameter("jsFunctionText");
         boolean enableUnicodeEscape = Boolean.parseBoolean(request
                 .getParameter("enableUnicodeEscape"));
-        FilterHelper.updateJavaScriptFilter(filterName, filterDesc,
+        FilterHelper.updateJavaScriptFilter(filterId, filterName, filterDesc,
                 jsFunctionText, companyId, enableUnicodeEscape);
     }
 
@@ -480,19 +507,21 @@ public class AjaxService extends HttpServlet
 
     public void updatePlainTextFilter()
     {
+    	long filterId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
 
-        String hql = "from PlainTextFilter infl where infl.filterName=:name "
+        String hql = "from PlainTextFilter infl where infl.id=:filterId "
                 + "and infl.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", filterName);
+        map.put("filterId", filterId);
         map.put("companyId", companyId);
 
         PlainTextFilter filter = (PlainTextFilter) HibernateUtil.getFirst(hql,
                 map);
         if (filter != null)
         {
+        	filter.setFilterName(filterName);
             filter.setFilterDescription(filterDesc);
             HibernateUtil.update(filter);
 
@@ -539,12 +568,12 @@ public class AjaxService extends HttpServlet
 
     public void updateInddFilter()
     {
-        String filterName = request.getParameter("filterName");
+        long filterId = Long.parseLong(request.getParameter("filterId"));
 
-        String hql = "from InddFilter infl where infl.filterName=:name "
+        String hql = "from InddFilter infl where infl.id=:filterId "
                 + "and infl.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", filterName);
+        map.put("filterId", filterId);
         map.put("companyId", companyId);
 
         InddFilter filter = (InddFilter) HibernateUtil.getFirst(hql, map);
@@ -571,6 +600,7 @@ public class AjaxService extends HttpServlet
 
     private void loadDocFilterParameter(MSOfficeDocFilter filter)
     {
+    	filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
@@ -616,12 +646,12 @@ public class AjaxService extends HttpServlet
 
     public void updateMSOfficeDocFilter()
     {
-        String filterName = request.getParameter("filterName");
+        long filterId = Long.parseLong(request.getParameter("filterId"));
 
-        String hql = "from MSOfficeDocFilter ms where ms.filterName=:name "
+        String hql = "from MSOfficeDocFilter ms where ms.id=:filterId "
                 + "and ms.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", filterName);
+        map.put("filterId", filterId);
         map.put("companyId", companyId);
         MSOfficeDocFilter filter = (MSOfficeDocFilter) HibernateUtil.getFirst(
                 hql, map);
@@ -649,6 +679,7 @@ public class AjaxService extends HttpServlet
 
     private void loadOpenOfficeFilterParameter(OpenOfficeFilter filter)
     {
+    	filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
@@ -670,12 +701,12 @@ public class AjaxService extends HttpServlet
 
     public void updateOpenOfficeFilter()
     {
-        String filterName = request.getParameter("filterName");
+    	long filterId = Long.parseLong(request.getParameter("filterId"));
 
-        String hql = "from OpenOfficeFilter oof where oof.filterName=:name "
+        String hql = "from OpenOfficeFilter oof where oof.id=:filterId "
                 + "and oof.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", filterName);
+        map.put("filterId", filterId);
         map.put("companyId", companyId);
         OpenOfficeFilter filter = (OpenOfficeFilter) HibernateUtil.getFirst(
                 hql, map);
@@ -703,6 +734,7 @@ public class AjaxService extends HttpServlet
 
     private void loadMSOffice2010FilterParameter(MSOffice2010Filter filter)
     {
+    	filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
@@ -752,6 +784,16 @@ public class AjaxService extends HttpServlet
                 .getParameter("urlTranslate"));
         filter.setUrlTranslate(urlTranslate);
 
+        String excelOrder = request
+                .getParameter("excelOrder");
+        String orderValue = "n";
+        if ("c".equals(excelOrder)){
+            orderValue = "c";
+        } else if ("r".equals(excelOrder)) {
+            orderValue = "r";
+        }
+        filter.setExcelOrder(orderValue);
+        
         String selectParaStyles = request
                 .getParameter("unextractableWordParagraphStyles");
         String allParaStyles = request.getParameter("allParagraphStyles");
@@ -793,12 +835,12 @@ public class AjaxService extends HttpServlet
 
     public void updateMSOffice2010Filter()
     {
-        String filterName = request.getParameter("filterName");
+    	long filterId = Long.parseLong(request.getParameter("filterId"));
 
-        String hql = "from MSOffice2010Filter msf where msf.filterName=:name "
+        String hql = "from MSOffice2010Filter msf where msf.id=:filterId "
                 + "and msf.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", filterName);
+        map.put("filterId", filterId);
         map.put("companyId", companyId);
         MSOffice2010Filter filter = (MSOffice2010Filter) HibernateUtil
                 .getFirst(hql, map);
@@ -811,7 +853,7 @@ public class AjaxService extends HttpServlet
                     FilterConstants.OFFICE2010_TABLENAME);
         }
     }
-
+    
     public static long tryParse(String s, long defaultV)
     {
         try
@@ -936,17 +978,34 @@ public class AjaxService extends HttpServlet
         String filterTableName = request.getParameter("filterTableName");
         boolean isNew = Boolean.parseBoolean(request.getParameter("isNew"));
 
-        // 2. check if name exists when new filter
-        if (isNew
-                && FilterHelper.checkExist(filterTableName, filterName,
-                        companyId))
-        {
-            writer.write("name_exists");
-            return;
-        }
-
-        // 3. do other check
-        writer.write(FilterHelper.isFilterValid(request, filterTableName));
+        // 2. check if name exists when new and edit
+		if (isNew) 
+		{
+			if (FilterHelper.checkExistNew(filterTableName, filterName, companyId)) 
+			{
+				writer.write("name_exists");
+				return;
+			} 
+			else 
+			{
+				writer.write(FilterHelper.isFilterValid(request, filterTableName));
+				return;
+			}
+		} 
+		else 
+		{
+			long filterId = Long.parseLong(request.getParameter("filterId"));
+			if (FilterHelper.checkExistEdit(filterId, filterTableName, filterName, companyId)) 
+			{
+				writer.write("name_exists");
+				return;
+			} 
+			else 
+			{
+				writer.write(FilterHelper.isFilterValid(request, filterTableName));
+				return;
+			}
+		}
     }
 
     public void saveXmlRuleFilter()

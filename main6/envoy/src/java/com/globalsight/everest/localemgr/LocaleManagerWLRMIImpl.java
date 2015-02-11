@@ -41,10 +41,10 @@ public class LocaleManagerWLRMIImpl extends RemoteServer implements
     }
 
     public void addSourceTargetLocalePair(GlobalSightLocale param1,
-            GlobalSightLocale param2) throws LocaleManagerException,
-            java.rmi.RemoteException
+            GlobalSightLocale param2, long companyId)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
-        m_localReference.addSourceTargetLocalePair(param1, param2);
+        m_localReference.addSourceTargetLocalePair(param1, param2, companyId);
     }
 
     public java.util.Vector getAllSourceLocalesByCompanyId(String p_companyId)

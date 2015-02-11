@@ -467,7 +467,13 @@ public class UpdateLeverageHelper
                             }
                         }
                     }
-                    newLeveragedTus.add(leveragedTu);
+
+                    // Do not save "STATISTICS_MATCH" into DB when update leverage.
+                    if (!MatchState.STATISTICS_MATCH.equals(leveragedTu
+                            .getMatchState()))
+                    {
+                        newLeveragedTus.add(leveragedTu);
+                    }
                 }
 
                 levMatches.setLeveragedTus(newLeveragedTus);

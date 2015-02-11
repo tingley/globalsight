@@ -372,13 +372,25 @@ public class DownloadFileHandler extends PageHandler
             catch (Exception e)
             {
                 jobname = ji.toString();
-            }
+			}
 
-            String tempS = locales.toString();
-            String localestr = tempS.substring(1, tempS.length() - 1);
-            localestr = locales.size() == 1 ? localestr : "Languages(" + localestr + ")";
-            downloadFileName = (jobId > -1 ? jobId + "_" : "") + jobname + "_" + localestr + ".zip";
-        }
+			String tempS = locales.toString();
+			String localestr = tempS.substring(1, tempS.length() - 1);
+			localestr = locales.size() == 1 ? localestr : "Languages("
+					+ localestr + ")";
+			
+			String isCheckedName = p_request.getParameter("isChecked");
+			if ("true".equals(isCheckedName))
+			{
+				downloadFileName = (jobId > -1 ? jobId + "_" : "") + jobname
+						+ "_" + localestr + ".zip";
+			}
+			else
+			{
+				downloadFileName = (jobId > -1 ? jobId + "_" : "") + jobname
+						 + ".zip";
+			}
+		}
         else if (jobIdSet!= null && jobIdSet.size() > 1)
         {
             String tempS = jobIdSet.toString();

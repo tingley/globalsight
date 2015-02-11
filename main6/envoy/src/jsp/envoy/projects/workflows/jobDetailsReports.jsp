@@ -177,7 +177,7 @@ $(document).ready(function(){
 <% if (userPerms.getPermissionFor(Permission.REPORTS_MAIN)) { %>
 		<TR>
 			<TD CLASS="tableHeadingBasic"><input type="checkbox" id="checkAll"></TD>
-    		<TD CLASS="tableHeadingBasic" style="width:220px;"><%=bundle.getString("reportName")%></TD>
+    		<TD CLASS="tableHeadingBasic" style="width:250px;"><%=bundle.getString("reportName")%></TD>
     		<TD CLASS="tableHeadingBasic" style="width:100px;"><%=bundle.getString("exportAs")%></TD>
         	<TD CLASS="tableHeadingBasic"><%=bundle.getString("reportDesc")%></TD>
     	</TR>
@@ -216,6 +216,19 @@ $(document).ready(function(){
             </TD>
             <TD>XLSX</TD>
             <TD><%=bundle.getString("review_reviewers_comments_desc")%></TD>
+        </TR>
+        </amb:permission>
+        
+        <amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+        	<TD><input type="checkbox" name="checkReport" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT%>"></TD>
+            <TD>
+          		<A CLASS=standardHREF href="javascript:;" onclick="javascript:fnGenerateReport(this.parentNode.parentNode);">
+             		<%=bundle.getString("review_reviewers_comments_simple")%>
+				</A>
+            </TD>
+            <TD>XLSX</TD>
+            <TD><%=bundle.getString("review_reviewers_comments_simple_desc")%></TD>
         </TR>
         </amb:permission>
 

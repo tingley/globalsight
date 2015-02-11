@@ -46,7 +46,7 @@ public class OfficeOptimizer extends Optimizer
         }
 
         tuv.setGxml(gxml);
-
-        tuv = DocsTagUtil.handleSpecialTag(tuv, companyId);
+//    remove style tag for office 1.0
+//        tuv = DocsTagUtil.handleSpecialTag(tuv, companyId);
 	}
 }

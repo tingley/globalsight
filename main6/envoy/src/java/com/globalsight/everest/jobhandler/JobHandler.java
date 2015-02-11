@@ -542,6 +542,25 @@ public interface JobHandler
     public String[] getJobIdsByState(String p_companyId, String p_state,
             int p_offset, int p_count, boolean p_isDescOrder)
             throws RemoteException, JobException;
+    
+    /**
+     * Get job IDs with special creator userName and range of fetching records
+     * 
+     * @param p_companyId
+     *            Company ID
+     * @param p_creatorUserName
+     *            creator's userName of job
+     * @param p_offset
+     *            Begin index of records
+     * @param p_count
+     *            Count number of fetching records
+     * @return
+     * @throws RemoteException
+     * @throws JobException
+     */
+    public String[] getJobIdsByCreator(long p_companyId, String p_creatorUserId,
+            int p_offset, int p_count, boolean p_isDescOrder)
+            throws RemoteException, JobException;
 
     /**
      * Get counts of every job state with speical company id

@@ -38,10 +38,20 @@ public class InddFilter implements Filter
     private boolean extractLineBreak = true;
     private boolean replaceNonbreakingSpace = false;
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from InddFilter infl where infl.filterName =:filterName and infl.companyId=:companyId";
         Map map = new HashMap();
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from InddFilter infl where infl.id<>:filterId and infl.filterName =:filterName and infl.companyId=:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
         map.put("filterName", filterName);
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;

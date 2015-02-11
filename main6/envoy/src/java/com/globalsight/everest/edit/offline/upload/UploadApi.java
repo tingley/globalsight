@@ -46,6 +46,8 @@ import java.util.Vector;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
@@ -639,13 +641,10 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             fis = new FileInputStream(tmpFile);
 
             Task task = ServerProxy.getTaskManager().getTask(p_taskId);
-            long companyId = task != null ? task.getCompanyId() : Long
-                    .parseLong(CompanyWrapper.getCurrentCompanyId());
-            long jobId = task.getJobId();
 
-            org.apache.poi.ss.usermodel.Workbook workbook = ExcelUtil
-                    .getWorkbook(tmpFile.getAbsolutePath(), fis);
-            org.apache.poi.ss.usermodel.Sheet sheet = null;
+            Workbook workbook = ExcelUtil.getWorkbook(
+                    tmpFile.getAbsolutePath(), fis);
+            Sheet sheet = null;
 
             if (WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
             {
@@ -687,14 +686,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             else if (targetLanguage.indexOf('[') < 0
                     || targetLanguage.indexOf(']') < 0)
             {
-                // Operates Reviewers Comments Report from 8.2.1 Release Server.
-                // if (p_reportName.equals(WebAppConstants.LANGUAGE_SIGN_OFF)
-                // && sheet.getCell(0,
-                // 3).getContents().equalsIgnoreCase("Job id"))
-                // {
-                // return loadReportData821(sheet, task);
-                // }
-
                 m_errWriter
                         .addFileErrorMsg("Target language format is not correct.\r\nIt should "
                                 + "contain a portion which is a locale code encolsed by [ ] such as [zh_CN]");
@@ -731,391 +722,54 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
 
             updateProcess(5);
-            Set<String> jobIds = new HashSet<String>();
 
-            if (p_reportName.equals(WebAppConstants.TRANSLATION_EDIT))
+            if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName))
             {
-                if (!ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10)
-                        .equalsIgnoreCase("Job id")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11)
-                                .equalsIgnoreCase("Segment id")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 12)
-                                .equalsIgnoreCase("Page name")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2)
-                                .startsWith("Modify the translation here"))
+                if (isTERReportAfter8501(sheet, segmentHeaderRow))
                 {
-                    // Added for parsing report from 8.5.0.1 release.
-                    if (sheet.getSheetName().equals("TER"))
-                    {
-                        return loadTranslateReportDate8501(sheet, task, tLocale);
-                    }
-
+                    return loadTERReportData(sheet, task, tLocale);
+                }
+                else if ("TER".equals(sheet.getSheetName()))
+                {
+                    return loadTERReportDataFor8501(sheet, task, tLocale);
+                }
+                else
+                {
                     m_errWriter
-                            .addFileErrorMsg("The file you are uploading does not keep the report's correct format."
-                                    + "\r\nMaybe you have changed some column header signatures or orders."
-                                    + "\r\nThe following column header signatures and orders should keep the source report's format."
-                                    + "\r\nJob id, Segment id, TargetPage id, Required translation."
-                                    + "\r\nPlease make sure they are correct and upload again.");
+                    .addFileErrorMsg("The file you are uploading does not keep the report's correct format."
+                            + "\r\nMaybe you have changed some column header signatures or orders."
+                            + "\r\nThe following column header signatures and orders should keep the source report's format."
+                            + "\r\nJob id, Segment id, TargetPage id, Required translation."
+                            + "\r\nPlease make sure they are correct and upload again.");
                     return m_errWriter.buildReportErroPage().toString();
                 }
-                else
-                {
-                    segId2RequiredTranslation = new HashMap<Long, String>();
-                    segId2PageId = new HashMap<Long, Long>();
-                    segId2FailureType = new HashMap<Long, String>();
-                    segId2Comment = new HashMap<Long, String>();
-                    segId2CommentStatus = new HashMap<Long, String>();
-
-                    String segmentId = null;
-                    long segIdLong;
-                    String updatedText = null;
-                    String jobIdText = null;
-                    String comment = null;
-                    String requiredComment = null;
-                    String commentStatus = null;
-                    boolean hasSegmentIdErro = false;
-
-                    int n = 5;
-                    int m = LOAD_DATA - n;
-
-                    for (int j = segmentStartRow, row = sheet.getLastRowNum(); j <= row; j++)
-                    {
-                        if (cancel)
-                            return null;
-
-                        int x = j * m / row;
-                        updateProcess(n + x);
-
-                        segmentId = ExcelUtil.getCellValue(sheet, j, 11);
-                        if (StringUtil.isEmpty(segmentId))
-                        {
-                            break;
-                        }
-                        segIdLong = new Long(Long.parseLong(segmentId));
-
-                        updatedText = ExcelUtil.getCellValue(sheet, j, 2);
-                        comment = ExcelUtil.getCellValue(sheet, j, 3);
-                        requiredComment = ExcelUtil.getCellValue(sheet, j, 4);
-                        commentStatus = ExcelUtil.getCellValue(sheet, j, 6);
-
-                        if (EditUtil.isRTLLocale(tLocale))
-                            updatedText = EditUtil.removeU200F(updatedText);
-
-                        jobIdText = ExcelUtil.getCellValue(sheet, j, 10);
-                        jobIds.add(jobIdText);
-                        if (segmentId != null && !segmentId.equals(""))
-                        {
-                            if (updatedText != null && !updatedText.equals(""))
-                            {
-                                segId2RequiredTranslation.put(segIdLong,
-                                        updatedText);
-                            }
-                            if(comment != null && !comment.equals(""))
-                            {
-                            	if (requiredComment != null
-                                        && !requiredComment.equals("")
-                                        && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
-                                {
-                            		segId2Comment.put(segIdLong, requiredComment);
-                                }       	 
-	                        	segId2CommentStatus.put(segIdLong,
-	                        			commentStatus);
-                            }
-                            else 
-                            {
-                            	if (requiredComment != null
-                                        && !requiredComment.equals("")
-                                        && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
-                                {
-                            		segId2Comment.put(segIdLong, requiredComment);
-                            		segId2CommentStatus.put(segIdLong, "query");
-                                }
-							}
-                        }
-                        else
-                        {
-                            m_errWriter
-                                    .addFileErrorMsg("Segment id is lost in row "
-                                            + (j + 1) + "\r\n");
-                            hasSegmentIdErro = true;
-                        }
-                    }
-
-                    if (hasSegmentIdErro)
-                    {
-                        return m_errWriter.buildReportErroPage().toString();
-                    }
-
-                    if (jobIds.size() > 1)
-                    {
-                        m_errWriter
-                                .addFileErrorMsg("The job id is not consistent, you may hava changed some of them."
-                                        + "\r\nPlease make sure they are correct and upload again.");
-                        return m_errWriter.buildReportErroPage().toString();
-                    }
-                    else if ((jobIds.size() == 1)
-                            && !jobIds.contains(String.valueOf(jobId)))
-                    {
-                        m_errWriter
-                                .addFileErrorMsg("The file you are uploading does not belong to this job."
-                                        + "\r\nPlease make sure they are correct and upload again.");
-                        return m_errWriter.buildReportErroPage().toString();
-                    }
-                    else if (jobIds.size() == 0)
-                    {
-                        m_errWriter
-                                .addFileErrorMsg("No job id detected."
-                                        + "\r\nPlease make sure they are correct and upload again.");
-                        return m_errWriter.buildReportErroPage().toString();
-                    }
-                }
-
             }
-            else if (p_reportName.equals(WebAppConstants.LANGUAGE_SIGN_OFF))
+            else if (WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
             {
-                if (!ExcelUtil.getCellValue(sheet, segmentHeaderRow, 9)
-                        .equalsIgnoreCase("Job id")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10)
-                                .equalsIgnoreCase("Segment id")
-                        || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11)
-                                .equalsIgnoreCase("Page name")
-                        || !ExcelUtil
-                                .getCellValue(sheet, segmentHeaderRow, 3)
-                                .equalsIgnoreCase(
-                                        bundle.getString("reviewers_comments_header")))
+                if (isRCRReportFrom8501Version(sheet, segmentHeaderRow))
                 {
-                	//for simplefied report
-                	if(!ExcelUtil.getCellValue(sheet, segmentHeaderRow, 6)
-                            .equalsIgnoreCase("Job id")
-                            || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 7)
-                                    .equalsIgnoreCase("Segment id")
-                            || !ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8)
-                                    .equalsIgnoreCase("Page name")
-                            || !ExcelUtil
-                                    .getCellValue(sheet, segmentHeaderRow, 2)
-                                    .equalsIgnoreCase(
-                                            bundle.getString("reviewers_comments_header")))
-                	{
-                		// Added for parsing report from 8.5.0.1 release.
-                		if (ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8)
-                				.equalsIgnoreCase(
-                						bundle.getString("lb_comment_free")))
-                		{
-                			return loadReviewReportDate8501(sheet, task, tLocale,
-                					bundle);
-                		}
-                		
-                		m_errWriter
-                		.addFileErrorMsg("The file you are uploading does not keep the report's correct format."
-                				+ "\r\nMaybe you have changed some column header signature or orders."
-                				+ "\r\nThe following column header signatrues and orders should keep the source report's format."
-                				+ "\r\nJob id, Segment id, Page name, Comment(free hand your comments)."
-                				+ "\r\nPlease make sure they are correct and upload again.");
-                		return m_errWriter.buildReportErroPage().toString();
-                	}
-                	else
-                	{
-                		segId2Comment = new HashMap<Long, String>();
-                        segId2PageId = new HashMap<Long, Long>();
-                        segId2FailureType = new HashMap<Long, String>();
-                        segId2CommentStatus = new HashMap<Long, String>();
-                        String segmentId = null;
-                        String pageId = null;
-                        String reviewerComment = null;
-                        Long segIdLong = null;
-                        String jobIdText = null;
-                        String failureType = null;
-                        String commentStatus = null;
-                        boolean hasIdErro = false;
-                        for (int k = segmentStartRow, row = sheet.getLastRowNum(); k <= row; k++)
-                        {
-                            if (cancel)
-                                return null;
-
-                            segmentId = ExcelUtil.getCellValue(sheet, k, 7);
-                            if (segmentId == null || segmentId.trim().length() == 0)
-                            {
-                                break;
-                            }
-                            segIdLong = new Long(Long.parseLong(segmentId));
-                            Tu tu = ServerProxy.getTuvManager()
-                                    .getTuForSegmentEditor(segIdLong, companyId);
-                            TuImpl tuImpl = (TuImpl) tu;
-                            Tuv tuv = tuImpl
-                                    .getTuv(reportTargetLocaleId, companyId);
-                            TuvImpl tuvImpl = (TuvImpl) tuv;
-                            TargetPage targetPage = tuvImpl
-                                    .getTargetPage(companyId);
-                            pageId = new String(String.valueOf(targetPage.getId()));
-
-                            reviewerComment = ExcelUtil.getCellValue(sheet, k, 2);
-                            if (EditUtil.isRTLLocale(tLocale))
-                                reviewerComment = EditUtil.removeU200F(reviewerComment);
-
-                            failureType = "";
-                            commentStatus = "";
-                            jobIdText = ExcelUtil.getCellValue(sheet, k, 6);
-
-                            jobIds.add(jobIdText);
-
-                            if (StringUtil.isNotEmpty(reviewerComment) || checkCommentStatus(sheet, k))
-                            {
-                                if (segmentId != null && !segmentId.equals("")
-                                        && pageId != null && !pageId.equals(""))
-                                {
-                                    segId2PageId.put(segIdLong,
-                                            new Long(Long.parseLong(pageId)));
-                                    segId2Comment.put(segIdLong, reviewerComment);
-                                    segId2FailureType.put(segIdLong, failureType);
-                                    segId2CommentStatus.put(segIdLong,
-                                            commentStatus);
-                                }
-                                else
-                                {
-                                    m_errWriter
-                                            .addFileErrorMsg("Segment or Page id is lost in row "
-                                                    + (k + 1) + "\r\n");
-                                    hasIdErro = true;
-                                }
-
-                            }
-
-                        }
-                        if (hasIdErro)
-                        {
-                            return m_errWriter.buildReportErroPage().toString();
-                        }
-
-                        if (jobIds.size() > 1)
-                        {
-                            m_errWriter
-                                    .addFileErrorMsg("The job id is not consistent, you may change some of them."
-                                            + "\r\nPlease make sure they are correct and upload again.");
-                            return m_errWriter.buildReportErroPage().toString();
-                        }
-                        else if ((jobIds.size() == 1)
-                                && !jobIds.contains(String.valueOf(jobId)))
-                        {
-                            m_errWriter
-                                    .addFileErrorMsg("The file you are uploading does not belong to this job."
-                                            + "\r\nPlease make sure they are correct and upload again.");
-                            return m_errWriter.buildReportErroPage().toString();
-                        }
-                        else if (jobIds.size() == 0)
-                        {
-                            m_errWriter
-                                    .addFileErrorMsg("No job id detected."
-                                            + "\r\nPlease make sure they are correct and upload again.");
-                            return m_errWriter.buildReportErroPage().toString();
-                        }
-                	}
+                    return loadRCRReportDataFor8501(sheet, task, tLocale, bundle);
+                }
+                else if (isRCRSimpleReportAfter855Version(sheet, segmentHeaderRow))
+                {
+                    return loadRCRSimpleReportData(sheet, task, tLocale, bundle);
+                }
+                else if (isRCRSimpleReport(sheet, segmentHeaderRow))
+                {
+                    return loadRCRSimpleReportDataFor855(sheet, task, tLocale, bundle);
+                }
+                else if (isRCRReportAfter8501Version(sheet, segmentHeaderRow))
+                {
+                    return loadRCRReportData(sheet, task, tLocale, bundle);
                 }
                 else
                 {
-                    segId2Comment = new HashMap<Long, String>();
-                    segId2PageId = new HashMap<Long, Long>();
-                    segId2FailureType = new HashMap<Long, String>();
-                    segId2CommentStatus = new HashMap<Long, String>();
-                    String segmentId = null;
-                    String pageId = null;
-                    String reviewerComment = null;
-                    Long segIdLong = null;
-                    String jobIdText = null;
-                    String failureType = null;
-                    String commentStatus = null;
-                    boolean hasIdErro = false;
-                    for (int k = segmentStartRow, row = sheet.getLastRowNum(); k <= row; k++)
-                    {
-                        if (cancel)
-                            return null;
-
-                        segmentId = ExcelUtil.getCellValue(sheet, k, 10);
-                        if (segmentId == null || segmentId.trim().length() == 0)
-                        {
-                            break;
-                        }
-                        segIdLong = new Long(Long.parseLong(segmentId));
-                        Tu tu = ServerProxy.getTuvManager()
-                                .getTuForSegmentEditor(segIdLong, companyId);
-                        TuImpl tuImpl = (TuImpl) tu;
-                        Tuv tuv = tuImpl
-                                .getTuv(reportTargetLocaleId, companyId);
-                        TuvImpl tuvImpl = (TuvImpl) tuv;
-                        TargetPage targetPage = tuvImpl
-                                .getTargetPage(companyId);
-                        pageId = new String(String.valueOf(targetPage.getId()));
-
-                        reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
-                        if (EditUtil.isRTLLocale(tLocale))
-                            reviewerComment = EditUtil.removeU200F(reviewerComment);
-
-                        failureType = ExcelUtil.getCellValue(sheet, k, 4);
-                        commentStatus = ExcelUtil.getCellValue(sheet, k, 5);
-                        jobIdText = ExcelUtil.getCellValue(sheet, k, 9);
-
-                        jobIds.add(jobIdText);
-
-                        if (StringUtil.isNotEmpty(reviewerComment) || checkCommentStatus(sheet, k))
-                        {
-                            if (segmentId != null && !segmentId.equals("")
-                                    && pageId != null && !pageId.equals(""))
-                            {
-                                segId2PageId.put(segIdLong,
-                                        new Long(Long.parseLong(pageId)));
-                                segId2Comment.put(segIdLong, reviewerComment);
-                                segId2FailureType.put(segIdLong, failureType);
-                                segId2CommentStatus.put(segIdLong,
-                                        commentStatus);
-                            }
-                            else
-                            {
-                                m_errWriter
-                                        .addFileErrorMsg("Segment or Page id is lost in row "
-                                                + (k + 1) + "\r\n");
-                                hasIdErro = true;
-                            }
-
-                        }
-
-                    }
-                    if (hasIdErro)
-                    {
-                        return m_errWriter.buildReportErroPage().toString();
-                    }
-
-                    if (jobIds.size() > 1)
-                    {
-                        m_errWriter
-                                .addFileErrorMsg("The job id is not consistent, you may change some of them."
-                                        + "\r\nPlease make sure they are correct and upload again.");
-                        return m_errWriter.buildReportErroPage().toString();
-                    }
-                    else if ((jobIds.size() == 1)
-                            && !jobIds.contains(String.valueOf(jobId)))
-                    {
-                        m_errWriter
-                                .addFileErrorMsg("The file you are uploading does not belong to this job."
-                                        + "\r\nPlease make sure they are correct and upload again.");
-                        return m_errWriter.buildReportErroPage().toString();
-                    }
-                    else if (jobIds.size() == 0)
-                    {
-                        m_errWriter
-                                .addFileErrorMsg("No job id detected."
-                                        + "\r\nPlease make sure they are correct and upload again.");
-                        return m_errWriter.buildReportErroPage().toString();
-                    }
+                    m_errWriter
+                            .addFileErrorMsg("The report type is not correct."
+                                    + "\r\nPlease make sure the report type is correct and upload again.");
+                    return m_errWriter.buildReportErroPage().toString();
                 }
-
             }
-            else
-            {
-                m_errWriter
-                        .addFileErrorMsg("The report type is not correct."
-                                + "\r\nPlease make sure the report type is correct and upload again.");
-                return m_errWriter.buildReportErroPage().toString();
-            }
-
         }
         catch (Throwable ex)
         {
@@ -1147,15 +801,12 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         }
 
         return null;
-
     }
 
     // Due modify Translations Edit Report column in 8.5.1, there need a
     // function for old report from 8.5.0.1.
-    private String loadTranslateReportDate8501(
-            org.apache.poi.ss.usermodel.Sheet p_sheet, Task p_task,
-            GlobalSightLocale p_tLocale) throws TuvException, RemoteException,
-            GeneralException
+    private String loadTERReportDataFor8501(Sheet p_sheet, Task p_task,
+            GlobalSightLocale p_tLocale) throws RemoteException
     {
         int segmentHeaderRow = ReviewerLisaQAXlsReportHelper.SEGMENT_HEADER_ROW;
         int segmentStartRow = ReviewerLisaQAXlsReportHelper.SEGMENT_START_ROW;
@@ -1289,10 +940,126 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return null;
     }
 
+    private String loadTERReportData(Sheet sheet, Task task,
+            GlobalSightLocale tLocale) throws RemoteException
+    {
+        int segmentStartRow = ReviewerLisaQAXlsReportHelper.SEGMENT_START_ROW;
+        Set<String> jobIds = new HashSet<String>();
+
+        segId2RequiredTranslation = new HashMap<Long, String>();
+        segId2PageId = new HashMap<Long, Long>();
+        segId2FailureType = new HashMap<Long, String>();
+        segId2Comment = new HashMap<Long, String>();
+        segId2CommentStatus = new HashMap<Long, String>();
+
+        String segmentId = null;
+        long segIdLong;
+        String updatedText = null;
+        String jobIdText = null;
+        String comment = null;
+        String requiredComment = null;
+        String commentStatus = null;
+        boolean hasSegmentIdErro = false;
+
+        int n = 5;
+        int m = LOAD_DATA - n;
+
+        for (int j = segmentStartRow, row = sheet.getLastRowNum(); j <= row; j++)
+        {
+            if (cancel)
+                return null;
+
+            int x = j * m / row;
+            updateProcess(n + x);
+
+            segmentId = ExcelUtil.getCellValue(sheet, j, 11);
+            if (StringUtil.isEmpty(segmentId))
+            {
+                break;
+            }
+            segIdLong = new Long(Long.parseLong(segmentId));
+
+            updatedText = ExcelUtil.getCellValue(sheet, j, 2);
+            comment = ExcelUtil.getCellValue(sheet, j, 3);
+            requiredComment = ExcelUtil.getCellValue(sheet, j, 4);
+            commentStatus = ExcelUtil.getCellValue(sheet, j, 6);
+
+            if (EditUtil.isRTLLocale(tLocale))
+                updatedText = EditUtil.removeU200F(updatedText);
+
+            jobIdText = ExcelUtil.getCellValue(sheet, j, 10);
+            jobIds.add(jobIdText);
+            if (segmentId != null && !segmentId.equals(""))
+            {
+                if (updatedText != null && !updatedText.equals(""))
+                {
+                    segId2RequiredTranslation.put(segIdLong, updatedText);
+                }
+                if (comment != null && !comment.equals(""))
+                {
+                    if (requiredComment != null
+                            && !requiredComment.equals("")
+                            && !StringUtil.equalsIgnoreSpace(requiredComment,
+                                    ""))
+                    {
+                        segId2Comment.put(segIdLong, requiredComment);
+                    }
+                    segId2CommentStatus.put(segIdLong, commentStatus);
+                }
+                else
+                {
+                    if (requiredComment != null
+                            && !requiredComment.equals("")
+                            && !StringUtil.equalsIgnoreSpace(requiredComment,
+                                    ""))
+                    {
+                        segId2Comment.put(segIdLong, requiredComment);
+                        segId2CommentStatus.put(segIdLong, "query");
+                    }
+                }
+            }
+            else
+            {
+                m_errWriter.addFileErrorMsg("Segment id is lost in row "
+                        + (j + 1) + "\r\n");
+                hasSegmentIdErro = true;
+            }
+        }
+
+        if (hasSegmentIdErro)
+        {
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        if (jobIds.size() > 1)
+        {
+            m_errWriter
+                    .addFileErrorMsg("The job id is not consistent, you may hava changed some of them."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if ((jobIds.size() == 1)
+                && !jobIds.contains(String.valueOf(task.getJobId())))
+        {
+            m_errWriter
+                    .addFileErrorMsg("The file you are uploading does not belong to this job."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if (jobIds.size() == 0)
+        {
+            m_errWriter
+                    .addFileErrorMsg("No job id detected."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        return null;
+    }
+
     // Due modify Reviewer Comments Report column in 8.5.1, there need a
     // function for old report from 8.5.0.1.
-    private String loadReviewReportDate8501(
-            org.apache.poi.ss.usermodel.Sheet p_sheet, Task p_task,
+    private String loadRCRReportDataFor8501(Sheet p_sheet, Task p_task,
             GlobalSightLocale p_tLocale, ResourceBundle bundle)
             throws TuvException, RemoteException, GeneralException
     {
@@ -1415,7 +1182,448 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
         return null;
     }
+
+    private String loadRCRSimpleReportData(Sheet sheet, Task task,
+            GlobalSightLocale tLocale, ResourceBundle bundle)
+            throws RemoteException
+    {
+        long companyId = task != null ? task.getCompanyId() : Long
+                .parseLong(CompanyWrapper.getCurrentCompanyId());
+
+        int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
+        Set<String> jobIds = new HashSet<String>();
+
+        segId2Comment = new HashMap<Long, String>();
+        segId2PageId = new HashMap<Long, Long>();
+        segId2FailureType = new HashMap<Long, String>();
+        segId2CommentStatus = new HashMap<Long, String>();
+        String segmentId = null;
+        String pageId = null;
+        String reviewerComment = null;
+        Long segIdLong = null;
+        String jobIdText = null;
+        String failureType = null;
+        String commentStatus = null;
+        boolean hasIdErro = false;
+        for (int k = segmentStartRow, row = sheet.getLastRowNum(); k <= row; k++)
+        {
+            if (cancel)
+                return null;
+
+            segmentId = ExcelUtil.getCellValue(sheet, k, 8);
+            if (segmentId == null || segmentId.trim().length() == 0)
+            {
+                break;
+            }
+            segIdLong = new Long(Long.parseLong(segmentId));
+            Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
+                    segIdLong, companyId);
+            TuImpl tuImpl = (TuImpl) tu;
+            Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, companyId);
+            TuvImpl tuvImpl = (TuvImpl) tuv;
+            TargetPage targetPage = tuvImpl.getTargetPage(companyId);
+            pageId = new String(String.valueOf(targetPage.getId()));
+
+            reviewerComment = ExcelUtil.getCellValue(sheet, k, 2);
+            if (EditUtil.isRTLLocale(tLocale))
+                reviewerComment = EditUtil.removeU200F(reviewerComment);
+
+            failureType = ExcelUtil.getCellValue(sheet, k, 3);
+            commentStatus = "";
+            jobIdText = ExcelUtil.getCellValue(sheet, k, 7);
+
+            jobIds.add(jobIdText);
+
+            if (StringUtil.isNotEmpty(reviewerComment)
+                    || checkCommentStatus(sheet, k))
+            {
+                if (segmentId != null && !segmentId.equals("")
+                        && pageId != null && !pageId.equals(""))
+                {
+                    segId2PageId.put(segIdLong,
+                            new Long(Long.parseLong(pageId)));
+                    segId2Comment.put(segIdLong, reviewerComment);
+                    segId2FailureType.put(segIdLong, failureType);
+                    segId2CommentStatus.put(segIdLong, commentStatus);
+                }
+                else
+                {
+                    m_errWriter
+                            .addFileErrorMsg("Segment or Page id is lost in row "
+                                    + (k + 1) + "\r\n");
+                    hasIdErro = true;
+                }
+
+            }
+        }
+        if (hasIdErro)
+        {
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        if (jobIds.size() > 1)
+        {
+            m_errWriter
+                    .addFileErrorMsg("The job id is not consistent, you may change some of them."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if ((jobIds.size() == 1)
+                && !jobIds.contains(String.valueOf(task.getJobId())))
+        {
+            m_errWriter
+                    .addFileErrorMsg("The file you are uploading does not belong to this job."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if (jobIds.size() == 0)
+        {
+            m_errWriter
+                    .addFileErrorMsg("No job id detected."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        return null;
+    }
+
+    private String loadRCRSimpleReportDataFor855(Sheet sheet, Task task,
+            GlobalSightLocale tLocale, ResourceBundle bundle)
+            throws RemoteException
+    {
+    	long companyId = task != null ? task.getCompanyId() : Long
+                .parseLong(CompanyWrapper.getCurrentCompanyId());
+
+        int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
+        Set<String> jobIds = new HashSet<String>();
+
+        segId2Comment = new HashMap<Long, String>();
+        segId2PageId = new HashMap<Long, Long>();
+        segId2FailureType = new HashMap<Long, String>();
+        segId2CommentStatus = new HashMap<Long, String>();
+        String segmentId = null;
+        String pageId = null;
+        String reviewerComment = null;
+        Long segIdLong = null;
+        String jobIdText = null;
+        String failureType = null;
+        String commentStatus = null;
+        boolean hasIdErro = false;
+        for (int k = segmentStartRow, row = sheet.getLastRowNum(); k <= row; k++)
+        {
+            if (cancel)
+                return null;
+
+            segmentId = ExcelUtil.getCellValue(sheet, k, 7);
+            if (segmentId == null || segmentId.trim().length() == 0)
+            {
+                break;
+            }
+            segIdLong = new Long(Long.parseLong(segmentId));
+            Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
+                    segIdLong, companyId);
+            TuImpl tuImpl = (TuImpl) tu;
+            Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, companyId);
+            TuvImpl tuvImpl = (TuvImpl) tuv;
+            TargetPage targetPage = tuvImpl.getTargetPage(companyId);
+            pageId = new String(String.valueOf(targetPage.getId()));
+
+            reviewerComment = ExcelUtil.getCellValue(sheet, k, 2);
+            if (EditUtil.isRTLLocale(tLocale))
+                reviewerComment = EditUtil.removeU200F(reviewerComment);
+
+            failureType = "";
+            commentStatus = "";
+            jobIdText = ExcelUtil.getCellValue(sheet, k, 6);
+
+            jobIds.add(jobIdText);
+
+            if (StringUtil.isNotEmpty(reviewerComment)
+                    || checkCommentStatus(sheet, k))
+            {
+                if (segmentId != null && !segmentId.equals("")
+                        && pageId != null && !pageId.equals(""))
+                {
+                    segId2PageId.put(segIdLong,
+                            new Long(Long.parseLong(pageId)));
+                    segId2Comment.put(segIdLong, reviewerComment);
+                    segId2FailureType.put(segIdLong, failureType);
+                    segId2CommentStatus.put(segIdLong, commentStatus);
+                }
+                else
+                {
+                    m_errWriter
+                            .addFileErrorMsg("Segment or Page id is lost in row "
+                                    + (k + 1) + "\r\n");
+                    hasIdErro = true;
+                }
+
+            }
+        }
+        if (hasIdErro)
+        {
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        if (jobIds.size() > 1)
+        {
+            m_errWriter
+                    .addFileErrorMsg("The job id is not consistent, you may change some of them."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if ((jobIds.size() == 1)
+                && !jobIds.contains(String.valueOf(task.getJobId())))
+        {
+            m_errWriter
+                    .addFileErrorMsg("The file you are uploading does not belong to this job."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if (jobIds.size() == 0)
+        {
+            m_errWriter
+                    .addFileErrorMsg("No job id detected."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        return null;
+    }
+
+    private String loadRCRReportData(Sheet sheet, Task task,
+            GlobalSightLocale tLocale, ResourceBundle bundle)
+            throws RemoteException
+    {
+        long companyId = task != null ? task.getCompanyId() : Long
+                .parseLong(CompanyWrapper.getCurrentCompanyId());
+
+        int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
+        Set<String> jobIds = new HashSet<String>();
+
+        segId2Comment = new HashMap<Long, String>();
+        segId2PageId = new HashMap<Long, Long>();
+        segId2FailureType = new HashMap<Long, String>();
+        segId2CommentStatus = new HashMap<Long, String>();
+        String segmentId = null;
+        String pageId = null;
+        String reviewerComment = null;
+        Long segIdLong = null;
+        String jobIdText = null;
+        String failureType = null;
+        String commentStatus = null;
+        boolean hasIdErro = false;
+        for (int k = segmentStartRow, row = sheet.getLastRowNum(); k <= row; k++)
+        {
+            if (cancel)
+                return null;
+
+            segmentId = ExcelUtil.getCellValue(sheet, k, 10);
+            if (segmentId == null || segmentId.trim().length() == 0)
+            {
+                break;
+            }
+            segIdLong = new Long(Long.parseLong(segmentId));
+            Tu tu = ServerProxy.getTuvManager()
+                    .getTuForSegmentEditor(segIdLong, companyId);
+            TuImpl tuImpl = (TuImpl) tu;
+            Tuv tuv = tuImpl
+                    .getTuv(reportTargetLocaleId, companyId);
+            TuvImpl tuvImpl = (TuvImpl) tuv;
+            TargetPage targetPage = tuvImpl
+                    .getTargetPage(companyId);
+            pageId = new String(String.valueOf(targetPage.getId()));
+
+            reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
+            if (EditUtil.isRTLLocale(tLocale))
+                reviewerComment = EditUtil.removeU200F(reviewerComment);
+
+            failureType = ExcelUtil.getCellValue(sheet, k, 4);
+            commentStatus = ExcelUtil.getCellValue(sheet, k, 5);
+            jobIdText = ExcelUtil.getCellValue(sheet, k, 9);
+
+            jobIds.add(jobIdText);
+
+            if (StringUtil.isNotEmpty(reviewerComment) || checkCommentStatus(sheet, k))
+            {
+                if (segmentId != null && !segmentId.equals("")
+                        && pageId != null && !pageId.equals(""))
+                {
+                    segId2PageId.put(segIdLong,
+                            new Long(Long.parseLong(pageId)));
+                    segId2Comment.put(segIdLong, reviewerComment);
+                    segId2FailureType.put(segIdLong, failureType);
+                    segId2CommentStatus.put(segIdLong,
+                            commentStatus);
+                }
+                else
+                {
+                    m_errWriter
+                            .addFileErrorMsg("Segment or Page id is lost in row "
+                                    + (k + 1) + "\r\n");
+                    hasIdErro = true;
+                }
+            }
+        }
+
+        if (hasIdErro)
+        {
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        if (jobIds.size() > 1)
+        {
+            m_errWriter
+                    .addFileErrorMsg("The job id is not consistent, you may change some of them."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if ((jobIds.size() == 1)
+                && !jobIds.contains(String.valueOf(task.getJobId())))
+        {
+            m_errWriter
+                    .addFileErrorMsg("The file you are uploading does not belong to this job."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if (jobIds.size() == 0)
+        {
+            m_errWriter
+                    .addFileErrorMsg("No job id detected."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        return null;
+    }
+
+    private boolean isTERReportAfter8501(Sheet sheet, int segmentHeaderRow)
+    {
+        // Cell "K7"
+        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
+        // Cell "L7"
+        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
+        // Cell "M7"
+        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 12);
+        // Cell "C7"
+        String modifyTranslation = ExcelUtil.getCellValue(sheet,
+                segmentHeaderRow, 2);
+
+        if ("Job id".equalsIgnoreCase(jobId)
+                && "Segment id".equalsIgnoreCase(segmentId)
+                && "Page name".equalsIgnoreCase(pageName)
+                && modifyTranslation.startsWith("Modify the translation here"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if this report is generated from 8501 version production instance.
+     */
+    private boolean isRCRReportFrom8501Version(Sheet sheet, int segmentHeaderRow)
+    {
+        // Cell "A7"
+        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 0);
+        // Cell "B7"
+        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 1);
+        // Cell "C7"
+        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2);
+        // Cell "I7"
+        String comment = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8);
+        if ("Job id".equalsIgnoreCase(jobId)
+                && "Segment Id".equalsIgnoreCase(segmentId)
+                && "Page name".equalsIgnoreCase(pageName)
+                && "Comment (free hand your comments)".equalsIgnoreCase(comment))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if this report is generated from production instance which version
+     * is AFTER 8501.
+     */
+    private boolean isRCRReportAfter8501Version(Sheet sheet,
+            int segmentHeaderRow)
+    {
+        // Cell "J7"
+        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 9);
+        // Cell "K7"
+        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
+        // Cell "L7"
+        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
+        // Cell "D7"
+        String revComments = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 3);
+
+        if ("Job id".equalsIgnoreCase(jobId)
+                && "Segment Id".equalsIgnoreCase(segmentId)
+                && "Page name".equalsIgnoreCase(pageName)
+                && "Reviewers Comments (enter your comments here)"
+                        .equalsIgnoreCase(revComments))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if this report is RCR simplified report.
+     */
+    private boolean isRCRSimpleReport(Sheet sheet, int segmentHeaderRow)
+    {
+        // Cell "G7"
+        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 6);
+        // Cell "H7"
+        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 7);
+        // Cell "I7"
+        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8);
+        // Cell "C7"
+        String revComments = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2);
+        
+        if ("Job id".equalsIgnoreCase(jobId)
+                && "Segment Id".equalsIgnoreCase(segmentId)
+                && "Page name".equalsIgnoreCase(pageName)
+                && "Reviewers Comments (enter your comments here)"
+                        .equalsIgnoreCase(revComments))
+        {
+            return true;
+        }
+
+        return false;
+    }
     
+    /**
+     * Check if this report is RCR simplified report.
+     */
+    private boolean isRCRSimpleReportAfter855Version(Sheet sheet, int segmentHeaderRow)
+    {
+        // Cell "H7"
+        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 7);
+        // Cell "I7"
+        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8);
+        // Cell "J7"
+        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 9);
+        // Cell "C7"
+        String revComments = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2);
+        
+        if ("Job id".equalsIgnoreCase(jobId)
+                && "Segment Id".equalsIgnoreCase(segmentId)
+                && "Page name".equalsIgnoreCase(pageName)
+                && "Reviewers Comments (enter your comments here)"
+                        .equalsIgnoreCase(revComments))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     // Check comment status for upload(ReviewersCommentsReport).
     private boolean checkCommentStatus(org.apache.poi.ss.usermodel.Sheet p_sheet, int p_row)
     {

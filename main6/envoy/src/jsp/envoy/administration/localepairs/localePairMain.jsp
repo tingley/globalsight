@@ -7,6 +7,8 @@
       com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairConstants, 
       com.globalsight.everest.util.comparator.LocalePairComparator,
       com.globalsight.everest.company.CompanyWrapper,
+      com.globalsight.everest.webapp.WebAppConstants,
+      com.globalsight.everest.servlet.util.SessionManager,
       java.lang.Boolean,
       java.util.ArrayList,
       java.util.Locale,
@@ -18,6 +20,8 @@
 <jsp:useBean id="remove" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="self" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="lps" scope="request" class="java.util.ArrayList" />
+<jsp:useBean id="export" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
+<jsp:useBean id="localePairsimport" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <% 
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -27,6 +31,9 @@
     String newURL = new1.getPageURL() + "&action=" + LocalePairConstants.CREATE;
     String newLocaleURL = newLocale.getPageURL() + "&action=" + LocalePairConstants.CREATE;
     String removeURL = remove.getPageURL() + "&action=" + LocalePairConstants.REMOVE;
+    String exportURL = export.getPageURL() + "&action=" + LocalePairConstants.EXPORT;
+    String importsUrl = localePairsimport.getPageURL() + "&action=import";
+    String selfURL = self.getPageURL();
     String title = bundle.getString("lb_locale_pairs");
     String helperText = bundle.getString("helper_text_locale_pair");
 
@@ -79,6 +86,20 @@ function removeLocalePair()
     lpForm.submit();
 }
 
+function exportLocalePair(){
+	var value = findSelectedLocalePair();
+	if(value.length == 0){
+		alert("Please select at least one locale pair!");
+		return;
+	}
+	lpForm.action = "<%=exportURL%>" + "&id=" + value;
+	lpForm.submit();
+}
+
+function importLocalePair(){
+	lpForm.action = "<%=importsUrl%>";
+	lpForm.submit();
+}
 // Find selected locale pair Ids
 function findSelectedLocalePair()
 {
@@ -120,6 +141,14 @@ function handleSelectAll() {
     buttonManagement();
 }
 
+function filterItems(e){
+	e = e ? e : window.event;
+	var keyCode = e.which ? e.which : e.keyCode;
+	if (keyCode == 13){
+		lpForm.action = "<%=selfURL%>";
+		lpForm.submit();
+	}
+}
 </SCRIPT>
 
 </HEAD>
@@ -205,6 +234,14 @@ function handleSelectAll() {
                 <amb:permission name="<%=Permission.LOCALE_PAIRS_NEW%>" >
                     <input type="button" value="<%=bundle.getString("lb_new")%>..." 
                     name="newBtn" id="newBtn" onClick="newLocalePair();">
+                </amb:permission>
+                   <amb:permission name="<%=Permission.LOCALE_PAIRS_EXPORT%>" >
+                    <input type="button" value="<%=bundle.getString("lb_export")%>..." 
+                    name="exportBtn" id="exportBtn" onClick="exportLocalePair();">
+                </amb:permission>
+                   <amb:permission name="<%=Permission.LOCALE_PAIRS_IMPORT%>" >
+                    <input type="button" value="<%=bundle.getString("lb_import")%>..." 
+                    name="importBtn" id="importBtn" onClick="importLocalePair();">
                 </amb:permission>
             </td>
         </TR>

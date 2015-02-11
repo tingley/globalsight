@@ -52,11 +52,22 @@ public class POFilter implements Filter
         return filters;
     }
 
-    public boolean checkExists(String filterName, long companyId)
+    public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from POFilter f " + "where f.filterName =:filterName "
                 + "and f.companyId =:companyId";
         Map map = new HashMap();
+        map.put("filterName", filterName);
+        map.put("companyId", companyId);
+        return HibernateUtil.search(hql, map).size() > 0;
+    }
+    
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    {
+        String hql = "from POFilter f " + "where f.id <>:filterId " + "and f.filterName =:filterName "
+                + "and f.companyId =:companyId";
+        Map map = new HashMap();
+        map.put("filterId", filterId);
         map.put("filterName", filterName);
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;

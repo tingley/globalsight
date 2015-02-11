@@ -37,6 +37,11 @@
 				<include name="**/*.ini" />
 			</fileset>
 		</copy>
+		<copy todir="${cap.serverclassesDest}/resources">
+			<fileset dir="${cap.javaSrcBase}/com/globalsight/everest/edit/offline/download/omegat">
+				<include name="**/*.pdf" />
+			</fileset>
+		</copy>
 		<copy todir="${cap.serverclassesDest}">
 			<fileset dir="${cap.javaSrcBase}">
 				<include name="**/*.properties" />

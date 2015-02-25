@@ -116,6 +116,9 @@ public class OfflineSegmentData implements Serializable
     // For in-context match
     private Tuv m_sourceTuv = null;
 
+    // For XLF/OmegaT TK, if target "state" attribute is "translated"...
+    private boolean isStateTranslated = false;
+
     //
     // Constructors
     //
@@ -1124,5 +1127,15 @@ public class OfflineSegmentData implements Serializable
     public void setTagCheckSuccesful(boolean m_tagCheckSuccesful)
     {
         this.m_tagCheckSuccesful = m_tagCheckSuccesful;
+    }
+
+    public boolean isStateTranslated()
+    {
+        return isStateTranslated;
+    }
+
+    public void setStateTranslated(boolean isStateTranslated)
+    {
+        this.isStateTranslated = isStateTranslated;
     }
 }

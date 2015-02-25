@@ -379,12 +379,14 @@ public class SendDownloadFileHelper implements WebAppConstants
         params.setSessionId(p_request.getSession().getId());
         params.setConsolidateTmxFiles(p_request
                 .getParameter(OfflineConstants.CONSOLIDATE_TMX) != null);
-        params.setNeedConsolidate(p_request
-                .getParameter(OfflineConstants.NEED_CONSOLIDATE) != null);
         params.setPreserveSourceFolder(p_request
                 .getParameter(OfflineConstants.PRESERVE_SOURCE_FOLDER) != null);
         params.setIncludeXmlNodeContextInformation(p_request
                 .getParameter(OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION) != null);
+        params.setConsolidateFileType(p_request.getParameter("consolidateFileType"));
+        if(p_request.getParameter("wordCountForDownload") != null 
+        		&& !p_request.getParameter("wordCountForDownload").equals(""))
+        	params.setWordCountForDownload(Integer.parseInt(p_request.getParameter("wordCountForDownload")));
         params.setIncludeRepetitions(p_request
                 .getParameter(OfflineConstants.INCLUDE_REPETITIONS) != null);
         params.setExcludeFullyLeveragedFiles(p_request

@@ -359,6 +359,8 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.OPERATION_LOG_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=operationLogUrl%>"><%=bundle.getString("lb_logs_operation")%></A><BR>
         </amb:permission>
+        
+        <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=systemActivitiesUrl%>"><%=bundle.getString("lb_system_activities")%></A>
 <%
     }
 %>
@@ -469,6 +471,9 @@ function openWizardWindow(url)
         </amb:permission>
         <amb:permission name="<%=Permission.ELOQUA%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=eloquaUrl%>"><%=bundle.getString("lb_eloqua")%></A><BR>
+        </amb:permission>
+        <amb:permission name="<%=Permission.MIND_TOUCH%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=mindtouchUrl%>"><%=bundle.getString("lb_mindtouch")%></A><BR>
         </amb:permission>
       </TD>
     <%

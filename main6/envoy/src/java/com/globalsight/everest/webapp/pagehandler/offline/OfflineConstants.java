@@ -133,6 +133,8 @@ public interface OfflineConstants
     String POPULATE_FUZZY = "populatefuzzy";
 
     String NEED_CONSOLIDATE = "needConsolidate";
+    String CONSOLIDATE_FILE_TYPE = "consolidateFileType";
+    String WORD_COUNT_FOR_DOWNLOAD = "wordCountForDownload";
     String PRESERVE_SOURCE_FOLDER = "preserveSourceFolder";
     String INCLUDE_XML_NODE_CONTEXT_INFORMATION = "includeXmlNodeContextInformation";
     String INCLUDE_REPETITIONS = "includeRepetitions";

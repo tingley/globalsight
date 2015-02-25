@@ -263,7 +263,8 @@ public class OEMProcessStatus
         int unextractFileNumber = fileNumbers[1];
 
         //GBS-1157, Added by Vincent Yan, 2010-7-6
-        if (p_params.isNeedConsolidate())
+        if (p_params.getConsolidateFileType() != null 
+        		&& p_params.getConsolidateFileType().equals("consolidate"))
         {
             count = 1 + unextractFileNumber;
         }

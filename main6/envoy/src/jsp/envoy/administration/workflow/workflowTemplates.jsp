@@ -123,31 +123,41 @@ var helpFile = "<%=bundle.getString("help_workflows")%>";
 
 function enableButtons()
 {
-	if ($(":checked").not($("option")).not($("#selectAll")).length == 1) {
-		<% if (s_duplicationEnabled) { %>
+	var count = $("input[name='RadioBtn']:checked").length;
+	if (count > 0) {
+		if (WfTemplateForm.removeBtn)
+	        WfTemplateForm.removeBtn.disabled = false;
+	    if (count == 1) {
+	    	<% if (s_duplicationEnabled) { %>
 		    if (WfTemplateForm.dupBtn)
 		        WfTemplateForm.dupBtn.disabled = false;
 		<% } %>
-		    if (WfTemplateForm.removeBtn)
-		        WfTemplateForm.removeBtn.disabled = false;
 		    if (WfTemplateForm.expBtn)
 		        WfTemplateForm.expBtn.disabled = false;
-	} else {
-		<% if (s_duplicationEnabled) { %>
-	    	if (WfTemplateForm.dupBtn)
-	        	WfTemplateForm.dupBtn.disabled = true;
+		} else {
+			<% if (s_duplicationEnabled) { %>
+		    if (WfTemplateForm.dupBtn)
+		        WfTemplateForm.dupBtn.disabled = true;
 		<% } %>
-		    if (WfTemplateForm.removeBtn)
-		        WfTemplateForm.removeBtn.disabled = true;
 		    if (WfTemplateForm.expBtn)
 		        WfTemplateForm.expBtn.disabled = true;
+		}
+	} else {
+		<% if (s_duplicationEnabled) { %>
+	    if (WfTemplateForm.dupBtn)
+	        WfTemplateForm.dupBtn.disabled = true;
+	<% } %>
+	    if (WfTemplateForm.removeBtn)
+	        WfTemplateForm.removeBtn.disabled = true;
+	    if (WfTemplateForm.expBtn)
+	        WfTemplateForm.expBtn.disabled = true;
 	}
 }
 
 function submitForm(selectedButton) 
 {
    var checked = false;        
-   var selectedRadioBtn = null;
+   var selectedRadioBtn = "";
    if (WfTemplateForm.RadioBtn != null) 
    {
       // If more than one radio button is displayed, the length attribute of the 
@@ -159,10 +169,10 @@ function submitForm(selectedButton)
           {
               if (WfTemplateForm.RadioBtn[i].checked == true) 
               {
-                  checked = true;
-                  selectedRadioBtn = WfTemplateForm.RadioBtn[i].value;
+                  selectedRadioBtn += WfTemplateForm.RadioBtn[i].value +" ";
               }
           }
+          checked = true;
       }
       // If only one is displayed, there is no radio button array, so
       // just check if the single radio button is checked
@@ -200,7 +210,7 @@ function submitForm(selectedButton)
       if (selectedButton == 'Remove')
       {   
          if(!confirm('<%=EditUtil.toJavascript(confirmRemove)%>')) return false;
-         WfTemplateForm.action = "<%=removeUrl%>&<%=WorkflowTemplateConstants.WF_TEMPLATE_INFO_ID%>=" + selectedRadioBtn;
+        WfTemplateForm.action = "<%=removeUrl%>&<%=WorkflowTemplateConstants.WF_TEMPLATE_INFO_ID%>=" + selectedRadioBtn;
       }
       else if (selectedButton == 'Duplicate')
       {          

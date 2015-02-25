@@ -32,9 +32,6 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.openoffice.StringIndex;
-import com.globalsight.cxe.engine.eventflow.Category;
-import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
-import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
@@ -49,6 +46,8 @@ import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.cxe.util.fileImport.eventFlow.Category;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -105,7 +104,7 @@ public class IdmlHelper
 
     private CxeMessage m_cxeMessage;
 
-    private EventFlow m_eventFlow;
+    private EventFlowXml m_eventFlow;
 
     private static Hashtable<String, Integer> s_exportBatches = new Hashtable<String, Integer>();
     private static Object s_exportBatchesLocker = new Object();
@@ -120,7 +119,7 @@ public class IdmlHelper
     public IdmlHelper(CxeMessage p_cxeMessage)
     {
         m_cxeMessage = p_cxeMessage;
-        m_eventFlow = new EventFlow(p_cxeMessage.getEventFlowXml());
+        m_eventFlow = p_cxeMessage.getEventFlowObject();
     }
 
     /**
@@ -159,19 +158,18 @@ public class IdmlHelper
             for (int i = 0; i < result.length; i++)
             {
                 // 5 modify eventflowxml
+                EventFlowXml newEventFlowXml = m_eventFlow.clone();
                 String basename = FileUtils.getBaseName(filename);
                 String dirname = getUnzipDir(basename);
                 String xmlfilename = dirname + File.separator + CONTENT;
                 modifyEventFlowXmlForImport(xmlfilename, i + 1,
-                        messageData.length);
+                        messageData.length, newEventFlowXml);
                 // 6 return proper CxeMesseges
                 CxeMessageType type = getPostConversionEvent();
                 CxeMessage cxeMessage = new CxeMessage(type);
                 cxeMessage.setParameters(m_cxeMessage.getParameters());
                 cxeMessage.setMessageData(messageData[i]);
-
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                cxeMessage.setEventFlowXml(eventFlowXml);
+                cxeMessage.setEventFlowObject(newEventFlowXml);
 
                 result[i] = cxeMessage;
             }
@@ -206,8 +204,7 @@ public class IdmlHelper
             String tFileName = (String) params.get("TargetFileName");
             if (ExportUtil.isLastFile(eBatchId, tFileName, targetLocale))
             {
-                String oofilename = getCategory().getDiplomatAttribute(
-                        "safeBaseFileName").getValue();
+                String oofilename = getCategory().getValue("safeBaseFileName");
                 String oofile = FileUtils.concatPath(m_saveDir, oofilename);
                 modifyEventFlowXmlForExport();
                 convert(oofile);
@@ -218,9 +215,7 @@ public class IdmlHelper
                                 .getPostMergeEvent()));
                 outputMsg.setMessageData(fmd);
                 outputMsg.setParameters(params);
-
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                outputMsg.setEventFlowXml(eventFlowXml);
+                outputMsg.setEventFlowObject(m_eventFlow.clone());
 
                 return new CxeMessage[]
                 { outputMsg };
@@ -239,7 +234,7 @@ public class IdmlHelper
                 CxeMessageType type = CxeMessageType
                         .getCxeMessageType(CxeMessageType.CXE_EXPORT_STATUS_EVENT);
                 CxeMessage outputMsg = new CxeMessage(type);
-                outputMsg.setEventFlowXml(m_eventFlow.serializeToXml());
+                outputMsg.setEventFlowObject(m_eventFlow.clone());
                 params.put("Exception", null);
                 params.put("ExportedTime", new Long(lastMod));
                 outputMsg.setParameters(params);
@@ -323,8 +318,7 @@ public class IdmlHelper
         {
             split(dirName);
 
-            String filename = getCategory().getDiplomatAttribute(
-                    "safeBaseFileName").getValue();
+            String filename = getCategory().getValue("safeBaseFileName");
             converter.convertXmlToIdml(filename, dirName);
         }
     }
@@ -441,53 +435,53 @@ public class IdmlHelper
     }
 
     protected void modifyEventFlowXmlForImport(String p_xmlFilename,
-            int p_docPageNum, int p_docPageCount) throws Exception
+            int p_docPageNum, int p_docPageCount, EventFlowXml newEventFlowXml) throws Exception
     {
+        String postMergeEvent;
+        String formatType;
+        String safeBaseFileName;
+        String originalFileSize;
+
         // First get original Category
         Category oriC = getCategory();
         if (oriC != null)
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            {
-                    oriC.getDiplomatAttribute("postMergeEvent"),
-                    oriC.getDiplomatAttribute("formatType"),
-                    oriC.getDiplomatAttribute("safeBaseFileName"),
-                    oriC.getDiplomatAttribute("originalFileSize"),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename),
-                    new DiplomatAttribute("hyperlinkIds",
-                            MSOffice2010Filter.toString(hyperlinkIds)) });
-
-            m_eventFlow.removeCategory(oriC);
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = oriC.getValue("postMergeEvent");
+            formatType = oriC.getValue("formatType");
+            safeBaseFileName = oriC.getValue("safeBaseFileName");
+            originalFileSize = oriC.getValue("originalFileSize");
+            newEventFlowXml.getCategory().remove(oriC);
         }
         else
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            {
-                    new DiplomatAttribute("postMergeEvent",
-                            m_eventFlow.getPostMergeEvent()),
-                    new DiplomatAttribute("formatType",
-                            m_eventFlow.getSourceFormatType()),
-                    new DiplomatAttribute("safeBaseFileName",
-                            getSafeBaseFileName()),
-                    new DiplomatAttribute("originalFileSize",
-                            String.valueOf(m_cxeMessage.getMessageData()
-                                    .getSize())),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename),
-                    new DiplomatAttribute("hyperlinkIds",
-                            MSOffice2010Filter.toString(hyperlinkIds)) });
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = newEventFlowXml.getPostMergeEvent();
+            formatType = newEventFlowXml.getSource().getFormatType();
+            safeBaseFileName = getSafeBaseFileName();
+            originalFileSize = String.valueOf(m_cxeMessage.getMessageData()
+                    .getSize());
         }
+        
+        Category newC = new Category();
+        newC.setName(CATEGORY_NAME);
+        
+        newC.addValue("postMergeEvent", postMergeEvent);
+        newC.addValue("formatType", formatType);
+        newC.addValue("safeBaseFileName", safeBaseFileName);
+        newC.addValue("originalFileSize", originalFileSize);
+        newC.addValue("relSafeName", p_xmlFilename);
+        newC.addValue("hyperlinkIds", MSOffice2010Filter.toString(hyperlinkIds));
+        newEventFlowXml.getCategory().add(newC);
+        
         // Then modify eventFlow
-        m_eventFlow.setPostMergeEvent(getPostMergeEvent());
-        // m_eventFlow.setSourceFormatType("xml");
+        newEventFlowXml.setPostMergeEvent(getPostMergeEvent());
+        // newEventFlowXml.setSourceFormatType("xml");
 
-        m_eventFlow.setDocPageCount(p_docPageCount);
-        m_eventFlow.setDocPageNumber(p_docPageNum);
+        newEventFlowXml.getBatchInfo().setDocPageCount(p_docPageCount);
+        newEventFlowXml.getBatchInfo().setDocPageNumber(p_docPageNum);
 
         if (displayName == null)
         {
-            displayName = m_eventFlow.getDisplayName();
+            displayName = newEventFlowXml.getDisplayName();
         }
     }
 
@@ -1241,8 +1235,7 @@ public class IdmlHelper
 
     private String writeContentToXmlBox() throws IOException
     {
-        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory()
-                .getDiplomatAttribute("relSafeName").getValue());
+        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory().getValue("relSafeName"));
         File saveFile = new File(saveFileName);
 
         m_cxeMessage.getMessageData().copyTo(saveFile);

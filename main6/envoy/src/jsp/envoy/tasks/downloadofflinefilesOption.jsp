@@ -114,6 +114,7 @@ String labelTerminology = bundle.getString("lb_terminology");
 <SCRIPT LANGUAGE="Javascript" SRC="envoy/terminology/viewer/error.js"></SCRIPT>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/downloadOpt.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript"> 
 var needWarning = false;
@@ -129,6 +130,17 @@ function dsubmit()
 	downloadForm.submit();
 }
 
+function setWordCountDisplay()
+{
+	if($("#consolidateFileType").val() == "consolidateByWordCount")
+	{
+		$("#wordCountForDownload").show();
+	}
+	else
+	{
+		$("#wordCountForDownload").hide();
+	}
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0"
@@ -236,10 +248,15 @@ function dsubmit()
                 </TD>
             </TR>
             <TR id="needConsolidateBox" class="standardText">
-            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_consolate") %></SPAN></TD>
+            	<TD><SPAN CLASS="standardText">Consolidate/Split Type</SPAN></TD>
                 <TD>
                     <SPAN CLASS="standardText">
-                      <input type="checkbox" id="needConsolidate" name="needConsolidate" value="true" checked="checked" onclick="uniquenessCheck('needConsolidate')">
+                    <select name="consolidateFileType" id="consolidateFileType" onchange="setWordCountDisplay();uniquenessCheck('needConsolidate')" CLASS="standardText">
+                    	<option value="consolidate">Consolidate All Files</option>
+                    	<option value="notConsolidate">File by File</option>
+                    	<option value="consolidateByWordCount">Split File per Word Count</option>
+                    </select>
+                    <input name="wordCountForDownload" id="wordCountForDownload" style="display:none;width:60px;height:19px" class="standardText"/>
                     </SPAN>
                 </TD>
             </TR>
@@ -278,7 +295,7 @@ function dsubmit()
      <INPUT type="button" name="cancel" value="<%=lb_cancel%>"
       onclick="location.replace('<%=url_cancel%>')">
 &nbsp;&nbsp;
-      <INPUT type="submit" name="apply" value="<%=lb_ok%>" onclick="submitForm()"> 
+      <INPUT type="button" name="apply" value="<%=lb_ok%>" onclick="submitForm()"> 
 </FORM>
 </DIV>
 </BODY>

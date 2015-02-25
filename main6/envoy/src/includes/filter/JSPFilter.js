@@ -210,6 +210,11 @@ function checkExistJSPFilterCallback(data)
 			sendAjax(checkExistJSPFilterCallback.obj, "saveJSPFilter", "saveJSPFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("jspFilterDialog");
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

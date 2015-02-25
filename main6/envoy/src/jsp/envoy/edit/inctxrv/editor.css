@@ -1,0 +1,68 @@
+.editorSegment {
+	color: blue !important;
+	/*font-family: serif; *font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px; *font-size: 10pt;*/
+}
+
+.editorSegmentUpdated {
+	background-color: lightgrey !important;
+}
+
+.editorSegmentExact { /* original color: background-color: #CCFFCC; */
+	/* original color: color: blue; */ /* before 6.3: #008000; */
+	color: #006400 !important;
+}
+
+.editorSegmentFuzzy { /* original color: background-color: #FFFFCC; */
+	/* original color: color: blue; */
+	color: #FF00FF !important;
+}
+
+.editorSegmentLocked {
+	color: #808080 !important;
+}
+
+.editorSegmentExcluded {
+	color: black !important;
+}
+
+.editorSegmentMT {
+	color: #FFA500 !important;
+}
+
+.editorSegmentInternalbackup {
+	color: #808080 !important;
+	font-style: italic;
+	text-decoration: underline;
+}
+
+.editorSegmentInternal {
+	background-color : #FFD700;
+}
+
+.searchText {
+	background-color : #FFFF00;
+}
+
+.editorSegmentUnverified {
+	color: #66FF00 !important;
+}
+
+.editorSegmentRepetition {
+	color: red !important;
+}
+
+.segmentContext {
+	text-decoration: underline;
+	font-style: italic;
+	font-weight: bolder;
+	font-size: 10pt;
+	color: #800040 !important;
+}
+.segmentContextUnlock {
+	text-decoration: underline;
+	font-style: italic;
+	font-weight: bolder;
+	font-size: 10pt;
+	color: #800040 !important;
+}

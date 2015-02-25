@@ -362,4 +362,37 @@ public abstract class AbstractWebService
             throw new WebServiceException(e.getMessage());
         }
     }
+    
+    /**
+     * Check if current user has the specified permission
+     * 
+     * @param accessToken
+     * @param permission
+     *            Permission information
+     * @throws WebServiceException
+     */
+	protected String checkPermissionReturnStr(String accessToken,
+			String permission) throws WebServiceException
+	{
+		try
+		{
+			User user = ServerProxy.getUserManager().getUserByName(
+					getUsernameFromSession(accessToken));
+			PermissionSet ps = Permission.getPermissionManager()
+					.getPermissionSetForUser(user.getUserId());
+
+			if (!ps.getPermissionFor(permission))
+			{
+				String msg = "User " + user.getUserName()
+						+ " does not have enough permission";
+				return msg;
+			}
+		}
+		catch (Exception e)
+		{
+			s_logger.error(e.getMessage(), e);
+			throw new WebServiceException(e.getMessage());
+		}
+		return null;
+	}
 }

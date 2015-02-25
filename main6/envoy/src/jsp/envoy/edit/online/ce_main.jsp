@@ -19,7 +19,10 @@
             com.globalsight.util.resourcebundle.SystemResourceBundle,
             com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper,
             com.globalsight.everest.foundation.User,
+            com.globalsight.util.gxml.GxmlElement,
+            com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+            com.globalsight.everest.edit.online.SegmentView,
             java.io.File,
             java.util.*"
     session="true"
@@ -30,7 +33,7 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 
 <%
-ResourceBundle bundle = PageHandler.getBundle(session);
+    ResourceBundle bundle = PageHandler.getBundle(session);
 
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
@@ -136,6 +139,58 @@ String lb_saveTheChanges = bundle.getString("jsmsg_editor_pls_save_comment");
 
 String uploadUrl = imageUploader.getPageURL() + "&commentUpload=true";
 
+SegmentView segmentView = state.getEditorManager().getSegmentView(
+            tuId, tuvId, "" + subId, state.getTargetPageId(),
+            state.getSourceLocale().getId(),
+            state.getTargetLocale().getId(), state.getTmNames(),
+            state.getDefaultTermbaseName());
+
+GxmlElement srcGxml = segmentView.getSourceSegment();
+GxmlElement tgtGxml = segmentView.getTargetSegment();
+
+String sourceSegment = srcGxml.getTextValue();
+String targetSegment = tgtGxml.getTextValue();
+
+OnlineTagHelper applet = new OnlineTagHelper();
+try
+{
+    String srcseg = GxmlUtil.getInnerXml(srcGxml);
+    String tgtseg = GxmlUtil.getInnerXml(tgtGxml);
+    applet.setDataType(segmentView.getDataType());
+    applet.setInputSegment(srcseg, "", segmentView.getDataType());
+    if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
+    {
+        applet.getVerbose();
+        srcseg = applet.makeVerboseColoredPtags(srcseg);
+    }
+    else
+    {
+        applet.getCompact();
+        srcseg = applet.makeCompactColoredPtags(srcseg);
+    }
+    
+    applet.setInputSegment(tgtseg, "", segmentView.getDataType());
+    if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
+    {
+        applet.getVerbose();
+        tgtseg = applet.makeVerboseColoredPtags(tgtseg);
+    }
+    else
+    {
+        applet.getCompact();
+        tgtseg = applet.makeCompactColoredPtags(tgtseg);
+    }
+    
+    sourceSegment = srcseg;
+    targetSegment = tgtseg;
+    
+}
+catch (Exception e)
+{
+    // ignore this exceptiopn
+}
+
+
 %>
 <!-- This JSP is: envoy/edit/online/ce_main.jsp -->
 <html>
@@ -155,7 +210,7 @@ BODY { margin: 0; }
 #idHelp { float: right; font-size: 8pt; cursor: hand; cursor:pointer; text-decoration: underline; }
 #idTable { margin-left: 10px; margin-right: 10px; }
 #idTitle, #idComment { width: 394px; }
-#idOldComments { overflow: auto; height: 165px; width: 394px;
+#idOldComments { overflow: auto; height: 90px; width: 394px;
                  border: 1px solid black;
                }
 .clickable  { cursor: hand; cursor:pointer; }
@@ -536,7 +591,19 @@ function doOnLoad()
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_comment") %>:</span></td>
     <td>
-      <textarea id="idComment" name="idComment" rows="5" cols="47" onchange="setDirty()"></textarea>
+      <textarea id="idComment" name="idComment" rows="4" cols="47" onchange="setDirty()"></textarea>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><span class="label"><%=bundle.getString("lb_source") %>:</span></td>
+    <td class="standardtext" width="100%">
+      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=sourceSegment %></div>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><span class="label"><%=bundle.getString("lb_target") %>:</span></td>
+    <td class="standardtext" width="100%">
+      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
     </td>
   </tr>
   <tr>

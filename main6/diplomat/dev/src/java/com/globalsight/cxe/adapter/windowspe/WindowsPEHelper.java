@@ -20,27 +20,18 @@ package com.globalsight.cxe.adapter.windowspe;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 
 import com.globalsight.cxe.adapter.adobe.AdobeAdapterException;
 import com.globalsight.cxe.adapter.adobe.AdobeConfiguration;
-import com.globalsight.cxe.engine.eventflow.Category;
-import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
-import com.globalsight.cxe.engine.eventflow.EventFlow;
-import com.globalsight.cxe.engine.eventflow.ExportBatchInfo;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.message.CxeMessage;
@@ -48,10 +39,11 @@ import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.cxe.util.fileImport.eventFlow.Category;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.file.FileWaiter;
 
@@ -75,7 +67,7 @@ public class WindowsPEHelper
 
     private CxeMessage m_cxeMessage;
 
-    private EventFlow m_eventFlow;
+    private EventFlowXml m_eventFlow;
 
     public static final int WINDOWSPE_EXE = 0;
 
@@ -98,7 +90,7 @@ public class WindowsPEHelper
     public WindowsPEHelper(CxeMessage p_cxeMessage)
     {
         m_cxeMessage = p_cxeMessage;
-        m_eventFlow = new EventFlow(p_cxeMessage.getEventFlowXml());
+        m_eventFlow = p_cxeMessage.getEventFlowObject();
         m_properties = m_config.loadProperties();
     }
 
@@ -138,17 +130,17 @@ public class WindowsPEHelper
             int i = 0;
             for (MessageData mdata : messageData)
             {
+                EventFlowXml newEventFlowXml = m_eventFlow.clone();
                 String suffix = XML_FILE_SUFFIX;
                 modifyEventFlowXmlForImport(FileUtils.getPrefix(FileUtils.getBaseName(filename))
-                        + suffix, i + 1, result.length);
+                        + suffix, i + 1, result.length, newEventFlowXml);
                 // 6 return proper CxeMesseges
                 CxeMessageType type = getPostConversionEvent();
                 CxeMessage cxeMessage = new CxeMessage(type);
                 cxeMessage.setParameters(m_cxeMessage.getParameters());
                 cxeMessage.setMessageData(mdata);
 
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                cxeMessage.setEventFlowXml(eventFlowXml);
+                cxeMessage.setEventFlowObject(newEventFlowXml);
 
                 result[i] = cxeMessage;
 
@@ -178,7 +170,7 @@ public class WindowsPEHelper
             writeContent();
             HashMap params = m_cxeMessage.getParameters();
 
-            String oofilename = getCategory().getDiplomatAttribute("safeBaseFileName").getValue();
+            String oofilename = getCategory().getValue("safeBaseFileName");
             String oofile = FileUtils.concatPath(m_saveDir, oofilename);
 
             modifyEventFlowXmlForExport(oofile);
@@ -192,8 +184,7 @@ public class WindowsPEHelper
             outputMsg.setMessageData(fmd);
             outputMsg.setParameters(params);
 
-            String eventFlowXml = m_eventFlow.serializeToXml();
-            outputMsg.setEventFlowXml(eventFlowXml);
+            outputMsg.setEventFlowObject(m_eventFlow.clone());
 
             return new CxeMessage[] { outputMsg };
         }
@@ -397,39 +388,49 @@ public class WindowsPEHelper
     }
 
     protected void modifyEventFlowXmlForImport(String p_xmlFilename, int p_docPageNum,
-            int p_docPageCount) throws Exception
+            int p_docPageCount, EventFlowXml newEventFlowXml) throws Exception
     {
+        String postMergeEvent;
+        String formatType;
+        String safeBaseFileName;
+        String originalFileSize;
+
         // First get original Category
         Category oriC = getCategory();
         if (oriC != null)
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[] {
-                    oriC.getDiplomatAttribute("postMergeEvent"),
-                    oriC.getDiplomatAttribute("formatType"),
-                    oriC.getDiplomatAttribute("safeBaseFileName"),
-                    oriC.getDiplomatAttribute("originalFileSize"),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
-
-            m_eventFlow.removeCategory(oriC);
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = oriC.getValue("postMergeEvent");
+            formatType = oriC.getValue("formatType");
+            safeBaseFileName = oriC.getValue("safeBaseFileName");
+            originalFileSize = oriC.getValue("originalFileSize");
+            newEventFlowXml.getCategory().remove(oriC);
         }
         else
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[] {
-                    new DiplomatAttribute("postMergeEvent", m_eventFlow.getPostMergeEvent()),
-                    new DiplomatAttribute("formatType", m_eventFlow.getSourceFormatType()),
-                    new DiplomatAttribute("safeBaseFileName", getSafeBaseFileName()),
-                    new DiplomatAttribute("originalFileSize", String.valueOf(m_cxeMessage
-                            .getMessageData().getSize())),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = newEventFlowXml.getPostMergeEvent();
+            formatType = newEventFlowXml.getSource().getFormatType();
+            safeBaseFileName = getSafeBaseFileName();
+            originalFileSize = String.valueOf(m_cxeMessage.getMessageData()
+                    .getSize());
         }
+        
+        Category newC = new Category();
+        newC.setName(CATEGORY_NAME);
+        
+        newC.addValue("postMergeEvent", postMergeEvent);
+        newC.addValue("formatType", formatType);
+        newC.addValue("safeBaseFileName", safeBaseFileName);
+        newC.addValue("originalFileSize", originalFileSize);
+        newC.addValue("relSafeName", p_xmlFilename);
+        
+        newEventFlowXml.getCategory().add(newC);
+        
         // Then modify eventFlow
-        m_eventFlow.setPostMergeEvent(getPostMergeEvent());
-        m_eventFlow.setSourceFormatType("xml");
+        newEventFlowXml.setPostMergeEvent(getPostMergeEvent());
+        newEventFlowXml.getSource().setFormatType("xml");
 
-        m_eventFlow.setDocPageCount(p_docPageCount);
-        m_eventFlow.setDocPageNumber(p_docPageNum);
+        newEventFlowXml.getBatchInfo().setDocPageCount(p_docPageCount);
+        newEventFlowXml.getBatchInfo().setDocPageNumber(p_docPageNum);
     }
 
     protected MessageData readConvOutput(String fileName) throws WindowsPEAdapterException
@@ -575,7 +576,7 @@ public class WindowsPEHelper
     private String writeContent() throws IOException
     {
         String saveFileName = FileUtils.concatPath(m_saveDir,
-                getCategory().getDiplomatAttribute("relSafeName").getValue());
+                getCategory().getValue("relSafeName"));
         File saveFile = new File(saveFileName);
         File parent = saveFile.getParentFile();
         if (!parent.exists())

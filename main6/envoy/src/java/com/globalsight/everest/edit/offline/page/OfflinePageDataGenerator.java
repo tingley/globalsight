@@ -70,6 +70,7 @@ import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
+import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
 import com.globalsight.util.GeneralException;
@@ -299,6 +300,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         return !m_isDownloadRequest;
     }
 
+    private boolean isDownloadForOmegaT()
+    {
+        return AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT == m_fileFormatId;
+    }
+
     /**
      * @return true if we can use Trados segment markup, false if we cannot.
      */
@@ -386,7 +392,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         // Create a new OPD which will receive the raw data from
         // TuvManager and CommentManager.
         m_offlinePage = new OfflinePageData();
-
+        m_offlinePage.setPopulate100(populate100);
         m_segmentCounter = 0;
 
         if (isUploadRequest())
@@ -598,7 +604,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(),
                     "0");
         }
-        
+
         List isProtectedChangeable = new ArrayList();
 
         // First, determine which gxml to use as the target and the
@@ -613,7 +619,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
             if (isDownloadRequest())
             {
-                parentProtection = determineTuvDownloadLockStatus(trgTuv, isProtectedChangeable);
+                parentProtection = determineTuvDownloadLockStatus(trgTuv,
+                        isProtectedChangeable);
             }
 
             if (parentProtection
@@ -715,8 +722,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // indicate to the user that it originally had a TM match.
             String topGxml = getTopLeveragedMatchGxml(fmList, srcTuv, trgTuv, 0);
             float topScore = getTopLeveragedMatchScore(fmList);
-            
-            // if this tuv is not exact, and it has sub segment with exact match, 
+
+            // if this tuv is not exact, and it has sub segment with exact
+            // match,
             // set it score to really fuzzy score
             TuvState tuvState = trgTuv.getState();
             if (topScore < 100
@@ -739,7 +747,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 if (topScore >= 100)
                 {
                     // there was a previous or current exact match
-                    parentProtection = determineTuvDownloadLockStatus(trgTuv, isProtectedChangeable);
+                    parentProtection = determineTuvDownloadLockStatus(trgTuv,
+                            isProtectedChangeable);
                     matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT,
                             parentProtection, String.valueOf(topScore));
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_EXACT;
@@ -774,7 +783,15 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         if ((InternalTextUtil.isInternalText(srgGxml) && !trgTuv.isLocalized())
                 || isPopulateSrcAsTrg(trgScore))
         {
-            trgGxml = srgGxml;
+            if (isDownloadForOmegaT() && MTHelper.isMTTaggedSegment(trgGxml))
+            {
+                // GBS-3722, just use MT tagged target segment, do not use
+                // source
+            }
+            else
+            {
+                trgGxml = srgGxml;
+            }
         }
 
         if (m_pageName.endsWith(".idml"))
@@ -787,7 +804,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         OfflineSegmentData result = new OfflineSegmentData(
                 String.valueOf(trgTuv.getTu(jobId).getTuId()),
                 srcTuv.getDataType(jobId), // *always* base on source
-                                               // datatype
+                                           // datatype
                 itemType, srgGxml, trgGxml, trgScore, matchTypeDisplay,
                 matchTypeId, fmList, // always included for
                                      // resource pages
@@ -1583,19 +1600,20 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         if (!result && p_tuv.getSubflowsAsGxmlElements() != null
                 && p_tuv.getSubflowsAsGxmlElements().size() > 0)
         {
-            Tuv srcTuv = p_tuv.getTu(jobId).getTuv(
-                    m_srcPage.getLocaleId(), jobId);
+            Tuv srcTuv = p_tuv.getTu(jobId).getTuv(m_srcPage.getLocaleId(),
+                    jobId);
             result = EditorHelper.isRealExactMatchLocalied(srcTuv, p_tuv,
                     m_matchTypeStats, "0", jobId);
-            
+
             if (result)
             {
                 // do not lock segment if it is MULTIPLE_TRANSLATION
                 Types types = m_matchTypeStats.getTypes(srcTuv.getId(), "0");
-                if (MatchState.MULTIPLE_TRANSLATION.equals(types.getMatchState()))
+                if (MatchState.MULTIPLE_TRANSLATION.equals(types
+                        .getMatchState()))
                 {
                     result = false;
-                    
+
                     if (isChangeable == null)
                     {
                         isChangeable = new ArrayList();
@@ -1603,7 +1621,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     isChangeable.add("false");
                 }
             }
-            
+
         }
 
         return result;

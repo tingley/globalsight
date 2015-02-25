@@ -67,7 +67,6 @@ public class XMLRuleFilter implements Filter
         this.id = id;
     }
 
-
     public boolean checkExistsNew(String filterName, long companyId)
     {
         String hql = "from XMLRuleFilter xr where xr.filterName =:filterName and xr.companyId=:companyId";
@@ -76,8 +75,9 @@ public class XMLRuleFilter implements Filter
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;
     }
-    
-    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+
+    public boolean checkExistsEdit(long filterId, String filterName,
+            long companyId)
     {
         String hql = "from XMLRuleFilter xr where xr.id<>:filterId and xr.filterName =:filterName and xr.companyId=:companyId";
         Map map = new HashMap();
@@ -202,8 +202,7 @@ public class XMLRuleFilter implements Filter
                         : XmlFilterConstants.PH_TRIM_DONOT).append(",");
         sb.append("\"nonasciiAs\":")
                 .append(isParsed ? parser.getNonasciiAs()
-                        : XmlFilterConstants.NON_ASCII_AS_CHARACTER)
-                .append(",");
+                        : XmlFilterConstants.NON_ASCII_AS_PRESERVE).append(",");
         sb.append("\"wsHandleMode\":")
                 .append(isParsed ? parser.getWhiteSpaceHanldeMode()
                         : XmlFilterConstants.WHITESPACE_HANDLE_PRESERVE)

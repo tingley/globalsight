@@ -64,6 +64,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -309,6 +310,9 @@ public class FileProfileMainHandler extends PageHandler
             }
 
             HibernateUtil.commit(tx);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILE_PROFILE, newName);
+            
         }
         catch (Exception e)
         {

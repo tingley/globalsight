@@ -101,6 +101,11 @@ public class TmxPseudo
 
         PseudoCodec codec = new PseudoCodec();
         Tmx2PseudoHandler eventHandler = new Tmx2PseudoHandler(p_PseudoData);
+        // GBS-3722
+        if (p_PseudoData.isFromSourceTargetPanel())
+        {
+            eventHandler.setMTIdentifiers(p_strTmxString);
+        }
         String segment = eventHandler.preProcessInternalText(
                 codec.encode(p_strTmxString), internalTag);
         DiplomatBasicParser parser = new DiplomatBasicParser(eventHandler);

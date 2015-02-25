@@ -275,6 +275,7 @@ public class TMSearchEditEntryHandlerHelper
         source = source.replace("\\", "\\\\");
         source = source.replace("\r", "\\r");
         source = source.replace("\n", "\\n");
+        source = source.replace("\t", "\\t");
         String ptagsSource = segmentManagerSource.getPtagString();
         entryInfo.put("source", source);
         entryInfo.put("ptagsSource", ptagsSource); 
@@ -290,6 +291,7 @@ public class TMSearchEditEntryHandlerHelper
         target = target.replace("\\", "\\\\");
         target = target.replace("\r", "\\r");
         target = target.replace("\n", "\\n");
+        target = target.replace("\t", "\\t");
         String ptagsTarget = segmentManagerTarget.getPtagString();
         entryInfo.put("target", target);
         entryInfo.put("ptagsTarget", ptagsTarget);

@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
+import com.globalsight.cxe.util.XmlUtil;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
+
 /** The CxeMessage class represents a message that is passed
  *  between CXE components or adapters
  */
@@ -30,7 +33,7 @@ public class CxeMessage implements Serializable
     //////////////////////////////////////
     private CxeMessageType m_messageType; //CxeMessageType
     private HashMap m_parameters;
-    private String m_eventFlowXml;
+    private EventFlowXml m_eventFlowObject;
     private MessageData m_messageData;
     private boolean m_deleteMessageData; //whether the message data should be deleted on a call to free()
 
@@ -46,7 +49,7 @@ public class CxeMessage implements Serializable
     public CxeMessage (CxeMessageType p_messageType)
     {
         m_messageType = p_messageType;
-        m_eventFlowXml = null;
+        m_eventFlowObject = null;
         m_messageData = null;
         m_parameters = new HashMap();
         m_deleteMessageData = false;
@@ -127,7 +130,7 @@ public class CxeMessage implements Serializable
      */
     public String getEventFlowXml()
     {
-        return m_eventFlowXml;
+        return XmlUtil.object2String(m_eventFlowObject);
     }
 
     /**
@@ -138,7 +141,7 @@ public class CxeMessage implements Serializable
      */
     public void setEventFlowXml(String p_eventFlowXml)
     {
-        m_eventFlowXml = p_eventFlowXml;
+        m_eventFlowObject = XmlUtil.string2Object(EventFlowXml.class, p_eventFlowXml);
     }
 
 
@@ -166,6 +169,22 @@ public class CxeMessage implements Serializable
     {
         if (m_deleteMessageData && m_messageData != null)
                 m_messageData.delete();
+    }
+
+    /**
+     * @return the m_eventFlowObject
+     */
+    public EventFlowXml getEventFlowObject()
+    {
+        return m_eventFlowObject;
+    }
+
+    /**
+     * @param m_eventFlowObject the m_eventFlowObject to set
+     */
+    public void setEventFlowObject(EventFlowXml m_eventFlowObject)
+    {
+        this.m_eventFlowObject = m_eventFlowObject;
     }
 }
 

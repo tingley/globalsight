@@ -1,0 +1,33 @@
+.editorSegment {
+    color: black !important;
+}
+
+.editorSegmentFuzzy {
+    color: black !important;
+}
+
+.editorSegmentExact {
+    color: black !important;
+}
+
+.editorSegmentLocked {
+    color: black !important;
+}
+
+.editorSegmentExcluded {
+    color: black !important;
+}
+
+.editorSegmentUpdated {
+    color: black !important;
+    background-color: yellow !important;
+}
+
+.editorSegmentUnverified {
+    color: black !important;
+}
+
+.editorSegmentRepetition {
+    color: black !important;
+}
+

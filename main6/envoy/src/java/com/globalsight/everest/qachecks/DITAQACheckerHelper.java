@@ -134,7 +134,8 @@ public class DITAQACheckerHelper
         }
         if (activity == null)
         {
-            throw new RuntimeException("NULL activity found!");
+            logger.error("Can not find activity by name: " + activityName);
+            return false;
         }
         if (activity.getRunDitaQAChecks())
         {

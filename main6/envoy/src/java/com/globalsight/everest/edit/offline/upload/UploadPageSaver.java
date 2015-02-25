@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.edit.offline.upload;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -31,11 +32,14 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.DisplayMatchTypeKeys;
 import com.globalsight.everest.edit.SynchronizationManager;
 import com.globalsight.everest.edit.SynchronizationStatus;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
+import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.download.DownLoadApi;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflinePageDataGenerator;
@@ -45,6 +49,7 @@ import com.globalsight.everest.edit.offline.page.SubflowMergeInfo;
 import com.globalsight.everest.edit.offline.page.SubsOfParent;
 import com.globalsight.everest.edit.offline.page.UploadIssue;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageManager;
@@ -54,12 +59,20 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.PageSegments;
 import com.globalsight.everest.tuv.SegmentPair;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImplVo;
+import com.globalsight.everest.tuv.TuvManager;
+import com.globalsight.everest.tuv.TuvManagerLocal;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.edit.online.AutoPropagateThread;
+import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.common.DiplomatBasicParserException;
+import com.globalsight.ling.inprogresstm.InProgressTmManager;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.GeneralException;
@@ -204,7 +217,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      * @exception UploadPageSaverException
      */
     public PageData initializeAndGetReferencePage(OfflinePageData p_uploadPage,
-            Collection p_excludedItemTypes, int p_uploadFileFormat)
+            Collection p_excludedItemTypes, int p_uploadFileFormat, String p_tempFileName)
             throws UploadPageSaverException
     {
         String pageId = p_uploadPage.getPageId();
@@ -259,7 +272,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                 throw ex;
             }
             else if (status.getStatus().equals(
-                    SynchronizationStatus.UPLOAD_STARTED))
+                    SynchronizationStatus.UPLOAD_STARTED)
+                    && s_synchManager.checkTempFileName(p_tempFileName))
             {
                 UploadPageSaverException ex = new UploadPageSaverException(
                         UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED,
@@ -528,7 +542,11 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                                 .setGxmlExcludeTopTagsIgnoreSubflows(
                                         uploadSegment.getDisplayTargetText(),
                                         jobId);
-
+                        if (uploadSegment.isStateTranslated()) {
+                            segmentPair.getTargetTuv().setState(TuvState.APPROVED);
+                        } else {
+                        	segmentPair.getTargetTuv().setState(TuvState.LOCALIZED);
+                        }
                         // set the modified flag
                         segmentPair.setModified();
                     }
@@ -581,6 +599,17 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                             // set the modified flag
                             segmentPair.setModified();
                         }
+
+                        if (uploadSegment.isStateTranslated())
+                        {
+                            segmentPair.getTargetTuv().setState(TuvState.APPROVED);
+                            segmentPair.setModified();
+                        }
+                        else
+                        {
+                        	segmentPair.getTargetTuv().setState(TuvState.LOCALIZED);
+                        	segmentPair.setModified();
+                        }
                     }
                 }
                 it.remove();
@@ -605,7 +634,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             boolean isLastOne = (i == p_referencePages.size() - 1);
             long trgPageId = refPageData.getPageSegments().getSourcePage()
                     .getTargetPageByLocaleId(m_targetLocale.getId()).getId();
-            save(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
+            saveNoJms(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
                     p_jmsDestinationQueue, isLastOne, trgPageId, p_isUploadingTasks);
         }
     }
@@ -836,6 +865,61 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             }
         }
     }
+    
+    private void saveTuvNoJms(List<TuvImplVo> p_modifiedTuvs, List p_newComments,
+            Map p_replyComments, User p_user, String p_fileName,
+            String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId,
+            List<Task> p_isUploadingTasks) throws GeneralException
+    {
+        if (p_modifiedTuvs == null || p_modifiedTuvs.size() == 0)
+        {
+            // If no modified TUVs, ensure the uploading status is set back to
+            // "N" before return.
+            if (p_isLastOne) {
+                TaskHelper.updateTaskStatus(p_isUploadingTasks, UPLOAD_DONE,
+                        false);
+            }
+
+            return;
+        }
+
+        SynchronizationManager syncMgr = getSynchronizationManager();
+        try
+        {
+            syncMgr.uploadStarted(p_trgPageId);
+        }
+        catch (RemoteException e)
+        {
+        }
+        
+       
+        try
+        {
+            PageManager pageMgr = ServerProxy.getPageManager();
+            SourcePage sp = pageMgr.getTargetPage(p_trgPageId)
+                    .getSourcePage();
+            long jobId = sp.getJobId();
+            
+            TuvManagerLocal tml = new TuvManagerLocal();
+            tml.saveTuvsFromOfflineNoJms(p_modifiedTuvs, jobId);
+        }
+        catch (RemoteException e)
+        {
+            s_category.error(e);
+        }
+        finally
+        {
+            try
+            {
+                syncMgr.uploadFinished(p_trgPageId);
+            }
+            catch (Throwable ex)
+            {
+            }
+
+        }
+    }
+    
 
     // "modifiedTuvs" are from same page/job.
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -885,6 +969,253 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         }
     }
 
+    /**
+     * Save modified target TUVs into in progress TM when offline upload.
+     * 
+     * @param p_modifiedTuvs
+     * @param p_sourceLocale
+     * @param p_targetPageId
+     */
+    private void saveTuvsIntoInProgressTm(List<TuvImplVo> p_modifiedTuvs,
+            GlobalSightLocale p_sourceLocale, Long p_targetPageId)
+    {
+        if (p_modifiedTuvs == null || p_modifiedTuvs.size() == 0)
+            return;
+
+        try
+        {
+            Tuv sourceTuv = null;
+            Tuv targetTuv = null;
+
+            PageManager pageMgr = ServerProxy.getPageManager();
+            TuvManager tuvMgr = ServerProxy.getTuvManager();
+            InProgressTmManager ipTmMgr = LingServerProxy
+                    .getInProgressTmManager();
+
+            SourcePage sp = pageMgr.getTargetPage(p_targetPageId)
+                    .getSourcePage();
+            long sourcePageId = sp.getId();
+            long jobId = sp.getJobId();
+            for (Iterator it = p_modifiedTuvs.iterator(); it.hasNext();)
+            {
+                targetTuv = (Tuv) it.next();
+                sourceTuv = tuvMgr.getTuvForSegmentEditor(targetTuv
+                        .getTu(jobId).getId(), p_sourceLocale.getId(), jobId);
+                // only saveTuvsIntoInProgressTm if target segment != source
+                // segment
+                String srcGxml = sourceTuv.getGxmlExcludeTopTags();
+                String tgtGxml = targetTuv.getGxmlExcludeTopTags();
+                if (srcGxml != null && tgtGxml != null
+                        && !srcGxml.equals(tgtGxml))
+                {
+                    ipTmMgr.save(sourceTuv, targetTuv, "0", sourcePageId);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            s_category.error("Cannot save TUVs to In Progress TM", e);
+            throw new UploadPageSaverException(e);
+        }
+    }
+
+    private void saveNewComments(List p_comments, String p_user,
+            Long p_targetPageId)
+    {
+        // p_comments is just a flat ArrayList of UploadIssue objects.
+
+        for (int i = 0, max = p_comments.size(); i < max; i++)
+        {
+            UploadIssue issue = (UploadIssue) p_comments.get(i);
+
+            long tuId = issue.getTuId();
+            long tuvId = issue.getTuvId();
+            long subId = issue.getSubId();
+
+            if (tuvId == -1)
+            {
+                continue;
+            }
+
+            String logicalKey = CommentHelper.makeLogicalKey(
+                    p_targetPageId.longValue(), tuId, tuvId, subId);
+
+            if (s_category.isDebugEnabled())
+            {
+                s_category.debug("Creating new comment for " + logicalKey);
+            }
+
+            try
+            {
+                CommentManager mgr = ServerProxy.getCommentManager();
+
+                mgr.addIssue(issue.getLevelObjectType(), issue.getTuvId(),
+                        issue.getTitle(), issue.getPriority(),
+                        issue.getStatus(), issue.getCategory(), p_user,
+                        issue.getComment(), logicalKey);
+            }
+            catch (Exception ex)
+            {
+                // Don't fail the upload because of comments.
+                s_category.error("Error creating new comment for " + logicalKey
+                        + " (continuing anyway)", ex);
+            }
+        }
+    }
+
+    private void saveModifiedComments(Map p_comments, String p_user)
+    {
+        // p_comments is a HashMap with original Issue objects as
+        // keys, and UploadIssue objects as values.
+
+        Collection oldIssues = p_comments.keySet();
+
+        for (Iterator it = oldIssues.iterator(); it.hasNext();)
+        {
+            Long oldIssueId = (Long) it.next();
+            UploadIssue issue = (UploadIssue) p_comments.get(oldIssueId);
+
+            if (s_category.isDebugEnabled())
+            {
+                s_category.debug("Replying to comment id=" + oldIssueId);
+            }
+
+            try
+            {
+                CommentManager mgr = ServerProxy.getCommentManager();
+                mgr.replyToIssue(oldIssueId.longValue(), issue.getTitle(),
+                        issue.getPriority(), issue.getStatus(),
+                        issue.getCategory(), p_user, issue.getComment());
+            }
+            catch (Exception ex)
+            {
+                // Don't fail the upload because of comments.
+                s_category.error("Error replying to comment " + oldIssueId
+                        + " (continuing anyway)", ex);
+            }
+        }
+    }
+    
+ // "modifiedTuvs" are from same page/job.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void saveNoJms(List<TuvImplVo> p_modifiedTuvs, List p_newComments,
+            Map p_replyComments, User p_user, String p_fileName,
+            String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId,
+            List<Task> p_isUploadingTasks) throws GeneralException
+    {
+        if (p_modifiedTuvs == null || p_modifiedTuvs.size() == 0)
+        {
+            // If no modified TUVs, ensure the uploading status is set back to
+            // "N" before return.
+            if (p_isLastOne) {
+                TaskHelper.updateTaskStatus(p_isUploadingTasks, UPLOAD_DONE,
+                        false);
+            }
+
+            return;
+        }
+
+        String companyIdStr = null;
+        try
+        {
+            TargetPage tp = ServerProxy.getPageManager().getTargetPage(
+                    p_trgPageId);
+            companyIdStr = String.valueOf(tp.getWorkflowInstance()
+                    .getCompanyId());
+        }
+        catch (Exception e)
+        {
+            s_category.error("Get company id Error:" + e);
+        }
+
+        // check if auto propagate
+        String specTus = "";
+        boolean isRepeatedSegments = false;
+        if (p_fileName != null
+                && p_fileName.contains(DownLoadApi.REPEATED_SEGMENTS_KEY))
+        {
+            isRepeatedSegments = true;
+        }
+
+        // save target tuvs
+        Iterator tuvIter = p_modifiedTuvs.iterator();
+        while (tuvIter.hasNext())
+        {
+            Tuv tuv = (Tuv) tuvIter.next();
+            tuv.setLastModifiedUser(p_user.getUserId());
+
+            if (isRepeatedSegments)
+            {
+                specTus = specTus + tuv.getTuId() + ",";
+            }
+        }
+        
+        saveTuvNoJms(p_modifiedTuvs, p_newComments, p_replyComments, p_user,
+                p_fileName, p_jmsDestinationQueue, p_isLastOne, p_trgPageId,
+                p_isUploadingTasks);
+
+        specTus = ""; // do not do Auto-Propagate from don's email
+        if (specTus != null && specTus.length() > 0)
+        {
+            // AutoPropagateThread.java
+            AutoPropagateThread apThread = new AutoPropagateThread();
+            apThread.setPickup("latest");
+            apThread.setSpecTus(specTus);
+            apThread.setTargetPageId("" + p_trgPageId);
+            apThread.setTuScope("specifiedTus");
+            apThread.setTuvScope("all");
+            apThread.setUser(p_user);
+            apThread.run();
+        }
+
+        // save modified target TUVs into in progress TM
+        saveTuvsIntoInProgressTm(p_modifiedTuvs, m_sourceLocale, p_trgPageId);
+
+        // save comments
+        saveNewComments(p_newComments, p_user.getUserId(), p_trgPageId);
+        saveModifiedComments(p_replyComments, p_user.getUserId());
+
+        // Delete the old files for preview
+        PreviewPDFHelper.deleteOldPdf(p_trgPageId, m_targetLocale.getId());
+        PreviewPageHandler.deleteOldPreviewFile(p_trgPageId,
+                m_targetLocale.getId());
+        // After a successful save, notify user.
+        // (Including when no modified Tuvs or comments are uploaded.)
+        GlobalSightLocale userLocale = setUserLocale(p_user);
+        String localePair = OfflineEditHelper.localePair(m_sourceLocale,
+                m_targetLocale, userLocale);
+
+        if (isRepeatedSegments)
+        {
+            if (p_isLastOne)
+            {
+                OfflineEditHelper.notifyUser(p_user, p_fileName, localePair,
+                        OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
+                        OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE,
+                        companyIdStr);
+            }
+        }
+        else
+        {
+            OfflineEditHelper.notifyUser(p_user, p_fileName, localePair,
+                    OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
+                    OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE, companyIdStr);
+        }
+        
+        if (p_isLastOne && p_isUploadingTasks != null && p_isUploadingTasks.size() > 0)
+        {
+            for (Task isUploadingTask : p_isUploadingTasks)
+            {
+                // Update task status (Upload Done)
+                TaskHelper.updateTaskStatus(isUploadingTask, AmbassadorDwUpConstants.UPLOAD_DONE, false);
+                s_category
+                        .info("Offline file uploading is done for task(taskID:"
+                                + isUploadingTask.getId() + "):"
+                                + isUploadingTask.getTaskName());
+            }
+        }
+    }
+    
     /**
      * Gets all the required data to build an Offline page from the DB.
      * 

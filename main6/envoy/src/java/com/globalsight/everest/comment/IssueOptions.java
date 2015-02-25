@@ -130,6 +130,52 @@ public class IssueOptions
         return list;
     }
     
+    public static List getAllQualityCategories(ResourceBundle bundle, String currentCompanyId)
+    {
+        List<String> qualityCategoryList = CompanyWrapper
+                .getCompanyQualityCategoryList(currentCompanyId);
+        List<Select> list = new ArrayList<Select>();
+        for (String key : qualityCategoryList)
+        {
+            String valueOfSelect = "";
+            try
+            {
+                valueOfSelect = bundle.getString(key);
+            }
+            catch (MissingResourceException e)
+            {
+                valueOfSelect = key;
+            }
+            // we should put value both at key and value places
+            Select option = new Select(valueOfSelect, valueOfSelect);
+            list.add(option);
+        }
+        return list;
+    }
+    
+    public static List getAllMarketCategories(ResourceBundle bundle, String currentCompanyId)
+    {
+        List<String> marketCategoryList = CompanyWrapper
+                .getCompanyMarketCategoryList(currentCompanyId);
+        List<Select> list = new ArrayList<Select>();
+        for (String key : marketCategoryList)
+        {
+            String valueOfSelect = "";
+            try
+            {
+                valueOfSelect = bundle.getString(key);
+            }
+            catch (MissingResourceException e)
+            {
+                valueOfSelect = key;
+            }
+            // we should put value both at key and value places
+            Select option = new Select(valueOfSelect, valueOfSelect);
+            list.add(option);
+        }
+        return list;
+    }
+
     public static List getAllStatus()
     {
         return c_allStatus;

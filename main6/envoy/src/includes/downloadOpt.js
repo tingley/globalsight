@@ -217,11 +217,17 @@ function setClientDwnldOptions(formSent)
 		}
 	}
 	
-	if (dwnldOpt.needConsolidate)
+	if (dwnldOpt.consolidateFileType)
 	{
-		if(dwnldOpt.needConsolidate == 'false' || dwnldOpt.needConsolidate == 'no')
+		$("#consolidateFileType").val(dwnldOpt.consolidateFileType);
+		setWordCountDisplay();
+		if (dwnldOpt.wordCountForDownload)
 		{
-			document.getElementById("needConsolidate").checked = false;
+			$("#wordCountForDownload").val(dwnldOpt.wordCountForDownload);
+		}
+		else
+		{
+			$("#wordCountForDownload").val('1000');
 		}
 	}
 	
@@ -230,6 +236,13 @@ function setClientDwnldOptions(formSent)
 		if(dwnldOpt.preserveSourceFolder == 'false' || dwnldOpt.preserveSourceFolder == 'no')
 		{
 			document.getElementById("preserveSourceFolder").checked = false;
+		}
+		else
+		{
+			if($("#consolidateFileType").val() == "consolidate")
+			{
+				$("#consolidateFileType").val("notConsolidate");
+			}
 		}
 	}
 	
@@ -283,6 +296,25 @@ function in_array(stringToSearch, arrayToSearch) {
 
 function submitForm()
 {
+	if($("#consolidateFileType").val() == "consolidateByWordCount")
+	{
+		tmp =$("#wordCountForDownload").val().trim();
+		if (tmp == "") {
+			alert("Please input word count.");
+			return;
+		}
+		
+		if (!isAllDigits(tmp)) {
+			alert("Invalid word count, only integer numbers are allowed.");
+			return;
+		}
+		
+		if(Number(tmp) < 1000){
+			alert("The minimum word count is 1000.");
+			return;
+		}
+	}
+	
 	saveUserOptions(downloadForm);
 }
 
@@ -331,12 +363,15 @@ function uniquenessCheck(obj)
 {
 	if(obj == 'preserveSourceFolder')
 	{
-		if(document.getElementById("preserveSourceFolder").checked == true)
-			document.getElementById("needConsolidate").checked = false;
+		if(document.getElementById("preserveSourceFolder").checked == true 
+				&& $("#consolidateFileType").val() == "consolidate")
+		{
+			$("#consolidateFileType").val("notConsolidate");
+		}
 	}
 	else if(obj == 'needConsolidate')
 	{
-		if(document.getElementById("needConsolidate").checked == true)
+		if($("#consolidateFileType").val() == "consolidate")
 			document.getElementById("preserveSourceFolder").checked = false;
 	}
 }

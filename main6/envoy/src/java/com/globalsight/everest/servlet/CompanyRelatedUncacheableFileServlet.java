@@ -184,7 +184,7 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
                         .toString().replace("\\", "/")
                         .replace("/", File.separator);
             }
-            else if (isDownloadingTM(p_request))
+            else if (isDownloadingTM(p_request) || isTMImport(p_request))
             {
                 fileFullPath = new StringBuffer().append(docHome)
                         .append(p_request.getPathInfo()).toString()
@@ -312,6 +312,17 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
         return false;
     }
 
+    private boolean isTMImport(HttpServletRequest p_request)
+    {
+        String servletpath = p_request.getServletPath();
+        if ("/tmImport".equals(servletpath))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
     private String getContentTypeByExtension(String p_ext)
     {
         String ext = "";

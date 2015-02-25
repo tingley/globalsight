@@ -245,6 +245,12 @@ public class TaskFilter
         {
             return null;
         }
+        
+        String acceptor = task.getAcceptor();
+        if (acceptor != null && acceptor.equals(user.getUserId()))
+        {
+            return null;
+        }
 
         Job job = task.getWorkflow().getJob();
         job = HibernateUtil.get(JobImpl.class, job.getId());

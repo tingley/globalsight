@@ -16,9 +16,11 @@
  */
 package com.globalsight.ling.tw;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -69,6 +71,12 @@ public class PseudoData
     static private Hashtable<String, String> m_hAddableOffice2010TagMap;
     // default resource
     static private ResourceBundle m_defaultResource;
+    // GBS-3722
+    private List<TagNode> m_mtIdentifierList = new ArrayList<TagNode>();
+    private Map<String, String> m_mtIdentifiers = new HashMap<String, String>();
+    private Map<String, String> m_mtIdentifierLeading = new HashMap<String, String>();
+    private Map<String, String> m_mtIdentifierTrailing = new HashMap<String, String>();
+    private boolean m_isFromSourceTargetPanel = true;
 
     static
     {
@@ -83,7 +91,7 @@ public class PseudoData
 
             // must set m_hAddableTagMap second
             m_hAddableTagMap = mapAddableTags(m_hPseudoOverrideMap);
-            
+
             m_hAddableOffice2010TagMap = mapAddable2010Tags();
         }
         catch (Exception e)
@@ -103,15 +111,25 @@ public class PseudoData
         // default resource
         m_resources = m_defaultResource;
     }
-    
+
     public boolean isXliffXlfFile()
     {
         return m_isXliffXlfFile;
     }
-    
+
     public void setIsXliffXlfFile(boolean isXliffXlfFile)
     {
         m_isXliffXlfFile = isXliffXlfFile;
+    }
+
+    public boolean isFromSourceTargetPanel()
+    {
+        return m_isFromSourceTargetPanel;
+    }
+
+    public void setIsFromSourceTargetPanel(boolean p_isFromSourceTargetPanel)
+    {
+        m_isFromSourceTargetPanel = p_isFromSourceTargetPanel;
     }
 
     /**
@@ -140,7 +158,7 @@ public class PseudoData
         {
             m_hPseudo2TmxMap.clear();
         }
-        
+
         if (m_missedhPseudo2TmxMap != null)
         {
             m_missedhPseudo2TmxMap.clear();
@@ -165,6 +183,14 @@ public class PseudoData
          */
     }
 
+    public void resetMTIdentifierList()
+    {
+        m_mtIdentifierList.clear();
+        m_mtIdentifiers.clear();
+        m_mtIdentifierLeading.clear();
+        m_mtIdentifierTrailing.clear();
+    }
+
     /**
      * Resets the source lists "mapped" flag for each node.
      */
@@ -175,6 +201,10 @@ public class PseudoData
         while (SrcEnumerator.hasMoreElements())
         {
             TagNode node = (TagNode) SrcEnumerator.nextElement();
+            node.setMapped(false);
+        }
+        for (TagNode node : m_mtIdentifierList)
+        {
             node.setMapped(false);
         }
     }
@@ -262,7 +292,7 @@ public class PseudoData
     {
         return m_hPseudo2TmxMap;
     }
-    
+
     public Hashtable getMissedPseudo2TmxMap()
     {
         return m_missedhPseudo2TmxMap;
@@ -358,6 +388,11 @@ public class PseudoData
     public Vector getSrcCompleteTagList()
     {
         return m_SrcCompleteTagList;
+    }
+
+    public List<TagNode> getMTIdentifierList()
+    {
+        return m_mtIdentifierList;
     }
 
     /**
@@ -502,9 +537,10 @@ public class PseudoData
         B_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</b>");
         B_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
         B_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
-        
-        //subscript
-        String strSub = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_SUB);
+
+        // subscript
+        String strSub = TmxTagGenerator
+                .getInlineTypeName(TmxTagGenerator.OFFICE_SUB);
 
         Hashtable sub_Data = new Hashtable();
         sub_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
@@ -517,9 +553,10 @@ public class PseudoData
         sub_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</sub>");
         sub_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
         sub_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
-        
-        //subscript
-        String strSup = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_SUP);
+
+        // subscript
+        String strSup = TmxTagGenerator
+                .getInlineTypeName(TmxTagGenerator.OFFICE_SUP);
         Hashtable sup_Data = new Hashtable();
         sup_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
         sup_Data.put(PseudoConstants.ADDABLE_TMX_TYPE, strSup);
@@ -763,7 +800,7 @@ public class PseudoData
                 .getInlineTypeName(TmxTagGenerator.OFFICE_ITALIC);
         String officeUnderline = TmxTagGenerator
                 .getInlineTypeName(TmxTagGenerator.OFFICE_UNDERLINE);
-        
+
         // =============================================================
         //
         // Note: A Tmx type listed in the following hash will always explicitly
@@ -883,11 +920,11 @@ public class PseudoData
                 "italic", "italic", true, null));
         p.put(officeUnderline, new PseudoOverrideMapItem(officeUnderline, true,
                 "underline", "underline", true, null));
-        
-        p.put(strSub, new PseudoOverrideMapItem(strSub, true,
-                "subscript", "sub", false, sub_Data));
-        p.put(strSup, new PseudoOverrideMapItem(strSup, true,
-                "superscript", "sup", false, sup_Data));
+
+        p.put(strSub, new PseudoOverrideMapItem(strSub, true, "subscript",
+                "sub", false, sub_Data));
+        p.put(strSup, new PseudoOverrideMapItem(strSup, true, "superscript",
+                "sup", false, sup_Data));
 
         return p;
     }
@@ -905,10 +942,10 @@ public class PseudoData
         map.put("subscript", "office-sub");
         map.put("sup", "office-sup");
         map.put("superscript", "office-sup");
-        
+
         return map;
     }
-    
+
     /*
      * Builds Pseudo-to-Tmx tag mapping for valid addable pseudo tags.
      * 
@@ -990,11 +1027,12 @@ public class PseudoData
                 p_strTagName = p_strTagName.toUpperCase();
             }
         }
-        
-        if (m_nAddablesMode == PseudoConstants.ADDABLES_AS_OFFICE_2010 || m_nAddablesMode == PseudoConstants.ADDABLES_AS_MIF)
+
+        if (m_nAddablesMode == PseudoConstants.ADDABLES_AS_OFFICE_2010
+                || m_nAddablesMode == PseudoConstants.ADDABLES_AS_MIF)
         {
-        	p_strTagName = p_strTagName.toLowerCase();
-        	return m_hAddableOffice2010TagMap.get(p_strTagName);
+            p_strTagName = p_strTagName.toLowerCase();
+            return m_hAddableOffice2010TagMap.get(p_strTagName);
         }
 
         return (String) m_hAddableTagMap.get(p_strTagName);
@@ -1183,11 +1221,11 @@ public class PseudoData
         }
         else if (p_format.equalsIgnoreCase("office-xml"))
         {
-        	m_nAddablesMode = PseudoConstants.ADDABLES_AS_OFFICE_2010;
+            m_nAddablesMode = PseudoConstants.ADDABLES_AS_OFFICE_2010;
         }
         else if (p_format.equalsIgnoreCase("mif"))
         {
-        	m_nAddablesMode = PseudoConstants.ADDABLES_AS_MIF;
+            m_nAddablesMode = PseudoConstants.ADDABLES_AS_MIF;
         }
         else
         {
@@ -1296,12 +1334,12 @@ public class PseudoData
         String tag = "";
         String p_strType = (String) p_attributes.get("type");
         String nativeCodeID = (String) p_attributes.get("x");
-        
+
         if (isIgnoreNativeId())
         {
             nativeCodeID = "0";
         }
-        
+
         if (p_tmxTagName.equals("ph"))
         {
             boolean isValidInt = false;
@@ -1341,13 +1379,13 @@ public class PseudoData
             if (nativeCodeID == null)
             {
                 nativeCodeID = (String) p_attributes.get("i");
-                
+
                 if (nativeCodeID == null)
                 {
                     nativeCodeID = (String) p_attributes.get("id");
                 }
             }
-            
+
             // NOTE: an empty type cannot be an addable type - so we
             // should always have an X attribute. However, it is
             // possble to have an addable type without an x attribute
@@ -1381,7 +1419,7 @@ public class PseudoData
                     nativeCodeID = (String) p_attributes.get("id");
                 }
             }
-            
+
             PseudoOverrideMapItem PNameItem = (PseudoOverrideMapItem) m_hPseudoOverrideMap
                     .get(p_strType);
 
@@ -1484,6 +1522,21 @@ public class PseudoData
         return m_internalTexts;
     }
 
+    public Map<String, String> getMTIdentifiers()
+    {
+        return m_mtIdentifiers;
+    }
+
+    public Map<String, String> getMTIdentifierLeading()
+    {
+        return m_mtIdentifierLeading;
+    }
+
+    public Map<String, String> getMTIdentifierTrailing()
+    {
+        return m_mtIdentifierTrailing;
+    }
+
     private void addInternalTags(String tag, String segment)
             throws TagNodeException
     {
@@ -1501,6 +1554,40 @@ public class PseudoData
         }
         TagNode tagNode = new TagNode(TagNode.INTERNAL, internalTag, attributes);
         m_SrcCompleteTagList.add(tagNode);
+    }
+
+    public void addMTIdentifierLeading(String tag, String segment)
+            throws TagNodeException
+    {
+        m_mtIdentifierLeading.put(tag, segment);
+        addMTIdentifiers(tag, segment);
+    }
+
+    public void addMTIdentifierTrailing(String tag, String segment)
+            throws TagNodeException
+    {
+        m_mtIdentifierTrailing.put(tag, segment);
+        addMTIdentifiers(tag, segment);
+    }
+
+    private void addMTIdentifiers(String tag, String segment)
+            throws TagNodeException
+    {
+        m_mtIdentifiers.put(tag, segment);
+        Properties attributes = new Properties();
+        attributes.put("internal", true);
+        String internalTag = null;
+        if (tag.startsWith("[") && tag.endsWith("]"))
+        {
+            internalTag = tag.substring(1, tag.length() - 1);
+        }
+        else
+        {
+            internalTag = tag;
+        }
+        TagNode tagNode = new TagNode(TagNode.INTERNAL, internalTag, attributes);
+        tagNode.setMTIdentifier(true);
+        m_mtIdentifierList.add(tagNode);
     }
 
     public void addInternalTags(InternalTexts texts) throws TagNodeException

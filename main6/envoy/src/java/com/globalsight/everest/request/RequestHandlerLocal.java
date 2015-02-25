@@ -685,7 +685,7 @@ public class RequestHandlerLocal implements RequestHandler
     /**
      * Initiate the importing of the created, already persisted request.
      */
-    private long submitRequest(RequestImpl p_request)
+    public long submitRequest(RequestImpl p_request)
             throws RequestHandlerException, RemoteException
     {
         // if this is an extracted request then check if the page

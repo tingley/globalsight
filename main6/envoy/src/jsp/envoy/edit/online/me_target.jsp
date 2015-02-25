@@ -782,7 +782,7 @@ function getSegmentIdFromHref(href)
 
 function isEditableSegment(obj)
 {
-    return (obj.tagName == 'A' && ((obj.className.indexOf('editorSegment') == 0)||(obj.className.indexOf('segmentContext')==0)));
+    return (obj.tagName == 'A' && ((obj.className.indexOf('editorSegment') != -1)||(obj.className.indexOf('segmentContext')!=-1)));
 }
 
 function getEditableSegment(obj)

@@ -271,8 +271,7 @@
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_SYSTEM%>"/>
   <% } %>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_WFMGMT%>"/>  
-  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_GENERAL%>"/>  
-  <permission id="<%=Permission.ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES%>"/>
+  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_GENERAL%>"/>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_NOMATCHES%>"/>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_REPETITIONS%>"/>  
 </category>
@@ -368,6 +367,7 @@
  <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
  <permission id="<%=Permission.COTI_JOB%>"/>
  <permission id="<%=Permission.ELOQUA%>"/>
+ <permission id="<%=Permission.MIND_TOUCH%>"/>
 </category>
 <category id="lb_job_scope">
   <permission id="<%=Permission.JOB_SCOPE_ALL%>"/>
@@ -528,6 +528,7 @@
     <permission id="<%=Permission.REPORTS_COMMENTS_ANALYSIS%>"/>
     <permission id="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>"/>
     <permission id="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE%>"/>
+    <permission id="<%=Permission.REPORTS_POST_REVIEW_QA%>"/>
     <permission id="<%=Permission.REPORTS_TRANSLATIONS_EDIT%>"/>
     <permission id="<%=Permission.REPORTS_SCORECARD%>"/>
     <permission id="<%=Permission.REPORTS_CHARACTER_COUNT%>"/>

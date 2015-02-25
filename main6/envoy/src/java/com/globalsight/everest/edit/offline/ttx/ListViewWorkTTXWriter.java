@@ -157,6 +157,11 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
                 + "Fuzzy Match word count: "
                 + m_page.getFuzzyMatchWordCountAsString() + "</ut>");
         m_outputStream.write(m_strEOL);
+        // Populate100%TargetSegments
+        m_outputStream.write("<ut DisplayText=\"GS:Populate100TargetSegments\">"
+                + "Populate 100% Target Segments: "
+                + (m_page.isPopulate100() ? "YES" : "NO") + "</ut>");
+        m_outputStream.write(m_strEOL);
         // Server Instance ID
         if (m_page.getServerInstanceID() != null)
         {

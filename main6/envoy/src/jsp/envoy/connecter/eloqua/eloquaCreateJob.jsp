@@ -412,7 +412,7 @@ function addFullDivElement2(id, name) {
 			'</select></div>'+
 			'<div class="fileInfo" >' + name + '</div>'+
 			'<div class="cancel"><a href="javascript:removeSelectedFile(\'' + id + '\')">'+
-			'<img style="padding-top:3px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'+
+			'<img style="padding-top:4px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'+
 			'<div class="uploadifyProgressBar" style="background-color:grey; width:642"></div>'+
 			'</div>');
 
@@ -1319,7 +1319,7 @@ function preview(id)
 					                    <c:out value="${lb_attachment}"/> / <c:out value="${lb_reference_file}"/>: 
 					                </td>
 					                <td width="51%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
-					                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer" onclick="delAttc()"></div></td>
+					                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc()"></div></td>
 					                <td width="15%" onmouseover="setInputFileDisable(1)">
 					                <input type="button" id="attachmentFileBtn"  title="<c:out value='${lb_create_job_browse_tip}'/>" onclick="chickAtt()" class="standardBtn_mouseout" value="<c:out value='${lb_browse}'/>">
 					                <input type="file"  class="attachmentFile" name="selectedAttachmentFile" id="selectedAttachmentFile" class="standardBtn_mouseout" onclick="setType(1)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_browse_tip}'/>">

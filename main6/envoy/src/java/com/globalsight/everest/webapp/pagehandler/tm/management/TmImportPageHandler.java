@@ -44,12 +44,15 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.importer.IImportManager;
+import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.util.progress.ProgressReporter;
 import com.globalsight.util.progress.TmProcessStatus;
+import com.sun.jndi.toolkit.url.UrlUtil;
 
 /**
  * <p>
@@ -326,7 +329,24 @@ public class TmImportPageHandler extends PageHandler implements
                 importer.setImportFile(tmStatus.getSavedFilepath(), true);
 
                 options = importer.analyzeFile();
-
+                StringBuffer sb = new StringBuffer();
+                sb.append("/globalsight/tmImport/");
+                sb.append(getUser(session).getCompanyName());
+                sb.append("/" + AmbFileStoragePathUtils.TM_IMPORT_FILE_SUB_DIR);
+                String filePathName = tmStatus.getLogUrl().replace('\\', '/');
+                String fileName = filePathName.substring(
+                        filePathName.lastIndexOf("/"), filePathName.length());
+                sb.append(fileName);
+                String logUrl = sb.toString();
+                logUrl = logUrl.replace('\\', '/');
+                try
+                {
+                    logUrl = UrlUtil.encode(logUrl, "utf-8");
+                }
+                catch (Exception e)
+                {
+                    logUrl = URLEncoder.encode(logUrl, "utf-8");
+                }
                 if (CATEGORY.isDebugEnabled())
                 {
                     CATEGORY.debug("upload options = " + options);
@@ -335,7 +355,7 @@ public class TmImportPageHandler extends PageHandler implements
                         tmStatus.getTotalTus());
                 sessionMgr.setAttribute(ImportUtil.ERROR_COUNT,
                         tmStatus.getErrorTus());
-                sessionMgr.setAttribute(LOG_URL, tmStatus.getLogUrl());
+                sessionMgr.setAttribute(LOG_URL, logUrl);
                 sessionMgr.setAttribute(ERROR_URL, tmStatus.getErrorUrl());
 
                 sessionMgr.setAttribute(TM_IMPORT_OPTIONS, options);

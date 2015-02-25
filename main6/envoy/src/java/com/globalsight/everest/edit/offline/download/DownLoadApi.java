@@ -705,6 +705,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         String curTargetFname = null;
         List<OfflinePageData> datas = new ArrayList<OfflinePageData>();
         OfflinePageData pageData = new OfflinePageData();
+        pageData.setPopulate100(m_downloadParams.isPopulate100());
         OfflinePageData repPageData = new OfflinePageData();
         boolean isConsolidate = false;
         boolean isCombined = false;
@@ -983,7 +984,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                                 .setTaskIds(m_downloadParams.getAllTaskIds());
                     }
 
-                    if (m_downloadParams.isNeedConsolidate())
+                    if (m_downloadParams.getConsolidateFileType() != null 
+                    		&& m_downloadParams.getConsolidateFileType().equals("consolidate"))
                     {
                         isConsolidate = true;
                         if (!pageData.getPageId().equals(OPD.getPageId()))
@@ -1018,8 +1020,10 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     }
                     else
                     {
+                    	Vector tempVector = OPD.getSegmentList();
                         curTargetFname = addExtractedPrimaryTargetPage(OPD,
                                 m_downloadParams);
+                        OPD.setSegmentList(tempVector);
                         // addResourceFiles(curTargetFname, OPD,
                         // m_downloadParams);
                     }
@@ -1200,6 +1204,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     {
         OfflinePageData consolidatedData = new OfflinePageData();
         consolidatedData.setPageName(m_downloadParams.getFullJobName());
+        consolidatedData.setPopulate100(m_downloadParams.isPopulate100());
         HashSet<OfflineSegmentData> allDatas = new HashSet<OfflineSegmentData>();
         boolean inited = false;
 
@@ -1725,7 +1730,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         String inboxPath = DownloadHelper.makePTFParentPath(p_downloadParams);
         String fname = "";
         StringBuffer fullPath = new StringBuffer(inboxPath);
-        if(p_downloadParams.isPreserveSourceFolder())
+        if(p_downloadParams.isPreserveSourceFolder() && !p_downloadParams.isNeedCombined())
         {
         	String jobIdStr = String.valueOf(p_page.getJobId());
         	String fullPageName = p_page.getFullPageName().replaceAll("\\\\", "/");
@@ -1754,7 +1759,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         + p_downloadParams.getTargetLocale().toString() + "."
                         + FILE_EXT_RTF_NO_DOT;
             }
-            else if (p_downloadParams.isNeedConsolidate())
+            else if (m_downloadParams.getConsolidateFileType() != null 
+            				&& p_downloadParams.getConsolidateFileType().equals("consolidate"))
             {
                 fname = p_downloadParams.getJob().getJobName() + "."
                         + FILE_EXT_RTF_NO_DOT;
@@ -1767,16 +1773,24 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
             if (m_downloadParams.isUnicodeRTF())
             {
-                m_pageCounter++;
-
-                StringBuffer sb = new StringBuffer();
-                sb.append(m_resource.getString("msg_dnld_adding_file"));
-                sb.append(fname);
-
-                m_status.speak(m_pageCounter, sb.toString());
-
-                m_zipper.writePath(fullPath.toString());
-                m_zipper.writeUnicodeRtfPage(p_page, p_downloadParams);
+            	if(m_downloadParams.getConsolidateFileType() != null 
+                		&& p_downloadParams.getConsolidateFileType().equals("consolidateByWordCount"))
+            	{
+            		writeByWordCount(fname, p_downloadParams, p_page, fullPath, inboxPath, FILE_EXT_RTF_NO_DOT);
+            	}
+            	else
+            	{
+            		m_pageCounter++;
+            		
+            		StringBuffer sb = new StringBuffer();
+            		sb.append(m_resource.getString("msg_dnld_adding_file"));
+            		sb.append(fname);
+            		
+            		m_status.speak(m_pageCounter, sb.toString());
+            		
+            		m_zipper.writePath(fullPath.toString());
+            		m_zipper.writeUnicodeRtfPage(p_page, p_downloadParams);
+            	}
             }
             else
             {
@@ -1800,40 +1814,57 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 fname = p_downloadParams.getFullJobName() + "_"
                         + p_downloadParams.getTargetLocale().toString() + "."
                         + FILE_EXT_XLIFF_NO_DOT;
-            else if (p_downloadParams.isNeedConsolidate())
+            else if (m_downloadParams.getConsolidateFileType() != null 
+    						&&p_downloadParams.getConsolidateFileType().equals("consolidate"))
                 fname = p_downloadParams.getJob().getJobName() + "."
                         + FILE_EXT_XLIFF_NO_DOT;
             else
                 fname = getUniqueExtractedPTFName(p_page, FILE_EXT_XLIFF_NO_DOT);
             fullPath.append(fname);
 
-            m_pageCounter++;
-
-            StringBuffer sb = new StringBuffer();
-            sb.append(m_resource.getString("msg_dnld_adding_file"));
-            sb.append(fname);
-
-            m_status.speak(m_pageCounter, sb.toString());
-
-            m_zipper.writePath(fullPath.toString());
-            m_zipper.writeUnicodeXliffPage(p_page, p_downloadParams);
+            if(m_downloadParams.getConsolidateFileType() != null 
+    				&& p_downloadParams.getConsolidateFileType().equals("consolidateByWordCount"))
+        	{
+            	writeByWordCount(fname, p_downloadParams, p_page, fullPath, inboxPath, FILE_EXT_XLIFF_NO_DOT);
+        	}
+            else 
+            {
+            	m_pageCounter++;
+            	
+            	StringBuffer sb = new StringBuffer();
+            	sb.append(m_resource.getString("msg_dnld_adding_file"));
+            	sb.append(fname);
+            	
+            	m_status.speak(m_pageCounter, sb.toString());
+            	
+            	m_zipper.writePath(fullPath.toString());
+            	m_zipper.writeUnicodeXliffPage(p_page, p_downloadParams);
+			}
         }
 
         else if (p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_TTX)
         {
             fname = getUniqueExtractedPTFName(p_page, FILE_EXT_TTX_NO_DOT);
             fullPath.append(fname);
-
-            m_pageCounter++;
-
-            StringBuffer sb = new StringBuffer();
-            sb.append(m_resource.getString("msg_dnld_adding_file"));
-            sb.append(fname);
-
-            m_status.speak(m_pageCounter, sb.toString());
-
-            m_zipper.writePath(fullPath.toString());
-            m_zipper.writeUnicodeTTXPage(p_page, p_downloadParams);
+            
+            if(m_downloadParams.getConsolidateFileType() != null 
+    				&& p_downloadParams.getConsolidateFileType().equals("consolidateByWordCount"))
+        	{
+            	writeByWordCount(fname, p_downloadParams, p_page, fullPath, inboxPath, FILE_EXT_TTX_NO_DOT);
+        	}
+            else
+            {
+            	m_pageCounter++;
+            	
+            	StringBuffer sb = new StringBuffer();
+            	sb.append(m_resource.getString("msg_dnld_adding_file"));
+            	sb.append(fname);
+            	
+            	m_status.speak(m_pageCounter, sb.toString());
+            	
+            	m_zipper.writePath(fullPath.toString());
+            	m_zipper.writeUnicodeTTXPage(p_page, p_downloadParams);
+            }
         }
 
         else if (p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_RTF_PARAVIEW_ONE)
@@ -1895,6 +1926,122 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         }
 
         return fname;
+    }
+
+    private void writeByWordCount(String p_fname,DownloadParams p_downloadParams,
+    		OfflinePageData p_page, StringBuffer p_fullpath,String p_inboxPath,
+    		String p_extension) throws IOException
+    {
+    	m_pageCounter++;
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append(m_resource.getString("msg_dnld_adding_file"));
+		sb.append(p_fname);
+		
+		m_status.speak(m_pageCounter, sb.toString());
+		
+		int wordCount = 0;
+		int fileCount = 1;
+		boolean needSplit = true;
+		int totalWordCount = 0;
+		int maxWordCount = p_downloadParams.getWordCountForDownload();
+		Vector segmentList = new Vector();
+		segmentList.addAll(p_page.getSegmentList());
+		OfflinePageData tempPageData = p_page;
+		initTempPageData(tempPageData);
+		for(OfflineSegmentData segmentData :(Vector<OfflineSegmentData>) segmentList)
+		{
+			totalWordCount = totalWordCount + segmentData.getSourceTuv().getWordCount();
+		}
+		if(totalWordCount <= maxWordCount)
+		{
+			needSplit = false;
+		}
+		String fullPath = p_fullpath.toString();
+		for(OfflineSegmentData segmentData :(Vector<OfflineSegmentData>) segmentList)
+		{
+			if(wordCount == 0 || wordCount >= maxWordCount)
+			{
+				String fileName;
+				if(!needSplit)
+				{
+					fileName = p_fname;
+				}
+				else
+				{
+					fileName = p_fname.substring(0, p_fname.indexOf(p_extension) - 1) 
+						+ "(" + fileCount + ")."+ p_extension;
+				}
+				fullPath = fullPath.substring(0, fullPath.lastIndexOf("/") + 1) + fileName;
+			}
+			
+			int segmentWordCount = segmentData.getSourceTuv().getWordCount();
+			wordCount = wordCount + segmentWordCount;
+			tempPageData.addSegment(segmentData);
+			setWordCount(tempPageData, segmentData, segmentWordCount);
+			if(wordCount >= maxWordCount)
+			{
+				m_zipper.writePath(fullPath);
+				writeFileByWordCount(tempPageData, p_downloadParams, p_extension);
+				initTempPageData(tempPageData);
+				
+				wordCount = 0;
+				fileCount++;
+			}
+		}
+		if(wordCount > 0)
+		{
+			m_zipper.writePath(fullPath);
+			writeFileByWordCount(tempPageData, p_downloadParams, p_extension);
+		}
+    }
+    
+    private void initTempPageData(OfflinePageData p_tempPageData)
+    {
+    	p_tempPageData.setSegmentList(new Vector());
+    	p_tempPageData.getSegmentMap().clear();
+    	p_tempPageData.setNoMatchWordCount(0);
+    	p_tempPageData.setFuzzyMatchWordCount(0);
+    	p_tempPageData.setExactMatchWordCount(0);
+    }
+    
+    private void setWordCount(OfflinePageData tempPageData, 
+    		OfflineSegmentData segmentData, int segmentWordCount)
+    {
+    	int matchTypeId = segmentData.getMatchTypeId();
+    	if(matchTypeId == MATCH_TYPE_EXACT)
+    	{
+    		tempPageData.setExactMatchWordCount(tempPageData.getExactMatchWordCount() 
+    				+ segmentWordCount);
+    	}
+    	else if(matchTypeId == MATCH_TYPE_FUZZY)
+    	{
+    		tempPageData.setFuzzyMatchWordCount(tempPageData.getFuzzyMatchWordCount() 
+    				+ segmentWordCount);
+    	}
+    	else if(matchTypeId == MATCH_TYPE_NOMATCH)
+    	{
+    		tempPageData.setNoMatchWordCount(tempPageData.getNoMatchWordCount() 
+    				+ segmentWordCount);
+    	}
+    }
+    
+    
+    private void writeFileByWordCount(OfflinePageData p_tempPageData,
+    		DownloadParams p_downloadParams, String p_extension)
+    {
+    	if(p_extension.equals(FILE_EXT_TTX_NO_DOT))
+		{
+			m_zipper.writeUnicodeTTXPage(p_tempPageData, p_downloadParams);
+		}
+		else if(p_extension.equals(FILE_EXT_XLIFF_NO_DOT))
+		{
+			m_zipper.writeUnicodeXliffPage(p_tempPageData, p_downloadParams);
+		}
+		else if(p_extension.equals(FILE_EXT_RTF_NO_DOT))
+		{
+			m_zipper.writeUnicodeRtfPage(p_tempPageData, p_downloadParams);
+		}
     }
 
     /**

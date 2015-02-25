@@ -310,7 +310,8 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
      * value disables addables.
      */
     public void setInputSegment(String p_source, String p_encoding,
-            String p_segmentFormat) throws PseudoOverrideItemException
+            String p_segmentFormat, boolean p_isFromSourceTargetPanel)
+            throws PseudoOverrideItemException
     {
         // Empty strings arrive as NULL pointer somehow, so fix that
         if (p_source == null)
@@ -331,6 +332,13 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
         m_segmentFormat = p_segmentFormat;
 
         m_withPtags.setAddables(p_segmentFormat);
+        m_withPtags.setIsFromSourceTargetPanel(p_isFromSourceTargetPanel);
+    }
+
+    public void setInputSegment(String p_source, String p_encoding,
+            String p_segmentFormat) throws PseudoOverrideItemException
+    {
+        setInputSegment(p_source, p_encoding, p_segmentFormat, true);
     }
 
     /*
@@ -548,8 +556,9 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
             // compact/verbose mode.
             m_withPtags.setPTagTargetString(p_target);
 
-            String errors = m_errChecker.check(m_withPtags, p_sourceWithSubContent,
-                    p_gxmlMaxLen, p_gxmlStorageEncoding, p_nativeContentMaxLen,
+            String errors = m_errChecker.check(m_withPtags,
+                    p_sourceWithSubContent, p_gxmlMaxLen,
+                    p_gxmlStorageEncoding, p_nativeContentMaxLen,
                     p_nativeStorageEncoding);
             m_internalErrMsg = m_errChecker.geStrInternalErrMsg();
             return errors;
@@ -589,45 +598,48 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
     public static void main(String[] args)
     {
         OnlineApplet oa = new OnlineApplet();
-        String diplomat = "1 L = 10<ph type=\"superscript\" id=\"173\" x=\"1\">&apos;&gt;" 
-        		+ "&lt;Font" 
-        		+ "&lt;FTag `&apos;&gt;"
-        		+ "&lt;FPosition FSuperscript&gt;"
-        	    + "&lt;FLocked No&gt;"
-        		+ "&gt; # end of Font"
-        	    + "&lt;String `</ph>3<ph type=\"text\" id=\"176\" x=\"2\">&apos;&gt;"
-        	    + "&lt;Font"
-        	    + "&lt;FTag `&apos;&gt;"
-        	    + "&lt;FLocked No&gt;"
-        	    + "&gt; # end of Font"
-        	    + "&lt;String `</ph> mL = 10<ph type=\"superscript\" id=\"179\" x=\"3\">&apos;&gt;"
-        	    + "&lt;Font"
-        	    + "&lt;FTag `&apos;&gt;"
-        	    + "&lt;FPosition FSuperscript&gt;"
-        	    + "&lt;FLocked No&gt;"
-        	    + "&gt; # end of Font"
-        	    + "&lt;String `</ph>6<ph type=\"text\" id=\"182\" x=\"4\">&apos;&gt;"
-        	    + "&lt;Font"
-        	    + "&lt;FTag `&apos;&gt;"
-        	    + "&lt;FLocked No&gt;"
-        	    + "&gt; # end of Font"
-        	    + "&lt;String `</ph> �L";
+        String diplomat = "1 L = 10<ph type=\"superscript\" id=\"173\" x=\"1\">&apos;&gt;"
+                + "&lt;Font"
+                + "&lt;FTag `&apos;&gt;"
+                + "&lt;FPosition FSuperscript&gt;"
+                + "&lt;FLocked No&gt;"
+                + "&gt; # end of Font"
+                + "&lt;String `</ph>3<ph type=\"text\" id=\"176\" x=\"2\">&apos;&gt;"
+                + "&lt;Font"
+                + "&lt;FTag `&apos;&gt;"
+                + "&lt;FLocked No&gt;"
+                + "&gt; # end of Font"
+                + "&lt;String `</ph> mL = 10<ph type=\"superscript\" id=\"179\" x=\"3\">&apos;&gt;"
+                + "&lt;Font"
+                + "&lt;FTag `&apos;&gt;"
+                + "&lt;FPosition FSuperscript&gt;"
+                + "&lt;FLocked No&gt;"
+                + "&gt; # end of Font"
+                + "&lt;String `</ph>6<ph type=\"text\" id=\"182\" x=\"4\">&apos;&gt;"
+                + "&lt;Font"
+                + "&lt;FTag `&apos;&gt;"
+                + "&lt;FLocked No&gt;"
+                + "&gt; # end of Font" + "&lt;String `</ph> �L";
         String target = "1 L = 10[superscript1]3[x2] mL = 10[superscript3]6[x4] �L--Changed";
-//      String diplomat = "1g = 10<bpt isTranslate=\"true\" i=\"3\" type=\"superscript\" erasable=\"yes\" movable=\"no\" x=\"2\">&lt;w:r w:rsidRPr=&quot;00F80D16&quot;&gt;&lt;w:rPr&gt;&lt;w:rFonts w:hint=&quot;eastAsia&quot;/&gt;&lt;w:vertAlign w:val=&quot;superscript&quot;/&gt;&lt;/w:rPr&gt;&lt;w:t&gt;</bpt>3<ept i=\"3\">&lt;/w:t&gt;&lt;/w:r&gt;</ept>mg = 10<bpt isTranslate=\"true\" i=\"5\" type=\"superscript\" erasable=\"yes\" movable=\"no\" x=\"4\">&lt;w:r w:rsidRPr=&quot;00F80D16&quot;&gt;&lt;w:rPr&gt;&lt;w:rFonts w:hint=&quot;eastAsia&quot;/&gt;&lt;w:vertAlign w:val=&quot;superscript&quot;/&gt;&lt;/w:rPr&gt;&lt;w:t&gt;</bpt>6<ept i=\"5\">&lt;/w:t&gt;&lt;/w:r&gt;</ept>ug ";
-//      String target = "1g = 10[superscript2]3[/superscript2]mg = 10[superscript4]6[/superscript4]ug===";
-        
+        // String diplomat =
+        // "1g = 10<bpt isTranslate=\"true\" i=\"3\" type=\"superscript\" erasable=\"yes\" movable=\"no\" x=\"2\">&lt;w:r w:rsidRPr=&quot;00F80D16&quot;&gt;&lt;w:rPr&gt;&lt;w:rFonts w:hint=&quot;eastAsia&quot;/&gt;&lt;w:vertAlign w:val=&quot;superscript&quot;/&gt;&lt;/w:rPr&gt;&lt;w:t&gt;</bpt>3<ept i=\"3\">&lt;/w:t&gt;&lt;/w:r&gt;</ept>mg = 10<bpt isTranslate=\"true\" i=\"5\" type=\"superscript\" erasable=\"yes\" movable=\"no\" x=\"4\">&lt;w:r w:rsidRPr=&quot;00F80D16&quot;&gt;&lt;w:rPr&gt;&lt;w:rFonts w:hint=&quot;eastAsia&quot;/&gt;&lt;w:vertAlign w:val=&quot;superscript&quot;/&gt;&lt;/w:rPr&gt;&lt;w:t&gt;</bpt>6<ept i=\"5\">&lt;/w:t&gt;&lt;/w:r&gt;</ept>ug ";
+        // String target =
+        // "1g = 10[superscript2]3[/superscript2]mg = 10[superscript4]6[/superscript4]ug===";
+
         try
         {
             oa.init();
-//            oa.setInputSegment(diplomat, "UTF8", "xlf");
+            // oa.setInputSegment(diplomat, "UTF8", "xlf");
             oa.setInputSegment(diplomat, "UTF8", "text");
-//            String str = oa.makeCompactColoredPtags(diplomat);
-//            System.out.println("str : " + str);
-//            String tmp = "[x0]Update the following table as necessary when this document is changed changed :[x1]";
+            // String str = oa.makeCompactColoredPtags(diplomat);
+            // System.out.println("str : " + str);
+            // String tmp =
+            // "[x0]Update the following table as necessary when this document is changed changed :[x1]";
             String a = oa.getCompact();
-//            String str2 = oa.getTargetDiplomat(target);
-//            System.out.println("str2 : " + str2);
-            String result = oa.errorCheck(target, diplomat, 0, "UTF8", 0, "UTF8");
+            // String str2 = oa.getTargetDiplomat(target);
+            // System.out.println("str2 : " + str2);
+            String result = oa.errorCheck(target, diplomat, 0, "UTF8", 0,
+                    "UTF8");
             System.out.println(result);
         }
         catch (DiplomatBasicParserException e)
@@ -641,9 +653,11 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
         catch (PseudoParserException e)
         {
             e.printStackTrace();
-        } catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

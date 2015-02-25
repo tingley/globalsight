@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,35 +43,53 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.diplomat.util.database.ConnectionPool;
+import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserRoleImpl;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageWordCounts;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.pageexport.ExportBatchEvent;
+import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.WfTemplateSearchParameters;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.taskmanager.TaskManager;
 import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
+import com.globalsight.everest.workflow.ConditionNodeTargetInfo;
 import com.globalsight.everest.workflow.WorkflowArrow;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowOwners;
 import com.globalsight.everest.workflow.WorkflowTask;
+import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowImpl;
+import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.log.ActivityLog;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.Assert;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.EditUtil;
+import com.globalsight.webservices.vo.JobFiles;
 
 /**
  * WebService APIs of GlobalSight handles web services related to projects,
@@ -94,7 +113,16 @@ public class Ambassador4Falcon extends JsonTypeWebService
     public static final String GET_WORK_OFFLINE_FILES = "getWorkOfflineFiles";
     public static final String UPLOAD_WORK_OFFLINE_FILES = "uploadWorkOfflineFiles";
     public static final String IMPORT_WORK_OFFLINE_FILES = "importWorkOfflineFiles";
+    public static final String ACCEPT_TASK = "acceptTask"; 
+    public static final String COMPLETE_TASK = "completeTask";
+    public static final String REJECT_TASK = "rejectTask";
+    public static final String EXPORT_JOB = "exportJob";
+    public static final String EXPORT_WORKFLOW = "exportWorkflow";
+    public static final String GET_JOB_EXPORT_FILES = "getJobExportFiles";
+    public static final String GET_JOB_EXPORT_WORKFLOW_FILES = "getJobExportWorkflowFiles";
+    public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
 
+    private static String NOT_IN_DB = "This job is not ready for query: ";
     private static SimpleDateFormat dateFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
 
@@ -115,17 +143,22 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            -- login user's token
      * @param p_intervalInMinute
      *            -- interval time in minutes.
+     * @param p_companyName
+     * 				--get job id of the company 
      * @return jobIDs in json string. A sample result is like:
      *         {"JOB_ID":"204,213,215,216,218,220,190,202,205,217,219"}
      * @throws WebServiceException
      * 
      */
     public String getJobIDsWithStatusChanged(String p_accessToken,
-            int p_intervalInMinute) throws WebServiceException
+            int p_intervalInMinute,String p_companyName) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_JOB_IDS_WITH_STATUS_CHANGED);
-        checkPermission(p_accessToken, Permission.JOBS_VIEW);
-
+		String jobsView = checkPermissionReturnStr(p_accessToken,
+				Permission.JOBS_VIEW);
+		if (StringUtil.isNotEmpty(jobsView))
+			return jobsView;
+	
         String json = "";
         ActivityLog.Start activityStart = null;
         Connection connection = null;
@@ -145,14 +178,25 @@ public class Ambassador4Falcon extends JsonTypeWebService
                 return makeErrorJson(GET_JOB_IDS_WITH_STATUS_CHANGED,
                         "Invaild time range parameter.");
             }
+			if (StringUtil.isEmpty(p_companyName))
+			{
+				return makeErrorJson(GET_JOB_IDS_WITH_STATUS_CHANGED,
+						"Invaild comoany name parameter.");
+			}
             // int hours = getHours(p_sinceTime);
             Calendar calendar = Calendar.getInstance();
             // calendar.add(Calendar.HOUR, 0 - hours);
             calendar.add(Calendar.MINUTE, 0 - p_intervalInMinute);
             String timeStamp = dateFormat.format(calendar.getTime());
             User user = getUser(getUsernameFromSession(p_accessToken));
-            String companyName = user.getCompanyName();
-
+            String curCompanyName = user.getCompanyName();
+            String curCompanyId = CompanyWrapper.getCompanyIdByName(curCompanyName);
+			if (!curCompanyId.equals("1")
+					&& !curCompanyName.equalsIgnoreCase(p_companyName))
+			{
+				return makeErrorJson(GET_JOB_IDS_WITH_STATUS_CHANGED,
+						"Invaild comoany name parameter.");
+			}
             String sql = "SELECT DISTINCT workflow.JOB_ID FROM task_info, workflow, job "
                     + "WHERE workflow.COMPANY_ID = ? "
                     + "AND (task_info.ACCEPTED_DATE > ? "
@@ -166,7 +210,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 
             connection = ConnectionPool.getConnection();
             query = connection.prepareStatement(sql);
-            query.setString(1, CompanyWrapper.getCompanyIdByName(companyName));
+            query.setString(1, CompanyWrapper.getCompanyIdByName(p_companyName));
             query.setString(2, timeStamp);
             query.setString(3, timeStamp);
             query.setString(4, timeStamp);
@@ -307,8 +351,11 @@ public class Ambassador4Falcon extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_DETAILED_WORD_COUNTS);
-        checkPermission(p_accessToken, Permission.REPORTS_DELL_FILE_LIST);
-
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.REPORTS_DELL_FILE_LIST);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
         String json = "";
         ActivityLog.Start activityStart = null;
         try
@@ -396,7 +443,360 @@ public class Ambassador4Falcon extends JsonTypeWebService
 
         return json;
     }
+    
+    /**
+     * Accept specified task.
+     * 
+     * @param p_accessToken
+     *            The access token received from the login.
+     * @param p_taskId
+     *            Task Id to be accepted.
+     * @return String in JSON. A sample is like:
+	 * 			  {"acceptTask":"success"}
+     * @throws WebServiceException
+     */
+    public String acceptTask(String p_accessToken, String p_taskId)
+            throws WebServiceException
+	{
+		String rtnString = "success";
+		checkAccess(p_accessToken, ACCEPT_TASK);
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.ACTIVITIES_ACCEPT);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		try
+		{
+			Assert.assertNotEmpty(p_accessToken, "Access token");
+			Assert.assertIsInteger(p_taskId);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorJson(ACCEPT_TASK, e.getMessage());
+		}
 
+		String acceptorName = getUsernameFromSession(p_accessToken);
+		String acceptor = UserUtil.getUserIdByName(acceptorName);
+
+		Task task = null;
+		try
+		{
+			task = TaskHelper.getTask(Long.parseLong(p_taskId));
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			String message = "Failed to get task object by taskId : "
+					+ p_taskId;
+			return makeErrorJson(ACCEPT_TASK, message);
+		}
+		ActivityLog.Start activityStart = null;
+		try
+		{
+			if (task != null)
+			{
+				Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+				activityArgs.put("loggedUserName", acceptorName);
+				activityArgs.put("taskId", p_taskId);
+				activityStart = ActivityLog.start(Ambassador.class,
+						"acceptTask(p_accessToken,p_taskId)", activityArgs);
+				if (task.getState() == Task.STATE_ACCEPTED
+						|| task.getState() == Task.STATE_COMPLETED)
+				{
+					return makeErrorJson(ACCEPT_TASK,
+							"The current task has been accepted or completed state.");
+				}
+				WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
+						.getWorkflowTaskInstance(acceptor, task.getId(),
+								WorkflowConstants.TASK_ALL_STATES);
+				task.setWorkflowTask(wfTask);
+				List allAssignees = task.getAllAssignees();
+				if (allAssignees != null && allAssignees.size() > 0)
+				{
+					if (!allAssignees.contains(acceptor))
+					{
+						String message = "'"
+								+ acceptor
+								+ "' is not an available assignee for current task "
+								+ p_taskId;
+						logger.warn(message);
+						return makeErrorJson(ACCEPT_TASK, message);
+					}
+				}
+				// GS will check if the acceptor is PM or available users
+				TaskHelper.acceptTask(acceptor, task);
+			}
+			else
+			{
+				return makeErrorJson(ACCEPT_TASK, "Invaild task id.");
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			String message = "Failed to accept task for taskId : " + p_taskId
+					+ ",maybe '" + acceptor
+					+ "' do not have the authority to operate the task";
+			return makeErrorJson(ACCEPT_TASK, message);
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+
+		return rtnString;
+	}
+	
+    /**
+     * Complete task
+     * 
+     * @param p_accessToken
+     *            The access token received from the login.
+     * @param p_taskId
+     *            Task Id to be completed.
+     * @param p_destinationArrow
+     *            This points to the next activity. Null if this task has no
+     *            condition node.
+     *  @return String in JSON. A sample is like:
+	 * 			  {"completeTask":"success"}
+     * @throws WebServiceException
+     */
+    public String completeTask(String p_accessToken, String p_taskId,
+            String p_destinationArrow) throws WebServiceException
+	{
+		String rtnStr = "success";
+		checkAccess(p_accessToken, "completeTask");
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.ACTIVITIES_ACCEPT);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
+		try
+		{
+			Assert.assertNotEmpty(p_accessToken, "Access token");
+			Assert.assertIsInteger(p_taskId);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorJson(COMPLETE_TASK, e.getMessage());
+		}
+
+		String userName = this.getUsernameFromSession(p_accessToken);
+		String userId = UserUtil.getUserIdByName(userName);
+
+		// Task object
+		TaskManager taskManager = ServerProxy.getTaskManager();
+		Task task = null;
+		try
+		{
+			task = taskManager.getTask(Long.parseLong(p_taskId));
+			if (task == null)
+				return makeErrorJson(COMPLETE_TASK, "Invaild task id.");
+		}
+		catch (RemoteException re)
+		{
+			String msg = "Fail to get task object by taskId : " + p_taskId;
+			logger.error(msg, re);
+			return makeErrorJson(COMPLETE_TASK, msg);
+		}
+		catch (Exception ex)
+		{
+			logger.error(ex.getMessage(), ex);
+		}
+
+		// Compelte task
+		ActivityLog.Start activityStart = null;
+		try
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", userName);
+			activityArgs.put("taskId", p_taskId);
+			activityArgs.put("destinationArrow", p_destinationArrow);
+			activityStart = ActivityLog.start(Ambassador.class,
+					"completeTask(p_accessToken,p_taskId,p_destinationArrow)",
+					activityArgs);
+			// Find the user to complete task.
+			WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
+					.getWorkflowTaskInstance(userId, task.getId(),
+							WorkflowConstants.TASK_ALL_STATES);
+			task.setWorkflowTask(wfTask);
+			List allAssignees = task.getAllAssignees();
+			if (allAssignees != null && allAssignees.size() > 0)
+			{
+				if (!allAssignees.contains(userId))
+				{
+					String message = "'"
+							+ userName
+							+ "' is not an available assignee for current task "
+							+ p_taskId;
+					logger.warn(message);
+					return makeErrorJson(COMPLETE_TASK, message);
+				}
+			}
+
+			Vector conditionNodes = wfTask.getConditionNodeTargetInfos();
+			if (conditionNodes != null && conditionNodes.size() > 0)
+			{
+				HashSet<String> arrowNames = new HashSet<String>();
+				for (int i = 0; i < conditionNodes.size(); i++)
+				{
+					ConditionNodeTargetInfo info = (ConditionNodeTargetInfo) conditionNodes
+							.get(i);
+					arrowNames.add(info.getArrowName());
+				}
+
+				if (!arrowNames.contains(p_destinationArrow))
+				{
+					String message = "\"" + p_destinationArrow
+							+ "\" is not a valid outgoing arrow name.";
+					logger.warn(message);
+					return makeErrorJson(COMPLETE_TASK, message);
+				}
+			}
+
+			TaskImpl dbTask = HibernateUtil.get(TaskImpl.class, task.getId());
+			ProjectImpl project = (ProjectImpl) dbTask.getWorkflow().getJob()
+					.getProject();
+			WorkflowImpl workflowImpl = (WorkflowImpl) dbTask.getWorkflow();
+			boolean isCheckUnTranslatedSegments = project
+					.isCheckUnTranslatedSegments();
+			boolean isRequriedScore = workflowImpl.getScorecardShowType() == 1 ? true
+					: false;
+			boolean isReviewOnly = dbTask.isReviewOnly();
+			if (isCheckUnTranslatedSegments && !isReviewOnly)
+			{
+				int percentage = SegmentTuvUtil
+						.getTranslatedPercentageForTask(task);
+				if (100 != percentage)
+				{
+					rtnStr = "The task is not 100% translated and can not be completed.";
+					return makeErrorJson(COMPLETE_TASK, rtnStr);
+				}
+			}
+			if (isRequriedScore && isReviewOnly)
+			{
+				if (StringUtil.isEmpty(workflowImpl.getScorecardComment()))
+				{
+					rtnStr = "The task is not scored and can not be completed.";
+					return makeErrorJson(COMPLETE_TASK, rtnStr);
+				}
+			}
+
+			if (task.getState() == Task.STATE_ACCEPTED)
+			{
+				ServerProxy.getTaskManager().completeTask(userId, task,
+						p_destinationArrow, null);
+			}
+			else
+			{
+				rtnStr = "Cannot complete this task as it is not in 'ACCEPTED' state";
+				 return makeErrorJson(COMPLETE_TASK, rtnStr);
+			}
+		}
+		catch (Exception ex)
+		{
+			String msg = "Fail to complete task : " + p_taskId + " ; "
+					+ ex.getMessage();
+			logger.error(msg, ex);
+			return makeErrorJson(COMPLETE_TASK, msg);
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+
+		return rtnStr;
+	}
+	
+    /**
+     * Reject specified task.
+     * 
+     * @param p_accessToken
+     *            The access token received from the login.
+     * 
+     * @param p_taskId
+     *            Task Id to be accepted.
+     * 
+     * @param p_rejectComment
+     *            Reject comment.
+     * @return String in JSON. A sample is like:
+	 * 				{"rejectTask":"success"}
+     * @throws WebServiceException
+     */
+    public String rejectTask(String p_accessToken, String p_taskId,
+            String p_rejectComment) throws WebServiceException
+	{
+		String rtnStr = "success";
+		checkAccess(p_accessToken, REJECT_TASK);
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
+		try
+		{
+			Assert.assertNotEmpty(p_accessToken, "Access token");
+			Assert.assertIsInteger(p_taskId);
+			Assert.assertNotEmpty(p_rejectComment, "Reject comment");
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorJson(REJECT_TASK, e.getMessage());
+		}
+		// rejector
+		String rejectUserName = getUsernameFromSession(p_accessToken);
+		String rejectUserId = UserUtil.getUserIdByName(rejectUserName);
+		Task task = null;
+		ActivityLog.Start activityStart = null;
+		try
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", rejectUserName);
+			activityArgs.put("p_taskId", p_taskId);
+			activityArgs.put("p_rejectComment", p_rejectComment);
+			activityStart = ActivityLog.start(Ambassador.class,
+					"rejectTask(p_accessToken,p_taskId,p_rejectComment)",
+					activityArgs);
+			WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
+					.getWorkflowTaskInstance(rejectUserId,
+							Long.parseLong(p_taskId),
+							WorkflowConstants.TASK_ALL_STATES);
+			task = (Task) HibernateUtil.get(TaskImpl.class,
+					Long.parseLong(p_taskId));
+			task.setWorkflowTask(wfTask);
+
+			String rejectComment = EditUtil.utf8ToUnicode(p_rejectComment);
+			if (task.getState() == Task.STATE_ACTIVE
+					|| task.getState() == Task.STATE_ACCEPTED)
+			{
+				TaskHelper.rejectTask(rejectUserId, task, rejectComment);
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			String message = "Failed to reject task by taskId : " + p_taskId;
+			return makeErrorJson(REJECT_TASK, message);
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+
+		return rtnStr;
+	}
+	
     private int addWordCountForJson(TargetPage tg, JSONObject jsonObj,
             int threshold, int mtConfidenceScore, boolean includeMTData)
             throws Exception
@@ -556,6 +956,835 @@ public class Ambassador4Falcon extends JsonTypeWebService
     }
 
     /**
+     * Exports the job specified by job name
+     * 
+     * @param p_accessToken
+     * @param p_jobName
+     *            String Job name
+     * @return String in JSON. A sample is like:
+     * 				{"status":"Export Request Sent","workflowLocale":"All Locales","jobName":"3801_656474062"}
+     * @throws WebServiceException
+     */
+    public String exportJob(String p_accessToken, String p_jobName)
+            throws WebServiceException
+	{
+		checkAccess(p_accessToken, EXPORT_JOB);
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.JOBS_EXPORT);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
+		String jobName = p_jobName;
+		ActivityLog.Start activityStart = null;
+		JSONObject jsonObj = new JSONObject();
+		try
+		{
+			String userName = getUsernameFromSession(p_accessToken);
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", userName);
+			activityArgs.put("jobName", p_jobName);
+			activityStart = ActivityLog.start(Ambassador.class,
+					"exportJob(p_accessToken, p_jobName)", activityArgs);
+			Job job = queryJob(jobName, p_accessToken, jsonObj);
+			if (job.getDisplayState().equalsIgnoreCase("ready"))
+			{
+				return makeErrorJson(EXPORT_JOB, p_jobName
+						+ " is ready state , can not be export.");
+			}
+			Object[] workflows = job.getWorkflows().toArray();
+			long projectId = job.getL10nProfile().getProject().getId();
+			User projectMgr = ServerProxy.getProjectHandler()
+					.getProjectById(projectId).getProjectManager();
+
+			// export all workflow
+			logger.info("Exporting all " + workflows.length
+					+ " workflows for job " + jobName);
+			for (int i = 0; i < workflows.length; i++)
+			{
+				Workflow w = (Workflow) workflows[i];
+				if (!w.getState().equals(Workflow.IMPORT_FAILED)
+						&& !w.getState().equals(Workflow.CANCELLED))
+				{
+					exportSingleWorkflow(job, w, projectMgr);
+				}
+			}
+			jsonObj.put("jobName", EditUtil.encodeXmlEntities(jobName));
+			jsonObj.put("workflowLocale", "All Locales");
+			jsonObj.put("status", "Export Request Sent");
+			return jsonObj.toString();
+
+		}
+		catch (Exception e)
+		{
+			logger.error("exportJob()", e);
+			String message = "Could not export job " + jobName;
+			return makeErrorJson(EXPORT_JOB, message);
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+	}
+    
+    /**
+     * Exports the job. If p_workflowLocale is null then all pages for all
+     * workflows are exported, otherwise the specific workflow corresponding to
+     * the locale is exported.
+     * 
+     * @param p_jobName
+     *            -- name of job
+     * @param p_workflowLocale
+     *            -- locale of workflow to export
+     * @return String in JSON. A sample is like:
+     * 				{"status":"Export Request Sent","workflowLocale":"de_DE","jobName":"3801_656474062"}
+     * @exception WebServiceException
+     */
+	public String exportWorkflow(String p_accessToken, String p_jobName,
+			String p_workflowLocale) throws WebServiceException
+	{
+		checkAccess(p_accessToken, EXPORT_WORKFLOW);
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.JOB_WORKFLOWS_EXPORT);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
+		String jobName = p_jobName;
+		String workflowLocale = p_workflowLocale;
+		String returnXml = "";
+		ActivityLog.Start activityStart = null;
+		JSONObject jsonObj = new JSONObject();
+		try
+		{
+			String userName = getUsernameFromSession(p_accessToken);
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", userName);
+			activityArgs.put("jobName", p_jobName);
+			activityArgs.put("workflowLocale", p_workflowLocale);
+			activityStart = ActivityLog
+					.start(Ambassador.class,
+							"exportWorkflow(p_accessToken, p_jobName,p_workflowLocale)",
+							activityArgs);
+			Job job = queryJob(jobName, p_accessToken, jsonObj);
+			Object[] workflows = job.getWorkflows().toArray();
+			long projectId = job.getL10nProfile().getProject().getId();
+			User projectMgr = ServerProxy.getProjectHandler()
+					.getProjectById(projectId).getProjectManager();
+			boolean didExport = false;
+
+			if (workflowLocale == null)
+			{
+				// export all workflow
+				logger.info("Exporting all " + workflows.length
+						+ " workflows for job " + jobName);
+				for (int i = 0; i < workflows.length; i++)
+				{
+					Workflow w = (Workflow) workflows[i];
+					if (!w.getState().equals(Workflow.IMPORT_FAILED)
+							&& !w.getState().equals(Workflow.CANCELLED))
+					{
+						exportSingleWorkflow(job, w, projectMgr);
+					}
+				}
+				didExport = true;
+			}
+			else
+			{
+				// export just one workflow
+				Locale locale = GlobalSightLocale
+						.makeLocaleFromString(workflowLocale);
+				logger.info("Job " + jobName + " has " + workflows.length
+						+ " workflow.");
+				for (int i = 0; i < workflows.length; i++)
+				{
+					Workflow w = (Workflow) workflows[i];
+					Locale wLocale = w.getTargetLocale().getLocale();
+					if (locale.equals(wLocale))
+					{
+						exportSingleWorkflow(job, w, projectMgr);
+						didExport = true;
+						break;
+					}
+				}
+			}
+
+			if (didExport == false)
+				throw new Exception("No workflow for locale " + workflowLocale);
+
+			jsonObj.put("jobName", EditUtil.encodeXmlEntities(jobName));
+			if (workflowLocale == null)
+				jsonObj.put("workflowLocale", "All Locales");
+			else jsonObj.put("workflowLocale", workflowLocale);
+
+			jsonObj.put("status", "Export Request Sent");
+			returnXml = jsonObj.toString();
+		}
+		catch (Exception e)
+		{
+			logger.error("exportWorkflow()", e);
+			String message = "Could not export workflow for job " + jobName;
+			return makeErrorJson(EXPORT_WORKFLOW, message);
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+		return returnXml;
+	}
+    
+	/**
+     * Get exported job files (do not care if the workflow is "EXPORTED")
+     * 
+     * @param p_accessToken
+     *            Access token
+     * @param p_jobName
+     *            Job name
+     * @return String in JSON. A sample is like:
+     * 				{"paths":["de_DE/17/accuracy_test_results.htm","de_DE/17/multiple_channels.htm","de_DE/17/stability_test_results.htm"],"root":"http://10.10.215.38:8080/globalsight/cxedocs/allie"}
+     * @throws WebServiceException
+     */
+    public String getJobExportFiles(String p_accessToken, String p_jobName)
+            throws WebServiceException
+	{
+		checkAccess(p_accessToken, GET_JOB_EXPORT_FILES);
+		String jobsView = checkPermissionReturnStr(p_accessToken,
+				Permission.JOBS_VIEW);
+		if (StringUtil.isNotEmpty(jobsView))
+			return jobsView;
+		String jobsExport = checkPermissionReturnStr(p_accessToken,
+				Permission.JOBS_EXPORT);
+		if (StringUtil.isNotEmpty(jobsExport))
+			return jobsExport;
+		
+		
+		String jobName = p_jobName;
+		ActivityLog.Start activityStart = null;
+		JSONObject jsonObj = new JSONObject();
+		Job job = queryJob(jobName, p_accessToken, jsonObj);
+		String jobCompanyId = String.valueOf(job.getCompanyId());
+		String curUserName = getUsernameFromSession(p_accessToken);
+		User curUser = getUser(curUserName);
+		Company curCompany = getCompanyByName(curUser.getCompanyName());
+		if (curCompany.getId() != 1
+				&& !isInSameCompany(curUserName, jobCompanyId))
+			throw new WebServiceException(
+					"Current user is not super user,cannot access the job which is not in the same company with current user");
+
+		String status = job.getState();
+		if (status == null)
+		{
+			return makeErrorJson(GET_JOB_EXPORT_FILES, "Job " + jobName
+					+ " does not exist.");
+		}
+
+		JobFiles jobFiles = new JobFiles();
+
+		StringBuilder prefix = new StringBuilder();
+		prefix.append(getUrl()).append("/cxedocs/");
+		String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
+		prefix.append(URLEncoder.encode(company, "utf-8"));
+		jobFiles.setRoot(prefix.toString());
+
+		Set<String> passoloFiles = new HashSet<String>();
+		long fileProfileId = -1l;
+		FileProfile fp = null;
+		FileProfilePersistenceManager fpManager = null;
+		boolean isXLZFile = false;
+
+		try
+		{
+			fpManager = ServerProxy.getFileProfilePersistenceManager();
+		}
+		catch (Exception e)
+		{
+			logger.error("Cannot get file profile manager.", e);
+			return makeErrorJson(GET_JOB_EXPORT_FILES,
+					"Cannot get file profile manager." + e.getMessage());
+		}
+		try
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", curUserName);
+			activityArgs.put("jobName", p_jobName);
+			activityStart = ActivityLog
+					.start(Ambassador.class,
+							"getJobExportFiles(p_accessToken, p_jobName)",
+							activityArgs);
+			for (Workflow w : job.getWorkflows())
+			{
+				if (Workflow.CANCELLED.equals(w.getState())
+						|| Workflow.PENDING.equals(w.getState())
+						|| Workflow.EXPORT_FAILED.equals(w.getState())
+						|| Workflow.IMPORT_FAILED.equals(w.getState()))
+					continue;
+
+				ArrayList<String> fileList = new ArrayList<String>();
+				for (TargetPage page : w.getTargetPages())
+				{
+					SourcePage sPage = page.getSourcePage();
+					if (sPage != null && sPage.isPassoloPage())
+					{
+						String p = sPage.getPassoloFilePath();
+						p = p.replace("\\", "/");
+						p = p.substring(p.indexOf("/") + 1);
+						passoloFiles.add(p);
+						if (fileList.contains(p))
+							continue;
+						else
+						{
+							fileList.add(p);
+						}
+
+						continue;
+					}
+					fileProfileId = sPage.getRequest().getFileProfileId();
+					fp = fpManager.getFileProfileById(fileProfileId, false);
+					if (fpManager.isXlzReferenceXlfFileProfile(fp.getName()))
+						isXLZFile = true;
+
+					String path = page.getExternalPageId();
+					path = path.replace("\\", "/");
+                    if (StringUtil.isNotEmpty(fp.getScriptOnExport()))
+                    {
+                        path = handlePathForScripts(path, job);
+                    }
+					int index = path.indexOf("/");
+					path = path.substring(index);
+					path = getRealFilePathForXliff(path, isXLZFile);
+
+					if (fileList.contains(path))
+						continue;
+					else
+					{
+						fileList.add(path);
+					}
+					StringBuffer allPath = new StringBuffer();
+					allPath.append(page.getGlobalSightLocale());
+					for (String s : path.split("/"))
+					{
+						if (s.length() > 0)
+						{
+							allPath.append("/").append(
+									URLEncoder.encode(s, "utf-8"));
+						}
+					}
+					jobFiles.addPath(allPath.toString());
+
+					isXLZFile = false;
+				}
+			}
+
+			for (String path : passoloFiles)
+			{
+				StringBuffer allPath = new StringBuffer();
+				allPath.append("passolo");
+				for (String s : path.split("/"))
+				{
+					if (s.length() > 0)
+					{
+						allPath.append("/").append(
+								URLEncoder.encode(s, "utf-8"));
+					}
+				}
+				jobFiles.addPath(allPath.toString());
+			}
+			JSONArray array = new JSONArray();
+			List<String> listPaths = jobFiles.getPaths();
+			for (String paths : listPaths)
+			{
+				array.put(paths);
+			}
+			jsonObj.put("paths", array);
+			String root = jobFiles.getRoot();
+			jsonObj.put("root", root);
+			return jsonObj.toString();
+		}
+		catch (Exception e)
+		{
+			logger.error("Error found in getJobExportFiles.", e);
+			return makeErrorJson(GET_JOB_EXPORT_FILES, e.getMessage());
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+	}
+    
+    /**
+     * Return exported files information for job's "EXPORTED" state workflows.
+     * 
+     * @param p_accessToken
+     *            Access token
+     * @param p_jobName
+     *            Job name
+     * @param workflowLocale
+     *            Locale of workflow, it can accept fr_FR, fr-FR, fr_fr formats
+     *            If it is null, all "EXPORTED" workflows' exported files info
+     *            will be returned.
+     * @return String in JSON. A sample is like:
+     * 				{"paths":["de_DE/17/accuracy_test_results.htm","de_DE/17/multiple_channels.htm","de_DE/17/stability_test_results.htm"],"root":"http://10.10.215.38:8080/globalsight/cxedocs/allie"}
+     * @throws WebServiceException
+     */
+	public String getJobExportWorkflowFiles(String p_accessToken,
+			String p_jobName, String workflowLocale) throws WebServiceException
+	{
+		checkAccess(p_accessToken, GET_JOB_EXPORT_WORKFLOW_FILES);
+		String jobsView = checkPermissionReturnStr(p_accessToken,
+				Permission.JOBS_VIEW);
+		if (StringUtil.isNotEmpty(jobsView))
+			return jobsView;
+		String jobsExport = checkPermissionReturnStr(p_accessToken,
+				Permission.JOBS_EXPORT);
+		if (StringUtil.isNotEmpty(jobsExport))
+			return jobsExport;
+		
+		ActivityLog.Start activityStart = null;
+		JSONObject jsonObj = new JSONObject();
+		String jobName = p_jobName;
+		Job job = queryJob(jobName, p_accessToken, jsonObj);
+		String jobCompanyId = String.valueOf(job.getCompanyId());
+		String curUserName = getUsernameFromSession(p_accessToken);
+		User curUser = getUser(curUserName);
+		Company curCompany = getCompanyByName(curUser.getCompanyName());
+		if (curCompany.getId() != 1
+				&& !isInSameCompany(curUserName, jobCompanyId))
+			throw new WebServiceException(
+					"Current user is not super user,cannot access the job which is not in the same company with current user");
+
+		String status = job.getState();
+		if (status == null)
+		{
+			return makeErrorJson(GET_JOB_EXPORT_WORKFLOW_FILES, "Job "
+					+ jobName + " does not exist.");
+		}
+
+		JobFiles jobFiles = new JobFiles();
+		long fileProfileId = -1l;
+		FileProfile fp = null;
+		FileProfilePersistenceManager fpManager = null;
+		boolean isXLZFile = false;
+
+		try
+		{
+			fpManager = ServerProxy.getFileProfilePersistenceManager();
+		}
+		catch (Exception e)
+		{
+			logger.error("Cannot get file profile manager.", e);
+			return makeErrorJson(GET_JOB_EXPORT_WORKFLOW_FILES,
+					"Cannot get file profile manager." + e.getMessage());
+		}
+
+		StringBuilder prefix = new StringBuilder();
+		prefix.append(getUrl()).append("/cxedocs/");
+		String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
+		prefix.append(URLEncoder.encode(company, "utf-8"));
+		jobFiles.setRoot(prefix.toString());
+
+		Set<String> passoloFiles = new HashSet<String>();
+
+		try
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", curUserName);
+			activityArgs.put("jobName", p_jobName);
+			activityArgs.put("workflowLocale", workflowLocale);
+			activityStart = ActivityLog
+					.start(Ambassador.class,
+							"getJobExportWorkflowFiles(p_accessToken, p_jobName,workflowLocale)",
+							activityArgs);
+			for (Workflow w : job.getWorkflows())
+			{
+				if (StringUtil.isEmpty(workflowLocale))
+				{
+					// need to download all 'Exported' workflow files
+					if (!Workflow.EXPORTED.equals(w.getState()))
+						continue;
+				}
+				else
+				{
+					// download workflow files
+					if (!isWorkflowOfLocaleExported(w, workflowLocale))
+						continue;
+				}
+				ArrayList<String> fileList = new ArrayList<String>();
+				for (TargetPage page : w.getTargetPages())
+				{
+					SourcePage sPage = page.getSourcePage();
+					if (sPage != null && sPage.isPassoloPage())
+					{
+						String p = sPage.getPassoloFilePath();
+						p = p.replace("\\", "/");
+						p = p.substring(p.indexOf("/") + 1);
+						passoloFiles.add(p);
+						if (fileList.contains(p))
+							continue;
+						else
+						{
+							fileList.add(p);
+						}
+
+						continue;
+					}
+
+					fileProfileId = sPage.getRequest().getFileProfileId();
+					fp = fpManager.getFileProfileById(fileProfileId, false);
+					if (fpManager.isXlzReferenceXlfFileProfile(fp.getName()))
+						isXLZFile = true;
+
+					String path = page.getExternalPageId();
+					path = path.replace("\\", "/");
+                    if (StringUtil.isNotEmpty(fp.getScriptOnExport()))
+                    {
+                        path = handlePathForScripts(path, job);
+                    }
+					int index = path.indexOf("/");
+					path = path.substring(index);
+					path = getRealFilePathForXliff(path, isXLZFile);
+
+					if (fileList.contains(path))
+						continue;
+					else
+					{
+						fileList.add(path);
+					}
+
+					StringBuffer allPath = new StringBuffer();
+					allPath.append(page.getGlobalSightLocale());
+					for (String s : path.split("/"))
+					{
+						if (s.length() > 0)
+						{
+							allPath.append("/").append(
+									URLEncoder.encode(s, "utf-8"));
+						}
+					}
+					jobFiles.addPath(allPath.toString());
+				}
+			}
+
+			for (String path : passoloFiles)
+			{
+				StringBuffer allPath = new StringBuffer();
+				allPath.append("passolo");
+				for (String s : path.split("/"))
+				{
+					if (s.length() > 0)
+					{
+						allPath.append("/").append(
+								URLEncoder.encode(s, "utf-8"));
+					}
+				}
+				jobFiles.addPath(allPath.toString());
+			}
+			JSONArray array = new JSONArray();
+			List<String> listPaths = jobFiles.getPaths();
+			for (String paths : listPaths)
+			{
+				array.put(paths);
+			}
+			jsonObj.put("paths", array);
+			String root = jobFiles.getRoot();
+			jsonObj.put("root", root);
+			return jsonObj.toString();
+		}
+		catch (Exception e)
+		{
+			logger.error("Error found in " + GET_JOB_EXPORT_WORKFLOW_FILES, e);
+			return makeErrorJson(GET_JOB_EXPORT_WORKFLOW_FILES, e.getMessage());
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+	}
+    
+    private String handlePathForScripts(String path, Job job)
+    {
+        path = path.replace("\\", "/");
+        String finalPath = path;
+        // for new scripts on import/export
+        if (path.contains("/PreProcessed_" + job.getId() + "_"))
+        {
+            finalPath = path.replace(path.substring(
+                    path.lastIndexOf("/PreProcessed_" + job.getId() + "_"),
+                    path.lastIndexOf("/")), "");
+        }
+        // compatible codes for old import/export
+        else
+        {
+            int index = path.lastIndexOf("/");
+            if (index > -1)
+            {
+                String fileName = path.substring(index + 1);
+                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+                fileName = fileName.substring(0, fileName.lastIndexOf("."));
+                String rest = path.substring(0, index);
+                if (rest.endsWith("/" + fileName))
+                {
+                    finalPath = rest + "." + extension;
+                }
+            }
+        }
+
+        return finalPath;
+    }
+
+    private boolean isWorkflowOfLocaleExported(Workflow workflow, String locale)
+    {
+        if (workflow == null || StringUtil.isEmpty(locale))
+            return false;
+
+        String workflowState = workflow.getState();
+        if (!workflowState.equals(Workflow.EXPORTED))
+            return false;
+
+        String lowerWorkflowLocale = workflow.getTargetLocale().toString()
+                .toLowerCase();
+        String lowerLocale = locale.replace('-', '_').toLowerCase();
+        if (lowerWorkflowLocale.equals(lowerLocale))
+            return true;
+        else
+            return false;
+    }
+    
+    private String getUrl()
+    {
+        return AmbassadorUtil.getCapLoginOrPublicUrl();
+    }
+    
+    private String getRealFilePathForXliff(String path, boolean isXLZFile)
+    {
+        if (StringUtil.isEmpty(path))
+            return path;
+
+        int index = -1;
+        index = path.lastIndexOf(".sub/");
+        if (index > 0)
+        {
+            // one big xliff file is split to some sub-files
+            path = path.substring(0, index);
+        }
+        if (isXLZFile)
+        {
+            path = path.substring(0, path.lastIndexOf("/"));
+            path += ".xlz";
+        }
+
+        return path;
+    }
+    
+    /**
+     * Check if the company info of job or project is the same with current user
+     */
+    private boolean isInSameCompany(String p_userName, String p_companyId)
+    {
+        if (p_userName == null || p_userName.trim().equals(""))
+            return false;
+        if (p_companyId == null || p_companyId.trim().equals(""))
+            return false;
+        try
+        {
+            User user = ServerProxy.getUserManager().getUserByName(p_userName);
+            String userCompanyId = ServerProxy.getJobHandler()
+                    .getCompany(user.getCompanyName()).getIdAsLong().toString();
+            return userCompanyId.equals(p_companyId) ? true : false;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+    
+    /**
+     * Exports all target pages of the given workflow
+     * 
+     * @param p_job
+     *            Entity of Job
+     * @param p_workflow
+     *            Entity of Workflow
+     * @param p_user
+     *            Specified user information
+     * @throws Exception
+     */
+    private void exportSingleWorkflow(Job p_job, Workflow p_workflow,
+            User p_user) throws Exception
+    {
+        List targetPages = p_workflow.getTargetPages();
+        ArrayList pageIds = new ArrayList();
+        for (int j = 0; j < targetPages.size(); j++)
+        {
+            TargetPage tp = (TargetPage) targetPages.get(j);
+            pageIds.add(tp.getIdAsLong());
+        }
+        ExportParameters ep = new ExportParameters(p_workflow);
+        boolean isTargetPage = true;
+        ArrayList wfIds = new ArrayList();
+        wfIds.add(p_workflow.getIdAsLong());
+        Long taskId = null;
+
+        logger.info("Exporting workflow  "
+                + p_workflow.getTargetLocale().toString() + " for job "
+                + p_job.getJobName());
+        long exportBatchId = ServerProxy.getExportEventObserver()
+                .notifyBeginExportTargetBatch(p_job, p_user, pageIds, wfIds,
+                        taskId, ExportBatchEvent.INTERIM_PRIMARY);
+        ServerProxy.getPageManager().exportPage(ep, pageIds, isTargetPage,
+                exportBatchId);
+    }
+    
+    /**
+     * Gets out the Job object corresponding to the job name assuming that is
+     * unique
+     * 
+     * @param p_jobName
+     *            Job name
+     * @param p_accessToken
+     * @return Job Return job object if there exist.
+     * @exception WebServiceException
+     */
+	private Job queryJob(String p_jobName, String p_accessToken,
+			JSONObject jsonObj) throws WebServiceException
+	{
+		Connection connection = null;
+		PreparedStatement query = null;
+		ResultSet results = null;
+
+		try
+		{
+			connection = ConnectionPool.getConnection();
+			String condition = appendJobCondition(p_jobName);
+
+			User user = getUser(getUsernameFromSession(p_accessToken));
+			long companyId = CompanyWrapper.getCompanyByName(
+					user.getCompanyName()).getId();
+
+			String sql = null;
+			if (companyId != 1)
+			{
+				sql = "SELECT ID FROM JOB WHERE COMPANY_ID=? AND " + condition;
+				query = connection.prepareStatement(sql);
+				query.setLong(1, companyId);
+				query.setString(2, p_jobName);
+			}
+			else
+			{
+				sql = "SELECT ID FROM JOB WHERE " + condition;
+				query = connection.prepareStatement(sql);
+				query.setString(1, p_jobName);
+			}
+
+			results = query.executeQuery();
+			if (results.next())
+			{
+				long id = results.getLong(1);
+				Job job = ServerProxy.getJobHandler().getJobById(id);
+				return job;
+			}
+			else
+			{
+				String message = NOT_IN_DB + p_jobName;
+				message = jsonObj.put("queryJob", message).toString();
+				/*
+				 * Do not change this Exception message "This job is not ready
+				 * for query", because getStatus() will deal with it in
+				 * catch(Exception e) and Desktop Icon
+				 * 
+				 * com/globalsight/action/AddCommentAction.java :
+				 * executeWithThread(String args[])
+				 */
+				throw new WebServiceException(message);
+			}
+		}
+		catch (ConnectionPoolException cpe)
+		{
+			String message = "Unable to connect to database to get job status.";
+			logger.error(message, cpe);
+			try
+			{
+				message = jsonObj.put("queryJob", message).toString();
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			throw new WebServiceException(message);
+		}
+		catch (SQLException sqle)
+		{
+			String message = "Unable to query DB for job status.";
+			logger.error(message, sqle);
+			try
+			{
+				message = jsonObj.put("queryJob", message).toString();
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			throw new WebServiceException(message);
+		}
+		catch (WebServiceException le)
+		{
+			throw le;
+		}
+		catch (Exception e)
+		{
+			String message = "Unable to get job information from System4.";
+			logger.error(message, e);
+			try
+			{
+				message = jsonObj.put("queryJob", message).toString();
+			}
+			catch (JSONException e1)
+			{
+				e1.printStackTrace();
+			}
+			throw new WebServiceException(message);
+		}
+		finally
+		{
+			releaseDBResource(results, query, connection);
+		}
+	}
+    
+    private String appendJobCondition(String p_jobName)
+    {
+        String condition = "NAME=?";
+
+        try
+        {
+            int index = p_jobName.lastIndexOf("_");
+            if (index > -1)
+            {
+                String random = p_jobName.substring(index + 1);
+                if (random != null && random.length() > 6
+                        && StringUtils.isNumeric(random))
+                {
+                    condition = "(NAME=? OR NAME LIKE '%" + random + "')";
+                }
+            }
+        }
+        catch (Exception ignore)
+        {
+
+        }
+
+        return condition;
+    }
+    
+    /**
      * Create new user
      * 
      * @param p_accessToken
@@ -576,8 +1805,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            String[] Permission groups which the new user belongs to.
      *            The element in the array is the name of permission group.
      *            Example: [{"Administrator"}, {"ProjectManager"}]
-     * @param p_status
-     *            String Status of user. This parameter is not using now, it should be null.
      * @param p_roles
      *            Roles String information of user. It uses a string with XML format to mark all roles information of user.
      *            Example:
@@ -596,6 +1823,23 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *                    </activities>
      *                  </role>
      *                </roles>
+     *                 If super user create user,Roles Example:
+     *                <?xml version=\"1.0\"?>
+     *					<roles>
+     *						<role>
+     *							<companyName>allie</companyName>
+     *							<sourceLocale>en_US</sourceLocale>
+     *							<targetLocale>de_DE</targetLocale>
+     *							<activities>
+     *								<activity>
+     *								<name>Dtp1</name>
+     *								</activity>
+     *								<activity>
+     *									<name>Dtp2</name>
+     *								</activity>
+     *							</activities>
+     *						</role>
+     *					</roles>
      * @param p_isInAllProject
      *            boolean If the user need to be included in all project.
      * @param p_projectIds
@@ -616,20 +1860,21 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *       11 -- Invalid permission groups 
      *       12 -- Invalid project information 
      *       13 -- Invalid role information 
+     *       14-- Current login user does not have enough permission
      *       -1 -- Unknown exception
      * @throws WebServiceException
      */
-    public int createUser(String p_accessToken, String p_userId,
-            String p_password, String p_firstName, String p_lastName,
-            String p_email, String[] p_permissionGrps, String p_status,
-            String p_roles, boolean p_isInAllProject, String[] p_projectIds)
-            throws WebServiceException
-    {
-        AmbassadorHelper helper = new AmbassadorHelper();
-        return helper.createUser(p_accessToken, p_userId, p_password,
-                p_firstName, p_lastName, p_email, p_permissionGrps, p_status,
-                p_roles, p_isInAllProject, p_projectIds);
-    }
+	public int createUser(String p_accessToken, String p_userId,
+			String p_password, String p_firstName, String p_lastName,
+			String p_email, String[] p_permissionGrps, String p_roles,
+			boolean p_isInAllProject, String[] p_projectIds)
+			throws WebServiceException
+	{
+		AmbassadorHelper helper = new AmbassadorHelper();
+		return helper.createUser(p_accessToken, p_userId, p_password,
+				p_firstName, p_lastName, p_email, p_permissionGrps, null,
+				p_roles, p_isInAllProject, p_projectIds);
+	}
 
     /**
      * Modify user
@@ -652,8 +1897,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            String[] Permission groups which the new user belongs to.
      *            The element in the array is the name of permission group.
      *            Example: [{"Administrator"}, {"ProjectManager"}]
-     * @param p_status
-     *            String Status of user. This parameter is not using now, it should be null.
      * @param p_roles
      *            Roles String information of user. It uses a string with XML format to mark all roles information of user.
      *            Example:
@@ -672,6 +1915,23 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *                    </activities>
      *                  </role>
      *                </roles>
+     *                 If super user modify user,Roles Example:
+     *                <?xml version=\"1.0\"?>
+     *					<roles>
+     *						<role>
+     *							<companyName>allie</companyName>
+     *							<sourceLocale>en_US</sourceLocale>
+     *							<targetLocale>de_DE</targetLocale>
+     *							<activities>
+     *								<activity>
+     *								<name>Dtp1</name>
+     *								</activity>
+     *								<activity>
+     *									<name>Dtp2</name>
+     *								</activity>
+     *							</activities>
+     *						</role>
+     *					</roles>
      * @param p_isInAllProject
      *            boolean If the user need to be included in all project.
      * @param p_projectIds
@@ -692,20 +1952,21 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *       11 -- Invalid permission groups 
      *       12 -- Invalid project information 
      *       13 -- Invalid role information 
+     *       14-- Current login user does not have enough permission
      *       -1 -- Unknown exception
      * @throws WebServiceException
      */
-    public int modifyUser(String p_accessToken, String p_userId,
-            String p_password, String p_firstName, String p_lastName,
-            String p_email, String[] p_permissionGrps, String p_status,
-            String p_roles, boolean p_isInAllProject, String[] p_projectIds)
-            throws WebServiceException
-    {
-        AmbassadorHelper helper = new AmbassadorHelper();
-        return helper.modifyUser(p_accessToken, p_userId, p_password,
-                p_firstName, p_lastName, p_email, p_permissionGrps, p_status,
-                p_roles, p_isInAllProject, p_projectIds);
-    }
+	public int modifyUser(String p_accessToken, String p_userId,
+			String p_password, String p_firstName, String p_lastName,
+			String p_email, String[] p_permissionGrps, String p_roles,
+			boolean p_isInAllProject, String[] p_projectIds)
+			throws WebServiceException
+	{
+		AmbassadorHelper helper = new AmbassadorHelper();
+		return helper.modifyUser(p_accessToken, p_userId, p_password,
+				p_firstName, p_lastName, p_email, p_permissionGrps, null,
+				p_roles, p_isInAllProject, p_projectIds);
+	}
 
     /**
      * Reassign task to other translators
@@ -746,8 +2007,11 @@ public class Ambassador4Falcon extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_WORKFLOW_TEMPLATE_NAMES);
-        checkPermission(p_accessToken, Permission.WORKFLOWS_VIEW);
-
+    	String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.WORKFLOWS_VIEW);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
         String json = "";
         try
         {
@@ -816,8 +2080,11 @@ public class Ambassador4Falcon extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_WORKFLOW_TEMPLATE_INFO);
-        checkPermission(p_accessToken, Permission.WORKFLOWS_VIEW);
-
+    	String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.WORKFLOWS_VIEW);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
         if (StringUtil.isEmpty(p_workflowTemplateName))
         {
             return makeErrorJson(GET_WORKFLOW_TEMPLATE_INFO,
@@ -830,6 +2097,16 @@ public class Ambassador4Falcon extends JsonTypeWebService
                     "empty companyName or no such company '" + p_companyName + "'.");
         }
 
+		User curUser = getUser(getUsernameFromSession(p_accessToken));
+		Company curcompany = getCompanyByName(curUser.getCompanyName());
+
+		if (curcompany.getId() != 1
+				&& !curcompany.getName().equalsIgnoreCase(p_companyName))
+		{
+			return makeErrorJson(GET_WORKFLOW_TEMPLATE_INFO,
+					"Invaild comoany name parameter.");
+		}
+		
         String json = "";
         ActivityLog.Start activityStart = null;
         try
@@ -1012,8 +2289,11 @@ public class Ambassador4Falcon extends JsonTypeWebService
             String p_activityAssigneesInJson) throws WebServiceException
     {
         checkAccess(p_accessToken, MODIFY_WORKFLOW_TEMPLATE_ASSIGNEES);
-        checkPermission(p_accessToken, Permission.WORKFLOWS_VIEW);
-
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.WORKFLOWS_VIEW);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
         // Parameters checking
         if (StringUtil.isEmpty(p_workflowTemplateName))
         {
@@ -1037,12 +2317,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
         Company company = getCompanyByName(p_companyName);
         User curUser = getUser(getUsernameFromSession(p_accessToken));
         Company companyOfLogUser = getCompanyByName(curUser.getCompanyName());
-        if (companyOfLogUser.getId() != company.getId())
-        {
-            return makeErrorJson(
-                    MODIFY_WORKFLOW_TEMPLATE_ASSIGNEES,
-                    "Logged user can only access workflows of its own company, can not access another company's data.");
-        }
+		if (companyOfLogUser.getId() != 1
+				&& companyOfLogUser.getId() != company.getId())
+		{
+			return makeErrorJson(
+					MODIFY_WORKFLOW_TEMPLATE_ASSIGNEES,
+					"Logged user can only access workflows of its own company, can not access another company's data.");
+		}
 
         // Activity-Assignees to be updated
         HashMap<Integer, JSONObject> seq2JsonObjMap = new HashMap<Integer, JSONObject>();
@@ -1435,8 +2716,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * @param p_taskId
      *            -- task ID to offline download file for.
      * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report --
-     *            2 : Offline Translation Kit
+     *            -- 1 : Reviewer Comments Report or Translations Edit Report (this follows UI settings)
+     *            -- 2 : Offline Translation Kit
+     *            -- 3 : Translation Edit Report
+     *            -- 4 : Reviewer Comments Report
+     *            -- 5 : Reviewer Comments Report (Simplified)
+     *            -- 6 : Post Review QA Report
+     *
      * @return -- JSON string. -- If fail, it is like
      *         '{"getWorkOfflineFiles":"Corresponding message is here."}'; -- If
      *         succeed, report returning is like
@@ -1464,7 +2750,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * @param p_taskId
      *            -- task ID to upload file to.
      * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
      *            -- 2 : Offline Translation Kit
      * @param p_fileName
      *            -- the upload file name
@@ -1497,7 +2783,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * @param p_identifyKey
      *            -- identifyKey to help locate where the uploaded file is.
      * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
      *            -- 2 : Offline Translation Kit
      * @return -- Empty if succeed; if fail, return corresponding message.
      * 
@@ -1512,6 +2798,110 @@ public class Ambassador4Falcon extends JsonTypeWebService
         AmbassadorHelper helper = new AmbassadorHelper();
         return helper.importWorkOfflineFiles(p_accessToken, p_taskId,
                 p_identifyKey, p_workOfflineFileType, true);
+    }
+
+    /**
+     * Get a link for in context review for specified task ID. User need not
+     * logging in GlobalSight.
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_taskId
+     *            -- task ID
+     * @return A link like "http://10.10.215.20:8080/globalsight/ControlServlet?linkName=self&pageName=inctxrvED1&secret=E127B35E1A1C1B52C742353BBA176327D7F54956B373428134DE7252182EAA0D".
+     * 
+     * @throws WebServiceException
+     */
+    public String getInContextReviewLink(String p_accessToken, String p_taskId)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, GET_IN_CONTEXT_REVIEW_LINK);
+        try {
+            Assert.assertNotEmpty(p_accessToken, "Access token");
+            Assert.assertIsInteger(p_taskId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return makeErrorJson(GET_IN_CONTEXT_REVIEW_LINK, e.getMessage());
+        }
+
+        String loggingUserName = getUsernameFromSession(p_accessToken);
+        String userId = UserUtil.getUserIdByName(loggingUserName);
+
+        Task task = null;
+        try
+        {
+            task = TaskHelper.getTask(Long.parseLong(p_taskId));
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            String message = "Failed to get task object by taskId : "
+                    + p_taskId;
+            return makeErrorJson(GET_IN_CONTEXT_REVIEW_LINK, message);
+        }
+
+        if (task == null)
+        {
+            return makeErrorJson(GET_IN_CONTEXT_REVIEW_LINK, "Can not get task by taskID.");
+        }
+
+        if (task.getState() == Task.STATE_COMPLETED)
+        {
+            return makeErrorJson(GET_IN_CONTEXT_REVIEW_LINK,
+                    "The current task has been in completed state.");
+        }
+
+        ActivityLog.Start activityStart = null;
+        try
+        {
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", loggingUserName);
+            activityArgs.put("taskId", p_taskId);
+            activityStart = ActivityLog.start(Ambassador.class,
+                    "getInContextReviewLink(p_accessToken, p_taskId)", activityArgs);
+
+            User pm = task.getWorkflow().getJob().getProject()
+                    .getProjectManager();
+            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
+                    .getWorkflowTaskInstance(userId, task.getId(),
+                            WorkflowConstants.TASK_ALL_STATES);
+            task.setWorkflowTask(wfTask);
+            List allAssignees = task.getAllAssignees();
+            if (allAssignees != null && allAssignees.size() > 0)
+            {
+                if (!allAssignees.contains(userId)
+                        && !userId.equalsIgnoreCase(pm.getUserId()))
+                {
+                    String message = "'"
+                            + userId
+                            + "' is neither acceptor/available assignee of current task nor project manager.";
+                    logger.warn(message);
+                    return makeErrorJson(GET_IN_CONTEXT_REVIEW_LINK, message);
+                }
+            }
+
+            StringBuffer link = new StringBuffer();
+            link.append(AmbassadorUtil.getCapLoginOrPublicUrl());
+            link.append("/ControlServlet?linkName=self&pageName=inctxrvED1&secret=");
+            StringBuffer secret = new StringBuffer();
+            secret.append("taskId=").append(p_taskId.trim())
+                    .append("&nameField=").append(loggingUserName);
+            link.append(AmbassadorUtil.encryptionString(secret.toString()));
+            return link.toString();
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            String message = "Failed to get In Context Review Link for taskId : " + p_taskId;
+            return makeErrorJson(GET_IN_CONTEXT_REVIEW_LINK, message);
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////

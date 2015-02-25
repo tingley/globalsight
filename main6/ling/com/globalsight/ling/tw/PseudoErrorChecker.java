@@ -19,7 +19,6 @@ package com.globalsight.ling.tw;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -34,7 +33,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.globalsight.cxe.adapter.openoffice.StringIndex;
-import com.globalsight.util.Replacer;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
@@ -85,23 +83,23 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
     private String styles;
     private SegmentUtil segmentUtil;
-    
+
     private static Pattern P1 = Pattern.compile("\\[([^/][^\\[]*)\\]");
-    
+
     private static List<String> MOVABLE_TAG = new ArrayList<String>();
     static
     {
-    	MOVABLE_TAG.add("b");
-    	MOVABLE_TAG.add("i");
-    	MOVABLE_TAG.add("u");
-    	MOVABLE_TAG.add("sub");
-    	MOVABLE_TAG.add("sup");
-    	
-    	MOVABLE_TAG.add("bold");
-    	MOVABLE_TAG.add("italic");
-    	MOVABLE_TAG.add("underline");
-    	MOVABLE_TAG.add("subscript");
-    	MOVABLE_TAG.add("superscript");
+        MOVABLE_TAG.add("b");
+        MOVABLE_TAG.add("i");
+        MOVABLE_TAG.add("u");
+        MOVABLE_TAG.add("sub");
+        MOVABLE_TAG.add("sup");
+
+        MOVABLE_TAG.add("bold");
+        MOVABLE_TAG.add("italic");
+        MOVABLE_TAG.add("underline");
+        MOVABLE_TAG.add("subscript");
+        MOVABLE_TAG.add("superscript");
     }
 
     /**
@@ -375,12 +373,12 @@ public class PseudoErrorChecker implements PseudoBaseHandler
     private Map<String, List<String>> getInsideTags(String s)
     {
         List<String> tags = new ArrayList<String>();
-//        tags.add("bold");
+        // tags.add("bold");
         tags.add("color");
         tags.add("hyperlink");
-//        tags.add("italic");
-//        tags.add("superscript");
-//        tags.add("underline");
+        // tags.add("italic");
+        // tags.add("superscript");
+        // tags.add("underline");
 
         Map<String, List<String>> insideTags = new HashMap<String, List<String>>();
 
@@ -418,8 +416,9 @@ public class PseudoErrorChecker implements PseudoBaseHandler
     private List<String> getAllTags(String s)
     {
         List<String> tags = new ArrayList<String>();
-        if (s == null || "".equals(s.trim())) {
-        	return tags;
+        if (s == null || "".equals(s.trim()))
+        {
+            return tags;
         }
 
         Pattern p = Pattern.compile("\\[[^\\]]*\\]");
@@ -636,7 +635,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
             m_tagsIsOk = true;
             return true;
         }
-        
+
         // simple tags
         String strTrgTagName;
         String invalidNames = "";
@@ -646,7 +645,17 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         TagNode firstUnusedNonErasable = null;
         boolean bHasMissing = false;
         boolean bHasInvalid = false;
+        List<TagNode> sourceTagList = new ArrayList<TagNode>();
         Vector srcTagList = m_PseudoData.getSrcCompleteTagList();
+        List<TagNode> mtIdentifierList = m_PseudoData.getMTIdentifierList();
+        for (Object o : srcTagList)
+        {
+            sourceTagList.add((TagNode) o);
+        }
+        for (TagNode node : mtIdentifierList)
+        {
+            sourceTagList.add(node);
+        }
         Enumeration trgEnumerator = m_TrgTagList.elements();
         int nInvalidCnt = 0;
         int nMissingCnt = 0;
@@ -660,8 +669,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
             // search the source tags for the first two occurances of
             // the item, once as erasable and once as non-erasable
-            Enumeration srcEnumerator = srcTagList.elements();
-            while (srcEnumerator.hasMoreElements())
+            for (TagNode srcItem : sourceTagList)
             {
                 if ((firstUnusedErasable != null)
                         && (firstUnusedNonErasable != null))
@@ -669,7 +677,6 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                     break;
                 }
 
-                TagNode srcItem = (TagNode) srcEnumerator.nextElement();
                 if (srcItem.isMapped())
                     continue;
 
@@ -688,36 +695,38 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                     encodeTrg = encodeTrg.substring(2, encodeTrg.length() - 1);
                     isEquals = encodeTrg.equalsIgnoreCase(srcItemTag);
                 }
-                
+
                 // make i1 == i, nbsp1 == nbsp
-                if(checkTagName(srcItemTag, strTrgTagName))
-                {      	
-                	if (!isEquals && strTrgTagName.startsWith(srcItemTag))
-                	{
-                		String temp = strTrgTagName.substring(srcItemTag.length());
-                		try
-                		{
-                			long tt = Long.parseLong(temp);
-                			isEquals = true;
-                		}
-                		catch (Exception e)
-                		{
-                			isEquals = false;
-                		}
-                	}
-                	if (!isEquals && srcItemTag.startsWith(strTrgTagName))
-                	{
-                		String temp = srcItemTag.substring(strTrgTagName.length());
-                		try
-                		{
-                			long tt = Long.parseLong(temp);
-                			isEquals = true;
-                		}
-                		catch (Exception e)
-                		{
-                			isEquals = false;
-                		}
-                	}
+                if (checkTagName(srcItemTag, strTrgTagName))
+                {
+                    if (!isEquals && strTrgTagName.startsWith(srcItemTag))
+                    {
+                        String temp = strTrgTagName.substring(srcItemTag
+                                .length());
+                        try
+                        {
+                            long tt = Long.parseLong(temp);
+                            isEquals = true;
+                        }
+                        catch (Exception e)
+                        {
+                            isEquals = false;
+                        }
+                    }
+                    if (!isEquals && srcItemTag.startsWith(strTrgTagName))
+                    {
+                        String temp = srcItemTag.substring(strTrgTagName
+                                .length());
+                        try
+                        {
+                            long tt = Long.parseLong(temp);
+                            isEquals = true;
+                        }
+                        catch (Exception e)
+                        {
+                            isEquals = false;
+                        }
+                    }
                 }
 
                 if (isEquals)
@@ -807,7 +816,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
                     if (tmxName == null)
                     {
-                    	bHasInvalid = true;
+                        bHasInvalid = true;
                         nInvalidCnt += 1;
 
                         if (invalidNames.length() > 0)
@@ -818,17 +827,18 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                         {
                             invalidNames += "\n\t";
                         }
-                        invalidNames += PseudoConstants.PSEUDO_OPEN_TAG + strTrgTagName
+                        invalidNames += PseudoConstants.PSEUDO_OPEN_TAG
+                                + strTrgTagName
                                 + PseudoConstants.PSEUDO_CLOSE_TAG;
                     }
                     else
                     {
-                    	TagNode dynamicMapItem = new TagNode(tmxName,
+                        TagNode dynamicMapItem = new TagNode(tmxName,
                                 strTrgTagName, POMI.m_hAttributes);
 
                         m_TrgTagList.setElementAt(dynamicMapItem,
                                 m_TrgTagList.indexOf(strTrgTagName));
-                    }                                       
+                    }
                 }
             }
             else
@@ -851,33 +861,32 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         }
 
         // search for missing tags that are non-erasable
-        Enumeration srcEnumerator = srcTagList.elements();
-        while (srcEnumerator.hasMoreElements())
+        for (TagNode srcItem : sourceTagList)
         {
-            TagNode srcItem = (TagNode) srcEnumerator.nextElement();
-            
             String erasable = (String) srcItem.getAttributes().get("erasable");
 
             if (!srcItem.isMapped()
                     && (erasable == null || erasable.toLowerCase().equals("no")))
             {
-                if (TagNode.INTERNAL.equals(srcItem.getTmxType()))
+                if (TagNode.INTERNAL.equals(srcItem.getTmxType())
+                        && !srcItem.isMTIdentifier())
                 {
-                	nMissingInternalCnt += 1;
+                    nMissingInternalCnt += 1;
 
                     if (missingInternalNames.length() > 0)
                     {
-                    	missingInternalNames += ", ";
+                        missingInternalNames += ", ";
                     }
                     if ((nMissingInternalCnt % 10) == 0)
                     {
-                    	missingInternalNames += "\n\t";
+                        missingInternalNames += "\n\t";
                     }
 
                     String tag = srcItem.getPTagName();
 
-                    missingInternalNames += PseudoConstants.PSEUDO_OPEN_TAG + tag
-                            + PseudoConstants.PSEUDO_CLOSE_TAG;;
+                    missingInternalNames += PseudoConstants.PSEUDO_OPEN_TAG
+                            + tag + PseudoConstants.PSEUDO_CLOSE_TAG;
+                    ;
                 }
                 else
                 {
@@ -969,23 +978,21 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         m_PseudoData.resetAllSourceListNodes();
         return true;
     }
-    
-    //check if the srcTag and trgTag are start with "i" or "nbsp".
+
+    // check if the srcTag and trgTag are start with "i" or "nbsp".
     private boolean checkTagName(String srcItemTag, String strTrgTagName)
     {
-    	if(srcItemTag.startsWith("i") && 
-    			strTrgTagName.startsWith("i"))
-    	{
-    		return true;
-    	}
-    	
-    	if(srcItemTag.startsWith("nbsp") && 
-    			strTrgTagName.startsWith("nbsp"))
-    	{
-    		return true;
-    	}
-    	
-    	return false;
+        if (srcItemTag.startsWith("i") && strTrgTagName.startsWith("i"))
+        {
+            return true;
+        }
+
+        if (srcItemTag.startsWith("nbsp") && strTrgTagName.startsWith("nbsp"))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1044,7 +1051,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         {
             return true;
         }
-        
+
         boolean hasError = false;
         String unbalancedTags = "";
         int size = m_TrgTagList.size();
@@ -1103,13 +1110,13 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                 {
                     String ptname = searchNode.getPTagName();
                     String tType = searchNode.getTmxType();
-                    
+
                     if ("bpt".equals(tType) || "ept".equals(tType))
                     {
                         continue;
                     }
                 }
-                
+
                 hasError = true;
 
                 if (unbalancedTags.length() > 0)
@@ -1267,24 +1274,31 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         {
             return true;
         }
-        
+
         // check if it is idml
         if (dataType.equals("xml"))
         {
+            // GBS-3722, MT identifiers should only be located in the beginning
+            // and in the end.
+            if (m_PseudoData.getMTIdentifierList().size() > 0)
+            {
+                return true;
+            }
+
             if (m_PseudoData.m_hPseudo2TmxMap == null
                     || m_PseudoData.m_hPseudo2TmxMap.size() == 0)
             {
                 return false;
             }
-            
+
             java.util.Collection tags = m_PseudoData.m_hPseudo2TmxMap.values();
             for (Object object : tags)
             {
                 String tag = object.toString();
-                if (tag.contains("&lt;Content&gt;") || 
-                        tag.contains("&lt;CharacterStyleRange ") || 
-                        tag.contains("&lt;/Content&gt;") ||
-                        tag.contains("&lt;/CharacterStyleRange&gt;"))
+                if (tag.contains("&lt;Content&gt;")
+                        || tag.contains("&lt;CharacterStyleRange ")
+                        || tag.contains("&lt;/Content&gt;")
+                        || tag.contains("&lt;/CharacterStyleRange&gt;"))
                 {
                     return true;
                 }
@@ -1301,7 +1315,13 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         {
             return false;
         }
-        
+
+        // GBS-3722, MT identifier tags cannot be moved
+        if (isMTIdentifierTagsMoved())
+        {
+            return true;
+        }
+
         m_InternalTags = new HashMap<String, String>();
 
         m_mockSource = fixMockSegment(m_mockSource, true);
@@ -1319,6 +1339,55 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         boolean result = fixMovedTag(false);
 
         return result;
+    }
+
+    /**
+     * Checks if MT identifier tags are moved.
+     * <p>
+     * 
+     * @since GBS-3722
+     */
+    private boolean isMTIdentifierTagsMoved()
+    {
+        String target = m_PseudoData.getPTagTargetString();
+        Map<String, String> mtIdentifierLeading = m_PseudoData
+                .getMTIdentifierLeading();
+        Map<String, String> mtIdentifierTrailing = m_PseudoData
+                .getMTIdentifierTrailing();
+        if (mtIdentifierLeading.size() == 0 && mtIdentifierTrailing.size() == 0)
+        {
+            return false;
+        }
+        for (String tag : mtIdentifierLeading.keySet())
+        {
+            int index = target.indexOf(tag);
+            if (index != -1)
+            {
+                String leadingText = target.substring(0, index);
+                if (leadingText.trim().length() > 0)
+                {
+                    m_strErrMsg = MessageFormat.format(
+                            m_resources.getString("ErrorTagMoved"), tag);
+                    return true;
+                }
+            }
+        }
+        for (String tag : mtIdentifierTrailing.keySet())
+        {
+            int index = target.lastIndexOf(tag);
+            if (index != -1)
+            {
+                String trailingText = target.substring(index + tag.length());
+                if (trailingText.trim().length() > 0)
+                {
+                    m_strErrMsg = MessageFormat.format(
+                            m_resources.getString("ErrorTagMoved"), tag);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -1341,9 +1410,6 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         // should not true here, just output this situation if true
         if (m_mockSource.length() != m_mockTarget.length())
         {
-            System.out.println(MessageFormat.format(
-                    "Length of target \"{0}\" is not same as \"{1}\"",
-                    m_mockTarget, m_mockSource));
             return false;
         }
 
@@ -1431,7 +1497,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
         return isTagMoved;
     }
-    
+
     private String getInternalText(String tag)
     {
         String key1 = "[" + tag + "]";
@@ -1448,7 +1514,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
         return null;
     }
-    
+
     private int getInternalIndex(String tag)
     {
         boolean addPrefix = true;
@@ -1456,7 +1522,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         {
             addPrefix = false;
         }
-        
+
         String key1 = addPrefix ? "[" + tag + "]" : tag;
         if (m_PseudoData.getInternalTexts().containsKey(key1))
         {
@@ -1475,7 +1541,8 @@ public class PseudoErrorChecker implements PseudoBaseHandler
             }
         }
 
-        String key2 = addPrefix ? "[" + escapeString(tag) + "]" : escapeString(tag);
+        String key2 = addPrefix ? "[" + escapeString(tag) + "]"
+                : escapeString(tag);
         if (m_PseudoData.getInternalTexts().containsKey(key2))
         {
             Iterator<String> keys = m_PseudoData.getInternalTexts().keySet()
@@ -1503,16 +1570,16 @@ public class PseudoErrorChecker implements PseudoBaseHandler
             String tag = m.group(1);
             String tmx = (String) m_PseudoData.m_hPseudo2TmxMap.get(tag);
             String itext = null;
-            if (MOVABLE_TAG.contains(tag) || tmx != null && tmx.contains("erasable=\"yes\""))
+            if (MOVABLE_TAG.contains(tag) || tmx != null
+                    && tmx.contains("erasable=\"yes\""))
             {
                 ori = StringUtil.replace(ori, "[" + tag + "]", "");
                 ori = StringUtil.replace(ori, "[/" + tag + "]", "");
             }
-            else if (tmx == null
-                    && ((itext = getInternalText(tag)) != null))
+            else if (tmx == null && ((itext = getInternalText(tag)) != null))
             {
                 // check if it is removed from target
-                String key = "[" + escapeString(tag)  + "]";
+                String key = "[" + escapeString(tag) + "]";
                 if (m_strInternalErrMsg != null
                         && m_strInternalErrMsg.contains(key))
                 {
@@ -1522,10 +1589,9 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                 else if (containTag(itext))
                 {
                     int itextIndex = getInternalIndex(tag);
-                    String ttt = "[gi"
-                            + itextIndex + "]";
+                    String ttt = "[gi" + itextIndex + "]";
                     ori = StringUtil.replace(ori, "[" + tag + "]", ttt);
-                    
+
                     if (isSource)
                     {
                         m_InternalTags.put(ttt, "[" + tag + "]");
@@ -1558,30 +1624,34 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         StringBuffer sb = new StringBuffer(itext);
         if (itext.contains("<ept ") && itext.contains("</ept>"))
         {
-            StringIndex si = StringIndex.getValueBetween(sb, 0, "<ept ", "</ept>");
-            
+            StringIndex si = StringIndex.getValueBetween(sb, 0, "<ept ",
+                    "</ept>");
+
             // it is from new extractor.
             if (si != null && si.value.contains("&lt;/style&gt;"))
             {
-            	return false;
+                return false;
             }
-            
-            if (si != null && si.value.contains("&lt;") && si.value.contains("&gt;"))
+
+            if (si != null && si.value.contains("&lt;")
+                    && si.value.contains("&gt;"))
             {
-               return true;
+                return true;
             }
         }
-        
+
         if (itext.contains("<bpt ") && itext.contains("</bpt>"))
         {
-            StringIndex si = StringIndex.getValueBetween(sb, 0, "<bpt ", "</bpt>");
-            
-            if (si != null && si.value.contains("&lt;") && si.value.contains("&gt;"))
+            StringIndex si = StringIndex.getValueBetween(sb, 0, "<bpt ",
+                    "</bpt>");
+
+            if (si != null && si.value.contains("&lt;")
+                    && si.value.contains("&gt;"))
             {
-               return true;
+                return true;
             }
         }
-        
+
         return false;
     }
 
@@ -1713,20 +1783,22 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         this.styles = styles;
     }
 
-	public String geStrInternalErrMsg() {
-		return m_strInternalErrMsg;
-	}
+    public String geStrInternalErrMsg()
+    {
+        return m_strInternalErrMsg;
+    }
 
-	public void setStrInternalErrMsg(String m_strInternalErrMsg) {
-		this.m_strInternalErrMsg = m_strInternalErrMsg;
-	}
-	
-	public void setEscapeResult(boolean vv)
-	{
-	    m_escapeResult = vv;
-	}
-	
-	public boolean getEscapeResult()
+    public void setStrInternalErrMsg(String m_strInternalErrMsg)
+    {
+        this.m_strInternalErrMsg = m_strInternalErrMsg;
+    }
+
+    public void setEscapeResult(boolean vv)
+    {
+        m_escapeResult = vv;
+    }
+
+    public boolean getEscapeResult()
     {
         return m_escapeResult;
     }

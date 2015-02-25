@@ -86,10 +86,16 @@ public class CompanyBasicHandler extends PageHandler implements
         String[] scorecardKeyArray = new String[]
         {"lb_spelling_grammar", "lb_consistency",
                 "lb_style", "lb_terminology",};
+        String[] qualityKeyArray = new String[]{"lb_good","lb_acceptable","lb_poor"};
+        String[] marketKeyArray = new String[]{"lb_suitable_fluent", "lb_literal_at_times","lb_unsuitable"};
         List<String> tmpkeyList = Arrays.asList(keyArray);
         List<String> tempScorecardKeyList = Arrays.asList(scorecardKeyArray);
+        List<String> tmpQualityKeyList = Arrays.asList(qualityKeyArray);
+        List<String> tmpMarketKeyList = Arrays.asList(marketKeyArray);
         List<String> keyList = new ArrayList<String>(tmpkeyList);
         List<String> sorcecardKeyList  = new ArrayList<String>(tempScorecardKeyList);
+        List<String> qualityKeyList = new ArrayList<String>(tmpQualityKeyList);
+        List<String> marketKeyList  = new ArrayList<String>(tmpMarketKeyList);
         try
         {
             if (action.equals(CompanyConstants.CREATE))
@@ -113,8 +119,12 @@ public class CompanyBasicHandler extends PageHandler implements
                 // init the "to" select table, add default value to it
                 List<Select> toList = initSelectList(keyList, bundle);
                 List<Select> scorecardToList = initSelectList(sorcecardKeyList, bundle);
+                List<Select> qualityToList = initSelectList(qualityKeyList, bundle);
+                List<Select> marketToList = initSelectList(marketKeyList, bundle);
                 p_request.setAttribute("toList", toList);
                 p_request.setAttribute("scorecardToList", scorecardToList);
+                p_request.setAttribute("qualityToList", qualityToList);
+                p_request.setAttribute("marketToList", marketToList);
             }
             else if (action.equals(CompanyConstants.EDIT))
             {
@@ -142,21 +152,35 @@ public class CompanyBasicHandler extends PageHandler implements
                     sessionMgr.setAttribute(CompanyConstants.COMPANY, company);
                     
                     List<String> containedCategories = CompanyWrapper
-                            .getCompanyCategoryList(String.valueOf(company.getId()));
+                            .getCompanyCategoryList(companyID);
                     List<String> containedScorecardCategories = CompanyWrapper
-                    		.getCompanyScorecardCategoryList(String.valueOf(company.getId()));
+                    		.getCompanyScorecardCategoryList(companyID);
+                    List<String> containedQualityCategories = CompanyWrapper.getCompanyQualityCategoryList(companyID);
+                    List<String> containedMarketCategories = CompanyWrapper.getCompanyMarketCategoryList(companyID);
                     List<Select> toList = initSelectList(containedCategories, bundle);
                     List<Select> scorecardToList = initSelectList(containedScorecardCategories, bundle);
+                    List<Select> qualityToList = initSelectList(containedQualityCategories, bundle);
+                    List<Select> marketToList = initSelectList(containedMarketCategories, bundle);
+                    
                     p_request.setAttribute("toList", toList);
                     p_request.setAttribute("scorecardToList", scorecardToList);
+                    p_request.setAttribute("qualityToList", qualityToList);
+                    p_request.setAttribute("marketToList", marketToList);
+                    
                     p_request.setAttribute("action", "edit");
                     keyList.removeAll(containedCategories);
                     sorcecardKeyList.removeAll(containedScorecardCategories);
+                    qualityKeyList.removeAll(containedQualityCategories);
+                    marketKeyList.removeAll(containedMarketCategories);
                     // init the "from" select table, add default value to it
                     List<Select> fromList = initSelectList(keyList, bundle);
                     List<Select> scorecardFromList = initSelectList(sorcecardKeyList, bundle);
+                    List<Select> qualityFromList = initSelectList(qualityKeyList, bundle);
+                    List<Select> marketFromList = initSelectList(marketKeyList, bundle);
                     p_request.setAttribute("fromList", fromList);
                     p_request.setAttribute("scorecardFromList", scorecardFromList);
+                    p_request.setAttribute("qualityFromList", qualityFromList);
+                    p_request.setAttribute("marketFromList", marketFromList);
                 }
                 p_request.setAttribute("edit", "true");
             }
@@ -240,6 +264,8 @@ public class CompanyBasicHandler extends PageHandler implements
         String alert = bundle.getString("jsmsg_company_category");
         String alert_illegal = bundle.getString("jsmsg_company_illegal_category");
         String alert_same = bundle.getString("jsmsg_company_same_category");
+        String qualityHelpMsg = bundle.getString("helper_text_reviewer_quality_category");
+        String marketHelpMsg = bundle.getString("helper_text_reviewer_market_category");
         
         p_request.setAttribute("cancelButton", lbcancel);
         p_request.setAttribute("saveButton", lbsave);
@@ -248,6 +274,8 @@ public class CompanyBasicHandler extends PageHandler implements
         p_request.setAttribute("helpFile", helpFile);
         p_request.setAttribute("helpMsg", helpMsg);
         p_request.setAttribute("scorecardHelpMsg", scorecardHelpMsg);
+        p_request.setAttribute("qualityHelpMsg", qualityHelpMsg);
+        p_request.setAttribute("marketHelpMsg", marketHelpMsg);
         p_request.setAttribute("label", label_new_category);
         p_request.setAttribute("labelForLeftTable", labelForLeftTable);
         p_request.setAttribute("labelForRightTable", labelForRightTable);

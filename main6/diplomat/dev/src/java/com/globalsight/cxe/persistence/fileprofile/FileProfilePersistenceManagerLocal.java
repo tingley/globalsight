@@ -43,6 +43,7 @@ import com.globalsight.cxe.persistence.knownformattype.KnownFormatTypeDescriptor
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileConstants;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.system.LogManager;
@@ -82,6 +83,8 @@ public class FileProfilePersistenceManagerLocal implements
             if (!isFileProfileNameDuplicate(p_profile))
             {
                 HibernateUtil.save((FileProfileImpl) p_profile);
+                OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_FILE_PROFILE,
+                        p_profile.getName());
                 return p_profile;
             }
             else
@@ -144,6 +147,9 @@ public class FileProfilePersistenceManagerLocal implements
         try
         {
             HibernateUtil.delete(p_fileProfile);
+            OperationLog.log(
+                    OperationLog.EVENT_DELETE, OperationLog.COMPONET_FILE_PROFILE,
+                    p_fileProfile.getName());
 
             LogManager.log(LogType.FILEPROFILE, LogManager.EVENT_TYPE_REMOVE, p_fileProfile.getId(),
                     "Delete File Profile [" + p_fileProfile.getName() + "]", p_fileProfile.getCompanyId());

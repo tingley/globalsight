@@ -51,7 +51,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.usermgr.LoggedUser;
 import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserLdapHelper;
-import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
@@ -73,7 +72,7 @@ import com.globalsight.util.modules.Modules;
  * authentication' and some system initialization and return the real link for
  * next page based on the operation result.
  */
-class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
+public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
 {
     private static final Logger CATEGORY = Logger
             .getLogger(EntryPageControlFlowHelper.class);

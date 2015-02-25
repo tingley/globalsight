@@ -291,6 +291,11 @@ function isPlainTextFilterValidCallback(data)
 			sendAjax(isFilterValidCallback.obj, "savePlainTextFilter", "savePlainTextFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("plaintextFilterDialog");
+		parent.location.reload();
+	}
 	else if (data == 'name_exists')
 	{
 		alert(existFilterName);

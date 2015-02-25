@@ -231,6 +231,11 @@ function checkExistExcelCallback(data)
 			sendAjax(checkExistExcelCallback.obj, "saveMSOfficeExcelFilter", "saveExcelFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("msOfficeExcelFilterDialog");
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

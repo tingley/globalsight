@@ -42,6 +42,9 @@ public class IdmlConverter
     private static boolean isInstalled = false;
 
     private static String convertDir = null;
+    private static String convertDir_incontextReview = null;
+    
+    private boolean isIncontextReview = false;
 
     public String convertIdmlToXml(String p_odFile, String p_dir)
             throws Exception
@@ -72,6 +75,16 @@ public class IdmlConverter
         ZipIt.compress(xmlDir.getPath(), zipFile);
 
         return zipFile.getPath();
+    }
+    
+    public boolean getIsInContextReivew()
+    {
+        return isIncontextReview;
+    }
+    
+    public void setIsInContextReivew(boolean vvv)
+    {
+        isIncontextReview = vvv;
     }
 
     public static boolean isInstalled()
@@ -106,8 +119,16 @@ public class IdmlConverter
                     SystemConfigParamNames.ADOBE_CONV_DIR_CS5,
                     CompanyWrapper.SUPER_COMPANY_ID);
         }
+        
+        if (convertDir_incontextReview == null)
+        {
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            convertDir_incontextReview = sc.getStringParameter(
+                    SystemConfigParamNames.INCTXRV_CONV_DIR,
+                    CompanyWrapper.SUPER_COMPANY_ID);
+        }
 
-        return convertDir;
+        return isIncontextReview ? convertDir_incontextReview : convertDir;
     }
 
     /**
@@ -140,9 +161,13 @@ public class IdmlConverter
         String type = "idml";
         String folder = "indd";
 
-        String testFile = type + (int) (Math.random() * 1000000) + ".test";
-        File tFile = new File(getConvertDir() + "/" + folder + "/" + testFile);
-        FileUtil.writeFile(tFile, "test converter is start or not");
+        File tFile = null;
+        if (!isIncontextReview)
+        {
+            String testFile = type + (int) (Math.random() * 1000000) + ".test";
+            tFile = new File(getConvertDir() + "/" + folder + "/" + testFile);
+            FileUtil.writeFile(tFile, "test converter is start or not");
+        }
 
         name = (int) (Math.random() * 1000000) + name;
         String prefixName = name.substring(0, name.lastIndexOf("."));
@@ -151,6 +176,7 @@ public class IdmlConverter
         // .getInstance().getValue());
         String path = getConvertDir() + "/" + folder + "/" + "/" + locale + "/"
                 + prefixName;
+        
 
         FileUtil.copyFile(p_odFile, new File(path + fileType));
         writeCommandFile(path + ".ip_command", type, "pdf");
@@ -177,10 +203,13 @@ public class IdmlConverter
 
         if (!found)
         {
-            if (tFile.exists())
+            if (!isIncontextReview)
             {
-                tFile.delete();
-                throw new Exception("idml converter is not started");
+                if (tFile.exists())
+                {
+                    tFile.delete();
+                    throw new Exception("idml converter is not started");
+                }
             }
         }
 

@@ -23,6 +23,7 @@ import java.util.Vector;
 
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.PostReviewCategory;
 import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
@@ -192,6 +193,17 @@ public interface JobHandler
      *             Component related exception.
      */
     public void createScorecardCategory(ScorecardCategory scorecardCategory) throws JobException;
+
+    /**
+     * Create a post review category.
+     * 
+     * @param postReviewCategory
+     *            the category to be created.
+     * @throws JobException
+     *             Component related exception.
+     */
+    public void createPostReviewCategory(
+            PostReviewCategory postReviewCategory) throws JobException;
 
     /**
      * Get the company with the specified name.

@@ -88,6 +88,12 @@ public class Pseudo2TmxHandler implements PseudoBaseHandler
         String sufferString = "";
 
         tmxString = m_PseudoData.getInternalTexts().get("[" + tagName + "]");
+        if (tmxString == null)
+        {
+            // GBS-3722
+            tmxString = m_PseudoData.getMTIdentifiers()
+                    .get("[" + tagName + "]");
+        }
 
         while (tmxString == null && tagName.startsWith("[[")
                 && tagName.endsWith("]"))

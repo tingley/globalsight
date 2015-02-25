@@ -407,7 +407,9 @@ function GetPTagString(text, verbose)
 {
     var result;
 
-    applet.setInputSegment(text, "", datatype);
+    // GBS-3722, mark if this string is from source target panel or other Match Results panels 
+    var isFromTarget = false;
+    applet.setInputSegment(text, "", datatype, isFromTarget);
     if (verbose == "<%=EditorConstants.PTAGS_VERBOSE%>")
     {
         applet.getVerbose(); // discard

@@ -234,6 +234,11 @@ function checkExistPPTCallback(data)
 			sendAjax(checkExistPPTCallback.obj, "saveMSOfficePPTFilter", "saveMSOfficePPTFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog(this.filterDialogId);
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

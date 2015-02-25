@@ -200,12 +200,8 @@ public class MsOfficeAdapter extends BaseAdapter
 
     private IConverterHelper2 initHelper(CxeMessage p_cxeMessage, Properties props) throws SAXException, IOException
     {
-        EventFlowXmlParser parser = new EventFlowXmlParser();
-        parser.parse(p_cxeMessage.getEventFlowXml());
-        String sourceFormat = parser.getSourceFormatType();
-
         IConverterHelper2 helper = null;
-        if (IFormatNames.FORMAT_OFFICE_XML.equals(sourceFormat))
+        if (IFormatNames.FORMAT_OFFICE_XML.equals(p_cxeMessage.getEventFlowObject().getSource().getFormatType()))
         {
             helper = new OfficeXmlHelper(p_cxeMessage, getLogger(), props);
         }

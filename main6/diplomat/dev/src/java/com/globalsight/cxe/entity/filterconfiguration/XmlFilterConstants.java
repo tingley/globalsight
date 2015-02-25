@@ -55,6 +55,7 @@ public interface XmlFilterConstants
     public static final int PH_TRIM_DONOT = 1;
     public static final int PH_TRIM_DO = 2;
 
+    public static final int NON_ASCII_AS_PRESERVE = 0;
     public static final int NON_ASCII_AS_CHARACTER = 1;
     public static final int NON_ASCII_AS_ENTITY = 2;
 

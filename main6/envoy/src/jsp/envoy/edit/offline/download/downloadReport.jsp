@@ -86,6 +86,8 @@
     PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 	boolean reviewCommentReport= perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF);
 	boolean reviewCommentSimpleReport= perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE);
+	boolean postReviewQAReport = perms.getPermissionFor(Permission.REPORTS_POST_REVIEW_QA);
+	boolean transEditReport = perms.getPermissionFor(Permission.REPORTS_TRANSLATIONS_EDIT);
     Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
     int state = task.getState();
     long task_id = task.getId();
@@ -182,16 +184,43 @@
     {
     	if(reviewCommentSimpleReport)
        		reportType = ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT;
-    	else
+    	else if(reviewCommentReport)
        		reportType = ReportConstants.REVIEWERS_COMMENTS_REPORT;
-       	downloadInstruction = bundle.getString("helper_text_download_language_instruction");
+    	else
+    		reportType = ReportConstants.POST_REVIEW_QA_REPORT;
+    	if(postReviewQAReport && (reviewCommentSimpleReport || reviewCommentReport))
+    	{
+    		downloadInstruction = bundle.getString("helper_text_download_review_instruction");
+    	}
+    	else if(!postReviewQAReport)
+    	{
+    		downloadInstruction = bundle.getString("helper_text_download_language_instruction");
+    	}
+    	else 
+    	{
+    		downloadInstruction = bundle.getString("helper_text_download_postreview_instruction");	
+    	}
        	downloadHelper = EditUtil.toJavascript(bundle.getString("helper_text_download_LSO"));
        	workOfflineUrl = downloadReportUrl;
     }
     else
     {
-		reportType = ReportConstants.TRANSLATIONS_EDIT_REPORT;
+    	if(postReviewQAReport)
+    		reportType = ReportConstants.POST_REVIEW_QA_REPORT;
+    	else
+			reportType = ReportConstants.TRANSLATIONS_EDIT_REPORT;
+    	if(postReviewQAReport && transEditReport)
+    	{
+    		downloadInstruction = bundle.getString("helper_text_download_edit_instruction");
+    	}
+    	else if(postReviewQAReport && !transEditReport)
+    	{
+    		downloadInstruction = bundle.getString("helper_text_download_postreview_instruction");
+    	}
+    	else
+    	{
         downloadInstruction = bundle.getString("helper_text_download_translation_instruction");
+        }
         downloadHelper = EditUtil.toJavascript(bundle.getString("helper_text_download_TER"));
         workOfflineUrl = downloadUrl;
     }
@@ -767,7 +796,7 @@ if (!review_only)
     <TD></TD>
     <TD ><%=downloadInstruction%></TD>
   </TR>
-    <%if(review_only && reviewCommentSimpleReport && reviewCommentReport){ %>
+    <%if(review_only && reviewCommentSimpleReport && reviewCommentReport && postReviewQAReport){ %>
 	  <TR>
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -778,6 +807,64 @@ if (!review_only)
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT %>"><%=bundle.getString("review_reviewers_comments_simple")%>
+     	</TD>
+     </TR>
+	 <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.POST_REVIEW_QA_REPORT %>"><%=bundle.getString("review_post_review_QA_report")%>
+     	</TD>
+     </TR>
+    <%} else if(review_only && reviewCommentSimpleReport && postReviewQAReport){%>
+	 <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT %>" checked><%=bundle.getString("review_reviewers_comments_simple")%>
+     	</TD>
+     </TR>
+	 <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.POST_REVIEW_QA_REPORT %>"><%=bundle.getString("review_post_review_QA_report")%>
+     	</TD>
+     </TR>
+    <%} else if(review_only && postReviewQAReport && reviewCommentReport){%>
+     <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_REPORT %>" checked><%=bundle.getString("review_reviewers_comments")%>
+     	</TD>
+     </TR>
+	 <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.POST_REVIEW_QA_REPORT %>"><%=bundle.getString("review_post_review_QA_report")%>
+     	</TD>
+     </TR>
+    <%} else if(review_only && reviewCommentSimpleReport && reviewCommentReport){%>
+      <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_REPORT %>" checked><%=bundle.getString("review_reviewers_comments")%>
+     	</TD>
+     </TR>
+	 <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT %>"><%=bundle.getString("review_reviewers_comments_simple")%>
+     	</TD>
+     </TR>
+    <%} else if(!review_only && postReviewQAReport && transEditReport){%>
+     <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.TRANSLATIONS_EDIT_REPORT %>" checked><%=bundle.getString("review_translations_edit_report")%>
+     	</TD>
+     </TR>
+	 <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.POST_REVIEW_QA_REPORT %>"><%=bundle.getString("review_post_review_QA_report")%>
      	</TD>
      </TR>
     <%} %>

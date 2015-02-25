@@ -217,8 +217,9 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private String jobName = null;
     private String m_instanceID = null;
     private boolean m_isOmegaT = false;
-    // Is uploading XLF 1.2 off-line TK?
     private boolean m_isXliff = false;
+    private boolean populate100 = false;
+    private boolean preserveSourceFolder = false;
 
     // **MUST** start false to properly load an upload file.
     private boolean m_isSource = false;
@@ -240,6 +241,9 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private boolean m_isRepetitons = false;
     
     private Vector m_excludedItemTypes = new Vector();
+
+    // For XLF/OmegaT translation kit, store its tuID to target "state" attribute value.
+    private HashMap<String, String> tuId2XlfTrgStateMap = new HashMap<String, String>();
 
     /**
      * Constructor.
@@ -315,6 +319,17 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     public void setIsXliff(boolean p_isXliff)
     {
         this.m_isXliff = p_isXliff;
+    }
+
+
+    public boolean isPopulate100()
+    {
+        return populate100;
+    }
+
+    public void setPopulate100(boolean populate100)
+    {
+        this.populate100 = populate100;
     }
 
     /**
@@ -3710,4 +3725,22 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         m_instanceID = p_instanceID;
     }
+
+    public void addXlfTargetState(String tuId, String state)
+    {
+        tuId2XlfTrgStateMap.put(tuId, state);
+    }
+
+    public String getXlfTargetState(String tuId)
+    {
+        return tuId2XlfTrgStateMap.get(tuId);
+    }
+
+	public void setPreserveSourceFolder(boolean preserveSourceFolder) {
+		this.preserveSourceFolder = preserveSourceFolder;
+	}
+
+	public boolean isPreserveSourceFolder() {
+		return preserveSourceFolder;
+	}
 }

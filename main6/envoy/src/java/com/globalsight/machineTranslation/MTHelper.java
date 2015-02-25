@@ -18,12 +18,14 @@ package com.globalsight.machineTranslation;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -36,6 +38,7 @@ import org.w3c.dom.Node;
 
 import com.globalsight.everest.projecthandler.EngineEnum;
 import com.globalsight.ling.docproc.DiplomatAPI;
+import com.globalsight.ling.tw.Tmx2PseudoHandler;
 import com.globalsight.util.PropertiesFactory;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -51,10 +54,17 @@ public class MTHelper
     private static final Logger CATEGORY = Logger.getLogger(MTHelper.class);
 
     public static final String MT_EXTRA_CONFIGS = "/properties/mt.config.properties";
+    // GBS-3722
+    private static String TAG_MT_LEADING_BPT = "<bpt internal=\"yes\" i=\"iii\" type=\"mtlid\">&lt;mtlid&gt;</bpt>";
+    private static String TAG_MT_TRAILING_BPT = "<bpt internal=\"yes\" i=\"iii\" type=\"mttid\">&lt;mttid&gt;</bpt>";
+    private static String TAG_MT_LEADING_EPT = "<ept i=\"iii\">&lt;/mtlid&gt;</ept>";
+    private static String TAG_MT_TRAILING_EPT = "<ept i=\"iii\">&lt;/mttid&gt;</ept>";
 
     /**
      * Init machine translation engine
-     * @param engineName MT engine name
+     * 
+     * @param engineName
+     *            MT engine name
      * @return MachineTranslator MT
      */
     public static MachineTranslator initMachineTranslator(String engineName)
@@ -125,7 +135,8 @@ public class MTHelper
      * @param p_gxml
      * @return List in TextNode
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     public static List getImmediateAndSubImmediateTextNodes(
             GxmlElement p_rootElement)
     {
@@ -183,7 +194,8 @@ public class MTHelper
 
         List<GxmlElement> result = new ArrayList<GxmlElement>();
         result.addAll(gxmlRootWithID.getChildElements());
-        result.addAll(gxmlRootWithID.getDescendantElements(GxmlElement.SUB_TYPE));
+        result.addAll(gxmlRootWithID
+                .getDescendantElements(GxmlElement.SUB_TYPE));
         Iterator<GxmlElement> it = result.iterator();
         Set<String> tags = getTagsRequireID();
         while (it.hasNext())
@@ -196,7 +208,7 @@ public class MTHelper
                 if (id == null)
                 {
                     return false;
-                }                
+                }
             }
         }
 
@@ -204,6 +216,7 @@ public class MTHelper
     }
 
     private static Set<String> tagsRequireIDAttribute = new HashSet<String>();
+
     private static Set<String> getTagsRequireID()
     {
         if (tagsRequireIDAttribute.size() == 0)
@@ -298,8 +311,9 @@ public class MTHelper
 
     /**
      * Check if the segments are from XLF source file.
+     * 
      * @param paramMap
-     * @return boolean 
+     * @return boolean
      */
     @SuppressWarnings("rawtypes")
     public static boolean isXlf(Map paramMap)
@@ -381,7 +395,7 @@ public class MTHelper
         p_string = p_string.replaceAll("&#xa;", "_#xaEntity_");
         p_string = p_string.replaceAll("&#xd;", "_#xdEntity_");
         p_string = p_string.replaceAll("&amp;", "_amp_");
-        
+
         p_string = p_string.replaceAll("&", "&amp;");
 
         p_string = p_string.replaceAll("_amp_", "&amp;");
@@ -398,6 +412,7 @@ public class MTHelper
 
     /**
      * Get all pure sub texts in a segment GXML.
+     * 
      * @param segmentInGxml
      * @return String[]
      */
@@ -459,7 +474,7 @@ public class MTHelper
         return false;
     }
 
-    /**
+/**
      * If XML attribute has "<" in it ,it will parse error. This method replaces
      * the attribute "<" into "&lt;".
      * 
@@ -530,17 +545,18 @@ public class MTHelper
         {
             return null;
         }
-        
+
         String result = null;
         int count = 0;
-        try 
+        try
         {
             StringBuffer sb = new StringBuffer();
             sb.append("<segment>").append(p_segString).append("</segment>");
-            GxmlElement gxmlElement = SegmentUtil2.getGxmlElement(sb.toString());
+            GxmlElement gxmlElement = SegmentUtil2
+                    .getGxmlElement(sb.toString());
 
             resetIdAndXBack(gxmlElement, idList, xList, count);
-            
+
             String gxml = gxmlElement.toGxml("xlf");
             result = GxmlUtil.stripRootTag(gxml);
         }
@@ -559,7 +575,7 @@ public class MTHelper
         {
             return;
         }
-        
+
         String id = element.getAttribute("id");
         if (id != null)
         {
@@ -570,12 +586,12 @@ public class MTHelper
             }
             else
             {
-                idValue  = String.valueOf(count + 1);
+                idValue = String.valueOf(count + 1);
             }
             element.setAttribute("id", idValue);
         }
-        
-        String x = element.getAttribute("x");        
+
+        String x = element.getAttribute("x");
         if (x != null)
         {
             String xValue = null;
@@ -589,12 +605,12 @@ public class MTHelper
             }
             element.setAttribute("x", xValue);
         }
-        
+
         if (id != null || x != null)
         {
             count++;
         }
-        
+
         Iterator<?> childIt = element.getChildElements().iterator();
         while (childIt.hasNext())
         {
@@ -605,6 +621,7 @@ public class MTHelper
 
     /**
      * Transform an XML node object to XML string.
+     * 
      * @param node
      * @return
      * @throws TransformerException
@@ -641,7 +658,7 @@ public class MTHelper
         }
 
         StringBuffer sb = new StringBuffer();
-        String str1= "";
+        String str1 = "";
         String str2 = machineTranslatedGxml;
         while (index > -1)
         {
@@ -653,5 +670,154 @@ public class MTHelper
         sb.append(str2);
 
         return sb.toString();
+    }
+
+    /**
+     * Tags machine translated content with leading and trailing identifiers
+     * configured in MT Profile.
+     * 
+     * @since GBS-3722
+     */
+    public static String tagMachineTranslatedContent(String gxml,
+            String leading, String trailing)
+    {
+        String regex = "(<segment[^>]*>)([\\d\\D]*?)(</segment>)";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(gxml);
+        StringBuilder result = new StringBuilder();
+        if (m.find())
+        {
+            String segment = m.group(2);
+            int maxI = maxI(segment);
+            result.append(m.group(1));
+            if (!StringUtil.isEmpty(leading))
+            {
+                maxI++;
+                result.append(TAG_MT_LEADING_BPT.replace("iii", "" + maxI));
+                result.append(leading);
+                result.append(TAG_MT_LEADING_EPT.replace("iii", "" + maxI));
+            }
+            result.append(segment);
+            if (!StringUtil.isEmpty(trailing))
+            {
+                maxI++;
+                result.append(TAG_MT_TRAILING_BPT.replace("iii", "" + maxI));
+                result.append(trailing);
+                result.append(TAG_MT_TRAILING_EPT.replace("iii", "" + maxI));
+            }
+            result.append(m.group(3));
+            gxml = result.toString();
+        }
+
+        return gxml;
+    }
+
+    /**
+     * Removes MT tags for export (keep leading and trailing content).
+     * 
+     * @since GBS-3722
+     */
+    public static String cleanMTTagsForExport(String chunk)
+    {
+        String replaced = chunk.replaceFirst(
+                Tmx2PseudoHandler.R_MT_IDENTIFIER_LEADING_BPT, "");
+        while (!replaced.equals(chunk))
+        {
+            chunk = replaced;
+            replaced = chunk.replaceFirst(
+                    Tmx2PseudoHandler.R_MT_IDENTIFIER_LEADING_BPT, "");
+        }
+
+        replaced = chunk.replaceFirst(
+                Tmx2PseudoHandler.R_MT_IDENTIFIER_LEADING_EPT, "");
+        while (!replaced.equals(chunk))
+        {
+            chunk = replaced;
+            replaced = chunk.replaceFirst(
+                    Tmx2PseudoHandler.R_MT_IDENTIFIER_LEADING_EPT, "");
+        }
+
+        replaced = chunk.replaceFirst(
+                Tmx2PseudoHandler.R_MT_IDENTIFIER_TRAILING_BPT, "");
+        while (!replaced.equals(chunk))
+        {
+            chunk = replaced;
+            replaced = chunk.replaceFirst(
+                    Tmx2PseudoHandler.R_MT_IDENTIFIER_TRAILING_BPT, "");
+        }
+
+        replaced = chunk.replaceFirst(
+                Tmx2PseudoHandler.R_MT_IDENTIFIER_TRAILING_EPT, "");
+        while (!replaced.equals(chunk))
+        {
+            chunk = replaced;
+            replaced = chunk.replaceFirst(
+                    Tmx2PseudoHandler.R_MT_IDENTIFIER_TRAILING_EPT, "");
+        }
+
+        return chunk;
+    }
+
+    /**
+     * Removes MT tags including leading and trailing content for TM storage.
+     * 
+     * @since GBS-3722
+     */
+    public static String cleanMTTagsForTMStorage(String chunk)
+    {
+        String replaced = chunk.replaceFirst(
+                Tmx2PseudoHandler.R_MT_IDENTIFIER_LEADING, "");
+        while (!replaced.equals(chunk))
+        {
+            chunk = replaced;
+            replaced = chunk.replaceFirst(
+                    Tmx2PseudoHandler.R_MT_IDENTIFIER_LEADING, "");
+        }
+
+        replaced = chunk.replaceFirst(
+                Tmx2PseudoHandler.R_MT_IDENTIFIER_TRAILING, "");
+        while (!replaced.equals(chunk))
+        {
+            chunk = replaced;
+            replaced = chunk.replaceFirst(
+                    Tmx2PseudoHandler.R_MT_IDENTIFIER_TRAILING, "");
+        }
+
+        return chunk;
+    }
+
+    /**
+     * Checks if the segment is MT identifier tagged.
+     * 
+     * @since GBS-3722
+     */
+    public static boolean isMTTaggedSegment(String segment)
+    {
+        String regexLeading = Tmx2PseudoHandler.R_MT_IDENTIFIER_LEADING
+                + Tmx2PseudoHandler.R_TEXT;
+        String regexTrailing = Tmx2PseudoHandler.R_TEXT
+                + Tmx2PseudoHandler.R_MT_IDENTIFIER_TRAILING;
+        String regexBoth = Tmx2PseudoHandler.R_MT_IDENTIFIER_LEADING
+                + Tmx2PseudoHandler.R_TEXT
+                + Tmx2PseudoHandler.R_MT_IDENTIFIER_TRAILING;
+
+        return segment.matches(regexLeading) || segment.matches(regexTrailing)
+                || segment.matches(regexBoth);
+    }
+
+    private static int maxI(String segment)
+    {
+        Pattern p = Pattern.compile("<[^>]*?i=\"(\\d+)\"[^>]*?>");
+        Matcher m = p.matcher(segment);
+        int i = 1;
+        while (m.find())
+        {
+            int tmp = Integer.parseInt(m.group(1));
+            if (tmp > i)
+            {
+                i = tmp;
+            }
+        }
+        return i;
     }
 }

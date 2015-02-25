@@ -117,6 +117,9 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     //for gbs-3574
     private int m_isReportUploaded = 0;//0:not upload; 1: uploaded.
     private int m_isReportUploadCheck = 0;//0:not check; 1: check.
+    
+    private String m_qualityAssessment = null;
+    private String m_marketSuitability = null;
 
     /**
      * Get state of the uploading this activity belong to.
@@ -1339,5 +1342,29 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     public void setTaskTuvs(Set taskTuvs)
     {
         this.taskTuvs = taskTuvs;
+    }
+
+    @Override
+    public void setQualityAssessment(String qualityAssessment)
+    {
+       this.m_qualityAssessment = qualityAssessment; 
+    }
+
+    @Override
+    public String getQualityAssessment()
+    {
+        return m_qualityAssessment;
+    }
+
+    @Override
+    public void setMarketSuitability(String marketSuitabilty)
+    {
+        this.m_marketSuitability = marketSuitabilty;
+    }
+
+    @Override
+    public String getMarketSuitability()
+    {
+        return m_marketSuitability;
     }
 }

@@ -127,6 +127,7 @@ import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageexport.DeleteLeverageMatchPersistenceCommand;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -363,24 +364,24 @@ public class ExportHelper
         }
     }
 
-    /**
-     * For adobe PDF file Preview
-     * 
-     * @param p_pageId
-     * @param p_targetEncoding
-     * @param p_keepGsTags
-     * @return
-     * @throws RemoteException
-     * @throws TranscoderException
-     * @throws UnsupportedEncodingException
-     */
     public String exportForPdfPreview(long p_pageId, String p_targetEncoding,
-            boolean p_keepGsTags) throws RemoteException, TranscoderException,
+            boolean p_keepGsTags, boolean p_isIncontextReview, boolean isTarget)
+            throws RemoteException, TranscoderException,
             UnsupportedEncodingException
     {
-        Page pageObj = ServerProxy.getPageManager().getTargetPage(p_pageId);
-        m_page = pageObj;
-        m_sourcePage = ((TargetPage) m_page).getSourcePage();
+        if (isTarget)
+        {
+            Page pageObj = ServerProxy.getPageManager().getTargetPage(p_pageId);
+            m_page = pageObj;
+            m_sourcePage = ((TargetPage) m_page).getSourcePage();
+        }
+        else
+        {
+            Page pageObj = ServerProxy.getPageManager().getSourcePage(p_pageId);
+            m_page = pageObj;
+            m_sourcePage = ((SourcePage) m_page);
+        }
+
         // Touch to load all TUs of this source page for performance.
         try
         {
@@ -390,8 +391,8 @@ public class ExportHelper
         {
         }
         String page = populatePage(getExportTemplate(),
-                getSegments(pageObj.getGlobalSightLocale()),
-                pageObj.getGlobalSightLocale(), true, null);
+                getSegments(m_page.getGlobalSightLocale()),
+                m_page.getGlobalSightLocale(), true, p_isIncontextReview, null);
         DiplomatAPI diplomat = new DiplomatAPI();
         diplomat.setPreview(true);
         byte[] mergeResult = diplomat.merge(page, p_targetEncoding,
@@ -422,6 +423,26 @@ public class ExportHelper
         }
 
         return sb.toString();
+
+    }
+
+    /**
+     * For adobe PDF file Preview
+     * 
+     * @param p_pageId
+     * @param p_targetEncoding
+     * @param p_keepGsTags
+     * @return
+     * @throws RemoteException
+     * @throws TranscoderException
+     * @throws UnsupportedEncodingException
+     */
+    public String exportForPdfPreview(long p_pageId, String p_targetEncoding,
+            boolean p_keepGsTags) throws RemoteException, TranscoderException,
+            UnsupportedEncodingException
+    {
+        return exportForPdfPreview(p_pageId, p_targetEncoding, p_keepGsTags,
+                false, true);
     }
 
     // ///////////////////
@@ -650,7 +671,7 @@ public class ExportHelper
                             .getXlfSrcAsTrg());
                     String page = populatePage(pageTemplate,
                             getSegments(m_page.getGlobalSightLocale()),
-                            targetLocale, false, null);
+                            targetLocale, false, false, null);
                     if (isTabstrip)
                     {
                         String mainFileName = buildMainFileName(
@@ -992,7 +1013,7 @@ public class ExportHelper
         }
         String page = populatePage(getExportTemplate(),
                 getSegments(m_page.getGlobalSightLocale()), targetLocale, true,
-                p_tuvIds);
+                false, p_tuvIds);
 
         // since only one file is exported at a time for preview, there is
         // no relevant batch info.
@@ -1055,7 +1076,7 @@ public class ExportHelper
         pageTemplate.setTabsTrip(false);
         String page = populatePage(pageTemplate,
                 getSegments(m_page.getGlobalSightLocale()),
-                targetPage.getGlobalSightLocale(), isPreview, null);
+                targetPage.getGlobalSightLocale(), isPreview, false, null);
         File temp = File.createTempFile("GSTargetPage", ".xml");
         OutputStreamWriter writer = new OutputStreamWriter(
                 new FileOutputStream(temp), "UTF-8");
@@ -1374,8 +1395,8 @@ public class ExportHelper
         String state = m_page.getPageState();
 
         return (!PageState.ACTIVE_JOB.equals(state)
-                && !PageState.EXPORTED.equals(state) 
-                && !PageState.IMPORT_SUCCESS.equals(state));
+                && !PageState.EXPORTED.equals(state) && !PageState.IMPORT_SUCCESS
+                    .equals(state));
     }
 
     /**
@@ -1398,8 +1419,8 @@ public class ExportHelper
      */
     @SuppressWarnings("rawtypes")
     private String populatePage(PageTemplate p_template, ArrayList p_segments,
-            GlobalSightLocale p_targetLocale, boolean p_isPreview, List p_tuvIds)
-            throws PageException
+            GlobalSightLocale p_targetLocale, boolean p_isPreview,
+            boolean p_isIncontextReview, List p_tuvIds) throws PageException
     {
         TuvMappingHolder corpusMappings = null;
         Map<Long, TuvMapping> targetCorpusSegments = null;
@@ -1432,8 +1453,8 @@ public class ExportHelper
         // Using cloned "template" to avoid adding extra spaces into TM.
         PageTemplate innerTemplate = new PageTemplate(p_template);
         populateTemplateWithUpdatedSegments(innerTemplate, p_segments,
-                p_targetLocale, p_isPreview, p_tuvIds, targetCorpusSegments,
-                true);
+                p_targetLocale, p_isPreview, p_isIncontextReview, p_tuvIds,
+                targetCorpusSegments, true);
         // gxml is used to export (template maybe have been changed for java
         // properties)
         String gxml = getPageData(innerTemplate);
@@ -1455,30 +1476,34 @@ public class ExportHelper
                 CorpusManagerWLRemote corpusManager = ServerProxy
                         .getCorpusManager();
                 Long srcPageCuvId = m_sourcePage.getCuvId();
-                
-                if (srcPageCuvId != null && srcPageCuvId.longValue() > 0) {
+
+                if (srcPageCuvId != null && srcPageCuvId.longValue() > 0)
+                {
                     CorpusDoc sourceCorpusDoc = corpusManager
                             .getCorpusDoc(srcPageCuvId);
-    
-                    if (sourceCorpusDoc != null && sourceCorpusDoc.isMapped() == false)
+
+                    if (sourceCorpusDoc != null
+                            && sourceCorpusDoc.isMapped() == false)
                     {
                         s_logger.debug("Populating template with source segments.");
                         ArrayList srcSegments = getSegments(m_sourcePage
                                 .getGlobalSightLocale());
                         populateTemplateWithUpdatedSegments(p_template,
-                                srcSegments, m_sourcePage.getGlobalSightLocale(),
-                                false, null, sourceCorpusSegments, false);
-    
+                                srcSegments,
+                                m_sourcePage.getGlobalSightLocale(), false,
+                                p_isIncontextReview, null,
+                                sourceCorpusSegments, false);
+
                         s_logger.debug("Getting source page GXML.");
                         String srcGxml = getPageData(p_template);
                         Logger.writeDebugFile("sourcePage.xml", srcGxml);
-    
+
                         // overwrite the original src GXML
                         s_logger.debug("Overwriting original source gxml.");
-                        ServerProxy.getNativeFileManager()
-                                .save(srcGxml, ExportConstants.UTF8,
-                                        sourceCorpusDoc.getGxmlPath());
-    
+                        ServerProxy.getNativeFileManager().save(srcGxml,
+                                ExportConstants.UTF8,
+                                sourceCorpusDoc.getGxmlPath());
+
                         // add the source page mapping to the corpus
                         if (sourceCorpusSegments != null
                                 && sourceCorpusSegments.size() > 0)
@@ -1486,7 +1511,7 @@ public class ExportHelper
                             s_logger.debug("Mapping src segments to corpus doc.");
                             List<TuvMapping> sourceCorpusSegmentList = new ArrayList<TuvMapping>(
                                     sourceCorpusSegments.values());
-    
+
                             corpusManager.mapSegmentsToCorpusDoc(
                                     sourceCorpusSegmentList, sourceCorpusDoc);
                         }
@@ -1496,15 +1521,17 @@ public class ExportHelper
                             s_logger.debug("No src segments to map to corpus doc.");
                         }
                     }
-    
-                    // add the target page to the corpus, but not store target files
+
+                    // add the target page to the corpus, but not store target
+                    // files
                     s_logger.debug("Adding target corpus doc.");
                     CorpusDoc targetCorpusDoc = corpusManager
                             .addNewTargetLanguageCorpusDoc(sourceCorpusDoc,
                                     p_targetLocale, gxml, null, false);
-    
+
                     if (targetCorpusSegments != null
-                            && targetCorpusSegments.size() > 0 && targetCorpusDoc != null)
+                            && targetCorpusSegments.size() > 0
+                            && targetCorpusDoc != null)
                     {
                         s_logger.debug("Mapping target segments to corpus doc.");
                         List<TuvMapping> targetCorpusSegmentList = new ArrayList<TuvMapping>(
@@ -1516,14 +1543,17 @@ public class ExportHelper
                     {
                         s_logger.debug("No target segments to map.");
                     }
-    
+
                     Long cuvId = m_page.getCuvId();
                     m_page = (TargetPage) HibernateUtil.get(TargetPage.class,
                             m_page.getId());
                     m_page.setCuvId(cuvId);
                     HibernateUtil.update(m_page);
-                } else {
-                    s_logger.info("can NOT get source page cuvId of [" + m_sourcePage.getExternalPageId() + "]");
+                }
+                else
+                {
+                    s_logger.info("can NOT get source page cuvId of ["
+                            + m_sourcePage.getExternalPageId() + "]");
                 }
             }
             catch (Exception e)
@@ -1551,7 +1581,7 @@ public class ExportHelper
     @SuppressWarnings("rawtypes")
     private void populateTemplateWithUpdatedSegments(PageTemplate p_template,
             List p_segments, GlobalSightLocale p_locale, boolean p_isPreview,
-            List p_tuvIds, Map p_corpusSegments,
+            boolean p_isIncontextReview, List p_tuvIds, Map p_corpusSegments,
             boolean p_restoreSpacesForJavaProerties) throws PageException
     {
         boolean changeFont = determineIfNeedFontChange(p_locale);
@@ -1578,7 +1608,8 @@ public class ExportHelper
         {
         }
 
-        boolean needToAddGsColor = needToAddColorTag(p_isPreview);
+        boolean needToAddGsColor = needToAddColorTag(p_isPreview,
+                p_isIncontextReview);
         boolean isInddOrIdml = isInddOrIdml();
         if (needToAddGsColor)
         {
@@ -1610,8 +1641,8 @@ public class ExportHelper
 
                 boolean isLocalizable = (element == GxmlElement.LOCALIZABLE);
                 updateSegValue(p_template, segment, p_isPreview,
-                        needToAddGsColor, p_tuvIds, p_corpusSegments,
-                        isLocalizable, isInddOrIdml);
+                        needToAddGsColor, p_isIncontextReview, p_tuvIds,
+                        p_corpusSegments, isLocalizable, isInddOrIdml);
             }
         }
 
@@ -2144,7 +2175,7 @@ public class ExportHelper
                 pageTemplate.setTabsTrip(isTabstrip);
                 pageTemplate.setXlfSrcAsTrg(exportParam.getXlfSrcAsTrg());
                 String populatePage = populatePage(pageTemplate, segments,
-                        targetLocale, false, null);
+                        targetLocale, false, false, null);
 
                 if (isTabstrip)
                 {
@@ -2334,8 +2365,10 @@ public class ExportHelper
      */
     @SuppressWarnings("rawtypes")
     private void updateSegValue(PageTemplate p_template, Tuv p_segment,
-            boolean p_isPreview, boolean p_needToAddGsColor, List p_tuvIds,
-            Map p_targetCorpusMappings, boolean p_isLocalizable, boolean isInddOrIdml)
+            boolean p_isPreview, boolean p_needToAddGsColor,
+            boolean p_isIncontextReview, List p_tuvIds,
+            Map p_targetCorpusMappings, boolean p_isLocalizable,
+            boolean isInddOrIdml)
     {
         long jobId = p_template.getSourcePage().getJobId();
         String tuvContent = null;
@@ -2376,6 +2409,9 @@ public class ExportHelper
                     {
                         String content = m.group(2);
 
+                        // GBS-3722, clean the MT tags first
+                        content = MTHelper.cleanMTTagsForExport(content);
+
                         content = addRemovedPrefixTag(content,
                                 tu.getPrefixTag());
                         content = addRemovedSuffixTag(content,
@@ -2389,7 +2425,7 @@ public class ExportHelper
                             {
                                 content = util.preHandle(content);
                             }
-                            
+
                             String oriContent = content;
                             content = addRemovedTags(content,
                                     tu.getRemovedTag());
@@ -2423,7 +2459,82 @@ public class ExportHelper
                     p_segment, tuvContent);
         }
 
-        if (p_needToAddGsColor)
+        if (p_isIncontextReview)
+        {
+            String gsidMark = "_gsid_" + tuId + "_";
+            if (tuvContent != null && !"".equals(tuvContent.trim()))
+            {
+                String segStart = "";
+                String segEnd = "";
+                String innerContent = tuvContent;
+                if (tuvContent.startsWith("<segment")
+                        && tuvContent.endsWith("</segment>"))
+                {
+                    int index = tuvContent.indexOf(">");
+                    int index_2 = tuvContent.lastIndexOf("<");
+                    segStart = tuvContent.substring(0, index + 1);
+                    innerContent = tuvContent.substring(index + 1, index_2);
+                    segEnd = tuvContent.substring(index_2);
+                }
+
+                boolean added = false;
+                if (isIdml())
+                {
+                    if (innerContent.startsWith("<"))
+                    {
+                        if (innerContent.endsWith(">"))
+                        {
+                            String keyWords = "<ept[^>]*?>&lt;/Content&gt;";
+                            Pattern p = Pattern.compile(keyWords);
+                            Matcher m = p.matcher(innerContent);
+
+                            if (m.find())
+                            {
+                                int index = m.start();
+
+                                while (m.find())
+                                {
+                                    index = m.start();
+                                }
+
+                                innerContent = innerContent.substring(0, index)
+                                        + gsidMark
+                                        + innerContent.substring(index);
+                                added = true;
+                            }
+                        }
+                        else
+                        {
+                            int index = innerContent.lastIndexOf(">");
+
+                            if (index != -1)
+                            {
+                                innerContent = innerContent.substring(0,
+                                        index + 1)
+                                        + gsidMark
+                                        + innerContent.substring(index + 1);
+                                added = true;
+                            }
+                        }
+                    }
+                    else if (innerContent.endsWith(">"))
+                    {
+                        int index = innerContent.indexOf("<");
+                        innerContent = innerContent.substring(0, index)
+                                + gsidMark + innerContent.substring(index);
+                        added = true;
+                    }
+                }
+
+                if (!added)
+                {
+                    innerContent = innerContent + gsidMark;
+                }
+
+                tuvContent = segStart + innerContent + segEnd;
+            }
+        }
+        else if (p_needToAddGsColor)
         {
             tuvContent = addGlobalSightColorTag(tuvContent, p_segment,
                     isInddOrIdml, jobId);
@@ -2431,27 +2542,24 @@ public class ExportHelper
 
         p_template.insertTuvContent(tuId, tuvContent);
     }
-    
+
     private StyleUtil getStyleUtil()
     {
-    	StyleUtil util = null;
-    	if (isDocx())
+        StyleUtil util = null;
+        if (isDocx())
         {
-            util = StyleFactory
-                    .getStyleUtil(StyleFactory.DOCX);
+            util = StyleFactory.getStyleUtil(StyleFactory.DOCX);
         }
         else if (isPptx())
         {
-            util = StyleFactory
-                    .getStyleUtil(StyleFactory.PPTX);
+            util = StyleFactory.getStyleUtil(StyleFactory.PPTX);
         }
         else if (isXlsx())
         {
-            util = StyleFactory
-                    .getStyleUtil(StyleFactory.XLSX);
+            util = StyleFactory.getStyleUtil(StyleFactory.XLSX);
         }
-    	
-    	return util;
+
+        return util;
     }
 
     @SuppressWarnings(
@@ -2691,9 +2799,10 @@ public class ExportHelper
         return isICE;
     }
 
-    private boolean needToAddColorTag(boolean p_isPreview)
+    private boolean needToAddColorTag(boolean p_isPreview,
+            boolean p_isIncontextReview)
     {
-        if (!p_isPreview)
+        if (!p_isPreview || p_isIncontextReview)
         {
             return false;
         }
@@ -2707,7 +2816,7 @@ public class ExportHelper
         {
             return true;
         }
-        
+
         if (isInddOrIdml())
         {
             return true;
@@ -2726,7 +2835,7 @@ public class ExportHelper
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -2745,8 +2854,8 @@ public class ExportHelper
             // Source segment has trailing spaces?
             long sourcePageLocaleId = m_sourcePage.getGlobalSightLocale()
                     .getIdAsLong();
-            Tuv sourceTuv = p_segment.getTu(p_jobId).getTuv(
-                    sourcePageLocaleId, p_jobId);
+            Tuv sourceTuv = p_segment.getTu(p_jobId).getTuv(sourcePageLocaleId,
+                    p_jobId);
             String sourceTuvContentNoTags = sourceTuv.getGxmlExcludeTopTags();
             int sourceTrailingSpaceNum = countTrailingSpaceNum(sourceTuvContentNoTags);
             // Target segment has trailing spaces?
@@ -2857,7 +2966,7 @@ public class ExportHelper
 
         return false;
     }
-    
+
     /**
      * Checks the page type is docx or not.
      * 
@@ -2944,7 +3053,7 @@ public class ExportHelper
                 String s2 = s.substring(index);
                 return addRemovedTags(s1, removedTag) + s2;
             }
-            
+
             // for other [it]
             Pattern pIt = Pattern.compile(REGEX_IT);
             Matcher mIt = pIt.matcher(s);

@@ -702,6 +702,24 @@ public class HibernateUtil
         return result.get(0);
     }
 
+    public static Object getFirstWithSql(String sql, Object param1, Object param2)
+            throws HibernateException
+    {
+        Session session = getSession();
+        SQLQuery query = session.createSQLQuery(sql);
+        query.setParameter(0, param1);
+        query.setParameter(01, param2);
+
+        List<?> result = query.list();
+
+        if (result == null || result.size() == 0)
+        {
+            return null;
+        }
+
+        return result.get(0);
+    }
+    
     /**
      * Gets the real object extends by <code>cglib</code>
      * 

@@ -187,6 +187,11 @@ function checkExistFMFilterCallback(data)
 			sendAjax(checkExistFMFilterCallback.obj, "saveFMFilter", "saveFMFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("fmFilterDialog");
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

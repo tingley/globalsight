@@ -31,6 +31,12 @@ import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
 import com.globalsight.cxe.util.CxeProxy;
+import com.globalsight.cxe.util.fileImport.eventFlow.BatchInfo;
+import com.globalsight.cxe.util.fileImport.eventFlow.Da;
+import com.globalsight.cxe.util.fileImport.eventFlow.Dv;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
+import com.globalsight.cxe.util.fileImport.eventFlow.Source;
+import com.globalsight.cxe.util.fileImport.eventFlow.Target;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.diplomat.util.database.ConnectionPool;
@@ -78,7 +84,7 @@ public class Importer
     private org.apache.log4j.Logger m_logger = null;
     private String m_importRequestType = null;
     // private String m_cxeDocsDir = null;
-    private AlignerExtractor m_alignerExtractor = null;
+    public AlignerExtractor m_alignerExtractor = null;
     private String m_importInitiatorId = null;
     private String m_priority = null;
     private String jobUuid = "";
@@ -195,6 +201,121 @@ public class Importer
             throw new FileSystemAdapterException("InputOutputIm", m_errorArgs,
                     ioe);
         }
+    }
+    
+    /**
+     * Creates the EventFlowXml. Assume going back to FileSystemTargetAdapter.
+     * 
+     * @param isAutomaticImport
+     *            -- false if manual import
+     * @return the object of Event Flow Xml
+     * @throws FileSystemAdapterException
+     */
+    public EventFlowXml makeEventFlowXmlObject(boolean p_isAutomaticImport)
+            throws FileSystemAdapterException
+    {
+        if (m_alignerExtractor == null)
+        {
+            getEventFlowXmlData();
+        }
+        else
+        {
+            // assume this is for aligner import
+            m_logger.info("Reading values for aligner import.");
+
+            KnownFormatType knf = m_alignerExtractor.getFormat();
+            m_formatType = knf.getFormatType();
+            m_preExtractEvent = knf.getPreExtractEvent();
+            m_preMergeEvent = knf.getPreMergeEvent();
+            m_codeset = m_alignerExtractor.getEncoding();
+            m_l10nProfileId = null;
+            m_locale = m_alignerExtractor.getLocale();
+        }
+
+        // xml file is encoded as UTF-8.
+        if ("xml".equalsIgnoreCase(m_formatType))
+        {
+            m_codeset = "UTF-8";
+        }
+
+        String l10nProfileId = null;// Fenshid: this via is no use at all
+        String eventFlowXml = null;
+        
+        EventFlowXml object = new EventFlowXml();
+        object.setPreMergeEvent(m_preMergeEvent);
+        object.setPostMergeEvent(CxeMessageType.getCxeMessageType(
+                CxeMessageType.FILE_SYSTEM_EXPORT_EVENT).getName());
+        
+        //batch info
+        BatchInfo info = new BatchInfo();
+        info.setL10NProfileId(m_l10nProfileId);
+        info.setProcessingMode("automatic");
+        info.setBatchId(m_batchId);
+        info.setFileProfileId(m_fileProfileId);
+        info.setPageCount(m_pageCount);
+        info.setPageNumber(m_pageNum);
+        info.setDocPageCount(m_docPageCount);
+        info.setDocPageNumber(m_docPageNum);
+        info.setDisplayName(m_displayName);
+        info.setBaseHref(m_baseHref);
+        info.setPriority(m_priority);
+        info.setJobName(m_jobName);
+        info.setJobId(m_jobId);
+        info.setUuid(jobUuid);
+        object.setBatchInfo(info);
+        
+        // source
+        Source source = new Source();
+        source.setName("FileSystemSourceAdapter");
+        if (p_isAutomaticImport)
+            source.setDataSourceType("fsAutoImport");
+        else
+            source.setDataSourceType("fs");
+        source.setDataSourceId(m_fileProfileId);
+        source.setFormatType(m_formatType);
+        source.setFormatName(m_formatName);
+        source.setPageIsCxePreviewable("false");
+        source.setImportRequestType(m_importRequestType);
+        source.setImportInitiatorId(m_importInitiatorId);
+        source.setLocale(m_locale);
+        source.setCharset(m_codeset);
+        Da da = new Da();
+        da.setName("Filename");
+        Dv dv = new Dv();
+        dv.setvalue(m_relativePathName);
+        da.getDv().add(dv);
+        source.getDa().add(da);
+        object.setSource(source);
+        
+        //target
+        Target target = new Target();
+        target.setName("FileSystemTargetAdapter");
+        if (m_targetLocales == null || "".equals(m_targetLocales.trim()))
+        {
+            target.setLocale("unknown");
+        }
+        else
+        {
+            target.setLocale(m_targetLocales);
+        }
+        target.setCharset("unknown");
+       
+        Da da2 = new Da();
+        da2.setName("ExportLocation");
+        Dv dv2 = new Dv();
+        dv2.setvalue("unknown");
+        da2.getDv().add(dv2);        
+        target.getDa().add(da2);
+        
+        Da da3 = new Da();
+        da3.setName("LocaleSubDir");
+        Dv dv3 = new Dv();
+        dv3.setvalue("unknown");
+        da3.getDv().add(dv3);        
+        target.getDa().add(da3);
+        object.setTarget(target);
+       
+        return object;
     }
 
     /**

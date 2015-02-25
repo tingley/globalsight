@@ -1388,6 +1388,11 @@ function checkExistHtmlFilterCallback(data)
 			sendAjax(checkExistHtmlFilterCallback.obj, "saveHtmlFilter", "saveHtmlFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("htmlFilterDialog");
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

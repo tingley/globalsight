@@ -34,16 +34,15 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.engine.eventflow.Category;
-import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
-import com.globalsight.cxe.engine.eventflow.EventFlow;
-import com.globalsight.cxe.engine.eventflow.ExportBatchInfo;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.cxe.util.fileImport.eventFlow.Category;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
+import com.globalsight.cxe.util.fileImport.eventFlow.ExportBatchInfo;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
@@ -70,7 +69,7 @@ public class PassoloHelper
 
     private CxeMessage m_cxeMessage;
 
-    private EventFlow m_eventFlow;
+    private EventFlowXml m_eventFlow;
 
     private static Object s_exportBatchesLocker = new Object();
 
@@ -96,7 +95,7 @@ public class PassoloHelper
     public PassoloHelper(CxeMessage p_cxeMessage)
     {
         m_cxeMessage = p_cxeMessage;
-        m_eventFlow = new EventFlow(p_cxeMessage.getEventFlowXml());
+        m_eventFlow = p_cxeMessage.getEventFlowObject();
         m_passoloProperties = passoloConfig.loadProperties();
     }
 
@@ -136,16 +135,16 @@ public class PassoloHelper
             int i = 0;
             for (String key : messageData.keySet())
             {
+                EventFlowXml newEventFlowXml = m_eventFlow.clone();
                 modifyEventFlowXmlForImport(filename, key, i + 1,
-                        messageData.size());
+                        messageData.size(), newEventFlowXml);
                 // 6 return proper CxeMesseges
                 CxeMessageType type = getPostConversionEvent();
                 CxeMessage cxeMessage = new CxeMessage(type);
                 cxeMessage.setParameters(m_cxeMessage.getParameters());
                 cxeMessage.setMessageData(messageData.get(key));
 
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                cxeMessage.setEventFlowXml(eventFlowXml);
+                cxeMessage.setEventFlowObject(newEventFlowXml);
 
                 result[i] = cxeMessage;
 
@@ -224,8 +223,7 @@ public class PassoloHelper
         try
         {
             setBasicParams();
-            String fileName = getCategory().getDiplomatAttribute(
-                    "safeBaseFileName").getValue();
+            String fileName = getCategory().getValue("safeBaseFileName");
             initLpu(fileName, exportBatchId);
             String saveFileName = writeContent();
             HashMap params = m_cxeMessage.getParameters();
@@ -251,8 +249,7 @@ public class PassoloHelper
             String tFileName = (String) params.get("TargetFileName");
             if (ExportUtil.isLastFile(eBatchId, tFileName, "all"))
             {
-                String oofilename = getCategory().getDiplomatAttribute(
-                        "safeBaseFileName").getValue();
+                String oofilename = fileName;
                 String oofile = FileUtils.concatPath(m_saveDir, oofilename);
 
                 modifyEventFlowXmlForExport(oofile);
@@ -271,9 +268,7 @@ public class PassoloHelper
                                 .getPostMergeEvent()));
                 outputMsg.setMessageData(fmd);
                 outputMsg.setParameters(params);
-
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                outputMsg.setEventFlowXml(eventFlowXml);
+                outputMsg.setEventFlowObject(m_eventFlow.clone());
 
                 INIT_FILES.get(exportBatchId).remove(fileName);
                 return new CxeMessage[]
@@ -293,7 +288,7 @@ public class PassoloHelper
                 CxeMessageType type = CxeMessageType
                         .getCxeMessageType(CxeMessageType.CXE_EXPORT_STATUS_EVENT);
                 CxeMessage outputMsg = new CxeMessage(type);
-                outputMsg.setEventFlowXml(m_eventFlow.serializeToXml());
+                outputMsg.setEventFlowObject(m_eventFlow.clone());
                 params.put("Exception", null);
                 params.put("ExportedTime", new Long(lastMod));
                 outputMsg.setParameters(params);
@@ -615,68 +610,61 @@ public class PassoloHelper
 
     private void modifyEventFlowXmlForExport(String name)
     {
-        String root = name + ".xliffs";
-        int size = FileUtil.getAllFiles(new File(root)).size();
-        int pageCount = m_eventFlow.getPageCount();
-        pageCount = pageCount - size + 1;
-        // m_eventFlow.setPageCount(pageCount);
-
         m_eventFlow.setPostMergeEvent(getCategory().getPostMergeEvent());
     }
 
     protected void modifyEventFlowXmlForImport(String fileName,
-            String xliffPath, int p_docPageNum, int p_docPageCount)
+            String xliffPath, int p_docPageNum, int p_docPageCount, EventFlowXml newEventFlowXml)
             throws Exception
     {
         File f = new File(fileName);
         String name = f.getName();
-
+        
+        String postMergeEvent;
+        String formatType;
+        String safeBaseFileName;
+        String originalFileSize;
         // First get original Category
         Category oriC = getCategory();
         if (oriC != null)
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            {
-                    oriC.getDiplomatAttribute("postMergeEvent"),
-                    oriC.getDiplomatAttribute("formatType"),
-                    oriC.getDiplomatAttribute("safeBaseFileName"),
-                    oriC.getDiplomatAttribute("originalFileSize"),
-                    new DiplomatAttribute("relSafeName", name + ".xliffs"
-                            + xliffPath) });
-
-            m_eventFlow.removeCategory(oriC);
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = oriC.getValue("postMergeEvent");
+            formatType = oriC.getValue("formatType");
+            safeBaseFileName = oriC.getValue("safeBaseFileName");
+            originalFileSize = oriC.getValue("originalFileSize");
+            newEventFlowXml.getCategory().remove(oriC);
         }
         else
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            {
-                    new DiplomatAttribute("postMergeEvent",
-                            m_eventFlow.getPostMergeEvent()),
-                    new DiplomatAttribute("formatType",
-                            m_eventFlow.getSourceFormatType()),
-                    new DiplomatAttribute("safeBaseFileName",
-                            getSafeBaseFileName()),
-                    new DiplomatAttribute("originalFileSize",
-                            String.valueOf(m_cxeMessage.getMessageData()
-                                    .getSize())),
-                    new DiplomatAttribute("relSafeName", name + ".xliffs"
-                            + xliffPath) });
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = newEventFlowXml.getPostMergeEvent();
+            formatType = newEventFlowXml.getSource().getFormatType();
+            safeBaseFileName = getSafeBaseFileName();
+            originalFileSize = String.valueOf(m_cxeMessage.getMessageData()
+                    .getSize());
         }
-        // Then modify eventFlow
-        m_eventFlow.setPostMergeEvent(getPostMergeEvent());
-        // m_eventFlow.setSourceFormatType("xml");
+        
+        Category newC = new Category();
+        newC.setName(CATEGORY_NAME);
+        newC.addValue("postMergeEvent", postMergeEvent);
+        newC.addValue("formatType", formatType);
+        newC.addValue("safeBaseFileName", safeBaseFileName);
+        newC.addValue("originalFileSize", originalFileSize);
+        newC.addValue("relSafeName", name + ".xliffs" + xliffPath);
+        newEventFlowXml.getCategory().add(newC);
 
-        m_eventFlow.setDocPageCount(p_docPageCount);
-        m_eventFlow.setDocPageNumber(p_docPageNum);
+        // Then modify eventFlow
+        newEventFlowXml.setPostMergeEvent(getPostMergeEvent());
+        // newEventFlowXml.setSourceFormatType("xml");
+
+        newEventFlowXml.getBatchInfo().setDocPageCount(p_docPageCount);
+        newEventFlowXml.getBatchInfo().setDocPageNumber(p_docPageNum);
 
         if (displayName == null)
         {
-            displayName = m_eventFlow.getDisplayName();
+            displayName = newEventFlowXml.getDisplayName();
         }
 
-        m_eventFlow.setDisplayName(displayName + xliffPath);
+        newEventFlowXml.getBatchInfo().setDisplayName(displayName + xliffPath);
     }
 
     protected MessageData readConvOutput(String fileName)
@@ -816,8 +804,7 @@ public class PassoloHelper
 
     private String writeContent() throws IOException
     {
-        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory()
-                .getDiplomatAttribute("relSafeName").getValue());
+        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory().getValue("relSafeName"));
         File saveFile = new File(saveFileName);
         File parent = saveFile.getParentFile();
         if (!parent.exists())

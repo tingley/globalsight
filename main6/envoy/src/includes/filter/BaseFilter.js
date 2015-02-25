@@ -241,6 +241,11 @@ function isBaseFilterValidCallback(data)
 			sendAjax(isFilterValidCallback.obj, "saveBaseFilter", "saveBaseFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("baseFilterDialog");
+		parent.location.reload();
+	}
 	else if (data == 'name_exists')
 	{
 		alert(existFilterName);

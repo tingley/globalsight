@@ -273,7 +273,7 @@ public class JobPackageZipper
             }
             writer.setResInsertOption(p_downloadParams.getResInsOption());
             writer.setUser(p_downloadParams.getUser());
-
+            setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
             // p_writer.writeRTF(p_page, m_zipOutputStream,
@@ -313,6 +313,7 @@ public class JobPackageZipper
 
         try
         {
+        	setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
 
@@ -345,6 +346,7 @@ public class JobPackageZipper
 
         try
         {
+        	setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
 
@@ -377,6 +379,7 @@ public class JobPackageZipper
 
         try
         {
+        	setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
 
@@ -416,6 +419,7 @@ public class JobPackageZipper
 
         try
         {
+        	setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
             m_zipOutputStream.closeEntry();
@@ -483,6 +487,7 @@ public class JobPackageZipper
 
         try
         {
+        	setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
             m_zipOutputStream.closeEntry();
@@ -513,6 +518,7 @@ public class JobPackageZipper
 
         try
         {
+        	setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
             m_zipOutputStream.closeEntry();
@@ -640,5 +646,13 @@ public class JobPackageZipper
                 CATEGORY.error(e.getMessage(), e);
             }
         }
+    }
+    
+    private void setPreserveSourceFolder(DownloadParams p_downloadParams, OfflinePageData p_page)
+    {
+    	if(p_downloadParams.isPreserveSourceFolder())
+    	{
+    		p_page.setPreserveSourceFolder(true);
+    	}
     }
 }

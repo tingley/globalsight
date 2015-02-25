@@ -718,6 +718,7 @@
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/downloadOpt.js"></SCRIPT>
 <SCRIPT>
 var taskId = <%=task_id%>;
@@ -1029,6 +1030,18 @@ function handleSelectAll(selectAll,theBoxes) {
 	    }
 }
 
+function setWordCountDisplay()
+{
+	if($("#consolidateFileType").val() == "consolidateByWordCount")
+	{
+		$("#wordCountForDownload").show();
+	}
+	else
+	{
+		$("#wordCountForDownload").hide();
+	}
+}
+
 $(document).ready(function(){
 	$("#taskWorkOfflineTab").removeClass("tableHeadingListOff");
 	$("#taskWorkOfflineTab").addClass("tableHeadingListOn");
@@ -1061,7 +1074,7 @@ $(document).ready(function(){
         <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=downloadUrl%>"><%=lbDownload%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
         <TD WIDTH="2"></TD>
         <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=uploadUrl%>"><%=lbUpload%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <%if(isReportUploadCheck == 1 || perms.getPermissionFor(Permission.REPORTS_TRANSLATIONS_EDIT)) {%>
+        <%if(isReportUploadCheck == 1 || perms.getPermissionFor(Permission.REPORTS_TRANSLATIONS_EDIT) || perms.getPermissionFor(Permission.REPORTS_POST_REVIEW_QA)) {%>
         <TD WIDTH="2"></TD>
         <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=downloadReportUrl%>"><%=lbDownloadReport%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
         <TD WIDTH="2"></TD>
@@ -1343,10 +1356,15 @@ $(document).ready(function(){
                 </TD>
             </TR>
             <TR id="needConsolidateBox" class="standardText">
-            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_consolate") %></SPAN></TD>
+            	<TD><SPAN CLASS="standardText">Consolidate/Split Type</SPAN></TD>
                 <TD>
                     <SPAN CLASS="standardText">
-                      <input type="checkbox" id="needConsolidate" name="needConsolidate" value="true" checked="checked" onclick="uniquenessCheck('needConsolidate')">
+                    <select name="consolidateFileType" id="consolidateFileType" onchange="setWordCountDisplay();uniquenessCheck('needConsolidate')" CLASS="standardText">
+                    	<option value="consolidate">Consolidate All Files</option>
+                    	<option value="notConsolidate">File by File</option>
+                    	<option value="consolidateByWordCount">Split File per Word Count</option>
+                    </select>
+                    <input name="wordCountForDownload" id="wordCountForDownload" style="display:none;width:60px;height:19px" class="standardText"/>
                     </SPAN>
                 </TD>
             </TR>

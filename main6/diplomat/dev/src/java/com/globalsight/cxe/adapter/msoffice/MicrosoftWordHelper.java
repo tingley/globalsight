@@ -31,8 +31,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.w3c.dom.Element;
-
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.IConverterHelper2;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
@@ -45,7 +43,8 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
-import com.globalsight.diplomat.util.Logger;
+import com.globalsight.cxe.util.fileImport.eventFlow.Category;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
@@ -106,8 +105,9 @@ public class MicrosoftWordHelper implements IConverterHelper2
     //
     // Private Member Data
     //
-    private String m_eventFlowXml = null;
-    protected EventFlowXmlParser m_parser = null;
+//    private String m_eventFlowXml = null;
+//    protected EventFlowXmlParser m_parser = null;
+    protected EventFlowXml m_eventFlowXml = null;
     private org.apache.log4j.Logger m_logger;
     private String m_safeBaseFileName = null;
     // the content specific conversion directory (D:\WINFILES\word)
@@ -148,9 +148,8 @@ public class MicrosoftWordHelper implements IConverterHelper2
     {
         m_cxeMessage = p_cxeMessage;
         m_logger = p_logger;
-        m_eventFlowXml = p_cxeMessage.getEventFlowXml();
+        m_eventFlowXml = p_cxeMessage.getEventFlowObject();
         m_msOfficeProperties = p_msOfficeProperties;
-        m_parser = new EventFlowXmlParser(m_eventFlowXml);
     }
 
     //
@@ -177,7 +176,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
         {
             String fullSafeName = writeFileToTempDir();
 
-            m_logger.info("Converting: " + m_parser.getDisplayName()
+            m_logger.info("Converting: " + m_eventFlowXml.getDisplayName()
                     + ", size: " + m_cxeMessage.getMessageData().getSize());
 
             convertWithOffice();
@@ -274,7 +273,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
         {
             m_logger.error("Could not perform conversion.", ex);
             String[] errorArgs =
-            { m_parser.getDisplayName() };
+            { m_eventFlowXml.getDisplayName() };
             throw new MsOfficeAdapterException("Import", errorArgs, ex);
         }
     }
@@ -295,19 +294,17 @@ public class MicrosoftWordHelper implements IConverterHelper2
 
         try
         {
-            Element categoryElement = m_parser
-                    .getCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
-            String relSafeName = m_parser.getCategoryDaValue(categoryElement,
-                    "relSafeName")[0];
+            Category c = m_eventFlowXml.getCategory("MicrosoftApplicationAdapter");
+            String relSafeName = c.getValue("relSafeName");
             String saveFile = m_saveDir + File.separator + relSafeName;
 
-            m_logger.info("ReConverting: " + m_parser.getDisplayName()
+            m_logger.info("ReConverting: " + m_eventFlowXml.getDisplayName()
                     + ", tmp file: " + saveFile);
 
             // Need to set these parameters prior to potential merge
             // errors (for gui).
             HashMap params = m_cxeMessage.getParameters();
-            boolean isComp = isComponent(m_parser.getDisplayName());
+            boolean isComp = isComponent(m_eventFlowXml.getDisplayName());
 
             if (isComp)
             {
@@ -324,9 +321,9 @@ public class MicrosoftWordHelper implements IConverterHelper2
             m_cxeMessage.getMessageData().copyTo(saveFile_f);
 
             long lastMod = saveFile_f.lastModified();
-            String exportBatchId = m_parser.getExportBatchId();
-            String fileName = m_parser.getFileName();
-            String targetLocale = m_parser.getTargetLocale();
+            String exportBatchId = m_eventFlowXml.getExportBatchInfo().getExportBatchId();
+            String fileName = m_eventFlowXml.getSource().getValue("Filename");
+            String targetLocale = m_eventFlowXml.getTargetLocale();
 
             // Use doc page count instead of overall batch page count.
             // int docPageCount = m_parser.getDocPageCount().intValue();
@@ -341,8 +338,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
             if (ExportUtil.isLastFile(eBatchId, tFileName, targetLocale))
             {
                 // This is the last page in the batch, so do the conversion.
-                String safeBaseFileName = m_parser.getCategoryDaValue(
-                        categoryElement, "safeBaseFileName")[0];
+                String safeBaseFileName = c.getValue("safeBaseFileName");
 
                 String htmlName = safeBaseFileName.substring(0,
                         safeBaseFileName.lastIndexOf(".")) + ".html";
@@ -360,13 +356,12 @@ public class MicrosoftWordHelper implements IConverterHelper2
                 FileMessageData fmd = (FileMessageData) MessageDataFactory
                         .createFileMessageData();
                 fmd.copyFrom(new File(expectedMsoFile));
-                String originalPostMergeEvent = m_parser.getCategoryDaValue(
-                        categoryElement, "postMergeEvent")[0];
+                String originalPostMergeEvent = c.getValue("postMergeEvent");
                 modifyEventFlowXmlForExport();
                 CxeMessageType type = CxeMessageType
                         .getCxeMessageType(originalPostMergeEvent);
                 CxeMessage outputMsg = new CxeMessage(type);
-                outputMsg.setEventFlowXml(m_eventFlowXml);
+                outputMsg.setEventFlowObject(m_eventFlowXml);
                 outputMsg.setMessageData(fmd);
                 outputMsg.setParameters(params);
 
@@ -381,7 +376,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
                 CxeMessageType type = CxeMessageType
                         .getCxeMessageType(CxeMessageType.CXE_EXPORT_STATUS_EVENT);
                 CxeMessage outputMsg = new CxeMessage(type);
-                outputMsg.setEventFlowXml(m_eventFlowXml);
+                outputMsg.setEventFlowObject(m_eventFlowXml);
                 params.put("Exception", null);
                 params.put("ExportedTime", new Long(lastMod));
                 outputMsg.setParameters(params);
@@ -393,7 +388,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
         {
             m_logger.error("Could not perform re-conversion.", ex);
             String[] errorArgs =
-            { m_parser.getDisplayName() };
+            { m_eventFlowXml.getDisplayName() };
             throw new MsOfficeAdapterException("Export", errorArgs, ex);
         }
     }
@@ -409,7 +404,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
             String p_expectedHtmlFileName) throws Exception
     {
         RecursiveCopy rc = new RecursiveCopy();
-        String[] targetLocales = m_parser.getTargetLocale().split(",");
+        String[] targetLocales = m_eventFlowXml.getTargetLocale().split(",");
         String baseDirName = p_expectedSubDirName
                 .substring(lastSeparatorIndex(p_expectedSubDirName) + 1);
         String baseFileName = p_expectedHtmlFileName
@@ -466,7 +461,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
     {
         // With so many different systems involved, the file may have
         // come from unix or NT.
-        String displayName = m_parser.getDisplayName();
+        String displayName = m_eventFlowXml.getDisplayName();
         m_logger.debug("Display name is  " + displayName);
 
         // Find where \ and / are in the filename, and use whichever
@@ -557,12 +552,11 @@ public class MicrosoftWordHelper implements IConverterHelper2
                         + f.getAbsolutePath());
             }
 
-            String modifiedEventFlowXml = modifyEventFlowXmlForImport(f, i + 1,
+            EventFlowXml xml = modifyEventFlowXmlForImport(f, i + 1,
                     x.length, slideSequence, bulletCss);
 
             CxeMessage importMsg = new CxeMessage(msgType);
-            importMsg.setEventFlowXml(modifiedEventFlowXml);
-
+            importMsg.setEventFlowObject(xml);
             importMsg.setParameters(hm);
             FileMessageData fmd = (FileMessageData) MessageDataFactory
                     .createFileMessageData();
@@ -583,24 +577,13 @@ public class MicrosoftWordHelper implements IConverterHelper2
      */
     private void modifyEventFlowXmlForExport() throws Exception
     {
-        Logger.writeDebugFile("msta_efxml_a.xml", m_eventFlowXml);
-
-        Element categoryElement = m_parser
-                .getCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
-        String originalPostMergeEvent = m_parser.getCategoryDaValue(
-                categoryElement, "postMergeEvent")[0];
-        m_parser.setPostMergeEvent(originalPostMergeEvent);
+        Category c = m_eventFlowXml.getCategory("MicrosoftApplicationAdapter");
+        String originalPostMergeEvent = c.getValue("postMergeEvent");
+        m_eventFlowXml.setPostMergeEvent(originalPostMergeEvent);
 
         // Re-set the base href.
-        String originalBaseHref = m_parser.getCategoryDaValue(categoryElement,
-                "originalBaseHref")[0];
-        m_parser.setBaseHref(originalBaseHref);
-
-        // Reconstruct the EventFlowXml String.
-        m_parser.reconstructEventFlowXmlStringFromDOM();
-        m_eventFlowXml = m_parser.getEventFlowXml();
-
-        Logger.writeDebugFile("msta_efxml_b.xml", m_eventFlowXml);
+        String originalBaseHref = c.getValue("originalBaseHref");
+        m_eventFlowXml.getBatchInfo().setBaseHref(originalBaseHref);
     }
 
     private boolean isMainFile(String fileName)
@@ -620,28 +603,24 @@ public class MicrosoftWordHelper implements IConverterHelper2
     /**
      * Modify the event flow xml for the import process.
      */
-    private String modifyEventFlowXmlForImport(File p_htmlFile,
+    private EventFlowXml modifyEventFlowXmlForImport(File p_htmlFile,
             int p_docPageNum, int p_docPageCount, HashMap slideSequence,
             String bulletCss) throws Exception
     {
         // First copy the EventFlowXml and then modify it.
-        String newEventFlowXml = new String(m_eventFlowXml);
-        EventFlowXmlParser parser = new EventFlowXmlParser(newEventFlowXml);
-        parser.parse();
-
+        EventFlowXml newXml = m_eventFlowXml.clone();
         String htmlFileName = p_htmlFile.getAbsolutePath();
         // Now get all the original values and replace with new values.
-        String originalPostMergeEvent = parser
-                .setPostMergeEvent(POST_MERGE_EVENT);
-        String originalPageCount = parser.getPageCount();
-        String originalPageNumber = parser.getPageNumber();
-
-        parser.setDocPageCount(Integer.toString(p_docPageCount));
-        parser.setDocPageNumber(Integer.toString(p_docPageNum));
+        String originalPostMergeEvent = newXml.getPostMergeEvent();
+        newXml.setPostMergeEvent(POST_MERGE_EVENT);
+        int originalPageCount = newXml.getBatchInfo().getPageCount();
+        int originalPageNumber = newXml.getBatchInfo().getPageNumber();
+        newXml.getBatchInfo().setDocPageCount(p_docPageCount);
+        newXml.getBatchInfo().setDocPageNumber(p_docPageNum);
 
         // The main Powerpoint file is not imported (see performConversion())
         // so we need to start counting at 1 for PPT.
-        String newDisplayName = parser.getDisplayName();
+        String newDisplayName = newXml.getDisplayName();
         if (m_type == MS_PPT)
         {
             String baseName = null;
@@ -702,77 +681,27 @@ public class MicrosoftWordHelper implements IConverterHelper2
             }
         }
 
-        String originalDisplayName = parser.setDisplayName(newDisplayName);
-        String originalBaseHref = parser
-                .setBaseHref(determineNewBaseHref(htmlFileName));
+        String originalDisplayName = newXml.getDisplayName();
+        newXml.getBatchInfo().setDisplayName(newDisplayName);
+        String originalBaseHref = newXml.getBatchInfo().getBaseHref();
+        newXml.getBatchInfo().setBaseHref(determineNewBaseHref(htmlFileName));
 
         // <cateogory name="MicrosoftApplicationAdapter">
-        Element categoryElement = parser
-                .addCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
-        String[] values = new String[1];
-
-        // <da
-        // name="postMergeEvent><dv>GlobalSight::FileSystemMergedEvent</dv></da>
-        values[0] = originalPostMergeEvent;
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "postMergeEvent", values));
-
-        // <da name="originalPageCount"><dv>1</dv></da>
-        values[0] = originalPageCount;
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "originalPageCount", values));
-
-        // <da name="originalPageNumber"><dv>1</dv></da>
-        values[0] = originalPageNumber;
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "originalPageNumber", values));
-
-        // <da name="originalDisplayName"><dv>en_US\foo.doc</dv></da>
-        values[0] = originalDisplayName;
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "originalDisplayName", values));
-
-        // <da name="originalBaseHref"><dv>en_US\blah\blah</dv></da>
-        values[0] = originalBaseHref;
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "originalBaseHref", values));
-
-        // <da name="safeBaseFileName"><dv>1234Foo.doc</dv></da>
-        values[0] = m_safeBaseFileName;
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "safeBaseFileName", values));
-
-        // <da name="relSafeName"><dv>blah_files\header.html</dv></da>
-        values[0] = htmlFileName.substring(m_saveDir.length(),
-                htmlFileName.length());
-
-        if (m_logger.isDebugEnabled())
-        {
-            m_logger.debug("relSafeName is " + values[0]);            
-        }
-
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "relSafeName", values));
-
-        // <da name="msoffice_dir"><dv>C:\WINFILES\word</dv></da>
-        values[0] = m_convDir;
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "msoffice_dir", values));
-
-        // For PPT issue
-        values[0] = bulletCss;
-        categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
-                "css_bullet", values));
-
-        // Reconstruct the EventFlowXml string.
-        parser.reconstructEventFlowXmlStringFromDOM();
-        String modifiedEventFlowXml = parser.getEventFlowXml();
-
-        // Write out the eventFlowXml for debugging.
-        Logger.writeDebugFile("efxml_" + Integer.toString(p_docPageNum)
-                + ".xml", modifiedEventFlowXml);
-
-        return modifiedEventFlowXml;
+        Category c = new Category();
+        c.setName("MicrosoftApplicationAdapter");
+        c.addValue("postMergeEvent", originalPostMergeEvent);
+        c.addValue("originalPageCount", Integer.toString(originalPageCount));
+        c.addValue("originalPageNumber", Integer.toString(originalPageNumber));
+        c.addValue("originalDisplayName", originalDisplayName);       
+        c.addValue("originalBaseHref", originalBaseHref);
+        c.addValue("safeBaseFileName", m_safeBaseFileName);
+        c.addValue("relSafeName", htmlFileName.substring(m_saveDir.length(),
+                htmlFileName.length()));
+        c.addValue("msoffice_dir", m_convDir);
+        c.addValue("css_bullet", bulletCss);
+        newXml.getCategory().add(c);
+ 
+        return newXml;
     }
 
     /**
@@ -784,8 +713,6 @@ public class MicrosoftWordHelper implements IConverterHelper2
     {
         try
         {
-            m_parser.parse();
-
             setType();
             setConversionDir();
             setSaveDirectory();
@@ -1377,18 +1304,6 @@ public class MicrosoftWordHelper implements IConverterHelper2
         return fullSafeName;
     }
 
-    //
-    // Mutators/Accessors for member data
-    //
-
-    /**
-     * Returns the EventFlowXml Parser
-     */
-    protected EventFlowXmlParser getEventFlowXmlParser()
-    {
-        return m_parser;
-    }
-
     /**
      * Returns the event to publish after doing a conversion from Native to XML. <br>
      * 
@@ -1399,81 +1314,19 @@ public class MicrosoftWordHelper implements IConverterHelper2
         return POST_NATIVE_TO_HTML_CONVERSION_EVENT;
     }
 
-    /**
-     * Returns the event to publish after doing a conversion from XML to Native.
-     * This should be an event that takes the content back to the data source
-     * adapter. <br>
-     * 
-     * @return something like "GlobalSight::FileSystemMergedEvent"
-     */
-    public String getPostHtmlToNativeConversionEvent()
-    {
-        return m_parser.getPostMergeEvent();
-    }
-
-    /**
-     * Access the Hashtable s_exportBatches to see what the current page count
-     * of this export batch is. This call decrements the value in the table.
-     */
-    private static boolean isExportFileComplete(String p_fileId, int p_pageCount)
-    {
-        // Default is to write out the file.
-        boolean result = true;
-        int curPageCnt = -1;
-
-        synchronized (s_exportBatches)
-        {
-            Integer oldPageCount = (Integer) s_exportBatches.get(p_fileId);
-            if (oldPageCount == null)
-            {
-                // First page of this exportBatch.
-                curPageCnt = p_pageCount - 1;
-                if (curPageCnt == 0)
-                {
-                    // The batch is complete, no need to put anything
-                    // in the hashtable.
-                    result = true;
-                }
-                else
-                {
-                    result = false;
-                    s_exportBatches.put(p_fileId, new Integer(curPageCnt));
-                }
-            }
-            else
-            {
-                curPageCnt = oldPageCount.intValue() - 1;
-                if (curPageCnt == 0)
-                {
-                    // The batch is complete, remove the value from the
-                    // hashtable.
-                    result = true;
-                    s_exportBatches.remove(p_fileId);
-                }
-                else
-                {
-                    result = false;
-                    s_exportBatches.put(p_fileId, new Integer(curPageCnt));
-                }
-            }
-        }
-
-        return result;
-    }
-
     private void setFileProfileId()
     {
         // GBS-789 : Can not create aligner package with MS Office file formats
         // There is no fileProfileId when create Aligner Package, and we assign
         // it as 0.
-        String fpId = m_parser.getFileProfileIdStr();
+        String fpId = m_eventFlowXml.getBatchInfo().getFileProfileId();
         if (fpId == null || fpId.equalsIgnoreCase("null"))
         {
             fileProfileId = 0;
         }
         else
         {
-            fileProfileId = m_parser.getFileProfileId();
+            fileProfileId = Long.parseLong(fpId);
         }
     }
 
@@ -1482,7 +1335,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
      */
     private void setType()
     {
-        String name = m_parser.getDisplayName().toLowerCase();
+        String name = m_eventFlowXml.getDisplayName().toLowerCase();
 
         if (name.endsWith(DOC) || name.endsWith(PDF))
         {
@@ -1531,7 +1384,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
                 .getInstance().getStringParameter(
                         SystemConfigParamNames.MSOFFICE_CONV_DIR));
 
-        String formatName = m_parser.getSourceFormatName().toLowerCase();
+        String formatName = m_eventFlowXml.getSource().getFormatName().toLowerCase();
         if (formatName != null
                 && ("word2003".equals(formatName)
                         || "excel2003".equals(formatName) || "powerpoint2003"
@@ -1570,7 +1423,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
         StringBuffer saveDir = new StringBuffer(m_convDir);
 
         saveDir.append(File.separator);
-        saveDir.append(m_isImport ? m_parser.getSourceLocale() : m_parser
+        saveDir.append(m_isImport ? m_eventFlowXml.getSourceLocale() : m_eventFlowXml
                 .getTargetLocale());
         File saveDirF = new File(saveDir.toString());
         saveDirF.mkdirs();
@@ -1599,7 +1452,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
     {
         String convDir = SystemConfiguration.getInstance().getStringParameter(
                 SystemConfigParamNames.MSOFFICE_CONV_DIR);
-        String formatName = m_parser.getSourceFormatName().toLowerCase();
+        String formatName = m_eventFlowXml.getSource().getFormatName().toLowerCase();
         if (formatName != null
                 && ("word2003".equals(formatName)
                         || "excel2003".equals(formatName) || "powerpoint2003"
@@ -1664,7 +1517,7 @@ public class MicrosoftWordHelper implements IConverterHelper2
      */
     private String determineAbsoluteExportPathForDisplay(HashMap p_params)
     {
-        String displayName = m_parser.getDisplayName();
+        String displayName = m_eventFlowXml.getDisplayName();
         String exportLocation = (String) p_params.get("ExportLocation");
         String localeSubDir = (String) p_params.get("LocaleSubDir");
 

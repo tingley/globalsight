@@ -74,4 +74,8 @@ public interface SynchronizationManager
      */
     SynchronizationStatus getStatus(Long p_pageId)
         throws RemoteException;
+
+	boolean checkTempFileName(String pTempFileName);
+	
+	void setTempFileName(String p_tempFileName);
 }

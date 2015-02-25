@@ -17,6 +17,7 @@
 
 package com.globalsight.everest.persistence.tuv;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -47,7 +48,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAltUtil;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
@@ -183,6 +183,33 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + TUV_TABLE_PLACEHOLDER + " tuv "
             + "SET tuv.STATE = 'APPROVED' "
             + "WHERE tuv.ID IN (untranslated_target_tuv_ids) ";
+    
+    private static final String COUNT_TRANSLATE_TUV_ALL = "SELECT COUNT(DISTINCT TUV.ID) FROM "
+            + TUV_TABLE_PLACEHOLDER
+            + " tuv, "
+            + TU_TABLE_PLACEHOLDER
+            + " tu, target_page_leverage_group tplg "
+            + " WHERE tuv.tu_id = tu.id"
+            + " AND tu.leverage_group_id = tplg.lg_id"
+            + " AND tuv.state != 'OUT_OF_DATE'"
+            + " AND tuv.STATE != 'DO_NOT_TRANSLATE'"
+            + " AND tuv.locale_id = ?"
+            + " AND tplg.tp_id = ?";
+    
+    private static final String COUNT_TRANSLATE_TUV_TRANSLATED = "SELECT COUNT(DISTINCT TUV.ID) FROM "
+            + TUV_TABLE_PLACEHOLDER
+            + " tuv, "
+            + TU_TABLE_PLACEHOLDER
+            + " tu, target_page_leverage_group tplg "
+            + " WHERE tuv.tu_id = tu.id"
+            + " AND tu.leverage_group_id = tplg.lg_id"
+            + " AND (tuv.state = 'LOCALIZED' OR tuv.state = 'APPROVED' OR tuv.state = 'EXACT_MATCH_LOCALIZED')"
+            + " AND tuv.locale_id = ?"
+            + " AND tplg.tp_id = ?"; 
+ 
+    private static final String GET_SOURCE_PAGE_ID = "SELECT SOURCE_PAGE_ID FROM TARGET_PAGE WHERE ID = ?";
+    private static final String GET_LOCALE_ID = "SELECT TARGET_LOCALE_ID FROM WORKFLOW w, TARGET_PAGE tp "
+            + "WHERE tp.WORKFLOW_IFLOW_INSTANCE_ID = w.IFLOW_INSTANCE_ID AND tp.ID = ?";
 
     /**
      * Save TUVs into DB.
@@ -1386,42 +1413,20 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
         int total = 0;
         int translatedCounts = 0;
-        PageManager pageManager = ServerProxy.getPageManager();
-        LeverageMatchLingManager lingManager =
-                LingServerProxy.getLeverageMatchLingManager();
-
-        SourcePage sourcePage = null;
-        TargetPage targetPage = null;
-        MatchTypeStatistics tuvMatchTypes = null;
         try
         {
-            targetPage = pageManager.getTargetPage(targetPageId);
-            sourcePage= targetPage.getSourcePage();
-            List sourceTuvs = getSourceTuvs(sourcePage);
-            List targetTuvs = getTargetTuvs(targetPage);
-            Long targetLocaleId = targetPage.getGlobalSightLocale().getIdAsLong();
-            lingManager.setIncludeMtMatches(true);
-            tuvMatchTypes = lingManager.getMatchTypesForStatistics(
-                    sourcePage.getIdAsLong(), targetLocaleId, 0);
-
-            for (int j = 0; j < targetTuvs.size(); j++)
-            {
-                Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
-                Tuv targetTuv = (Tuv) targetTuvs.get(j);
-
-                TuvState targetState = targetTuv.getState();
-                // Ignore "DO_NOT_TRANSLATE" segment.
-                if (TuvState.DO_NOT_TRANSLATE.equals(targetState))
-                    continue;
-
-                if (SegmentFilter.isTreatAsTranslated(sourceTuv, targetTuv,
-                        tuvMatchTypes))
-                {
-                    translatedCounts++;
-                }
-
-                total++;
-            }
+            Long sourcePageId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_SOURCE_PAGE_ID, targetPageId)).longValue();
+            Long localeId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_LOCALE_ID, targetPageId)).longValue();
+            String tuvTableName = BigTableUtil
+                    .getTuvTableJobDataInBySourcePageId(sourcePageId);
+            String tuTableName = BigTableUtil
+                    .getTuTableJobDataInBySourcePageId(sourcePageId);
+            String sql = COUNT_TRANSLATE_TUV_ALL.replace(TUV_TABLE_PLACEHOLDER,
+                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            total = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId)).intValue();
+            sql = COUNT_TRANSLATE_TUV_TRANSLATED.replace(TUV_TABLE_PLACEHOLDER,
+                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
+            translatedCounts = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId)).intValue();
 
             result[0] = total;
             result[1] = translatedCounts;

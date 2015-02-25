@@ -27,6 +27,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.util.fileImport.FileImportUtil;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.Request;
@@ -59,6 +60,7 @@ class BatchMonitor
         private long m_totalPages = -1;
         private HashMap m_docsToPageCount = new HashMap();
         private HashMap m_docsToPages = new HashMap();
+        private String batchId = null;
 
         RequestMap(Collection p_requests)
         {
@@ -66,6 +68,7 @@ class BatchMonitor
             {
                 Request request = (Request) it.next();
                 BatchInfo info = request.getBatchInfo();
+                batchId = info.getBatchId();
 
                 // Must be the same for all requests in a batch.
                 m_totalPages = info.getPageCount();
@@ -83,6 +86,30 @@ class BatchMonitor
                 }
 
                 reqs.add(curDocPageNum);
+            }
+            
+            if (batchId != null)
+            {
+                List<BatchInfo> bis = FileImportUtil.CANCELED_REQUEST.get(batchId);
+                if (bis != null && bis.size() > 0)
+                {
+                    for (BatchInfo bi : bis)
+                    {
+                        Long curPage = new Long(bi.getPageNumber());
+                        Long curDocPageCount = new Long(bi.getDocPageCount());
+                        Long curDocPageNum = new Long(bi.getDocPageNumber());
+                        m_docsToPageCount.put(curPage, curDocPageCount);
+
+                        ArrayList reqs = (ArrayList) m_docsToPages.get(curPage);
+                        if (reqs == null)
+                        {
+                            reqs = new ArrayList();
+                            m_docsToPages.put(curPage, reqs);
+                        }
+
+                        reqs.add(curDocPageNum);
+                    }
+                }
             }
         }
 
@@ -125,6 +152,11 @@ class BatchMonitor
             {
                 c_logger.debug("BatchMonitor: job is complete (" + m_totalPages
                         + " documents)");
+            }
+            
+            if (batchId != null)
+            {
+                FileImportUtil.CANCELED_REQUEST.remove(batchId);
             }
 
             return true;

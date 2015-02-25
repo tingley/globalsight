@@ -196,6 +196,11 @@ function checkExistJavaScriptCallback(data)
 			sendAjax(checkExistJavaScriptCallback.obj, "saveJavaScriptFilter", "saveJavaScriptFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("javaScriptFilterDialog");
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

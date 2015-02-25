@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.company.PostReviewCategory" table="POST_REVIEW_CATEGORY">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="categoryName" length="200" column="CATEGORY_NAME" type="string" not-null="false" unique="false" />
+        <property name="categoryType" length="20" column="CATEGORY_TYPE" type="string" not-null="false" unique="false" />
+        <property name="companyId" column="COMPANY_ID" type="long" not-null="true"/>
+    </class>
+</hibernate-mapping>

@@ -39,9 +39,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
-import com.globalsight.cxe.engine.eventflow.Category;
-import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
-import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
@@ -53,6 +50,8 @@ import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.cxe.util.fileImport.eventFlow.Category;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -118,7 +117,7 @@ public class AdobeHelper
 
     private CxeMessage m_cxeMessage;
 
-    private EventFlow m_eventFlow;
+    private EventFlowXml m_eventFlow;
 
     static private Hashtable s_exportBatches = new Hashtable();
 
@@ -155,7 +154,7 @@ public class AdobeHelper
     public AdobeHelper(CxeMessage p_cxeMessage, Properties p_adobeProperties)
     {
         m_cxeMessage = p_cxeMessage;
-        m_eventFlow = new EventFlow(p_cxeMessage.getEventFlowXml());
+        m_eventFlow = p_cxeMessage.getEventFlowObject();
         m_adobeProperties = p_adobeProperties;
     }
 
@@ -185,6 +184,7 @@ public class AdobeHelper
             for (int i = 0; i < result.length; i++)
             {
                 // 6 modify eventflowxml
+                EventFlowXml newEventFlowXml = m_eventFlow.clone();
                 String suffix = XML_FILE_SUFFIX;
                 if (i == 1)
                 {
@@ -192,20 +192,17 @@ public class AdobeHelper
                 }
                 modifyEventFlowXmlForImport(
                         FileUtils.getPrefix(FileUtils.getBaseName(filename))
-                                + suffix, i + 1, result.length);
+                                + suffix, i + 1, result.length, newEventFlowXml);
                 // 7 return proper CxeMesseges
                 CxeMessageType type = getPostConversionEvent();
                 CxeMessage cxeMessage = new CxeMessage(type);
                 cxeMessage.setParameters(m_cxeMessage.getParameters());
                 cxeMessage.setMessageData(messageData[i]);
 
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                cxeMessage.setEventFlowXml(eventFlowXml);
+                cxeMessage.setEventFlowObject(newEventFlowXml);
 
                 result[i] = cxeMessage;
             }
-            writeDebugFile(m_conversionType + "_" + getBaseFileName()
-                    + "_sa.xml", m_eventFlow.serializeToXml());
 
             return result;
         }
@@ -244,7 +241,7 @@ public class AdobeHelper
                 }
                 else
                 {
-                    String xmpTranslated = m_eventFlow.getAdobeXmpTranslated();
+                    String xmpTranslated = m_eventFlow.getBatchInfo().getAdobeXmpTranslated();
                     if (xmpTranslated == null
                             || xmpTranslated.trim().equals(""))
                     {
@@ -252,7 +249,7 @@ public class AdobeHelper
                                 .getStringParameter(SystemConfigParamNames.ADOBE_XMP_TRANSLATE);
                     }
 
-                    String hiddenTranslated = m_eventFlow
+                    String hiddenTranslated = m_eventFlow.getBatchInfo()
                             .getInddHiddenTranslated();
                     if (hiddenTranslated == null
                             || hiddenTranslated.trim().equals(""))
@@ -262,15 +259,15 @@ public class AdobeHelper
 
                     m_isAdobeXmpTranslate = "true".equals(xmpTranslated);
                     isInddHiddenTranslate = "true".equals(hiddenTranslated);
-                    isMasterTranslate = "true".equals(m_eventFlow
+                    isMasterTranslate = "true".equals(m_eventFlow.getBatchInfo()
                             .getMasterTranslated());
                 }
 
-                m_eventFlow.setAdobeXmpTranslated(String
+                m_eventFlow.getBatchInfo().setAdobeXmpTranslated(String
                         .valueOf(m_isAdobeXmpTranslate));
-                m_eventFlow.setInddHiddenTranslated(String
+                m_eventFlow.getBatchInfo().setInddHiddenTranslated(String
                         .valueOf(isInddHiddenTranslate));
-                m_eventFlow.setMasterTranslated(String
+                m_eventFlow.getBatchInfo().setMasterTranslated(String
                         .valueOf(isMasterTranslate));
             }
         }
@@ -315,8 +312,7 @@ public class AdobeHelper
         if (m_type == ADOBE_INDD)
         {
             String sourceFormat = m_isImport ? m_eventFlow.getSource()
-                    .getFormatType() : m_eventFlow.getDiplomatAttribute(
-                    "formatType").getValue();
+                    .getFormatType() : m_eventFlow.getValue("formatType");
             String IndesignConverterDir = "";
             if ("indd_cs5.5".equals(sourceFormat))
             {
@@ -348,8 +344,7 @@ public class AdobeHelper
         else if (m_type == ADOBE_INX)
         {
             String sourceFormat = m_isImport ? m_eventFlow.getSource()
-                    .getFormatType() : m_eventFlow.getDiplomatAttribute(
-                    "formatType").getValue();
+                    .getFormatType() : m_eventFlow.getValue("formatType");
             String IndesignConverterDir = sourceFormat.equals("inx") ? m_sc
                     .getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR)
                     : m_sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS3);
@@ -420,11 +415,7 @@ public class AdobeHelper
                                 .getPostMergeEvent()));
                 outputMsg.setMessageData(fmd);
                 outputMsg.setParameters(params);
-
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                writeDebugFile(m_conversionType + "_" + getBaseFileName()
-                        + "_ea.xml", eventFlowXml);
-                outputMsg.setEventFlowXml(eventFlowXml);
+                outputMsg.setEventFlowObject(m_eventFlow.clone());
 
                 return new CxeMessage[]
                 { outputMsg };
@@ -443,7 +434,7 @@ public class AdobeHelper
                 CxeMessageType type = CxeMessageType
                         .getCxeMessageType(CxeMessageType.CXE_EXPORT_STATUS_EVENT);
                 CxeMessage outputMsg = new CxeMessage(type);
-                outputMsg.setEventFlowXml(m_eventFlow.serializeToXml());
+                outputMsg.setEventFlowObject(m_eventFlow.clone());
                 params.put("Exception", null);
                 params.put("ExportedTime", new Long(lastMod));
                 outputMsg.setParameters(params);
@@ -488,12 +479,12 @@ public class AdobeHelper
         {
             // MasterTranslated
             String masterTranslated = "MasterTranslated="
-                    + m_eventFlow.getMasterTranslated();
+                    + m_eventFlow.getBatchInfo().getMasterTranslated();
             text.append(masterTranslated).append("\r\n");
 
             // TranslateHiddenLayer
             String transHiddenLayer = "TranslateHiddenLayer="
-                    + m_eventFlow.getInddHiddenTranslated();
+                    + m_eventFlow.getBatchInfo().getInddHiddenTranslated();
             text.append(transHiddenLayer).append("\r\n");
         }
 
@@ -626,68 +617,72 @@ public class AdobeHelper
             throws Exception
     {
         // First save original value to Category.
-        m_eventFlow.addCategory(new Category(CATEGORY_NAME,
-                new DiplomatAttribute[]
-                {
-                        new DiplomatAttribute("postMergeEvent", m_eventFlow
-                                .getPostMergeEvent()),
-                        new DiplomatAttribute("formatType", m_eventFlow
-                                .getSourceFormatType()),
-                        new DiplomatAttribute("safeBaseFileName",
-                                getSafeBaseFileName()),
-                        new DiplomatAttribute("originalFileSize", String
-                                .valueOf(m_cxeMessage.getMessageData()
-                                        .getSize())),
-                        new DiplomatAttribute("relSafeName", p_xmlFilename) }));
+        Category c = new Category();
+        c.setName(CATEGORY_NAME);
+        c.addValue("postMergeEvent", m_eventFlow
+                .getPostMergeEvent());
+        c.addValue("formatType", m_eventFlow.getSource().getFormatType());
+        c.addValue("safeBaseFileName",
+                getSafeBaseFileName());
+        c.addValue("originalFileSize", String
+                .valueOf(m_cxeMessage.getMessageData()
+                        .getSize()));
+        c.addValue("relSafeName", p_xmlFilename);
+        m_eventFlow.getCategory().add(c);
+        
         // Then modify eventFlow
         m_eventFlow.setPostMergeEvent(getPostMergeEvent());
-        m_eventFlow.setSourceFormatType("xml");
+        m_eventFlow.getSource().setFormatType("xml");
     }
 
     protected void modifyEventFlowXmlForImport(String p_xmlFilename,
-            int p_docPageNum, int p_docPageCount) throws Exception
+            int p_docPageNum, int p_docPageCount, EventFlowXml newEventFlowXm) throws Exception
     {
+        String postMergeEvent;
+        String formatType;
+        String safeBaseFileName;
+        String originalFileSize;
+
         // First get original Category
         Category oriC = getCategory();
         if (oriC != null)
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            { oriC.getDiplomatAttribute("postMergeEvent"),
-                    oriC.getDiplomatAttribute("formatType"),
-                    oriC.getDiplomatAttribute("safeBaseFileName"),
-                    oriC.getDiplomatAttribute("originalFileSize"),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
-
-            m_eventFlow.removeCategory(oriC);
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = oriC.getValue("postMergeEvent");
+            formatType = oriC.getValue("formatType");
+            safeBaseFileName = oriC.getValue("safeBaseFileName");
+            originalFileSize = oriC.getValue("originalFileSize");
+            newEventFlowXm.getCategory().remove(oriC);
         }
         else
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            {
-                    new DiplomatAttribute("postMergeEvent",
-                            m_eventFlow.getPostMergeEvent()),
-                    new DiplomatAttribute("formatType",
-                            m_eventFlow.getSourceFormatType()),
-                    new DiplomatAttribute("safeBaseFileName",
-                            getSafeBaseFileName()),
-                    new DiplomatAttribute("originalFileSize",
-                            String.valueOf(m_cxeMessage.getMessageData()
-                                    .getSize())),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = newEventFlowXm.getPostMergeEvent();
+            formatType = newEventFlowXm.getSource().getFormatType();
+            safeBaseFileName = getSafeBaseFileName();
+            originalFileSize = String.valueOf(m_cxeMessage.getMessageData()
+                    .getSize());
         }
+        
+        Category newC = new Category();
+        newC.setName(CATEGORY_NAME);
+        
+        newC.addValue("postMergeEvent", postMergeEvent);
+        newC.addValue("formatType", formatType);
+        newC.addValue("safeBaseFileName", safeBaseFileName);
+        newC.addValue("originalFileSize", originalFileSize);
+        newC.addValue("relSafeName", p_xmlFilename);
+        newEventFlowXm.getCategory().add(newC);
+        
         // Then modify eventFlow
-        m_eventFlow.setPostMergeEvent(getPostMergeEvent());
-        m_eventFlow.setSourceFormatType("xml");
+        newEventFlowXm.setPostMergeEvent(getPostMergeEvent());
+        newEventFlowXm.getSource().setFormatType("xml");
 
-        m_eventFlow.setDocPageCount(p_docPageCount);
-        m_eventFlow.setDocPageNumber(p_docPageNum);
+        newEventFlowXm.getBatchInfo().setDocPageCount(p_docPageCount);
+        newEventFlowXm.getBatchInfo().setDocPageNumber(p_docPageNum);
 
         if (m_isAdobeXmpTranslate && p_docPageNum == 2)
         {
-            m_eventFlow.setDisplayName(XMP_DISPLAY_NAME_PREFIX
-                    + m_eventFlow.getDisplayName());
+            newEventFlowXm.getBatchInfo().setDisplayName(XMP_DISPLAY_NAME_PREFIX
+                    + newEventFlowXm.getDisplayName());
         }
     }
 
@@ -1036,8 +1031,7 @@ public class AdobeHelper
 
     private String writeContentToXmlBox() throws IOException
     {
-        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory()
-                .getDiplomatAttribute("relSafeName").getValue());
+        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory().getValue("relSafeName"));
         File saveFile = new File(saveFileName);
 
         m_cxeMessage.getMessageData().copyTo(saveFile);
@@ -1166,7 +1160,7 @@ public class AdobeHelper
     private void writeStatusToTargetLocales(String p_extectedFile)
             throws IOException
     {
-        String l10nProfileId = m_eventFlow.getBatchInfo().getL10nProfileId();
+        String l10nProfileId = m_eventFlow.getBatchInfo().getL10NProfileId();
         Set<String> targetLocales = findTargetLocales(l10nProfileId);
         String splitChar = File.separator;
         if ("\\".equalsIgnoreCase(splitChar))

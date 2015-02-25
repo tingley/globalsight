@@ -60,6 +60,7 @@ import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -84,7 +85,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm.LeverageSegment;
+import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.util.GlobalSightLocale;
@@ -555,11 +556,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
         TranslationMemoryProfile tmp = p_job.getL10nProfile()
                 .getTranslationMemoryProfile();
-        List<String> excludItems = null;
-        if (tmp != null)
-        {
-            excludItems = new ArrayList<String>(tmp.getJobExcludeTuTypes());
-        }
+        Vector<String> excludItems = null;
 
         for (Workflow workflow : p_job.getWorkflows())
         {
@@ -573,7 +570,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             if (p_targetLocale.getId() == workflow.getTargetLocale().getId())
             {
                 targetPages = workflow.getTargetPages();
-                break;
+                tmp = workflow.getJob().getL10nProfile()
+                        .getTranslationMemoryProfile();
+                if (tmp != null)
+                {
+                    excludItems = tmp.getJobExcludeTuTypes();
+                }
             }
         }
 
@@ -601,9 +603,11 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
 
                 // Leverage TM
-                Map<Long, LeverageSegment> exactMatches = leverageMatchLingManager
-                        .getExactMatches(sourcePage.getIdAsLong(),
-                                targetPage.getLocaleId());
+                MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager
+                        .getMatchTypesForStatistics(
+                                sourcePage.getIdAsLong(),
+                                targetPage.getLocaleId(),
+                                p_job.getLeverageMatchThreshold());
                 Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap = leverageMatchLingManager
                         .getFuzzyMatches(sourcePage.getIdAsLong(),
                                 targetPage.getLocaleId());
@@ -642,8 +646,9 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                         continue;
                     }
                     
-                    StringBuilder matches = getMatches(exactMatches, 
-                    		fuzzyLeverageMatcheMap, targetTuv, sourceTuv);
+                    StringBuilder matches = getMatches(fuzzyLeverageMatcheMap,
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
+                            sourceTuv, targetTuv, p_job.getId());
 
                     List<IssueHistory> issueHistories = new ArrayList<IssueHistory>();
                     String failure = "";
@@ -792,7 +797,6 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 SegmentTuTuvCacheManager.clearCache();
                 sourceTuvs = null;
                 targetTuvs = null;
-                exactMatches = null;
                 fuzzyLeverageMatcheMap = null;
                 issuesMap = null;
 				allTuvMap = null;
@@ -1183,26 +1187,31 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     /**
      * Get TM matches.
      */
-    private StringBuilder getMatches(Map exactMatches,
-            Map fuzzyLeverageMatcheMap, Tuv targetTuv, Tuv sourceTuv)
+    private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
+            MatchTypeStatistics tuvMatchTypes,
+            Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
+            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
     {
-    	StringBuilder matches = new StringBuilder();
-        Set leverageMatches = (Set) fuzzyLeverageMatcheMap.get(sourceTuv
-                .getIdAsLong());
+        StringBuilder matches = new StringBuilder();
 
-        if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
+        Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
+                .getIdAsLong());
+        if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
+                tuvMatchTypes, excludedItemTypes, p_jobId))
+        {
+            matches.append(bundle.getString("lb_in_context_match"));
+        }
+        else if (LeverageUtil.isExactMatch(sourceTuv, tuvMatchTypes))
         {
             matches.append(StringUtil.formatPCT(100));
         }
-        else if (leverageMatches != null)
+        else if (fuzzyLeverageMatches != null)
         {
             int count = 0;
-            for (Iterator ite = leverageMatches.iterator(); ite
-                    .hasNext();)
+            for (Iterator ite = fuzzyLeverageMatches.iterator(); ite.hasNext();)
             {
-                LeverageMatch leverageMatch = (LeverageMatch) ite
-                        .next();
-                if ((leverageMatches.size() > 1))
+                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
+                if ((fuzzyLeverageMatches.size() > 1))
                 {
                     matches.append(++count)
                             .append(", ")
@@ -1235,7 +1244,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     .append(bundle
                             .getString("jobinfo.tradosmatches.invoice.repetition"));
         }
-        
+
         return matches;
     }
     

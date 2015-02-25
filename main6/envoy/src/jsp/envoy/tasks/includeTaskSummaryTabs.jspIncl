@@ -836,7 +836,8 @@ function doUploadingCheck(urlSent)
 	        perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 	        boolean workoffline = perms.getPermissionFor(Permission.ACTIVITIES_WORKOFFLINE);
 	        boolean reviewCommentReportPermission = perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF) ||
-	        									 perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE);
+	        									 perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE) ||
+	        									 perms.getPermissionFor(Permission.REPORTS_POST_REVIEW_QA);
 	        boolean showScorecard = workflowImpl.getScorecardShowType() == -1 ? false : true;
 	        if (!isPageDetailOne)
 	        {

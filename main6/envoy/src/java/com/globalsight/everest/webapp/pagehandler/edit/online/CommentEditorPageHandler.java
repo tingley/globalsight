@@ -34,9 +34,11 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.online.CommentView;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
@@ -117,6 +119,22 @@ public class CommentEditorPageHandler extends PageHandler implements
         if ((value = p_request.getParameter("commentId")) != null)
         {
             commentId = Long.parseLong(value);
+        }
+        
+        String fromPage = p_request.getParameter("fromPage");
+        if ("source".equals(fromPage))
+        {
+            TargetPage targetPage = ServerProxy.getPageManager().getTargetPage(
+                    state.getTargetPageId());
+            long jobId = targetPage.getSourcePage().getJobId();
+
+            Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
+                    tuvId, jobId);
+            Tuv targetTuv = sourceTuv.getTu(jobId).getTuv(
+                    state.getTargetLocale().getId(), jobId);
+
+            tuvId = targetTuv.getId();
+            state.setTuvId(tuvId);
         }
 
         CommentView view = EditorHelper.getCommentView(state, commentId, tuId,

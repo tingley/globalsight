@@ -16,10 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.createJobs;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,7 +38,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -51,7 +48,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -113,7 +109,6 @@ import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.zip.ZipIt;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 
-import de.innosystec.unrar.Archive;
 import de.innosystec.unrar.rarfile.FileHeader;
 
 public class CreateJobsMainHandler extends PageHandler
@@ -135,7 +130,7 @@ public class CreateJobsMainHandler extends PageHandler
     private final static int MAX_LINE_LENGTH = 4096;
     private Map<String, List<FileProfileImpl>> extensionToFileProfileMap;
     private Map<String, String> l10NToTargetLocalesMap = new HashMap<String, String>();
-    private Map<String, String> l10NToJobAttributeMap = new HashMap<String, String>();
+//    private Map<String, String> l10NToJobAttributeMap = new HashMap<String, String>();
 
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
             HttpServletRequest request, HttpServletResponse response,
@@ -338,7 +333,7 @@ public class CreateJobsMainHandler extends PageHandler
         return false;
     }
 
-    public Integer getCreatingJobsNum(Long companyId)
+    public static Integer getCreatingJobsNum(Long companyId)
     {
     	Integer creatingJobsNum = null;
     	try
@@ -425,8 +420,8 @@ public class CreateJobsMainHandler extends PageHandler
         {
             String l10Nid = request.getParameter("l10Nid");
             String hasAttribute = "false";
-            if (l10NToJobAttributeMap.get(l10Nid) == null)
-            {
+//            if (l10NToJobAttributeMap.get(l10Nid) == null)
+//            {
                 L10nProfile lp = ServerProxy.getProjectHandler()
                         .getL10nProfile(Long.valueOf(l10Nid));
                 Project p = lp.getProject();
@@ -449,12 +444,12 @@ public class CreateJobsMainHandler extends PageHandler
                         }
                     }
                 }
-                l10NToJobAttributeMap.put(l10Nid, hasAttribute);
-            }
-            else
-            {
-                hasAttribute = l10NToJobAttributeMap.get(l10Nid);
-            }
+//                l10NToJobAttributeMap.put(l10Nid, hasAttribute);
+//            }
+//            else
+//            {
+//                hasAttribute = l10NToJobAttributeMap.get(l10Nid);
+//            }
             response.setContentType("text/html;charset=UTF-8");
             writer.write(hasAttribute);
         }

@@ -92,6 +92,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.edit.SegmentUtil2;
@@ -111,7 +112,6 @@ public abstract class AbstractTargetPagePersistence implements
     private MachineTranslator machineTranslator = null;
     // private boolean autoCommitToTm = false;
     private IXliffProcessor processor;
-
 
     public Collection<TargetPage> persistObjectsWithUnextractedFile(
             SourcePage p_sourcePage, Collection p_targetLocales)
@@ -302,8 +302,7 @@ public abstract class AbstractTargetPagePersistence implements
 
             /****** Priority 4 : Handle MT hitting ******/
             MachineTranslationProfile mtProfile = MTProfileHandlerHelper
-                    .getMtProfileBySourcePage(p_sourcePage,
-                    p_targetLocale);
+                    .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
             if (mtProfile != null && mtProfile.isActive())
             {
                 String mtEngine = mtProfile.getMtEngine();
@@ -334,17 +333,20 @@ public abstract class AbstractTargetPagePersistence implements
             {
                 machineTranslator = null;
             }
-            
+
             /****** Priority 5 : remove all internal text segments match ******/
             Set<Tu> internalTextTus = new HashSet<Tu>();
             if (appliedTuTuvMap != null && appliedTuTuvMap.size() > 0)
             {
-                for (Iterator it = appliedTuTuvMap.keySet().iterator(); it.hasNext();)
+                for (Iterator it = appliedTuTuvMap.keySet().iterator(); it
+                        .hasNext();)
                 {
                     TuImpl tu = (TuImpl) it.next();
                     Tuv tuv = (Tuv) p_sourceTuvMap.get(tu);
-                    if (InternalTextUtil.isInternalText(tuv.getGxmlExcludeTopTags())
-                            && !GxmlUtil.isEntireInternalText(tuv.getGxmlElement()))
+                    if (InternalTextUtil.isInternalText(tuv
+                            .getGxmlExcludeTopTags())
+                            && !GxmlUtil.isEntireInternalText(tuv
+                                    .getGxmlElement()))
                     {
                         internalTextTus.add(tu);
                     }
@@ -372,7 +374,8 @@ public abstract class AbstractTargetPagePersistence implements
                     if (tuv.getXliffAlt(false) != null
                             && tuv.getXliffAlt(false).size() > 0)
                     {
-                        processor.addAltTrans(newTuv, tuv, p_targetLocale, jobId);
+                        processor.addAltTrans(newTuv, tuv, p_targetLocale,
+                                jobId);
                     }
 
                     if (tu.getTuv(newTuv.getLocaleId(), false, jobId) == null
@@ -407,7 +410,8 @@ public abstract class AbstractTargetPagePersistence implements
         {
             throw new PageException(e);
         }
-        finally {
+        finally
+        {
             unAppliedTus = null;
             appliedTuTuvMap = null;
         }
@@ -652,7 +656,7 @@ public abstract class AbstractTargetPagePersistence implements
                 .getExactMatchesWithSetInside(p_sourcePage.getIdAsLong(),
                         p_targetLocale.getIdAsLong(), mode, tmProfile);
         // All fuzzy matches (<100)
-        Map<Long, Set<LeverageMatch>>  fuzzyLeverageMatchesMap = null;
+        Map<Long, Set<LeverageMatch>> fuzzyLeverageMatchesMap = null;
         try
         {
             fuzzyLeverageMatchesMap = leverageMatchLingManager.getFuzzyMatches(
@@ -1064,7 +1068,22 @@ public abstract class AbstractTargetPagePersistence implements
             // replace the content in target tuv with mt result
             if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
             {
-                currentNewTuv.setGxml(MTHelper.fixMtTranslatedGxml(machineTranslatedGxml));
+                // GBS-3722
+                if (mtProfile.isIncludeMTIdentifiers())
+                {
+                    String leading = mtProfile.getMtIdentifierLeading();
+                    String trailing = mtProfile.getMtIdentifierTrailing();
+                    if (!StringUtil.isEmpty(leading)
+                            || !StringUtil.isEmpty(trailing))
+                    {
+                        machineTranslatedGxml = MTHelper
+                                .tagMachineTranslatedContent(
+                                        machineTranslatedGxml, leading,
+                                        trailing);
+                    }
+                }
+                currentNewTuv.setGxml(MTHelper
+                        .fixMtTranslatedGxml(machineTranslatedGxml));
                 currentNewTuv.setMatchType(LeverageMatchType.UNKNOWN_NAME);
                 currentNewTuv.setLastModifiedUser(machineTranslator
                         .getEngineName() + "_MT");
@@ -1102,7 +1121,7 @@ public abstract class AbstractTargetPagePersistence implements
                 lm.setMtName(machineTranslator.getEngineName() + "_MT");
                 lm.setMatchedOriginalSource(sourceTuv.getGxml());
 
-//                lm.setSid(sourceTuv.getSid());
+                // lm.setSid(sourceTuv.getSid());
                 lm.setCreationUser(machineTranslator.getEngineName());
                 lm.setCreationDate(sourceTuv.getLastModified());
                 lm.setModifyDate(sourceTuv.getLastModified());
@@ -1175,7 +1194,7 @@ public abstract class AbstractTargetPagePersistence implements
                     lm.setMtName(machineTranslator.getEngineName() + "_MT");
                     lm.setMatchedOriginalSource(sourceTuv.getGxml());
 
-//                    lm.setSid(sourceTuv.getSid());
+                    // lm.setSid(sourceTuv.getSid());
                     lm.setCreationUser(machineTranslator.getEngineName());
                     lm.setCreationDate(sourceTuv.getLastModified());
                     lm.setModifyDate(sourceTuv.getLastModified());
@@ -1216,7 +1235,6 @@ public abstract class AbstractTargetPagePersistence implements
      * 
      * @param tmProfile
      */
-
 
     /**
      * Checks to see if the locale pair is supported by the MT engine

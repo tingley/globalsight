@@ -50,6 +50,7 @@ import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.MessageData;
+import com.globalsight.cxe.util.fileImport.FileImportUtil;
 import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -236,6 +237,7 @@ public class CxeProxy
                 params.put("TargetLocales", targetLocales);
             s_targetLocales.remove(key);
         }
+        params.put("key", key);
 
         // for GBS-2137, update the new job to "IN_QUEUE" state
         String state = job.getState();
@@ -244,10 +246,16 @@ public class CxeProxy
             JobCreationMonitor.updateJobState(job, Job.IN_QUEUE);
         }
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX
-                + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-        sendCxeMessage(cxeMessage, jmsTopic);
-
+        if (FileImportUtil.USE_JMS)
+        {
+            String jmsTopic = EventTopicMap.JMS_PREFIX
+                    + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
+            sendCxeMessage(cxeMessage, jmsTopic);
+        }
+        else
+        {
+            FileImportUtil.importFileWithThread(cxeMessage);
+        }
     }
 
     /**

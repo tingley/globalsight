@@ -58,4 +58,5 @@ public interface XliffConstants
 
 	String HASH_MARK = "# ";
 
+	String STATE = "state";
 }

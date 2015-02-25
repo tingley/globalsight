@@ -40,6 +40,7 @@ import org.json.JSONObject;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.ImageHelper;
@@ -2249,6 +2250,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         return result.toString();
     }
+    
+    public SegmentView getSegmentView(long p_tuId, long p_tuvId,
+            String p_subId, long p_trgPageId, long p_sourceLocaleId,
+            long p_targetLocaleId, String[] p_tmNames, String p_termbase)
+            throws OnlineEditorException, RemoteException
+    {
+        return getSegmentView(p_tuId, p_tuvId, p_subId, p_trgPageId,
+                p_sourceLocaleId, p_targetLocaleId, p_tmNames, p_termbase, true);
+    }
 
     /**
      * <p>
@@ -2279,7 +2289,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      */
     public SegmentView getSegmentView(long p_tuId, long p_tuvId,
             String p_subId, long p_trgPageId, long p_sourceLocaleId,
-            long p_targetLocaleId, String[] p_tmNames, String p_termbase)
+            long p_targetLocaleId, String[] p_tmNames, String p_termbase,
+            boolean isTarget)
             throws OnlineEditorException, RemoteException
     {
         SegmentView result = new SegmentView();
@@ -2288,8 +2299,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String itemType;
         boolean isLocalizable;
 
-        Tuv sourceTuv;
-        Tuv targetTuv;
+        Tuv sourceTuv = null;
+        Tuv targetTuv = null;
 
         if (p_subId == null)
         {
@@ -2305,7 +2316,27 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         	result.setSubId(new Long(p_subId));
         	result.setTargetLocaleId(p_targetLocaleId);
         	
-            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, jobId);
+        	if (isTarget)
+        	{
+        	    targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, jobId);
+        	    
+        	    String mergeState = targetTuv.getMergeState();
+                if (mergeState.equals(Tuv.NOT_MERGED))
+                {
+                    sourceTuv = m_tuvManager.getTuvForSegmentEditor(p_tuId,
+                            p_sourceLocaleId, jobId);
+                }
+                else
+                {
+                    sourceTuv = getMergedSourceTuvByTargetId(p_tuvId);
+                }
+        	}
+        	else
+            {
+                sourceTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, jobId);
+                targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuId,
+                        p_targetLocaleId, jobId);
+            }
 
             Set<XliffAlt> xliffAltSet = targetTuv.getXliffAlt(true);
             if (xliffAltSet != null && !xliffAltSet.isEmpty())
@@ -2327,16 +2358,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 result.setXliffAlt(xliffAltSet);
             }
 
-            String mergeState = targetTuv.getMergeState();
-            if (mergeState.equals(Tuv.NOT_MERGED))
-            {
-                sourceTuv = m_tuvManager.getTuvForSegmentEditor(p_tuId,
-                        p_sourceLocaleId, jobId);
-            }
-            else
-            {
-                sourceTuv = getMergedSourceTuvByTargetId(p_tuvId);
-            }
+            
 
             boolean isWSXlf = false;
             boolean isAutoCommit = false;
@@ -3218,9 +3240,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             for (int i = 0; i < p_issueList.size(); i++)
             {
                 Issue issue = (Issue) p_issueList.get(i);
+                IssueHistory history = (IssueHistory) issue.getHistory().get(0);
                 m_commentManager.editIssue(issue.getId(), issue.getTitle(),
                         issue.getPriority(), Issue.STATUS_CLOSED,
-                        issue.getCategory(), p_user, issue.getComment());
+                        issue.getCategory(), p_user, history.getComment());
             }
         }
         catch (Exception ex)
@@ -6051,9 +6074,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return tuIdList;
     }
 
-
+    
     @Override
     public String getSourceJsonData(EditorState p_state, boolean isAssignee)
+    {
+        return getSourceJsonData(p_state, isAssignee, false);
+    }
+
+    @Override
+    public String getSourceJsonData(EditorState p_state, boolean isAssignee, boolean fromInCtxRv)
     {
         long srcPageId = p_state.getSourcePageId().longValue();
 
@@ -6064,7 +6093,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         try
         {
             json = getSourceJsonResult(srcPageId, targetLocale, paginateInfo,
-                    options);
+                    options, fromInCtxRv);
         }
         catch (OnlineEditorException e)
         {
@@ -6076,10 +6105,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
         return json.toString();
     }
-
+    
     public JSONArray getSourceJsonResult(long p_srcPageId,
             GlobalSightLocale p_locale, PaginateInfo paginateInfo,
             RenderingOptions options) throws OnlineEditorException,
+            RemoteException
+    {
+        return getSourceJsonResult(p_srcPageId, p_locale, paginateInfo, options, false);
+    }
+
+    public JSONArray getSourceJsonResult(long p_srcPageId,
+            GlobalSightLocale p_locale, PaginateInfo paginateInfo,
+            RenderingOptions options, boolean fromInCtxRv) throws OnlineEditorException,
             RemoteException
     {
         JSONArray jsonArr = new JSONArray();
@@ -6115,7 +6152,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 _count++;
                 Tuv tuv = (Tuv) tuvs.get(i);
                 JSONObject jsonObj = getSourceJsonResult(b_rtlLocale, tuv,
-                        true, jobId);
+                        true, jobId, fromInCtxRv);
                 jsonArr.put(jsonObj);
                 // template.insertTuvContent(tuv.getTuId(), html);
             }
@@ -6136,11 +6173,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
 	private JSONObject getSourceJsonResult(boolean b_rtlLocale, Tuv tuv,
-			boolean ptag, long p_jobId) throws JSONException
+			boolean ptag, long p_jobId, boolean fromInCtxRv) throws JSONException
 	{
         JSONObject jsonObj = new JSONObject();
         String dataType = tuv.getDataType(p_jobId);
-        long tuId = tuv.getTu(p_jobId).getTuId();
+        Tu tu = tuv.getTu(p_jobId);
+        long tuId = tu.getTuId();
         String segment = "";
         GxmlElement elem = tuv.getGxmlElement();
         segment = GxmlUtil.getDisplayHtml(elem, dataType, VIEWMODE_LIST);
@@ -6163,6 +6201,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 		}
         jsonObj.put("tuId", tuId);
         jsonObj.put("segment", segment);
+        if (fromInCtxRv)
+        {
+            jsonObj.put("tuvId", tuv.getId());
+            jsonObj.put("subId", DUMMY_SUBID);
+        }
         List subflows = tuv.getSubflowsAsGxmlElements(true);
         boolean b_subflows = (subflows != null && subflows.size() > 0);
         if (b_subflows)
@@ -6202,7 +6245,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             }
             jsonObj.put("subArray", subArray);
         }
-        StringBuffer mainClass = new StringBuffer();
+        StringBuffer mainClass = fromInCtxRv ?  new StringBuffer("SE editorSegment ") : new StringBuffer();
         if (tuv.isRepeated())
         {
             mainClass.append(UIConstants.COLOR_REPEATED);
@@ -6214,10 +6257,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         jsonObj.put("mainstyle", mainClass);
         return jsonObj;
     }
+	
+	@Override
+	public String getTargetJsonData(EditorState p_state, boolean isAssignee,
+            HashMap<String, String> p_searchMap)
+	{
+	    return getTargetJsonData(p_state, isAssignee, p_searchMap, false);
+	}
 
     @Override
     public String getTargetJsonData(EditorState p_state, boolean isAssignee,
-            HashMap<String, String> p_searchMap)
+            HashMap<String, String> p_searchMap, boolean fromInCtxRv)
     {
         JSONObject mainJson = new JSONObject();
         JSONArray targetjArray = new JSONArray();
@@ -6388,9 +6438,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 JSONObject targetj = getTargetJsonResult(readyCase, srcTuv,
                         trgTuv, options, termLMResultSet, p_excludedItemTypes,
                         targetPage, tuvMatchTypes, imageMaps, comments,
-                        repetitions, p_searchMap, p_state);
+                        repetitions, p_searchMap, p_state, fromInCtxRv);
                 JSONObject sourcej = getSourceJsonResult(b_rtlLocale, srcTuv,
-                        p_state.getNeedShowPTags(), jobId);
+                        p_state.getNeedShowPTags(), jobId, fromInCtxRv);
                 targetjArray.put(targetj);
                 sourcejArray.put(sourcej);
             }
@@ -6418,7 +6468,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             Vector p_excludedItemTypes, TargetPage p_targetPage,
             MatchTypeStatistics p_matchTypes, Collection p_imageMaps,
             ArrayList p_comments, SegmentRepetitions p_repetitions,
-            HashMap p_searchMap, EditorState p_editorState)
+            HashMap p_searchMap, EditorState p_editorState, boolean fromInCtxRv)
             throws OnlineEditorException, RemoteException, JSONException
     {
         long jobId = p_targetPage.getSourcePage().getJobId();
@@ -6596,7 +6646,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
 //        if ((!reviewMode || reviewReadOnly)
 //                && (isReadOnlyMode || (isReadOnly && isRealExactLocalized) || isExcluded))
-        if ((!reviewMode || reviewReadOnly) && (isReadOnly || isExcluded))
+        if ((!reviewMode || reviewReadOnly) && (isReadOnly || isExcluded) && !fromInCtxRv)
         {
         }
         else

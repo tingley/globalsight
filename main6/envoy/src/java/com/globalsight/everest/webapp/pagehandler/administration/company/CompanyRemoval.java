@@ -208,6 +208,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TARGET_PAGE_LEVERAGE_GROUP = "delete from TARGET_PAGE_LEVERAGE_GROUP where TP_ID in ";
     private static final String SQL_DELETE_TASK_INFO_BY_COMPANY_ID = "delete from TASK_INFO where COMPANY_ID=?";
     private static final String SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID = "delete from SCORECARD_CATEGORY WHERE COMPANY_ID = ?";
+    private static final String SQL_DELETE_POST_REVIEW_CATEGORY_BY_COMPANY_ID = "delete from POST_REVIEW_CATEGORY WHERE COMPANY_ID = ?";
     private static final String SQL_DELETE_TASK_INFO_BY_TASK_ID = "delete from TASK_INFO where TASK_ID in ";
     private static final String SQL_DELETE_TASK_INTERIM = "delete from TASK_INTERIM where USER_ID in ";
     private static final String SQL_DELETE_TASK_TUV = "delete from TASK_TUV where TASK_ID in ";
@@ -921,6 +922,8 @@ public class CompanyRemoval
             removeScoreByCompanyId(conn);
             // remove scorecardCategory
             removeScorecardCategory(conn);
+            //remove post review category
+            romovePostReviewCategory(conn);
             // remove workflows
             removeWorkflow(conn, null);
             // remove jobs
@@ -3238,6 +3241,15 @@ public class CompanyRemoval
         execOnce(conn, SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID, companyId);
 
         logEnd("SCORECARD_CATEGORY");
+    }
+    
+    private void romovePostReviewCategory(Connection conn) throws SQLException
+    {
+        logStart("POST_REVIEW_CATEGORY");
+        long companyId = company.getId();
+        execOnce(conn, SQL_DELETE_POST_REVIEW_CATEGORY_BY_COMPANY_ID, companyId);
+
+        logEnd("POST_REVIEW_CATEGORY");
     }
     
     private void removeTaskInfo(Connection conn) throws SQLException

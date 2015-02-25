@@ -29,6 +29,7 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.dependencychecking.WorkflowTemplateDependencyChecker;
 import com.globalsight.util.GeneralException;
+
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
@@ -36,6 +37,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.ResourceBundle;
 import java.util.Vector;
+
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -116,24 +118,28 @@ class WorkflowTemplateControlFlowHelper
         {  
             String wftiId = m_request.getParameter("wfTemplateInfoId");
             Vector deps = null;
-            deps = checkForDependencies(wftiId, p_session);
-            if (deps.size() <= 0) 
+            Vector<String> nonDependency = new Vector<String>();
+            deps = checkForDependencies(wftiId, p_session, nonDependency);
+            if (nonDependency.size() > 0)
             {
-                try 
+                for (String nonDependencyId : nonDependency)
                 {
-                    removeTemplate(wftiId);            
+                    try
+                    {
+                        removeTemplate(nonDependencyId);
+                    }
+                    catch (ServletException se)
+                    {
+                        throw new EnvoyServletException(se);
+                    }
+                    catch (IOException ie)
+                    {
+                        throw new EnvoyServletException(ie);
+                    }
+                    destinationPage = "self";
                 }
-                catch(ServletException se) 
-                {
-                    throw new EnvoyServletException(se);
-                }
-                catch(IOException ie)
-                {
-                    throw new EnvoyServletException(ie);
-                }    
-                destinationPage = "self";
             }
-            else 
+            if(deps.size() > 0) 
             {
             	//format error message
             	StringBuffer error_msg_bf = new StringBuffer();
@@ -185,39 +191,61 @@ class WorkflowTemplateControlFlowHelper
      * 
      * @param p_wftiId
      * @param session
+     * @param nonDependency 
+     * @param dependency 
      * @return 
      * @exception EnvoyServletException
      *                   Failed to look for dependencies for the profile.
      *                   The cause is indicated by the exception message.
      */
-    private Vector checkForDependencies(String p_wftiId, HttpSession session)
+    private Vector checkForDependencies(String p_wftiId, HttpSession session, Vector<String> nonDependency)
         throws EnvoyServletException
     {
         try
         {
-            ResourceBundle bundle = PageHandler.getBundle(session);
-            WorkflowTemplateInfo wfti = getWorkflowTemplateInfo(p_wftiId);
-
-            WorkflowTemplateDependencyChecker depChecker = 
-                new WorkflowTemplateDependencyChecker();
-            Hashtable catDeps = depChecker.categorizeDependencies(wfti);
-            
-            // Now convert the hashtable into a Vector of Strings
             Vector deps = new Vector();
-            if (catDeps.size() > 0)
+            ResourceBundle bundle = PageHandler.getBundle(session);
+            String[] wftiIds = p_wftiId.trim().split(" ");
+            for (String wftiId : wftiIds)
             {
-                Object[] args = {bundle.getString("lb_workflow_template")};  
-                deps.add(MessageFormat.format(bundle.getString("msg_dependency"), args));
-            }
+                WorkflowTemplateInfo wfti = getWorkflowTemplateInfo(wftiId);
 
-            for (Enumeration e = catDeps.keys(); e.hasMoreElements() ;)
-            {
-                String key = (String)e.nextElement();
-                deps.add("\n*** " + bundle.getString(key) + " ***\n");
-                Vector values = (Vector)catDeps.get(key);
-                for (int i = 0 ; i < values.size() ; i++)
+                WorkflowTemplateDependencyChecker depChecker = new WorkflowTemplateDependencyChecker();
+                Hashtable catDeps = depChecker.categorizeDependencies(wfti);
+
+                // Now convert the hashtable into a Vector of Strings
+
+                if (catDeps.size() > 0)
                 {
-                    deps.add((String)values.get(i) + "\n");
+                    if (deps.isEmpty())
+                    {
+                        Object[] args =
+                        { bundle.getString("lb_workflow_templates") };
+                        deps.add(MessageFormat.format(
+                                bundle.getString("msg_dependency_workflow"),
+                                args));
+                    }
+                }
+                else
+                {
+                    nonDependency.add(wftiId);
+                }
+                for (Enumeration e = catDeps.keys(); e.hasMoreElements();)
+                {
+
+                    String key = (String) e.nextElement();
+                     if (deps.lastIndexOf("\n*** " + bundle.getString(key)
+                            + " ***\n") == -1)
+                    {
+                        deps.add("\n*** " + bundle.getString(key) + " ***\n");
+                    }
+                    deps.add(wfti.getName() + " : ");
+                    Vector values = (Vector) catDeps.get(key);
+                    for (int i = 0; i < values.size(); i++)
+                    {
+                        deps.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp"+(String) values.get(i) + "\n");
+                    }
+                    deps.add("\n");
                 }
             }
             return deps;

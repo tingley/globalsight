@@ -309,6 +309,11 @@ function isQAFilterValidCallback(data)
 			sendAjax(isFilterValidCallback.obj, "saveQAFilter", "saveQAFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		qaFilter.closeQAFilterDialog();
+		parent.location.reload();
+	}
 	else if (data == 'name_exists')
 	{
 		alert(existFilterName);

@@ -83,6 +83,8 @@ public class ExcelReportsMainHandler extends PageHandler
         reportNameListUsing6States.add("xlsReportComment");
         // Vendor PO
         reportNameListUsing6States.add("xlsReportVendorPO");
+        //Post-Review QA Report
+        reportNameListUsing6States.add("xlsReportPostReviewQA");
     }
 
     @Override

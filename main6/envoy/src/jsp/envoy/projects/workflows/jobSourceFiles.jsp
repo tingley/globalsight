@@ -22,6 +22,8 @@
  <jsp:useBean id="searchText" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
   <jsp:useBean id="jobScorecard" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="incontextreiview" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
 	//jobSummary child page needed started.
 	ResourceBundle bundle = PageHandler.getBundle(session);
@@ -35,6 +37,9 @@
 	{
 		thisFileSearch = "";
 	}
+	
+	String url_incontextreview = incontextreiview.getPageURL();
+	
 	String searchTextUrl = searchText.getPageURL()
 			+ "&action=searchText" + "&jobId="
 			+ request.getAttribute("jobId");
@@ -345,7 +350,7 @@ function searchPages(){
 											<a class="standardHREF" href="${item.pageUrl}" target="_blank" title="${item.sourcePage.displayPageName}">
 										</c:when>
 										<c:otherwise>
-											<a class="standardHREF" href="#" onclick="openViewerWindow('${item.pageUrl}');return false;" oncontextmenu="contextForPage('${item.pageUrl}',event)" onfocus="this.blur();" title="${item.sourcePage.displayPageName}">
+											<a class="standardHREF" href="#" onclick="openViewerWindow('${item.pageUrl}');return false;" oncontextmenu="contextForPage('${item.pageUrl}',event, '${item.sourcePage.displayPageName}')" onfocus="this.blur();" title="${item.sourcePage.displayPageName}">
 										</c:otherwise>
 									</c:choose>
 								</amb:permission>
@@ -602,6 +607,27 @@ function selectAll(){
 	}
 }
 
+function openInContextReview(url)
+{
+    document.getElementById("idBody").focus();
+	
+	var ajaxUrl = "<%=checkPageExistURL%>&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")) +"&targetLocale="+"<%=thisTargetLocaleId%>"+ url;
+	$.get(ajaxUrl,function(data){
+		if(data==""){
+        	if (w_viewer != null && !w_viewer.closed)
+            {
+                w_viewer.focus();
+                return;
+            }
+
+            var style = "resizable=yes,top=0,left=0,height=" + (screen.availHeight - 60) + ",width=" + (screen.availWidth - 20);
+            w_viewer = window.open('<%= url_incontextreview %>' + url, 'Viewer', style);
+		}else{
+			alert(data);
+		}
+	});
+}
+
 function openViewerWindow(url)
 {
 	document.getElementById("idBody").focus();
@@ -623,7 +649,7 @@ function openViewerWindow(url)
 	});
 }
 
-function contextForPage(url, e)
+function contextForPage(url, e, displayName)
 {
     if(e instanceof Object)
     {
@@ -644,6 +670,12 @@ function contextForPage(url, e)
          new ContextItem("<%=bundle.getString("lb_context_item_edit_src_page")%>",
            function(){ openGxmlEditor(url,"${sourceEditor.pageURL}");}, !canEditSource)
        ];
+       
+       if (displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/)))
+       {
+    	   popupoptions[popupoptions.length] = new ContextItem("Open In Context Review",
+       	        function(){ openInContextReview(url);});
+       }
     }
     else
     {
@@ -651,6 +683,12 @@ function contextForPage(url, e)
          new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
            function(){ openViewerWindow(url);})
        ];
+       
+       if (displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/)))
+       {
+    	   popupoptions[popupoptions.length] = new ContextItem("Open In Context Review",
+       	        function(){ openInContextReview(url);});
+       }
     }
     
     ContextMenu.display(popupoptions, e);

@@ -90,9 +90,11 @@ import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfi
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
 import com.globalsight.webservices.client.Ambassador;
 import com.globalsight.webservices.client.WebServiceClientHelper;
 
@@ -110,14 +112,22 @@ public class AjaxService extends HttpServlet
     {
         this.request = request;
         this.response = response;
-        setCompanyId();
+        boolean check = setCompanyId();
 
         response.setCharacterEncoding(request.getCharacterEncoding());
         String method = request.getParameter("action");
         try
         {
-            writer = response.getWriter();
-            AjaxService.class.getMethod(method, null).invoke(AjaxService.this);
+        	writer = response.getWriter();
+			if (!check)
+			{
+				writer.write("failed");
+			}
+			else
+			{
+				AjaxService.class.getMethod(method, null).invoke(
+						AjaxService.this);
+			}
         }
         catch (Exception e)
         {
@@ -125,20 +135,25 @@ public class AjaxService extends HttpServlet
         }
     }
 
-    public void setCompanyId()
-    {
-        String companyName = UserUtil.getCurrentCompanyName(request);
-        try
-        {
-            companyId = ServerProxy.getJobHandler().getCompany(companyName)
-                    .getIdAsLong();
-            CompanyThreadLocal.getInstance().setIdValue("" + companyId);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Can not get the Company!");
-        }
-    }
+	public boolean setCompanyId()
+	{
+		String companyName = UserUtil.getCurrentCompanyName(request);
+		if (StringUtil.isNotEmpty(companyName))
+		{
+			try
+			{
+				companyId = ServerProxy.getJobHandler().getCompany(companyName)
+						.getIdAsLong();
+				CompanyThreadLocal.getInstance().setIdValue("" + companyId);
+				return true;
+			}
+			catch (Exception e)
+			{
+				CATEGORY.error("Can not get the Company!");
+			}
+		}
+		return false;
+	}
 
     public void test()
     {
@@ -361,6 +376,8 @@ public class AjaxService extends HttpServlet
         loadPPTFilterParameter(filter);
 
         HibernateUtil.saveOrUpdate(filter);
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filter.getId(),
                 FilterConstants.MSOFFICEPPT_TABLENAME);
         writer.write(Long.toString(filter.getId()));
@@ -382,6 +399,8 @@ public class AjaxService extends HttpServlet
         {
             loadPPTFilterParameter(filter);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
             saveBaseFilterMapping(filter.getId(),
                     FilterConstants.MSOFFICEPPT_TABLENAME);
         }
@@ -426,6 +445,8 @@ public class AjaxService extends HttpServlet
         loadPOFilterParameter(filter);
 
         HibernateUtil.saveOrUpdate(filter);
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filter.getId(), FilterConstants.PO_TABLENAME);
         writer.write(Long.toString(filter.getId()));
     }
@@ -445,6 +466,8 @@ public class AjaxService extends HttpServlet
         {
             loadPOFilterParameter(filter);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
             saveBaseFilterMapping(filter.getId(), FilterConstants.PO_TABLENAME);
         }
     }
@@ -635,6 +658,8 @@ public class AjaxService extends HttpServlet
         {
             loadInddFilterParameter(filter);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         }
     }
 
@@ -646,6 +671,8 @@ public class AjaxService extends HttpServlet
         filter.setFilterName(filterName);
         loadDocFilterParameter(filter);
         HibernateUtil.saveOrUpdate(filter);
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filter.getId(),
                 FilterConstants.MSOFFICEDOC_TABLENAME);
 
@@ -714,6 +741,8 @@ public class AjaxService extends HttpServlet
         {
             loadDocFilterParameter(filter);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
             saveBaseFilterMapping(filter.getId(),
                     FilterConstants.MSOFFICEDOC_TABLENAME);
         }
@@ -727,7 +756,8 @@ public class AjaxService extends HttpServlet
         filter.setFilterName(filterName);
         loadOpenOfficeFilterParameter(filter);
         HibernateUtil.saveOrUpdate(filter);
-
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         writer.write(Long.toString(filter.getId()));
     }
 
@@ -769,6 +799,8 @@ public class AjaxService extends HttpServlet
         {
             loadOpenOfficeFilterParameter(filter);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         }
     }
 
@@ -780,6 +812,8 @@ public class AjaxService extends HttpServlet
         filter.setFilterName(filterName);
         loadMSOffice2010FilterParameter(filter);
         HibernateUtil.saveOrUpdate(filter);
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filter.getId(),
                 FilterConstants.OFFICE2010_TABLENAME);
 
@@ -909,6 +943,8 @@ public class AjaxService extends HttpServlet
         {
             loadMSOffice2010FilterParameter(filter);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
             saveBaseFilterMapping(filter.getId(),
                     FilterConstants.OFFICE2010_TABLENAME);
         }
@@ -1103,7 +1139,7 @@ public class AjaxService extends HttpServlet
                 .getParameter("extendedWhitespaceChars");
         int phConsolidationMode = XmlFilterConfigParser.PH_CONSOLIDATE_DONOT;
         int phTrimMode = XmlFilterConfigParser.PH_TRIM_DONOT;
-        int nonasciiAs = XmlFilterConfigParser.NON_ASCII_AS_CHARACTER;
+        int nonasciiAs = XmlFilterConfigParser.NON_ASCII_AS_PRESERVE;
         int wsHandleMode = XmlFilterConfigParser.WHITESPACE_HANDLE_COLLAPSE;
         int emptyTagFormat = XmlFilterConfigParser.EMPTY_TAG_FORMAT_PRESERVE;
         String elementPostFilter = request.getParameter("elementPostFilter");

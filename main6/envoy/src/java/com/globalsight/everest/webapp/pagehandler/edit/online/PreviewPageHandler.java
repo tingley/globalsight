@@ -43,10 +43,11 @@ import com.globalsight.cxe.adapter.msoffice.PptxFileManager;
 import com.globalsight.cxe.adapter.msoffice2010.MsOffice2010Converter;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeConverter;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
-import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.cxe.util.XmlUtil;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -102,7 +103,7 @@ public class PreviewPageHandler extends PageHandler
     private Job m_job = null;
     // this company_id is of the job, not for the user.
     private String m_company_id = "";
-    private EventFlow m_eventFlow = null;
+    private EventFlowXml m_eventFlow = null;
     private String m_relSafeName = null;;
     private String m_safeBaseFileName = null;
     private String m_convDir = null;
@@ -442,9 +443,9 @@ public class PreviewPageHandler extends PageHandler
         {
             sourcePage = ServerProxy.getPageManager().getSourcePage(pageId);
 
-            m_eventFlow = new EventFlow(sourcePage.getRequest()
+            m_eventFlow = XmlUtil.string2Object(EventFlowXml.class, sourcePage.getRequest()
                     .getEventFlowXml());
-            formatType = m_eventFlow.getSourceFormatType();
+            formatType = m_eventFlow.getSource().getFormatType();
             if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(formatType))
             {
                 m_convDir = OpenOfficeHelper.getConversionDir();
@@ -453,10 +454,8 @@ public class PreviewPageHandler extends PageHandler
             {
                 m_convDir = OfficeXmlHelper.getConversionDir();
             }
-            m_relSafeName = m_eventFlow.getDiplomatAttribute("relSafeName")
-                    .getValue();
-            m_safeBaseFileName = m_eventFlow.getDiplomatAttribute(
-                    "safeBaseFileName").getValue();
+            m_relSafeName = m_eventFlow.getValue("relSafeName");
+            m_safeBaseFileName = m_eventFlow.getValue("safeBaseFileName");;
         }
         catch (Exception e)
         {
@@ -493,10 +492,10 @@ public class PreviewPageHandler extends PageHandler
         }
 
         String converterDir = m_convDir + File.separator + targetLocale;
-        EventFlow eventFlow = new EventFlow(sourcePage.getRequest()
+        EventFlowXml eventFlow = XmlUtil.string2Object(EventFlowXml.class, sourcePage.getRequest()
                 .getEventFlowXml());
-        String relSafeName = eventFlow.getDiplomatAttribute("relSafeName")
-                .getValue();
+
+        String relSafeName = eventFlow.getValue("relSafeName");
         String path = converterDir + File.separator + relSafeName;
         ExportHelper ex = new ExportHelper();
         try

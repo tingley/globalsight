@@ -270,7 +270,7 @@ public class TaskDetailHandler extends PageHandler
             // for counting translated text issue
             String pageIds = p_request.getParameter(TASK_PAGE_IDS);
 
-            if (pageIds == null || pageIds.length() == 0)
+            if (pageIds == null || pageIds.length() == 0 || "undefined".equalsIgnoreCase(pageIds))
             {
                 return;
             }

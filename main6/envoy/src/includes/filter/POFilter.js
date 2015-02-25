@@ -173,6 +173,11 @@ function checkExistPOFilterCallback(data)
 			sendAjax(checkExistPOFilterCallback.obj, "savePOFilter", "savePOFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog(this.filterDialogId);
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

@@ -79,6 +79,31 @@
 	var current_engine='<%=current_engine%>';
 	var jsonInfo=<%=jsonInfo%>;
 	var exInfoVal='<%=exInfoVal%>';
+	
+	$(document).ready(function() {
+		if(<%=mtProfile.isIncludeMTIdentifiers()%>)
+		{
+		    setDisableTR('mtIdentifierLeadingTR', false);
+		    setDisableTR('mtIdentifierTrailingTR', false);
+		}
+		else
+		{
+		    setDisableTR('mtIdentifierLeadingTR', true);
+		    setDisableTR('mtIdentifierTrailingTR', true);
+		}
+		$("#includeMTIdentifiers").click(function(){
+			if(this.checked)
+			{
+				setDisableTR('mtIdentifierLeadingTR', false);
+			    setDisableTR('mtIdentifierTrailingTR', false);
+			}
+			else
+			{
+				setDisableTR('mtIdentifierLeadingTR', true);
+			    setDisableTR('mtIdentifierTrailingTR', true);
+			}
+		});
+	});
 	  
 	$(function(){
 		contorlMTOptionShowing();
@@ -131,6 +156,21 @@
 			if(!name){
 				alert("Please check name");
 				return;
+			}
+			var mtIdentifiersRegex = /[\"\'<>&]/;
+			var mtIdentiferLeading = $.trim($("#mtIdentifierLeading").val());
+			var mtIdentiferTrailing = $.trim($("#mtIdentifierTrailing").val());
+			if (mtIdentifiersRegex.test(mtIdentiferLeading))
+			{
+				alert("<%=bundle.getString("jsmsg_mt_invalid_mt_identifiers")%>");
+	            $("#mtIdentifierLeading").focus();
+	            return;
+			}
+			if (mtIdentifiersRegex.test(mtIdentiferTrailing))
+			{
+				alert("<%=bundle.getString("jsmsg_mt_invalid_mt_identifiers")%>");
+	            $("#mtIdentifierTrailing").focus();
+	            return;
 			}
 			$("#OK").attr("disabled",true);
 		    var isShowInEditor = $("#idShowInEditor").is(":checked");
@@ -528,7 +568,33 @@
 		}
 		return ret;
 	};
-
+	
+	function setDisableTR(trId, isDisabled) 
+	{
+		var trElem = document.getElementById(trId);
+		var color;
+		if (isDisabled) 
+		{
+			color = "gray";
+		} 
+		else 
+		{
+			color = "black";
+		}
+		trElem.style.color = color;
+		
+		// Operate text elements
+		elems = trElem.getElementsByTagName("input");
+		for ( var i = 0; i < elems.length; i++) 
+		{
+			if ("text" == elems[i].type) 
+			{
+				elems[i].readOnly = isDisabled;
+				elems[i].style.color = color;
+			}
+		}
+	}
+	
 </SCRIPT>
 </HEAD>
 
@@ -587,7 +653,7 @@
 
 					<TR>
 						<TD ALIGN="LEFT" STYLE="vertical-align: middle"><%=bundle.getString("lb_tm_mt_confidence_score")%>:</TD>
-						<TD><INPUT ID="mtConfidenceScore" NAME="mtConfidenceScore"
+						<TD><INPUT CLASS="standardText" ID="mtConfidenceScore" NAME="mtConfidenceScore"
 							SIZE="1" MAXLENGTH="3"
 							VALUE="<%=mtProfile.getMtConfidenceScore()%>">%</TD>
 					</TR>
@@ -600,6 +666,24 @@
 							<%=mtProfile.isShowInEditor() ? "checked" : ""%> TYPE="checkbox" />
 						</TD>
 					</TR>
+					
+					<TR>
+						<TD align="left"><%=bundle.getString("lb_mt_include_mt_identifiers")%>:</TD>
+						<TD><INPUT CLASS="standardText" TYPE="checkbox" ID="includeMTIdentifiers" NAME="<%=MTProfileConstants.MT_INCLUDE_MT_IDENTIFIERS%>" <%=mtProfile.isIncludeMTIdentifiers() ? "checked" : ""%> />
+						</TD>
+					</TR>
+					<tr id="mtIdentifierLeadingTR">
+					    <td></td>
+                        <td><%=bundle.getString("lb_mt_mt_identifier_leading")%>:
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<INPUT CLASS="standardTextBold" TYPE="text" MAXLENGTH="20" SIZE="6" ID="mtIdentifierLeading" NAME="<%=MTProfileConstants.MT_MT_IDENTIFIER_LEADING%>" VALUE="<%=mtProfile.getMtIdentifierLeading() != null ? mtProfile.getMtIdentifierLeading() : ""%>" />
+                        </td>
+                    </tr>
+                    <tr id="mtIdentifierTrailingTR">
+                        <td></td>
+                        <td><%=bundle.getString("lb_mt_mt_identifier_trailing")%>:
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<INPUT CLASS="standardTextBold" TYPE="text" MAXLENGTH="20" SIZE="6" ID="mtIdentifierTrailing" NAME="<%=MTProfileConstants.MT_MT_IDENTIFIER_TRAILING%>" VALUE="<%=mtProfile.getMtIdentifierTrailing() != null ? mtProfile.getMtIdentifierTrailing() : ""%>" />
+                        </td>
+                    </tr>
 				</TABLE>
 
 				<!-- prevent Chrome filling the form automatically. For GBS-1209-->

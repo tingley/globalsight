@@ -936,6 +936,11 @@ function checkExistJavaPropertiesCallback(data)
 			sendAjax(checkExistJavaPropertiesCallback.obj, "saveJavaPropertiesFilter", "saveJavaPropertiesFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("javaPropertiesFilterDialog");
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

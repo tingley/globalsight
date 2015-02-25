@@ -19,9 +19,12 @@ package com.globalsight.everest.webapp.pagehandler.tm.corpus;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -96,6 +99,16 @@ import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 
 public class TMSearchBroswerHandlerHelper
 {
+	private static final String DATE_EQUALS = "eq";
+	private static final String DATE_NOT_EQUALS = "neq";
+	private static final String DATE_GREATER_THAN = "gt";
+	private static final String DATE_LESS_THAN = "lt";
+	private static final String DATE_GREATER_THAN_OR_EQUALS = "gteq";
+	private static final String DATE_LESS_THAN_OR_EQUALS = "lteq";
+	private static final SimpleDateFormat format = new SimpleDateFormat(
+			"yyyy-MM-dd");
+	private static final SimpleDateFormat sdf = new SimpleDateFormat(
+			"MM/dd/yyyy");
     /**
      * Set permission for user
      * 
@@ -186,6 +199,22 @@ public class TMSearchBroswerHandlerHelper
         setLableToJsp(request, bundle, "msg_tm_search_no_entry_selected");
         setLableToJsp(request, bundle, "msg_tm_search_confirm_deleted");
         setLableToJsp(request, bundle, "msg_tm_search_confirm_replaced");
+        
+        setLableToJsp(request, bundle, "lb_search_by");
+        setLableToJsp(request, bundle, "lb_report_startDate");
+        setLableToJsp(request, bundle, "lb_report_endDate");
+        setLableToJsp(request, bundle, "lb_modified_on");
+        setLableToJsp(request, bundle, "lb_created_on");
+        setLableToJsp(request, bundle, "lb_equal_to");
+        setLableToJsp(request, bundle, "lb_not_equal_to");
+        setLableToJsp(request, bundle, "lb_greater_than");
+        setLableToJsp(request, bundle, "lb_less_than");
+        setLableToJsp(request, bundle, "lb_greater_than_or_equal_to");
+        setLableToJsp(request, bundle, "lb_less_than_or_equal_to");
+        setLableToJsp(request, bundle, "lb_calendar_title");
+        setLableToJsp(request, bundle, "lb_tm_check_date_greater_less");
+        setLableToJsp(request, bundle, "lb_tm_check_date_greater_equal_less");
+        setLableToJsp(request, bundle, "lb_tm_check_date_greater_less_equal");
     }
 
     /**
@@ -540,6 +569,23 @@ public class TMSearchBroswerHandlerHelper
             String searchIn, String replaceText) throws Exception
     {
         boolean searchInSource = "source".equals(searchIn);
+        boolean advancedSearch = "true".equals((String) request
+                .getParameter("advancedSearch"));
+		String searchByDataType = null;
+		String startDateOption = null;
+		Date startDate = null;
+		String endDateOption = null;
+		Date endDate = null;
+		if (advancedSearch)
+		{
+			searchByDataType = (String) request
+					.getParameter("searchByDataType");
+			startDateOption = (String) request.getParameter("startDateOption");
+			startDate = parseDate((String) request.getParameter("startDate"));
+			endDateOption = (String) request.getParameter("endDateOption");
+			endDate = parseDate((String) request.getParameter("endDate"));
+		}
+		
         LocaleManager lm = ServerProxy.getLocaleManager();
 
         GlobalSightLocale sourceGSL = lm.getLocaleById(Long
@@ -623,6 +669,14 @@ public class TMSearchBroswerHandlerHelper
                 while (itMatch.hasNext())
                 {
                     LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
+            		if (advancedSearch && !searchInSource)
+    				{
+    					boolean checkTrgDate = searchByDate(searchByDataType,
+    							startDateOption, endDateOption, startDate, endDate,
+    							matchedTuv);
+    					if (!checkTrgDate)
+    						continue;
+    				}
                     long score = new Float(matchedTuv.getScore()).longValue();
                     if (score < thresHold)
                     {
@@ -631,7 +685,14 @@ public class TMSearchBroswerHandlerHelper
                     }
 
                     BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
-
+               		if (advancedSearch && searchInSource)
+    				{
+    					boolean checkSrcDate = searchByDate(searchByDataType,
+    							startDateOption, endDateOption, startDate, endDate,
+    							sourceTuv);
+    					if (!checkSrcDate)
+    						continue;
+    				}
                     String scoreStr = StringUtil.formatPCT(score);
                     long tuId = matchedTuv.getTu().getId();
                     long tmId = matchedTuv.getTu().getTmId();
@@ -725,7 +786,23 @@ public class TMSearchBroswerHandlerHelper
             String searchIn, String replaceText) throws Exception
     {
         boolean searchInSource = "source".equals(searchIn);
-
+        boolean advancedSearch = "true".equals((String) request
+                .getParameter("advancedSearch"));
+		String searchByDataType = null;
+		String startDateOption = null;
+		Date startDate = null;
+		String endDateOption = null;
+		Date endDate = null;
+		if (advancedSearch)
+		{
+			searchByDataType = (String) request
+					.getParameter("searchByDataType");
+			startDateOption = (String) request.getParameter("startDateOption");
+			startDate = parseDate((String) request.getParameter("startDate"));
+			endDateOption = (String) request.getParameter("endDateOption");
+			endDate = parseDate((String) request.getParameter("endDate"));
+		}
+		
         LocaleManager lm = ServerProxy.getLocaleManager();
         GlobalSightLocale sourceGSL = lm.getLocaleById(Long
                 .parseLong(sourceLocaleId));
@@ -764,6 +841,14 @@ public class TMSearchBroswerHandlerHelper
                 }
                 long tuId = tu.getId();
                 BaseTmTuv srcTuv = tu.getFirstTuv(sourceGSL);
+				if (advancedSearch && searchInSource)
+				{
+					boolean checkSrcDate = searchByDate(searchByDataType,
+							startDateOption, endDateOption, startDate, endDate,
+							srcTuv);
+					if (!checkSrcDate)
+						continue;
+				}
                 String gxml = GxmlUtil.stripRootTag(srcTuv.getSegment());
 
                 BaseTmTuv trgTuv;
@@ -773,6 +858,14 @@ public class TMSearchBroswerHandlerHelper
                 {
                     Map<String, Object> map = new HashMap<String, Object>();
                     trgTuv = (BaseTmTuv) it.next();
+					if (advancedSearch && !searchInSource)
+					{
+						boolean checkTrgDate = searchByDate(searchByDataType,
+								startDateOption, endDateOption, startDate,
+								endDate, trgTuv);
+						if (!checkTrgDate)
+							continue;
+					}
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
                     if (null == sid)
@@ -840,6 +933,141 @@ public class TMSearchBroswerHandlerHelper
         return JsonUtil.toJson(temp);
     }
 
+	private static boolean searchByDate(String searchByDataType,
+			String startDateOption, String endDateOption, Date startDate,
+			Date endDate, BaseTmTuv tuv)
+	{
+		if (startDate == null && endDate == null)
+			return true;
+
+		Date date = null;
+		try
+		{
+			if (StringUtil.isNotEmpty(searchByDataType))
+			{
+				if (searchByDataType.equalsIgnoreCase("create"))
+				{
+					date = format.parse(format.format(tuv.getCreationDate()));
+				}
+				else if (searchByDataType.equalsIgnoreCase("modify"))
+				{
+					date = format.parse(format.format(tuv.getModifyDate()));
+				}
+			}
+		}
+		catch (ParseException e)
+		{
+			e.printStackTrace();
+		}
+
+		if (startDate != null && endDate == null)
+		{
+			if (startDateOption.equals(DATE_EQUALS))
+			{
+				if (date.equals(startDate))
+				{
+					return true;
+				}
+			}
+			else if (startDateOption.equals(DATE_NOT_EQUALS))
+			{
+				if (!date.equals(startDate))
+				{
+					return true;
+				}
+			}
+			else if (startDateOption.equals(DATE_GREATER_THAN))
+			{
+				if (date.after(startDate))
+				{
+					return true;
+				}
+			}
+
+			else if (startDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+			{
+				if (date.after(startDate) || date.equals(startDate))
+				{
+					return true;
+				}
+			}
+		}
+		else if (startDate == null && endDate != null)
+		{
+
+			if (endDateOption.equals(DATE_LESS_THAN))
+			{
+				if (date.before(endDate))
+				{
+					return true;
+				}
+			}
+			else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+			{
+				if (date.before(endDate) || date.equals(endDate))
+				{
+					return true;
+				}
+			}
+		}
+		else if (startDate != null && endDate != null)
+		{
+			if (startDateOption.equals(DATE_GREATER_THAN))
+			{
+				if (endDateOption.equals(DATE_LESS_THAN))
+				{
+					if (date.after(startDate) && date.before(endDate))
+					{
+						return true;
+					}
+				}
+				else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+				{
+					if (date.after(startDate)
+							&& (date.before(endDate) || date.equals(endDate)))
+					{
+						return true;
+					}
+				}
+			}
+			else if (startDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+			{
+				if (endDateOption.equals(DATE_LESS_THAN))
+				{
+					if ((date.after(startDate) || date.equals(startDate))
+							&& date.before(endDate))
+					{
+						return true;
+					}
+				}
+				else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+				{
+					if ((date.after(startDate) || date.equals(startDate))
+							&& (date.before(endDate) || date.equals(endDate)))
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	private static Date parseDate(String dateStr)
+	{
+		if (StringUtil.isNotEmpty(dateStr))
+		{
+			try
+			{
+				return sdf.parse(dateStr);
+			}
+			catch (ParseException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
     /**
      * Refresh page
      * 

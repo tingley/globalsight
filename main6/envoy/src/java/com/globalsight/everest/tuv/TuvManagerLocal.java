@@ -19,6 +19,8 @@ package com.globalsight.everest.tuv;
 
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +34,7 @@ import org.hibernate.Session;
 
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
@@ -49,13 +52,6 @@ public final class TuvManagerLocal implements TuvManager
 {
     static private final Logger CATEGORY = Logger
             .getLogger(TuvManagerLocal.class);
-
-    /**
-     * Constructs a TuvManagerLocal.
-     */
-    TuvManagerLocal()
-    {
-    }
 
     /**
      * Factory method for creating Tu instances. Does not persist the Tu.
@@ -133,7 +129,129 @@ public final class TuvManagerLocal implements TuvManager
 
         return tuv;
     }
+    
+    /**
+     * Update TuvImpl
+     *
+     * @param p_tuv
+     *            TuvImpl
+     * @throws Exception
+     */
+    public static void updateTuvs(Connection p_connection,
+            List<TuvImplVo> p_tuvs, long p_jobId) throws Exception
+    {
+        if (p_tuvs == null || p_tuvs.size() == 0)
+        {
+            return;
+        }
 
+        PreparedStatement tuvUpdateStmt = null;
+        try
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.append("update ")
+                    .append(BigTableUtil.getTuvTableJobDataInByJobId(p_jobId))
+                    .append(" set ");
+
+            sql.append("segment_clob = ?, ");// 1
+            sql.append("segment_string = ?,");// 2
+            sql.append("exact_match_key = ?,");// 3
+            sql.append("state = ?, "); // 4
+            sql.append("merge_state = ?, ");// 5
+            sql.append("timestamp = ?, ");// 6
+            sql.append("last_modified = ?, ");// 7
+            sql.append("modify_user = ? where id = ?");// 8,9
+
+            tuvUpdateStmt = p_connection.prepareStatement(sql.toString());
+
+            Timestamp t = new Timestamp(System.currentTimeMillis());
+            
+            // addBatch counters
+            int batchUpdate = 0;
+
+            for (TuvImplVo tuv : p_tuvs)
+            {
+                TuvImpl temp = new TuvImpl();
+                temp.setGxml(tuv.getGxml());
+                
+                tuvUpdateStmt.setString(1, temp.getSegmentClob());
+                tuvUpdateStmt.setString(2, temp.getSegmentString());
+                tuvUpdateStmt.setLong(3, GlobalSightCrc
+                        .calculate(((TuvLing) tuv).getExactMatchFormat()));
+                tuvUpdateStmt.setString(4, tuv.getState() == null ? TuvState.LOCALIZED.getName()
+                        : tuv.getState().getName());
+                tuvUpdateStmt.setString(5, tuv.getMergeState());
+                tuvUpdateStmt.setTimestamp(6, t);
+                tuvUpdateStmt.setTimestamp(7, t);
+                tuvUpdateStmt.setString(8, tuv.getLastModifiedUser());
+                tuvUpdateStmt.setLong(9, tuv.getId());
+                tuvUpdateStmt.addBatch();
+
+                batchUpdate++;
+
+                if (batchUpdate > DbUtil.BATCH_INSERT_UNIT)
+                {
+                    tuvUpdateStmt.executeBatch();
+                    batchUpdate = 0;
+                }
+            }
+
+            // execute the rest of the added batch
+            if (batchUpdate > 0)
+            {
+                tuvUpdateStmt.executeBatch();
+            }
+
+            p_connection.commit();
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+        finally
+        {
+            DbUtil.silentClose(tuvUpdateStmt);
+        }
+    }
+  
+    /**
+     * Saves the target segments from an offline edit.
+     * 
+     * @param p_tuvs
+     *            TuvImplVo List of Tuvs to be saved
+     * @throws TuvException
+     *             when an error occurs.
+     */
+    public void saveTuvsFromOfflineNoJms(List<TuvImplVo> p_tuvs, long p_jobId)
+            throws TuvException
+    {
+        Connection conn = null;
+        boolean isAutoCommit = true;
+        try
+        {
+            conn = DbUtil.getConnection();
+            isAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            updateTuvs(conn, p_tuvs, p_jobId);
+        }
+        catch (Exception ex)
+        {
+            CATEGORY.error("Cannot save offline TUV", ex);
+            throw new TuvException("Cannot save offline TUVs", ex);
+        }
+        finally
+        {
+            try
+            {
+                conn.setAutoCommit(isAutoCommit);
+            }
+            catch (SQLException e)
+            {
+            }
+            DbUtil.silentReturnConnection(conn);
+        }
+     }
+    
     /**
      * Saves the target segments from an offline edit.
      * 
@@ -157,7 +275,8 @@ public final class TuvManagerLocal implements TuvManager
                 tuvInDb.setExactMatchKey(GlobalSightCrc
                         .calculate(((TuvLing) tuv).getExactMatchFormat()));
                 tuvInDb.setGxml(tuv.getGxml());
-                tuvInDb.setState(TuvState.LOCALIZED);
+                tuvInDb.setState(tuv.getState() == null ? TuvState.LOCALIZED
+                        : tuv.getState());
                 tuvInDb.setMergeState(tuv.getMergeState());
                 tuvInDb.setLastModifiedUser(tuv.getLastModifiedUser());
                 tuvInDb.setLastModified(new Date());

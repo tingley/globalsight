@@ -210,6 +210,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     WebAppConstants.WORK_OBJECT);
             sessionMgr.setAttribute(WebAppConstants.JOB_ID,
                     Long.toString(theTask.getJobId()));
+            sessionMgr.setAttribute("taskStatus", theTask.getStateAsString());
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     String.valueOf(theTask.getTargetLocale().getId()));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
@@ -239,7 +240,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
             sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
-
             // store jobId, target language and source page id for Lisa QA report
             sessionMgr.setAttribute(WebAppConstants.JOB_ID,
                     Long.parseLong(jobId));

@@ -83,6 +83,10 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             		.add(OfflineConstants.PRESERVE_SOURCE_FOLDER);// 17
             DOWNLOAD_OPTIONS
             		.add(OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION);// 18
+            DOWNLOAD_OPTIONS
+            		.add(OfflineConstants.CONSOLIDATE_FILE_TYPE);// 19
+            DOWNLOAD_OPTIONS
+            		.add(OfflineConstants.WORD_COUNT_FOR_DOWNLOAD);// 20
 
             // NOTES:These constants must be added in sequence!!!!
             DOWNLOAD_OPTIONS_DEFAULT
@@ -120,6 +124,8 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS_DEFAULT.add("no");// 16
             DOWNLOAD_OPTIONS_DEFAULT.add("no");// 17
             DOWNLOAD_OPTIONS_DEFAULT.add("no");// 18
+            DOWNLOAD_OPTIONS_DEFAULT.add("consolidate");// 19
+            DOWNLOAD_OPTIONS_DEFAULT.add("2000");// 20
         }
         catch (Throwable ignore)
         {

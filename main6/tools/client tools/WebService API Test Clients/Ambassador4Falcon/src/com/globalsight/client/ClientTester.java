@@ -9,11 +9,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.rmi.RemoteException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.globalsight.www.webservices.Ambassador4Falcon;
+import com.globalsight.www.webservices.WebServiceException;
 
 public class ClientTester
 {
@@ -60,10 +62,12 @@ public class ClientTester
 //            testTaskReassign(ambassador, fullAccessToken);
 
             // GBS-3421(8.5.3) & GBS-3696(8.5.8) & GBS-3536
-            File file = testGetWorkOfflineFiles(ambassador, fullAccessToken);
+//            File file = testGetWorkOfflineFiles(ambassador, fullAccessToken);
 //            String identifyKey = testUploadWorkOfflineFiles(ambassador,
 //                    fullAccessToken);
 //            testImportWorkOfflineFiles(ambassador, fullAccessToken, identifyKey);
+
+            testGetInContextReviewLink(ambassador, fullAccessToken);
         }
         catch (Exception ex)
         {
@@ -79,7 +83,7 @@ public class ClientTester
         int intervalInMinute = 1;
 
         String result = ambassador.getJobIDsWithStatusChanged(p_accessToken,
-                intervalInMinute);
+                intervalInMinute,"york");
         System.out.println(result);
     }
 
@@ -178,7 +182,7 @@ public class ClientTester
 
         System.out.println("Create new user [" + userId + "] ...");
         int result = ambassador.createUser(p_accessToken, userId, password,
-                firstName, lastName, email, permissionGroups, status,
+                firstName, lastName, email, permissionGroups,
                 roleXml.toString(), isInAllProjects, projectIds);
         System.out.println(result);
     }
@@ -212,7 +216,7 @@ public class ClientTester
 
         System.out.println("Modify user [" + userId + "] ...");
         int result = ambassador.modifyUser(p_accessToken, userId, password,
-                firstName, lastName, email, permissionGroups, status,
+                firstName, lastName, email, permissionGroups,
                 roleXml.toString(), isInAllProjects, projectIds);
         System.out.println(result);
     }
@@ -325,6 +329,16 @@ public class ClientTester
 
         String result = ambassador.importWorkOfflineFiles(p_accessToken,
                 taskId, p_identifyKey, workOfflineFileType);
+        System.out.println(result);
+    }
+
+    private static void testGetInContextReviewLink(
+            Ambassador4Falcon ambassador, String p_accessToken)
+            throws WebServiceException, RemoteException
+    {
+        String taskId = "7535";
+        String result = ambassador
+                .getInContextReviewLink(p_accessToken, taskId);
         System.out.println(result);
     }
 }

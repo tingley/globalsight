@@ -58,6 +58,8 @@ import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.cxe.util.XmlUtil;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
@@ -309,18 +311,24 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     .getCompanyId());
             String filename = tPage.getSourcePage().getExternalPageId();
             String fileSuffix = filename.substring(filename.lastIndexOf("."));
+            String targetLocale = null;
+            String targetFileName = null;
+            String targetPdfFileName = null;
+            File previewDir = null;
+            
+            // delete preview file
             if (INDD_SUFFIX.equalsIgnoreCase(fileSuffix)
                     || INX_SUFFIX.equalsIgnoreCase(fileSuffix)
                     || FM_SUFFIX.equalsIgnoreCase(fileSuffix)
                     || IDML_SUFFIX.equalsIgnoreCase(fileSuffix))
             {
-                String targetLocale = ServerProxy.getLocaleManager()
+                targetLocale = ServerProxy.getLocaleManager()
                         .getLocaleById(p_targetLocaleId).getLocale().toString();
-                String targetFileName = targetLocale
+                targetFileName = targetLocale
                         + filename.substring(filename.indexOf(File.separator));
-                String targetPdfFileName = FileUtils.getPrefix(targetFileName)
+                targetPdfFileName = FileUtils.getPrefix(targetFileName)
                         + PDF_SUFFIX;
-                File previewDir = AmbFileStoragePathUtils
+                previewDir = AmbFileStoragePathUtils
                         .getPdfPreviewDir(company_id);
                 String fullTargetPdfFileName = previewDir + File.separator
                         + targetPdfFileName;
@@ -349,6 +357,15 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                         FileUtils.deleteSilently(userPreviewFile);
                     }
                 }
+            }
+            
+            // delete in context review file
+            if (INDD_SUFFIX.equalsIgnoreCase(fileSuffix)
+                    || IDML_SUFFIX.equalsIgnoreCase(fileSuffix))
+            {
+                String fullTargetPdfFileName = previewDir + "_inctx" + File.separator
+                        + targetPdfFileName;
+                FileUtils.deleteSilently(fullTargetPdfFileName);
             }
         }
         catch (Exception e)
@@ -1320,12 +1337,13 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             throw new EnvoyServletException(e);
         }
 
-        EventFlow eventFlow = new EventFlow(sourcePage.getRequest().getEventFlowXml());
-        String formatType = eventFlow.getDiplomatAttribute("formatType").getValue().trim();
+        EventFlowXml eventFlow = XmlUtil.string2Object(EventFlowXml.class, sourcePage.getRequest()
+                .getEventFlowXml());
+
+        String formatType = eventFlow.getValue("formatType").trim();
         String displayNameLower = eventFlow.getDisplayName().toLowerCase();
-        DiplomatAttribute m_relSafeNameDA = eventFlow.getDiplomatAttribute("relSafeName");
-        relSafeName = m_relSafeNameDA != null ? m_relSafeNameDA.getValue() : null;
-        safeBaseFileName = eventFlow.getDiplomatAttribute("safeBaseFileName").getValue();
+        relSafeName = eventFlow.getValue("relSafeName");
+        safeBaseFileName = eventFlow.getValue("safeBaseFileName");
 
         if ("mif".equals(formatType))
         {
@@ -1368,7 +1386,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             fileType = displayNameLower.endsWith("indd") ? ADOBE_INDD : ADOBE_INX;
             fileSuffix = displayNameLower.endsWith("indd") ? INDD_SUFFIX : INX_SUFFIX;
 
-            String inddHiddenTranslated = eventFlow.getInddHiddenTranslated();
+            String inddHiddenTranslated = eventFlow.getBatchInfo().getInddHiddenTranslated();
             if (inddHiddenTranslated != null && !"".equals(inddHiddenTranslated))
             {
                 isTranslateHiddenLayer = "true".equals(inddHiddenTranslated);
@@ -1378,7 +1396,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 isTranslateHiddenLayer = true;
             }
 
-            String masterTranslated = eventFlow.getMasterTranslated();
+            String masterTranslated = eventFlow.getBatchInfo().getMasterTranslated();
             if (masterTranslated != null && !"".equals(masterTranslated))
             {
                 isTranslateMaster = "true".equals(masterTranslated);

@@ -56,6 +56,7 @@ import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.company.PostReviewCategory;
 import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Currency;
@@ -741,6 +742,22 @@ public class JobHandlerLocal implements JobHandler
         {
             String[] arg = new String[1];
             arg[0] = scorecardCategory.getScorecardCategory();
+            throw new JobException(
+                    JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
+        }
+    }
+    
+    public void createPostReviewCategory(
+            PostReviewCategory postReviewCategory) throws JobException
+    {
+        try
+        {
+            HibernateUtil.save(postReviewCategory);
+        }
+        catch (Exception e)
+        {
+            String[] arg = new String[1];
+            arg[0] = postReviewCategory.getCategoryName();
             throw new JobException(
                     JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
         }

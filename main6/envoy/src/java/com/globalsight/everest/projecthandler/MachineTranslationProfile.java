@@ -27,7 +27,6 @@ import java.util.Set;
  */
 public class MachineTranslationProfile implements java.io.Serializable
 {
-
     private static final long serialVersionUID = 3321290565544942964L;
 
     private long id;
@@ -46,6 +45,9 @@ public class MachineTranslationProfile implements java.io.Serializable
     private String jsonInfo;
     private long mtConfidenceScore;
     private boolean showInEditor;
+    private boolean includeMTIdentifiers = false;
+    private String mtIdentifierLeading;
+    private String mtIdentifierTrailing;
 
     public String getJsonInfo()
     {
@@ -65,6 +67,16 @@ public class MachineTranslationProfile implements java.io.Serializable
     public void setShowInEditor(boolean showInEditor)
     {
         this.showInEditor = showInEditor;
+    }
+
+    public boolean isIncludeMTIdentifiers()
+    {
+        return includeMTIdentifiers;
+    }
+
+    public void setIncludeMTIdentifiers(boolean includeMTIdentifiers)
+    {
+        this.includeMTIdentifiers = includeMTIdentifiers;
     }
 
     public boolean isActive()
@@ -125,9 +137,7 @@ public class MachineTranslationProfile implements java.io.Serializable
     {
         return new String[]
         { String.valueOf(getId()), getUrl(), getPort().toString(),
-                getUsername(),
-                getPassword(),
-                getCategory(), getAccountinfo() };
+                getUsername(), getPassword(), getCategory(), getAccountinfo() };
     }
 
     public MachineTranslationProfile()
@@ -146,7 +156,6 @@ public class MachineTranslationProfile implements java.io.Serializable
     {
         this.id = id;
     }
-
 
     public MachineTranslationProfile(long id, String mtProfileName,
             String mtEngin, String description, long mtConfidenceScore,
@@ -279,6 +288,26 @@ public class MachineTranslationProfile implements java.io.Serializable
     public void setAccountinfo(String accountinfo)
     {
         this.accountinfo = accountinfo;
+    }
+
+    public String getMtIdentifierLeading()
+    {
+        return this.mtIdentifierLeading;
+    }
+
+    public void setMtIdentifierLeading(String mtIdentifierLeading)
+    {
+        this.mtIdentifierLeading = mtIdentifierLeading;
+    }
+
+    public String getMtIdentifierTrailing()
+    {
+        return this.mtIdentifierTrailing;
+    }
+
+    public void setMtIdentifierTrailing(String mtIdentifierTrailing)
+    {
+        this.mtIdentifierTrailing = mtIdentifierTrailing;
     }
 
     public Long getCompanyid()

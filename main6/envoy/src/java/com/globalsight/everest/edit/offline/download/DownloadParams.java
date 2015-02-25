@@ -112,6 +112,8 @@ public class DownloadParams implements Serializable
 
     // need consolidate output file (for XLF format)
     private boolean needConsolidate = false;
+    private String consolidateFileType = null;
+    private int wordCountForDownload = 2000;
     private boolean preserveSourceFolder = false;
     private boolean includeXmlNodeContextInformation = false;
     private boolean needCombined = false;
@@ -1556,4 +1558,20 @@ public class DownloadParams implements Serializable
     {
         TMEditType = tMEditType;
     }
+
+	public void setConsolidateFileType(String consolidateFileType) {
+		this.consolidateFileType = consolidateFileType;
+	}
+
+	public String getConsolidateFileType() {
+		return consolidateFileType;
+	}
+
+	public void setWordCountForDownload(int wordCountForDownload) {
+		this.wordCountForDownload = wordCountForDownload;
+	}
+
+	public int getWordCountForDownload() {
+		return wordCountForDownload;
+	}
 }

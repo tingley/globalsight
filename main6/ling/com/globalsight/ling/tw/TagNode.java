@@ -19,9 +19,8 @@ package com.globalsight.ling.tw;
 import java.util.Hashtable;
 
 /**
- * Primarily a data class that contains all the attributes of a single
- * tmx tag.  This data is used by the error checker for both source
- * and target items.
+ * Primarily a data class that contains all the attributes of a single tmx tag.
+ * This data is used by the error checker for both source and target items.
  */
 public class TagNode
 {
@@ -31,23 +30,24 @@ public class TagNode
     private String m_strPTagName;
     private boolean m_bIsPaired;
     private Hashtable m_hAttributes;
+    // GBS-3722
+    private boolean m_isMTIdentifier = false;
     public static final String INTERNAL = "internal";
 
     /**
      * constructor.
      */
     public TagNode(String p_strTmxTagName, String p_strPTagName,
-        Hashtable p_hAttributes)
-        throws TagNodeException
+            Hashtable p_hAttributes) throws TagNodeException
     {
         super();
 
-        if (p_strTmxTagName == null || p_strTmxTagName.length() == 0 ||
-            p_strPTagName == null || p_hAttributes == null)
+        if (p_strTmxTagName == null || p_strTmxTagName.length() == 0
+                || p_strPTagName == null || p_hAttributes == null)
         {
             throw new TagNodeException("Invalid Tagnode");
         }
-        
+
         if (!INTERNAL.equals(p_strTmxTagName) && p_strPTagName.length() == 0)
         {
             throw new TagNodeException("Invalid Tagnode");
@@ -71,7 +71,9 @@ public class TagNode
 
     /**
      * Sets the mapped indicator.
-     * @param p_State - true to set as mapped. False to set as unmapped.
+     * 
+     * @param p_State
+     *            - true to set as mapped. False to set as unmapped.
      */
     public void setMapped(boolean p_State)
     {
@@ -79,11 +81,12 @@ public class TagNode
     }
 
     /**
-     * Records the index of this node in the source list.  Source
-     * nodes are also referenced by the target list. If you are in the
-     * target list you can use this index to know the nodes position
-     * in the source list.
-     * @param p_Idx - the source list index where this node can be found.
+     * Records the index of this node in the source list. Source nodes are also
+     * referenced by the target list. If you are in the target list you can use
+     * this index to know the nodes position in the source list.
+     * 
+     * @param p_Idx
+     *            - the source list index where this node can be found.
      */
     public void setSourceListIndex(int p_Idx)
     {
@@ -92,7 +95,9 @@ public class TagNode
 
     /**
      * Sets the literal TMX name for this node.
-     * @param p_Name - the TMX type name.
+     * 
+     * @param p_Name
+     *            - the TMX type name.
      */
     public void setTmxType(String p_Name)
     {
@@ -101,7 +106,9 @@ public class TagNode
 
     /**
      * Set the PTag name for this node.
-     * @param p_Name - the PTag name as a string.
+     * 
+     * @param p_Name
+     *            - the PTag name as a string.
      */
     public void setPTagName(String p_Name)
     {
@@ -110,16 +117,20 @@ public class TagNode
 
     /**
      * Sets the tags attributes for this node.
-     * @param p_hAttr - the attrbute hash.
+     * 
+     * @param p_hAttr
+     *            - the attrbute hash.
      */
-     public void setAttributes(Hashtable p_hAttr)
+    public void setAttributes(Hashtable p_hAttr)
     {
         m_hAttributes = p_hAttr;
     }
 
     /**
      * Sets whether the node is a paired type.
-     * @param p_State - true to indicate paired. Otherwise false.
+     * 
+     * @param p_State
+     *            - true to indicate paired. Otherwise false.
      */
     public void setPaired(boolean p_State)
     {
@@ -128,6 +139,7 @@ public class TagNode
 
     /**
      * Indicates whether this node has been mapped.
+     * 
      * @return true if node is mapped. Otherwise false.
      */
     public boolean isMapped()
@@ -135,11 +147,22 @@ public class TagNode
         return m_bMapped;
     }
 
+    public boolean isMTIdentifier()
+    {
+        return m_isMTIdentifier;
+    }
+
+    public void setMTIdentifier(boolean p_isMTIdentifier)
+    {
+        m_isMTIdentifier = p_isMTIdentifier;
+    }
+
     /**
-     * Gets the original index of this node in regards to the source
-     * list.  Source nodes are also referenced by the target list. If
-     * you are in the target list you can use this index to know the
-     * nodes position in the source list.
+     * Gets the original index of this node in regards to the source list.
+     * Source nodes are also referenced by the target list. If you are in the
+     * target list you can use this index to know the nodes position in the
+     * source list.
+     * 
      * @return the index as an integer.
      */
     public int getSourceListIndex()
@@ -149,6 +172,7 @@ public class TagNode
 
     /**
      * Gets the literal TMX name for this node.
+     * 
      * @return the TMX type name as a string.
      */
     public String getTmxType()
@@ -158,6 +182,7 @@ public class TagNode
 
     /**
      * Gets the PTag name for this node.
+     * 
      * @return the PTag name as a string.
      */
     public String getPTagName()
@@ -167,6 +192,7 @@ public class TagNode
 
     /**
      * Indicates whether the node is a paired.
+     * 
      * @return true if node is paired. Otherwise false.
      */
     public boolean isPaired()
@@ -176,17 +202,18 @@ public class TagNode
 
     /**
      * Gets the tags attributes for this node.
+     * 
      * @return the attribute hash.
      */
     public Hashtable getAttributes()
     {
         return m_hAttributes;
     }
-    
+
     public String toString()
-    {   
+    {
         StringBuffer sb = new StringBuffer();
-        
+
         sb.append("m_bMapped=");
         sb.append(m_bMapped);
         sb.append(", m_nSourceListIndex=");

@@ -152,6 +152,7 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
+import com.globalsight.everest.projecthandler.ProjectHandlerException;
 import com.globalsight.everest.projecthandler.ProjectHandlerLocal;
 import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.ProjectInfo;
@@ -189,6 +190,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.CharacterCountReportGenerator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.PostReviewQAReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
@@ -237,6 +239,7 @@ import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.ling.tm2.segmenttm.TMidTUid;
 import com.globalsight.ling.tm3.core.BaseTm;
 import com.globalsight.ling.tm3.core.TM3Attribute;
 import com.globalsight.ling.tm3.core.TM3Tu;
@@ -363,6 +366,8 @@ public class Ambassador extends AbstractWebService
     
 	public static final String EXPORT_TM = "exportTM";
 	
+	public static final String TM_FULL_TEXT_SEARCH = "tmFullTextSearch";
+	
 	public static final String TM_EXPORT_STATUS = "getTmExportStatus";
 	
 	public static final String CREATE_JOB_GROUP ="createJobGroup";
@@ -379,13 +384,20 @@ public class Ambassador extends AbstractWebService
     public static final String GENERATE_CHARACTER_COUNT_REPORT = "generateCharacterCountReport";
     public static final String GENERATE_REVIEWERS_COMMENT_REPORT = "generateReviewersCommentReport";
     public static final String GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT = "generateReviewersCommentSimplifiedReport";
+    public static final String GENERATE_POST_REVIEW_QA_REPORT = "generatePostReviewQAReport";
 
     public static final String GENERATE_DITA_QA_REPORT = "generateDITAQAReport";
     public static final String GENERATE_QA_CHECKS_REPORT = "generateQAChecksReport";
 
+    public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
+
     public static String ERROR_JOB_NAME = "You cannot have \\, /, :, ;, *, ?, |, \", &lt;, &gt;, % or &amp; in the Job Name.";
 
     public static String ERROR_JOB_GROUP_NAME = "You cannot have \\, /, :, ;, ,,.,*, ?,!,$,#,@,[,],{,},(,),^,+,=,~, |, \',\", &lt;, &gt;, % or &amp; in the Job Group Name.";
+    
+    public static String ERROR_EXPORT_FILE_NAME = "You cannot have \\, /, :, ;, ,,.,*, ?,!,$,#,@,[,],{,},(,),^,+,=,~, |, \',\", &lt;, &gt;, % or &amp; in the Export File Name.";
+    
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final Logger logger = Logger.getLogger(Ambassador.class);
 
@@ -428,7 +440,9 @@ public class Ambassador extends AbstractWebService
     private final static String NULL_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             + "\r\n<entries>\r\n\t<entry>\r\n\t\t"
             + "<percentage>0%</percentage>\r\n\t</entry>\r\n</entries>";
-
+    
+    private static final SimpleDateFormat format = new SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss");
     /*
      * The version of desktop icon e.g. VERSION = "(3.1,8.2)" -> 3.1 is the
      * minimal version to allow access webservice, 8.2 is the current version of
@@ -1038,6 +1052,7 @@ public class Ambassador extends AbstractWebService
      *       11 -- Invalid permission groups 
      *       12 -- Invalid project information 
      *       13 -- Invalid role information 
+     *       14-- Current login user does not have enough permission
      *       -1 -- Unknown exception
      * @throws WebServiceException
      */
@@ -1114,6 +1129,7 @@ public class Ambassador extends AbstractWebService
      *       11 -- Invalid permission groups 
      *       12 -- Invalid project information 
      *       13 -- Invalid role information 
+     *       14-- Current login user does not have enough permission
      *       -1 -- Unknown exception
      * @throws WebServiceException
      */
@@ -2910,6 +2926,37 @@ public class Ambassador extends AbstractWebService
         return path;
     }
 
+    private String handlePathForScripts(String path, Job job)
+    {
+        path = path.replace("\\", "/");
+        String finalPath = path;
+        // for new scripts on import/export
+        if (path.contains("/PreProcessed_" + job.getId() + "_"))
+        {
+            finalPath = path.replace(path.substring(
+                    path.lastIndexOf("/PreProcessed_" + job.getId() + "_"),
+                    path.lastIndexOf("/")), "");
+        }
+        // compatible codes for old import/export
+        else
+        {
+            int index = path.lastIndexOf("/");
+            if (index > -1)
+            {
+                String fileName = path.substring(index + 1);
+                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+                fileName = fileName.substring(0, fileName.lastIndexOf("."));
+                String rest = path.substring(0, index);
+                if (rest.endsWith("/" + fileName))
+                {
+                    finalPath = rest + "." + extension;
+                }
+            }
+        }
+
+        return finalPath;
+    }
+
     /**
      * Return exported files information for job's "EXPORTED" state workflows.
      * 
@@ -4481,8 +4528,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            String message = makeErrorXml(ACCEPT_TASK, e.getMessage());
-            throw new WebServiceException(message);
+            return makeErrorXml(ACCEPT_TASK, e.getMessage());
         }
 
         String acceptorName = getUsernameFromSession(p_accessToken);
@@ -4498,31 +4544,57 @@ public class Ambassador extends AbstractWebService
             logger.error(e.getMessage(), e);
             String message = "Failed to get task object by taskId : "
                     + p_taskId;
-            message = makeErrorXml(ACCEPT_TASK, message);
-            throw new WebServiceException(message);
+            return makeErrorXml(ACCEPT_TASK, message);
         }
         ActivityLog.Start activityStart = null;
         try
-        {
-            if (task != null)
-            {
-                Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-                activityArgs.put("loggedUserName", acceptorName);
-                activityArgs.put("taskId", p_taskId);
-                activityStart = ActivityLog.start(Ambassador.class,
-                        "acceptTask(p_accessToken,p_taskId)", activityArgs);
-                // GS will check if the acceptor is PM or available users
-                TaskHelper.acceptTask(acceptor, task);
-            }
-        }
+		{
+			if (task != null)
+			{
+				Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+				activityArgs.put("loggedUserName", acceptorName);
+				activityArgs.put("taskId", p_taskId);
+				activityStart = ActivityLog.start(Ambassador.class,
+						"acceptTask(p_accessToken,p_taskId)", activityArgs);
+				if (task.getState() == Task.STATE_ACCEPTED
+						|| task.getState() == Task.STATE_COMPLETED)
+				{
+					return makeErrorXml(ACCEPT_TASK,
+							"The current task has been accepted or completed state.");
+				}
+				
+				WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
+						.getWorkflowTaskInstance(acceptor, task.getId(),
+								WorkflowConstants.TASK_ALL_STATES);
+				task.setWorkflowTask(wfTask);
+				List allAssignees = task.getAllAssignees();
+				if (allAssignees != null && allAssignees.size() > 0)
+				{
+					if (!allAssignees.contains(acceptor))
+					{
+						String message = "'"
+								+ acceptor
+								+ "' is not an available assignee for current task "
+								+ p_taskId;
+						logger.warn(message);
+						return makeErrorXml(ACCEPT_TASK, message);
+					}
+				}
+				// GS will check if the acceptor is PM or available users
+				TaskHelper.acceptTask(acceptor, task);
+			}
+			else
+			{
+				return makeErrorXml(ACCEPT_TASK, "Invaild task id.");
+			}
+		}
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
             String message = "Failed to accept task for taskId : " + p_taskId
                     + ",maybe '" + acceptor
                     + "' do not have the authority to operate the task";
-            message = makeErrorXml(ACCEPT_TASK, message);
-            throw new WebServiceException(message);
+            return makeErrorXml(ACCEPT_TASK, message);
         }
         finally
         {
@@ -4560,11 +4632,10 @@ public class Ambassador extends AbstractWebService
             Assert.assertIsInteger(p_taskId);
         }
         catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            String message = makeErrorXml(COMPLETE_TASK, e.getMessage());
-            throw new WebServiceException(message);
-        }
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorXml(COMPLETE_TASK, e.getMessage());
+		}
 
         String userName = this.getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
@@ -4577,12 +4648,11 @@ public class Ambassador extends AbstractWebService
             task = taskManager.getTask(Long.parseLong(p_taskId));
         }
         catch (RemoteException re)
-        {
-            String msg = "Fail to get task object by taskId : " + p_taskId;
-            logger.error(msg, re);
-            msg = makeErrorXml("completeTask", msg);
-            throw new WebServiceException(msg);
-        }
+		{
+			String msg = "Fail to get task object by taskId : " + p_taskId;
+			logger.error(msg, re);
+			return makeErrorXml(COMPLETE_TASK, msg);
+		}
         catch (Exception ex)
         {
             logger.error(ex.getMessage(), ex);
@@ -4678,13 +4748,12 @@ public class Ambassador extends AbstractWebService
             }
         }
         catch (Exception ex)
-        {
-            String msg = "Fail to complete task : " + p_taskId + " ; "
-                    + ex.getMessage();
-            logger.error(msg, ex);
-            msg = makeErrorXml("completeTask", msg);
-            throw new WebServiceException(msg);
-        }
+		{
+			String msg = "Fail to complete task : " + p_taskId + " ; "
+					+ ex.getMessage();
+			logger.error(msg, ex);
+			return makeErrorXml(COMPLETE_TASK, msg);
+		}
         finally
         {
             if (activityStart != null)
@@ -4725,11 +4794,10 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_rejectComment, "Reject comment");
         }
         catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            String message = makeErrorXml(REJECT_TASK, e.getMessage());
-            throw new WebServiceException(message);
-        }
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorXml(REJECT_TASK, e.getMessage());
+		}
         // rejector
         String rejectUserName = getUsernameFromSession(p_accessToken);
         String rejectUserId = UserUtil.getUserIdByName(rejectUserName);
@@ -4760,12 +4828,11 @@ public class Ambassador extends AbstractWebService
             }
         }
         catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            String message = "Failed to reject task by taskId : " + p_taskId;
-            message = makeErrorXml(REJECT_TASK, message);
-            throw new WebServiceException(message);
-        }
+		{
+			logger.error(e.getMessage(), e);
+			String message = "Failed to reject task by taskId : " + p_taskId;
+			return makeErrorXml(REJECT_TASK, message);
+		}
         finally
         {
             if (activityStart != null)
@@ -11372,14 +11439,6 @@ public class Ambassador extends AbstractWebService
             // get permission set for current user
             User user = ServerProxy.getUserManager().getUserByName(
                     getUsernameFromSession(p_accessToken));
-            String userId = user.getUserId();
-            if (!UserUtil.isInPermissionGroup(userId,
-                    Permission.GROUP_ADMINISTRATOR)
-                    && !UserUtil.isInPermissionGroup(userId,
-                            Permission.GROUP_PROJECT_MANAGER))
-                throw new WebServiceException(
-                        "Current user has not permissions to get all source locales");
-
             LocaleManagerLocal lml = new LocaleManagerLocal();
             ArrayList locales = new ArrayList(
                     lml.getAllSourceLocalesByCompanyId(CompanyWrapper
@@ -11436,14 +11495,6 @@ public class Ambassador extends AbstractWebService
             // get permission set for current user
             User user = ServerProxy.getUserManager().getUserByName(
                     getUsernameFromSession(p_accessToken));
-            String userId = user.getUserId();
-            if (!UserUtil.isInPermissionGroup(userId,
-                    Permission.GROUP_ADMINISTRATOR)
-                    && !UserUtil.isInPermissionGroup(userId,
-                            Permission.GROUP_PROJECT_MANAGER))
-                throw new WebServiceException(
-                        "Current user has not permissions to get target locales");
-
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", user.getUserName());
             activityArgs.put("sourceLocale", p_sourceLocale);
@@ -11566,15 +11617,6 @@ public class Ambassador extends AbstractWebService
             ProjectHandlerLocal handler = new ProjectHandlerLocal();
             BasicL10nProfile basicL10nProfile = (BasicL10nProfile) handler
                     .getL10nProfile(Long.parseLong(p_l10nID));
-            String userId = getUsernameFromSession(p_accessToken);
-            if (!UserUtil.isSuperAdmin(userId)
-                    && !UserUtil.isSuperPM(userId)
-                    && !UserUtil.isInPermissionGroup(userId,
-                            Permission.GROUP_ADMINISTRATOR)
-                    && !UserUtil.isInPermissionGroup(userId,
-                            Permission.GROUP_PROJECT_MANAGER))
-                throw new WebServiceException(
-                        "Current user has not permissions to get the priority information");
             strReturn.append(basicL10nProfile.getPriority());
         }
         catch (Exception e)
@@ -11819,8 +11861,6 @@ public class Ambassador extends AbstractWebService
                     }
                 }
             }
-
-            throw new WebServiceException("Can not find the job attribute");
         }
         catch (Exception e)
         {
@@ -11834,6 +11874,8 @@ public class Ambassador extends AbstractWebService
                 activityStart.end();
             }
         }
+
+        return null;
     }
 
     /**
@@ -16114,108 +16156,116 @@ public class Ambassador extends AbstractWebService
      */
     public String dispatchWorkflow(String p_accessToken, String p_wfIds)
             throws WebServiceException
-    {
-        String message = "";
+	{
+		String message = "";
+		// Validate inputting parameters
+		try
+		{
+			User user = ServerProxy.getUserManager().getUserByName(
+					getUsernameFromSession(p_accessToken));
+			PermissionSet ps = Permission.getPermissionManager()
+					.getPermissionSetForUser(user.getUserId());
 
-        // Validate inputting parameters
-        try
-        {
-            Assert.assertNotEmpty(p_accessToken, "Access token");
-            Assert.assertNotEmpty(p_wfIds, "Workflow IDs");
-        }
-        catch (Exception e)
-        {
-            message = makeErrorXml("dispatchWorkflow", "Invaild parameters");
-            throw new WebServiceException(message);
-        }
+			if (!ps.getPermissionFor(Permission.JOB_WORKFLOWS_DISPATCH)
+					&& !ps.getPermissionFor(Permission.JOBS_DISPATCH))
+			{
+				String msg = "User " + user.getUserName()
+						+ " does not have enough permission";
+				return makeErrorXml("dispatchWorkflow", msg);
+			}
+			Assert.assertNotEmpty(p_accessToken, "Access token");
+			Assert.assertNotEmpty(p_wfIds, "Workflow IDs");
+		}
+		catch (Exception e)
+		{
+			return makeErrorXml("dispatchWorkflow", e.getMessage());
+		}
 
-        // User muse be in Administrator or PM group
-        String username = getUsernameFromSession(p_accessToken);
-        if (!UserUtil.isInPermissionGroup(username,
-                Permission.GROUP_PROJECT_MANAGER)
-                && !UserUtil.isInPermissionGroup(username,
-                        Permission.GROUP_ADMINISTRATOR))
-            throw new WebServiceException(makeErrorXml(
-                    "dispatchWorkflow",
-                    "User ".concat(username).concat(
-                            " do NOT have permission to run this")));
+		long wfId = 0l;
+		ArrayList<Long> wfIdsArray = new ArrayList<Long>();
+		String[] wfIds = null;
+		Workflow wf = null;
+		String wfIdString = "";
 
-        long wfId = 0l;
-        ArrayList<Long> wfIdsArray = new ArrayList<Long>();
-        String[] wfIds = null;
-        Workflow wf = null;
-        String wfIdString = "";
-        ArrayList<String> failIdsArrayList = new ArrayList<String>();
+		wfIds = p_wfIds.split(",");
+		int length = wfIds.length;
+		for (int i = 0; i < length; i++)
+		{
+			wfIdString = wfIds[i].trim();
+			if (wfIdString.equals(""))
+				continue;
+			try
+			{
+				wfId = Long.parseLong(wfIdString);
+				wfIdsArray.add(Long.valueOf(wfId));
+			}
+			catch (NumberFormatException nfe)
+			{
+				return makeErrorXml("dispatchWorkflow", "Invaild workflow id: "
+						+ wfIdString + ",non-numeric chars.");
+			}
+		}
+		ActivityLog.Start activityStart = null;
+		try
+		{
+			String userName = this.getUsernameFromSession(p_accessToken);
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", userName);
+			activityArgs.put("wfIds", p_wfIds);
+			activityStart = ActivityLog.start(Ambassador.class,
+					"dispatchWorkflow(p_accessToken, p_wfIds)", activityArgs);
+			WorkflowManagerWLRemote wfm = ServerProxy.getWorkflowManager();
+			String projectId = null;
+			for (int i = 0; i < wfIdsArray.size(); i++)
+			{
+				wfId = wfIdsArray.get(i).longValue();
+				try
+				{
+					wf = wfm.getWorkflowById(wfId);
+					if (wf != null)
+					{
+						projectId = String.valueOf(wf.getJob().getProjectId());
+						if (UserUtil.isInProject(userName, projectId))
+						{
+							wfm.dispatch(wf);
+						}
+						else
+						{
+							return makeErrorXml("dispatchWorkflow",
+									"Invaild workflow id: " + wfId
+											+ " for current user.");
+						}
+					}
+					else
+					{
+						return makeErrorXml("dispatchWorkflow",
+								"Invaild workflow id: " + wfId
+										+ ",does not exist.");
+					}
+				}
+				catch (WorkflowManagerException wfe)
+				{
+					logger.error(wfe.getMessage(), wfe);
+					return makeErrorXml("dispatchWorkflow", wfe.getMessage());
+				}
+			}
 
-        wfIds = p_wfIds.split(",");
-        int length = wfIds.length;
-        for (int i = 0; i < length; i++)
-        {
-            wfIdString = wfIds[i].trim();
-            if (wfIdString.equals(""))
-                continue;
-            try
-            {
-                wfId = Long.parseLong(wfIdString);
-                wfIdsArray.add(Long.valueOf(wfId));
-            }
-            catch (NumberFormatException nfe)
-            {
-                failIdsArrayList.add(wfIdString);
-            }
-        }
-        ActivityLog.Start activityStart = null;
-        try
-        {
-            String userName = this.getUsernameFromSession(p_accessToken);
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", userName);
-            activityArgs.put("wfIds", p_wfIds);
-            activityStart = ActivityLog.start(Ambassador.class,
-                    "dispatchWorkflow(p_accessToken, p_wfIds)", activityArgs);
-            WorkflowManagerWLRemote wfm = ServerProxy.getWorkflowManager();
-            String projectId = null;
-            for (int i = 0; i < wfIdsArray.size(); i++)
-            {
-                wfId = wfIdsArray.get(i).longValue();
-                try
-                {
-                    wf = wfm.getWorkflowById(wfId);
-                    projectId = String.valueOf(wf.getJob().getProjectId());
-                    if (UserUtil.isInProject(username, projectId))
-                        wfm.dispatch(wf);
-                    else
-                        failIdsArrayList.add(String.valueOf(wfId));
-                }
-                catch (WorkflowManagerException wfe)
-                {
-                    logger.error(wfe.getMessage(), wfe);
-                    failIdsArrayList.add(String.valueOf(wfId));
-                }
-            }
-            if (failIdsArrayList != null && failIdsArrayList.size() > 0)
-            {
-                message = "Invaild inputting workflow ID -- "
-                        .concat(failIdsArrayList.toString());
-                message = makeErrorXml("dispatchWorkflow", message);
-                throw new WebServiceException(message);
-            }
-            return null;
-        }
-        catch (Exception e)
-        {
-            message = makeErrorXml("dispatchWorkflow", e.getMessage());
-            throw new WebServiceException(message);
-        }
-        finally
-        {
-            if (activityStart != null)
-            {
-                activityStart.end();
-            }
+			return null;
+		}
+		catch (Exception e)
+		{
+			message = makeErrorXml("dispatchWorkflow", e.getMessage());
+			throw new WebServiceException(message);
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
 
-        }
-    }
+		}
+	}
 
     private String replaceAndString(String p_str)
     {
@@ -16414,37 +16464,6 @@ public class Ambassador extends AbstractWebService
                 return false;
         }
         return true;
-    }
-
-    private String handlePathForScripts(String path, Job job)
-    {
-        path = path.replace("\\", "/");
-        String finalPath = path;
-        // for new scripts on import/export
-        if (path.contains("/PreProcessed_" + job.getId() + "_"))
-        {
-            finalPath = path.replace(path.substring(
-                    path.lastIndexOf("/PreProcessed_" + job.getId() + "_"),
-                    path.lastIndexOf("/")), "");
-        }
-        // compatible codes for old import/export
-        else
-        {
-            int index = path.lastIndexOf("/");
-            if (index > -1)
-            {
-                String fileName = path.substring(index + 1);
-                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-                fileName = fileName.substring(0, fileName.lastIndexOf("."));
-                String rest = path.substring(0, index);
-                if (rest.endsWith("/" + fileName))
-                {
-                    finalPath = rest + "." + extension;
-                }
-            }
-        }
-
-        return finalPath;
     }
 
     private String getJobInfo(Job job) throws WebServiceException
@@ -17234,6 +17253,57 @@ public class Ambassador extends AbstractWebService
 
 		return returnString;
     }
+    
+    /**
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_jobId
+     *            -- job ID to get report.
+     * @param p_targetLocale
+     *            -- target locale. eg "zh_CN"(case insensitive).
+     * @return -- XML string. -- If fail, it will return an xml string to tell
+     *         error message; -- If succeed, report returning is like
+     *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/PostReviewQAReport/20140219/PRR-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
+     * @throws WebServiceException
+     */
+    public String generatePostReviewQAReport(String p_accessToken, 
+            String p_jobId, String p_targetLocale) throws WebServiceException
+    {
+        checkAccess(p_accessToken, GENERATE_POST_REVIEW_QA_REPORT);
+        String returnString = "";
+        try 
+        {
+            //get and check job ids
+            Long jobId = Long.valueOf(p_jobId);
+            List<Long> jobIdList = new ArrayList<Long>();
+            jobIdList.add(jobId);
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
+            String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
+            if(illegalJobIds.length() > 0)
+            {
+                return makeErrorXml(GENERATE_POST_REVIEW_QA_REPORT,
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
+            }
+            //get target locales
+            List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
+            targetLocalList.add(getLocaleByName(p_targetLocale));
+            //get report
+            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            PostReviewQAReportGenerator generator = new PostReviewQAReportGenerator(
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), userId);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
+            returnString = getReportsUrl(files);
+        } 
+        catch (Exception e) 
+        {
+            logger.error("Error found in generatePostReviewQAReport.", e);
+            return makeErrorXml(GENERATE_POST_REVIEW_QA_REPORT,
+                    "Error info: " + e.toString());
+        }
+        
+        return returnString;
+    }
 
     /**
      * 
@@ -17592,8 +17662,13 @@ public class Ambassador extends AbstractWebService
      * @param p_taskId
      *            -- task ID to offline download file for.
      * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report --
-     *            2 : Offline Translation Kit
+     *            -- 1 : Reviewer Comments Report or Translations Edit Report (this follows UI settings)
+     *            -- 2 : Offline Translation Kit
+     *            -- 3 : Translation Edit Report
+     *            -- 4 : Reviewer Comments Report
+     *            -- 5 : Reviewer Comments Report (Simplified)
+     *            -- 6 : Post Review QA Report
+     *
      * @return -- XML string. -- If fail, it will return an xml string to tell
      *         error message; -- If succeed, report returning is like
      *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/ReviewersCommentsReport-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
@@ -17619,7 +17694,7 @@ public class Ambassador extends AbstractWebService
      * @param p_taskId
      *            -- task ID to upload file to.
      * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
      *            -- 2 : Offline Translation Kit
      * @param p_fileName
      *            -- the upload file name
@@ -17656,7 +17731,7 @@ public class Ambassador extends AbstractWebService
      * @param p_identifyKey
      *            -- identifyKey to help locate where the uploaded file is.
      * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
      *            -- 2 : Offline Translation Kit
      * @return -- Empty if succeed; if fail, return corresponding message.
      * 
@@ -17998,7 +18073,7 @@ public class Ambassador extends AbstractWebService
 		return returnXml.toString();
 	}
     
-    /**
+	/**
 	 * Export TM data.
 	 * 
 	 * @param p_accessToken
@@ -18009,10 +18084,12 @@ public class Ambassador extends AbstractWebService
 	 *            -- language to export like "de_DE,fr_FR" or "fr_FR" or empty.
 	 *            If empty, export all.
 	 * @param p_startDate
-	 *            -- start time in "yyyyMMdd HHmmss" format, can not be empty.
+	 *            -- start time in "yyyyMMdd" format,on this day of all time
+	 *            periods will be included,can not be empty.
 	 * @param p_finishDate
-	 *            -- finish time in "yyyyMMdd HHmmss" format, can be empty, if
-	 *            empty, use current time.
+	 *            -- finish time in "yyyyMMdd" format,on this day of all time
+	 *            periods will be included,can be empty, if empty, use current
+	 *            time.
 	 * @param p_exportFormat
 	 *            -- export file formats: "GMX" and "TMX1.4b".
 	 * @param p_exportedFileName
@@ -18035,6 +18112,25 @@ public class Ambassador extends AbstractWebService
 		if (StringUtil.isEmpty(p_tmName))
 			return makeErrorXml(EXPORT_TM, "Invaild tm name.");
 
+		if (StringUtil.isNotEmpty(p_exportedFileName))
+		{
+			String specialChars = "~!@#$%^&*()+=[]\\';,./{}|\":<>?";
+			for (int i = 0; i < p_exportedFileName.trim().length(); i++)
+			{
+				char c = p_exportedFileName.trim().charAt(i);
+				if (specialChars.indexOf(c) > -1)
+				{
+					return makeErrorXml(EXPORT_TM, ERROR_EXPORT_FILE_NAME);
+				}
+			}
+		}
+		
+		if(p_exportedFileName != null && p_exportedFileName.length() > 0)
+			p_exportedFileName = p_exportedFileName.trim();
+
+		if(p_exportedFileName != null && p_exportedFileName.length() == 0)
+			p_exportedFileName = null;
+		
 		String identifyKey = null;
 		IExportManager exporter = null;
 		String options = null;
@@ -18057,7 +18153,7 @@ public class Ambassador extends AbstractWebService
 		}
 		else
 		{
-			startDate = checkDate(p_startDate, "start");
+			startDate = checkDate(p_startDate);
 			if (startDate.equals("error"))
 			{
 				return makeErrorXml(EXPORT_TM, "Invaild start date.");
@@ -18066,12 +18162,12 @@ public class Ambassador extends AbstractWebService
 
 		if (!StringUtil.isEmpty(p_finishDate))
 		{
-			finishDate = checkDate(p_finishDate, "finish");
+			finishDate = checkDate(p_finishDate);
 			if (finishDate.equals("error"))
 			{
 				return makeErrorXml(EXPORT_TM, "Invaild finish date.");
 			}
-			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 			try
 			{
 				Date fshDate = sdf.parse(finishDate);
@@ -18093,6 +18189,7 @@ public class Ambassador extends AbstractWebService
 			String[] languageArr = p_languages.split(",");
 			for (String lang : languageArr)
 			{
+				lang = lang.replace("-", "_");
 				GlobalSightLocale locale = GSDataFactory
 						.localeFromCode(lang.trim());
 				if (locale == null)
@@ -18101,6 +18198,7 @@ public class Ambassador extends AbstractWebService
 							+ lang);
 				}
 			}
+			p_languages = p_languages.replace("-", "_");
 		}
 
 		if (StringUtil.isEmpty(p_exportFormat)
@@ -18146,14 +18244,381 @@ public class Ambassador extends AbstractWebService
 
 		return identifyKey;
 	}
+	
+	/**
+	 * TM full text search.
+	 * 
+	 * @param p_accessToken
+	 * @param p_string
+	 *            --Search text,can not be empty.
+	 * @param p_tmNames
+	 *            --TM name,can not be empty.
+	 * @param p_sourceLocale
+	 *            --Source locale,like 'en_US',can not be empty.
+	 * @param p_targetLocale
+	 *            --Target locale,like 'de_DE',can not be empty.
+	 * @param p_dateType
+	 *            --The type of search by time,like 'create' or 'modify',can be
+	 *            empty.
+	 * @param p_startDate
+	 *            --Start time in "yyyyMMdd" format, on this day of all time
+	 *            periods will be included, can be empty.
+	 * @param p_finishDate
+	 *            -- Finish time in "yyyyMMdd" format, on this day of all time
+	 *            periods will be included, can be empty.
+	 * @param p_companyName
+	 *            --Company name.If super user,compay name is subsidiaries name.
+	 *            If not super user,company name is the login user of the
+	 *            company.
+	 * 
+	 */
+	public String tmFullTextSearch(String p_accessToken, String p_string,
+			String p_tmNames, String p_sourceLocale, String p_targetLocale,
+			String p_dateType, String p_startDate, String p_finishDate,
+			String p_companyName) throws WebServiceException
+	{
+		if (StringUtil.isEmpty(p_accessToken))
+			return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild access token.");
+		// Check access token
+		checkAccess(p_accessToken, TM_FULL_TEXT_SEARCH);
 
-	private String checkDate(String strDate, String label)
+		String errorXml = checkParamters(p_accessToken, p_string, p_tmNames,
+				p_sourceLocale, p_targetLocale, p_dateType,p_startDate, p_finishDate,
+				p_companyName);
+		if (StringUtil.isNotEmpty(errorXml))
+			return errorXml;
+
+		if (StringUtil.isEmpty(p_dateType))
+			p_dateType = "create";
+
+		StringBuffer xml = new StringBuffer(XML_HEAD);
+		LocaleManager lm = ServerProxy.getLocaleManager();
+		try
+		{
+			Date startDate = parseStartDate(p_startDate);
+			Date endDate = parseEndDate(p_finishDate);
+			boolean searchInSource = true;
+			Company company = ServerProxy.getJobHandler().getCompany(
+					p_companyName);
+			GlobalSightLocale sourceGSL = lm.getLocaleByString(p_sourceLocale);
+			GlobalSightLocale targetGSL = lm.getLocaleByString(p_targetLocale);
+			// get all selected TMS
+			ArrayList<Tm> tmList = new ArrayList<Tm>();
+			String[] tmNameArray = p_tmNames.split(",");
+			for (String tmName : tmNameArray)
+			{
+				tmList.add(getProjectTm(tmName, company.getId()));
+			}
+			// do search
+			TmCoreManager mgr = LingServerProxy.getTmCoreManager();
+			List<TMidTUid> queryResult = mgr.tmConcordanceQuery(tmList,
+					p_string, searchInSource ? sourceGSL : targetGSL,
+					searchInSource ? targetGSL : sourceGSL, null);
+
+			xml.append("<Segements>\r\n");
+			xml.append("\t<sourceLocale>").append(sourceGSL.getDisplayName())
+					.append("</sourceLocale>\r\n");
+			xml.append("\t<targetLocale>").append(targetGSL.getDisplayName())
+					.append("</targetLocale>\r\n");
+
+			// Get all TUS by queryResult, then get all needed properties
+			List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager()
+					.getSegmentsById(queryResult);
+			for (int i = 0, max = tus.size(); i < max; i++)
+			{
+				SegmentTmTu tu = tus.get(i);
+				if (tu == null)
+				{
+					continue;
+				}
+				long tuId = tu.getId();
+				BaseTmTuv srcTuv = tu.getFirstTuv(sourceGSL);
+				if (startDate != null || endDate != null)
+				{
+					if (p_dateType.equalsIgnoreCase("create"))
+					{
+						Date creationDate = format.parse(format.format(srcTuv
+								.getCreationDate()));
+						boolean checkSrcDate = checkCreatetionDate(
+								creationDate, startDate, endDate);
+						if (!checkSrcDate)
+							continue;
+					}
+					else if (p_dateType.equalsIgnoreCase("modify"))
+					{
+						Date modifyDate = format.parse(format.format(srcTuv
+								.getModifyDate()));
+						boolean checkSrcDate = checkCreatetionDate(modifyDate,
+								startDate, endDate);
+						if (!checkSrcDate)
+							continue;
+					}
+				}
+				xml.append("\t<segement>\r\n");
+				xml.append("\t\t<sourceSegement>")
+						.append(EditUtil.encodeXmlEntities(srcTuv.getSegment()))
+						.append("</sourceSegement>\r\n");
+				BaseTmTuv trgTuv;
+				Collection targetTuvs = tu.getTuvList(targetGSL);
+				for (Iterator it = targetTuvs.iterator(); it.hasNext();)
+				{
+					trgTuv = (BaseTmTuv) it.next();
+					xml.append("\t\t<targetSegement>")
+							.append(EditUtil.encodeXmlEntities(trgTuv
+									.getSegment()))
+							.append("</targetSegement>\r\n");
+					String sid = trgTuv.getSid();
+					long tuvId = trgTuv.getId();
+					if (null == sid)
+					{
+						sid = "N/A";
+					}
+					long tmId = trgTuv.getTu().getTmId();
+					xml.append("\t\t<sid>").append(sid).append("</sid>\r\n");
+					xml.append("\t\t<tmName>")
+							.append(ServerProxy.getProjectHandler()
+									.getProjectTMById(tmId, false).getName())
+							.append("</tmName>\r\n");
+				}
+				xml.append("\t</segement>\r\n");
+			}
+			xml.append("<Segements>\r\n");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		if (xml.toString().length() > 0)
+			return xml.toString();
+
+		return "No matching content !";
+	}
+
+	private boolean checkCreatetionDate(Date creationDate, Date startDate,
+			Date endDate)
+	{
+		if (startDate != null && endDate == null)
+		{
+			if (!creationDate.after(startDate)
+					&& !creationDate.equals(startDate))
+			{
+				return false;
+			}
+		}
+		else if (startDate == null && endDate != null)
+		{
+			if (!creationDate.before(endDate) && creationDate.equals(endDate))
+			{
+				return false;
+			}
+		}
+		else if (startDate != null && endDate != null)
+		{
+			if ((!creationDate.after(startDate) && !creationDate
+					.equals(startDate))
+					|| (!creationDate.before(endDate) && !creationDate
+							.equals(endDate)))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+    
+	private Date parseStartDate(String dateStr)
+	{
+		SimpleDateFormat sfm1 = new SimpleDateFormat("yyyyMMdd HHmmss");
+		if (StringUtil.isNotEmpty(dateStr))
+		{
+			try
+			{
+				dateStr += " 000000";
+				return sfm1.parse(dateStr);
+			}
+			catch (ParseException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	private Date parseEndDate(String dateStr)
+	{
+		SimpleDateFormat sfm1 = new SimpleDateFormat("yyyyMMdd HHmmss");
+		if (StringUtil.isNotEmpty(dateStr))
+		{
+			try
+			{
+				dateStr += " 235959";
+				return sfm1.parse(dateStr);
+			}
+			catch (ParseException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	private String checkParamters(String p_accessToken, String p_string,
+			String p_tmNames, String p_sourceLocale, String p_targetLocale,
+			String p_dateType, String p_startDate, String p_finishDate,
+			String p_companyName)
+	{
+		if (StringUtil.isEmpty(p_string))
+			return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild search string.");
+
+		if (StringUtil.isEmpty(p_tmNames))
+			return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild tm name.");
+
+		if (StringUtil.isEmpty(p_sourceLocale))
+			return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild source locale.");
+
+		GlobalSightLocale sourceLocale = GSDataFactory
+				.localeFromCode(p_sourceLocale);
+		if (sourceLocale == null)
+			return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild source locale.");
+
+		if (StringUtil.isEmpty(p_targetLocale))
+			return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild target locale.");
+
+		GlobalSightLocale targetLocale = GSDataFactory
+				.localeFromCode(p_targetLocale);
+		if (targetLocale == null)
+			return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild target locale.");
+		
+		if (StringUtil.isNotEmpty(p_dateType))
+		{
+			if (!p_dateType.equalsIgnoreCase("create")
+					&& !p_dateType.equalsIgnoreCase("modify"))
+				return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild date type.");
+		}
+		
+		if (StringUtil.isEmpty(p_companyName))
+			return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild company name.");
+
+		String userName = getUsernameFromSession(p_accessToken);
+		Company logUserCompany = getCompanyInfo(userName);
+		if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String
+				.valueOf(logUserCompany.getId())))
+		{
+			if (!logUserCompany.getName().equalsIgnoreCase(p_companyName))
+			{
+				return makeErrorXml(TM_FULL_TEXT_SEARCH,
+						"Invaild company name.");
+			}
+			else
+			{
+				String[] tmNameArr = p_tmNames.split(",");
+				for (String tmName : tmNameArr)
+				{
+					ProjectTM projectTm = getProjectTm(tmName,
+							logUserCompany.getId());
+					if (projectTm == null)
+					{
+						return makeErrorXml(TM_FULL_TEXT_SEARCH, tmName
+								+ " is invaild tm name.");
+					}
+				}
+			}
+		}
+		else
+		{
+			try
+			{
+				Company company = ServerProxy.getJobHandler().getCompany(
+						p_companyName);
+				String[] tmNameArr = p_tmNames.split(",");
+				for (String tmName : tmNameArr)
+				{
+					ProjectTM projectTm = getProjectTm(tmName, company.getId());
+					if (projectTm == null)
+					{
+						return makeErrorXml(TM_FULL_TEXT_SEARCH, tmName
+								+ "is invaild tm name.");
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		String startDate = null;
+		String finishDate = null;
+		if (StringUtil.isNotEmpty(p_startDate))
+		{
+			startDate = checkDate(p_startDate);
+			if (startDate.equals("error"))
+			{
+				return makeErrorXml(EXPORT_TM, "Invaild start date.");
+			}
+		}
+
+		if (!StringUtil.isEmpty(p_finishDate))
+		{
+			finishDate = checkDate(p_finishDate);
+			if (finishDate.equals("error"))
+			{
+				return makeErrorXml(EXPORT_TM, "Invaild finish date.");
+			}
+			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+			try
+			{
+				if (StringUtil.isNotEmpty(startDate))
+				{
+					Date fshDate = sdf.parse(finishDate);
+					Date staDate = sdf.parse(startDate);
+					if (fshDate.before(staDate))
+					{
+						return makeErrorXml(EXPORT_TM,
+								"Invaild start date and finish date.");
+					}
+				}
+			}
+			catch (ParseException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		return null;
+	}
+	
+	private ProjectTM getProjectTm(String tmName, String companyId)
+	{
+		ProjectTM projectTM = null;
+		try
+		{
+			String hql = "from ProjectTM p where p.name = :name and p.companyId = :companyId";
+
+			HashMap map = new HashMap();
+			map.put("name", tmName);
+			map.put("companyId", Long.parseLong(companyId));
+			projectTM = (ProjectTM) HibernateUtil.getFirst(hql, map);
+		}
+		catch (Exception e)
+		{
+			String[] args = new String[1];
+			args[0] = String.valueOf(tmName);
+			throw new ProjectHandlerException(
+					ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
+					args, e);
+		}
+
+		return projectTM;
+	}
+	
+	private String checkDate(String strDate)
 	{
 		String formatDate = null;
 		try
 		{
-			SimpleDateFormat sfm1 = new SimpleDateFormat("yyyyMMdd HHmmss");
-			SimpleDateFormat sfm2 = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+			SimpleDateFormat sfm1 = new SimpleDateFormat("yyyyMMdd");
+			SimpleDateFormat sfm2 = new SimpleDateFormat("MM/dd/yyyy");
 			formatDate = sfm2.format(sfm1.parse(strDate));
 		}
 		catch (Exception e)
@@ -18273,4 +18738,108 @@ public class Ambassador extends AbstractWebService
 			e.printStackTrace();
 		}
 	}
+
+    /**
+     * Get a link for in context review for specified task ID. User need not
+     * logging in GlobalSight.
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_taskId
+     *            -- task ID
+     * @return A link like "http://10.10.215.20:8080/globalsight/ControlServlet?linkName=self&pageName=inctxrvED1&secret=E127B35E1A1C1B52C742353BBA176327D7F54956B373428134DE7252182EAA0D".
+     * 
+     * @throws WebServiceException
+     */
+    public String getInContextReviewLink(String p_accessToken, String p_taskId)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, GET_IN_CONTEXT_REVIEW_LINK);
+        try {
+            Assert.assertNotEmpty(p_accessToken, "Access token");
+            Assert.assertIsInteger(p_taskId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, e.getMessage());
+        }
+
+        String loggingUserName = getUsernameFromSession(p_accessToken);
+        String userId = UserUtil.getUserIdByName(loggingUserName);
+
+        Task task = null;
+        try
+        {
+            task = TaskHelper.getTask(Long.parseLong(p_taskId));
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            String message = "Failed to get task object by taskId : "
+                    + p_taskId;
+            return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, message);
+        }
+
+        if (task == null)
+        {
+            return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, "Can not get task by taskID.");
+        }
+
+        if (task.getState() == Task.STATE_COMPLETED)
+        {
+            return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK,
+                    "The current task has been in completed state.");
+        }
+
+        ActivityLog.Start activityStart = null;
+        try
+        {
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", loggingUserName);
+            activityArgs.put("taskId", p_taskId);
+            activityStart = ActivityLog.start(Ambassador.class,
+                    "getInContextReviewLink(p_accessToken, p_taskId)", activityArgs);
+
+            User pm = task.getWorkflow().getJob().getProject()
+                    .getProjectManager();
+            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
+                    .getWorkflowTaskInstance(userId, task.getId(),
+                            WorkflowConstants.TASK_ALL_STATES);
+            task.setWorkflowTask(wfTask);
+            List allAssignees = task.getAllAssignees();
+            if (allAssignees != null && allAssignees.size() > 0)
+            {
+                if (!allAssignees.contains(userId)
+                        && !userId.equalsIgnoreCase(pm.getUserId()))
+                {
+                    String message = "'"
+                            + userId
+                            + "' is neither acceptor/available assignee of current task nor project manager.";
+                    logger.warn(message);
+                    return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, message);
+                }
+            }
+
+            StringBuffer link = new StringBuffer();
+            link.append(AmbassadorUtil.getCapLoginOrPublicUrl());
+            link.append("/ControlServlet?linkName=self&pageName=inctxrvED1&secret=");
+            StringBuffer secret = new StringBuffer();
+            secret.append("taskId=").append(p_taskId.trim())
+                    .append("&nameField=").append(loggingUserName);
+            link.append(AmbassadorUtil.encryptionString(secret.toString()));
+            return link.toString();
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            String message = "Failed to get In Context Review Link for taskId : " + p_taskId;
+            return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, message);
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
+    }
 }

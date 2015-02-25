@@ -91,8 +91,8 @@ public class EloquaConnectorComparator extends StringComparator
             rv = this.compareStrings(aValue, bValue);
             break;
         case DESC:
-            aValue = a.getUrl();
-            bValue = b.getUrl();
+            aValue = a.getDescription();
+            bValue = b.getDescription();
             rv = this.compareStrings(aValue, bValue);
             break;   
         case GS_COMPANY_NAME:

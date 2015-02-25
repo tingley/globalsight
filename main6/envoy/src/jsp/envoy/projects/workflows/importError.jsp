@@ -93,7 +93,7 @@ function cleanError()
             <!-- End Details table -->
 		<P>
         <!-- Pages table -->
-		<TABLE CELLPADDING="3" CELLSPACING="0" BORDER="0" style="width:100%;table-layout:fixed">
+		<TABLE CELLPADDING="3" CELLSPACING="0" BORDER="0" style="width:100%;">
 		<TR CLASS="tableHeadingBasic">
 			<TD NOWRAP style="width:44%"><%=bundle.getString("lb_pages")%></TD>
 			<TD ALIGN="CENTER" NOWRAP style="width:12%"><%=bundle.getString("lb_source_word_count")%></TD>

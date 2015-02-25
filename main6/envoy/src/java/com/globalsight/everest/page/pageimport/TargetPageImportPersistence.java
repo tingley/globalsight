@@ -31,6 +31,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.util.EventFlowXmlParser;
+import com.globalsight.cxe.util.XmlUtil;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.PageException;
@@ -239,9 +241,8 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
         try
         {
             String eventflowXml = p_sourcePage.getRequest().getEventFlowXml();
-            EventFlowXmlParser parser = new EventFlowXmlParser();
-            parser.parse(eventflowXml);
-            jobUid = parser.getSourceImportInitiatorId();
+            EventFlowXml eventFlowXml = XmlUtil.string2Object(EventFlowXml.class, eventflowXml);
+            jobUid = eventFlowXml.getSource().getImportInitiatorId();
         }
         catch (Exception e)
         {

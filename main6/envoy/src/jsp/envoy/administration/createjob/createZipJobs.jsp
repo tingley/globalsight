@@ -368,7 +368,7 @@ function addFullDivElement(id, zipName, filePath, fileName, fileSize, isSwitched
             + '<div class="profile" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="profileArea"></span></div>'
             // div of cancel button
             + '<div class="cancel"><a href="javascript:removeFile(\''+ id + '\',\'' + zipName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'") + '\',' + fileSize + ',\'' + filePath.replace(/\\/g, "\\\\").replace(/\'/g, "\\'") + '\')">' 
-            + '<img style="padding-top:3px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'
+            + '<img style="padding-top:4px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'
             // div of progress bar
             + '<div class="uploadifyProgressBar" id="ProgressBar' + id + '"></div>'
             + '</div></div>'
@@ -1009,8 +1009,8 @@ function isIE() { //ie?
         <td colspan="6"><div id="appl"></div><div id="attachment"></div>
             <table cellSpacing="0" cellPadding="0" width="100%" align="center" border="0">
                 <tr>
-                    <td width="100px" height="32px" align="center" valign="middle" onmouseover="setInputFileDisable(0)">
-                    &nbsp;<input type="button" id="sourceFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>">
+                    <td width="100px" height="30px" align="center" valign="middle" onmouseover="setInputFileDisable(0)">
+                    <input type="button" id="sourceFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>">
                     <input type="file" class="sourceFile" value="Add File" name="selectedSourceFile" id="selectedSourceFile" onclick="setType(0)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_add_file_tip}'/>">
                     </td>
                     <td width="100px" align="center" valign="middle"><input id="uploadedFiles" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_uploaded_files}'/>" title="<c:out value='${lb_create_job_uploaded_files_tip}'/>"></td>
@@ -1072,7 +1072,7 @@ function isIE() { //ie?
                     <c:out value="${lb_attachment}"/> / <c:out value="${lb_reference_file}"/>: 
                 </td>
                 <td width="51%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
-                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer" onclick="delAttc()"></div></td>
+                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc()"></div></td>
                 <td width="15%" onmouseover="setInputFileDisable(1)">
                 <input type="button" id="attachmentFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_browse}'/>">
                 <input type="file" class="attachmentFile" name="selectedAttachmentFile" id="selectedAttachmentFile" class="standardBtn_mouseout" onclick="setType(1)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_browse_tip}'/>">

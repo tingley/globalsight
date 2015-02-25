@@ -29,7 +29,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
@@ -57,8 +56,8 @@ import com.globalsight.util.gxml.TextNode;
  */
 public class GxmlUtil
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(GxmlUtil.class.getName());
+    private static final Logger CATEGORY = Logger.getLogger(GxmlUtil.class
+            .getName());
 
     static private final String HTML = "html";
     static private final String JHTML = "jhtml";
@@ -259,12 +258,14 @@ public class GxmlUtil
                     while (it.hasNext())
                     {
                         GxmlElement child = (GxmlElement) it.next();
-                        boolean isInternalNode = isInternalNode(child, p_context);
-                        if (isInternalNode && child.getType() == GxmlElement.BPT)
+                        boolean isInternalNode = isInternalNode(child,
+                                p_context);
+                        if (isInternalNode
+                                && child.getType() == GxmlElement.BPT)
                         {
                             p_res.append(getInternalDisplayHtml(child));
                         }
-                        
+
                         List childElements = child.getChildElements();
                         if (childElements.size() != 0)
                         {
@@ -303,8 +304,9 @@ public class GxmlUtil
                             getDisplayHtml(child, p_dataFormat, p_context,
                                     false, p_res);
                         }
-                        
-                        if (isInternalNode && child.getType() == GxmlElement.EPT)
+
+                        if (isInternalNode
+                                && child.getType() == GxmlElement.EPT)
                         {
                             p_res.append(getInternalDisplayHtml(child));
                         }
@@ -667,12 +669,14 @@ public class GxmlUtil
                     for (Iterator it = childNodes.iterator(); it.hasNext();)
                     {
                         GxmlElement child = (GxmlElement) it.next();
-                        boolean isInternalNode = isInternalNode(child, p_context);
-                        if (isInternalNode && child.getType() == GxmlElement.BPT)
+                        boolean isInternalNode = isInternalNode(child,
+                                p_context);
+                        if (isInternalNode
+                                && child.getType() == GxmlElement.BPT)
                         {
                             p_res.append(getInternalDisplayHtml(child));
                         }
-                        
+
                         List childElements = child.getChildElements();
                         if (childElements.size() > 0)
                         {
@@ -692,8 +696,9 @@ public class GxmlUtil
                                     p_page, p_imageMaps, p_tuvId, p_context,
                                     false, p_res);
                         }
-                        
-                        if (isInternalNode && child.getType() == GxmlElement.EPT)
+
+                        if (isInternalNode
+                                && child.getType() == GxmlElement.EPT)
                         {
                             p_res.append(getInternalDisplayHtml(child));
                         }
@@ -761,7 +766,8 @@ public class GxmlUtil
                     }
                     else
                     {
-                        nodeV = EditUtil.encodeHtmlEntities(p_node.getTextValue());
+                        nodeV = EditUtil.encodeHtmlEntities(p_node
+                                .getTextValue());
                     }
 
                     p_res.append(disableLinks(nodeV));
@@ -806,8 +812,10 @@ public class GxmlUtil
 
     private static boolean isTagElement(GxmlElement element)
     {
-        return element.getType() == GxmlElement.BPT || element.getType() == GxmlElement.EPT
-                || element.getType() == GxmlElement.PH || element.getType() == GxmlElement.IT
+        return element.getType() == GxmlElement.BPT
+                || element.getType() == GxmlElement.EPT
+                || element.getType() == GxmlElement.PH
+                || element.getType() == GxmlElement.IT
                 || element.getType() == GxmlElement.UT;
     }
 
@@ -1213,15 +1221,15 @@ public class GxmlUtil
         String result = p_html;
         // Remove the o:gfxdata value that is very large which causes
         // StackOverFlow error during the match
-        result = StringUtil.replaceWithRE(result, O_PATTERN, new Replacer() 
+        result = StringUtil.replaceWithRE(result, O_PATTERN, new Replacer()
         {
-			@Override
-			public String getReplaceString(Matcher m) 
-			{
-				// TODO Auto-generated method stub
-				return "o:gfxdata=\"\"";
-			}
-		});
+            @Override
+            public String getReplaceString(Matcher m)
+            {
+                // TODO Auto-generated method stub
+                return "o:gfxdata=\"\"";
+            }
+        });
 
         RE re = new RE();
 
@@ -1358,13 +1366,13 @@ public class GxmlUtil
             int i_start = p_xml.indexOf('>');
             int i_end = p_xml.lastIndexOf('<');
             int xmlLen = p_xml.length();
-            if (i_end == 0 && i_end < i_start && i_start != (xmlLen -1))
+            if (i_end == 0 && i_end < i_start && i_start != (xmlLen - 1))
             {
                 // indicates this is not an empty tag, like <x1>segment content,
                 // then return original.
                 return p_xml;
             }
-            
+
             if (i_end < i_start)
             {
                 // indicates this is an empty tag, like <localizable xxxx />,
@@ -1512,23 +1520,24 @@ public class GxmlUtil
             matchText = MessageFormat.format(MOVE_TAGS_REGEX_ALL, new String[]
             { id, startTag, endTag });
             p = Pattern.compile(matchText);
-            
-            src = StringUtil.replaceWithRE(src, Pattern.compile(matchText), new Replacer() 
-            {
-				@Override
-				public String getReplaceString(Matcher m) 
-				{
-					return m.group(1);
-				}
-			});
+
+            src = StringUtil.replaceWithRE(src, Pattern.compile(matchText),
+                    new Replacer()
+                    {
+                        @Override
+                        public String getReplaceString(Matcher m)
+                        {
+                            return m.group(1);
+                        }
+                    });
         }
 
         return src;
     }
 
     /**
-     * Check if the GxmlElement is completely composed of protection
-     * text (internal text).
+     * Check if the GxmlElement is completely composed of protection text
+     * (internal text).
      * <p>
      * If yes, this segment does not need translate, in protection.
      * </p>
@@ -1554,7 +1563,8 @@ public class GxmlUtil
         {
             for (GxmlElement subEle : subFlowList)
             {
-                allNotInternalTextNodes.addAll(subEle.getTextNodeWithoutInternal());
+                allNotInternalTextNodes.addAll(subEle
+                        .getTextNodeWithoutInternal());
             }
         }
 

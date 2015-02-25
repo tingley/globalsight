@@ -44,6 +44,9 @@ import org.xml.sax.InputSource;
 import com.globalsight.connector.eloqua.models.Email;
 import com.globalsight.connector.eloqua.models.LandingPage;
 import com.globalsight.connector.eloqua.util.EloquaHelper;
+import com.globalsight.connector.mindtouch.MindTouchManager;
+import com.globalsight.connector.mindtouch.util.MindTouchHelper;
+import com.globalsight.connector.mindtouch.vo.MindTouchPageInfo;
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
@@ -51,6 +54,7 @@ import com.globalsight.cxe.entity.eloqua.EloquaConnector;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
+import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
 import com.globalsight.cxe.entity.xmldtd.XmlDtd;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.cxe.message.CxeMessage;
@@ -416,8 +420,10 @@ public class Exporter
                         // execute script
                         // "PostProcessed" parameter may be used as flag to tell
                         // it should invoke post processor.
-                        String cmd = "cmd.exe /c " + scriptOnExport + " \""
-                                + targetFolder + "\" \"PostProcessed\" -r";
+                    	String trgLocale = "targetLocale:" + wf.getTargetLocale().toString();
+						String cmd = "cmd.exe /c " + scriptOnExport + " \""
+								+ targetFolder + "\" \"PostProcessed\" \""
+								+ trgLocale + "\" -r";
                         ProcessRunner pr = new ProcessRunner(cmd);
                         Thread t = new Thread(pr);
                         t.start();
@@ -471,7 +477,10 @@ public class Exporter
             // For eloqua file
             handleEloquaFiles(finalFileName, fp, wf, hasScript);
 
-			// Added by Vincent Yan
+            // For MindTouch file
+            handleMindTouchFiles(finalFileName, fp, wf);
+
+            // Added by Vincent Yan
 			HashMap<String, String> infos = CVSUtil.seperateFileInfo(
 					finalFileStr, m_exportLocation);
             if (infos != null && CVSUtil.isCVSJob(infos.get("jobId")))
@@ -586,7 +595,60 @@ public class Exporter
 
         return exportStatusMsg;
     }
-    
+
+    /**
+     * When export, post contents/tags back to MindTouch server.
+     * 
+     * @param finalFileName -- the absolute full pathname.
+     */
+    private void handleMindTouchFiles(String finalFileName, FileProfile fp,
+            Workflow wf)
+    {
+        try {
+            // MindTouch file name is like "$MindTouch Title$(contents).xml" or
+            // ""$MindTouch Title$(tags).xml".
+            if (finalFileName.endsWith("(contents).xml")
+                    || finalFileName.endsWith("(tags).xml"))
+            {
+                finalFileName = finalFileName.replace("/", "\\");
+                String sourceLocale = wf.getJob().getL10nProfile()
+                        .getSourceLocale().toString();
+                String targetLocale = wf.getTargetLocale().toString();
+                String sourceFilePathName = finalFileName
+                        .replaceFirst("\\\\" + targetLocale + "\\\\", "\\\\"
+                                + sourceLocale + "\\\\");
+                
+                File trgFile = new File(finalFileName);
+                File srcFile = new File(sourceFilePathName);
+                if (srcFile.exists()) {
+                    File objFile = new File(sourceFilePathName + ".obj");
+                    if (objFile.exists())
+                    {
+                        MindTouchPageInfo pageInfo = MindTouchHelper
+                                .parseObjFile(objFile);
+                        long mtcId = Long.parseLong(pageInfo
+                                .getMindTouchConnectorId());
+                        MindTouchConnector mtc = MindTouchManager
+                                .getMindTouchConnectorById(mtcId);
+                        MindTouchHelper helper = new MindTouchHelper(mtc);
+                        if (finalFileName.endsWith("(contents).xml"))
+                        {
+                            helper.postPageContents(trgFile, pageInfo,
+                                    sourceLocale, targetLocale);
+                        }
+                        else if (finalFileName.endsWith("(tags).xml"))
+                        {
+                            helper.putPageTags(trgFile, pageInfo, sourceLocale,
+                                    targetLocale);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+        }
+    }
+
     private void handleEloquaFiles(String finalFileName, FileProfile fp, Workflow wf, boolean hasScript)
     {
         if (finalFileName.endsWith(".email.html") || finalFileName.endsWith(".landingPage.html"))

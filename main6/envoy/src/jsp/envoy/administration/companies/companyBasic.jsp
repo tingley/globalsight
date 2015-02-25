@@ -146,8 +146,10 @@ function submitForm(formAction)
 		{
     		var tbox = document.getElementById("to");
     		var stbox = document.getElementById("scorecardTo");
+    		var qtbox = document.getElementById("qualityTo");
+    		var mtbox = document.getElementById("marketTo");
     		if (tbox.options.length == 0 
-    	    		|| stbox.options.length == 0 )
+    	    		|| stbox.options.length == 0 || qtbox.options.length == 0 || mtbox.options.length == 0)
     		{
     			alert("<c:out value='${alert}'/>");
     			return false;
@@ -159,6 +161,14 @@ function submitForm(formAction)
     		for(var i=0;i<stbox.options.length;i++)
     		{
     			stbox.options[i].selected=true;
+    		}
+    		for(var i=0;i<qtbox.options.length;i++)
+    		{
+    			qtbox.options[i].selected=true;
+    		}
+    		for(var i=0;i<mtbox.options.length;i++)
+    		{
+    			mtbox.options[i].selected=true;
     		}
             
         	companyForm.action = "<%=saveURL%>";
@@ -534,6 +544,133 @@ function Trim(str)
 	RegularExp = /^\s+|\s+$/gi;
 	return newStr.replace( RegularExp,"" );
 }
+
+function addQualityTo()
+{
+	var txt = document.getElementById("newQualityCategory").value;
+	if(txt.indexOf(",")>0)
+	{
+		alert("<%=bundle.getString("msg_company_category_invalid") %>");
+		return;
+	}
+
+	if(checkForQualityCategory(txt))
+	{
+		alert("You cannot add " + txt + "manually.");
+		return false;
+	}
+	
+	if(Trim(txt) != "")
+	{
+		txt = Trim(txt);
+		if (!isLetterAndNumber(txt) && !isChinese(txt))
+		{
+			alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
+			return false;
+		}
+		
+		var toBox = document.getElementById("qualityTo");
+		var fromBox = document.getElementById("qualityFrom");
+		for (var i=0;i<toBox.options.length;i++)
+		{
+			if(toBox.options[i].text.toLowerCase()==txt.toLowerCase())
+			{
+				alert("<c:out value='${alert_same}'/>");
+				return false;
+			}
+		}
+		for (var j=0;j<fromBox.options.length;j++)
+		{
+			if(fromBox.options[j].text.toLowerCase()==txt.toLowerCase())
+			{
+				alert("<c:out value='${alert_same}'/>");
+				return false;
+			}
+		}
+		var op = new Option();
+		op.value = txt;
+		op.text = txt;
+		op.title = txt;
+		toBox.options[toBox.options.length] = op;
+		document.getElementById("newQualityCategory").value = "";
+
+		SortD(toBox);
+	}
+	}
+	
+	function checkForQualityCategory(txt)
+	{
+		if(txt == "lb_good" || txt == "lb_acceptable" 
+			||	txt ==  "lb_poor")
+		{
+			return true;
+		}
+
+		return false;
+	}
+	
+	function addMarketTo()
+	{
+		var txt = document.getElementById("newMarketCategory").value;
+		if(txt.indexOf(",")>0)
+		{
+			alert("<%=bundle.getString("msg_company_category_invalid") %>");
+			return;
+		}
+
+		if(checkForMarketCategory(txt))
+		{
+			alert("You cannot add " + txt + "manually.");
+			return false;
+		}
+		
+		if(Trim(txt) != "")
+		{
+			txt = Trim(txt);
+			if (!isLetterAndNumber(txt) && !isChinese(txt))
+			{
+				alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
+				return false;
+			}
+			
+			var toBox = document.getElementById("marketTo");
+			var fromBox = document.getElementById("marketFrom");
+			for (var i=0;i<toBox.options.length;i++)
+			{
+				if(toBox.options[i].text.toLowerCase()==txt.toLowerCase())
+				{
+					alert("<c:out value='${alert_same}'/>");
+					return false;
+				}
+			}
+			for (var j=0;j<fromBox.options.length;j++)
+			{
+				if(fromBox.options[j].text.toLowerCase()==txt.toLowerCase())
+				{
+					alert("<c:out value='${alert_same}'/>");
+					return false;
+				}
+			}
+			var op = new Option();
+			op.value = txt;
+			op.text = txt;
+			op.title = txt;
+			toBox.options[toBox.options.length] = op;
+			document.getElementById("newMarketCategory").value = "";
+
+			SortD(toBox);
+		}}
+		
+		function checkForMarketCategory(txt)
+		{
+			if(txt == "lb_suitable_fluent" || txt == "lb_literal_at_times" 
+				||	txt ==  "lb_unsuitable")
+			{
+				return true;
+			}
+
+			return false;
+		} 
 </script>
 
 </head>
@@ -776,6 +913,132 @@ function Trim(str)
         			</td>
         			<td>
         				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addScorecardTo()">
+        			</td>
+        		</tr>
+      			</table>
+    		</td>
+  		</tr>
+  		<tr valign="top">
+    		<td colspan=3>
+    			<br/><div class="standardText"><c:out value="${qualityHelpMsg}"/>:</div>
+      			<table border="0" class="standardText" cellpadding="2">
+      			<tr>
+      				<td>
+      					<span><c:out value="${labelForLeftTable}"/>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><c:out value="${labelForRightTable}"/>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="qualityFrom" name="qualityFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${qualityFromList}">
+	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('qualityFrom','qualityTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('qualityTo','qualityFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="qualityTo" name="qualityTo" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${qualityToList}">
+	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+				<table border="0" class="standardText" cellpadding="2">
+        		<tr>
+        			<td>
+	        			<span><c:out value="${label}"/></span> :
+        			</td>
+        			<td>
+        				<input id="newQualityCategory" size="40" maxlength="100">
+        				<input style="display:none">
+        			</td>
+        			<td>
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addQualityTo()">
+        			</td>
+        		</tr>
+      			</table>
+    		</td>
+  		</tr>
+  		<tr valign="top">
+    		<td colspan=3>
+    			<br/><div class="standardText"><c:out value="${marketHelpMsg}"/>:</div>
+      			<table border="0" class="standardText" cellpadding="2">
+      			<tr>
+      				<td>
+      					<span><c:out value="${labelForLeftTable}"/>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><c:out value="${labelForRightTable}"/>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="marketFrom" name="marketFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${marketFromList}">
+	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('marketFrom','marketTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('marketTo','marketFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="marketTo" name="marketTo" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${marketToList}">
+	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+				<table border="0" class="standardText" cellpadding="2">
+        		<tr>
+        			<td>
+	        			<span><c:out value="${label}"/></span> :
+        			</td>
+        			<td>
+        				<input id="newMarketCategory" size="40" maxlength="100">
+        				<input style="display:none">
+        			</td>
+        			<td>
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addMarketTo()">
         			</td>
         		</tr>
       			</table>

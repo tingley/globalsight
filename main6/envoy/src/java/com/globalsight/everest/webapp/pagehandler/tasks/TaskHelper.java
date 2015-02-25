@@ -1205,4 +1205,16 @@ public class TaskHelper
 
         return true;
     }
+
+    public static void updateReviewInfo(long p_taskId, String qualityAssessment,
+            String marketSuitabilty)
+    {
+        Task p_task = getTask(p_taskId);
+        if (p_task != null)
+        {
+            p_task.setQualityAssessment(qualityAssessment);
+            p_task.setMarketSuitability(marketSuitabilty);
+            HibernateUtil.update(p_task);
+        }
+    }
 }

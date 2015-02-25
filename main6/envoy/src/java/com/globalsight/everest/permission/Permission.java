@@ -340,7 +340,7 @@ public class Permission
     static public final String GET_PROJECTS_I_MANAGE = "projects.getmanage";
     static public final String GET_PROJECTS_I_BELONG = "projects.getbelong";
 
-    static public final String ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES = "account.download.all.offline.files";
+//    static public final String ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES = "account.download.all.offline.files";
     static public final String ACCOUNT_NOTIFICATION_SYSTEM = "account.notification.system";
     static public final String ACCOUNT_NOTIFICATION_WFMGMT = "account.notification.wfmgmt";
     static public final String ACCOUNT_NOTIFICATION_GENERAL = "account.notification.general";
@@ -379,6 +379,7 @@ public class Permission
 
     static public final String REPORTS_COMMENTS_ANALYSIS = "reports.comments.analysis";
     static public final String REPORTS_TRANSLATIONS_EDIT = "reports.translations.edit";
+    static public final String REPORTS_POST_REVIEW_QA = "reports.post.review.qa";
     static public final String REPORTS_LANGUAGE_SIGN_OFF = "reports.language.sign.off";
     static public final String REPORTS_LANGUAGE_SIGN_OFF_SIMPLE = "reports.language.sign.off.simple";
     static public final String REPORTS_CHARACTER_COUNT = "reports.character.count";
@@ -529,7 +530,8 @@ public class Permission
     static public final String REPORTS_SCORECARD = "reports.scorecard";
     static public final String VIEW_SCORECARD = "viewScorecard";
     static public final String ELOQUA = "eloqua";
-    
+    static public final String MIND_TOUCH = "mindtouch";
+
     // Limit the range of global LP permissions,super LocalizationParticipant
     // user can only edit below permissions.
     static public final String[] GLOBAL_LP_PERMS =
@@ -540,7 +542,7 @@ public class Permission
             ACTIVITIES_COMMENTS_EDIT, CONTENT_MANAGER,
             ACCOUNT_NOTIFICATION_GENERAL, ACTIVITIES_EXPORT,
             ACTIVITIES_EXPORT_INPROGRESS, ACTIVITIES_DOWNLOAD,
-            ACTIVITIES_ACCEPT_ALL, ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES,
+            ACTIVITIES_ACCEPT_ALL,
             ACTIVITIES_DOWNLOAD_ALL, ACTIVITIES_UPLOAD_SUPPORT_FILES,
             ACTIVITIES_DETAIL_STATISTICS, ACTIVITIES_SUMMARY_STATISTICS,
             SOURCE_PAGE_EDIT, COMMENT_ACCESS_RESTRICTED,
@@ -555,7 +557,8 @@ public class Permission
             ACTIVITIES_BATCH_COMPLETE_WORKFLOW, ACTIVITIES_UPDATE_LEVERAGE,
             ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY, TM_VIEW, TM_SEARCH,
             ACTIVITIES_TM_SEARCH, ACTIVITIES_TB_SEARCH, TERMINOLOGY_VIEW,
-            TERMINOLOGY_SEARCH, ACTIVITIES_DOWNLOAD_COMBINED,ACTIVITIES_EXPORT_DOWNLOAD};
+            TERMINOLOGY_SEARCH, ACTIVITIES_DOWNLOAD_COMBINED,
+            ACTIVITIES_EXPORT_DOWNLOAD,REPORTS_POST_REVIEW_QA};
 
     /**
      * You should add any new permissions to this call so that the permission
@@ -888,7 +891,7 @@ public class Permission
 
         added = addPermission(284, FILE_EXT_REMOVE) || added;
 
-        added = addPermission(285, ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES) || added;
+//        added = addPermission(285, ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES) || added;
 
         added = addPermission(286, JOB_FILES_DOWNLOAD) || added;
 
@@ -1083,7 +1086,8 @@ public class Permission
         added = addPermission(414, JOBS_REMOVEGROUP) || added;
         added = addPermission(415, JOBS_ADDJOBTOGROUP) || added;
         added = addPermission(416, JOBS_REMOVEJOBFROMGROUP) || added;
-        
+        added = addPermission(417, MIND_TOUCH) || added;
+        added = addPermission(418, REPORTS_POST_REVIEW_QA) || added;
         return added;
     }
 

@@ -108,7 +108,14 @@ function addCommentColumn(item,i)
 function editAll(p_action)
 {
 	var lbid=$(".lbid");
-	if(!p_action||!lbid.length)return;
+	
+	var donotReturn = false;
+	if (typeof inViewerPage != "undefined" && inViewerPage)
+	{
+		donotReturn = true;
+	}
+	
+	if((!p_action||!lbid.length) && !donotReturn) return;
 	main.getRedata();
 }
 
@@ -150,7 +157,7 @@ $(
 			buildData(main.localData[reuseData]);
 		}
 		// General from "me_source.jsp" and "me_target.jsp".
-		else if(main.localData && !searchBySid && !searchByUser && !setToNormal)
+		else if(main.localData && !searchBySid && !searchByUser && !setToNormal && (typeof inViewerPage == "undefined" || !inViewerPage))
 		{
 			buildData(main.localData[pageName]);
 		}
@@ -165,7 +172,7 @@ $(
 	}
 ); 
 
-function buildData(data){
+function buildData(data, se_able){
 	showFinish = false;
 	if(modeId!=3){
 		var conhtml=$.trim($("#idPageHtml").text());
@@ -181,19 +188,19 @@ function buildData(data){
 	$(".commentstyle").remove();
 	localData=data;
 	max = localData.length;
-	recursion(localData,0);
+	recursion(localData,0, se_able);
 }
 
-function recursion(data,beginIndex){
+function recursion(data,beginIndex, se_able){
 	 var _count = 0;
 	for(var i = beginIndex;_count <lazy && i <max; i++){
 		_count++;
-		renderHtml(data[i]);
+		renderHtml(data[i], se_able);
 	}
 	
 	if(i<max){
 		setTimeout(function(){
-			recursion(data,i);
+			recursion(data,i, se_able);
 		}, 100);
 	}else{
 		initUI();
@@ -202,7 +209,7 @@ function recursion(data,beginIndex){
 	}
 }
 
-function renderHtml(item){
+function renderHtml(item, se_able){
 	var idPageHtml=$("#idPageHtml");
 	var temp=trnode.clone(true);
 	if(modeFrom == "target")
@@ -227,7 +234,7 @@ function renderHtml(item){
 		temp.children('td').eq(1).attr("dir","rtl");
 	}
 	
-	var htmlcontent=getNodeByClass(item);
+	var htmlcontent=getNodeByClass(item, se_able);
 	if(item.subArray){
 		temp.children('td').eq(1).html("<table width='100%' cellspacing='0' cellpadding='2'>"+htmlcontent.html()+"</table>");
 	}else{
@@ -248,10 +255,10 @@ function initUI(){
 	initreviewMode(menu.comment);
 }
 
-function getNodeByClass(item){
+function getNodeByClass(item, se_able){
 	var temp;
 	// if "mainstyle.match("SE ")", it should display right click context menus.
-	var scriptFlag = inner_reviewMode || item.mainstyle.match("SE ");
+	var scriptFlag = inner_reviewMode || item.mainstyle.match("SE ") || se_able;
 	if(scriptFlag){
 		temp=SEnode.clone(true);
 		var funP="javascript:SE("+item.tuId+","+item.tuvId+","+item.subId+")";

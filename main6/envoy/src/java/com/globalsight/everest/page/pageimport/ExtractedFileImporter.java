@@ -155,11 +155,11 @@ public class ExtractedFileImporter extends FileImporter
 
         c_logger.info("Importing page: " + p_request.getExternalPageId());
         long start_PERFORMANCE = System.currentTimeMillis();
-
+        long jobId = getJobIdFromEventFlowXml(p_request);
         try
         {
             long time_PERFORMANCE = System.currentTimeMillis();
-            sourcePage = createSourcePage(p_request);
+            sourcePage = createSourcePage(p_request, jobId);
             pages.put(sourcePage.getGlobalSightLocale().getIdAsLong(),
                     sourcePage);
 
@@ -180,7 +180,7 @@ public class ExtractedFileImporter extends FileImporter
                             + p_request.getExternalPageId());
                     time_PERFORMANCE = System.currentTimeMillis();
 
-                    exactMatchedSegments = leveragePage(p_request, sourcePage);
+                    exactMatchedSegments = leveragePage(p_request, sourcePage, jobId);
 
                     if (c_logger.isDebugEnabled())
                     {
@@ -195,7 +195,7 @@ public class ExtractedFileImporter extends FileImporter
                 time_PERFORMANCE = System.currentTimeMillis();
 
                 TermLeverageResult termMatches = leverageTermsForPage(
-                        p_request, sourcePage);
+                        p_request, sourcePage, jobId);
 
                 if (c_logger.isDebugEnabled())
                 {
@@ -358,7 +358,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Creates the source page.
      */
-    private SourcePage createSourcePage(Request p_request)
+    private SourcePage createSourcePage(Request p_request, long jobId)
             throws FileImportException
     {
         SourcePage page = null;
@@ -372,7 +372,7 @@ public class ExtractedFileImporter extends FileImporter
         }
         else
         {
-            page = createPageFromGxml(p_request);
+            page = createPageFromGxml(p_request, jobId);
         }
 
         return page;
@@ -381,7 +381,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Creates Page, Leverage Groups, Tus and Tuvs
      */
-    private SourcePage createPageFromGxml(Request p_request)
+    private SourcePage createPageFromGxml(Request p_request, long jobId)
             throws FileImportException
     {
         long companyId = p_request.getCompanyId();
@@ -395,11 +395,11 @@ public class ExtractedFileImporter extends FileImporter
         }
         catch (FileImportException ge)
         {
-            srcPage = createPage(p_request, gxmlRootElement);
+            srcPage = createPage(p_request, gxmlRootElement, jobId);
             return srcPage;
         }
 
-        srcPage = createPage(p_request, gxmlRootElement);
+        srcPage = createPage(p_request, gxmlRootElement, jobId);
         ExtractedSourceFile esf = null;
 
         try
@@ -409,11 +409,10 @@ public class ExtractedFileImporter extends FileImporter
 
             esf = getExtractedSourceFile(srcPage);
             setAttributesOfExtractedFile(p_request, esf, gxmlRootElement);
-            tus = createTUs(p_request, srcPage, gxmlRootElement);
-            srcTuvs = createTUVs(p_request, tus);
+            tus = createTUs(p_request, srcPage, gxmlRootElement, jobId);
+            srcTuvs = createTUVs(p_request, tus, jobId);
             setExactMatchKeysForSrcTUVs(srcTuvs);
             srcPage.setCompanyId(companyId);
-            long jobId = getJobIdFromEventFlowXml(p_request);
 
             // Re-calculate word-count from excluded items.
             if (srcTuvs != null && srcTuvs.size() > 0)
@@ -481,7 +480,7 @@ public class ExtractedFileImporter extends FileImporter
      * @return SourcePage The page for importing.
      * @throws FileImportException
      */
-    private SourcePage createPage(Request p_request, GxmlRootElement p_element)
+    private SourcePage createPage(Request p_request, GxmlRootElement p_element, long jobId)
             throws FileImportException
     {
         SourcePage srcPage = null;
@@ -532,7 +531,6 @@ public class ExtractedFileImporter extends FileImporter
                         args, pe);
             }
         }
-        long jobId = getJobIdFromEventFlowXml(p_request);
         srcPage.setJobId(jobId);
 
         return srcPage;
@@ -618,14 +616,14 @@ public class ExtractedFileImporter extends FileImporter
      * @return java.util.List
      */
     private ArrayList<Tu> createTUs(Request p_request, SourcePage p_page,
-            GxmlRootElement p_GxmlRootElement) throws FileImportException
+            GxmlRootElement p_GxmlRootElement, long jobId) throws FileImportException
     {
         LeverageGroup lg = getLeverageGroupForPage(p_page);
         long tmId = getTMId(p_request);
         GlobalSightLocale sourceLocale = getSourceLocale(p_request);
 
         return createTUs_1(p_request, p_page, lg, tmId, sourceLocale,
-                p_GxmlRootElement, new ArrayList<Tu>());
+                p_GxmlRootElement, new ArrayList<Tu>(), jobId);
     }
 
     private LeverageGroup getLeverageGroupForPage(SourcePage p_page)
@@ -642,10 +640,9 @@ public class ExtractedFileImporter extends FileImporter
 
     private ArrayList<Tu> createTUs_1(Request p_request, SourcePage p_page,
             LeverageGroup p_lg, long p_tmId, GlobalSightLocale p_sourceLocale,
-            GxmlElement p_GxmlElement, ArrayList<Tu> p_tuList)
+            GxmlElement p_GxmlElement, ArrayList<Tu> p_tuList, long jobId)
             throws FileImportException
     {
-        long jobId = getJobIdFromEventFlowXml(p_request);
         if (p_GxmlElement == null)
         {
             return p_tuList;
@@ -753,7 +750,7 @@ public class ExtractedFileImporter extends FileImporter
 
                 case GxmlElement.GS: // 23
                     p_tuList = createTUs_1(p_request, p_page, p_lg, p_tmId,
-                            p_sourceLocale, elem, p_tuList);
+                            p_sourceLocale, elem, p_tuList, jobId);
                     break;
 
                 default: // other
@@ -830,7 +827,7 @@ public class ExtractedFileImporter extends FileImporter
      * 
      * @return java.util.List
      */
-    private ArrayList<Tuv> createTUVs(Request p_request, ArrayList<Tu> p_tus)
+    private ArrayList<Tuv> createTUVs(Request p_request, ArrayList<Tu> p_tus, long jobId)
             throws Exception
     {
         ArrayList<Tuv> srcTuvs = new ArrayList<Tuv>(p_tus.size());
@@ -853,7 +850,6 @@ public class ExtractedFileImporter extends FileImporter
                 .getProjectManagerId();
         String creationId = projectManagerId == null ? Tmx.DEFAULT_USER
                 : projectManagerId;
-        long jobId = getJobIdFromEventFlowXml(p_request);
         for (int i = 0, max = p_tus.size(); i < max; i++)
         {
             Tu tu = p_tus.get(i);
@@ -1278,7 +1274,7 @@ public class ExtractedFileImporter extends FileImporter
     }
 
     private LeverageDataCenter createLeverageDataCenter(Request p_request,
-            SourcePage p_sourcePage) throws Exception
+            SourcePage p_sourcePage, long jobId) throws Exception
     {
         L10nProfile l10nProfile = p_request.getL10nProfile();
         LeveragingLocales leveragingLocales = l10nProfile
@@ -1312,7 +1308,6 @@ public class ExtractedFileImporter extends FileImporter
                 newLeveragingLocales);
 
         TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
-        long jobId = getJobIdFromEventFlowXml(p_request);
         return tmCoreManager.createLeverageDataCenterForPage(p_sourcePage,
                 leverageOptions, jobId);
     }
@@ -1352,14 +1347,14 @@ public class ExtractedFileImporter extends FileImporter
      * L10nProfile.
      */
     private ExactMatchedSegments leveragePage(Request p_request,
-            SourcePage p_sourcePage) throws FileImportException
+            SourcePage p_sourcePage, long jobId) throws FileImportException
     {
         ExactMatchedSegments exactMatchedSegments = null;
 
         try
         {
             LeverageDataCenter leverageDataCenter = createLeverageDataCenter(
-                    p_request, p_sourcePage);
+                    p_request, p_sourcePage, jobId);
 
             if (isReimport(p_sourcePage))
             {
@@ -1446,10 +1441,9 @@ public class ExtractedFileImporter extends FileImporter
      *         id, or null when the database does not exist or an error happens.
      */
     private TermLeverageResult leverageTermsForPage(Request p_request,
-            SourcePage p_sourcePage)
+            SourcePage p_sourcePage, long jobId)
     {
         TermLeverageResult result = null;
-        long jobId = getJobIdFromEventFlowXml(p_request);
         String project = p_request.getL10nProfile().getProject().getName();
         String termbaseName = p_request.getL10nProfile().getProject()
                 .getTermbaseName();

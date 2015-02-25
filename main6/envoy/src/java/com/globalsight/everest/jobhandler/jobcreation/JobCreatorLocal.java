@@ -38,20 +38,22 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.w3c.dom.Element;
 
 import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.util.CxeProxy;
-import com.globalsight.cxe.util.EventFlowXmlParser;
+import com.globalsight.cxe.util.XmlUtil;
+import com.globalsight.cxe.util.fileImport.eventFlow.Category;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentManagerWLRemote;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.comment.IssueHistoryImpl;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.corpus.CorpusDoc;
 import com.globalsight.everest.corpus.CorpusDocGroup;
 import com.globalsight.everest.corpus.CorpusManagerWLRemote;
@@ -89,6 +91,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.CreatePdfThread;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
@@ -167,9 +170,8 @@ public class JobCreatorLocal implements JobCreator
             BatchInfo info = p_request.getBatchInfo();
             boolean isBatch = (info != null);
 
-            EventFlowXmlParser parser = new EventFlowXmlParser();
-            parser.parse(p_request.getEventFlowXml());
-            String theJobId = parser.getJobId();
+            EventFlowXml e = XmlUtil.string2Object(EventFlowXml.class, p_request.getEventFlowXml());
+            String theJobId = e.getBatchInfo().getJobId();
             if (theJobId != null)
             {
                 job = JobCreationMonitor
@@ -199,7 +201,7 @@ public class JobCreatorLocal implements JobCreator
             }
 
             // Handle GS Edition job
-            handleEditionJob(p_request, sp, job.getId());
+            handleEditionJob(p_request, sp, job.getId(), e);
 
             boolean isBatchComplete = isBatchComplete(job, monitor);
             if (isBatchComplete)
@@ -219,19 +221,19 @@ public class JobCreatorLocal implements JobCreator
             }
 
             // Update job state
-            updateJobState(job, isBatch, isBatchComplete, sp);
+            updateJobState(job, isBatch, isBatchComplete, sp, e);
 
             // Handle Documentum job
             if (DocumentumOperator.DCTM_CATEGORY.equalsIgnoreCase(p_request
                     .getDataSourceType()))
             {
-                priorHandleDocumentumJob(parser, job);
+                priorHandleDocumentumJob(e, job);
             }
 
             // remove job cache after batch complete
             if (isBatchComplete)
             {
-                String uuid = parser.getJobUuid();
+                String uuid = e.getBatchInfo().getUuid();
                 if (uuid == null && job != null && job instanceof JobImpl)
                 {
                     uuid = ((JobImpl) job).getUuid();
@@ -247,6 +249,27 @@ public class JobCreatorLocal implements JobCreator
             if (isBatchComplete)
             {
                 XmlDtdManager.validateJob(job);
+
+                // in context review tool - Auto-generate PDFs
+                // check if this funtion enabled
+                boolean enabled = false;
+
+                try
+                {
+                    SystemConfiguration sc = SystemConfiguration.getInstance();
+                    enabled = sc.getBooleanParameter("incontext.review.enable");
+                }
+                catch (Exception ex)
+                {
+                    // ignore
+                }
+                        
+
+                if (enabled)
+                {
+                    CreatePdfThread t = new CreatePdfThread(job, c_logger);
+                    t.start();
+                }
             }
         }
         catch (Exception e)
@@ -649,7 +672,7 @@ public class JobCreatorLocal implements JobCreator
     }
 
     private void updateJobState(Job p_job, boolean p_isBatch,
-            boolean p_isBatchComplete, SourcePage p_sp)
+            boolean p_isBatchComplete, SourcePage p_sp, EventFlowXml ex)
             throws JobCreationException
     {
         try
@@ -690,7 +713,7 @@ public class JobCreatorLocal implements JobCreator
                         }
                         else
                         {
-                            shouldNotify = handleImportFailure(job);
+                            shouldNotify = handleImportFailure(job, ex);
                             job = loadJobIntoCacheFromDB(job); // refresh with
                             // state change
                         }
@@ -741,7 +764,7 @@ public class JobCreatorLocal implements JobCreator
                         // Import Failed
                         sendEmailFromAdmin(job, false);
                     }
-                    notifyCXEofJobState(job, p_sp, details);
+                    notifyCXEofJobState(job, p_sp, details, ex);
                 }
                 else
                 {
@@ -764,7 +787,7 @@ public class JobCreatorLocal implements JobCreator
                 }
                 else
                 {
-                    handleImportFailure(job);
+                    handleImportFailure(job, ex);
                 }
             }
             else
@@ -1341,7 +1364,7 @@ public class JobCreatorLocal implements JobCreator
      * property file, an unextracted reimport is enforced and the failed job
      * would be discarded.
      */
-    private boolean handleImportFailure(Job p_job) throws Exception
+    private boolean handleImportFailure(Job p_job, EventFlowXml ex) throws Exception
     {
         boolean notifyFailure = p_job.getRequestList().size() == 0
                 || m_specialFormatTypes.size() == 0;
@@ -1363,9 +1386,7 @@ public class JobCreatorLocal implements JobCreator
                             fp.getKnownFormatTypeId());
             String name = format.getName().toLowerCase();
 
-            EventFlowXmlParser parser = new EventFlowXmlParser();
-            parser.parse(r.getEventFlowXml());
-            String preMergeEvent = parser.getPreMergeEvent();
+            String preMergeEvent = ex.getPreMergeEvent();
 
             notifyFailure = preMergeEvent == null
                     || CxeMessageType
@@ -1379,65 +1400,61 @@ public class JobCreatorLocal implements JobCreator
             }
             else
             {
-                notifyFailure = importByDataSourceType(parser, p_job);
+                notifyFailure = importByDataSourceType(ex, p_job);
             }
         }
 
         return notifyFailure;
     }
 
-    private boolean importByDataSourceType(EventFlowXmlParser p_parser,
+    private boolean importByDataSourceType(EventFlowXml ex,
             Job p_job) throws Exception
     {
         boolean isInvalidDataSource = false;
         String jobName = p_job.getJobName();
         String batchId = jobName + System.currentTimeMillis();
-        String dataSourceType = p_parser.getSourceDataSourceType();
+        String dataSourceType = ex.getSource().getDataSourceType();
 
         if (DataSourceType.TEAM_SITE.equals(dataSourceType))
         {
-            CxeProxy.importFromTeamSite(
-                    p_parser.getDataValue("category", "SourceFileName"),
-                    p_parser.getConvertedFileName(),
-                    Integer.parseInt(p_parser.getSourceFileSize()),
-                    p_parser.getSourceLocale(), p_parser.getSourceEncoding(),
-                    p_parser.getBatchId(), 1, 1, 1, 1,
-                    p_parser.getSourceDataSourceId(),
-                    p_parser.getL10nProfileId(), jobName,
-                    p_parser.getDataValue("category", "UserName"),
-                    p_parser.getServerName(), p_parser.getStoreName(),
+            CxeProxy.importFromTeamSite(ex.getCategory().get(0).getValue("SourceFileName"),
+                    ex.getSource().getValue("ConvertedFileName"),
+                    Integer.parseInt(ex.getSource().getValue("FileSize")),
+                    ex.getSourceLocale(),ex.getSource().getCharset(),
+                    ex.getBatchInfo().getBatchId(), 1, 1, 1, 1,
+                    ex.getSource().getDataSourceId(),
+                    ex.getBatchInfo().getL10NProfileId(), jobName,
+                    ex.getCategory().get(0).getValue("UserName"),
+                    ex.getValue("ServerName"), ex.getValue("StoreName"),
                     Boolean.TRUE, CxeProxy.IMPORT_TYPE_L10N);
 
         }
         else if (DataSourceType.VIGNETTE.equals(dataSourceType))
         {
+            Category c = ex.getCategory().get(0);
             CxeProxy.importFromVignette(
                     jobName,
-                    p_parser.getBatchId(),
+                    ex.getBatchInfo().getBatchId(),
                     1,
                     1,
                     1,
                     1,
-                    p_parser.getDataValue("category", "ObjectId"),
-                    p_parser.getDataValue("category", "Path"),
-                    p_parser.getSourceDataSourceId(),
-                    p_parser.getDataValue("category", "SourceProjectMid")
-                            + "|"
-                            + p_parser.getDataValue("category",
-                                    "TargetProjectMid"),
-                    p_parser.getDataValue("category", "ReturnStatus"),
-                    p_parser.getDataValue("category", "VersionFlag"),
+                    c.getValue("ObjectId"),
+                    c.getValue("Path"),
+                    ex.getSource().getDataSourceId(),
+                    c.getValue("SourceProjectMid") + "|" + c.getValue("TargetProjectMid"),
+                    c.getValue("ReturnStatus"),
+                    c.getValue("VersionFlag"),
                     Boolean.TRUE, CxeProxy.IMPORT_TYPE_L10N);
         }
         else if (dataSourceType != null
                 && dataSourceType.startsWith(DataSourceType.FILE_SYSTEM))
         {
             boolean isAutoImport = dataSourceType.indexOf("AutoImport") > 0;
-            String fileName = p_parser.getDataValue("source", "Filename");
-            String initiatorId = p_parser.getDataValue("source",
-                    "importInitiator");
+            String fileName =  ex.getSource().getValue("Filename");
+            String initiatorId = ex.getSource().getValue("importInitiator");
             CxeProxy.importFromFileSystem(fileName, jobName, null, batchId,
-                    p_parser.getSourceDataSourceId(), new Integer(1),
+                    ex.getSource().getDataSourceId(), new Integer(1),
                     new Integer(1), new Integer(1), new Integer(1),
                     new Boolean(isAutoImport), Boolean.TRUE,
                     CxeProxy.IMPORT_TYPE_L10N, initiatorId, new Integer(0));
@@ -1558,7 +1575,7 @@ public class JobCreatorLocal implements JobCreator
      * @exception RemoteException
      */
     private void notifyCXEofJobState(Job p_job, SourcePage p_sp,
-            String p_details) throws RemoteException
+            String p_details, EventFlowXml ex) throws RemoteException
     {
         String state = p_job.getState();
         try
@@ -1573,9 +1590,7 @@ public class JobCreatorLocal implements JobCreator
 
             Request r = requests.iterator().next();
 
-            EventFlowXmlParser parser = new EventFlowXmlParser();
-            parser.parse(r.getEventFlowXml());
-            String dataSourceType = parser.getSourceDataSourceType();
+            String dataSourceType = ex.getSource().getDataSourceType();
 
             if (DataSourceType.TEAM_SITE.equals(dataSourceType))
             {
@@ -1629,20 +1644,16 @@ public class JobCreatorLocal implements JobCreator
     /**
      * Prior real Documentum job handling.
      */
-    private void priorHandleDocumentumJob(EventFlowXmlParser parser, Job job)
+    private void priorHandleDocumentumJob(EventFlowXml e, Job job)
     {
         try
         {
-            Element msCategory = parser
-                    .getCategory(DocumentumOperator.DCTM_CATEGORY);
+            Category c = e.getCategory(DocumentumOperator.DCTM_CATEGORY);
             c_logger.debug("Starting to create a documentum job......");
 
-            String dctmObjId = parser.getCategoryDaValue(msCategory,
-                    DocumentumOperator.DCTM_OBJECTID)[0];
-            String isAttrFileStr = parser.getCategoryDaValue(msCategory,
-                    DocumentumOperator.DCTM_ISATTRFILE)[0];
-            String userId = parser.getCategoryDaValue(msCategory,
-                    DocumentumOperator.DCTM_USERID)[0];
+            String dctmObjId = c.getValue(DocumentumOperator.DCTM_OBJECTID);
+            String isAttrFileStr = c.getValue(DocumentumOperator.DCTM_ISATTRFILE);
+            String userId = c.getValue(DocumentumOperator.DCTM_USERID);
             Boolean isAttrFile = Boolean.valueOf(isAttrFileStr);
 
             if (!isAttrFile.booleanValue())
@@ -1724,7 +1735,7 @@ public class JobCreatorLocal implements JobCreator
      * @throws Exception
      */
     private void handleEditionJob(Request p_request, SourcePage p_sp,
-            long p_jobId) throws Exception
+            long p_jobId, EventFlowXml e) throws Exception
     {
         HashMap editionJobParams = p_request.getEditionJobParams();
         if (editionJobParams != null && editionJobParams.size() > 0)
@@ -1733,7 +1744,7 @@ public class JobCreatorLocal implements JobCreator
             saveEditionJobInfo(p_jobId, editionJobParams);
 
             // job comments info (seems this won't be used)
-            saveJobComments(p_jobId, editionJobParams, p_request);
+            saveJobComments(p_jobId, editionJobParams, p_request, e);
 
             // segment comments handling
             HashMap segComments = (HashMap) editionJobParams.get("segComments");
@@ -1838,15 +1849,12 @@ public class JobCreatorLocal implements JobCreator
     }
 
     private Comment saveJobComments(long p_jobId, HashMap p_editionJobInfoMap,
-            Request p_request) throws Exception
+            Request p_request, EventFlowXml e) throws Exception
     {
         Comment comment = null;
         try
         {
-            EventFlowXmlParser parser = new EventFlowXmlParser();
-            parser.parse(p_request.getEventFlowXml());
-            String currentUserName = parser.getSourceImportInitiatorId();
-
+            String currentUserName = e.getSource().getImportInitiatorId();
             Vector jobComments = (Vector) p_editionJobInfoMap
                     .get("jobComments");
             String originalWsdlUrl = (String) p_editionJobInfoMap

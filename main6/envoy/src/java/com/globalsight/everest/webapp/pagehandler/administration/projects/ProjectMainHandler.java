@@ -51,6 +51,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.importer.IImportManager;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.progress.ProcessStatus;
@@ -411,6 +412,8 @@ public class ProjectMainHandler extends PageHandler
             if (project != null)
             {
                 project.deactivate();
+                OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_PROJECT,
+                        project.getName());
                 // change the in-active project name to an unique value
                 long time = (new Date()).getTime();
                 String changedProjectName = project.getName() + "_" + time;

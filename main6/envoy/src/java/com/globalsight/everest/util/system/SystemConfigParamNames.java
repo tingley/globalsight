@@ -302,6 +302,9 @@ public interface SystemConfigParamNames
     public static final String ADOBE_CONV_DIR_CS4 = "adobe.cs4.dir";
     public static final String ADOBE_CONV_DIR_CS5 = "adobe.cs5.dir";
     public static final String ADOBE_CONV_DIR_CS5_5 = "adobe.cs5.5.dir";
+    public static final String ADOBE_CONV_DIR_CS6 = "adobe.cs6.dir";
+    // in context review tool - converter dir
+    public static final String INCTXRV_CONV_DIR = "incontext.review.dir";
 
     // for the passolo adapters
     public static final String PASSOLO_INSTALL_KEY = "passolo.installKey";

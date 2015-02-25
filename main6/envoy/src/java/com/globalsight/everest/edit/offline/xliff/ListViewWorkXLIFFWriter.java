@@ -514,21 +514,30 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         return data.getMatchTypeId() == AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
     }
 
-    private String getState(OfflineSegmentData data)
+    /**
+     * The state is always "new" in below cases: 1. For xliff 1.2, if
+     * "Populate 100% Target Segments" is not checked; 2. For OmegaT, it has no
+     * "Populate 100% Target Segments" option on UI, always use
+     * "isPopulate100=false" setting.
+     */
+    private String getState(OfflineSegmentData data,
+            DownloadParams p_downloadParams)
     {
         String state = "new";
-
-        if (isInContextMatch(data) || isExtractMatch(data))
+        if (p_downloadParams.isPopulate100())
         {
-            state = "final";
-        }
-        else if (isPenaltiedExtarctMatch(data))
-        {
-            state = "translated";
-        }
-        else if (isFuzzyMatch(data))
-        {
-            state = "needs-review-translation";
+            if (isInContextMatch(data) || isExtractMatch(data))
+            {
+                state = "final";
+            }
+            else if (isPenaltiedExtarctMatch(data))
+            {
+                state = "translated";
+            }
+            else if (isFuzzyMatch(data))
+            {
+                state = "needs-review-translation";
+            }
         }
 
         return state;
@@ -679,7 +688,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             String s = XLIFFStandardUtil.convertToStandard(p_osd, trgSegment);
             m_outputStream.write("<target");
             m_outputStream.write(" state=");
-            m_outputStream.write(str2DoubleQuotation(getState(p_osd)));
+            m_outputStream.write(str2DoubleQuotation(getState(p_osd, p_downloadParams)));
             m_outputStream.write(">");
             m_outputStream.write(s);
             m_outputStream.write("</target>");
@@ -930,6 +939,10 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         m_outputStream.write(XliffConstants.HASH_MARK);
         m_outputStream.write("No Match word count:");
         m_outputStream.write(m_page.getNoMatchWordCountAsString());
+        m_outputStream.write(m_strEOL);
+
+        m_outputStream.write(AmbassadorDwUpConstants.HEADER_POPULATE_100_SEGMENTS + " "
+                + (m_page.isPopulate100() ? "YES":"NO"));
         m_outputStream.write(m_strEOL);
 
         // Server Instance ID

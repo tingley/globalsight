@@ -327,7 +327,7 @@ function addDivElement(id, filePath, fileName, fileSize, isSwitched) {
             + '<div class="profile" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="profileArea"></span></div>'
             // div of cancel button
             + '<div class="cancel"><a href="javascript:removeFile(\''+ id + '\',' + fileSize + ',\'' + filePath.replace(/\\/g, "\\\\").replace(/\'/g, "\\'") + '\')">' 
-            + '<img style="padding-top:3px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'
+            + '<img style="padding-top:4px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'
             // div of progress bar
             + '<div class="uploadifyProgressBar" id="ProgressBar' + id + '"></div>'
             + '</div></div>'
@@ -816,7 +816,7 @@ $(document).ready(function() {
         <td colspan="6"><div id="appl"></div><div id="attachment"></div>
             <table cellSpacing="0" cellPadding="0" width="100%" align="center" border="0">
                 <tr>
-                    <td width="100px" height="28px" valign="middle">&nbsp;<input type="button" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>" title="<c:out value='${lb_create_job_add_file_tip}'/>" onclick="javascript:OW(this)"></td>
+                    <td width="100px" height="36px" align="center" valign="middle"><input type="button" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>" title="<c:out value='${lb_create_job_add_file_tip}'/>" onclick="javascript:OW(this)"></td>
                     <td width="100px" align="center" valign="middle"><input id="uploadedFiles" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_uploaded_files}'/>" title="<c:out value='${lb_create_job_uploaded_files_tip}'/>"></td>
                     <td align="center" class="footertext">
                         <c:out value="${lb_total}"/>: <span id="fileNo">0</span>
@@ -876,7 +876,7 @@ $(document).ready(function() {
                     <c:out value="${lb_attachment}"/> / <c:out value="${lb_reference_file}"/>: 
                 </td>
                 <td width="51%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
-                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer" onclick="delAttc()"></div></td>
+                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc()"></div></td>
                 <td width="15%"><input type="button" class="standardBtn_mouseout" value="<c:out value='${lb_browse}'/>" title="<c:out value='${lb_create_job_browse_tip}'/>" onclick="javascript:OAW(this)">
                 <td width="15%"><div id="attributeButtonDIV" style="display:none"><input id="attributeButton" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>"></div>
                 </td>

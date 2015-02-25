@@ -177,9 +177,14 @@ public class DownloadHelper implements AmbassadorDwUpConstants
      * NOTE: The string must be escaped correctly to appear in an MS-word
      * hyperlink.
      */
-    static public String makeMSWordResParentPath()
+    static public String makeMSWordResParentPath(int deep)
     {
-        return "..\\\\\\\\" + m_resource.getString(RESOURCES_DIR) + "\\\\\\\\";
+    	String parentPrefix = "";
+    	for(int i = 0; i < deep - 2; i++)
+    	{
+    		parentPrefix = parentPrefix + "..\\\\\\\\";
+    	}
+        return parentPrefix + m_resource.getString(RESOURCES_DIR) + "\\\\\\\\";
     }
 
     /**

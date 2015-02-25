@@ -71,8 +71,10 @@
         userPerms.getPermissionFor(Permission.CORPUS_ALIGNER_VIEW) ||
         userPerms.getPermissionFor(Permission.CREATE_JOB) ||
         userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET) ||
-		userPerms.getPermissionFor(Permission.RSS_READER) ||
-        (b_customerAccessGroup && userPerms.getPermissionFor(Permission.CUSTOMER_UPLOAD)))
+        userPerms.getPermissionFor(Permission.RSS_READER) ||
+        userPerms.getPermissionFor(Permission.ELOQUA) ||
+        userPerms.getPermissionFor(Permission.MIND_TOUCH) ||
+	(b_customerAccessGroup && userPerms.getPermissionFor(Permission.CUSTOMER_UPLOAD)))
             hasDataSourceMenu = true;
 
     boolean hasGuidesMenu = false;
@@ -161,6 +163,7 @@
    String rateUrl = LinkHelper.getWebActivityURL(request, "rate");
    String reportsUrl = LinkHelper.getWebActivityURL(request, "reports");  
    String shutdownUrl = LinkHelper.getWebActivityURL(request, "shutdown");
+   String systemActivitiesUrl = LinkHelper.getWebActivityURL(request, "jobCreationStatus");
    String snippetImportUrl = LinkHelper.getWebActivityURL(request, "snippetimport");
    String cvsServerUrl = LinkHelper.getWebActivityURL(request, "cvsserver");
    String cvsModuleUrl = LinkHelper.getWebActivityURL(request, "cvsmodule");
@@ -172,6 +175,7 @@
    String createZipJobUrl = LinkHelper.getWebActivityURL(request, "createZipJobs");
    String createCotiJobUrl = LinkHelper.getWebActivityURL(request, "cotiJobs");
    String eloquaUrl = LinkHelper.getWebActivityURL(request, "eloqua");
+   String mindtouchUrl = LinkHelper.getWebActivityURL(request, "mindtouch");
    String systemParametersUrl = LinkHelper.getWebActivityURL(request, "configuration");
    String adminSystemParametersUrl = LinkHelper.getWebActivityURL(request, "adminConfiguration");
    String remoteIpUrl = LinkHelper.getWebActivityURL(request, "remoteIpConfiguration");
@@ -436,6 +440,10 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_logs_operation"
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_shutdown")%>", "javascript:goToUrl('<%=shutdownUrl%>');", ""));
 <% } %>
 <% } %>
+
+<% if (isSuperAdmin3) { %>
+setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_system_activities")%>", "javascript:goToUrl('<%=systemActivitiesUrl%>');", ""));
+<% } %>
 <% } //end if hasSetupMenu %>
 
 //////////////// DataSource menu ///////////////////
@@ -554,6 +562,10 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_coti_job"
 
 <% if (userPerms.getPermissionFor(Permission.ELOQUA)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_eloqua")%>", "javascript:goToUrl('<%=eloquaUrl%>');", ""));
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.MIND_TOUCH)) { %>
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_mindtouch")%>", "javascript:goToUrl('<%=mindtouchUrl%>');", ""));
 <% } %>
 
 <% } //end if hasDataSourceMenu %>

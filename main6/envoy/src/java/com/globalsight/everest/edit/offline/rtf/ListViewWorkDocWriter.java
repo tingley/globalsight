@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.MissingResourceException;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -657,8 +658,19 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
 
             String pageid = p_osd.getPageId() == -1 ? m_page.getPageId() : "" + p_osd.getPageId();
             // escaped for rtf
-            String url = DownloadHelper.makeMSWordResParentPath()
-                    + pageid + "\\\\\\\\" + pageid + ".html";
+            String url;
+            if(m_page.isPreserveSourceFolder())
+            {
+            	String fullPageName = m_page.getFullPageName();
+            	Set<String> set = StringUtil.split(fullPageName, "\\\\");
+            	url = DownloadHelper.makeMSWordResParentPath(set.size())
+            			+ pageid + "\\\\\\\\" + pageid + ".html";
+            }
+            else
+            {
+            	url = DownloadHelper.makeMSWordResParentPath(3)
+    			+ pageid + "\\\\\\\\" + pageid + ".html";
+            }
 
             m_outputStream.write(makeMsWordHyperLink(url,
                     p_osd.getDisplaySegmentID(),
@@ -847,7 +859,13 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
                 + AmbassadorDwUpConstants.HEADER_NOMATCH_COUNT_KEY + " "
                 + m_page.getNoMatchWordCount() + "\\par}");
         m_outputStream.write(m_strEOL);
-        
+
+        // Populate 100% Target Segments
+        m_outputStream.write("{" + m_strExternalStyle
+                + AmbassadorDwUpConstants.HEADER_POPULATE_100_SEGMENTS + " "
+                + (m_page.isPopulate100() ? "YES":"NO") + "\\par}");
+        m_outputStream.write(m_strEOL);
+
         // Server Instance ID
         if (m_page.getServerInstanceID() != null)
         {

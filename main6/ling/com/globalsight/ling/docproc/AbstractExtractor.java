@@ -439,7 +439,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
     {
         return readInput(null);
     }
-    
+
     public Reader readInput(BaseFilter p_baseFilter) throws ExtractorException
     {
         Reader input = getInputReader(p_baseFilter);
@@ -655,6 +655,13 @@ public abstract class AbstractExtractor implements ExtractorInterface
     }
 
     public Output switchExtractor(String to_translate, String dataFormat,
+            Filter filter, boolean isFromXml) throws ExtractorException
+    {
+        return switchExtractor(to_translate, dataFormat, null, filter, true,
+                isFromXml);
+    }
+
+    public Output switchExtractor(String to_translate, String dataFormat,
             String rules) throws ExtractorException
     {
         return switchExtractor(to_translate, dataFormat, rules, null);
@@ -664,11 +671,13 @@ public abstract class AbstractExtractor implements ExtractorInterface
             String rules, Filter filter) throws ExtractorException
     {
         // keep all whitespace from GBS-3663
-        return switchExtractor(to_translate, dataFormat, rules, filter, true);
+        return switchExtractor(to_translate, dataFormat, rules, filter, true,
+                false);
     }
 
     private Output switchExtractor(String to_translate, String dataFormat,
-            String rules, Filter filter, boolean p_preserveAllWhite)
+            String rules, Filter filter, boolean p_preserveAllWhite,
+            boolean isFromXml)
     {
 
         ExtractorRegistry reg = ExtractorRegistry.getObject();
@@ -691,7 +700,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
         String content = to_translate;
         // html
-        if (formatId == 1)
+        if (formatId == 1 && !isFromXml)
         {
             content = StandardExtractor.checkHtmlTags(content);
         }
@@ -731,7 +740,8 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
     }
 
-    private Reader getInputReader(BaseFilter p_baseFilter) throws ExtractorException
+    private Reader getInputReader(BaseFilter p_baseFilter)
+            throws ExtractorException
     {
         Reader input = null;
         ByteArrayInputStream bis;
@@ -823,7 +833,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
                     String tempString = buffReader.readLine();
                     StringBuffer newString = new StringBuffer();
-                    
+
                     // get internal texts
                     List<Escaping> es = null;
                     try
@@ -838,9 +848,11 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
                     while (tempString != null)
                     {
-                        tempString = EscapingHelper.handleString4Import(
-                                tempString, es, m_ExtractorRegistry
-                                        .getFormatName(m_input.getType()), true);
+                        tempString = EscapingHelper
+                                .handleString4Import(tempString, es,
+                                        m_ExtractorRegistry
+                                                .getFormatName(m_input
+                                                        .getType()), true);
                         // keep empty cdata section
                         tempString = tempString
                                 .replace("<![CDATA[]]>",

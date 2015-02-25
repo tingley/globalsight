@@ -645,4 +645,13 @@ public interface Task extends WorkObject
 
 	public int getIsReportUploaded();
 
+    public void setQualityAssessment(String qualityAssessment);
+    
+    public String getQualityAssessment();
+
+    public void setMarketSuitability(String marketSuitabilty);
+    
+    public String getMarketSuitability();
+    
+
 }

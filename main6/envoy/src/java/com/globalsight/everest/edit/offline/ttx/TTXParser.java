@@ -63,6 +63,7 @@ public class TTXParser
     private String gs_ExactMatchWordCount = null;
     private String gs_FuzzyMatchWordCount = null;
     private String gs_EditAll = null;
+    private String gs_Populate100TargetSegments = null;// YES or NO
 
     private StringBuffer results = new StringBuffer();
     // private String latestPosition = null;
@@ -316,6 +317,11 @@ public class TTXParser
                 {
                     gs_EditAll = utValue;
                 }
+                else if (TTXConstants.GS_POPULATE_100_TARGET_SEGMENTS.equals(attValue)
+                        ||"Populate 100% Target Segments".equalsIgnoreCase(utName))
+                {
+                    gs_Populate100TargetSegments = utValue;
+                }
             }
         }
     }
@@ -353,6 +359,9 @@ public class TTXParser
         results.append("# Fuzzy Match word count: ")
                 .append(this.gs_FuzzyMatchWordCount)
                 .append(TTXConstants.NEW_LINE);
+        results.append("# Populate 100% Target Segments: ")
+                .append(this.gs_Populate100TargetSegments)
+                .append(TTXConstants.NEW_LINE);
         results.append("# Edit all: ").append(this.gs_EditAll);
     }
 
@@ -384,7 +393,8 @@ public class TTXParser
                 || TTXConstants.GS_FUZZY_MATCH_WORD_COUNT
                         .equalsIgnoreCase(p_value)
                 || TTXConstants.GS_EDIT_ALL.equalsIgnoreCase(p_value)
-                || "GS:InstanceID".equalsIgnoreCase(p_value))
+                || "GS:InstanceID".equalsIgnoreCase(p_value)
+                || TTXConstants.GS_POPULATE_100_TARGET_SEGMENTS.equalsIgnoreCase(p_value))
         {
             return true;
         }

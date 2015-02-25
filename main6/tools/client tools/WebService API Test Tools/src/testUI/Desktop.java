@@ -3,6 +3,7 @@ package testUI;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+
 import test.TestManager;
 import test.TestManagerImpl;
 import util.*;
@@ -10,6 +11,8 @@ import util.*;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -148,7 +151,7 @@ public class Desktop extends javax.swing.JFrame
         aUCenterPanel.setName("aUCenterPanel"); // NOI18N
         aUCenterPanel.setLayout(new java.awt.GridLayout(6, 3));
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(testtool.TestToolApp.class).getContext().getResourceMap(Desktop.class);
+        final org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(testtool.TestToolApp.class).getContext().getResourceMap(Desktop.class);
         hostLabel.setText(resourceMap.getString("hostLabel.text")); // NOI18N
         hostLabel.setName("hostLabel"); // NOI18N
         aUCenterPanel.add(hostLabel);
@@ -316,33 +319,43 @@ public class Desktop extends javax.swing.JFrame
             public void valueChanged(ListSelectionEvent e) {
                 labelTextFieldPairs.clear();
                 oMCenterPanel.removeAll();
+                functionNoteLabel.removeAll();
+                functionNoteLabel.setText(resourceMap.getString("functionNoteLabel.text"));
                 Operation o = (Operation) operationList.getSelectedValue();
                 functionLabel.setText(o.toString());
                 ArrayList<Parameter> params = o.getParaList();
                 for (Parameter para : params) {
                     //For map, get the parameters from the properties file in the map
-                    if (para.getType().equals("Map")) {    //For HashMap type
-                        Properties p = WriteLog.getResourceFile();
-                        String parameterList = p.getProperty(o.getName());
-                        StringTokenizer st = new StringTokenizer(parameterList, ",");
-                        List parametersList = new ArrayList();
-                        while (st.hasMoreTokens()) {
-                            parametersList.add(st.nextToken().trim());
-                        }
-                        for (int i = 0; i < parametersList.size(); i = i + 2) {
-                            Label_TextField_Panel pair = new Label_TextField_Panel();
-                            pair.setLabel(parametersList.get(i + 1) + "(" + parametersList.get(i) + ")");
-                            pair.setTextField("");
-                            //For bytes, need to read for file
-                            if (parametersList.get(i).equals("base64Binary")) {
-                                pair.setJButton();
-                            }
-                            if ((parametersList.get(i + 1).equals("accessToken")))
-                                pair.getTextField().setEditable(false);
-                            oMCenterPanel.add(pair);
-                            labelTextFieldPairs.add(pair);
-                        }
-                    } else {
+					if (para.getType().equals("Map")) { // For HashMap type
+						Properties p = WriteLog.getResourceFile();
+						String parameterList = p.getProperty(o.getName());
+						StringTokenizer st = new StringTokenizer(parameterList,
+								",");
+						List parametersList = new ArrayList();
+						while (st.hasMoreTokens()) {
+							parametersList.add(st.nextToken().trim());
+						}
+						if (parameterList.contains("Vector")) {
+							functionNoteLabel.setText("<html>"+resourceMap.getString("functionNoteLabel.text")+".<br/><font color =#FF0000>"+resourceMap.getString("functionVectorNoteLabel.text")+"</html>");
+						} else {
+							for (int i = 0; i < parametersList.size(); i = i + 2) {
+								Label_TextField_Panel pair = new Label_TextField_Panel();
+								pair.setLabel(parametersList.get(i + 1) + "("
+										+ parametersList.get(i) + ")");
+								pair.setTextField("");
+								// For bytes, need to read for file
+								if (parametersList.get(i)
+										.equals("base64Binary")) {
+									pair.setJButton();
+								}
+								if ((parametersList.get(i + 1)
+										.equals("accessToken")))
+									pair.getTextField().setEditable(false);
+								oMCenterPanel.add(pair);
+								labelTextFieldPairs.add(pair);
+							}
+						}
+					} else {
                         Label_TextField_Panel pair = new Label_TextField_Panel();
                         pair.setLabel(para.getName() + "(" + para.getType() + ")");
                         pair.setTextField("");

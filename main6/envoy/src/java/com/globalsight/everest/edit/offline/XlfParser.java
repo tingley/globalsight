@@ -12,64 +12,54 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import com.globalsight.util.edit.EditUtil;
-
-public class XlfParser {
-
-	public String getBody(Document doc) throws Exception {
+public class XlfParser
+{
+    @SuppressWarnings("rawtypes")
+    public String getBody(Document doc) throws Exception
+	{
 		Element root = getRootNode(doc);
 		List transUnitList = getTransunitList(getTransunitNodeList(root));
 		Iterator iterator = transUnitList.iterator();
-
 		StringBuffer result = new StringBuffer();
-
-		while (iterator.hasNext()) {
+		while (iterator.hasNext())
+		{
 			TransUnitInner transUnit = (TransUnitInner) iterator.next();
-
 			result.append(XliffConstants.WARN_SIGN).append(transUnit.getId());
 			result.append(XliffConstants.NEW_LINE);
-
-//			String matchType = transUnit.getMatchType();
-//			if ((!("".equals(matchType))) && (matchType != null)) {
-//				result.append(XliffConstants.WARN_SIGN).append(
-//						XliffConstants.MATCH_TYPE).append(
-//						XliffConstants.ONE_SPACE);
-//				result.append(transUnit.getMatchType());
-//				result.append(XliffConstants.NEW_LINE);
-//
-//			}
-
-			String target = transUnit.getTarget();
-			
-			//For GBS-1869, It seems that docode is not needed.
-//			target = EditUtil.decodeXmlEntities(target);
-
-			result.append(target);
+            if (transUnit.getTargetState() != null
+                    && transUnit.getTargetState().trim().length() > 0)
+			{
+                result.append(
+                        AmbassadorDwUpConstants.SEGMENT_XLF_TARGET_STATE_KEY
+                                + " ").append(transUnit.getTargetState());
+			}
+			result.append(XliffConstants.NEW_LINE);
+			result.append(transUnit.getTarget());
 			result.append(XliffConstants.NEW_LINE);
 			result.append(XliffConstants.NEW_LINE);
-
 		}
 
 		return result.toString();
 	}
 
-	public Iterator getTransunitNodeList(Element root) {
+    @SuppressWarnings("rawtypes")
+    public Iterator getTransunitNodeList(Element root) {
 		Iterator transUnits = null;
-		LoopOut: for (Iterator iFile = root
-				.elementIterator(XliffConstants.FILE); iFile.hasNext();) {
-			Element file = (Element) iFile.next();
-			for (Iterator iBody = file.elementIterator(XliffConstants.BODY); iBody
-					.hasNext();) {
-				Element body = (Element) iBody.next();
-				transUnits = body.elementIterator(XliffConstants.TRANS_UNIT);
-				break LoopOut;
-			}
-		}
-		return transUnits;
+        LoopOut: for (Iterator iFile = root
+                .elementIterator(XliffConstants.FILE); iFile.hasNext();) {
+            Element file = (Element) iFile.next();
+            for (Iterator iBody = file.elementIterator(XliffConstants.BODY); iBody
+                    .hasNext();) {
+                Element body = (Element) iBody.next();
+                transUnits = body.elementIterator(XliffConstants.TRANS_UNIT);
+                break LoopOut;
+            }
+        }
+        return transUnits;
 	}
 
-	public List getTransunitList(Iterator transunitNodes) {
-
+    @SuppressWarnings("rawtypes")
+    public List getTransunitList(Iterator transunitNodes) {
 		TransUnitInner transUnitObj = null;
 		List<TransUnitInner> list = new ArrayList<TransUnitInner>();
 
@@ -86,12 +76,17 @@ public class XlfParser {
 //			Attribute matchType = transUnit.attribute(XliffConstants.EXTRADATA);
 			Element source = transUnit.element(XliffConstants.SOURCE);
 			Element target = transUnit.element(XliffConstants.TARGET);
+			String targetState = target.attributeValue(XliffConstants.STATE);
 
 			transUnitObj = new TransUnitInner();
 			transUnitObj.setId(id.getText());
 //			transUnitObj.setMatchType(matchType.getText());
 			transUnitObj.setSource(source.getText());
 			transUnitObj.setTarget(target.getText());
+			if (targetState != null && targetState.trim().length() > 0)
+			{
+			    transUnitObj.setTargetState(targetState);
+			}
 
 			list.add(transUnitObj);
 		}
@@ -302,12 +297,11 @@ public class XlfParser {
 
 	private class TransUnitInner {
 		private String id;
-
 		private String source;
-
 		private String target;
-
 		private String matchType;
+		// "state" attribute of "target"
+		private String targetState;
 
 		public String getMatchType() {
 			return matchType;
@@ -341,7 +335,17 @@ public class XlfParser {
 			this.target = target;
 		}
 
-		public String toString() {
+		public String getTargetState()
+        {
+            return targetState;
+        }
+
+        public void setTargetState(String targetState)
+        {
+            this.targetState = targetState;
+        }
+
+        public String toString() {
 			StringBuffer result = new StringBuffer();
 			result.append("id:").append(id).append("\n");
 			result.append("matchType:").append(matchType).append("\n");

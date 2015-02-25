@@ -39,6 +39,7 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.PostReviewCategory;
 import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.JobException;
@@ -212,6 +213,14 @@ public class CompanyMainHandler extends PageActionHandler implements
             String[] scorecardCategories = p_request
                     .getParameterValues("scorecardTo");
             createScorecardCategory(scorecardCategories, companyId);
+            
+            String[] qualityCategories = p_request
+                    .getParameterValues("qualityTo");
+            createQualityCategory(qualityCategories, companyId);
+            
+            String[] marketCategories = p_request
+                    .getParameterValues("marketTo");
+            createMarketCategory(marketCategories, companyId);
 
             initialFilterConfigurations(companyId);
             initialHTMLFilter(companyId);
@@ -265,11 +274,16 @@ public class CompanyMainHandler extends PageActionHandler implements
         String[] categories = p_request.getParameterValues("to");
         String[] scorecardCategories = p_request
                 .getParameterValues("scorecardTo");
+        String[] qualityCategories = p_request.getParameterValues("qualityTo");
+        String[] marketCategories = p_request.getParameterValues("marketTo");
         // delete categories first
         deleteCategory(company.getId());
         createCategory(categories, company.getId());
         deleteScorecardCategory(company.getId());
         createScorecardCategory(scorecardCategories, company.getId());
+        deleteQualityAndMarketCategory(company.getId());
+        createQualityCategory(qualityCategories, company.getId());
+        createMarketCategory(marketCategories, company.getId());
         clearSessionExceptTableInfo(session, CompanyConstants.COMPANY_KEY);
     }
 
@@ -414,6 +428,23 @@ public class CompanyMainHandler extends PageActionHandler implements
             return false;
         }
     }
+    
+    private boolean deleteQualityAndMarketCategory(long companyId)
+    {
+        try
+        {
+            String hql = "from PostReviewCategory as q where q.companyId = "
+                    + companyId;
+            List<String> containedCategoryList = (List<String>) HibernateUtil
+                    .search(hql);
+            HibernateUtil.delete(containedCategoryList);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
 
     /**
      * Create new categories for a company
@@ -459,6 +490,54 @@ public class CompanyMainHandler extends PageActionHandler implements
                 ServerProxy.getJobHandler().createScorecardCategory(
                         scorecardCategory);
                 // HibernateUtil.save(category);
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private boolean createQualityCategory(String[] qualityCategories,
+            long companyId)
+    {
+        try
+        {
+            for (int i = 0; i < qualityCategories.length; i++)
+            {
+                String categoryString = qualityCategories[i];
+                PostReviewCategory qualityCategory = new PostReviewCategory();
+                qualityCategory.setCategoryName(categoryString);
+                qualityCategory.setCompanyId(companyId);
+                qualityCategory.setCategoryType("Q");
+                ServerProxy.getJobHandler().createPostReviewCategory(
+                        qualityCategory);
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean createMarketCategory(String[] marketCategories,
+            long companyId)
+    {
+        try
+        {
+            for (int i = 0; i < marketCategories.length; i++)
+            {
+                String categoryString = marketCategories[i];
+                PostReviewCategory marketCategory = new PostReviewCategory();
+                marketCategory.setCategoryName(categoryString);
+                marketCategory.setCompanyId(companyId);
+                marketCategory.setCategoryType("M");
+                ServerProxy.getJobHandler().createPostReviewCategory(
+                        marketCategory);
             }
             return true;
         }

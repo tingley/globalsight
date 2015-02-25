@@ -330,4 +330,30 @@ public class CompanyWrapper
         return scorecardCategoryList;
     }
 
+    public static List<String> getCompanyQualityCategoryList(String companyId)
+    {
+        String hql = "select q.categoryName from PostReviewCategory as q where q.categoryType ='Q' and q.companyId = "+companyId;
+        List<String> qualityCategoryList = (List<String>)HibernateUtil.search(hql);
+        if (qualityCategoryList == null || qualityCategoryList.size() == 0)
+        {
+            String[] keyArray = new String[]
+            { "lb_good", "lb_acceptable", "lb_poor",};
+            qualityCategoryList = Arrays.asList(keyArray);
+        }
+        return qualityCategoryList;
+    }
+
+    public static List<String> getCompanyMarketCategoryList(String companyId)
+    {
+        String hql = "select q.categoryName from PostReviewCategory as q where q.categoryType ='M' and q.companyId = "+companyId;
+        List<String> marketCategoryList = (List<String>)HibernateUtil.search(hql);
+        if (marketCategoryList == null || marketCategoryList.size() == 0)
+        {
+            String[] keyArray = new String[]
+            { "lb_suitable_fluent", "lb_literal_at_times", "lb_unsuitable",};
+            marketCategoryList = Arrays.asList(keyArray);
+        }
+        return marketCategoryList;
+    }
+
 }

@@ -82,6 +82,14 @@
                 <suffix value=".yyyyMMdd"/>
                 <append value="true"/>
             </periodic-rotating-file-handler>
+            <periodic-rotating-file-handler name="operation" autoflush="true">
+            	<formatter>
+                    <pattern-formatter pattern="%m%n"/>
+                </formatter>
+                <file relative-to="jboss.server.log.dir" path="../../../../logs/operation.log"/>
+                <suffix value=".yyyyMMdd"/>
+                <append value="true"/>
+            </periodic-rotating-file-handler>
             <periodic-rotating-file-handler name="TermAuditLog" autoflush="true">
                 <formatter>
                     <pattern-formatter pattern="%m%n"/>
@@ -147,6 +155,12 @@
                 <level name="INFO"/>
                 <handlers>
                     <handler name="activity"/>
+                </handlers>
+            </logger>
+            <logger category="com.globalsight.log.OperationLog.entry" use-parent-handlers="false">
+                <level name="INFO"/>
+                <handlers>
+                    <handler name="operation"/>
                 </handlers>
             </logger>
             <logger category="TermAuditLog" use-parent-handlers="false">

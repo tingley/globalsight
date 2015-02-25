@@ -22,6 +22,8 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParserException;
@@ -64,9 +66,25 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
     private PseudoData m_PseudoData;
 
     private int i_subCount = 0;
-    
+
     private static ArrayList<String> m_specialTags = new ArrayList<String>();
-    
+    // GBS-3722
+    public static final String R_MT_IDENTIFIER_LEADING_BPT = "<bpt internal=\"yes\" i=\"\\d+\" type=\"mtlid\">&lt;mtlid&gt;</bpt>";
+    public static final String R_MT_IDENTIFIER_LEADING_EPT = "<ept i=\"\\d+\">&lt;/mtlid&gt;</ept>";
+    public static final String R_MT_IDENTIFIER_TRAILING_BPT = "<bpt internal=\"yes\" i=\"\\d+\" type=\"mttid\">&lt;mttid&gt;</bpt>";
+    public static final String R_MT_IDENTIFIER_TRAILING_EPT = "<ept i=\"\\d+\">&lt;/mttid&gt;</ept>";
+    public static final String R_TEXT = "([\\d\\D]*?)";
+
+    public static final String R_MT_IDENTIFIER_LEADING = R_MT_IDENTIFIER_LEADING_BPT
+            + R_TEXT + R_MT_IDENTIFIER_LEADING_EPT;
+    public static final String R_MT_IDENTIFIER_TRAILING = R_MT_IDENTIFIER_TRAILING_BPT
+            + R_TEXT + R_MT_IDENTIFIER_TRAILING_EPT;
+
+    public static Pattern P_MT_IDENTIFIER_LEADING = Pattern
+            .compile(R_MT_IDENTIFIER_LEADING);
+    public static Pattern P_MT_IDENTIFIER_TRAILING = Pattern
+            .compile(R_MT_IDENTIFIER_TRAILING);
+
     static
     {
         m_specialTags.add("br");
@@ -326,7 +344,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             int i_SrcIdx = -1;
             TagNode BPTItem = null;
             String PTag = null;
-            
+
             try
             {
                 String vvv = m_hEpt2BptSrcIndexMap.get(p_hAttributes.get("i"));
@@ -346,9 +364,9 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
                 else
                 {
                     i_SrcIdx = Integer.parseInt(vvv);
-    
+
                     BPTItem = m_PseudoData.getSrcTagItem(i_SrcIdx);
-    
+
                     if (BPTItem == null)
                     {
                         throw new DiplomatBasicParserException();
@@ -400,7 +418,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
                     appended = true;
                 }
             }
-            
+
             if (!appended)
             {
                 currentElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
@@ -525,5 +543,41 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
         }
 
         return texts.getSegment();
+    }
+
+    /**
+     * Adds MT Identifiers (leading&trailing) to source tag list so that they
+     * will be taken as mandatory tags during the error checker.
+     * 
+     * @since GBS-3722
+     */
+    public void setMTIdentifiers(String segment)
+            throws DiplomatBasicParserException
+    {
+        if (m_PseudoData.getMTIdentifierList().size() > 0)
+        {
+            // already added, just return.
+            return;
+        }
+        try
+        {
+            Matcher m = P_MT_IDENTIFIER_LEADING.matcher(segment);
+            if (m.find())
+            {
+                m_PseudoData.addMTIdentifierLeading("[" + m.group(1) + "]",
+                        m.group());
+            }
+
+            m = P_MT_IDENTIFIER_TRAILING.matcher(segment);
+            if (m.find())
+            {
+                m_PseudoData.addMTIdentifierTrailing("[" + m.group(1) + "]",
+                        m.group());
+            }
+        }
+        catch (TagNodeException e)
+        {
+            throw new DiplomatBasicParserException(e.getMessage());
+        }
     }
 }

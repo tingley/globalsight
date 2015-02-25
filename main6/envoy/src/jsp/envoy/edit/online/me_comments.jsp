@@ -24,6 +24,7 @@
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
+            com.globalsight.everest.taskmanager.Task,
             com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
             com.globalsight.config.UserParamNames,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
@@ -236,7 +237,14 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
 EditorState state =
   (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
 CommentThreadView view = state.getCommentThreads();
-
+boolean isActive = false;
+if (sessionMgr.getAttribute("taskStatus") != null)
+{
+    String taskStatus = (String) sessionMgr.getAttribute("taskStatus");
+    if (Task.STATE_ACTIVE_STR.equalsIgnoreCase(taskStatus)) {
+        isActive = true;
+     }
+}
 // keep all issues for set all status to closed
 ArrayList currentIssues = view.getIssues();
 int currentIssuesSize = currentIssues.size();
@@ -559,7 +567,7 @@ $(document).ready(function(){
       <!--<span class="clickable" onclick='filterComments()'>Filter...</span>-->
     </TD>
 <%
-    if (enableCloseAllComments!= null && enableCloseAllComments.equals("1")) {
+    if (enableCloseAllComments!= null && enableCloseAllComments.equals("1") && !isActive) {
 %>
     <TD ALIGN="RIGHT">
       <A id="idCloseAllComments" CLASS="HREFBoldWhite" HREF="#"

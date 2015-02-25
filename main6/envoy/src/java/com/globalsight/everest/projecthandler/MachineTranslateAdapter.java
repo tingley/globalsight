@@ -16,10 +16,8 @@
  */
 package com.globalsight.everest.projecthandler;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -40,7 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.google.translate.api.v2.core.Translator;
-import org.google.translate.api.v2.core.TranslatorException;
 import org.google.translate.api.v2.core.model.Translation;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,6 +55,7 @@ import com.globalsight.machineTranslation.mstranslator.MSMTUtil;
 import com.globalsight.machineTranslation.promt.ProMtInvoker;
 import com.globalsight.machineTranslation.promt.ProMtPts9Invoker;
 import com.globalsight.machineTranslation.safaba.SafabaTranslateUtil;
+import com.globalsight.util.StringUtil;
 import com.microsofttranslator.api.V2.LanguageService;
 
 public class MachineTranslateAdapter
@@ -110,16 +108,16 @@ public class MachineTranslateAdapter
                 setDoMtParams(p_request, mtProfile);
                 break;
             case Google_Translate:
-            	setGoogleParams(p_request, mtProfile);
-            	break;
+                setGoogleParams(p_request, mtProfile);
+                break;
         }
     }
 
     private void setGoogleParams(HttpServletRequest p_request,
             MachineTranslationProfile mtProfile)
     {
-        String apiKey = p_request.getParameter(
-                MTProfileConstants.MT_GOOGLE_API_KEY);
+        String apiKey = p_request
+                .getParameter(MTProfileConstants.MT_GOOGLE_API_KEY);
         if (apiKey != null)
             apiKey = apiKey.trim();
 
@@ -129,7 +127,7 @@ public class MachineTranslateAdapter
         }
     }
 
-	private void makeBaseMT(HttpServletRequest p_request,
+    private void makeBaseMT(HttpServletRequest p_request,
             MachineTranslationProfile mtProfile, String engine)
     {
         String mtProfileName = p_request.getParameter("MtProfileName");
@@ -175,6 +173,34 @@ public class MachineTranslateAdapter
         {
             mtProfile.setShowInEditor(true);
         }
+        String includeMTIdentifiers = p_request
+                .getParameter(MTProfileConstants.MT_INCLUDE_MT_IDENTIFIERS);
+        mtProfile.setIncludeMTIdentifiers("on".equals(includeMTIdentifiers));
+
+        if (mtProfile.isIncludeMTIdentifiers())
+        {
+            String mtIdentifierLeading = p_request
+                    .getParameter(MTProfileConstants.MT_MT_IDENTIFIER_LEADING);
+            if (StringUtil.isEmpty(mtIdentifierLeading))
+            {
+                mtProfile.setMtIdentifierLeading("");
+            }
+            else
+            {
+                mtProfile.setMtIdentifierLeading(mtIdentifierLeading);
+            }
+            String mtIdentifierTrailing = p_request
+                    .getParameter(MTProfileConstants.MT_MT_IDENTIFIER_TRAILING);
+            if (StringUtil.isEmpty(mtIdentifierTrailing))
+            {
+                mtProfile.setMtIdentifierTrailing("");
+            }
+            else
+            {
+                mtProfile.setMtIdentifierTrailing(mtIdentifierTrailing);
+            }
+        }
+
         String companyName = p_request.getParameter("companyName");
         if (StringUtils.isEmpty(companyName))
         {
@@ -268,7 +294,8 @@ public class MachineTranslateAdapter
         if (exInfo == null || exInfo.size() < dirNames.length)
         {
 
-            exInfo = exInfo == null ? new HashSet<MachineTranslationExtentInfo>() : exInfo;
+            exInfo = exInfo == null ? new HashSet<MachineTranslationExtentInfo>()
+                    : exInfo;
             for (int i = exInfo.size(); i < dirNames.length; i++)
             {
                 exInfo.add(new MachineTranslationExtentInfo());
@@ -395,7 +422,7 @@ public class MachineTranslateAdapter
             case DoMT:
                 return testDoMT(mtProfile, writer);
             case Google_Translate:
-            	return testGoogle(mtProfile, writer);
+                return testGoogle(mtProfile, writer);
         }
 
         return false;
@@ -418,7 +445,7 @@ public class MachineTranslateAdapter
         String apiKey = mtProfile.getAccountinfo();
         Translator translator = new Translator(apiKey);
         Translation translation = null;
-        
+
         try
         {
             translation = translator.translate(encodedText, "en", "fr");
@@ -426,7 +453,8 @@ public class MachineTranslateAdapter
         catch (Exception e)
         {
             JSONObject jso = new JSONObject();
-            jso.put("ExceptionInfo", new String("Connection to https://www.googleapis.com refused."));
+            jso.put("ExceptionInfo", new String(
+                    "Connection to https://www.googleapis.com refused."));
             writer.write(jso.toString());
             logger.error(e);
             return false;
@@ -440,7 +468,7 @@ public class MachineTranslateAdapter
         return false;
     }
 
-	/**
+    /**
      * Test the MS MT engine is reachable for specified parameters.
      * 
      * @param mtProfile
@@ -465,8 +493,8 @@ public class MachineTranslateAdapter
             // Test if it is "public" URL
             String msMtUrl = mtProfile.getUrl();
             SoapService soap = new SoapServiceLocator(msMtUrl);
-            String accessToken = MSMTUtil.getAccessToken(clientId,
-                    clientSecret);
+            String accessToken = MSMTUtil
+                    .getAccessToken(clientId, clientSecret);
             LanguageService service = soap
                     .getBasicHttpBinding_LanguageService();
             service.translate(accessToken, "hello world", "en", "fr",
@@ -589,8 +617,7 @@ public class MachineTranslateAdapter
                                 .get(0);
                         String lpName4show = firstDC.getSourceLanguage() + "-"
                                 + firstDC.getTargetLanguage();
-                        String lpName = firstDC.getSourceAbbreviation()
-                                + "-"
+                        String lpName = firstDC.getSourceAbbreviation() + "-"
                                 + firstDC.getTargetAbbreviation();
                         for (int i = 0; i < dcListForSpecifiedLPCode.size(); i++)
                         {
@@ -695,7 +722,7 @@ public class MachineTranslateAdapter
                 int index = exMsg.toLowerCase().indexOf("unknownhostexception");
                 exMsg = exMsg.substring(index + "unknownhostexception".length()
                         + 1, exMsg.length());
-//                exMsg = "Unkown Host:" + exMsg;
+                // exMsg = "Unkown Host:" + exMsg;
             }
 
             try

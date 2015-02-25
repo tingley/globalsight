@@ -1064,16 +1064,16 @@ function doOnLoad()
                                         </TD>
                                     </TR>
                                     <TR ALIGN="LEFT">
-                                        <TD COLSPAN=2><INPUT TYPE="checkbox" ID="<%=isSaveToProjectTm%>" NAME="<%=isSaveToProjectTm%>" VALUE="true" onclick="checkSaveUnlSeg(this)"><%=lbisSaveToProjectTm%></TD>
+                                        <TD COLSPAN=2><INPUT TYPE="checkbox" ID="<%=isSaveToProjectTm%>" NAME="<%=isSaveToProjectTm%>" VALUE="true" onclick="checkSaveUnlSeg(this)" CHECKED><%=lbisSaveToProjectTm%></TD>
                                     </TR>
                                     <TR ALIGN="LEFT">
-		                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			                           <INPUT id="<%=isSaveAllUnlocToProjectTm%>" onclick="checkSaveUnlSeg(this)" TYPE="radio"><%=lbsaveAllUnlSegToTM%>
+		                               <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			                               <INPUT id="<%=isSaveAllUnlocToProjectTm%>" onclick="checkSaveUnlSeg(this)" TYPE="radio"><%=lbsaveAllUnlSegToTM%>
 			                           </TD>
 			                        </TR>
 			                        <TR ALIGN="LEFT">
 			                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			                           <INPUT id="<%=isSaveApprovedToProjectTm%>" onclick="checkSaveUnlSeg(this)" TYPE="radio" NAME="<%=isSaveApprovedToProjectTm%>"><%=lbonlySaveApprovedSegToTM%>
+			                           <INPUT id="<%=isSaveApprovedToProjectTm%>" onclick="checkSaveUnlSeg(this)" TYPE="radio" NAME="<%=isSaveApprovedToProjectTm%>" CHECKED><%=lbonlySaveApprovedSegToTM%>
 			                           </TD>
 			                        </TR>
                                     <TR ALIGN="LEFT">

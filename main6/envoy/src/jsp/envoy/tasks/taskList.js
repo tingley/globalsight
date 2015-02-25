@@ -466,28 +466,36 @@ function initButtonActions() {
     $("#translatedTextBtn").bind("click", function() {
         if (!hasSelected)
             return;
-
         var taskIds = getSelectedTasks();
         var random = Math.random();
-        $.getJSON(selfUrl, {
-            taskAction:"retrieveTranslatedText",
-            state:currentTaskState,
-            taskParam:taskIds,
-            random:random
-        }, function(data) {
-            $(data).each(function (i, item) {
-                var taskId = item.taskId;
-                var percent = item.percent;
-                var $row = $("#listForm :checkbox[value='" + taskId + "']");
-                var translatedTextItem =$row.parent().siblings().filter(".translatedText");
-                if (percent < 100) {
-                    translatedTextItem.removeClass("completed").addClass("uncompleted");
-					}
-                else
-                    translatedTextItem.removeClass("uncompleted").addClass("completed");
-                translatedTextItem.html("("+percent+"%)");
-            });
-        });
+        taskIds = taskIds.split(",");
+        var j=0;
+        var count = setInterval(function translatedTextc()
+    	{
+        	$.getJSON(selfUrl, {
+        		taskAction:"retrieveTranslatedText",
+        		state:currentTaskState,
+        		taskParam:taskIds[j],
+        		random:random
+        	}, function(data) {
+        		$(data).each(function (i, item) {
+        			var taskId = item.taskId;
+            		var percent = item.percent;
+            		var $row = $("#listForm :checkbox[value='" + taskId + "']");
+            		var translatedTextItem =$row.parent().siblings().filter(".translatedText");
+            		if (percent < 100)
+            		{
+            			translatedTextItem.removeClass("completed").addClass("uncompleted");
+            		}
+            		else
+            			translatedTextItem.removeClass("uncompleted").addClass("completed");
+            		translatedTextItem.html("("+percent+"%)");
+        		});
+        	});
+        	j++;
+    		if(j>=taskIds.length)
+        		clearInterval(count);
+    	},200);
     });
 
     //Complete Activity

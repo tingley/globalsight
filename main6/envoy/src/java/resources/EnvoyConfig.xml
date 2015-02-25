@@ -93,6 +93,18 @@
       <WebPage pageName="SD1" isDefault="true" jspName="/envoy/administration/shutdown/shutdown.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.shutdown.ShutdownMainHandler"></WebPage>
     </WebActivity>
   </WebModule>  
+  <WebModule webModuleName="jobCreationStatus">
+    <WebActivity webActivityName="jobCreationStatus">
+      <WebPage pageName="WR1" isDefault="true" jspName="/envoy/administration/systemActivities/jobCreationStatus/waitingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobCreationState.WaitingRequestHandler">
+         <PageLink linkName="self" destinationPageName="WR1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+      </WebPage>
+      <WebPage pageName="IR1" isDefault="false" jspName="/envoy/administration/systemActivities/jobCreationStatus/importingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobCreationState.ImportingRequestHandler">
+         <PageLink linkName="waiting" destinationPageName="WR1"></PageLink>
+         <PageLink linkName="self" destinationPageName="IR1"></PageLink>
+      </WebPage>
+    </WebActivity>
+  </WebModule>
   <WebModule webModuleName="companies">
     <WebActivity webActivityName="companies">
       <WebPage pageName="COM1" isDefault="true" jspName="/envoy/administration/companies/companyMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.company.CompanyMainHandler">
@@ -711,20 +723,30 @@
         <PageLink linkName="self" destinationPageName="em2"></PageLink>
         <PageLink linkName="connect" destinationPageName="em3"></PageLink>
       </WebPage>
-      <WebPage pageName="em4" isDefault="false" jspName="/envoy/connecter/eloqua/eloquaFileList.jsp" pageHandlerClassName="com.globalsight.connector.eloqua.EloquaFileListHandler">
-        <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
-        <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>
-        <PageLink linkName="jobAttributes" destinationPageName="JA"></PageLink>
-        <PageLink linkName="self" destinationPageName="em3"></PageLink>
-      </WebPage>
       <WebPage pageName="em3" isDefault="false" jspName="/envoy/connecter/eloqua/eloquaCreateJob.jsp" pageHandlerClassName="com.globalsight.connector.eloqua.EloquaCreateJobHandler">
-        <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
-        <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>
-        <PageLink linkName="jobAttributes" destinationPageName="JA"></PageLink>
         <PageLink linkName="self" destinationPageName="em3"></PageLink>
       </WebPage>
     </WebActivity>
-    <WebActivity webActivityName="fileprofiles">
+
+    <WebActivity webActivityName="mindtouch">
+      <WebPage pageName="mt" isDefault="true" jspName="/envoy/connecter/mindtouch/mindtouchMain.jsp" pageHandlerClassName="com.globalsight.connector.mindtouch.MindTouchMainHandler">
+        <PageLink linkName="self" destinationPageName="mt"></PageLink>
+        <PageLink linkName="new1" destinationPageName="mt2"></PageLink>
+        <PageLink linkName="edit" destinationPageName="mt2"></PageLink>
+        <PageLink linkName="remove" destinationPageName="mt"></PageLink>
+        <PageLink linkName="connect" destinationPageName="mt3"></PageLink>
+      </WebPage>
+      <WebPage pageName="mt2" isDefault="false" jspName="/envoy/connecter/mindtouch/mindtouchBasic.jsp" pageHandlerClassName="com.globalsight.connector.mindtouch.MindTouchBasicHandler">
+        <PageLink linkName="self" destinationPageName="mt2"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="mt"></PageLink>
+        <PageLink linkName="save" destinationPageName="mt"></PageLink>
+      </WebPage>
+      <WebPage pageName="mt3" isDefault="false" jspName="/envoy/connecter/mindtouch/mindtouchCreateJob.jsp" pageHandlerClassName="com.globalsight.connector.mindtouch.MindTouchCreateJobHandler">
+        <PageLink linkName="self" destinationPageName="mt3"></PageLink>
+      </WebPage>
+    </WebActivity>
+
+	<WebActivity webActivityName="fileprofiles">
       <WebPage pageName="FP1" isDefault="true" jspName="/envoy/administration/fileprofile/fileprofileMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileMainHandler">
         <PageLink linkName="self" destinationPageName="FP1"></PageLink>
         <PageLink linkName="remove" destinationPageName="FP1"></PageLink>
@@ -1448,6 +1470,7 @@
         <PageLink linkName="editSourcePageWc" destinationPageName="EDITSOURCEPAGEWC"></PageLink>
         <PageLink linkName="searchText" destinationPageName="SOURCEFILES"></PageLink>
         <PageLink linkName="jobScorecard" destinationPageName="SCORECARD"></PageLink>
+        <PageLink linkName="incontextreiview" destinationPageName="inctxrvED1"></PageLink>
       </WebPage>
       <WebPage pageName="COSTS" isDefault="false" jspName="/envoy/projects/workflows/jobCosts.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobCostsHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
@@ -1635,7 +1658,7 @@
       <WebPage pageName="SW1" isDefault="true" jspName="/envoy/serviceware/swimport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.serviceware.ServiceWareMainHandler"></WebPage>
     </WebActivity>
   </WebModule>
-  <WebModule webModuleName="editor">
+ <WebModule webModuleName="editor">
     <WebActivity webActivityName="edit">
       <WebPage pageName="ED1" isDefault="true" jspName="/envoy/edit/online/me_main.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.EditorPageHandler">
         <PageLink linkName="self" destinationPageName="ED1"></PageLink>
@@ -1796,6 +1819,60 @@
         <Description>Shows a text-version (whitespace-preserving) of the editor.</Description>
       </WebPage>
       <WebPage pageName="CTMB" isDefault="true" jspName="/envoy/tm/corpus/corpusBrowser.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.BrowseCorpusMainHandler"></WebPage>
+	  <!-- in context review tool start -->
+	  <WebPage pageName="inctxrvED1" isDefault="false" jspName="/envoy/edit/inctxrv/me_main.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="self" destinationPageName="inctxrvED1"></PageLink>
+        <PageLink linkName="menu" destinationPageName="inctxrvED2"></PageLink>
+        <PageLink linkName="contentSrcTrg" destinationPageName="inctxrvED3"></PageLink>
+        <PageLink linkName="contentSrc" destinationPageName="inctxrvED4"></PageLink>
+        <PageLink linkName="contentTrg" destinationPageName="inctxrvED7"></PageLink>
+        <PageLink linkName="contentReview" destinationPageName="inctxrvED15"></PageLink>
+      </WebPage>
+      <WebPage pageName="inctxrvED2" isDefault="false" jspName="/envoy/edit/inctxrv/me_menu.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="refresh" destinationPageName="inctxrvED1"></PageLink>
+        <PageLink linkName="viewSource" destinationPageName="inctxrvED4"></PageLink>
+        <PageLink linkName="viewTarget" destinationPageName="inctxrvED7"></PageLink>
+        <PageLink linkName="pageInfo" destinationPageName="ED10"></PageLink>
+        <PageLink linkName="resources" destinationPageName="ED12"></PageLink>
+        <PageLink linkName="help" destinationPageName="ED11"></PageLink>
+      </WebPage>
+      <WebPage pageName="inctxrvED3" isDefault="false" jspName="/envoy/edit/inctxrv/me_split.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="self" destinationPageName="inctxrvED3"></PageLink>
+        <PageLink linkName="pane1" destinationPageName="inctxrvED4"></PageLink>
+        <PageLink linkName="pane2" destinationPageName="inctxrvED7"></PageLink>
+      </WebPage>
+      <WebPage pageName="inctxrvED4" isDefault="false" jspName="/envoy/edit/inctxrv/me_pane1.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="content" destinationPageName="inctxrvED5"></PageLink>
+        <PageLink linkName="sourceMenu" destinationPageName="inctxrvED6"></PageLink>
+		<PageLink linkName="inctxrvPDF" destinationPageName="inctxrvED16_1"></PageLink>
+      </WebPage>
+      <WebPage pageName="inctxrvED5" isDefault="false" jspName="/envoy/edit/inctxrv/me_source.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="segmentEditor" destinationPageName="SE1"></PageLink>
+        <PageLink linkName="commentEditor" destinationPageName="CE1"></PageLink>
+        <PageLink linkName="refreshSelf" destinationPageName="inctxrvED5"></PageLink>
+      </WebPage>
+      <WebPage pageName="inctxrvED6" isDefault="false" jspName="/envoy/edit/inctxrv/me_sourceMenu.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler"></WebPage>
+      <WebPage pageName="inctxrvED7" isDefault="false" jspName="/envoy/edit/inctxrv/me_pane2.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="content" destinationPageName="inctxrvED8"></PageLink>
+        <PageLink linkName="targetMenu" destinationPageName="inctxrvED9"></PageLink>
+		<PageLink linkName="inctxrvPDF" destinationPageName="inctxrvED16_2"></PageLink>
+      </WebPage>
+      <WebPage pageName="inctxrvED8" isDefault="false" jspName="/envoy/edit/inctxrv/me_target.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="segmentEditor" destinationPageName="SE1"></PageLink>
+        <PageLink linkName="commentEditor" destinationPageName="CE1"></PageLink>
+        <PageLink linkName="refreshSelf" destinationPageName="inctxrvED8"></PageLink>
+      </WebPage>
+      <WebPage pageName="inctxrvED9" isDefault="false" jspName="/envoy/edit/inctxrv/me_targetMenu.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="changeViewMode" destinationPageName="inctxrvED8"></PageLink>
+      </WebPage>
+      <WebPage pageName="inctxrvED15" isDefault="false" jspName="/envoy/edit/inctxrv/me_comments.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
+        <PageLink linkName="self" destinationPageName="inctxrvED15"></PageLink>
+        <PageLink linkName="commentEditor" destinationPageName="CE1"></PageLink>
+        <PageLink linkName="closeComment" destinationPageName="inctxrvED15"></PageLink>
+      </WebPage>
+	  <WebPage pageName="inctxrvED16_1" isDefault="false" jspName="/envoy/edit/inctxrv/pdf/viewer1.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFPageHandler"></WebPage>
+	  <WebPage pageName="inctxrvED16_2" isDefault="false" jspName="/envoy/edit/inctxrv/pdf/viewer2.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFPageHandler"></WebPage>
+	  <!-- in context review tool end -->
     </WebActivity>
   </WebModule>
   <WebModule webModuleName="editor2">
@@ -1908,6 +1985,7 @@
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="dtpUpload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
+        <PageLink linkName="incontextreiview" destinationPageName="inctxrvED1"></PageLink>
         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2776,6 +2854,9 @@
     </WebActivity>
     <WebActivity webActivityName="xlsReportScorecard">
       <WebPage pageName="SORRECARDREPORT" isDefault="true" jspName="/envoy/administration/reports/ScorecardReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+    </WebActivity>
+    <WebActivity webActivityName="xlsReportPostReviewQA">
+      <WebPage pageName="POSTREVIEWQA" isDefault="true" jspName="/envoy/administration/reports/PostReviewQAReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportTranslationsEdit">
       <WebPage pageName="TRANSLATIONSEDIT" isDefault="true" jspName="/envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>

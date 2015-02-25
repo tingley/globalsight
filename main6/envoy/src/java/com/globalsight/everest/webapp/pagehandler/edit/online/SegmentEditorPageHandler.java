@@ -36,9 +36,12 @@ import com.globalsight.everest.edit.online.CommentView;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
@@ -143,6 +146,19 @@ public class SegmentEditorPageHandler extends PageHandler implements
             long targetPageId = state.getTargetPageId().longValue();
             long sourceLocaleId = state.getSourceLocale().getId();
             long targetLocaleId = state.getTargetLocale().getId();
+            
+            String fromPage = p_request.getParameter("fromPage");
+            if ("source".equals(fromPage))
+            {
+                TargetPage targetPage = ServerProxy.getPageManager().getTargetPage(targetPageId);
+                long jobId = targetPage.getSourcePage().getJobId();
+                
+                Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(tuvId, jobId);
+                Tuv targetTuv = sourceTuv.getTu(jobId).getTuv(targetLocaleId, jobId);
+                
+                tuvId = targetTuv.getId();
+                state.setTuvId(tuvId);
+            }
 
             segmentView = EditorHelper.getSegmentView(state, tuId, tuvId,
                     subId, targetPageId, sourceLocaleId, targetLocaleId);

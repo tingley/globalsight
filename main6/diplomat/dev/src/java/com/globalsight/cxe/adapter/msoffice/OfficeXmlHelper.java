@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 import javax.xml.transform.TransformerException;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xpath.XPathAPI;
 import org.w3c.dom.Document;
@@ -48,9 +47,6 @@ import org.xml.sax.SAXException;
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.IConverterHelper2;
 import com.globalsight.cxe.adapter.openoffice.StringIndex;
-import com.globalsight.cxe.engine.eventflow.Category;
-import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
-import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
@@ -62,6 +58,8 @@ import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.cxe.util.fileImport.eventFlow.Category;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -115,9 +113,9 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private static SystemConfiguration m_sc = SystemConfiguration.getInstance();
 
-    private String m_eventFlowXml;
+//    private String m_eventFlowXml;
     private CxeMessage m_cxeMessage;
-    private EventFlow m_eventFlow;
+    private EventFlowXml m_eventFlow;
 
     private String m_hiddenSharedId = "";
     private String m_numStyleIds = "";
@@ -253,8 +251,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             Properties p_msOfficeProperties)
     {
         m_cxeMessage = p_cxeMessage;
-        m_eventFlowXml = p_cxeMessage.getEventFlowXml();
-        m_eventFlow = new EventFlow(m_eventFlowXml);
+        m_eventFlow = p_cxeMessage.getEventFlowObject();
         m_properties = p_msOfficeProperties;
         m_logger = p_logger;
     }
@@ -445,6 +442,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             for (int i = 0; i < msgs.length; i++)
             {
                 // 5 modify eventflowxml
+                EventFlowXml newEventFlowXml = m_eventFlow.clone();
                 String xmlfilename = xmlFiles[i];
                 if (xmlfilename != null && xmlfilename.length() > dirLen)
                 {
@@ -453,15 +451,13 @@ public class OfficeXmlHelper implements IConverterHelper2
                 }
                 modifyEventFlowXmlForImport(xmlfilename, i + 1, msgs.length,
                         unParaStyles, unCharStyles, internalCharStyles,
-                        m_numStyleIds);
+                        m_numStyleIds, newEventFlowXml);
                 // 7 return proper CxeMesseges
                 CxeMessageType type = getPostConversionEvent();
                 CxeMessage cxeMessage = new CxeMessage(type);
                 cxeMessage.setParameters(m_cxeMessage.getParameters());
                 cxeMessage.setMessageData(messageData[i]);
-
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                cxeMessage.setEventFlowXml(eventFlowXml);
+                cxeMessage.setEventFlowObject(newEventFlowXml);
 
                 File f = new File(xmlfilename);
                 String name = f.getName();
@@ -485,8 +481,8 @@ public class OfficeXmlHelper implements IConverterHelper2
                     msgs[i] = cxeMessage;
                 }
             }
-            writeDebugFile(m_conversionType + "_" + getBaseFileName()
-                    + "_sa.xml", m_eventFlow.serializeToXml());
+//            writeDebugFile(m_conversionType + "_" + getBaseFileName()
+//                    + "_sa.xml", m_eventFlow.serializeToXml());
 
             if (m_type == OFFICE_PPTX)
             {
@@ -590,8 +586,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             int docPageCount = m_eventFlow.getBatchInfo().getDocPageCount();
             String key = exportBatchId + getBaseFileName() + targetLocale;
 
-            String oofilename = getCategory().getDiplomatAttribute(
-                    "safeBaseFileName").getValue();
+            String oofilename = getCategory().getValue("safeBaseFileName");
             String eBatchId = (String) params.get("ExportBatchId");
             String tFileName = (String) params.get("TargetFileName");
 
@@ -622,11 +617,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                                 .getPostMergeEvent()));
                 outputMsg.setMessageData(fmd);
                 outputMsg.setParameters(params);
-
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                writeDebugFile(m_conversionType + "_" + getBaseFileName()
-                        + "_ea.xml", eventFlowXml);
-                outputMsg.setEventFlowXml(eventFlowXml);
+                outputMsg.setEventFlowObject(m_eventFlow);
 
                 return outputMsg;
             }
@@ -644,7 +635,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 CxeMessageType type = CxeMessageType
                         .getCxeMessageType(CxeMessageType.CXE_EXPORT_STATUS_EVENT);
                 CxeMessage outputMsg = new CxeMessage(type);
-                outputMsg.setEventFlowXml(m_eventFlow.serializeToXml());
+                outputMsg.setEventFlowObject(m_eventFlow);
                 params.put("Exception", null);
                 params.put("ExportedTime", new Long(lastMod));
                 outputMsg.setParameters(params);
@@ -1037,8 +1028,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 mergeSortSegments(dirName);
             }
 
-            String filename = getCategory().getDiplomatAttribute(
-                    "safeBaseFileName").getValue();
+            String filename = getCategory().getValue("safeBaseFileName");
             oxc.convertXmlToOffice(filename, dirName);
         }
     }
@@ -1399,7 +1389,7 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     protected void modifyEventFlowXmlForImport(String p_xmlFilename,
             int p_docPageNum, int p_docPageCount, String unParaStyles,
-            String unCharStyles, String internalCharStyles, String numStyleIds)
+            String unCharStyles, String internalCharStyles, String numStyleIds, EventFlowXml newEventFlowXml)
             throws Exception
     {
         if (unParaStyles == null || unParaStyles.length() == 0)
@@ -1436,86 +1426,71 @@ public class OfficeXmlHelper implements IConverterHelper2
         {
             hiddenSharedSI = m_hiddenSharedId;
         }
+        
+        String postMergeEvent;
+        String formatType;
+        String safeBaseFileName;
+        String originalFileSize;
 
         // First get original Category
-        Category oriC = getCategory();
+        Category oriC = newEventFlowXml.getCategory(CATEGORY_NAME);
         if (oriC != null)
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            {
-                    oriC.getDiplomatAttribute("postMergeEvent"),
-                    oriC.getDiplomatAttribute("formatType"),
-                    oriC.getDiplomatAttribute("safeBaseFileName"),
-                    oriC.getDiplomatAttribute("originalFileSize"),
-                    new DiplomatAttribute("unParaStyles", unParaStyles),
-                    new DiplomatAttribute("unCharStyles", unCharStyles),
-                    new DiplomatAttribute("internalCharStyles",
-                            internalCharStyles),
-                    new DiplomatAttribute("numStyleIds", numStyleIds),
-                    new DiplomatAttribute("hiddenSharedSI", hiddenSharedSI),
-                    new DiplomatAttribute("sheetHiddenCell", sheetHiddenCell),
-                    new DiplomatAttribute("unextractableExcelCellStyles",
-                            MSOffice2010Filter.toString(new ArrayList<String>(
-                                    m_unextractableExcelCellStyles))),
-                    new DiplomatAttribute("isTableOfContentTranslate",
-                            String.valueOf(isTableOfContentTranslate)),
-                    new DiplomatAttribute("isHeaderFooterTranslate",
-                            String.valueOf(m_isHeaderTranslate)),
-                    new DiplomatAttribute("isToolTipsTranslate",
-                            String.valueOf(m_isToolTipsTranslate)),
-                    new DiplomatAttribute("isHiddenTextTranslate",
-                            String.valueOf(m_isHiddenTextTranslate)),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
-
-            m_eventFlow.removeCategory(oriC);
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = oriC.getValue("postMergeEvent");
+            formatType = oriC.getValue("formatType");
+            safeBaseFileName = oriC.getValue("safeBaseFileName");
+            originalFileSize = oriC.getValue("originalFileSize");
+            newEventFlowXml.getCategory().remove(oriC);
         }
         else
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            {
-                    new DiplomatAttribute("postMergeEvent",
-                            m_eventFlow.getPostMergeEvent()),
-                    new DiplomatAttribute("formatType",
-                            m_eventFlow.getSourceFormatType()),
-                    new DiplomatAttribute("safeBaseFileName",
-                            getSafeBaseFileName()),
-                    new DiplomatAttribute("originalFileSize",
-                            String.valueOf(m_cxeMessage.getMessageData()
-                                    .getSize())),
-                    new DiplomatAttribute("unParaStyles", unParaStyles),
-                    new DiplomatAttribute("unCharStyles", unCharStyles),
-                    new DiplomatAttribute("internalCharStyles",
-                            internalCharStyles),
-                    new DiplomatAttribute("numStyleIds", numStyleIds),
-                    new DiplomatAttribute("hiddenSharedSI", hiddenSharedSI),
-                    new DiplomatAttribute("sheetHiddenCell", sheetHiddenCell),
-                    new DiplomatAttribute("unextractableExcelCellStyles",
-                            MSOffice2010Filter.toString(new ArrayList<String>(
-                                    m_unextractableExcelCellStyles))),
-                    new DiplomatAttribute("isTableOfContentTranslate",
-                            String.valueOf(isTableOfContentTranslate)),
-                    new DiplomatAttribute("isHeaderFooterTranslate",
-                            String.valueOf(m_isHeaderTranslate)),
-                    new DiplomatAttribute("isToolTipsTranslate",
-                            String.valueOf(m_isToolTipsTranslate)),
-                    new DiplomatAttribute("isHiddenTextTranslate",
-                            String.valueOf(m_isHiddenTextTranslate)),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = newEventFlowXml.getPostMergeEvent();
+            formatType = newEventFlowXml.getSource().getFormatType();
+            safeBaseFileName = getSafeBaseFileName();
+            originalFileSize = String.valueOf(m_cxeMessage.getMessageData()
+                    .getSize());
         }
-        // Then modify eventFlow
-        m_eventFlow.setPostMergeEvent(getPostMergeEvent());
-        // m_eventFlow.setSourceFormatType("xml");
+        
+        Category newC = new Category();
+        newC.setName(CATEGORY_NAME);
+        
+        newC.addValue("postMergeEvent", postMergeEvent);
+        newC.addValue("formatType", formatType);
+        newC.addValue("safeBaseFileName", safeBaseFileName);
+        newC.addValue("originalFileSize", originalFileSize);
+        newC.addValue("unParaStyles", unParaStyles);
+        newC.addValue("unCharStyles", unCharStyles);
+        newC.addValue("internalCharStyles",
+                internalCharStyles);
+        newC.addValue("numStyleIds", numStyleIds);
+        newC.addValue("hiddenSharedSI", hiddenSharedSI);
+        newC.addValue("sheetHiddenCell", sheetHiddenCell);
+        newC.addValue("unextractableExcelCellStyles",
+                MSOffice2010Filter.toString(new ArrayList<String>(
+                        m_unextractableExcelCellStyles)));
+        newC.addValue("isTableOfContentTranslate",
+                String.valueOf(isTableOfContentTranslate));
+        newC.addValue("isHeaderFooterTranslate",
+                String.valueOf(m_isHeaderTranslate));
+        newC.addValue("isToolTipsTranslate",
+                String.valueOf(m_isToolTipsTranslate));
+        newC.addValue("isHiddenTextTranslate",
+                String.valueOf(m_isHiddenTextTranslate));
+        newC.addValue("relSafeName", p_xmlFilename);
+        newEventFlowXml.getCategory().add(newC);
 
-        m_eventFlow.setDocPageCount(p_docPageCount);
-        m_eventFlow.setDocPageNumber(p_docPageNum);
+        // Then modify eventFlow
+        newEventFlowXml.setPostMergeEvent(getPostMergeEvent());
+        // newEventFlowXml.setSourceFormatType("xml");
+
+        newEventFlowXml.getBatchInfo().setDocPageCount(p_docPageCount);
+        newEventFlowXml.getBatchInfo().setDocPageNumber(p_docPageNum);
 
         // modify display name
         String number = getPageNumber(fileNamePrefix);
         String newDisplayName = getNewDisplayName(fileNamePrefix, number);
 
-        m_eventFlow.setDisplayName(newDisplayName);
+        newEventFlowXml.getBatchInfo().setDisplayName(newDisplayName);
     }
 
     protected MessageData readConvOutput(String fileName)
@@ -2843,7 +2818,6 @@ public class OfficeXmlHelper implements IConverterHelper2
                     for (int i = 0; i < notes.length; i++)
                     {
                         File f = notes[i];
-                        String fname = f.getName();
 
                         // ignore hidden slide's node : GBS-3576
                         if (PptxFileManager.isSlideHiddenFile(hiddenSlideFiles,
@@ -3222,8 +3196,7 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private String writeContentToXmlBox() throws IOException
     {
-        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory()
-                .getDiplomatAttribute("relSafeName").getValue());
+        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory().getValue("relSafeName"));
         File saveFile = new File(saveFileName);
 
         m_cxeMessage.getMessageData().copyTo(saveFile);
@@ -3243,28 +3216,6 @@ public class OfficeXmlHelper implements IConverterHelper2
     {
         return new MsOfficeAdapterException("Import", new String[]
         { arg }, e);
-    }
-
-    private void writeDebugFile(String fileName, String content)
-    {
-        String debugFileDirectory = m_properties
-                .getProperty("DebugFileDirectory");
-        if (debugFileDirectory != null)
-        {
-            try
-            {
-                FileUtils.write(new File(debugFileDirectory, fileName),
-                        content, "UTF-8");
-            }
-            catch (Exception e)
-            {
-                if (m_logger.isEnabledFor(Priority.WARN))
-                {
-                    m_logger.warn("Fail to write content to file: " + fileName,
-                            e);
-                }
-            }
-        }
     }
 
     private List<File> copyToTargetLocales(String[] files)
@@ -3317,53 +3268,6 @@ public class OfficeXmlHelper implements IConverterHelper2
             targetDirF.mkdirs();
             FileCopier.copy(expectedFile, targetDir.toString());
         }
-    }
-
-    private static boolean isExportFileComplete(String p_filekey,
-            int p_pageCount)
-    {
-        // Default is to write out the file.
-        boolean result = true;
-        int curPageCnt = -1;
-
-        synchronized (s_exportBatchesLocker)
-        {
-            Integer oldPageCount = s_exportBatches.get(p_filekey);
-            if (oldPageCount == null)
-            {
-                // First page of this exportBatch.
-                curPageCnt = p_pageCount - 1;
-                if (curPageCnt == 0)
-                {
-                    // The batch is complete, no need to put anything
-                    // in the hashtable.
-                    result = true;
-                }
-                else
-                {
-                    result = false;
-                    s_exportBatches.put(p_filekey, new Integer(curPageCnt));
-                }
-            }
-            else
-            {
-                curPageCnt = oldPageCount.intValue() - 1;
-                if (curPageCnt == 0)
-                {
-                    // The batch is complete, remove the value from the
-                    // hashtable.
-                    result = true;
-                    s_exportBatches.remove(p_filekey);
-                }
-                else
-                {
-                    result = false;
-                    s_exportBatches.put(p_filekey, new Integer(curPageCnt));
-                }
-            }
-        }
-
-        return result;
     }
 
     /**

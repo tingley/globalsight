@@ -161,6 +161,68 @@ public abstract class BaseAdapterMDB implements MessageDrivenBean,
         }
     }
 
+    /**
+     * Handles the AdapterResults. It is used if no JMS.
+     * 
+     * @param cxeMessage
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    public List<CxeMessage> handlerAdapterResults(CxeMessage cxeMessage) throws Exception
+    {
+        setAdapter(loadAdapter());
+        List<CxeMessage> cms = new ArrayList<CxeMessage>();
+        String companyId =  CompanyThreadLocal.getInstance().getValue();
+        m_adapter.loadConfiguration();
+        m_adapter.loadProcessors();
+        
+        CxeMessage preProcessedMsg = m_adapter
+                .runPreProcessor(cxeMessage);
+        preProcessedMsg.getParameters().put(
+                CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+
+        AdapterResult results[] = m_adapter
+                .handleMessage(preProcessedMsg);
+
+        for (int i = 0; results != null && i < results.length; i++)
+        {
+            CxeMessage newCxeMessage = results[i].cxeMessage;
+            if (newCxeMessage != null)
+            {
+                newCxeMessage.getParameters().put(
+                        CompanyWrapper.CURRENT_COMPANY_ID,
+                        companyId);
+
+                CxeMessage postProcessedMsg = m_adapter
+                        .runPostProcessor(newCxeMessage);
+                postProcessedMsg.getParameters().put(
+                        CompanyWrapper.CURRENT_COMPANY_ID,
+                        companyId);
+
+                cms.add(postProcessedMsg);
+            }
+            
+            List<CxeMessage> msgs = results[i].getMsgs();
+            for (CxeMessage msg : msgs)
+            {
+                msg.getParameters().put(
+                        CompanyWrapper.CURRENT_COMPANY_ID,
+                        companyId);
+
+                CxeMessage postProcessedMsg = m_adapter
+                        .runPostProcessor(msg);
+                postProcessedMsg.getParameters().put(
+                        CompanyWrapper.CURRENT_COMPANY_ID,
+                        companyId);
+
+                cms.add(postProcessedMsg);
+            }
+        }
+        
+        return cms;
+    }
+    
     //
     // Implementation of Message Listener Methods
     //

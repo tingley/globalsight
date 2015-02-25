@@ -50,6 +50,8 @@ public class SynchronizationManagerLocal
 
     /** Internal map holding page upload statuses. */
     static private HashMap m_pagestatus = new HashMap();
+    
+    static private HashSet m_pageTempFileName = new HashSet();
 
     //
     // Constructor
@@ -86,6 +88,7 @@ public class SynchronizationManagerLocal
         throws SystemShutdownException
     {
         m_pagestatus.clear();
+        m_pageTempFileName.clear();
 
         super.destroy();
     }
@@ -144,6 +147,18 @@ public class SynchronizationManagerLocal
             return null;
         }
     }
+    
+    public boolean checkTempFileName(String p_tempFileName)
+    {
+    	if(m_pageTempFileName.contains(p_tempFileName))
+    	{
+    		return false;
+    	}
+    	else
+    	{
+    		return true;
+    	}
+    }
 
     //
     // Private Methods
@@ -182,5 +197,10 @@ public class SynchronizationManagerLocal
                 s_logger.debug("Page " + p_pageId + ": " + p_status);
             }
         }
+    }
+    
+    public void setTempFileName(String p_tempFileName)
+    {
+    	m_pageTempFileName.add(p_tempFileName);
     }
 }

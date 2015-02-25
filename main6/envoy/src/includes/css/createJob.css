@@ -93,6 +93,8 @@
 	white-space:nowrap;
 	overflow:hidden;
 	text-overFlow:ellipsis;
+	font-size:10pt;
+	font-family:Arial,Helvetica,sans-serif;
 }
 .uploadifyQueueItem {
 	background-color: #F5F5F5;

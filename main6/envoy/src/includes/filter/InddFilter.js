@@ -277,7 +277,12 @@ function checkExistInddFilterCallback(data)
 		{
 			sendAjax(checkExistInddFilterCallback.obj, "saveInddFilter", "saveInddFilterCallback");
 		}
-	} 
+	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("inddFilterDialog");
+		parent.location.reload();
+	}
 	else 
 	{
 		alert(existFilterName);

@@ -49,6 +49,7 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandlerFactory;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.edit.inctxrv.InContextReviewHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskFilter;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskListHandler;
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
@@ -337,6 +338,12 @@ public class ControlServlet extends HttpServlet
             {
                 targetPageDescriptor = WebSiteDescription.instance()
                         .getPageDescriptor(RETRIEVE_PAGE);
+            }
+            else if ("inctxrvED1".equals(pageName))
+            {
+                targetPageDescriptor = WebSiteDescription.instance()
+                        .getPageDescriptor("inctxrvED1");
+                InContextReviewHelper.loginUser(p_request, p_response);
             }
             // Determine if we came from the login page.
             else if (p_request.getParameter(WebAppConstants.LOGIN_NAME_FIELD) == null

@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -56,6 +57,7 @@ import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserRole;
 import com.globalsight.everest.jobhandler.JobHandlerWLRemote;
+import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.PermissionManager;
@@ -70,6 +72,7 @@ import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.PostReviewQAReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
@@ -85,6 +88,7 @@ import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.log.ActivityLog;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
 import com.globalsight.util.ExcelUtil;
@@ -128,7 +132,8 @@ public class AmbassadorHelper extends JsonTypeWebService
     private final int INVALID_PERMISSION_GROUPS = 11;
     private final int INVALID_PROJECTS = 12;
     private final int INVALID_ROLES = 13;
-    
+    private final int INVALD_PERMISSION = 14;
+    private String SEPARATOR = "_";
     private static final String PROCESS_DEFINITION_IDS_PLACEHOLDER = "\uE000"
             + "_processDefinition_Ids_" + "\uE000";
 
@@ -848,6 +853,23 @@ public class AmbassadorHelper extends JsonTypeWebService
      *                    </activities>
      *                  </role>
      *                </roles>
+     *              If super user create user,Roles Example:
+     *                <?xml version=\"1.0\"?>
+     *					<roles>
+     *						<role>
+     *							<companyName>allie</companyName>
+     *							<sourceLocale>en_US</sourceLocale>
+     *							<targetLocale>de_DE</targetLocale>
+     *							<activities>
+     *								<activity>
+     *								<name>Dtp1</name>
+     *								</activity>
+     *								<activity>
+     *									<name>Dtp2</name>
+     *								</activity>
+     *							</activities>
+     *						</role>
+     *					</roles>
      * @param p_isInAllProject
      *            boolean If the user need to be included in all project.
      * @param p_projectIds
@@ -868,6 +890,7 @@ public class AmbassadorHelper extends JsonTypeWebService
      *       11 -- Invalid permission groups 
      *       12 -- Invalid project information 
      *       13 -- Invalid role information 
+     *       14-- Current login user does not have enough permission
      *       -1 -- Unknown exception
      * @throws WebServiceException
      */
@@ -878,7 +901,10 @@ public class AmbassadorHelper extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, "createUser");
-        checkPermission(p_accessToken, Permission.USERS_NEW);
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.USERS_NEW);
+		if (StringUtil.isNotEmpty(returnStr))
+			return INVALD_PERMISSION;
 
         int checkResult = validateUserInfo(p_accessToken, p_userId, p_password,
                 p_firstName, p_lastName, p_email, p_permissionGrps,
@@ -1028,9 +1054,6 @@ public class AmbassadorHelper extends JsonTypeWebService
         }
         Company companyOfLoggedUser = CompanyWrapper
                 .getCompanyByName(loggedUser.getCompanyName());
-        if (CompanyWrapper.SUPER_COMPANY_ID.equals(String
-                .valueOf(companyOfLoggedUser.getId())))
-            return CAN_NOT_CREATE_SUPER_USER;
         long companyIdOfLoggedUser = companyOfLoggedUser.getId();
         String companyIdStringOfLoggedUser = String
                 .valueOf(companyIdOfLoggedUser);
@@ -1109,15 +1132,16 @@ public class AmbassadorHelper extends JsonTypeWebService
                     long projectId = -1L;
     
                     for (String pid : projectIds)
-                    {
-                        if (StringUtil.isEmpty(pid))
-                            return INVALID_PROJECTS;
-                        projectId = Long.parseLong(pid.trim());
-                        project = projectManager.getProjectById(projectId);
-                        if (project == null
-                                || project.getCompanyId() != companyIdOfLoggedUser)
-                            return INVALID_PROJECTS;
-                    }
+					{
+						if (StringUtil.isEmpty(pid))
+							return INVALID_PROJECTS;
+						projectId = Long.parseLong(pid.trim());
+						project = projectManager.getProjectById(projectId);
+						if (project == null
+								|| (companyIdOfLoggedUser != 1 && project
+										.getCompanyId() != companyIdOfLoggedUser))
+							return INVALID_PROJECTS;
+					}
                 }
                 catch (Exception e)
                 {
@@ -1170,6 +1194,23 @@ public class AmbassadorHelper extends JsonTypeWebService
      *                    </activities>
      *                  </role>
      *                </roles>
+     *                If super user modify user,Roles Example:
+     *                <?xml version=\"1.0\"?>
+     *					<roles>
+     *						<role>
+     *							<companyName>allie</companyName>
+     *							<sourceLocale>en_US</sourceLocale>
+     *							<targetLocale>de_DE</targetLocale>
+     *							<activities>
+     *								<activity>
+     *								<name>Dtp1</name>
+     *								</activity>
+     *								<activity>
+     *									<name>Dtp2</name>
+     *								</activity>
+     *							</activities>
+     *						</role>
+     *					</roles>
      * @param p_isInAllProject
      *            boolean If the user need to be included in all project.
      * @param p_projectIds
@@ -1189,7 +1230,8 @@ public class AmbassadorHelper extends JsonTypeWebService
      *       10 -- Invalid email address 
      *       11 -- Invalid permission groups 
      *       12 -- Invalid project information 
-     *       13 -- Invalid role information 
+     *       13 -- Invalid role information
+     *       14-- Current login user does not have enough permission
      *       -1 -- Unknown exception
      * @throws WebServiceException
      */
@@ -1201,7 +1243,10 @@ public class AmbassadorHelper extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, "modifyUser");
-        checkPermission(p_accessToken, Permission.USERS_EDIT);
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.USERS_EDIT);
+		if (StringUtil.isNotEmpty(returnStr))
+			return INVALD_PERMISSION;
         
         int checkResult = validateUserInfo(p_accessToken, p_userId, p_password,
                 p_firstName, p_lastName, p_email, p_permissionGrps,
@@ -1346,51 +1391,86 @@ public class AmbassadorHelper extends JsonTypeWebService
 
             UserManagerWLRemote userManager = ServerProxy.getUserManager();
             JobHandlerWLRemote jobManager = ServerProxy.getJobHandler();
-            Company company = CompanyWrapper.getCompanyByName(p_user
+            Company loggedCompany = CompanyWrapper.getCompanyByName(p_user
                     .getCompanyName());
 
             for (Iterator iter = rolesList.iterator(); iter.hasNext();)
-            {
-                Element roleElement = (Element) iter.next();
-                sourceLocale = roleElement.element("sourceLocale").getText();
-                targetLocale = roleElement.element("targetLocale").getText();
-                localePair = ServerProxy.getLocaleManager()
-                        .getLocalePairBySourceTargetStrings(sourceLocale,
-                                targetLocale);
-                if (localePair == null)
-                    return null;
+			{
+				Element roleElement = (Element) iter.next();
+				sourceLocale = roleElement.element("sourceLocale").getText();
+				targetLocale = roleElement.element("targetLocale").getText();
+				String localeCompanyName = null;
+				Company localeCompany = null;
+				Element node = (Element) roleElement
+						.selectSingleNode("companyName");
+				if (CompanyWrapper.SUPER_COMPANY_ID.equals(String
+						.valueOf(loggedCompany.getId())))
+				{
+					if (node == null)
+						return null;
+					localeCompanyName = roleElement.element("companyName")
+							.getText();
+					localeCompany = CompanyWrapper
+							.getCompanyByName(localeCompanyName.trim());
+					if (localeCompany == null)
+						return null;
+				}
+				else
+				{
+					if (node != null)
+						return null;
+				}
 
-                List activitiesList = roleElement.elements("activities");
-                if (activitiesList == null || activitiesList.size() == 0)
-                    return null;
+				if (localeCompany == null)
+					localePair = getLocalePairBySourceTargetAndCompanyStrings(
+							sourceLocale, targetLocale, loggedCompany.getId());
+				else localePair = getLocalePairBySourceTargetAndCompanyStrings(
+						sourceLocale, targetLocale, localeCompany.getId());
+				
+				if (localePair == null)
+					return null;
 
-                for (Iterator iter1 = activitiesList.iterator(); iter1
-                        .hasNext();)
-                {
-                    Element activitiesElement = (Element) iter1.next();
+				List activitiesList = roleElement.elements("activities");
+				if (activitiesList == null || activitiesList.size() == 0)
+					return null;
 
-                    List activityList = activitiesElement.elements();
-                    for (Iterator iter2 = activityList.iterator(); iter2
-                            .hasNext();)
-                    {
-                        Element activityElement = (Element) iter2.next();
-                        activityName = activityElement.element("name")
-                                .getText();
-                        activity = jobManager
-                                .getActivityByDisplayName(activityName);
-                        if (activity == null
-                                || activity.getCompanyId() != company.getId())
-                            return null;
+				for (Iterator iter1 = activitiesList.iterator(); iter1
+						.hasNext();)
+				{
+					Element activitiesElement = (Element) iter1.next();
 
-                        role = userManager.createUserRole();
-                        ((Role) role).setActivity(activity);
-                        ((Role) role).setSourceLocale(sourceLocale);
-                        ((Role) role).setTargetLocale(targetLocale);
-                        //role.setUser(p_user.getUserId());
-                        roles.add(role);
-                    }
-                }
-            }
+					List activityList = activitiesElement.elements();
+					for (Iterator iter2 = activityList.iterator(); iter2
+							.hasNext();)
+					{
+						Element activityElement = (Element) iter2.next();
+						activityName = activityElement.element("name")
+								.getText();
+						if (localeCompany != null)
+						{
+							activity = jobManager.getActivityByCompanyId(
+									activityName + "_" + localeCompany.getId(),
+									String.valueOf(localeCompany.getId()));
+						}
+						else
+						{
+							activity = jobManager.getActivityByCompanyId(
+									activityName + "_" + loggedCompany.getId(),
+									String.valueOf(loggedCompany.getId()));
+						}
+
+						if (activity == null)
+							return null;
+
+						role = userManager.createUserRole();
+						((Role) role).setActivity(activity);
+						((Role) role).setSourceLocale(sourceLocale);
+						((Role) role).setTargetLocale(targetLocale);
+						// role.setUser(p_user.getUserId());
+						roles.add(role);
+					}
+				}
+			}
         }
         catch (Exception e)
         {
@@ -1398,6 +1478,73 @@ public class AmbassadorHelper extends JsonTypeWebService
             return null;
         }
         return roles;
+    }
+    
+    
+    private LocalePair getLocalePairBySourceTargetAndCompanyStrings(
+            String p_sourceLocaleString, String p_targetLocaleString,
+            long companyId) throws LocaleManagerException, RemoteException
+    {
+        if (p_sourceLocaleString == null || p_sourceLocaleString.length() <= 1
+                || p_targetLocaleString == null
+                || p_targetLocaleString.length() <= 1)
+        {
+            return null;
+        }
+        LocalePair localePair = null;
+        // source
+        StringTokenizer srcTokenizer = new StringTokenizer(
+                p_sourceLocaleString, SEPARATOR);
+
+        // should at least be 2 (ll_cc) or at most 3 (ll_cc_vv)
+        String language = srcTokenizer.nextToken();
+        String country = "";
+
+        if (p_sourceLocaleString.length() > 3)
+        {
+            country = srcTokenizer.nextToken();
+        }
+
+        HashMap map = new HashMap();
+        map.put("sLanguage", language);
+        map.put("sCountry", country);
+        // target
+        StringTokenizer trgTokenizer = new StringTokenizer(
+                p_targetLocaleString, SEPARATOR);
+        language = trgTokenizer.nextToken();
+        country = "";
+        if (p_targetLocaleString.length() > 3)
+        {
+            country = trgTokenizer.nextToken();
+        }
+
+        map.put("tLanguage", language);
+        map.put("tCountry", country);
+
+        try
+		{
+			StringBuffer hql = new StringBuffer();
+			hql.append("from LocalePair lp where lp.isActive = 'Y'")
+					.append(" and lp.source.language = :sLanguage ")
+					.append(" and lp.source.country = :sCountry ")
+					.append(" and lp.target.language = :tLanguage ")
+					.append(" and lp.target.country = :tCountry");
+
+			hql.append(" and lp.companyId = :companyId");
+			map.put("companyId", companyId);
+
+			List localePairs = HibernateUtil.search(hql.toString(), map);
+			if (localePairs != null && localePairs.size() > 0)
+			{
+				localePair = (LocalePair) localePairs.get(0);
+			}
+		}
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return localePair;
     }
 
     /**
@@ -1503,6 +1650,12 @@ public class AmbassadorHelper extends JsonTypeWebService
     String taskReassign(String p_accessToken, String p_taskId,
             String[] p_users) throws WebServiceException
     {
+		checkAccess(p_accessToken, "jobsReassign");
+		String returnStr = checkPermissionReturnStr(p_accessToken,
+				Permission.JOB_WORKFLOWS_REASSIGN);
+		if (StringUtil.isNotEmpty(returnStr))
+			return returnStr;
+		
         try
         {
             Assert.assertNotEmpty(p_accessToken, "Access token");
@@ -1518,8 +1671,7 @@ public class AmbassadorHelper extends JsonTypeWebService
         {
             throw new WebServiceException("Users is null");
         }
-        checkAccess(p_accessToken, "jobsReassign");
-        checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_REASSIGN);
+        
 
         ArrayList<String> reassignedUsers = new ArrayList<String>();
         StringBuffer users = new StringBuffer();
@@ -1565,8 +1717,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             Company company = CompanyWrapper.getCompanyByName(loggedUser
                     .getCompanyName());
             long companyId = company.getId();
-            String companyName = company.getCompanyName();
-            if (companyId != taskInfo.getCompanyId())
+            if (companyId !=1 && companyId != taskInfo.getCompanyId())
                 return "Cannot re-assign task which is in different company";
 
             String taskAcceptor = taskInfo.getAcceptor();
@@ -1960,8 +2111,12 @@ public class AmbassadorHelper extends JsonTypeWebService
      * @param p_taskId
      *            -- task ID to offline download file for.
      * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report
+     *            -- 1 : Reviewer Comments Report or Translations Edit Report (this follows UI settings)
      *            -- 2 : Offline Translation Kit
+     *            -- 3 : Translation Edit Report
+     *            -- 4 : Reviewer Comments Report
+     *            -- 5 : Reviewer Comments Report (Simplified)
+     *            -- 6 : Post Review QA Report
      * @throws WebServiceException
      */
     protected String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
@@ -1969,12 +2124,13 @@ public class AmbassadorHelper extends JsonTypeWebService
             throws WebServiceException
     {
         // Check work offline file type
-        if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2)
+        if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2
+                && p_workOfflineFileType != 3 && p_workOfflineFileType != 4
+                && p_workOfflineFileType != 5 && p_workOfflineFileType !=6)
         {
             return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
-                    "Invalid workOfflineFileType "
-                            + p_workOfflineFileType
-                            + ", it should be limited in 1(Reviewer Comments Report or Translations Edit Report) or 2(Offline Translation Kit).");
+                    "Invalid workOfflineFileType " + p_workOfflineFileType
+                            + ", it should be limited in 1, 2, 3, 4, 5 or 6.");
         }
 
         Task task = null;
@@ -1998,16 +2154,19 @@ public class AmbassadorHelper extends JsonTypeWebService
             return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
                     "This task should be in ACCEPTED state.");
         }
-
-        User loggedUser = getUser(getUsernameFromSession(p_accessToken));
-        String userId = loggedUser.getUserId();
-        ProjectImpl project = getProjectByTask(task);
-        if (!userId.equals(task.getAcceptor())
-                && !userId.equals(project.getProjectManagerId())) {
-            return makeErrorJson(GET_WORK_OFFLINE_FILES,
-                    "This task belongs to user " + task.getAcceptor()
-                    + ", current logged user has no previlege to handle it.");
-        }
+        
+		User loggedUser = getUser(getUsernameFromSession(p_accessToken));
+		String userId = loggedUser.getUserId();
+		ProjectImpl project = getProjectByTask(task);
+		if (!userId.equals(task.getAcceptor())
+				&& !userId.equals(project.getProjectManagerId()))
+		{
+			return makeErrorJson(
+					GET_WORK_OFFLINE_FILES,
+					"This task belongs to user "
+							+ UserUtil.getUserNameById(task.getAcceptor())
+							+ ", current logged user has no previlege to handle it.");
+		}
 
         String returning = "";
         String companyName = CompanyWrapper.getCompanyNameById(task.getCompanyId());
@@ -2022,13 +2181,14 @@ public class AmbassadorHelper extends JsonTypeWebService
                             "getWorkOfflineFiles", activityArgs);
 
             String fileUrl = null;
+            ReportGenerator generator = null;
+            boolean isIncludeCompactTags = (project == null ? false
+                    : project.isReviewReportIncludeCompactTags());
+            // Follow UI settings to decide which report to generate.
             if (p_workOfflineFileType == 1)
             {
-                ReportGenerator generator = null;
                 if (task.getType() == Activity.TYPE_REVIEW)
                 {
-                    boolean isIncludeCompactTags = (project == null ? false
-                            : project.isReviewReportIncludeCompactTags());
                     PermissionSet perms = Permission.getPermissionManager()
                             .getPermissionSetForUser(task.getAcceptor());
                     if (!perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF)
@@ -2056,7 +2216,58 @@ public class AmbassadorHelper extends JsonTypeWebService
                     generator = new TranslationsEditReportGenerator(companyName);
                     ((TranslationsEditReportGenerator) generator).setUserId(userId);
                 }
+            }
+            // translation kit
+            else if (p_workOfflineFileType == 2)
+            {
+                OfflineEditManager oem = ServerProxy.getOfflineEditManager();
+                DownloadParams params = oem.getDownloadParamsByUser(userId, task);
+                File file = oem.getDownloadOfflineFiles(userId, task.getId(), params);
+                StringBuffer root = new StringBuffer();
+                root.append(AmbassadorUtil.getCapLoginOrPublicUrl()).append("/DownloadOfflineKit");
+                if (task.getCompanyId() != 1)
+                {
+                    root.append("/").append(companyName); 
+                }
+                root.append("/GlobalSight/CustomerDownload/").append(file.getName());
+                fileUrl = root.toString();
+            }
+            // TER (does not care current task type)
+            else if (p_workOfflineFileType == 3)
+            {
+                generator = new TranslationsEditReportGenerator(companyName);
+                ((TranslationsEditReportGenerator) generator).setUserId(userId);
+            }
+            // RCR (does not care current task type)
+            else if (p_workOfflineFileType == 4)
+            {
+                generator = new ReviewersCommentsReportGenerator(companyName);
+                ((ReviewersCommentsReportGenerator) generator)
+                        .setIncludeCompactTags(isIncludeCompactTags);
+                ((ReviewersCommentsReportGenerator) generator)
+                        .setUserId(userId);
+            }
+            // RCR Simplified (does not care current task type)
+            else if (p_workOfflineFileType == 5)
+            {
+                generator = new ReviewersCommentsSimpleReportGenerator(
+                        companyName);
+                ((ReviewersCommentsSimpleReportGenerator) generator)
+                        .setIncludeCompactTags(isIncludeCompactTags);
+                ((ReviewersCommentsSimpleReportGenerator) generator)
+                        .setUserId(userId);
+            }
+            //PRR (does not care current task type)
+            else if (p_workOfflineFileType == 6)
+            {
+                generator = new PostReviewQAReportGenerator(companyName);
+                ((PostReviewQAReportGenerator) generator).setUserId(userId);
+            }
 
+            if (p_workOfflineFileType == 1 || p_workOfflineFileType == 3
+                    || p_workOfflineFileType == 4 || p_workOfflineFileType == 5
+                    || p_workOfflineFileType == 6)
+            {
                 List<Long> jobIds = new ArrayList<Long>();
                 jobIds.add(task.getJobId());
                 List<GlobalSightLocale> trgLocales = new ArrayList<GlobalSightLocale>();
@@ -2075,20 +2286,6 @@ public class AmbassadorHelper extends JsonTypeWebService
                     String root = AmbassadorUtil.getCapLoginOrPublicUrl() + "/DownloadReports";
                     fileUrl = root + "/" + path;
                 }
-            }
-            else if (p_workOfflineFileType == 2)
-            {
-                OfflineEditManager oem = ServerProxy.getOfflineEditManager();
-                DownloadParams params = oem.getDownloadParamsByUser(userId, task);
-                File file = oem.getDownloadOfflineFiles(userId, task.getId(), params);
-                StringBuffer root = new StringBuffer();
-                root.append(AmbassadorUtil.getCapLoginOrPublicUrl()).append("/DownloadOfflineKit");
-                if (task.getCompanyId() != 1)
-                {
-                    root.append("/").append(companyName); 
-                }
-                root.append("/GlobalSight/CustomerDownload/").append(file.getName());
-                fileUrl = root.toString();
             }
 
             if (p_isJson)
@@ -2249,6 +2446,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             String p_identifyKey, int p_workOfflineFileType, boolean p_isJson)
             throws WebServiceException
     {
+        String repName = null;
         if (StringUtil.isEmpty(p_identifyKey))
         {
             return makeErrorMessage(p_isJson, IMPORT_WORK_OFFLINE_FILES, "Empty parameter identifyKey");
@@ -2332,20 +2530,22 @@ public class AmbassadorHelper extends JsonTypeWebService
                 FileInputStream fis = new FileInputStream(tmpSaveFile);
                 Workbook wb = ExcelUtil.getWorkbook(tmpSaveFile.getAbsolutePath(), fis);
                 Sheet sheet = ExcelUtil.getDefaultSheet(wb);
-                String repName = sheet.getRow(0).getCell(0).toString();
+                repName = sheet.getRow(0).getCell(0).toString();
                 if (!"Translation Edit Report".equalsIgnoreCase(repName)
-                        && !"Reviewers Comments Report".equalsIgnoreCase(repName)
+                        && !"Reviewers Comments Report"
+                                .equalsIgnoreCase(repName)
                         && !"Reviewers Comments Report (Simplified)"
-                                .equalsIgnoreCase(repName))
+                                .equalsIgnoreCase(repName)
+                        && !"Post-Review QA Report".equalsIgnoreCase(repName))
                 {
                     return makeErrorMessage(p_isJson, UPLOAD_WORK_OFFLINE_FILES,
-                            "The file is neither Translation Edit Report nor Reviewers Comments Report file.");
+                            "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report file.");
                 }
             }
             catch (Exception e)
             {
                 return makeErrorMessage(p_isJson, UPLOAD_WORK_OFFLINE_FILES,
-                        "The file is neither Translation Edit Report nor Reviewers Comments Report file.");
+                        "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report file.");
             }
         }
 
@@ -2364,10 +2564,16 @@ public class AmbassadorHelper extends JsonTypeWebService
 
             if (p_workOfflineFileType == 1)
             {
-                String reportName = WebAppConstants.TRANSLATION_EDIT;
-                if (task.getType() == Activity.TYPE_REVIEW)
+                String reportName = WebAppConstants.TRANSLATION_EDIT; 
+                if ("Reviewers Comments Report".equalsIgnoreCase(repName)
+                        || "Reviewers Comments Report (Simplified)"
+                                .equalsIgnoreCase(repName))
                 {
                     reportName = WebAppConstants.LANGUAGE_SIGN_OFF;
+                }
+                else if ("Post-Review QA Report".equalsIgnoreCase(repName))
+                {
+                    reportName = WebAppConstants.POST_REVIEW_QA;
                 }
                 // Process uploading in same thread, not use separate thread so
                 // that error message can be returned to invoker.

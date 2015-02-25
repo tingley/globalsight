@@ -427,6 +427,16 @@ TR.standardText
         </TR>
         </amb:permission>
         <!--    Character count report End-->
+        <amb:permission name="<%=Permission.REPORTS_POST_REVIEW_QA%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+           	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportPostReviewQA","PostReviewQA")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportPostReviewQA'; return true"><%=bundle.getString("review_post_review_QA_report")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("review_post_review_QA_report_desc")%></TD>
+        </TR>
+        </amb:permission>
         
 		<amb:permission name="<%=Permission.REPORTS_TRANSLATIONS_EDIT%>">
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">

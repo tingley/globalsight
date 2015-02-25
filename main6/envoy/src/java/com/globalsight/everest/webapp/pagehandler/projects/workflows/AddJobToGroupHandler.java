@@ -167,13 +167,13 @@ public class AddJobToGroupHandler extends PageHandler
 		{
 			p_request
 					.setAttribute("errorProject",
-							"Select the job is not the same project, so you can not select a group !");
+							"The selected jobs belong to different projects, cannot add them to same job group.");
 		}
 		if (errorSource)
 		{
 			p_request
 					.setAttribute("errorSource",
-							"Select the job is not the same source locale, so you can not select a group !");
+							"The selected jobs have different source locales, can not add them to same job group.");
 		}
 
 		if (!errorProject && !errorSource)

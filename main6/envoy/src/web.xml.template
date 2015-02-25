@@ -523,6 +523,19 @@
     </init-param>
   </servlet>
 
+<servlet>
+    <servlet-name>tmImport</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
   <servlet>
     <servlet-name>viewSupportFiles</servlet-name>
     <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
@@ -862,6 +875,11 @@
   <servlet-mapping>
     <servlet-name>viewCommentAttachments2</servlet-name>
     <url-pattern>/GlobalSight/CommentReference2/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>tmImport</servlet-name>
+    <url-pattern>/tmImport/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

@@ -25,6 +25,7 @@ import java.util.Vector;
 
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.PostReviewCategory;
 import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
@@ -154,7 +155,12 @@ public class JobHandlerWLRMIImpl extends RemoteServer implements
     {
         m_localReference.createScorecardCategory(scorecardCategory);
     }
-
+    
+    public void createPostReviewCategory(PostReviewCategory postReviewCategory) throws JobException
+    {
+        m_localReference.createPostReviewCategory(postReviewCategory);
+    }
+    
     public void modifyCompany(Company p_company) throws RemoteException,
             JobException
     {

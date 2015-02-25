@@ -292,9 +292,7 @@ function confirmForm(formSent) {
       <% } %>
           <INPUT TYPE="BUTTON" VALUE="<%=lbOptions%>..." 
           onclick="submitForm('options')"> 
-      <amb:permission name="<%=Permission.ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES%>" >
       <input type="BUTTON" value="<%=lbDownloadOptions%>..." onclick="submitForm('downloadOption')">
-	  </amb:permission>
 	  <INPUT TYPE="BUTTON" VALUE="<%=lbSave%>" onclick="submitForm('save')">  
 	</TD>
   </TR>

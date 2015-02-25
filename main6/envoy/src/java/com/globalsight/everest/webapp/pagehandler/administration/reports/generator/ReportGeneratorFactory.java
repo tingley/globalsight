@@ -63,6 +63,7 @@ public class ReportGeneratorFactory
         reportGeneratorMap.put(ReportConstants.TRANSLATIONS_EDIT_REPORT,
                 TranslationsEditReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.SUMMARY_REPORT, SummaryReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.POST_REVIEW_QA_REPORT, PostReviewQAReportGenerator.class.getName());
     }
 
     public static ReportGenerator getReportGenerator(String p_reportType,

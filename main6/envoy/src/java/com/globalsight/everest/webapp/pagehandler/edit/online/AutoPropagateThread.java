@@ -475,6 +475,10 @@ public class AutoPropagateThread implements Runnable
                                 sourceTuv, gxml, p_jobId);
                         TuvImpl changedTargetTuv = modifyTargetTuv(targetTuv,
                                 gxml, p_user);
+                        if (p_applyingTuv.getState().equals(TuvState.APPROVED))
+                        {
+                            changedTargetTuv.setState(TuvState.APPROVED);
+                        }
                         tuvs.add(changedTargetTuv);
                     }
                     catch (Exception ignore)
@@ -502,17 +506,13 @@ public class AutoPropagateThread implements Runnable
             return false;
         }
         TuvState tuvState = p_targetTuv.getState();
-        String state = "";
-        if (tuvState != null)
-        {
-            state = tuvState.getName();
-        }
-        if (TuvState.LOCALIZED.getName().equals(state)
-                || TuvState.EXACT_MATCH_LOCALIZED.getName().equals(state)
-                || TuvState.ALIGNMENT_LOCALIZED.getName().equals(state)
-                || TuvState.UNVERIFIED_EXACT_MATCH.getName().equals(state)
-                || TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED.getName()
-                        .equals(state))
+        if (TuvState.LOCALIZED.equals(tuvState)
+                || TuvState.APPROVED.equals(tuvState)
+                || TuvState.EXACT_MATCH_LOCALIZED.equals(tuvState)
+                || TuvState.ALIGNMENT_LOCALIZED.equals(tuvState)
+                || TuvState.UNVERIFIED_EXACT_MATCH.equals(tuvState)
+                || TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
+                        .equals(tuvState))
         {
             isLocalized = true;
         }

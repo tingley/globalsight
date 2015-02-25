@@ -15,6 +15,7 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommunicationInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Company.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ScorecardCategory.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/PostReviewCategory.hbm.xml"/>
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ScorecardScore.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Category.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/FMFilter.hbm.xml" />
@@ -173,5 +174,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/EloquaConnector.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/QAFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/JobGroup.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/MindTouchConnector.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

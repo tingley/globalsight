@@ -73,6 +73,12 @@
             column="IS_REPORT_UPLOAD_CHECK" type="int" not-null="true"
             unique="false" />
 
+        <property name="qualityAssessment" column="QUALITY_ASSESSMENT"
+				type="string" not-null="false" unique="false"/>
+				
+        <property name="marketSuitability" column="MARKET_SUITABILITY"
+				type="string" not-null="false" unique="false"/>		
+
         <bag name="ratings" inverse="true" cascade="save-update">
             <key column="TASK_ID" />
             <one-to-many

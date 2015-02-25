@@ -36,10 +36,6 @@ import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.globalsight.cxe.adapter.adobe.AdobeHelper;
@@ -64,6 +60,8 @@ import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
 import com.globalsight.cxe.message.MessageDataReader;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
+import com.globalsight.cxe.util.fileImport.eventFlow.Source;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
@@ -795,6 +793,7 @@ public class StandardExtractor
         TranslatableElement elemTarget = new TranslatableElement();
         String msgctxt = null;
         String xliffpart;
+        XmlEntities xe = new XmlEntities();
         DiplomatWordCounter wc = new DiplomatWordCounter();
         while (p_it.hasNext())
         {
@@ -822,27 +821,9 @@ public class StandardExtractor
                     elemTarget = (TranslatableElement) element;
                 }
 
-                // If need do a secondary filter.
+                // It is always true as we have no way to know if "msgstr" is
+                // for wanted language.
                 boolean needSecondaryFilter = true;
-                // Because of GBS-2785, we can not know target language of text
-                // in "msgstr", all "msgstr" will be ignored for now. So here
-                // all segments from PO file can go through secondary filter.
-                // if (segSource != null && segTarget != null
-                // && segSource.size() == segTarget.size())
-                // {
-                // String source, target;
-                // for (int i = 0, max = segSource.size(); i < max; i++)
-                // {
-                // source = ((SegmentNode) segSource.get(i)).getSegment();
-                // target = ((SegmentNode) segTarget.get(i)).getSegment();
-                // if (!StringUtil.equalsIgnoreSpace(source, target))
-                // {
-                // needSecondaryFilter = false;
-                // break;
-                // }
-                // }
-                // }
-
                 SegmentNode sn;
                 String seg;
                 if (segSource != null && segSource.size() > 0)
@@ -881,20 +862,19 @@ public class StandardExtractor
                         p_diplomat.setInputFormat(inputFormatName);
 
                         SegmentNode node = (SegmentNode) segSource.get(i);
-                        XmlEntities xe = new XmlEntities();
-                        String segmentValue = xe.decodeStringBasic(node
-                                .getSegment());
-                        // decode TWICE to make sure secondary parser can work
-                        // as expected, but it will result in an entity
-                        // issue,seems it can't be resolved in current framework
-                        // of GS.
-                        if (segmentValue.indexOf("&") > -1)
-                        {
-                            segmentValue = xe.decodeStringBasic(segmentValue);
-                        }
-
+                        String segmentValue = node.getSegment();
                         if ("html".equalsIgnoreCase(inputFormatName))
                         {
+                            segmentValue = xe.decodeStringBasic(segmentValue);
+                            // decode TWICE to make sure secondary parser can
+                            // work as expected, but it will result in an entity
+                            // issue, seems it can't be resolved in current
+                            // framework of GS.
+                            if (segmentValue.indexOf("&") > -1)
+                            {
+                                segmentValue = xe
+                                        .decodeStringBasic(segmentValue);
+                            }
                             segmentValue = checkHtmlTags(segmentValue);
                         }
                         p_diplomat.setSourceString(segmentValue);
@@ -906,15 +886,21 @@ public class StandardExtractor
                         }
                         catch (Exception e)
                         {
-                            // Protected the data with PlaceHolder, and recount
-                            SegmentNode node01 = (SegmentNode) segSource.get(0);
+                            // Protected the data with PlaceHolder, and
+                            // recount to reduce word-count number.
+                            SegmentNode node01 = (SegmentNode) segSource.get(i);
                             String text = node01.getSegment();
                             text = text.replace(m_tag_amp, "&amp;");
+                            text = text.replace(m_tag_start, "").replace(
+                                    m_tag_end, "");
                             node01.setSegment(text);
-                            SegmentUtil.replaceHtmltagWithPH(node01);
-                            SegmentNode node02 = (SegmentNode) segTarget.get(0);
-                            SegmentUtil.replaceHtmltagWithPH(node02);
-
+                            if ("html".equalsIgnoreCase(inputFormatName))
+                            {
+                                SegmentUtil.replaceHtmltagWithPH(node01);
+                                SegmentNode node02 = (SegmentNode) segTarget
+                                        .get(i);
+                                SegmentUtil.replaceHtmltagWithPH(node02);
+                            }
                             wc.countDocumentElement(elemSource,
                                     p_extractedOutPut);
                             wc.countDocumentElement(elemTarget,
@@ -988,7 +974,7 @@ public class StandardExtractor
                                         ((TranslatableElement) element2)
                                                 .setXliffPart(attrs);
                                     }
-								}
+                                }
                                 p_extractedOutPut.addDocumentElement(element2);
                             }
                         }
@@ -1522,6 +1508,14 @@ public class StandardExtractor
         }
     }
 
+    private String noNull(String s)
+    {
+        if (s == null)
+            return "";
+
+        return s;
+    }
+
     /**
      * Gets needed values from the event flow xml
      * 
@@ -1529,20 +1523,13 @@ public class StandardExtractor
      */
     private void parseEventFlowXml() throws LingAdapterException
     {
+        EventFlowXml eventFlowObject = m_cxeMessage.getEventFlowObject();
         StringReader sr = null;
         try
         {
-            sr = new StringReader(m_cxeMessage.getEventFlowXml());
-            InputSource is = new InputSource(sr);
-            DOMParser parser = new DOMParser();
-            parser.setFeature("http://xml.org/sax/features/validation", false);
-            parser.parse(is);
-            Element elem = parser.getDocument().getDocumentElement();
-            NodeList nl = elem.getElementsByTagName("source");
-            Element sourceElement = (Element) nl.item(0);
-
+            Source s = eventFlowObject.getSource();
             // get format type
-            m_formatType = sourceElement.getAttribute("formatType");
+            m_formatType = s.getFormatType();
             // take rtf format as word format to convert.
             if (m_formatType.equals(IFormatNames.FORMAT_RTF))
             {
@@ -1552,7 +1539,7 @@ public class StandardExtractor
             // get format name, set it empty if can not get
             try
             {
-                m_formatName = sourceElement.getAttribute("formatName");
+                m_formatName = s.getFormatName();
             }
             catch (Exception e)
             {
@@ -1564,20 +1551,12 @@ public class StandardExtractor
             }
 
             // get file profile id
-            m_fileProfile = sourceElement.getAttribute("dataSourceId");
-
-            Element localeElement = (Element) sourceElement
-                    .getElementsByTagName("locale").item(0);
-            m_locale = localeElement.getFirstChild().getNodeValue();
-
-            Element charsetElement = (Element) sourceElement
-                    .getElementsByTagName("charset").item(0);
-            m_encoding = charsetElement.getFirstChild().getNodeValue();
+            m_fileProfile = s.getDataSourceId();
+            m_locale = s.getLocale();
+            m_encoding = s.getCharset();
 
             // Get the display name to use when logging an extractor error.
-            nl = elem.getElementsByTagName("displayName");
-            Element displayNameElement = (Element) nl.item(0);
-            m_displayName = displayNameElement.getFirstChild().getNodeValue();
+            m_displayName = eventFlowObject.getDisplayName();
             m_errorArgs[0] = "Extractor";
             // the filename is the first arg to the error messages
             m_errorArgs[1] = m_displayName;
@@ -1585,191 +1564,45 @@ public class StandardExtractor
             // For PPT issue
             if (DiplomatAPI.isMsOfficePowerPointFormat(m_formatType))
             {
-                nl = elem.getElementsByTagName("da");
-                for (int i = 0; i < nl.getLength(); i++)
-                {
-                    Element e = (Element) nl.item(i);
-                    if (e.getAttribute("name").equals("css_bullet"))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            m_bullets_MsOffice = dv.getFirstChild()
-                                    .getNodeValue();
-                        }
-                        break;
-                    }
-                }
+                m_bullets_MsOffice = eventFlowObject.getValue("css_bullet");
             }
 
             // For GBS-3054, idml is actually xml format
             if (IFormatNames.FORMAT_XML.equals(m_formatType))
             {
-                nl = elem.getElementsByTagName("da");
-                for (int i = 0; i < nl.getLength(); i++)
-                {
-                    Element e = (Element) nl.item(i);
-                    if ("hyperlinkIds".equals(e.getAttribute("name")))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node n = dv.getFirstChild();
-                            if (n != null)
-                            {
-                                m_hyperlinkIds = n.getNodeValue();
-                            }
-                        }
-                        break;
-                    }
-                }
+                m_hyperlinkIds = eventFlowObject.getValue("hyperlinkIds");
             }
 
             if (DiplomatAPI.isOpenOfficeFormat(m_formatType)
                     || DiplomatAPI.isOfficeXmlFormat(m_formatType))
             {
-                nl = elem.getElementsByTagName("da");
-                for (int i = 0; i < nl.getLength(); i++)
-                {
-                    Element e = (Element) nl.item(i);
-                    String aname = e.getAttribute("name");
-                    if ("unParaStyles".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_office_unPara = (valueText != null) ? valueText
-                                    .getNodeValue() : "";
-                        }
-                    }
-                    if ("unCharStyles".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_office_unChar = (valueText != null) ? valueText
-                                    .getNodeValue() : "";
-                        }
-                    }
-                    if ("internalCharStyles".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_office_internalChar = (valueText != null) ? valueText
-                                    .getNodeValue() : "";
-                        }
-                    }
-                    if ("numStyleIds".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_xlsx_numStyleIds = (valueText != null) ? valueText
-                                    .getNodeValue() : "";
-                        }
-                    }
-                    if ("hiddenSharedSI".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_xlsx_hiddenSharedSI = (valueText != null) ? valueText
-                                    .getNodeValue() : "";
-                        }
-                    }
-                    if ("sheetHiddenCell".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_xlsx_sheetHiddenCell = (valueText != null) ? valueText
-                                    .getNodeValue() : "";
-                        }
-                    }
-                    if ("unextractableExcelCellStyles".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_xlsx_unextractableCellStyles = (valueText != null) ? valueText
-                                    .getNodeValue() : "";
-                        }
-                    }
-                    if ("isHeaderFooterTranslate".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_isHeaderFooterTranslate = (valueText != null) ? valueText
-                                    .getNodeValue() : null;
-                        }
-                    }
-                    if ("isToolTipsTranslate".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_isToolTipsTranslate = (valueText != null) ? valueText
-                                    .getNodeValue() : null;
-                        }
-                    }
-                    if ("isHiddenTextTranslate".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_isHiddenTextTranslate = (valueText != null) ? valueText
-                                    .getNodeValue() : null;
-                        }
-                    }
-                    if ("isTableOfContentTranslate".equals(aname))
-                    {
-                        Element dv = (Element) e.getElementsByTagName("dv")
-                                .item(0);
-                        if (dv != null)
-                        {
-                            Node valueText = dv.getFirstChild();
-                            m_isTableOfContentTranslate = (valueText != null) ? valueText
-                                    .getNodeValue() : null;
-                        }
-                    }
-                }
+                m_office_unPara = noNull(eventFlowObject
+                        .getValue("unParaStyles"));
+                m_office_unChar = noNull(eventFlowObject
+                        .getValue("unCharStyles"));
+                m_office_internalChar = noNull(eventFlowObject
+                        .getValue("internalCharStyles"));
+
+                m_xlsx_numStyleIds = noNull(eventFlowObject
+                        .getValue("numStyleIds"));
+                m_xlsx_hiddenSharedSI = noNull(eventFlowObject
+                        .getValue("hiddenSharedSI"));
+                m_xlsx_sheetHiddenCell = noNull(eventFlowObject
+                        .getValue("sheetHiddenCell"));
+                m_xlsx_unextractableCellStyles = noNull(eventFlowObject
+                        .getValue("unextractableExcelCellStyles"));
+                m_isHeaderFooterTranslate = noNull(eventFlowObject
+                        .getValue("isHeaderFooterTranslate"));
+                m_isToolTipsTranslate = noNull(eventFlowObject
+                        .getValue("isToolTipsTranslate"));
+                m_isHiddenTextTranslate = noNull(eventFlowObject
+                        .getValue("isHiddenTextTranslate"));
+                m_isTableOfContentTranslate = noNull(eventFlowObject
+                        .getValue("isTableOfContentTranslate"));
             }
 
-            // For Adobe indesign issue
-            nl = elem.getElementsByTagName("batchInfo");
-            Element batchInfoElement = (Element) nl.item(0);
-            Element docPageCountElement = (Element) batchInfoElement
-                    .getElementsByTagName("docPageCount").item(0);
-            m_docPageCount = Integer.parseInt(docPageCountElement
-                    .getFirstChild().getNodeValue());
-            Element docPageNumElement = (Element) batchInfoElement
-                    .getElementsByTagName("docPageNumber").item(0);
-            m_docPageNum = Integer.parseInt(docPageNumElement.getFirstChild()
-                    .getNodeValue());
+            m_docPageCount = eventFlowObject.getBatchInfo().getDocPageCount();
+            m_docPageNum = eventFlowObject.getBatchInfo().getDocPageNumber();
         }
         catch (Exception e)
         {
@@ -2003,8 +1836,6 @@ public class StandardExtractor
      * filter/parser,the input html content is snippet, maybe invalid,it will
      * cause parse error.To avoid this,encode the invalid "<" or ">" to entity.
      * 
-     * @param p_str
-     * @return
      */
     public static String checkHtmlTags(String p_str)
     {

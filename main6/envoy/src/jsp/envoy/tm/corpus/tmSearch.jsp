@@ -133,18 +133,26 @@ border:solid 1px #6e8bde;
     /* Moz + FF */
     opacity: 0.4;
 }
+.calendar { 
+	width:16px;
+	height:15px;
+	cursor:pointer;
+	vertical-align:middle;
+	}
 </STYLE>
 
 <title>${lb_tm_search2}</title>
 <script SRC="/globalsight/includes/utilityScripts.js"></script>
 <script SRC="/globalsight/envoy/administration/permission/tree.js"></script>
 <script SRC="/globalsight/includes/setStyleSheet.js"></script>
-<script LANGUAGE="JavaScript"
-	SRC="/globalsight/includes/dnd/DragAndDrop.js"></script>
+<script LANGUAGE="JavaScript" SRC="/globalsight/includes/dnd/DragAndDrop.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>
 <%@ include file="/envoy/common/warning.jspIncl"%>
 <%@ include file="/envoy/common/paging.jspIncl"%>
+<script type="text/javascript" src="/globalsight/jquery/jquery.xmlext.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript">
 var needWarning = false;
 var objectName = "";
@@ -165,7 +173,12 @@ var hasReplacePerm;
 var searchText;
 var advancedSearch = false;
 var searchIn = "source";
-var replaceText="";
+var replaceText;
+var searchByDataType;
+var startDateOption;
+var startDate;
+var endDateOption;
+var endDate;
 
 var result = new Array();
 var searchType;
@@ -658,11 +671,33 @@ function shareConditionTMAndTermSearch()
   }
 }
 
+function showCalendar(id) {
+    var cal1 = new calendar2(document.getElementById(id));
+    cal1.year_scroll = true;
+    cal1.time_comp = false;
+    cal1.popup();
+}
+
 /*
  * Events
  */
 $(document).ready(function(){
-	 
+	$("#csf").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#cef").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#cef").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#csf").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
 	 loadGuides();  
 	 init();
 	 shareConditionTMAndTermSearch();
@@ -856,7 +891,18 @@ $(document).ready(function(){
    	     $("#revertTD").show();
    	     $("#searchInTD").show();
    	     $("#information").html("${lb_tm_search_hint2}");
-   	     
+   	     $("#dateSearch").show();
+   	 	 startDateOption = $("#startDateOption").val();
+	  	if(startDateOption == "eq")
+	  	{
+	  		$("#endDateOption").attr("disabled",true);
+	  		$("#cef").attr("disabled",true);
+	  	}
+	  	else if(startDateOption == "neq")
+		{
+			$("#endDateOption").attr("disabled",true);
+			$("#cef").attr("disabled",true);
+		}
    	     advancedSearch = true;
    	     searchClick();
      })
@@ -869,6 +915,8 @@ $(document).ready(function(){
    	     $("#revertTD").hide();
    	     $("#searchInTD").hide();
    	     $("#information").html("");
+   	 	 $("#dateSearch").hide();
+   	 	 
    	     advancedSearch = false;
    	     searchClick();
      })
@@ -897,6 +945,38 @@ $(document).ready(function(){
     		 //search in source or target can be allowed for AdvancedSearch
     		 searchIn = $("#searchIn").val();
     		 replaceText = $("#replaceText").val();
+    		 searchByDataType = $("#dateTypeOption").val();
+    		 startDateOption = $("#startDateOption").val();
+    		 startDate = $("#csf").val();
+    		 endDateOption = $("#endDateOption").val();
+    		 endDate = $("#cef").val();
+    		 
+    		 startDateOption = $("#startDateOption").val();
+    		 endDateOption = $("#endDateOption").val();
+    		 if(startDateOption == "gt" && endDateOption == "lt"){
+    			startDate = $("#csf").val();
+    			endDate = $("#cef").val();
+    			if(startDate == endDate){
+    				alert("${lb_tm_check_date_greater_less}");
+    				return;
+    			}
+    		}
+    		 if(startDateOption == "gt" && endDateOption == "lteq"){
+     			startDate = $("#csf").val();
+     			endDate = $("#cef").val();
+     			if(startDate == endDate){
+     				alert("${lb_tm_check_date_greater_less_equal}");
+     				return;
+     			}
+     		}
+    		 if(startDateOption == "gteq" && endDateOption == "lt"){
+     			startDate = $("#csf").val();
+     			endDate = $("#cef").val();
+     			if(startDate == endDate){
+     				alert("${lb_tm_check_date_greater_equal_less}");
+     				return;
+     			}
+     		}
        	 }
 
     	 var searchParams;
@@ -958,7 +1038,12 @@ $(document).ready(function(){
 			           "maxEntriesPerPage":maxEntriesPerPage,
 			           "searchIn":searchIn,
 			           "advancedSearch":advancedSearch,
-			           "replaceText":replaceText};
+			           "replaceText":replaceText,
+			           "searchByDataType":searchByDataType,
+			           "startDateOption":startDateOption,
+			           "startDate":startDate,
+			           "endDateOption":endDateOption,
+			           "endDate":endDate};
     	 }
     	 else
          {
@@ -970,8 +1055,12 @@ $(document).ready(function(){
 			           "maxEntriesPerPage":maxEntriesPerPage,
 			           "searchIn":searchIn,
 			           "advancedSearch":advancedSearch,
-			           "replaceText":replaceText};
-    		 
+			           "replaceText":replaceText,
+			           "searchByDataType":searchByDataType,
+			           "startDateOption":startDateOption,
+			           "startDate":startDate,
+			           "endDateOption":endDateOption,
+			           "endDate":endDate};
     	 }
     	 
     	 $("#pageNavigationHeader").html("");
@@ -1021,6 +1110,27 @@ $(window).unload(function(){
 		addWindow.close();
 	}
 });
+function disableOption(){
+	startDateOption = $("#startDateOption").val();
+	if(startDateOption == "eq")
+	{
+		$("#endDateOption").attr("disabled",true);
+		$("#cef").attr("value","");
+		$("#cef").attr("disabled",true);
+	}
+	else if(startDateOption == "neq")
+	{
+		$("#endDateOption").attr("disabled",true);
+		$("#cef").attr("value","");
+		$("#cef").attr("disabled",true);
+	}
+	else
+	{
+		$("#endDateOption").attr("disabled",false);
+		$("#cef").attr("value","");
+		$("#cef").attr("disabled",false);
+	}
+}
 </script>
 </head>
 <body>
@@ -1101,6 +1211,45 @@ $(window).unload(function(){
 							    </td>
 							    <td class="search_content" nowrap>${lb_source_locale}: <select id="sourceLocale"></select></td>
 								<td class="search_content" nowrap width="100%">${lb_target_locale}: <select id="targetLocale"></select></td>
+							  </tr>
+							</table>
+						  </td>
+						</tr>
+						<tr style="background: none repeat scroll 0 0 #DEE3ED;display: none;" id ="dateSearch">
+						  <td>
+							<table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
+							  <tr>
+							    <td class="search_content" id="dateType" nowrap>${lb_search_by}:
+							       <select id="dateTypeOption" style="width:100px">
+							       		<option value="create">${lb_created_on }</option>
+							       		<option value="modify">${lb_modified_on}</option>
+							       </select>
+							    </td>
+							    <td class="search_content" id="" nowrap>${lb_report_startDate}:</td>
+							    <td class="search_content" id="startDate" nowrap>
+							    	<select id="startDateOption" onchange="disableOption()">
+							       		<option value="eq" id="eqStart">${lb_equal_to}</option>
+							       		<option value="neq">${lb_not_equal_to}</option>
+							       		<option value="gt"  id="gtStart">${lb_greater_than}</option>
+							       		<option value="gteq"  id="gteqStart">${lb_greater_than_or_equal_to}</option>
+							       </select>
+							    </td>
+							    <td class="search_content">
+							   	    <input type="text" name="csf" id="csf">
+      							</td>
+							    <td class="search_content" id="" nowrap>${lb_report_endDate}:
+							     <td class="search_content" id="endDate" nowrap>
+							   		<select id="endDateOption">
+							       		<option value="lt" id="ltEnd">${lb_less_than}</option>
+							       		<option value="lteq" id="lteqEnd">${lb_less_than_or_equal_to}</option>
+							       </select>
+							    </td>
+							    <td class="search_content">
+							    	<input type="text" name="cef"  id="cef"">
+      							</td>
+      							<td class="search_content">
+      								<span class='info'>(MM/DD/YYYY)</span>
+      							</td>
 							  </tr>
 							</table>
 						  </td>

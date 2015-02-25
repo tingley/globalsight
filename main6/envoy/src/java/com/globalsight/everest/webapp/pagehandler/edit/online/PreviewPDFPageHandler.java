@@ -49,11 +49,11 @@ import com.globalsight.cxe.adapter.adobe.AdobeHelper;
 import com.globalsight.cxe.adapter.idml.IdmlConverter;
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.adapter.quarkframe.FrameHelper;
-import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
-import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.cxe.util.XmlUtil;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.UserImpl;
@@ -1083,18 +1083,14 @@ public class PreviewPDFPageHandler extends PageHandler
         {
             throw new EnvoyServletException(e);
         }
-
-        EventFlow eventFlow = new EventFlow(sourcePage.getRequest()
+        
+        EventFlowXml eventFlow = XmlUtil.string2Object(EventFlowXml.class, sourcePage.getRequest()
                 .getEventFlowXml());
-        String formatType = eventFlow.getDiplomatAttribute("formatType")
-                .getValue().trim();
+
+        String formatType = eventFlow.getValue("formatType").trim();
         String displayNameLower = eventFlow.getDisplayName().toLowerCase();
-        DiplomatAttribute m_relSafeNameDA = eventFlow
-                .getDiplomatAttribute("relSafeName");
-        m_relSafeName = m_relSafeNameDA != null ? m_relSafeNameDA.getValue()
-                : null;
-        m_safeBaseFileName = eventFlow.getDiplomatAttribute("safeBaseFileName")
-                .getValue();
+        m_relSafeName = eventFlow.getValue("relSafeName");
+        m_safeBaseFileName = eventFlow.getValue("safeBaseFileName");
 
         if ("mif".equals(formatType))
         {
@@ -1138,7 +1134,7 @@ public class PreviewPDFPageHandler extends PageHandler
             m_inDesignFileSuffix = displayNameLower.endsWith("indd") ? INDD_SUFFIX
                     : INX_SUFFIX;
 
-            String inddHiddenTranslated = eventFlow.getInddHiddenTranslated();
+            String inddHiddenTranslated = eventFlow.getBatchInfo().getInddHiddenTranslated();
             if (inddHiddenTranslated != null
                     && !"".equals(inddHiddenTranslated))
             {
@@ -1149,7 +1145,7 @@ public class PreviewPDFPageHandler extends PageHandler
                 m_translateHiddenLayer = true;
             }
 
-            String masterTranslated = eventFlow.getMasterTranslated();
+            String masterTranslated = eventFlow.getBatchInfo().getMasterTranslated();
             if (masterTranslated != null && !"".equals(masterTranslated))
             {
                 m_masterTranslated = "true".equals(masterTranslated);

@@ -873,11 +873,11 @@ public class TaskListHandler extends PageHandler
         downloadParams.setDisplayExactMatch(displayExactMatch);
         downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
         downloadParams.setPopulateFuzzy("yes".equalsIgnoreCase(populateFuzzy));
-        downloadParams.setNeedConsolidate(true);
         downloadParams.setPreserveSourceFolder("yes"
                     .equalsIgnoreCase(preserveSourceFolder));
-            downloadParams.setIncludeXmlNodeContextInformation("yes"
+        downloadParams.setIncludeXmlNodeContextInformation("yes"
                     .equalsIgnoreCase(includeXmlNodeContextInformation));
+        downloadParams.setConsolidateFileType("consolidate");
         downloadParams.setNeedCombined(true);
         downloadParams.setIncludeRepetitions("yes"
                 .equalsIgnoreCase(includeRepetitions));
@@ -948,6 +948,8 @@ public class TaskListHandler extends PageHandler
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
         String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
         String includeXmlNodeContextInformation = downloadOfflineFilesOptions.get(18);
+        String consolidateFileType = downloadOfflineFilesOptions.get(19);
+        String wordCountForDownload = downloadOfflineFilesOptions.get(20);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         String zipFileName = "DownloadAllOfflineFiles.zip";
@@ -1044,14 +1046,12 @@ public class TaskListHandler extends PageHandler
             downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
             downloadParams.setPopulateFuzzy("yes"
                     .equalsIgnoreCase(populateFuzzy));
-            downloadParams.setNeedConsolidate("yes"
-                    .equalsIgnoreCase(consolidateXLF));
             downloadParams.setPreserveSourceFolder("yes"
                     .equalsIgnoreCase(preserveSourceFolder));
             downloadParams.setIncludeXmlNodeContextInformation("yes"
                     .equalsIgnoreCase(includeXmlNodeContextInformation));
-            downloadParams.setNeedConsolidate("yes"
-                    .equalsIgnoreCase(consolidateXLF));
+            downloadParams.setConsolidateFileType(consolidateFileType);
+            downloadParams.setWordCountForDownload(Integer.parseInt(wordCountForDownload));
             downloadParams.setIncludeRepetitions("yes"
                     .equalsIgnoreCase(includeRepetitions));
             downloadParams.setChangeCreationIdForMTSegments("yes"

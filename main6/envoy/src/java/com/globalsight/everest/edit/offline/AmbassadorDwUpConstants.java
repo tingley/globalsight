@@ -74,6 +74,7 @@ public interface AmbassadorDwUpConstants
     static public final String HEADER_NOTES_KEY = "# Notes:";
     static public final String HEADER_JOB_NAME = "# Job Name:";
     static public final String HEADER_JOB_ID = "# Job ID:";
+    static public final String HEADER_POPULATE_100_SEGMENTS = "# Populate 100% Target Segments:";
 
     static public final String SEGMENT_ID_KEY = "# ";
     static public final String SEGMENT_PAGE_NAME_KEY = "# Page Name:";
@@ -85,6 +86,7 @@ public interface AmbassadorDwUpConstants
     static public final String SEGMENT_MATCH_VAL_KEY = "# Match Score:";
     static public final String SEGMENT_RESOURCE_KEY = "# Resources:";
     static public final String SEGMENT_SID_KEY = "# SID:";
+    static public final String SEGMENT_XLF_TARGET_STATE_KEY = "# Xliff Target State:";
 
     // Grammar for Plain text format javacc parser. Note: the grammar
     // cannot accept translated values.

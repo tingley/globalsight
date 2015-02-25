@@ -114,7 +114,7 @@ public class LingAdapter extends BaseAdapter
                 CxeMessageType.GXML_CREATED_EVENT);
 
             results= makeSingleAdapterResult(type, newMessageData,
-                p_cxeMessage.getParameters(), p_cxeMessage.getEventFlowXml());
+                p_cxeMessage.getParameters(), p_cxeMessage.getEventFlowObject());
         }
         catch (LingAdapterException lae)
         {
@@ -152,7 +152,7 @@ public class LingAdapter extends BaseAdapter
             MessageData newMessageData = sm.merge();
             CxeMessageType type = sm.getPostMergeEvent();
             results= makeSingleAdapterResult(type, newMessageData,
-                p_cxeMessage.getParameters(), p_cxeMessage.getEventFlowXml());
+                p_cxeMessage.getParameters(), p_cxeMessage.getEventFlowObject().clone());
         }
         catch (LingAdapterException lae)
         {

@@ -39,6 +39,8 @@ import com.globalsight.util.StringUtil;
  */
 public class ColumnTag extends TagSupport implements TableConstants
 {
+    private static final long serialVersionUID = 6797674181578276319L;
+
     private int sortBy;
     private String  label;
     private boolean wrap = true;        //default is header will wrap
@@ -275,7 +277,7 @@ public class ColumnTag extends TagSupport implements TableConstants
 
                     if (!StringUtil.isEmpty(filter)) {
                         filterContent += "<td>";
-                        filterContent += "<input type='text' id='" + filter + "' name='" + filter + "' value='" + filterValue + "' onkeydown='filterItems(event);' class='standardText' title='Input the filter,press Enter to filter'/>";
+                        filterContent += "<input type='text' id='" + filter + "' name='" + filter + "' value='" + filterValue + "' onkeydown='filterItems(event);' class='standardText' title='Input the filter, press Enter to filter'/>";
                         filterContent += "</td>";
                     } 
                     else if (StringUtil.isEmpty(filter)&&!StringUtil.isEmpty(filterSelect)) {

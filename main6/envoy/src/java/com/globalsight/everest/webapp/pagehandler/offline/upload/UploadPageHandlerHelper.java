@@ -134,6 +134,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
     {
         OEMProcessStatus status;
         OfflineEditManager OEM;
+        String isReport =null;
         User user = (User) sessionMgr.getAttribute(USER);
 
         boolean fromTaskUploadPage = UPLOAD_FROMTASKUPLOAD
@@ -149,13 +150,10 @@ public class UploadPageHandlerHelper implements WebAppConstants
         }
         String fileName = (String) sessionMgr.getAttribute("tempFileName");
         File file = (File) sessionMgr.getAttribute("tempFile");
-        String isReport = (String) sessionMgr.getAttribute("isReport");
 
         String reportTypeInfo = null;
-        if (StringUtil.isEmpty(taskId)
-                && (fileName.toLowerCase().endsWith(".xlsx") 
-                        || fileName.toLowerCase().endsWith(".xls"))
-                && !"yes".equals(isReport))
+        if ((fileName.toLowerCase().endsWith(".xlsx") || fileName.toLowerCase()
+                .endsWith(".xls")))
         {
             // Check "AA1" cell to see if it is a report file.
             String[] taskInfo = getReportInfoFromXlsx(fileName, file);
@@ -216,17 +214,9 @@ public class UploadPageHandlerHelper implements WebAppConstants
         OEM = (OfflineEditManager) sessionMgr.getAttribute(UPLOAD_MANAGER);
         if ("yes".equals(isReport))
         {
-            String reportType = (String) sessionMgr.getAttribute(REPORT_TYPE);
-            if (reportType == null)
-            {
-                reportType = reportTypeInfo;
-            }
-
             processReportFileContents(file, user, fileName, p_request, status,
-                    OEM, reportType, taskId);
+                    OEM, reportTypeInfo, taskId);
 
-            sessionMgr.removeElement("isReport");
-            sessionMgr.removeElement(REPORT_TYPE);
             p_response.setContentType("text/html");
         }
         else
@@ -352,7 +342,6 @@ public class UploadPageHandlerHelper implements WebAppConstants
         SessionManager sessionManager = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
 
-        String reportName = (String) p_request.getParameter(REPORT_TYPE);
         // read the uploaded file
         MultipartFormDataReader reader = new MultipartFormDataReader();
 
@@ -373,11 +362,6 @@ public class UploadPageHandlerHelper implements WebAppConstants
             sessionManager.setAttribute(UPLOAD_MANAGER, OEM);
             sessionManager.setAttribute("tempFile", tempFile);
             sessionManager.setAttribute("tempFileName", reader.getFilename());
-            if (reportName != null)
-            {
-                sessionManager.setAttribute("isReport", "yes");
-                sessionManager.setAttribute(REPORT_TYPE, reportName);
-            }
         }
         catch (Exception e)
         {
@@ -466,6 +450,10 @@ public class UploadPageHandlerHelper implements WebAppConstants
                                 .equals(ReportConstants.REVIEWERS_COMMENTS_REPORT_ABBREVIATION))
                 {
                     reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
+                }
+                else if(reportInfo.equals(ReportConstants.POST_REVIEW_REPORT_ABBREVIATION))
+                {
+                    reportType = WebAppConstants.POST_REVIEW_QA;
                 }
 
                 if (reportType != null && !"".equals(reportType))

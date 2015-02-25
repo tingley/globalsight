@@ -27,6 +27,7 @@ import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
 import com.globalsight.cxe.util.EventFlowXmlParser;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.GeneralException;
@@ -318,6 +319,32 @@ public abstract class BaseAdapter
         outputMessage.setMessageData(p_messageData);
         outputMessage.setParameters(p_params);
         outputMessage.setEventFlowXml(p_eventFlowXml);
+        return makeSingleAdapterResult(outputMessage);
+    }
+    
+    /**
+     * Convenience method to create an AdapterResult array based on a newly
+     * created CxeMessage object. The created array only has one AdapterResult
+     * in it.
+     * 
+     * @param p_msgType
+     *            the type of the CxeMessage
+     * @param p_messageData
+     *            MessageData
+     * @param p_params
+     *            HashMap of parameters
+     * @param p_eventFlowXml
+     *            Object of EventFlowXml
+     * @return AdapterResult[]
+     */
+    protected static AdapterResult[] makeSingleAdapterResult(
+            CxeMessageType p_msgType, MessageData p_messageData,
+            HashMap p_params, EventFlowXml p_eventFlowXml) throws IOException
+    {
+        CxeMessage outputMessage = new CxeMessage(p_msgType);
+        outputMessage.setMessageData(p_messageData);
+        outputMessage.setParameters(p_params);
+        outputMessage.setEventFlowObject(p_eventFlowXml);
         return makeSingleAdapterResult(outputMessage);
     }
 

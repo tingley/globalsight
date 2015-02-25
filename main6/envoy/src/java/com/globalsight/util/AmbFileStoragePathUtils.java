@@ -852,6 +852,18 @@ public class AmbFileStoragePathUtils
         return sc
                 .getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5_5);
     }
+    
+    public static String getInddCs6ConversionPath()
+    {
+        return sc
+                .getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS6);
+    }
+    
+    public static String getInContextReviewConversionPath()
+    {
+        return sc
+                .getStringParameter(SystemConfigParamNames.INCTXRV_CONV_DIR);
+    }
 
     public static String getWindowsPeConversionPath()
     {

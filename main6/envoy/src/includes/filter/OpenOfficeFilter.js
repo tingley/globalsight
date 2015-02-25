@@ -1058,6 +1058,11 @@ function checkExistOpenOfficeFilterCallback(data)
 			sendAjax(checkExistOpenOfficeFilterCallback.obj, "saveOpenOfficeFilter", "saveOpenOfficeFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("openofficeFilterDialog");
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

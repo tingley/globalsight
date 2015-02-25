@@ -17,11 +17,16 @@
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,11 +43,15 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
@@ -53,7 +62,11 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportH
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -68,6 +81,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
     protected List<Long> m_jobIDS = new ArrayList<Long>();
     protected List<GlobalSightLocale> m_targetLocales = new ArrayList<GlobalSightLocale>();
     String m_userId;
+    private HashMap totalSegmentCount=new HashMap();
     private ResourceBundle m_bundle;
 
     private CellStyle contentStyle = null;
@@ -211,6 +225,25 @@ public class CharacterCountReportGenerator implements ReportGenerator
             workBook.write(out);
             out.close();
             ((SXSSFWorkbook)workBook).dispose();
+            
+            // Write total Segment Count
+            FileInputStream fis = new FileInputStream(file);
+            Workbook workbook = ExcelUtil.getWorkbook(file.getAbsolutePath(), fis);
+            List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(job);
+            for (GlobalSightLocale trgLocale : p_targetLocales)
+            {
+                if (!jobTL.contains(trgLocale))
+                    continue;
+
+                Sheet sheet = ExcelUtil.getSheet(workbook, trgLocale.toString());
+                Row row = getRow(sheet, 4);
+                Cell cell = getCell(row, 3);
+                cell.setCellValue(totalSegmentCount.get(
+                        trgLocale.getDisplayName(m_uiLocale)).toString());
+            }
+            out = new FileOutputStream(file);
+            workbook.write(out);
+            out.close();
             workBooks.add(file);
 
             // Sets Reports Percent.
@@ -320,6 +353,11 @@ public class CharacterCountReportGenerator implements ReportGenerator
         Cell jobIdCell = getCell(langRow, col);
         jobIdCell.setCellValue(bundle.getString("jobinfo.jobid"));
         jobIdCell.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+        
+        Cell TotalSegmentsCell = getCell(langRow, col);
+        TotalSegmentsCell.setCellValue(bundle.getString("lb_segmentCount_in_job"));
+        TotalSegmentsCell.setCellStyle(getHeaderStyle(p_workBook));
     }
 
     /**
@@ -343,6 +381,12 @@ public class CharacterCountReportGenerator implements ReportGenerator
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
         
+        Cell cell_PathAndName = getCell(segHeaderRow, col);
+        cell_PathAndName.setCellValue(bundle.getString("lb_file_path_and_name"));
+        cell_PathAndName.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+        
         Cell cell_B = getCell(segHeaderRow, col);
         cell_B.setCellValue(bundle.getString("lb_source_segment"));
         cell_B.setCellStyle(getHeaderStyle(p_workBook));
@@ -364,6 +408,12 @@ public class CharacterCountReportGenerator implements ReportGenerator
         Cell cell_E = getCell(segHeaderRow, col);
         cell_E.setCellValue(bundle.getString("lb_target_character_count"));
         cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 30 * 256);
+        col++;
+        
+        Cell cell_F = getCell(segHeaderRow, col);
+        cell_F.setCellValue(bundle.getString("lb_tm_match_original"));
+        cell_F.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 30 * 256);
     }
 
@@ -403,8 +453,12 @@ public class CharacterCountReportGenerator implements ReportGenerator
         Cell jobIdCell = getCell(langInfoRow, col++);
         jobIdCell.setCellValue(p_job.getId());
         jobIdCell.setCellStyle(getContentStyle(p_workbook));
+        
+        //total SegmentCount
+        Cell totalSegmentsCell = getCell(langInfoRow, col++);
+        totalSegmentsCell.setCellStyle(getContentStyle(p_workbook));
     }
-
+    
     /**
      * Write segment information into each row of the sheet
      * 
@@ -427,7 +481,9 @@ public class CharacterCountReportGenerator implements ReportGenerator
             throws Exception
     {
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
-
+        TranslationMemoryProfile tmp = null;
+        Vector<String> excludItems = null;
+        
         long jobId = p_job.getId();
 
         for (Workflow workflow : p_job.getWorkflows())
@@ -443,13 +499,21 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     .equals(workflow.getTargetLocale().getDisplayName()))
             {
                 targetPages = workflow.getTargetPages();
+                tmp = workflow.getJob().getL10nProfile()
+                        .getTranslationMemoryProfile();
+                if (tmp != null)
+                {
+                    excludItems = tmp.getJobExcludeTuTypes();
+                }
             }
         }
         if (!targetPages.isEmpty())
         {
+            String category = null;
             String sourceSegmentString = null;
             String targetSegmentString = null;
-
+            LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
+                    .getLeverageMatchLingManager();
             for (int i = 0; i < targetPages.size(); i++)
             {
                 TargetPage targetPage = (TargetPage) targetPages.get(i);
@@ -463,7 +527,15 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     // if the request comes from pop up editor
                     continue;
                 }
-
+                // Leverage TM
+                MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager
+                        .getMatchTypesForStatistics(
+                                sourcePage.getIdAsLong(),
+                                targetPage.getLocaleId(),
+                                p_job.getLeverageMatchThreshold());
+                Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap = leverageMatchLingManager
+                        .getFuzzyMatches(sourcePage.getIdAsLong(),
+                                targetPage.getLocaleId());
                 SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
                 List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
@@ -477,6 +549,14 @@ public class CharacterCountReportGenerator implements ReportGenerator
                             .getTextValue();
                     targetSegmentString = targetTuv.getGxmlElement()
                             .getTextValue();
+                    category = sourceTuv.getTu(p_job.getId()).getTuType();
+                    if (excludItems != null && excludItems.contains(category))
+                    {
+                        continue;
+                    }
+                    StringBuilder matches = getMatches(fuzzyLeverageMatcheMap,
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
+                            sourceTuv, targetTuv, p_job.getId());
                     
                     CellStyle contentStyle = getContentStyle(p_workBook);
                     Row currentRow = getRow(p_sheet, p_row);
@@ -487,6 +567,21 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     cell_A.setCellStyle(contentStyle);
                     col++;
 
+                    //File Path and Name
+                    String filePathName = targetPage.getSourcePage().getExternalPageId();
+                    filePathName = filePathName.replace("\\", "/");
+                    if (filePathName.indexOf("/") > -1)
+                    {
+                        filePathName = filePathName.substring(
+                                filePathName.indexOf("/" + (int) jobId + "/")
+                                        + Long.toString(jobId).length() + 2,
+                                filePathName.length());
+                    }
+                    Cell cell_PathAndName = getCell(currentRow, col);
+                    cell_PathAndName.setCellValue(filePathName);
+                    cell_PathAndName.setCellStyle(contentStyle);
+                    col++;
+                    
                     // Source segment
                     Cell cell_B = getCell(currentRow, col);
                     cell_B.setCellValue(sourceSegmentString);
@@ -509,11 +604,18 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     Cell cell_E = getCell(currentRow, col);
                     cell_E.setCellValue(targetSegmentString.length());
                     cell_E.setCellStyle(contentStyle);
+                    col++;
+
+                    // TM match
+                    Cell cell_F = getCell(currentRow, col);
+                    cell_F.setCellValue(matches.toString());
+                    cell_F.setCellStyle(contentStyle);
                     
                     p_row++;
                 }
             }
         }
+        totalSegmentCount.put(p_targetLang, p_row-7);
     }
 
     private void setAllCellStyleNull()
@@ -568,6 +670,70 @@ public class CharacterCountReportGenerator implements ReportGenerator
         return contentStyle;
     }
 
+    /**
+     * Get TM matches.
+     */
+    private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
+            MatchTypeStatistics tuvMatchTypes,
+            Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
+            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
+    {
+        StringBuilder matches = new StringBuilder();
+
+        Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
+                .getIdAsLong());
+        if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
+                tuvMatchTypes, excludedItemTypes, p_jobId))
+        {
+            matches.append(m_bundle.getString("lb_in_context_match"));
+        }
+        else if (LeverageUtil.isExactMatch(sourceTuv, tuvMatchTypes))
+        {
+            matches.append(StringUtil.formatPCT(100));
+        }
+        else if (fuzzyLeverageMatches != null)
+        {
+            int count = 0;
+            for (Iterator ite = fuzzyLeverageMatches.iterator(); ite.hasNext();)
+            {
+                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
+                if ((fuzzyLeverageMatches.size() > 1))
+                {
+                    matches.append(++count)
+                            .append(", ")
+                            .append(StringUtil
+                                    .formatPCT(leverageMatch
+                                            .getScoreNum()))
+                            .append("\r\n");
+                }
+                else
+                {
+                    matches.append(StringUtil
+                            .formatPCT(leverageMatch.getScoreNum()));
+                    break;
+                }
+            }
+        }
+        else
+        {
+            matches.append(m_bundle.getString("lb_no_match_report"));
+        }
+        if (targetTuv.isRepeated())
+        {
+            matches.append("\r\n")
+                    .append(m_bundle
+                            .getString("jobinfo.tradosmatches.invoice.repeated"));
+        }
+        else if (targetTuv.getRepetitionOfId() > 0)
+        {
+            matches.append("\r\n")
+                    .append(m_bundle
+                            .getString("jobinfo.tradosmatches.invoice.repetition"));
+        }
+
+        return matches;
+    }
+    
     private Row getRow(Sheet p_sheet, int p_col)
     {
         Row row = p_sheet.getRow(p_col);

@@ -130,6 +130,16 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
                 p_targetPageId, p_sourceLocaleId, p_targetLocaleId, p_tmNames,
                 p_termbase);
     }
+    
+    public SegmentView getSegmentView(long p_tuId, long p_tuvId,
+            String p_subId, long p_trgPageId, long p_sourceLocaleId,
+            long p_targetLocaleId, String[] p_tmNames, String p_termbase,
+            boolean isTarget) throws OnlineEditorException, RemoteException
+    {
+        return m_localReference.getSegmentView(p_tuId, p_tuvId, p_subId,
+                p_trgPageId, p_sourceLocaleId, p_targetLocaleId, p_tmNames,
+                p_termbase, isTarget);
+    }
 
     public PageInfo getPageInfo(long p_srcPageId) throws OnlineEditorException,
             RemoteException
@@ -301,7 +311,7 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
                         p_sourceLocaleId, p_targetLocaleId, p_jobId);
     }
 
-
+    
     @Override
     public String getSourceJsonData(EditorState p_state, boolean isAssignee)
     {
@@ -313,5 +323,18 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
             HashMap<String, String> hm)
     {
         return m_localReference.getTargetJsonData(p_state, isAssignee, hm);
+    }
+
+    @Override
+    public String getSourceJsonData(EditorState p_state, boolean isAssignee, boolean fromInCtxRv)
+    {
+        return m_localReference.getSourceJsonData(p_state, isAssignee, fromInCtxRv);
+    }
+
+    @Override
+    public String getTargetJsonData(EditorState p_state, boolean isAssignee,
+            HashMap<String, String> hm, boolean fromInCtxRv)
+    {
+        return m_localReference.getTargetJsonData(p_state, isAssignee, hm, fromInCtxRv);
     }
 }

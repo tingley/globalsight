@@ -65,6 +65,7 @@ import com.globalsight.everest.vendormanagement.UpdatedDataEvent;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserSearchParams;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -310,6 +311,7 @@ public class UserManagerLocal implements UserManager
         {
 			HibernateUtil.delete(ur);
 			HibernateUtil.delete(u);
+
 		} 
         catch (Exception e1) 
         {
@@ -329,7 +331,9 @@ public class UserManagerLocal implements UserManager
         // remove user owned activities from interim table (TASK_INTERIM)
         TaskInterimPersistenceAccessor.deleteInterimUser(p_uid);
         UserUtil.removeUserFromUserIdUserName(p_uid);
-
+        OperationLog.log(p_userRequestingRemove.getUserId(),
+                OperationLog.EVENT_DELETE, OperationLog.COMPONET_USERS,
+                u.getUserName());
         try
         {
             ArrayList usersToUnmap = new ArrayList();
@@ -515,7 +519,9 @@ public class UserManagerLocal implements UserManager
         	p_user.setPassword(encyptMD5Password(password));
         }
         HibernateUtil.saveOrUpdate(p_user);
-
+        OperationLog.log(p_userRequestingMod.getUserId(),
+                OperationLog.EVENT_EDIT, OperationLog.COMPONET_USERS,
+                p_user.getUserName());
         // assign the user to the appropriate projects
         associateUserWithProjectsById(p_user.getUserId(), p_projectIds);
 
@@ -1875,6 +1881,9 @@ public class UserManagerLocal implements UserManager
             }
             p_user.setPassword(pass);
             HibernateUtil.saveOrUpdate(p_user);
+            OperationLog.log(p_userRequestingAdd.getUserId(),
+                    OperationLog.EVENT_ADD, OperationLog.COMPONET_USERS,
+                    p_user.getUserId());
 
             // add the user to the appropriate projects
             associateUserWithProjectsById(p_user.getUserId(), p_projectIds);

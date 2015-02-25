@@ -363,7 +363,7 @@ String totalTus = (String)sessionMgr.getAttribute(ImportUtil.TOTAL_COUNT);
    -->
   <TR>
     <TD>    
-    <A CLASS="standardHREF" HREF="#" onClick="lookFile('<%=logUrl%>');"><%=bundle.getString("lb_click_here_to_view")%> <%=isOne?"it":"them" %>.</A>
+    <A CLASS="standardHREF" HREF="<%=logUrl%>"><%=bundle.getString("lb_click_here_to_view")%> <%=isOne?"it":"them" %>.</A>
     </TD>
  </TR>
      

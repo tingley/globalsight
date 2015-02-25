@@ -16,6 +16,7 @@
  */
 package com.globalsight.cxe.entity.filterconfiguration;
 
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +32,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.hibernate.HibernateException;
 import org.json.JSONArray;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
@@ -38,8 +40,10 @@ import com.globalsight.cxe.entity.filterconfiguration.RemoveInfo.FilterInfos;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.SortUtil;
 
@@ -159,6 +163,8 @@ public class FilterHelper
         filter.setInternalTextJson(internalTexts);
 
         HibernateUtil.saveOrUpdate(filter);
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         return filter.getId();
     }
 
@@ -182,6 +188,8 @@ public class FilterHelper
             filter.setSecondFilterTableName(secondFilterTableName);
             filter.setInternalTextJson(internalTexts);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         }
 
         return filter != null ? filter.getId() : -2;
@@ -202,7 +210,8 @@ public class FilterHelper
         filter.setContentPostFilterTableName(contentPostFilterTableName);
 
         HibernateUtil.saveOrUpdate(filter);
-
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         return filter.getId();
     }
 
@@ -224,6 +233,8 @@ public class FilterHelper
             filter.setContentPostFilterId(contentPostFilterId);
             filter.setContentPostFilterTableName(contentPostFilterTableName);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
             return filter.getId();
         }
         return -2;
@@ -240,6 +251,8 @@ public class FilterHelper
         filter.setJsFunctionText(jsFunctionText);
         filter.setEnableUnicodeEscape(enableUnicodeEscape);
         HibernateUtil.saveOrUpdate(filter);
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         return filter.getId();
     }
 
@@ -258,6 +271,8 @@ public class FilterHelper
             filter.setJsFunctionText(jsFunctionText);
             filter.setEnableUnicodeEscape(enableUnicodeEscape);
             HibernateUtil.update(filter);
+            OperationLog.log(OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         }
     }
 
@@ -302,12 +317,27 @@ public class FilterHelper
     public static void deleteFilter(String filterTableName, long filterId)
             throws Exception
     {
-        // Filter filter = MapOfTableNameAndSpecialFilter
-        // .getFilterInstance(filterTableName);
+        
+//        Filter filter = MapOfTableNameAndSpecialFilter
+//                .getFilterInstance(filterTableName);
+       List<Filter> list = getFilterByMapping(filterId, filterTableName);
+       Filter filter = list.get(0);
         String sql = "delete from " + filterTableName + " where id=" + filterId;
         HibernateUtil.executeSql(sql);
-        // HibernateUtil.delete(HibernateUtil.load(filter.getClass(),
-        // filterId));
+        OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
+    }
+
+
+    private static List<Filter> getFilterByMapping(long filterId,
+            String filterTableName)
+    {
+        Filter filter = MapOfTableNameAndSpecialFilter
+                .getFilterInstance(filterTableName);
+        String sql = "select * from " + filterTableName
+                + " where id = ?";
+
+        return (List<Filter>) HibernateUtil.searchWithSql(filter.getClass(),
+                sql, filterId);
     }
 
     public static void deleteFilters(
@@ -817,12 +847,17 @@ public class FilterHelper
     public static long saveXmlRuleFilter(XMLRuleFilter filter)
     {
         HibernateUtil.saveOrUpdate(filter);
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         return filter.getId();
     }
 
     public static void updateFilter(Filter filter)
     {
         HibernateUtil.update(filter);
+        OperationLog.log(OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
     }
 
     public static HtmlFilter getHtmlFilter(long filterId)
@@ -838,6 +873,9 @@ public class FilterHelper
     public static long saveFilter(Filter filter)
     {
         HibernateUtil.saveOrUpdate(filter);
+        OperationLog.log(OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
         return filter.getId();
     }
 

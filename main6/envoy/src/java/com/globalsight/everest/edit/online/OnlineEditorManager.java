@@ -138,6 +138,12 @@ public interface OnlineEditorManager extends UIConstants
             String p_subId, long p_targetPageId, long p_sourceLocaleId,
             long p_targetLocaleId, String[] p_tmNames, String p_termbase)
             throws OnlineEditorException, RemoteException;
+    
+    public SegmentView getSegmentView(long p_tuId, long p_tuvId,
+            String p_subId, long p_trgPageId, long p_sourceLocaleId,
+            long p_targetLocaleId, String[] p_tmNames, String p_termbase,
+            boolean isTarget) throws OnlineEditorException, RemoteException;
+    
 
     /**
      * Retrieves the PageInfo data object: page name, page format, word count,
@@ -276,8 +282,11 @@ public interface OnlineEditorManager extends UIConstants
 
     public String getSourceJsonData(EditorState p_state, boolean isAssignee);
 
+    public String getSourceJsonData(EditorState p_state, boolean isAssignee, boolean fromInCtxRv);
+    
     public String getTargetJsonData(EditorState state, boolean isAssignee,
             HashMap<String, String> hm);
 
-
+    public String getTargetJsonData(EditorState state, boolean isAssignee,
+            HashMap<String, String> hm, boolean fromInCtxRv);
 }

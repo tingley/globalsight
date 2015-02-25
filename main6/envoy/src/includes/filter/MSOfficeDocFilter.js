@@ -1107,6 +1107,11 @@ function checkExistMSOfficeDocFilterCallback(data)
 			sendAjax(checkExistMSOfficeDocFilterCallback.obj, "saveMSOfficeDocFilter", "saveMSOfficeDocFilterCallback");
 		}
 	}
+	else if(data == 'failed')
+	{
+		closePopupDialog("msOfficeDocFilterDialog");
+		parent.location.reload();
+	}
 	else
 	{
 		alert(existFilterName);

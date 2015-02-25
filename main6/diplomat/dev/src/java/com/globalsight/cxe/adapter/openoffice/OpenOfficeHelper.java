@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xpath.XPathAPI;
 import org.w3c.dom.Document;
@@ -35,9 +34,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.globalsight.cxe.engine.eventflow.Category;
-import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
-import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
@@ -49,6 +45,8 @@ import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.cxe.util.fileImport.eventFlow.Category;
+import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -103,7 +101,7 @@ public class OpenOfficeHelper
 
     private CxeMessage m_cxeMessage;
 
-    private EventFlow m_eventFlow;
+    private EventFlowXml m_eventFlow;
 
     private static Hashtable<String, Integer> s_exportBatches = new Hashtable<String, Integer>();
     private static Object s_exportBatchesLocker = new Object();
@@ -133,7 +131,7 @@ public class OpenOfficeHelper
     public OpenOfficeHelper(CxeMessage p_cxeMessage, Properties p_ooProperties)
     {
         m_cxeMessage = p_cxeMessage;
-        m_eventFlow = new EventFlow(p_cxeMessage.getEventFlowXml());
+        m_eventFlow = p_cxeMessage.getEventFlowObject();
         m_ooProperties = p_ooProperties;
     }
 
@@ -170,6 +168,7 @@ public class OpenOfficeHelper
             for (int i = 0; i < result.length; i++)
             {
                 // 6 modify eventflowxml
+                EventFlowXml newEventFlowXml = m_eventFlow.clone();
                 String basename = FileUtils.getBaseName(filename);
                 String dirname = getUnzipDir(basename);
                 String xmlfilename = dirname + File.separator + XML_CONTENT;
@@ -178,20 +177,16 @@ public class OpenOfficeHelper
                     xmlfilename = dirname + File.separator + XML_STYLES;
                 }
                 modifyEventFlowXmlForImport(xmlfilename, i + 1, result.length,
-                        unParaStyles, unCharStyles);
+                        unParaStyles, unCharStyles, newEventFlowXml);
                 // 7 return proper CxeMesseges
                 CxeMessageType type = getPostConversionEvent();
                 CxeMessage cxeMessage = new CxeMessage(type);
                 cxeMessage.setParameters(m_cxeMessage.getParameters());
                 cxeMessage.setMessageData(messageData[i]);
-
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                cxeMessage.setEventFlowXml(eventFlowXml);
+                cxeMessage.setEventFlowObject(newEventFlowXml);
 
                 result[i] = cxeMessage;
             }
-            writeDebugFile(m_conversionType + "_" + getBaseFileName()
-                    + "_sa.xml", m_eventFlow.serializeToXml());
 
             return result;
         }
@@ -384,8 +379,7 @@ public class OpenOfficeHelper
             String tFileName = (String) params.get("TargetFileName");
             if (ExportUtil.isLastFile(eBatchId, tFileName, targetLocale))
             {
-                String oofilename = getCategory().getDiplomatAttribute(
-                        "safeBaseFileName").getValue();
+                String oofilename = getCategory().getValue("safeBaseFileName");
                 String oofile = FileUtils.concatPath(m_saveDir, oofilename);
                 modifyEventFlowXmlForExport();
                 convert(oofile);
@@ -397,10 +391,7 @@ public class OpenOfficeHelper
                 outputMsg.setMessageData(fmd);
                 outputMsg.setParameters(params);
 
-                String eventFlowXml = m_eventFlow.serializeToXml();
-                writeDebugFile(m_conversionType + "_" + getBaseFileName()
-                        + "_ea.xml", eventFlowXml);
-                outputMsg.setEventFlowXml(eventFlowXml);
+                outputMsg.setEventFlowObject(m_eventFlow.clone());
 
                 return new CxeMessage[]
                 { outputMsg };
@@ -419,7 +410,7 @@ public class OpenOfficeHelper
                 CxeMessageType type = CxeMessageType
                         .getCxeMessageType(CxeMessageType.CXE_EXPORT_STATUS_EVENT);
                 CxeMessage outputMsg = new CxeMessage(type);
-                outputMsg.setEventFlowXml(m_eventFlow.serializeToXml());
+                outputMsg.setEventFlowObject(m_eventFlow.clone());
                 params.put("Exception", null);
                 params.put("ExportedTime", new Long(lastMod));
                 outputMsg.setParameters(params);
@@ -519,8 +510,7 @@ public class OpenOfficeHelper
         }
         else
         {
-            String filename = getCategory().getDiplomatAttribute(
-                    "safeBaseFileName").getValue();
+            String filename = getCategory().getValue("safeBaseFileName");
             ooc.convertXmlToOd(filename, dirName);
         }
     }
@@ -696,7 +686,7 @@ public class OpenOfficeHelper
 
     protected void modifyEventFlowXmlForImport(String p_xmlFilename,
             int p_docPageNum, int p_docPageCount, String unParaStyles,
-            String unCharStyles) throws Exception
+            String unCharStyles, EventFlowXml newEventFlowXml) throws Exception
     {
         if (unParaStyles == null || unParaStyles.length() == 0)
         {
@@ -706,52 +696,55 @@ public class OpenOfficeHelper
         {
             unCharStyles = ",";
         }
+        
+        String postMergeEvent;
+        String formatType;
+        String safeBaseFileName;
+        String originalFileSize;
 
         // First get original Category
         Category oriC = getCategory();
         if (oriC != null)
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            { oriC.getDiplomatAttribute("postMergeEvent"),
-                    oriC.getDiplomatAttribute("formatType"),
-                    oriC.getDiplomatAttribute("safeBaseFileName"),
-                    oriC.getDiplomatAttribute("originalFileSize"),
-                    new DiplomatAttribute("unParaStyles", unParaStyles),
-                    new DiplomatAttribute("unCharStyles", unCharStyles),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
-
-            m_eventFlow.removeCategory(oriC);
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = oriC.getValue("postMergeEvent");
+            formatType = oriC.getValue("formatType");
+            safeBaseFileName = oriC.getValue("safeBaseFileName");
+            originalFileSize = oriC.getValue("originalFileSize");
+            newEventFlowXml.getCategory().remove(oriC);
         }
         else
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            {
-                    new DiplomatAttribute("postMergeEvent",
-                            m_eventFlow.getPostMergeEvent()),
-                    new DiplomatAttribute("formatType",
-                            m_eventFlow.getSourceFormatType()),
-                    new DiplomatAttribute("safeBaseFileName",
-                            getSafeBaseFileName()),
-                    new DiplomatAttribute("originalFileSize",
-                            String.valueOf(m_cxeMessage.getMessageData()
-                                    .getSize())),
-                    new DiplomatAttribute("unParaStyles", unParaStyles),
-                    new DiplomatAttribute("unCharStyles", unCharStyles),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
-            m_eventFlow.addCategory(newC);
+            postMergeEvent = newEventFlowXml.getPostMergeEvent();
+            formatType = newEventFlowXml.getSource().getFormatType();
+            safeBaseFileName = getSafeBaseFileName();
+            originalFileSize = String.valueOf(m_cxeMessage.getMessageData()
+                    .getSize());
         }
-        // Then modify eventFlow
-        m_eventFlow.setPostMergeEvent(getPostMergeEvent());
-        // m_eventFlow.setSourceFormatType("xml");
+        
+        Category newC = new Category();
+        newC.setName(CATEGORY_NAME);
+        
+        newC.addValue("postMergeEvent", postMergeEvent);
+        newC.addValue("formatType", formatType);
+        newC.addValue("safeBaseFileName", safeBaseFileName);
+        newC.addValue("originalFileSize", originalFileSize);
+        newC.addValue("unParaStyles", originalFileSize);
+        newC.addValue("unCharStyles", unCharStyles);
+        newC.addValue("relSafeName", p_xmlFilename);
+        
+        newEventFlowXml.getCategory().add(newC);
 
-        m_eventFlow.setDocPageCount(p_docPageCount);
-        m_eventFlow.setDocPageNumber(p_docPageNum);
+        // Then modify eventFlow
+        newEventFlowXml.setPostMergeEvent(getPostMergeEvent());
+        // newEventFlowXml.setSourceFormatType("xml");
+
+        newEventFlowXml.getBatchInfo().setDocPageCount(p_docPageCount);
+        newEventFlowXml.getBatchInfo().setDocPageNumber(p_docPageNum);
 
         if (m_isHeaderTranslate && p_docPageNum == 2)
         {
-            m_eventFlow.setDisplayName(OO_HEADER_DISPLAY_NAME_PREFIX
-                    + m_eventFlow.getDisplayName());
+            newEventFlowXml.getBatchInfo().setDisplayName(OO_HEADER_DISPLAY_NAME_PREFIX
+                    + newEventFlowXml.getDisplayName());
         }
     }
 
@@ -836,8 +829,7 @@ public class OpenOfficeHelper
 
     private String writeContentToXmlBox() throws IOException
     {
-        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory()
-                .getDiplomatAttribute("relSafeName").getValue());
+        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory().getValue("relSafeName"));
         File saveFile = new File(saveFileName);
 
         m_cxeMessage.getMessageData().copyTo(saveFile);
@@ -857,27 +849,6 @@ public class OpenOfficeHelper
     {
         return new OpenOfficeAdapterException("Import", new String[]
         { arg }, e);
-    }
-
-    private void writeDebugFile(String fileName, String content)
-    {
-        String debugFileDirectory = m_ooProperties
-                .getProperty("DebugFileDirectory");
-        if (debugFileDirectory != null)
-        {
-            try
-            {
-                FileUtils.write(new File(debugFileDirectory, fileName),
-                        content, "UTF-8");
-            }
-            catch (Exception e)
-            {
-                if (logger.isEnabledFor(Priority.WARN))
-                {
-                    logger.warn("Fail to write content to file: " + fileName, e);
-                }
-            }
-        }
     }
 
     private List<File> copyToTargetLocales(String[] files)
@@ -923,53 +894,6 @@ public class OpenOfficeHelper
             targetDirF.mkdirs();
             FileCopier.copy(expectedFile, targetDir.toString());
         }
-    }
-
-    private static boolean isExportFileComplete(String p_filekey,
-            int p_pageCount)
-    {
-        // Default is to write out the file.
-        boolean result = true;
-        int curPageCnt = -1;
-
-        synchronized (s_exportBatchesLocker)
-        {
-            Integer oldPageCount = s_exportBatches.get(p_filekey);
-            if (oldPageCount == null)
-            {
-                // First page of this exportBatch.
-                curPageCnt = p_pageCount - 1;
-                if (curPageCnt == 0)
-                {
-                    // The batch is complete, no need to put anything
-                    // in the hashtable.
-                    result = true;
-                }
-                else
-                {
-                    result = false;
-                    s_exportBatches.put(p_filekey, new Integer(curPageCnt));
-                }
-            }
-            else
-            {
-                curPageCnt = oldPageCount.intValue() - 1;
-                if (curPageCnt == 0)
-                {
-                    // The batch is complete, remove the value from the
-                    // hashtable.
-                    result = true;
-                    s_exportBatches.remove(p_filekey);
-                }
-                else
-                {
-                    result = false;
-                    s_exportBatches.put(p_filekey, new Integer(curPageCnt));
-                }
-            }
-        }
-
-        return result;
     }
 
     public static String getConversionDir() throws Exception

@@ -85,6 +85,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editor" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="incontextreiview" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editorSameWindow" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="finish" scope="request"
@@ -197,7 +199,9 @@ private String printPageLink(JspWriter out, String p_page, String p_url, boolean
     out.print("', event); return false;\"");
     out.print(" oncontextmenu=\"contextForPage('");
     out.print(p_url);
-    out.print("', event)\"");
+    out.print("', event, '");
+    out.print(pageName);
+    out.print("')\"");
     out.print(" onfocus='this.blur();'");
     out.print(" page='");
     out.print(p_url);
@@ -252,7 +256,9 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     out.print("', event); return false;\"");
     out.print(" oncontextmenu=\"contextForPage('");
     out.print(p_url);
-    out.print("', event)\"");
+    out.print("', event, '");
+    out.print(pageName);
+    out.print("')\"");
     out.print(" onfocus='this.blur();'");
     out.print(" page='");
     out.print(p_url);
@@ -353,7 +359,8 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String labelSelectionWarning = bundle.getString("jsmsg_my_activities_Warning");
     String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
     String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
-    
+    List<String> trgPageIdBatches = new ArrayList<String>();
+    int translatedTextCount = 10;
     //use to get the translated text
     StringBuffer tarPageIds = new StringBuffer();
 
@@ -415,6 +422,9 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String editorListUrl = editor.getPageURL();
     String editorReviewUrl = editor.getPageURL() +
        "&" + WebAppConstants.REVIEW_MODE + "=true";
+    String incontextreviewUrl = incontextreiview.getPageURL();
+    String incontextreviewUrlRe = incontextreiview.getPageURL() +
+            "&" + WebAppConstants.REVIEW_MODE + "=true";
 
     String createStfUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
 					    	//GBS-2913 Added to the url parameter taskId,state
@@ -759,9 +769,6 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
         access = WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS;
     }    
     
-    // get date/time format
-    // NOTE: The system4 standard is to **not** format date and time according
-    // to the UILOCALE as in (Locale)session.getAttribute(WebAppConstants.UILOCALE)
     NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
     numberFormat.setMaximumFractionDigits(1);
     
@@ -959,7 +966,7 @@ function hideContextMenu()
     document.getElementById("idBody").focus();
 }
 
-function contextForPage(url, e)
+function contextForPage(url, e, displayName)
 {
     if(e instanceof Object)
     {
@@ -970,19 +977,20 @@ function contextForPage(url, e)
     var lb_context_item_inline_editor;
     var lb_context_item_popup_editor ;
     var fontB1 = "<B>", fontB2 = "</B>";
+    var showInContextReview = (displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/)));
+    var inctxTitle = "Open In Context Review";
     
     if (b_canEditInSameWindow)
     {
+    	lb_context_item_inline_editor  = "<%=bundle.getString("lb_context_item_inline_editor") %>";
+        lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_popup_editor") %>";
+        
     	if (b_editInSameWindow)
         {
-            lb_context_item_inline_editor  = "<%=bundle.getString("lb_context_item_inline_editor") %>";
-            lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_popup_editor") %>";
             lb_context_item_inline_editor  = fontB1 + lb_context_item_inline_editor + fontB2;
         }
         else
         {
-        	lb_context_item_inline_editor  = "<%=bundle.getString("lb_context_item_inline_editor") %>";
-            lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_popup_editor") %>";
             lb_context_item_popup_editor   = fontB1 + lb_context_item_popup_editor + fontB2;
         }
       popupoptions = [
@@ -991,6 +999,12 @@ function contextForPage(url, e)
         new ContextItem(lb_context_item_popup_editor,
           function(){ openListEditor(url, e);})
         ];
+      
+      if (showInContextReview)
+      {
+    	  popupoptions[popupoptions.length] = new ContextItem(inctxTitle,
+               function(){openInContextReview(url, e);});
+      }
     }
     else
     {
@@ -1004,6 +1018,12 @@ function contextForPage(url, e)
       popupoptions = [
    		new ContextItem(title, function(){ openListEditor(url, e);})
         ];
+      
+      if (showInContextReview)
+      {
+    	  popupoptions[popupoptions.length] = new ContextItem(inctxTitle,
+               function(){ openInContextReview(url, e);});
+      }
     }
     ContextMenu.display(popupoptions, e); 
 }
@@ -1021,6 +1041,32 @@ function openParaEditor(url, e)
       // For issue "(AMB-115) Toolbar behaviour for the Inline editor" to resolve the problem which the scroll jump up fist (no good UE) after closed inline editor
       var inlineUrl =  "<%=editorParaUrl%>" + url+tfilePath;
       window.open(inlineUrl, 'topFrame',
+          'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
+          ',width=' + (screen.availWidth - 20));
+    }
+}
+
+function openInContextReview(url, e)
+{
+    if (!canClose())
+    {
+        cancelEvent(e);
+        raiseSegmentEditor();
+    }
+    else
+    {
+        hideContextMenu();
+
+        if (b_isReviewActivity)
+        {
+          url = "<%=incontextreviewUrlRe%>" + url;
+        }
+        else
+        {
+           url = "<%=incontextreviewUrl%>" + url;
+        }
+		 url += "&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>"));
+         w_editor = window.open(url, 'MainEditor',
           'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
           ',width=' + (screen.availWidth - 20));
     }
@@ -1045,7 +1091,7 @@ function openListEditor(url, e)
         {
            url = "<%=editorListUrl%>" + url;
         }
-		 url += "&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>"));
+		 url += "&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")); 
          w_editor = window.open(url, 'MainEditor',
           'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
           ',width=' + (screen.availWidth - 20));
@@ -1389,7 +1435,32 @@ function searchPages(){
 	            }
 	            if(tarPageIds.length() != 0)
 	            {
-	               translatedTextUrl = translatedTextUrl + "&" + TaskDetailHandler.TASK_PAGE_IDS + "=" + tarPageIds.toString();
+	                String[] tpIds = tarPageIds.toString().split(",");
+	                StringBuffer tpIdBatch = new StringBuffer();
+	                int count = 0;
+	                for (String tpId : tpIds)
+	                {
+	                    if (count == translatedTextCount)
+	                    {
+	                        trgPageIdBatches.add(tpIdBatch.toString()+",");
+	                        tpIdBatch = new StringBuffer();
+	                        count = 0;
+	                    }
+
+	                    if (tpIdBatch.length() == 0)
+                        {
+                            tpIdBatch.append(tpId);
+                        }
+                        else
+                        {
+                            tpIdBatch.append(",").append(tpId);
+                        }
+	                    count++;
+	                }
+	                if (tpIdBatch.length() > 0)
+                    {
+	                    trgPageIdBatches.add(tpIdBatch.toString()+",");
+                    }
 	            }
 	            sessionMgr.setAttribute("treeLink", treeLink.toString().replaceAll("\\\\", "<").replaceAll("'", "&apos;"));
 	            sessionMgr.setAttribute("ajaxUrl",detail.getPageURL());
@@ -1634,7 +1705,8 @@ $(document).ready(function(){
 	$("#taskTargetFilesTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
 	$("#taskTargetFilesTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
 })
-
+var j=0;
+var k=0;
 var xmlHttp = false;
 try {
   xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
@@ -1656,6 +1728,7 @@ function callServer(url)
   xmlHttp.onreadystatechange = updatePage;
   xmlHttp.send(null);
 }
+
 function updatePage() 
 {
   if (xmlHttp.readyState == 4)
@@ -1668,16 +1741,18 @@ function updatePage()
        {
             var translatedText = translatedTexts.substring(0, translatedTexts.length - 1);
             var translatedVar = translatedText.split(",");
-            for(var i = 0; i < translatedVar.length; i++)
+            k++;
+            var num=(j-1)*<%=translatedTextCount%>;
+            for(var i=num; i < (translatedVar.length+num); i++)
             {
                 var objName = "oPara" + i;
                 var obj = document.getElementById(objName);
-                if(translatedVar[i] < 100){
+                if(translatedVar[i-num] < 100){
                 	obj.style.color = "red";
-                	obj.innerHTML = "(" + translatedVar[i] + "%)";
+                	obj.innerHTML = "(" + translatedVar[i-num] + "%)";
                 }else{
                 	obj.style.color = "black";
-                	obj.innerHTML = "(" + translatedVar[i] + "%)";
+                	obj.innerHTML = "(" + translatedVar[i-num] + "%)";
                 }
             }
        }
@@ -1686,6 +1761,20 @@ function updatePage()
 }
 function translatedText()
 {
-   callServer("<%=translatedTextUrl%>");
+	var resultIds = eval(<%=trgPageIdBatches%>);
+	resultIds=resultIds.join(",").split(",,");
+	var count = setInterval(function translatedTextc()
+	{
+		if(j==k)
+		{
+		    callServer("<%=translatedTextUrl + "&" +TaskDetailHandler.TASK_PAGE_IDS%>" + "=" + resultIds[j]);
+		    j++;
+		}
+        if(j>=resultIds.length)
+    	{
+    		clearInterval(count);
+    	}
+	},10);
 }
+
 </SCRIPT>

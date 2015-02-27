@@ -1761,6 +1761,8 @@ function updatePage()
 }
 function translatedText()
 {
+	j=0;
+	k=0;
 	var resultIds = eval(<%=trgPageIdBatches%>);
 	resultIds=resultIds.join(",").split(",,");
 	var count = setInterval(function translatedTextc()

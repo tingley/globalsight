@@ -396,11 +396,10 @@ public class UploadPageHandlerHelper implements WebAppConstants
      * When generate TER, RCR, RCSR, task info will be added in "AA1" cell. Try
      * to get task relevant info from this cell now.
      */
-    private String[] getReportInfoFromXlsx(String p_fileName, File p_file, HttpServletRequest p_request)
+	private String[] getReportInfoFromXlsx(String p_fileName, File p_file,
+			HttpServletRequest p_request)
     {
         String[] result = { "", "", ""};
-        String titleInfo = "";
-
         try
         {
             String fileSuff = p_fileName.substring(p_fileName.lastIndexOf("."));
@@ -411,7 +410,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
                     fis);
             Sheet sheet = ExcelUtil.getDefaultSheet(workbook);
             String taskInfoReport = ExcelUtil.getCellValue(sheet, 0, 26);
-            titleInfo = ExcelUtil.getCellValue(sheet, 0, 0);
+            String titleInfo = ExcelUtil.getCellValue(sheet, 0, 0);
 
             String taskId = "";
             String isReport = "";
@@ -452,24 +451,19 @@ public class UploadPageHandlerHelper implements WebAppConstants
                         ResourceBundleConstants.LOCALE_RESOURCE_NAME,
                         (Locale) p_request.getSession().getAttribute(
                                 WebAppConstants.UILOCALE));
-                if (res.getString("review_reviewers_comments")
-                        .equals(titleInfo)
-                        || res.getString("review_reviewers_comments_simple")
-                                .equals(titleInfo)
-                        || res.getString("review_translations_edit_report")
-                                .equals(titleInfo))
+                if (res.getString("review_reviewers_comments").equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple").equals(titleInfo)
+                        || res.getString("review_translations_edit_report").equals(titleInfo))
                 {
                     isReport = "yes";
                 }
-                if (res.getString("review_reviewers_comments")
-                        .equals(titleInfo)
-                        || res.getString("review_reviewers_comments_simple")
-                                .equals(titleInfo))
+
+                if (res.getString("review_reviewers_comments").equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple").equals(titleInfo))
                 {
                     reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
                 }
-                else if (res.getString("review_translations_edit_report")
-                        .equals(titleInfo))
+                else if (res.getString("review_translations_edit_report").equals(titleInfo))
                 {
                     reportType = WebAppConstants.TRANSLATION_EDIT;
                 }
@@ -481,7 +475,6 @@ public class UploadPageHandlerHelper implements WebAppConstants
             result[0] = isReport;
             result[1] = reportType;
             result[2] = taskId;
-//            result[3] = titleInfo;
         }
         catch (IOException e)
         {

@@ -143,7 +143,6 @@ public class UploadPageHandlerHelper implements WebAppConstants
         Date taskUploadFileStartTime = new Date();
         String userId = user.getUserId();
         String taskId = "";
-        String titleInfo = "";
         if (fromTaskUploadPage)
         {
             taskId = (String) sessionMgr.getAttribute(TASK_ID);
@@ -156,30 +155,12 @@ public class UploadPageHandlerHelper implements WebAppConstants
                 .endsWith(".xls")))
         {
             // Check "AA1" cell to see if it is a report file.
-            String[] taskInfo = getReportInfoFromXlsx(fileName, file);
+            String[] taskInfo = getReportInfoFromXlsx(fileName, file, p_request);
             isReport = taskInfo[0];
             reportTypeInfo = taskInfo[1];
-            taskId = taskInfo[2];
-            titleInfo = taskInfo[3];
-
-            // Report file generated before 8.5.8 build has no task info in
-            // "AA1" cell, check "A1" cell for further confirmation.
-            if (!"yes".equals(isReport))
+            if (!StringUtil.isEmpty(taskInfo[2]))
             {
-                SystemResourceBundle srb = SystemResourceBundle.getInstance();
-                ResourceBundle res = srb.getResourceBundle(
-                        ResourceBundleConstants.LOCALE_RESOURCE_NAME,
-                        (Locale) p_request.getSession().getAttribute(
-                                WebAppConstants.UILOCALE));
-                if (res.getString("review_reviewers_comments")
-                        .equals(titleInfo)
-                        || res.getString("review_reviewers_comments_simple")
-                                .equals(titleInfo)
-                        || res.getString("review_translations_edit_report")
-                                .equals(titleInfo))
-                {
-                    isReport = "yes";
-                }
+                taskId = taskInfo[2];
             }
 
             // Locate current in progress task.
@@ -415,9 +396,9 @@ public class UploadPageHandlerHelper implements WebAppConstants
      * When generate TER, RCR, RCSR, task info will be added in "AA1" cell. Try
      * to get task relevant info from this cell now.
      */
-    private String[] getReportInfoFromXlsx(String p_fileName, File p_file)
+    private String[] getReportInfoFromXlsx(String p_fileName, File p_file, HttpServletRequest p_request)
     {
-        String[] result = { "", "", "", ""};
+        String[] result = { "", "", ""};
         String titleInfo = "";
 
         try
@@ -462,10 +443,45 @@ public class UploadPageHandlerHelper implements WebAppConstants
                     taskId = infos[1];
                 }
             }
+            // Report file generated before 8.5.8 build has no task info in
+            // "AA1" cell, check "A1" cell for further confirmation.
+            if (!"yes".equals(isReport))
+            {
+                SystemResourceBundle srb = SystemResourceBundle.getInstance();
+                ResourceBundle res = srb.getResourceBundle(
+                        ResourceBundleConstants.LOCALE_RESOURCE_NAME,
+                        (Locale) p_request.getSession().getAttribute(
+                                WebAppConstants.UILOCALE));
+                if (res.getString("review_reviewers_comments")
+                        .equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple")
+                                .equals(titleInfo)
+                        || res.getString("review_translations_edit_report")
+                                .equals(titleInfo))
+                {
+                    isReport = "yes";
+                }
+                if (res.getString("review_reviewers_comments")
+                        .equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple")
+                                .equals(titleInfo))
+                {
+                    reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
+                }
+                else if (res.getString("review_translations_edit_report")
+                        .equals(titleInfo))
+                {
+                    reportType = WebAppConstants.TRANSLATION_EDIT;
+                }
+                else
+                {
+                    reportType = WebAppConstants.POST_REVIEW_QA;
+                }
+            }
             result[0] = isReport;
             result[1] = reportType;
             result[2] = taskId;
-            result[3] = titleInfo;
+//            result[3] = titleInfo;
         }
         catch (IOException e)
         {

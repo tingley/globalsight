@@ -622,7 +622,8 @@ public class HtmlEntities
         h.put(new Character('>'), "&gt;");
         h.put(new Character('&'), "&amp;");
         h.put(new Character('"'), "&quot;");
-        h.put(new Character('\''), "&apos;");
+        //Low version IE does not support "&apos;".
+        h.put(new Character('\''), "&#39;");
         return h;
     }
 

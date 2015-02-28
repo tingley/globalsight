@@ -90,13 +90,14 @@ public class UploadPageHandlerHelper implements WebAppConstants
                         taskId, Integer.parseInt(state));
                 TaskHelper.storeObject(httpSession,
                         WebAppConstants.WORK_OBJECT, task);
-                
+
                 // Set task uploadStatus
                 TaskBO taskBO = new TaskBO(task.getId());
                 taskBO.setUploadStatus(OfflineConstants.TASK_UPLOADSTATUS_UPLOADING);
                 Map<Long, TaskBO> taskBOMap = new HashMap<Long, TaskBO>();
-                taskBOMap.put(taskBO.getId(),taskBO);
-                TaskHelper.storeObject(httpSession, SESSION_MAP_TASKBO, taskBOMap);
+                taskBOMap.put(taskBO.getId(), taskBO);
+                TaskHelper.storeObject(httpSession, SESSION_MAP_TASKBO,
+                        taskBOMap);
             }
             catch (Exception e)
             {
@@ -108,18 +109,19 @@ public class UploadPageHandlerHelper implements WebAppConstants
     public void cancelProcess(HttpServletRequest p_request,
             HttpServletResponse p_response, SessionManager sessionMgr)
     {
-    	OfflineEditManager oem = (OfflineEditManager) sessionMgr.getAttribute(UPLOAD_MANAGER);
-    	
-    	if (oem == null) 
-    			return;
-    	
-    	if (oem instanceof Cancelable) 
-    	{
-    		Cancelable cancelable = (Cancelable) oem;
-    		cancelable.cancel();
-		}
+        OfflineEditManager oem = (OfflineEditManager) sessionMgr
+                .getAttribute(UPLOAD_MANAGER);
+
+        if (oem == null)
+            return;
+
+        if (oem instanceof Cancelable)
+        {
+            Cancelable cancelable = (Cancelable) oem;
+            cancelable.cancel();
+        }
     }
-    
+
     /**
      * Uploading process includes read file contents, validate the content,
      * compare file content and database content
@@ -128,13 +130,14 @@ public class UploadPageHandlerHelper implements WebAppConstants
      * @param p_response
      * @param sessionMgr
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     public void uploadProcess(HttpServletRequest p_request,
             HttpServletResponse p_response, SessionManager sessionMgr)
     {
         OEMProcessStatus status;
         OfflineEditManager OEM;
-        String isReport =null;
+        String isReport = null;
         User user = (User) sessionMgr.getAttribute(USER);
 
         boolean fromTaskUploadPage = UPLOAD_FROMTASKUPLOAD
@@ -158,16 +161,14 @@ public class UploadPageHandlerHelper implements WebAppConstants
             String[] taskInfo = getReportInfoFromXlsx(fileName, file, p_request);
             isReport = taskInfo[0];
             reportTypeInfo = taskInfo[1];
-            if (!StringUtil.isEmpty(taskInfo[2]))
-            {
-                taskId = taskInfo[2];
-            }
+            taskId = taskInfo[2];
 
             // Locate current in progress task.
             try
             {
                 long tskId = Long.valueOf(taskId);
-                Task curTaskForReport = ServerProxy.getTaskManager().getTask(tskId);
+                Task curTaskForReport = ServerProxy.getTaskManager().getTask(
+                        tskId);
                 if (curTaskForReport.getState() != Task.STATE_ACCEPTED)
                 {
                     curTaskForReport = locateCurrentTask(tskId);
@@ -229,7 +230,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
         if (status != null)
         {
             int percentage = status.getPercentage();
-            
+
             Map map = new HashMap();
             map.put("percentage", percentage);
             map.put("counter", status.getCounter());
@@ -238,57 +239,75 @@ public class UploadPageHandlerHelper implements WebAppConstants
             List<String> list = new ArrayList<String>();
             List<Long> taskIdList = status.getTaskIdList();
             Task task = null;
-    		ProjectImpl project =null;
-    		String str = null;
-            if(taskIdList != null && taskIdList.size() > 0){
-            	for (long taskId : taskIdList) {
-        			task = (Task) HibernateUtil.get(TaskImpl.class,taskId);
-        			if(task != null){
-        				project = (ProjectImpl)task.getWorkflow().getJob().getProject();
-        				boolean  isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
-        				str = taskId + "," + isCheckUnTranslatedSegments;
-        				list.add(str);
-        			}
-        		}
-            }else{
-            	if(status.getTaskIds() != null && status.getTaskIds().size() > 0){
-            		Set<Long> set = status.getTaskIds();
-            		for (long taskId : set) {
-            			task = (Task) HibernateUtil.get(TaskImpl.class,taskId);
-            			if(task != null){
-            				project = (ProjectImpl)task.getWorkflow().getJob().getProject();
-            				boolean  isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
-            				str = taskId + "," + isCheckUnTranslatedSegments;
-            				list.add(str);
-            			}
-            		}
-            	}
+            ProjectImpl project = null;
+            String str = null;
+            if (taskIdList != null && taskIdList.size() > 0)
+            {
+                for (long taskId : taskIdList)
+                {
+                    task = (Task) HibernateUtil.get(TaskImpl.class, taskId);
+                    if (task != null)
+                    {
+                        project = (ProjectImpl) task.getWorkflow().getJob()
+                                .getProject();
+                        boolean isCheckUnTranslatedSegments = project
+                                .isCheckUnTranslatedSegments();
+                        str = taskId + "," + isCheckUnTranslatedSegments;
+                        list.add(str);
+                    }
+                }
+            }
+            else
+            {
+                if (status.getTaskIds() != null
+                        && status.getTaskIds().size() > 0)
+                {
+                    Set<Long> set = status.getTaskIds();
+                    for (long taskId : set)
+                    {
+                        task = (Task) HibernateUtil.get(TaskImpl.class, taskId);
+                        if (task != null)
+                        {
+                            project = (ProjectImpl) task.getWorkflow().getJob()
+                                    .getProject();
+                            boolean isCheckUnTranslatedSegments = project
+                                    .isCheckUnTranslatedSegments();
+                            str = taskId + "," + isCheckUnTranslatedSegments;
+                            list.add(str);
+                        }
+                    }
+                }
             }
             map.put("taskIsCheckUnTran", list);
             map.put("errMsg", errorMsg);
             if (status.getCheckResult() != null)
             {
-            	map.put("internalTagMiss", status.getCheckResult().getMessage(true));
-            	status.setCheckResult(null);
+                map.put("internalTagMiss",
+                        status.getCheckResult().getMessage(true));
+                status.setCheckResult(null);
             }
-            
-            map.put("process", status.isUseProcess() ?  status.getProcess() + "%" : null);            
-            
+
+            map.put("process", status.isUseProcess() ? status.getProcess()
+                    + "%" : null);
+
             ServletOutputStream out = p_response.getOutputStream();
             out.write(JsonUtil.toJson(map).getBytes("UTF-8"));
             out.close();
         }
     }
 
-    public void translatedText(HttpServletRequest p_request, 
-    		HttpServletResponse p_response)throws IOException
+    public void translatedText(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws IOException
     {
-    	String parameter = p_request.getParameter("taskParam");
-    	long taskId = TaskHelper.getLong(parameter);
+        String parameter = p_request.getParameter("taskParam");
+        long taskId = TaskHelper.getLong(parameter);
         Task task = null;
-        try {
+        try
+        {
             task = TaskHelper.getTask(taskId);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new TaskException(
                     TaskException.MSG_FAILED_TO_GET_TRANSLATE_TEXT, null, e);
         }
@@ -396,18 +415,19 @@ public class UploadPageHandlerHelper implements WebAppConstants
      * When generate TER, RCR, RCSR, task info will be added in "AA1" cell. Try
      * to get task relevant info from this cell now.
      */
-	private String[] getReportInfoFromXlsx(String p_fileName, File p_file,
-			HttpServletRequest p_request)
+    private String[] getReportInfoFromXlsx(String p_fileName, File p_file,
+            HttpServletRequest p_request)
     {
-        String[] result = { "", "", ""};
+        String[] result =
+        { "", "", "" };
         try
         {
             String fileSuff = p_fileName.substring(p_fileName.lastIndexOf("."));
             File tmpFile = File.createTempFile("TEM_", fileSuff);
             FileUtils.copyFile(p_file, tmpFile);
             FileInputStream fis = new FileInputStream(tmpFile);
-            Workbook workbook = ExcelUtil.getWorkbook(tmpFile.getAbsolutePath(),
-                    fis);
+            Workbook workbook = ExcelUtil.getWorkbook(
+                    tmpFile.getAbsolutePath(), fis);
             Sheet sheet = ExcelUtil.getDefaultSheet(workbook);
             String taskInfoReport = ExcelUtil.getCellValue(sheet, 0, 26);
             String titleInfo = ExcelUtil.getCellValue(sheet, 0, 0);
@@ -431,7 +451,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
                 {
                     reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
                 }
-                else if(reportInfo.equals(ReportConstants.POST_REVIEW_REPORT_ABBREVIATION))
+                else if (reportInfo
+                        .equals(ReportConstants.POST_REVIEW_REPORT_ABBREVIATION))
                 {
                     reportType = WebAppConstants.POST_REVIEW_QA;
                 }
@@ -446,24 +467,32 @@ public class UploadPageHandlerHelper implements WebAppConstants
             // "AA1" cell, check "A1" cell for further confirmation.
             if (!"yes".equals(isReport))
             {
+                String[] titleInfos = titleInfo.split("_");
                 SystemResourceBundle srb = SystemResourceBundle.getInstance();
                 ResourceBundle res = srb.getResourceBundle(
                         ResourceBundleConstants.LOCALE_RESOURCE_NAME,
                         (Locale) p_request.getSession().getAttribute(
                                 WebAppConstants.UILOCALE));
-                if (res.getString("review_reviewers_comments").equals(titleInfo)
-                        || res.getString("review_reviewers_comments_simple").equals(titleInfo)
-                        || res.getString("review_translations_edit_report").equals(titleInfo))
+                if (res.getString("review_reviewers_comments")
+                        .equals(titleInfos[0])
+                        || res.getString("review_reviewers_comments_simple")
+                                .equals(titleInfos[0])
+                        || res.getString("review_translations_edit_report")
+                                .equals(titleInfos[0]))
                 {
                     isReport = "yes";
+                    taskId = titleInfos[1];
                 }
 
-                if (res.getString("review_reviewers_comments").equals(titleInfo)
-                        || res.getString("review_reviewers_comments_simple").equals(titleInfo))
+                if (res.getString("review_reviewers_comments")
+                        .equals(titleInfos[0])
+                        || res.getString("review_reviewers_comments_simple")
+                                .equals(titleInfos[0]))
                 {
                     reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
                 }
-                else if (res.getString("review_translations_edit_report").equals(titleInfo))
+                else if (res.getString("review_translations_edit_report")
+                        .equals(titleInfos[0]))
                 {
                     reportType = WebAppConstants.TRANSLATION_EDIT;
                 }
@@ -498,8 +527,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
         {
             long id = Long.valueOf(p_taskId).longValue();
             task = ServerProxy.getTaskManager().getTask(id);
-            Collection tasks = ServerProxy.getTaskManager()
-                    .getCurrentTasks(task.getWorkflow().getId());
+            Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(
+                    task.getWorkflow().getId());
             if (tasks != null)
             {
                 for (Iterator it = tasks.iterator(); it.hasNext();)
@@ -514,7 +543,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
         }
         catch (Exception e)
         {
-            
+
         }
         return task;
     }

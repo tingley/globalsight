@@ -1,5 +1,6 @@
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.JspWriter;
 
 import org.apache.log4j.Logger;
 
@@ -32,6 +34,7 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.comment.CommentMainHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator;
 import com.globalsight.everest.workflow.Activity;
@@ -394,5 +397,209 @@ public class TaskDetailHelper
     {
         CostingEngineLocal local = new CostingEngineLocal();
         return local.getRate(p_id);
+    }
+    
+    
+    /**
+     * methods from taskdetail jsp
+     */
+    public static String getMainFileName(String p_filename)
+    {
+        int index = p_filename.indexOf(")");
+        if (index > 0 && p_filename.startsWith("("))
+        {
+            index++;
+            while (Character.isSpace(p_filename.charAt(index)))
+            {
+                index++;
+            }
+
+            return p_filename.substring(index, p_filename.length());
+        }
+
+        return p_filename;
+    }
+
+    public static String getSubFileName(String p_filename)
+    {
+        int index = p_filename.indexOf(")");
+        if (index > 0 && p_filename.startsWith("("))
+        {
+            return p_filename.substring(0, p_filename.indexOf(")") + 1);
+        }
+
+        return null;
+    }
+
+    public static String getFileName(String p_page)
+    {
+        String fileName = getMainFileName(p_page);
+        String subName = getSubFileName(p_page);
+
+        if (subName != null)
+        {
+            fileName = fileName + " " + subName;
+        }
+
+        return fileName;
+    }
+
+    // Prints file name with full path
+    public static String printPageLink(JspWriter out, String p_page,
+            String p_url, boolean hasEditPerm) throws IOException
+    {
+        // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
+        // show them last so the main file names are grouped together
+        // text=en_US\182\endpoint\ch01.htm|sourcePageId=752|targetPageId=3864|taskId=4601?
+
+        String pageName = getMainFileName(p_page);
+        String subName = getSubFileName(p_page);
+
+        if (subName != null)
+        {
+            pageName = pageName + " " + subName;
+        }
+        StringBuffer treeParam = new StringBuffer();
+        if (hasEditPerm)
+        {
+            out.print("<a href='#'");
+            out.print(" onclick=\"openEditorWindow('");
+            out.print(p_url);
+            out.print("', event); return false;\"");
+            out.print(" oncontextmenu=\"contextForPage('");
+            out.print(p_url);
+            out.print("', event, '");
+            out.print(pageName);
+            out.print("')\"");
+            out.print(" onfocus='this.blur();'");
+            out.print(" page='");
+            out.print(p_url);
+            out.print("'");
+            out.print(" CLASS='standardHREF'>");
+            out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:500px\'>\");}</SCRIPT>");
+            out.print(pageName);
+            out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>");
+            out.print("</a>");
+            treeParam.append("text=" + pageName)
+                    .append(p_url.replaceAll("&", "|"))
+                    .append("|title=" + pageName);
+        }
+        else
+        {
+            out.print(pageName);
+        }
+
+        return treeParam.toString();
+    }
+
+    // Prints short file name with full path in tooltip
+    public static String printPageLinkShort(JspWriter out, String p_page,
+            String p_url, boolean hasEditPerm) throws IOException
+    {
+        // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
+        // show them last so the main file names are grouped together
+        String pageName = getMainFileName(p_page);
+        String subName = getSubFileName(p_page);
+        String shortName = pageName;
+
+        int bslash = shortName.lastIndexOf("\\");
+        int fslash = shortName.lastIndexOf("/");
+        int index;
+        if (bslash > 0 && bslash > fslash)
+        {
+            shortName = shortName.substring(bslash + 1);
+        }
+        else if (fslash > 0 && fslash > bslash)
+        {
+            shortName = shortName.substring(fslash + 1);
+        }
+
+        if (subName != null)
+        {
+            pageName = pageName + " " + subName;
+            shortName = shortName + " " + subName;
+        }
+        StringBuffer treeParam = new StringBuffer();
+        if (hasEditPerm)
+        {
+            out.print("<a href='#'");
+            out.print(" onclick=\"openEditorWindow('");
+            out.print(p_url);
+            out.print("', event); return false;\"");
+            out.print(" oncontextmenu=\"contextForPage('");
+            out.print(p_url);
+            out.print("', event, '");
+            out.print(pageName);
+            out.print("')\"");
+            out.print(" onfocus='this.blur();'");
+            out.print(" page='");
+            out.print(p_url);
+            out.print("'");
+            out.print(" CLASS='standardHREF' TITLE='");
+            out.print(pageName.replace("\'", "&apos;"));
+            out.print("'>");
+            out.print(shortName);
+            out.print("</a>");
+            treeParam.append("text=" + shortName.replace("\'", "&apos;"))
+                    .append(p_url.replaceAll("&", "|"))
+                    .append("|title=" + pageName);
+        }
+        else
+        {
+            out.print(pageName);
+        }
+
+        return treeParam.toString();
+    }
+    
+    public static StringBuffer getExportLink(Task theTask, String url, long workflowId)
+    {
+        StringBuffer exportLink = new StringBuffer(url);
+        exportLink.append("&");
+        exportLink.append(JobManagementHandler.WF_ID);
+        exportLink.append("=");
+        exportLink.append(workflowId);
+        exportLink.append("&");
+        exportLink.append(JobManagementHandler.EXPORT_SELECTED_WORKFLOWS_ONLY_PARAM);
+        exportLink.append("=true");
+        //GBS-2913 Added to the url parameter taskId
+        exportLink.append("&");
+        exportLink.append(WebAppConstants.TASK_ID);
+        exportLink.append("=");
+        exportLink.append(theTask.getId());
+        exportLink.append("&");
+        exportLink.append(WebAppConstants.TASK_STATE);
+        exportLink.append("=");
+        exportLink.append(theTask.getState());
+        
+        return exportLink;
+    }
+
+    public static StringBuffer getDownloadLink(Task theTask, String url,
+            long workflowId, String jobId)
+    {
+        StringBuffer downloadLink = new StringBuffer(
+                "/globalsight/ControlServlet"
+                        + "?linkName=jobDownload&pageName=TK2"
+                        + "&firstEntry=true&fromTaskDetail=true");
+        downloadLink.append("&");
+        downloadLink.append(DownloadFileHandler.PARAM_JOB_ID);
+        downloadLink.append("=");
+        downloadLink.append(jobId);
+        downloadLink.append("&");
+        downloadLink.append(DownloadFileHandler.PARAM_WORKFLOW_ID);
+        downloadLink.append("=");
+        downloadLink.append(workflowId);
+        // GBS-2913 Added to the url parameter taskId
+        downloadLink.append("&");
+        downloadLink.append(WebAppConstants.TASK_ID);
+        downloadLink.append("=");
+        downloadLink.append(theTask.getId());
+        downloadLink.append("&");
+        downloadLink.append(WebAppConstants.TASK_STATE);
+        downloadLink.append("=");
+        downloadLink.append(theTask.getState());
+
+        return downloadLink;
     }
 }

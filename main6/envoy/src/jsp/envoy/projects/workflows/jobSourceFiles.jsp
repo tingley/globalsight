@@ -163,6 +163,17 @@
 	{
 		appletcontent.append(" </APPLET>");
 	}
+	
+    boolean enabledInContextReview = false;
+
+    try
+    {
+        enabledInContextReview = sysConfig.getBooleanParameter("incontext.review.enable");
+    }
+    catch (Exception ex)
+    {
+        // ignore
+    }
 %>
 <html>
 <head>
@@ -661,6 +672,12 @@ function contextForPage(url, e, displayName)
 
     var allowEditSource = eval('${allowEditSourcePage}');
     var canEditSource = eval('${canEditSourcePage}');
+    
+    var showInContextReview = displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/));
+    
+    <% if (!enabledInContextReview) {%>
+    showInContextReview = false;
+    <% } %>
 
     if (allowEditSource)
     {
@@ -671,7 +688,7 @@ function contextForPage(url, e, displayName)
            function(){ openGxmlEditor(url,"${sourceEditor.pageURL}");}, !canEditSource)
        ];
        
-       if (displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/)))
+       if (showInContextReview)
        {
     	   popupoptions[popupoptions.length] = new ContextItem("Open In Context Review",
        	        function(){ openInContextReview(url);});
@@ -684,7 +701,7 @@ function contextForPage(url, e, displayName)
            function(){ openViewerWindow(url);})
        ];
        
-       if (displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/)))
+       if (showInContextReview)
        {
     	   popupoptions[popupoptions.length] = new ContextItem("Open In Context Review",
        	        function(){ openInContextReview(url);});

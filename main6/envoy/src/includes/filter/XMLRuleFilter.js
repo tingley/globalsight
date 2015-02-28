@@ -211,7 +211,7 @@ XMLRuleFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	str.append("</td>");
 	str.append("</tr>");
 	
-	str.append("<tr style='display:none;'>");
+	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsConvertHTMLEntity + "" + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
 	var isCheckConvertHtmlEntity = (this.filter.convertHtmlEntity) ? "checked":"";
@@ -341,7 +341,7 @@ XMLRuleFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("</td>");
 	str.append("</tr>");
 	
-	str.append("<tr style='display:none;'>");
+	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsConvertHTMLEntity + "" + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='isEnableConvertHtmlEntity' type='checkbox' name='convertHtmlEntity' value='false'"+"></input>");
@@ -733,14 +733,11 @@ XMLRuleFilter.prototype.generateNonasciiAs = function (filter)
 {
 	var str = new StringBuffer("");
 		
-	str.append("<nobr><input value='1' type='radio' name='nonasciiAs'" + ((filter && filter.nonasciiAs == "1") ? " checked" : "") + ">" 
+	str.append("<nobr><input value='1' type='radio' name='nonasciiAs'" + ((filter) ? (( filter.nonasciiAs == "1") ? " checked" : "") : " checked") + ">" 
 				+ fontTagS + jsNonasciiAsCharacter +fontTagE);
 	str.append("&nbsp;&nbsp;");
 	str.append("<nobr><input value='2' type='radio' name='nonasciiAs'" + ((filter && filter.nonasciiAs == "2") ? " checked" : "") + ">" 
 				+ fontTagS + jsNonasciiAsEntity +fontTagE);
-	str.append("&nbsp;&nbsp;");
-	str.append("<nobr><input value='0' type='radio' name='nonasciiAs'" + ((filter) ? (( filter.nonasciiAs == "0") ? " checked" : "") : " checked") + ">" 
-				+ fontTagS + jsNonasciiAsPreserve +fontTagE);
 	return str.toString();
 }
 

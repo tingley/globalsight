@@ -264,9 +264,6 @@ public class XmlExtractor extends AbstractExtractor implements
                 m_internalTexts = null;
             }
 
-            // GBS-3702
-            XmlExtractorHelper.protectEntities(getInput());
-
             m_preserveEmptyTag = m_xmlFilterHelper.preserveEmptyTag();
             if (m_preserveEmptyTag)
             {
@@ -449,8 +446,6 @@ public class XmlExtractor extends AbstractExtractor implements
         }
 
         String nodeValue = p_node.getNodeValue();
-        // GBS-3702
-        nodeValue = XmlExtractorHelper.revertEntities(nodeValue);
         if (!processGsaSnippet(nodeValue))
         {
             String comment = "<!--" + nodeValue + "-->";
@@ -527,8 +522,6 @@ public class XmlExtractor extends AbstractExtractor implements
         XmlFilterProcessIns xmlPI = m_xmlFilterHelper
                 .getMatchedProcessIns(nodeName);
         String piValue = p_node.getNodeValue();
-        // GBS-3702
-        piValue = XmlExtractorHelper.revertEntities(piValue);
         String piStart = "<?" + nodeName + " ";
         String piEnd = "?>";
         String piString = piStart + piValue + piEnd;
@@ -742,58 +735,12 @@ public class XmlExtractor extends AbstractExtractor implements
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private void textProcessor(Node p_node, boolean switchesExtraction,
             boolean isInExtraction, boolean isTranslatable,
             boolean... isTextNodeDontTranslateInline)
     {
-        textProcessor(p_node, p_node.getNodeValue(), switchesExtraction,
-                isInExtraction, isTranslatable, isTextNodeDontTranslateInline);
-    }
-
-    private void textProcessor(Node p_node, String p_nodeValue,
-            boolean switchesExtraction, boolean isInExtraction,
-            boolean isTranslatable, boolean... isTextNodeDontTranslateInline)
-    {
-        String nodeValue = p_nodeValue;
-        // GBS-3702
-        nodeValue = XmlExtractorHelper.revertEntities(nodeValue);
-        if (!XmlExtractorHelper.NON_ENTITIES.contains(nodeValue))
-        {
-            Pattern p = Pattern.compile("&([^;]*?);");
-            Matcher m = p.matcher(nodeValue);
-            int start = 0;
-            boolean handled = false;
-            while (m.find(start))
-            {
-                handled = true;
-                String entity = m.group();
-                String text = nodeValue.substring(start, m.start());
-                textProcessor(p_node, text, switchesExtraction, isInExtraction,
-                        isTranslatable, isTextNodeDontTranslateInline);
-                if (XmlExtractorHelper.NON_ENTITIES.contains(entity))
-                {
-                    textProcessor(p_node, entity, switchesExtraction,
-                            isInExtraction, isTranslatable,
-                            isTextNodeDontTranslateInline);
-                }
-                else
-                {
-                    // entity node is here after GBS-3702 change
-                    entityProcessor(m.group(1), switchesExtraction,
-                            isInExtraction, isTranslatable);
-                }
-
-                start = m.end();
-            }
-            if (handled)
-            {
-                String text = nodeValue.substring(start);
-                textProcessor(p_node, text, switchesExtraction, isInExtraction,
-                        isTranslatable, isTextNodeDontTranslateInline);
-                return;
-            }
-        }
-
+        String nodeValue = p_node.getNodeValue();
         Node parentNode = p_node.getParentNode();
         boolean isParentTagInternal = Rule.isInternal(m_ruleMap, parentNode);
         boolean isInline = Rule
@@ -806,7 +753,7 @@ public class XmlExtractor extends AbstractExtractor implements
             Set words = Rule.getWords(m_ruleMap, p_node);
             if (words != null && words.size() > 0)
             {
-                String adjustedNodeValue = getAdjustedNodeValue(p_nodeValue,
+                String adjustedNodeValue = getAdjustedNodeValue(nodeValue,
                         words);
                 p_node.setNodeValue(adjustedNodeValue);
             }
@@ -833,6 +780,8 @@ public class XmlExtractor extends AbstractExtractor implements
                 {
                     String temp = m_xmlFilterHelper.processText(nodeValue,
                             isInline, isPreserveWS);
+                    // GBS-3577
+                    temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
                 else
@@ -863,6 +812,8 @@ public class XmlExtractor extends AbstractExtractor implements
                         outputSrcComment(srcComment, isTranslatable);
                     }
 
+                    // GBS-3577
+                    temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
 
@@ -885,7 +836,7 @@ public class XmlExtractor extends AbstractExtractor implements
             }
             else
             {
-                outputSkeleton(nodeValue);
+                outputSkeleton(m_xmlEncoder.encodeStringBasic(nodeValue));
             }
         }
     }
@@ -895,8 +846,6 @@ public class XmlExtractor extends AbstractExtractor implements
     {
         // keep empty cdata section
         String nodeValue = p_node.getNodeValue();
-        // GBS-3702
-        nodeValue = XmlExtractorHelper.revertEntities(nodeValue);
         if ("_globalsight_cdata_empty_content_".equals(nodeValue))
         {
             outputSkeleton("<![CDATA[]]>");
@@ -971,10 +920,10 @@ public class XmlExtractor extends AbstractExtractor implements
         }
     }
 
-    private void entityProcessor(String p_nodeName, boolean switchesExtraction,
+    private void entityProcessor(Node p_node, boolean switchesExtraction,
             boolean isInExtraction, boolean isTranslatable)
     {
-        String entityTag = p_nodeName;
+        String entityTag = p_node.getNodeName();
         String name = "&" + entityTag + ";";
         XmlFilterEntity xmlEntity = m_xmlFilterHelper
                 .getMatchedXmlFilterEntity(entityTag);
@@ -1001,8 +950,7 @@ public class XmlExtractor extends AbstractExtractor implements
                 {
                     if (isInExtraction)
                     {
-                        outputExtractedStuff(
-                                m_xmlEncoder.encodeStringBasic(name),
+                        outputExtractedStuff(wrapEntity(entityTag),
                                 isTranslatable, false);
                     }
                     else
@@ -1033,12 +981,13 @@ public class XmlExtractor extends AbstractExtractor implements
             {
                 if (switchesExtraction || m_isElementPost)
                 {
-                    m_switchExtractionBuffer += name;
+                    m_switchExtractionBuffer += m_xmlEncoder
+                            .encodeStringBasic(name);
                 }
                 else
                 {
-                    outputExtractedStuff(m_xmlEncoder.encodeStringBasic(name),
-                            isTranslatable, false);
+                    outputExtractedStuff(wrapEntity(entityTag), isTranslatable,
+                            false);
                 }
             }
             else
@@ -1048,11 +997,10 @@ public class XmlExtractor extends AbstractExtractor implements
         }
     }
 
-    private void entityProcessor(Node p_node, boolean switchesExtraction,
-            boolean isInExtraction, boolean isTranslatable)
+    private String nbspPh()
     {
-        entityProcessor(p_node.getNodeName(), switchesExtraction,
-                isInExtraction, isTranslatable);
+        String nbsp = "<ph type=\"x-nbspace\" erasable=\"yes\">&amp;amp;nbsp;</ph>";
+        return nbsp;
     }
 
     private String wrapEntity(String entityTag)
@@ -1061,6 +1009,29 @@ public class XmlExtractor extends AbstractExtractor implements
         String entityName = "&" + entityTag + ";";
         String entityRef = m_xmlEncoder.encodeStringBasic(entityName);
 
+        StringBuffer temp = new StringBuffer();
+        temp.append("<ph type=\"");
+        if (isNbsp)
+        {
+            temp.append("x-nbspace\"");
+            temp.append(" erasable=\"yes");
+        }
+        else
+        {
+            temp.append("entity-");
+            temp.append(entityTag);
+        }
+        temp.append("\">");
+        temp.append(entityRef);
+        temp.append("</ph>");
+
+        return temp.toString();
+    }
+
+    // For non-entity case such as "&amp;copy;" for protection purpose.
+    private String wrapAsEntity(String entityTag, String entityRef)
+    {
+        boolean isNbsp = "nbsp".equals(entityTag) ? true : false;
         StringBuffer temp = new StringBuffer();
         temp.append("<ph type=\"");
         if (isNbsp)
@@ -1213,12 +1184,12 @@ public class XmlExtractor extends AbstractExtractor implements
             m_isOriginalXmlNode = true;
             if (isInternalTag && hasOnlyOneOrNoChildNode(p_node))
             {
-                handleInternalTagNode(p_node, isEmptyTag, isClosedTag,
-                        isTranslatable, isPreserveWS);
+                handleInternalTagNode(p_node, isEmptyTag, isTranslatable,
+                        isPreserveWS);
             }
             else
             {
-                handleNormalNode(p_node, isEmptyTag, isClosedTag);
+                handleNormalNode(p_node, isEmptyTag);
             }
             return;
         }
@@ -1337,13 +1308,7 @@ public class XmlExtractor extends AbstractExtractor implements
                             }
                             else if (node.getNodeType() == Node.TEXT_NODE)
                             {
-                                String nodeValue = node.getNodeValue();
-                                // GBS-3702
-                                nodeValue = XmlExtractorHelper
-                                        .revertEntities(nodeValue);
-                                outputExtractedStuff(
-                                        m_xmlEncoder
-                                                .encodeStringBasic(nodeValue),
+                                outputExtractedStuff(node.getNodeValue(),
                                         isTranslatable, isPreserveWS);
                             }
                         }
@@ -1749,8 +1714,6 @@ public class XmlExtractor extends AbstractExtractor implements
                 else if (node.getNodeType() == Node.TEXT_NODE)
                 {
                     String text = node.getNodeValue();
-                    // GBS-3702
-                    text = XmlExtractorHelper.revertEntities(text);
                     text = m_xmlEncoder.encodeStringBasic(text);
                     text = m_xmlEncoder.encodeStringBasic(text);
                     outputExtractedStuff(text, isTranslatable, isPreserveWS);
@@ -1915,8 +1878,6 @@ public class XmlExtractor extends AbstractExtractor implements
                 continue;
             }
             String value = att.getNodeValue();
-            // GBS-3702
-            value = XmlExtractorHelper.revertEntities(value);
             String sid = Rule.getSid(m_ruleMap, att);
             boolean extracts = Rule.extracts(m_ruleMap, att);
             // Only for xml files converted from Indesign.
@@ -2053,15 +2014,13 @@ public class XmlExtractor extends AbstractExtractor implements
                     {
                         String versionName = versionNode.getNodeName();
                         String versionValue = versionNode.getNodeValue();
-                        // GBS-3702
-                        versionValue = XmlExtractorHelper
-                                .revertEntities(versionValue);
                         outputSkeleton(" " + versionName + "=\"" + versionValue
                                 + "\"");
                         versionNode = null;
                     }
 
-                    outputSkeleton(" " + attname + "=\"" + value + "\"");
+                    outputSkeleton(" " + attname + "=\""
+                            + m_xmlEncoder.encodeStringBasic(value) + "\"");
                 }
             }
         }
@@ -2270,16 +2229,9 @@ public class XmlExtractor extends AbstractExtractor implements
         {
             try
             {
-                // GBS-3702, do tag decoding and entity protection before going
-                // to html post-filter
-                String textForHtmlFilter = XmlExtractorHelper
-                        .decodeToHtmlPostFilter(m_switchExtractionBuffer);
-                boolean decoded = !m_switchExtractionBuffer
-                        .equals(XmlExtractorHelper
-                                .revertEntities(textForHtmlFilter));
-
-                Output output = switchExtractor(textForHtmlFilter, otherFormat,
-                        otherFilter, true);
+                String replaced = specialPreReplacement(isCdata);
+                Output output = switchExtractor(replaced, otherFormat,
+                        otherFilter);
                 Iterator it = output.documentElementIterator();
                 while (it.hasNext())
                 {
@@ -2291,7 +2243,8 @@ public class XmlExtractor extends AbstractExtractor implements
                             Segmentable segmentableElement = (Segmentable) element;
                             segmentableElement.setDataType(otherFormat);
                             String chunk = segmentableElement.getChunk();
-
+                            chunk = specialPostReplacement(chunk,
+                                    (isCdata || m_isOriginalXmlNode));
                             if (isEntityOrSpaceOnly(chunk))
                             {
                                 outputSkeleton(chunk);
@@ -2299,6 +2252,8 @@ public class XmlExtractor extends AbstractExtractor implements
                             else
                             {
                                 segmentableElement.setChunk(chunk);
+                                fixEntitiesForOtherFormat(segmentableElement,
+                                        (isCdata || m_isOriginalXmlNode));
                                 outputDocumentElement(element, sid);
                             }
                             break;
@@ -2306,14 +2261,16 @@ public class XmlExtractor extends AbstractExtractor implements
                         case DocumentElement.SKELETON:
                             String skeleton = ((SkeletonElement) element)
                                     .getSkeleton();
-                            // GBS-3702
-                            if (decoded)
+                            skeleton = specialPostReplacement(skeleton,
+                                    (isCdata || m_isOriginalXmlNode));
+                            if (isCdata)
                             {
-                                skeleton = XmlExtractorHelper
-                                        .encodeFromHtmlPostFilter(skeleton);
+                                skeleton = StringUtil.replace(skeleton, "�",
+                                        "&nbsp;");
                             }
-                            m_admin.reset(null);
-                            getOutput().addSkeletonTmx(skeleton);
+                            skeleton = (isCdata || m_isOriginalXmlNode) ? m_xmlEncoder
+                                    .decodeStringBasic(skeleton) : skeleton;
+                            outputSkeleton(skeleton);
                             break;
                     }
                 }
@@ -2333,6 +2290,62 @@ public class XmlExtractor extends AbstractExtractor implements
         m_switchExtractionSid = null;
         m_isOriginalXmlNode = false;
         // m_otherFormat = null;
+    }
+
+    /**
+     * To avoid unexpected extraction in switching extractor, replace them
+     * first.
+     * 
+     * Note: maybe we should fix such issue in html extractor instead of here.
+     */
+    private String specialPreReplacement(boolean isCdata)
+    {
+        String replaced = m_switchExtractionBuffer;
+        if (isCdata)
+        {
+            replaced = StringUtil.replace(replaced, "&copy;", "_ampcopyright_");
+        }
+        replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
+        // GBS-3577
+        if (!isCdata)
+        {
+            replaced = StringUtil.replace(replaced, "&nbsp;", "_amp_amp_nbsp_");
+        }
+        else
+        {
+            replaced = StringUtil.replace(replaced, "&nbsp;", "_cdata_nbsp_");
+        }
+
+        // To send to html filter, need encode again
+        char[] specXmlEncodeChar =
+        { '&' };
+        replaced = XmlFilterHelper.encodeSpecifiedEntities(replaced,
+                specXmlEncodeChar);
+
+        return replaced;
+    }
+
+    private String specialPostReplacement(String chunk, boolean isCdata)
+    {
+        // &copy;
+        chunk = StringUtil.replace(chunk, "_copyright_",
+                wrapAsEntity("copy", "&copy;"));
+        chunk = StringUtil.replace(chunk, "_ampcopyright_",
+                wrapAsEntity("copy", "&amp;copy;"));
+        if (!isCdata)
+        {
+            // &nbsp; for GBS-3577
+            chunk = StringUtil.replace(chunk, "&amp;nbsp;",
+                    wrapAsEntity("nbsp", "&nbsp;"));
+            chunk = StringUtil.replace(chunk, "_amp_amp_nbsp_",
+                    wrapAsEntity("nbsp", "&amp;nbsp;"));
+        }
+        else
+        {
+            chunk = StringUtil.replace(chunk, "_cdata_nbsp_", "&amp;nbsp;");
+        }
+
+        return chunk;
     }
 
     private boolean isEntityOrSpaceOnly(String seg)
@@ -2369,6 +2382,124 @@ public class XmlExtractor extends AbstractExtractor implements
         m_switchExtractionBuffer = new String();
         m_switchExtractionSid = null;
         m_isOriginalXmlNode = false;
+    }
+
+    /**
+     * encode twice for this kind of element text : &amp;lt;p&amp;gt; here is p
+     * &amp;lt;/p&amp;gt; TODO : but not for original XML element
+     */
+    private void fixEntitiesForOtherFormat(Segmentable element, boolean isCdata)
+    {
+        if (isCdata)
+        {
+            return;
+        }
+
+        String[] tagNames =
+        { "bpt", "ept", "it", "ph" };
+        String result = encodingEntitiesForOtherFormat(element.getChunk(),
+                tagNames);
+        element.setChunk(result);
+    }
+
+    private String encodingEntitiesForOtherFormat(String chunk,
+            String[] tagNames)
+    {
+        String result = chunk;
+        for (String tagName : tagNames)
+        {
+            result = encodingEntitiesForOtherFormat(result, tagName);
+        }
+
+        return result;
+    }
+
+    private String encodingEntitiesForOtherFormat(String chunk, String tagName)
+    {
+        StringBuffer ori = new StringBuffer(chunk);
+        StringBuffer result = new StringBuffer(chunk.length());
+        String endTag = "</" + tagName + ">";
+        String startTag = "<" + tagName;
+        int fromIndex = 0;
+        int index_e = ori.indexOf(endTag, fromIndex);
+
+        if (index_e != -1)
+        {
+            int index_s = ori.indexOf(startTag, fromIndex);
+
+            while (index_e != -1 && index_s != -1 && index_s < index_e)
+            {
+                int endIndex = index_e + endTag.length();
+                int index_se = ori.indexOf(">", index_s);
+                if (index_se != -1)
+                {
+                    result.append(ori.substring(fromIndex, index_se + 1));
+                    String temp = ori.substring(index_se + 1, index_e);
+                    String encoded = encodeStringBasicExceptSub(temp);
+                    result.append(encoded);
+                    result.append(ori.substring(index_e, endIndex));
+                }
+                else
+                {
+                    result.append(ori.substring(fromIndex, endIndex));
+                }
+
+                fromIndex = endIndex;
+                index_e = ori.indexOf(endTag, fromIndex);
+                index_s = ori.indexOf(startTag, fromIndex);
+            }
+
+            if (ori.length() > fromIndex)
+            {
+                result.append(ori.substring(fromIndex));
+            }
+
+            return result.toString();
+        }
+        else
+        {
+            return chunk;
+        }
+    }
+
+    private String encodeStringBasicExceptSub(String temp)
+    {
+        if (temp.indexOf("<") == -1)
+        {
+            return m_xmlEncoder.encodeStringBasic(temp);
+        }
+        else
+        {
+            StringBuffer result = new StringBuffer();
+            Pattern p = Pattern
+                    .compile("<[^<>]*>[^<>]*</[^<>]*>|<[^<>]*/\\s*>");
+            Matcher m = p.matcher(temp);
+            int fromIndex = 0;
+            if (m.find())
+            {
+                do
+                {
+                    int start = m.start();
+                    int end = m.end();
+                    result.append(m_xmlEncoder.encodeStringBasic(temp
+                            .substring(fromIndex, start)));
+                    result.append(temp.substring(start, end));
+                    fromIndex = end;
+                } while (m.find());
+
+                if (fromIndex < temp.length())
+                {
+                    result.append(m_xmlEncoder.encodeStringBasic(temp
+                            .substring(fromIndex)));
+                }
+            }
+            else
+            {
+                result.append(temp);
+            }
+
+            return result.toString();
+        }
     }
 
     /**
@@ -2632,7 +2763,7 @@ public class XmlExtractor extends AbstractExtractor implements
      * @param isEmptyTag
      */
     private void handleInternalTagNode(Node p_node, boolean isEmptyTag,
-            boolean isClosedTag, boolean isTranslatable, boolean isPreserveWS)
+            boolean isTranslatable, boolean isPreserveWS)
     {
         String name = p_node.getNodeName();
         int bptIndex = m_admin.incrementBptIndex();
@@ -2646,14 +2777,7 @@ public class XmlExtractor extends AbstractExtractor implements
         {
             Node att = attrs.item(i);
             String attname = att.getNodeName();
-            if (isClosedTag && ATTRIBUTE_PRESERVE_CLOSED_TAG.equals(attname))
-            {
-                // ignore ATTRIBUTE_PRESERVE_CLOSED_TAG attribute
-                continue;
-            }
             String value = att.getNodeValue();
-            // GBS-3702
-            value = XmlExtractorHelper.revertEntities(value);
             m_switchExtractionBuffer += " " + attname + "=&quot;" + value
                     + "&quot;";
         }
@@ -2671,8 +2795,7 @@ public class XmlExtractor extends AbstractExtractor implements
         outputExtractedStuffForInternalTag(isTranslatable, isPreserveWS);
     }
 
-    private void handleNormalNode(Node p_node, boolean isEmptyTag,
-            boolean isClosedTag)
+    private void handleNormalNode(Node p_node, boolean isEmptyTag)
     {
         String name = p_node.getNodeName();
         m_switchExtractionBuffer += "<" + name;
@@ -2683,27 +2806,13 @@ public class XmlExtractor extends AbstractExtractor implements
         {
             Node att = attrs.item(i);
             String attname = att.getNodeName();
-            if (isClosedTag && ATTRIBUTE_PRESERVE_CLOSED_TAG.equals(attname))
-            {
-                // ignore ATTRIBUTE_PRESERVE_CLOSED_TAG attribute
-                continue;
-            }
             String value = att.getNodeValue();
-            // GBS-3702
-            value = XmlExtractorHelper.revertEntities(value);
             m_switchExtractionBuffer += " " + attname + "=\"" + value + "\"";
         }
 
         if (isEmptyTag)
         {
-            if (m_useEmptyTag || isClosedTag)
-            {
-                m_switchExtractionBuffer += "/>";
-            }
-            else
-            {
-                m_switchExtractionBuffer += "</" + name + ">";
-            }
+            m_switchExtractionBuffer += "/>";
         }
         else
         {

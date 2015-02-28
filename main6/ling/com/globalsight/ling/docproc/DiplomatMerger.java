@@ -45,6 +45,7 @@ import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.EncodingChecker;
 import com.globalsight.ling.common.HtmlEntities;
+import com.globalsight.ling.common.HtmlEscapeSequence;
 import com.globalsight.ling.common.NativeEnDecoder;
 import com.globalsight.ling.common.NativeEnDecoderException;
 import com.globalsight.ling.common.Text;
@@ -52,7 +53,6 @@ import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.XmlWriter;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.ling.docproc.extractor.xliff.WSConstants;
-import com.globalsight.ling.docproc.extractor.xml.XmlExtractorHelper;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.worldserver.WsSkeletonDispose;
 import com.globalsight.machineTranslation.MTHelper;
@@ -109,11 +109,13 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     private EncodingChecker m_encodingChecker = null;
     private CxeMessage cxeMessage = null;
     private boolean m_convertHtmlEntityForHtml;
+    private boolean m_convertHtmlEntityForXml;
     private long m_filterId;
     private String m_filterTableName;
     private BaseFilter m_baseFilter;
     private List<Escaping> m_escapings;
-    private XMLRuleFilter m_xmlFilter = null;
+    private boolean isXmlFilterConfigured = false;
+    // For entity encoding issue
     private boolean m_isCDATA = false;
 
     // For secondary filter:if second parser(currently it is html parser) is
@@ -222,6 +224,55 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return result.toString();
     }
 
+/**
+     * For "Entity Encoding issue", if source segment string contains special signs,
+     * For CDATA:
+     *     Replace the '&lt;' to char '<'
+     *     Replace the '&gt;' to char '>'
+     *     Replace the '&amp;' to char '&'
+     *     Replace the '&apos;' to single quote '''
+     *     Replace the '&quot;' to double quote '"'
+     * For Node:
+     *     Replace the '&apos;' to single quote '''
+     *     Replace the '&quot;' to double quote '"'
+     *     Replace the '&gt;' to char '>'
+     */
+    private String entityEncode(String sourceSeg)
+    {
+        String targetSeg = sourceSeg;
+
+        if (m_isCDATA)
+        {
+            targetSeg = convertHtmlEntityForXml(targetSeg,
+                    m_convertHtmlEntityForXml);
+        }
+        else if ((isXmlFilterConfigured && !m_convertHtmlEntityForXml)
+                || !isXmlFilterConfigured)
+        {
+            targetSeg = targetSeg.replaceAll("&apos;", "\'");
+            targetSeg = targetSeg.replaceAll("&quot;", "\"");
+        }
+
+        return targetSeg;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String decoding(String s)
+    {
+        HashMap<String, Character> map = new HashMap<String, Character>();
+        map.putAll(HtmlEntities.mHtmlEntityToChar);
+        map.putAll(HtmlEntities.mDefaultEntityToChar);
+        map.remove("&nbsp");
+        map.remove("&nbsp;");
+        for (String key : map.keySet())
+        {
+            String value = map.get(key).toString();
+            s = s.replace(key, value);
+        }
+
+        return s;
+    }
+
     @SuppressWarnings("unchecked")
     private String encoding(String s, boolean encodeAllHtmlEntities)
     {
@@ -238,6 +289,23 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             String value = map.get(key);
             s = s.replace(key.toString(), value);
+        }
+
+        return s;
+    }
+
+    private String convertHtmlEntityForXml(String s,
+            boolean convertHtmlEntityForXml)
+    {
+        if (s == null || s.length() == 0)
+            return s;
+
+        s = decoding(s);
+        s = decoding(s);
+
+        if (convertHtmlEntityForXml)
+        {
+            s = encoding(s, convertHtmlEntityForXml);
         }
 
         return s;
@@ -263,6 +331,48 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         targetSeg = targetSeg.replaceAll("_xaFlag_", "&#xa;");
 
         return targetSeg;
+    }
+
+    /**
+     * For "Entity Encoding issue" If the attribute of element contains special
+     * sign(e.g. '&apos;'), Then Replace the '&apos;' to single quote ''' Else
+     * Do nothing.
+     */
+    private String entityEncodeForSkeleton(String sourceSeg, boolean isXliff)
+    {
+        String targetSeg = sourceSeg;
+
+        if (!isXliff)
+        {
+            targetSeg = targetSeg.replaceAll("&apos;", "\'");
+        }
+
+        // Judge to set value for "m_isCDATA".
+        isInCDATA(targetSeg);
+
+        return targetSeg;
+    }
+
+    private String entityEncodeForSkeleton(String sourceSeg)
+    {
+        return entityEncodeForSkeleton(sourceSeg, false);
+    }
+
+    private void isInCDATA(String documentText)
+    {
+        int beginIndex = documentText.lastIndexOf("<![CDATA[");
+        int endIndex = documentText.lastIndexOf("]]>");
+
+        if (m_isCDATA && endIndex >= 0 && beginIndex < endIndex)
+        {
+            m_isCDATA = false;
+        }
+
+        // Mark the CDATA element for "entityEncode(String sourceSeg)"
+        if (beginIndex >= 0 && beginIndex > endIndex)
+        {
+            m_isCDATA = true;
+        }
     }
 
     /**
@@ -300,8 +410,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return p_para;
     }
 
-    private String applyNativeEncoding(String p_text, String p_format,
-            String p_type, char p_lastOutputChar)
+    private String applyNativeEncoding(String p_text, String p_mainFormat,
+            String p_format, String p_type, char p_lastOutputChar)
             throws DiplomatMergerException
     {
         // Convert PUA characters back to original C0 control codes
@@ -331,6 +441,16 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             {
                 newText = encoder.encodeWithEncodingCheck(newText,
                         String.valueOf(p_lastOutputChar));
+            }
+            // For GBS-3795. Don't change "OxA0" to &nbsp; It is not xml entity.
+            else if (ExtractorRegistry.FORMAT_XML
+                    .equalsIgnoreCase(p_mainFormat)
+                    && encoder instanceof HtmlEscapeSequence)
+            {
+                HtmlEscapeSequence htmlEscapeSequence = (HtmlEscapeSequence) encoder;
+                newText = htmlEscapeSequence.encodeWithEncodingCheck(newText,
+                        true, new char[]
+                        {});
             }
             else
             {
@@ -525,21 +645,6 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
         try
         {
-            // GBS-3702
-            if (isContent() && FORMAT_XML.equals(mainFormat)
-                    && m_xmlFilter != null)
-            {
-                tmp = XmlFilterHelper.saveNonAsciiAs(tmp, m_xmlFilter);
-            }
-            if (!isContent() && FORMAT_XML.equalsIgnoreCase(mainFormat)
-                    && FORMAT_HTML.equalsIgnoreCase(format) && !m_isCDATA)
-            {
-                // GBS-3702, need to change
-                // "<font face=&quot;&#8230;Arial&quot;>" back to
-                // "&lt;font face=&quot;&#8230;Arial&quot;&gt;"
-                tmp = XmlExtractorHelper.encodeTagFromHtmlPostFilter(tmp);
-            }
-
             if (!isContent() && m_isFromOfficeContent)
             {
                 // For GBS-2073, for a tag in office embedded content like
@@ -549,20 +654,22 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 tmp = encode(tmp);
             }
 
-            if (isContent()
-                    && !FORMAT_XLIFF.equals(format)
+            if (isContent() && !FORMAT_XLIFF.equals(format)
                     && !FORMAT_PO.equals(mainFormat)
-                    && !FORMAT_HTML.equals(mainFormat)
-                    && (!FORMAT_XML.equals(mainFormat) || isIndd(mainFormat,
-                            format)))
+                    && !FORMAT_HTML.equals(mainFormat))
             {
-                tmp = applyNativeEncoding(tmp, format, type,
-                        m_l10nContent.getLastChar());
+                // Do not encode CDATA content from XML and passing HTML.
+                if (!(ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
+                        && ExtractorRegistry.FORMAT_HTML
+                                .equalsIgnoreCase(format) && m_isCDATA))
+                {
+                    tmp = applyNativeEncoding(tmp, mainFormat, format, type,
+                            m_l10nContent.getLastChar());
+                }
             }
 
             // For "Entity Encode issue"
-            if (!FORMAT_XML.equals(mainFormat)
-                    && FORMAT_HTML.equalsIgnoreCase(format)
+            if (ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format)
                     && m_convertHtmlEntityForHtml)
             {
                 if (isContent())
@@ -571,21 +678,64 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 }
             }
 
+            if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format)
+                    && m_isCDATA)
+            {
+                if (isContent())
+                {
+                    tmp = convertHtmlEntityForXml(tmp,
+                            m_convertHtmlEntityForXml);
+                }
+            }
+
+            if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
+            {
+                if ((isXmlFilterConfigured && !m_convertHtmlEntityForXml)
+                        || !isXmlFilterConfigured)
+                {
+                    tmp = tmp.replaceAll("&apos;", "\'");
+                    tmp = tmp.replaceAll("&quot;", "\"");
+                }
+
+                if (m_isCDATA && isXmlFilterConfigured
+                        && m_convertHtmlEntityForXml)
+                {
+                    tmp = encode(tmp);
+                    tmp = tmp.replace("&amp;amp;nbsp;", "&amp;nbsp;");
+                }
+            }
+
             // Always encode basic HTML entities regardless of setting.
-            if (isContent() && FORMAT_HTML.equalsIgnoreCase(mainFormat)
-                    && FORMAT_HTML.equalsIgnoreCase(format))
+            if (isContent()
+                    && ExtractorRegistry.FORMAT_HTML
+                            .equalsIgnoreCase(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
             {
                 tmp = encoding(tmp, false);
             }
 
-            if (FORMAT_XLIFF.equalsIgnoreCase(format))
+            if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format))
+            {
+                if (isContent())
+                {
+                    tmp = entityEncode(tmp);
+                }
+                else
+                {
+                    tmp = entityEncodeForSkeleton(tmp);
+                }
+            }
+            else if (ExtractorRegistry.FORMAT_XLIFF.equalsIgnoreCase(format))
             {
                 if (isContent())
                 {
                     tmp = entityDecodeForXliff(tmp);
                 }
             }
-            else if (FORMAT_OFFICE_XML.equalsIgnoreCase(format))
+            else if (ExtractorRegistry.FORMAT_OFFICE_XML
+                    .equalsIgnoreCase(format))
             {
                 if (!isContent())
                 {
@@ -594,8 +744,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
 
             // GBS-3596
-            if (FORMAT_PO.equalsIgnoreCase(mainFormat)
-                    && FORMAT_HTML.equalsIgnoreCase(format))
+            if (ExtractorRegistry.FORMAT_PO.equalsIgnoreCase(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
             {
                 if (isContent())
                 {
@@ -621,50 +771,10 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
             m_l10nContent.addContent(tmp);
         }
-        catch (Exception e)
+        catch (DiplomatMergerException e)
         {
             m_error = e;
         }
-    }
-
-    private void setIsCDATA(String skeleton)
-    {
-        int beginIndex = skeleton.lastIndexOf("<![CDATA[");
-        int endIndex = skeleton.lastIndexOf("]]>");
-
-        if (m_isCDATA && endIndex >= 0 && beginIndex < endIndex)
-        {
-            m_isCDATA = false;
-        }
-
-        if (beginIndex >= 0 && beginIndex > endIndex)
-        {
-            m_isCDATA = true;
-        }
-    }
-
-    private boolean isIndd(String mainFormat, String format)
-    {
-        if (cxeMessage != null)
-        {
-            // idml/indd exporting
-            int value = CxeMessageType.getCxeMessageType(
-                    cxeMessage.getEventFlowObject().getPostMergeEvent())
-                    .getValue();
-
-            return CxeMessageType.IDML_LOCALIZED_EVENT == value
-                    || CxeMessageType.ADOBE_LOCALIZED_EVENT == value;
-        }
-        else
-        {
-            if (FORMAT_XML.equals(mainFormat) && FORMAT_XML.equals(format))
-            {
-                // cxeMessage == null, this should be idml/indd view pdf
-                // operation
-                return true;
-            }
-        }
-        return false;
     }
 
     // For GBS-2521.
@@ -844,7 +954,17 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     }
                     tmp = applyNativeEncodingForSkeleton(tmp,
                             encoderForSkeleton);
-                    setIsCDATA(tmp);
+                    if (IFormatNames.FORMAT_XLIFF.equals(srcDataType)
+                            || IFormatNames.FORMAT_XLIFF_NAME
+                                    .equals(srcDataType)
+                            || IFormatNames.FORMAT_PO.equals(srcDataType))
+                    {
+                        tmp = entityEncodeForSkeleton(tmp, true);
+                    }
+                    else
+                    {
+                        tmp = entityEncodeForSkeleton(tmp);
+                    }
 
                     SkeletonDispose sd;
 
@@ -1030,10 +1150,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
             if (isXmlFormat)
             {
-                m_xmlFilter = FilterHelper.getXmlFilter(m_filterId);
-                if (m_xmlFilter != null)
+                XMLRuleFilter xmlFilter = FilterHelper.getXmlFilter(m_filterId);
+                if (xmlFilter != null)
                 {
+                    m_convertHtmlEntityForXml = xmlFilter.isConvertHtmlEntity();
                     getValueOfconvertHtmlEntity = true;
+                    isXmlFilterConfigured = true;
                 }
             }
 
@@ -1050,10 +1172,16 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         m_convertHtmlEntityForHtml = Boolean
                                 .valueOf(convertHtml.trim());
                     }
+                    else if (isXmlFormat)
+                    {
+                        m_convertHtmlEntityForXml = Boolean.valueOf(convertHtml
+                                .trim());
+                    }
                 }
                 else
                 {
                     m_convertHtmlEntityForHtml = false;
+                    m_convertHtmlEntityForXml = false;
                 }
             }
 

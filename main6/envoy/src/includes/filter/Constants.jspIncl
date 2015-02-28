@@ -170,7 +170,6 @@ var jsExcelOrderRow = "<%= bundle.getString("lb_filter_ExcelOrder_row") %>";
 var jsExcelOrderColumn = "<%= bundle.getString("lb_filter_ExcelOrder_column") %>";
 var jsNonasciiAsCharacter = "<%= bundle.getString("lb_filter_NonasciiAsCharacter") %>";
 var jsNonasciiAsEntity = "<%= bundle.getString("lb_filter_NonasciiAsEntity") %>";
-var jsNonasciiAsPreserve = "<%= bundle.getString("lb_filter_NonasciiAsPreserve") %>";
 var jsWhitespaceHandling = "<%= bundle.getString("lb_filter_WhitespaceHandling") %>";
 var jsWsHandlingCollapse = "<%= bundle.getString("lb_filter_WhitespaceHandlingCollapse") %>";
 var jsWsHandlingPreserve = "<%= bundle.getString("lb_filter_WhitespaceHandlingPreserve") %>";

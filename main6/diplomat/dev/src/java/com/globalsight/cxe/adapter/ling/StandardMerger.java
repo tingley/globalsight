@@ -41,6 +41,7 @@ import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.MessageData;
@@ -58,6 +59,7 @@ import com.globalsight.ling.common.TranscoderException;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.DiplomatMergerException;
 import com.globalsight.ling.docproc.IFormatNames;
+import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.merger.paginated.PaginatedMerger;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -195,6 +197,15 @@ public class StandardMerger implements IFormatNames
             String s = new String(mergeResult, m_targetEncoding);
 
             s = handleReturns(s);
+
+            if (FORMAT_XML.equals(m_formatType)
+                    && filterId != -1
+                    && FilterConstants.XMLRULE_TABLENAME
+                            .equals(filterTableName))
+            {
+                s = XmlFilterHelper
+                        .saveNonAsciiAs(s, filterId, filterTableName);
+            }
 
             if (FORMAT_MIF.equals(m_formatType))
             {

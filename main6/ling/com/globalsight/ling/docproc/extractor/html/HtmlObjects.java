@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
-import com.globalsight.ling.docproc.extractor.xml.XmlExtractorHelper;
 
 /**
  * <P>
@@ -73,9 +72,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return (hasValue ? XmlExtractorHelper.revertEntities(name) + "="
-                    + XmlExtractorHelper.revertEntities(value)
-                    : XmlExtractorHelper.revertEntities(name));
+            return (hasValue ? name + "=" + value : name);
         }
 
         public boolean hasValue()
@@ -85,12 +82,12 @@ public interface HtmlObjects
 
         public String getValue()
         {
-            return (hasValue ? XmlExtractorHelper.revertEntities(value) : "");
+            return (hasValue ? value : "");
         }
 
         public String getName()
         {
-            return XmlExtractorHelper.revertEntities(name);
+            return name;
         }
 
         public void deleteValue()
@@ -348,17 +345,12 @@ public interface HtmlObjects
             isClosed = b;
         }
 
-        public String getTag()
-        {
-            return XmlExtractorHelper.revertEntities(tag);
-        }
-
         public String toString()
         {
             StringBuffer res = new StringBuffer();
 
             res.append("<");
-            res.append(XmlExtractorHelper.revertEntities(tag));
+            res.append(tag);
 
             if (attributes.size() > 0)
             {
@@ -401,7 +393,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return XmlExtractorHelper.revertEntities(original);
+            return original;
         }
     }
 
@@ -421,7 +413,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return XmlExtractorHelper.revertEntities(original);
+            return original;
         }
     }
 
@@ -442,7 +434,7 @@ public interface HtmlObjects
 
         public String getText()
         {
-            return XmlExtractorHelper.revertEntities(text);
+            return text;
         }
     }
 
@@ -463,7 +455,7 @@ public interface HtmlObjects
 
         public String getText()
         {
-            return XmlExtractorHelper.revertEntities(text);
+            return text;
         }
     }
 
@@ -486,12 +478,12 @@ public interface HtmlObjects
 
         public String getText()
         {
-            return XmlExtractorHelper.revertEntities(text);
+            return text;
         }
 
         public String toString()
         {
-            return "<%" + XmlExtractorHelper.revertEntities(text) + "%>";
+            return "<%" + text + "%>";
         }
     }
 
@@ -529,12 +521,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return XmlExtractorHelper.revertEntities(original);
-        }
-
-        public String getTag()
-        {
-            return XmlExtractorHelper.revertEntities(tag);
+            return original;
         }
 
         public boolean isDefinedAttribute(String p_attrib)
@@ -563,11 +550,6 @@ public interface HtmlObjects
             super(t, a, b, o, l, c);
             text = s;
         }
-
-        public String toString()
-        {
-            return XmlExtractorHelper.revertEntities(text);
-        }
     }
 
     public static class Java extends Tag
@@ -580,11 +562,6 @@ public interface HtmlObjects
             super(t, a, b, o, l, c);
             text = s;
         }
-
-        public String toString()
-        {
-            return XmlExtractorHelper.revertEntities(text);
-        }
     }
 
     public static class Style extends Tag
@@ -596,11 +573,6 @@ public interface HtmlObjects
         {
             super(t, a, b, o, l, c);
             text = s;
-        }
-
-        public String toString()
-        {
-            return XmlExtractorHelper.revertEntities(text);
         }
     }
 
@@ -619,7 +591,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return "</" + XmlExtractorHelper.revertEntities(tag) + ">";
+            return "</" + tag + ">";
         }
     }
 
@@ -638,12 +610,12 @@ public interface HtmlObjects
 
         public String getComment()
         {
-            return XmlExtractorHelper.revertEntities(comment);
+            return comment;
         }
 
         public String toString()
         {
-            return "<!--" + XmlExtractorHelper.revertEntities(comment) + "-->";
+            return "<!--" + comment + "-->";
         }
     }
 
@@ -664,12 +636,12 @@ public interface HtmlObjects
 
         public String getComment()
         {
-            return XmlExtractorHelper.revertEntities(comment);
+            return comment;
         }
 
         public String toString()
         {
-            return "<!--" + XmlExtractorHelper.revertEntities(comment) + "-->";
+            return "<!--" + comment + "-->";
         }
     }
 
@@ -685,8 +657,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return "<!---" + XmlExtractorHelper.revertEntities(comment)
-                    + "--->";
+            return "<!---" + comment + "--->";
         }
     }
 
@@ -705,7 +676,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return "<!" + XmlExtractorHelper.revertEntities(declaration) + ">";
+            return "<!" + declaration + ">";
         }
     }
 
@@ -725,9 +696,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return "<?" + XmlExtractorHelper.revertEntities(instruction) + ">"; // see
-                                                                                // html
-                                                                                // grammar
+            return "<?" + instruction + ">"; // see html grammar
         }
     }
 
@@ -746,7 +715,7 @@ public interface HtmlObjects
 
         public String toString()
         {
-            return XmlExtractorHelper.revertEntities(text);
+            return text;
         }
     }
 
@@ -798,14 +767,9 @@ public interface HtmlObjects
             }
         }
 
-        public String getInternalText()
-        {
-            return XmlExtractorHelper.revertEntities(internalText);
-        }
-
         public String toString()
         {
-            return XmlExtractorHelper.revertEntities(original);
+            return original;
         }
     }
 }

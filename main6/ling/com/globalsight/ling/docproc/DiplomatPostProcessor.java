@@ -246,7 +246,15 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
                 result.append("<ph type=\"x-nbspace\" erasable=\"yes\" x=\"");
                 result.append(m_externalMatchingCount);
                 result.append("\">");
-                result.append("&amp;nbsp;");
+                if (IFormatNames.FORMAT_XML.equals(formatName))
+                {
+                    // GBS-3577
+                    result.append("&amp;#160;");
+                }
+                else
+                {
+                    result.append("&amp;nbsp;");
+                }
                 result.append("</ph>");
 
                 m_externalMatchingCount++;
@@ -352,7 +360,7 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
     {
         Integer state = (Integer) m_tmxStateStack.peek();
 
-        if (state == s_TEXT && !IFormatNames.FORMAT_XML.equals(formatName)
+        if (state == s_TEXT
                 && !OfficeXmlHelper.OFFICE_XML.equalsIgnoreCase(formatName)
                 && !OfficeContentPostFilterHelper.isOfficeFormat(formatName))
         {

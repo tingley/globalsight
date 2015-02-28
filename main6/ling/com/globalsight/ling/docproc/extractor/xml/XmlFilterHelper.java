@@ -19,8 +19,6 @@ package com.globalsight.ling.docproc.extractor.xml;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -37,7 +35,6 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.srccomment.SrcCmtXmlComment;
 import com.globalsight.ling.common.srccomment.SrcCmtXmlTag;
-import com.globalsight.util.StringUtil;
 
 public class XmlFilterHelper
 {
@@ -395,17 +392,6 @@ public class XmlFilterHelper
         }
 
         // default preserve empty tag as source if not using a filter
-        return true;
-    }
-
-    public boolean preserveEntities()
-    {
-        if (!isConfigParserNull())
-        {
-            return m_xmlFilterConfigParser.getNonasciiAs() == XmlFilterConstants.NON_ASCII_AS_PRESERVE;
-        }
-
-        // default preserve entities as source if not using a filter
         return true;
     }
 
@@ -1160,28 +1146,31 @@ public class XmlFilterHelper
     // public static
     // ////////////////////////////////////////////////////////
 
-    public static String saveNonAsciiAs(String text, XMLRuleFilter xmlFilter)
-            throws Exception
+    public static String saveNonAsciiAs(String p_src, long p_filterId,
+            String p_filterTableName) throws Exception
     {
-        if (xmlFilter != null)
+        if (p_filterId != -1
+                && FilterConstants.XMLRULE_TABLENAME.equals(p_filterTableName))
         {
+            XMLRuleFilter filter = FilterHelper.getXmlFilter(p_filterId);
             XmlFilterConfigParser configParser = new XmlFilterConfigParser(
-                    xmlFilter);
+                    filter);
             configParser.parserXml();
 
-            int saveAs = configParser.getNonasciiAs();
-            if (XmlFilterConfigParser.NON_ASCII_AS_ENTITY == saveAs)
+            if (configParser.getNonasciiAs() == XmlFilterConfigParser.NON_ASCII_AS_ENTITY)
             {
-                text = saveNonAsciiAsNumberEntity(text);
+                // DOMParser parser = new DOMParser();
+                // InputSource is = new InputSource(new StringReader(p_src));
+                // parser.parse(is);
+                // Document doc = parser.getDocument();
+                // domNodeVisitor(doc);
+
+                String xml = saveNonAsciiAsNumberEntity(p_src);
+                return xml;
             }
-            else if (XmlFilterConfigParser.NON_ASCII_AS_CHARACTER == saveAs)
-            {
-                text = saveNonAsciiAsCharacter(text);
-            }
-            // default, text is preserved as source
         }
 
-        return text;
+        return p_src;
     }
 
     /**
@@ -1254,67 +1243,132 @@ public class XmlFilterHelper
     // private static
     // ////////////////////////////////////////////////////////
 
-    private static String saveNonAsciiAsNumberEntity(String text)
+    private static String saveNonAsciiAsNumberEntity(String p_src)
     {
-        if (StringUtil.isEmpty(text))
+        if (p_src == null || p_src.length() == 0 || p_src.trim().length() == 0)
         {
-            return text;
+            return p_src;
         }
 
-        int length = text.length();
-        StringBuilder sb = new StringBuilder(length);
+        int length = p_src.length();
+        StringBuffer src = new StringBuffer(p_src);
+        StringBuffer ret = new StringBuffer(length);
         for (int i = 0; i < length; i++)
         {
-            char c = text.charAt(i);
+            char c = src.charAt(i);
             int ci = (int) c;
             if (isAscii(ci))
             {
-                sb.append(c);
+                ret.append(c);
+            }
+            else if (isEncodeable(src, i))
+            {
+                ret.append(NUMBER_ENTITY_START).append(ci)
+                        .append(NUMBER_ENTITY_END);
             }
             else
             {
-                sb.append(NUMBER_ENTITY_START).append(ci)
-                        .append(NUMBER_ENTITY_END);
+                ret.append(c);
             }
         }
 
-        return sb.toString();
+        return ret.toString();
     }
 
-    private static String saveNonAsciiAsCharacter(String text)
+    private static boolean isEncodeable(StringBuffer p_src, int index)
     {
-        if (StringUtil.isEmpty(text))
-        {
-            return text;
-        }
+        // white space
+        boolean blank = false;
+        boolean lt = false;
+        String sub = null;
 
-        String regex = NUMBER_ENTITY_START + "(\\d+)" + NUMBER_ENTITY_END;
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(text);
-        while (m.find())
+        for (int i = index - 1; i >= 0; i--)
         {
-            String entityNumber = m.group(1);
-            int ascii = 0;
-            try
+            char c = p_src.charAt(i);
+            String cstr = "" + c;
+
+            if ("".equals(cstr.trim()))
             {
-                ascii = Integer.parseInt(entityNumber);
+                blank = true;
             }
-            catch (NumberFormatException nfe)
+            else if (c == '<')
             {
+                sub = p_src.substring(i, index);
+                lt = true;
+                break;
             }
-            if (isAscii(ascii))
+            // node value, encode
+            else if (c == '>')
             {
-                continue;
-            }
-            String entity = m.group();
-            if (XmlExtractorHelper.ENTITIES.contains(entity))
-            {
-                char c = (char) ascii;
-                text = StringUtil.replace(text, entity, String.valueOf(c));
+                return true;
             }
         }
 
-        return text;
+        // node name, do not encode
+        if (lt && !blank)
+        {
+            return false;
+        }
+
+        // comments, encode
+        if (sub.startsWith("<!--"))
+        {
+            return true;
+        }
+
+        // cdata, encode
+        if (sub.startsWith("<![CDATA["))
+        {
+            return true;
+        }
+
+        // dtd or version, do not encode
+        if (sub.startsWith("<!") || sub.startsWith("<?"))
+        {
+            return false;
+        }
+
+        // determine attribute
+        int subLen = sub.length();
+        boolean eq = false;
+        boolean singleQuote = false;
+        boolean doubleQuote = false;
+        for (int i = 1; i < subLen; i++)
+        {
+            char c = sub.charAt(i);
+
+            if (c == '=' && !singleQuote && !doubleQuote)
+            {
+                eq = true;
+            }
+
+            if (c == '\'' && eq && !doubleQuote)
+            {
+                singleQuote = !singleQuote;
+                if (!singleQuote)
+                {
+                    eq = false;
+                }
+            }
+
+            if (c == '"' && eq && !singleQuote)
+            {
+                doubleQuote = !doubleQuote;
+                if (!doubleQuote)
+                {
+                    eq = false;
+                }
+            }
+        }
+
+        if (singleQuote || doubleQuote)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private static boolean isAscii(int ci)

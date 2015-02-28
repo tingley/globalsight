@@ -202,7 +202,8 @@ public class XMLRuleFilter implements Filter
                         : XmlFilterConstants.PH_TRIM_DONOT).append(",");
         sb.append("\"nonasciiAs\":")
                 .append(isParsed ? parser.getNonasciiAs()
-                        : XmlFilterConstants.NON_ASCII_AS_PRESERVE).append(",");
+                        : XmlFilterConstants.NON_ASCII_AS_CHARACTER)
+                .append(",");
         sb.append("\"wsHandleMode\":")
                 .append(isParsed ? parser.getWhiteSpaceHanldeMode()
                         : XmlFilterConstants.WHITESPACE_HANDLE_PRESERVE)

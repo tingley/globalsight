@@ -655,13 +655,6 @@ public abstract class AbstractExtractor implements ExtractorInterface
     }
 
     public Output switchExtractor(String to_translate, String dataFormat,
-            Filter filter, boolean isFromXml) throws ExtractorException
-    {
-        return switchExtractor(to_translate, dataFormat, null, filter, true,
-                isFromXml);
-    }
-
-    public Output switchExtractor(String to_translate, String dataFormat,
             String rules) throws ExtractorException
     {
         return switchExtractor(to_translate, dataFormat, rules, null);
@@ -671,13 +664,11 @@ public abstract class AbstractExtractor implements ExtractorInterface
             String rules, Filter filter) throws ExtractorException
     {
         // keep all whitespace from GBS-3663
-        return switchExtractor(to_translate, dataFormat, rules, filter, true,
-                false);
+        return switchExtractor(to_translate, dataFormat, rules, filter, true);
     }
 
     private Output switchExtractor(String to_translate, String dataFormat,
-            String rules, Filter filter, boolean p_preserveAllWhite,
-            boolean isFromXml)
+            String rules, Filter filter, boolean p_preserveAllWhite)
     {
 
         ExtractorRegistry reg = ExtractorRegistry.getObject();
@@ -700,7 +691,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
         String content = to_translate;
         // html
-        if (formatId == 1 && !isFromXml)
+        if (formatId == 1)
         {
             content = StandardExtractor.checkHtmlTags(content);
         }

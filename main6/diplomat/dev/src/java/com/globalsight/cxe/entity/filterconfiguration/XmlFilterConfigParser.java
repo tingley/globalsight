@@ -323,7 +323,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
     {
         if (m_nonasciiAs == -1)
         {
-            int result = NON_ASCII_AS_PRESERVE;
+            int result = NON_ASCII_AS_CHARACTER;
             String v = getSingleElementValue(NODE_NON_ASCII_AS);
             try
             {
@@ -331,7 +331,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             }
             catch (Exception e)
             {
-                result = NON_ASCII_AS_PRESERVE;
+                result = NON_ASCII_AS_CHARACTER;
             }
 
             m_nonasciiAs = result;

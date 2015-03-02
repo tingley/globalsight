@@ -28,10 +28,9 @@ public class JarManager
 {
     private static Logger log = Logger.getLogger(JarManager.class);
 
-    private static String DEFAULT = GitUtil.SERVER_NAME
-            + "/jboss/jboss_server/server/default";
-    private static String LIB = DEFAULT + "/deploy/globalsight.ear/lib/";
-    private static String APPLET_LIB = DEFAULT + "/deploy/globalsight.ear/"
+    private static String EAR = GitUtil.SERVER_NAME + "/jboss/server/standalone/deployments/globalsight.ear";
+    private static String LIB = EAR + "/deploy/globalsight.ear/lib/";
+    private static String APPLET_LIB = EAR + "/deploy/globalsight.ear/"
             + "globalsight-web.war/applet/lib/";
     private static String SERVER_LIB = GitUtil.SERVER_NAME
             + "/jboss/jboss_server/lib/";
@@ -72,7 +71,7 @@ public class JarManager
 
     private static String MAIL_JAR_PATH = BuildUtil.ROOT
             + "/main6/tools/j2eeVendor/jboss/jboss_server/server/default/lib/mail.jar";
-    private static String MAIL_JAR_NEW_PATH = DEFAULT + "/lib/mail.jar";
+    private static String MAIL_JAR_NEW_PATH = EAR + "/lib/mail.jar";
 
     private static String ADD_SOURCE_JAR_PATH = BuildUtil.ROOT
             + "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/SelectFilesApplet.jar";
@@ -147,7 +146,7 @@ public class JarManager
             ALL_JARS.add(new Jar(INSTALL_JAR_PATH, INSTALL_JAR_NEW_PATH,
                     "/tools/install/"));
             ALL_JARS.add(new Jar(GRAPHICAL_WF_JAR_PATH,
-                    GRAPHICAL_WF_JAR_NEW_PATH, "/gui/planview/", "/everest/webapp/applet/common/"));
+                    GRAPHICAL_WF_JAR_NEW_PATH, "/gui/planview/", "/everest/webapp/applet/common/", "/SortUtil"));
             ALL_JARS.add(new Jar(CUSTOMER_JAR_PATH, CUSTOMER_JAR_NEW_PATH,
                     "/everest/webapp/applet/", "/zip/ZipIt"));
             ALL_JARS.add(new Jar(PROMT_UTIL_JAR, PROMT_UTIL_NEW_JAR,

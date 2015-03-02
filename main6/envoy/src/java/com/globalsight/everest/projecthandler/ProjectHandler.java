@@ -134,6 +134,9 @@ public interface ProjectHandler
      */
     Collection getAllL10nProfiles() throws RemoteException,
             ProjectHandlerException;
+    
+	Collection getL10ProfilesByProjectId(long projectId)
+			throws RemoteException, ProjectHandlerException;
 
     Collection getAllL10nProfilesData() throws RemoteException,
             ProjectHandlerException;

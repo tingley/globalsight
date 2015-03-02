@@ -25,16 +25,16 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -43,12 +43,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.BasicL10nProfile;
+import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserRoleImpl;
 import com.globalsight.everest.jobhandler.Job;
@@ -59,8 +63,10 @@ import com.globalsight.everest.page.pageexport.ExportBatchEvent;
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectImpl;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WfTemplateSearchParameters;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -69,6 +75,7 @@ import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.taskmanager.TaskManager;
 import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
@@ -121,6 +128,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
     public static final String GET_JOB_EXPORT_FILES = "getJobExportFiles";
     public static final String GET_JOB_EXPORT_WORKFLOW_FILES = "getJobExportWorkflowFiles";
     public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
+    public static final String GET_ALL_PROJECT_PROFILES="getAllProjectProfiles";
 
     private static String NOT_IN_DB = "This job is not ready for query: ";
     private static SimpleDateFormat dateFormat = new SimpleDateFormat(
@@ -498,7 +506,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 				Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 				activityArgs.put("loggedUserName", acceptorName);
 				activityArgs.put("taskId", p_taskId);
-				activityStart = ActivityLog.start(Ambassador.class,
+				activityStart = ActivityLog.start(Ambassador4Falcon.class,
 						"acceptTask(p_accessToken,p_taskId)", activityArgs);
 				if (task.getState() == Task.STATE_ACCEPTED
 						|| task.getState() == Task.STATE_COMPLETED)
@@ -616,7 +624,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			activityArgs.put("loggedUserName", userName);
 			activityArgs.put("taskId", p_taskId);
 			activityArgs.put("destinationArrow", p_destinationArrow);
-			activityStart = ActivityLog.start(Ambassador.class,
+			activityStart = ActivityLog.start(Ambassador4Falcon.class,
 					"completeTask(p_accessToken,p_taskId,p_destinationArrow)",
 					activityArgs);
 			// Find the user to complete task.
@@ -762,7 +770,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			activityArgs.put("loggedUserName", rejectUserName);
 			activityArgs.put("p_taskId", p_taskId);
 			activityArgs.put("p_rejectComment", p_rejectComment);
-			activityStart = ActivityLog.start(Ambassador.class,
+			activityStart = ActivityLog.start(Ambassador4Falcon.class,
 					"rejectTask(p_accessToken,p_taskId,p_rejectComment)",
 					activityArgs);
 			WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
@@ -795,6 +803,179 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		}
 
 		return rtnStr;
+	}
+	
+	public String getAllProjectProfiles(String p_accessToken,
+			String p_companyName) throws WebServiceException
+	{
+		checkAccess(p_accessToken, GET_ALL_PROJECT_PROFILES);
+		String curUserName = getUsernameFromSession(p_accessToken);
+		User curUser = UserUtil.getUserById(UserUtil
+				.getUserIdByName(curUserName));
+		String curCompanyName = curUser.getCompanyName();
+		String curCompanyId = CompanyWrapper.getCompanyIdByName(curCompanyName);
+
+		if (!curCompanyId.equals("1")
+				&& !curCompanyName.equalsIgnoreCase(p_companyName))
+		{
+			return makeErrorJson(GET_ALL_PROJECT_PROFILES,
+					"Invaild comoany name parameter.");
+		}
+
+		String companyId = CompanyWrapper.getCompanyIdByName(p_companyName);
+		List<Project> projectList = null;
+		JSONObject jsonObj = new JSONObject();
+		ActivityLog.Start activityStart = null;
+		try
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", curUserName);
+			activityArgs.put("p_companyName", p_companyName);
+			activityStart = ActivityLog.start(Ambassador4Falcon.class,
+					"getAllProjectProfiles(p_accessToken,p_companyName)",
+					activityArgs);
+			Locale uiLocale = getUILocale(p_accessToken);
+			projectList = ServerProxy.getProjectHandler()
+					.getProjectsByCompanyId(Long.parseLong(companyId));
+			JSONArray projectArray = new JSONArray();
+			for (Project project : projectList)
+			{
+				JSONObject projectJson = new JSONObject();
+				projectJson.put("projectID", project.getId());
+				projectJson.put("projectName", project.getName());
+				projectJson.put("projectManager", project.getProjectManager());
+				if (project.getAttributeSet() != null)
+				{
+					projectJson.put("attributeGroupId", project
+							.getAttributeSet().getId());
+					projectJson.put("attributeGroupName", project
+							.getAttributeSet().getName());
+				}
+				JSONArray l10ProfileArray = new JSONArray();
+				Collection allL10Profiles = ServerProxy.getProjectHandler()
+						.getL10ProfilesByProjectId(project.getId());
+				Iterator it = allL10Profiles.iterator();
+				while (it.hasNext())
+				{
+					JSONObject l10Json = new JSONObject();
+					BasicL10nProfile l10 = (BasicL10nProfile) it.next();
+					l10Json.put("l10nProfileId", l10.getId());
+					l10Json.put("l10nProfileName", l10.getName());
+					l10Json.put("sourceLocale", l10.getSourceLocale()
+							.getDisplayName());
+					if (l10.isAutoDispatch())
+					{
+						l10Json.put("workflowDispatchType", "Automatic");
+					}
+					else
+					{
+						l10Json.put("workflowDispatchType", "Manual");
+					}
+					l10Json.put("priority", l10.getPriority());
+					// tmProfile
+					Iterator itTm = l10.getTmProfiles().iterator();
+					if (itTm.hasNext())
+					{
+						TranslationMemoryProfile tmProfile = (TranslationMemoryProfile) itTm
+								.next();
+						l10Json.put("tmProfileId", tmProfile.getId());
+						l10Json.put("tmProfileName", tmProfile.getName());
+					}
+					// work flow
+					JSONArray workflowArray = new JSONArray();
+					GlobalSightLocale[] targets = l10.getTargetLocales();
+					for (int i = 0; i < targets.length; i++)
+					{
+						JSONObject workflowJson = new JSONObject();
+						WorkflowTemplateInfo workflowTemplateInfo = (WorkflowTemplateInfo) l10
+								.getWorkflowTemplateInfo((GlobalSightLocale) targets[i]);
+						workflowJson.put("wfTemplateId",
+								workflowTemplateInfo.getId());
+						workflowJson.put("wfTemplateName",
+								workflowTemplateInfo.getName());
+						LocalePair lp = ServerProxy.getLocaleManager()
+								.getLocalePairBySourceTargetIds(
+										workflowTemplateInfo.getSourceLocale()
+												.getId(),
+										workflowTemplateInfo.getTargetLocale()
+												.getId());
+						String localePair = lp.getSource().getDisplayName()
+								+ " -> " + lp.getTarget().getDisplayName();
+						workflowJson.put("wfTemplateLocalePair", localePair);
+						if (workflowTemplateInfo.getMtProfileId() != 0)
+						{
+							MachineTranslationProfile mt = MTProfileHandlerHelper
+									.getMTProfileByRelation(l10.getId(),
+											workflowTemplateInfo.getId());
+							workflowJson.put("mtProfileId", mt.getId());
+							workflowJson.put("mtProfileName",
+									mt.getMtProfileName());
+							workflowJson.put("mtProfileEngine",
+									mt.getMtEngine());
+							workflowJson.put("mtProfileConfidenceScore",
+									mt.getMtConfidenceScore());
+						}
+						workflowArray.put(workflowJson);
+					}
+					l10Json.put("workflows", workflowArray.toString());
+					// fileProfile
+					JSONArray fileProfileArray = new JSONArray();
+					Iterator itFileProfile = l10.getFileProfiles().iterator();
+					if (itFileProfile.hasNext())
+					{
+						JSONObject fileProfileJson = new JSONObject();
+						FileProfileImpl fileProfile = (FileProfileImpl) itFileProfile
+								.next();
+						fileProfileJson.put("fileProfileId",
+								fileProfile.getId());
+						fileProfileJson.put("fileProfileName",
+								fileProfile.getName());
+						fileProfileJson
+								.put("sourceFileFormat",
+										ServerProxy
+												.getFileProfilePersistenceManager()
+												.getKnownFormatTypeById(
+														fileProfile
+																.getKnownFormatTypeId(),
+														false).getName());
+						Vector<Long> extensionIds = fileProfile
+								.getFileExtensionIds();
+						String fileExtensions = "";
+						for (int j = 0; j < extensionIds.size(); j++)
+						{
+							FileExtensionImpl extension = HibernateUtil.get(
+									FileExtensionImpl.class,
+									extensionIds.get(j));
+							fileExtensions += extension.getName() + ",";
+						}
+						if (fileExtensions != ""
+								&& fileExtensions.endsWith(","))
+						{
+							fileProfileJson.put(
+									"fileExtensions",
+									fileExtensions.substring(0,
+											fileExtensions.lastIndexOf(",")));
+						}
+						fileProfileArray.put(fileProfileJson);
+					}
+					l10Json.put("fileProfiles", fileProfileArray.toString());
+
+					l10ProfileArray.put(l10Json);
+				}
+				projectJson.put("l10n_profiles", l10ProfileArray.toString());
+				projectArray.put(projectJson);
+			}
+			jsonObj.put("projects", projectArray.toString());
+		}
+		catch (Exception e)
+		{
+			String message = "Unable to get all projects";
+			logger.error(e.getMessage(), e);
+			message = makeErrorJson(GET_ALL_PROJECT_PROFILES, message);
+			throw new WebServiceException(message);
+		}
+
+		return jsonObj.toString();
 	}
 	
     private int addWordCountForJson(TargetPage tg, JSONObject jsonObj,
@@ -983,7 +1164,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 			activityArgs.put("loggedUserName", userName);
 			activityArgs.put("jobName", p_jobName);
-			activityStart = ActivityLog.start(Ambassador.class,
+			activityStart = ActivityLog.start(Ambassador4Falcon.class,
 					"exportJob(p_accessToken, p_jobName)", activityArgs);
 			Job job = queryJob(jobName, p_accessToken, jsonObj);
 			if (job.getDisplayState().equalsIgnoreCase("ready"))
@@ -2857,7 +3038,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggingUserName);
             activityArgs.put("taskId", p_taskId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = ActivityLog.start(Ambassador4Falcon.class,
                     "getInContextReviewLink(p_accessToken, p_taskId)", activityArgs);
 
             User pm = task.getWorkflow().getJob().getProject()
@@ -2903,7 +3084,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
             }
         }
     }
-
+    
     ///////////////////////////////////////////////////////////////////////////
     //// COMMON PRIVATE METHODS
     ///////////////////////////////////////////////////////////////////////////

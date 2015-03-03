@@ -622,7 +622,7 @@ function loadPage()
             </div>
             <div id="srclocaleArea" style="background-color:white;height:40%;width:89%;left:15px;position:relative;">
                 <div id="sourceLocaleArea" style="overflow:scroll;overflow-x:hidden;padding-left:5px">
-                <%=sourceLocale.getDisplayLanguage(uilocale) %>
+                <%=sourceLocale.toString()+"("+sourceLocale.getDisplayLanguage(uilocale)+"_"+sourceLocale.getDisplayCountry(uilocale)+")" %>
                 </div>
             </div>
             <div style="height:5px"></div>
@@ -630,8 +630,8 @@ function loadPage()
                 &nbsp;&nbsp;&nbsp;&nbsp;<%= bundle.getString("lb_target_locale") %>
             </div>
             <div id="localeArea" style="background-color:white;height:40%;width:89%;left:15px;position:relative;">
-                <div id="targetLocaleArea" style="overflow:scroll;overflow-x:hidden;padding-left:5px">
-                <%=targetLocale.getDisplayLanguage(uilocale) %>
+                <div id="targetLocaleArea" style="height:20px;overflow:scroll;overflow-x:hidden;padding-left:5px">
+                <%=targetLocale.toString()+"("+targetLocale.getDisplayLanguage(uilocale)+"_"+targetLocale.getDisplayCountry(uilocale)+")" %>
                 </div>
             </div>
         </div>

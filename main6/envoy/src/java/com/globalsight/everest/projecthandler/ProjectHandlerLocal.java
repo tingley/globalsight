@@ -564,6 +564,24 @@ public class ProjectHandlerLocal implements ProjectHandler
                     null, pe);
         }
     }
+    
+	@Override
+	public Collection getL10ProfilesByProjectId(long projectId)
+			throws RemoteException, ProjectHandlerException
+	{
+		try
+		{
+			String hql = "FROM BasicL10nProfile L1 where L1.isActive = 'Y' and L1.project.id="
+					+ projectId + " order by L1.name";
+			return HibernateUtil.search(hql);
+		}
+		catch (Exception pe)
+		{
+			throw new ProjectHandlerException(
+					ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES,
+					null, pe);
+		}
+	}
 
     /**
      * Get both active and inactive L10nProfiles for current company.

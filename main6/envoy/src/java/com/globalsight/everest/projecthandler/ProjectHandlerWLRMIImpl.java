@@ -730,4 +730,11 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
     {
         return m_localReference.getAllProjectTMs(isSuperAdmin, cond);
     }
+
+	@Override
+	public Collection getL10ProfilesByProjectId(long projectId)
+			throws RemoteException, ProjectHandlerException
+	{
+		return m_localReference.getL10ProfilesByProjectId(projectId);
+	}
 }

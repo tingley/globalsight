@@ -805,10 +805,40 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		return rtnStr;
 	}
 	
+	/**
+	 * Get all projects relevant information for specified company name.
+	 * 
+	 * @param p_accessToken
+	 *            -- login user's token
+	 * @param p_companyName
+	 *            -- company name to get data from
+	 * @return JSON string, sample is "{"Projects":"[{\"projectID\":1040,\"projectManager\":\"allieadmin\",\"projectName\":\"3818_project\",
+	 * \"l10n_profiles\":\"[{\\\"sourceLocale\\\":\\\"English (United States) [en_US]\\\",
+	 * \\\"fileProfiles\\\":\\\"[{\\\\\\\"sourceFileFormat\\\\\\\":\\\\\\\"HTML\\\\\\\",\\\\\\\"fileProfileName\\\\\\\":\\\\\\\"file_profile_html_3818\\\\\\\",\\\\\\\"fileProfileId\\\\\\\":6,\\\\\\\"fileExtensions\\\\\\\":\\\\\\\"html\\\\\\\"}]\\\",
+	 * \\\"tmProfileId \\\ ":1,
+	 * \\\"workflows\\\":\\\"[{\\\\\\\"wfTemplateLocalePair\\\\\\\":\\\\\\\"English (United States) [en_US] -> Korean (South Korea) [ko_KR]\\\\\\\",\\\\\\\"wfTemplateName\\\\\\\":\\\\\\\"en_ko_project_3818\\\\\\\",\\\\\\\"wfTemplateId\\\\\\\":1316}]\\\",
+	 * \\\"priority\\\":3,\\\"workflowDispatchType\\\":\\\"Automatic\\\",\\\"l10nProfileId\\\":10,\\\"tmProfileName\\\":\\\"tm_profile_01\\\",\\\"l10nProfileName\\\":\\\"localization_profile_3818\\\"}]\"}]"} ".
+	 * @throws WebServiceException
+	 */
 	public String getAllProjectProfiles(String p_accessToken,
 			String p_companyName) throws WebServiceException
 	{
 		checkAccess(p_accessToken, GET_ALL_PROJECT_PROFILES);
+		if (StringUtil.isEmpty(p_companyName))
+		{
+			return makeErrorJson(GET_ALL_PROJECT_PROFILES,
+					"Invaild company name");
+		}
+		String companyId = null;
+		try
+		{
+			companyId = CompanyWrapper.getCompanyIdByName(p_companyName);
+		}
+		catch (Exception e)
+		{
+			return makeErrorJson(GET_ALL_PROJECT_PROFILES,
+					"No company named with '" + p_companyName + "'.");
+		}
 		String curUserName = getUsernameFromSession(p_accessToken);
 		User curUser = UserUtil.getUserById(UserUtil
 				.getUserIdByName(curUserName));
@@ -819,10 +849,10 @@ public class Ambassador4Falcon extends JsonTypeWebService
 				&& !curCompanyName.equalsIgnoreCase(p_companyName))
 		{
 			return makeErrorJson(GET_ALL_PROJECT_PROFILES,
-					"Invaild comoany name parameter.");
+					"Current user is neither super user nor user from company '"
+							+ p_companyName + "'.");
 		}
 
-		String companyId = CompanyWrapper.getCompanyIdByName(p_companyName);
 		List<Project> projectList = null;
 		JSONObject jsonObj = new JSONObject();
 		ActivityLog.Start activityStart = null;
@@ -834,7 +864,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			activityStart = ActivityLog.start(Ambassador4Falcon.class,
 					"getAllProjectProfiles(p_accessToken,p_companyName)",
 					activityArgs);
-			Locale uiLocale = getUILocale(p_accessToken);
 			projectList = ServerProxy.getProjectHandler()
 					.getProjectsByCompanyId(Long.parseLong(companyId));
 			JSONArray projectArray = new JSONArray();
@@ -974,7 +1003,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			message = makeErrorJson(GET_ALL_PROJECT_PROFILES, message);
 			throw new WebServiceException(message);
 		}
-
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
 		return jsonObj.toString();
 	}
 	

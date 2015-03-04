@@ -1,0 +1,32 @@
+2010-07-13 10:21:01.006 : Account: host=70.99.171.38 port=80 userName=webserviceadmin password=password
+2010-07-13 10:21:01.022 : EndPoint: http://70.99.171.38:80/globalsight/services/AmbassadorWebService?wsdl
+2010-07-13 10:21:05.178 : BEGIN: Parsing WSDL into Operation XML...
+2010-07-13 10:21:16.679 : END: Parsing WSDL into Operation XML
+
+2010-07-23 09:40:13.796 : Account: host=10.10.211.127 port=8080 userName=leonadmin password=password
+2010-07-23 09:40:13.796 : EndPoint: http://10.10.211.127:8080/globalsight/services/AmbassadorWebService?wsdl
+2010-07-23 09:40:14.296 : BEGIN: Parsing WSDL into Operation XML...
+2010-07-23 09:40:14.968 : END: Parsing WSDL into Operation XML
+
+2010-07-23 09:41:58.437 : Test Operation:login
+2010-07-23 09:41:58.437 : Parameter Types:[string   p_username, string   p_password]
+2010-07-23 09:41:58.437 : Parameter input:[string,string]
+
+2010-07-23 09:41:58.515 : TestException:method.invoke() Exception during TestMangerImpl.testOperation(),Please check the argument(s) you input
+
+2010-07-23 09:42:25.046 : Test Operation:getAllProjects
+2010-07-23 09:42:25.046 : Parameter Types:[string   p_accessToken]
+2010-07-23 09:42:25.046 : Parameter input:[XUQs5YlZlt/Lq1HaU81inQ==<separator>+6QYGO5F73E=]
+
+2010-07-23 09:42:34.25 : Test Operation:getAllProjects
+2010-07-23 09:42:34.25 : Parameter Types:[string   p_accessToken]
+2010-07-23 09:42:34.25 : Parameter input:[XUQs5YlZlt/Lq1HaU81inQ==<separator>+6QYGO5F73E=]
+
+2010-07-23 09:42:35.14 : Test Operation:getAllProjects
+2010-07-23 09:42:35.14 : Parameter Types:[string   p_accessToken]
+2010-07-23 09:42:35.14 : Parameter input:[XUQs5YlZlt/Lq1HaU81inQ==<separator>+6QYGO5F73E=]
+
+2010-07-23 09:42:36.812 : Test Operation:getAllProjects
+2010-07-23 09:42:36.812 : Parameter Types:[string   p_accessToken]
+2010-07-23 09:42:36.812 : Parameter input:[XUQs5YlZlt/Lq1HaU81inQ==<separator>+6QYGO5F73E=]
+

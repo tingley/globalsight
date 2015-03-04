@@ -954,6 +954,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
 						JSONObject fileProfileJson = new JSONObject();
 						FileProfileImpl fileProfile = (FileProfileImpl) itFileProfile
 								.next();
+						if (!fileProfile.isActive())
+							continue;
 						fileProfileJson.put("fileProfileId",
 								fileProfile.getId());
 						fileProfileJson.put("fileProfileName",
@@ -968,21 +970,28 @@ public class Ambassador4Falcon extends JsonTypeWebService
 														false).getName());
 						Vector<Long> extensionIds = fileProfile
 								.getFileExtensionIds();
-						String fileExtensions = "";
-						for (int j = 0; j < extensionIds.size(); j++)
+						if (extensionIds.size() == 0)
 						{
-							FileExtensionImpl extension = HibernateUtil.get(
-									FileExtensionImpl.class,
-									extensionIds.get(j));
-							fileExtensions += extension.getName() + ",";
+							fileProfileJson.put("fileExtensions", "All");
 						}
-						if (fileExtensions != ""
-								&& fileExtensions.endsWith(","))
+						else
 						{
-							fileProfileJson.put(
-									"fileExtensions",
-									fileExtensions.substring(0,
-											fileExtensions.lastIndexOf(",")));
+							String fileExtensions = "";
+							for (int j = 0; j < extensionIds.size(); j++)
+							{
+								FileExtensionImpl extension = HibernateUtil
+										.get(FileExtensionImpl.class,
+												extensionIds.get(j));
+								fileExtensions += extension.getName() + ",";
+							}
+							if (fileExtensions != ""
+									&& fileExtensions.endsWith(","))
+							{
+								fileProfileJson.put("fileExtensions",
+										fileExtensions
+												.substring(0, fileExtensions
+														.lastIndexOf(",")));
+							}
 						}
 						fileProfileArray.put(fileProfileJson);
 					}

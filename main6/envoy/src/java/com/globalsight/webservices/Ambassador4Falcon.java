@@ -812,12 +812,12 @@ public class Ambassador4Falcon extends JsonTypeWebService
 	 *            -- login user's token
 	 * @param p_companyName
 	 *            -- company name to get data from
-	 * @return JSON string, sample is "{"Projects":"[{\"projectID\":1040,\"projectManager\":\"allieadmin\",\"projectName\":\"3818_project\",
-	 * \"l10n_profiles\":\"[{\\\"sourceLocale\\\":\\\"English (United States) [en_US]\\\",
-	 * \\\"fileProfiles\\\":\\\"[{\\\\\\\"sourceFileFormat\\\\\\\":\\\\\\\"HTML\\\\\\\",\\\\\\\"fileProfileName\\\\\\\":\\\\\\\"file_profile_html_3818\\\\\\\",\\\\\\\"fileProfileId\\\\\\\":6,\\\\\\\"fileExtensions\\\\\\\":\\\\\\\"html\\\\\\\"}]\\\",
-	 * \\\"tmProfileId \\\ ":1,
-	 * \\\"workflows\\\":\\\"[{\\\\\\\"wfTemplateLocalePair\\\\\\\":\\\\\\\"English (United States) [en_US] -> Korean (South Korea) [ko_KR]\\\\\\\",\\\\\\\"wfTemplateName\\\\\\\":\\\\\\\"en_ko_project_3818\\\\\\\",\\\\\\\"wfTemplateId\\\\\\\":1316}]\\\",
-	 * \\\"priority\\\":3,\\\"workflowDispatchType\\\":\\\"Automatic\\\",\\\"l10nProfileId\\\":10,\\\"tmProfileName\\\":\\\"tm_profile_01\\\",\\\"l10nProfileName\\\":\\\"localization_profile_3818\\\"}]\"}]"} ".
+	 * @return JSON string, sample is
+	 *         "[{"projectID":1037,"projectManager":"gsalliepm","projectName":"Template","l10n_profiles":[{"sourceLocale":"English (United States) [en_US]" , "fileProfiles":[{"sourceFileFormat":"XML","fileProfileName": "file_profile_xml_02","fileProfileId":4,"fileExtensions":"xml"}],"tmProfileId":1,
+	 *         "workflows":[{"wfTemplateLocalePair": "English (United States) [en_US] -> German (Germany) [de_DE]","mtProfileId":4,"wfTemplateName":"en_de_template","mtProfileEngine":"MS_Translator","mtProfileConfidenceScore":"90%","mtProfileName":"859MT_1_import_1","wfTemplateId":1313},
+	 *         {"wfTemplateLocalePair":"English (United States) [en_US] -> French (France) [fr_FR]" ,"mtProfileId":3,"wfTemplateName":"en_fr_template","mtProfileEngine":"MS_Translator","mtProfileConfidenceScore":"90%","mtProfileName" :"859MT_1","wfTemplateId":1312}, 
+	 *         {"wfTemplateLocalePair":"English (United States) [en_US] -> Spanish (Spain) [es_ES]" ,"mtProfileId":5,"wfTemplateName":"en_es_template","mtProfileEngine":"MS_Translator","mtProfileConfidenceScore":"90%","mtProfileName":"859MT_1_import_2","wfTemplateId":1314}],
+	 *         "priority":3,"workflowDispatchType":"Automatic","l10nProfileId":12,"tmProfileName":"tm_profile_01","l10nProfileName":"localization_profile_en_01"}]}]".
 	 * @throws WebServiceException
 	 */
 	public String getAllProjectProfiles(String p_accessToken,
@@ -854,8 +854,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		}
 
 		List<Project> projectList = null;
-		JSONObject jsonObj = new JSONObject();
 		ActivityLog.Start activityStart = null;
+		JSONArray projectArray = new JSONArray();
 		try
 		{
 			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
@@ -866,7 +866,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
 					activityArgs);
 			projectList = ServerProxy.getProjectHandler()
 					.getProjectsByCompanyId(Long.parseLong(companyId));
-			JSONArray projectArray = new JSONArray();
 			for (Project project : projectList)
 			{
 				JSONObject projectJson = new JSONObject();
@@ -931,22 +930,22 @@ public class Ambassador4Falcon extends JsonTypeWebService
 						String localePair = lp.getSource().getDisplayName()
 								+ " -> " + lp.getTarget().getDisplayName();
 						workflowJson.put("wfTemplateLocalePair", localePair);
-						if (workflowTemplateInfo.getMtProfileId() != 0)
+						MachineTranslationProfile mt = MTProfileHandlerHelper
+								.getMTProfileByRelation(l10.getId(),
+										workflowTemplateInfo.getId());
+						if (mt != null)
 						{
-							MachineTranslationProfile mt = MTProfileHandlerHelper
-									.getMTProfileByRelation(l10.getId(),
-											workflowTemplateInfo.getId());
 							workflowJson.put("mtProfileId", mt.getId());
 							workflowJson.put("mtProfileName",
 									mt.getMtProfileName());
 							workflowJson.put("mtProfileEngine",
 									mt.getMtEngine());
 							workflowJson.put("mtProfileConfidenceScore",
-									mt.getMtConfidenceScore());
+									mt.getMtConfidenceScore()+"%");
 						}
 						workflowArray.put(workflowJson);
 					}
-					l10Json.put("workflows", workflowArray.toString());
+					l10Json.put("workflows", workflowArray);
 					// fileProfile
 					JSONArray fileProfileArray = new JSONArray();
 					Iterator itFileProfile = l10.getFileProfiles().iterator();
@@ -987,14 +986,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
 						}
 						fileProfileArray.put(fileProfileJson);
 					}
-					l10Json.put("fileProfiles", fileProfileArray.toString());
+					l10Json.put("fileProfiles", fileProfileArray);
 
 					l10ProfileArray.put(l10Json);
 				}
-				projectJson.put("l10n_profiles", l10ProfileArray.toString());
+				projectJson.put("l10n_profiles", l10ProfileArray);
 				projectArray.put(projectJson);
 			}
-			jsonObj.put("projects", projectArray.toString());
 		}
 		catch (Exception e)
 		{
@@ -1010,7 +1008,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 				activityStart.end();
 			}
 		}
-		return jsonObj.toString();
+		return projectArray.toString();
 	}
 	
     private int addWordCountForJson(TargetPage tg, JSONObject jsonObj,

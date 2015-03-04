@@ -902,7 +902,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 					l10Json.put("priority", l10.getPriority());
 					// tmProfile
 					Iterator itTm = l10.getTmProfiles().iterator();
-					if (itTm.hasNext())
+					while (itTm.hasNext())
 					{
 						TranslationMemoryProfile tmProfile = (TranslationMemoryProfile) itTm
 								.next();
@@ -949,7 +949,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 					// fileProfile
 					JSONArray fileProfileArray = new JSONArray();
 					Iterator itFileProfile = l10.getFileProfiles().iterator();
-					if (itFileProfile.hasNext())
+					while (itFileProfile.hasNext())
 					{
 						JSONObject fileProfileJson = new JSONObject();
 						FileProfileImpl fileProfile = (FileProfileImpl) itFileProfile

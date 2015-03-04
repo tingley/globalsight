@@ -25,11 +25,11 @@ import java.util.Locale;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.dispatcher.util.StringUtils;
 import com.globalsight.everest.projecthandler.EngineEnum;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.SegmentNode;
+import com.globalsight.machineTranslation.google.GoogleProxy;
 import com.globalsight.machineTranslation.safaba.SafabaProxy;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -130,6 +130,9 @@ public abstract class AbstractTranslator implements MachineTranslator
             case DoMT:
                 translatedSegs = doBatchTranslation(sourceLocale, targetLocale, segments);
                 break;
+            case Google_Translate:
+            	translatedSegs = trGoogle(sourceLocale, targetLocale, segments, containTags);
+            	break;
         }
 
         if (translatedSegs != null && translatedSegs.length > 0 && !isHaveRootTag)
@@ -192,7 +195,7 @@ public abstract class AbstractTranslator implements MachineTranslator
         {
             String translatedBody = doTranslation(sourceLocale, targetLocale,
                     segmentsInXlf.toString());
-            if (StringUtils.isBlank(translatedBody))
+            if (StringUtil.isEmpty(translatedBody))
             {
                 return null;
             }
@@ -273,57 +276,63 @@ public abstract class AbstractTranslator implements MachineTranslator
             String[] segments, boolean containTags)
             throws MachineTranslationException
     {
-        int batchSize = determineBatchSize();
-        List<String> translatedList = new ArrayList<String>();
-        List<String> unTranslatedList = Arrays.asList(segments);
-        
-        boolean hasMore = true;
-        while (hasMore)
-        {
-            List<String> subList = null;
-            String[] subResults = null;
-            if (unTranslatedList.size() <= batchSize)
-            {
-                subList = unTranslatedList;
-                hasMore = false;
-            }
-            else
-            {
-                subList = unTranslatedList.subList(0, batchSize);
-                unTranslatedList = unTranslatedList.subList(batchSize,
-                        unTranslatedList.size());
-            }
+    	 long start = System.currentTimeMillis();
+         List<String> translatedList = new ArrayList<String>();
+         List<String> subList = new ArrayList<String>();
+         int charCount = 0;
 
-            Object[] segmentObjArray = subList.toArray();
-            String[] segmentsArray = new String[segmentObjArray.length];
-            for (int i = 0; i < segmentObjArray.length; i++)
-            {
-                segmentsArray[i] = (String) segmentObjArray[i];
-            }
+         for (int i = 0; i < segments.length; i++)
+         {
+             subList.add(segments[i]);
+             
+             if (i == segments.length - 1 
+            		 || charCount + GxmlUtil.stripRootTag(segments[i + 1]).length() > GoogleProxy.MT_GOOGLE_MAX_CHARACTER_NUM)
+             {
+                 Object[] segmentObjArray = subList.toArray();
+                 String[] segmentsArray = new String[segmentObjArray.length];
+                 for (int j = 0; j < segmentObjArray.length; j++)
+                 {
+                     segmentsArray[j] = (String) segmentObjArray[j];
+                 }
+                 String[] subResults = null;
 
-            if (containTags)
-            {
-                subResults = translateSegmentsWithTags(sourceLocale,
-                        targetLocale, segmentsArray);
-            }
-            else if (!containTags)
-            {
-                subResults = translateSegmentsWithoutTags(sourceLocale,
-                        targetLocale, segmentsArray);
-            }
-            
-            if (subResults != null)
-            {
-                translatedList.addAll(Arrays.asList(subResults));
-            }
-        }
+                 if (containTags)
+                 {
+                    subResults = translateSegmentsWithTags(sourceLocale,
+                            targetLocale, segmentsArray);
+                 }
+                 else if (!containTags)
+                 {
+                     subResults = translateSegmentsWithoutTags(sourceLocale,
+                             targetLocale, segmentsArray);
+                 }
 
-        String[] results = new String[segments.length];
-        for (int i = 0; i < translatedList.size(); i++)
-        {
-            results[i] = (String) translatedList.get(i);
-        }
-        return results;
+                 if (subResults != null)
+                 {
+                     translatedList.addAll(Arrays.asList(subResults));
+                 }
+                 subList.clear();
+                 charCount = 0;
+             }
+             else
+             {
+                 charCount += GxmlUtil.stripRootTag(segments[i]).length();
+             }
+         }
+
+         String[] results = new String[segments.length];
+         for (int i = 0; i < translatedList.size(); i++)
+         {
+             results[i] = (String) translatedList.get(i);
+         }
+
+         if (CATEGORY.isDebugEnabled())
+         {
+             CATEGORY.debug("Used time: " + (System.currentTimeMillis() - start));
+         }
+         return results;
+    	
+    	
     }
 
     private String[] trMs(Locale sourceLocale, Locale targetLocale,
@@ -659,7 +668,7 @@ public abstract class AbstractTranslator implements MachineTranslator
             }
         }
 
-        // for MS MT, Google MT(batch translation)
+        // for MS & Google MT(batch translation)
         if (map.size() > 0)
         {
             // Put all keys into "keysInArray"

@@ -1715,7 +1715,7 @@ public class Ambassador extends AbstractWebService
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			throw new WebServiceException(e.getMessage());
 		}
 		finally
 		{

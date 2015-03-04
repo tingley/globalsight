@@ -1,0 +1,9 @@
+Buildfile: build.xml
+
+clean:
+     [echo] *** Clean Files ****
+     [echo] path is D:\Ambassador\workspace\desktopicon/desktopicon 
+   [delete] Deleting directory D:\Ambassador\workspace\desktopicon\desktopicon
+
+BUILD SUCCESSFUL
+Total time: 0 seconds

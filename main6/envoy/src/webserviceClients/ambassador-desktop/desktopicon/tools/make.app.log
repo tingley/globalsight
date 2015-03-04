@@ -1,0 +1,18 @@
+Buildfile: build.xml
+
+clean:
+     [echo] *** Clean Files ****
+     [echo] path is D:\Welocalize\SVN_ROOT\Open Source_GlobalSight\GlobalSight_7.1_latest\main6\envoy\src\webserviceClients\ambassador-desktop\desktopicon\tools/../DesktopIcon 
+   [delete] Deleting: D:\Welocalize\SVN_ROOT\Open Source_GlobalSight\GlobalSight_7.1_latest\main6\envoy\src\webserviceClients\ambassador-desktop\desktopicon\build\DesktopIcon.zip
+
+copy.files:
+     [echo] *** Copy files ****
+     [echo] path is D:\Welocalize\SVN_ROOT\Open Source_GlobalSight\GlobalSight_7.1_latest\main6\envoy\src\webserviceClients\ambassador-desktop\desktopicon\tools/../DesktopIcon 
+     [copy] Copying 64 files to D:\Welocalize\SVN_ROOT\Open Source_GlobalSight\GlobalSight_7.1_latest\main6\envoy\src\webserviceClients\ambassador-desktop\desktopicon\DesktopIcon
+
+compile:
+    [javac] Compiling 72 source files to D:\Welocalize\SVN_ROOT\Open Source_GlobalSight\GlobalSight_7.1_latest\main6\envoy\src\webserviceClients\ambassador-desktop\desktopicon\DesktopIcon
+    [javac] D:\Welocalize\SVN_ROOT\Open Source_GlobalSight\GlobalSight_7.1_latest\main6\envoy\src\webserviceClients\ambassador-desktop\desktopicon\src\com\globalsight\action\DownloadAction.java:226: ÐèÒª ')'
+    [javac] 					.append(File.separator);
+    [javac] 					                       ^
+    [javac] 1 ´íÎó

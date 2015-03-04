@@ -1,0 +1,96 @@
+2010-07-23 09:42:25.14 : getAllProjects()
+<?xml version="1.0" encoding="UTF-8" ?>
+<ProjectInformation>
+<Project>
+	<id>1</id>
+	<name>Template</name>
+	<description>N/A</description>
+	<projectmanager>gsleonpm</projectmanager>
+</Project>
+<Project>
+	<id>3</id>
+	<name>peoject01</name>
+	<description>from leon company</description>
+	<projectmanager>leonadmin</projectmanager>
+</Project>
+<Project>
+	<id>4</id>
+	<name>project02</name>
+	<description>N/A</description>
+	<projectmanager>222</projectmanager>
+</Project>
+</ProjectInformation>
+
+
+2010-07-23 09:42:34.296 : getAllProjects()
+<?xml version="1.0" encoding="UTF-8" ?>
+<ProjectInformation>
+<Project>
+	<id>1</id>
+	<name>Template</name>
+	<description>N/A</description>
+	<projectmanager>gsleonpm</projectmanager>
+</Project>
+<Project>
+	<id>3</id>
+	<name>peoject01</name>
+	<description>from leon company</description>
+	<projectmanager>leonadmin</projectmanager>
+</Project>
+<Project>
+	<id>4</id>
+	<name>project02</name>
+	<description>N/A</description>
+	<projectmanager>222</projectmanager>
+</Project>
+</ProjectInformation>
+
+
+2010-07-23 09:42:35.531 : getAllProjects()
+<?xml version="1.0" encoding="UTF-8" ?>
+<ProjectInformation>
+<Project>
+	<id>1</id>
+	<name>Template</name>
+	<description>N/A</description>
+	<projectmanager>gsleonpm</projectmanager>
+</Project>
+<Project>
+	<id>3</id>
+	<name>peoject01</name>
+	<description>from leon company</description>
+	<projectmanager>leonadmin</projectmanager>
+</Project>
+<Project>
+	<id>4</id>
+	<name>project02</name>
+	<description>N/A</description>
+	<projectmanager>222</projectmanager>
+</Project>
+</ProjectInformation>
+
+
+2010-07-23 09:42:36.843 : getAllProjects()
+<?xml version="1.0" encoding="UTF-8" ?>
+<ProjectInformation>
+<Project>
+	<id>1</id>
+	<name>Template</name>
+	<description>N/A</description>
+	<projectmanager>gsleonpm</projectmanager>
+</Project>
+<Project>
+	<id>3</id>
+	<name>peoject01</name>
+	<description>from leon company</description>
+	<projectmanager>leonadmin</projectmanager>
+</Project>
+<Project>
+	<id>4</id>
+	<name>project02</name>
+	<description>N/A</description>
+	<projectmanager>222</projectmanager>
+</Project>
+</ProjectInformation>
+
+

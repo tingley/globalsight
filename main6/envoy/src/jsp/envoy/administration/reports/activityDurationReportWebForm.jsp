@@ -11,6 +11,7 @@
                   com.globalsight.everest.projecthandler.Project,
                   com.globalsight.everest.jobhandler.Job,
                   com.globalsight.util.GlobalSightLocale,
+                  com.globalsight.util.edit.EditUtil,
                   com.globalsight.everest.company.CompanyWrapper,
                   java.util.Locale,
                   java.util.ResourceBundle"
@@ -44,11 +45,23 @@
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY">
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript">
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
 
+//Set the jobs data for js(jobInfos)
+var jobInfos = new Array();
+<%
+for(int i=0; i<jobList.size(); i++)  
+{
+    ReportJobInfo j = jobList.get(i);
+%>
+	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=EditUtil.encodeTohtml(j.getJobName())%>", <%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
+<%
+}
+%>
 $(document).ready(function(){
 	$("#csf").datepicker({
 		changeMonth: true,
@@ -112,6 +125,64 @@ function submitForm() {
       }
   });
 }
+
+
+function filterJob(){
+	var jobNameList = document.getElementById("jobId");
+	var projectNameList = document.getElementById("projectId");
+	var jobStatus = document.getElementById("status");
+	var targetLocalesList = document.getElementById("targetLocalsList");
+	
+	// selected project 
+	var currSelectValueProject = new Array();
+	for(i=0;i<projectNameList.length;i++)
+	{
+		var op= projectNameList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueProject.push(op.value);
+		}
+	}
+	
+	// selected job status 
+	var currSelectValueJobStatus = new Array();
+	for(i=0;i<jobStatus.length;i++)
+	{
+		var op= jobStatus.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueJobStatus.push(op.value);
+		}
+	} 
+	   
+	// selected target locales 
+	var currSelectValueTargetLocale = new Array();
+	for(i=0;i<targetLocalesList.length;i++)
+	{
+		var op= targetLocalesList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueTargetLocale.push(op.value);
+		}
+	}
+	addOption("jobId","<%=bundle.getString("all")%>","*")
+	 $("#jobId").find("option[value='*']").attr("selected",true);
+	jobNameList.options.length=1;
+	
+	// Insert jobNameList select options 
+	for(var i=0; i<jobInfos.length; i++)
+	{
+		if(contains(currSelectValueProject, jobInfos[i].projectId)
+			&& contains(currSelectValueJobStatus, jobInfos[i].jobStatus)
+			&& containsArray(currSelectValueTargetLocale, jobInfos[i].targetLocals))
+		{
+			addOption("jobId", jobInfos[i].jobName, jobInfos[i].jobId);
+		}
+	}
+	if(document.getElementById("jobId").options.length==1){
+		jobNameList.options.length=0;
+	}
+}
 </script>
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
 <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
@@ -131,7 +202,7 @@ function submitForm() {
     <tr>
         <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select name="jobId" MULTIPLE size="6" style="width:300px">
+        <select id="jobId" name="jobId" MULTIPLE size="6" style="width:300px">
             <option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
 <%
             for (ReportJobInfo j : jobList)
@@ -146,7 +217,7 @@ function submitForm() {
     <tr>
         <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select name="projectId" MULTIPLE size=4>
+        <select id="projectId" name="projectId" MULTIPLE size=4 onchange="filterJob()">
             <option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%          for (Project p : projectList)
             {
@@ -160,7 +231,7 @@ function submitForm() {
     <tr>
         <td class="standardText"><%=bundle.getString("lb_status")%><span class="asterisk">*</span>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select name="status" MULTIPLE size=4>
+        <select id="status" name="status" MULTIPLE size=4 onchange="filterJob()">
             <option value="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
             <option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
             <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
@@ -175,7 +246,7 @@ function submitForm() {
     <tr>
         <td class="standardText"><%=bundle.getString("lb_target_locales")%>*:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select name="targetLocalesList" multiple="true" size=4>
+        <select id="targetLocalsList" name="targetLocalesList" multiple="true" size=4 onchange="filterJob()">
             <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
             for(GlobalSightLocale gsLocale : targetLocales)

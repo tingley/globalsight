@@ -127,7 +127,7 @@ public interface UserParamNames
     public static final String EDITOR_AUTO_ADJUST_WHITESPACE = "editor_autowhite";
     public static final String EDITOR_AUTO_ADJUST_WHITESPACE_DEFAULT = "1";
 
-    //Report Options -- Abbreviate Report Name
+    // Report Options -- Abbreviate Report Name
     public static final String EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT = "abbreviate_report_name";
     public static final String EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT_DEFAULT = "yes";
 
@@ -214,6 +214,12 @@ public interface UserParamNames
     public static final String DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT = "changeCreationIdForMT";
     public static final String DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT = "no";
 
+    // GBS-3776
+    public static final String DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE = "penalizedReferenceTmPre";
+    public static final String DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE_DEFAULT = "yes";
+    public static final String DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER = "penalizedReferenceTmPer";
+    public static final String DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER_DEFAULT = "no";
+
     public static final String DOWNLOAD_OPTION_TERMINOLOGY = "termSelector";
     public static final String DOWNLOAD_OPTION_TERMINOLOGY_DEFAULT = "tbx";
 
@@ -221,7 +227,8 @@ public interface UserParamNames
     public static final String DOWNLOAD_OPTION_CONSOLIDATE_TERM_DEFAULT = "yes";
 
     public static final String DOWNLOAD_OPTION_TM_EDIT_TYPE = "TMEditType";
-    // Allow edit locked segments: default is "Deny Edit",value 4 (original "No" meant 0).
+    // Allow edit locked segments: default is "Deny Edit",value 4 (original "No"
+    // meant 0).
     public static final int DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT = AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY;
 
     //

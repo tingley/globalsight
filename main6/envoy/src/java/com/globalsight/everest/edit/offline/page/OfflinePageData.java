@@ -115,7 +115,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
     static private final Logger CATEGORY = Logger
             .getLogger(OfflinePageData.class);
-    
+
     private PseudoData tmxPTagData = new PseudoData();
     private PseudoData tuvPTagData = new PseudoData();
     private TmxPseudo convertor = new TmxPseudo();
@@ -138,7 +138,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
      * m_ref_allOSDMerged), we use this list to build a target page.
      */
     private Vector m_segmentList = new Vector();
-    
+
     private Vector<OfflineSegmentData> m_segmentListUnmerged = new Vector<OfflineSegmentData>();
 
     /** Key: a OfflineSegmentData's DisplaySegmentID; value: the OSD. */
@@ -239,10 +239,11 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private String m_alljobnames;
 
     private boolean m_isRepetitons = false;
-    
+
     private Vector m_excludedItemTypes = new Vector();
 
-    // For XLF/OmegaT translation kit, store its tuID to target "state" attribute value.
+    // For XLF/OmegaT translation kit, store its tuID to target "state"
+    // attribute value.
     private HashMap<String, String> tuId2XlfTrgStateMap = new HashMap<String, String>();
 
     /**
@@ -300,7 +301,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         this.m_isConvertLf = m_isConvertLf;
     }
-    
+
     public boolean isOmegaT()
     {
         return m_isOmegaT;
@@ -320,7 +321,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         this.m_isXliff = p_isXliff;
     }
-
 
     public boolean isPopulate100()
     {
@@ -2250,7 +2250,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     }
 
     public void writeOfflineTmxFile(OutputStream p_outputStream,
-            DownloadParams p_params, int p_tmxLevel, int p_mode)
+            DownloadParams p_params, int p_tmxLevel, int p_mode,
+            boolean isPenaltyTmx)
     {
         OutputStreamWriter w;
 
@@ -2267,8 +2268,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         {
             FileUtil.writeBom(p_outputStream, TmxUtil.TMX_ENCODING);
             w = new OutputStreamWriter(p_outputStream, TmxUtil.TMX_ENCODING);
-//            writeOfflineTmxFile(w, p_params, p_tmxLevel, p_mode);
-			writeOfflineTmxFile(w, p_params, p_tmxLevel, p_mode, true);
+            // writeOfflineTmxFile(w, p_params, p_tmxLevel, p_mode);
+            writeOfflineTmxFile(w, p_params, p_tmxLevel, p_mode, isPenaltyTmx);
             w.flush();
         }
         catch (FileNotFoundException ex)
@@ -2443,7 +2444,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     userId = "";
                 }
                 // Tm data maybe is created from MT.
-                if (changeCreationId && isCreatedFromMTEngine(match.getProjectTmIndex()))
+                if (changeCreationId
+                        && isCreatedFromMTEngine(match.getProjectTmIndex()))
                 {
                     userId = "MT!";
                 }
@@ -2477,12 +2479,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         try
         {
             StringBuilder sb = new StringBuilder();
-            sb.append("SegmentID is ")
-                    .append(p_OSD.getDisplaySegmentID())
+            sb.append("SegmentID is ").append(p_OSD.getDisplaySegmentID())
                     .append("; source TUV ID is ")
                     .append(p_OSD.getSourceTuv().getId())
-                    .append("; target TUV ID is ")
-                    .append(p_OSD.getTrgTuvId());
+                    .append("; target TUV ID is ").append(p_OSD.getTrgTuvId());
             return sb.toString();
         }
         catch (Exception e)
@@ -2535,9 +2535,9 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         return s.replace("\n", replace);
     }
 
-    @SuppressWarnings("rawtypes")
     public void writeOfflineTmxFile(OutputStreamWriter p_outputStream,
-            DownloadParams p_params, int p_tmxLevel, int p_mode)
+            DownloadParams p_params, int p_tmxLevel, int p_mode,
+            boolean isPenaltyTmx)
     {
         if (p_outputStream == null)
         {
@@ -2574,520 +2574,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             {
                 if (m_segmentList.size() > 0)
                 {
-                    long srcPageId = ((OfflineSegmentData) m_segmentList.get(0)).getPageId();
-                    jobId = BigTableUtil.getJobBySourcePageId(srcPageId).getId();
-                }
-            }
-            catch (Exception e)
-            {
-                // this is not reliable compeletely.
-                jobId = p_params.getRightJob().getId();
-            }
-
-            Set<Long> tpIdsTuvsAlreadyLoaded = new HashSet<Long>();
-            if (p_mode != TmxUtil.TMX_MODE_ICE_ONLY)
-            {
-                for (ListIterator it = m_segmentList.listIterator(); it
-                        .hasNext();)
-                {
-                    OfflineSegmentData osd = (OfflineSegmentData) it.next();
-                    if (osd.getDisplaySegmentID().length() <= 0)
-                    {
-                        p_outputStream.close();
-
-                        osd = (OfflineSegmentData) it.previous();
-                        String msg = "Cannot write a format two segment:\n"
-                                + "The in-memory segment ID for the segment following "
-                                + osd.getDisplaySegmentID() + " is empty.";
-
-                        CATEGORY.error(msg);
-
-                        throw new AmbassadorDwUpException(
-                                AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT,
-                                msg);
-                    }
-
-                    // Find the orignal non-ice segment.
-                    if (p_mode == TmxUtil.TMX_MODE_NON_ICE && isContinue(osd))
-                    {
-                        continue;
-                    }
-
-                    String sourceText = null;
-                    String targetText = null;
-                    String userId = null;
-                    boolean isAddTail = false;
-                    boolean changeCreationIdToMT = p_params
-                            .getChangeCreationIdForMTSegments();
-                    boolean isFromXliff = false;
-                    String sourceLocale = new String();
-                    String targetLocale = new String();
-
-                    if (osd.getTargetTuv() != null)
-                    {
-                        sourceText = osd.getSourceTuv().getGxml();
-                        targetText = osd.getTargetTuv().getGxml();
-
-                        if (osd.getTargetTuv().getTu(jobId).getDataType()
-                                .equals(IFormatNames.FORMAT_XLIFF))
-                        {
-                            isFromXliff = true;
-                        }
-
-                        sourceLocale = osd.getSourceTuv().getGlobalSightLocale()
-                                .getLocaleCode();
-                        targetLocale = osd.getTargetTuv().getGlobalSightLocale()
-                                .getLocaleCode();
-                    }
-
-                    String translateTuString = null;
-                    boolean isCreatedFromMT = false;
-                    String[] translatedSrcTrgSegments = new String[2];
-                    // ## Compose the translated segment into tmx string first,
-                    // but write at last.
-                    if (osd.getTargetTuv() != null
-                            && osd.getTargetTuv().isLocalized())
-                    {
-                        userId = osd.getTargetTuv().getLastModifiedUser();
-                        isCreatedFromMT = isCreatedFromMTEngine(userId);
-                        if (isAddLocalizedTargetAsTu(p_mode, isCreatedFromMT))
-                        {
-                            translateTuString = getTranslatedTuString(osd,
-                                    sourceText, sourceLocale, targetText,
-                                    targetLocale, isOmegaT, isFromXliff,
-                                    p_tmxLevel, changeCreationIdToMT,
-                                    translatedSrcTrgSegments);
-                        }
-                    }
-
-                    // avoid to output two same tu for Machine Translate
-                    boolean isAddTrasnlatedTU = true;
-                    if (StringUtil.isEmpty(translateTuString))
-                    {
-                        isAddTrasnlatedTU = false;
-                    }
-
-                    // Write TM matches into tmx.
-                    StringBuffer exactTuString = new StringBuffer();
-                    StringBuffer fuzzyTuString = new StringBuffer();
-                    List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
-                    if (osd.hasTMMatches() || osd.hasMTMatches())
-                    {
-                        // Load Tuvs/XliffAlts of current page for performance.
-                        loadCurrentTargetPageTuvsForPerformance(
-                                tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
-                                jobId);
-
-                        allLMs = getAllLeverageMatches(osd, jobId);
-                        Iterator<LeverageMatch> matches = allLMs.iterator();
-                        String sid = null;
-                        if (matches.hasNext())
-                        {
-                            // write the tu head, the source and first match
-                            LeverageMatch match = (LeverageMatch) matches.next();
-                            // Set current user id as default create_id
-                            userId = p_params.getUser().getUserId();
-                            ArrayList<String> array = getSourceTargetText(osd,
-                                    match, sourceText, targetText, userId,
-                                    isFromXliff, sourceLocale, targetLocale,
-                                    changeCreationIdToMT, jobId);
-                            sourceText = array.get(0);
-                            targetText = array.get(1);
-                            userId = array.get(2);
-                            isCreatedFromMT = isCreatedFromMTEngine(match.getProjectTmIndex());
-
-                            if (isOmegaT)
-                            {
-                                sourceText = convertOmegaT(sourceText, osd);
-                                targetText = convertOmegaT(targetText, osd);
-                            }
-                            else if (m_isConvertLf)
-                            {
-                                sourceText = convertLf(sourceText, p_tmxLevel);
-                                targetText = convertLf(targetText, p_tmxLevel);
-                            }
-
-                            if (p_mode == TmxUtil.TMX_MODE_INC_ALL
-                                    || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
-                                    || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
-                                    || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
-                            {
-                                if (isSameAsLocalizedSegments(
-                                        translatedSrcTrgSegments, sourceText,
-                                        targetText))
-                                {
-                                    isAddTrasnlatedTU = false;
-                                }
-
-                                if (match.getScoreNum() == 100)
-                                {
-                                    TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-                                            sourceText, m_sourceLocaleName,
-                                            null, null, null, null);
-                                    TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-                                            targetText, m_targetLocaleName,
-                                            "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
-                                            match.getCreationDate(),
-                                            "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
-                                            match.getModifyDate());
-                                    exactTuString = new StringBuffer(
-                                            TmxUtil.composeTuWithoutTuCloseTag(
-                                                    srcTuvInfo, trgTuvInfo,
-                                                    p_tmxLevel, match.getSid(),
-                                                    isOmegaT, OmegaTConst.tu_type_100,
-                                                    osd.getDisplaySegmentID()));
-                                    isAddTail = true;
-                                }
-                                else
-                                {
-                                    TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-                                            sourceText, m_sourceLocaleName,
-                                            null, null, null, null);
-                                    TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-                                            targetText, m_targetLocaleName,
-                                            "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
-                                            match.getCreationDate(),
-                                            "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
-                                            match.getModifyDate());
-                                    fuzzyTuString = new StringBuffer(
-                                            TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid()));
-                                    isAddTail = false;
-                                }
-                            }
-                        }
-
-                        while (matches.hasNext())
-                        {
-                            LeverageMatch match = matches.next();
-                            // Set current user id as default create_id
-                            userId = p_params.getUser().getUserId();
-                            ArrayList<String> array = getSourceTargetText(osd,
-                                    match, sourceText, targetText, userId,
-                                    isFromXliff, sourceLocale, targetLocale,
-                                    changeCreationIdToMT, jobId);
-                            sourceText = array.get(0);
-                            targetText = array.get(1);
-                            userId = array.get(2);
-                            isCreatedFromMT = isCreatedFromMTEngine(match.getProjectTmIndex());
-
-                            if (isOmegaT)
-                            {
-                                sourceText = convertOmegaT(sourceText, osd);
-                                targetText = convertOmegaT(targetText, osd);
-                            }
-                            else if (m_isConvertLf)
-                            {
-                                sourceText = convertLf(sourceText, p_tmxLevel);
-                                targetText = convertLf(targetText, p_tmxLevel);
-                            }
-
-                            if (p_mode == TmxUtil.TMX_MODE_INC_ALL
-                                    || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
-                                    || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
-                                    || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
-                            {
-                                if (isSameAsLocalizedSegments(
-                                        translatedSrcTrgSegments, sourceText,
-                                        targetText))
-                                {
-                                    isAddTrasnlatedTU = false;
-                                }
-
-                                if (match.getScoreNum() == 100)
-                                {
-                                    if (sid != null
-                                            && sid.equals(match.getSid()))
-                                    {
-                                        TmxUtil.TmxTuvInfo tuvInfo = new TmxUtil.TmxTuvInfo(
-                                                targetText, m_targetLocaleName,
-                                                "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
-                                                match.getCreationDate(),
-                                                "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
-                                                match.getModifyDate());
-                                        exactTuString.append(TmxUtil.composeTmTuv(tuvInfo, p_tmxLevel));
-                                        isAddTail = true;
-                                    }
-                                    else
-                                    {
-                                        if (isAddTail)
-                                        {
-                                            exactTuString.append(TmxUtil.composeTuTail());
-                                        }
-
-                                        TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-                                                sourceText, m_sourceLocaleName,
-                                                null, null, null, null);
-                                        TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-                                                targetText, m_targetLocaleName,
-                                                "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
-                                                match.getCreationDate(),
-                                                "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
-                                                match.getModifyDate());
-                                        String tuHere = TmxUtil.composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid());
-                                        exactTuString.append(tuHere);
-
-                                        isAddTail = true;
-                                        sid = match.getSid();
-                                    }
-                                }
-                                else
-                                {
-                                    if (isAddTail)
-                                    {
-                                        exactTuString.append(TmxUtil.composeTuTail());
-                                    }
-
-                                    TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-                                            sourceText, m_sourceLocaleName,
-                                            null, null, null, null);
-                                    TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-                                            targetText, m_targetLocaleName,
-                                            "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
-                                            match.getCreationDate(),
-                                            "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
-                                            match.getModifyDate());
-                                    String fuHere = TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid());
-
-                                    fuzzyTuString.append(fuHere);
-
-                                    isAddTail = false;
-                                }
-                            }
-                        }
-
-                        if (isAddTail)
-                        {
-                            exactTuString.append(TmxUtil.composeTuTail());
-                        }
-
-                        String exactAndFuzzy = exactTuString.append(fuzzyTuString).toString();
-                        p_outputStream.write(exactAndFuzzy);
-                    }
-
-                    if (isAddTrasnlatedTU)
-                    {
-                        p_outputStream.write(translateTuString);
-                    }
-
-                }
-            }
-            else if (m_segmentListUnmerged != null)
-            {
-                // write ice for omegat
-                for (ListIterator it = m_segmentListUnmerged.listIterator(); it.hasNext();)
-                {
-                    OfflineSegmentData osd = (OfflineSegmentData) it.next();
-                    if (osd.getDisplaySegmentID().length() <= 0)
-                    {
-                        p_outputStream.close();
-
-                        osd = (OfflineSegmentData) it.previous();
-                        String msg = "Cannot write a format two segment:\n"
-                                + "The in-memory segment ID for the segment following "
-                                + osd.getDisplaySegmentID() + " is empty.";
-
-                        CATEGORY.error(msg);
-
-                        throw new AmbassadorDwUpException(
-                                AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT,
-                                msg);
-                    }
-
-                    String matchType = osd.getDisplayMatchType();
-                    boolean isIce = matchType == null ? false : matchType
-                            .contains("Context Exact Match");
-
-                    if (isIce)
-                    {
-                        String userId = null;
-                        String sourceText = null;
-                        String targetText = null;
-                        boolean isFromXliff = false;
-                        String targetLocal = new String();
-                        String sourceLocal = new String();
-                        boolean isCreatedFromMT = false;
-                        boolean changeCreationId = p_params
-                                .getChangeCreationIdForMTSegments();
-                        boolean addThis = false;
-                        String sid = null;
-
-                        if (osd.getTargetTuv() != null)
-                        {
-                            sourceText = osd.getSourceTuv().getGxml();
-                            targetText = osd.getTargetTuv().getGxml();
-                            sid = osd.getSourceTuv().getSid();
-
-                            if (osd.getTargetTuv().getTu(jobId)
-                                    .getDataType()
-                                    .equals(IFormatNames.FORMAT_XLIFF))
-                            {
-                                isFromXliff = true;
-                            }
-
-                            sourceLocal = osd.getSourceTuv()
-                                    .getGlobalSightLocale().getLocaleCode();
-                            targetLocal = osd.getTargetTuv()
-                                    .getGlobalSightLocale().getLocaleCode();
-                        }
-
-                        List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
-                        if (osd.hasTMMatches() || osd.hasMTMatches())
-                        {
-                            // Load Tuvs/XliffAlts of current page for performance.
-                            loadCurrentTargetPageTuvsForPerformance(
-                                    tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
-                                    jobId);
-
-                            allLMs = getAllLeverageMatches(osd, jobId);
-                        }
-
-                        if (allLMs != null
-                                && allLMs.size() > 0
-                                && osd.getTargetTuv() != null
-                                && osd.getTargetTuv().isExactMatchLocalized(jobId))
-                        {
-                            LeverageMatch match = allLMs.get(0);
-                            
-                            if (sid != null && !sid.equals(match.getSid()))
-                            {
-                                for (int i = 1; i < allLMs.size(); i++)
-                                {
-                                    LeverageMatch match1 = allLMs.get(i);
-
-                                    if (sid.equals(match1.getSid()))
-                                    {
-                                        match = match1;
-                                        break;
-                                    }
-                                }
-                            }
-                            
-                            userId = match.getCreationUser();
-                            ArrayList<String> array = getSourceTargetText(osd,
-                                    match, sourceText, targetText, userId,
-                                    isFromXliff, sourceLocal, targetLocal,
-                                    changeCreationId, jobId);
-                            sourceText = array.get(0);
-                            targetText = array.get(1);
-                            userId = array.get(2);
-                            isCreatedFromMT = isCreatedFromMTEngine(match.getProjectTmIndex());
-
-                            if (!isCreatedFromMT)
-                            {
-                                addThis = true;
-                            }
-                            else
-                            {
-                                addThis = false;
-                            }
-
-                            if (addThis)
-                            {
-                                String tempSource = new String();
-                                String tempTarget = new String();
-
-                                if (isFromXliff)
-                                {
-                                    tempSource = getFixResultForTMX(SegmentUtil
-                                            .restoreSegment(sourceText,
-                                                    sourceLocal));
-                                    tempTarget = getFixResultForTMX(SegmentUtil
-                                            .restoreSegment(targetText,
-                                                    targetLocal));
-                                }
-                                else
-                                {
-                                    tempSource = getFixResultForTMX(sourceText);
-                                    tempTarget = getFixResultForTMX(targetText);
-                                }
-
-                                if (isOmegaT)
-                                {
-                                    tempSource = convertOmegaT(tempSource, osd);
-                                    tempTarget = convertOmegaT(tempTarget, osd);
-                                }
-                                else if (m_isConvertLf)
-                                {
-                                    tempSource = convertLf(tempSource,
-                                            p_tmxLevel);
-                                    tempTarget = convertLf(tempTarget,
-                                            p_tmxLevel);
-                                }
-
-                                TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-                                        tempSource, m_sourceLocaleName,
-                                        null, null, null, null);
-                                TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-                                        tempTarget, m_targetLocaleName,
-                                        "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
-                                        match.getCreationDate(),
-                                        "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
-                                        match.getModifyDate());
-                                String ttuString = TmxUtil.composeTu(
-                                        srcTuvInfo, trgTuvInfo, p_tmxLevel,
-                                        match.getSid(), isOmegaT,
-                                        OmegaTConst.tu_type_ice,
-                                        osd.getDisplaySegmentID());
-                                p_outputStream.write(ttuString.toString());
-                            }
-                        }
-                    }
-                }
-            }
-
-            TmxUtil.writeBodyCloseTag(p_outputStream);
-            TmxUtil.writeTmxCloseTag(p_outputStream);
-            p_outputStream.flush();
-        }
-        catch (IOException ex)
-        {
-            CATEGORY.error(ex.getMessage(), ex);
-            throw new AmbassadorDwUpException(
-                    AmbassadorDwUpExceptionConstants.GENERAL_IO_WRITE_ERROR, ex);
-        }
-    }
-    
-	public void writeOfflineTmxFile(OutputStreamWriter p_outputStream,
-			DownloadParams p_params, int p_tmxLevel, int p_mode,
-			boolean singleExport)
-	{
-        if (p_outputStream == null)
-        {
-            CATEGORY.error("Null output stream.");
-
-            throw new AmbassadorDwUpException(
-                    AmbassadorDwUpExceptionConstants.INVALID_FILE_NAME,
-                    "Null output stream.");
-        }
-
-        int omegaT = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT;
-        boolean isOmegaT = (omegaT == p_params.getFileFormatId());
-
-        try
-        {
-            int tmxLevel = p_tmxLevel;
-            if (tmxLevel == -1)
-            {
-                tmxLevel = getTmxLevel(p_params);
-            }
-            // When offline download to get level 1 tmx,some element attributes
-            // are still using level 2 style,only segment contents are
-            // tag-stripped.When import such tmx files back system TM,they can't
-            // pass tmx11.dtd check. So here use tmx14.dtd.
-            TmxUtil.writeXmlHeader(p_outputStream, 2);
-            TmxUtil.writeTmxOpenTag(p_outputStream, 2);
-            TmxUtil.writeTmxHeader(m_sourceLocaleName, p_outputStream,
-                    p_tmxLevel);
-            TmxUtil.writeBodyOpenTag(p_outputStream);
-
-            // Decide the job ID
-            long jobId = -1;
-            try
-            {
-                if (m_segmentList.size() > 0)
-                {
-                    long srcPageId = ((OfflineSegmentData) m_segmentList.get(0)).getPageId();
-                    jobId = BigTableUtil.getJobBySourcePageId(srcPageId).getId();
+                    long srcPageId = ((OfflineSegmentData) m_segmentList.get(0))
+                            .getPageId();
+                    jobId = BigTableUtil.getJobBySourcePageId(srcPageId)
+                            .getId();
                 }
             }
             catch (Exception e)
@@ -3145,10 +2635,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             isFromXliff = true;
                         }
 
-                        sourceLocale = osd.getSourceTuv().getGlobalSightLocale()
-                                .getLocaleCode();
-                        targetLocale = osd.getTargetTuv().getGlobalSightLocale()
-                                .getLocaleCode();
+                        sourceLocale = osd.getSourceTuv()
+                                .getGlobalSightLocale().getLocaleCode();
+                        targetLocale = osd.getTargetTuv()
+                                .getGlobalSightLocale().getLocaleCode();
                     }
 
                     String translateTuString = null;
@@ -3167,7 +2657,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                     sourceText, sourceLocale, targetText,
                                     targetLocale, isOmegaT, isFromXliff,
                                     p_tmxLevel, changeCreationIdToMT,
-                                    translatedSrcTrgSegments);
+                                    translatedSrcTrgSegments, isPenaltyTmx);
                         }
                     }
 
@@ -3203,7 +2693,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             sourceText = array.get(0);
                             targetText = array.get(1);
                             userId = array.get(2);
-                            isCreatedFromMT = isCreatedFromMTEngine(match.getProjectTmIndex());
+                            isCreatedFromMT = isCreatedFromMTEngine(match
+                                    .getProjectTmIndex());
 
                             if (isOmegaT)
                             {
@@ -3228,18 +2719,20 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                     isAddTrasnlatedTU = false;
                                 }
 
-								TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-										sourceText, m_sourceLocaleName, null,
-										null, null, null);
-								TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-										targetText, m_targetLocaleName,
-										"MT!".equals(userId) ? "MT!" : match.getCreationUser(),
-										match.getCreationDate(),
-										"MT!".equals(userId) ? "MT!" : match.getModifyUser(),
-										match.getModifyDate());
-								exactAndFuzzy.append(TmxUtil.composeTu(
-										srcTuvInfo, trgTuvInfo, p_tmxLevel,
-										match.getSid()));
+                                TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
+                                        sourceText, m_sourceLocaleName, null,
+                                        null, null, null);
+                                TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
+                                        targetText, m_targetLocaleName,
+                                        "MT!".equals(userId) ? "MT!" : match
+                                                .getCreationUser(),
+                                        match.getCreationDate(),
+                                        "MT!".equals(userId) ? "MT!" : match
+                                                .getModifyUser(),
+                                        match.getModifyDate());
+                                exactAndFuzzy.append(TmxUtil.composeTu(
+                                        srcTuvInfo, trgTuvInfo, p_tmxLevel,
+                                        match.getSid(), isPenaltyTmx));
                             }
                         }
 
@@ -3255,7 +2748,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             else if (m_segmentListUnmerged != null)
             {
                 // write ice for omegat
-                for (ListIterator it = m_segmentListUnmerged.listIterator(); it.hasNext();)
+                for (ListIterator it = m_segmentListUnmerged.listIterator(); it
+                        .hasNext();)
                 {
                     OfflineSegmentData osd = (OfflineSegmentData) it.next();
                     if (osd.getDisplaySegmentID().length() <= 0)
@@ -3298,8 +2792,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             targetText = osd.getTargetTuv().getGxml();
                             sid = osd.getSourceTuv().getSid();
 
-                            if (osd.getTargetTuv().getTu(jobId)
-                                    .getDataType()
+                            if (osd.getTargetTuv().getTu(jobId).getDataType()
                                     .equals(IFormatNames.FORMAT_XLIFF))
                             {
                                 isFromXliff = true;
@@ -3314,7 +2807,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
                         if (osd.hasTMMatches() || osd.hasMTMatches())
                         {
-                            // Load Tuvs/XliffAlts of current page for performance.
+                            // Load Tuvs/XliffAlts of current page for
+                            // performance.
                             loadCurrentTargetPageTuvsForPerformance(
                                     tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
                                     jobId);
@@ -3325,10 +2819,11 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         if (allLMs != null
                                 && allLMs.size() > 0
                                 && osd.getTargetTuv() != null
-                                && osd.getTargetTuv().isExactMatchLocalized(jobId))
+                                && osd.getTargetTuv().isExactMatchLocalized(
+                                        jobId))
                         {
                             LeverageMatch match = allLMs.get(0);
-                            
+
                             if (sid != null && !sid.equals(match.getSid()))
                             {
                                 for (int i = 1; i < allLMs.size(); i++)
@@ -3342,7 +2837,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                     }
                                 }
                             }
-                            
+
                             userId = match.getCreationUser();
                             ArrayList<String> array = getSourceTargetText(osd,
                                     match, sourceText, targetText, userId,
@@ -3351,7 +2846,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             sourceText = array.get(0);
                             targetText = array.get(1);
                             userId = array.get(2);
-                            isCreatedFromMT = isCreatedFromMTEngine(match.getProjectTmIndex());
+                            isCreatedFromMT = isCreatedFromMTEngine(match
+                                    .getProjectTmIndex());
 
                             if (!isCreatedFromMT)
                             {
@@ -3396,19 +2892,23 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                 }
 
                                 TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-                                        tempSource, m_sourceLocaleName,
-                                        null, null, null, null);
+                                        tempSource, m_sourceLocaleName, null,
+                                        null, null, null);
                                 TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
                                         tempTarget, m_targetLocaleName,
-                                        "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
+                                        "MT!".equals(userId) ? "MT!" : match
+                                                .getCreationUser(),
                                         match.getCreationDate(),
-                                        "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
+                                        "MT!".equals(userId) ? "MT!" : match
+                                                .getModifyUser(),
                                         match.getModifyDate());
-                                String ttuString = TmxUtil.composeTu(
-                                        srcTuvInfo, trgTuvInfo, p_tmxLevel,
-                                        match.getSid(), isOmegaT,
-                                        OmegaTConst.tu_type_ice,
-                                        osd.getDisplaySegmentID());
+                                String ttuString = TmxUtil
+                                        .composeTu(srcTuvInfo, trgTuvInfo,
+                                                p_tmxLevel, match.getSid(),
+                                                isOmegaT,
+                                                OmegaTConst.tu_type_ice,
+                                                osd.getDisplaySegmentID(),
+                                                isPenaltyTmx);
                                 p_outputStream.write(ttuString.toString());
                             }
                         }
@@ -3440,15 +2940,13 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 && m_segmentListUnmerged.size() > 0)
         {
             int osdHash = osd.hashCode();
-            for (ListIterator it2 = m_segmentListUnmerged
-                    .listIterator(); it2.hasNext();)
+            for (ListIterator it2 = m_segmentListUnmerged.listIterator(); it2
+                    .hasNext();)
             {
-                OfflineSegmentData osd2 = (OfflineSegmentData) it2
-                        .next();
+                OfflineSegmentData osd2 = (OfflineSegmentData) it2.next();
                 String matchType2 = osd2.getDisplayMatchType();
-                boolean isIce2 = matchType2 == null ? false
-                        : matchType2
-                                .contains("Context Exact Match");
+                boolean isIce2 = matchType2 == null ? false : matchType2
+                        .contains("Context Exact Match");
                 if (!isIce2 && osd2.hashCode() == osdHash)
                 {
                     osd = osd2;
@@ -3456,7 +2954,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 }
             }
         }
-        
+
         // if the segment is still ICE match, continue
         matchType = osd.getDisplayMatchType();
         isIce = matchType == null ? false : matchType
@@ -3484,30 +2982,28 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     }
 
     /**
-     * Compose the tmx tu string for localized segment. 
+     * Compose the tmx tu string for localized segment.
      */
     private String getTranslatedTuString(OfflineSegmentData osd,
             String sourceText, String sourceLocale, String targetText,
             String targetLocale, boolean isOmegaT, boolean isFromXliff,
             int p_tmxLevel, boolean changeCreationIdToMT,
-            String[] translatedSrcTrgSegments)
+            String[] translatedSrcTrgSegments, boolean isPenaltyTmx)
     {
         String tempSource = new String();
         String tempTarget = new String();
 
         if (isFromXliff)
         {
-            tempSource = getFixResultForTMX(SegmentUtil
-                    .restoreSegment(sourceText, sourceLocale));
-            tempTarget = getFixResultForTMX(SegmentUtil
-                    .restoreSegment(targetText, targetLocale));
+            tempSource = getFixResultForTMX(SegmentUtil.restoreSegment(
+                    sourceText, sourceLocale));
+            tempTarget = getFixResultForTMX(SegmentUtil.restoreSegment(
+                    targetText, targetLocale));
         }
         else
         {
-            tempSource = getFixResultForTMX(GxmlUtil
-                    .stripRootTag(sourceText));
-            tempTarget = getFixResultForTMX(GxmlUtil
-                    .stripRootTag(targetText));
+            tempSource = getFixResultForTMX(GxmlUtil.stripRootTag(sourceText));
+            tempTarget = getFixResultForTMX(GxmlUtil.stripRootTag(targetText));
         }
 
         if (isOmegaT)
@@ -3535,20 +3031,19 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
         Tuv sourceTuv = osd.getSourceTuv();
         Tuv targetTuv = osd.getTargetTuv();
-        TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-                tempSource, m_sourceLocaleName,
-                sourceTuv.getCreatedUser(),
-                sourceTuv.getCreatedDate(),
-                sourceTuv.getLastModifiedUser(),
+        TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(tempSource,
+                m_sourceLocaleName, sourceTuv.getCreatedUser(),
+                sourceTuv.getCreatedDate(), sourceTuv.getLastModifiedUser(),
                 sourceTuv.getLastModified());
-        TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-                tempTarget, m_targetLocaleName,
-                "MT!".equals(userId) ? "MT!" : targetTuv.getCreatedUser(),
-                targetTuv.getCreatedDate(),
-                "MT!".equals(userId) ? "MT!" : targetTuv.getLastModifiedUser(),
+        TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(tempTarget,
+                m_targetLocaleName, "MT!".equals(userId) ? "MT!"
+                        : targetTuv.getCreatedUser(),
+                targetTuv.getCreatedDate(), "MT!".equals(userId) ? "MT!"
+                        : targetTuv.getLastModifiedUser(),
                 targetTuv.getLastModified());
 
-        return TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, null);
+        return TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, null,
+                isPenaltyTmx);
     }
 
     private boolean isSameAsLocalizedSegments(
@@ -3672,7 +3167,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             Hashtable tuvMap = tuvPTagData.getPseudo2TmxMap();
             Hashtable tmxMap = tmxPTagData.getPseudo2TmxMap();
             Hashtable tmxMissedMap = tmxPTagData.getMissedPseudo2TmxMap();
-            
+
             // do not convert to long format for non extact match
             if (tuvMap == null
                     || tmxMap == null
@@ -3761,16 +3256,16 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     }
 
     /**
-     * Convert TMX tags to long format, sample:
-     * <bpt i="1" type="bold" x="1" /> to
-     * <bpt i="1" type="bold" x="1">&lt;b&gt;</bpt>
+     * Convert TMX tags to long format, sample: <bpt i="1" type="bold" x="1" />
+     * to <bpt i="1" type="bold" x="1">&lt;b&gt;</bpt>
+     * 
      * @return
      */
     private String convertTmxToLongFormat(String tmxContent, String tuvTag,
             String tmxTag)
     {
-        StringIndex si = StringIndex.getValueBetween(
-                new StringBuffer(tuvTag), 0, ">", "<");
+        StringIndex si = StringIndex.getValueBetween(new StringBuffer(tuvTag),
+                0, ">", "<");
         if (si != null && si.value != null)
         {
             String tmx = tmxTag;
@@ -3778,7 +3273,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             String pre = tmx.substring(0, index);
             String end = tmx.substring(index + 1);
             String newTmx = pre + ">" + si.value + end;
-            
+
             if (tmxContent.contains(tmx))
             {
                 tmxContent = tmxContent.replace(tmx, newTmx);
@@ -3902,7 +3397,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         this.m_segmentList = segmentList;
     }
-    
+
     public Vector<OfflineSegmentData> getSegmentListUnmerged()
     {
         return m_segmentListUnmerged;
@@ -3950,17 +3445,17 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         {
             return false;
         }
-        
+
         if ("MT!".equals(p_userId))
         {
             return true;
         }
-        
+
         String uid = p_userId.toLowerCase();
         String[] supportedMTEngines = MachineTranslator.gsSupportedMTEngines;
         for (int j = 0; j < supportedMTEngines.length; j++)
         {
-            
+
             if (p_userId != null && uid.indexOf("_mt") > -1
                     && uid.indexOf(supportedMTEngines[j].toLowerCase()) > -1)
             {
@@ -3971,13 +3466,13 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
         return isCreatedFromMTEngine;
     }
-    
+
     private boolean isCreatedFromMTEngine(int p_projectTmIndex)
     {
-        
-        if(p_projectTmIndex == Leverager.MT_PRIORITY)
+
+        if (p_projectTmIndex == Leverager.MT_PRIORITY)
         {
-        	return true;
+            return true;
         }
 
         return false;
@@ -4118,11 +3613,13 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         return tuId2XlfTrgStateMap.get(tuId);
     }
 
-	public void setPreserveSourceFolder(boolean preserveSourceFolder) {
-		this.preserveSourceFolder = preserveSourceFolder;
-	}
+    public void setPreserveSourceFolder(boolean preserveSourceFolder)
+    {
+        this.preserveSourceFolder = preserveSourceFolder;
+    }
 
-	public boolean isPreserveSourceFolder() {
-		return preserveSourceFolder;
-	}
+    public boolean isPreserveSourceFolder()
+    {
+        return preserveSourceFolder;
+    }
 }

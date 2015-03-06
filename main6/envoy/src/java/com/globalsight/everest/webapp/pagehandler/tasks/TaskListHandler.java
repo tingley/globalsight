@@ -71,6 +71,7 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.ProjectImpl;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -221,8 +222,9 @@ public class TaskListHandler extends PageHandler
         {
             if (getState && state != listParams.getTaskState())
             {
-            	HashMap<String, String> filters = new HashMap<String, String>();
-            	filters.put("advancedSearch", listParams.getFilters().get("advancedSearch"));
+                HashMap<String, String> filters = new HashMap<String, String>();
+                filters.put("advancedSearch",
+                        listParams.getFilters().get("advancedSearch"));
                 listParams.setFilters(filters);
                 listParams.setPageNumber(1);
                 listParams.setSortColumn("jobId");
@@ -317,22 +319,22 @@ public class TaskListHandler extends PageHandler
             p_response.getWriter().write(taskStatusJSON);
             return;
         }
-        else if("uploadingCheck".equals(action))
+        else if ("uploadingCheck".equals(action))
         {
-        	String taskIdParam = p_request.getParameter(TASK_ID);
+            String taskIdParam = p_request.getParameter(TASK_ID);
             long taskId = TaskHelper.getLong(taskIdParam);
             TaskImpl task = HibernateUtil.get(TaskImpl.class, taskId);
             String result = "";
-            if(task.getIsUploading() == 'Y')
+            if (task.getIsUploading() == 'Y')
             {
-            	result = "{\"isUploading\":true}";
+                result = "{\"isUploading\":true}";
             }
             else
             {
-            	result = "{\"isUploading\":false}";
+                result = "{\"isUploading\":false}";
             }
-        	p_response.getWriter().write(result);
-        	return;
+            p_response.getWriter().write(result);
+            return;
         }
         // for GBS-1939
         else if (TASK_ACTION_SELECTED_TASKSSTATUS.equals(action))
@@ -718,7 +720,10 @@ public class TaskListHandler extends PageHandler
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
         String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
-        String includeXmlNodeContextInformation = downloadOfflineFilesOptions.get(18);
+        String includeXmlNodeContextInformation = downloadOfflineFilesOptions
+                .get(18);
+        String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
+        String penalizedReferenceTmPer = downloadOfflineFilesOptions.get(22);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         JobPackageZipper zipper = new JobPackageZipper();
@@ -740,6 +745,7 @@ public class TaskListHandler extends PageHandler
         List<Long> alljobIds = new ArrayList<Long>();
         List<Long> alltaskIds = new ArrayList<Long>();
         List<Long> alljobIdsSort = new ArrayList<Long>();
+        List<Long> allPenalties = new ArrayList<Long>();
         List<Job> alljobs = new ArrayList<Job>();
         List<Long> allpageIdList = new ArrayList<Long>();
         List<String> allpageNameList = new ArrayList<String>();
@@ -770,6 +776,13 @@ public class TaskListHandler extends PageHandler
 
             long jobId = task.getJobId();
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            TranslationMemoryProfile tmp = job.getL10nProfile()
+                    .getTranslationMemoryProfile();
+            long penalty = tmp.getRefTmPenalty();
+            if (penalty > 0)
+            {
+                allPenalties.add(penalty);
+            }
             alljobIds.add(jobId);
             alljobIdsSort.add(jobId);
             alljobs.add(job);
@@ -844,6 +857,7 @@ public class TaskListHandler extends PageHandler
         }
 
         SortUtil.sort(alljobIdsSort);
+        SortUtil.sort(allPenalties);
         String jobName = "Jobs_" + alljobIdsSort.get(0) + "-"
                 + alljobIdsSort.get(alljobIdsSort.size() - 1);
 
@@ -867,6 +881,7 @@ public class TaskListHandler extends PageHandler
         downloadParams.setTermFormat(terminology);
         downloadParams.setAllJobs(alljobs);
         downloadParams.setAllTaskIds(alltaskIds);
+        downloadParams.setAllPenalties(allPenalties);
         downloadParams.setAllPage_tasks(allPage_tasks);
         downloadParams.setAllPSF_tasks(allPSF_tasks);
         downloadParams.setAllSTF_tasks(allSTF_tasks);
@@ -874,9 +889,9 @@ public class TaskListHandler extends PageHandler
         downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
         downloadParams.setPopulateFuzzy("yes".equalsIgnoreCase(populateFuzzy));
         downloadParams.setPreserveSourceFolder("yes"
-                    .equalsIgnoreCase(preserveSourceFolder));
+                .equalsIgnoreCase(preserveSourceFolder));
         downloadParams.setIncludeXmlNodeContextInformation("yes"
-                    .equalsIgnoreCase(includeXmlNodeContextInformation));
+                .equalsIgnoreCase(includeXmlNodeContextInformation));
         downloadParams.setConsolidateFileType("consolidate");
         downloadParams.setNeedCombined(true);
         downloadParams.setIncludeRepetitions("yes"
@@ -885,6 +900,10 @@ public class TaskListHandler extends PageHandler
                 .equalsIgnoreCase(changeCreationIdForMt));
         downloadParams.setExcludeFullyLeveragedFiles("yes"
                 .equalsIgnoreCase(excludeFullyLeveragedFiles));
+        downloadParams.setPenalizedReferenceTmPre("yes"
+                .equalsIgnoreCase(penalizedReferenceTmPre));
+        downloadParams.setPenalizedReferenceTmPer("yes"
+                .equalsIgnoreCase(penalizedReferenceTmPer));
         downloadParams.setZipper(zipper);
 
         try
@@ -947,9 +966,12 @@ public class TaskListHandler extends PageHandler
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
         String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
-        String includeXmlNodeContextInformation = downloadOfflineFilesOptions.get(18);
+        String includeXmlNodeContextInformation = downloadOfflineFilesOptions
+                .get(18);
         String consolidateFileType = downloadOfflineFilesOptions.get(19);
         String wordCountForDownload = downloadOfflineFilesOptions.get(20);
+        String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
+        String penalizedReferenceTmPer = downloadOfflineFilesOptions.get(22);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         String zipFileName = "DownloadAllOfflineFiles.zip";
@@ -1051,13 +1073,18 @@ public class TaskListHandler extends PageHandler
             downloadParams.setIncludeXmlNodeContextInformation("yes"
                     .equalsIgnoreCase(includeXmlNodeContextInformation));
             downloadParams.setConsolidateFileType(consolidateFileType);
-            downloadParams.setWordCountForDownload(Integer.parseInt(wordCountForDownload));
+            downloadParams.setWordCountForDownload(Integer
+                    .parseInt(wordCountForDownload));
             downloadParams.setIncludeRepetitions("yes"
                     .equalsIgnoreCase(includeRepetitions));
             downloadParams.setChangeCreationIdForMTSegments("yes"
                     .equalsIgnoreCase(changeCreationIdForMt));
             downloadParams.setExcludeFullyLeveragedFiles("yes"
                     .equalsIgnoreCase(excludeFullyLeveragedFiles));
+            downloadParams.setPenalizedReferenceTmPre("yes"
+                    .equalsIgnoreCase(penalizedReferenceTmPre));
+            downloadParams.setPenalizedReferenceTmPer("yes"
+                    .equalsIgnoreCase(penalizedReferenceTmPer));
 
             downloadParams.setZipper(zipper);
             try
@@ -1405,18 +1432,21 @@ public class TaskListHandler extends PageHandler
                     }
                     else
                     {
-                    	if(task.isReviewOnly())
-                    	{
-                    		WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
-                    		if(workflowImpl.getScorecardShowType() == 1 &&
-                    				StringUtil.isEmpty(workflowImpl.getScorecardComment()))
-                    		{
-                    			isNeedScoreTaskId.append("[JobID:")
-	                    			.append(task.getJobId()).append(",JobName:")
-	                    			.append(task.getJobName()).append("],");
-                    			continue;
-                    		}
-                    	}
+                        if (task.isReviewOnly())
+                        {
+                            WorkflowImpl workflowImpl = (WorkflowImpl) task
+                                    .getWorkflow();
+                            if (workflowImpl.getScorecardShowType() == 1
+                                    && StringUtil.isEmpty(workflowImpl
+                                            .getScorecardComment()))
+                            {
+                                isNeedScoreTaskId.append("[JobID:")
+                                        .append(task.getJobId())
+                                        .append(",JobName:")
+                                        .append(task.getJobName()).append("],");
+                                continue;
+                            }
+                        }
                         ProjectImpl project = (ProjectImpl) task.getWorkflow()
                                 .getJob().getProject();
                         boolean isCheckUnTranslatedSegments = project
@@ -1429,87 +1459,97 @@ public class TaskListHandler extends PageHandler
                             if (100 == percentage)
                             {
                                 isFinishedTaskId.append(taskId).append(" ");
-                                
-                                if(task.getIsReportUploadCheck() == 0 
-                                		||(task.getIsReportUploadCheck() == 1 
-                                        		&&  task.getIsReportUploaded() == 1))
+
+                                if (task.getIsReportUploadCheck() == 0
+                                        || (task.getIsReportUploadCheck() == 1 && task
+                                                .getIsReportUploaded() == 1))
                                 {
-                                	isFinishedReportUploadTaskId.append(taskId).append(" ");
+                                    isFinishedReportUploadTaskId.append(taskId)
+                                            .append(" ");
                                 }
-                                
-                                if(task.getIsReportUploadCheck() == 1 
-                                		&&  task.getIsReportUploaded() == 0)
+
+                                if (task.getIsReportUploadCheck() == 1
+                                        && task.getIsReportUploaded() == 0)
                                 {
-                                	isNeedReportUploadCheckTaskId.append("[JobID:")
-                                	.append(task.getJobId()).append(",JobName:")
-                                	.append(task.getJobName()).append("],");
+                                    isNeedReportUploadCheckTaskId
+                                            .append("[JobID:")
+                                            .append(task.getJobId())
+                                            .append(",JobName:")
+                                            .append(task.getJobName())
+                                            .append("],");
                                 }
                             }
                             else
                             {
-                            	unTranslatedTaskId.append(taskId).append(" ");
+                                unTranslatedTaskId.append(taskId).append(" ");
                             }
                         }
                         else
                         {
                             isFinishedTaskId.append(taskId).append(" ");
-                            
-                            if(task.getIsReportUploadCheck() == 0 
-                            		||(task.getIsReportUploadCheck() == 1 
-                                    		&&  task.getIsReportUploaded() == 1))
+
+                            if (task.getIsReportUploadCheck() == 0
+                                    || (task.getIsReportUploadCheck() == 1 && task
+                                            .getIsReportUploaded() == 1))
                             {
-                            	isFinishedReportUploadTaskId.append(taskId).append(" ");
+                                isFinishedReportUploadTaskId.append(taskId)
+                                        .append(" ");
                             }
-                            
-                            if(task.getIsReportUploadCheck() == 1 
-                            		&&  task.getIsReportUploaded() == 0)
+
+                            if (task.getIsReportUploadCheck() == 1
+                                    && task.getIsReportUploaded() == 0)
                             {
-                            	isNeedReportUploadCheckTaskId.append("[JobID:")
-                            	.append(task.getJobId()).append(",JobName:")
-                            	.append(task.getJobName()).append("],");
+                                isNeedReportUploadCheckTaskId.append("[JobID:")
+                                        .append(task.getJobId())
+                                        .append(",JobName:")
+                                        .append(task.getJobName()).append("],");
                             }
                         }
-                        
+
                     }
                 }
             }
             String result = "{";
-            if(isUploadingJobName.length() != 0)
+            if (isUploadingJobName.length() != 0)
             {
-            	result = result + "\"isUploadingJobName\":\"" 
-            			+ isUploadingJobName.substring(0,
-            				isUploadingJobName.length() - 1) + "\",";
+                result = result
+                        + "\"isUploadingJobName\":\""
+                        + isUploadingJobName.substring(0,
+                                isUploadingJobName.length() - 1) + "\",";
             }
-            if(isFinishedTaskId.length() != 0)
+            if (isFinishedTaskId.length() != 0)
             {
-            	result = result + "\"isFinishedTaskId\":\"" 
-						+ isFinishedTaskId.toString().trim() + "\",";
+                result = result + "\"isFinishedTaskId\":\""
+                        + isFinishedTaskId.toString().trim() + "\",";
             }
-            if(isNeedScoreTaskId.length() != 0)
+            if (isNeedScoreTaskId.length() != 0)
             {
-            	result = result + "\"isNeedScoreTaskId\":\"" 
-    					+ isNeedScoreTaskId.substring(0,
-    							isNeedScoreTaskId.length() - 1) + "\",";
+                result = result
+                        + "\"isNeedScoreTaskId\":\""
+                        + isNeedScoreTaskId.substring(0,
+                                isNeedScoreTaskId.length() - 1) + "\",";
             }
-            if(isNeedReportUploadCheckTaskId.length() != 0)
+            if (isNeedReportUploadCheckTaskId.length() != 0)
             {
-            	result = result + "\"isNeedReportUploadCheckTaskId\":\"" 
-				+ isNeedReportUploadCheckTaskId.toString().trim() + "\",";
+                result = result + "\"isNeedReportUploadCheckTaskId\":\""
+                        + isNeedReportUploadCheckTaskId.toString().trim()
+                        + "\",";
             }
-            if(isFinishedReportUploadTaskId.length() != 0)
+            if (isFinishedReportUploadTaskId.length() != 0)
             {
-            	result = result + "\"isFinishedReportUploadTaskId\":\"" 
-				+ isFinishedReportUploadTaskId.toString().trim() + "\",";
+                result = result + "\"isFinishedReportUploadTaskId\":\""
+                        + isFinishedReportUploadTaskId.toString().trim()
+                        + "\",";
             }
-            if(unTranslatedTaskId.length()  != 0)
+            if (unTranslatedTaskId.length() != 0)
             {
-            	result = result + "\"unTranslatedTaskId\":\"" 
-    					+ unTranslatedTaskId.toString().trim() + "\",";
+                result = result + "\"unTranslatedTaskId\":\""
+                        + unTranslatedTaskId.toString().trim() + "\",";
             }
-            
-            if(result.length() > 2)
-            	result = result.substring(0 , result .length() - 1);
-            
+
+            if (result.length() > 2)
+                result = result.substring(0, result.length() - 1);
+
             result = result + "}";
 
             return result;

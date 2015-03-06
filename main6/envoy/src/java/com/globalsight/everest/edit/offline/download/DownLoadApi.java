@@ -38,6 +38,7 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.edit.SynchronizationManager;
 import com.globalsight.everest.edit.SynchronizationStatus;
@@ -70,6 +71,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileMgr;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -430,16 +432,16 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         is = new ByteArrayInputStream(projectInfo.getBytes("UTF-8"));
         m_zipper.writeFile(is);
         is.close();
-        
 
-        //write OmegaT_Quick_Start.pdf to omegaT kit root folder.
-		String docRoot = null;
-		docRoot = SystemConfiguration.getInstance().getStringParameter(
-				SystemConfigParamNames.WEB_SERVER_DOC_ROOT);
-		File globalsight_ear = (new File(docRoot)).getParentFile();
-		String OmegaTQuickStart = globalsight_ear.getPath()
-				+ "/lib/classes/resources/" + OmegaTConst.OMEGAT_QUICK_START;
-		OmegaTQuickStart = OmegaTQuickStart.replace("\\", "/").replace("/", File.separator);
+        // write OmegaT_Quick_Start.pdf to omegaT kit root folder.
+        String docRoot = null;
+        docRoot = SystemConfiguration.getInstance().getStringParameter(
+                SystemConfigParamNames.WEB_SERVER_DOC_ROOT);
+        File globalsight_ear = (new File(docRoot)).getParentFile();
+        String OmegaTQuickStart = globalsight_ear.getPath()
+                + "/lib/classes/resources/" + OmegaTConst.OMEGAT_QUICK_START;
+        OmegaTQuickStart = OmegaTQuickStart.replace("\\", "/").replace("/",
+                File.separator);
         addStaticResourceFile(new File(OmegaTQuickStart),
                 parentPath.substring(0, parentPath.length() - 1));
     }
@@ -984,8 +986,9 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                                 .setTaskIds(m_downloadParams.getAllTaskIds());
                     }
 
-                    if (m_downloadParams.getConsolidateFileType() != null 
-                    		&& m_downloadParams.getConsolidateFileType().equals("consolidate"))
+                    if (m_downloadParams.getConsolidateFileType() != null
+                            && m_downloadParams.getConsolidateFileType()
+                                    .equals("consolidate"))
                     {
                         isConsolidate = true;
                         if (!pageData.getPageId().equals(OPD.getPageId()))
@@ -1020,7 +1023,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     }
                     else
                     {
-                    	Vector tempVector = OPD.getSegmentList();
+                        Vector tempVector = OPD.getSegmentList();
                         curTargetFname = addExtractedPrimaryTargetPage(OPD,
                                 m_downloadParams);
                         OPD.setSegmentList(tempVector);
@@ -1226,7 +1229,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
             if (forTMX)
             {
-            	segmentsUnmergedSet.addAll(data.getSegmentList());
+                segmentsUnmergedSet.addAll(data.getSegmentList());
             }
         }
         segmentsUnmerged.addAll(segmentsUnmergedSet);
@@ -1402,25 +1405,55 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         String tmxPlainPath = null;
         String tmx14bPath = null;
         String fname = null;
+        String penaltyTmxName = null;
+        String fullPenaltyPath = null;
         String fullPlainPath = null;
         String full14bPath = null;
         int resMode = p_downloadParams.getResInsOption();
+        boolean isOmegaT = (DOWNLOAD_FILE_FORMAT_OMEGAT == p_downloadParams
+                .getFileFormatId());
+        long penalty = 0;
+        boolean needPenaltyTmx = false;
 
         if (p_downloadParams.isNeedCombined())
         {
-            fname = p_downloadParams.getFullJobName() + "_"
-                    + p_downloadParams.getTargetLocale().toString() + "."
-                    + FILE_EXT_TMX_NO_DOT;
+            String localeString = p_downloadParams.getTargetLocale().toString()
+                    + "." + FILE_EXT_TMX_NO_DOT;
+            String jobName = p_downloadParams.getFullJobName();
+            fname = jobName + "_" + localeString;
+            if (!isOmegaT)
+            {
+                List<Long> penalties = p_downloadParams.getAllPenalties();
+                if (penalties.size() > 0)
+                {
+                    needPenaltyTmx = true;
+                    penaltyTmxName = getPenaltyTmxName(jobName,
+                            p_downloadParams, penalty) + "_" + localeString;
+                }
+            }
         }
         else
         {
+            TranslationMemoryProfile tmp = p_downloadParams.getJob()
+                    .getL10nProfile().getTranslationMemoryProfile();
+            penalty = tmp.getRefTmPenalty();
             fname = getUniqueExtractedPTFName(p_page, FILE_EXT_TMX_NO_DOT);
+            if (!isOmegaT && penalty > 0)
+            {
+                needPenaltyTmx = true;
+                penaltyTmxName = getPenaltyTmxName(FileUtils.getPrefix(fname),
+                        p_downloadParams, penalty) + "." + FILE_EXT_TMX_NO_DOT;
+            }
         }
 
         if (resMode == AmbassadorDwUpConstants.MAKE_RES_TMX_14B)
         {
             tmx14bPath = DownloadHelper.makeTmx14bParentPath(p_downloadParams);
             full14bPath = tmx14bPath + fname;
+            if (needPenaltyTmx)
+            {
+                fullPenaltyPath = tmx14bPath + penaltyTmxName;
+            }
         }
         else if (resMode == AmbassadorDwUpConstants.MAKE_RES_TMX_PLAIN)
         {
@@ -1433,9 +1466,14 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
             tmx14bPath = DownloadHelper.makeTmx14bParentPath(p_downloadParams);
             full14bPath = tmx14bPath + fname;
+            if (needPenaltyTmx)
+            {
+                fullPenaltyPath = tmx14bPath + penaltyTmxName;
+            }
         }
 
-        if (full14bPath != null || fullPlainPath != null)
+        if (full14bPath != null || fullPlainPath != null
+                || fullPenaltyPath != null)
         {
             StringBuffer sb = new StringBuffer();
             sb.append(m_resource.getString("msg_dnld_adding_file"));
@@ -1453,14 +1491,26 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 m_zipper.writePath(full14bPath);
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
-                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode, false);
             }
 
             if (fullPlainPath != null)
             {
                 m_zipper.writePath(fullPlainPath);
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
-                        TmxUtil.TMX_LEVEL_ONE, convertLF, mode);
+                        TmxUtil.TMX_LEVEL_ONE, convertLF, mode, false);
+            }
+            // GBS-3776, additional PENALTY TMX file
+            if (fullPenaltyPath != null)
+            {
+                sb = new StringBuffer();
+                sb.append(m_resource.getString("msg_dnld_adding_file"));
+                sb.append(penaltyTmxName);
+                m_pageCounter++;
+                m_status.speak(m_pageCounter, sb.toString());
+                m_zipper.writePath(fullPenaltyPath);
+                m_zipper.writeTmxPage(p_page, p_downloadParams,
+                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode, true);
             }
 
             if (seperateMT && full14bPath != null)
@@ -1479,7 +1529,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
                 m_zipper.writePath(icePath);
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
-                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode, false);
 
                 // add mt files
                 mode = TmxUtil.TMX_MODE_MT_ONLY;
@@ -1495,28 +1545,29 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
                 m_zipper.writePath(mtPath);
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
-                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode, false);
 
                 // GBS-3163 : change this to /tm/mt/penalty-xx/
                 List<Job> jobList = new ArrayList<Job>();
-                if(m_downloadParams.getAllJob() != null)
+                if (m_downloadParams.getAllJob() != null)
                 {
-                	jobList = m_downloadParams.getAllJob();
+                    jobList = m_downloadParams.getAllJob();
                 }
                 else
                 {
-                	jobList.add(m_downloadParams.getRightJob());
-				}
+                    jobList.add(m_downloadParams.getRightJob());
+                }
                 Set<Integer> mtConfidenceScoreSet = new HashSet<Integer>();
                 int mtConfidenceScore = 100;
                 boolean useMT = false;
-                for(Job j: jobList)
+                for (Job j : jobList)
                 {
-                	try
+                    try
                     {
                         if (j != null)
                         {
-                            j = ServerProxy.getJobHandler().getJobById(j.getId());
+                            j = ServerProxy.getJobHandler().getJobById(
+                                    j.getId());
                         }
                         else
                         {
@@ -1528,12 +1579,12 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     {
                         j = null;
                     }
-                    
+
                     if (j != null)
                     {
                         Collection<Workflow> wfs = j.getWorkflows();
-                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs.iterator()
-                                : null;
+                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs
+                                .iterator() : null;
 
                         while (wfsIt.hasNext())
                         {
@@ -1541,49 +1592,52 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             if (wf.getTargetLocale().getId() == m_downloadParams
                                     .getTargetLocale().getId())
                             {
-                            	if(wf.getUseMT())
-                            	{	
-                            		mtConfidenceScoreSet.add(wf.getMtConfidenceScore());
-                            		useMT = true;
-                            	}
+                                if (wf.getUseMT())
+                                {
+                                    mtConfidenceScoreSet.add(wf
+                                            .getMtConfidenceScore());
+                                    useMT = true;
+                                }
                             }
                         }
                     }
                 }
 
-                Vector<OfflineSegmentData> allSegments = p_page.getSegmentList();
+                Vector<OfflineSegmentData> allSegments = p_page
+                        .getSegmentList();
                 sb = new StringBuffer();
-                if(useMT)
+                if (useMT)
                 {
-                	for(Integer score: mtConfidenceScoreSet)
+                    for (Integer score : mtConfidenceScoreSet)
                     {
-                		String tmxPenalty = DownloadHelper
-                        		.makeTmxParentPath(m_downloadParams);
-                    	mtConfidenceScore = 100 - score;
-                        String penaltyDir = "mt/penalty-" + mtConfidenceScore + "/";
+                        String tmxPenalty = DownloadHelper
+                                .makeTmxParentPath(m_downloadParams);
+                        mtConfidenceScore = 100 - score;
+                        String penaltyDir = "mt/penalty-" + mtConfidenceScore
+                                + "/";
                         tmxPenalty = tmxPenalty + penaltyDir + fname;
-                        
+
                         sb.setLength(0);
                         sb.append(m_resource.getString("msg_dnld_adding_file"));
                         sb.append("/tm/");
                         sb.append(penaltyDir);
                         sb.append(fname);
-                        
+
                         m_pageCounter++;
                         m_status.speak(m_pageCounter, sb.toString());
-                        
+
                         Vector<OfflineSegmentData> tempSegments = new Vector<OfflineSegmentData>();
-                        for(OfflineSegmentData segment: allSegments)
+                        for (OfflineSegmentData segment : allSegments)
                         {
-                        	if(segment.getMatchValue() == score)
-                        	{
-                        		tempSegments.add(segment);
-                        	}
+                            if (segment.getMatchValue() == score)
+                            {
+                                tempSegments.add(segment);
+                            }
                         }
                         p_page.setSegmentList(tempSegments);
                         m_zipper.writePath(tmxPenalty);
                         m_zipper.writeTmxPage(p_page, p_downloadParams,
-                                TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                                TmxUtil.TMX_LEVEL_TWO, convertLF, mode, false);
                     }
                 }
                 else
@@ -1594,13 +1648,72 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     sb.append(fname);
                     sb.append(" ");
                     sb.append(m_resource.getString("msg_job_create_empty_file"));
-                
-	                m_pageCounter++;
-	                m_status.speak(m_pageCounter, sb.toString());
+
+                    m_pageCounter++;
+                    m_status.speak(m_pageCounter, sb.toString());
                 }
             }
 
         }
+    }
+
+    private String getPenaltyTmxName(String jobName,
+            DownloadParams downloadParams, long penalty)
+    {
+        StringBuilder penaltyTmxName = new StringBuilder();
+        if (downloadParams.isNeedCombined())
+        {
+            penaltyTmxName.append(jobName);
+            penaltyTmxName.append("_");
+            penaltyTmxName.append(FILE_PENALTY_TMX);
+            if (downloadParams.getPenalizedReferenceTmPer())
+            {
+                List<Long> penalties = downloadParams.getAllPenalties();
+                if (penalties.size() > 0)
+                {
+                    penaltyTmxName.append("-");
+                    penaltyTmxName.append(penalties.get(0));
+                    penaltyTmxName.append("%");
+                    penaltyTmxName.append("-");
+                    penaltyTmxName.append(penalties.get(penalties.size() - 1));
+                    penaltyTmxName.append("%");
+                }
+            }
+        }
+        else
+        {
+            penaltyTmxName.append(jobName);
+            penaltyTmxName.append("_");
+            penaltyTmxName.append(FILE_PENALTY_TMX);
+            if (downloadParams.getPenalizedReferenceTmPer())
+            {
+                penaltyTmxName.append("-");
+                penaltyTmxName.append(penalty);
+                penaltyTmxName.append("%");
+            }
+            int idx = jobName.lastIndexOf("_");
+            if (idx > -1)
+            {
+                String randomNumber = jobName.substring(idx + 1);
+                if (randomNumber.matches("^\\d{5,10}$"))
+                {
+                    penaltyTmxName = new StringBuilder();
+                    penaltyTmxName.append(jobName.substring(0, idx));
+                    penaltyTmxName.append("_");
+                    penaltyTmxName.append(FILE_PENALTY_TMX);
+                    if (downloadParams.getPenalizedReferenceTmPer())
+                    {
+                        penaltyTmxName.append("-");
+                        penaltyTmxName.append(penalty);
+                        penaltyTmxName.append("%");
+                    }
+                    penaltyTmxName.append("_");
+                    penaltyTmxName.append(randomNumber);
+                }
+            }
+        }
+
+        return penaltyTmxName.toString();
     }
 
     private void addTermFile(OfflinePageData page, DownloadParams downloadParams)
@@ -1730,23 +1843,33 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         String inboxPath = DownloadHelper.makePTFParentPath(p_downloadParams);
         String fname = "";
         StringBuffer fullPath = new StringBuffer(inboxPath);
-        if(p_downloadParams.isPreserveSourceFolder() && !p_downloadParams.isNeedCombined())
+        if (p_downloadParams.isPreserveSourceFolder()
+                && !p_downloadParams.isNeedCombined())
         {
-        	String jobIdStr = String.valueOf(p_page.getJobId());
-        	String fullPageName = p_page.getFullPageName().replaceAll("\\\\", "/");
-        	//GBS-3766
-        	String sourceFileName = fullPageName.substring(fullPageName.lastIndexOf("/") + 1);
-        	String preProcessedFolderName = "PreProcessed_" + jobIdStr + "_" 
-				        	+ sourceFileName.substring(0, sourceFileName.lastIndexOf(".")) + "_" 
-				        	+ sourceFileName.substring(sourceFileName.lastIndexOf(".") + 1);
-        	if(fullPageName.indexOf("/" + preProcessedFolderName + "/") > 0)
-        	{
-        		fullPageName = fullPageName.replace("/" + preProcessedFolderName + "/", "/");
-        	}
-        	
-        	fullPath = fullPath.append(fullPageName.substring(
-        			fullPageName.indexOf("/" + jobIdStr + "/") + jobIdStr.length() + 2, 
-        			fullPageName.lastIndexOf("/") + 1));
+            String jobIdStr = String.valueOf(p_page.getJobId());
+            String fullPageName = p_page.getFullPageName().replaceAll("\\\\",
+                    "/");
+            // GBS-3766
+            String sourceFileName = fullPageName.substring(fullPageName
+                    .lastIndexOf("/") + 1);
+            String preProcessedFolderName = "PreProcessed_"
+                    + jobIdStr
+                    + "_"
+                    + sourceFileName.substring(0,
+                            sourceFileName.lastIndexOf("."))
+                    + "_"
+                    + sourceFileName
+                            .substring(sourceFileName.lastIndexOf(".") + 1);
+            if (fullPageName.indexOf("/" + preProcessedFolderName + "/") > 0)
+            {
+                fullPageName = fullPageName.replace("/"
+                        + preProcessedFolderName + "/", "/");
+            }
+
+            fullPath = fullPath.append(fullPageName.substring(
+                    fullPageName.indexOf("/" + jobIdStr + "/")
+                            + jobIdStr.length() + 2,
+                    fullPageName.lastIndexOf("/") + 1));
         }
 
         if (p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_RTF
@@ -1759,8 +1882,9 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         + p_downloadParams.getTargetLocale().toString() + "."
                         + FILE_EXT_RTF_NO_DOT;
             }
-            else if (m_downloadParams.getConsolidateFileType() != null 
-            				&& p_downloadParams.getConsolidateFileType().equals("consolidate"))
+            else if (m_downloadParams.getConsolidateFileType() != null
+                    && p_downloadParams.getConsolidateFileType().equals(
+                            "consolidate"))
             {
                 fname = p_downloadParams.getJob().getJobName() + "."
                         + FILE_EXT_RTF_NO_DOT;
@@ -1773,24 +1897,26 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
             if (m_downloadParams.isUnicodeRTF())
             {
-            	if(m_downloadParams.getConsolidateFileType() != null 
-                		&& p_downloadParams.getConsolidateFileType().equals("consolidateByWordCount"))
-            	{
-            		writeByWordCount(fname, p_downloadParams, p_page, fullPath, inboxPath, FILE_EXT_RTF_NO_DOT);
-            	}
-            	else
-            	{
-            		m_pageCounter++;
-            		
-            		StringBuffer sb = new StringBuffer();
-            		sb.append(m_resource.getString("msg_dnld_adding_file"));
-            		sb.append(fname);
-            		
-            		m_status.speak(m_pageCounter, sb.toString());
-            		
-            		m_zipper.writePath(fullPath.toString());
-            		m_zipper.writeUnicodeRtfPage(p_page, p_downloadParams);
-            	}
+                if (m_downloadParams.getConsolidateFileType() != null
+                        && p_downloadParams.getConsolidateFileType().equals(
+                                "consolidateByWordCount"))
+                {
+                    writeByWordCount(fname, p_downloadParams, p_page, fullPath,
+                            inboxPath, FILE_EXT_RTF_NO_DOT);
+                }
+                else
+                {
+                    m_pageCounter++;
+
+                    StringBuffer sb = new StringBuffer();
+                    sb.append(m_resource.getString("msg_dnld_adding_file"));
+                    sb.append(fname);
+
+                    m_status.speak(m_pageCounter, sb.toString());
+
+                    m_zipper.writePath(fullPath.toString());
+                    m_zipper.writeUnicodeRtfPage(p_page, p_downloadParams);
+                }
             }
             else
             {
@@ -1814,56 +1940,61 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 fname = p_downloadParams.getFullJobName() + "_"
                         + p_downloadParams.getTargetLocale().toString() + "."
                         + FILE_EXT_XLIFF_NO_DOT;
-            else if (m_downloadParams.getConsolidateFileType() != null 
-    						&&p_downloadParams.getConsolidateFileType().equals("consolidate"))
+            else if (m_downloadParams.getConsolidateFileType() != null
+                    && p_downloadParams.getConsolidateFileType().equals(
+                            "consolidate"))
                 fname = p_downloadParams.getJob().getJobName() + "."
                         + FILE_EXT_XLIFF_NO_DOT;
             else
                 fname = getUniqueExtractedPTFName(p_page, FILE_EXT_XLIFF_NO_DOT);
             fullPath.append(fname);
 
-            if(m_downloadParams.getConsolidateFileType() != null 
-    				&& p_downloadParams.getConsolidateFileType().equals("consolidateByWordCount"))
-        	{
-            	writeByWordCount(fname, p_downloadParams, p_page, fullPath, inboxPath, FILE_EXT_XLIFF_NO_DOT);
-        	}
-            else 
+            if (m_downloadParams.getConsolidateFileType() != null
+                    && p_downloadParams.getConsolidateFileType().equals(
+                            "consolidateByWordCount"))
             {
-            	m_pageCounter++;
-            	
-            	StringBuffer sb = new StringBuffer();
-            	sb.append(m_resource.getString("msg_dnld_adding_file"));
-            	sb.append(fname);
-            	
-            	m_status.speak(m_pageCounter, sb.toString());
-            	
-            	m_zipper.writePath(fullPath.toString());
-            	m_zipper.writeUnicodeXliffPage(p_page, p_downloadParams);
-			}
+                writeByWordCount(fname, p_downloadParams, p_page, fullPath,
+                        inboxPath, FILE_EXT_XLIFF_NO_DOT);
+            }
+            else
+            {
+                m_pageCounter++;
+
+                StringBuffer sb = new StringBuffer();
+                sb.append(m_resource.getString("msg_dnld_adding_file"));
+                sb.append(fname);
+
+                m_status.speak(m_pageCounter, sb.toString());
+
+                m_zipper.writePath(fullPath.toString());
+                m_zipper.writeUnicodeXliffPage(p_page, p_downloadParams);
+            }
         }
 
         else if (p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_TTX)
         {
             fname = getUniqueExtractedPTFName(p_page, FILE_EXT_TTX_NO_DOT);
             fullPath.append(fname);
-            
-            if(m_downloadParams.getConsolidateFileType() != null 
-    				&& p_downloadParams.getConsolidateFileType().equals("consolidateByWordCount"))
-        	{
-            	writeByWordCount(fname, p_downloadParams, p_page, fullPath, inboxPath, FILE_EXT_TTX_NO_DOT);
-        	}
+
+            if (m_downloadParams.getConsolidateFileType() != null
+                    && p_downloadParams.getConsolidateFileType().equals(
+                            "consolidateByWordCount"))
+            {
+                writeByWordCount(fname, p_downloadParams, p_page, fullPath,
+                        inboxPath, FILE_EXT_TTX_NO_DOT);
+            }
             else
             {
-            	m_pageCounter++;
-            	
-            	StringBuffer sb = new StringBuffer();
-            	sb.append(m_resource.getString("msg_dnld_adding_file"));
-            	sb.append(fname);
-            	
-            	m_status.speak(m_pageCounter, sb.toString());
-            	
-            	m_zipper.writePath(fullPath.toString());
-            	m_zipper.writeUnicodeTTXPage(p_page, p_downloadParams);
+                m_pageCounter++;
+
+                StringBuffer sb = new StringBuffer();
+                sb.append(m_resource.getString("msg_dnld_adding_file"));
+                sb.append(fname);
+
+                m_status.speak(m_pageCounter, sb.toString());
+
+                m_zipper.writePath(fullPath.toString());
+                m_zipper.writeUnicodeTTXPage(p_page, p_downloadParams);
             }
         }
 
@@ -1928,120 +2059,124 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         return fname;
     }
 
-    private void writeByWordCount(String p_fname,DownloadParams p_downloadParams,
-    		OfflinePageData p_page, StringBuffer p_fullpath,String p_inboxPath,
-    		String p_extension) throws IOException
+    private void writeByWordCount(String p_fname,
+            DownloadParams p_downloadParams, OfflinePageData p_page,
+            StringBuffer p_fullpath, String p_inboxPath, String p_extension)
+            throws IOException
     {
-    	m_pageCounter++;
-		
-		StringBuffer sb = new StringBuffer();
-		sb.append(m_resource.getString("msg_dnld_adding_file"));
-		sb.append(p_fname);
-		
-		m_status.speak(m_pageCounter, sb.toString());
-		
-		int wordCount = 0;
-		int fileCount = 1;
-		boolean needSplit = true;
-		int totalWordCount = 0;
-		int maxWordCount = p_downloadParams.getWordCountForDownload();
-		Vector segmentList = new Vector();
-		segmentList.addAll(p_page.getSegmentList());
-		OfflinePageData tempPageData = p_page;
-		initTempPageData(tempPageData);
-		for(OfflineSegmentData segmentData :(Vector<OfflineSegmentData>) segmentList)
-		{
-			totalWordCount = totalWordCount + segmentData.getSourceTuv().getWordCount();
-		}
-		if(totalWordCount <= maxWordCount)
-		{
-			needSplit = false;
-		}
-		String fullPath = p_fullpath.toString();
-		for(OfflineSegmentData segmentData :(Vector<OfflineSegmentData>) segmentList)
-		{
-			if(wordCount == 0 || wordCount >= maxWordCount)
-			{
-				String fileName;
-				if(!needSplit)
-				{
-					fileName = p_fname;
-				}
-				else
-				{
-					fileName = p_fname.substring(0, p_fname.indexOf(p_extension) - 1) 
-						+ "(" + fileCount + ")."+ p_extension;
-				}
-				fullPath = fullPath.substring(0, fullPath.lastIndexOf("/") + 1) + fileName;
-			}
-			
-			int segmentWordCount = segmentData.getSourceTuv().getWordCount();
-			wordCount = wordCount + segmentWordCount;
-			tempPageData.addSegment(segmentData);
-			setWordCount(tempPageData, segmentData, segmentWordCount);
-			if(wordCount >= maxWordCount)
-			{
-				m_zipper.writePath(fullPath);
-				writeFileByWordCount(tempPageData, p_downloadParams, p_extension);
-				initTempPageData(tempPageData);
-				
-				wordCount = 0;
-				fileCount++;
-			}
-		}
-		if(wordCount > 0)
-		{
-			m_zipper.writePath(fullPath);
-			writeFileByWordCount(tempPageData, p_downloadParams, p_extension);
-		}
+        m_pageCounter++;
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(m_resource.getString("msg_dnld_adding_file"));
+        sb.append(p_fname);
+
+        m_status.speak(m_pageCounter, sb.toString());
+
+        int wordCount = 0;
+        int fileCount = 1;
+        boolean needSplit = true;
+        int totalWordCount = 0;
+        int maxWordCount = p_downloadParams.getWordCountForDownload();
+        Vector segmentList = new Vector();
+        segmentList.addAll(p_page.getSegmentList());
+        OfflinePageData tempPageData = p_page;
+        initTempPageData(tempPageData);
+        for (OfflineSegmentData segmentData : (Vector<OfflineSegmentData>) segmentList)
+        {
+            totalWordCount = totalWordCount
+                    + segmentData.getSourceTuv().getWordCount();
+        }
+        if (totalWordCount <= maxWordCount)
+        {
+            needSplit = false;
+        }
+        String fullPath = p_fullpath.toString();
+        for (OfflineSegmentData segmentData : (Vector<OfflineSegmentData>) segmentList)
+        {
+            if (wordCount == 0 || wordCount >= maxWordCount)
+            {
+                String fileName;
+                if (!needSplit)
+                {
+                    fileName = p_fname;
+                }
+                else
+                {
+                    fileName = p_fname.substring(0,
+                            p_fname.indexOf(p_extension) - 1)
+                            + "(" + fileCount + ")." + p_extension;
+                }
+                fullPath = fullPath.substring(0, fullPath.lastIndexOf("/") + 1)
+                        + fileName;
+            }
+
+            int segmentWordCount = segmentData.getSourceTuv().getWordCount();
+            wordCount = wordCount + segmentWordCount;
+            tempPageData.addSegment(segmentData);
+            setWordCount(tempPageData, segmentData, segmentWordCount);
+            if (wordCount >= maxWordCount)
+            {
+                m_zipper.writePath(fullPath);
+                writeFileByWordCount(tempPageData, p_downloadParams,
+                        p_extension);
+                initTempPageData(tempPageData);
+
+                wordCount = 0;
+                fileCount++;
+            }
+        }
+        if (wordCount > 0)
+        {
+            m_zipper.writePath(fullPath);
+            writeFileByWordCount(tempPageData, p_downloadParams, p_extension);
+        }
     }
-    
+
     private void initTempPageData(OfflinePageData p_tempPageData)
     {
-    	p_tempPageData.setSegmentList(new Vector());
-    	p_tempPageData.getSegmentMap().clear();
-    	p_tempPageData.setNoMatchWordCount(0);
-    	p_tempPageData.setFuzzyMatchWordCount(0);
-    	p_tempPageData.setExactMatchWordCount(0);
+        p_tempPageData.setSegmentList(new Vector());
+        p_tempPageData.getSegmentMap().clear();
+        p_tempPageData.setNoMatchWordCount(0);
+        p_tempPageData.setFuzzyMatchWordCount(0);
+        p_tempPageData.setExactMatchWordCount(0);
     }
-    
-    private void setWordCount(OfflinePageData tempPageData, 
-    		OfflineSegmentData segmentData, int segmentWordCount)
+
+    private void setWordCount(OfflinePageData tempPageData,
+            OfflineSegmentData segmentData, int segmentWordCount)
     {
-    	int matchTypeId = segmentData.getMatchTypeId();
-    	if(matchTypeId == MATCH_TYPE_EXACT)
-    	{
-    		tempPageData.setExactMatchWordCount(tempPageData.getExactMatchWordCount() 
-    				+ segmentWordCount);
-    	}
-    	else if(matchTypeId == MATCH_TYPE_FUZZY)
-    	{
-    		tempPageData.setFuzzyMatchWordCount(tempPageData.getFuzzyMatchWordCount() 
-    				+ segmentWordCount);
-    	}
-    	else if(matchTypeId == MATCH_TYPE_NOMATCH)
-    	{
-    		tempPageData.setNoMatchWordCount(tempPageData.getNoMatchWordCount() 
-    				+ segmentWordCount);
-    	}
+        int matchTypeId = segmentData.getMatchTypeId();
+        if (matchTypeId == MATCH_TYPE_EXACT)
+        {
+            tempPageData.setExactMatchWordCount(tempPageData
+                    .getExactMatchWordCount() + segmentWordCount);
+        }
+        else if (matchTypeId == MATCH_TYPE_FUZZY)
+        {
+            tempPageData.setFuzzyMatchWordCount(tempPageData
+                    .getFuzzyMatchWordCount() + segmentWordCount);
+        }
+        else if (matchTypeId == MATCH_TYPE_NOMATCH)
+        {
+            tempPageData.setNoMatchWordCount(tempPageData.getNoMatchWordCount()
+                    + segmentWordCount);
+        }
     }
-    
-    
+
     private void writeFileByWordCount(OfflinePageData p_tempPageData,
-    		DownloadParams p_downloadParams, String p_extension)
+            DownloadParams p_downloadParams, String p_extension)
     {
-    	if(p_extension.equals(FILE_EXT_TTX_NO_DOT))
-		{
-			m_zipper.writeUnicodeTTXPage(p_tempPageData, p_downloadParams);
-		}
-		else if(p_extension.equals(FILE_EXT_XLIFF_NO_DOT))
-		{
-			m_zipper.writeUnicodeXliffPage(p_tempPageData, p_downloadParams);
-		}
-		else if(p_extension.equals(FILE_EXT_RTF_NO_DOT))
-		{
-			m_zipper.writeUnicodeRtfPage(p_tempPageData, p_downloadParams);
-		}
+        if (p_extension.equals(FILE_EXT_TTX_NO_DOT))
+        {
+            m_zipper.writeUnicodeTTXPage(p_tempPageData, p_downloadParams);
+        }
+        else if (p_extension.equals(FILE_EXT_XLIFF_NO_DOT))
+        {
+            m_zipper.writeUnicodeXliffPage(p_tempPageData, p_downloadParams);
+        }
+        else if (p_extension.equals(FILE_EXT_RTF_NO_DOT))
+        {
+            m_zipper.writeUnicodeRtfPage(p_tempPageData, p_downloadParams);
+        }
     }
 
     /**

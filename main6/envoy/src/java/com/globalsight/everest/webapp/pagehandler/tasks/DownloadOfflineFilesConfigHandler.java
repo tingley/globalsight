@@ -79,14 +79,15 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);// 15
             DOWNLOAD_OPTIONS
                     .add(OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES);// 16
+            DOWNLOAD_OPTIONS.add(OfflineConstants.PRESERVE_SOURCE_FOLDER);// 17
             DOWNLOAD_OPTIONS
-            		.add(OfflineConstants.PRESERVE_SOURCE_FOLDER);// 17
+                    .add(OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION);// 18
+            DOWNLOAD_OPTIONS.add(OfflineConstants.CONSOLIDATE_FILE_TYPE);// 19
+            DOWNLOAD_OPTIONS.add(OfflineConstants.WORD_COUNT_FOR_DOWNLOAD);// 20
             DOWNLOAD_OPTIONS
-            		.add(OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION);// 18
+                    .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE);// 21
             DOWNLOAD_OPTIONS
-            		.add(OfflineConstants.CONSOLIDATE_FILE_TYPE);// 19
-            DOWNLOAD_OPTIONS
-            		.add(OfflineConstants.WORD_COUNT_FOR_DOWNLOAD);// 20
+                    .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER);// 22
 
             // NOTES:These constants must be added in sequence!!!!
             DOWNLOAD_OPTIONS_DEFAULT
@@ -126,6 +127,10 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS_DEFAULT.add("no");// 18
             DOWNLOAD_OPTIONS_DEFAULT.add("consolidate");// 19
             DOWNLOAD_OPTIONS_DEFAULT.add("2000");// 20
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE_DEFAULT);// 21
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER_DEFAULT);// 22
         }
         catch (Throwable ignore)
         {
@@ -255,7 +260,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
 
         key = OfflineConstants.NEED_CONSOLIDATE;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-        
+
         key = OfflineConstants.PRESERVE_SOURCE_FOLDER;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
 
@@ -264,8 +269,14 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
 
         key = OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-        
+
         key = OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION;
+        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+
+        key = UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE;
+        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+
+        key = UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
     }
 

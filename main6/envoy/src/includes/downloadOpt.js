@@ -22,18 +22,24 @@ function init()
     formatSelection();
 
     loadGuides();
-    $("select[name='formatSelector']").change(formatSelection)
+    $("select[name='formatSelector']").change(formatSelection);
 	tmxTypeSelection();	
-	$("#tmxTypeSelector").change(tmxTypeSelection)
-
+	$("#tmxTypeSelector").change(tmxTypeSelection);
 }
 
 function tmxTypeSelection(){
 	var val=$("#tmxTypeSelector").val();
+	var format=$("select[name='formatSelector']").val();
 	if(val.match("resInsTmx")){
 		$(".tmxTypeSelector").show();
+		if("OmegaT" == format){
+		   $("#penalizedReferenceTm").hide();
+	    }else{
+		   $("#penalizedReferenceTm").show();
+	    }
 	}else{
 		$(".tmxTypeSelector").hide();
+		$("#penalizedReferenceTm").hide();
 	}
 }
 
@@ -43,8 +49,17 @@ function formatSelection(){
 	$(".OmegaT").show();
 	$(".TTX").show();
 	var resTermSelector=$("#resTermSelector");
-	//$(".formatAcces").hide();
 	var val=$("select[name='formatSelector']").val();
+	var tmxType=$("#tmxTypeSelector").val();
+	if("OmegaT" == val){
+		$("#penalizedReferenceTm").hide();
+	}else{
+	    if(tmxType.match("resInsTmx")){
+		   $("#penalizedReferenceTm").show();
+		}else{
+		   $("#penalizedReferenceTm").hide();
+		}
+	}
 	
 	var key=optionKey[val];
 	key();
@@ -173,7 +188,17 @@ function setClientDwnldOptions(formSent)
     	document.getElementById("changeCreationIdForMT").checked = true;
     }
     
-	
+    if (dwnldOpt.penalizedReferenceTmPre == 'yes')
+    {
+    	$("#penalizedReferenceTmPre").attr("checked", true);
+    	$("#penalizedReferenceTmPer").attr("checked", false);
+    }
+    
+    if (dwnldOpt.penalizedReferenceTmPer == 'yes')
+    {
+    	$("#penalizedReferenceTmPer").attr("checked", true);
+    	$("#penalizedReferenceTmPre").attr("checked", false);
+    }
 
 	if(dwnldOpt.termSelector)
 	{
@@ -187,6 +212,7 @@ function setClientDwnldOptions(formSent)
 			}
 		}
 	}
+	
 	if(dwnldOpt.TMEditType)
 	{
 		if (tmEditTypeSelector) {
@@ -270,8 +296,6 @@ function setClientDwnldOptions(formSent)
 		}
 	}
 }
-
-
 
 function doOnLoad()
 {

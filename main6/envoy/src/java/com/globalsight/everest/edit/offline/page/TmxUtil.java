@@ -29,13 +29,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-import com.globalsight.everest.edit.offline.download.omegat.OmegaTConst;
 import com.globalsight.everest.localemgr.LocaleManagerLocal;
 import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.exporter.ExportUtil;
@@ -60,12 +58,11 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class TmxUtil
 {
-    static private final Logger s_logger = Logger
-            .getLogger(TmxUtil.class);
+    static private final Logger s_logger = Logger.getLogger(TmxUtil.class);
     public static final int TMX_LEVEL_ONE = 1;
     public static final int TMX_LEVEL_TWO = 2;
     public static final String TMX_ENCODING = FileUtil.UTF16LE;
-    
+
     /**
      * Include all tmx data
      */
@@ -154,11 +151,11 @@ public class TmxUtil
         result.setAdminLang(Tmx.DEFAULT_ADMINLANG);
         p_writer.write(result.getHeaderXml());
     }
-    
+
     public static String composeTuWithoutTuCloseTag(
             TmxUtil.TmxTuvInfo srcTuvInfo, TmxUtil.TmxTuvInfo trgTuvInfo,
             int p_tmxLevel, String sid, boolean isOmegaT, String matchType,
-            String tuId)
+            String tuId, boolean isPenaltyTmx)
     {
         StringBuffer result = new StringBuffer();
 
@@ -177,30 +174,23 @@ public class TmxUtil
         }
 
         // Source TUV
-        result.append(composeTmTuv(srcTuvInfo, p_tmxLevel));
+        result.append(composeTmTuv(srcTuvInfo, p_tmxLevel, isPenaltyTmx));
 
         // Target TUV
-        result.append(composeTmTuv(trgTuvInfo, p_tmxLevel));
+        result.append(composeTmTuv(trgTuvInfo, p_tmxLevel, false));
 
         return result.toString();
     }
 
-    public static String composeTuWithoutTuCloseTag(
-            TmxUtil.TmxTuvInfo srcTuvInfo, TmxUtil.TmxTuvInfo trgTuvInfo,
-            int p_tmxLevel, String sid)
-    {
-        return composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo, p_tmxLevel,
-                sid, false, null, null);
-    }
-    
     public static String composeTu(TmxUtil.TmxTuvInfo srcTuvInfo,
             TmxUtil.TmxTuvInfo trgTuvInfo, int p_tmxLevel, String sid,
-            boolean isOmegaT, String matchType, String tuId)
+            boolean isOmegaT, String matchType, String tuId,
+            boolean isPenaltyTmx)
     {
         StringBuffer result = new StringBuffer();
 
         result.append(composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo,
-                p_tmxLevel, sid, isOmegaT, matchType, tuId));
+                p_tmxLevel, sid, isOmegaT, matchType, tuId, isPenaltyTmx));
 
         // TU close tag
         result.append(TmxUtil.composeTuTail());
@@ -209,14 +199,15 @@ public class TmxUtil
     }
 
     public static String composeTu(TmxUtil.TmxTuvInfo srcTuvInfo,
-            TmxUtil.TmxTuvInfo trgTuvInfo, int p_tmxLevel, String sid)
+            TmxUtil.TmxTuvInfo trgTuvInfo, int p_tmxLevel, String sid,
+            boolean isPenaltyTmx)
     {
         return composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, sid, false, null,
-                null);
+                null, isPenaltyTmx);
     }
 
     public static String composeTmTuv(TmxUtil.TmxTuvInfo tmxTuvInfo,
-            int p_tmxLevel)
+            int p_tmxLevel, boolean isPenaltyTmx)
     {
         StringBuffer result = new StringBuffer();
         if (tmxTuvInfo != null)
@@ -229,6 +220,11 @@ public class TmxUtil
             Timestamp modifyDate = tmxTuvInfo.getModifyDate();
 
             String tuv = operateCDATA(tuvText);
+            // GBS-3776
+            if (isPenaltyTmx)
+            {
+                tuv = "- " + tuv;
+            }
             result.append("<tuv xml:lang=\"");
             result.append(tuvLocale.replace("_", "-")).append("\"");
 
@@ -265,7 +261,7 @@ public class TmxUtil
         return result.toString();
     }
 
-    //Encodes Greater Than and Less Than in CDATA element.
+    // Encodes Greater Than and Less Than in CDATA element.
     public static String operateCDATA(String p_segText)
     {
         String segment = p_segText;
@@ -278,7 +274,7 @@ public class TmxUtil
             segment = segment.replace(orig,
                     orig.replace("<", "&lt;").replace(">", "&gt;"));
         }
-        
+
         return segment;
     }
 
@@ -290,19 +286,24 @@ public class TmxUtil
     private static String convertToTmxLevel(String p_xml, int p_tmxLevel)
     {
         Document dom = null;
-    	try {
-    		//normal operation
-            dom = getDom("<seg>" + p_xml + "</seg>");    		
-    	} catch (RuntimeException re) {
-            //p_xml may contain "<" or ">" which will result in parse error,so encode it.
-        	String p_xml2 = EditUtil.encodeHtmlEntities(p_xml);
-        	dom = getDom("<seg>" + p_xml2 + "</seg>");
-    	}
+        try
+        {
+            // normal operation
+            dom = getDom("<seg>" + p_xml + "</seg>");
+        }
+        catch (RuntimeException re)
+        {
+            // p_xml may contain "<" or ">" which will result in parse error,so
+            // encode it.
+            String p_xml2 = EditUtil.encodeHtmlEntities(p_xml);
+            dom = getDom("<seg>" + p_xml2 + "</seg>");
+        }
 
         Element root = dom.getRootElement();
         if (p_tmxLevel == TMX_LEVEL_ONE)
         {
-            String[] strs = { "//bpt", "//ept", "//ph", "//it", "//ut", "//hi" };
+            String[] strs =
+            { "//bpt", "//ept", "//ph", "//it", "//ut", "//hi" };
             replaceNbsps(root);
             for (int i = 0; i < strs.length; i++)
             {
@@ -311,13 +312,15 @@ public class TmxUtil
         }
         else if (p_tmxLevel == TMX_LEVEL_TWO)
         {
-            String[] attributes = { "locType", "wordcount", "erasable", "movable" };
+            String[] attributes =
+            { "locType", "wordcount", "erasable", "movable" };
             // TMX Compliance: nbsp must be output as character.
             replaceNbsps(root);
             // Remove any SUB tags (but TM2 doesn't contain any).
             removeSubElements(root);
             removeUncompliantAttributes(root, attributes);
-            removeAttributeForNode(root, "it", new String[]{ "i" });
+            removeAttributeForNode(root, "it", new String[]
+            { "i" });
         }
 
         return root.asXML();
@@ -341,7 +344,7 @@ public class TmxUtil
         // String[] strs = { "//bpt", "//ept", "//ph", "//it", "//ut", "//hi" };
         String[] attributes =
         { "locType", "wordcount", "erasable", "movable" };
-        //removeEmbedTags(root);
+        // removeEmbedTags(root);
         // TMX Compliance: nbsp must be output as character.
         // GBS-587, comment out nbsp converting for testing patch 7.1.4.1
         // replaceNbsps(root);
@@ -647,12 +650,12 @@ public class TmxUtil
             this.creationUser = creationUser;
             if (creationDate != null)
             {
-                this.creationDate = new Timestamp(creationDate.getTime());                
+                this.creationDate = new Timestamp(creationDate.getTime());
             }
             this.modifyUser = modifyUser;
             if (modifyDate != null)
             {
-                this.modifyDate = new Timestamp(modifyDate.getTime());                
+                this.modifyDate = new Timestamp(modifyDate.getTime());
             }
         }
 
@@ -660,7 +663,7 @@ public class TmxUtil
         {
             return this.tuvText;
         }
-        
+
         String getTuvLocale()
         {
             return this.tuvLocale;
@@ -753,7 +756,7 @@ public class TmxUtil
             prop = new Tmx.Prop(Tmx.PROP_SOURCE_TM_NAME, temp);
             result.append(prop.asXML());
         }
-        
+
         // attribute properties
         if (tu.getProps() != null)
         {
@@ -845,7 +848,7 @@ public class TmxUtil
                 result.append(Tmx.CHANGEID);
                 result.append("=\"");
                 result.append(EditUtil.encodeXmlEntities(modifyUser));
-                result.append("\" ");                
+                result.append("\" ");
             }
         }
 
@@ -875,7 +878,7 @@ public class TmxUtil
 
         return result.toString();
     }
-    
+
     /**
      * Returns the XML representation like Element.asXML() but without the
      * top-level tag.

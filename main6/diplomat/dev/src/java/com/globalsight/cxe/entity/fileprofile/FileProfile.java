@@ -89,7 +89,7 @@ public interface FileProfile
     /**
      * Return the character set of the file profile
      * 
-     * @return file profile code_set
+     * @return file profile codeSet
      */
     public String getCodeSet();
 
@@ -185,10 +185,10 @@ public interface FileProfile
     /**
      * Set the character set of the file profile
      * 
-     * @param p_code_set
+     * @param p_codeSet
      *            The character set of the file profile
      */
-    public void setCodeSet(String p_code_set);
+    public void setCodeSet(String p_codeSet);
 
     public boolean supportsSid();
 

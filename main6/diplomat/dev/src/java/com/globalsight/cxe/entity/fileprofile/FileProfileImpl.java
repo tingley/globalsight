@@ -64,7 +64,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     private String m_name;
     private String m_description;
     private long m_companyId;
-    private String m_code_set;
+    private String m_codeSet;
     private Set<Long> m_extensionIds;
     private boolean m_byDefaultExportStf = false;
     private String m_scriptOnImport;
@@ -100,7 +100,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         m_name = null;
         m_description = null;
         m_companyId = -1;
-        m_code_set = null;
+        m_codeSet = null;
         m_scriptOnImport = null;
         m_scriptOnExport = null;
         m_extensionIds = new HashSet<Long>();
@@ -120,7 +120,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         m_name = o.getName();
         m_description = o.getDescription();
         m_companyId = o.getCompanyId();
-        m_code_set = o.getCodeSet();
+        m_codeSet = o.getCodeSet();
         m_scriptOnImport = o.getScriptOnImport();
         m_scriptOnExport = o.getScriptOnExport();
 
@@ -244,7 +244,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      */
     public String getCodeSet()
     {
-        return m_code_set;
+        return m_codeSet;
     }
 
     /**
@@ -372,7 +372,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      */
     public void setCodeSet(String p_code_set)
     {
-        m_code_set = p_code_set;
+        m_codeSet = p_code_set;
     }
 
     /**
@@ -419,16 +419,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                 + (m_scriptOnExport == null ? "null" : m_scriptOnExport)
                 + " m_extensionIds="
                 + (m_extensionIds == null ? "null" : m_extensionIds.toString());
-    }
-
-    public String getCode_set()
-    {
-        return m_code_set;
-    }
-
-    public void setCode_set(String m_code_set)
-    {
-        this.m_code_set = m_code_set;
     }
 
     public long getXmlRuleId()

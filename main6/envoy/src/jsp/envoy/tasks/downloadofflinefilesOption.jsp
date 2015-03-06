@@ -121,7 +121,7 @@ String labelTerminology = bundle.getString("lb_terminology");
 var needWarning = false;
 var objectName = "<%= bundle.getString("lb_account_information_my") %>";
 var guideNode = "myAccount";
-var helpFile = "<%=bundle.getString("help_my_account_options")%>";
+var helpFile = "<%=bundle.getString("help_download")%>";
 var dwnldOpt = <%=dwnldOpt%>;
 </SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">

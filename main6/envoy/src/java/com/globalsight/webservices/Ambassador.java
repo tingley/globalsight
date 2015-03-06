@@ -1462,238 +1462,269 @@ public class Ambassador extends AbstractWebService
      */
     public void createJobOnInitial(HashMap args) throws WebServiceException,
     	NumberFormatException, RemoteException, GeneralException, NamingException
-    {
-        Job job = null;
+	{
+		Job job = null;
 
-        // Checks authority.
-        String accessToken = (String) args.get("accessToken");
-        checkAccess(accessToken, CREATE_JOB);
-        checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+		// Checks authority.
+		String accessToken = (String) args.get("accessToken");
+		checkAccess(accessToken, CREATE_JOB);
+		checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+		ActivityLog.Start activityStart = null;
+		try
+		{
+			// Read parameters.
+			String jobId = (String) args.get("jobId");
+			job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
+			String jobName = job.getJobName();
+			String recreateFlag = (String) args.get("recreate");
+			if (!"true".equalsIgnoreCase(recreateFlag))
+			{
+				String msg = checkIfCreateJobCalled("createJobOnInitial",
+						job.getId(), jobName);
+				if (msg != null)
+				{
+					throw new WebServiceException(msg);
+				}
+			}
+			cachedJobIds.add(job.getId());
 
-        // Read parameters.
-        String jobId = (String) args.get("jobId");
-        job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
-        String jobName = job.getJobName();
-        String recreateFlag = (String) args.get("recreate");
-        if (!"true".equalsIgnoreCase(recreateFlag))
-        {
-            String msg = checkIfCreateJobCalled("createJobOnInitial",
-                    job.getId(), jobName);
-            if (msg != null)
-            {
-                throw new WebServiceException(msg);
-            }
-        }
-        cachedJobIds.add(job.getId());
+			String uuId = ((JobImpl) job).getUuid();
+			String comment = (String) args.get("comment");
+			Vector filePaths = (Vector) args.get("filePaths");
+			Vector fileProfileIds = (Vector) args.get("fileProfileIds");
+			Vector targetLocales = (Vector) args.get("targetLocales");
+			String priority = (String) args.get("priority");
+			String attributesXml = (String) args.get("attributes");
 
-        String uuId = ((JobImpl) job).getUuid();
-        String comment = (String) args.get("comment");
-        Vector filePaths = (Vector) args.get("filePaths");
-        Vector fileProfileIds = (Vector) args.get("fileProfileIds");
-        Vector targetLocales = (Vector) args.get("targetLocales");
-        String priority = (String) args.get("priority");
-        String attributesXml = (String) args.get("attributes");
-        if (filePaths != null && filePaths.size() > 0)
-        {
-            for (int i = 0; i < filePaths.size(); i++)
-            {
-                String filePath = (String) filePaths.get(i);
-                String extensionMsg = checkExtensionExisted(filePath);
-                if (extensionMsg != null)
-                {
-                    throw new WebServiceException(makeErrorXml(
-                            "createJobOnInitial", extensionMsg));
-                }
-            }
-        }
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("jobId", jobId);
+			activityArgs.put("jobName", jobName);
+			activityArgs.put("recreate", recreateFlag);
+			activityArgs.put("comment", comment);
+			activityArgs.put("filePaths", filePaths);
+			activityArgs.put("fileProfileIds", fileProfileIds);
+			activityArgs.put("targetLocales", targetLocales);
+			activityArgs.put("attributes", attributesXml);
+			activityArgs.put("isJobCreatedOriginallyViaWS",
+					(String) args.get("isJobCreatedOriginallyViaWS"));
+			activityStart = ActivityLog.start(Ambassador.class,
+					"createJobOnInitial(args)", activityArgs);
+			if (filePaths != null && filePaths.size() > 0)
+			{
+				for (int i = 0; i < filePaths.size(); i++)
+				{
+					String filePath = (String) filePaths.get(i);
+					String extensionMsg = checkExtensionExisted(filePath);
+					if (extensionMsg != null)
+					{
+						throw new WebServiceException(makeErrorXml(
+								"createJobOnInitial", extensionMsg));
+					}
+				}
+			}
 
-        FileProfilePersistenceManager fppm = null;
-        String fpId = "";
-        long iFpId = 0l;
-        String filename = "", realFilename = "", tmpFilename = "";
-        String zipDir = "";
-        String vTargetLocale = "";
-        FileProfile fp = null, referenceFP = null;
-        File file = null, tmpFile = null;
-        Vector fileProfiles = new Vector();
-        Vector files = new Vector();
-        Vector afterTargetLocales = new Vector();
-        ArrayList<String> zipFiles = null;
-        long referenceFPId = 0l;
+			FileProfilePersistenceManager fppm = null;
+			String fpId = "";
+			long iFpId = 0l;
+			String filename = "", realFilename = "", tmpFilename = "";
+			String zipDir = "";
+			String vTargetLocale = "";
+			FileProfile fp = null, referenceFP = null;
+			File file = null, tmpFile = null;
+			Vector fileProfiles = new Vector();
+			Vector files = new Vector();
+			Vector afterTargetLocales = new Vector();
+			ArrayList<String> zipFiles = null;
+			long referenceFPId = 0l;
 
-        boolean isWSFlag = true;
-        if ("false".equals((String) args.get("isJobCreatedOriginallyViaWS"))) {
-            isWSFlag = false;
-        }
+			boolean isWSFlag = true;
+			if ("false"
+					.equals((String) args.get("isJobCreatedOriginallyViaWS")))
+			{
+				isWSFlag = false;
+			}
 
-        try
-        {
-            fppm = ServerProxy.getFileProfilePersistenceManager();
+			try
+			{
+				fppm = ServerProxy.getFileProfilePersistenceManager();
 
-            for (int i = 0; i < filePaths.size(); i++)
-            {
-                vTargetLocale = (String) targetLocales.get(i);
+				for (int i = 0; i < filePaths.size(); i++)
+				{
+					vTargetLocale = (String) targetLocales.get(i);
 
-                fpId = (String) fileProfileIds.get(i);
-                iFpId = Long.parseLong(fpId);
-                fp = fppm.readFileProfile(iFpId);
-                referenceFPId = fp.getReferenceFP();
-                referenceFP = fppm.readFileProfile(referenceFPId);
+					fpId = (String) fileProfileIds.get(i);
+					iFpId = Long.parseLong(fpId);
+					fp = fppm.readFileProfile(iFpId);
+					referenceFPId = fp.getReferenceFP();
+					referenceFP = fppm.readFileProfile(referenceFPId);
 
-                filename = (String) filePaths.get(i);
-                filename = filename.replace('\\', File.separatorChar);
-                String srcLocale = findSrcLocale(fpId);
-                filename = getRealPath(jobId, filename, srcLocale, isWSFlag);
-                realFilename = AmbFileStoragePathUtils.getCxeDocDir(job
-                        .getCompanyId()) + File.separator + filename;
-                file = new File(realFilename);
-                if (file.getAbsolutePath().endsWith(".xml"))
-                {
-                    saveFileAsUTF8(file);
-                }
-                // indicates this is an "XLZ" format file profile
-                if (48 == fp.getKnownFormatTypeId())
-                {
-                    /**
-                     * Process XLZ file If file extension is 'xlz', then do
-                     * below steps, 1. Unpack the file to folder named with xlz
-                     * file name For Example, ..\testXLZFile.xlz will be
-                     * unpacked to ..\testXLZFile\xlzFile01.xlf
-                     * ..\testXLZFile\xlzFile02.txb
-                     * 
-                     * 2. add new file profiles according with reference file
-                     * profile with current xlz file to all xliff files unpacked
-                     * from xlz
-                     * 
-                     * 3. add target locales according with reference target
-                     * locale with current xlz file to all xliff files unpacked
-                     * from xlz
-                     * 
-                     * NOTE: We just process xliff files for now, ignore any
-                     * other types of files.
-                     */
-                    zipDir = realFilename.substring(0,
-                            realFilename.lastIndexOf("."));
-                    zipFiles = ZipIt.unpackZipPackage(realFilename, zipDir);
-                    String relativePath = filename.substring(0,
-                            filename.lastIndexOf("."));
-                    String tmp = "";
-                    for (String f : zipFiles)
-                    {
-                        tmpFilename = zipDir + File.separator + f;
-                        tmpFile = new File(tmpFilename);
-                        if (XliffFileUtil.isXliffFile(f))
-                        {
-                            tmp = relativePath + File.separator + f;
-                            changeFileListByXliff(tmp, vTargetLocale,
-                                    referenceFP, fileProfiles, files,
-                                    afterTargetLocales);
-                        }
-                    }
-                }
-                else if (39 == fp.getKnownFormatTypeId())
-                {
-                    changeFileListByXliff(filename, vTargetLocale, fp,
-                            fileProfiles, files, afterTargetLocales);
-                }
-                else
-                {
-                    fileProfiles.add(fp);
-                    files.add(file);
-                    afterTargetLocales.add(vTargetLocale);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            if (job != null)
-            {
-                JobCreationMonitor.updateJobState(job, Job.IMPORTFAILED);
-            }
-            logger.error("Get file profile failed with exception "
-                    + e.getMessage());
-            throw new WebServiceException(
-                    "Get file profile failed with exception " + e.getMessage());
-        }
+					filename = (String) filePaths.get(i);
+					filename = filename.replace('\\', File.separatorChar);
+					String srcLocale = findSrcLocale(fpId);
+					filename = getRealPath(jobId, filename, srcLocale, isWSFlag);
+					realFilename = AmbFileStoragePathUtils.getCxeDocDir(job
+							.getCompanyId()) + File.separator + filename;
+					file = new File(realFilename);
+					if (file.getAbsolutePath().endsWith(".xml"))
+					{
+						saveFileAsUTF8(file);
+					}
+					// indicates this is an "XLZ" format file profile
+					if (48 == fp.getKnownFormatTypeId())
+					{
+						/**
+						 * Process XLZ file If file extension is 'xlz', then do
+						 * below steps, 1. Unpack the file to folder named with
+						 * xlz file name For Example, ..\testXLZFile.xlz will be
+						 * unpacked to ..\testXLZFile\xlzFile01.xlf
+						 * ..\testXLZFile\xlzFile02.txb
+						 * 
+						 * 2. add new file profiles according with reference
+						 * file profile with current xlz file to all xliff files
+						 * unpacked from xlz
+						 * 
+						 * 3. add target locales according with reference target
+						 * locale with current xlz file to all xliff files
+						 * unpacked from xlz
+						 * 
+						 * NOTE: We just process xliff files for now, ignore any
+						 * other types of files.
+						 */
+						zipDir = realFilename.substring(0,
+								realFilename.lastIndexOf("."));
+						zipFiles = ZipIt.unpackZipPackage(realFilename, zipDir);
+						String relativePath = filename.substring(0,
+								filename.lastIndexOf("."));
+						String tmp = "";
+						for (String f : zipFiles)
+						{
+							tmpFilename = zipDir + File.separator + f;
+							tmpFile = new File(tmpFilename);
+							if (XliffFileUtil.isXliffFile(f))
+							{
+								tmp = relativePath + File.separator + f;
+								changeFileListByXliff(tmp, vTargetLocale,
+										referenceFP, fileProfiles, files,
+										afterTargetLocales);
+							}
+						}
+					}
+					else if (39 == fp.getKnownFormatTypeId())
+					{
+						changeFileListByXliff(filename, vTargetLocale, fp,
+								fileProfiles, files, afterTargetLocales);
+					}
+					else
+					{
+						fileProfiles.add(fp);
+						files.add(file);
+						afterTargetLocales.add(vTargetLocale);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				if (job != null)
+				{
+					JobCreationMonitor.updateJobState(job, Job.IMPORTFAILED);
+				}
+				logger.error("Get file profile failed with exception "
+						+ e.getMessage());
+				throw new WebServiceException(
+						"Get file profile failed with exception "
+								+ e.getMessage());
+			}
 
-        // Calls script if has.
-        // Vector result = FileSystemUtil.execScript(files, fileProfiles,
-        // targetLocales);
-        Vector result = FileSystemUtil.execScript(files, fileProfiles,
-                afterTargetLocales, Long.parseLong(jobId), jobName);
-        Vector sFiles = (Vector) result.get(0);
-        Vector sProFiles = (Vector) result.get(1);
-        Vector stargetLocales = (Vector) result.get(2);
-        Vector exitValues = (Vector) result.get(3);
+			// Calls script if has.
+			// Vector result = FileSystemUtil.execScript(files, fileProfiles,
+			// targetLocales);
+			Vector result = FileSystemUtil.execScript(files, fileProfiles,
+					afterTargetLocales, Long.parseLong(jobId), jobName);
+			Vector sFiles = (Vector) result.get(0);
+			Vector sProFiles = (Vector) result.get(1);
+			Vector stargetLocales = (Vector) result.get(2);
+			Vector exitValues = (Vector) result.get(3);
 
-        // cache job attributes
-        List<JobAttributeVo> atts = null;
-        String companyId = null;
+			// cache job attributes
+			List<JobAttributeVo> atts = null;
+			String companyId = null;
 
-        try
-        {
-            if (attributesXml != null && attributesXml.length() > 0)
-            {
-                Attributes attributes = com.globalsight.cxe.util.XmlUtil
-                        .string2Object(Attributes.class, attributesXml);
-                atts = (List<JobAttributeVo>) attributes.getAttributes();
-                companyId = CompanyThreadLocal.getInstance().getValue();
+			try
+			{
+				if (attributesXml != null && attributesXml.length() > 0)
+				{
+					Attributes attributes = com.globalsight.cxe.util.XmlUtil
+							.string2Object(Attributes.class, attributesXml);
+					atts = (List<JobAttributeVo>) attributes.getAttributes();
+					companyId = CompanyThreadLocal.getInstance().getValue();
 
-                List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
-                for (JobAttributeVo jobAttributeVo : atts)
-                {
-                    jobatts.add(AttributeUtil
-                            .createJobAttribute(jobAttributeVo));
-                }
+					List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
+					for (JobAttributeVo jobAttributeVo : atts)
+					{
+						jobatts.add(AttributeUtil
+								.createJobAttribute(jobAttributeVo));
+					}
 
-                RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
-            }
-        }
-        catch (Exception e)
-        {
-            // log this exception to avoid break job creation
-            logger.error("Get JobAttribute failed with exception.", e);
-        }
+					RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
+				}
+			}
+			catch (Exception e)
+			{
+				// log this exception to avoid break job creation
+				logger.error("Get JobAttribute failed with exception.", e);
+			}
 
-        // Sends events to cxe.
-        int pageCount = sFiles.size();
-        for (int i = 0; i < pageCount; i++)
-        {
-            File realFile = (File) sFiles.get(i);
-            FileProfile realProfile = (FileProfile) sProFiles.get(i);
-            String targetLocale = (String) stargetLocales.get(i);
-            String path = realFile.getPath();
-            String relativeName = path.substring(AmbFileStoragePathUtils
-                    .getCxeDocDir().getPath().length() + 1);
+			// Sends events to cxe.
+			int pageCount = sFiles.size();
+			for (int i = 0; i < pageCount; i++)
+			{
+				File realFile = (File) sFiles.get(i);
+				FileProfile realProfile = (FileProfile) sProFiles.get(i);
+				String targetLocale = (String) stargetLocales.get(i);
+				String path = realFile.getPath();
+				String relativeName = path.substring(AmbFileStoragePathUtils
+						.getCxeDocDir().getPath().length() + 1);
 
-            try
-            {
-                publishEventToCxe(jobId, jobName, i + 1, pageCount, 1, 1,
-                        relativeName, Long.toString(realProfile.getId()),
-                        targetLocale, (Integer) exitValues.get(i), priority);
-            }
-            catch (Exception e)
-            {
-                logger.error("Create job(" + jobName
-                        + ") failed with exception " + e.getMessage());
-                throw new WebServiceException("Create job(" + jobName
-                        + ") failed with exception " + e.getMessage());
-            }
-        }
+				try
+				{
+					publishEventToCxe(jobId, jobName, i + 1, pageCount, 1, 1,
+							relativeName, Long.toString(realProfile.getId()),
+							targetLocale, (Integer) exitValues.get(i), priority);
+				}
+				catch (Exception e)
+				{
+					logger.error("Create job(" + jobName
+							+ ") failed with exception " + e.getMessage());
+					throw new WebServiceException("Create job(" + jobName
+							+ ") failed with exception " + e.getMessage());
+				}
+			}
 
-        // set job attribute
-        if (atts != null && atts.size() > 0)
-        {
-            AddJobAttributeThread thread = new AddJobAttributeThread(uuId,
-                    companyId);
-            thread.setJobAttributeVos(atts);
-            thread.createJobAttributes();
-        }
+			// set job attribute
+			if (atts != null && atts.size() > 0)
+			{
+				AddJobAttributeThread thread = new AddJobAttributeThread(uuId,
+						companyId);
+				thread.setJobAttributeVos(atts);
+				thread.createJobAttributes();
+			}
 
-        // Send email at the end.
-        sendUploadCompletedEmail(filePaths, fileProfileIds, accessToken,
-                jobName, comment, new Date());
-    }
+			// Send email at the end.
+			sendUploadCompletedEmail(filePaths, fileProfileIds, accessToken,
+					jobName, comment, new Date());
+		}
+		catch (Exception e)
+		{
+			throw new WebServiceException(e.getMessage());
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+	}
 
     private String checkIfCreateJobCalled(String methodName, long jobId,
             String jobName) throws WebServiceException
@@ -2007,20 +2038,26 @@ public class Ambassador extends AbstractWebService
         Connection connection = null;
         PreparedStatement query = null;
         ResultSet results = null;
+        ActivityLog.Start activityStart = null;
 
         try
-        {
-            String sql = "SELECT ID FROM JOB WHERE NAME=?";
-            connection = ConnectionPool.getConnection();
-            query = connection.prepareStatement(sql);
-            query.setString(1, jobName);
-            results = query.executeQuery();
-            if (results.next())
-            {
-                return getUniqueJobName(args);
-            }
-            else
-                return jobName;
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName",
+					getUsernameFromSession(accessToken));
+			activityArgs.put("jobName", jobName);
+			activityStart = ActivityLog.start(Ambassador.class,
+					"getUniqueJobName(args)", activityArgs);
+			String sql = "SELECT ID FROM JOB WHERE NAME=?";
+			connection = ConnectionPool.getConnection();
+			query = connection.prepareStatement(sql);
+			query.setString(1, jobName);
+			results = query.executeQuery();
+			if (results.next())
+			{
+				return getUniqueJobName(args);
+			}
+			else return jobName;
         }
         catch (ConnectionPoolException cpe)
         {
@@ -2048,9 +2085,14 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException(message);
         }
         finally
-        {
-            releaseDBResource(results, query, connection);
-        }
+		{
+			releaseDBResource(results, query, connection);
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+
+		}
     }
 
     /**

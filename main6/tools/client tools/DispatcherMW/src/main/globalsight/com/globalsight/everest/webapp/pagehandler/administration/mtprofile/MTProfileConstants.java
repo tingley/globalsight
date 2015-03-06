@@ -16,10 +16,9 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.mtprofile;
 
-
 public interface MTProfileConstants
 {
-  
+
     /**
      * Constant used as a key for a list of workflow templates.
      */
@@ -30,10 +29,9 @@ public interface MTProfileConstants
      */
     public static final String MT_PROFILE = "mtProfile";
 
-
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: UI Fields
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: UI Fields
+    // ////////////////////////////////////////////////////////////////////
     // fields for the first page of tm profile creation.
     public static final String NAME_FIELD = "nameField";
     public static final String DESCRIPTION_FIELD = "descField";
@@ -73,23 +71,22 @@ public interface MTProfileConstants
      */
     public static final String MT_PROFILE_ID = "mtProfileId";
 
-
     // For paging/sorting
     public static final String MTPS_LIST = "mtProfiles";
     public static final String MTP_KEY = "mtProfile";
 
-    //////////////////////////////////////////////////////////////////////
-    //  End: UI Fields
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: UI Fields
+    // ////////////////////////////////////////////////////////////////////
 
-     //////////////////////////////////////////////////////////////////////
-    //  Begin: Action Parameters
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Action Parameters
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Constant used as an action string for a request.
      */
     public static final String ACTION = "formAction";
-    
+
     public static final String NEW_ACTION = "new";
     /**
      * Constant used for an edit action.
@@ -120,6 +117,15 @@ public interface MTProfileConstants
      */
     public static final String SAVE_ACTION = "save";
     /**
+     * Constant used for a save action.
+     */
+    public static final String EXPORT_ACTION = "export";
+    /**
+     * Constant used for a save action.
+     */
+    public static final String IMPORT_ACTION = "import";
+
+    /**
      * Constant used for a save all workflows action.
      */
     public static final String SAVE_ALL_TRANSLATION_MEMORY_PROFILES_ACTION = "saveTranslationMemoryProfiles";
@@ -129,12 +135,12 @@ public interface MTProfileConstants
     public static final String SAVE_MT_OPTIONS_ACTION = "saveMTOptions";
     public static final String TEST_MT_OPTIONS_ACTION = "testHost";
     public static final String CANCEL_MT_OPTIONS_ACTION = "cancelMTOptions";
-    
+
     public static final String SEARCH_ACTION = "search";
 
-    //////////////////////////////////////////////////////////////////////
-    //  End: Action Parameters
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: Action Parameters
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Constant used for a save workflow action.
      */
@@ -145,23 +151,27 @@ public interface MTProfileConstants
     public static final String SELECTED_TRANSLATION_MEMORY_PROFILE = "selectedTranslationMemoryProfile";
 
     // for Segmentation Rule
-    public static final String SELECTED_SR =  "selectedSR";
-    
+    public static final String SELECTED_SR = "selectedSR";
+
     public static final String MATCH_PERCENTAGE = "matchPercentage";
-    
+
     public static final String TM_PROCENDENCE = "tmProcendence";
-    
+
     /**
-     * Constants for Machine Translation configurations in TM profile
-     * Moved from SystemConfigParamNames line 505-509
-     * The four parameters were in envoy.properties and system_parameter table,
-     * now are integrated with TM profile.
+     * Constants for Machine Translation configurations in TM profile Moved from
+     * SystemConfigParamNames line 505-509 The four parameters were in
+     * envoy.properties and system_parameter table, now are integrated with TM
+     * profile.
      */
-    public static final String MT_USE_MT="machineTranslation.useMT";
+    public static final String MT_USE_MT = "machineTranslation.useMT";
     public static final String MT_ENGINE = "machineTranslation.engine";
-//    public static final String MT_AUTOCOMMIT_TO_TM = "machineTranslation.autoCommitToTM";
+    // public static final String MT_AUTOCOMMIT_TO_TM =
+    // "machineTranslation.autoCommitToTM";
     public static final String MT_SHOW_IN_EDITOR = "machineTranslation.showInEditor";
-    
+    public static final String MT_INCLUDE_MT_IDENTIFIERS = "machineTranslation.includeMTIdentifiers";
+    public static final String MT_MT_IDENTIFIER_LEADING = "machineTranslation.mtIdentifierLeading";
+    public static final String MT_MT_IDENTIFIER_TRAILING = "machineTranslation.mtIdentifierTrailing";
+
     public static final String MT_PTSURL = "ptsurl";
     public static final String MT_LocalPairs_Map = "directionsMap";
     public static final String MT_LocalPairs_List = "directionsList";
@@ -171,7 +181,7 @@ public interface MTProfileConstants
     public static final String MT_PTS_URL_FLAG = "pts_url_flag";
     public static final String MT_PTS_URL_FLAG_V8 = "0";
     public static final String MT_PTS_URL_FLAG_V9 = "1";
-    
+
     public static final String MT_MS_URL = "ms_mt_url";
     public static final String MT_MS_APPID = "ms_mt_appid";
     public static final String MT_MS_CLIENT_ID = "ms_mt_client_id";
@@ -183,19 +193,21 @@ public interface MTProfileConstants
     public static final String MT_MS_CATEGORY = "ms_mt_category";
     public static final String MT_MS_URL_FLAG = "ms_mt_url_flag";
     public static final int MT_MS_MAX_CHARACTER_NUM = 1000;
-    
+
     public static final String MT_AO_URL = "ao_mt_url";
     public static final String MT_AO_PORT = "ao_mt_port";
     public static final String MT_AO_USERNAME = "ao_mt_username";
     public static final String MT_AO_PASSWORD = "ao_mt_password";
     public static final String MT_AO_ACCOUNT_NUMBER = "ao_mt_account_number";
-    
+
     public static final String MT_SAFA_HOST = "safa_mt_host";
     public static final String MT_SAFA_PORT = "safa_mt_port";
     public static final String MT_SAFA_COMPANY_NAME = "safa_mt_company_name";
     public static final String MT_SAFA_PASSWORD = "safa_mt_password";
     public static final String MT_SAFA_CLIENT = "safaba_client";
-    
+
+    public static final String MT_GOOGLE_API_KEY = "mt_google_api_key";
+
     public static final String MT_ENGINE_GOOGLE = "Google";
     public static final String MT_ENGINE_PROMT = "Promt";
     public static final String MT_ENGINE_MSTRANSLATOR = "MS_Translator";
@@ -205,7 +217,7 @@ public interface MTProfileConstants
      * For TM accessing control
      */
     public static final String TM_ENABLE_ACCESS_CONTROL = "enableTMAccessControl";
-    
+
     public static final String FILTER_NAME = "mtProfileNameFilter";
     public static final String FILTER_STORAGE_TM = "mtProfileStorageTmFilter";
     public static final String FILTER_COMPANY_NAME = "mtProfileCompanyFilter";

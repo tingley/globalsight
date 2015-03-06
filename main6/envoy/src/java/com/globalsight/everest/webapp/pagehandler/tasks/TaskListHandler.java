@@ -1325,6 +1325,10 @@ public class TaskListHandler extends PageHandler
                     {
                         pageName = isDisplayFull ? tp.getDisplayPageName() : tp
                                 .getShortPageName();
+						if (pageName.contains("\\\\"))
+						{
+							pageName = pageName.replace("\\\\","\\");
+						}
                         pageName = JsonUtil.encode(pageName);
                         pagesWithUnTranslatedSeg.append("\"")
                                 .append(JsonUtil.encode(pageName))

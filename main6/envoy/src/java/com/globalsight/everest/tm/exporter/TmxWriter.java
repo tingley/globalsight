@@ -654,8 +654,16 @@ public class TmxWriter implements IWriter
 
         StringBuffer tuAndSource = new StringBuffer();
 		String tuResult = getTUStr(p_tu, tmx, options, prop);
-        tuAndSource.append(tuResult);
         SegmentTmTuv sourcTuv = (SegmentTmTuv) p_tu.getSourceTuv();
+		if (!isRun)
+		{
+			if (sourcTuv.getSid() != null)
+			{
+				prop = new Tmx.Prop(Tmx.PROP_TM_UDA_SID, sourcTuv.getSid());
+				tuAndSource.append(prop.asXML());
+				isRun = true;
+			}
+		}
 		tuAndSource.append(convertToTmx(sourcTuv, sourceLang, options,
 				outputFormat));
 
@@ -713,7 +721,7 @@ public class TmxWriter implements IWriter
 				{
 					e.printStackTrace();
 				}
-
+				result.append(tuResult);
 				if (!isRun)
 				{
 					if (tuv.getSid() != null)

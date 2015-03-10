@@ -123,7 +123,7 @@ public class CotiJobComparator extends EnvoyDataComparator
                 break;
 
             case STATUS:
-                compareBySourceLocale(p_objects, job1, job2);
+            	compareByJobStatus(p_objects, job1, job2);
                 break;
 
             case SOURCE_LOCALE:
@@ -157,8 +157,8 @@ public class CotiJobComparator extends EnvoyDataComparator
     private void compareByCotiProjectId(Object[] p_objects, COTIJob p_job1,
             COTIJob p_job2)
     {
-        p_objects[0] = new Long(p_job1.getCotiProjectId());
-        p_objects[1] = new Long(p_job2.getCotiProjectId());
+        p_objects[0] = p_job1.getCotiProjectId();
+        p_objects[1] = p_job2.getCotiProjectId();
     }
 
     private void compareByCotiProjectName(Object[] p_objects, COTIJob p_job1,

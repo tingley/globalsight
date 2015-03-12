@@ -1279,33 +1279,25 @@ public class Exporter
                 }
                 else
                 {
-                    if ("javascript".equals(m_formatType))
+                    if (aChar == 't')
+                        aChar = '\t';
+                    else if (aChar == 'r')
+                        aChar = '\r';
+                    else if (aChar == 'n' && "javaprop".equals(m_formatType))
+                        aChar = '\n';
+                    else if (aChar == 'f')
+                        aChar = '\f';
+                    else
+                        isConvert = false;
+
+                    if (isConvert)
                     {
-                        out[outLen++] = '\\';
                         out[outLen++] = aChar;
                     }
                     else
                     {
-                        if (aChar == 't')
-                            aChar = '\t';
-                        else if (aChar == 'r')
-                            aChar = '\r';
-                        else if (aChar == 'n')
-                            aChar = '\n';
-                        else if (aChar == 'f')
-                            aChar = '\f';
-                        else
-                            isConvert = false;
-
-                        if (isConvert)
-                        {
-                            out[outLen++] = aChar;
-                        }
-                        else
-                        {
-                            out[outLen++] = '\\';
-                            out[outLen++] = aChar;
-                        }
+                        out[outLen++] = '\\';
+                        out[outLen++] = aChar;
                     }
                 }
             }

@@ -16,27 +16,23 @@
  */
 package com.globalsight.ling.common;
 
-import com.globalsight.ling.common.NativeEnDecoder;
-import com.globalsight.ling.common.NativeEnDecoderException;
+import java.util.Hashtable;
 
 //jakarta regexp package
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 
-import java.util.Hashtable;
-
-
 /**
- * <P>Implementation of encoding and decoding escape sequences for
- * JavaScript.  Note that this is now very specific to extracting JS
- * strings for translation and for merging them back into the
- * skeleton.  The only supported sequence of events is
- * ENcode(DEcode(s)).</P>
+ * <P>
+ * Implementation of encoding and decoding escape sequences for JavaScript. Note
+ * that this is now very specific to extracting JS strings for translation and
+ * for merging them back into the skeleton. The only supported sequence of
+ * events is ENcode(DEcode(s)).
+ * </P>
  *
  * @see NativeEnDecoder
  */
-public class JSEscapeSequence
-    extends NativeEnDecoder
+public class JSEscapeSequence extends NativeEnDecoder
 {
     //
     // Private Transient Member Variables
@@ -46,16 +42,18 @@ public class JSEscapeSequence
     private static final Hashtable mEscapeToChar = mapEscapeToChar();
 
     private static final String NCR_BEGIN = "\\u";
-    private static final char[] ZERO_ARRAY = {'0', '0', '0', '0'};
+    private static final char[] ZERO_ARRAY =
+    { '0', '0', '0', '0' };
     private static final int HEX_DIGIT = 4;
 
     private static RE m_pattern = null;
-    static {
+    static
+    {
         try
         {
-            m_pattern = new RE (
-              "\\\\(\\\\|t|n|r|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2}|.)",
-              RE.MATCH_NORMAL);
+            m_pattern = new RE(
+                    "\\\\(\\\\|t|r|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2})",
+                    RE.MATCH_NORMAL);
         }
         catch (RESyntaxException e)
         {
@@ -67,45 +65,42 @@ public class JSEscapeSequence
     // Implementation of Interface -- NativeEnDecoder
     //
 
-    public String decode (String p_str)
-        throws NativeEnDecoderException
+    public String decode(String p_str) throws NativeEnDecoderException
     {
         return decodeString(p_str);
     }
 
     public String decode(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
 
-    public String encode(String p_str)
-        throws NativeEnDecoderException
+    public String encode(String p_str) throws NativeEnDecoderException
     {
         return encodeString(p_str);
     }
 
     public String encode(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
 
     public String encodeWithEncodingCheckForSkeleton(String p_nativeString)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         return encodingCheck(p_nativeString);
     }
-    
+
     public String encodeWithEncodingCheck(String p_nativeString)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         String s = encodeString(p_nativeString);
         return encodingCheck(s);
     }
 
-    private String encodingCheck(String p_str)
-        throws NativeEnDecoderException
+    private String encodingCheck(String p_str) throws NativeEnDecoderException
     {
         StringBuffer sbuf = new StringBuffer();
 
@@ -136,7 +131,7 @@ public class JSEscapeSequence
     }
 
     public String encodeWithEncodingCheck(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
@@ -146,24 +141,32 @@ public class JSEscapeSequence
     //
 
     /**
-     * <P>Decodes escape sequences in a string and converts them to
-     * unicode characters.  Escape sequences that will be decoded are
-     * CharacterEscapeSequence, HexEscapeSequence and
-     * UnicodeEscapeSequence defined in chapter 7.8.4 in Standard
-     * ECMA-262 (ECMAScript Language Specification).</P>
+     * <P>
+     * Decodes escape sequences in a string and converts them to unicode
+     * characters. Escape sequences that will be decoded are
+     * CharacterEscapeSequence, HexEscapeSequence and UnicodeEscapeSequence
+     * defined in chapter 7.8.4 in Standard ECMA-262 (ECMAScript Language
+     * Specification).
+     * </P>
      *
-     * <P>The exception to this is that protected quotes inside the
-     * same type of quotes are <STRONG>not</STRONG> decoded.</P>
+     * <P>
+     * The exception to this is that protected quotes inside the same type of
+     * quotes are <STRONG>not</STRONG> decoded.
+     * </P>
      *
-     * <P>Example: <CODE>s = "eval('return \'1\' == \'2\'');"</CODE>.
-     * will remain the same after being subjected to this function.</P>
+     * <P>
+     * Example: <CODE>s = "eval('return \'1\' == \'2\'');"</CODE>. will remain
+     * the same after being subjected to this function.
+     * </P>
      *
-     * <P>We also ignore \b\f\v since they won't make it through the
-     * XML parsers.  If a Unicode sequence maps to these or any other
-     * control characters, tough luck, the DiplomatAPI will catch the
-     * error.</P>
+     * <P>
+     * We also ignore \b\f\v since they won't make it through the XML parsers.
+     * If a Unicode sequence maps to these or any other control characters,
+     * tough luck, the DiplomatAPI will catch the error.
+     * </P>
      *
-     * @param s string to be decoded
+     * @param s
+     *            string to be decoded
      * @return decoded string
      */
     public static String decodeString(String s)
@@ -180,7 +183,7 @@ public class JSEscapeSequence
         int last_index = 0;
         StringBuffer ret = new StringBuffer();
         // copy RE to make it thread-safe
-        RE pattern = new RE (m_pattern.getProgram());
+        RE pattern = new RE(m_pattern.getProgram());
 
         while (pattern.match(s, last_index))
         {
@@ -188,25 +191,23 @@ public class JSEscapeSequence
             last_index = pattern.getParenEnd(0);
 
             String es = pattern.getParen(1);
-            Character c =
-              (Character)mEscapeToChar.get(new Character(es.charAt(0)));
+            Character c = (Character) mEscapeToChar.get(new Character(es
+                    .charAt(0)));
 
             if (c == null)
             {
-                if (es.charAt(0) == 'u')          // UnicodeEscapeSequence
+                if (es.charAt(0) == 'u') // UnicodeEscapeSequence
                 {
                     c = decodeUnicodeSequence(es);
                 }
-                else if (es.charAt(0) == 'x')     // HexEscapeSequence
+                else if (es.charAt(0) == 'x') // HexEscapeSequence
                 {
                     c = decodeHexSequence(es);
                 }
-                /* JS knows no Octal escapes - conflict with regexps
-                else                              // OctalEscapeSequence
-                {
-                    c = decodeOctalSequence(es);
-                }
-                */
+                /*
+                 * JS knows no Octal escapes - conflict with regexps else //
+                 * OctalEscapeSequence { c = decodeOctalSequence(es); }
+                 */
 
                 if (c == null)
                 {
@@ -226,22 +227,7 @@ public class JSEscapeSequence
                 ret.append('\\'); // so: output backslash again
             }
 
-            if (ch == '\n')
-            {
-                ret.append("\\n");
-            }
-            else if (ch == '\r')
-            {
-                ret.append("\\r");
-            }
-            else if (ch == '\t')
-            {
-                ret.append("\\t");
-            }
-            else
-            {
-                ret.append(c);
-            }
+            ret.append(c);
         }
 
         ret.append(s.substring(last_index));
@@ -265,7 +251,8 @@ public class JSEscapeSequence
                 }
                 else
                 {
-                    ret.append('\\'); b_escaped = false;
+                    ret.append('\\');
+                    b_escaped = false;
                 }
             }
             else if (ch == '\'' || ch == '\"')
@@ -276,7 +263,8 @@ public class JSEscapeSequence
                 }
                 else if (ch == theQuote && b_escaped)
                 {
-                    ret.append('\\'); b_escaped = false;
+                    ret.append('\\');
+                    b_escaped = false;
                 }
                 else if (ch == theQuote && !b_escaped)
                 {
@@ -284,7 +272,8 @@ public class JSEscapeSequence
                 }
                 else if (b_escaped)
                 {
-                    ret.append('\\'); b_escaped = false;
+                    ret.append('\\');
+                    b_escaped = false;
                 }
                 else
                 {
@@ -293,7 +282,8 @@ public class JSEscapeSequence
             }
             else if (b_escaped)
             {
-                ret.append('\\'); b_escaped = false;
+                ret.append('\\');
+                b_escaped = false;
             }
 
             ret.append(ch);
@@ -302,18 +292,21 @@ public class JSEscapeSequence
         return ret.toString();
     }
 
-
     /**
-     * <P>Encodes characters in strings to JavaScript escape
-     * sequences. Characters that will always be encoded are
-     * \b,\f,\t,\n,\r,\v, as defined in chapter 7.7.4 in Standard
-     * ECMA-262 (ECMAScript Language Specification).</P>
+     * <P>
+     * Encodes characters in strings to JavaScript escape sequences. Characters
+     * that will always be encoded are \b,\f,\t,\n,\r,\v, as defined in chapter
+     * 7.7.4 in Standard ECMA-262 (ECMAScript Language Specification).
+     * </P>
      *
-     * <P>The characters \,'," (backslash, apostrophe, quote) will
-     * only be encoded if they produce a valid output string, one that
-     * is parseable without errors.</P>
+     * <P>
+     * The characters \,'," (backslash, apostrophe, quote) will only be encoded
+     * if they produce a valid output string, one that is parseable without
+     * errors.
+     * </P>
      *
-     * @param s string to be encoded
+     * @param s
+     *            string to be encoded
      * @return encoded string
      */
     public static String encodeString(String s)
@@ -321,7 +314,7 @@ public class JSEscapeSequence
         StringBuffer ret = new StringBuffer();
 
         boolean b_escaped = false;
-//        char theQuote = '\0';
+        // char theQuote = '\0';
         char ch;
         for (int i = 0; i < s.length(); ++i)
         {
@@ -335,7 +328,8 @@ public class JSEscapeSequence
                 }
                 else
                 {
-                    ret.append('\\'); b_escaped = false;
+                    ret.append('\\');
+                    b_escaped = false;
                 }
             }
             else if (ch == '\'' || ch == '\"')
@@ -343,28 +337,28 @@ public class JSEscapeSequence
                 ret.append('\\');
                 b_escaped = false;
 
-//              else if (ch == '\'' || ch == '\"')
-//              {
-//                  if (theQuote == '\0' && !b_escaped)
-//                  {
-//                      theQuote = ch;
-//                  }
-//                  else if (ch == theQuote && b_escaped)
-//                  {
-//                      ret.append('\\'); b_escaped = false;
-//                  }
-//                  else if (ch == theQuote && !b_escaped)
-//                  {
-//                      theQuote = '\0';
-//                  }
-//                  else if (b_escaped)
-//                  {
-//                      ret.append('\\'); b_escaped = false;
-//                  }
-//                  else
-//                  {
-//                      // System.err.println("OUCH: " + ch);
-//                  }
+                // else if (ch == '\'' || ch == '\"')
+                // {
+                // if (theQuote == '\0' && !b_escaped)
+                // {
+                // theQuote = ch;
+                // }
+                // else if (ch == theQuote && b_escaped)
+                // {
+                // ret.append('\\'); b_escaped = false;
+                // }
+                // else if (ch == theQuote && !b_escaped)
+                // {
+                // theQuote = '\0';
+                // }
+                // else if (b_escaped)
+                // {
+                // ret.append('\\'); b_escaped = false;
+                // }
+                // else
+                // {
+                // // System.err.println("OUCH: " + ch);
+                // }
             }
             else if (b_escaped)
             {
@@ -380,7 +374,7 @@ public class JSEscapeSequence
         for (int i = 0; i < s.length(); ++i)
         {
             Character c = new Character(s.charAt(i));
-            String es = (String)mCharToEscape.get(c);
+            String es = (String) mCharToEscape.get(c);
 
             if (es != null)
             {
@@ -388,7 +382,7 @@ public class JSEscapeSequence
             }
             else
             {
-            	//keep same behaviour with JPEscapeSequence
+                // keep same behaviour with JPEscapeSequence
                 if (c.charValue() < 20 || c.charValue() > 127)
                 {
                     String hex = Integer.toHexString(c.charValue());
@@ -420,7 +414,7 @@ public class JSEscapeSequence
 
         try
         {
-            c = new Character((char)Integer.parseInt(s.substring(i), 16));
+            c = new Character((char) Integer.parseInt(s.substring(i), 16));
         }
         catch (NumberFormatException e)
         {
@@ -436,7 +430,7 @@ public class JSEscapeSequence
 
         try
         {
-            c = new Character((char)Integer.parseInt(s, 8));
+            c = new Character((char) Integer.parseInt(s, 8));
         }
         catch (NumberFormatException e)
         {
@@ -453,7 +447,7 @@ public class JSEscapeSequence
 
         try
         {
-            c = new Character((char)Integer.parseInt(s.substring(i), 16));
+            c = new Character((char) Integer.parseInt(s.substring(i), 16));
         }
         catch (NumberFormatException e)
         {
@@ -470,14 +464,12 @@ public class JSEscapeSequence
         // h.put(new Character('\\'), "\\\\");
         h.put(new Character('\b'), "\\b");
         h.put(new Character('\u000c'), "\\f");
-        h.put(new Character('\n'), "\\n");
         h.put(new Character('\r'), "\\r");
         h.put(new Character('\t'), "\\t");
         h.put(new Character('\u000b'), "\\v");
 
         return h;
     }
-
 
     private static Hashtable mapEscapeToChar()
     {
@@ -486,12 +478,11 @@ public class JSEscapeSequence
         // Don't map chars that are illegal in XML
 
         h.put(new Character('\\'), new Character('\\'));
-        // h.put(new Character('b'),  new Character('\b'));
-        // h.put(new Character('f'),  new Character('\u000c'));
-        h.put(new Character('n'),  new Character('\n'));
-        h.put(new Character('r'),  new Character('\r'));
-        h.put(new Character('t'),  new Character('\t'));
-        // h.put(new Character('v'),  new Character('\u000b'));
+        // h.put(new Character('b'), new Character('\b'));
+        // h.put(new Character('f'), new Character('\u000c'));
+        h.put(new Character('r'), new Character('\r'));
+        h.put(new Character('t'), new Character('\t'));
+        // h.put(new Character('v'), new Character('\u000b'));
 
         return h;
     }

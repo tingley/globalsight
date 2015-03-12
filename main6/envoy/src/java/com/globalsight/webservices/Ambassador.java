@@ -271,6 +271,7 @@ import com.globalsight.util.StringUtil;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.progress.ProcessStatus;
@@ -18357,7 +18358,7 @@ public class Ambassador extends AbstractWebService
 					p_string, searchInSource ? sourceGSL : targetGSL,
 					searchInSource ? targetGSL : sourceGSL, null);
 
-			xml.append("<Segements>\r\n");
+			xml.append("<segments>\r\n");
 			xml.append("\t<sourceLocale>").append(sourceGSL.getDisplayName())
 					.append("</sourceLocale>\r\n");
 			xml.append("\t<targetLocale>").append(targetGSL.getDisplayName())
@@ -18396,19 +18397,20 @@ public class Ambassador extends AbstractWebService
 							continue;
 					}
 				}
-				xml.append("\t<segement>\r\n");
-				xml.append("\t\t<sourceSegement>")
-						.append(EditUtil.encodeXmlEntities(srcTuv.getSegment()))
-						.append("</sourceSegement>\r\n");
+				xml.append("\t<segment>\r\n");
+				xml.append("\t\t<sourceSegment>")
+						.append(EditUtil.encodeXmlEntities(GxmlUtil
+								.stripRootTag(srcTuv.getSegment())))
+						.append("</sourceSegment>\r\n");
 				BaseTmTuv trgTuv;
 				Collection targetTuvs = tu.getTuvList(targetGSL);
 				for (Iterator it = targetTuvs.iterator(); it.hasNext();)
 				{
 					trgTuv = (BaseTmTuv) it.next();
-					xml.append("\t\t<targetSegement>")
-							.append(EditUtil.encodeXmlEntities(trgTuv
-									.getSegment()))
-							.append("</targetSegement>\r\n");
+					xml.append("\t\t<targetSegment>")
+							.append(EditUtil.encodeXmlEntities(GxmlUtil
+									.stripRootTag(trgTuv.getSegment())))
+							.append("</targetSegment>\r\n");
 					String sid = trgTuv.getSid();
 					long tuvId = trgTuv.getId();
 					if (null == sid)
@@ -18422,9 +18424,9 @@ public class Ambassador extends AbstractWebService
 									.getProjectTMById(tmId, false).getName())
 							.append("</tmName>\r\n");
 				}
-				xml.append("\t</segement>\r\n");
+				xml.append("\t</segment>\r\n");
 			}
-			xml.append("<Segements>\r\n");
+			xml.append("</sgements>\r\n");
 		}
 		catch (Exception e)
 		{

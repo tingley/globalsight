@@ -30,6 +30,10 @@
 			not-null="false" />
 		<property name="poRequired" column="POREQUIRED" type="int"
 			not-null="false" />
+		<property name="autoAcceptTrans" column="AUTO_ACCEPT_TRANS"
+			type="boolean" not-null="false" />
+		<property name="autoSendTrans" column="AUTO_SEND_TRANS"
+			type="boolean" not-null="false" />	
 		<property name="reviewOnlyAutoAccept" column="REVIEWONLYAUTOACCEPT"
 			type="boolean" not-null="false" />
 		<property name="reviewOnlyAutoSend" column="REVIEWONLYAUTOSEND"

@@ -177,6 +177,7 @@ import com.globalsight.everest.taskmanager.TaskPersistenceAccessor;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.TmManagerLocal;
 import com.globalsight.everest.tm.exporter.ExportUtil;
+import com.globalsight.everest.tm.exporter.TmxWriter;
 import com.globalsight.everest.tm.importer.ImportUtil;
 import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.everest.tuv.Tuv;
@@ -18397,19 +18398,21 @@ public class Ambassador extends AbstractWebService
 							continue;
 					}
 				}
+				TmxWriter.convertTuvToTmxLevel(tu, (SegmentTmTuv) srcTuv,
+						TmxWriter.TMX_LEVEL_2);
 				xml.append("\t<segment>\r\n");
 				xml.append("\t\t<sourceSegment>")
-						.append(EditUtil.encodeXmlEntities(GxmlUtil
-								.stripRootTag(srcTuv.getSegment())))
+						.append(GxmlUtil.stripRootTag(srcTuv.getSegment()))
 						.append("</sourceSegment>\r\n");
 				BaseTmTuv trgTuv;
 				Collection targetTuvs = tu.getTuvList(targetGSL);
 				for (Iterator it = targetTuvs.iterator(); it.hasNext();)
 				{
 					trgTuv = (BaseTmTuv) it.next();
+					TmxWriter.convertTuvToTmxLevel(tu, (SegmentTmTuv) trgTuv,
+							TmxWriter.TMX_LEVEL_2);
 					xml.append("\t\t<targetSegment>")
-							.append(EditUtil.encodeXmlEntities(GxmlUtil
-									.stripRootTag(trgTuv.getSegment())))
+							.append(GxmlUtil.stripRootTag(trgTuv.getSegment()))
 							.append("</targetSegment>\r\n");
 					String sid = trgTuv.getSid();
 					long tuvId = trgTuv.getId();

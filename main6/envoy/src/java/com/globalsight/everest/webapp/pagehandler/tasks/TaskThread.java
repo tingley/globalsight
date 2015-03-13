@@ -123,7 +123,8 @@ public class TaskThread extends MultiCompanySupportedThread
                 || (company.getEnableQAChecks() && project
                         .getAutoAcceptQATask())
                 || (company.getEnableDitaChecks() && project
-                        .getAutoAcceptDitaQaTask()))
+                        .getAutoAcceptDitaQaTask())
+                || project.getAutoAcceptTrans())
         {
             JbpmContext ctx = null;
             try
@@ -159,9 +160,11 @@ public class TaskThread extends MultiCompanySupportedThread
                 boolean autoAcceptFlag4 = (company.getEnableQAChecks()
                         && QACheckerHelper.isQAActivity(p_task) && project
                         .getAutoAcceptQATask());
+                boolean autoAcceptFlag5 = (Activity.TYPE_TRANSLATE== type && project
+                        .getAutoAcceptTrans());
 
                 if (autoAcceptFlag1 || autoAcceptFlag2 || autoAcceptFlag3
-                        || autoAcceptFlag4)
+                        || autoAcceptFlag4 || autoAcceptFlag5)
                 {
                     // accept task, but not send "acceptance mail" to acceptor
                     // because we will send another "auto-accept" mail to
@@ -173,12 +176,19 @@ public class TaskThread extends MultiCompanySupportedThread
                     ServerProxy.getTaskManager().acceptTask(acceptor, p_task,
                             data);
 
+                    File[] terReportFiles = null;
                     File[] rcrReportFiles = null;
                     File qaReport = null;
                     if (Activity.TYPE_REVIEW == type
                             && project.getReviewOnlyAutoSend())
                     {
                         rcrReportFiles = generateReviewCommentReport(project,
+                                acceptor, p_task, type, companyName);
+                    }
+                    if (Activity.TYPE_TRANSLATE == type
+                            && project.getAutoSendTrans())
+                    {
+                    	terReportFiles = generateTranslationsEditReport(project,
                                 acceptor, p_task, type, companyName);
                     }
 
@@ -200,6 +210,10 @@ public class TaskThread extends MultiCompanySupportedThread
                     if (rcrReportFiles != null && rcrReportFiles.length > 0)
                     {
                         allFiles.addAll(Arrays.asList(rcrReportFiles));
+                    }
+                    if (terReportFiles != null && terReportFiles.length > 0)
+                    {
+                        allFiles.addAll(Arrays.asList(terReportFiles));
                     }
                     if (qaReport != null && qaReport.exists())
                     {
@@ -321,6 +335,38 @@ public class TaskThread extends MultiCompanySupportedThread
                 }
             }
             else
+            {
+                generator = new TranslationsEditReportGenerator(p_companyName);
+            }
+
+            log.info("Is generating report for task(taskID:" + p_task.getId()
+                    + "):" + p_task.getTaskName()
+                    + " as auto-accept and send mail are checked.");
+            files = generator.generateReports(jobIDS, targetLocales);
+            roleName = null;
+        }
+
+        return files;
+    }
+    
+    /**
+     * For "translation" task, if "Auto-send Translations Edit Report" is
+     * checked on project setup page, generate TER report as attachments.
+     */
+    private static File[] generateTranslationsEditReport(ProjectImpl p_project,
+            String p_acceptor, TaskImpl p_task, int p_activityType,
+            String p_companyName) throws Exception
+    {
+        File[] files = null;
+        if (p_project.getAutoSendTrans())
+        {
+            roleName = p_acceptor;
+            List<Long> jobIDS = new ArrayList<Long>();
+            jobIDS.add(p_task.getJobId());
+            List<GlobalSightLocale> targetLocales = new ArrayList<GlobalSightLocale>();
+            targetLocales.add(p_task.getTargetLocale());
+            ReportGenerator generator = null;
+            if (p_activityType == Activity.TYPE_TRANSLATE)
             {
                 generator = new TranslationsEditReportGenerator(p_companyName);
             }

@@ -291,7 +291,7 @@ public class TmxWriter implements IWriter
      * according to the TMX export level. This means we strip out internal tags
      * for level 1, and convert tags to Trados form if we need to.
      */
-    private SegmentTmTuv convertTuvToTmxLevel(SegmentTmTu p_tu,
+    public static SegmentTmTuv convertTuvToTmxLevel(SegmentTmTu p_tu,
             SegmentTmTuv p_tuv, int p_level)
     {
         String format = p_tu.getFormat();
@@ -368,7 +368,7 @@ public class TmxWriter implements IWriter
     /**
      * Removes attributes that were added to G-TMX but are not valid in TMX.
      */
-    private void removeNonTmxAttributes(Element p_segment)
+    private static void removeNonTmxAttributes(Element p_segment)
     {
         removeNodes(p_segment, "//@erasable");
         removeNodes(p_segment, "//@movable");
@@ -379,7 +379,7 @@ public class TmxWriter implements IWriter
     /**
      * Removes nodes identified by the XPath p_path from a DOM Element.
      */
-    private void removeNodes(Element p_segment, String p_path)
+    private static void removeNodes(Element p_segment, String p_path)
     {
         List nodes = p_segment.selectNodes(p_path);
 
@@ -1000,7 +1000,7 @@ public class TmxWriter implements IWriter
      * does not only surround embedded tags but also text, which must be pulled
      * out of the <sub> and added to the parent tag.
      */
-    private Element removeSubElements(Element p_seg)
+    private static Element removeSubElements(Element p_seg)
     {
         ArrayList elems = new ArrayList();
 
@@ -1021,7 +1021,7 @@ public class TmxWriter implements IWriter
      * it does not only surround embedded tags but also text, which must be
      * pulled out of the <sub> and added to the parent tag.
      */
-    private void removeSubElement(Element p_element)
+    private static void removeSubElement(Element p_element)
     {
         Element parent = p_element.getParent();
         int index = parent.indexOf(p_element);
@@ -1059,7 +1059,7 @@ public class TmxWriter implements IWriter
         }
     }
 
-    private void findSubElements(ArrayList p_result, Element p_element)
+    private static void findSubElements(ArrayList p_result, Element p_element)
     {
         // Depth-first traversal: add embedded <sub> to the list first.
         for (int i = 0, max = p_element.nodeCount(); i < max; i++)
@@ -1083,7 +1083,7 @@ public class TmxWriter implements IWriter
      * does not only surround embedded tags but also text, which must be pulled
      * out of the <sub> and added to the parent tag.
      */
-    private Element replaceNbsps(Element p_seg)
+    private static Element replaceNbsps(Element p_seg)
     {
         ArrayList elems = new ArrayList();
 
@@ -1104,7 +1104,7 @@ public class TmxWriter implements IWriter
      * it does not only surround embedded tags but also text, which must be
      * pulled out of the <sub> and added to the parent tag.
      */
-    private void replaceNbsp(Element p_element)
+    private static void replaceNbsp(Element p_element)
     {
         Element parent = p_element.getParent();
         int index = parent.indexOf(p_element);
@@ -1142,7 +1142,7 @@ public class TmxWriter implements IWriter
         }
     }
 
-    private void findNbspElements(ArrayList p_result, Element p_element)
+    private static void findNbspElements(ArrayList p_result, Element p_element)
     {
         // Depth-first traversal: add embedded <ph x-nbspace> to the list first.
         for (int i = 0, max = p_element.nodeCount(); i < max; i++)
@@ -1193,12 +1193,12 @@ public class TmxWriter implements IWriter
      * Injects HTML codes into empty TMX tags from TM2. <bpt type=bold />
      * becomes <bpt type=bold>&lt;B&gt;</bpt>
      */
-    private void injectStandardFormattingCodes(Element p_root)
+    private static void injectStandardFormattingCodes(Element p_root)
     {
         injectStandardFormattingCodes(p_root, p_root);
     }
 
-    private void injectStandardFormattingCodes(Element p_root, Element p_element)
+    private static void injectStandardFormattingCodes(Element p_root, Element p_element)
     {
         // Depth-first traversal: add embedded <sub> to the list first.
         for (int i = 0, max = p_element.nodeCount(); i < max; i++)

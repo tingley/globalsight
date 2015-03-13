@@ -368,6 +368,7 @@
  <permission id="<%=Permission.COTI_JOB%>"/>
  <permission id="<%=Permission.ELOQUA%>"/>
  <permission id="<%=Permission.MIND_TOUCH%>"/>
+ <permission id="<%=Permission.GIT_CONNECTOR%>"/>
 </category>
 <category id="lb_job_scope">
   <permission id="<%=Permission.JOB_SCOPE_ALL%>"/>

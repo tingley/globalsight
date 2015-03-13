@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.cxe.entity.gitconnector.GitConnectorFileMapping"
+        table="CONNECTOR_GIT_FILE_MAPPING">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="sourceLocale" length="30" column="SOURCE_LOCALE" type="string"
+            not-null="true" unique="false" />
+        <property name="sourceMappingPath" length="300" column="SOURCE_MAPPING_PATH" type="string"
+            not-null="true" unique="false" />
+        <property name="targetLocale" length="30" column="TARGET_LOCALE" type="string"
+            not-null="true" unique="false" />
+        <property name="targetMappingPath" length="300" column="TARGET_MAPPING_PATH" type="string"
+            not-null="true" unique="false" />
+        <property name="gitConnectorId" column="GIT_CONNECTOR_ID" length="20"
+            type="long" not-null="true" />
+        <property name="parentId" column="PARENT_ID" length="20"
+            type="long" not-null="true" />
+        <property name="companyId" column="COMPANY_ID" length="20"
+            type="long" not-null="true" />
+        <property name="isActive" column="IS_ACTIVE" type="yes_no"
+            not-null="true" unique="false" />
+    </class>
+
+</hibernate-mapping>

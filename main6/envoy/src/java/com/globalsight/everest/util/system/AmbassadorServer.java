@@ -40,6 +40,7 @@ import org.json.JSONObject;
 import com.globalsight.config.SystemParameter;
 import com.globalsight.config.SystemParameterEntityException;
 import com.globalsight.config.SystemParameterPersistenceManagerLocal;
+import com.globalsight.connector.git.GitConnectorPushThread;
 import com.globalsight.cxe.adapter.database.DbAutoImporter;
 import com.globalsight.cxe.adapter.filesystem.autoImport.AutomaticImportMonitor;
 import com.globalsight.cxe.engine.util.FileUtils;
@@ -55,6 +56,7 @@ import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PropertiesInternalText;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -312,6 +314,10 @@ public class AmbassadorServer
             startCxeDatabaseAutomaticImport();
             
             WorkflowExportingHelper.cleanTable();
+            
+            GitConnectorPushThread runnable = new GitConnectorPushThread();
+            Thread t = new MultiCompanySupportedThread(runnable);
+            t.start();
         }
         catch (Exception e)
         {

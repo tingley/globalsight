@@ -18418,7 +18418,9 @@ public class Ambassador extends AbstractWebService
 						sid = "N/A";
 					}
 					long tmId = trgTuv.getTu().getTmId();
-					xml.append("\t\t<sid>").append(sid).append("</sid>\r\n");
+					xml.append("\t\t<sid>")
+							.append(EditUtil.encodeXmlEntities(sid))
+							.append("</sid>\r\n");
 					xml.append("\t\t<tmName>")
 							.append(ServerProxy.getProjectHandler()
 									.getProjectTMById(tmId, false).getName())
@@ -18426,7 +18428,7 @@ public class Ambassador extends AbstractWebService
 				}
 				xml.append("\t</segment>\r\n");
 			}
-			xml.append("</sgements>\r\n");
+			xml.append("</segments>\r\n");
 		}
 		catch (Exception e)
 		{

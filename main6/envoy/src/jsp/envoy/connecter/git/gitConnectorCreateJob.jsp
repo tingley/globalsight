@@ -152,7 +152,7 @@ $(document).ready(function ()
     // Initialize MindTouch Pages tree
     $("#treeDIV").dynatree({
         title: "Loading Git Connector tree",
-        persist: true,
+        persist: false,
         checkbox: true,
         selectMode: 3,
         initAjax: {
@@ -736,20 +736,6 @@ function showCreatePage() {
 }
 
 function showFilePage() {
-	//clear FP
-	$("[name='fileProfile']").each(function(){
-        addEmptyOption(this);
-    });
-    $("[name='fileProfile']").attr("value", "");
-    $("[name='fileProfile'] option").attr("disabled", false);
-    $("#targetLocaleArea").show();
-    $("#targetLocaleArea").html("");
-    mapped = false;
-    l10Nid = 0;
-    $("#attributeButtonDIV").hide();
-    attributeRequired = false;
-    $(this).blur();
-	
     document.title="<%=treeTitle%>";
 
     $("#gitconnectorPagesDiv").show();
@@ -954,7 +940,7 @@ function removeSelectedFile(id) {
         <span class="mainHeading"><%=treeTitle%></span>
         <table>
             <tr><td height="10">&nbsp;</td></tr>
-            <tr><TD class="standardText"><%=treeHelperText%> Git Connectoe server: <A class='standardHREF' href="<%=gc.getUrl()%>" target="_blank"><b><%=gc.getUrl()%>.</b></A></TD></tr>
+            <tr><TD class="standardText"><%=treeHelperText%><A class='standardHREF' href="<%=gc.getUrl()%>" target="_blank"><b><%=gc.getUrl()%></b></A>.</TD></tr>
         </table><br/>
     </div>
     <div id="mtCreateJobHeader" style="display: none">

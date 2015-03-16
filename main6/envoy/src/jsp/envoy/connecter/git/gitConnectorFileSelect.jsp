@@ -20,7 +20,7 @@
 <%
 	ResourceBundle bundle = PageHandler.getBundle(session); 
 	Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
-	String title = bundle.getString("lb_select_module");
+	String title = bundle.getString("lb_select_file_path");
 %>
 
 <head>

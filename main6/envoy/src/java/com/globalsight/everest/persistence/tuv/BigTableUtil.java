@@ -367,6 +367,12 @@ public class BigTableUtil implements TuvQueryConstants
         return templatePartTableName;
     }
 
+	public static String getTuTuvAttributeTableByJobId(long p_jobId)
+	{
+		long companyId = getJobById(p_jobId).getCompanyId();
+		return "TRANSLATION_TU_TUV_ATTR_" + companyId;
+	}
+
     public static boolean isJobDataMigrated(long p_sourcePageId)
             throws Exception
     {
@@ -474,15 +480,16 @@ public class BigTableUtil implements TuvQueryConstants
     }
 
     /**
-     * Check if COMPANY level TU/TUV/LM tables exist, if not, create them.
-     * 
-     * <p>
-     * The table name styles are: "translation_unit_[companyId]",
-     * "translation_unit_variant_[companyId]", "leverage_match_[companyId]".
-     * </p>
-     * 
-     * @param companyId
-     */
+	 * Check if COMPANY level TU/TUV/LM/ATTR tables exist, if not, create them.
+	 * 
+	 * <p>
+	 * The table name styles are: "translation_unit_[companyId]",
+	 * "translation_unit_variant_[companyId]", "leverage_match_[companyId]",
+	 * "translation_tu_tuv_[companyId]".
+	 * </p>
+	 * 
+	 * @param companyId
+	 */
     public static void checkTuTuvLmWorkingTablesForCompany(long companyId)
     {
         String tuTableName = "translation_unit_" + companyId;
@@ -493,6 +500,9 @@ public class BigTableUtil implements TuvQueryConstants
 
         String lmTableName = "leverage_match_" + companyId;
         createLMTable(lmTableName);
+
+        String tuTuvAttrTableName = "translation_tu_tuv_attr_" + companyId;
+        createTuTuvAttrTable(tuTuvAttrTableName);
     }
 
     /**
@@ -836,6 +846,44 @@ public class BigTableUtil implements TuvQueryConstants
         catch (Exception e)
         {
             logger.error("Failed to create table " + lmTableName, e);
+        }
+    }
+
+    /**
+	 * Create "translation_tu_tuv_[companyId]" table. This table has no archived
+	 * table, and it is one table per company, not support job level.
+	 * 
+	 * @param p_tuTuvAttrTableName
+	 */
+    public static void createTuTuvAttrTable(String p_tuTuvAttrTableName)
+    {
+        if (DbUtil.isTableExisted(p_tuTuvAttrTableName))
+        {
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE TABLE ").append(p_tuTuvAttrTableName).append(" ");
+        sb.append("(");
+        sb.append(" ID BIGINT(20) NOT NULL AUTO_INCREMENT, ");
+        sb.append(" OBJECT_ID BIGINT(20) DEFAULT NULL, ");
+        sb.append(" OBJECT_TYPE VARCHAR(20) DEFAULT NULL, ");
+        sb.append(" NAME VARCHAR(100) NOT NULL, ");
+        sb.append(" VARCHAR_VALUE VARCHAR(512) DEFAULT NULL, ");
+        sb.append(" TEXT_VALUE TEXT, ");
+        sb.append(" LONG_VALUE BIGINT(20) DEFAULT NULL, ");
+        sb.append(" DATE_VALUE DATETIME DEFAULT NULL, ");
+        sb.append(" PRIMARY KEY (ID), ");
+        sb.append(" KEY IDX_OBJECT_ID_TYPE_NAME (OBJECT_ID, OBJECT_TYPE, NAME) ");
+        sb.append(" ) ENGINE=INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET=utf8");
+
+        try
+        {
+            HibernateUtil.executeSql(sb.toString());
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to create table " + p_tuTuvAttrTableName, e);
         }
     }
 

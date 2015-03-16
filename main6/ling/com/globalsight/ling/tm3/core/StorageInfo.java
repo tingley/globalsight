@@ -48,6 +48,7 @@ abstract class StorageInfo<T extends TM3Data>
     static final String TUV_TABLE_NAME = "TM3_TUV";
     static final String INDEX_TABLE_NAME = "TM3_INDEX";
     static final String ATTR_VAL_TABLE_NAME = "TM3_ATTR_VAL";
+    static final String TU_TUV_ATTR_TABLE_NAME = "TM3_TU_TUV_ATTR";
 
     protected StorageInfo(BaseTm<T> tm, TM3TmType type)
     {
@@ -108,6 +109,11 @@ abstract class StorageInfo<T extends TM3Data>
         return tm.getAttrValTableName();
     }
 
+    String getTuTuvAttrTableName()
+    {
+    	return tm.getTuTuvAttrTableName();
+    }
+
     public TM3TmType getType()
     {
         return type;
@@ -138,6 +144,9 @@ abstract class StorageInfo<T extends TM3Data>
             createFuzzyIndex(conn);
             // Other tables
             createAttrTable(conn);
+
+            createTuTuvAttrTable(conn);
+
             conn.commit();
         }
         catch (Exception e)
@@ -169,6 +178,7 @@ abstract class StorageInfo<T extends TM3Data>
 
             destroyAttrTable(conn);
             destroyFuzzyIndex(conn);
+            destroyTuTuvAttrTable(conn);
             destroyTuStorage(conn);
             conn.commit();
         }
@@ -266,10 +276,10 @@ abstract class StorageInfo<T extends TM3Data>
     protected abstract void createTuStorage(Connection conn)
             throws SQLException;
 
-    protected abstract void createFuzzyIndex(Connection conn)
+    protected abstract void destroyTuStorage(Connection conn)
             throws SQLException;
 
-    protected abstract void destroyTuStorage(Connection conn)
+    protected abstract void createFuzzyIndex(Connection conn)
             throws SQLException;
 
     protected abstract void destroyFuzzyIndex(Connection conn)
@@ -281,7 +291,13 @@ abstract class StorageInfo<T extends TM3Data>
     protected abstract void destroyAttrTable(Connection conn)
             throws SQLException;
 
-    protected static String getTableName(long id, String baseName)
+	protected abstract void createTuTuvAttrTable(Connection conn)
+			throws SQLException;
+
+	protected abstract void destroyTuTuvAttrTable(Connection conn)
+            throws SQLException;
+
+	protected static String getTableName(long id, String baseName)
     {
         return baseName + "_" + id;
     }

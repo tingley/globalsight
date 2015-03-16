@@ -992,6 +992,8 @@ public class CompanyRemoval
             removeXmlDtd(conn);
             // remove xml rules
             removeXmlRule(conn);
+            // remove tu/tuv attributes
+            removeTuTuvAttr(conn);
             // remove tuvs
             removeTuv(conn, jobIds);
             // remove tus
@@ -2999,6 +3001,12 @@ public class CompanyRemoval
                 removeRemovedPrefixTag(conn, tuIds);
                 removeRemovedSuffixTag(conn, tuIds);
                 removeRemovedTag(conn, tuIds);
+                // 
+				if (tuTableName.equals("TRANSLATION_UNIT_" + companyId)
+						&& DbUtil.isTableExisted("TRANSLATION_TU_TUV_ATTR_"	+ companyId))
+                {
+                	exec(conn, "delete from TRANSLATION_TU_TUV_ATTR_" + companyId + " where object_type = 'TU' and object_id in ", tuIds);
+                }
             }
 
             // remove TUV data of job
@@ -3008,10 +3016,16 @@ public class CompanyRemoval
             {
                 removeXliffAlt(conn, tuvIds);
                 removeIssues(conn, tuvIds);
+                // to be safe, delete again via tuvIds
+				if (tuTableName.equals("TRANSLATION_UNIT_" + companyId)
+						&& DbUtil.isTableExisted("TRANSLATION_TU_TUV_ATTR_"	+ companyId))
+                {
+                	exec(conn, "delete from TRANSLATION_TU_TUV_ATTR_" + companyId + " where object_type = 'TUV' and object_id in ", tuvIds);
+                }
                 exec(conn, "delete from " + tuvTableName + " where ID in ", tuvIds);
             }
 
-            exec(conn, "delete from " + tuTableName + " where ID in ", tuIds); 
+            exec(conn, "delete from " + tuTableName + " where ID in ", tuIds);
         }
     }
 
@@ -3620,6 +3634,15 @@ public class CompanyRemoval
             execOnce(conn, SQL_DROP + tableName);
             logEnd(tableName);
         }
+    }
+
+    // drop TRANSLATION_TU_TUV_ATTR_x table (for company removal ONLY)
+    private void removeTuTuvAttr(Connection conn) throws SQLException
+    {
+    	String tableName = "TRANSLATION_TU_TUV_ATTR_" + company.getId();
+        logStart(tableName);
+        execOnce(conn, SQL_DROP + tableName);
+        logEnd(tableName);
     }
 
     // Drop all TUV tables (for remove company ONLY)

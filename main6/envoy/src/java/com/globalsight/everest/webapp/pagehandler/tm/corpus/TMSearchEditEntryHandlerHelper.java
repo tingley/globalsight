@@ -111,6 +111,7 @@ public class TMSearchEditEntryHandlerHelper
         String newSource = (String) request.getParameter("source");
         String newTarget = (String) request.getParameter("target");
         String newSid = (String) request.getParameter("sid");
+        newSid = EditUtil.decodeXmlEntities(newSid);
         String sourceNoChanged = (String) request
                 .getParameter("sourceNoChanged");
         String targetNoChanged = (String) request

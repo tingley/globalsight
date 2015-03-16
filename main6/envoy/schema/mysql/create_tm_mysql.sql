@@ -234,6 +234,7 @@ CREATE TABLE `TM3_TM` (
   `tuv_table` varchar(128) DEFAULT NULL,
   `fuzzy_table` varchar(128) DEFAULT NULL,
   `attr_val_table` varchar(128) DEFAULT NULL,
+  `tu_tuv_attr_table` varchar(128) DEFAULT NULL,
   `srcLocaleId` bigint(20),
   `tgtLocaleId` bigint(20),
   `sharedStorageId` bigint(20),

@@ -53,6 +53,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     private String tuvTableName;
     private String indexTableName;
     private String attrValTableName;
+    private String tuTuvAttrTableName;
     private Set<TM3Attribute> attributes = new HashSet<TM3Attribute>();
 
     // Injected
@@ -135,6 +136,16 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     void setAttrValTableName(String name)
     {
         this.attrValTableName = name;
+    }
+
+    String getTuTuvAttrTableName()
+    {
+    	return tuTuvAttrTableName;
+    }
+
+    void setTuTuvAttrTableName(String name)
+    {
+    	this.tuTuvAttrTableName = name;
     }
 
     TM3Manager getManager()

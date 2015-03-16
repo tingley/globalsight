@@ -33,9 +33,9 @@ class SharedStorageTables {
         }
         createTuStorage(inlineAttributes);
         createAttrTable();
+        createTuTuvAttrTable();
         return true;
     }
-    
     
     boolean destroy() throws SQLException {
         if (!exists()) {
@@ -43,6 +43,7 @@ class SharedStorageTables {
         }
         destroyFuzzyIndex();
         destroyAttrTable();
+        destroyTuTuvAttrTable();
         destroyTuStorage();
         return true;
     }
@@ -54,7 +55,11 @@ class SharedStorageTables {
     static String getTuvTableName(long poolId) {
         return table(StorageInfo.TUV_TABLE_NAME, poolId);
     }
-    
+
+    static String getTuTuvAttrTableName(long poolId) {
+    	return table(StorageInfo.TU_TUV_ATTR_TABLE_NAME, poolId);
+    }
+
     static String getAttrValTableName(long poolId) {
         return table(StorageInfo.ATTR_VAL_TABLE_NAME, poolId);
     }
@@ -84,6 +89,27 @@ class SharedStorageTables {
                     " (id) ON DELETE CASCADE, " +
             "FOREIGN KEY (attrId) REFERENCES TM3_ATTR (id) ON DELETE CASCADE " +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+        );
+    }
+
+    // Create "tm3_tu_tuv_attr_shared_x" table
+    protected void createTuTuvAttrTable() throws SQLException
+    {
+        SQLUtil.exec(conn,
+        		"CREATE TABLE " + getTuTuvAttrTableName(poolId) + " (" +
+                "ID BIGINT(20) NOT NULL AUTO_INCREMENT, " +
+                "TM_ID BIGINT(20) DEFAULT NULL, " +
+                "OBJECT_ID BIGINT(20) DEFAULT NULL, " +
+                "OBJECT_TYPE VARCHAR(20) DEFAULT NULL, " +
+                "NAME VARCHAR(100) NOT NULL, " +
+                "VARCHAR_VALUE VARCHAR(512) DEFAULT NULL, " +
+                "TEXT_VALUE TEXT, " +
+                "LONG_VALUE BIGINT(20) DEFAULT NULL, " +
+                "DATE_VALUE DATETIME DEFAULT NULL, " +
+                "PRIMARY KEY (ID), " +
+                "KEY IDX_OBJECT_ID_TYPE_NAME (OBJECT_ID, OBJECT_TYPE, NAME), " +
+                "KEY IDX_TM_ID (TM_ID) " +
+                ") ENGINE=INNODB AUTO_INCREMENT = 1"
         );
     }
 
@@ -130,7 +156,7 @@ class SharedStorageTables {
             "FOREIGN KEY (lastEventID) REFERENCES TM3_EVENTS (id) " +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
         );
-        
+
         //Create index on TUV table
         stmt = new StringBuilder();
         stmt.append("CREATE INDEX INDEX_").append(tuvTableName)
@@ -142,13 +168,16 @@ class SharedStorageTables {
     protected void destroyAttrTable() throws SQLException {
         SQLUtil.exec(conn, "drop table if exists " + getAttrValTableName(poolId));
     }
-    
+
+    protected void destroyTuTuvAttrTable() throws SQLException {
+        SQLUtil.exec(conn, "drop table if exists " + getTuTuvAttrTableName(poolId));
+    }
+
     protected void destroyTuStorage() throws SQLException {
         SQLUtil.exec(conn, "drop table if exists " + getTuvTableName(poolId));
         SQLUtil.exec(conn, "drop table if exists " + getTuTableName(poolId));
     }
-    
-    
+
     protected void destroyFuzzyIndex() throws SQLException {
         // Because we have per-TM tables, this is suddenly complicated.
         // We need to drop everything

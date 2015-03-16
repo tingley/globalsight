@@ -32,7 +32,7 @@ public interface TM3AttributeValueType {
                             + " value " + value + " not of type String");
                 }
                 String s = (String) value;
-                if (s.length() > maxLength)
+                if (s.length() > maxLength && !".sid".equals(name))
                 {
                     throw new IllegalArgumentException("attr " + name
                             + " value " + value + " longer than " + maxLength);

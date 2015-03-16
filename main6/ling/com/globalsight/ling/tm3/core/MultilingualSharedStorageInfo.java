@@ -92,6 +92,9 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
                     .append(getAttrValTableName()).append(" where tmId = ?")
                     .addValue(getTm().getId()));
             SQLUtil.exec(conn, new StatementBuilder().append("delete from ")
+            		.append(getTuTuvAttrTableName()).append(" where tm_id = ?")
+            		.addValue(getTm().getId()));
+            SQLUtil.exec(conn, new StatementBuilder().append("delete from ")
                     .append(getTuvTableName()).append(" where tmId = ?")
                     .addValue(getTm().getId()));
             SQLUtil.exec(conn, new StatementBuilder().append("delete from ")
@@ -142,6 +145,8 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
                 sharedStorageId, id));
         tm.setAttrValTableName(SharedStorageTables
                 .getAttrValTableName(sharedStorageId));
+		tm.setTuTuvAttrTableName(SharedStorageTables
+				.getTuTuvAttrTableName(sharedStorageId));
     }
 
     //
@@ -197,4 +202,13 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
     {
     }
 
+	@Override
+	protected void createTuTuvAttrTable(Connection conn) throws SQLException
+	{
+	}
+
+	@Override
+	protected void destroyTuTuvAttrTable(Connection conn) throws SQLException
+	{
+	}
 }

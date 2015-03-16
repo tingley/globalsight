@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSONArray;
 import com.globalsight.everest.company.Company;
+import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
@@ -21,7 +22,9 @@ import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.GlobalSightLocale;
+
 import org.apache.log4j.Logger;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -46,6 +49,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskListConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskListParams;
@@ -516,7 +520,6 @@ public class TaskListServlet extends HttpServlet
             }
             
             final User user = PageHandler.getUser(session);
-            String codeSet =job.getFileProfile().getCodeSet();
             SystemConfiguration config = SystemConfiguration.getInstance();
             String exportLocation = config.getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR);
             int bomType = job.getFileProfile().getBOMType();
@@ -530,6 +533,9 @@ public class TaskListServlet extends HttpServlet
                 }
                 
                 String localeSubDir = workflow.getTargetLocale().toString();
+                
+                L10nProfile l10nProfile = LocProfileHandlerHelper.getL10nProfile(job.getL10nProfileId());
+                String codeSet = l10nProfile.getCodeSet(workflow.getTargetLocale());
                 
                 ExportParameters ep = new ExportParameters(workflow, codeSet,
                         exportLocation, localeSubDir, bomType);

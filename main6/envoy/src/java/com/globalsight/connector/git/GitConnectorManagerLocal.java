@@ -136,9 +136,8 @@ public class GitConnectorManagerLocal
     
     public static List<?> getAllCacheFiles()
     {
-    	String hql = " from GitConnectorCacheFile where 1 = :i ";
+    	String hql = " from GitConnectorCacheFile";
     	Map map = new HashMap();
-        map.put("i", 1);
         return HibernateUtil.search(hql, map);
     }
 }

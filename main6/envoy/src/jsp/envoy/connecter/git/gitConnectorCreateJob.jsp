@@ -373,20 +373,6 @@ $(document).ready(function ()
 
     $("#cancel").click(function()
     {
-        //clear FP
-    	$("[name='fileProfile']").each(function(){
-            addEmptyOption(this);
-        });
-        $("[name='fileProfile']").attr("value", "");
-        $("[name='fileProfile'] option").attr("disabled", false);
-        $("#targetLocaleArea").show();
-        $("#targetLocaleArea").html("");
-        mapped = false;
-        l10Nid = 0;
-        $("#attributeButtonDIV").hide();
-        attributeRequired = false;
-        $(this).blur();
-
     	showFilePage();
     });
 
@@ -750,6 +736,20 @@ function showCreatePage() {
 }
 
 function showFilePage() {
+	//clear FP
+	$("[name='fileProfile']").each(function(){
+        addEmptyOption(this);
+    });
+    $("[name='fileProfile']").attr("value", "");
+    $("[name='fileProfile'] option").attr("disabled", false);
+    $("#targetLocaleArea").show();
+    $("#targetLocaleArea").html("");
+    mapped = false;
+    l10Nid = 0;
+    $("#attributeButtonDIV").hide();
+    attributeRequired = false;
+    $(this).blur();
+	
     document.title="<%=treeTitle%>";
 
     $("#gitconnectorPagesDiv").show();

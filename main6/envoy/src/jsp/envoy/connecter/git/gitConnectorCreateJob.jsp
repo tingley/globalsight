@@ -921,6 +921,7 @@ function updateLocales()
 
 function removeSelectedFile(id) {
     $("#bp"+id).remove();
+    $("#bptip"+id).remove();
     $("#c"+id).attr("checked", false);
     updateFileProfileSelect();
     updateFileTotal();

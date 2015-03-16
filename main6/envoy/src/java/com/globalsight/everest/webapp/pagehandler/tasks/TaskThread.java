@@ -160,8 +160,9 @@ public class TaskThread extends MultiCompanySupportedThread
                 boolean autoAcceptFlag4 = (company.getEnableQAChecks()
                         && QACheckerHelper.isQAActivity(p_task) && project
                         .getAutoAcceptQATask());
-                boolean autoAcceptFlag5 = (Activity.TYPE_TRANSLATE== type && project
-                        .getAutoAcceptTrans());
+				boolean autoAcceptFlag5 = ((Activity.TYPE_TRANSLATE == type || 
+						Activity.TYPE_REVIEW_EDITABLE == type) && project
+						.getAutoAcceptTrans());
 
                 if (autoAcceptFlag1 || autoAcceptFlag2 || autoAcceptFlag3
                         || autoAcceptFlag4 || autoAcceptFlag5)
@@ -185,7 +186,7 @@ public class TaskThread extends MultiCompanySupportedThread
                         rcrReportFiles = generateReviewCommentReport(project,
                                 acceptor, p_task, type, companyName);
                     }
-                    if (Activity.TYPE_TRANSLATE == type
+                    if ((Activity.TYPE_TRANSLATE == type || Activity.TYPE_REVIEW_EDITABLE == type)
                             && project.getAutoSendTrans())
                     {
                     	terReportFiles = generateTranslationsEditReport(project,
@@ -366,7 +367,8 @@ public class TaskThread extends MultiCompanySupportedThread
             List<GlobalSightLocale> targetLocales = new ArrayList<GlobalSightLocale>();
             targetLocales.add(p_task.getTargetLocale());
             ReportGenerator generator = null;
-            if (p_activityType == Activity.TYPE_TRANSLATE)
+            if (p_activityType == Activity.TYPE_TRANSLATE || 
+            		p_activityType == Activity.TYPE_REVIEW_EDITABLE)
             {
                 generator = new TranslationsEditReportGenerator(p_companyName);
             }

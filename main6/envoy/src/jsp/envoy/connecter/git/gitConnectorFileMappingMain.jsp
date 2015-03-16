@@ -210,7 +210,7 @@ function filterItems(e)
         <td style="padding-top:5px" align="left">
             <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"  name="removeBtn" id="removeBtn" disabled onclick="removeMTConnctor();">
             <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."  name="newBtn" onclick="newMTConnector();">
-            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_back_to_git_connector")%>..."  name="newBtn" onclick="back();">
+            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_back_to_git_connector")%>"  name="newBtn" onclick="back();">
         </td>
     </tr>
 </table>

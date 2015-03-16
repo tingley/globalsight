@@ -229,10 +229,10 @@ function filterItems(e)
     </tr>
     <tr>
         <td style="padding-top:5px" align="left">
-            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"  name="removeBtn" id="removeBtn" disabled onclick="removeMTConnctor();">
-            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."  name="newBtn" onclick="newMTConnector();">
-            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_file_mapping")%>" name="fileMappingBtn" id="fileMappingBtn" disabled onclick="fileMapping();">
             <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_connect")%>" name="connectBtn" id="connectBtn" disabled onclick="connect();">
+            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"  name="removeBtn" id="removeBtn" disabled onclick="removeMTConnctor();">
+            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_file_mapping")%>..." name="fileMappingBtn" id="fileMappingBtn" disabled onclick="fileMapping();">
+            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."  name="newBtn" onclick="newMTConnector();">
         </td>
     </tr>
 </table>

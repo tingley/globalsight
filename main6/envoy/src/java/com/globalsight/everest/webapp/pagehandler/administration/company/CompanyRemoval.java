@@ -208,6 +208,8 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TARGET_PAGE_LEVERAGE_GROUP = "delete from TARGET_PAGE_LEVERAGE_GROUP where TP_ID in ";
     private static final String SQL_DELETE_TASK_INFO_BY_COMPANY_ID = "delete from TASK_INFO where COMPANY_ID=?";
     private static final String SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID = "delete from SCORECARD_CATEGORY WHERE COMPANY_ID = ?";
+    private static final String SQL_DELETE_GIT_CONNECTOR_BY_COMPANY_ID = "delete from CONNECTOR_GIT WHERE COMPANY_ID = ?";
+    private static final String SQL_DELETE_GIT_CONNECTOR_FILE_MAPPING_BY_COMPANY_ID = "delete from CONNECTOR_GIT_FILE_MAPPING WHERE COMPANY_ID = ?";
     private static final String SQL_DELETE_POST_REVIEW_CATEGORY_BY_COMPANY_ID = "delete from POST_REVIEW_CATEGORY WHERE COMPANY_ID = ?";
     private static final String SQL_DELETE_TASK_INFO_BY_TASK_ID = "delete from TASK_INFO where TASK_ID in ";
     private static final String SQL_DELETE_TASK_INTERIM = "delete from TASK_INTERIM where USER_ID in ";
@@ -253,6 +255,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_WORKFLOW_OWNER = "delete from WORKFLOW_OWNER where WORKFLOW_ID in ";
     private static final String SQL_DELETE_WORKFLOW_REQUEST = "delete from WORKFLOW_REQUEST where ID in ";
     private static final String SQL_DELETE_SCORE = "delete from SCORECARD_SCORE where JOB_ID in ";
+    private static final String SQL_DELETE_GIT_CONNECTOR_JOB = "delete from CONNECTOR_GIT_JOB where JOB_ID in ";
     private static final String SQL_DELETE_WORKFLOW_REQUEST_WFTEMPLATE = "delete from WORKFLOW_REQUEST_WFTEMPLATE where WORKFLOW_TEMPLATE_ID in ";
     private static final String SQL_DELETE_XLIFF_ALT = "delete from XLIFF_ALT where TUV_ID in ";
     private static final String SQL_DELETE_XML_DTD = "delete from XML_DTD where COMPANY_ID=?";
@@ -558,6 +561,7 @@ public class CompanyRemoval
             removeUpdatedSourcePage(conn, jobIds);
             
             removeScoreByJobId(conn, jobIds);
+            removeGitConnectorJobByJobId(conn, jobIds);
             removeWorkflowRequest(conn, jobIds);
             removeIpTmIndex(conn, jobIds);
             removeIpTmSrcL(conn, jobIds);
@@ -922,6 +926,12 @@ public class CompanyRemoval
             removeScoreByCompanyId(conn);
             // remove scorecardCategory
             removeScorecardCategory(conn);
+            //remove git connector Job
+            removeGitConnectorJob(conn);
+            //remove git connector file mapping
+            removeGitConnectorFileMapping(conn);
+            //remove git connector
+            removeGitConnector(conn);
             //remove post review category
             romovePostReviewCategory(conn);
             // remove workflows
@@ -3257,6 +3267,38 @@ public class CompanyRemoval
         logEnd("SCORECARD_CATEGORY");
     }
     
+    private void removeGitConnector(Connection conn) throws SQLException
+    {
+        logStart("GIT_CONNECTOR");
+        long companyId = company.getId();
+        execOnce(conn, SQL_DELETE_GIT_CONNECTOR_BY_COMPANY_ID, companyId);
+
+        logEnd("GIT_CONNECTOR");
+    }
+    
+    private void removeGitConnectorJob(Connection conn) 
+    		throws SQLException
+    {
+    	logStart("GIT_CONNECTOR_JOB");
+    	long companyId = company.getId();
+        List<List<Object>> jobIds = queryBatchList(conn, SQL_QUERY_JOB,
+                companyId);
+        if (jobIds.size() > 0)
+        {
+        	removeGitConnectorJobByJobId(conn, jobIds);
+        }
+    	logEnd("GIT_CONNECTOR_JOB");
+    }
+    
+    private void removeGitConnectorFileMapping(Connection conn) throws SQLException
+    {
+        logStart("GIT_CONNECTOR_FILE_MAPPING");
+        long companyId = company.getId();
+        execOnce(conn, SQL_DELETE_GIT_CONNECTOR_FILE_MAPPING_BY_COMPANY_ID, companyId);
+
+        logEnd("GIT_CONNECTOR_FILE_MAPPING");
+    }
+    
     private void romovePostReviewCategory(Connection conn) throws SQLException
     {
         logStart("POST_REVIEW_CATEGORY");
@@ -3931,6 +3973,14 @@ public class CompanyRemoval
     	logStart("SCORE");
         exec(conn, SQL_DELETE_SCORE, jobIds);
         logEnd("SCORE");
+    }
+    
+    private void removeGitConnectorJobByJobId(Connection conn,
+            List<List<Object>> jobIds) throws SQLException
+    {
+    	logStart("GIT_CONNECTOR_JOB");
+        exec(conn, SQL_DELETE_GIT_CONNECTOR_JOB, jobIds);
+        logEnd("GIT_CONNECTOR_JOB");
     }
 
     private void removeWorkflowRequest(Connection conn,

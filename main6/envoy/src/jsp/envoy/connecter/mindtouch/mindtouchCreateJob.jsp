@@ -128,25 +128,11 @@ String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 
-// Init the dialog for page info displaying.
-var pageInfoDialog = null;
-$(
-	function () {
-    	pageInfoDialog = $("#currentNodeDiv").dialog({
-            modal: false,
-            autoOpen: false,
-            closeOnEscape: true,
-            minHeight: 125,
-            minWidth:500
-        });
-    }
-)
-
 $(document).ready(function ()
 {
     // Set CSS Value
 	var defaultWidth = "100%";
-	var defaultHeight = $(window).height() * 0.65;
+	var defaultHeight = $(window).height() * 0.55;
     $("#treeDIV").width(defaultWidth);
     $("#treeDIV").height(defaultHeight);
 
@@ -406,9 +392,6 @@ function clearFieldValues() {
 }
 
 function goToCreateJob() {
-    $("#currentNodeDiv").dialog("close");
-    $("#currentNodeDiv").hide();
-
     var selNodes = $("#treeDIV").dynatree("getSelectedNodes");
     if(selNodes.length == 0)
     {
@@ -493,10 +476,6 @@ function fnSelectAll2(isChecked) {
 }
 
 function fnReload() {
-    // Close page information dialog first
-	$("#currentNodeDiv").dialog("close");
-    $("#currentNodeDiv").hide();
-
     $("#treeDIV").dynatree("getTree").reload();
 }
 
@@ -509,17 +488,13 @@ function initPageDivInfo(pageIdAndUrl, pageTitle) {
 	var pdfUrl = "<%=mtc.getUrl()%>" + "/@api/deki/pages/" + pageId + "/pdf";
     pdfUrl = "<A class='standardHREF' href='" + pdfUrl + "' target='_blank'>" + pdfUrl + "</A>";
 
-    var html = "<table cellpadding=1 cellspacing=1 border=0 class='standardText'>" +
-            "<tr height='20'><td width='80'>Page Title:</td><td>" + pageTitle + "</td></tr>" +
-            "<tr height='20'><td width='80'>Page Id:</td><td>" + pageId + "</td></tr>" +
-            "<tr height='20'><td width='80'>PDF Review:</td><td>" + pdfUrl + "</td></tr>" +
-            "<tr height='20'><td width='80'>Page URL:</td><td>" + pageUrl + "</td></tr>" + 
+    var html = "<table cellpadding=1 cellspacing=1 border=0 class='standardText' width='100%' style='border-collapse: collapse;'>" +
+            "<tr height='20' style='border-top:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='80'>Page Title:</td><td width='95%'>" + pageTitle + "</td></tr>" +
+            "<tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='80'>Page Id:</td><td width='95%'>" + pageId + "</td></tr>" +
+            "<tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='80'>PDF Review:</td><td width='95%'>" + pdfUrl + "</td></tr>" +
+            "<tr height='20' style='border-bottom:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='80'>Page URL:</td><td width='95%'>" + pageUrl + "</td></tr>" + 
             "</table>";
     $("#currentNodeDiv").html(html);
-
-    $("#currentNodeDiv").dialog("open").height("auto");
-    $("#currentNodeDiv").dialog("open").width("auto");
-    $("#currentNodeDiv").show();
 }
 
 function getPageIdFromKey(pageIdAndUrl) {
@@ -786,8 +761,27 @@ function removeSelectedFile(id) {
         </table>
 
         <div id="treeDIV"><!-- Page tree is in this DIV. --></div>
-        <!-- this Div has the "page information" dialog -->
-        <div id="currentNodeDiv" title="Page Information" style="display:none" class="standardText"></div>
+        <div>&nbsp;</div>
+        <div id="currentNodeDiv" style="display:block" class="standardText">
+            <table cellpadding=1 cellspacing=1 border=0 class='standardText' width='100%' style='border-collapse: collapse;'>
+                <tr height='20' style='border-top:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'>
+				    <td width='80'>Page Title:</td>
+					<td width='95%'></td>
+				</tr>
+                <tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'>
+				    <td width='80'>Page Id:</td>
+					<td width='95%'></td>
+				</tr>
+                <tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'>
+					<td width='80'>PDF Review:</td>
+					<td width='95%'></td>
+				</tr>
+                <tr height='20' style='border-bottom:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'>
+				    <td width='80'>Page URL:</td>
+					<td width='95%'></td>
+				</tr>
+            </table>
+		</div>
         <div>&nbsp;</div>
         <div align="left"><input type="BUTTON" VALUE="<%=bundle.getString("lb_go_to_create_job")%>" onClick="goToCreateJob();"/></div>
     </div>

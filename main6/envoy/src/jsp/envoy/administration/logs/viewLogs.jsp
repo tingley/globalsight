@@ -322,6 +322,20 @@ TR.trodd {
                 <TD><%=bundle.getString("log_activity_file") %></TD>
                 <TD><%=bundle.getString("log_activity")%></TD>
             </TR>
+            <TR>
+                <td>
+                  <input type="checkbox" id="operation" name="operation" value="operation.log" />
+                </td>
+                <TD><%=bundle.getString("log_operation_file") %></TD>
+                <TD><%=bundle.getString("log_operation")%></TD>
+            </TR>
+            <TR>
+                <td>
+                  <input type="checkbox" id="webservices" name="webservices" value="webservices.log" />
+                </td>
+                <TD><%=bundle.getString("log_webservices_file") %></TD>
+                <TD><%=bundle.getString("log_webservices")%></TD>
+            </TR>
 <!-- 
             <TR>
                 <td>

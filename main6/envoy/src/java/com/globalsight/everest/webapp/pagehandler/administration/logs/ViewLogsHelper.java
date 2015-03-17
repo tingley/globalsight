@@ -603,6 +603,10 @@ public class ViewLogsHelper
             filter = new GlobalSightLogFilter();
         else if ("activity.log".equals(logType))
             filter = new ActivityLogFilter();
+        else if ("operation.log".equals(logType))
+            filter = new OperationLogFilter();
+        else if ("webservices.log".equals(logType))
+            filter = new WebservicesLogFilter();
         else if ("JBoss_GlobalSight.log".equals(logType))
             filter = new JBossLogFilter();
 
@@ -632,6 +636,32 @@ public class ViewLogsHelper
         public boolean accept(File pathname)
         {
             if (pathname.getName().startsWith("activity.log"))
+                return true;
+            else
+                return false;
+        }
+    }
+
+    class OperationLogFilter implements FileFilter
+    {
+
+        @Override
+        public boolean accept(File pathname)
+        {
+            if (pathname.getName().startsWith("operation.log"))
+                return true;
+            else
+                return false;
+        }
+    }
+
+    class WebservicesLogFilter implements FileFilter
+    {
+
+        @Override
+        public boolean accept(File pathname)
+        {
+            if (pathname.getName().startsWith("webservices.log"))
                 return true;
             else
                 return false;

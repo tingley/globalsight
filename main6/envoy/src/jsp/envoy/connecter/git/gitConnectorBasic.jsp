@@ -140,21 +140,7 @@ function confirmForm()
 
     var url = $("#url").val();
     if(url.indexOf("http") == 0)
-    {
-	    if (isEmptyString(gitForm.username.value))
-	    {
-	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_user_name")))%>");
-	        gitForm.username.focus();
-	        return false;
-	    }
-	
-	    if (isEmptyString(gitForm.password.value))
-	    {
-	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_password")))%>");
-	        gitForm.password.focus();
-	        return false;
-	    }
-    }
+    {}
     else
     {
     	$("#username").val("");
@@ -221,11 +207,11 @@ function validName()
             <td><input type="text" name="branch" id="branch" style="width: 360px;" value="<%=branch%>" maxLength="200"></td>
         </tr>
         <tr id="usernameTr">
-            <td><%=bundle.getString("lb_user_name")%><span class="asterisk">*</span>:</td>
+            <td><%=bundle.getString("lb_user_name")%>:</td>
             <td><input type="text" name="username" id="username" style="width: 360px;" value="<%=username%>" maxLength="200"></td>
         </tr>
         <tr id="passwordTr">
-            <td><%=bundle.getString("lb_password")%><span class="asterisk">*</span>:</td>
+            <td><%=bundle.getString("lb_password")%>:</td>
             <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200"></td>
         </tr>
         <tr>

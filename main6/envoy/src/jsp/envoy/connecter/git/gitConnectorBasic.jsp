@@ -140,7 +140,36 @@ function confirmForm()
 
     var url = $("#url").val();
     if(url.indexOf("http") == 0)
-    {}
+    {
+    	var end = url.indexOf("@");
+    	if(end > 0)
+    	{
+	    	var start = 7;
+	    	if(url.indexOf("https") == 0)
+	    	{
+	    		start = 8;
+	    	}
+	    	
+	    	var temp = url.substring(start, end);
+	    	if(temp.indexOf(":") > 0)
+	    	{
+	    		var temp2 = $("#username").val() + ":" + $("#password").val();
+	    		if(temp2 != temp)
+	    		{
+	    			alert("Username/Password is inconsistent, please check.");
+	    			return false;
+	    		}
+	    	}
+	    	else
+	    	{
+	    		if($("#username").val() != temp)
+	    		{
+	    			alert("Username is inconsistent, please check.");
+	    			return false;
+	    		}
+	    	}
+    	}
+    }
     else
     {
     	$("#username").val("");

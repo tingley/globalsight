@@ -50,9 +50,6 @@ public class GitConnectorMainHandler extends PageActionHandler
             GitConnector c = HibernateUtil.get(GitConnector.class, cId);
             c.setIsActive(false);
             HibernateUtil.update(c);
-            
-            GitConnectorHelper helper = new GitConnectorHelper(c);
-            FileUtil.deleteFile(helper.getGitFolder());
         }
     }
 

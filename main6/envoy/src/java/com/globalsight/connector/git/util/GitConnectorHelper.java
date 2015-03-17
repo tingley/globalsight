@@ -65,7 +65,7 @@ public class GitConnectorHelper
     public File getGitFolder()
     {
     	File docFolder = AmbFileStoragePathUtils.getCxeDocDir(gc.getCompanyId());
-        String gitFolderStr = docFolder + File.separator + GIT_CONNECTOR + File.separator + gc.getName();
+        String gitFolderStr = docFolder + File.separator + GIT_CONNECTOR + File.separator + gc.getName() + "_" + gc.getId();
         return new File(gitFolderStr);
     }
     

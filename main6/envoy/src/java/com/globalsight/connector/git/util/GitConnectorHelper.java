@@ -52,7 +52,11 @@ public class GitConnectorHelper
     
     final SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() 
 	{
-		public void configure(Host host, Session session) {}
+		public void configure(Host host, Session session) {
+			java.util.Properties config = new java.util.Properties(); 
+			config.put("StrictHostKeyChecking", "no");
+			session.setConfig(config);
+		}
 	};
 
     private GitConnector gc = null;

@@ -471,7 +471,7 @@ function goToCreateJob() {
     }
 
     showCreatePage();
-    $("#fileQueue").html("");
+    //$("#fileQueue").html("");
     for (var i = 0; i < selNodes.length; i++) {
     	var path = selNodes[i].data.path;
     	var name = selNodes[i].data.title;
@@ -485,31 +485,34 @@ function goToCreateJob() {
 }
 
 function addFullDivElement(id, zipName, filePath, fileName, isSwitched) {
-    $("#fileQueue").append('<div id="bp' + id + '" class="uploadifyQueueItem">' 
-            // div of progress bar container
-            + '<div id="ProgressDiv' + id + '" class="uploadifyProgress" style="background:rgb(103, 138, 166)">'
-            // div of file name
-            + '<div class="fileInfo" id="FileInfo' + id + '" onclick="mapTargetLocales(ProgressDiv' + id + ')">' 
-            + fileName + '<input type="hidden" id="Hidden' + id + '" name="jobWholeName" value="' + fileName + '">'
-            + '<input type="hidden" name="jobFilePath" value="' + filePath + '">' 
-            + '<input type="hidden" name="isSwitched" value="' + isSwitched + '"></div>'
-            // detail link
-            + '<div class="detail"><a href="javascript:showTip(\'' + id + '\')">(more)</a></div>'
-            // div of complete icon
-            + '<div class="icon" ><span class="icons"><img src="/globalsight/images/createjob/success.png" style="width:20px;height:20px"></span></div>'
-            // div of file profile select
-            + '<div class="profile" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="profileArea"></span></div>'
-            // div of cancel button
-            + '<div class="cancel"><a href="javascript:removeSelectedFile(\'' + id + '\')">' 
-            + '<img style="padding-top:4px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'
-            // div of progress bar
-            + '<div class="uploadifyProgressBar" id="ProgressBar' + id + '"></div>'
-            + '</div></div>'
-            + '<div id="bptip' + id + '" class="tip_cj" style="display:none">' + filePath + '</div>');
-    queryFileProfile(id);
-    updateToDefaultFileProfile();
-    updateFileProfileSelect();
-    updateFileTotal();
+	if ($("#bp"+id).length > 0)
+	{
+	}
+	else
+	{
+	    $("#fileQueue").append('<div id="bp' + id + '" class="uploadifyQueueItem">' 
+	            // div of progress bar container
+	            + '<div id="ProgressDiv' + id + '" class="uploadifyProgress" style="background:rgb(103, 138, 166)">'
+	            // div of file name
+	            + '<div class="fileInfo" id="FileInfo' + id + '" onclick="mapTargetLocales(ProgressDiv' + id + ')">' 
+	            + fileName + '<input type="hidden" id="Hidden' + id + '" name="jobWholeName" value="' + fileName + '">'
+	            + '<input type="hidden" name="jobFilePath" value="' + filePath + '">' 
+	            + '<input type="hidden" name="isSwitched" value="' + isSwitched + '"></div>'
+	            // detail link
+	            + '<div class="detail"><a href="javascript:showTip(\'' + id + '\')">(more)</a></div>'
+	            // div of complete icon
+	            + '<div class="icon" ><span class="icons"><img src="/globalsight/images/createjob/success.png" style="width:20px;height:20px"></span></div>'
+	            // div of file profile select
+	            + '<div class="profile" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="profileArea"></span></div>'
+	            // div of cancel button
+	            + '<div class="cancel"><a href="javascript:removeSelectedFile(\'' + id + '\')">' 
+	            + '<img style="padding-top:4px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'
+	            // div of progress bar
+	            + '<div class="uploadifyProgressBar" id="ProgressBar' + id + '"></div>'
+	            + '</div></div>'
+	            + '<div id="bptip' + id + '" class="tip_cj" style="display:none">' + filePath + '</div>');
+	    queryFileProfile(id);
+	}
 }
 
 function queryFileProfile(id)
@@ -523,7 +526,7 @@ function queryFileProfile(id)
             function(data){
                 profile.html("<select id='fp" + id
                         + "' name='fileProfile' style='width:143;z-index:50;padding-top:2px;padding-bottom:2px;' " 
-                        + "onchange='disableUnavailableFileProfiles(this)'><option value=''></option>"
+                        + "onchange='changeFileProfile(this);disableUnavailableFileProfiles(this)'><option value=''></option>"
                         + data
                         + "</select>");
                 if (l10Nid == 0)
@@ -534,6 +537,9 @@ function queryFileProfile(id)
                 if (!mapped && $("#fp" + id).val() != "") {
                     mapTargetLocales(document.getElementById("ProgressDiv" + id));
                 }
+                updateToDefaultFileProfile();
+        	    //updateFileProfileSelect();
+        	    updateFileTotal();
         });
 }
 
@@ -673,7 +679,7 @@ function changeFileProfile(select)
 
     updateToDefaultFileProfile();
 
-    updateFileProfileSelect();
+    //updateFileProfileSelect();
 }
 
 // If one file is mapped with file profile, the other files with same extension 
@@ -685,7 +691,7 @@ function updateToDefaultFileProfile()
         for (var j = 0; j < selects.length; j++)
         {
             var aSelect = selects[j];
-            if (aSelect.value == "-1")
+            if (aSelect.value == "")
             {
                 $(aSelect).val(defaultFileProfile); 
             }
@@ -923,7 +929,7 @@ function removeSelectedFile(id) {
     $("#bp"+id).remove();
     $("#bptip"+id).remove();
     $("#c"+id).attr("checked", false);
-    updateFileProfileSelect();
+    //updateFileProfileSelect();
     updateFileTotal();
 }
 

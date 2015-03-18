@@ -156,7 +156,7 @@ function confirmForm()
 	    		var temp2 = $("#username").val() + ":" + $("#password").val();
 	    		if(temp2 != temp)
 	    		{
-	    			alert("Username/Password is inconsistent, please check.");
+	    			alert("User name and password don’t match the name and password in URL, please check them again.");
 	    			return false;
 	    		}
 	    	}
@@ -164,7 +164,7 @@ function confirmForm()
 	    	{
 	    		if($("#username").val() != temp)
 	    		{
-	    			alert("Username is inconsistent, please check.");
+	    			alert("User name doesn’t match the name in URL, please check it again.");
 	    			return false;
 	    		}
 	    	}

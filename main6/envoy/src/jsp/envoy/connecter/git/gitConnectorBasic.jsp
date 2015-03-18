@@ -156,7 +156,7 @@ function confirmForm()
 	    		var temp2 = $("#username").val() + ":" + $("#password").val();
 	    		if(temp2 != temp)
 	    		{
-	    			alert("User name and password don’t match the name and password in URL, please check them again.");
+	    			alert("User name or password doesn’t match the value in URL, please check them again.");
 	    			return false;
 	    		}
 	    	}

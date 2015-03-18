@@ -16,6 +16,7 @@
  */
 package com.globalsight.cxe.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
 import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
 import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
@@ -56,11 +58,16 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
@@ -1121,7 +1128,13 @@ public class CxeProxy
             type = CxeMessageType
                     .getCxeMessageType(CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
         }
-
+        //Deal with file encoding when exporting office2010
+		String targetCharset = getTargetCharset(p_messageId);
+		if (StringUtil.isNotEmpty(targetCharset)
+				&& !p_targetCharset.equalsIgnoreCase(targetCharset))
+		{
+			p_targetCharset = targetCharset;
+		}
         CxeMessage exportMsg = new CxeMessage(type);
         HashMap params = new HashMap();
 
@@ -1180,6 +1193,75 @@ public class CxeProxy
         sendCxeMessage(exportMsg, jmsTopic);
     }
 
+	private static String getTargetCharset(String p_messageId)
+	{
+		try
+		{
+			SourcePage sourcePage = ServerProxy.getPageManager()
+					.getTargetPage(Long.parseLong(p_messageId)).getSourcePage();
+			String sourceLocale = sourcePage.getGlobalSightLocale().getLocaleCode();
+			String externalPageId = sourcePage.getExternalPageId();
+			if (externalPageId.toLowerCase().endsWith("docx")
+					|| externalPageId.toLowerCase().endsWith("pptx")
+					|| externalPageId.toLowerCase().endsWith("xlsx"))
+			{
+				JobSummaryHelper helper = new JobSummaryHelper();
+				String eventFlowXml = sourcePage.getRequest().getEventFlowXml();
+				String safeBaseFilename = helper
+						.getOffice2010SafeBaseFileName(eventFlowXml);
+				StringBuffer soureLocalePath = new StringBuffer();
+				// Get the storage dir for company base on the parameter
+				// p_companyId
+				soureLocalePath
+						.append(AmbFileStoragePathUtils
+								.getFileStorageDirPath(1))
+						.append(File.separator)
+						.append(OfficeXmlHelper.CONVERSION_DIR_NAME)
+						.append(File.separator).append(sourceLocale)
+						.append(File.separator);
+				StringBuilder path = new StringBuilder();
+				if (StringUtil.isNotEmpty(safeBaseFilename))
+				{
+					path.append(soureLocalePath.toString());
+					path.append(safeBaseFilename);
+					path.append(".");
+				}
+				if (externalPageId.toLowerCase().endsWith("docx"))
+				{
+					path.append(OfficeXmlHelper.OFFICE_DOCX)
+							.append(File.separator).append("word")
+							.append(File.separator).append("document.xml");
+				}
+				else if (externalPageId.toLowerCase().endsWith("pptx"))
+				{
+					path.append(OfficeXmlHelper.OFFICE_PPTX)
+							.append(File.separator).append("ppt")
+							.append(File.separator).append("slide.xml");
+				}
+				else if (externalPageId.toLowerCase().endsWith("xlsx"))
+				{
+					path.append(OfficeXmlHelper.OFFICE_XLSX)
+							.append(File.separator).append("xl")
+							.append(File.separator).append("sharedStrings.xml");
+				}
+
+				File xmlFile = new File(path.toString());
+				if (xmlFile.exists() && xmlFile.isFile())
+				{
+					return FileUtil.getEncodingOfXml(xmlFile);
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
     /**
      * Initiates an export within CXE using JMS(Override method for documentum
      * workflow Id).
@@ -1271,7 +1353,13 @@ public class CxeProxy
             type = CxeMessageType
                     .getCxeMessageType(CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
         }
-
+        //Deal with file encoding when exporting office2010
+		String targetCharset = getTargetCharset(p_messageId);
+		if (StringUtil.isNotEmpty(targetCharset)
+				&& !p_targetCharset.equalsIgnoreCase(targetCharset))
+		{
+			p_targetCharset = targetCharset;
+		}
         CxeMessage exportMsg = new CxeMessage(type);
         HashMap params = new HashMap();
 

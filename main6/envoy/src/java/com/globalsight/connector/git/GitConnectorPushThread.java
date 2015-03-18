@@ -1,9 +1,9 @@
 package com.globalsight.connector.git;
 
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Transaction;
 
 import com.globalsight.connector.git.util.GitConnectorHelper;
 import com.globalsight.cxe.entity.gitconnector.GitConnector;
@@ -21,30 +21,32 @@ public class GitConnectorPushThread implements Runnable
         super();
     }
 
-    private void startPush() throws Exception
+    public void startPush() throws Exception
     {
-        try
-        {
-           List<GitConnectorCacheFile> cacheFiles = (List<GitConnectorCacheFile>) 
-           		GitConnectorManagerLocal.getAllCacheFiles();
-           if(cacheFiles != null && cacheFiles.size() > 0)
-           {
-        	   for(GitConnectorCacheFile cacheFile: cacheFiles)
-        	   {
-        		   GitConnector gc = GitConnectorManagerLocal
-        		   		.getGitConnectorById(cacheFile.getGitConnectorId());
-        		   GitConnectorHelper helper = new GitConnectorHelper(gc);
-        		   helper.gitConnectorPush(cacheFile.getFilePath());
-        		   HibernateUtil.delete(cacheFile);
-        	   }
-        	   startPush();
-           }
-           else
-           {
-        	   Thread.sleep(60 * 1000);
-        	   startPush();
-           }
-        }
+		try 
+		{
+			while (true) 
+			{
+				Transaction tx = HibernateUtil.getTransaction();
+				String hql = " from GitConnectorCacheFile";
+				List<GitConnectorCacheFile> cacheFiles = (List<GitConnectorCacheFile>)
+						HibernateUtil.search(hql);
+				if (cacheFiles != null && cacheFiles.size() > 0) 
+				{
+					for (GitConnectorCacheFile cacheFile : cacheFiles) 
+					{
+						GitConnector gc = GitConnectorManagerLocal
+								.getGitConnectorById(cacheFile.getGitConnectorId());
+						GitConnectorHelper helper = new GitConnectorHelper(gc);
+						helper.gitConnectorPush(cacheFile.getFilePath());
+						HibernateUtil.delete(cacheFile);
+					}
+				}
+				HibernateUtil.commit(tx);
+				
+				Thread.sleep(60 * 1000);
+			}
+		}
         catch (Exception e)
         {
             logger.error("Push git file failed.", e);

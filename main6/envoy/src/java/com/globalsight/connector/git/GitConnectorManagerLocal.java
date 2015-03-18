@@ -133,11 +133,4 @@ public class GitConnectorManagerLocal
             return null;
         }
     }
-    
-    public static List<?> getAllCacheFiles()
-    {
-    	String hql = " from GitConnectorCacheFile";
-    	Map map = new HashMap();
-        return HibernateUtil.search(hql, map);
-    }
 }

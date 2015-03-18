@@ -9,14 +9,14 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<spring.version>3.2.2.RELEASE</spring.version>
+		<spring.version>4.0.9.RELEASE</spring.version>
 		<war.name>dispatcherMW</war.name>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> 
 	</properties>
 
 	<dependencies>
-		<!-- Spring 3 dependencies -->
+		<!-- Spring 4 dependencies -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
@@ -58,7 +58,12 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 			<version>4.3.2</version>
-		</dependency>		
+		</dependency>
+		<dependency>										<!--commons-lang3  -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+		</dependency>
 		<dependency>										<!-- commons-io -->
     		<groupId>org.apache.commons</groupId>
     		<artifactId>commons-io</artifactId>
@@ -128,12 +133,6 @@
 			<artifactId>wsdl4j</artifactId>
 			<version>1.6.3</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.7.1</version>
-		</dependency>
 		<dependency>										<!-- jdom2 -->
     		<groupId>org.jdom</groupId>
     		<artifactId>jdom2</artifactId>
@@ -189,24 +188,24 @@
 			<version>1.0.0.Final</version>
 		</dependency>
 		<dependency>
-			<groupId>com.welocalize</groupId>
+			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
-			<version>1.9.0</version>
+			<version>1.9.11</version>
 		</dependency>
 		<dependency>
-			<groupId>com.welocalize</groupId>
+			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-jaxrs</artifactId>
-			<version>1.9.0</version>
+			<version>1.9.11</version>
 		</dependency>
 		<dependency>
-			<groupId>com.welocalize</groupId>
+			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.0</version>
+			<version>1.9.11</version>
 		</dependency>
 		<dependency>
-			<groupId>com.welocalize</groupId>
+			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-xc</artifactId>
-			<version>1.9.0</version>
+			<version>1.9.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.welocalize</groupId>

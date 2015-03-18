@@ -270,14 +270,6 @@ public class ReportGeneratorHandler extends PageHandler implements
     private List<Long> getReportJobIDS(HttpServletRequest p_request, List<String> reportTypeList)
             throws Exception
     {
-        String reportType = "";
-        if (reportTypeList != null && reportTypeList.size() > 0)
-            reportType = reportTypeList.get(0);        
-        if(reportType.equals(ReportConstants.ACTIVITY_DURATION_REPORT))
-        {
-            return new ActivityDurationReportGenerator().getReportJobIDS(p_request);
-        }
-
         List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
                 .getParameter(ReportConstants.JOB_IDS));     
         String dateRange = p_request.getParameter("dateRange");
@@ -366,7 +358,7 @@ public class ReportGeneratorHandler extends PageHandler implements
         List<String> reportTypeList = ReportHelper.getListOfStr(
                 p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
         List<Long> reportJobIDS = getReportJobIDS(p_request, reportTypeList);
-        // just for LisaQACommentsAnalysisReportWebForm.jsp
+        // just for LisaQACommentsAnalysisReportWebForm.jsp and activityDurationReportWebForm.jsp
         String dateRange = p_request.getParameter("dateRange");
         if ("Y".equals(dateRange) && reportJobIDS.size() == 0)
         {

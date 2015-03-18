@@ -166,6 +166,14 @@ function MappingPathSelect(mode)
   <tr valign="top">
     <td>
       <table border="0" class="standardText" cellpadding="2">
+      	<tr>
+          <td class="standardText">
+            Git Connector Name:
+          </td>
+          <td colspan="4" align="left" class="standardText">
+            <%=connector.getName() %>
+          </td>
+        </tr>
         <tr>
           <td class="standardText">
             <%=bundle.getString("lb_source_locale")%><span class="asterisk">*</span>:
@@ -222,6 +230,8 @@ function MappingPathSelect(mode)
           </td>
           <td>
             <input type="text" name="targetMappingPath" value="<%=targetMappingPath %>" size="40"  editable="false" />
+            <input type="button" name="targetSelect" value="<%=bundle.getString("lb_select")%>"
+            onclick="MappingPathSelect('Target')">
           </td>
         </tr>
         <tr>

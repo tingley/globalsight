@@ -165,6 +165,14 @@ function changeSourceLocale() {
   <tr valign="top">
     <td>
       <table border="0" class="standardText" cellpadding="2">
+      	<tr>
+          <td class="standardText">
+            Git Connector Name:
+          </td>
+          <td colspan="4" align="left" class="standardText">
+            <%=connector.getName() %>
+          </td>
+        </tr>
         <tr>
           <td class="standardText">
             <%=bundle.getString("lb_source_locale")%><span class="asterisk">*</span>:
@@ -196,25 +204,50 @@ function changeSourceLocale() {
             onclick="MappingPathSelect('Source')">
           </td>
         </tr>
-        
+        <tr>
+        <table class="listborder">
+        <tbody>
         <%
         int i = 0;
-        for (i = 0; i < targetLocales.size(); i++) {
-        	locale = (GlobalSightLocale)targetLocales.elementAt(i);
+        if(targetLocales.size() > 0)
+        {
         	%>
-        	<tr>
-        	   <td class="standardText"><%=bundle.getString("lb_target_locale")%></td>
-        	   <td><input type="checkbox" id="targetLocale<%=i%>" name="targetLocale<%=i %>" value="<%=locale.getId() %>"/><%=locale.getDisplayName(uiLocale) %></td>
-        	   <td class="standardText"><%=bundle.getString("lb_target_mapping_path")%></td>
-        	   <td>
-        	       <input type="text" id="targetMappingPath<%=i %>" name="targetMappingPath<%=i %>" value="" size="40" editable="false" />       	       
-        	   </td>
-               <td><input type="checkbox" id="subfolder<%=i %>" name="subfolder<%=i %>" value="1"><%=bundle.getString("msg_git_connector_file_mapping_auto_create_subfolder") %></td>        	   
+        	<thead>
+	        <tr  class = "tableHeadingBasic" style="height:25px">
+	        	<td class="standardText"><%=bundle.getString("lb_target_locale")%></td>
+	        	<td class="standardText"><%=bundle.getString("lb_target_mapping_path")%></td>
+	        	<td class="standardText"><%=bundle.getString("msg_git_connector_file_mapping_auto_create_subfolder") %></td>    
+	        </tr>
+	        </thead>
+        	<%
+        }
+        String tableRowEvenTM = "tableRowEvenTM";
+        String tableRowOddTM = "tableRowOddTM";
+        
+        for (i = 0; i < targetLocales.size(); i++) {
+        	String style = "";
+        	if (i % 2 == 0)
+        	{
+        		style = tableRowEvenTM;
+        	}
+        	else
+        	{
+        		style = tableRowOddTM;
+        	}
+        	%>
+        	<tr class="<%=style%>">
+        	   <td class="standardText"><input type="checkbox" id="targetLocale<%=i%>" name="targetLocale<%=i %>" value="<%=locale.getId() %>"/><%=locale.getDisplayName(uiLocale) %></td></td>
+        	   <td class="standardText">
+        	       <input type="text" id="targetMappingPath<%=i %>" name="targetMappingPath<%=i %>" value="" size="40" editable="false" />
+        	       <input type="button" name="moduleSelectBtn" value="<%=bundle.getString("lb_select") %>" onclick="MappingPathSelect('<%=i %>')"/>     	       
+        	   </td class="standardText">
+               <td><input type="checkbox" id="subfolder<%=i %>" name="subfolder<%=i %>" value="1"></td>        	   
         	</tr>
         	<%
         }
         %>
-        
+        </table>
+        </tr>
         <input type="hidden" name="count" value="<%=i %>" />
       </table></td></tr>
       <tr><td>&nbsp;</td></tr>

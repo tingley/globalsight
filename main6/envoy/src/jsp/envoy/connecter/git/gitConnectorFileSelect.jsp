@@ -76,9 +76,19 @@ session.setAttribute("gitConnectorId", gitConnectorId);
 	</script>
 </body>
 <script language="JavaScript">
-function returnValue(mode) {
-    if (mode == "Source") {
+function returnValue(mode) 
+{
+    if (mode == "Source") 
+    {
         window.opener.currentForm.sourceMappingPath.value = tree2.getSelectedItemId().substring(<%=length%>);
+    }
+    else if (mode == "Target") 
+    {
+        window.opener.currentForm.targetMappingPath.value = tree2.getSelectedItemId().substring(<%=length%>);
+    } 
+    else
+    {
+        window.opener.currentForm.targetMappingPath<%=mode%>.value = tree2.getSelectedItemId().substring(<%=length%>);
     }
     window.close();
 }

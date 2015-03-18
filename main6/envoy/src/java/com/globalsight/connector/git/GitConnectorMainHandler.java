@@ -1,5 +1,6 @@
 package com.globalsight.connector.git;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +38,9 @@ public class GitConnectorMainHandler extends PageActionHandler
     {
         GitConnector connector = (GitConnector) form;
         HibernateUtil.saveOrUpdate(connector);
+        
+        GitConnectorHelper helper = new GitConnectorHelper(connector);
+        helper.gitConnectorClone();
     }
 
     @ActionHandler(action = "remove", formClass = "")

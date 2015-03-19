@@ -18,6 +18,8 @@
 		  <module name="org.apache.xerces" export="true"/>
 		  <module name="org.codehaus.jackson.jackson-core-asl" export="true"/>
 		  <module name="org.codehaus.jackson.jackson-mapper-asl" export="true"/>
+		  <module name="org.codehaus.jackson.jackson-xc" export="true"/>
+		  <module name="org.codehaus.jackson.jackson-jaxrs" export="true"/>	
 		  <module name="org.dom4j" export="true"/>
 		  <module name="org.hibernate" export="true"/>
 		  <module name="org.hibernate.envers" export="true"/>

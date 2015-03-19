@@ -11,6 +11,8 @@
 		  <module name="org.apache.commons.io" export="true"/>
 		  <module name="org.apache.commons.lang" export="true"/>
 	      <module name="org.apache.commons.pool" export="true"/>
+		  <module name="org.apache.cxf" export="true"/>
+  		  <module name="org.apache.cxf.impl" export="true"/>
 		  <module name="org.apache.httpcomponents" export="true"/>
           <module name="org.apache.xalan" export="true"/>
 		  <module name="org.apache.xerces" export="true"/>

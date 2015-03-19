@@ -120,7 +120,26 @@
         <filter-name>HibernateFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    
+
+	<!-- CXF for Adobe Experience Manager -->
+	<servlet>
+		<servlet-name>CXFServlet</servlet-name>
+		<servlet-class>com.globalsight.webservices.AemCXFNoSpringServlet</servlet-class>
+		<init-param>
+			<param-name>port_for_aem_service</param-name>
+			<param-value>8081</param-value>
+		</init-param>
+		<init-param>
+			<param-name>path_for_aem_service</param-name>
+			<param-value>/aemServices/WebService4AEM</param-value>
+		</init-param>
+		<init-param>
+			<param-name>class_for_aem_service</param-name>
+			<param-value>com.globalsight.webservices.WebService4AEMImpl</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
 <!-- Begin: Axis listener -->
     <listener>
         <listener-class>org.apache.axis.transport.http.AxisHTTPSessionListener</listener-class>

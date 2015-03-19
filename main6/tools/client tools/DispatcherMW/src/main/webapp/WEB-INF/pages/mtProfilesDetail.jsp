@@ -112,8 +112,8 @@ function testHost(formAction) {
                     if(data) {
                         if(data.ExceptionInfo) {
                             var vl = data.ExceptionInfo + "";
-                            var s = vl.indexOf(":");
-                            vl = vl.substr(s + 1);
+                            //var s = vl.indexOf(":");
+                            //vl = vl.substr(s + 1);
                             alert(vl);
                         } else if(data.Info) {
                            //self.location.href = '../mtProfiles/refresh.htm';

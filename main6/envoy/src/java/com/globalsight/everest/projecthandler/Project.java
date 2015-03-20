@@ -244,6 +244,14 @@ public interface Project
     public void setPoRequired(int poRequired);
 
     // Auto accept task and auto send report option in Project Level.
+    public boolean getAutoAcceptTrans();
+
+    public void setAutoAcceptTrans(boolean autoAcceptTrans);
+
+    public boolean getAutoSendTrans();
+
+    public void setAutoSendTrans(boolean autoSendTrans);
+    
     public boolean getReviewOnlyAutoAccept();
 
     public void setReviewOnlyAutoAccept(boolean reviewAutoAccept);

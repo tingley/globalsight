@@ -43,6 +43,9 @@ import com.globalsight.dispatcher.dao.DispatcherDAOFactory;
 import com.globalsight.dispatcher.dao.MTPLanguagesDAO;
 import com.globalsight.dispatcher.dao.MTProfilesDAO;
 import com.globalsight.everest.projecthandler.MachineTranslationExtentInfo;
+import com.globalsight.machineTranslation.MachineTranslationException;
+import com.globalsight.machineTranslation.google.GoogleProxy;
+import com.globalsight.machineTranslation.iptranslator.IPTranslatorProxy;
 import com.globalsight.machineTranslation.iptranslator.IPTranslatorUtil;
 
 /**
@@ -160,7 +163,7 @@ public class MTPLanguagesController implements AppConstants
         return isExist;
     }    
     
-    public boolean isSupportsLocalePair(MTPLanguage p_mtpLang)
+    public boolean isSupportsLocalePair(MTPLanguage p_mtpLang) 
     {
         MachineTranslationExtentInfo result = null;
         MachineTranslationProfile mt = p_mtpLang.getMtProfile();
@@ -173,7 +176,17 @@ public class MTPLanguagesController implements AppConstants
         {
             case MS_Translator:
             case Safaba:
-                return true;
+                 return true;
+            case Google_Translate:
+                try
+                {
+                    GoogleProxy googleProxy = new GoogleProxy();
+                    return googleProxy.supportsLocalePair(sourcelocale, targetlocale);
+                }
+                catch (MachineTranslationException e1)
+                {
+                    e1.printStackTrace();
+                }
             case ProMT:
                 lp = getLanguagePairNameForProMt(sourcelocale, targetlocale);
                 break;

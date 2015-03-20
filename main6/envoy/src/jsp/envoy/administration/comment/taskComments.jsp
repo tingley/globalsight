@@ -977,7 +977,7 @@ function handleMultiSelectAll_2() {
 <table cellpadding=0 cellspacing=0 border=0 class="standardText" width="80%" style="min-width:1024px;">
   <tr>
     <td>
-      <b><%=bundle.getString("lb_activity")%><%=bundle.getString("lb_comments")%>: </b><%=task.getTaskDisplayName()%>
+      <b><%=bundle.getString("lb_activity")%> <%=bundle.getString("lb_comments")%>: </b><%=task.getTaskDisplayName()%>
     </td>
   </tr>
   <tr>

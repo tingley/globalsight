@@ -36,6 +36,7 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
         tm.setTuvTableName(getTableName(id, TUV_TABLE_NAME));
         tm.setFuzzyIndexTableName(getTableName(id, INDEX_TABLE_NAME));
         tm.setAttrValTableName(getTableName(id, ATTR_VAL_TABLE_NAME));
+        tm.setTuTuvAttrTableName(getTableName(id, TU_TUV_ATTR_TABLE_NAME));
     }
     
     @Override
@@ -116,12 +117,39 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
         );
     }
-    
-    @Override
+
+	@Override
+	protected void createTuTuvAttrTable(Connection conn) throws SQLException
+    {
+        SQLUtil.exec(conn,
+        		"CREATE TABLE " + getTuTuvAttrTableName() + " (" +
+                "ID BIGINT(20) NOT NULL AUTO_INCREMENT, " +
+                "TM_ID BIGINT(20) DEFAULT NULL, " +
+                "OBJECT_ID BIGINT(20) DEFAULT NULL, " +
+                "OBJECT_TYPE VARCHAR(20) DEFAULT NULL, " +
+                "NAME VARCHAR(100) NOT NULL, " +
+                "VARCHAR_VALUE VARCHAR(512) DEFAULT NULL, " +
+                "TEXT_VALUE TEXT, " +
+                "LONG_VALUE BIGINT(20) DEFAULT NULL, " +
+                "DATE_VALUE DATETIME DEFAULT NULL, " +
+                "PRIMARY KEY (ID), " +
+                "KEY IDX_OBJECT_ID_TYPE_NAME (OBJECT_ID, OBJECT_TYPE, NAME), " +
+                "KEY IDX_TM_ID (TM_ID) " +
+                ") ENGINE=INNODB AUTO_INCREMENT = 1"
+        );
+    }
+
+	@Override
+	protected void destroyTuTuvAttrTable(Connection conn) throws SQLException
+	{
+		SQLUtil.exec(conn, "drop table if exists " + getTuTuvAttrTableName());
+	}
+
+	@Override
     protected void destroyAttrTable(Connection conn) throws SQLException {
         SQLUtil.exec(conn, "drop table if exists " + getAttrValTableName());
     }
-    
+
     @Override
     protected void destroyTuStorage(Connection conn) throws SQLException {
         SQLUtil.exec(conn, "drop table if exists " + getTuvTableName());
@@ -130,10 +158,8 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
         getTuvIds().destroy(conn);
     }
     
-    
     @Override
     protected void destroyFuzzyIndex(Connection conn) throws SQLException {
         SQLUtil.exec(conn, "drop table if exists " + getFuzzyIndexTableName());
     }
-        
 }

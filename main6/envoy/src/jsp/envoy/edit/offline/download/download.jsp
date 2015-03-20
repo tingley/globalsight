@@ -269,6 +269,7 @@
     String labelActivity = bundle.getString("lb_activity") + bundle.getString("lb_colon");
     String labelJobName =  bundle.getString("lb_job_name") + bundle.getString("lb_colon");
     String labelResInsertion = bundle.getString("lb_resource_linking");
+    String labelPenalizedReferenceTm = bundle.getString("lb_work_offline_option_penalized_reference_tm");
     String labelResInsertionNote = bundle.getString("lb_resource_linking_note");
     String labelTerminology = bundle.getString("lb_terminology");
     String labelFinishWarning = bundle.getString("jsmsg_my_activities_finished");
@@ -710,6 +711,7 @@
     }
 %>
 <HTML>
+<!-- This JSP is: /envoy/edit/offline/download/download.jsp -->
 <HEAD>
 <TITLE><%= pagetitle %></TITLE>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
@@ -1045,6 +1047,18 @@ function setWordCountDisplay()
 	}
 }
 
+function switchRadio(penalizedReferenceTmRadio)
+{
+    if ("penalizedReferenceTmPre" == penalizedReferenceTmRadio.id)
+    {
+        $("#penalizedReferenceTmPer").attr("checked", false);
+    }
+    else
+    {
+        $("#penalizedReferenceTmPre").attr("checked", false);
+    }
+}
+
 $(document).ready(function(){
 	$("#taskWorkOfflineTab").removeClass("tableHeadingListOff");
 	$("#taskWorkOfflineTab").addClass("tableHeadingListOn");
@@ -1308,6 +1322,14 @@ $(document).ready(function(){
               <TD></TD>
 			  <TD><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="changeCreationIdForMT" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN></TD>
 			</TR>
+			<TR id="penalizedReferenceTm">
+              <TD><SPAN CLASS="standardText"><%=labelPenalizedReferenceTm%>:</SPAN></TD>
+              <TD><SPAN CLASS="standardText">
+              <input type="radio" id="penalizedReferenceTmPre" name="<%=UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE%>" checked="checked" onclick="switchRadio(this);"/><%=bundle.getString("lb_work_offline_option_penalized_reference_tm_pre")%>
+              <br>
+              <input type="radio" id="penalizedReferenceTmPer" name="<%=UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER%>" onclick="switchRadio(this);"/><%=bundle.getString("lb_work_offline_option_penalized_reference_tm_per")%>
+              </SPAN></TD>
+            </TR>
             <TR>
               <TD><SPAN CLASS="standardText"><%= labelTerminology %></SPAN></TD>
               <TD><SPAN CLASS="standardText">

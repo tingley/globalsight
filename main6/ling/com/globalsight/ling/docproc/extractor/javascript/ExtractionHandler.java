@@ -178,16 +178,16 @@ public class ExtractionHandler implements IParseEvents
         {
             switch (commentType)
             {
-            case SINGLE_LINE_COMMENT:
-                m_extractor.readMetaMarkup(s.substring(2));
-                break;
-            case MULTI_LINE_COMMENT:
-                m_extractor.readMetaMarkup(s.substring(2, s.length() - 2));
-                break;
-            case CRIPPLED_SINGLE_LINE_COMMENT:
-                // fall through, followed by EOF
-            default: // do nothing
-                break;
+                case SINGLE_LINE_COMMENT:
+                    m_extractor.readMetaMarkup(s.substring(2));
+                    break;
+                case MULTI_LINE_COMMENT:
+                    m_extractor.readMetaMarkup(s.substring(2, s.length() - 2));
+                    break;
+                case CRIPPLED_SINGLE_LINE_COMMENT:
+                    // fall through, followed by EOF
+                default: // do nothing
+                    break;
             }
         }
         catch (ExtractorException ex) // a RegExException, really
@@ -243,16 +243,11 @@ public class ExtractionHandler implements IParseEvents
 
     public void handleString(String s)
     {
-        // Bug 2133: DAE's Javascript strings contain illegal
-        // newlines and we cannot make DAE change them.
-        // So instead the grammar reads them and here we delete
-        // any newlines in the string. (Use \n for real newlines.)
-        s = Text.removeCRNL(s);
-        if(m_extractor.getNoUseJsFunction() && useJsFilter() && !matchedFilter)
+        if (m_extractor.getNoUseJsFunction() && useJsFilter() && !matchedFilter)
         {
             outputEmbeddedSkipString(s);
             return;
-        }        
+        }
         if (useJsFilter() && !matchedFilter)
         {
             m_output.addSkeleton(s);
@@ -275,7 +270,6 @@ public class ExtractionHandler implements IParseEvents
 
             return;
         }
-
 
         // The HTML extractor cannot be called in embedded contexts.
         if (isEmbeddedExtractor())
@@ -449,7 +443,8 @@ public class ExtractionHandler implements IParseEvents
         m_extractor.addToEmbeddedString(makeEmbeddedString(s.substring(0, 1)));
 
         // sub tag
-        m_extractor.addToEmbeddedString("<sub isSkip=\"false\" locType=\"translatable\"");
+        m_extractor
+                .addToEmbeddedString("<sub isSkip=\"false\" locType=\"translatable\"");
         m_extractor.addToEmbeddedString(" datatype=\""
                 + ExtractorRegistry.FORMAT_JAVASCRIPT + "\" type=\"string\">");
         m_extractor.addToEmbeddedString(m_xmlEncoder.encodeStringBasic(s
@@ -459,15 +454,16 @@ public class ExtractionHandler implements IParseEvents
         // ending quote
         m_extractor.addToEmbeddedString(makeEmbeddedString(s.substring(len - 1,
                 len)));
-        
+
     }
+
     /**
      * <p>
      * Switches the extractor to HTML to handle a stretch of HTML codes embedded
      * in the Javascript input.
      * 
-     * @param p_input:
-     *            the input string that the extractor will parse
+     * @param p_input
+     *            : the input string that the extractor will parse
      */
     private void switchToHtml(String p_input) throws ExtractorException
     {
@@ -481,18 +477,18 @@ public class ExtractionHandler implements IParseEvents
             DocumentElement element = (DocumentElement) it.next();
             switch (element.type())
             {
-            case DocumentElement.SKELETON:
-                SkeletonElement s = (SkeletonElement) element;
-                m_output.addSkeletonTmx(s.getSkeleton());
-                break;
-            case DocumentElement.TRANSLATABLE: // fall through
-            case DocumentElement.LOCALIZABLE:
-                Segmentable o = (Segmentable) element;
-                o.setDataType("html");
-                // fall through
-            default:
-                m_output.addDocumentElement(element);
-                break;
+                case DocumentElement.SKELETON:
+                    SkeletonElement s = (SkeletonElement) element;
+                    m_output.addSkeletonTmx(s.getSkeleton());
+                    break;
+                case DocumentElement.TRANSLATABLE: // fall through
+                case DocumentElement.LOCALIZABLE:
+                    Segmentable o = (Segmentable) element;
+                    o.setDataType("html");
+                    // fall through
+                default:
+                    m_output.addDocumentElement(element);
+                    break;
             }
         }
     }
@@ -504,7 +500,7 @@ public class ExtractionHandler implements IParseEvents
         {
             return;
         }
-        
+
         if (matchedFilter)
         {
             count--;
@@ -519,7 +515,7 @@ public class ExtractionHandler implements IParseEvents
     {
         return jsFilterRegex != null && jsFilterRegex.length() > 0;
     }
-    
+
     @Override
     public void handleFunctionStart(String s)
     {
@@ -527,7 +523,7 @@ public class ExtractionHandler implements IParseEvents
         {
             return;
         }
-        
+
         if (count < 0)
         {
             count = 0;
@@ -555,7 +551,7 @@ public class ExtractionHandler implements IParseEvents
         {
             return;
         }
-        
+
         if (!matchedFilter)
         {
             functionName = s;
@@ -573,7 +569,7 @@ public class ExtractionHandler implements IParseEvents
         {
             jsFilterRegex = jsFilterRegex.trim();
         }
-        
+
         this.jsFilterRegex = jsFilterRegex;
     }
 }

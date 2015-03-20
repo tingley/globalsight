@@ -44,6 +44,8 @@ import org.xml.sax.InputSource;
 import com.globalsight.connector.eloqua.models.Email;
 import com.globalsight.connector.eloqua.models.LandingPage;
 import com.globalsight.connector.eloqua.util.EloquaHelper;
+import com.globalsight.connector.git.GitConnectorManagerLocal;
+import com.globalsight.connector.git.util.GitConnectorHelper;
 import com.globalsight.connector.mindtouch.MindTouchManager;
 import com.globalsight.connector.mindtouch.util.MindTouchHelper;
 import com.globalsight.connector.mindtouch.vo.MindTouchPageInfo;
@@ -53,6 +55,10 @@ import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.eloqua.EloquaConnector;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.cxe.entity.gitconnector.GitConnector;
+import com.globalsight.cxe.entity.gitconnector.GitConnectorCacheFile;
+import com.globalsight.cxe.entity.gitconnector.GitConnectorFileMapping;
+import com.globalsight.cxe.entity.gitconnector.GitConnectorJob;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
 import com.globalsight.cxe.entity.xmldtd.XmlDtd;
@@ -91,9 +97,11 @@ import com.globalsight.util.file.XliffFileUtil;
  */
 public class Exporter
 {
-	private static Pattern FILE_PATTERN = Pattern.compile("<file[^>]*(target-language=[\"']([^\"']*?)[\"'])[^>]*>");
-	private static Pattern UNIT_PATTERN = Pattern.compile("<trans-unit[\\s\\S]*?(<target[^>]*xml:lang=[\"']([^\"']*?)[\"'][\\s\\S]*?</target>)[\\s\\S]*?</trans-unit>");
-	
+    private static Pattern FILE_PATTERN = Pattern
+            .compile("<file[^>]*(target-language=[\"']([^\"']*?)[\"'])[^>]*>");
+    private static Pattern UNIT_PATTERN = Pattern
+            .compile("<trans-unit[\\s\\S]*?(<target[^>]*xml:lang=[\"']([^\"']*?)[\"'][\\s\\S]*?</target>)[\\s\\S]*?</trans-unit>");
+
     private String m_cxeDocsDir;
     private CxeMessage m_cxeMessage;
     private org.apache.log4j.Logger m_logger;
@@ -402,7 +410,8 @@ public class Exporter
 
             finalFileStr = finalFile.getAbsolutePath();
             String scriptOnExport = fp.getScriptOnExport();
-            boolean hasScript = scriptOnExport != null && scriptOnExport.length() > 0;
+            boolean hasScript = scriptOnExport != null
+                    && scriptOnExport.length() > 0;
 
             if (hasScript)
             {
@@ -420,10 +429,11 @@ public class Exporter
                         // execute script
                         // "PostProcessed" parameter may be used as flag to tell
                         // it should invoke post processor.
-                    	String trgLocale = "targetLocale:" + wf.getTargetLocale().toString();
-						String cmd = "cmd.exe /c " + scriptOnExport + " \""
-								+ targetFolder + "\" \"PostProcessed\" \""
-								+ trgLocale + "\" -r";
+                        String trgLocale = "targetLocale:"
+                                + wf.getTargetLocale().toString();
+                        String cmd = "cmd.exe /c " + scriptOnExport + " \""
+                                + targetFolder + "\" \"PostProcessed\" \""
+                                + trgLocale + "\" -r";
                         ProcessRunner pr = new ProcessRunner(cmd);
                         Thread t = new Thread(pr);
                         t.start();
@@ -453,36 +463,41 @@ public class Exporter
                         return exportStatusMsg;
                     }
                     finally
-					{
-						// FileUtils.deleteSilently(finalFileName);
-						FileUtils.deleteAllFilesSilently(targetFolder);
-						finalFileStr = finalFile.getParentFile()
-								.getParentFile().getAbsolutePath()
-								+ File.separator + finalFile.getName();
-					}
+                    {
+                        // FileUtils.deleteSilently(finalFileName);
+                        FileUtils.deleteAllFilesSilently(targetFolder);
+                        finalFileStr = finalFile.getParentFile()
+                                .getParentFile().getAbsolutePath()
+                                + File.separator + finalFile.getName();
+                    }
                 }
             }
-            
+
             if (hasScript)
             {
                 File f = new File(finalFileName);
                 if (!f.exists())
                 {
-                    File f2 = new File(f.getParentFile().getParentFile(), f.getName());
+                    File f2 = new File(f.getParentFile().getParentFile(),
+                            f.getName());
                     if (f2.exists())
                         finalFileName = f2.getAbsolutePath();
                 }
             }
-            
+
             // For eloqua file
             handleEloquaFiles(finalFileName, fp, wf, hasScript);
 
             // For MindTouch file
             handleMindTouchFiles(finalFileName, fp, wf);
+            
+            //For GitConnector file
+            handleGitConnectorFiles(finalFileName, wf, m_displayName.substring(0,
+                    m_displayName.indexOf(File.separator)));
 
             // Added by Vincent Yan
-			HashMap<String, String> infos = CVSUtil.seperateFileInfo(
-					finalFileStr, m_exportLocation);
+            HashMap<String, String> infos = CVSUtil.seperateFileInfo(
+                    finalFileStr, m_exportLocation);
             if (infos != null && CVSUtil.isCVSJob(infos.get("jobId")))
             {
                 CVSUtil.saveCVSFile(
@@ -508,7 +523,6 @@ public class Exporter
                 m_pageNumber = (Integer) m_cxeMessage.getParameters().get(
                         "PageNum");
 
-                
                 if (xmlDtd == null)
                 {
                     if (m_sourceFileName != null && wf != null)
@@ -599,12 +613,14 @@ public class Exporter
     /**
      * When export, post contents/tags back to MindTouch server.
      * 
-     * @param finalFileName -- the absolute full pathname.
+     * @param finalFileName
+     *            -- the absolute full pathname.
      */
     private void handleMindTouchFiles(String finalFileName, FileProfile fp,
             Workflow wf)
     {
-        try {
+        try
+        {
             // MindTouch file name is like "$MindTouch Title$(contents).xml" or
             // ""$MindTouch Title$(tags).xml".
             if (finalFileName.endsWith("(contents).xml")
@@ -617,10 +633,11 @@ public class Exporter
                 String sourceFilePathName = finalFileName
                         .replaceFirst("\\\\" + targetLocale + "\\\\", "\\\\"
                                 + sourceLocale + "\\\\");
-                
+
                 File trgFile = new File(finalFileName);
                 File srcFile = new File(sourceFilePathName);
-                if (srcFile.exists()) {
+                if (srcFile.exists())
+                {
                     File objFile = new File(sourceFilePathName + ".obj");
                     if (objFile.exists())
                     {
@@ -644,44 +661,139 @@ public class Exporter
                     }
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error(e);
         }
     }
-
-    private void handleEloquaFiles(String finalFileName, FileProfile fp, Workflow wf, boolean hasScript)
+    
+    
+    private void handleGitConnectorFiles(String finalFileName, Workflow wf, String sourceLocale)
     {
-        if (finalFileName.endsWith(".email.html") || finalFileName.endsWith(".landingPage.html"))
+    	try 
+    	{
+    		HashMap<String, String> infos = getInfos(finalFileName, wf);
+    		long jobId = Long.parseLong(infos.get("jobId"));
+    		GitConnectorJob gitConnectorJob = GitConnectorManagerLocal
+    											.getGitConnectorJobByJobId(jobId);
+    		if(gitConnectorJob != null)
+    		{
+    			GitConnector gc = GitConnectorManagerLocal
+    								.getGitConnectorById(gitConnectorJob.getGitConnectorId());
+    			
+    			List<GitConnectorFileMapping> gcfms = (List<GitConnectorFileMapping>) GitConnectorManagerLocal
+    						.getAllFileMappings(gc.getId(), sourceLocale, wf.getTargetLocale().toString());
+    			HashMap<String, String> mappings = getMappings(gcfms);
+    			
+    			GitConnectorHelper helper = new GitConnectorHelper(gc);
+    			File gitFolder = helper.getGitFolder();
+    			String relativeFilePath = infos.get("relativeFilePath");
+    			String sourceFileMappingPath = gc.getName() + "_" + gc.getId() + File.separator + relativeFilePath;
+    			String sourceFolderMappingPath = sourceFileMappingPath
+    							.substring(0, sourceFileMappingPath.lastIndexOf(File.separator));
+    			String suffix;
+    			if(mappings.size() == 0)
+    			{
+    				suffix = relativeFilePath.substring(0, relativeFilePath.lastIndexOf(".")) 
+		    				+ "(" + wf.getTargetLocale().toString() + ")" 
+		    				+ relativeFilePath.substring(relativeFilePath.lastIndexOf("."));
+    			}
+    			else if(mappings.get(sourceFileMappingPath) != null)
+    			{
+    				suffix = mappings.get(sourceFileMappingPath).substring(gc.getName().length() + Long.toString(gc.getId()).length() + 2);
+    			}
+    			else if(mappings.get(sourceFolderMappingPath) != null)
+    			{
+    				suffix = sourceFileMappingPath.replace(sourceFolderMappingPath, mappings.get(sourceFolderMappingPath));
+    				suffix = suffix.substring(gc.getName().length() + Long.toString(gc.getId()).length() + 2);
+    			}
+    			else
+    			{
+    				suffix = relativeFilePath.substring(0, relativeFilePath.lastIndexOf(".")) 
+		    				+ "(" + wf.getTargetLocale().toString() + ")" 
+		    				+ relativeFilePath.substring(relativeFilePath.lastIndexOf("."));
+    			}
+    			
+    			File dstFile = new File(gitFolder.getPath() + File.separator + suffix);
+    			File srcFile = new File(finalFileName);
+    			FileUtil.copyFile(srcFile, dstFile);
+    			
+    			GitConnectorCacheFile cacheFile = new GitConnectorCacheFile();
+    			cacheFile.setFilePath(suffix);
+    			cacheFile.setGitConnectorId(gitConnectorJob.getGitConnectorId());
+    			HibernateUtil.save(cacheFile);
+    		}
+		} 
+    	catch (Exception e) 
+		{
+			logger.error(e);
+		}
+    }
+    
+    private HashMap<String, String> getInfos(String finalFileName, Workflow wf)
+    {
+    	HashMap<String, String> infos = new HashMap<String, String>();
+    	String prefixStr = m_exportLocation + File.separator + wf.getTargetLocale().toString();
+		String jobIdFilePath = finalFileName.substring(prefixStr.length() + 1);
+		String jobIdStr = jobIdFilePath.substring(0, jobIdFilePath.indexOf(File.separator));
+		String relativeFilePath = jobIdFilePath.substring(jobIdFilePath.indexOf(File.separator) + 1);
+		infos.put("jobId", jobIdStr);
+		infos.put("relativeFilePath", relativeFilePath);
+		return infos;
+    }
+    
+    private HashMap<String, String> getMappings(List<GitConnectorFileMapping> gcfms)
+    {
+    	HashMap<String, String> mappings = new HashMap<String, String>();
+    	
+    	if(gcfms != null && gcfms.size() >0)
+    	{
+    		for(GitConnectorFileMapping gcfm: gcfms)
+    		{
+    			mappings.put(gcfm.getSourceMappingPath(), gcfm.getTargetMappingPath());
+    		}
+    	}
+    	
+		return mappings;
+    }
+
+    private void handleEloquaFiles(String finalFileName, FileProfile fp,
+            Workflow wf, boolean hasScript)
+    {
+        if (finalFileName.endsWith(".email.html")
+                || finalFileName.endsWith(".landingPage.html"))
         {
             String name = finalFileName.substring(
                     finalFileName.lastIndexOf(File.separator) + 1,
                     finalFileName.lastIndexOf("."));
             name = name.substring(0, name.lastIndexOf("."));
             String targetFolder = finalFileName.substring(0,
-                    finalFileName.lastIndexOf(File.separator));        
+                    finalFileName.lastIndexOf(File.separator));
             String companyId = String.valueOf(fp.getCompanyId());
             String sourceFolder = determineSourceFolder(companyId);
-            
+
             File f = new File(targetFolder, name + ".obj");
             boolean uploaded = f.exists();
             if (!uploaded)
             {
                 f = new File(sourceFolder, name + ".obj");
-                
+
                 if (!f.exists() && hasScript)
                 {
                     File parent = f.getParentFile();
                     if (parent != null)
                         parent = parent.getParentFile();
-                    
+
                     if (parent != null)
                         f = new File(parent, name + ".obj");
                 }
             }
-            
+
             if (f.exists())
             {
-                // It seems that there is a issue with html export. Need do unescape again
+                // It seems that there is a issue with html export. Need do
+                // unescape again
                 File sf = new File(finalFileName);
                 try
                 {
@@ -693,7 +805,7 @@ public class Exporter
                 {
                     m_logger.error(e);
                 }
-                
+
                 if (finalFileName.endsWith(".email.html"))
                 {
                     File emailFile = new File(finalFileName);
@@ -702,28 +814,30 @@ public class Exporter
                     if (m.getName() != null)
                     {
                         m.updateFromFile(emailFile);
-                        
+
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
-                        
+
                         if (uploaded && h.getEmail(m.getId()) != null)
                         {
                             h.updateEmail(m);
                         }
                         else
                         {
-                        	if (!uploaded)
-                        	{
-                        		String eloquaName = m.getName();
-                                String targetLocale = wf.getTargetLocale().toString();
-                                eloquaName = eloquaName + "(" + targetLocale + ")";
+                            if (!uploaded)
+                            {
+                                String eloquaName = m.getName();
+                                String targetLocale = wf.getTargetLocale()
+                                        .toString();
+                                eloquaName = eloquaName + "(" + targetLocale
+                                        + ")";
                                 m.setName(eloquaName);
-                        	}
-                            
+                            }
+
                             m.setId("");
                             m = h.saveEmail(m);
                         }
-                        
+
                         if (m != null)
                         {
                             f = new File(targetFolder, name + ".obj");
@@ -742,24 +856,26 @@ public class Exporter
                         m.updateFromFile(saveFile);
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
-                        
+
                         if (uploaded && h.getLandingPage(m.getId()) != null)
                         {
                             h.updateLandingPage(m);
                         }
                         else
                         {
-                        	if (!uploaded)
-                        	{
-                        		String eloquaName = m.getName();
-                                String targetLocale = wf.getTargetLocale().toString();
-                                eloquaName = eloquaName + "(" + targetLocale + ")";
+                            if (!uploaded)
+                            {
+                                String eloquaName = m.getName();
+                                String targetLocale = wf.getTargetLocale()
+                                        .toString();
+                                eloquaName = eloquaName + "(" + targetLocale
+                                        + ")";
                                 m.setName(eloquaName);
-                        	}
+                            }
                             m.setId("");
                             m = h.saveLandingPage(m);
                         }
-                        
+
                         if (m != null)
                         {
                             f = new File(targetFolder, name + ".obj");
@@ -774,28 +890,29 @@ public class Exporter
 
     private String replaceFileLocale(String content, String targetLocale)
     {
-        content = StringUtil.replaceWithRE(content, FILE_PATTERN, new Replacer(targetLocale) 
+        content = StringUtil.replaceWithRE(content, FILE_PATTERN, new Replacer(
+                targetLocale)
         {
-			
-			@Override
-			public String getReplaceString(Matcher m) 
-			{
-	            String f = m.group();
-	            String target = m.group(1);
-	            String locale = m.group(2);
-	            String rTarget = StringUtil.replace(target, locale, r1);
-	            String rf = StringUtil.replace(f,target, rTarget);
-				return rf;
-			}
-		});
-        
+
+            @Override
+            public String getReplaceString(Matcher m)
+            {
+                String f = m.group();
+                String target = m.group(1);
+                String locale = m.group(2);
+                String rTarget = StringUtil.replace(target, locale, r1);
+                String rf = StringUtil.replace(f, target, rTarget);
+                return rf;
+            }
+        });
+
         return content;
     }
 
     private void changeTargetLocale(String targetLocale, File xliffFile,
             String encoding)
     {
-        targetLocale =  StringUtil.replace(targetLocale,"_", "-");
+        targetLocale = StringUtil.replace(targetLocale, "_", "-");
         try
         {
             String content = FileUtil.readFile(xliffFile, encoding);
@@ -812,19 +929,20 @@ public class Exporter
 
     private String replaceTransUnit(String content, String targetLocale)
     {
-        content = StringUtil.replaceWithRE(content, UNIT_PATTERN, new Replacer(targetLocale) 
+        content = StringUtil.replaceWithRE(content, UNIT_PATTERN, new Replacer(
+                targetLocale)
         {
-			@Override
-			public String getReplaceString(Matcher m) 
-			{
-	            String f = m.group();
-	            String target = m.group(1);
-	            String locale = m.group(2);
-	            String rTarget = StringUtil.replace(target, locale, r1);
-	            String rf = StringUtil.replace(f,target, rTarget);
-				return rf;
-			}
-		});
+            @Override
+            public String getReplaceString(Matcher m)
+            {
+                String f = m.group();
+                String target = m.group(1);
+                String locale = m.group(2);
+                String rTarget = StringUtil.replace(target, locale, r1);
+                String rf = StringUtil.replace(f, target, rTarget);
+                return rf;
+            }
+        });
 
         return content;
     }
@@ -1213,6 +1331,7 @@ public class Exporter
             aChar = in[off++];
             if (aChar == '\\')
             {
+                boolean isConvert = true;
                 aChar = in[off++];
                 if (aChar == 'u')
                 {
@@ -1260,8 +1379,26 @@ public class Exporter
                 }
                 else
                 {
-                    out[outLen++] = '\\';
-                    out[outLen++] = aChar;
+                    if (aChar == 't')
+                        aChar = '\t';
+                    else if (aChar == 'r')
+                        aChar = '\r';
+                    else if (aChar == 'n' && "javaprop".equals(m_formatType))
+                        aChar = '\n';
+                    else if (aChar == 'f')
+                        aChar = '\f';
+                    else
+                        isConvert = false;
+
+                    if (isConvert)
+                    {
+                        out[outLen++] = aChar;
+                    }
+                    else
+                    {
+                        out[outLen++] = '\\';
+                        out[outLen++] = aChar;
+                    }
                 }
             }
             else
@@ -1292,17 +1429,18 @@ public class Exporter
         for (int i = 0; i < fs.length; i++)
         {
             File file = fs[i];
-            if(!isFileExist(file, targetFile) && file.getName().equals(fileName))
+            if (!isFileExist(file, targetFile)
+                    && file.getName().equals(fileName))
             {
-            	FileCopier.copyFile(file, targetFile);
+                FileCopier.copyFile(file, targetFile);
             }
         }
     }
-    
+
     private boolean isFileExist(File file, File targetFile)
     {
-    	File destFile = new File(targetFile, file.getName());
-    	return destFile.exists();
+        File destFile = new File(targetFile, file.getName());
+        return destFile.exists();
     }
 
     private boolean readyForScript(String p_targetFolder, String p_companyId)
@@ -1559,7 +1697,7 @@ public class Exporter
     {
         if ("passolo".equals(m_formatType))
         {
-            String name = StringUtil.replace(m_sourceFileName,"\\", "/");
+            String name = StringUtil.replace(m_sourceFileName, "\\", "/");
             return m_exportLocation + "/passolo"
                     + name.substring(name.indexOf("/"));
         }

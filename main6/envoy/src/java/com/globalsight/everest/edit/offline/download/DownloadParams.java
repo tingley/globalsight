@@ -99,6 +99,7 @@ public class DownloadParams implements Serializable
     private Job m_job = null;
     private List<Job> m_allJobs = null;
     private List<Long> m_allTaskIds = null;
+    private List<Long> m_allPenalties = null;
     private ArrayList autoActionNodeEmail = null;
 
     HashMap<Long, Long> allPSF_tasks = new HashMap<Long, Long>();
@@ -120,6 +121,9 @@ public class DownloadParams implements Serializable
     private boolean includeRepetitions = false;
     // GBS-3467
     private boolean excludeFullyLeveragedFiles = false;
+    // GBS-3776
+    private boolean penalizedReferenceTmPre = false;
+    private boolean penalizedReferenceTmPer = false;
 
     private String activityType = "";
 
@@ -1150,6 +1154,16 @@ public class DownloadParams implements Serializable
         this.m_allTaskIds = p_taskIds;
     }
 
+    public List<Long> getAllPenalties()
+    {
+        return m_allPenalties;
+    }
+
+    public void setAllPenalties(List<Long> p_allPenalties)
+    {
+        this.m_allPenalties = p_allPenalties;
+    }
+
     public ArrayList getAutoActionNodeEmail()
     {
         return this.autoActionNodeEmail;
@@ -1210,25 +1224,26 @@ public class DownloadParams implements Serializable
             this.needConsolidate = needConsolidate;
     }
 
-    public void setPreserveSourceFolder(boolean preserveSourceFolder) 
+    public void setPreserveSourceFolder(boolean preserveSourceFolder)
     {
-		this.preserveSourceFolder = preserveSourceFolder;
-	}
+        this.preserveSourceFolder = preserveSourceFolder;
+    }
 
-	public boolean isPreserveSourceFolder() 
-	{
-		return preserveSourceFolder;
-	}
-	
-	public void setIncludeXmlNodeContextInformation(boolean includeXmlNodeContextInformation) 
+    public boolean isPreserveSourceFolder()
     {
-		this.includeXmlNodeContextInformation = includeXmlNodeContextInformation;
-	}
+        return preserveSourceFolder;
+    }
 
-	public boolean isIncludeXmlNodeContextInformation() 
-	{
-		return includeXmlNodeContextInformation;
-	}
+    public void setIncludeXmlNodeContextInformation(
+            boolean includeXmlNodeContextInformation)
+    {
+        this.includeXmlNodeContextInformation = includeXmlNodeContextInformation;
+    }
+
+    public boolean isIncludeXmlNodeContextInformation()
+    {
+        return includeXmlNodeContextInformation;
+    }
 
     public boolean isNeedCombined()
     {
@@ -1270,6 +1285,26 @@ public class DownloadParams implements Serializable
     public void setExcludeFullyLeveragedFiles(boolean excludeFullyLeveragedFiles)
     {
         this.excludeFullyLeveragedFiles = excludeFullyLeveragedFiles;
+    }
+
+    public boolean getPenalizedReferenceTmPre()
+    {
+        return penalizedReferenceTmPre;
+    }
+
+    public void setPenalizedReferenceTmPre(boolean penalizedReferenceTmPre)
+    {
+        this.penalizedReferenceTmPre = penalizedReferenceTmPre;
+    }
+
+    public boolean getPenalizedReferenceTmPer()
+    {
+        return penalizedReferenceTmPer;
+    }
+
+    public void setPenalizedReferenceTmPer(boolean penalizedReferenceTmPer)
+    {
+        this.penalizedReferenceTmPer = penalizedReferenceTmPer;
     }
 
     public String getActivityType()
@@ -1561,19 +1596,23 @@ public class DownloadParams implements Serializable
         TMEditType = tMEditType;
     }
 
-	public void setConsolidateFileType(String consolidateFileType) {
-		this.consolidateFileType = consolidateFileType;
-	}
+    public void setConsolidateFileType(String consolidateFileType)
+    {
+        this.consolidateFileType = consolidateFileType;
+    }
 
-	public String getConsolidateFileType() {
-		return consolidateFileType;
-	}
+    public String getConsolidateFileType()
+    {
+        return consolidateFileType;
+    }
 
-	public void setWordCountForDownload(int wordCountForDownload) {
-		this.wordCountForDownload = wordCountForDownload;
-	}
+    public void setWordCountForDownload(int wordCountForDownload)
+    {
+        this.wordCountForDownload = wordCountForDownload;
+    }
 
-	public int getWordCountForDownload() {
-		return wordCountForDownload;
-	}
+    public int getWordCountForDownload()
+    {
+        return wordCountForDownload;
+    }
 }

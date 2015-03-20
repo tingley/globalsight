@@ -2,6 +2,6 @@
 <footer>
 	<a href="#">Info</a> 
 	| <a href="#">Legal</a> 
-	| <span class="leftmargin10">&copy; Welocalize 2014</span>
+	| <span class="leftmargin10">&copy; Welocalize 2015</span>
 	<span style="float: right; padding: 0px 20px;">Version: ${project.version}</span>
 </footer>

@@ -161,14 +161,17 @@ public class UploadPageHandlerHelper implements WebAppConstants
             String[] taskInfo = getReportInfoFromXlsx(fileName, file, p_request);
             isReport = taskInfo[0];
             reportTypeInfo = taskInfo[1];
-            taskId = taskInfo[2];
+            if (!StringUtil.isEmpty(taskInfo[2]))
+            {
+                taskId = taskInfo[2];
+            }
+            
 
             // Locate current in progress task.
             try
             {
                 long tskId = Long.valueOf(taskId);
-                Task curTaskForReport = ServerProxy.getTaskManager().getTask(
-                        tskId);
+                Task curTaskForReport = ServerProxy.getTaskManager().getTask(tskId);
                 if (curTaskForReport.getState() != Task.STATE_ACCEPTED)
                 {
                     curTaskForReport = locateCurrentTask(tskId);
@@ -394,8 +397,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
                 task = ServerProxy.getTaskManager().getTask(id);
             }
 
-            p_OEM.processUploadReportPage(p_tmpFile, p_user, task, p_fileName,
-                    p_reportName);
+            p_OEM.processUploadReportPage(p_tmpFile, p_user, task, p_fileName, p_reportName);
         }
         catch (Exception e)
         {
@@ -418,8 +420,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
     private String[] getReportInfoFromXlsx(String p_fileName, File p_file,
             HttpServletRequest p_request)
     {
-        String[] result =
-        { "", "", "" };
+        String[] result = { "", "", "" };
         try
         {
             String fileSuff = p_fileName.substring(p_fileName.lastIndexOf("."));
@@ -439,20 +440,16 @@ public class UploadPageHandlerHelper implements WebAppConstants
             {
                 String[] infos = taskInfoReport.split("_");
                 String reportInfo = infos[0];
-                if (reportInfo
-                        .equals(ReportConstants.TRANSLATIONS_EDIT_REPORT_ABBREVIATION))
+                if (reportInfo.equals(ReportConstants.TRANSLATIONS_EDIT_REPORT_ABBREVIATION))
                 {
                     reportType = WebAppConstants.TRANSLATION_EDIT;
                 }
-                else if (reportInfo
-                        .equals(ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION)
-                        || reportInfo
-                                .equals(ReportConstants.REVIEWERS_COMMENTS_REPORT_ABBREVIATION))
+                else if (reportInfo.equals(ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION)
+                        || reportInfo.equals(ReportConstants.REVIEWERS_COMMENTS_REPORT_ABBREVIATION))
                 {
                     reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
                 }
-                else if (reportInfo
-                        .equals(ReportConstants.POST_REVIEW_REPORT_ABBREVIATION))
+                else if (reportInfo.equals(ReportConstants.POST_REVIEW_REPORT_ABBREVIATION))
                 {
                     reportType = WebAppConstants.POST_REVIEW_QA;
                 }
@@ -467,32 +464,24 @@ public class UploadPageHandlerHelper implements WebAppConstants
             // "AA1" cell, check "A1" cell for further confirmation.
             if (!"yes".equals(isReport))
             {
-                String[] titleInfos = titleInfo.split("_");
                 SystemResourceBundle srb = SystemResourceBundle.getInstance();
                 ResourceBundle res = srb.getResourceBundle(
                         ResourceBundleConstants.LOCALE_RESOURCE_NAME,
                         (Locale) p_request.getSession().getAttribute(
                                 WebAppConstants.UILOCALE));
-                if (res.getString("review_reviewers_comments")
-                        .equals(titleInfos[0])
-                        || res.getString("review_reviewers_comments_simple")
-                                .equals(titleInfos[0])
-                        || res.getString("review_translations_edit_report")
-                                .equals(titleInfos[0]))
+                if (res.getString("review_reviewers_comments").equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple").equals(titleInfo)
+                        || res.getString("lb_translation_edit_report").equals(titleInfo))
                 {
                     isReport = "yes";
-                    taskId = titleInfos[1];
                 }
 
-                if (res.getString("review_reviewers_comments")
-                        .equals(titleInfos[0])
-                        || res.getString("review_reviewers_comments_simple")
-                                .equals(titleInfos[0]))
+                if (res.getString("review_reviewers_comments").equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple").equals(titleInfo))
                 {
                     reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
                 }
-                else if (res.getString("review_translations_edit_report")
-                        .equals(titleInfos[0]))
+                else if (res.getString("lb_translation_edit_report").equals(titleInfo))
                 {
                     reportType = WebAppConstants.TRANSLATION_EDIT;
                 }

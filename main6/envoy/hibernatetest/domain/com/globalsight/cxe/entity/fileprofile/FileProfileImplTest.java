@@ -23,6 +23,7 @@ import java.util.Set;
 import java.sql.Timestamp;
 import java.util.*;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 import junit.framework.TestCase;
@@ -80,7 +81,7 @@ public class FileProfileImplTest extends TestCase
         impl.setTimestamp(new Timestamp(date.getTime()));
         impl.setIsActive(true);
         impl.setKnownFormatTypeId(1);
-        impl.setCode_set("s");
+        impl.setCodeSet("s");
         impl.setXmlRuleFileId(1);
         impl.setScriptOnExport("s");
         impl.setScriptOnImport("e");

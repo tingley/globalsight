@@ -18,12 +18,10 @@
 package com.globalsight.everest.projecthandler;
 
 import java.io.StringWriter;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
@@ -36,14 +34,10 @@ import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.everest.tm.importer.ImportUtil;
 import com.globalsight.everest.tm.util.Tmx;
-import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.ExactMatchFormatHandler;
-import com.globalsight.ling.common.TuvSegmentBaseHandler;
-import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.UTC;
 import com.globalsight.util.XmlParser;
@@ -243,6 +237,8 @@ public class ProjectTmTuvT extends PersistentObject
 
     public void setSid(String sid)
     {
+		if (sid != null && sid.length() > 254)
+			sid = sid.substring(0, 254);
         this.sid = sid;
     }
 

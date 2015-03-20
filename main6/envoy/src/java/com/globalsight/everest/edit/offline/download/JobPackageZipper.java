@@ -161,13 +161,14 @@ public class JobPackageZipper
     }
 
     public void writeTmxPage(OfflinePageData p_writer, DownloadParams p_params,
-            int p_tmxLevel, boolean isConvertLf, int mode) throws AmbassadorDwUpException
+            int p_tmxLevel, boolean isConvertLf, int mode, boolean isPenaltyTmx)
+            throws AmbassadorDwUpException
     {
         try
         {
-        	p_writer.setIsConvertLf(isConvertLf);
+            p_writer.setIsConvertLf(isConvertLf);
             p_writer.writeOfflineTmxFile(m_zipOutputStream, p_params,
-                    p_tmxLevel, mode);
+                    p_tmxLevel, mode, isPenaltyTmx);
             m_zipOutputStream.closeEntry();
         }
         catch (IOException ex)
@@ -177,11 +178,12 @@ public class JobPackageZipper
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
     }
-    
+
     public void writeTmxPage(OfflinePageData p_writer, DownloadParams p_params,
             int p_tmxLevel) throws AmbassadorDwUpException
     {
-    	writeTmxPage(p_writer, p_params, p_tmxLevel, false, TmxUtil.TMX_MODE_INC_ALL);
+        writeTmxPage(p_writer, p_params, p_tmxLevel, false,
+                TmxUtil.TMX_MODE_INC_ALL, false);
     }
 
     private List<TermLeverageMatchResult> getTermMatchs(OfflinePageData page)
@@ -314,7 +316,7 @@ public class JobPackageZipper
 
         try
         {
-        	setPreserveSourceFolder(p_downloadParams, p_page);
+            setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
 
@@ -347,7 +349,7 @@ public class JobPackageZipper
 
         try
         {
-        	setPreserveSourceFolder(p_downloadParams, p_page);
+            setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
 
@@ -380,7 +382,7 @@ public class JobPackageZipper
 
         try
         {
-        	setPreserveSourceFolder(p_downloadParams, p_page);
+            setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
 
@@ -420,7 +422,7 @@ public class JobPackageZipper
 
         try
         {
-        	setPreserveSourceFolder(p_downloadParams, p_page);
+            setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
             m_zipOutputStream.closeEntry();
@@ -488,7 +490,7 @@ public class JobPackageZipper
 
         try
         {
-        	setPreserveSourceFolder(p_downloadParams, p_page);
+            setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
             m_zipOutputStream.closeEntry();
@@ -519,7 +521,7 @@ public class JobPackageZipper
 
         try
         {
-        	setPreserveSourceFolder(p_downloadParams, p_page);
+            setPreserveSourceFolder(p_downloadParams, p_page);
             writer.write(p_page, m_zipOutputStream, GlobalSightLocale
                     .makeLocaleFromString(p_downloadParams.getUiLocale()));
             m_zipOutputStream.closeEntry();
@@ -659,12 +661,13 @@ public class JobPackageZipper
             }
         }
     }
-    
-    private void setPreserveSourceFolder(DownloadParams p_downloadParams, OfflinePageData p_page)
+
+    private void setPreserveSourceFolder(DownloadParams p_downloadParams,
+            OfflinePageData p_page)
     {
-    	if(p_downloadParams.isPreserveSourceFolder())
-    	{
-    		p_page.setPreserveSourceFolder(true);
-    	}
+        if (p_downloadParams.isPreserveSourceFolder())
+        {
+            p_page.setPreserveSourceFolder(true);
+        }
     }
 }

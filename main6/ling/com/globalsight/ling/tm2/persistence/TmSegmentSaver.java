@@ -18,11 +18,8 @@ package com.globalsight.ling.tm2.persistence;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -32,7 +29,6 @@ import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.population.SegmentsForSave;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
@@ -512,7 +508,12 @@ public class TmSegmentSaver
         p_tuvNonClobInsert.setString(9, p_tuv.getCreationUser());
         p_tuvNonClobInsert.setString(10, p_tuv.getModifyUser());
         p_tuvNonClobInsert.setString(11, p_tuv.getUpdatedProject());
-        p_tuvNonClobInsert.setString(12, p_tuv.getSid());
+        String sid = p_tuv.getSid();
+        if (sid != null && sid.length() > 254)
+        {
+        	sid = sid.substring(0, 254);
+        }
+        p_tuvNonClobInsert.setString(12, sid);
         p_tuvNonClobInsert.addBatch();
     }
 

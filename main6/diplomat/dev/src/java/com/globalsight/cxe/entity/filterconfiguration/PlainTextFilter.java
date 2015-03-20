@@ -62,10 +62,10 @@ public class PlainTextFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
-    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    public boolean checkExistsEdit(long filterId, String filterName,
+            long companyId)
     {
-        String hql = "from PlainTextFilter f "
-        		+ "where f.id<>:filterId "
+        String hql = "from PlainTextFilter f " + "where f.id<>:filterId "
                 + "and f.filterName =:filterName "
                 + "and f.companyId =:companyId";
         Map map = new HashMap();
@@ -74,7 +74,7 @@ public class PlainTextFilter implements Filter
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;
     }
-    
+
     public String getFilterTableName()
     {
         return FilterConstants.PLAINTEXT_TABLENAME;
@@ -94,7 +94,7 @@ public class PlainTextFilter implements Filter
             CATEGORY.error("configXml : " + configXml, e);
             isParsed = false;
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":")
@@ -107,8 +107,16 @@ public class PlainTextFilter implements Filter
                 .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"customTextRules\":").append("\"").append(
-                isParsed ? FilterHelper.escape(parser.getCustomTextRulesJson()) : "[]").append("\",");
+        sb.append("\"customTextRules\":")
+                .append("\"")
+                .append(isParsed ? FilterHelper.escape(parser
+                        .getCustomTextRulesJson()) : "[]").append("\",");
+        sb.append("\"elementPostFilter\":").append("\"")
+                .append(isParsed ? parser.getElementPostFilterTableName() : "")
+                .append("\",");
+        sb.append("\"elementPostFilterId\":").append("\"")
+                .append(isParsed ? parser.getElementPostFilterId() : "")
+                .append("\",");
         sb.append("\"baseFilterId\":").append("\"").append(getBaseFilterId())
                 .append("\"");
         sb.append("}");

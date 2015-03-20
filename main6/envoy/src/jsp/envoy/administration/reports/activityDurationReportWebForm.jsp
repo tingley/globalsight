@@ -11,6 +11,7 @@
                   com.globalsight.everest.projecthandler.Project,
                   com.globalsight.everest.jobhandler.Job,
                   com.globalsight.util.GlobalSightLocale,
+                  com.globalsight.util.edit.EditUtil,
                   com.globalsight.everest.company.CompanyWrapper,
                   java.util.Locale,
                   java.util.ResourceBundle"
@@ -44,11 +45,23 @@
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY">
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript">
 var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
 
+//Set the jobs data for js(jobInfos)
+var jobInfos = new Array();
+<%
+for(int i=0; i<jobList.size(); i++)  
+{
+    ReportJobInfo j = jobList.get(i);
+%>
+	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=EditUtil.encodeTohtml(j.getJobName())%>", <%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
+<%
+}
+%>
 $(document).ready(function(){
 	$("#csf").datepicker({
 		changeMonth: true,
@@ -67,6 +80,35 @@ $(document).ready(function(){
 		}
 	});
 });
+
+function defautSelect(){
+	var jobIdsval;
+	
+	jobIdsval=$("#jobId").val();
+	
+	if(jobIdsval)return;
+     var ops=$("#jobId").children();
+     if(ops.length==0){
+      return ('No job name(s) is(are) selected.');
+     }else{
+      ops.attr("selected", true);
+     }
+}
+
+function dataSelectAll(){
+	var startVal=searchForm.<%=creationStart%>.value;
+	if(startVal){
+		defautSelect();
+		  return ""; 
+	}
+	
+	var endVal=searchForm.<%=creationEnd%>.value;
+	if(endVal){
+		defautSelect();
+        return ""; 
+	}
+	  return "";
+}
 
 //The function for canceling the report.
 function fnDoCancel() {
@@ -98,6 +140,39 @@ function fnDoCancel() {
 }
 
 function submitForm() {
+	var msg =  dataSelectAll();
+   	if (msg != "")
+   	{
+    	alert(msg);
+    	return;
+   	}
+   
+   	alertInfo = null;
+	var jobIDArr = fnGetSelectedJobIds();
+	if(jobIDArr == null || jobIDArr.length == 0)
+	{
+		if(alertInfo != null)
+			alert(alertInfo); 
+		return;	
+	}	
+
+	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalsList"), jobInfos))
+	{
+		alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
+		return;
+	}
+	
+	var startVal=searchForm.<%=creationStart%>.value;
+	var endVal=searchForm.<%=creationEnd%>.value;
+	
+	if((!startVal) &&(!endVal))
+	{
+		$("#dateRange").val("N")
+	}else{
+		$("#dateRange").val("Y")
+	}
+
+	document.getElementById("inputJobIDS").value = jobIDArr.toString(); 
   $.ajax({
       type: 'POST',
       dataType: 'json',
@@ -106,11 +181,93 @@ function submitForm() {
       success: function (data) {
         if(data != null && data.status == inProgressStatus) {
           alert('<%=bundle.getString("msg_duplilcate_report")%>');
-        } else {
+        } 
+        else if(data != null && data.error){
+        	alert(data.error);
+        }
+        	else {
           $("form[name='searchForm']").submit();
         }
       }
   });
+}
+
+function fnGetSelectedJobIds()
+{
+	var jobIDArr = new Array();
+		var selObj = document.getElementById("jobId");
+		for (i=0; i<selObj.options.length; i++) 
+		{
+			if (selObj.options[i].selected) 
+			{
+				jobIDArr.push(selObj.options[i].value);
+			}
+		}
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+	    {
+			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
+			return;
+	    }
+	jobIDArr.sort(sortNumber);
+	
+	return jobIDArr;
+}
+
+function filterJob(){
+	var jobNameList = document.getElementById("jobId");
+	var projectNameList = document.getElementById("projectId");
+	var jobStatus = document.getElementById("status");
+	var targetLocalesList = document.getElementById("targetLocalsList");
+	
+	// selected project 
+	var currSelectValueProject = new Array();
+	for(i=0;i<projectNameList.length;i++)
+	{
+		var op= projectNameList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueProject.push(op.value);
+		}
+	}
+	
+	// selected job status 
+	var currSelectValueJobStatus = new Array();
+	for(i=0;i<jobStatus.length;i++)
+	{
+		var op= jobStatus.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueJobStatus.push(op.value);
+		}
+	} 
+	   
+	// selected target locales 
+	var currSelectValueTargetLocale = new Array();
+	for(i=0;i<targetLocalesList.length;i++)
+	{
+		var op= targetLocalesList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueTargetLocale.push(op.value);
+		}
+	}
+	jobNameList.options.length=0;
+	
+	// Insert jobNameList select options 
+	for(var i=0; i<jobInfos.length; i++)
+	{
+		if(contains(currSelectValueProject, jobInfos[i].projectId)
+			&& contains(currSelectValueJobStatus, jobInfos[i].jobStatus)
+			&& containsArray(currSelectValueTargetLocale, jobInfos[i].targetLocals))
+		{
+			addOption("jobId", jobInfos[i].jobName, jobInfos[i].jobId);
+		}
+	}
+}
+function sortNumber(a,b) 
+{ 
+	return a - b 
 }
 </script>
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
@@ -126,13 +283,14 @@ function submitForm() {
 
 <form name="searchForm" method="post" action="<%=formAction%>">
 <input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.ACTIVITY_DURATION_REPORT%>">
+<input type="hidden" id="inputJobIDS" name="inputJobIDS">
+<input type="hidden" id="dateRange" name="dateRange">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
     <tr>
         <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select name="jobId" MULTIPLE size="6" style="width:300px">
-            <option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
+        <select id="jobId" name="jobId" MULTIPLE size="6" style="width:300px">
 <%
             for (ReportJobInfo j : jobList)
             {
@@ -146,7 +304,7 @@ function submitForm() {
     <tr>
         <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select name="projectId" MULTIPLE size=4>
+        <select id="projectId" name="projectId" MULTIPLE size=4 onchange="filterJob()">
             <option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%          for (Project p : projectList)
             {
@@ -160,7 +318,7 @@ function submitForm() {
     <tr>
         <td class="standardText"><%=bundle.getString("lb_status")%><span class="asterisk">*</span>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select name="status" MULTIPLE size=4>
+        <select id="status" name="status" MULTIPLE size=4 onchange="filterJob()">
             <option value="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
             <option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
             <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
@@ -175,7 +333,7 @@ function submitForm() {
     <tr>
         <td class="standardText"><%=bundle.getString("lb_target_locales")%>*:</td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select name="targetLocalesList" multiple="true" size=4>
+        <select id="targetLocalsList" name="targetLocalesList" multiple="true" size=4 onchange="filterJob()">
             <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
             for(GlobalSightLocale gsLocale : targetLocales)

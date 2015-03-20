@@ -174,6 +174,8 @@ public class CreateJobsMainHandler extends PageHandler
             }
             else if (action.equals("queryFileProfile"))
             {
+            	this.setPageParameter(request, bundle, user, session,
+                        currentCompanyId);
                 this.queryFileProfile(request, response, currentCompanyId, user);
                 return;
             }

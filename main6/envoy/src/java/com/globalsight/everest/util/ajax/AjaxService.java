@@ -538,6 +538,9 @@ public class AjaxService extends HttpServlet
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         String customTextRules = request.getParameter("customTextRules");
+        String elementPostFilter = request.getParameter("elementPostFilter");
+        String elementPostFilterId = request
+                .getParameter("elementPostFilterId");
 
         JSONArray jsonArrayCustomTextRules = new JSONArray();
         try
@@ -552,7 +555,8 @@ public class AjaxService extends HttpServlet
         String configXml = PlainTextFilterParser.nullConfigXml;
         try
         {
-            configXml = PlainTextFilterParser.toXml(jsonArrayCustomTextRules);
+            configXml = PlainTextFilterParser.toXml(jsonArrayCustomTextRules,
+                    elementPostFilter, elementPostFilterId);
         }
         catch (Exception e)
         {
@@ -582,12 +586,16 @@ public class AjaxService extends HttpServlet
         String result = "";
         String source = request.getParameter("source");
         String customTextRules = request.getParameter("customTextRules");
+        String elementPostFilter = request.getParameter("elementPostFilter");
+        String elementPostFilterId = request
+                .getParameter("elementPostFilterId");
         try
         {
 
             JSONArray jsonArrayCustomTextRules = new JSONArray(customTextRules);
-            String configXml = PlainTextFilterParser
-                    .toXml(jsonArrayCustomTextRules);
+            String configXml = PlainTextFilterParser.toXml(
+                    jsonArrayCustomTextRules, elementPostFilter,
+                    elementPostFilterId);
             PlainTextFilterParser p = new PlainTextFilterParser(configXml);
             p.parserXml();
 

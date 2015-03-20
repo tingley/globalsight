@@ -164,7 +164,7 @@ public class QAChecker
         }
         else
         {
-            logger.info("Done QA Checks, no errors reported. Report "
+            logger.info("Done QA Checks, no issues reported. Report "
                     + reportPath + " is saved.");
         }
     }

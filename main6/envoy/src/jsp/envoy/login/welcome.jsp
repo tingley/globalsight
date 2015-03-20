@@ -475,6 +475,9 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.MIND_TOUCH%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=mindtouchUrl%>"><%=bundle.getString("lb_mindtouch")%></A><BR>
         </amb:permission>
+        <amb:permission name="<%=Permission.GIT_CONNECTOR%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=gitconnectorUrl%>"><%=bundle.getString("lb_git_connector")%></A><BR>
+      	</amb:permission>
       </TD>
     <%
         }

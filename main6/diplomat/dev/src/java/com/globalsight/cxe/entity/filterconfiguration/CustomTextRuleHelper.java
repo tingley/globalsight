@@ -68,7 +68,7 @@ public class CustomTextRuleHelper
             {
                 // ignore
             }
-            else if (index.length == 2)
+            else if (index.length == 2 && index[0] < index[1])
             {
                 String oneLine = line.substring(index[0], index[1]);
                 sb.append(oneLine).append(lineSeparator);
@@ -185,7 +185,7 @@ public class CustomTextRuleHelper
                             break;
                         }
 
-                        i0 = line.indexOf(startStr, i0);
+                        i0 = line.indexOf(startStr, i0 + startStr.length());
                     }
                 }
             }
@@ -240,10 +240,9 @@ public class CustomTextRuleHelper
                         {
                             int number = Integer.parseInt(finishOcc);
                             int find = 0;
-                            while (m.find(startIndex))
+                            while (m.find())
                             {
                                 find = find + 1;
-                                startIndex = m.end();
 
                                 if (find == number)
                                 {
@@ -279,7 +278,7 @@ public class CustomTextRuleHelper
                         {
                             int number = Integer.parseInt(finishOcc);
                             int find = 0;
-                            int i0 = line.indexOf(finishStr, startIndex);
+                            int i0 = line.indexOf(finishStr);
                             while (i0 != -1)
                             {
                                 find = find + 1;

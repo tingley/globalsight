@@ -74,6 +74,7 @@
         userPerms.getPermissionFor(Permission.RSS_READER) ||
         userPerms.getPermissionFor(Permission.ELOQUA) ||
         userPerms.getPermissionFor(Permission.MIND_TOUCH) ||
+        userPerms.getPermissionFor(Permission.GIT_CONNECTOR) ||
 	(b_customerAccessGroup && userPerms.getPermissionFor(Permission.CUSTOMER_UPLOAD)))
             hasDataSourceMenu = true;
 
@@ -170,6 +171,7 @@
    String cvsModuleMappingUrl = LinkHelper.getWebActivityURL(request, "moduleMapping");
    String cvsFileProfileUrl = LinkHelper.getWebActivityURL(request, "cvsfileprofile");
    String cvsJobUrl = LinkHelper.getWebActivityURL(request, "cvsjob");
+   String gitconnectorUrl = LinkHelper.getWebActivityURL(request, "gitconnector");
    String rssReaderUrl = LinkHelper.getWebActivityURL(request, "rssReader");
    String createJobUrl = LinkHelper.getWebActivityURL(request, "createJobs");
    String createZipJobUrl = LinkHelper.getWebActivityURL(request, "createZipJobs");
@@ -566,6 +568,10 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_eloqua")%
 
 <% if (userPerms.getPermissionFor(Permission.MIND_TOUCH)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_mindtouch")%>", "javascript:goToUrl('<%=mindtouchUrl%>');", ""));
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.GIT_CONNECTOR)) { %>
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_git_connector")%>", "javascript:goToUrl('<%=gitconnectorUrl%>');", ""));
 <% } %>
 
 <% } //end if hasDataSourceMenu %>

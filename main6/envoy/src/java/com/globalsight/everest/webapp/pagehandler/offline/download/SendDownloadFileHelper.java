@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
@@ -383,14 +384,20 @@ public class SendDownloadFileHelper implements WebAppConstants
                 .getParameter(OfflineConstants.PRESERVE_SOURCE_FOLDER) != null);
         params.setIncludeXmlNodeContextInformation(p_request
                 .getParameter(OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION) != null);
-        params.setConsolidateFileType(p_request.getParameter("consolidateFileType"));
-        if(p_request.getParameter("wordCountForDownload") != null 
-        		&& !p_request.getParameter("wordCountForDownload").equals(""))
-        	params.setWordCountForDownload(Integer.parseInt(p_request.getParameter("wordCountForDownload")));
+        params.setConsolidateFileType(p_request
+                .getParameter("consolidateFileType"));
+        if (p_request.getParameter("wordCountForDownload") != null
+                && !p_request.getParameter("wordCountForDownload").equals(""))
+            params.setWordCountForDownload(Integer.parseInt(p_request
+                    .getParameter("wordCountForDownload")));
         params.setIncludeRepetitions(p_request
                 .getParameter(OfflineConstants.INCLUDE_REPETITIONS) != null);
         params.setExcludeFullyLeveragedFiles(p_request
                 .getParameter(OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES) != null);
+        params.setPenalizedReferenceTmPre(p_request
+                .getParameter(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE) != null);
+        params.setPenalizedReferenceTmPer(p_request
+                .getParameter(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER) != null);
         boolean changeCreationId = false;
         try
         {
@@ -496,47 +503,49 @@ public class SendDownloadFileHelper implements WebAppConstants
 
             if (idList != null)
             {
-            	sortSourcePageIds(idList, p_pageIdList, p_pageNameList);
+                sortSourcePageIds(idList, p_pageIdList, p_pageNameList);
             }
         }
     }
-    
-    private void sortSourcePageIds(String[] idList, List p_pageIdList, List p_pageNameList)
+
+    private void sortSourcePageIds(String[] idList, List p_pageIdList,
+            List p_pageNameList)
     {
-    	List<SourcePage> sps = new ArrayList<SourcePage>();
-    	Long pageId = null;
+        List<SourcePage> sps = new ArrayList<SourcePage>();
+        Long pageId = null;
         SourcePage page = null;
 
-		for (int i = 0; idList != null && i < idList.length; i++) 
-		{
-			try 
-			{
-				pageId = new Long(idList[i]);
-				page = (SourcePage) ServerProxy.getPageManager().getSourcePage(
-						pageId.longValue());
-			} 
-			catch (Exception e) 
-			{
-				throw new EnvoyServletException(e);
-			}
+        for (int i = 0; idList != null && i < idList.length; i++)
+        {
+            try
+            {
+                pageId = new Long(idList[i]);
+                page = (SourcePage) ServerProxy.getPageManager().getSourcePage(
+                        pageId.longValue());
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
+            }
 
-			sps.add(page);
-		}
-		
-		sortSourcePage(sps);
-		
-		for (SourcePage sp : sps)
-		{
-			p_pageIdList.add(sp.getId());
+            sps.add(page);
+        }
+
+        sortSourcePage(sps);
+
+        for (SourcePage sp : sps)
+        {
+            p_pageIdList.add(sp.getId());
             p_pageNameList.add(sp.getExternalPageId());
-		}
+        }
     }
-    
+
     private void sortSourcePage(List<SourcePage> sps)
     {
-    	Collections.sort(sps, new Comparator<SourcePage>(){
+        Collections.sort(sps, new Comparator<SourcePage>()
+        {
 
-    		private String getMainFileName(String p_filename)
+            private String getMainFileName(String p_filename)
             {
                 int index = p_filename.indexOf(")");
                 if (index > 0 && p_filename.startsWith("("))
@@ -557,7 +566,7 @@ public class SendDownloadFileHelper implements WebAppConstants
              * Extracts the sub-file part of an MsOffice multipart file:
              * "(header) en_US/ppt.ppt" --&gt; "(header)".
              */
-    		private String getSubFileName(String p_filename)
+            private String getSubFileName(String p_filename)
             {
                 int index = p_filename.indexOf(")");
                 if (index > 0 && p_filename.startsWith("("))
@@ -567,75 +576,78 @@ public class SendDownloadFileHelper implements WebAppConstants
 
                 return "";
             }
-    		
-    		private int compareSubName(String subName, String subName2)
-    		{
-    			if (subName == null || subName.length() == 0)
-    				return -1;
-    			
-    			if (subName2 == null || subName2.length() == 0)
-    				return 1;
-    			
-    			if (subName.equalsIgnoreCase(subName2))
-    				return 0;
-    			
-    			boolean mat1 = subName.matches("\\(\\D+\\d+\\)") || subName.matches("\\(\\D+\\d+ hyperlinks\\)");
-    			boolean mat2 = subName2.matches("\\(\\D+\\d+\\)")|| subName2.matches("\\(\\D+\\d+ hyperlinks\\)");
-    			
-    			if (mat1 && !mat2)
-    				return -1;
-    			
-    			if (!mat1 && !mat2)
-    			{
-    				return subName.compareTo(subName2);
-    			}
-    				
-    			
-    			if (mat1 && mat2)
-    			{
-    				 Pattern p = Pattern.compile("\\((\\D+)(\\d+)");
-        			 Matcher m = p.matcher(subName);
-        			 Matcher m2 = p.matcher(subName2);
-        			 if (m.find() && m2.find())
-        			 {
-        				 String n1 = m.group(1);
-        				 String n2 = m2.group(1);
-        				 
-        				 String num1 = m.group(2);
-        				 String num2 = m2.group(2);
-        				 
-        				 int i1 = Integer.parseInt(num1);
-        				 int i2 = Integer.parseInt(num2);
-        				 
-        				 if (!n1.equalsIgnoreCase(n2))
-        					 return n1.compareTo(n2);
-        				 
-        				 if (i1 != i2)
-        					 return i1 - i2;
-        				 
-        				 //(sheet11 hyperlinks) with (sheet11)
-        				 return subName.length() - subName2.length();
-        			 }
-    			}
-    			
-    			return 0;
-    		}
-    		
-			@Override
-			public int compare(SourcePage sp1, SourcePage sp2) {
-				String aMainName = this.getMainFileName(sp1.getExternalPageId());
+
+            private int compareSubName(String subName, String subName2)
+            {
+                if (subName == null || subName.length() == 0)
+                    return -1;
+
+                if (subName2 == null || subName2.length() == 0)
+                    return 1;
+
+                if (subName.equalsIgnoreCase(subName2))
+                    return 0;
+
+                boolean mat1 = subName.matches("\\(\\D+\\d+\\)")
+                        || subName.matches("\\(\\D+\\d+ hyperlinks\\)");
+                boolean mat2 = subName2.matches("\\(\\D+\\d+\\)")
+                        || subName2.matches("\\(\\D+\\d+ hyperlinks\\)");
+
+                if (mat1 && !mat2)
+                    return -1;
+
+                if (!mat1 && !mat2)
+                {
+                    return subName.compareTo(subName2);
+                }
+
+                if (mat1 && mat2)
+                {
+                    Pattern p = Pattern.compile("\\((\\D+)(\\d+)");
+                    Matcher m = p.matcher(subName);
+                    Matcher m2 = p.matcher(subName2);
+                    if (m.find() && m2.find())
+                    {
+                        String n1 = m.group(1);
+                        String n2 = m2.group(1);
+
+                        String num1 = m.group(2);
+                        String num2 = m2.group(2);
+
+                        int i1 = Integer.parseInt(num1);
+                        int i2 = Integer.parseInt(num2);
+
+                        if (!n1.equalsIgnoreCase(n2))
+                            return n1.compareTo(n2);
+
+                        if (i1 != i2)
+                            return i1 - i2;
+
+                        // (sheet11 hyperlinks) with (sheet11)
+                        return subName.length() - subName2.length();
+                    }
+                }
+
+                return 0;
+            }
+
+            @Override
+            public int compare(SourcePage sp1, SourcePage sp2)
+            {
+                String aMainName = this.getMainFileName(sp1.getExternalPageId());
                 String aSubName = this.getSubFileName(sp1.getExternalPageId());
                 String bMainName = this.getMainFileName(sp2.getExternalPageId());
                 String bSubName = this.getSubFileName(sp2.getExternalPageId());
 
-            	int rv = aMainName.compareTo(bMainName);
+                int rv = aMainName.compareTo(bMainName);
                 if (rv == 0)
                 {
                     rv = compareSubName(aSubName, bSubName);
                 }
-                    
+
                 return rv;
-			}});
+            }
+        });
     }
 
     public List<Long> getAllPSFList(Task task) throws EnvoyServletException

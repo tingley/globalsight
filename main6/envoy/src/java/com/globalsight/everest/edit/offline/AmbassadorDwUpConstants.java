@@ -38,6 +38,7 @@ public interface AmbassadorDwUpConstants
     static public final String FILE_EXT_BIN = ".bin";
     static public final String FILE_XML = "xml";
     static public final String FILE_EXT_TMX_NO_DOT = "tmx";
+    static public final String FILE_PENALTY_TMX = "PENALTY";
 
     static public final String FILE_NAME_BREAK = "_";
 
@@ -93,13 +94,13 @@ public interface AmbassadorDwUpConstants
     static public final String HEADER_EDITALL_VALUE_YES = "Yes";
     static public final String HEADER_EDITALL_VALUE_NO = "No";
     static public final String HEADER_EDITALL_VALUE_UNAUTHORIZED = "UNAUTHORIZED";
-    
+
     static public final String HEADER_TM_EDIT_TYPE_NONE = "None";
     static public final String HEADER_TM_EDIT_TYPE_BOTH = "Incontext Match and Exact Match";
     static public final String HEADER_TM_EDIT_TYPE_ICE = "Incontext Match";
     static public final String HEADER_TM_EDIT_TYPE_100 = "Exact Match";
     static public final String HEADER_TM_EDIT_TYPE_DENY = "Deny Edit";
-    
+
     static public final String LINK_NAME_MAIN_HELP = "For more information, see the Offline Help, Placeholder Map and GlobalSight Wiki.";
     static public final String LINK_NAME_UPLOAD_HELP = "Click here to learn how to save files for upload.";
 
@@ -155,12 +156,15 @@ public interface AmbassadorDwUpConstants
 
     // Grammar for Plain text format javacc parser. Note: the grammar
     // cannot accept translated values.
-    static public final String HEADER_PAGENAME_KEY = "# " + LABEL_PAGENAME + ":";
+    static public final String HEADER_PAGENAME_KEY = "# " + LABEL_PAGENAME
+            + ":";
     static public final String HEADER_PAGEID_KEY = "# " + LABEL_PAGEID + ":";
     static public final String HEADER_JOBID_KEY = "# " + LABEL_JOBID + ":";
     static public final String HEADER_STAGEID_KEY = "# " + LABEL_STAGEID + ":";
-    static public final String SEGMENT_FORMAT_KEY = "# " + LABEL_SEGMENT_FORMAT + ":";
-    static public final String HEADER_SERVER_INSTANCEID_KEY = "# " + LABEL_SERVER_INSTANCEID + ":";
+    static public final String SEGMENT_FORMAT_KEY = "# " + LABEL_SEGMENT_FORMAT
+            + ":";
+    static public final String HEADER_SERVER_INSTANCEID_KEY = "# "
+            + LABEL_SERVER_INSTANCEID + ":";
 
     // Could be translated - as these are not part of the offline grammar.
     // However, grammar is not translated so we leave them for consistancy.
@@ -223,7 +227,7 @@ public interface AmbassadorDwUpConstants
     static public final int DOWNLOAD_EDITALL_STATE_UNAUTHORIZED = 40;
     static public final int DOWNLOAD_EDITALL_STATE_YES = 41;
     static public final int DOWNLOAD_EDITALL_STATE_NO = 42;
-    
+
     static public final int TM_EDIT_TYPE_NONE = 0;
     static public final int TM_EDIT_TYPE_BOTH = 1;
     static public final int TM_EDIT_TYPE_ICE = 2;
@@ -394,7 +398,7 @@ public interface AmbassadorDwUpConstants
     // Utility files
     /** MsWord Template name (AOR-Template.dot). */
     static public final String MSWORD_TEMPLATE_FNAME = "AOR-Template.dot";
-    
+
     static public final String UPLOAD_IN_PROGRESS = "uploadInProgress";
     static public final String UPLOAD_DONE = "uploadDone";
 }

@@ -490,6 +490,10 @@ public class ProjectHandlerHelper
         p_project.setPoRequired(poRequired);
 
         // Auto Send Options
+        p_project.setAutoAcceptTrans("on".equalsIgnoreCase(p_request
+                .getParameter("translationAA")));
+        p_project.setAutoSendTrans("on".equalsIgnoreCase(p_request
+                .getParameter("translationAS")));
         p_project.setReviewOnlyAutoAccept("on".equalsIgnoreCase(p_request
                 .getParameter("reviewOnlyAA")));
         p_project.setReviewOnlyAutoSend("on".equalsIgnoreCase(p_request

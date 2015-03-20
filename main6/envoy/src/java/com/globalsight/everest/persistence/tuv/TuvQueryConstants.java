@@ -21,24 +21,16 @@ package com.globalsight.everest.persistence.tuv;
  */
 public interface TuvQueryConstants
 {
-//    public static final Class TASK_TUV_CLASS = TaskTuv.class;
-//    public static final Class TUV_CLASS = TuvImpl.class;
-//    public static final Class TU_CLASS = TuImpl.class;
-//    public static final Class TASK_CLASS = Task.class;
-
     public static final String TU_TABLE_PLACEHOLDER = "\uE000" + "_TRANSLATION_UNIT_TABLE_" + "\uE000";
     public static final String TUV_TABLE_PLACEHOLDER = "\uE000" + "_TRANSLATION_UNIT_VARIANT_TABLE_" + "\uE000";
     public static final String LM_TABLE_PLACEHOLDER = "\uE000" + "_LEVERAGE_MATCH_TABLE_" + "\uE000";
     public static final String TEMPLATE_PART_TABLE_PLACEHOLDER = "\uE000" + "_TEMPLATE_PART_TABLE_" + "\uE000";
+    public static final String TU_TUV_ATTR_TABLE_PLACEHOLDER = "\uE000" + "_TRANSLATION_TU_TUV_ATTR_TABLE_" + "\uE000";
 
     public static final String TRANSLATION_UNIT_TABLE = "TRANSLATION_UNIT";
     public static final String TRANSLATION_UNIT_VARIANT_TABLE = "TRANSLATION_UNIT_VARIANT";
     public static final String LEVERAGE_MATCH_TABLE = "LEVERAGE_MATCH";
     public static final String TEMPLATE_PART_TABLE = "TEMPLATE_PART";
-
-    // TU
-
-    // Tuv
 
     // TaskTuv
     public static final String TASK_ID_ARG = "taskId";

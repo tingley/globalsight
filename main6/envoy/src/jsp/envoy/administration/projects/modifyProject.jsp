@@ -91,6 +91,7 @@
     boolean isEnableDitaChecks = false;
 
     String checkOrNot = "checked";
+    String translationAAChecked = "", translationASChecked = "";
     String reviewOnlyAAChecked = "", reviewOnlyASChecked = "";
     String reviewReportIncludeCompactTags = "";
     String autoAcceptPMTaskChecked = "";	
@@ -127,6 +128,8 @@
               checkOrNot = "";
         }
 
+        translationAAChecked = project.getAutoAcceptTrans()? "checked" : "";
+        translationASChecked = project.getAutoSendTrans()? "checked" : "";
         reviewOnlyAAChecked = project.getReviewOnlyAutoAccept()? "checked" : "";
         reviewOnlyASChecked = project.getReviewOnlyAutoSend()? "checked" : "";
         reviewReportIncludeCompactTags = project.isReviewReportIncludeCompactTags() ? "checked" : "";
@@ -213,10 +216,19 @@ var needWarning = false;
 var objectName = "<%=bundle.getString("lb_projects")%>";
 var guideNode="projects";
 var helpFile = "<%=bundle.getString("help_projects_edit")%>";
+var translationAAChecked = "<%=translationAAChecked%>";
 var reviewOnlyAAChecked = "<%=reviewOnlyAAChecked%>";
 
 $(document).ready(function() {
 	// Inital value for Auto Accept Elements.
+	if("checked" == translationAAChecked)
+	{
+		setDisableTR('translationASTRID', false);
+	}
+	else
+	{
+		setDisableTR('translationASTRID', true);
+	}
 	if("checked" == reviewOnlyAAChecked)
 	{
 		setDisableTR('reviewOnlyASTRID', false);
@@ -235,6 +247,21 @@ $(document).ready(function() {
 		setDisableTR('reviewReportIncludeCompactTagsTD', true);
 	}
 	
+	/** 
+	 * If click the checkbox "Auto-accept Translation Task", 
+	 * then the "Auto-send Translation Edit Report" TD should be editable. 
+	 */
+	$("#translationAA").click(function(){
+		if(this.checked)
+		{
+			setDisableTR('translationASTRID', false);
+		}
+		else
+		{
+			setDisableTR('translationASTRID', true);
+			$("#translationAS").attr("checked",false);
+		}
+	});
 	/** 
 	 * If click the checkbox "Auto-accept Review Task", 
 	 * then the "Auto-send Reviewers Comments Report" TD should be editable. 
@@ -753,6 +780,16 @@ function changeSelectWidth(selected){
     <tr>
         <td><%=bundle.getString("PO_required")%>:</td>
         <td><INPUT TYPE=checkbox id="poRequired" name="poRequired" onfocus="this.select()" <%=checkOrNot%> ></td>
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_project_translationAutoAccept")%>:</td>
+        <td><INPUT TYPE=checkbox id="translationAA" name="translationAA" <%=translationAAChecked%> ></td>
+    </tr>
+    <tr id="translationASTRID">
+        <td colspan="2">&nbsp;&nbsp;
+          	<%=bundle.getString("lb_project_translationAutoSend")%>:
+          	<INPUT TYPE=checkbox id="translationAS" name="translationAS" <%=translationASChecked%> >
+        </td>
     </tr>
     <tr>
         <td><%=bundle.getString("lb_project_reviewOnlyAutoAccept")%>:</td>

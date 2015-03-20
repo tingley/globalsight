@@ -50,6 +50,7 @@ String downloadOptions = bundle.getString("lb_download_options");
 // Parameter values
 String placeholderFormat = bundle.getString("lb_placeholder_format");
 String labelResInsertion = bundle.getString("lb_resource_linking");
+String labelPenalizedReferenceTm = bundle.getString("lb_work_offline_option_penalized_reference_tm");
 String labelResInsertionNote = bundle.getString("lb_resource_linking_note");
 String exactMatchesEditable = bundle.getString("lb_exact_matches_editable");
 String pagename = (String)request.getAttribute(UserParamNames.PAGENAME_DISPLAY);
@@ -122,7 +123,7 @@ String labelTerminology = bundle.getString("lb_terminology");
 var needWarning = false;
 var objectName = "<%= bundle.getString("lb_account_information_my") %>";
 var guideNode = "myAccount";
-var helpFile = "<%=bundle.getString("help_my_account_options")%>";
+var helpFile = "<%=bundle.getString("help_download")%>";
 var dwnldOpt = <%=dwnldOpt%>;
 </SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
@@ -142,6 +143,18 @@ function setWordCountDisplay()
 	{
 		$("#wordCountForDownload").hide();
 	}
+}
+
+function switchRadio(penalizedReferenceTmRadio)
+{
+    if ("penalizedReferenceTmPre" == penalizedReferenceTmRadio.id)
+    {
+        $("#penalizedReferenceTmPer").attr("checked", false);
+    }
+    else
+    {
+        $("#penalizedReferenceTmPre").attr("checked", false);
+    }
 }
 </SCRIPT>
 </HEAD>
@@ -201,8 +214,16 @@ function setWordCountDisplay()
             </TR>
   			<TR>
               <TD></TD>
-			  <TD><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="changeCreationIdForMT" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN></TD>
+			  <TD><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="changeCreationIdForMT" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>" checked="checked" value="true"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN></TD>
 			</TR>
+			<TR id="penalizedReferenceTm">
+              <TD><SPAN CLASS="standardText"><%=labelPenalizedReferenceTm%>:</SPAN></TD>
+              <TD><SPAN CLASS="standardText">
+              <input type="radio" id="penalizedReferenceTmPre" name="<%=UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE%>" checked="checked" onclick="switchRadio(this);"/><%=bundle.getString("lb_work_offline_option_penalized_reference_tm_pre")%>
+              <br>
+              <input type="radio" id="penalizedReferenceTmPer" name="<%=UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER%>" onclick="switchRadio(this);"/><%=bundle.getString("lb_work_offline_option_penalized_reference_tm_per")%>
+              </SPAN></TD>
+            </TR>
             <TR>
               <TD><SPAN CLASS="standardText"><%= labelTerminology %></SPAN></TD>
               <TD><SPAN CLASS="standardText">

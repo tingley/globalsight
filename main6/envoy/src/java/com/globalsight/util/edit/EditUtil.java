@@ -28,9 +28,9 @@ import org.apache.regexp.REProgram;
 import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.cxe.adapter.adobe.AdobeHelper;
-import com.globalsight.cxe.adapter.openoffice.OpenOfficeConverter;
 import com.globalsight.cxe.adapter.idml.IdmlConverter;
 import com.globalsight.cxe.adapter.msoffice2010.MsOffice2010Converter;
+import com.globalsight.cxe.adapter.openoffice.OpenOfficeConverter;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.util.GlobalSightLocale;
@@ -43,8 +43,8 @@ import com.globalsight.util.IntHolder;
  */
 public final class EditUtil
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(EditUtil.class.getName());
+    private static final Logger CATEGORY = Logger.getLogger(EditUtil.class
+            .getName());
 
     static private REProgram rep_stripTags;
 
@@ -69,7 +69,8 @@ public final class EditUtil
 
     private static final String NCR_BEGIN = "\\u";
 
-    private static final char[] ZERO_ARRAY = { '0', '0', '0', '0' };
+    private static final char[] ZERO_ARRAY =
+    { '0', '0', '0', '0' };
 
     private static final int HEX_DIGIT = 4;
 
@@ -190,14 +191,14 @@ public final class EditUtil
                     {
                         if (s.charAt(i + 1) == 'u')
                         {
-                            sb.append((char) Integer.parseInt(s.substring(
-                                    i + 2, i + 6), 16));
+                            sb.append((char) Integer.parseInt(
+                                    s.substring(i + 2, i + 6), 16));
                             i += 5;
                         }
                         else
                         {
-                            sb.append((char) Integer.parseInt(s.substring(
-                                    i + 1, i + 3), 16));
+                            sb.append((char) Integer.parseInt(
+                                    s.substring(i + 1, i + 3), 16));
                             i += 2;
                         }
                     }
@@ -242,14 +243,14 @@ public final class EditUtil
                     {
                         if (s.charAt(i + 1) == 'u')
                         {
-                            sb.append((char) Integer.parseInt(s.substring(
-                                    i + 2, i + 6), 16));
+                            sb.append((char) Integer.parseInt(
+                                    s.substring(i + 2, i + 6), 16));
                             i += 5;
                         }
                         else
                         {
-                            sb.append((char) Integer.parseInt(s.substring(
-                                    i + 1, i + 3), 16));
+                            sb.append((char) Integer.parseInt(
+                                    s.substring(i + 1, i + 3), 16));
                             i += 2;
                         }
                     }
@@ -350,11 +351,11 @@ public final class EditUtil
 
         return res.toString();
     }
-    
+
     /**
      * <P>
-     * Encodes special html characters in a string (&lt;, &gt;, &amp;, &nbsp; and
-     * &quot;).
+     * Encodes special html characters in a string (&lt;, &gt;, &amp;, &nbsp;
+     * and &quot;).
      * </P>
      */
     static public String encodeTohtml(String s)
@@ -456,9 +457,6 @@ public final class EditUtil
 
             switch (c)
             {
-                case '\n':
-                    res.append("\\n");
-                    break;
                 case '\t':
                     res.append("\\t");
                     break;
@@ -473,7 +471,7 @@ public final class EditUtil
 
         return res.toString();
     }
-    
+
     /**
      * <P>
      * Encodes special HTML characters in a string (&lt;, &gt;, &amp;, and
@@ -573,7 +571,8 @@ public final class EditUtil
             res = "he";
         else if (res.startsWith("ji"))
             res = "yi";
-        else if (res.startsWith("in")) res = "id";
+        else if (res.startsWith("in"))
+            res = "id";
 
         if (p_locale.getCountryCode() != null)
         {
@@ -598,7 +597,8 @@ public final class EditUtil
             res = "he";
         else if (res.startsWith("ji"))
             res = "yi";
-        else if (res.startsWith("in")) res = "id";
+        else if (res.startsWith("in"))
+            res = "id";
 
         if (p_locale.getCountry() != null)
         {
@@ -623,7 +623,8 @@ public final class EditUtil
             res = "he";
         else if (res.startsWith("ji"))
             res = "yi";
-        else if (res.startsWith("in")) res = "id";
+        else if (res.startsWith("in"))
+            res = "id";
 
         if (p_locale.length() > 3)
         {
@@ -645,7 +646,7 @@ public final class EditUtil
     {
         return isRTLLocale(p_locale.getLanguageCode());
     }
-    
+
     /**
      * <P>
      * Tests whether the writing direction of this language is left-to-right or
@@ -660,25 +661,25 @@ public final class EditUtil
         // (unlike java.util.Locale).
         return (language.startsWith("ar") || language.startsWith("he")
                 || language.startsWith("iw") || language.startsWith("fa") || language
-                .startsWith("ur"));
+                    .startsWith("ur"));
     }
 
     public static String toRtlString(String s)
     {
         if (s == null)
             s = "";
-        
+
         return '\u200F' + s;
     }
-    
+
     public static String removeU200F(String s)
     {
         if (s == null)
             s = "";
-        
+
         return s.replace("" + '\u200F', "");
     }
-    
+
     /**
      * <P>
      * Get the HTML's DIR attribute value based on the locale's language.
@@ -788,49 +789,50 @@ public final class EditUtil
         {
             return true;
         }
-        
+
         if (p_dataType.equals(IFormatNames.FORMAT_OPENOFFICE_XML))
         {
             return OpenOfficeConverter.isOpenOfficeInstalled();
         }
-        
+
         if (p_dataType.equals(IFormatNames.FORMAT_OFFICE_XML))
         {
             return MsOffice2010Converter.isInstalled();
-        }       
+        }
 
         return false;
     }
-    
+
     static public String warnPreviewNotInstalled(String p_dataType)
     {
-        if (p_dataType.equals(IFormatNames.FORMAT_OFFICE_XML) && !MsOffice2010Converter.isInstalled())
+        if (p_dataType.equals(IFormatNames.FORMAT_OFFICE_XML)
+                && !MsOffice2010Converter.isInstalled())
         {
             return "lb_preivew_not_set_office2007";
         }
-        
+
         return "";
     }
-    
+
     static public String warnPdfPreviewNotInstalled(EditorState p_state)
     {
-    	 if (p_state == null)
-         {
-             CATEGORY.warn("FIXME hasPDFPreviewMode(): p_state is null");
-             return "";
-         }
-    	 
-    	 String filename = p_state.getSourcePageName();
-    	 
-    	filename = filename.toLowerCase();
+        if (p_state == null)
+        {
+            CATEGORY.warn("FIXME hasPDFPreviewMode(): p_state is null");
+            return "";
+        }
+
+        String filename = p_state.getSourcePageName();
+
+        filename = filename.toLowerCase();
         if (filename.endsWith("idml") && !IdmlConverter.isInstalled())
         {
             return "lb_preivew_not_set_cs5";
         }
-        
+
         return "";
     }
-    
+
     static public boolean hasPDFPreviewMode(EditorState p_state)
     {
         if (p_state == null)
@@ -838,7 +840,7 @@ public final class EditUtil
             CATEGORY.warn("FIXME hasPDFPreviewMode(): p_state is null");
             return false;
         }
-        
+
         String filename = p_state.getSourcePageName().toLowerCase();
 
         if ((filename.endsWith(".indd") || filename.endsWith(".inx"))
@@ -846,17 +848,18 @@ public final class EditUtil
         {
             return true;
         }
-        
+
         if (filename.endsWith(".fm") && "mif".equals(p_state.getPageFormat()))
         {
             return true;
         }
-        
-        if (filename.endsWith(".docx") && "office-xml".equals(p_state.getPageFormat()))
+
+        if (filename.endsWith(".docx")
+                && "office-xml".equals(p_state.getPageFormat()))
         {
             return true;
         }
-        
+
         filename = filename.toLowerCase();
         if (filename.endsWith("idml"))
         {
@@ -966,8 +969,7 @@ public final class EditUtil
                     {
                         chNew = result.charAt(result.length() - 1);
                     }
-                }
-                while (Character.isWhitespace(chNew));
+                } while (Character.isWhitespace(chNew));
             }
         }
 
@@ -1084,8 +1086,7 @@ public final class EditUtil
             do
             {
                 temp = temp.replace(i, i + 6, "'");
-            }
-            while ((i = temp.toString().indexOf("&apos;")) >= 0);
+            } while ((i = temp.toString().indexOf("&apos;")) >= 0);
 
             p_string = temp.toString();
         }
@@ -1125,7 +1126,9 @@ public final class EditUtil
 
     /**
      * Remove CRLF from string, and change "\t" to one space only.
-     * @param str -- String to be changed
+     * 
+     * @param str
+     *            -- String to be changed
      * @return -- String
      */
     public static String removeCRLF(String str)

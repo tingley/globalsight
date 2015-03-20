@@ -16,49 +16,64 @@
  */
 package com.globalsight.ling.docproc.extractor.plaintext;
 
-import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
-import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
-import com.globalsight.cxe.entity.filterconfiguration.Filter;
-import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
-import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
-import com.globalsight.ling.common.NativeEnDecoderException;
-import com.globalsight.ling.common.PTEscapeSequence;
-import com.globalsight.ling.docproc.AbstractExtractor;
-import com.globalsight.ling.docproc.ExtractorException;
-import com.globalsight.ling.docproc.ExtractorExceptionConstants;
-
-import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
+import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
+import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
+import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
+import com.globalsight.ling.common.HtmlEntities;
+import com.globalsight.ling.common.PTEscapeSequence;
+import com.globalsight.ling.docproc.AbstractExtractor;
+import com.globalsight.ling.docproc.DocumentElement;
+import com.globalsight.ling.docproc.ExtractorException;
+import com.globalsight.ling.docproc.ExtractorExceptionConstants;
+import com.globalsight.ling.docproc.Output;
+import com.globalsight.ling.docproc.Segmentable;
+import com.globalsight.ling.docproc.SkeletonElement;
+import com.globalsight.util.StringUtil;
+
 /**
- * <p>Plain text file extractor.</p>
+ * <p>
+ * Plain text file extractor.
+ * </p>
  *
- * <p><b>Note:</b> The conversion of certain format related
- * characters into diplomat tags is handled by a separate tag
- * controller object - referred to as the TmxController.  The
- * controller has static rules that govern the creation of certain
- * diplomat tags. The static rules are specific to this parser. They
- * can be changed by editing the flags in the TmxController class.</p>
+ * <p>
+ * <b>Note:</b> The conversion of certain format related characters into
+ * diplomat tags is handled by a separate tag controller object - referred to as
+ * the TmxController. The controller has static rules that govern the creation
+ * of certain diplomat tags. The static rules are specific to this parser. They
+ * can be changed by editing the flags in the TmxController class.
+ * </p>
  */
-public class Extractor
-    extends AbstractExtractor
-    implements ExtractorExceptionConstants,
-               PTTmxControllerConstants
+public class Extractor extends AbstractExtractor implements
+        ExtractorExceptionConstants, PTTmxControllerConstants
 {
     static public boolean s_breakOnSingleCR = false;
     static public boolean s_keepEmbeddedCR = true;
 
-    static {
+    private Filter m_elementPostFilter = null;
+    private List<CustomTextRule> m_customTextRules = null;
+    private static final String PLACEHOLDER_LEFT = "GS_PLACEHOLDER_LEFT";
+    private static final String PLACEHOLDER_RIGHT = "GS_PLACEHOLDER_RIGHT";
+
+    static
+    {
         try
         {
-            ResourceBundle res =
-                ResourceBundle.getBundle("properties/Diplomat", Locale.US);
+            ResourceBundle res = ResourceBundle.getBundle(
+                    "properties/Diplomat", Locale.US);
 
             String value;
 
@@ -70,7 +85,9 @@ public class Extractor
                     s_breakOnSingleCR = true;
                 }
             }
-            catch (MissingResourceException e) {}
+            catch (MissingResourceException e)
+            {
+            }
 
             try
             {
@@ -80,7 +97,9 @@ public class Extractor
                     s_keepEmbeddedCR = false;
                 }
             }
-            catch (MissingResourceException e) {}
+            catch (MissingResourceException e)
+            {
+            }
         }
         catch (MissingResourceException e)
         {
@@ -89,18 +108,21 @@ public class Extractor
     }
 
     /**
-     * <p>Line-segmenting flag.  When true, this flag triggers
-     * "chunk level" segmenting on a single carriage return.  When
-     * false "chunk level" segmenting is triggered on the double
-     * carriage return.</p>
+     * <p>
+     * Line-segmenting flag. When true, this flag triggers "chunk level"
+     * segmenting on a single carriage return. When false "chunk level"
+     * segmenting is triggered on the double carriage return.
+     * </p>
      */
     public boolean m_breakOnSingleCR = s_breakOnSingleCR;
 
     /**
-     * <p>When m_bBreakOnSingleCR is disabled, this flag controls what
-     * happens to to embedded carriage returns. When this flag is
-     * true, carrage returns are maintained. When set to false, each
-     * carriage return is converted to a single space.</p>
+     * <p>
+     * When m_bBreakOnSingleCR is disabled, this flag controls what happens to
+     * to embedded carriage returns. When this flag is true, carrage returns are
+     * maintained. When set to false, each carriage return is converted to a
+     * single space.
+     * </p>
      */
     public boolean m_keepEmbeddedCR = s_keepEmbeddedCR;
 
@@ -110,21 +132,24 @@ public class Extractor
     }
 
     /**
-     * <p>Adds the tokens for a given translatable segment to the
-     * output object.  Escapes are encoded here after the extractor
-     * has made its determination about embedded carriage returns
-     * and/or applied space substitution.</p>
+     * <p>
+     * Adds the tokens for a given translatable segment to the output object.
+     * Escapes are encoded here after the extractor has made its determination
+     * about embedded carriage returns and/or applied space substitution.
+     * </p>
      *
-     * <p>Conversion of format related tokens to diplomat tags is
-     * handled by a dynamically created tag controller object. The tag
-     * controller has static rules that govern the creation of
-     * diplomat format tags. Since our format tags borrow from the TMX
-     * specification the controller object was named
-     * PTTmxController.</p>
+     * <p>
+     * Conversion of format related tokens to diplomat tags is handled by a
+     * dynamically created tag controller object. The tag controller has static
+     * rules that govern the creation of diplomat format tags. Since our format
+     * tags borrow from the TMX specification the controller object was named
+     * PTTmxController.
+     * </p>
      *
-     * @param p_vTokens - A vector of PTToken objects.
+     * @param p_vTokens
+     *            - A vector of PTToken objects.
      */
-    private void addTokensToOutput(Vector p_vTokens)
+    private void addTokensToOutput(Vector p_vTokens, boolean p_postFiltered)
     {
         PTTmxController TmxCtrl = new PTTmxController();
         PTEscapeSequence PTEsc = new PTEscapeSequence();
@@ -136,11 +161,23 @@ public class Extractor
         Enumeration en = p_vTokens.elements();
         while (en.hasMoreElements())
         {
-            PTToken Tok = (PTToken)en.nextElement();
+            PTToken Tok = (PTToken) en.nextElement();
 
             if (Tok.m_nType == PTToken.TEXT)
             {
-                getOutput().addTranslatable(Tok.m_strContent);
+                String content = Tok.m_strContent;
+                if (p_postFiltered)
+                {
+                    content = StringUtil
+                            .replace(content, PLACEHOLDER_LEFT, "<");
+                    content = StringUtil.replace(content, PLACEHOLDER_RIGHT,
+                            ">");
+                    getOutput().addTranslatableTmx(content);
+                }
+                else
+                {
+                    getOutput().addTranslatable(content);
+                }
             }
             else
             {
@@ -164,18 +201,17 @@ public class Extractor
     }
 
     /**
-     * <p>This method is the top level entry point to start the
-     * extractor.  The output of the extraction process is stored in
-     * an Output object which was passed to the extraction framework
-     * by the caller.</p>
+     * <p>
+     * This method is the top level entry point to start the extractor. The
+     * output of the extraction process is stored in an Output object which was
+     * passed to the extraction framework by the caller.
+     * </p>
      *
      * @see com.globalsight.ling.docproc.AbstractExtractor
      *      docproc.AbstractExtractor
-     * @see com.globalsight.ling.docproc.Output
-     *      docproc.Output
+     * @see com.globalsight.ling.docproc.Output docproc.Output
      */
-    public void extract()
-        throws ExtractorException
+    public void extract() throws ExtractorException
     {
         getOutput().setDataFormat("plaintext");
         // GBS-3672
@@ -186,14 +222,14 @@ public class Extractor
             pf = (PlainTextFilter) f;
         }
 
-        List<CustomTextRule> customTextRules = null;
         if (pf != null)
         {
             try
             {
                 PlainTextFilterParser parser = new PlainTextFilterParser(pf);
                 parser.parserXml();
-                customTextRules = parser.getCustomTextRules();
+                m_customTextRules = parser.getCustomTextRules();
+                m_elementPostFilter = parser.getElementPostFilter();
             }
             catch (Exception ex)
             {
@@ -201,7 +237,7 @@ public class Extractor
             }
         }
 
-        if (customTextRules != null && customTextRules.size() > 0)
+        if (m_customTextRules != null && m_customTextRules.size() > 0)
         {
             // The Custom Text File filter should process files line-by-line.
             LineNumberReader lr = new LineNumberReader(readInput());
@@ -214,12 +250,12 @@ public class Extractor
                 while (line != null)
                 {
                     int[] index = CustomTextRuleHelper.extractOneLine(line,
-                            customTextRules);
+                            m_customTextRules);
                     if (index == null)
                     {
                         getOutput().addSkeleton(line);
                     }
-                    else if (index.length == 2)
+                    else if (index.length == 2 && index[0] < index[1])
                     {
                         String s0 = line.substring(0, index[0]);
                         String s1 = line.substring(index[0], index[1]);
@@ -230,16 +266,30 @@ public class Extractor
                         }
                         if (s1 != null && s1.length() > 0)
                         {
-                            getOutput().addTranslatable(s1);
+                            if (m_elementPostFilter != null)
+                            {
+                                gotoPostFilter(s1);
+                            }
+                            else
+                            {
+                                getOutput().addTranslatable(s1);
+                            }
                         }
                         if (s2 != null && s2.length() > 0)
                         {
                             getOutput().addSkeleton(s2);
                         }
                     }
+                    else
+                    {
+                        getOutput().addSkeleton(line);
+                    }
 
-                    getOutput().addSkeleton(lineterminator);
                     line = lr.readLine();
+                    if (line != null)
+                    {
+                        getOutput().addSkeleton(lineterminator);
+                    }
                 }
             }
             catch (Exception e)
@@ -247,106 +297,188 @@ public class Extractor
                 throw new ExtractorException(e);
             }
         }
-        // extract as before if no rule
         else
         {
-            int cVECTORSTART = 200;
-            int cVECTORINC = 50;
-
-            boolean bLeadingSequence = true;
-            boolean bPrevWasCR = false;
-            PTToken nextToken;
-            Vector vTokenBuf = new Vector(cVECTORSTART, cVECTORINC);
-
-            Parser parser = new Parser(readInput());
-            PTToken token = parser.getNextToken();
-
-            while (token.m_nType != PTToken.EOF)
+            if (m_elementPostFilter != null)
             {
-                if (token.m_nType == PTToken.TEXT)
+                gotoPostFilter();
+            }
+            else
+            {
+                extractString(readInput(), false);
+            }
+        }
+    }
+
+    private void extractString(Reader p_input, boolean p_postFiltered)
+    {
+        int cVECTORSTART = 200;
+        int cVECTORINC = 50;
+
+        boolean bLeadingSequence = true;
+        boolean bPrevWasCR = false;
+        PTToken nextToken;
+        Vector vTokenBuf = new Vector(cVECTORSTART, cVECTORINC);
+
+        Parser parser = new Parser(p_input);
+        PTToken token = parser.getNextToken();
+
+        while (token.m_nType != PTToken.EOF)
+        {
+            if (token.m_nType == PTToken.TEXT)
+            {
+                // termination of leading whitespace
+                bLeadingSequence = false;
+            }
+            else if ((token.m_nType == PTToken.LINEBREAK))
+            {
+                // termination of leading whitespace
+                bLeadingSequence = false;
+
+                if (m_breakOnSingleCR)
                 {
-                    // termination of leading whitespace
-                    bLeadingSequence = false;
+                    // write vTokenBuf if not empty
+                    addTokensToOutput(vTokenBuf, p_postFiltered);
+
+                    // write CR as skel
+                    getOutput().addSkeleton(token.m_strContent);
+                    token = parser.getNextToken();
+                    continue;
                 }
-                else if ((token.m_nType == PTToken.LINEBREAK))
+                else
                 {
-                    // termination of leading whitespace
-                    bLeadingSequence = false;
-
-                    if (m_breakOnSingleCR)
+                    if (bPrevWasCR)
                     {
-                        // write vTokenBuf if not empty
-                        addTokensToOutput(vTokenBuf);
+                        // write vTokenBuf
+                        addTokensToOutput(vTokenBuf, p_postFiltered);
 
-                        // write CR as skel
+                        // then read write CRs
+                        // 1st - previous one
                         getOutput().addSkeleton(token.m_strContent);
+                        // 2nd - current one
+                        getOutput().addSkeleton(token.m_strContent);
+
+                        // write additional trailing CRs
                         token = parser.getNextToken();
+                        while (token.m_nType == PTToken.LINEBREAK)
+                        {
+                            getOutput().addSkeleton(token.m_strContent);
+                            token = parser.getNextToken();
+                        }
                         continue;
                     }
                     else
                     {
-                        if (bPrevWasCR)
+                        bPrevWasCR = true;
+
+                        // What to do with embedded carriage returns?
+                        nextToken = parser.getNextToken();
+
+                        if ((nextToken.m_nType != PTToken.LINEBREAK)
+                                && m_keepEmbeddedCR
+                                && (token.m_nType != PTToken.EOF))
                         {
-                            // write vTokenBuf
-                            addTokensToOutput(vTokenBuf);
-
-                            // then read write CRs
-                            // 1st - previous one
-                            getOutput().addSkeleton(token.m_strContent);
-                            // 2nd - current one
-                            getOutput().addSkeleton(token.m_strContent);
-
-                            // write additional trailing CRs
-                            token = parser.getNextToken();
-                            while (token.m_nType == PTToken.LINEBREAK)
-                            {
-                                getOutput().addSkeleton(token.m_strContent);
-                                token = parser.getNextToken();
-                            }
-                            continue;
+                            // keep it
+                            vTokenBuf.add(token);
                         }
-                        else
+                        else if ((nextToken.m_nType != PTToken.LINEBREAK)
+                                && !m_keepEmbeddedCR
+                                && (token.m_nType != PTToken.EOF))
                         {
-                            bPrevWasCR = true;
-
-                            // What to do with embedded carriage returns?
-                            nextToken = parser.getNextToken();
-
-                            if ((nextToken.m_nType != PTToken.LINEBREAK)
-                                    && m_keepEmbeddedCR
-                                    && (token.m_nType != PTToken.EOF))
-                            {
-                                // keep it
-                                vTokenBuf.add(token);
-                            }
-                            else if ((nextToken.m_nType != PTToken.LINEBREAK)
-                                    && !m_keepEmbeddedCR
-                                    && (token.m_nType != PTToken.EOF))
-                            {
-                                // convert it
-                                vTokenBuf.add(new PTToken(PTToken.TEXT, " "));
-                            }
-                            token = nextToken;
+                            // convert it
+                            vTokenBuf.add(new PTToken(PTToken.TEXT, " "));
                         }
-                        continue;
+                        token = nextToken;
                     }
+                    continue;
                 }
-
-                bPrevWasCR = false;
-                vTokenBuf.add(token);
-                token = parser.getNextToken();
             }
 
-            addTokensToOutput(vTokenBuf);
+            bPrevWasCR = false;
+            vTokenBuf.add(token);
+            token = parser.getNextToken();
+        }
+
+        addTokensToOutput(vTokenBuf, p_postFiltered);
+    }
+
+    /**
+     * Goes to element post-filter for extraction with given string.
+     * 
+     * @since GBS-3881
+     */
+    private void gotoPostFilter(String str)
+    {
+        String dataFormat = FilterConstants.FILTER_TABLE_NAMES_FORMAT
+                .get(m_elementPostFilter.getFilterTableName());
+        Output output = switchExtractor(str, dataFormat, m_elementPostFilter);
+        Iterator it = output.documentElementIterator();
+        while (it.hasNext())
+        {
+            DocumentElement element = (DocumentElement) it.next();
+            switch (element.type())
+            {
+                case DocumentElement.TRANSLATABLE:
+                case DocumentElement.LOCALIZABLE:
+                    Segmentable segmentableElement = (Segmentable) element;
+                    String chunk = segmentableElement.getChunk();
+                    getOutput().addTranslatableTmx(chunk);
+
+                    break;
+
+                case DocumentElement.SKELETON:
+                    String skeleton = ((SkeletonElement) element).getSkeleton();
+                    getOutput().addSkeletonTmx(skeleton);
+
+                    break;
+            }
         }
     }
 
     /**
-     * <p>Part of Jim's rules engine idea. Still required by the
-     * ExtractorInterface.</p>
+     * Goes to element post-filter for extraction.
+     * 
+     * @since GBS-3881
      */
-    public void loadRules()
-        throws ExtractorException
+    private void gotoPostFilter()
+    {
+        HtmlEntities encoder = new HtmlEntities();
+        String dataFormat = FilterConstants.FILTER_TABLE_NAMES_FORMAT
+                .get(m_elementPostFilter.getFilterTableName());
+        Output output = switchExtractor(dataFormat, m_elementPostFilter);
+        Iterator it = output.documentElementIterator();
+        while (it.hasNext())
+        {
+            DocumentElement element = (DocumentElement) it.next();
+            switch (element.type())
+            {
+                case DocumentElement.TRANSLATABLE:
+                case DocumentElement.LOCALIZABLE:
+                    Segmentable segmentableElement = (Segmentable) element;
+                    String chunk = segmentableElement.getChunk();
+                    // need to keep <bpt>, <ph>.. tag generated from post-filter
+                    chunk = StringUtil.replace(chunk, "<", PLACEHOLDER_LEFT);
+                    chunk = StringUtil.replace(chunk, ">", PLACEHOLDER_RIGHT);
+                    extractString(new StringReader(chunk), true);
+
+                    break;
+
+                case DocumentElement.SKELETON:
+                    String skeleton = ((SkeletonElement) element).getSkeleton();
+                    getOutput().addSkeletonTmx(skeleton);
+
+                    break;
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * Part of Jim's rules engine idea. Still required by the
+     * ExtractorInterface.
+     * </p>
+     */
+    public void loadRules() throws ExtractorException
     {
     }
 }

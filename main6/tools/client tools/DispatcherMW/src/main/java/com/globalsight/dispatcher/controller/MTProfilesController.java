@@ -19,6 +19,8 @@ package com.globalsight.dispatcher.controller;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,8 +36,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.google.translate.api.v2.core.Translator;
+import org.google.translate.api.v2.core.model.Translation;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
@@ -206,6 +210,9 @@ public class MTProfilesController
                 break;
             case IPTranslator:
                 setIPMtParams(p_request, mtProfile);
+                break;
+            case Google_Translate:
+                setGtMtParams(p_request, mtProfile);
                 break;
         }
 
@@ -440,6 +447,20 @@ public class MTProfilesController
         }
     }
     
+    private void setGtMtParams(HttpServletRequest p_request,
+            MachineTranslationProfile mtProfile)
+    {
+        String apiKey = p_request
+                .getParameter(MTProfileConstants.MT_GOOGLE_API_KEY);
+        if (apiKey != null)
+            apiKey = apiKey.trim();
+
+        if (StringUtils.isNotBlank(apiKey))
+        {
+            mtProfile.setAccountinfo(apiKey);
+        }
+    }
+    
     public boolean checkPassword(String p_pass)
     {
         if (p_pass == null)
@@ -468,10 +489,52 @@ public class MTProfilesController
                 return testMSHost(mtProfile, writer);
             case IPTranslator:
                 return testIPHost(mtProfile, writer);
+            case Google_Translate:
+                return testGoogle(mtProfile, writer);
 
         }
         return false;
 
+    }
+
+    private boolean testGoogle(MachineTranslationProfile mtProfile,
+            PrintWriter writer) throws JSONException
+    {
+            String encodedText = "";
+
+            try
+            {
+                encodedText = URLEncoder.encode("This is test", "UTF-8");
+            }
+            catch (UnsupportedEncodingException e1)
+            {
+                logger.error(e1);
+            }
+
+            String apiKey = mtProfile.getAccountinfo();
+            Translator translator = new Translator(apiKey);
+            Translation translation = null;
+
+            try
+            {
+                translation = translator.translate(encodedText, "en", "fr");
+            }
+            catch (Exception e)
+            {
+                JSONObject jso = new JSONObject();
+                jso.put("ExceptionInfo", new String(
+                        "Connection to https://www.googleapis.com refused."));
+                writer.write(jso.toString());
+                logger.error(e);
+                return false;
+            }
+
+            if (translation != null)
+            {
+                return true;
+            }
+
+            return false;
     }
 
     private boolean testIPHost(MachineTranslationProfile mtProfile,

@@ -15,6 +15,8 @@
             type="string" not-null="false" />
         <property name="attrValTableName" length="128" column="attr_val_table" 
             type="string" not-null="false" />
+        <property name="tuTuvAttrTableName" length="128" column="tu_tuv_attr_table" 
+            type="string" not-null="false" />
 
         <set name="attributes" inverse="true">
             <key column="tmId" />

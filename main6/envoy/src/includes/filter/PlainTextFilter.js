@@ -35,6 +35,7 @@ function PlainTextFilter()
 	this.currentOption = this.optionCustomTextRules;
 	this.editItemId = -1;
 	this.editItemEnable = false;
+	this.availablePostFilters = ["html_filter"];
 }
 
 PlainTextFilter.prototype.setFilter = function (filter)
@@ -112,6 +113,14 @@ PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFi
 	str.append(generateBaseFilterList(this.filterTableName, this.filter));
 	str.append("</td>");
 	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsElementPostFilter + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateElementPostFilter(this.filter));
+	str.append("</td>");
+	str.append("</tr>");
+	
 	str.append("</table>");
 	
 	str.append("<div class='specialFilter_dialog_label' style='width:450px'>");
@@ -170,6 +179,14 @@ PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append(generateBaseFilterList(this.filterTableName));
 	str.append("</td>");
 	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsElementPostFilter + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateElementPostFilter());
+	str.append("</td>");
+	str.append("</tr>");
+	
 	str.append("</table>");
 	
 	str.append("<div class='specialFilter_dialog_label' style='width:450px'>");
@@ -256,6 +273,10 @@ function savePlainTextFilter()
 	var filterDesc = document.getElementById("plaintextFilterDesc").value;
 	var baseFilterId = document.getElementById("plain_text_filter_baseFilterSelect").value;
 	var customTextRules = JSON.stringify(plaintextFilter.optionObjsMap[plaintextFilter.optionCustomTextRules]);
+	var elementPostFilterIdTable = document.getElementById("elementPostFilter").value;
+	var splitedElementPostIdTable = splitByFirstIndex(elementPostFilterIdTable, "-");
+	var elementPostFilterId = (splitedElementPostIdTable) ? splitedElementPostIdTable[0] : "-1";
+	var elementPostFilter = (splitedElementPostIdTable) ? splitedElementPostIdTable[1] : "-1";
 	
 	//alertUserBaseFilter(baseFilterId);
 
@@ -268,7 +289,9 @@ function savePlainTextFilter()
 		filterId : savePlainTextFilter.filterId,
 		companyId : companyId,
 		baseFilterId : baseFilterId,
-		customTextRules : customTextRules
+		customTextRules : customTextRules,
+		elementPostFilter : elementPostFilter,
+		elementPostFilterId : elementPostFilterId
 	};
 
 	// send for check
@@ -321,6 +344,8 @@ function updatePlainTextFilterCallback(data)
 		xrFilter.filterDescription = isFilterValidCallback.obj.filterDesc;
 		xrFilter.baseFilterId = isFilterValidCallback.obj.baseFilterId;
 		xrFilter.customTextRules = isFilterValidCallback.obj.customTextRules;
+		xrFilter.elementPostFilter = isFilterValidCallback.obj.elementPostFilter;
+		xrFilter.elementPostFilterId = isFilterValidCallback.obj.elementPostFilterId;
 		xrFilter.companyId = companyId;
 		var specialFilters = updateSpecialFilter(savePlainTextFilter.specialFilters, xrFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
@@ -342,10 +367,66 @@ function savePlainTextFilterCallback(data)
 		xrFilter.filterDescription = isFilterValidCallback.obj.filterDesc;
 		xrFilter.baseFilterId = isFilterValidCallback.obj.baseFilterId;
 		xrFilter.customTextRules = isFilterValidCallback.obj.customTextRules;
+		xrFilter.elementPostFilter = isFilterValidCallback.obj.elementPostFilter;
+		xrFilter.elementPostFilterId = isFilterValidCallback.obj.elementPostFilterId;
 		xrFilter.companyId = companyId;
 		filter.specialFilters.push(xrFilter);
 		reGenerateFilterList(topFilterId, filter.specialFilters, color);
 	}
+}
+
+PlainTextFilter.prototype.generateElementPostFilter = function (filter)
+{
+	var str = new StringBuffer("<select id='elementPostFilter' class='xml_filter_select'>");
+	str.append("<option value='-1'" + ((filter && filter.elementPostFilter == "-1") ? " selected" : "") + ">" + jsChoose + "</option>");
+	
+	str.append(this.generateAvailableFilterOptions(filter, "elementPostFilterId", "elementPostFilter"));
+	str.append("</select>");
+	return str.toString();
+}
+
+PlainTextFilter.prototype.generateAvailableFilterOptions = function(filter, filterIdPara, filterTableNamePara)
+{
+	var str = new StringBuffer("");
+	var _filterConfigurations = filterConfigurations;
+	
+	if (_filterConfigurations)
+	{
+	for(var i = 0; i < _filterConfigurations.length; i++)
+	{
+		var _filter = _filterConfigurations[i];
+        if (this.availablePostFilters.contains(_filter.filterTableName))
+        {
+        	var _htmlSpecialFilters = _filter.specialFilters;
+        	if (_htmlSpecialFilters)
+        	{
+	        	for (var j = 0; j < _htmlSpecialFilters.length; j++)
+	        	{
+	        		var _htmlSpecialFilter = _htmlSpecialFilters[j];
+	        		var _filterTableName = _htmlSpecialFilter.filterTableName;
+	        		var _filterName = _htmlSpecialFilter.filterName;
+
+	        		var _id = _htmlSpecialFilter.id;
+	        		var theFiterId = (filter) ? eval("filter." + filterIdPara) : -2;
+	        		var theFilterTableName = (filter) ? eval("filter." + filterTableNamePara) : "";
+		        		
+	        		var selected = ""; 
+	        		if (_id == theFiterId && _filterTableName == theFilterTableName)
+	        		{
+	        			selected = "selected";
+	        		}
+	        		var id_filterTableName = _id + "-" + _filterTableName;
+	        		if (_filterTableName != undefined && _filterName != undefined && _id != undefined)
+	        		{
+	        		    str.append("<option value='" + id_filterTableName + "' " + selected + ">" + _filterName + "</option>");	
+	        		}
+
+	        	}
+        	}
+        }
+	}
+	}
+	return str.toString();
 }
 
 PlainTextFilter.prototype.generateTagsTable = function (filter)

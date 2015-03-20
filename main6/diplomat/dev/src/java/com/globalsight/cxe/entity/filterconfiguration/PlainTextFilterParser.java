@@ -44,6 +44,8 @@ public class PlainTextFilterParser
 {
     public static final String NODE_ROOT = "PlainTextFilterConfig";
     public static final String NODE_CUSTOM = "customTextRules";
+    public static final String NODE_ELEMENT_POST_FILTER = "elementPostFilter";
+    public static final String NODE_ELEMENT_POST_FILTER_ID = "elementPostFilterId";
 
     public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</"
             + NODE_ROOT + ">";
@@ -54,6 +56,8 @@ public class PlainTextFilterParser
     private Document m_document = null;
     private Element m_rootElement = null;
     private String m_configXml = null;
+    private String m_elementPostFilter = null;
+    private String m_elementPostFilterId = null;
 
     public PlainTextFilterParser(PlainTextFilter f)
     {
@@ -73,7 +77,9 @@ public class PlainTextFilterParser
 
     // {tagName : "name1", itemid : 1, attributes : [{itemid : 0, aName :
     // "name1", aOp : "equal", aValue : "vvv1"}]}
-    public static String toXml(JSONArray customTextRules) throws Exception
+    public static String toXml(JSONArray customTextRules,
+            String elementPostFilter, String elementPostFilterId)
+            throws Exception
     {
         StringBuffer sb = new StringBuffer();
         sb.append("<").append(NODE_ROOT).append(">");
@@ -81,6 +87,12 @@ public class PlainTextFilterParser
         sb.append(customTextRules == null ? ""
                 : jsonArrayToXml(customTextRules));
         sb.append("</").append(NODE_CUSTOM).append(">");
+        sb.append("<").append(NODE_ELEMENT_POST_FILTER).append(">");
+        sb.append(elementPostFilter);
+        sb.append("</").append(NODE_ELEMENT_POST_FILTER).append(">");
+        sb.append("<").append(NODE_ELEMENT_POST_FILTER_ID).append(">");
+        sb.append(elementPostFilterId);
+        sb.append("</").append(NODE_ELEMENT_POST_FILTER_ID).append(">");
         sb.append("</").append(NODE_ROOT).append(">");
 
         return sb.toString();
@@ -147,6 +159,51 @@ public class PlainTextFilterParser
         }
 
         return result;
+    }
+
+    public String getElementPostFilterTableName()
+    {
+        if (m_elementPostFilter == null)
+        {
+            String result = getSingleElementValue(NODE_ELEMENT_POST_FILTER);
+            m_elementPostFilter = (result == null ? "" : result);
+        }
+
+        return m_elementPostFilter;
+    }
+
+    public Filter getElementPostFilter() throws Exception
+    {
+        long postFilterId = -1;
+        String v = getElementPostFilterId();
+        try
+        {
+            postFilterId = Long.parseLong(v);
+        }
+        catch (Exception e)
+        {
+        }
+        String filterTableName = getElementPostFilterTableName();
+
+        if (postFilterId >= 0 && filterTableName != null)
+        {
+            return FilterHelper.getFilter(filterTableName, postFilterId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public String getElementPostFilterId()
+    {
+        if (m_elementPostFilterId == null)
+        {
+            String result = getSingleElementValue(NODE_ELEMENT_POST_FILTER_ID);
+            m_elementPostFilterId = (result == null ? "" : result);
+        }
+
+        return m_elementPostFilterId;
     }
 
     public String getCustomTextRulesJson()
@@ -248,7 +305,8 @@ public class PlainTextFilterParser
             return "[]";
         }
 
-        String newXml = innerXml.replace("<finishString/>", "<finishString></finishString>");
+        String newXml = innerXml.replace("<finishString/>",
+                "<finishString></finishString>");
         StringBuffer ret = new StringBuffer(
                 (XML.toJSONObject(newXml)).toString());
 

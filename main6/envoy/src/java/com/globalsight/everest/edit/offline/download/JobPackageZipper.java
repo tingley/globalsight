@@ -51,6 +51,7 @@ import com.globalsight.everest.edit.offline.rtf.RTFWriterAnsi;
 import com.globalsight.everest.edit.offline.rtf.RTFWriterUnicode;
 import com.globalsight.everest.edit.offline.ttx.ListViewWorkTTXWriter;
 import com.globalsight.everest.edit.offline.xliff.ListViewWorkXLIFFWriter;
+import com.globalsight.everest.edit.offline.xliff.xliff20.ListViewWorkXLIFF20Writer;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
@@ -593,11 +594,22 @@ public class JobPackageZipper
     {
         try
         {
-            ListViewWorkXLIFFWriter writer = new ListViewWorkXLIFFWriter();
+            if (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20)
+            {
+                ListViewWorkXLIFF20Writer writer = new ListViewWorkXLIFF20Writer();
 
-            writer.write(p_downloadParams, p_page, m_zipOutputStream,
-                    GlobalSightLocale.makeLocaleFromString(p_downloadParams
-                            .getUiLocale()));
+                writer.write(p_downloadParams, p_page, m_zipOutputStream,
+                        GlobalSightLocale.makeLocaleFromString(p_downloadParams
+                                .getUiLocale()));
+            }
+            else
+            {
+                ListViewWorkXLIFFWriter writer = new ListViewWorkXLIFFWriter();
+
+                writer.write(p_downloadParams, p_page, m_zipOutputStream,
+                        GlobalSightLocale.makeLocaleFromString(p_downloadParams
+                                .getUiLocale()));
+            }
         }
         catch (IOException ex)
         {

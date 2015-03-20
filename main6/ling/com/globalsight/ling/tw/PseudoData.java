@@ -63,6 +63,7 @@ public class PseudoData
     private String m_dataType = null;
     private boolean ignoreNativeId = false;
     private boolean m_isXliffXlfFile = false;
+    private boolean isXliff20File = false;
 
     // Hash which holds directives to override the standard creation of PTags.
     static private Properties m_hPseudoOverrideMap;
@@ -1628,5 +1629,21 @@ public class PseudoData
     public void setIgnoreNativeId(boolean ignoreNativeId)
     {
         this.ignoreNativeId = ignoreNativeId;
+    }
+
+    /**
+     * @return the isXliff20File
+     */
+    public boolean isXliff20File()
+    {
+        return isXliff20File;
+    }
+
+    /**
+     * @param isXliff20File the isXliff20File to set
+     */
+    public void setXliff20File(boolean isXliff20File)
+    {
+        this.isXliff20File = isXliff20File;
     }
 }

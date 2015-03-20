@@ -216,7 +216,8 @@ public interface AmbassadorDwUpConstants
     static public final int DOWNLOAD_FILE_FORMAT_TTX = 36;
     static public final int DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED = 37;
     static public final int DOWNLOAD_FILE_FORMAT_OMEGAT = 39;
-    static public final int DOWNLOAD_FILE_FORMAT_LIST_END = 40;
+    static public final int DOWNLOAD_FILE_FORMAT_XLF20 = 40;
+    static public final int DOWNLOAD_FILE_FORMAT_LIST_END = 41;
 
     // EDITALL STATE (a user selectable download option)
     static public final int DOWNLOAD_EDITALL_STATE_UNAUTHORIZED = 40;

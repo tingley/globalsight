@@ -218,6 +218,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private String m_instanceID = null;
     private boolean m_isOmegaT = false;
     private boolean m_isXliff = false;
+    private boolean m_isXliff20 = false;
     private boolean populate100 = false;
     private boolean preserveSourceFolder = false;
 
@@ -2268,7 +2269,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             FileUtil.writeBom(p_outputStream, TmxUtil.TMX_ENCODING);
             w = new OutputStreamWriter(p_outputStream, TmxUtil.TMX_ENCODING);
 //            writeOfflineTmxFile(w, p_params, p_tmxLevel, p_mode);
-			writeOfflineTmxFile(w, p_params, p_tmxLevel, p_mode, true);
+            writeOfflineTmxFile(w, p_params, p_tmxLevel, p_mode, true);
             w.flush();
         }
         catch (FileNotFoundException ex)
@@ -3047,10 +3048,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         }
     }
     
-	public void writeOfflineTmxFile(OutputStreamWriter p_outputStream,
-			DownloadParams p_params, int p_tmxLevel, int p_mode,
-			boolean singleExport)
-	{
+    public void writeOfflineTmxFile(OutputStreamWriter p_outputStream,
+            DownloadParams p_params, int p_tmxLevel, int p_mode,
+            boolean singleExport)
+    {
         if (p_outputStream == null)
         {
             CATEGORY.error("Null output stream.");
@@ -3228,18 +3229,18 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                     isAddTrasnlatedTU = false;
                                 }
 
-								TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-										sourceText, m_sourceLocaleName, null,
-										null, null, null);
-								TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-										targetText, m_targetLocaleName,
-										"MT!".equals(userId) ? "MT!" : match.getCreationUser(),
-										match.getCreationDate(),
-										"MT!".equals(userId) ? "MT!" : match.getModifyUser(),
-										match.getModifyDate());
-								exactAndFuzzy.append(TmxUtil.composeTu(
-										srcTuvInfo, trgTuvInfo, p_tmxLevel,
-										match.getSid()));
+                                TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
+                                        sourceText, m_sourceLocaleName, null,
+                                        null, null, null);
+                                TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
+                                        targetText, m_targetLocaleName,
+                                        "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
+                                        match.getCreationDate(),
+                                        "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
+                                        match.getModifyDate());
+                                exactAndFuzzy.append(TmxUtil.composeTu(
+                                        srcTuvInfo, trgTuvInfo, p_tmxLevel,
+                                        match.getSid()));
                             }
                         }
 
@@ -3977,7 +3978,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         
         if(p_projectTmIndex == Leverager.MT_PRIORITY)
         {
-        	return true;
+            return true;
         }
 
         return false;
@@ -4118,11 +4119,28 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         return tuId2XlfTrgStateMap.get(tuId);
     }
 
-	public void setPreserveSourceFolder(boolean preserveSourceFolder) {
-		this.preserveSourceFolder = preserveSourceFolder;
-	}
+    public void setPreserveSourceFolder(boolean preserveSourceFolder) {
+        this.preserveSourceFolder = preserveSourceFolder;
+    }
 
-	public boolean isPreserveSourceFolder() {
-		return preserveSourceFolder;
-	}
+    public boolean isPreserveSourceFolder() {
+        return preserveSourceFolder;
+    }
+    
+
+    /**
+     * @return the m_isXliff20
+     */
+    public boolean isXliff20()
+    {
+        return m_isXliff20;
+    }
+
+    /**
+     * @param m_isXliff20 the m_isXliff20 to set
+     */
+    public void setIsXliff20(boolean m_isXliff20)
+    {
+        this.m_isXliff20 = m_isXliff20;
+    }
 }

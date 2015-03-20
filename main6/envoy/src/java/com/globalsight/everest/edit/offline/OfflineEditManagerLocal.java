@@ -67,6 +67,8 @@ import com.globalsight.everest.edit.offline.upload.PtagErrorPageWriter;
 import com.globalsight.everest.edit.offline.upload.UploadApi;
 import com.globalsight.everest.edit.offline.upload.UploadPageSaverException;
 import com.globalsight.everest.edit.offline.xliff.XLIFFStandardUtil;
+import com.globalsight.everest.edit.offline.xliff.xliff20.ListViewWorkXLIFF20Writer;
+import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.PageManager;
@@ -205,6 +207,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
     static private final int UPLOAD_TYPE_XLF = 6;
 
     static private final int UPLOAD_TYPE_TTX = 7;
+    
+    static private final int UPLOAD_TYPE_XLF20 = 8;
 
     static private int counter = 0;
 
@@ -475,6 +479,11 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                                 {
                                     errorMsg = oe.getMessage();
                                 }
+                                
+                                if (errorMsg == null)
+                                {
+                                    errorMsg = aeMessage;
+                                }
 
                                 errorMsg = EditUtil.encodeTohtml(errorMsg);
                                 errorMsg = errorMsg.replace("\r\n", "<BR />");
@@ -705,6 +714,22 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     processUploadResult(errorString, processedCounter);
                     break;
                 }
+                
+                case UPLOAD_TYPE_XLF20:
+                {
+                    String txt = Tmx2Xliff20.conveterToTxt(FileUtil.readFile(p_tmpFile, ListViewWorkXLIFF20Writer.XLIFF_ENCODING));
+                    errorString = api.processXliff20(new StringReader(txt),
+                        p_fileName, p_user, taskId, excludedItemTypes,
+                        JmsHelper.JMS_UPLOAD_QUEUE);
+                    m_status.speak(processedCounter, fileName);
+                    m_status.speak(processedCounter, m_resource
+                            .getString("msg_upld_format_rtf_listview"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_errchk_in_progress"));
+                    processUploadResult(errorString, processedCounter);
+                    break;
+                }
+
 
                 case UPLOAD_TYPE_TTX:
                 {
@@ -1304,7 +1329,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 // Xliff file
                 if (content.indexOf("<xliff") > -1)
                 {
-                    rslt.m_type = UPLOAD_TYPE_XLF;
+                    if (content.contains("2.0"))
+                    {
+                        rslt.m_type = UPLOAD_TYPE_XLF20;
+                    }
+                    else
+                    {
+                        rslt.m_type = UPLOAD_TYPE_XLF;
+                    }
                 }
                 // TTX file
                 else if (content.indexOf("<TRADOStag") > -1)

@@ -114,6 +114,21 @@ public class Pseudo2TmxHandler implements PseudoBaseHandler
                     .append(sufferString);
             return;
         }
+        
+        if (m_PseudoData.isXliff20File())
+        {
+            if (tagName.startsWith("g"))
+            {
+                String i = tagName.substring(1);
+                tmxString = (String) m_PseudoData.m_missedhPseudo2TmxMap.get(i);
+                
+                if (tmxString != null)
+                {
+                    resultTmx.append(tmxString);
+                    return;
+                }
+            }
+        }
 
         // If not found in unique source mappings, try looking in
         // the addables map. The I Attribute for addables

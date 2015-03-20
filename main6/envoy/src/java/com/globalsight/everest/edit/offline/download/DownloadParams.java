@@ -1199,6 +1199,7 @@ public class DownloadParams implements Serializable
     public void setNeedConsolidate(boolean needConsolidate)
     {
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT
@@ -1252,6 +1253,7 @@ public class DownloadParams implements Serializable
     public void setIncludeRepetitions(boolean includeRepetitions)
     {
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT)

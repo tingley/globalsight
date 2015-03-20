@@ -298,6 +298,8 @@
 	
     String formatXlfName12 = OfflineConstants.FORMAT_XLF_NAME_12;
 	String formatXlfValue12 = OfflineConstants.FORMAT_XLF_VALUE_12;
+  
+	String formatXlfValue20 = OfflineConstants.FORMAT_XLF_VALUE_20;
 	
 	String formatTTXName = OfflineConstants.FORMAT_TTX_NAME;
 	String formatTTXValue = OfflineConstants.FORMAT_TTX_VALUE;
@@ -816,6 +818,7 @@ function disablePTFOptions(p_state)
     	var formatSelect = theForm.formatSelector;
     	if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>" ||
     	    formatSelect.options[formatSelect.selectedIndex].value == "<%= formatTTXValue %>" ||
+    	    formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfValue20 %>" ||
     	    formatSelect.options[formatSelect.selectedIndex].value == "<%= formatOmegaTValue %>" )
     	{
     	    theForm.ptagSelector.disabled = true;
@@ -1276,6 +1279,7 @@ $(document).ready(function(){
                   <OPTION VALUE="<%= formatValueRtfListViewTradosOptimized %>" title="For Trados 7 and SDL Trados 2007"><%= formatRtfListViewTradosOptimized %></OPTION>
                   <OPTION VALUE="<%= formatValueRtfListView %>" title="For SDL Trados 2009 and 2011"><%= formatRtfListView %></OPTION>
                   <OPTION VALUE="<%= formatXlfName12 %>" title="For Xliff 1.2"><%=formatXlfValue12 %></OPTION>
+                  <OPTION VALUE="<%= formatXlfValue20 %>" title="For Xliff 2.0"><%=formatXlfValue20 %></OPTION>
                   <OPTION VALUE="<%= formatTTXValue %>" title="For Trados 7 and SDL Trados 2007"><%=formatTTXName %></OPTION>
                 </SELECT>
               </SPAN></TD>

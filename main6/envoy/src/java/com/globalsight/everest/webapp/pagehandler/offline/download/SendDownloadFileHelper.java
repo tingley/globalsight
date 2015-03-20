@@ -880,6 +880,10 @@ public class SendDownloadFileHelper implements WebAppConstants
         {
             result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF;
         }
+        else if (fileFormat.equals(OfflineConstants.FORMAT_XLF_VALUE_20))
+        {
+            result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20;
+        }
         else if (fileFormat.equals(OfflineConstants.FORMAT_TTX_VALUE))
         {
             result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX;

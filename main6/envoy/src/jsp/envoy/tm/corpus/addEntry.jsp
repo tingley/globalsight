@@ -396,7 +396,7 @@ $(document).ready(function(){
   <tr>
     <td class="table_left">${lb_sid}:</td>
     <td class="table_right">
-      <input id="sid" type="text" size="40" value="">
+      <textarea rows="2" cols="50" id="sid" class="standardTextNew"></textarea>
 	</td>
   </tr>
   <tr>

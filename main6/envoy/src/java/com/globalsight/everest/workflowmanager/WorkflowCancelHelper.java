@@ -34,6 +34,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.request.Request;
+import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyFileRemoval;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -122,6 +123,18 @@ public class WorkflowCancelHelper
             + "AND tuv.LOCALE_ID = ? "
             + "AND splg.SP_ID IN (" + SOURCE_PAGE_IDS_PLACEHOLDER + ")";
 
+    private static final String SQL_DELETE_TU_TUV_ATTR = "DELETE attr.* FROM "
+    		+ TuvQueryConstants.TU_TUV_ATTR_TABLE_PLACEHOLDER + " attr, "
+    		+ TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " tuv, "
+    		+ TuvQueryConstants.TU_TABLE_PLACEHOLDER + " tu, "
+    		+ "source_page_leverage_group splg "
+    		+ "WHERE attr.OBJECT_TYPE = " + TuTuvAttributeImpl.OBJECT_TYPE_TUV
+    		+ " AND attr.OBJECT_ID = tuv.ID "
+    		+ " AND tuv.TU_ID = tu.ID "
+    	    + " AND tuv.LOCALE_ID = ? "
+    		+ " AND tu.LEVERAGE_GROUP_ID = splg.LG_ID "
+    	    + " AND splg.SP_ID IN (" + SOURCE_PAGE_IDS_PLACEHOLDER + ")";
+
     public static void cancelWorkflow(Workflow workflow) throws Exception
     {
         runningMessage = "Deleting workflow data in table ";
@@ -161,6 +174,7 @@ public class WorkflowCancelHelper
 
             String srcPageIds = getSourcePageIdsInStr(workflow);
             deleteLeverageMatch(conn, trgLocaleId, srcPageIds, jobId);
+            deleteTuTuvAttributeByTuvIds(conn, trgLocaleId, srcPageIds, jobId);
             deleteTuv(conn, trgLocaleId, srcPageIds, jobId);
 
             conn.commit();
@@ -374,6 +388,24 @@ public class WorkflowCancelHelper
         logStart(lmTableName.toUpperCase());
         execOnce(conn, sql, trgLocaleId);
         logEnd(lmTableName.toUpperCase());
+    }
+
+	private static void deleteTuTuvAttributeByTuvIds(Connection conn,
+			long trgLocaleId, String srcPageIds, long p_jobId) throws Exception
+    {
+        String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(p_jobId);
+        String tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(p_jobId);
+        String tuTuvAttrTableName = BigTableUtil.getTuTuvAttributeTableByJobId(p_jobId);
+		String sql = SQL_DELETE_TU_TUV_ATTR
+				.replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName)
+				.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTableName)
+				.replace(TuvQueryConstants.TU_TUV_ATTR_TABLE_PLACEHOLDER,
+						tuTuvAttrTableName)
+				.replace(SOURCE_PAGE_IDS_PLACEHOLDER, srcPageIds);
+
+        logStart(tuTuvAttrTableName.toUpperCase());
+        execOnce(conn, sql, trgLocaleId);
+        logEnd(tuTuvAttrTableName.toUpperCase());
     }
 
     private static void deleteTuv(Connection conn, long trgLocaleId,

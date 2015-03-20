@@ -934,6 +934,9 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setAttributeSet(originalProject.getAttributeSet());
             clone.setPMCost(originalProject.getPMCost());
             clone.setPoRequired(originalProject.getPoRequired());
+            clone.setAutoAcceptTrans(originalProject
+            		.getAutoAcceptTrans());
+            clone.setAutoSendTrans(originalProject.getAutoSendTrans());
             clone.setReviewOnlyAutoAccept(originalProject
                     .getReviewOnlyAutoAccept());
             clone.setReviewOnlyAutoSend(originalProject.getReviewOnlyAutoSend());

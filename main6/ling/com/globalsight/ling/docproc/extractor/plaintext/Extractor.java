@@ -255,7 +255,7 @@ public class Extractor extends AbstractExtractor implements
                     {
                         getOutput().addSkeleton(line);
                     }
-                    else if (index.length == 2)
+                    else if (index.length == 2 && index[0] < index[1])
                     {
                         String s0 = line.substring(0, index[0]);
                         String s1 = line.substring(index[0], index[1]);
@@ -279,6 +279,10 @@ public class Extractor extends AbstractExtractor implements
                         {
                             getOutput().addSkeleton(s2);
                         }
+                    }
+                    else
+                    {
+                        getOutput().addSkeleton(line);
                     }
 
                     line = lr.readLine();

@@ -531,6 +531,7 @@ public class Permission
     static public final String VIEW_SCORECARD = "viewScorecard";
     static public final String ELOQUA = "eloqua";
     static public final String MIND_TOUCH = "mindtouch";
+    static public final String GIT_CONNECTOR = "gitConnector";
 
     // Limit the range of global LP permissions,super LocalizationParticipant
     // user can only edit below permissions.
@@ -1088,6 +1089,7 @@ public class Permission
         added = addPermission(416, JOBS_REMOVEJOBFROMGROUP) || added;
         added = addPermission(417, MIND_TOUCH) || added;
         added = addPermission(418, REPORTS_POST_REVIEW_QA) || added;
+        added = addPermission(419, GIT_CONNECTOR) || added;
         return added;
     }
 

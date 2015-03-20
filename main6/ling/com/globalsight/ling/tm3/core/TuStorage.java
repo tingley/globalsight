@@ -35,6 +35,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.ling.tm3.core.persistence.BatchStatementBuilder;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
@@ -228,20 +229,59 @@ abstract class TuStorage<T extends TM3Data>
     {
         // This is very simple. Just dump the old values and write the
         // new ones.
-        deleteCustomAttributes(conn, tu.getId());
-        saveInlineAttributes(conn, tu.getId(), inlineAttributes);
+        deleteCustomAttribute(conn, tu.getId());
         saveCustomAttributes(conn, tu.getId(), customAttributes);
+
+        updateInlineAttributes(conn, tu.getId(), inlineAttributes);
     }
 
     /**
-     * Save inline attributes. This is the same across all table types.
+     * Update inline attributes. This is the same across all table types.
      * 
      * @param conn
      * @param attributes
      * @throws SQLException
      */
-    abstract void saveInlineAttributes(Connection conn, long tuId,
-            Map<TM3Attribute, Object> attributes) throws SQLException;
+    public void updateInlineAttributes(Connection conn, long tuId,
+            Map<TM3Attribute, Object> attributes) throws SQLException
+    {
+        if (attributes.isEmpty())
+        {
+            return;
+        }
+        StatementBuilder sb = new StatementBuilder("UPDATE ").append(
+                getStorage().getTuTableName()).append(" SET ");
+        boolean first = true;
+        TM3TuTuvAttribute sidAttr = null;
+        for (Map.Entry<TM3Attribute, Object> e : attributes.entrySet())
+        {
+        	// SID attribute is always stored into another table
+			if (".sid".equalsIgnoreCase(e.getKey().getName()))
+        	{
+				sidAttr = new TM3TuTuvAttribute(tuId,
+						TM3TuTuvAttribute.OBJECT_TYPE_TU,
+						TM3TuTuvAttribute.NAME_SID);
+                sidAttr.setTextValue((String) e.getValue());
+                sidAttr.setTmId(getStorage().getId());
+				continue;
+        	}
+
+			if (!first)
+            {
+                sb.append(", ");
+            }
+            sb.append(e.getKey().getColumnName() + " = ? ").addValue(
+                    e.getValue());
+            first = false;
+        }
+        sb.append(" WHERE id = ? ").addValue(tuId);
+        SQLUtil.exec(conn, sb);
+
+        if (sidAttr != null)
+        {
+        	updateTuTuvAttribute(conn, sidAttr);
+        }
+    }
 
     /**
      * Save custom attributes. This is the same across all table types.
@@ -253,7 +293,71 @@ abstract class TuStorage<T extends TM3Data>
     abstract void saveCustomAttributes(Connection conn, long tuId,
             Map<TM3Attribute, String> attributes) throws SQLException;
 
-    void deleteCustomAttributes(Connection conn, long tuId) throws SQLException
+    /**
+	 * Save "special" attributes (such as long SID) from TU/TUV tables.
+	 * 
+	 * @param conn
+	 * @param attributes
+	 * @throws SQLException
+	 */
+	protected void saveTuTuvAttributes(Connection conn,
+			List<TM3TuTuvAttribute> attributes) throws SQLException
+    {
+		if (attributes.isEmpty())
+		{
+			return;
+		}
+		BatchStatementBuilder sb = new BatchStatementBuilder()
+			.append("INSERT INTO ")
+			.append(getStorage().getTuTuvAttrTableName())
+			.append(" (tm_id, object_id, object_type, name, varchar_value, text_value, long_value, date_value) values (?, ?, ?, ?, ?, ?, ?, ?)");
+		for (TM3TuTuvAttribute att : attributes)
+		{
+			sb.addBatch(att.getTmId(), att.getObjectId(), att.getObjectType(),
+					att.getName(), att.getVarcharValue(), att.getTextValue(),
+					att.getLongValue(), att.getDateValue());
+		}
+		SQLUtil.execBatch(conn, sb);
+    }
+	
+	/**
+	 * Update "special" attributes (such as long SID) from TU/TUV tables.
+	 * 
+	 * @param conn
+	 * @param attribute
+	 * @throws SQLException
+	 */
+	protected void updateTuTuvAttribute(Connection conn,
+			TM3TuTuvAttribute attribute) throws SQLException
+	{
+		if (attribute != null)
+		{
+			deleteTuTuvAttribute(conn, attribute);
+
+			List<TM3TuTuvAttribute> attributes = new ArrayList<TM3TuTuvAttribute>();
+			attributes.add(attribute);
+			saveTuTuvAttributes(conn, attributes);
+		}
+	}
+
+	private void deleteTuTuvAttribute(Connection conn,
+			TM3TuTuvAttribute attribute) throws SQLException
+	{
+        if (attribute != null)
+        {
+			StatementBuilder sb = new StatementBuilder("DELETE FROM ")
+					.append(getStorage().getTuTuvAttrTableName())
+					.append(" WHERE object_type = ? ")
+					.addValue(attribute.getObjectType())
+					.append(" AND object_id = ? ")
+					.addValue(attribute.getObjectId()).append(" AND name = ? ")
+					.addValue(attribute.getName());
+        	SQLUtil.exec(conn,  sb);
+        }
+	}
+
+	private void deleteCustomAttribute(Connection conn, long tuId)
+			throws SQLException
     {
         try
         {
@@ -309,6 +413,9 @@ abstract class TuStorage<T extends TM3Data>
             return Collections.emptyList();
         }
         List<TuData<T>> tuDatas = getTuData(conn, tuIds, locking);
+
+        // Update SID attributes that are stored in "tm3_tu_tuv_attr_shared_xx".
+        loadTuTuvSidAttrs(conn, tuIds, tuDatas);
 
         // Now fetch TUVs
         loadTuvs(conn, tuIds, tuDatas, locking);
@@ -425,6 +532,48 @@ abstract class TuStorage<T extends TM3Data>
         {
             throw new SQLException(e);
         }
+    }
+
+    // Long SID (>255) is stored in "tm3_tu_tuv_shared_xx" table
+	private void loadTuTuvSidAttrs(Connection conn, List<Long> tuIds,
+			List<TuData<T>> tuDatas) throws SQLException
+    {
+		StatementBuilder sb = new StatementBuilder(
+				"SELECT id, tm_id, object_id, object_type, name, varchar_value, text_value, long_value, date_value FROM ")
+				.append(getStorage().getTuTuvAttrTableName())
+				.append(" WHERE name = 'SID' AND object_type = 'TU' AND object_id IN")
+				.append(SQLUtil.longGroup(tuIds));
+		try
+		{
+            PreparedStatement ps = sb.toPreparedStatement(conn);
+            ResultSet rs = SQLUtil.execQuery(ps);
+
+            Iterator<TuData<T>> tus = tuDatas.iterator();
+            TuData<T> current = null;
+            while (rs.next())
+            {
+                long tuId = rs.getLong("object_id");
+                String sid = rs.getString("text_value");
+                current = advanceToTu(current, tus, tuId);
+                if (current != null)
+                {
+                	for (TM3Attribute att : getStorage().getInlineAttributes())
+                	{
+                		if (att != null && att.getName().equals(".sid"))
+                		{
+                			// reset SID attribute
+                			current.attrs.put(att, sid);
+                			break;
+                		}
+                	}
+                }
+            }
+            ps.close();
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
     }
 
     private void loadTuvs(Connection conn, List<Long> tuIds,

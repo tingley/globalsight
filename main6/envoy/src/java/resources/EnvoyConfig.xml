@@ -745,6 +745,42 @@
         <PageLink linkName="self" destinationPageName="mt3"></PageLink>
       </WebPage>
     </WebActivity>
+    
+    <WebActivity webActivityName="gitconnector">
+      <WebPage pageName="GCM" isDefault="true" jspName="/envoy/connecter/git/gitConnectorMain.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorMainHandler">
+      	<PageLink linkName="new1" destinationPageName="GCB"></PageLink>
+        <PageLink linkName="modify" destinationPageName="GCB"></PageLink>
+        <PageLink linkName="remove" destinationPageName="GCM"></PageLink>
+      	<PageLink linkName="self" destinationPageName="GCM"></PageLink>
+      	<PageLink linkName="connect" destinationPageName="GCCJ"></PageLink>
+      	<PageLink linkName="fileMapping" destinationPageName="GCFMM"></PageLink>
+      </WebPage>
+      <WebPage pageName="GCB" isDefault="false" jspName="/envoy/connecter/git/gitConnectorBasic.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorBasicHandler">
+      	<PageLink linkName="self" destinationPageName="GCB"></PageLink>
+        <PageLink linkName="save" destinationPageName="GCM"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="GCM"></PageLink>
+      </WebPage>
+      <WebPage pageName="GCCJ" isDefault="false" jspName="/envoy/connecter/git/gitConnectorCreateJob.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorCreateJobHandler">
+      	<PageLink linkName="self" destinationPageName="GCCJ"></PageLink>
+      </WebPage>
+      <WebPage pageName="GCFMM" isDefault="false" jspName="/envoy/connecter/git/gitConnectorFileMappingMain.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorFileMappingMainHandler">
+      	<PageLink linkName="self" destinationPageName="GCFMM"></PageLink>
+        <PageLink linkName="new1" destinationPageName="GCFMN"></PageLink>
+        <PageLink linkName="modify" destinationPageName="GCFMB"></PageLink>
+        <PageLink linkName="remove" destinationPageName="GCFMM"></PageLink>
+        <PageLink linkName="back" destinationPageName="GCM"></PageLink>
+      </WebPage>
+      <WebPage pageName="GCFMN" isDefault="false" jspName="/envoy/connecter/git/gitConnectorFileMappingNew.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorFileMappingNewHandler">
+      	<PageLink linkName="self" destinationPageName="GCFMN"></PageLink>
+        <PageLink linkName="save" destinationPageName="GCFMM"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="GCFMM"></PageLink>
+      </WebPage>
+      <WebPage pageName="GCFMB" isDefault="false" jspName="/envoy/connecter/git/gitConnectorFileMappingBasic.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorFileMappingBasicHandler">
+      	<PageLink linkName="self" destinationPageName="GCFMB"></PageLink>
+        <PageLink linkName="save" destinationPageName="GCFMM"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="GCFMM"></PageLink>
+      </WebPage>
+    </WebActivity>
 
 	<WebActivity webActivityName="fileprofiles">
       <WebPage pageName="FP1" isDefault="true" jspName="/envoy/administration/fileprofile/fileprofileMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileMainHandler">

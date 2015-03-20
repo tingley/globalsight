@@ -63,6 +63,8 @@ public class ProjectImpl extends PersistentObject implements Project,
     private int poRequired = 1;
 
     // Auto-accept task and Auto-send report options.
+    private boolean autoAcceptTrans = false; // Auto-accept Translation Task
+    private boolean autoSendTrans = false; // Auto-send Translations Comments Report
     private boolean reviewOnlyAutoAccept = false; // Auto-accept Review Task
     private boolean reviewOnlyAutoSend = false; // Auto-send Reviewers Comments
                                                 // Report
@@ -538,7 +540,23 @@ public class ProjectImpl extends PersistentObject implements Project,
         this.poRequired = poRequired;
     }
 
-    public boolean getReviewOnlyAutoAccept()
+    public boolean getAutoAcceptTrans() {
+		return autoAcceptTrans;
+	}
+
+	public void setAutoAcceptTrans(boolean autoAcceptTrans) {
+		this.autoAcceptTrans = autoAcceptTrans;
+	}
+
+	public boolean getAutoSendTrans() {
+		return autoSendTrans;
+	}
+
+	public void setAutoSendTrans(boolean autoSendTrans) {
+		this.autoSendTrans = autoSendTrans;
+	}
+
+	public boolean getReviewOnlyAutoAccept()
     {
         return reviewOnlyAutoAccept;
     }

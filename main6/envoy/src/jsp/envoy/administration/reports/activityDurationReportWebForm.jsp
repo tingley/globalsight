@@ -81,6 +81,35 @@ $(document).ready(function(){
 	});
 });
 
+function defautSelect(){
+	var jobIdsval;
+	
+	jobIdsval=$("#jobId").val();
+	
+	if(jobIdsval)return;
+     var ops=$("#jobId").children();
+     if(ops.length==0){
+      return ('No job name(s) is(are) selected.');
+     }else{
+      ops.attr("selected", true);
+     }
+}
+
+function dataSelectAll(){
+	var startVal=searchForm.<%=creationStart%>.value;
+	if(startVal){
+		defautSelect();
+		  return ""; 
+	}
+	
+	var endVal=searchForm.<%=creationEnd%>.value;
+	if(endVal){
+		defautSelect();
+        return ""; 
+	}
+	  return "";
+}
+
 //The function for canceling the report.
 function fnDoCancel() {
   $.ajax({
@@ -111,6 +140,39 @@ function fnDoCancel() {
 }
 
 function submitForm() {
+	var msg =  dataSelectAll();
+   	if (msg != "")
+   	{
+    	alert(msg);
+    	return;
+   	}
+   
+   	alertInfo = null;
+	var jobIDArr = fnGetSelectedJobIds();
+	if(jobIDArr == null || jobIDArr.length == 0)
+	{
+		if(alertInfo != null)
+			alert(alertInfo); 
+		return;	
+	}	
+
+	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalsList"), jobInfos))
+	{
+		alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
+		return;
+	}
+	
+	var startVal=searchForm.<%=creationStart%>.value;
+	var endVal=searchForm.<%=creationEnd%>.value;
+	
+	if((!startVal) &&(!endVal))
+	{
+		$("#dateRange").val("N")
+	}else{
+		$("#dateRange").val("Y")
+	}
+
+	document.getElementById("inputJobIDS").value = jobIDArr.toString(); 
   $.ajax({
       type: 'POST',
       dataType: 'json',
@@ -119,13 +181,38 @@ function submitForm() {
       success: function (data) {
         if(data != null && data.status == inProgressStatus) {
           alert('<%=bundle.getString("msg_duplilcate_report")%>');
-        } else {
+        } 
+        else if(data != null && data.error){
+        	alert(data.error);
+        }
+        	else {
           $("form[name='searchForm']").submit();
         }
       }
   });
 }
 
+function fnGetSelectedJobIds()
+{
+	var jobIDArr = new Array();
+		var selObj = document.getElementById("jobId");
+		for (i=0; i<selObj.options.length; i++) 
+		{
+			if (selObj.options[i].selected) 
+			{
+				jobIDArr.push(selObj.options[i].value);
+			}
+		}
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+	    {
+			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
+			return;
+	    }
+	jobIDArr.sort(sortNumber);
+	
+	return jobIDArr;
+}
 
 function filterJob(){
 	var jobNameList = document.getElementById("jobId");
@@ -165,9 +252,7 @@ function filterJob(){
 	    	currSelectValueTargetLocale.push(op.value);
 		}
 	}
-	addOption("jobId","<%=bundle.getString("all")%>","*")
-	 $("#jobId").find("option[value='*']").attr("selected",true);
-	jobNameList.options.length=1;
+	jobNameList.options.length=0;
 	
 	// Insert jobNameList select options 
 	for(var i=0; i<jobInfos.length; i++)
@@ -179,9 +264,10 @@ function filterJob(){
 			addOption("jobId", jobInfos[i].jobName, jobInfos[i].jobId);
 		}
 	}
-	if(document.getElementById("jobId").options.length==1){
-		jobNameList.options.length=0;
-	}
+}
+function sortNumber(a,b) 
+{ 
+	return a - b 
 }
 </script>
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
@@ -197,13 +283,14 @@ function filterJob(){
 
 <form name="searchForm" method="post" action="<%=formAction%>">
 <input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.ACTIVITY_DURATION_REPORT%>">
+<input type="hidden" id="inputJobIDS" name="inputJobIDS">
+<input type="hidden" id="dateRange" name="dateRange">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
     <tr>
         <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
         <select id="jobId" name="jobId" MULTIPLE size="6" style="width:300px">
-            <option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
 <%
             for (ReportJobInfo j : jobList)
             {

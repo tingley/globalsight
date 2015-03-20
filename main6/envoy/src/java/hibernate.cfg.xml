@@ -110,6 +110,10 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CVSModule.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CVSModuleMapping.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CVSModuleMappingRename.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnector.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnectorCacheFile.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnectorFileMapping.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnectorJob.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RemoteIp.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AutoAction.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/JSPFilter.hbm.xml" />

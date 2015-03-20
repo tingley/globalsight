@@ -93,6 +93,8 @@ function fnInitialData(){
 		$("#idMsMtClientid").val('${mtProfile.username}');
 		$("#idMsMtClientSecret").val('${mtProfile.password}');
 		$("#idMsMtCategory").val('${mtProfile.category}');
+	}else if('Google_Translate' == current_engine){
+		$("#idAPIKey").val('${mtProfile.accountinfo}')
 	}	
 }
 
@@ -110,8 +112,8 @@ function testHost(formAction) {
                     if(data) {
                         if(data.ExceptionInfo) {
                             var vl = data.ExceptionInfo + "";
-                            var s = vl.indexOf(":");
-                            vl = vl.substr(s + 1);
+                            //var s = vl.indexOf(":");
+                            //vl = vl.substr(s + 1);
                             alert(vl);
                         } else if(data.Info) {
                            //self.location.href = '../mtProfiles/refresh.htm';
@@ -215,7 +217,15 @@ function checkOptions(formAction) {
             alert("Machine Translation engine url can't be empty or null.");
             return false;
         }
-    }
+    }else if(formAction == "Google_Translate") 
+	{
+		var apiKey = $.trim($("#idAPIKey").val());
+		if (apiKey ==null || apiKey == "") 
+		{
+            alert("Machine Translation engine API Key can't be empty or null!");
+            return false;                	
+        }
+	}
     return true;
 }
 
@@ -271,6 +281,7 @@ function contorlMTOptionShowing() {
     var aoMtDiv = document.getElementById("aoMtDiv");
     var safaMtDiv = document.getElementById("safaMtDiv");
     var IPTranslatorDiv = document.getElementById("IPTranslatorDiv");
+    var googleDiv = document.getElementById("googleDiv");
     var engineSelect = document.getElementById("mtEngine");
     var selectedEngineName = engineSelect.options[engineSelect.selectedIndex].value;
     // hide them all first
@@ -279,9 +290,10 @@ function contorlMTOptionShowing() {
     aoMtDiv.style.display = 'none';
     safaMtDiv.style.display = 'none';
     IPTranslatorDiv.style.display = 'none';
+    googleDiv.style.display='none';
     // display corresponding div by selected engine name.
-    if(selectedEngineName.toLowerCase() == "google") {
-        //do nothing
+    if(selectedEngineName.toLowerCase() == "google_translate") {
+    	googleDiv.style.display='block';
     } else if(selectedEngineName.toLowerCase() == "promt") {
         ptsDiv.style.display = 'block';
     } else if(selectedEngineName.toLowerCase() == "ms_translator") {
@@ -295,7 +307,7 @@ function contorlMTOptionShowing() {
     }
     //2.Display "Save" button or "Next" button
     var okBtn = document.getElementById("OK");
-    if(selectedEngineName.toLowerCase() == "google" || selectedEngineName.toLowerCase() == "ms_translator" || selectedEngineName.toLowerCase() == "safaba" || selectedEngineName == "IPTranslator") {
+    if(selectedEngineName.toLowerCase() == "google_translate" || selectedEngineName.toLowerCase() == "ms_translator" || selectedEngineName.toLowerCase() == "safaba" || selectedEngineName == "IPTranslator") {
         okBtn.value = "Save";
     } else {
         okBtn.value = "get Info";
@@ -434,7 +446,8 @@ function fnSaveOrUpdate() {
 									<option value="IPTranslator">IPTranslator</option>
 									<option value="MS_Translator">MS_Translator</option>
 									<option value="ProMT">ProMT</option>
-									<option value="Safaba">Safaba</option>															
+									<option value="Safaba">Safaba</option>	
+									<option value="Google_Translate">Google_Translate</option>														
 							</select>
 							</td>
 						</tr>
@@ -641,7 +654,28 @@ function fnSaveOrUpdate() {
                             </tbody>
                         </table>
                     </div>
-                    <!-- **************** IPTranslator MT Options : End ****************** -->				
+                    <!-- **************** IPTranslator MT Options : End ****************** -->	
+                    
+                    
+                    <!-- **************** Google MT Options : Start ****************** -->
+					<div id="googleDiv" style="display: none;">
+						<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0"
+							class="standardText" WIDTH="90%">
+							<tr>
+								<td colspan="3"><b>Settings for Google machine
+										translation engine. Google uses fixed URL:
+										https://www.googleapis.com</b></td>
+							</tr>
+							<tr>
+								<td ALIGN="LEFT">Google API Key<font color="red">*</font>:
+								</td>
+								<td><INPUT CLASS="standardText" ID="idAPIKey"
+									NAME="mt_google_api_key" value="" TYPE="text" MAXLENGTH="80"
+									SIZE="80" /></td>
+							</tr>
+						</TABLE>
+					</div>
+					<!-- **************** Google MT Options : End ******************** -->			
 				
 			</div>
 			<div>

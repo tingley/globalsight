@@ -153,38 +153,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         return sb;
     }
 
-    /**
-     * Save inline attributes. This is the same across all table types.
-     * 
-     * @param conn
-     * @param attributes
-     * @throws SQLException
-     */
-    @Override
-    void saveInlineAttributes(Connection conn, long tuId,
-            Map<TM3Attribute, Object> attributes) throws SQLException
-    {
-        if (attributes.isEmpty())
-        {
-            return;
-        }
-        StatementBuilder sb = new StatementBuilder("UPDATE ").append(
-                getStorage().getTuTableName()).append(" SET ");
-        boolean first = true;
-        for (Map.Entry<TM3Attribute, Object> e : attributes.entrySet())
-        {
-            if (!first)
-            {
-                sb.append(", ");
-            }
-            sb.append(e.getKey().getColumnName() + " = ? ").addValue(
-                    e.getValue());
-            first = false;
-        }
-
-        sb.append(" WHERE id = ? ").addValue(tuId);
-        SQLUtil.exec(conn, sb);
-    }
 
     /**
      * Save custom attributes. This is the same across all table types.
@@ -211,8 +179,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
         SQLUtil.execBatch(conn, sb);
     }
-
-    @Override
+    @Override
     public void saveTu(Connection conn, TM3Tu<T> tu) throws SQLException
     {
         tu.setId(getStorage().getTuId(conn));
@@ -220,6 +187,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 .getInlineAttributes(tu.getAttributes());
         Map<TM3Attribute, String> customAttributes = BaseTm
                 .getCustomAttributes(tu.getAttributes());
+        List<TM3TuTuvAttribute> sidAttrs = new ArrayList<TM3TuTuvAttribute>();
         StatementBuilder sb = new StatementBuilder("INSERT INTO ").append(
                 getStorage().getTuTableName())
                 .append(" (id, tmId, srcLocaleId");
@@ -231,12 +199,29 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 tu.getSourceTuv().getLocale().getId());
         for (Map.Entry<TM3Attribute, Object> e : inlineAttributes.entrySet())
         {
-            sb.append(", ?").addValue(e.getValue());
+        	// SID attribute is always stored into another table
+			if (".sid".equalsIgnoreCase(e.getKey().getName()))
+        	{
+                sb.append(", ?").addValue(null);
+
+                TM3TuTuvAttribute attr = new TM3TuTuvAttribute(tu.getId(),
+						TM3TuTuvAttribute.OBJECT_TYPE_TU,
+						TM3TuTuvAttribute.NAME_SID);
+				attr.setTextValue((String) e.getValue());
+				attr.setTmId(getStorage().getId());
+				sidAttrs.add(attr);
+        	}
+        	else
+        	{
+                sb.append(", ?").addValue(e.getValue());
+        	}
         }
         sb.append(")");
         SQLUtil.exec(conn, sb);
+
         addTuvs(conn, tu, tu.getAllTuv());
         saveCustomAttributes(conn, tu.getId(), customAttributes);
+        saveTuTuvAttributes(conn, sidAttrs);
     }
 
     @Override

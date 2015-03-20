@@ -142,6 +142,7 @@ public class JobCreationMonitor
                     companyId, jobId);
             String lmArchiveTable = BigTableUtil
                     .decideLMArchiveTableForJobCreation(companyId);
+            String tuTuvAttrTable = "translation_tu_tuv_attr_" + companyId;
             job.setTuTable(tuTable);
             job.setTuArchiveTable(tuArchiveTable);
             job.setTuvTable(tuvTable);
@@ -173,6 +174,10 @@ public class JobCreationMonitor
             if (!DbUtil.isTableExisted(lmArchiveTable))
             {
                 BigTableUtil.createLMTable(lmArchiveTable);
+            }
+            if (!DbUtil.isTableExisted(tuTuvAttrTable))
+            {
+            	BigTableUtil.createTuTuvAttrTable(tuTuvAttrTable);
             }
         }
         catch (Exception e)

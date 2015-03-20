@@ -122,6 +122,10 @@ public class SegmentTmPopulator
             // independent segments
             Collection<SegmentTmTu> segmentTus = TmUtil.createSegmentTmTus(tu,
                     p_sourceLocale);
+
+            // handle long SID for TM2 only.
+            handleLongSidBeforeSave(segmentTus);
+
             jobDataToSave.addTus(segmentTus);
         }
 
@@ -303,6 +307,38 @@ public class SegmentTmPopulator
         }
 
         return makeCorpusMapping(tm, segmentsForSave, jobDataToSave);
+    }
+
+    /**
+	 * Before save TUs into TM2, it need check if TU has been existed in DB by
+	 * segment string and SID values. As we only store at most 254 characters
+	 * for long SID, before comparing, we need pre-handle the long SID too.
+	 * 
+	 * @param segmentTus
+	 */
+    private void handleLongSidBeforeSave(Collection<SegmentTmTu> segmentTus)
+    {
+		if (segmentTus == null || segmentTus.size() == 0)
+			return;
+
+		String sid = null;
+        for (SegmentTmTu tmTu : segmentTus)
+        {
+        	sid = tmTu.getSID();
+        	if (sid != null && sid.length() > 254)
+        	{
+        		tmTu.setSID(sid.substring(0, 254));
+        	}
+
+        	for (BaseTmTuv tmTuv : tmTu.getTuvs())
+        	{
+        		sid = tmTuv.getSid();
+        		if (sid != null && sid.length() > 254)
+        		{
+        			tmTuv.setSid(sid.substring(0, 254));
+        		}
+        	}
+        }
     }
 
     private void mergeTuProperties(BaseTmTu baseTu, List<Long> handledTus,

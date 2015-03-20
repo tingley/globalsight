@@ -676,6 +676,7 @@ public class SegmentTmPersistence
             ps = m_connection.prepareStatement(updateSql);
             Iterator itTuv = p_nonClobTuvs.iterator();
             int count = 0;
+            String sid = null;
             while (itTuv.hasNext())
             {
                 count++;
@@ -684,7 +685,11 @@ public class SegmentTmPersistence
                 ps.setString(1, tuv.getSegment());
                 ps.setLong(2, tuv.getExactMatchKey());
                 ps.setString(3, tuv.getModifyUser());
-                ps.setString(4, tuv.getSid());
+                if (tuv.getSid() != null && tuv.getSid().length() > 254)
+                {
+                	sid = tuv.getSid().substring(0, 254);
+                }
+                ps.setString(4, sid);
                 ps.setLong(5, tuv.getId());
                 ps.addBatch();
 

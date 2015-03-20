@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.cxe.entity.gitconnector.GitConnectorJob"
+        table="CONNECTOR_GIT_JOB">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="gitConnectorId" column="GIT_CONNECTOR_ID" length="20"
+            type="long" not-null="true" />
+        <property name="jobId" column="JOB_ID" length="20"
+            type="long" not-null="true" />
+    </class>
+
+</hibernate-mapping>

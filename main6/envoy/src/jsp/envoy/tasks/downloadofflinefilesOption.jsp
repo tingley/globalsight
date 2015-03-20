@@ -211,7 +211,7 @@ function switchRadio(penalizedReferenceTmRadio)
             </TR>
   			<TR>
               <TD></TD>
-			  <TD><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="changeCreationIdForMT" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN></TD>
+			  <TD><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="changeCreationIdForMT" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>" checked="checked" value="true"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN></TD>
 			</TR>
 			<TR id="penalizedReferenceTm">
               <TD><SPAN CLASS="standardText"><%=labelPenalizedReferenceTm%>:</SPAN></TD>

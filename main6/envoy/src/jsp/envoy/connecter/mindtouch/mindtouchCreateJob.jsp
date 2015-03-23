@@ -489,10 +489,10 @@ function initPageDivInfo(pageIdAndUrl, pageTitle) {
     pdfUrl = "<A class='standardHREF' href='" + pdfUrl + "' target='_blank'>" + pdfUrl + "</A>";
 
     var html = "<table cellpadding=1 cellspacing=1 border=0 class='standardText' width='100%' style='border-collapse: collapse;'>" +
-            "<tr height='20' style='border-top:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='80'>Page Title:</td><td width='95%'>" + pageTitle + "</td></tr>" +
-            "<tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='80'>Page Id:</td><td width='95%'>" + pageId + "</td></tr>" +
-            "<tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='80'>PDF Review:</td><td width='95%'>" + pdfUrl + "</td></tr>" +
-            "<tr height='20' style='border-bottom:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='80'>Page URL:</td><td width='95%'>" + pageUrl + "</td></tr>" + 
+            "<tr height='20' style='border-top:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='10%'>Page Title:</td><td width='90%'>" + pageTitle + "</td></tr>" +
+            "<tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='10%'>Page Id:</td><td width='90%'>" + pageId + "</td></tr>" +
+            "<tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='10%'>PDF Review:</td><td width='90%'>" + pdfUrl + "</td></tr>" +
+            "<tr height='20' style='border-bottom:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'><td width='10%'>Page URL:</td><td width='90%'>" + pageUrl + "</td></tr>" + 
             "</table>";
     $("#currentNodeDiv").html(html);
 }
@@ -763,22 +763,22 @@ function removeSelectedFile(id) {
         <div id="treeDIV"><!-- Page tree is in this DIV. --></div>
         <div>&nbsp;</div>
         <div id="currentNodeDiv" style="display:block" class="standardText">
-            <table cellpadding=1 cellspacing=1 border=0 class='standardText' width='100%' style='border-collapse: collapse;'>
-                <tr height='20' style='border-top:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'>
-				    <td width='80'>Page Title:</td>
-					<td width='95%'></td>
+            <table cellpadding=1 cellspacing=1 border=0 class='standardText' width='100%' style='border-collapse: collapse;border:1px dotted #808080;'>
+                <tr height='20' >
+				    <td width='10%'>Page Title:</td>
+					<td width='90%'></td>
 				</tr>
-                <tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'>
-				    <td width='80'>Page Id:</td>
-					<td width='95%'></td>
+                <tr height='20' >
+				    <td width='10%'>Page Id:</td>
+					<td width='90%'></td>
 				</tr>
-                <tr height='20' style='border-left:1px dotted #808080;border-right:1px dotted #808080'>
-					<td width='80'>PDF Review:</td>
-					<td width='95%'></td>
+                <tr height='20' >
+					<td width='10%'>PDF Review:</td>
+					<td width='90%'></td>
 				</tr>
-                <tr height='20' style='border-bottom:1px dotted #808080;border-left:1px dotted #808080;border-right:1px dotted #808080'>
-				    <td width='80'>Page URL:</td>
-					<td width='95%'></td>
+                <tr height='20' >
+				    <td width='10%'>Page URL:</td>
+					<td width='90%'></td>
 				</tr>
             </table>
 		</div>

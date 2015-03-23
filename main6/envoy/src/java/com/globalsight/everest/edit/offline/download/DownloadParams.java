@@ -106,7 +106,7 @@ public class DownloadParams implements Serializable
     HashMap<Long, Long> allSTF_tasks = new HashMap<Long, Long>();
     HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
 
-    private boolean m_changeCreationIdForMTSegments = false;
+    private boolean m_changeCreationIdForMTSegments = true;
 
     private boolean populate100 = true;
     private boolean populateFuzzy = true;

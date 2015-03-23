@@ -205,13 +205,7 @@ function changeSourceLocale() {
           </td>
         </tr>
         <tr>
-        <table class="listborder">
-        <tbody>
-        <%
-        int i = 0;
-        if(targetLocales.size() > 0)
-        {
-        	%>
+        <table class="listborder" border="0" cellpadding="1" cellspacing="0" width="100%">
         	<thead>
 	        <tr  class = "tableHeadingBasic" style="height:25px">
 	        	<td class="standardText"><%=bundle.getString("lb_target_locale")%></td>
@@ -219,13 +213,15 @@ function changeSourceLocale() {
 	        	<td class="standardText"><%=bundle.getString("msg_git_connector_file_mapping_auto_create_subfolder") %></td>    
 	        </tr>
 	        </thead>
-        	<%
-        }
+        <tbody>
+        <%
+        int i = 0;
         String tableRowEvenTM = "tableRowEvenTM";
         String tableRowOddTM = "tableRowOddTM";
         
         for (i = 0; i < targetLocales.size(); i++) {
         	String style = "";
+        	locale = (GlobalSightLocale)targetLocales.elementAt(i);
         	if (i % 2 == 0)
         	{
         		style = tableRowEvenTM;
@@ -246,6 +242,7 @@ function changeSourceLocale() {
         	<%
         }
         %>
+         </tbody>
         </table>
         </tr>
         <input type="hidden" name="count" value="<%=i %>" />

@@ -212,7 +212,7 @@ public interface UserParamNames
     public static final String DOWNLOAD_OPTION_CONSOLIDATE_TMX_DEFAULT = "yes";
 
     public static final String DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT = "changeCreationIdForMT";
-    public static final String DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT = "no";
+    public static final String DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT = "yes";
 
     // GBS-3776
     public static final String DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE = "penalizedReferenceTmPre";

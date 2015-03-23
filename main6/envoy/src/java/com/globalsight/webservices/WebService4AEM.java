@@ -162,4 +162,32 @@ public interface WebService4AEM {
 	public String getImportExportStatus(String p_accessToken)
 			throws WebServiceException;
 	
+    /**
+     * Adds a comment
+     * <p>
+     * 
+     * @param p_accessToken
+     *            - the accessToken received from login()
+     * @param p_objectId
+     *            - The id of the object (Job or Task) to add the comment too.
+     *            The object must be DISPATCHED or part of a DISPATCHED job.
+     * @param p_objectType
+     *            - The type of the object that p_objectId refers to. 1 = JOB 3
+     *            = TASK
+     * @param p_userId
+     *            - A valid user's user id that is adding the comment.
+     * @param p_comment
+     *            - A comment to add to the task.
+     * @param p_file
+     *            - A file which was attached.
+     * @param p_fileName
+     *            - file name of attached file.
+     * @param p_access
+     *            - access specification of attachment file Restricted = Only
+     *            the Project Manager can view this file. General = All
+     *            Participants of the Task can view this file.
+     */
+    public String addJobComment(String p_accessToken, String p_jobName,
+            String p_userId, String p_comment, byte[] p_file,
+            String p_fileName, String p_access) throws WebServiceException;
 }

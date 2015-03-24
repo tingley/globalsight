@@ -2572,10 +2572,19 @@ public class CompanyRemoval
             logEnd("LEVERAGE_MATCH_ARCHIVED");
         }
 
+        String lmAttrTable = "LEVERAGE_MATCH_ATTR_" + companyId;
+        if (DbUtil.isTableExisted(conn, lmAttrTable))
+        {
+            logStart(lmAttrTable);
+            execOnce(conn, SQL_DROP + lmAttrTable);
+            logEnd(lmAttrTable);
+        }
+
         // Drop all leverage match tables for current company.
         List<String> lmTables = new ArrayList<String>();
         lmTables.add("LEVERAGE_MATCH_" + companyId);
         lmTables.add("LEVERAGE_MATCH_" + companyId + "_ARCHIVED");
+        
         List<Long> jobIds = getJobIdsByCompanyId(companyId);
         for (long jobId : jobIds)
         {
@@ -2601,6 +2610,7 @@ public class CompanyRemoval
         tables.add("LEVERAGE_MATCH_ARCHIVED");
         tables.add("LEVERAGE_MATCH_" + companyId);
         tables.add("LEVERAGE_MATCH_" + companyId + "_ARCHIVED");
+        tables.add("LEVERAGE_MATCH_ATTR_" + companyId);
 
         for (String tableName : tables)
         {

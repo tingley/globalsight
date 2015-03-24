@@ -1,5 +1,6 @@
 ## GBS-3528: SID support: char limit = 255. Longer resnames fail at job creation.
 ## create "translation_tu_tuv_attr_xx" table for every company.
+## create "leverage_match_attr_xx" table for every compnay.
 ## create tm3 "tm3_tu_tuv_attr_shared_xx" tables for every company.
 
 DELIMITER $$
@@ -51,8 +52,34 @@ BEGIN
 		EXECUTE stmt1;
 		DEALLOCATE PREPARE stmt1;
 
-		## create tm3 "tm3_tu_tuv_attr_shared_xx" tables for every company.
+		## create "leverage_match_attr_xx" tables for every company.
 		SET @sql2 = CONCAT(
+			"CREATE TABLE LEVERAGE_MATCH_ATTR_", companyId, " (",
+			"ID BIGINT(20) NOT NULL AUTO_INCREMENT, ",
+			"SOURCE_PAGE_ID INT(11) DEFAULT NULL, ",
+			"ORIGINAL_SOURCE_TUV_ID BIGINT(20) DEFAULT NULL, ",
+			"SUB_ID VARCHAR(40) DEFAULT NULL, ",
+			"TARGET_LOCALE_ID BIGINT(20) DEFAULT NULL, ",
+			"ORDER_NUM SMALLINT(6) DEFAULT NULL, ",
+			"NAME VARCHAR(100) NOT NULL, ",
+			"VARCHAR_VALUE VARCHAR(512) DEFAULT NULL, ",
+			"TEXT_VALUE TEXT, ",
+			"LONG_VALUE BIGINT(20) DEFAULT NULL, ",
+			"DATE_VALUE DATETIME DEFAULT NULL, ",
+			"PRIMARY KEY (ID), ",
+			"KEY IDX_4_UNIQUE_KEY (ORIGINAL_SOURCE_TUV_ID,SUB_ID,TARGET_LOCALE_ID,ORDER_NUM), ",
+			"KEY IDX_SPID_TRGLOCID (SOURCE_PAGE_ID,TARGET_LOCALE_ID) ",
+			") ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
+		);
+		## logger
+		SELECT @sql2 AS SQL2;
+
+		PREPARE stmt2 FROM @sql2;
+		EXECUTE stmt2;
+		DEALLOCATE PREPARE stmt2;
+
+		## create tm3 "tm3_tu_tuv_attr_shared_xx" tables for every company.
+		SET @sql3 = CONCAT(
 			"CREATE TABLE TM3_TU_TUV_ATTR_SHARED_", companyId, " (",
 			"ID BIGINT(20) NOT NULL AUTO_INCREMENT, ",
 			"TM_ID BIGINT(20) DEFAULT NULL, ",
@@ -69,11 +96,11 @@ BEGIN
 			") ENGINE=INNODB AUTO_INCREMENT = 1;"
 		);
 		## logger
-		SELECT @sql2 AS SQL2;
-		
-		PREPARE stmt2 FROM @sql2;
-		EXECUTE stmt2;
-		DEALLOCATE PREPARE stmt2;
+		SELECT @sql3 AS SQL3;
+
+		PREPARE stmt3 FROM @sql3;
+		EXECUTE stmt3;
+		DEALLOCATE PREPARE stmt3;
 
 	END LOOP;
 	CLOSE company_id_cur;

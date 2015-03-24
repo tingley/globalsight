@@ -114,6 +114,11 @@ public class WorkflowCancelHelper
             + "WHERE target_locale_id = ? "
             + "AND source_page_id IN (" + SOURCE_PAGE_IDS_PLACEHOLDER + ")";
 
+    private static final String SQL_DELETE_LM_ATTR = "DELETE FROM "
+    		+ TuvQueryConstants.LM_ATTR_TABLE_PLACEHOLDER + " "
+    		+ "WHERE target_locale_id = ? "
+    		+ "AND source_page_id IN (" + SOURCE_PAGE_IDS_PLACEHOLDER + ")";
+
     private static final String SQL_DELETE_TUV = "DELETE tuv.* FROM "
             + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " tuv, "
             + TuvQueryConstants.TU_TABLE_PLACEHOLDER + " tu, "
@@ -128,7 +133,7 @@ public class WorkflowCancelHelper
     		+ TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " tuv, "
     		+ TuvQueryConstants.TU_TABLE_PLACEHOLDER + " tu, "
     		+ "source_page_leverage_group splg "
-    		+ "WHERE attr.OBJECT_TYPE = " + TuTuvAttributeImpl.OBJECT_TYPE_TUV
+    		+ "WHERE attr.OBJECT_TYPE = '" + TuTuvAttributeImpl.OBJECT_TYPE_TUV + "'"
     		+ " AND attr.OBJECT_ID = tuv.ID "
     		+ " AND tuv.TU_ID = tu.ID "
     	    + " AND tuv.LOCALE_ID = ? "
@@ -173,6 +178,7 @@ public class WorkflowCancelHelper
             deleteSegmentComment(conn, workflow);
 
             String srcPageIds = getSourcePageIdsInStr(workflow);
+            deleteLMAttributes(conn, trgLocaleId, srcPageIds, jobId);
             deleteLeverageMatch(conn, trgLocaleId, srcPageIds, jobId);
             deleteTuTuvAttributeByTuvIds(conn, trgLocaleId, srcPageIds, jobId);
             deleteTuv(conn, trgLocaleId, srcPageIds, jobId);
@@ -390,7 +396,20 @@ public class WorkflowCancelHelper
         logEnd(lmTableName.toUpperCase());
     }
 
-	private static void deleteTuTuvAttributeByTuvIds(Connection conn,
+	private static void deleteLMAttributes(Connection conn, long trgLocaleId,
+			String srcPageIds, long p_jobId) throws Exception
+	{
+		String lmAttrTable = BigTableUtil.getLMAttributeTableByJobId(p_jobId);
+		String sql = SQL_DELETE_LM_ATTR.replace(
+				TuvQueryConstants.LM_ATTR_TABLE_PLACEHOLDER, lmAttrTable)
+				.replace(SOURCE_PAGE_IDS_PLACEHOLDER, srcPageIds);
+
+		logStart(lmAttrTable.toUpperCase());
+		execOnce(conn, sql, trgLocaleId);
+		logEnd(lmAttrTable.toUpperCase());
+	}
+
+    private static void deleteTuTuvAttributeByTuvIds(Connection conn,
 			long trgLocaleId, String srcPageIds, long p_jobId) throws Exception
     {
         String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(p_jobId);

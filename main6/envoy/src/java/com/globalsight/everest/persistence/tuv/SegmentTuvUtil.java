@@ -274,7 +274,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 {
 					TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
 							tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-							TuTuvAttributeImpl.NAME_SID);
+							TuTuvAttributeImpl.SID);
                     sidAttr.setTextValue(tuv.getSid());
                     sidAttibutes.add(sidAttr);
                 }
@@ -1213,7 +1213,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 {
 					TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
 							tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-							TuTuvAttributeImpl.NAME_SID);
+							TuTuvAttributeImpl.SID);
                     sidAttr.setTextValue(tuv.getSid());
                     sidAttibutes.add(sidAttr);
                 }

@@ -58,12 +58,6 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance;
     }
 
-    public void deleteLeverageMatches(Long p_sourcePageId)
-            throws LingManagerException
-    {
-        m_localInstance.deleteLeverageMatches(p_sourcePageId);
-    }
-
     public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
             String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId)
             throws LingManagerException

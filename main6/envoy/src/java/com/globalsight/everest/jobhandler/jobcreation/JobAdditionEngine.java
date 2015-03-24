@@ -212,6 +212,7 @@ public class JobAdditionEngine
             String lmArchiveTable = BigTableUtil
                     .decideLMArchiveTableForJobCreation(companyId);
             String tuTuvAttrTable = "translation_tu_tuv_attr_" + companyId;
+            String lmAttrTable = "leverage_match_attr_" + companyId;
             job.setTuTable(tuTable);
             job.setTuArchiveTable(tuArchiveTable);
             job.setTuvTable(tuvTable);
@@ -247,6 +248,10 @@ public class JobAdditionEngine
             if (!DbUtil.isTableExisted(tuTuvAttrTable))
             {
             	BigTableUtil.createTuTuvAttrTable(tuTuvAttrTable);
+            }
+            if (!DbUtil.isTableExisted(lmAttrTable))
+            {
+            	BigTableUtil.createLMAttrTable(lmAttrTable);
             }
         }
         catch (Exception e)

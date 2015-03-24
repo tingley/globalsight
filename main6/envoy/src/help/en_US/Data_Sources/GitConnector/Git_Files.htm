@@ -109,7 +109,7 @@ else
 		document.location.reload();
 //-->
 </script>
-<h1>Oracle Eloqua Assets</h1>
+<h1>Git Files</h1>
 
 <!--(Table)=========================================================-->
 <table x-use-null-cells cellspacing="10" width="100%" class="whs1">
@@ -120,7 +120,7 @@ else
 <td width="20%" class="whs5">
 <p class="whs6">Summary:</td>
 <td width="80%" class="whs7">
-<p class="whs6">This screen lists all pages in a tree from selected Git server. User can select pages to go to create job.</td></tr>
+<p class="whs6">This screen lists all files from selected Git repository in tre view. Users can select files to create job in GlobalSight.</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="2" rowspan="1" width="100%" class="whs8">
@@ -142,13 +142,19 @@ else
 <td colspan="1" rowspan="1" width="20%" class="whs10">
 <p class="whs6">Go to Create Job</td>
 <td colspan="1" rowspan="1" width="80%" class="whs12">
-<p>Go to next page to create Git Job.</td></tr>
+<p>Use selected files to create job.</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="20%" class="whs10">
+<p class="whs6">Back</td>
+<td colspan="1" rowspan="1" width="80%" class="whs12">
+<p>Return to Git Connector page</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="20%" class="whs10">
 <p class="whs6">Notes</td>
 <td colspan="1" rowspan="1" width="80%" class="whs12">
-<p>The user logging to Git server must have enough permissions to read/write, otherwise the target files cannot be sent back to Git server.</td></tr>
+<p>Git user must hava read and write permission, otherwise target files cannot be pushed back to remote Git repository.</td></tr>
 
 </table>
 

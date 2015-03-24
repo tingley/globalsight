@@ -373,7 +373,7 @@ $(document).ready(function ()
 
     $("#cancel").click(function()
     {
-    	showFilePage();
+    	document.location.href="/globalsight/ControlServlet?linkName=connect&pageName=GCM&action=connect&gcId=" + <%= gc.getId()%>;
     });
 
 });
@@ -466,7 +466,7 @@ function goToCreateJob() {
     var selNodes = $("#treeDIV").dynatree("getSelectedNodes");
     if(selNodes.length == 0)
     {
-        alert("<%=bundle.getString("msg_select_page")%>");
+        alert("<%=bundle.getString("msg_select_file")%>");
         return;
     }
 
@@ -482,6 +482,11 @@ function goToCreateJob() {
 	    	addFullDivElement(id, name, path, name, true);
 		}
     }
+}
+
+function back()
+{
+	document.location.href="/globalsight/ControlServlet?activityName=gitconnector";	
 }
 
 function addFullDivElement(id, zipName, filePath, fileName, isSwitched) {
@@ -983,7 +988,10 @@ function removeSelectedFile(id) {
         <!-- this Div has the "page information" dialog -->
         <div id="currentNodeDiv" title="Page Information" style="display:none" class="standardText"></div>
         <div>&nbsp;</div>
-        <div align="left"><input type="BUTTON" VALUE="<%=bundle.getString("lb_go_to_create_job")%>" onClick="goToCreateJob();"/></div>
+        <div align="left">
+        <input type="BUTTON" VALUE="<%=bundle.getString("lb_go_to_create_job")%>" onClick="goToCreateJob();"/>
+        <input type="BUTTON" VALUE="<%=bundle.getString("lb_back")%>" onClick="back();"/>
+        </div>
     </div>
     <!-- End of Page Tree -->
 

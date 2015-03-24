@@ -1146,8 +1146,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     p_connection.commit();
                 }
 
-				LeverageMatchAttributeUtil.saveLeverageMatchAttributes(
-						p_connection, sidAttrs, p_jobId);
+                if (sidAttrs.size() > 0)
+                {
+    				LeverageMatchAttributeUtil.saveLeverageMatchAttributes(
+    						p_connection, sidAttrs, p_jobId);                	
+                }
             }
         }
         catch (Exception ex)
@@ -1908,25 +1911,28 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             }
         }
 
-		List<LeverageMatchAttribute> attrs = LeverageMatchAttributeUtil
-				.getLeverageMatchAttrbutes(sourcePageId, trgLocaleId);
-		HashMap<String, LeverageMatchAttribute> sidAttrMap = new HashMap<String, LeverageMatchAttribute>(); 
-		for (LeverageMatchAttribute attr : attrs)
-		{
-			if (LeverageMatchAttribute.SID.equalsIgnoreCase(attr.getName()))
-			{
-				sidAttrMap.put(attr.getUniqueKey(), attr);
-			}
-		}
-		for (LeverageMatch lm : leverageMatches)
-		{
-			String key = lm.getOriginalSourceTuvId() + "_" + lm.getSubId()
-					+ "_" + lm.getOrderNum() + "_" + lm.getTargetLocaleId();
-			if (sidAttrMap.get(key) != null)
-			{
-				lm.setSid(sidAttrMap.get(key).getTextValue());
-			}
-		}
+        if (sourcePageId != -1 && trgLocaleId != -1)
+        {
+    		List<LeverageMatchAttribute> attrs = LeverageMatchAttributeUtil
+    				.getLeverageMatchAttrbutes(sourcePageId, trgLocaleId);
+    		HashMap<String, LeverageMatchAttribute> sidAttrMap = new HashMap<String, LeverageMatchAttribute>(); 
+    		for (LeverageMatchAttribute attr : attrs)
+    		{
+    			if (LeverageMatchAttribute.SID.equalsIgnoreCase(attr.getName()))
+    			{
+    				sidAttrMap.put(attr.getUniqueKey(), attr);
+    			}
+    		}
+    		for (LeverageMatch lm : leverageMatches)
+    		{
+    			String key = lm.getOriginalSourceTuvId() + "_" + lm.getSubId()
+    					+ "_" + lm.getOrderNum() + "_" + lm.getTargetLocaleId();
+    			if (sidAttrMap.get(key) != null)
+    			{
+    				lm.setSid(sidAttrMap.get(key).getTextValue());
+    			}
+    		}
+        }
 
         return leverageMatches;
     }

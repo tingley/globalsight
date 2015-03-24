@@ -25,6 +25,7 @@ import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.StringUtil;
 
@@ -285,6 +286,12 @@ public class ExportParameters implements java.io.Serializable
             companyId = String.valueOf(p_workflow.getJob().getCompanyId());
         }
 
+		if (m_exportCodeset != null
+				&& m_exportCodeset
+						.equalsIgnoreCase(JobManagementHandler.SAME_AS_SOURCE))
+		{
+			m_exportCodeset = p_workflow.getJob().getFileProfile().getCodeSet();
+		}
         m_localeSubDir = p_localeSubDir == null ? getLocaleSubDirType(p_workflow
                 .getTargetLocale().toString()) : p_localeSubDir;
         m_exportLocation = p_exportLocation == null ? lookupDefaultExportLocation(companyId)

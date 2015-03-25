@@ -35,13 +35,18 @@ import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.OpenSshConfig.Host;
-import com.jcraft.jsch.Session;
+import org.eclipse.jgit.util.FS;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UserInfo;
 import com.globalsight.connector.git.vo.GitConnectorFile;
 import com.globalsight.cxe.entity.gitconnector.GitConnector;
 import com.globalsight.everest.util.comparator.FileComparator;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class GitConnectorHelper
 {
@@ -49,17 +54,78 @@ public class GitConnectorHelper
             .getLogger(GitConnectorHelper.class);
     
     private static final String GIT_CONNECTOR = "GitConnector";
+    private GitConnector gc = null;
     
     final SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() 
 	{
-		public void configure(Host host, Session session) {
+		public void configure(Host host, Session session) 
+		{
+			try 
+			{
+				String privateKeyFile = gc.getPrivateKeyFile().replaceAll("\\\\", "/");
+				if(StringUtil.isNotEmpty(privateKeyFile))
+				{
+					JSch jsch = getJSch(host, FS.DETECTED);
+					jsch.addIdentity(privateKeyFile);
+				}
+			} 
+			catch (JSchException e)
+			{
+				e.printStackTrace();
+			}
+			
 			java.util.Properties config = new java.util.Properties(); 
 			config.put("StrictHostKeyChecking", "no");
 			session.setConfig(config);
+			
+			String password = gc.getPassword();
+			if(StringUtil.isNotEmpty(password))
+			{
+				MyUserInfo ui = new MyUserInfo(gc.getPassword());
+				session.setUserInfo(ui);
+			}
 		}
 	};
+	
+	public static class MyUserInfo implements UserInfo
+	{
+		String passphrase;
+		
+		public MyUserInfo(String passphrase) 
+		{
+		    this.passphrase = passphrase;
+		}
 
-    private GitConnector gc = null;
+		public String getPassphrase() 
+		{
+			return passphrase;
+		}
+
+		public String getPassword() 
+		{
+			return null;
+		}
+		
+		public boolean promptPassphrase(String message) 
+		{
+			return true;
+		}
+
+		public boolean promptPassword(String message) 
+		{
+			return true;
+		}
+		
+		public boolean promptYesNo(String str) 
+		{
+			return true;
+		}
+
+		public void showMessage(String message) 
+		{
+			System.out.println(message);
+		}
+	}
 
     public GitConnectorHelper(GitConnector gc)
     {

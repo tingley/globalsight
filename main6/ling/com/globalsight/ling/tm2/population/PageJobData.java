@@ -27,14 +27,18 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvAttributeUtil;
+import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvMerger;
 import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
@@ -60,6 +64,7 @@ public class PageJobData
     private List m_tentativeTus;
 
     private GlobalSightLocale m_sourceLocale;
+    private long m_jobId;
 
     /**
      * Constructor.
@@ -67,12 +72,13 @@ public class PageJobData
      * @param p_sourceLocale
      *            Source locale (GlobalSightLocale)
      */
-    public PageJobData(GlobalSightLocale p_sourceLocale)
+    public PageJobData(GlobalSightLocale p_sourceLocale, long p_jobId)
     {
         m_mergedTus = null; // initially null
 
         m_tentativeTus = new ArrayList();
         m_sourceLocale = p_sourceLocale;
+        m_jobId = p_jobId;
     }
 
     public void addTu(PageTmTu p_tu)
@@ -305,15 +311,40 @@ public class PageJobData
             }
 
             // fix missing x attribute
+            List<Long> tuvIds = new ArrayList<Long>();
             it = m_mergedTus.iterator();
             while (it.hasNext())
             {
                 PageTmTu tu = (PageTmTu) it.next();
                 TmxTagRepairer.fixMissingX(tu, m_sourceLocale);
+                for (BaseTmTuv tuv :tu.getTuvs())
+                {
+                	tuvIds.add(tuv.getId());
+                }
             }
 
-            // renumber sub ids. Fix for 12870
+            // load SID from "translation_tu_tuv_attr_xx" table
+    		List<TuTuvAttributeImpl> sidAttrs = SegmentTuTuvAttributeUtil
+    				.getSidAttributesByTuvIds(tuvIds, m_jobId);
+    		HashMap<Long, String> sidAttrMap = new HashMap<Long, String>();
+    		for (TuTuvAttributeImpl sidAttr : sidAttrs)
+    		{
+    			sidAttrMap.put(sidAttr.getObjectId(), sidAttr.getTextValue());
+    		}
+    		it = m_mergedTus.iterator();
+    		while (it.hasNext())
+    		{
+                PageTmTu tu = (PageTmTu) it.next();
+                for (BaseTmTuv tuv :tu.getTuvs())
+                {
+        			if (StringUtil.isNotEmpty(sidAttrMap.get(tuv.getId())))
+        			{
+        				tuv.setSid(sidAttrMap.get(tuv.getId()));
+        			}
+                }
+    		}
 
+    		// renumber sub ids. Fix for 12870
             // Need to do this to all segments (not only merged
             // segments) so that leveraged segments will also be
             // corrected.

@@ -111,6 +111,8 @@ public abstract class JobManagementHandler extends PageHandler
     public static final String EXPORT_WF_SEL_ID_PARAM = "exportWFSel";
 
     public static final String EXPORT_WF_CODE_PARAM = "exportCode";
+    
+    public static final String SAME_AS_SOURCE ="Same as Source";
 
     public static final String EXPORT_WF_DIR_PARAM = "exportWFDir";
 

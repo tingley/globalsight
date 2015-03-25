@@ -116,6 +116,12 @@ var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 					disPtag();
 					disOmegaT();
 				},
+				"Xliff 2.0":function(){
+					$("#includeXmlNodeContextInformationBox").show();
+					populateHide();
+					disPtag();
+					disOmegaT();
+				},
 				"OmegaT":function(){
 					$("#includeXmlNodeContextInformationBox").show();
 					populateHide();

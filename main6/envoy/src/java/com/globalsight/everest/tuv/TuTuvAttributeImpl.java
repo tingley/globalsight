@@ -35,7 +35,7 @@ public class TuTuvAttributeImpl
 	/**
 	 * Available values for "NAME" column
 	 */
-	public static final String NAME_SID = "SID";
+	public static final String SID = "SID";
 
 	/**
 	 * Available values for "OBJECT_TYPE" column

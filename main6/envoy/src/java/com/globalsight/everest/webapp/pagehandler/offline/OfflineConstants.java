@@ -112,6 +112,8 @@ public interface OfflineConstants
     String FORMAT_XLF_VALUE_12 = "Xliff 1.2";
     String EDITOR_XLF_NAME = "xlfEditor";
     String EDITOR_XLF_VALUE = "Xliff Editor";
+    String FORMAT_XLF_VALUE_20 = "Xliff 2.0";
+    
 
     // ttx names(only support Trados 7 TTX)
     String FORMAT_TTX_NAME = "Trados 7 TTX";

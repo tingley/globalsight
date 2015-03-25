@@ -373,7 +373,20 @@ public class BigTableUtil implements TuvQueryConstants
 		return "TRANSLATION_TU_TUV_ATTR_" + companyId;
 	}
 
-    public static boolean isJobDataMigrated(long p_sourcePageId)
+	public static String getLMAttributeTableByJobId(long p_jobId)
+	{
+		long companyId = getJobById(p_jobId).getCompanyId();
+		return "LEVERAGE_MATCH_ATTR_" + companyId;
+	}
+
+	public static String getLMAttributeTableBySourcePageId(long p_sourcePageId)
+			throws Exception
+	{
+		long companyId = getCompanyIdBySourcePageId(p_sourcePageId);
+		return "LEVERAGE_MATCH_ATTR_" + companyId;
+	}
+
+	public static boolean isJobDataMigrated(long p_sourcePageId)
             throws Exception
     {
         boolean isMigrated = false;
@@ -500,6 +513,9 @@ public class BigTableUtil implements TuvQueryConstants
 
         String lmTableName = "leverage_match_" + companyId;
         createLMTable(lmTableName);
+
+        String lmAttrTableName = "leverage_match_attr_" + companyId;
+        createLMAttrTable(lmAttrTableName);
 
         String tuTuvAttrTableName = "translation_tu_tuv_attr_" + companyId;
         createTuTuvAttrTable(tuTuvAttrTableName);
@@ -846,6 +862,52 @@ public class BigTableUtil implements TuvQueryConstants
         catch (Exception e)
         {
             logger.error("Failed to create table " + lmTableName, e);
+        }
+    }
+
+    /**
+	 * Create attribute table for leverage match data, this is a company level
+	 * table, table name is like "leverage_match_attr_[companyID]".
+	 * 
+	 * @param p_lmAttrTableName
+	 */
+    public static void createLMAttrTable(String p_lmAttrTableName)
+    {
+        if (DbUtil.isTableExisted(p_lmAttrTableName))
+        {
+            return;
+        }
+
+        String sql1 = "DROP TABLE IF EXISTS " + p_lmAttrTableName + " CASCADE;";
+
+        StringBuilder buf = new StringBuilder();
+        buf.append("CREATE TABLE ").append(p_lmAttrTableName).append(" ");
+        buf.append("(");
+        buf.append("ID BIGINT(20) NOT NULL AUTO_INCREMENT, ");
+        buf.append("SOURCE_PAGE_ID INT(11) DEFAULT NULL, ");
+        buf.append("ORIGINAL_SOURCE_TUV_ID BIGINT(20) DEFAULT NULL, ");
+        buf.append("SUB_ID VARCHAR(40) DEFAULT NULL, ");
+        buf.append("TARGET_LOCALE_ID BIGINT(20) DEFAULT NULL, ");
+        buf.append("ORDER_NUM SMALLINT(6) DEFAULT NULL, ");
+        buf.append("NAME VARCHAR(100) NOT NULL, ");
+        buf.append("VARCHAR_VALUE VARCHAR(512) DEFAULT NULL, ");
+        buf.append("TEXT_VALUE TEXT, ");
+        buf.append("LONG_VALUE BIGINT(20) DEFAULT NULL, ");
+        buf.append("DATE_VALUE DATETIME DEFAULT NULL, ");
+        buf.append("PRIMARY KEY (ID), ");
+        buf.append("KEY IDX_4_UNIQUE_KEY (ORIGINAL_SOURCE_TUV_ID,SUB_ID,TARGET_LOCALE_ID,ORDER_NUM), ");
+        buf.append("KEY IDX_SPID_TRGLOCID (SOURCE_PAGE_ID,TARGET_LOCALE_ID) ");
+        buf.append(") ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;");
+        String sql2 = buf.toString();
+        
+        try
+        {
+            HibernateUtil.executeSql(sql1);
+            HibernateUtil.executeSql(sql2);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to create table " + p_lmAttrTableName, e);
         }
     }
 

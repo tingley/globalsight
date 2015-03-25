@@ -106,7 +106,7 @@ public class DownloadParams implements Serializable
     HashMap<Long, Long> allSTF_tasks = new HashMap<Long, Long>();
     HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
 
-    private boolean m_changeCreationIdForMTSegments = false;
+    private boolean m_changeCreationIdForMTSegments = true;
 
     private boolean populate100 = true;
     private boolean populateFuzzy = true;
@@ -1213,6 +1213,7 @@ public class DownloadParams implements Serializable
     public void setNeedConsolidate(boolean needConsolidate)
     {
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT
@@ -1267,6 +1268,7 @@ public class DownloadParams implements Serializable
     public void setIncludeRepetitions(boolean includeRepetitions)
     {
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT)

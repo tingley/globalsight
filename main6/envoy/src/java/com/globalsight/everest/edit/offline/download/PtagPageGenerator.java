@@ -173,6 +173,7 @@ public class PtagPageGenerator
             }
 
             if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
+                    || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 
                     || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ) {
 				p_OSD.setDisplaySourceText(TmxUtil.convertXlfToTmxFormat(p_OSD.getDisplaySourceText()));
 			} else if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX) {
@@ -197,6 +198,7 @@ public class PtagPageGenerator
             }
 
             if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
+                    || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 
                     || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ) {
 				p_OSD.setDisplayTargetText(TmxUtil.convertXlfToTmxFormat(p_OSD.getDisplayTargetText()));				
 			} else if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX) {

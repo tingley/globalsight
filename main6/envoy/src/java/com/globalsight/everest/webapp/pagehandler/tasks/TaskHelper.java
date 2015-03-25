@@ -420,7 +420,8 @@ public class TaskHelper
         boolean isQATask = QACheckerHelper.isQAActivity(p_task);
         if (project.getReviewOnlyAutoAccept() || project.getAutoAcceptPMTask()
                 || (isDitaQaTask && project.getAutoAcceptDitaQaTask())
-                || (isQATask && project.getAutoAcceptQATask()))
+                || (isQATask && project.getAutoAcceptQATask())
+                || project.getAutoAcceptTrans())
         {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put(TaskThread.KEY_ACTION, TaskThread.ACTION_AUTOACCEPT);

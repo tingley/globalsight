@@ -728,6 +728,66 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                         }
                     }
                 }
+                
+                // for xliff 2.0 offline upload
+                // for example [b] is changed to [g1]
+                if (MOVABLE_TAG.contains(srcItemTag) && strTrgTagName.startsWith("g"))
+                {
+                    String temp = strTrgTagName.substring(1);
+                    try
+                    {
+                        long tt = Long.parseLong(temp);
+                        Hashtable atts = srcItem.getAttributes();
+                        
+                        String i = (String) atts.get("i");
+                        if (i == null)
+                        {
+                            i = (String) atts.get("x");
+                        }
+                        
+                        if (i != null && tt == Long.parseLong(i))
+                        {
+                            isEquals = true;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        isEquals = false;
+                    }
+                }
+                
+                // for xliff 2.0 offline upload
+                // for example [/b] is changed to [/g1]
+                if (srcItemTag.startsWith("/") && strTrgTagName.startsWith("/"))
+                {
+                    String src = srcItemTag.substring(1);
+                    String trg = strTrgTagName.substring(1);
+                    
+                    if (MOVABLE_TAG.contains(src) && trg.startsWith("g"))
+                    {
+                        String temp = trg.substring(1);
+                        try
+                        {
+                            long tt = Long.parseLong(temp);
+                            Hashtable atts = srcItem.getAttributes();
+                            
+                            String i = (String) atts.get("i");
+                            if (i == null)
+                            {
+                                i = (String) atts.get("x");
+                            }
+                            
+                            if (i != null && tt == Long.parseLong(i))
+                            {
+                                isEquals = true;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            isEquals = false;
+                        }
+                    }
+                }
 
                 if (isEquals)
                 {

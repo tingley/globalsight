@@ -32,6 +32,7 @@ import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.localemgr.CodeSetImpl;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
@@ -43,6 +44,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -161,8 +163,12 @@ public class BasicWorkflowTemplateHandler extends PageHandler implements
                 .getAllWorkflowManagersInProject();
         List localePairs = WorkflowTemplateHandlerHelper
                 .getAllLocalePairs(uiLocale);
+        List targetEncodingList = new ArrayList();
+        CodeSetImpl codeSet = new CodeSetImpl();
+        codeSet.setCodeSet(JobManagementHandler.SAME_AS_SOURCE);
+        targetEncodingList.add(codeSet);
         List targetEncodings = WorkflowTemplateHandlerHelper.getAllCodeSets();
-
+        targetEncodingList.addAll(targetEncodings);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
 
@@ -170,7 +176,7 @@ public class BasicWorkflowTemplateHandler extends PageHandler implements
         sessionMgr.setAttribute(PROJECTS, projectInfos);
         sessionMgr.setAttribute(WORKFLOW_MANAGERS, wfManagers);
         sessionMgr.setAttribute(LOCALE_PAIRS, localePairs);
-        sessionMgr.setAttribute(ENCODINGS, targetEncodings);
+        sessionMgr.setAttribute(ENCODINGS, targetEncodingList);
 
         // get the template id first (for edit, or duplicate actions)
         String id = p_request.getParameter(WF_TEMPLATE_INFO_ID);

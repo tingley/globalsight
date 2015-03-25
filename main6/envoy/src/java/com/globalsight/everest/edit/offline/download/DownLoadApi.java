@@ -1827,6 +1827,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             }
         }
         else if (p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_XLF
+                || p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_XLF20
                 || p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_OMEGAT)
         {
             fullPath.append(fname);
@@ -1949,6 +1950,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         }
 
         else if (p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_XLF
+                || p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_XLF20
                 || p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_OMEGAT)
         {
             if (p_downloadParams.isNeedCombined())

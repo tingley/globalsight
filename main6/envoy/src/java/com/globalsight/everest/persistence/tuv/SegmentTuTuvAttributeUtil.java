@@ -79,7 +79,7 @@ public class SegmentTuTuvAttributeUtil extends SegmentTuTuvCacheManager
 			throws Exception
 	{
 		return queryAttributes(p_tuvIds, TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-				TuTuvAttributeImpl.NAME_SID, p_jobId);
+				TuTuvAttributeImpl.SID, p_jobId);
 	}
 
 	/**
@@ -243,7 +243,7 @@ public class SegmentTuTuvAttributeUtil extends SegmentTuTuvCacheManager
 	{
 		updateTuTuvAttributes(p_connection, sidAttibutes,
 				TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-				TuTuvAttributeImpl.NAME_SID, p_jobId);
+				TuTuvAttributeImpl.SID, p_jobId);
 	}
 
 	/**

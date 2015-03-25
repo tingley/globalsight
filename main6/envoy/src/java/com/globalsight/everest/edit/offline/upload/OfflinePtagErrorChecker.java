@@ -476,6 +476,8 @@ public class OfflinePtagErrorChecker implements Cancelable
 
         // Create PTag resources
         pTagData = new PseudoData();
+        pTagData.setXliff20File(p_uploadPage.isXliff20());
+        
         pTagData.setLocale(m_errWriter.getLocale());
 
         convertor = new TmxPseudo();

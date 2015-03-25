@@ -20,7 +20,6 @@ package com.globalsight.everest.integration.ling.tm2;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,6 +71,7 @@ import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
@@ -152,9 +152,6 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             + "  PROJECT_TM_INDEX, TM_ID, TM_PROFILE_ID, MT_NAME, MATCHED_ORIGINAL_SOURCE, "
             + "  JOB_DATA_TU_ID, SID, CREATION_USER, CREATION_DATE, MODIFY_USER, MODIFY_DATE, MATCHED_TEXT_CLOB) "
             + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final String DELETE_LM_BY_SOURCE_PAGE_ID = "delete from "
-            + LM_TABLE_NAME_PLACE_HOLDER + " WHERE source_page_id = ? ";
 
     /**
      * Indicate whether MT matches should be returned in the query results.
@@ -738,42 +735,6 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     }
 
     /**
-     * Delete leverage matches for specified source page.
-     */
-    public void deleteLeverageMatches(Long p_sourcePageId)
-            throws LingManagerException
-    {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        try
-        {
-            connection = DbUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            String lmTableName = BigTableUtil
-                    .getLMTableJobDataInBySourcePageId(p_sourcePageId);
-            String sql = DELETE_LM_BY_SOURCE_PAGE_ID.replace(
-                    LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
-
-            ps = connection.prepareStatement(sql.toString());
-            ps.executeUpdate();
-            connection.commit();
-        }
-        catch (Exception ex)
-        {
-            c_logger.error(
-                    "Failed to delete leverage matches by sourcePageId : "
-                            + p_sourcePageId, ex);
-            throw new LingManagerException(ex);
-        }
-        finally
-        {
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(connection);
-        }
-    }
-
-    /**
      * Delete leverage matches for specified TUV.
      * 
      * @param p_OriginalSourceTuvId
@@ -785,9 +746,9 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * @param p_orderNum
      *            -- Can be null
      */
-    public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
-            String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId)
-            throws LingManagerException
+	public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
+			String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId)
+			throws LingManagerException
     {
         Connection connection = null;
         PreparedStatement ps = null;
@@ -796,6 +757,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             connection = DbUtil.getConnection();
             connection.setAutoCommit(false);
+
+            // Delete leverage match attributes first.
+			LeverageMatchAttributeUtil.deleteLMAttributes(
+					p_OriginalSourceTuvId, p_subId, p_targetLocaleId,
+					p_orderNum, p_jobId);
 
             // Delete
             String sql = getDeleteSql(p_OriginalSourceTuvId, p_subId,
@@ -1108,6 +1074,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 String insertSql = INSERT_INTO_LEVERAGE_MATCH_SQL.replace(
                         LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
 
+                List<LeverageMatchAttribute> sidAttrs = new ArrayList<LeverageMatchAttribute>();
                 ps = p_connection.prepareStatement(insertSql);
                 for (LeverageMatch lm : lms)
                 {
@@ -1140,8 +1107,24 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     ps.setString(15, lm.getMatchedOriginalSource());
 
                     ps.setLong(16, lm.getJobDataTuId());
-
-                    ps.setString(17, lm.getSid());
+					// SID is always saved into "leverage_match_attr_xx" table
+					// since 8.6.1.
+                    ps.setString(17, null);
+                    if (StringUtil.isNotEmpty(lm.getSid()))
+                    {
+                    	// Also save it into original table if not too long.
+                    	if (lm.getSid().length() < 254)
+                    	{
+                    		ps.setString(17, lm.getSid());
+                    	}
+						LeverageMatchAttribute sidAttr = new LeverageMatchAttribute(
+								lm.getSourcePageId(),
+								lm.getOriginalSourceTuvId(), lm.getSubId(),
+								lm.getOrderNum(), lm.getTargetLocaleId());
+                    	sidAttr.setName(LeverageMatchAttribute.SID);
+                    	sidAttr.setTextValue(lm.getSid());
+                    	sidAttrs.add(sidAttr);
+                    }
                     ps.setString(18, lm.getCreationUser());
                     // creation date
                     Date creationDate = lm.getCreationDate() == null ? new Date() : lm.getCreationDate();
@@ -1167,6 +1150,12 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 	ps.executeBatch();
                     p_connection.commit();
                 }
+
+                if (sidAttrs.size() > 0)
+                {
+    				LeverageMatchAttributeUtil.saveLeverageMatchAttributes(
+    						p_connection, sidAttrs, p_jobId);                	
+                }
             }
         }
         catch (Exception ex)
@@ -1180,7 +1169,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
     }
 
-    /**
+	/**
      * All leverage matches may be from different companies, group them first.
      * 
      * @param p_leverageMatchList
@@ -1866,13 +1855,14 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * 
      * @param rs
      * @return
-     * @throws SQLException
+     * @throws Exception 
      */
     private List<LeverageMatch> convertToLeverageMatches(ResultSet rs)
-            throws SQLException
+            throws Exception
     {
         List<LeverageMatch> leverageMatches = new ArrayList<LeverageMatch>();
-
+        long sourcePageId = -1;
+        long trgLocaleId = -1;
         while (rs.next())
         {
             LeverageMatch lm = new LeverageMatch();
@@ -1913,6 +1903,40 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             }
 
             leverageMatches.add(lm);
+
+			// we assume all leverage matches in the ResultSet is for same
+			// source page and target locale.
+            if (sourcePageId == -1)
+            {
+            	sourcePageId = lm.getSourcePageId();
+            }
+            if (trgLocaleId == -1)
+            {
+            	trgLocaleId = lm.getTargetLocaleId();
+            }
+        }
+
+        if (sourcePageId != -1 && trgLocaleId != -1)
+        {
+    		List<LeverageMatchAttribute> attrs = LeverageMatchAttributeUtil
+    				.getLeverageMatchAttrbutes(sourcePageId, trgLocaleId);
+    		HashMap<String, LeverageMatchAttribute> sidAttrMap = new HashMap<String, LeverageMatchAttribute>(); 
+    		for (LeverageMatchAttribute attr : attrs)
+    		{
+    			if (LeverageMatchAttribute.SID.equalsIgnoreCase(attr.getName()))
+    			{
+    				sidAttrMap.put(attr.getUniqueKey(), attr);
+    			}
+    		}
+    		for (LeverageMatch lm : leverageMatches)
+    		{
+    			String key = lm.getOriginalSourceTuvId() + "_" + lm.getSubId()
+    					+ "_" + lm.getOrderNum() + "_" + lm.getTargetLocaleId();
+    			if (sidAttrMap.get(key) != null)
+    			{
+    				lm.setSid(sidAttrMap.get(key).getTextValue());
+    			}
+    		}
         }
 
         return leverageMatches;

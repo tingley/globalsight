@@ -1709,6 +1709,128 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         }
         return localeId;
     }
+    
+    public String processXliff20(Reader p_reader, String p_fileName,
+            User p_user, long p_ownerTaskId, Collection p_excludedItemTypes,
+            String p_jmsQueueDestination)
+    {
+        loadListViewTextFile(p_reader, p_fileName, true);
+        
+        m_uploadPageData.setIsXliff20(true);
+        
+        List<Task> isUploadingTasks = new ArrayList<Task>();
+        String errPage = null;
+        String checkErrMsg = null;
+        
+        // for GBS-1939, for GBS-2829
+        List<Long> taskIdsList = null;
+        String taskId = m_uploadPageData.getTaskId();
+        String[] taskIds = null;
+        if (taskId.contains(","))
+        {
+            taskIds = taskId.split(",");
+            taskIdsList = new ArrayList<Long>();
+            for (String tid : taskIds)
+            {
+                Long isUploadingTaskId = Long.valueOf(tid);
+                taskIdsList.add(isUploadingTaskId);
+                // Update task status (Uploading)
+                Task isUploadingTask = TaskHelper.updateTaskStatus(
+                        isUploadingTaskId, UPLOAD_IN_PROGRESS);
+                if (isUploadingTask != null)
+                {
+                    isUploadingTasks.add(isUploadingTask);
+                    OfflineFileUploadStatus.addFileState(isUploadingTaskId,
+                            p_fileName, "Running");
+                }
+            }
+            m_uploadPageData.setTaskIds(taskIdsList);
+        }
+        else
+        {
+            Long isUploadingTaskId = Long.valueOf(taskId);
+            // Update task status (Uploading)
+            Task isUploadingTask = TaskHelper.updateTaskStatus(
+                    isUploadingTaskId, UPLOAD_IN_PROGRESS);
+            if (isUploadingTask != null)
+            {
+                isUploadingTasks.add(isUploadingTask);
+                OfflineFileUploadStatus.addFileState(isUploadingTaskId,
+                        p_fileName, "Running");
+            }
+        }
+
+        // Fix for GBS-2191
+        if (p_ownerTaskId == -1)
+        {
+            String ownerTaskId = taskIds != null ? taskIds[0] : taskId;
+            p_ownerTaskId = Long.parseLong(ownerTaskId);
+            m_uploadPageData.setTaskId(ownerTaskId);
+
+            Task task = getTask(p_ownerTaskId);
+            if ((errPage = checkTask(p_user, task, p_fileName)) != null)
+            {
+                completeUploadingTask(isUploadingTasks);
+                return errPage;
+            }
+            p_excludedItemTypes = getExcludedItemTypes(task);
+        }
+
+        // check all tasks for combined download files
+        if (isUploadingTasks != null)
+        {
+            for (Task task : isUploadingTasks)
+            {
+                if ((errPage = checkTask(p_user, task, p_fileName)) != null)
+                {
+                    completeUploadingTask(isUploadingTasks);
+                    return errPage;
+                }
+            }
+        }
+
+        if ((errPage = preLoadInit(p_ownerTaskId, p_user, p_reader)) != null)
+        {
+            completeUploadingTask(isUploadingTasks);
+            return errPage;
+        }
+
+        // Verify if upload file is a consolated file
+        if (m_uploadPageData.getPageId().indexOf(",") > 0)
+            m_uploadPageData.setConsolated(true);
+
+        if ((errPage = postLoadInit(p_ownerTaskId,
+                m_uploadPageData.getTaskId(), p_excludedItemTypes,
+                DOWNLOAD_FILE_FORMAT_TXT)) != null)
+        {
+            completeUploadingTask(isUploadingTasks);
+            return errPage;
+        }
+
+        // Check uploaded page for errors. If there are no errors - save it
+        if ((errPage = checkPage(p_user, p_fileName)) != null)
+        {
+            // do not return here
+            checkErrMsg = errPage;
+        }
+
+        // do not save page if iscontinue = n for internal tag error
+        if (this.status.getIsContinue() != null
+                && this.status.getIsContinue().equals(Boolean.FALSE))
+        {
+            // do not return here
+            if (checkErrMsg == null)
+                checkErrMsg = "IsContinue=fasle";
+        }
+
+        if ((errPage = save(m_uploadPageData, m_referencePageDatas,
+                p_jmsQueueDestination, p_user, p_fileName, isUploadingTasks)) != null)
+        {
+            completeUploadingTask(isUploadingTasks);
+        }
+
+        return getErrorMsg(checkErrMsg, errPage);
+    }
 
     /**
      * Processes a single upload page (Unicode text file, RTF list view).
@@ -2123,9 +2245,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
      * @return if there are no errors, null is returned. If there are errors, a
      *         fully formed HTML error report page is returned.
      */
-    private String loadListViewTextFile(Reader p_reader, String p_fileName,
+    public String loadListViewTextFile(Reader p_reader, String p_fileName,
             boolean p_keepIssues)
     {
+        if (m_uploadPageData == null)
+        {
+            m_uploadPageData = new OfflinePageData();
+            m_referencePageDatas = new ArrayList<PageData>();
+        }
 
         try
         {
@@ -2161,6 +2288,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         || line.startsWith(GS_TOOLKIT_FORMAT)
                         || line.startsWith(SEGMENT_SID_KEY)
                         || line.startsWith(SEGMENT_XLF_TARGET_STATE_KEY)
+                        || line.startsWith(SEGMENT_INCONTEXT_MATCH_KEY)
+                        || line.startsWith(SEGMENT_TM_PROFILE_KEY)
+                        || line.startsWith(SEGMENT_TERMBASE_KEY)
                         || line.startsWith(HEADER_POPULATE_100_SEGMENTS);
                 if (!ignoreThisLine)
                 {

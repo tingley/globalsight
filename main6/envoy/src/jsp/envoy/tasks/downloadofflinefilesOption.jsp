@@ -66,6 +66,8 @@ String formatValueRtfListViewTradosOptimized = OfflineConstants.FORMAT_RTF_TRADO
 String formatXlfName12 = OfflineConstants.FORMAT_XLF_NAME_12;
 String formatXlfValue12 = OfflineConstants.FORMAT_XLF_VALUE_12;
 
+String formatXlfValue20 = OfflineConstants.FORMAT_XLF_VALUE_20;
+
 String formatTTXName = OfflineConstants.FORMAT_TTX_NAME;
 String formatTTXValue = OfflineConstants.FORMAT_TTX_VALUE;
 
@@ -185,6 +187,7 @@ function switchRadio(penalizedReferenceTmRadio)
                   <OPTION VALUE="<%= formatValueRtfListViewTradosOptimized %>" title="for Trados 7 and SDL Trados 2007"><%= formatRtfListViewTradosOptimized %></OPTION>
                   <OPTION VALUE="<%= formatValueRtfListView %>" title="For SDL Trados 2009 and 2011"><%= formatRtfListView %></OPTION>
                   <OPTION VALUE="<%= formatXlfName12 %>" title="For Xliff 1.2"><%=formatXlfValue12 %></OPTION>
+                  <OPTION VALUE="<%= formatXlfValue20 %>" title="For Xliff 2.0"><%=formatXlfValue20 %></OPTION>
                   <OPTION VALUE="<%= formatTTXValue %>" title="For Trados 7 and SDL Trados 2007"><%=formatTTXName %></OPTION>
                 </SELECT>
               </SPAN></TD>

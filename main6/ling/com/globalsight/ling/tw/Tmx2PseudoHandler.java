@@ -25,6 +25,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20;
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.internal.InternalTag;
@@ -282,6 +283,32 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
         {
             // Original code - intentionally empty
             // Some tags will not have an "i" attribute
+        }
+        
+        if (m_PseudoData.isXliff20File())
+        {
+            String PTag = Tmx2Xliff20.getTag(p_strTmxTagName, p_hAttributes, p_strOriginalString);
+            
+            try
+            {
+                // capture source data
+                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName,
+                        PTag, p_hAttributes));
+            }
+            catch (TagNodeException e)
+            {
+                throw new DiplomatBasicParserException(e.toString());
+            }
+
+            selfElement.type = IT;
+            selfElement.setText(p_strOriginalString);
+            selfElement.tagName = PTag;
+
+            currentElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
+            currentElement.append(PTag);
+            currentElement.append(PseudoConstants.PSEUDO_CLOSE_TAG);
+            
+            return;
         }
 
         if (p_strTmxTagName.equals("bpt"))

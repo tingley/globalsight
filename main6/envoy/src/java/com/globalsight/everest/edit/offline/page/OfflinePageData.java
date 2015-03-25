@@ -218,6 +218,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private String m_instanceID = null;
     private boolean m_isOmegaT = false;
     private boolean m_isXliff = false;
+    private boolean m_isXliff20 = false;
     private boolean populate100 = false;
     private boolean preserveSourceFolder = false;
 
@@ -3643,5 +3644,21 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     public boolean isPreserveSourceFolder()
     {
         return preserveSourceFolder;
+    }
+    
+    /**
+     * @return the m_isXliff20
+     */
+    public boolean isXliff20()
+    {
+        return m_isXliff20;
+    }
+
+    /**
+     * @param m_isXliff20 the m_isXliff20 to set
+     */
+    public void setIsXliff20(boolean m_isXliff20)
+    {
+        this.m_isXliff20 = m_isXliff20;
     }
 }

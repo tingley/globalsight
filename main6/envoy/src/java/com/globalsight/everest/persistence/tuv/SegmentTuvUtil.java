@@ -272,9 +272,14 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 ps.setString(18, null);
                 if (StringUtil.isNotEmpty(tuv.getSid()))
                 {
-					TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
+                	// Also save it in original table if not too long.
+                	if (tuv.getSid().length() < 254) {
+                    	ps.setString(18, tuv.getSid());
+                    }
+
+                	TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
 							tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-							TuTuvAttributeImpl.NAME_SID);
+							TuTuvAttributeImpl.SID);
                     sidAttr.setTextValue(tuv.getSid());
                     sidAttibutes.add(sidAttr);
                 }
@@ -1213,7 +1218,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 {
 					TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
 							tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
-							TuTuvAttributeImpl.NAME_SID);
+							TuTuvAttributeImpl.SID);
                     sidAttr.setTextValue(tuv.getSid());
                     sidAttibutes.add(sidAttr);
                 }

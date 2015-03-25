@@ -386,11 +386,7 @@ function doTypeChanged()
 
 function selectValue(select, value)
 {
-	var values = null;
-	if(value.contains(","))
-	{
-	  values = value.split(",");
-	}
+	var  values = value.split(",");
 	if(values != null && values.length > 0)
 	{
 		 for(var j=0;j< values.length ;j++)

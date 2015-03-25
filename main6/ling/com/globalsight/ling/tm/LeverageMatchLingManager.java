@@ -82,13 +82,6 @@ public interface LeverageMatchLingManager
             String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId);
 
     /**
-     * Delete leverage matches for specified source page.
-     * 
-     * @param p_sourcePageId
-     */
-    public void deleteLeverageMatches(Long p_sourcePageId);
-
-    /**
      * For each source Tuv find any exact matches in the LEVERAGE_MATCH table
      * that should be leveraged into target tuvs.
      * 

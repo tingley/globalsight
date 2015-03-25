@@ -20,6 +20,7 @@ com.globalsight.cxe.entity.fileprofile.FileProfile,
 com.globalsight.cxe.entity.knownformattype.KnownFormatType,
 com.globalsight.everest.foundation.L10nProfile,
 com.globalsight.everest.jobhandler.Job,
+com.globalsight.everest.localemgr.CodeSetImpl,
 com.globalsight.everest.localemgr.CodeSet,
 com.globalsight.everest.page.DataSourceType,
 com.globalsight.everest.page.TargetPage,
@@ -1499,10 +1500,14 @@ private String getSubFileName(String p_filename)
         GlobalSightLocale p_locale, StringBuffer codeSetOptions, boolean hasJavaProperties, boolean hasJsp)
     throws EnvoyServletException
     {
-        List allCodeSets = null;
+        List allCodeSets = new ArrayList();
         try
         {
-            allCodeSets = ServerProxy.getLocaleManager().getAllCodeSets();
+        	CodeSetImpl sameCode = new CodeSetImpl();
+        	sameCode.setCodeSet(JobManagementHandler.SAME_AS_SOURCE);
+             allCodeSets.add(sameCode);
+           	 List codeSets = ServerProxy.getLocaleManager().getAllCodeSets();
+           	 allCodeSets.addAll(codeSets);
         }
         catch (Exception e)
         {

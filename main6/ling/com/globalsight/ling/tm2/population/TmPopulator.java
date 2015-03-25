@@ -141,7 +141,7 @@ public class TmPopulator
             conn = DbUtil.getConnection();
             GlobalSightLocale sourceLocale = p_page.getGlobalSightLocale();
             // prepare a repository of job data for the page
-            PageJobData pageJobData = new PageJobData(sourceLocale);
+            PageJobData pageJobData = new PageJobData(sourceLocale, p_jobId);
 
             // Get page data from TU and TUV table
             PageJobDataRetriever pageJobDataRetriever = new PageJobDataRetriever(

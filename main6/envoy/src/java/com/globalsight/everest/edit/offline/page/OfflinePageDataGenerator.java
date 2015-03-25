@@ -48,6 +48,7 @@ import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.integration.ling.tm2.Types;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.PageTemplate;
@@ -55,6 +56,7 @@ import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.SnippetPageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.PageSegments;
 import com.globalsight.everest.tuv.PageSegmentsException;
@@ -76,6 +78,7 @@ import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 
@@ -169,6 +172,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private TargetPage m_trgPage = null;
     private Set m_interpretedTuIds = null;
     protected Map m_fuzzyMatchMap = null;
+    // GBS-3776
+    protected Map m_fuzzyMatchRefTmsMap = null;
     protected Map m_exactMatchMap = null;
     private MatchTypeStatistics m_matchTypeStats = null;
     protected TermLeverageMatchResultSet m_termResultSet = null;
@@ -264,6 +269,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         m_trgPage = null;
         m_interpretedTuIds = null;
         m_fuzzyMatchMap = null;
+        m_fuzzyMatchRefTmsMap = null;
         m_matchTypeStats = null;
         m_termResultSet = null;
         m_sourcePageIdAsString = null;
@@ -582,6 +588,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         Tuv trgTuv = p_pair.getTargetTuv();
 
         ArrayList fmList = null;
+        ArrayList fmRefTmsList = null;
         boolean parentProtection = false;
         String trgGxml = "";
         float trgScore = SCORE_UNKNOWN;
@@ -601,6 +608,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         if (isDownloadRequest())
         {
             fmList = getTMDataForSegment(p_pair, "0");
+            fmRefTmsList = getTMDataRefTmsForSegment(p_pair, "0");
             state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(),
                     "0");
         }
@@ -803,11 +811,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         // Then create/append offline parent seg
         OfflineSegmentData result = new OfflineSegmentData(
                 String.valueOf(trgTuv.getTu(jobId).getTuId()),
-                srcTuv.getDataType(jobId), // *always* base on source
-                                           // datatype
-                itemType, srgGxml, trgGxml, trgScore, matchTypeDisplay,
-                matchTypeId, fmList, // always included for
-                                     // resource pages
+                srcTuv.getDataType(jobId), itemType, srgGxml, trgGxml,
+                trgScore, matchTypeDisplay, matchTypeId, fmList, fmRefTmsList,
                 parentProtection, getTermDataForSegment(p_pair));
 
         result.setTargetTuv(trgTuv);
@@ -903,12 +908,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 GxmlElement srcSub = (GxmlElement) it2.next();
                 String srcSubId = srcSub.getAttribute(GxmlNames.SUB_ID);
                 ArrayList fmList = null;
+                ArrayList fmRefTmsList = null;
                 SubflowData trgSubData = (SubflowData) trgSubflowMap
                         .get(srcSubId);
 
                 if (isDownloadRequest())
                 {
                     fmList = getTMDataForSegment(p_pair, srcSubId);
+                    fmRefTmsList = getTMDataRefTmsForSegment(p_pair, srcSubId);
                 }
 
                 if (trgSubData == null && p_isNormalPageSegs)
@@ -1102,10 +1109,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                         // always refer to source datatype
                         srcDataType, srcItemType,
                         srcSub.toGxmlExcludeTopTags(), trgSubGxml, trgScore,
-                        matchTypeDisplay, matchTypeId, fmList, // always
-                                                               // included for
-                                                               // resource
-                                                               // pages
+                        matchTypeDisplay, matchTypeId, fmList, fmRefTmsList,
                         subProtection, null);
 
                 result.setCopyOfSource((state != LeverageMatchLingManager.UNVERIFIED)
@@ -1372,6 +1376,31 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             if (leverageMatches != null)
             {
                 m_fuzzyMatchMap = getLeverageMatchMap(leverageMatches);
+                // GBS-3776
+                Job job = ServerProxy.getJobHandler().getJobById(sp.getJobId());
+                if (job != null)
+                {
+                    TranslationMemoryProfile tmp = job.getL10nProfile()
+                            .getTranslationMemoryProfile();
+                    String refTms = tmp.getRefTMsToLeverageFrom();
+                    if (!StringUtil.isEmpty(refTms))
+                    {
+                        List<Long> refTmIdsForPenalty = new ArrayList<Long>();
+                        String[] ids = refTms.split(",");
+                        for (String id : ids)
+                        {
+                            try
+                            {
+                                refTmIdsForPenalty.add(Long.parseLong(id));
+                            }
+                            catch (Exception ignore)
+                            {
+                            }
+                        }
+                        m_fuzzyMatchRefTmsMap = getLeverageMatchMap(
+                                leverageMatches, refTmIdsForPenalty);
+                    }
+                }
                 m_matchTypeStats = getMatchTypesForStatistics(leverageMatches,
                         0, sp.getJobId());
             }
@@ -1439,6 +1468,36 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             }
         }
 
+        return result;
+    }
+
+    private Map<Long, ArrayList<LeverageMatch>> getLeverageMatchMap(
+            List p_leverageMatches, List<Long> refTmIdsForPenalty)
+    {
+        // Put all the LeverageMatch in HashMap grouping by original Tuv id
+        Map<Long, ArrayList<LeverageMatch>> result = new HashMap<Long, ArrayList<LeverageMatch>>();
+
+        for (Iterator it = p_leverageMatches.iterator(); it.hasNext();)
+        {
+            LeverageMatch match = (LeverageMatch) it.next();
+            if (!refTmIdsForPenalty.contains(match.getTmId()))
+            {
+                continue;
+            }
+
+            Long key = new Long(match.getOriginalSourceTuvId());
+            ArrayList<LeverageMatch> set = (ArrayList<LeverageMatch>) result
+                    .get(key);
+
+            if (set == null)
+            {
+                set = new ArrayList<LeverageMatch>();
+                result.put(key, set);
+            }
+
+            // TreeSet sorts the elements
+            set.add(match);
+        }
         return result;
     }
 
@@ -1794,6 +1853,75 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         m_lastPid = p_tuv.getTu(p_jobId).getPid();
 
         return true;
+    }
+
+    /**
+     * Gets the corresponding set of fuzzy matches from selected reference tms.
+     * Use zero for subId ("0") to get parent matches.
+     * 
+     * @since GBS-3776
+     */
+    private ArrayList getTMDataRefTmsForSegment(SegmentPair p_pair,
+            String p_subId)
+    {
+        if (m_fuzzyMatchRefTmsMap == null)
+        {
+            return null;
+        }
+
+        ArrayList ts = (ArrayList) m_fuzzyMatchRefTmsMap.get(p_pair
+                .getSourceTuv().getIdAsLong());
+
+        if (ts == null)
+        {
+            return null;
+        }
+
+        ArrayList result = null;
+        int i = 0;
+        Iterator it = ts.iterator();
+
+        // Get and filter matches by sub id.
+        while (it.hasNext() && i < m_maxFuzzyNum)
+        {
+            LeverageMatch levMatch = (LeverageMatch) it.next();
+
+            if (levMatch.getSubId().equals(p_subId))
+            {
+                if (result == null)
+                {
+                    result = new ArrayList(m_maxFuzzyNum);
+                }
+
+                result.add(levMatch);
+                i++;
+            }
+        }
+
+        if (result != null)
+        {
+            // make the order according to the score number
+            SortUtil.sort(result, new Comparator<LeverageMatch>()
+            {
+                public int compare(LeverageMatch l1, LeverageMatch l2)
+                {
+                    if (l1 != null && l2 != null)
+                    {
+                        if (l1.getScoreNum() > l2.getScoreNum())
+                        {
+                            return -1;
+                        }
+                        else
+                        {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                }
+            });
+        }
+
+        return result;
     }
 
     /**

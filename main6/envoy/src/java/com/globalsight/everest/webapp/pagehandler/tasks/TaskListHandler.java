@@ -778,10 +778,14 @@ public class TaskListHandler extends PageHandler
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
             TranslationMemoryProfile tmp = job.getL10nProfile()
                     .getTranslationMemoryProfile();
-            long penalty = tmp.getRefTmPenalty();
-            if (penalty > 0)
+            String refTms = tmp.getRefTMsToLeverageFrom();
+            if (!StringUtil.isEmpty(refTms))
             {
-                allPenalties.add(penalty);
+                long penalty = tmp.getRefTmPenalty();
+                if (penalty > 0)
+                {
+                    allPenalties.add(penalty);
+                }
             }
             alljobIds.add(jobId);
             alljobIdsSort.add(jobId);
@@ -1325,10 +1329,10 @@ public class TaskListHandler extends PageHandler
                     {
                         pageName = isDisplayFull ? tp.getDisplayPageName() : tp
                                 .getShortPageName();
-						if (pageName.contains("\\\\"))
-						{
-							pageName = pageName.replace("\\\\","\\");
-						}
+                        if (pageName.contains("\\\\"))
+                        {
+                            pageName = pageName.replace("\\\\", "\\");
+                        }
                         pageName = JsonUtil.encode(pageName);
                         pagesWithUnTranslatedSeg.append("\"")
                                 .append(JsonUtil.encode(pageName))

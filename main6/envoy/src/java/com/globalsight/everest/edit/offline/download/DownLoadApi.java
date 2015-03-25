@@ -92,6 +92,7 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ServerUtil;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -1436,7 +1437,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             TranslationMemoryProfile tmp = p_downloadParams.getJob()
                     .getL10nProfile().getTranslationMemoryProfile();
-            penalty = tmp.getRefTmPenalty();
+            String refTms = tmp.getRefTMsToLeverageFrom();
+            if (!StringUtil.isEmpty(refTms))
+            {
+                penalty = tmp.getRefTmPenalty();
+            }
             fname = getUniqueExtractedPTFName(p_page, FILE_EXT_TMX_NO_DOT);
             if (!isOmegaT && penalty > 0)
             {
@@ -1657,6 +1662,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         }
     }
 
+    /**
+     * Gets the tmx file name according to the reference tms penalty.
+     * 
+     * @since GBS-3776
+     */
     private String getPenaltyTmxName(String jobName,
             DownloadParams downloadParams, long penalty)
     {
@@ -1671,12 +1681,17 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 List<Long> penalties = downloadParams.getAllPenalties();
                 if (penalties.size() > 0)
                 {
+                    long min = penalties.get(0);
+                    long max = penalties.get(penalties.size() - 1);
                     penaltyTmxName.append("-");
-                    penaltyTmxName.append(penalties.get(0));
+                    penaltyTmxName.append(min);
                     penaltyTmxName.append("%");
-                    penaltyTmxName.append("-");
-                    penaltyTmxName.append(penalties.get(penalties.size() - 1));
-                    penaltyTmxName.append("%");
+                    if (max != min)
+                    {
+                        penaltyTmxName.append("-");
+                        penaltyTmxName.append(max);
+                        penaltyTmxName.append("%");
+                    }
                 }
             }
         }

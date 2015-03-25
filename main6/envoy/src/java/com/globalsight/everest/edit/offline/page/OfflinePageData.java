@@ -2672,14 +2672,21 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     // Write TM matches into tmx.
                     StringBuffer exactAndFuzzy = new StringBuffer();
                     List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
-                    if (osd.hasTMMatches() || osd.hasMTMatches())
+                    boolean hasMatches = osd.hasTMMatches()
+                            || osd.hasMTMatches();
+                    if (isPenaltyTmx)
+                    {
+                        hasMatches = osd.hasRefTmsTMMatches()
+                                || osd.hasRefTmsMTMatches();
+                    }
+                    if (hasMatches)
                     {
                         // Load Tuvs/XliffAlts of current page for performance.
                         loadCurrentTargetPageTuvsForPerformance(
                                 tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
                                 jobId);
 
-                        allLMs = getAllLeverageMatches(osd, jobId);
+                        allLMs = getAllLeverageMatches(osd, jobId, isPenaltyTmx);
                         Iterator<LeverageMatch> matches = allLMs.iterator();
 
                         while (matches.hasNext())
@@ -2806,7 +2813,14 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         }
 
                         List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
-                        if (osd.hasTMMatches() || osd.hasMTMatches())
+                        boolean hasMatches = osd.hasTMMatches()
+                                || osd.hasMTMatches();
+                        if (isPenaltyTmx)
+                        {
+                            hasMatches = osd.hasRefTmsTMMatches()
+                                    || osd.hasRefTmsMTMatches();
+                        }
+                        if (hasMatches)
                         {
                             // Load Tuvs/XliffAlts of current page for
                             // performance.
@@ -2814,7 +2828,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                     tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
                                     jobId);
 
-                            allLMs = getAllLeverageMatches(osd, jobId);
+                            allLMs = getAllLeverageMatches(osd, jobId,
+                                    isPenaltyTmx);
                         }
 
                         if (allLMs != null
@@ -3069,13 +3084,20 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
     @SuppressWarnings("unchecked")
     private List<LeverageMatch> getAllLeverageMatches(OfflineSegmentData osd,
-            long p_jobId) throws TuvException, RemoteException,
-            GeneralException
+            long p_jobId, boolean isPenaltyTmx) throws TuvException,
+            RemoteException, GeneralException
     {
         List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
 
         // Matches from "leverage_match_xx" table
-        allLMs.addAll(osd.getOriginalFuzzyLeverageMatchList());
+        if (isPenaltyTmx)
+        {
+            allLMs.addAll(osd.getOriginalFuzzyLeverageMatchRefTmsList());
+        }
+        else
+        {
+            allLMs.addAll(osd.getOriginalFuzzyLeverageMatchList());
+        }
 
         Tuv currTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
                 osd.getTrgTuvId(), p_jobId);

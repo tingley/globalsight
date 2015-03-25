@@ -75,6 +75,9 @@ public class OfflineSegmentData implements Serializable
     private boolean m_hasTerminology = false;
     private boolean m_hasTMMatches = false;
     private boolean m_hasMTMatches = false;
+    // GBS-3776
+    private boolean m_hasRefTmsTMMatches = false;
+    private boolean m_hasRefTmsMTMatches = false;
 
     // values for a target entry (parent or subflow)
     private Long m_trgTuvId = null;
@@ -98,6 +101,7 @@ public class OfflineSegmentData implements Serializable
 
     // Fuzzy matches -the original list of fuzzy LeverageMatches
     private List m_originalFuzzyLeverageMatchList = null;
+    private List m_originalFuzzyLeverageMatchRefTmsList = null;
     private List notCountTags;
 
     /**
@@ -125,7 +129,8 @@ public class OfflineSegmentData implements Serializable
     public OfflineSegmentData()
     {
         this("", "", "", "", "", -1, "",
-                AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED, null, false, null);
+                AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED, null, null,
+                false, null);
     }
 
     /**
@@ -137,7 +142,8 @@ public class OfflineSegmentData implements Serializable
     public OfflineSegmentData(String p_id)
     {
         this(p_id, "", "", "", "", -1, "",
-                AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED, null, false, null);
+                AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED, null, null,
+                false, null);
     }
 
     /**
@@ -170,7 +176,7 @@ public class OfflineSegmentData implements Serializable
     public OfflineSegmentData(String p_id, String p_segFmt, String p_segType,
             String p_srcText, String p_trgText, float p_matchScore,
             String p_matchType, int p_matchTypeId, List p_fuzzyList,
-            boolean p_isProtected, List p_termList)
+            List p_fuzzyRefTmsList, boolean p_isProtected, List p_termList)
     {
         super();
 
@@ -191,6 +197,7 @@ public class OfflineSegmentData implements Serializable
 
         // TM
         setOriginalFuzzyLevergeMatchList(p_fuzzyList);
+        setOriginalFuzzyLevergeMatchRefTmsList(p_fuzzyRefTmsList);
 
         // Terms
         setTerminologyList(p_termList);
@@ -354,6 +361,34 @@ public class OfflineSegmentData implements Serializable
     }
 
     /**
+     * Sets the original fuzzy leverage match list from selected reference tms.
+     * 
+     * @since GBS-3776
+     */
+    public void setOriginalFuzzyLevergeMatchRefTmsList(List p_list)
+    {
+        m_originalFuzzyLeverageMatchRefTmsList = p_list;
+        if (p_list != null && p_list.size() > 0)
+        {
+            for (int i = 0; i < p_list.size(); i++)
+            {
+                LeverageMatch lm = (LeverageMatch) p_list.get(i);
+                if (!StringUtil.isEmpty(lm.getMtName()))
+                {
+                    m_hasRefTmsMTMatches = true;
+                }
+                else
+                {
+                    m_hasRefTmsTMMatches = true;
+                }
+                // break for performance.
+                if (m_hasRefTmsTMMatches && m_hasRefTmsMTMatches)
+                    break;
+            }
+        }
+    }
+
+    /**
      * Sets the original fuzzy leverage match list.
      * 
      * @param p_originalFuzzyMatchList
@@ -364,21 +399,21 @@ public class OfflineSegmentData implements Serializable
         m_originalFuzzyLeverageMatchList = p_list;
         if (p_list != null && p_list.size() > 0)
         {
-			for (int i = 0; i < p_list.size(); i++)
-        	{
-        		LeverageMatch lm = (LeverageMatch) p_list.get(i);
-        		if (!StringUtil.isEmpty(lm.getMtName()))
-        		{
-        			m_hasMTMatches = true;
-        		}
-        		else
-        		{
-        			m_hasTMMatches = true;
-        		}
-        		// break for performance.
-				if (m_hasTMMatches && m_hasMTMatches)
-					break;
-        	}
+            for (int i = 0; i < p_list.size(); i++)
+            {
+                LeverageMatch lm = (LeverageMatch) p_list.get(i);
+                if (!StringUtil.isEmpty(lm.getMtName()))
+                {
+                    m_hasMTMatches = true;
+                }
+                else
+                {
+                    m_hasTMMatches = true;
+                }
+                // break for performance.
+                if (m_hasTMMatches && m_hasMTMatches)
+                    break;
+            }
         }
     }
 
@@ -680,6 +715,17 @@ public class OfflineSegmentData implements Serializable
     }
 
     /**
+     * Gets the original list of fuzzy LeverageMatches from selected reference
+     * tms.
+     * 
+     * @since GBS-3776
+     */
+    public List getOriginalFuzzyLeverageMatchRefTmsList()
+    {
+        return m_originalFuzzyLeverageMatchRefTmsList;
+    }
+
+    /**
      * Gets the list of ptag fuzzy match strings.
      */
     public List getDisplayFuzzyMatchList()
@@ -795,7 +841,27 @@ public class OfflineSegmentData implements Serializable
 
     public boolean hasMTMatches()
     {
-    	return m_hasMTMatches;
+        return m_hasMTMatches;
+    }
+
+    /**
+     * Checks if a segment has TM matches from selected reference tms.
+     * 
+     * @since GBS-3776
+     */
+    public boolean hasRefTmsTMMatches()
+    {
+        return m_hasRefTmsTMMatches;
+    }
+
+    /**
+     * Checks if a segment has MT matches from selected reference tms.
+     * 
+     * @since GBS-3776
+     */
+    public boolean hasRefTmsMTMatches()
+    {
+        return m_hasRefTmsMTMatches;
     }
 
     /**
@@ -1057,8 +1123,8 @@ public class OfflineSegmentData implements Serializable
         else if (!m_displayTargetText.toString().equals(
                 other.m_displayTargetText.toString()))
             return false;
-        if(m_matchScore != other.getMatchValue())
-        	return false;
+        if (m_matchScore != other.getMatchValue())
+            return false;
         return true;
     }
 
@@ -1098,7 +1164,7 @@ public class OfflineSegmentData implements Serializable
 
         return new Date();
     }
-    
+
     public void setDisplayPageName(String pagename)
     {
         displayPageName = pagename;
@@ -1108,7 +1174,7 @@ public class OfflineSegmentData implements Serializable
     {
         return displayPageName;
     }
-    
+
     public void setPageId(long pageid)
     {
         pageId = pageid;

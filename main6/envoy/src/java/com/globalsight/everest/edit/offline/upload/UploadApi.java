@@ -2248,6 +2248,11 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     public String loadListViewTextFile(Reader p_reader, String p_fileName,
             boolean p_keepIssues)
     {
+        if (m_uploadPageData == null)
+        {
+            m_uploadPageData = new OfflinePageData();
+            m_referencePageDatas = new ArrayList<PageData>();
+        }
 
         try
         {
@@ -2283,6 +2288,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         || line.startsWith(GS_TOOLKIT_FORMAT)
                         || line.startsWith(SEGMENT_SID_KEY)
                         || line.startsWith(SEGMENT_XLF_TARGET_STATE_KEY)
+                        || line.startsWith(SEGMENT_INCONTEXT_MATCH_KEY)
+                        || line.startsWith(SEGMENT_TM_PROFILE_KEY)
+                        || line.startsWith(SEGMENT_TERMBASE_KEY)
                         || line.startsWith(HEADER_POPULATE_100_SEGMENTS);
                 if (!ignoreThisLine)
                 {
@@ -2340,12 +2348,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         // Read the upload file into an OfflinePageData object.
         try
         {
-            if (m_uploadPageData == null)
-            {
-                m_uploadPageData = new OfflinePageData();
-                m_referencePageDatas = new ArrayList<PageData>();
-            }
-            
             m_errWriter.setFileName(p_fileName);
             m_uploadPageData.setLoadConversionLineBreak(m_normalizedLB);
             m_uploadPageData.loadOfflineTextFile(new_reader, false);

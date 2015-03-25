@@ -88,6 +88,9 @@ public interface AmbassadorDwUpConstants
     static public final String SEGMENT_RESOURCE_KEY = "# Resources:";
     static public final String SEGMENT_SID_KEY = "# SID:";
     static public final String SEGMENT_XLF_TARGET_STATE_KEY = "# Xliff Target State:";
+    static public final String SEGMENT_INCONTEXT_MATCH_KEY = "# In-Context Match word count";
+    static public final String SEGMENT_TM_PROFILE_KEY = "# GlobalSight TM Profile";
+    static public final String SEGMENT_TERMBASE_KEY = "# GlobalSight Termbase";
 
     // Grammar for Plain text format javacc parser. Note: the grammar
     // cannot accept translated values.

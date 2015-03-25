@@ -60,12 +60,15 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.match.Match;
 import com.globalsight.everest.edit.offline.xliff.xliff20.match.Matches;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.page.TemplatePart;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
@@ -266,6 +269,46 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         StringBuffer sb = new StringBuffer(strEOL);
 
         sb.append("# GlobalSight Download File").append(strEOL);
+        
+        // Activity Type. Should be removed
+        sb.append("# Activity Type: ").append(downloadParams.getActivityType()).append(strEOL);
+        
+        // User name. Should be removed.
+        String user = null;
+        if (downloadParams.getUser() != null)
+        {
+            user = UserUtil.getUserNameById(downloadParams
+                    .getUser().getUserId());
+        }
+        else
+        {
+            if (downloadParams.getAutoActionNodeEmail() != null)
+            {
+                user = "";
+
+                for (int x = 0; x < downloadParams.getAutoActionNodeEmail()
+                        .size(); x++)
+                {
+                    String email = downloadParams.getAutoActionNodeEmail()
+                            .get(x).toString();
+                    email = email.replace("<", " - ").replace(">", "");
+                    user += email;
+                    if (x < downloadParams.getAutoActionNodeEmail().size() - 1)
+                    {
+                        user += ",";
+                    }
+                }
+            }
+        }
+        if (user != null)
+        {
+            sb.append("# User name: ").append(user).append(strEOL);
+        }
+        
+        // Accept time. Should be removed.
+        String acceptTaskTime = getAcceptTaskTime(getTasks(downloadParams));
+        sb.append("# Accept time: ").append(acceptTaskTime).append(strEOL);
+        
         sb.append("# Encoding: ").append(XLIFF_ENCODING).append(strEOL);
         sb.append("# Document Format: ").append(page.getDocumentFormat())
                 .append(strEOL);
@@ -304,12 +347,80 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                 .append(page.getFuzzyMatchWordCountAsString()).append(strEOL);
         sb.append("# No Match word count: ")
                 .append(page.getNoMatchWordCountAsString()).append(strEOL);
+        
+        sb.append("# Populate 100% Target Segments: ")
+                .append(page.isPopulate100() ? "YES" : "NO").append(strEOL);
+        
+        // Server Instance ID
+        if (page.getServerInstanceID() != null)
+        {
+            sb.append("# GlobalSight Instance ID: ")
+                    .append(page.getServerInstanceID()).append(strEOL);
+        }
+        
+        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
+                Long.parseLong(page.getWorkflowId()));
+        sb.append("# In-Context Match word count: ")
+                .append(wf.getInContextMatchWordCount()).append(strEOL);
+        
         sb.append("# Edit all: ").append(page.getDisplayTMEditType())
                 .append(strEOL);
 
+        if (downloadParams.getJob() != null)
+        {
+            TranslationMemoryProfile tmprofile = downloadParams.getJob()
+                    .getL10nProfile().getTranslationMemoryProfile();
+            sb.append("# GlobalSight TM Profile id: ")
+                    .append(tmprofile.getId()).append(strEOL);
+            sb.append("# GlobalSight TM Profile name: ")
+                    .append(tmprofile.getName()).append(strEOL);
+            sb.append("# GlobalSight Termbase: ")
+                    .append(downloadParams.getJob().getL10nProfile()
+                            .getProject().getTermbaseName()).append(strEOL);
+        }
+
+        if (downloadParams.getFileFormatId() != -1)
+        {
+            String format = downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ? "OmegaT"
+                    : "Xliff";
+            sb.append("# GlobalSight Offline Toolkit Format: ").append(format)
+                    .append(strEOL);
+        }
+        
         return sb.toString();
     }
 
+    private String getAcceptTaskTime(List<Task> tasks)
+    {
+        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        StringBuffer acceptTime = new StringBuffer();
+        for(Task task:tasks)
+        {
+            acceptTime.append(dateFormat.format(task.getEstimatedAcceptanceDate()))
+                        .append(",");
+        }
+        return acceptTime.substring(0, acceptTime.length() - 1);
+    }
+
+    private List<Task> getTasks(DownloadParams p_downloadParams)
+    {
+        List<Task> tasks = new ArrayList<Task>();
+        List<Long>  taskIds = p_downloadParams.getAllTaskIds();
+        if(taskIds != null)
+        {           
+            for(Long taskId:taskIds)
+            {
+                tasks.add(TaskHelper.getTask(taskId));
+            }
+        }
+        else
+        {
+            long taskId = Long.parseLong(p_downloadParams.getTaskID());
+            tasks.add(TaskHelper.getTask(taskId));
+        }
+        return tasks;
+    }
+    
     /**
      * Gets the skeleton from database.
      * 
@@ -990,6 +1101,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
      */
     private void addHeader() throws Exception
     {
+        xliff.setVersion("2.0");
+        
         String sLocale = page.getSourceLocaleName();
         if (sLocale != null)
         {

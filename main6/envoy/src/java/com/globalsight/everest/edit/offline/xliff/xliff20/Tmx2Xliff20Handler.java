@@ -438,8 +438,13 @@ public class Tmx2Xliff20Handler
         }
     }
 
+    /**
+     * Just handle as nomal text.
+     * @param substring
+     */
     public void handleIsExtractedText(String substring)
     {
+        handleText(substring);
     }
 
     /**

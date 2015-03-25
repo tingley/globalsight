@@ -471,9 +471,19 @@ public class Tmx2Xliff20
         StringBuffer sb = new StringBuffer();
         File f = xliff2.getFile().get(0);
         List<Note> notes = f.getNotes().getNote();
-
+        
         // remove the first \r\n in note
-        sb.append(notes.get(0).getContent().substring(1));
+        String note = notes.get(0).getContent().substring(1);
+        
+        // remove content between # Activity Type and # Encoding
+        int index = note.indexOf("# Activity Type:");
+        int index2 = note.indexOf("# Encoding:");
+        if (index > 0 && index2 > 0)
+        {
+            note = note.substring(0, index) + note.substring(index2);
+        }
+        
+        sb.append(note);
         sb.append("\r\n");
         List<Object> us = f.getUnitOrGroup();
         for (Object o : us)

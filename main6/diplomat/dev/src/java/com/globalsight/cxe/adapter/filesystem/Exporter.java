@@ -673,12 +673,13 @@ public class Exporter
     {
     	try 
     	{
-    		HashMap<String, String> infos = getInfos(finalFileName, wf);
-    		long jobId = Long.parseLong(infos.get("jobId"));
+    		long jobId = wf.getJob().getJobId();
     		GitConnectorJob gitConnectorJob = GitConnectorManagerLocal
-    											.getGitConnectorJobByJobId(jobId);
+					.getGitConnectorJobByJobId(jobId);
     		if(gitConnectorJob != null)
     		{
+    			HashMap<String, String> infos = getInfos(finalFileName, wf);
+    			
     			GitConnector gc = GitConnectorManagerLocal
     								.getGitConnectorById(gitConnectorJob.getGitConnectorId());
     			
@@ -736,9 +737,7 @@ public class Exporter
     	HashMap<String, String> infos = new HashMap<String, String>();
     	String prefixStr = m_exportLocation + File.separator + wf.getTargetLocale().toString();
 		String jobIdFilePath = finalFileName.substring(prefixStr.length() + 1);
-		String jobIdStr = jobIdFilePath.substring(0, jobIdFilePath.indexOf(File.separator));
 		String relativeFilePath = jobIdFilePath.substring(jobIdFilePath.indexOf(File.separator) + 1);
-		infos.put("jobId", jobIdStr);
 		infos.put("relativeFilePath", relativeFilePath);
 		return infos;
     }

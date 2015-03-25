@@ -36,11 +36,13 @@ import org.hibernate.Session;
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvAttributeUtil;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.util.comparator.TMidTUidComparator;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
@@ -67,6 +69,7 @@ import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
 
@@ -196,6 +199,8 @@ public class TmCoreManagerLocal implements TmCoreManager
                     p_sourcePage.getId(), sourceLocale, p_jobId);
             SegmentQueryResult result = pageJobDataRetriever.queryForLeverage();
 
+            List<Long> tuvIds = new ArrayList<Long>();
+            List<BaseTmTuv> tuvs = new ArrayList<BaseTmTuv>();
             BaseTmTu tu = null;
             while ((tu = result.getNextTu()) != null)
             {
@@ -211,10 +216,27 @@ public class TmCoreManagerLocal implements TmCoreManager
                     diplomatParser.parse(tuv.getSegment());
                     tuv.setExactMatchKey(GlobalSightCrc.calculate(handler
                             .toString()));
-
-                    leverageDataCenter.addOriginalSourceTuv(tuv);
+                    tuvIds.add(tuv.getId());
+                    tuvs.add(tuv);
                 }
             }
+
+            // load SID from "translation_tu_tuv_attr_xx" table
+			List<TuTuvAttributeImpl> sidAttrs = SegmentTuTuvAttributeUtil
+					.getSidAttributesByTuvIds(tuvIds, p_jobId);
+    		HashMap<Long, String> sidAttrMap = new HashMap<Long, String>();
+    		for (TuTuvAttributeImpl sidAttr : sidAttrs)
+    		{
+    			sidAttrMap.put(sidAttr.getObjectId(), sidAttr.getTextValue());
+    		}
+    		for (BaseTmTuv tuv : tuvs)
+    		{
+    			if (StringUtil.isNotEmpty(sidAttrMap.get(tuv.getId())))
+    			{
+    				tuv.setSid(sidAttrMap.get(tuv.getId()));
+    			}
+    			leverageDataCenter.addOriginalSourceTuv(tuv);
+    		}
         }
         catch (Exception e)
         {

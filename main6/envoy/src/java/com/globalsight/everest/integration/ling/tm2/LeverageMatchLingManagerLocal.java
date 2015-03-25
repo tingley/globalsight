@@ -1112,6 +1112,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     ps.setString(17, null);
                     if (StringUtil.isNotEmpty(lm.getSid()))
                     {
+                    	// Also save it into original table if not too long.
+                    	if (lm.getSid().length() < 254)
+                    	{
+                    		ps.setString(17, lm.getSid());
+                    	}
 						LeverageMatchAttribute sidAttr = new LeverageMatchAttribute(
 								lm.getSourcePageId(),
 								lm.getOriginalSourceTuvId(), lm.getSubId(),

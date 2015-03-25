@@ -1316,18 +1316,21 @@ public class Ambassador extends AbstractWebService
             String attributeXml) throws WebServiceException
     {
         Vector fPaths = new Vector();
+        filePaths = filePaths.trim();
         for (String path : filePaths.split("\\|"))
         {
             fPaths.add(path);
         }
 
         Vector fIds = new Vector();
+        fileProfileIds = fileProfileIds.trim();
         for (String fId : fileProfileIds.split("\\|"))
         {
             fIds.add(fId);
         }
 
         Vector tLocales = new Vector();
+        targetLocales = targetLocales.trim();
         for (String tLocale : targetLocales.split("\\|"))
         {
             tLocales.add(tLocale);

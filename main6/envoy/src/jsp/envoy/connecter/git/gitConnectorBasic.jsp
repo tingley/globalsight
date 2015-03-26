@@ -141,7 +141,7 @@ function confirmForm()
     }
     
     var url = $("#url").val();
-    if (url.indexOf("ssh") == 0 && isEmptyString(gitForm.privateKeyFile.value))
+    if (url.indexOf("http") != 0 && isEmptyString(gitForm.privateKeyFile.value))
     {
         alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_private_key_file_path")))%>");
         gitForm.privateKeyFile.focus();
@@ -277,15 +277,10 @@ if(url.indexOf("http") == 0)
 	$("#usernameTr").show();
 	$("#privateKeyFilePathTr").hide();
 }
-else if (url.indexOf("ssh") == 0)
-{
-	$("#usernameTr").hide();
-	$("#privateKeyFilePathTr").show();
-}
 else
 {
 	$("#usernameTr").hide();
-	$("#privateKeyFilePathTr").hide();
+	$("#privateKeyFilePathTr").show();
 }
 
 $("#url").keyup(function(){
@@ -295,15 +290,10 @@ $("#url").keyup(function(){
 		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
-	else if (url.indexOf("ssh") == 0)
-	{
-		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").show();
-	}
 	else
 	{
 		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").hide();
+		$("#privateKeyFilePathTr").show();
 	}
 });
 
@@ -314,15 +304,10 @@ $("#url").keydown(function(){
 		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
-	else if (url.indexOf("ssh") == 0)
-	{
-		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").show();
-	}
 	else
 	{
 		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").hide();
+		$("#privateKeyFilePathTr").show();
 	}
 });
 
@@ -333,15 +318,10 @@ $("#url").focus(function(){
 		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
-	else if (url.indexOf("ssh") == 0)
-	{
-		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").show();
-	}
 	else
 	{
 		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").hide();
+		$("#privateKeyFilePathTr").show();
 	}
 });
 
@@ -352,15 +332,10 @@ $("#url").blur(function(){
 		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
-	else if (url.indexOf("ssh") == 0)
-	{
-		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").show();
-	}
 	else
 	{
 		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").hide();
+		$("#privateKeyFilePathTr").show();
 	}
 });
 </script>

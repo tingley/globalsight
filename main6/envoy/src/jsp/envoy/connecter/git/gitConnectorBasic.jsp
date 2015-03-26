@@ -180,6 +180,8 @@ function confirmForm()
 	    		}
 	    	}
     	}
+    	
+    	#("#privateKeyFile").val("");
     }
     else
     {

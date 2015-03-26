@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -78,6 +79,29 @@ public class GitConnectorManagerLocal
 				" and e.targetLocale = '" + targetLocale + "' ";
 		HashMap<String, Long> map = new HashMap<String, Long>();
 		map.put("gitConnectorId", gitConnectorId);
+		String currentId = CompanyThreadLocal.getInstance().getValue();
+		if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
+		{
+		    hql += " and e.companyId = :companyId";
+		    map.put("companyId", Long.parseLong(currentId));
+		}
+		return HibernateUtil.search(hql, map);
+    }
+    
+    public static List<?> getAllFileMapping(long gitConnectorId,
+    		String sourceLocale, Set<String> targetLocales)
+    {
+    	String hql = "from GitConnectorFileMapping e where e.isActive = 'Y' and " +
+				" e.gitConnectorId = :gitConnectorId and e.sourceLocale =  '" + sourceLocale + "' " +
+				" and e.targetLocale in ( ";
+		HashMap map = new HashMap();
+		map.put("gitConnectorId", gitConnectorId);
+		String targetLoclestr = "";
+		for(String targetLocale: targetLocales)
+		{
+			targetLoclestr = targetLoclestr + "'" + targetLocale + "',";
+		}
+		hql += targetLoclestr.substring(0, targetLoclestr.length() -1) + ") ";
 		String currentId = CompanyThreadLocal.getInstance().getValue();
 		if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
 		{

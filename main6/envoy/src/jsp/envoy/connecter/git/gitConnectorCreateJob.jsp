@@ -43,6 +43,7 @@
     String uploadAttachmentUrl = self.getPageURL() + "&action=uploadAttachment";
     String updateTargetLocalesUrl = self.getPageURL() + "&action=updateTargetLocales";
     String createGitConnectorJobUrl = self.getPageURL() + "&action=createGitConnectorJob";
+    String checkFileMappingUrl = self.getPageURL() + "&action=checkFileMapping";
 
     Integer creatingJobsNum = (Integer)request.getAttribute("creatingJobsNum");
     if (creatingJobsNum == null)
@@ -268,8 +269,9 @@ $(document).ready(function ()
     // create job
     var creating = false;
     $("#create").click(function()
-    {
+    {   
         $(this).blur();
+        
         if (creating) {
             return;
         }
@@ -351,7 +353,43 @@ $(document).ready(function ()
         $("#fileMapFileProfile").val(fileMapFileProfile);
 
         fnSelectAll2(false);
-
+        
+        var noMappingFile = "";
+    	var fileProfileId = "";	
+    	$("select[name=fileProfile]").each(function(){
+    		fileProfileId = $(this).val();
+    		return false
+    	})
+    	
+    	var targetLocaleIds = "";
+    	$("input[name=targetLocale]:checked").each(function(){
+    		targetLocaleIds = targetLocaleIds + " " + $(this).val();
+    	})
+    	targetLocaleIds = targetLocaleIds.substr(1);
+		$.ajaxSettings.async = false;
+        $("input[name=jobFilePath]").each(function(){
+	    	var random = Math.random();
+    		$.get("<%=checkFileMappingUrl%>", 
+            {action:"action",filePath:$(this).val(),fileProfileId:fileProfileId,gcId:"<%=gc.getId()%>",targetLocaleIds:targetLocaleIds,"no":Math.random()}, 
+            function(data)
+            {
+            	if(data != "")
+            	{
+            		noMappingFile = noMappingFile + data + ", ";
+            	}
+            });
+        })
+        if(noMappingFile.length > 0)
+        {
+        	noMappingFile = noMappingFile.substr(0, noMappingFile.length -2);
+        	noMappingFile = "Such file(s) do not have mapping path: "+noMappingFile + ". Do you sure you want continue to create job?"
+        	if(!confirm(noMappingFile))
+        	{
+        		creating = false;
+        		return;
+        	}
+        }
+        
         alert('<%=bundle.getString("msg_job_create_successful")%>');
         creating = false;
         $("#createJobForm").attr("target", "_self");

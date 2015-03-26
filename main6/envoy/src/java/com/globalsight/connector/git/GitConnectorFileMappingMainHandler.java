@@ -88,7 +88,7 @@ public class GitConnectorFileMappingMainHandler extends PageActionHandler
 
                     if (createSubFolder)
                     {
-                    	ArrayList<String> subFolders = getAllSubFolders(prefixStr + srcMappingPath);
+                    	ArrayList<String> subFolders = getAllSubFolders(gcFolder.getPath() + File.separator + srcMappingPath);
                         String srcPath = "", tarPath = "";
                         for (String path : subFolders)
                         {
@@ -172,12 +172,11 @@ public class GitConnectorFileMappingMainHandler extends PageActionHandler
     														.getAllSonFileMappings(gcfmId);
     				for (GitConnectorFileMapping o : gcfms) 
     				{
-    					o.setIsActive(false);
-    					HibernateUtil.update(o);
+    					HibernateUtil.delete(o);
     				}
     				
     				GitConnectorFileMapping gcfm = null;
-    				ArrayList<String> subFolders = getAllSubFolders(prefixStr + srcMappingPath);
+    				ArrayList<String> subFolders = getAllSubFolders(gcFolder.getPath() + File.separator + srcMappingPath);
     				String srcPath = "", tarPath = "";
     				for (String path : subFolders)
     				{
@@ -207,8 +206,7 @@ public class GitConnectorFileMappingMainHandler extends PageActionHandler
             											.getAllSonFileMappings(gcfmId);
             	for (GitConnectorFileMapping o : gcfms) 
             	{
-            		o.setIsActive(false);
-            		HibernateUtil.update(o);
+            		HibernateUtil.delete(o);
             	}
             }
         }
@@ -234,8 +232,7 @@ public class GitConnectorFileMappingMainHandler extends PageActionHandler
             				GitConnectorManagerLocal.getAllSonFileMappings(c.getId());
             for(GitConnectorFileMapping gcfm: gcfms)
             {
-            	gcfm.setIsActive(false);
-            	HibernateUtil.update(gcfm);
+            	HibernateUtil.delete(gcfm);
             }
         }
     }

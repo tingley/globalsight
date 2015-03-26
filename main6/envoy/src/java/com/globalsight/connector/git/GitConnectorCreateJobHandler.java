@@ -3,11 +3,14 @@ package com.globalsight.connector.git;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -20,9 +23,13 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.connector.git.form.CreateGitConnectorJobForm;
 import com.globalsight.connector.git.util.GitConnectorHelper;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.gitconnector.GitConnector;
+import com.globalsight.cxe.entity.gitconnector.GitConnectorFileMapping;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -77,6 +84,64 @@ public class GitConnectorCreateJobHandler extends PageActionHandler
             out.close();
             pageReturn();
         }
+    }
+    
+    @ActionHandler(action = "checkFileMapping", formClass = "")
+    public void checkFileMapping(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+    	String gcIdStr = request.getParameter("gcId");
+    	GitConnector gc = GitConnectorManagerLocal.getGitConnectorById(Long.parseLong(gcIdStr));
+    	GitConnectorHelper helper = new GitConnectorHelper(gc);
+    	response.setContentType("text/html;charset=UTF-8");
+    	String filePath = request.getParameter("filePath");
+    	filePath = filePath.substring(helper.getGitFolder().getPath().length() + 1);
+    	String parentFolderPath = filePath.substring(0, filePath.lastIndexOf(File.separator));
+    	
+    	String fileProfileIdStr = request.getParameter("fileProfileId").split(",")[1];
+    	long l10Id = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(fileProfileIdStr)).getL10nProfileId();
+    	BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class, l10Id);
+    	String sourceLocaleName = l10Profile.getSourceLocale().getLocaleCode();
+    	
+    	Set<String> targetLocales = new HashSet();
+    	String[] targetLocaleIds = request.getParameter("targetLocaleIds").split(" ");
+    	for(String targetLocaleIdStr: targetLocaleIds)
+    	{
+    		targetLocales.add(HibernateUtil.get(GlobalSightLocale.class, Long.parseLong(targetLocaleIdStr)).toString());
+    	}
+    	
+    	List<GitConnectorFileMapping> fms = (List<GitConnectorFileMapping>)
+    			GitConnectorManagerLocal.getAllFileMapping(Long.parseLong(gcIdStr), sourceLocaleName, targetLocales);
+    	for(GitConnectorFileMapping fm: fms)
+    	{
+    		if(targetLocales.size() == 0)
+    		{
+    			break;
+    		}
+    		
+			String sourceMappingPath = fm.getSourceMappingPath();
+			if(filePath.equals(sourceMappingPath) ||
+					parentFolderPath.equals(sourceMappingPath))
+			{
+				targetLocales.remove(fm.getTargetLocale());
+			}
+    	}
+    	
+    	String msg = "";
+    	if(targetLocales.size() != 0)
+    	{
+    		msg = filePath + "(";
+    		for(String targetLocale: targetLocales)
+    		{
+    			msg += targetLocale + ",";
+    		}
+    		msg = msg.substring(0, msg.length() - 1) + ")";
+    	}
+    	
+        PrintWriter writer = response.getWriter();
+        writer.write(msg);
+        writer.close();
+    	pageReturn();
     }
 
     @ActionHandler(action = "updateTargetLocales", formClass = "")

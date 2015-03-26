@@ -690,7 +690,7 @@ public class Exporter
     			GitConnectorHelper helper = new GitConnectorHelper(gc);
     			File gitFolder = helper.getGitFolder();
     			String relativeFilePath = infos.get("relativeFilePath");
-    			String sourceFileMappingPath = gc.getName() + "_" + gc.getId() + File.separator + relativeFilePath;
+    			String sourceFileMappingPath = relativeFilePath;
     			String sourceFolderMappingPath = sourceFileMappingPath
     							.substring(0, sourceFileMappingPath.lastIndexOf(File.separator));
     			String suffix;
@@ -702,12 +702,11 @@ public class Exporter
     			}
     			else if(mappings.get(sourceFileMappingPath) != null)
     			{
-    				suffix = mappings.get(sourceFileMappingPath).substring(gc.getName().length() + Long.toString(gc.getId()).length() + 2);
+    				suffix = mappings.get(sourceFileMappingPath);
     			}
     			else if(mappings.get(sourceFolderMappingPath) != null)
     			{
-    				suffix = sourceFileMappingPath.replace(sourceFolderMappingPath, mappings.get(sourceFolderMappingPath));
-    				suffix = suffix.substring(gc.getName().length() + Long.toString(gc.getId()).length() + 2);
+    				suffix = mappings.get(sourceFolderMappingPath) + sourceFileMappingPath.substring(sourceFolderMappingPath.length(), sourceFileMappingPath.length());
     			}
     			else
     			{

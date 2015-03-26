@@ -226,7 +226,7 @@ public class GitConnectorFileMappingMainHandler extends PageActionHandler
             long gcfmId = Long.parseLong(id);
             GitConnectorFileMapping c = HibernateUtil.get(GitConnectorFileMapping.class, gcfmId);
             c.setIsActive(false);
-            HibernateUtil.update(c);
+            HibernateUtil.delete(c);
             
             List<GitConnectorFileMapping> gcfms = (List<GitConnectorFileMapping>) 
             				GitConnectorManagerLocal.getAllSonFileMappings(c.getId());

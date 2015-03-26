@@ -133,7 +133,7 @@ public class GitConnectorManagerLocal
     	try
         {
             String hql = "from GitConnectorFileMapping c where c.isActive='Y' and c.sourceLocale=:srcLocale and c.targetLocale=:tarLocale and "
-                    + "c.sourceMappingPath=:srcMappingPath and c.companyId=:companyId and id!=:Id";
+                    + "c.sourceMappingPath=:srcMappingPath and c.companyId=:companyId and id!=:Id and c.gitConnectorId = :gcId";
             Map map = new HashMap();
             map.put("srcLocale", gcfm.getSourceLocale());
             map.put("tarLocale", gcfm.getTargetLocale());
@@ -141,6 +141,7 @@ public class GitConnectorManagerLocal
             // map.put("tarModule", p_mm.getTargetModule());
             map.put("companyId", gcfm.getCompanyId());
             map.put("Id", gcfm.getId());
+            map.put("gcId",gcfm.getGitConnectorId());
 
             Collection mms = HibernateUtil.search(hql, map);
             Iterator i = mms.iterator();

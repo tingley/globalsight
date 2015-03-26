@@ -307,7 +307,10 @@ public class ExcelStyleUtil extends StyleUtil
                 // negative also needs to be filtered
                 continue;
             }
-            String newString = sheetMatcher.group(1) + " t=\"s\""
+            
+            String group1 = sheetMatcher.group(1);
+            group1 = group1.replaceAll(" t=\"[^\"]*\"", "");
+            String newString = group1 + " t=\"s\""
                     + sheetMatcher.group(2) + siNumberInSharedString
                     + sheetMatcher.group(4);
 

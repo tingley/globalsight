@@ -238,5 +238,9 @@ if (gitmsg != null && gitmsg.size()>0) {
 		<%
 }
 %>
+function changePageSize(value) 
+{
+	window.location='/globalsight/ControlServlet?linkName=self&pageName=GCFMM&gitConnectorKeyPageNum=1&gitConnectorKeySorting=0&numOfPageSize=' + value + '&gitConnectorId=' + <%=gitConnectorId%>
+}
 </script>
 </HTML>

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -87,6 +88,29 @@ public class GitConnectorManagerLocal
 		return HibernateUtil.search(hql, map);
     }
     
+    public static List<?> getAllFileMapping(long gitConnectorId,
+    		String sourceLocale, Set<String> targetLocales)
+    {
+    	String hql = "from GitConnectorFileMapping e where e.isActive = 'Y' and " +
+				" e.gitConnectorId = :gitConnectorId and e.sourceLocale =  '" + sourceLocale + "' " +
+				" and e.targetLocale in ( ";
+		HashMap map = new HashMap();
+		map.put("gitConnectorId", gitConnectorId);
+		String targetLoclestr = "";
+		for(String targetLocale: targetLocales)
+		{
+			targetLoclestr = targetLoclestr + "'" + targetLocale + "',";
+		}
+		hql += targetLoclestr.substring(0, targetLoclestr.length() -1) + ") ";
+		String currentId = CompanyThreadLocal.getInstance().getValue();
+		if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
+		{
+		    hql += " and e.companyId = :companyId";
+		    map.put("companyId", Long.parseLong(currentId));
+		}
+		return HibernateUtil.search(hql, map);
+    }
+    
     public static List<?> getAllSonFileMappings(long parentId)
     {
         String hql = "from GitConnectorFileMapping e where e.isActive = 'Y' and " +
@@ -109,7 +133,7 @@ public class GitConnectorManagerLocal
     	try
         {
             String hql = "from GitConnectorFileMapping c where c.isActive='Y' and c.sourceLocale=:srcLocale and c.targetLocale=:tarLocale and "
-                    + "c.sourceMappingPath=:srcMappingPath and c.companyId=:companyId and id!=:Id";
+                    + "c.sourceMappingPath=:srcMappingPath and c.companyId=:companyId and id!=:Id and c.gitConnectorId = :gcId";
             Map map = new HashMap();
             map.put("srcLocale", gcfm.getSourceLocale());
             map.put("tarLocale", gcfm.getTargetLocale());
@@ -117,6 +141,7 @@ public class GitConnectorManagerLocal
             // map.put("tarModule", p_mm.getTargetModule());
             map.put("companyId", gcfm.getCompanyId());
             map.put("Id", gcfm.getId());
+            map.put("gcId",gcfm.getGitConnectorId());
 
             Collection mms = HibernateUtil.search(hql, map);
             Iterator i = mms.iterator();

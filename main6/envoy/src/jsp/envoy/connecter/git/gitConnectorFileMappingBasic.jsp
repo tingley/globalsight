@@ -199,7 +199,7 @@ function MappingPathSelect(mode)
             <%=bundle.getString("lb_source_mapping_path")%><span class="asterisk">*</span>:
           </td>
           <td>
-            <input type="text" name="sourceMappingPath" value="<%=sourceMappingPath %>" size="40" editable="false" />&nbsp;&nbsp;
+            <input type="text" name="sourceMappingPath" value="<%=sourceMappingPath %>" size="40" editable="false" readonly="true"/>&nbsp;&nbsp;
             <input type="button" name="sourceSelect" value="<%=bundle.getString("lb_select")%>"
             onclick="MappingPathSelect('Source')">
           </td>

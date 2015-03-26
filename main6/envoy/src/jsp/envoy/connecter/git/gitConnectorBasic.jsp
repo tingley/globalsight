@@ -139,8 +139,15 @@ function confirmForm()
         gitForm.branch.focus();
         return false;
     }
-
+    
     var url = $("#url").val();
+    if (url.indexOf("http") != 0 && isEmptyString(gitForm.privateKeyFile.value))
+    {
+        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_private_key_file_path")))%>");
+        gitForm.privateKeyFile.focus();
+        return false;
+    }
+
     if(url.indexOf("http") == 0)
     {
     	$("#privateKeyFilePath").val("");
@@ -173,6 +180,8 @@ function confirmForm()
 	    		}
 	    	}
     	}
+    	
+    	#("#privateKeyFile").val("");
     }
     else
     {
@@ -246,7 +255,7 @@ function validName()
             <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200"></td>
         </tr>
         <tr id="privateKeyFilePathTr">
-            <td><%=bundle.getString("lb_private_key_file_path")%>:</td>
+            <td><%=bundle.getString("lb_private_key_file_path")%><span class="asterisk">*</span>:</td>
             <td><input type="text" name="privateKeyFile" id="privateKeyFile" style="width: 360px;" value="<%=privateKeyFile%>" maxLength="300" ></td>
         </tr>
         <tr>
@@ -270,15 +279,10 @@ if(url.indexOf("http") == 0)
 	$("#usernameTr").show();
 	$("#privateKeyFilePathTr").hide();
 }
-else if (url.indexOf("ssh") == 0)
-{
-	$("#usernameTr").hide();
-	$("#privateKeyFilePathTr").show();
-}
 else
 {
 	$("#usernameTr").hide();
-	$("#privateKeyFilePathTr").hide();
+	$("#privateKeyFilePathTr").show();
 }
 
 $("#url").keyup(function(){
@@ -288,15 +292,10 @@ $("#url").keyup(function(){
 		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
-	else if (url.indexOf("ssh") == 0)
-	{
-		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").show();
-	}
 	else
 	{
 		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").hide();
+		$("#privateKeyFilePathTr").show();
 	}
 });
 
@@ -307,15 +306,10 @@ $("#url").keydown(function(){
 		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
-	else if (url.indexOf("ssh") == 0)
-	{
-		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").show();
-	}
 	else
 	{
 		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").hide();
+		$("#privateKeyFilePathTr").show();
 	}
 });
 
@@ -326,15 +320,10 @@ $("#url").focus(function(){
 		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
-	else if (url.indexOf("ssh") == 0)
-	{
-		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").show();
-	}
 	else
 	{
 		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").hide();
+		$("#privateKeyFilePathTr").show();
 	}
 });
 
@@ -345,15 +334,10 @@ $("#url").blur(function(){
 		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
-	else if (url.indexOf("ssh") == 0)
-	{
-		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").show();
-	}
 	else
 	{
 		$("#usernameTr").hide();
-		$("#privateKeyFilePathTr").hide();
+		$("#privateKeyFilePathTr").show();
 	}
 });
 </script>

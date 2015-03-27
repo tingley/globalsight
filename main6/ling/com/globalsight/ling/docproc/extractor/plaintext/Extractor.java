@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.docproc.extractor.plaintext;
 
+import java.io.File;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -26,6 +27,10 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
@@ -33,7 +38,6 @@ import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
-import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.PTEscapeSequence;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DocumentElement;
@@ -42,6 +46,7 @@ import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.Segmentable;
 import com.globalsight.ling.docproc.SkeletonElement;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -60,13 +65,21 @@ import com.globalsight.util.StringUtil;
 public class Extractor extends AbstractExtractor implements
         ExtractorExceptionConstants, PTTmxControllerConstants
 {
+    static private final Logger s_logger = Logger.getLogger(Extractor.class);
+
     static public boolean s_breakOnSingleCR = false;
     static public boolean s_keepEmbeddedCR = true;
 
-    private Filter m_elementPostFilter = null;
     private List<CustomTextRule> m_customTextRules = null;
-    private static final String PLACEHOLDER_LEFT = "GS_PLACEHOLDER_LEFT";
-    private static final String PLACEHOLDER_RIGHT = "GS_PLACEHOLDER_RIGHT";
+    // GBS-3881
+    private Filter m_elementPostFilter = null;
+    private String m_postFormat = null;
+    private static String[] invalidHtmlTagCharacters = new String[]
+    { "{", "}", "%", "^", "~", "!", "@", "&", "*", "(", ")", "?" };
+    private static final String PLACEHOLDER_LEFT_TAG = "GS_PLACEHOLDER_LEFT_TAG";
+    private static final String PLACEHOLDER_RIGHT_TAG = "GS_PLACEHOLDER_RIGHT_TAG";
+    private static final String PLACEHOLDER_LEFT_NATIVE = "GS_PLACEHOLDER_LEFT_NATIVE";
+    private static final String PLACEHOLDER_RIGHT_NATIVE = "GS_PLACEHOLDER_RIGHT_NATIVE";
 
     static
     {
@@ -168,11 +181,16 @@ public class Extractor extends AbstractExtractor implements
                 String content = Tok.m_strContent;
                 if (p_postFiltered)
                 {
-                    content = StringUtil
-                            .replace(content, PLACEHOLDER_LEFT, "<");
-                    content = StringUtil.replace(content, PLACEHOLDER_RIGHT,
-                            ">");
-                    getOutput().addTranslatableTmx(content);
+                    content = StringUtil.replace(content, PLACEHOLDER_LEFT_TAG,
+                            "<");
+                    content = StringUtil.replace(content,
+                            PLACEHOLDER_RIGHT_TAG, ">");
+                    content = StringUtil.replace(content,
+                            PLACEHOLDER_LEFT_NATIVE, "&lt;");
+                    content = StringUtil.replace(content,
+                            PLACEHOLDER_RIGHT_NATIVE, "&gt;");
+                    getOutput().addTranslatableTmx(content, null, true,
+                            m_postFormat);
                 }
                 else
                 {
@@ -213,37 +231,36 @@ public class Extractor extends AbstractExtractor implements
      */
     public void extract() throws ExtractorException
     {
-        getOutput().setDataFormat("plaintext");
-        // GBS-3672
-        Filter f = this.getMainFilter();
-        PlainTextFilter pf = null;
-        if (f != null && f instanceof PlainTextFilter)
+        try
         {
-            pf = (PlainTextFilter) f;
-        }
+            getOutput().setDataFormat("plaintext");
+            // GBS-3672
+            Filter f = this.getMainFilter();
+            PlainTextFilter pf = null;
+            if (f != null && f instanceof PlainTextFilter)
+            {
+                pf = (PlainTextFilter) f;
+            }
 
-        if (pf != null)
-        {
-            try
+            if (pf != null)
             {
                 PlainTextFilterParser parser = new PlainTextFilterParser(pf);
                 parser.parserXml();
                 m_customTextRules = parser.getCustomTextRules();
                 m_elementPostFilter = parser.getElementPostFilter();
+                if (m_elementPostFilter != null)
+                {
+                    m_postFormat = FilterConstants.FILTER_TABLE_NAMES_FORMAT
+                            .get(m_elementPostFilter.getFilterTableName());
+                }
             }
-            catch (Exception ex)
-            {
-                throw new ExtractorException(ex);
-            }
-        }
 
-        if (m_customTextRules != null && m_customTextRules.size() > 0)
-        {
-            // The Custom Text File filter should process files line-by-line.
-            LineNumberReader lr = new LineNumberReader(readInput());
-
-            try
+            if (m_customTextRules != null && m_customTextRules.size() > 0)
             {
+                // The Custom Text File filter should process files
+                // line-by-line.
+                LineNumberReader lr = new LineNumberReader(readInput());
+
                 String lineterminator = "\n";
                 String line = lr.readLine();
 
@@ -292,21 +309,22 @@ public class Extractor extends AbstractExtractor implements
                     }
                 }
             }
-            catch (Exception e)
-            {
-                throw new ExtractorException(e);
-            }
-        }
-        else
-        {
-            if (m_elementPostFilter != null)
-            {
-                gotoPostFilter();
-            }
             else
             {
-                extractString(readInput(), false);
+                if (m_elementPostFilter != null)
+                {
+                    gotoPostFilter();
+                }
+                else
+                {
+                    extractString(readInput(), false);
+                }
             }
+        }
+        catch (Exception e)
+        {
+            s_logger.error(e);
+            throw new ExtractorException(e);
         }
     }
 
@@ -409,9 +427,8 @@ public class Extractor extends AbstractExtractor implements
      */
     private void gotoPostFilter(String str)
     {
-        String dataFormat = FilterConstants.FILTER_TABLE_NAMES_FORMAT
-                .get(m_elementPostFilter.getFilterTableName());
-        Output output = switchExtractor(str, dataFormat, m_elementPostFilter);
+        str = protectInvalidTags(str);
+        Output output = switchExtractor(str, m_postFormat, m_elementPostFilter);
         Iterator it = output.documentElementIterator();
         while (it.hasNext())
         {
@@ -420,16 +437,12 @@ public class Extractor extends AbstractExtractor implements
             {
                 case DocumentElement.TRANSLATABLE:
                 case DocumentElement.LOCALIZABLE:
-                    Segmentable segmentableElement = (Segmentable) element;
-                    String chunk = segmentableElement.getChunk();
-                    getOutput().addTranslatableTmx(chunk);
-
+                    getOutput().addDocumentElement(element, true);
                     break;
 
                 case DocumentElement.SKELETON:
                     String skeleton = ((SkeletonElement) element).getSkeleton();
                     getOutput().addSkeletonTmx(skeleton);
-
                     break;
             }
         }
@@ -440,12 +453,17 @@ public class Extractor extends AbstractExtractor implements
      * 
      * @since GBS-3881
      */
-    private void gotoPostFilter()
+    private void gotoPostFilter() throws Exception
     {
-        HtmlEntities encoder = new HtmlEntities();
-        String dataFormat = FilterConstants.FILTER_TABLE_NAMES_FORMAT
-                .get(m_elementPostFilter.getFilterTableName());
-        Output output = switchExtractor(dataFormat, m_elementPostFilter);
+        File f = getInput().getFile();
+        if (f == null)
+        {
+            return;
+        }
+        String content = FileUtil.readFile(f, "utf-8");
+        content = protectInvalidTags(content);
+        Output output = switchExtractor(content, m_postFormat,
+                m_elementPostFilter);
         Iterator it = output.documentElementIterator();
         while (it.hasNext())
         {
@@ -457,19 +475,66 @@ public class Extractor extends AbstractExtractor implements
                     Segmentable segmentableElement = (Segmentable) element;
                     String chunk = segmentableElement.getChunk();
                     // need to keep <bpt>, <ph>.. tag generated from post-filter
-                    chunk = StringUtil.replace(chunk, "<", PLACEHOLDER_LEFT);
-                    chunk = StringUtil.replace(chunk, ">", PLACEHOLDER_RIGHT);
+                    chunk = StringUtil
+                            .replace(chunk, "<", PLACEHOLDER_LEFT_TAG);
+                    chunk = StringUtil.replace(chunk, ">",
+                            PLACEHOLDER_RIGHT_TAG);
                     extractString(new StringReader(chunk), true);
-
                     break;
 
                 case DocumentElement.SKELETON:
                     String skeleton = ((SkeletonElement) element).getSkeleton();
                     getOutput().addSkeletonTmx(skeleton);
-
                     break;
             }
         }
+    }
+
+    /**
+     * Protects invalid html tags, like <>, <{0}> before going into html
+     * post-filter.
+     * 
+     * @since GBS-3881
+     */
+    private String protectInvalidTags(String content)
+    {
+        Pattern p = Pattern.compile("<([^>]*?)>");
+        Matcher m = p.matcher(content);
+        while (m.find())
+        {
+            boolean isInvalidTag = false;
+            String tag = m.group(1);
+            if (StringUtil.isEmpty(tag))
+            {
+                isInvalidTag = true;
+            }
+            else
+            {
+                for (int i = 0; i < tag.length(); i++)
+                {
+                    char c = tag.charAt(i);
+                    if (StringUtil.isIncludedInArray(invalidHtmlTagCharacters,
+                            String.valueOf(c)))
+                    {
+                        isInvalidTag = true;
+                        break;
+                    }
+                }
+            }
+            if (isInvalidTag)
+            {
+                StringBuilder replaced = new StringBuilder();
+                replaced.append(content.substring(0, m.start()));
+                replaced.append(PLACEHOLDER_LEFT_NATIVE);
+                replaced.append(tag);
+                replaced.append(PLACEHOLDER_RIGHT_NATIVE);
+                replaced.append(content.substring(m.end()));
+
+                content = replaced.toString();
+                m = p.matcher(content);
+            }
+        }
+        return content;
     }
 
     /**

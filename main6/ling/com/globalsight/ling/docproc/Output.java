@@ -16,11 +16,12 @@
  */
 package com.globalsight.ling.docproc;
 
-import com.globalsight.ling.common.XmlEntities;
-import java.util.List;
-import java.util.Vector;
 import java.util.Iterator;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import com.globalsight.ling.common.XmlEntities;
 
 /**
  * Object for output results from extractor.
@@ -50,8 +51,9 @@ public class Output
         m_encoder = new XmlEntities();
         m_diplomatAttributes = new DiplomatAttribute();
     }
-    
-    public void addDocumentElement(DocumentElement documentElement, boolean append)
+
+    public void addDocumentElement(DocumentElement documentElement,
+            boolean append)
     {
         if (!append)
         {
@@ -61,33 +63,37 @@ public class Output
         {
             boolean isBothTranlatable = (documentElement.type() == DocumentElement.TRANSLATABLE && isSameElementType(DocumentElement.TRANSLATABLE));
             boolean appendAble = false;
-            
-            if(isBothTranlatable)
+
+            if (isBothTranlatable)
             {
-                TranslatableElement elem = (TranslatableElement) m_documentElements.lastElement();
+                TranslatableElement elem = (TranslatableElement) m_documentElements
+                        .lastElement();
                 TranslatableElement addedElem = (TranslatableElement) documentElement;
 
-                boolean isSameDataType = (elem.getDataType() == addedElem.getDataType() || (elem
-                        .getDataType() != null && elem.getDataType().equalsIgnoreCase(
-                        addedElem.getDataType())));
-                boolean isSameType = (elem.getType() == addedElem.getType() || (elem.getType() != null && elem
-                        .getType().equalsIgnoreCase(addedElem.getType())));
-                boolean isEmptySid = (elem.getSid() == null && addedElem.getSid() == null);
-                
+                boolean isSameDataType = (elem.getDataType() == addedElem
+                        .getDataType() || (elem.getDataType() != null && elem
+                        .getDataType()
+                        .equalsIgnoreCase(addedElem.getDataType())));
+                boolean isSameType = (elem.getType() == addedElem.getType() || (elem
+                        .getType() != null && elem.getType().equalsIgnoreCase(
+                        addedElem.getType())));
+                boolean isEmptySid = (elem.getSid() == null && addedElem
+                        .getSid() == null);
+
                 appendAble = (isSameDataType && isSameType && isEmptySid);
-                
+
                 if (appendAble)
                 {
                     elem.appendChunk(addedElem.getChunk());
                 }
             }
 
-            if(!appendAble)
+            if (!appendAble)
             {
                 m_documentElements.add(documentElement);
             }
         }
-        
+
         m_currentAttributesSet = false;
     }
 
@@ -113,9 +119,9 @@ public class Output
     }
 
     public void addEmptyGsa(String extract, String desc, String locale,
-        String add, boolean delete, String added, String deleted,
-        String snippetName, String snippetId)
-        throws DocumentElementException
+            String add, boolean delete, String added, String deleted,
+            String snippetName, String snippetId)
+            throws DocumentElementException
     {
         GsaStartElement elem = new GsaStartElement(true);
 
@@ -135,8 +141,8 @@ public class Output
 
         if (!elem.validate())
         {
-            throw new DocumentElementException(
-                "Invalid GS tag " + elem.toString());
+            throw new DocumentElementException("Invalid GS tag "
+                    + elem.toString());
         }
 
         m_documentElements.add(elem);
@@ -144,9 +150,9 @@ public class Output
     }
 
     public void addGsaStart(String extract, String desc, String locale,
-        String add, boolean delete, String added, String deleted,
-        String snippetName, String snippetId)
-        throws DocumentElementException
+            String add, boolean delete, String added, String deleted,
+            String snippetName, String snippetId)
+            throws DocumentElementException
     {
         GsaStartElement elem = new GsaStartElement(false);
 
@@ -166,8 +172,8 @@ public class Output
 
         if (!elem.validate())
         {
-            throw new DocumentElementException(
-                "Invalid GS tag " + elem.toString());
+            throw new DocumentElementException("Invalid GS tag "
+                    + elem.toString());
         }
 
         m_documentElements.add(elem);
@@ -182,8 +188,8 @@ public class Output
 
         if (isSameElementType(DocumentElement.GSA_START))
         {
-            GsaStartElement elem =
-                (GsaStartElement)m_documentElements.lastElement();
+            GsaStartElement elem = (GsaStartElement) m_documentElements
+                    .lastElement();
 
             elem.setEmpty();
         }
@@ -211,12 +217,13 @@ public class Output
         // already existing node, add to it.
         if (isSameElementType(DocumentElement.LOCALIZABLE))
         {
-            LocalizableElement elem =
-                (LocalizableElement)m_documentElements.lastElement();
+            LocalizableElement elem = (LocalizableElement) m_documentElements
+                    .lastElement();
 
             elem.appendChunk(chunk);
         }
-        else // create the node than add to it.
+        else
+        // create the node than add to it.
         {
             LocalizableElement elem = new LocalizableElement();
             elem.setChunk(chunk);
@@ -236,17 +243,17 @@ public class Output
     }
 
     public void addSegment(SegmentNode p_segment)
-        throws DocumentElementException
+            throws DocumentElementException
     {
         // if not a translatable node than throw an exception
         if (!isSameElementType(DocumentElement.TRANSLATABLE))
         {
-            throw new DocumentElementException (
-                "cannot add segment to a non-translatable tag");
+            throw new DocumentElementException(
+                    "cannot add segment to a non-translatable tag");
         }
 
-        TranslatableElement elem =
-            (TranslatableElement)m_documentElements.lastElement();
+        TranslatableElement elem = (TranslatableElement) m_documentElements
+                .lastElement();
         elem.addSegment(p_segment);
     }
 
@@ -267,8 +274,8 @@ public class Output
         {
             // already existing node, add to it.
 
-            SkeletonElement elem =
-                (SkeletonElement)m_documentElements.lastElement();
+            SkeletonElement elem = (SkeletonElement) m_documentElements
+                    .lastElement();
             elem.appendSkeleton(chunk);
         }
         else
@@ -297,8 +304,8 @@ public class Output
         m_diplomatAttributes.addWordCount(p_iWordCount);
     }
 
-    private void addTrans(String p_strChunk, boolean p_bTmx, 
-                          String sid, Map xliffTransPart, boolean isPreserveWS, String dataType)
+    private void addTrans(String p_strChunk, boolean p_bTmx, String sid,
+            Map xliffTransPart, boolean isPreserveWS, String dataType)
     {
         String chunk;
 
@@ -315,9 +322,11 @@ public class Output
         boolean appended = false;
         if (isSameElementType(DocumentElement.TRANSLATABLE))
         {
-            TranslatableElement elem = (TranslatableElement) m_documentElements.lastElement();
+            TranslatableElement elem = (TranslatableElement) m_documentElements
+                    .lastElement();
 
-            if (dataType == null || elem.getDataType() == null
+            if (dataType == null
+                    || elem.getDataType() == null
                     || (dataType != null && dataType.equals(elem.getDataType())))
             {
                 elem.appendChunk(chunk);
@@ -330,11 +339,11 @@ public class Output
                 {
                     elem.setSid(sid);
                 }
-                
+
                 appended = true;
             }
         }
-        
+
         // create the node then add to it.
         if (!appended)
         {
@@ -342,30 +351,34 @@ public class Output
             elem.setChunk(chunk);
             elem.setSid(sid);
             elem.setPreserveWhiteSpace(isPreserveWS);
-            
-            if(xliffTransPart != null) {
+            elem.setDataType(dataType);
+
+            if (xliffTransPart != null)
+            {
                 elem.setXliffPart(xliffTransPart);
             }
-            
+
             m_documentElements.add(elem);
             m_currentAttributesSet = false;
         }
     }
-    
+
     private void addTrans(String p_strChunk, boolean p_bTmx, String sid)
     {
         addTrans(p_strChunk, p_bTmx, sid, null, false, null);
     }
-    
+
     private void addTrans(String p_strChunk, boolean p_bTmx)
     {
         addTrans(p_strChunk, p_bTmx, null);
     }
 
     /**
-     * Add a transaltion node to the Output object
-     * Creation date: (7/28/2000 11:05:18 AM)
-     * @param p_strChunk java.lang.String
+     * Add a transaltion node to the Output object Creation date: (7/28/2000
+     * 11:05:18 AM)
+     * 
+     * @param p_strChunk
+     *            java.lang.String
      */
     public void addTranslatable(String p_strChunk)
     {
@@ -376,22 +389,24 @@ public class Output
     {
         addTrans(p_Tmx, true);
     }
-    
+
     public void addTranslatableTmx(String p_Tmx, String sid)
     {
         addTrans(p_Tmx, true, sid, null, false, null);
     }
-    
-    public void addTranslatableTmx(String p_Tmx, String sid, boolean isPreserveWS, String dataType)
+
+    public void addTranslatableTmx(String p_Tmx, String sid,
+            boolean isPreserveWS, String dataType)
     {
         addTrans(p_Tmx, true, sid, null, isPreserveWS, dataType);
     }
-    
-    public void addTranslatableTmx(String p_Tmx, String sid, boolean isPreserveWS)
+
+    public void addTranslatableTmx(String p_Tmx, String sid,
+            boolean isPreserveWS)
     {
         addTrans(p_Tmx, true, sid, null, isPreserveWS, null);
     }
-    
+
     public void addTranslatableTmx(String p_Tmx, String sid, Map XliffAttributes)
     {
         addTrans(p_Tmx, true, sid, XliffAttributes, false, null);
@@ -434,8 +449,7 @@ public class Output
             return false;
         }
 
-        return (((DocumentElement)m_documentElements.lastElement()).type() ==
-            p_iDocumentType);
+        return (((DocumentElement) m_documentElements.lastElement()).type() == p_iDocumentType);
     }
 
     public void setDataFormat(String p_DataFormat)
@@ -444,35 +458,23 @@ public class Output
     }
 
     /*
-    private void setGsaAttrs(String extract, String add, boolean delete,
-        String added, String deleted, String snippetName, String snippetId)
-        throws DocumentElementException
-    {
-        // if not a localizable node than throw an exception
-        if (!isSameElementType(DocumentElement.GSA_START))
-        {
-            throw new DocumentElementException (
-                "cannot add GSA attributes to non-GSA tag");
-        }
-
-        GsaStartElement elem =
-            (GsaStartElement)m_documentElements.lastElement();
-
-        elem.setExtract(extract);
-        elem.setAdd(add);
-        elem.setAdded(added);
-        elem.setDeleted(deleted);
-        elem.setSnippetName(snippetName);
-        elem.setSnippetId(snippetId);
-
-        if (delete)
-        {
-            elem.setDeletable();
-        }
-
-        m_currentAttributesSet = true;
-    }
-    */
+     * private void setGsaAttrs(String extract, String add, boolean delete,
+     * String added, String deleted, String snippetName, String snippetId)
+     * throws DocumentElementException { // if not a localizable node than throw
+     * an exception if (!isSameElementType(DocumentElement.GSA_START)) { throw
+     * new DocumentElementException (
+     * "cannot add GSA attributes to non-GSA tag"); }
+     * 
+     * GsaStartElement elem = (GsaStartElement)m_documentElements.lastElement();
+     * 
+     * elem.setExtract(extract); elem.setAdd(add); elem.setAdded(added);
+     * elem.setDeleted(deleted); elem.setSnippetName(snippetName);
+     * elem.setSnippetId(snippetId);
+     * 
+     * if (delete) { elem.setDeletable(); }
+     * 
+     * m_currentAttributesSet = true; }
+     */
 
     public void setLocale(String p_Locale)
     {
@@ -480,17 +482,17 @@ public class Output
     }
 
     public void setLocalizableAttrs(String p_strDataType, String p_strType)
-        throws DocumentElementException
+            throws DocumentElementException
     {
         // if not a localizable node, throw an exception
         if (!isSameElementType(DocumentElement.LOCALIZABLE))
         {
-            throw new DocumentElementException (
-                "cannot set localizable attributes on non-localizable tag");
+            throw new DocumentElementException(
+                    "cannot set localizable attributes on non-localizable tag");
         }
 
-        LocalizableElement elem =
-            (LocalizableElement)m_documentElements.lastElement();
+        LocalizableElement elem = (LocalizableElement) m_documentElements
+                .lastElement();
 
         elem.setDataType(p_strDataType);
         elem.setType(p_strType);
@@ -504,8 +506,10 @@ public class Output
 
     /**
      * Caution: m_diplomatAttributes.WordCount may not be zero!
+     * 
      * @author Jim Hargrave
-     * @param p_iTotalWordCount int
+     * @param p_iTotalWordCount
+     *            int
      */
     public void setTotalWordCount(int p_iTotalWordCount)
     {
@@ -535,7 +539,7 @@ public class Output
 
         m_currentAttributesSet = true;
     }
-    
+
     public void setTranslatableAttrs(String p_strDataType, String p_strType)
             throws DocumentElementException
     {
@@ -554,7 +558,7 @@ public class Output
             return null;
         }
 
-        return (DocumentElement)m_documentElements.lastElement();
+        return (DocumentElement) m_documentElements.lastElement();
     }
 
     public String getCurrentDataFormat()
@@ -567,38 +571,39 @@ public class Output
         m_currentDataFormat = p_DataFormat;
     }
 
-//      /**
-//       * Test to see if we have set the current nodes attributes
-//       *
-//       * @return boolean
-//       */
-//      public boolean isSetCurrentAttributes()
-//      {
-//          return m_currentAttributesSet;
-//      }
+    // /**
+    // * Test to see if we have set the current nodes attributes
+    // *
+    // * @return boolean
+    // */
+    // public boolean isSetCurrentAttributes()
+    // {
+    // return m_currentAttributesSet;
+    // }
 
     public int getSize()
     {
         return m_documentElements.size();
     }
-    
+
     /**
      * Clear DocumentElements, seldom use.
      */
-    public void clearDocumentElements() {
-    	//can't be like this: ... = null;
-    	this.m_documentElements = new Vector();
+    public void clearDocumentElements()
+    {
+        // can't be like this: ... = null;
+        this.m_documentElements = new Vector();
     }
-    
+
     public String getTargetLanguage()
     {
         return m_diplomatAttributes.getTargetLanguage();
     }
-    
+
     public void setTargetLanguage(String targetLanguage)
     {
-        if(targetLanguage!=null)
-        m_diplomatAttributes.setTargetLanguage(targetLanguage);
+        if (targetLanguage != null)
+            m_diplomatAttributes.setTargetLanguage(targetLanguage);
     }
 
 }

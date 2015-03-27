@@ -28,14 +28,20 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl;
 import com.globalsight.everest.webapp.pagehandler.administration.users.ExportUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 public class ExportFilterHelper
 {
+    private static final Logger logger = Logger
+            .getLogger(ExportFilterHelper.class);
+
     private static final String SQL_SELECT_XML_FILTER = "select * from "
             + FilterConstants.XMLRULE_TABLENAME
             + " where id = ? and company_id = ?";
@@ -262,6 +268,45 @@ public class ExportFilterHelper
                         filterSet.add(FilterConstants.BASE_TABLENAME + "."
                                 + bfm.getBaseFilterId());
                     }
+                }
+            }
+            else if (filterTableName
+                    .equalsIgnoreCase(FilterConstants.PLAINTEXT_TABLENAME))
+            {
+                try
+                {
+                    PlainTextFilter plainTextFilter = (PlainTextFilter) filter;
+                    PlainTextFilterParser parser = new PlainTextFilterParser(
+                            plainTextFilter);
+                    parser.parserXml();
+                    String postFilterTableName = parser
+                            .getElementPostFilterTableName();
+                    String postFilterId = parser.getElementPostFilterId();
+
+                    if (!StringUtil.isEmpty(postFilterTableName)
+                            && !StringUtil.isEmpty(postFilterId))
+                    {
+                        filterSet.add(postFilterTableName + "." + postFilterId);
+                        if (postFilterTableName
+                                .equalsIgnoreCase(FilterConstants.HTML_TABLENAME))
+                        {
+                            BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
+                                    postFilterTableName,
+                                    Long.parseLong(postFilterId));
+
+                            if (bfm != null)
+                            {
+                                filterSet.add("base_filter_mapping" + "."
+                                        + bfm.getId());
+                                filterSet.add(FilterConstants.BASE_TABLENAME
+                                        + "." + bfm.getBaseFilterId());
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.error("An error occurred while processing plain text filter.");
                 }
             }
             else if (filterTableName
@@ -534,12 +579,10 @@ public class ExportFilterHelper
                             }
                             catch (Exception e)
                             {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
+                                logger.error("An error occurred while processing xml filter.");
                             }
                         }
                     }
-
                 }
             }
             else if (filterTableName
@@ -661,8 +704,7 @@ public class ExportFilterHelper
                     }
                     catch (Exception e)
                     {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        logger.error("An error occurred while processing xml filter.");
                     }
                 }
             }

@@ -2728,7 +2728,7 @@ public class Ambassador extends AbstractWebService
             else
             {
                 // This job is not in the table of DB, it was not created
-                status = "IN_QUEUE";
+                status = "UNKNOWN";
             }
         }
         catch (ConnectionPoolException cpe)

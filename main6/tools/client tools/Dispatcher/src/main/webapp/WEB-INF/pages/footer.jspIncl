@@ -1,7 +1,0 @@
-<div style="height:50px;"></div>
-<footer>
-	<a href="#">Info</a> 
-	| <a href="#">Legal</a> 
-	| <span class="leftmargin10">&copy; Welocalize 2013</span>
-	<span style="float: right; padding: 0px 20px;">Version: ${project.version}</span>
-</footer>

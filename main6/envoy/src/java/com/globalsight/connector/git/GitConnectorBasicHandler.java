@@ -54,7 +54,6 @@ public class GitConnectorBasicHandler extends PageActionHandler
         }
         finally
         {
-        	FileUtil.deleteFile(gitFolder);
         	out.close();
         	pageReturn();
         }

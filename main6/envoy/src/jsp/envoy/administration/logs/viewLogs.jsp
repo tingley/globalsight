@@ -117,8 +117,8 @@ TR.trodd {
 			}
         }
         if ($("#daysDownload").is(":checked")) {
-        	if (!isAllDigits($("#days").val())) {
-        		alert("<%=bundle.getString("msg_log_wrong_days") %>");
+        	if (!isAllDigits($("#days").val()) || $("#days").val()>60 || $("#days").val()==0) {
+        		alert("<%=bundle.getString("msg_log_wrong_days_1") %>");
         		return false;
         	}
         }

@@ -56,6 +56,7 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.document.StateType;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Target;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Unit;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Xliff;
+import com.globalsight.everest.edit.offline.xliff.xliff20.document.YesNo;
 import com.globalsight.everest.edit.offline.xliff.xliff20.match.Match;
 import com.globalsight.everest.edit.offline.xliff.xliff20.match.Matches;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
@@ -583,6 +584,25 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
         Unit unit = new Unit();
         file.getUnitOrGroup().add(unit);
+        
+        // Handle edit type
+        YesNo translate = YesNo.YES;
+        if (TMEditType != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH)
+        {
+            if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100
+                    && isInContextMatch(osd))
+                translate = YesNo.NO;
+            else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
+                    && isExtractMatch(osd))
+                translate = YesNo.NO;
+            else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
+                    && (isExtractMatch(osd) || isInContextMatch(osd)))
+                translate = YesNo.NO;
+            else
+                translate = YesNo.YES;
+        }
+        unit.setTranslate(translate);
+        unit.setId("u" + osd.getDisplaySegmentID());
 
         OriginalData od = new OriginalData();
 
@@ -921,7 +941,10 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
             // Adds source
             sourceStr = processInternalText(sourceStr);
+            
             Match m = new Match();
+            m.setRef("#" + osd.getDisplaySegmentID());
+            
             Source s = new Source();
             m.setSource(s);
             m.setMatchQuality(new BigDecimal(leverageMatch.getScoreNum()));
@@ -932,8 +955,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             tmxXliff.parse(sourceStr);
             s.getContent().addAll(handler.getResult());
             List<Data> data = tmxXliff.getDatas();
+            
             OriginalData originalData = new OriginalData();
-            m.setOriginalData(originalData);
             originalData.getData().addAll(data);
 
             // Adds target
@@ -947,6 +970,12 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             t.getContent().addAll(tmxXliff.getResult());
             List<Data> data2 = tmxXliff.getDatas();
             originalData.getData().addAll(data2);
+            
+            // Adds data
+            if (originalData.getData().size() > 0)
+            {
+                m.setOriginalData(originalData);
+            }
 
             // Sets origin
             String tmOrigin = getTmOrigin(leverageMatch, osd, sourceTuv,
@@ -1080,6 +1109,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             while (tag != null)
             {
                 Match m = new Match();
+                m.setRef("#" + osd.getDisplaySegmentID());
 
                 Source source = new Source();
                 source.getContent().add(src);

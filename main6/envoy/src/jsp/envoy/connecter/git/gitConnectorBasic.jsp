@@ -181,7 +181,7 @@ function confirmForm()
 	    	}
     	}
     	
-    	#("#privateKeyFile").val("");
+    	$("#privateKeyFile").val("");
     }
     else
     {

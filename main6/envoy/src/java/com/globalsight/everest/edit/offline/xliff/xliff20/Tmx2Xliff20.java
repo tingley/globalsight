@@ -544,12 +544,12 @@ public class Tmx2Xliff20
             else if (o instanceof Sc)
             {
                 Sc sc = (Sc) o;
-                sb.append("[x").append(sc.getId()).append("/]");
+                sb.append("[x").append(sc.getId()).append("]");
             }
             else if (o instanceof Ec)
             {
                 Ec ec = (Ec) o;
-                sb.append("[x").append(ec.getId()).append("/]");
+                sb.append("[x").append(ec.getId()).append("]");
             }
         }
     }
@@ -594,7 +594,7 @@ public class Tmx2Xliff20
                 i = (String) p_hAttributes.get("i");
             }
 
-            return "x" + i + "/";
+            return "x" + i;
         }
     }
 }

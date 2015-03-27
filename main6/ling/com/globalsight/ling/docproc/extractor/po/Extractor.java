@@ -34,7 +34,6 @@ import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.machineTranslation.google.GoogleProxy;
 import com.globalsight.util.StringUtil;
-import com.globalsight.util.edit.EditUtil;
 
 /**
  * <p>
@@ -52,18 +51,19 @@ import com.globalsight.util.edit.EditUtil;
 public class Extractor extends AbstractExtractor implements
         ExtractorExceptionConstants
 {
-    private static Logger logger = Logger.getLogger(Extractor.class.getName());
+    private static Logger c_logger =
+    		Logger.getLogger(Extractor.class.getName());
 
-    public static final String TYPE_SKEL = "Skeleton";
-    public static final String TYPE_TRANS = "Translatable";
-    public static final String TYPE_MSGID = POToken.MSGSID;
-    public static final String TYPE_MSGSTR = POToken.MSGSTR;
+    public static final String typeSke = "Skeleton";
+    public static final String typeTra = "Translatable";
+    public static final String typeMsgID = POToken.MSGSID;
+    public static final String typeMsgStr = POToken.MSGSTR;
 
+    public static Map<String, String> sourceMap;
+    public static Map<String, String> targetMap;
+    
     private boolean m_isSetTargetLanguage = false;
-
     private List<String> m_targetList;
-
-    private String msgctxt = null;
 
     public Extractor()
     {
@@ -84,8 +84,8 @@ public class Extractor extends AbstractExtractor implements
     public void extract() throws ExtractorException
     {
         m_isSetTargetLanguage = false;
-        m_targetList = new ArrayList<String>();
-
+        m_targetList = new ArrayList();
+        
         Output output = getOutput();
         output.setDataFormat(IFormatNames.FORMAT_PO);
         Parser parser = new Parser(readInput());
@@ -94,51 +94,45 @@ public class Extractor extends AbstractExtractor implements
         String content = null, realContent = null;
         boolean isMsgID = false, isMsgIDPlural = false;
         boolean isMsgStr = false, isMsgStrPlural = false;
-
         List<String> msgIDList = new ArrayList<String>();
         List<String> msgIDPluralList = new ArrayList<String>();
         List<String> msgStrList = new ArrayList<String>();
+        int pluralLen = 2;
 
         for (int i = 0; i < lineList.size(); i++)
         {
             content = (String) lineList.get(i);
             realContent = getMsg(content);
-            if (content.startsWith(POToken.MSGCTXT))
-            {
-                msgctxt = realContent;
-                output.addSkeleton(content + "\n");
-            }
-            else if (content.startsWith(POToken.MSGSID))
+            if (content.startsWith(POToken.MSGSID))
             {
                 if (content.startsWith(POToken.MSGSID_PLURAL))
                 {
                     isMsgIDPlural = true;
                     msgIDPluralList.add(realContent);
-                    output.addSkeleton(content + "\n");
+                    addOutput(output, typeSke, content + "\n", msgIDList, msgStrList);
                 }
                 else
                 {
                     msgIDList.add(realContent);
                     isMsgID = true;
                     isMsgStr = false;
-                    output.addSkeleton(content + "\n");
+                    addOutput(output, typeSke, content + "\n", msgIDList, msgStrList);
                 }
+            }
+            else if (content.startsWith(POToken.MSGSTR_PLURAL))
+            {
+                msgStrList.add(realContent);
+                isMsgIDPlural = false;
+                isMsgID = false;
+                isMsgStr = false;
+                isMsgStrPlural = true;
             }
             else if (content.startsWith(POToken.MSGSTR))
             {
                 msgStrList.add(realContent);
-                isMsgID = false;
                 isMsgIDPlural = false;
-                if (content.startsWith(POToken.MSGSTR_PLURAL))
-                {
-                    isMsgStr = false;
-                    isMsgStrPlural = true;
-                }
-                else
-                {
-                    isMsgStr = true;
-                    isMsgStrPlural = false;
-                }
+                isMsgID = false;
+                isMsgStr = true;
             }
             else if (content.startsWith(POToken.QuotationMark)
                     && (content.length() > 0))
@@ -166,30 +160,42 @@ public class Extractor extends AbstractExtractor implements
             }
             else
             {
-                addMsgListAndComm(msgIDList, msgIDPluralList, output, msgStrList);
-                msgctxt = null;
-                if (content != null && (!content.startsWith(POToken.MSGSTR)))
-                {
-                    output.addSkeleton(content + "\n");
-                }
-
+                addMsgListAndComm(msgIDList, msgIDPluralList, isMsgIDPlural, pluralLen,
+                        output, content, msgStrList, isMsgID, isMsgStr);
                 isMsgID = false;
                 isMsgIDPlural = false;
                 isMsgStr = false;
             }
+
+            content = null;
         }
 
-        addMsgListAndComm(msgIDList, msgIDPluralList, output, msgStrList);
-
+        addMsgListAndComm(msgIDList, msgIDPluralList, isMsgIDPlural, pluralLen,
+                output, content, msgStrList, isMsgID, isMsgStr);
         setTargetLanguage(msgIDList, msgIDPluralList, msgStrList, output, true);
+        isMsgID = false;
+        isMsgIDPlural = false;
+        isMsgStr = false;
+        content = null;
+        lineList = null;
     }
 
     /**
-     * Add MSG list and comment to output.
+     * Add msg list and comment to output.
+     * 
+     * @param p_msgIDList
+     *            The list of msgid.
+     * @param p_msgIDPluralList
+     *            The list of msgid_plural.
+     * @param p_msgStrList
+     *            The list of msgstr.
+     * @param p_content
+     *            The comment.
      */
-    private void addMsgListAndComm(List<String> p_msgIDList,
-            List<String> p_msgIDPluralList, Output p_output,
-            List<String> p_msgStrList)
+    public void addMsgListAndComm(List<String> p_msgIDList,
+            List<String> p_msgIDPluralList, boolean p_isMsgIDPlural,
+            int p_pluraLen, Output p_output, String p_content,
+            List<String> p_msgStrList, boolean p_isMsgID, boolean p_isMsgStr)
     {
         if (p_msgIDPluralList != null && p_msgIDPluralList.size() > 0
                 && p_msgIDList != null && p_msgIDList.size() > 0)
@@ -224,9 +230,14 @@ public class Extractor extends AbstractExtractor implements
         }
         else if (p_msgIDList != null && p_msgIDList.size() > 0)
         {
-            outputTranslatable(p_output, p_msgIDList, p_msgStrList);
+            addOutput(p_output, typeTra, "", p_msgIDList, p_msgStrList);
         }
 
+        if (p_content != null && (!p_content.startsWith(POToken.MSGSTR)))
+        {
+            addOutput(p_output, typeSke, p_content + "\n", p_msgIDList, p_msgStrList);
+        }
+        
         // Detect the language of target/msgStr, which is used for creating tuv.
         setTargetLanguage(p_msgIDList, p_msgIDPluralList,p_msgStrList, p_output, false);
 
@@ -235,44 +246,74 @@ public class Extractor extends AbstractExtractor implements
         if (p_msgStrList != null)       p_msgStrList.clear();
     }
 
-    private void outputTranslatable(Output p_output, List<String> p_msgIDList,
+    /**
+     * Add the content to output.
+     */
+    public static void addOutput(Output p_output, String p_type,
+            String p_content, List<String> p_msgIDList,
             List<String> p_msgStrList)
     {
-        if (p_msgIDList == null || p_msgIDList.size() < 1)
+        if (p_type.equals(typeSke))
         {
-            if (p_msgStrList != null && p_msgStrList.size() > 0)
+            p_output.addSkeleton(p_content);
+        }
+        else if (p_type.equals(typeTra))
+        {
+            if (p_msgIDList == null || p_msgIDList.size() < 1)
             {
-                for (int i = 0; i < p_msgStrList.size(); i++)
+                if (p_msgStrList != null && p_msgStrList.size() > 0)
                 {
-                    String content = (String) p_msgStrList.get(i);
+                    for (int i = 0; i < p_msgStrList.size(); i++)
+                    {
+                        String content = (String) p_msgStrList.get(i);
+                        addMsgStr(content, p_output, (i == 0 ? true : false), content);
+                    }
+                }
+                else
+                {
+                    p_output.addSkeleton(POToken.MSGSTR + " \"\"\n");
+                }
+                return;
+            }
+            /*else if (p_msgStrList == null
+                    || p_msgStrList.size() < 1
+                    || (p_msgStrList.size() == 1 && ("".equals(p_msgStrList.get(0)))))
+            {
+                for (int i = 0; i < p_msgIDList.size(); i++)
+                {
+                    String content = (String) p_msgIDList.get(i);
                     addMsgStr(content, p_output, (i == 0 ? true : false), content);
                 }
             }
+            else if (p_msgIDList.size() == p_msgStrList.size())
+            {
+                for (int i = 0; i < p_msgIDList.size(); i++)
+                {
+                    String msgID = (String) p_msgIDList.get(i);
+                    String msgStr = (String) p_msgStrList.get(i);
+                    addMsgStr(msgID, p_output, (i == 0 ? true : false), msgStr);
+                }
+            }*/
             else
             {
-                p_output.addSkeleton(POToken.MSGSTR + " \"\"\n");
-            }
-            return;
-        }
-        else
-        {
-            String source = getStringFromList(p_msgIDList);
+                String source = getStringFromList(p_msgIDList);
 
-            if (source == null || source.trim().length() < 1)
-            {
-                addSkeleton(p_output, TYPE_MSGSTR, p_msgStrList);
-            }
-            else
-            {
-                String target = getStringFromList(p_msgStrList);
-                p_output.addSkeleton(POToken.MSGSTR + " \"");
-                addTranslatable(p_output, source, target);
-                p_output.addSkeleton("\"\n");
+                if (source == null || source.trim().length() < 1)
+                {
+                    addSkeleton(p_output, typeMsgStr, p_msgStrList);
+                }
+                else
+                {
+                    String target = getStringFromList(p_msgStrList);
+                    p_output.addSkeleton(POToken.MSGSTR + " \"");
+                    addTranslatable(p_output, source, target);
+                    p_output.addSkeleton("\"\n");
+                }
             }
         }
     }
 
-    private String getStringFromList(List<String> p_list)
+    public static String getStringFromList(List<String> p_list)
     {
         if (p_list == null || p_list.size() == 0)
             return "";
@@ -296,8 +337,8 @@ public class Extractor extends AbstractExtractor implements
      *            if need start with "msgstr "
      * 
      */
-    private void addMsgStr(String p_content, Output p_output, boolean p_isHead,
-            String p_target)
+    public static void addMsgStr(String p_content, Output p_output,
+            boolean p_isHead, String p_target)
     {
         String msgStrHead = POToken.MSGSTR;
         if (p_content.trim().length() > 0)
@@ -335,9 +376,21 @@ public class Extractor extends AbstractExtractor implements
         }
     }
 
-    private void addTranslatable(Output p_output, String p_source,
+    public static void addTranslatable(Output p_output, String p_source,
             String p_target)
     {
+        if (sourceMap == null)
+        {
+            sourceMap = new HashMap<String, String>();
+            sourceMap.put("xliffPart", "source");
+        }
+
+        if (targetMap == null)
+        {
+            targetMap = new HashMap<String, String>();
+            targetMap.put("xliffPart", "target");
+        }
+
         String source, target;
         source = replaceSpecialCharacter(p_source);
         if (p_target == null || p_target.length() == 0)
@@ -349,31 +402,20 @@ public class Extractor extends AbstractExtractor implements
             target = replaceSpecialCharacter(p_target);
         }
 
-        Map<String, String> sourceAttributes = new HashMap<String, String>();
-        sourceAttributes.put("xliffPart", "source");
-        if (msgctxt != null && msgctxt.trim().length() > 0)
-        {
-            String comment = "[PO:" + POToken.MSGCTXT + "] "
-                    + EditUtil.encodeXmlEntities(msgctxt);
-            sourceAttributes.put(POToken.MSGCTXT, comment);
-        }
-        Map<String, String> targetAttributes = new HashMap<String, String>();
-        targetAttributes.put("xliffPart", "target");
-
-        p_output.addTranslatableTmx(source, null, sourceAttributes);
+        p_output.addTranslatableTmx(source, null, sourceMap);
         p_output.addSkeleton("");
-        p_output.addTranslatableTmx(target, null, targetAttributes);
+        p_output.addTranslatableTmx(target, null, targetMap);
     }
 
     /**
      * Replace some special character for msgstr, due word count issue.
      */
-    private String replaceSpecialCharacter(String p_str)
+    public static String replaceSpecialCharacter(String p_str)
     {
         return p_str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
-    private void addSkeleton(Output p_output, String type, List<String> p_list)
+    public static void addSkeleton(Output p_output, String type, List p_list)
     {
         if (p_list == null || p_list.size() < 1)
         {
@@ -389,14 +431,14 @@ public class Extractor extends AbstractExtractor implements
 
     }
 
-    private void addSkeleton(Output p_output, String p_type,
+    public static void addSkeleton(Output p_output, String p_type,
             String p_strSkeleton, boolean p_isHead)
     {
         String msg = "\"" + p_strSkeleton + "\"\n";
 
         if (p_isHead)
         {
-            if (TYPE_MSGID.equals(p_type))
+            if (typeMsgID.equals(p_type))
             {
                 msg = POToken.MSGSID + " " + msg;
             }
@@ -407,6 +449,7 @@ public class Extractor extends AbstractExtractor implements
         }
 
         p_output.addSkeleton(msg);
+
     }
 
     /**
@@ -415,7 +458,7 @@ public class Extractor extends AbstractExtractor implements
      * @param p_content
      * @return
      */
-    private String getMsg(String p_content)
+    public String getMsg(String p_content)
     {
         if (p_content.equals("\n"))
             return p_content;
@@ -440,15 +483,10 @@ public class Extractor extends AbstractExtractor implements
             result = result.substring(POToken.MSGSTR.length() + 1);
         }
 
-        if (result.startsWith(POToken.MSGCTXT))
-        {
-            result = result.substring(POToken.MSGCTXT.length() + 1);
-        }
-
         return trimQuotationMarks(result);
     }
 
-    private String trimQuotationMarks(String p_content)
+    public String trimQuotationMarks(String p_content)
     {
         String result = p_content;
         if (result.startsWith(POToken.QuotationMark)
@@ -475,7 +513,6 @@ public class Extractor extends AbstractExtractor implements
      * @param isLastLine
      *            if it is the last line of File
      */
-    @SuppressWarnings("rawtypes")
     private void setTargetLanguage(List<String> p_msgIDList,
             List<String> p_msgIDPluralList, List<String> p_msgStrList,
             Output p_output, boolean isLastLine)

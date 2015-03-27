@@ -987,7 +987,6 @@ public class ExtractedFileImporter extends FileImporter
         String translate = p_elem.getAttribute("translate");
         String xliffMrkId = p_elem.getAttribute("xliffSegSourceMrkId");
         String xliffMrkIndex = p_elem.getAttribute("xliffSegSourceMrkIndex");
-        String poMsgctxtAsComment = p_elem.getAttribute(POToken.MSGCTXT);
         long pid = Long.parseLong(p_elem
                 .getAttribute(GxmlNames.TRANSLATABLE_BLOCKID));
 
@@ -1059,12 +1058,7 @@ public class ExtractedFileImporter extends FileImporter
                 }
 
                 tuv.setSid(p_elem.getAttribute("sid"));
-                String srcComment = getSrcComment(seg);
-                tuv.setSrcComment(srcComment);
-                if (srcComment == null) {
-                    tuv.setSrcComment(poMsgctxtAsComment);
-                }
-                
+                tuv.setSrcComment(getSrcComment(seg));
                 tu.setXliffMrkId(xliffMrkId);
                 tu.setXliffMrkIndex(xliffMrkIndex);
 

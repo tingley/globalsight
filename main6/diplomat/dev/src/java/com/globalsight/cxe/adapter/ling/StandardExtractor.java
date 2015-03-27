@@ -90,7 +90,6 @@ import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.msoffice2010.ExcelExtractor;
 import com.globalsight.ling.docproc.extractor.msoffice2010.PptxExtractor;
 import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
-import com.globalsight.ling.docproc.extractor.po.POToken;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -104,6 +103,7 @@ import com.globalsight.util.edit.SegmentUtil;
  * extracting any of the known formats as documented in the javadoc for
  * DiplomatAPI.
  */
+@SuppressWarnings("deprecation")
 public class StandardExtractor
 {
     // ////////////////////////////////////
@@ -791,7 +791,6 @@ public class StandardExtractor
         ArrayList segTarget = new ArrayList();
         TranslatableElement elemSource = new TranslatableElement();
         TranslatableElement elemTarget = new TranslatableElement();
-        String msgctxt = null;
         String xliffpart;
         XmlEntities xe = new XmlEntities();
         DiplomatWordCounter wc = new DiplomatWordCounter();
@@ -808,11 +807,6 @@ public class StandardExtractor
                 {
                     segSource = segments;
                     elemSource = (TranslatableElement) element;
-                    Map attrs = elemSource.getXliffPart();
-                    if (attrs != null)
-                    {
-                        msgctxt = (String) attrs.get(POToken.MSGCTXT);
-                    }
                     continue;
                 }
                 else if (xliffpart.equals("target"))
@@ -961,18 +955,6 @@ public class StandardExtractor
                                         text = sn.getSegment();
                                         text = text.replace(m_tag_amp, "&amp;");
                                         sn.setSegment(text);
-                                    }
-                                    if (StringUtil.isNotEmpty(msgctxt))
-                                    {
-                                        Map attrs = ((TranslatableElement) element2)
-                                                .getXliffPart();
-                                        if (attrs == null)
-                                        {
-                                            attrs = new HashMap();
-                                        }
-                                        attrs.put(POToken.MSGCTXT, msgctxt);
-                                        ((TranslatableElement) element2)
-                                                .setXliffPart(attrs);
                                     }
                                 }
                                 p_extractedOutPut.addDocumentElement(element2);

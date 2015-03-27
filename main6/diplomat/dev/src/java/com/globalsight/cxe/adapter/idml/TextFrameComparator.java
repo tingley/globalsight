@@ -16,12 +16,14 @@
  */
 package com.globalsight.cxe.adapter.idml;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 class TextFrameComparator implements Comparator<TextFrameObj>
 {
     List<Double> pageX = null;
+    List<Integer> pageNum = null;
 
     public List<Double> getPageX()
     {
@@ -49,8 +51,7 @@ class TextFrameComparator implements Comparator<TextFrameObj>
             {
                 double dbl1 = pageX.get(i);
                 double dbl2 = pageX.get(i + 1);
-                if (o1.pointX >= dbl1 && o1.pointX < dbl2 && o2.pointX >= dbl1
-                        && o2.pointX < dbl2)
+                if (o1.pointX >= dbl1 && o1.pointX < dbl2 && o2.pointX >= dbl1 && o2.pointX < dbl2)
                 {
                     isSamePage = true;
                     break;
@@ -89,6 +90,40 @@ class TextFrameComparator implements Comparator<TextFrameObj>
             else
             {
                 return 0;
+            }
+        }
+    }
+
+    public void setPageNum(List<Integer> pageNumlist)
+    {
+        this.pageNum = pageNumlist;
+    }
+
+    public void setTextFramePageNum(ArrayList<TextFrameObj> spreadTextFrameList)
+    {
+        for (TextFrameObj textFrameObj : spreadTextFrameList)
+        {
+            if (pageX.size() == 1 && pageNum != null && pageNum.size() == 1)
+            {
+                textFrameObj.pageNum = pageNum.get(0);
+            }
+            else
+            {
+                int pageSize = pageX.size();
+
+                for (int i = 0; i < pageSize - 1; i++)
+                {
+                    double dbl1 = pageX.get(i);
+                    double dbl2 = pageX.get(i + 1);
+                    if (textFrameObj.pointX >= dbl1 && textFrameObj.pointX < dbl2)
+                    {
+                        textFrameObj.pageNum = pageNum.get(i);
+                    }
+                    if (i == (pageSize - 2) && textFrameObj.pointX >= dbl2)
+                    {
+                        textFrameObj.pageNum = pageNum.get(pageSize - 1);
+                    }
+                }
             }
         }
     }

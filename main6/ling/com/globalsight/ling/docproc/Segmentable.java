@@ -38,7 +38,18 @@ public abstract class Segmentable
     private Map xliffAttributes = null;
     private boolean m_isPreserveWS = false;
     private String isLocalized = null;
+    private int inddPageNum = 0;
     
+    public int getInddPageNum()
+    {
+        return inddPageNum;
+    }
+
+    public void setInddPageNum(int inddPageNum)
+    {
+        this.inddPageNum = inddPageNum;
+    }
+
     public boolean isPreserveWhiteSpace()
     {
         return m_isPreserveWS;
@@ -209,6 +220,11 @@ public abstract class Segmentable
         if (sid != null)
         {
             attribs.setProperty("sid", sid);
+        }
+        
+        if (inddPageNum != 0)
+        {
+            attribs.setProperty("inddPageNum", "" + inddPageNum);
         }
         
         if(xliffAttributes != null && xliffAttributes.size() > 0) {

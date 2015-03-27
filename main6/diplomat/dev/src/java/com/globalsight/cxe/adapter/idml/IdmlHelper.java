@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -337,7 +338,7 @@ public class IdmlHelper
         content = repairHyperlinks(content);
 
         Pattern p = Pattern
-                .compile("<story name=\"(.*?)\">[\\r\\n]*([\\d\\D]*?)</story>");
+                .compile("<story name=\"(.*?)\"[^>]*?>[\\r\\n]*([\\d\\D]*?)</story>");
         Matcher m = p.matcher(content);
         while (m.find())
         {
@@ -594,11 +595,16 @@ public class IdmlHelper
         LinkedList<TextFrameObj> allTextFrameList = new LinkedList<TextFrameObj>();
         ArrayList<TextFrameObj> spreadTextFrameList = new ArrayList<TextFrameObj>();
         List<Double> pageXlist = new ArrayList<Double>();
+        List<Integer> pageNumlist = new ArrayList<Integer>();
         List<String> overrideList = new ArrayList<String>();
         Pattern pPage = Pattern
                 .compile("<Page[\\s]+[^>]*ItemTransform=\"([^\"]+)\"[^>]*>");
         Pattern pTextFrame = Pattern
                 .compile("<TextFrame[\\s]+[^>]*ParentStory=\"([^\"]+)\"[^>]*ItemTransform=\"([^\"]+)\"[^>]*>");
+        int pageDiff = 0;
+        boolean isFirstPage = true;
+        Map<String, Integer> storyPage = new HashMap<String, Integer>();
+        
 
         for (String src : spreadFiles)
         {
@@ -606,6 +612,7 @@ public class IdmlHelper
             File f = new File(path);
             String c = FileUtil.readFile(f, "utf-8").trim();
             pageXlist.clear();
+            pageNumlist.clear();
             overrideList.clear();
             spreadTextFrameList.clear();
             boolean isMaster = c.endsWith("</idPkg:MasterSpread>");
@@ -630,10 +637,10 @@ public class IdmlHelper
                     double dblX = Double.parseDouble(tempX);
                     pageXlist.add(dblX);
                 }
-                
+
                 String pageTag = mPage.group();
-                StringIndex siOverList = StringIndex.getValueBetween(pageTag,
-                        0, "OverrideList=\"", "\"");
+                StringIndex siOverList = StringIndex.getValueBetween(pageTag, 0, "OverrideList=\"",
+                        "\"");
                 if (siOverList != null)
                 {
                     String temp = siOverList.value;
@@ -641,6 +648,28 @@ public class IdmlHelper
                     for (String tempS : tempArray)
                     {
                         overrideList.add(tempS);
+                    }
+                }
+
+                // find page number
+                if (!isMaster)
+                {
+                    int pageEndIndex = c.indexOf("</Page>", mPage.end());
+                    String pageTagContent = c.substring(mPage.start(), pageEndIndex);
+                    StringIndex pageNumSi = StringIndex.getValueBetween(pageTagContent, 0,
+                            "<ListItem type=\"long\">", "</ListItem>");
+                    if (pageNumSi != null)
+                    {
+                        int pageNum = Integer.parseInt(pageNumSi.value);
+
+                        if (isFirstPage)
+                        {
+                            isFirstPage = false;
+                            pageDiff = pageNum - 1;
+                        }
+
+                        int pageNumFromOne = pageNum - pageDiff;
+                        pageNumlist.add(pageNumFromOne);
                     }
                 }
             }
@@ -715,10 +744,14 @@ public class IdmlHelper
             if (spreadTextFrameList.size() > 0)
             {
                 Collections.sort(pageXlist);
+                Collections.sort(pageNumlist);
                 
                 TextFrameComparator tfcom = new TextFrameComparator();
                 tfcom.setPageX(pageXlist);
+                tfcom.setPageNum(pageNumlist);
                 Collections.sort(spreadTextFrameList, tfcom);
+                
+                tfcom.setTextFramePageNum(spreadTextFrameList);
 
                 for (TextFrameObj textFrameObj : spreadTextFrameList)
                 {
@@ -785,6 +818,7 @@ public class IdmlHelper
                 if (storySrc.contains(story) && !storySrcSorted.contains(story))
                 {
                     storySrcSorted.add(story);
+                    storyPage.put(story, tfo.pageNum);
                 }
             }
 
@@ -834,7 +868,12 @@ public class IdmlHelper
             c = formatForImport(c);
 
             buff.append(FileUtil.lineSeparator);
-            buff.append("<story name=\"").append(src).append("\">");
+            buff.append("<story name=\"").append(src).append("\"");
+            if (storyPage.containsKey(src))
+            {
+                buff.append(" pageNum=\"").append(storyPage.get(src)).append("\"");
+            }
+            buff.append(">");
             buff.append(FileUtil.lineSeparator);
             buff.append(c);
             buff.append(FileUtil.lineSeparator);

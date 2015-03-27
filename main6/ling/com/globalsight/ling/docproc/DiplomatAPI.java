@@ -33,6 +33,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.adobe.InddTuMappingHelper;
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.adapter.ling.ExtractRule;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
@@ -1080,13 +1081,15 @@ public class DiplomatAPI implements IFormatNames
         // htmlExtractor.setFilterId(filterId);
         // }
 
+        boolean isIdmlXml = false;
+        boolean isInddXml = false;
         if (extractor instanceof com.globalsight.ling.docproc.extractor.xml.Extractor)
         {
             com.globalsight.ling.docproc.extractor.xml.Extractor xmlExtractor = (com.globalsight.ling.docproc.extractor.xml.Extractor) extractor;
             if (fileProfileId != null)
             {
-                xmlExtractor.setIsIdmlXml(IdmlHelper.isIdmlFileProfile(Long
-                        .parseLong(fileProfileId)));
+                isIdmlXml = IdmlHelper.isIdmlFileProfile(Long.parseLong(fileProfileId));
+                xmlExtractor.setIsIdmlXml(isIdmlXml);
             }
 
             for (ExtractRule r : rules)
@@ -1232,6 +1235,11 @@ public class DiplomatAPI implements IFormatNames
         wc.setLocalizableWordcount(m_options.m_localizableWordCount);
         wc.countDiplomatDocument(m_output);
         m_output = wc.getOutput();
+        
+        if (isIdmlXml || isInddXml)
+        {
+            InddTuMappingHelper.processOutput(m_output);
+        }
 
         // call GC here to free some memory used in extracting
         // System.gc();

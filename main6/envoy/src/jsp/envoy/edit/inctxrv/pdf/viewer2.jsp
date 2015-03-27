@@ -43,12 +43,16 @@ switch (iViewMode)
     <SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
     <script src="compatibility.js"></script>
 
-
+<link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
+<script src="/globalsight/includes/ContextMenu.js"></script>
+        <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js">
+        </SCRIPT>
 
 <!-- This snippet is used in production (included from viewer.html) -->
 <link rel="resource" type="application/l10n" href="locale/locale.properties"/>
 <script src="l10n.js"></script>
 <script src="pdf.js"></script>
+<script src="viewerCommon.js"></script>
 
 
 
@@ -297,6 +301,8 @@ function navigateToDiv(pageNumber, left, top, curScale)
 
 function load()
 {
+	ContextMenu.intializeContextMenu();
+	
 	<% if(pdfUrl != null)  { %>
 	$("#outerContainer").hide();
 	var nurl =  "/globalsight/envoy/edit/inctxrv/pdf/viewer2.jsp?file=<%=pdfUrl %>";
@@ -311,12 +317,206 @@ function load()
 	$("#messageDiv").html("<%= errorMsg %>");
 		<% } %>
 }
+
+function contextForPage(e)
+{
+    if(!e) e = window.event;
+
+    var o;
+    if(window.event)
+    {
+    o = e.srcElement;
+    }
+    else
+    {
+    o = e.target;
+    while(o.nodeType != o.ELEMENT_NODE)
+	o = o.parentNode;
+    }
+	
+	if (o.nodeName == "DIV" && "textLayer" != o.className && o.id != "segDiv" && o.className.indexOf("segDiv") == -1)
+	{
+	var popupoptions = [
+        new ContextItem("Edit segment",
+          function(){editSegment(o)}),
+        new ContextItem("Add/edit comment",
+          function(){editComment(o)})
+        ];
+		
+	ContextMenu.display(popupoptions, e);
+	
+	//editSegment(o);
+	
+	if(e instanceof Object)
+    {
+	    e.preventDefault();
+	    e.stopPropagation();
+    }
+    else
+    {
+	    e.returnValue  = false;
+	    e.cancelBubble = true
+    }
+	}
+}
+
+var currentSegment;
+
+function highlightObjects(o)
+{
+	var loPn = PDFViewerApplication.pdfViewer.location.pageNumber;
+// 1 un highlight
+    var pageDiv = document.getElementById("pageContainer" + loPn);
+    var pageDivChildrens = pageDiv.childNodes;
+    var textLayerChildrens;
+	var textLayerDiv;
+	var divArr;
+    
+    if (pageDivChildrens && pageDivChildrens.length > 0)
+    {
+  	  for(var i = 0; i < pageDivChildrens.length; i++)
+  	  {
+  		  var divChild = pageDivChildrens[i];
+  		  
+  		  if (divChild.nodeName == "DIV" && "textLayer" == divChild.className)
+  		  {
+  			  textLayerDiv = divChild;
+  			  break;
+  		  }
+  	  }
+  	  
+  	  textLayerChildrens = textLayerDiv.childNodes;
+  	  divArr = new Array(textLayerChildrens.length);
+  	  // 1 find extract match
+  	  for(var i = 0; i < textLayerChildrens.length; i++)
+  	  {
+  		  var divChild = textLayerChildrens[i];
+  		  divArr[i] = divChild;
+  		  var divContent = divChild.textContent;
+  		  
+  			divChild.innerHTML = divContent;
+  			
+  			var className = divChild.className;
+  			if (className.indexOf("highlight") != -1)
+  			{
+  				className = className.replace("highlight", "");
+  	  			divChild.className = className;
+  			}
+  	  }
+  	  
+  	divArr.sort(sortDivByOffset);
+    }
+
+//2
+var pageContent = buildPageContent(loPn, window.parent.parent.parent.localData, true);
+
+var find = false;
+if (divArr && divArr.length > 0)
+{
+	for(var i = 0; i < divArr.length; i++)
+	{
+		var divChild = divArr[i];
+		
+		if (o == divChild)
+		{
+			var otext = o.textContent;
+			if (otext == "")
+			{
+				if (typeof(parent.parent.source.content.findSegment) != "undefined")
+			    {
+					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516");
+			    }
+				return;
+			}
+			
+			var segment = getSegment(pageContent, o, i, divArr);
+			
+			if (segment)
+			{
+				currentSegment = segment;
+				
+				findSegment(segment.tuId, segment.tgtSegmentNoTag);
+				
+				if (typeof(parent.parent.source.content.findSegment) != "undefined")
+			    {
+					parent.parent.source.content.findSegment(segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag);
+			    }
+			}
+			else
+			{
+				if (typeof(parent.parent.source.content.findSegment) != "undefined")
+			    {
+					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516");
+			    }
+			}
+		}
+	}
+}
+else
+{
+	o.className = "highlight";
+}
+}
+
+function editSegment(o, donotHighlight)
+{
+	var donothhh = false;
+	if (donotHighlight)
+	{
+		donothhh = true;
+	}
+	
+	if (!donothhh)
+	{
+		highlightObjects(o);
+	}
+
+	if (currentSegment)
+	{
+		var textcontent = currentSegment.tgtSegment;
+		var segDivEle = document.getElementById("segDiv");
+		segDivEle.removeAttribute('hidden');
+		
+		var segTextEle = document.getElementById("segText");
+		segTextEle.value = textcontent;
+	}
+}
+
+function saveSegment(saveIt)
+{
+	var segDivEle = document.getElementById("segDiv");
+	segDivEle.setAttribute('hidden', '');
+	
+	var segTextEle = document.getElementById("segText");
+	var newText = segTextEle.value;
+	segTextEle.value = "";
+	
+	if (saveIt && newText != currentSegment.tgtSegment)
+	{
+		var obj = {
+				save : newText,
+				saveFromInCtxRv : newText,
+			    refresh : "0",
+			    tuId : currentSegment.tuId,
+			    tuvId  : currentSegment.tuvId,
+			    subId  : currentSegment.subId,
+			    ptags  : "compact"
+			};
+		
+		sendAjax(obj);
+	}
+}
+
+function editComment(o)
+{
+}
+
 </script>
 
 <script type="text/javascript" src="/globalsight/jquery/me_table.js"></script>
   </head>
 
-  <body tabindex="1" class="loadingInProgress" onload="load()">
+  <body tabindex="1" class="loadingInProgress" onload="load()"> <!-- oncontextmenu="contextForPage(event)" -->
   <div id="messageDiv" style="display: none"></div>
     <div id="outerContainer">
 
@@ -607,6 +807,64 @@ function load()
       </div>  <!-- overlayContainer -->
 
     </div> <!-- outerContainer -->
+    <div id="segDiv" hidden>
+	<style scoped>
+#segDiv {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 9999999;
+
+  display: block;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+#segDiv[hidden] {
+  display: none;
+}
+
+#segDiv .segDiv-dialog-box {
+  display: inline-block;
+  margin: -50px auto 0;
+  position: relative;
+  top: 45%;
+  left: 0;
+  min-width: 220px;
+  max-width: 768px;
+
+  padding: 9px;
+
+  border: 1px solid hsla(0, 0%, 0%, .5);
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+
+  background-color: #474747;
+
+  color: hsl(0, 0%, 85%);
+  font-size: 16px;
+  line-height: 20px;
+}
+#segDiv .segDiv-row {
+  clear: both;
+  padding: 1em 0;
+}
+#segDiv .segDiv-actions {
+  clear: both;
+}
+  </style>
+	<div class="segDiv-dialog-box">
+    <div class="segDiv-row">
+      <textarea id="segText" rows="5"></textarea>
+    </div>
+    <div class="segDiv-actions">
+	  <input type="button" value="Cancel" onclick="saveSegment(false)"> &nbsp;&nbsp;
+	  <input type="button" value="Save" onclick="saveSegment(true)"> &nbsp;&nbsp;
+      <!-- <input type="checkbox" id="rePDF">Re-Generate PDF?  -->
+    </div>
+  </div>
+	</div>
     <div id="printContainer"></div>
 <div id="mozPrintCallback-shim" hidden>
   <style scoped>

@@ -762,6 +762,10 @@
       </WebPage>
       <WebPage pageName="GCCJ" isDefault="false" jspName="/envoy/connecter/git/gitConnectorCreateJob.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorCreateJobHandler">
       	<PageLink linkName="self" destinationPageName="GCCJ"></PageLink>
+      	<PageLink linkName="showFileMapping" destinationPageName="GCCJSFM"></PageLink>
+      </WebPage>
+      <WebPage pageName="GCCJSFM" isDefault="false" jspName="/envoy/connecter/git/gitConnectorCreateJobShowFileMapping.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorCreateJobHandler">
+      	<PageLink linkName="self" destinationPageName="GCCJSFM"></PageLink>
       </WebPage>
       <WebPage pageName="GCFMM" isDefault="false" jspName="/envoy/connecter/git/gitConnectorFileMappingMain.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorFileMappingMainHandler">
       	<PageLink linkName="self" destinationPageName="GCFMM"></PageLink>

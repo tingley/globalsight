@@ -18,8 +18,15 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.axis.utils.XMLUtils;
 import org.apache.log4j.Logger;
@@ -219,6 +226,32 @@ public class PlainTextFilterParser
             CATEGORY.error("Error occur when xml to json", e);
             return "[]";
         }
+    }
+
+    public String getNewConfigXml(String elementName, String newValue)
+            throws Exception
+    {
+        setSingleElementValue(elementName, newValue);
+
+        return documentToStr();
+    }
+
+    public String documentToStr() throws Exception
+    {
+        String returnStr = null;
+        StringWriter strWtr = new StringWriter();
+        StreamResult strResult = new StreamResult(strWtr);
+        TransformerFactory tfac = TransformerFactory.newInstance();
+        Transformer t = tfac.newTransformer();
+        t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        t.transform(new DOMSource(m_rootElement), strResult);
+        String result = strResult.getWriter().toString().trim();
+
+        returnStr = result.substring(result.indexOf("<" + NODE_ROOT + ">"),
+                result.length());
+        strWtr.close();
+
+        return returnStr;
     }
 
     public String setSingleElementValue(String p_elementName, String p_value)

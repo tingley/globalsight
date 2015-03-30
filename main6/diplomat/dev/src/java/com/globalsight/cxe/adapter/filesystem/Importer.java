@@ -22,10 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessage;
@@ -47,12 +44,9 @@ import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
-import com.globalsight.everest.projecthandler.ProjectHandler;
-import com.globalsight.everest.projecthandler.ProjectHandlerLocal;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.edit.EditUtil;
 

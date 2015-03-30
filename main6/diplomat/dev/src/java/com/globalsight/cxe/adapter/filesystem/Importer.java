@@ -293,39 +293,9 @@ public class Importer
         //target
         Target target = new Target();
         target.setName("FileSystemTargetAdapter");
-        L10nProfile profile = null;
-		if (m_l10nProfileId != null)
-		{
-			long l10nProfileId = Long.parseLong(m_l10nProfileId);
-			try
-			{
-				ProjectHandler ph = new ProjectHandlerLocal();
-				profile = ph.getL10nProfile(l10nProfileId);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
         if (m_targetLocales == null || "".equals(m_targetLocales.trim()))
 		{
-			if (profile != null)
-			{
-				String locales = "";
-				List allLocales = new ArrayList(Arrays.asList(profile
-						.getTargetLocales()));
-				for (int i = 0; i < allLocales.size(); i++)
-				{
-					locales += allLocales.get(i) + ",";
-				}
-				if (locales != "" && locales.endsWith(","))
-				{
-					target.setLocale(locales.substring(0,
-							locales.lastIndexOf(",")));
-					m_targetLocales = locales.substring(0,
-							locales.lastIndexOf(","));
-				}
-			}
+        	target.setLocale("unknown");
 		}
         else
         {

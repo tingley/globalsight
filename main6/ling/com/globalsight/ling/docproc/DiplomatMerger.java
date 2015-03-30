@@ -660,7 +660,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
             if (isContent() && !FORMAT_XLIFF.equals(format)
                     && !FORMAT_PO.equals(mainFormat)
-                    && !FORMAT_HTML.equals(mainFormat))
+                    && !FORMAT_HTML.equals(mainFormat)
+                    && !FORMAT_PLAINTEXT.equals(mainFormat))
             {
                 // Do not encode CDATA content from XML and passing HTML.
                 if (!(ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)

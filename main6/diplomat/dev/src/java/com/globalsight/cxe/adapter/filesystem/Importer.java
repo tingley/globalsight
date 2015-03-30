@@ -238,9 +238,6 @@ public class Importer
             m_codeset = "UTF-8";
         }
 
-        String l10nProfileId = null;// Fenshid: this via is no use at all
-        String eventFlowXml = null;
-        
         EventFlowXml object = new EventFlowXml();
         object.setPreMergeEvent(m_preMergeEvent);
         object.setPostMergeEvent(CxeMessageType.getCxeMessageType(
@@ -291,9 +288,9 @@ public class Importer
         Target target = new Target();
         target.setName("FileSystemTargetAdapter");
         if (m_targetLocales == null || "".equals(m_targetLocales.trim()))
-        {
-            target.setLocale("unknown");
-        }
+		{
+        	target.setLocale("unknown");
+		}
         else
         {
             target.setLocale(m_targetLocales);

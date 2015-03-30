@@ -101,7 +101,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
     private Xliff xliff = new Xliff();
     private File file = new File();
 
-    protected String strEOL = "\r\n";
+    protected static String strEOL = "\r\n";
     public static final char NORMALIZED_LINEBREAK = '\n';
     private int altFlag = -100;
 
@@ -219,7 +219,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                 {
                     if (content.charAt(i + 1) != '/')
                     {
-                        sb.append("\n");
+                        sb.append(strEOL);
                     }
 
                     int j = content.indexOf(">", i + 1);
@@ -234,7 +234,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                         if (content.charAt(i + 1) == '/'
                                 && !notBreakTag.contains(s))
                         {
-                            sb.append("\n");
+                            sb.append(strEOL);
                         }
                     }
                 }
@@ -802,8 +802,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         {
             LeverageMatch.orderMatchResult(list2);
 
-            Matches ms = new Matches();
-            unit.setMatches(ms);
+            Matches ms = new Matches();           
 
             for (int i = 0; i < list2.size(); i++)
             {
@@ -813,6 +812,11 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                 {
                     ms.getMatch().add(m);
                 }
+            }
+            
+            if (ms.getMatch().size() > 0)
+            {
+                unit.setMatches(ms);
             }
         }
     }
@@ -1098,7 +1102,6 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         if (ms == null)
         {
             ms = new Matches();
-            unit.setMatches(ms);
         }
 
         for (TermLeverageMatchResult result : matchs)
@@ -1119,8 +1122,14 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                 target.getContent().add(tag);
                 m.setTarget(target);
 
+                ms.getMatch().add(m);
                 tag = result.getNextTargetTerm();
             }
+        }
+        
+        if (ms.getMatch().size() > 0)
+        {
+            unit.setMatches(ms);            
         }
     }
 

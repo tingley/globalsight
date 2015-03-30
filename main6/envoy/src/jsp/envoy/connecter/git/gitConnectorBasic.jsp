@@ -20,7 +20,7 @@
 	String testURL = self.getPageURL() + "&action=test";
 	
 	String helper = bundle.getString("helper_text_git_connector_edit");
-    String errorConnect = bundle.getString("error_mindtouch_connector");
+    String errorConnect = bundle.getString("error_git_connector");
 
     String title = null;
 	String id = "-1";

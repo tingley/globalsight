@@ -522,6 +522,9 @@ public class Upgrade
             ignoreFiles.add("run.bat");
             ignoreFiles.add("run.conf");
             
+            ignoreFiles.add("createJob.properties");
+            ignoreFiles.add("offlineUpload.properties");
+            
             if (!isUpdateJboss())
             {
             	ignoreFiles.add("standalone.xml");

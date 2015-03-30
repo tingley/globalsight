@@ -22,7 +22,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessage;
@@ -44,9 +47,12 @@ import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
+import com.globalsight.everest.projecthandler.ProjectHandler;
+import com.globalsight.everest.projecthandler.ProjectHandlerLocal;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.edit.EditUtil;
 
@@ -238,9 +244,6 @@ public class Importer
             m_codeset = "UTF-8";
         }
 
-        String l10nProfileId = null;// Fenshid: this via is no use at all
-        String eventFlowXml = null;
-        
         EventFlowXml object = new EventFlowXml();
         object.setPreMergeEvent(m_preMergeEvent);
         object.setPostMergeEvent(CxeMessageType.getCxeMessageType(
@@ -290,10 +293,40 @@ public class Importer
         //target
         Target target = new Target();
         target.setName("FileSystemTargetAdapter");
+        L10nProfile profile = null;
+		if (m_l10nProfileId != null)
+		{
+			long l10nProfileId = Long.parseLong(m_l10nProfileId);
+			try
+			{
+				ProjectHandler ph = new ProjectHandlerLocal();
+				profile = ph.getL10nProfile(l10nProfileId);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
         if (m_targetLocales == null || "".equals(m_targetLocales.trim()))
-        {
-            target.setLocale("unknown");
-        }
+		{
+			if (profile != null)
+			{
+				String locales = "";
+				List allLocales = new ArrayList(Arrays.asList(profile
+						.getTargetLocales()));
+				for (int i = 0; i < allLocales.size(); i++)
+				{
+					locales += allLocales.get(i) + ",";
+				}
+				if (locales != "" && locales.endsWith(","))
+				{
+					target.setLocale(locales.substring(0,
+							locales.lastIndexOf(",")));
+					m_targetLocales = locales.substring(0,
+							locales.lastIndexOf(","));
+				}
+			}
+		}
         else
         {
             target.setLocale(m_targetLocales);

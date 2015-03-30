@@ -15,6 +15,8 @@
 %>
 <jsp:useBean id="self" scope="request"
     class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="showFileMapping" scope="request"
+    class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     // Lables
     ResourceBundle bundle = PageHandler.getBundle(session);
@@ -44,6 +46,7 @@
     String updateTargetLocalesUrl = self.getPageURL() + "&action=updateTargetLocales";
     String createGitConnectorJobUrl = self.getPageURL() + "&action=createGitConnectorJob";
     String checkFileMappingUrl = self.getPageURL() + "&action=checkFileMapping";
+    String showFileMappingUrl = showFileMapping.getPageURL();
 
     Integer creatingJobsNum = (Integer)request.getAttribute("creatingJobsNum");
     if (creatingJobsNum == null)
@@ -203,6 +206,8 @@ $(document).ready(function ()
     }).mouseout(function(){
         $(this).removeClass("standardBtn_mouseover").addClass("standardBtn_mouseout");
     }).css("width","90px");
+    
+    $("#checkFileMapping").css("width","130px");
 
     // action of job name text
     $("#jobName").focus(function() {
@@ -354,7 +359,7 @@ $(document).ready(function ()
 
         fnSelectAll2(false);
         
-        var noMappingFile = "";
+        var allMapping = true;
     	var fileProfileId = "";	
     	$("select[name=fileProfile]").each(function(){
     		fileProfileId = $(this).val();
@@ -375,15 +380,14 @@ $(document).ready(function ()
             {
             	if(data != "")
             	{
-            		noMappingFile = noMappingFile + data + ", ";
+            		allMapping = false;
             	}
             });
         })
-        if(noMappingFile.length > 0)
+        if(!allMapping)
         {
-        	noMappingFile = noMappingFile.substr(0, noMappingFile.length -2);
-        	noMappingFile = "Such file(s) do not have mapping path: "+noMappingFile + ". Do you sure you want continue to create job?"
-        	if(!confirm(noMappingFile))
+        	var msg = "Not all files are mapped on all target locales, you can click ‘Check File Mapping’ button to see detailed information. Do you want to continue to create job?";
+        	if(!confirm(msg))
         	{
         		creating = false;
         		return;
@@ -428,6 +432,48 @@ $(document).ready(function ()
     });
 
 });
+
+function showFileMapping()
+{
+	var jobFilePaths =document.getElementsByName("jobFilePath");
+	if(jobFilePaths.length == 0)
+	{
+		alert("Please add files and select target locales.");
+		return;
+	}
+	
+	var fileProfiles = document.getElementsByName("fileProfile");
+	var fileProfileId = "";	
+	for(var i=0;i<fileProfiles.length;i++)
+	{
+		fileProfileId = fileProfiles[i].value;
+	}
+	if(fileProfileId == "")
+	{
+		alert("Select target locale(s) for this job");
+		return;
+	}
+	
+	var targetLocales = document.getElementsByName("targetLocale");
+	var targetLocaleIds = "";	
+	for(var i=0;i<targetLocales.length;i++)
+	{
+		if(targetLocales[i].checked)
+		{
+			targetLocaleIds = targetLocaleIds + " " + targetLocales[i].value;
+		}
+	}
+	if(targetLocaleIds == "")
+	{
+		alert("Select target locale(s) for this job");
+		return;
+	}
+	
+	var url = "<%=showFileMappingUrl%>";
+		window.open(url, null,
+	    'width = 700,height = 400,status = no,center = yes,left = 300,top = 100');
+	
+}
 
 function addEmptyOption(o)
 {
@@ -1049,6 +1095,8 @@ function removeSelectedFile(id) {
     <!-- Start of Create Job Section -->
     <div id="createJobDiv" style="margin-left:0px; margin-top:0px; display:none;" class="standardText">
         <form name="createJobForm" id="createJobForm" method="post" action="" enctype="multipart/form-data" target="none_iframe">
+        	<input type="hidden" id="gcId" value="<%=gc.getId()%>">
+			<input type="hidden" id="checkFileMappingUrl" value="<%=checkFileMappingUrl%>">
             <input type="hidden" id="attributeString" name="attributeString" value="" />
             <input type="hidden" id="fileMapFileProfile" name="fileMapFileProfile" value="" />
             <input type="hidden" name="userName" value="<%=userName%>" />
@@ -1076,6 +1124,9 @@ function removeSelectedFile(id) {
                                             <tr>
                                                 <td width="100px" height="32px" align="center" valign="middle" onmouseover="setInputFileDisable(0)">
                                                     &nbsp;<input type="button" onclick="showFilePage();" title="<c:out value='${lb_git_connector_create_job_add_file_tip}'/>" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>">
+                                                </td>
+                                                <td width="150px" height="32px" align="center" valign="middle">
+                                                    &nbsp;<input id="checkFileMapping" type="button"  width="150px" onclick="showFileMapping();" title="Check File Mapping" class="standardBtn_mouseout" value="Check File Mapping">
                                                 </td>
                                                 <td width="100px" align="center" valign="middle"></td>
                                                 <td align="center" class="footertext"><c:out value="${lb_total}"/>: <span id="fileNo">0</span> - <c:out value='${lb_uploaded}'/>: <span id="fileNo2">0</span></td>

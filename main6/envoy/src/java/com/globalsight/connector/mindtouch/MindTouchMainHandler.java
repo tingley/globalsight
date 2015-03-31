@@ -50,6 +50,11 @@ public class MindTouchMainHandler extends PageActionHandler
             Object form) throws Exception
     {
         MindTouchConnector connector = (MindTouchConnector) form;
+        String id = request.getParameter("companyId");
+        if(StringUtil.isNotEmpty(id))
+        {
+        	connector.setCompanyId(Long.parseLong(id));
+        }
         HibernateUtil.saveOrUpdate(connector);
     }
 

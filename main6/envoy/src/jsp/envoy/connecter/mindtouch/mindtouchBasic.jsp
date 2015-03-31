@@ -29,6 +29,7 @@
 	String password = "";
 	String url = "";
 	String desc = "";
+	long companyId = -1;
 	MindTouchConnector connector = (MindTouchConnector) request.getAttribute("mindtouch");
     boolean edit = false;
 	if (connector != null)
@@ -40,6 +41,7 @@
         username = connector.getUsername();
         password = connector.getPassword();
         url = connector.getUrl();
+        companyId = connector.getCompanyId();
         desc = connector.getDescription();
         desc = desc == null ? "" : desc;
 	}
@@ -184,6 +186,9 @@ function validName()
     <div style="float: left;">
     <FORM name="mindtouchForm" id="mindtouchForm" method="post" action="">
     <input type="hidden" name="id" value="<%=id%>" />
+    <%if(edit) {%>
+    <input type="hidden" name="companyId" value="<%=companyId%>" />
+    <%} %>
     <table class="standardText">
     	<tr>
     		<td ><%=bundle.getString("lb_name")%> <span class="asterisk">*</span>:</td>

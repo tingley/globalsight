@@ -75,7 +75,7 @@ public class Extractor extends AbstractExtractor implements
     private Filter m_elementPostFilter = null;
     private String m_postFormat = null;
     private static String[] invalidHtmlTagCharacters = new String[]
-    { "{", "}", "%", "^", "~", "!", "@", "&", "*", "(", ")", "?" };
+    { "{", "}", "%", "^", "~", "!", "&", "*", "(", ")", "?" };
     private static final String PLACEHOLDER_LEFT_TAG = "GS_PLACEHOLDER_LEFT_TAG";
     private static final String PLACEHOLDER_RIGHT_TAG = "GS_PLACEHOLDER_RIGHT_TAG";
     private static final String PLACEHOLDER_LEFT_NATIVE = "GS_PLACEHOLDER_LEFT_NATIVE";
@@ -437,6 +437,13 @@ public class Extractor extends AbstractExtractor implements
             {
                 case DocumentElement.TRANSLATABLE:
                 case DocumentElement.LOCALIZABLE:
+                    Segmentable segmentableElement = (Segmentable) element;
+                    String chunk = segmentableElement.getChunk();
+                    chunk = StringUtil.replace(chunk, PLACEHOLDER_LEFT_NATIVE,
+                            "&lt;");
+                    chunk = StringUtil.replace(chunk, PLACEHOLDER_RIGHT_NATIVE,
+                            "&gt;");
+                    segmentableElement.setChunk(chunk);
                     getOutput().addDocumentElement(element, true);
                     break;
 

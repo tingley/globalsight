@@ -1328,10 +1328,43 @@ public class Ambassador extends AbstractWebService
         }
 
         Vector tLocales = new Vector();
-        for (String tLocale : targetLocales.split("\\|"))
-        {
-            tLocales.add(tLocale);
-        }
+		if (StringUtil.isEmpty(targetLocales) && fIds.size() > 0)
+		{
+			for (int i = 0; i < fIds.size(); i++)
+			{
+				tLocales.add(" ");
+			}
+		}
+		else if (targetLocales.contains("|"))
+		{
+			for (String tLocale : targetLocales.split("\\|"))
+			{
+				if (StringUtil.isEmpty(tLocale))
+				{
+					tLocales.add(tLocale);
+				}
+				else
+				{
+					if (tLocale.contains(","))
+					{
+						String locales = "";
+						for (String locale : tLocale.split(","))
+						{
+							locales += locale.trim() + ",";
+						}
+						if (locales != "" && locales.endsWith(","))
+						{
+							tLocales.add(locales.substring(0,
+									locales.lastIndexOf(",")));
+						}
+					}
+					else
+					{
+						tLocales.add(tLocale.trim());
+					}
+				}
+			}
+		}
 
         HashMap args = new HashMap();
         args.put("accessToken", accessToken);

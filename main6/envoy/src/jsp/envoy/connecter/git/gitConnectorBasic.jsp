@@ -80,6 +80,9 @@ function save()
 {
     if (confirmForm())
     {
+    	<%if(edit){%>
+    	$("#branch").attr("disabled",false);
+    	<%}%>
         testConnect();
     }
 }
@@ -244,7 +247,7 @@ function validName()
         </tr>
         <tr>
             <td><%=bundle.getString("lb_branch")%><span class="asterisk">*</span>:</td>
-            <td><input type="text" name="branch" id="branch" style="width: 360px;" value="<%=branch%>" maxLength="200"></td>
+            <td><input type="text" name="branch" id="branch" style="width: 360px;" value="<%=branch%>" <% if(edit){%>disabled<%} %> maxLength="200"></td>
         </tr>
         <tr id="usernameTr">
             <td><%=bundle.getString("lb_user_name")%>:</td>

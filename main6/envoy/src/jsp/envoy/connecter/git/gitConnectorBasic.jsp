@@ -31,6 +31,7 @@
 	String url = "";
 	String desc = "";
 	String privateKeyFile = "";
+	long companyId = -1;
 	GitConnector connector = (GitConnector) request.getAttribute("gitConnector");
     boolean edit = false;
 	if (connector != null)
@@ -44,6 +45,7 @@
         branch = connector.getBranch();
         privateKeyFile = connector.getPrivateKeyFile();
         url = connector.getUrl();
+        companyId = connector.getCompanyId();
         desc = connector.getDescription();
         desc = desc == null ? "" : desc;
 	}
@@ -232,6 +234,9 @@ function validName()
     <div style="float: left;">
     <FORM name="gitForm" id="gitForm" method="post" action="">
     <input type="hidden" name="id" value="<%=id%>" />
+    <%if(edit){%>
+    <input type="hidden" name="companyId" value="<%=companyId%>" />
+    <%}%>
     <table class="standardText">
     	<tr>
     		<td ><%=bundle.getString("lb_name")%> <span class="asterisk">*</span>:</td>

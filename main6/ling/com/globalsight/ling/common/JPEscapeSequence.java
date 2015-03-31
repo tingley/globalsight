@@ -16,22 +16,18 @@
  */
 package com.globalsight.ling.common;
 
-import com.globalsight.ling.common.NativeEnDecoder;
-import com.globalsight.ling.common.NativeEnDecoderException;
-
 /**
  * Encodes and decodes Java Properties escape sequences.
  */
-public class JPEscapeSequence
-    extends NativeEnDecoder
+public class JPEscapeSequence extends NativeEnDecoder
 {
     private boolean isJavaProperty = false;
+
     /*
-     * Converts escaped unicode (\\uxxxx) to unicode chars,
-     * and standard escape sequences to their native forms.
+     * Converts escaped unicode (\\uxxxx) to unicode chars, and standard escape
+     * sequences to their native forms.
      */
-    public String decode (String p_str)
-        throws NativeEnDecoderException
+    public String decode(String p_str) throws NativeEnDecoderException
     {
         char aChar;
         Character c;
@@ -50,12 +46,12 @@ public class JPEscapeSequence
             if (aChar == '\\')
             {
                 aChar = p_str.charAt(x++);
-                if (aChar == 'u') //unicode escapes
+                if (aChar == 'u') // unicode escapes
                 {
                     try
                     {
-                        c = new Character((char)Integer.parseInt(
-                          p_str.substring(x, x+4), 16));
+                        c = new Character((char) Integer.parseInt(
+                                p_str.substring(x, x + 4), 16));
                         result.append(c);
                         x += 4;
                     }
@@ -88,24 +84,24 @@ public class JPEscapeSequence
     }
 
     public String decode(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
 
     /**
-     * Encodes standard character escapes and converts characters
-     * below 20 and above 127 into unicode escapes (\\uxxxx).  Note:
-     * The generic Merger should have removed all TMX and XML escapes.
+     * Encodes standard character escapes and converts characters below 20 and
+     * above 127 into unicode escapes (\\uxxxx). Note: The generic Merger should
+     * have removed all TMX and XML escapes.
      */
     public String encode(String p_str)
     {
         char aChar;
         int len = p_str.length();
         boolean b_leading = true;
-        StringBuffer result = new StringBuffer(len*2);
+        StringBuffer result = new StringBuffer(len * 2);
 
-        for (int x = 0; x < len; )
+        for (int x = 0; x < len;)
         {
             aChar = p_str.charAt(x++);
 
@@ -116,26 +112,25 @@ public class JPEscapeSequence
 
             switch (aChar)
             {
-                // note jdk 1.2.2 interprets \b as literal char 'b'
+            // note jdk 1.2.2 interprets \b as literal char 'b'
 
             // Leading spaces need to be escaped
-            case ' ':
-                    if (b_leading && getLastChar() != null && "=:".contains(getLastChar()))
+                case ' ':
+                    if (b_leading && getLastChar() != null
+                            && "=:".contains(getLastChar()))
                     {
                         result.append('\\');
                         b_leading = false;
                     }
                     result.append(' ');
                     continue;
-            case '\t': result.append('\\'); result.append('t');
-                continue;
-            case '\n': result.append('\\'); result.append('n');
-                continue;
-            case '\r': result.append('\\'); result.append('r');
-                continue;
-            case '\f': result.append('\\'); result.append('f');
-                continue;
-            case '\\':
+                case '\t':
+                case '\n':
+                case '\r':
+                case '\f':
+                    result.append(aChar);
+                    continue;
+                case '\\':
                     result.append('\\');
 
                     boolean thisIsEscapeChar = false;
@@ -161,40 +156,44 @@ public class JPEscapeSequence
                     {
                         result.append('\\');
                     }
-                continue;
+                    continue;
 
-                /*
-            case '#': result.append('\\'); result.append('#');
-                continue;
-            case '!': result.append('\\'); result.append('!');
-                continue;
-            case '=': result.append('\\'); result.append('=');
-                continue;
-            case ':': result.append('\\'); result.append(':');
-                continue;
-            case '\"':result.append('\\'); result.append('\"');
-                continue;
-            case '\'':result.append('\\'); result.append('\'');
-                continue;
-                */
-            default:
-                if ((aChar < 20) || (aChar > 127))
-                {
-                    String s = new String(Integer.toHexString(aChar));
-                    switch (s.length())
+                    /*
+                     * case '#': result.append('\\'); result.append('#');
+                     * continue; case '!': result.append('\\');
+                     * result.append('!'); continue; case '=':
+                     * result.append('\\'); result.append('='); continue; case
+                     * ':': result.append('\\'); result.append(':'); continue;
+                     * case '\"':result.append('\\'); result.append('\"');
+                     * continue; case '\'':result.append('\\');
+                     * result.append('\''); continue;
+                     */
+                default:
+                    if ((aChar < 20) || (aChar > 127))
                     {
-                    case 1: s = "\\u000" + s;   break;
-                    case 2: s = "\\u00" + s;    break;
-                    case 3: s = "\\u0" + s;     break;
-                    case 4: s = "\\u" + s;      break;
-                    default:
+                        String s = new String(Integer.toHexString(aChar));
+                        switch (s.length())
+                        {
+                            case 1:
+                                s = "\\u000" + s;
+                                break;
+                            case 2:
+                                s = "\\u00" + s;
+                                break;
+                            case 3:
+                                s = "\\u0" + s;
+                                break;
+                            case 4:
+                                s = "\\u" + s;
+                                break;
+                            default:
+                        }
+                        result.append(s);
                     }
-                    result.append(s);
-                }
-                else
-                {
-                    result.append(aChar);
-                }
+                    else
+                    {
+                        result.append(aChar);
+                    }
             }
         }
 
@@ -202,24 +201,25 @@ public class JPEscapeSequence
     }
 
     public String encode(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
 
     public String encodeWithEncodingCheck(String p_NativeString)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         return encode(p_NativeString);
     }
 
     public String encodeWithEncodingCheck(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
-    
-    public void setIsJavaProperty(boolean flag) {
+
+    public void setIsJavaProperty(boolean flag)
+    {
         isJavaProperty = flag;
     }
 }

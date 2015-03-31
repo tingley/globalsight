@@ -83,7 +83,6 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.ling.common.MapOfHtmlEntity;
-import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -1353,7 +1352,6 @@ public class Exporter
             aChar = in[off++];
             if (aChar == '\\')
             {
-                boolean isConvert = true;
                 aChar = in[off++];
                 if (aChar == 'u')
                 {
@@ -1401,34 +1399,8 @@ public class Exporter
                 }
                 else
                 {
-                    if (IFormatNames.FORMAT_JAVASCRIPT.equals(m_formatType))
-                    {
-                        out[outLen++] = '\\';
-                        out[outLen++] = aChar;
-                    }
-                    else
-                    {
-                        if (aChar == 't')
-                            aChar = '\t';
-                        else if (aChar == 'r')
-                            aChar = '\r';
-                        else if (aChar == 'n')
-                            aChar = '\n';
-                        else if (aChar == 'f')
-                            aChar = '\f';
-                        else
-                            isConvert = false;
-
-                        if (isConvert)
-                        {
-                            out[outLen++] = aChar;
-                        }
-                        else
-                        {
-                            out[outLen++] = '\\';
-                            out[outLen++] = aChar;
-                        }
-                    }
+                    out[outLen++] = '\\';
+                    out[outLen++] = aChar;
                 }
             }
             else

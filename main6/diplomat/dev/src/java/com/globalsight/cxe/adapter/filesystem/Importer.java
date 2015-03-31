@@ -22,10 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessage;
@@ -54,6 +51,7 @@ import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectHandlerLocal;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -61,7 +59,10 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class Importer
 {
-    // ////////////////////////////////////
+	private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
+			.getLogger(Importer.class);
+
+	// ////////////////////////////////////
     // Private Members //
     // ////////////////////////////////////
     // private byte[] m_content = null;
@@ -293,7 +294,8 @@ public class Importer
         //target
         Target target = new Target();
         target.setName("FileSystemTargetAdapter");
-		
+
+        target.setLocale(m_targetLocales);
         if (m_targetLocales == null || "".equals(m_targetLocales.trim()))
 		{
 			L10nProfile profile = null;
@@ -307,31 +309,24 @@ public class Importer
 				}
 				catch (Exception e)
 				{
-					e.printStackTrace();
+					logger.error("Failed to get l10nProfile object by Id: "
+							+ this.m_l10nProfileId, e);
 				}
 			}
 			if (profile != null)
 			{
 				String locales = "";
-				List allLocales = new ArrayList(Arrays.asList(profile
-						.getTargetLocales()));
-				for (int i = 0; i < allLocales.size(); i++)
+				for (GlobalSightLocale gsl: profile.getTargetLocales())
 				{
-					locales += allLocales.get(i) + ",";
+					locales += gsl + ",";
 				}
 				if (locales != "" && locales.endsWith(","))
 				{
-					target.setLocale(locales.substring(0,
-							locales.lastIndexOf(",")));
-					m_targetLocales = locales.substring(0,
-							locales.lastIndexOf(","));
+					m_targetLocales = locales.substring(0, locales.lastIndexOf(","));
+					target.setLocale(m_targetLocales);
 				}
 			}
 		}
-        else
-        {
-            target.setLocale(m_targetLocales);
-        }
         target.setCharset("unknown");
        
         Da da2 = new Da();

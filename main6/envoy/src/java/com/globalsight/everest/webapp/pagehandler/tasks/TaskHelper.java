@@ -1042,7 +1042,7 @@ public class TaskHelper
         String title = EditUtil.utf8ToUnicode(p_request.getParameter("title"));
         String companyName = EditUtil.utf8ToUnicode(p_request
                 .getParameter("companyName"));
-        if (p_request.getParameter("company").equals("false"))
+        if ("false".equalsIgnoreCase(p_request.getParameter("company")))
         {
             companyName = EditUtil.utf8ToUnicode(p_request
                     .getParameter("companies"));

@@ -26,6 +26,7 @@ import com.globalsight.cxe.adapter.openoffice.StringIndex;
 
 class TextFrameObj
 {
+    int pageNum = 0;
     String parentStory = null;
     String itemTransform = null;
     double pointX = 0;

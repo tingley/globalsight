@@ -172,4 +172,7 @@ public interface Tu /** extends TuLing */
     
     public String getXliffMrkIndex();
 
+    public int getInddPageNum();
+
+    public void setInddPageNum(int inddPageNum);
 }

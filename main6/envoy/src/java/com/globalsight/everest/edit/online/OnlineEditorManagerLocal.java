@@ -38,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.globalsight.cxe.adapter.adobe.InddTuMapping;
+import com.globalsight.cxe.adapter.adobe.InddTuMappingHelper;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -6187,6 +6189,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         // TODO Ooptions.getNeedShowPTags() move to jquey
         segment = getEditorSegment(tuv, EditorConstants.PTAGS_COMPACT, segment,
                 ptag, p_jobId);
+        String segmentNoTag = elem.getTextValue().trim();
         String searchText = null;
 		if (!editorState.getNeedShowPTags())
 		{
@@ -6201,6 +6204,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 		}
         jsonObj.put("tuId", tuId);
         jsonObj.put("segment", segment);
+        if (fromInCtxRv)
+        {
+            jsonObj.put("segmentNoTag", segmentNoTag);
+        }
         if (fromInCtxRv)
         {
             jsonObj.put("tuvId", tuv.getId());
@@ -6272,6 +6279,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         JSONObject mainJson = new JSONObject();
         JSONArray targetjArray = new JSONArray();
         JSONArray sourcejArray = new JSONArray();
+        JSONArray mappingjArray = new JSONArray();
         editorState = p_state;
         searchMap = p_searchMap;
         long p_trgPageId = p_state.getTargetPageId().longValue();
@@ -6441,6 +6449,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         repetitions, p_searchMap, p_state, fromInCtxRv);
                 JSONObject sourcej = getSourceJsonResult(b_rtlLocale, srcTuv,
                         p_state.getNeedShowPTags(), jobId, fromInCtxRv);
+                
+                if (fromInCtxRv)
+                {
+                    InddTuMapping mp = InddTuMappingHelper.getMappingByTu(jobId, srcTuv.getTuId());
+                    
+                    if (mp != null)
+                    {
+                        targetj.put("pageNum", mp.getPageNum());
+                        sourcej.put("pageNum", mp.getPageNum());
+                    }
+                }
+                
                 targetjArray.put(targetj);
                 sourcejArray.put(sourcej);
             }
@@ -6500,6 +6520,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 dataType, p_options.getViewMode());
         String segmentSrc = GxmlUtil.getDisplayHtml(p_srcTuv.getGxmlElement(),
                 dataType, p_options.getViewMode());
+        String segmentNoTag = p_targetTuv.getGxmlElement().getTextValue().trim();
         boolean isReadOnly = false;
         boolean isReadOnlyMode = p_options.getEditMode() == EDITMODE_READ_ONLY;
         boolean isRealExactLocalized = true;
@@ -6642,6 +6663,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 			seg = getNewSegement(seg,searchText,"target");
 		}
         jsonObj.put("segment", seg);
+        if (fromInCtxRv)
+        {
+            jsonObj.put("segmentNoTag", segmentNoTag);
+        }
         mainClass.append(style + " ");
 
 //        if ((!reviewMode || reviewReadOnly)

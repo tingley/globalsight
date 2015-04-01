@@ -741,7 +741,7 @@ public abstract class JobVoSearcher implements WebAppConstants
                 user, searchType);
         // if ("stateOnly".equals(searchType))
         // {
-        // jobVos = getJobVos(ts, null);
+        // jobVos = getJobVos(ts, null);	
         // }
         // else
         // {

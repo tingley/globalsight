@@ -667,61 +667,6 @@ public abstract class AbstractExtractor implements ExtractorInterface
         return switchExtractor(to_translate, dataFormat, rules, filter, true);
     }
 
-    /**
-     * @since GBS-3881
-     */
-    public Output switchExtractor(String dataFormat, Filter postFilter)
-    {
-        ExtractorRegistry reg = ExtractorRegistry.getObject();
-
-        int formatId = -1;
-        if (dataFormat != null)
-        {
-            formatId = reg.getFormatId(dataFormat);
-        }
-
-        if (formatId == -1)
-        {
-            String message = ExtractorExceptionConstants.UNKNOWN_FORMAT
-                    + dataFormat;
-
-            throw new ExtractorException(
-                    ExtractorExceptionConstants.XML_EXTRACTOR_UNKNOWN_FORMAT,
-                    message);
-        }
-
-        EFInputData input = getInput();
-        int oriType = input.getType();
-        input.setType(formatId);
-
-        AbstractExtractor ex;
-        Output out = new Output();
-
-        ex = makeExtractor(input.getType());
-        ex.init(input, out);
-        ex.setMainBaseFilter(this.getMainBaseFilter());
-
-        if (postFilter != null)
-        {
-            ex.setMainFilter(postFilter);
-            long filterId = postFilter.getId();
-            String filterTableName = postFilter.getFilterTableName();
-            if (FilterConstants.HTML_TABLENAME.equals(filterTableName)
-                    && formatId == 1)
-            {
-                ((Extractor) ex).setRules(null, filterId);
-                ((Extractor) ex).setFilterId(filterId);
-                ((Extractor) ex).setFilterTableName(filterTableName);
-            }
-        }
-
-        ex.loadRules();
-        ex.extract();
-        input.setType(oriType);
-
-        return out;
-    }
-
     private Output switchExtractor(String to_translate, String dataFormat,
             String rules, Filter filter, boolean p_preserveAllWhite)
     {

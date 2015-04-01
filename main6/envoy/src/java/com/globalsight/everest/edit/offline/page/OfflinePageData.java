@@ -2647,7 +2647,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     String[] translatedSrcTrgSegments = new String[2];
                     // ## Compose the translated segment into tmx string first,
                     // but write at last.
-                    if (osd.getTargetTuv() != null
+                    if (!isPenaltyTmx && osd.getTargetTuv() != null
                             && osd.getTargetTuv().isLocalized())
                     {
                         userId = osd.getTargetTuv().getLastModifiedUser();
@@ -2658,7 +2658,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                     sourceText, sourceLocale, targetText,
                                     targetLocale, isOmegaT, isFromXliff,
                                     p_tmxLevel, changeCreationIdToMT,
-                                    translatedSrcTrgSegments, isPenaltyTmx);
+                                    translatedSrcTrgSegments);
                         }
                     }
 
@@ -3004,7 +3004,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             String sourceText, String sourceLocale, String targetText,
             String targetLocale, boolean isOmegaT, boolean isFromXliff,
             int p_tmxLevel, boolean changeCreationIdToMT,
-            String[] translatedSrcTrgSegments, boolean isPenaltyTmx)
+            String[] translatedSrcTrgSegments)
     {
         String tempSource = new String();
         String tempTarget = new String();
@@ -3059,7 +3059,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 targetTuv.getLastModified());
 
         return TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, null,
-                isPenaltyTmx);
+                false);
     }
 
     private boolean isSameAsLocalizedSegments(
@@ -3645,7 +3645,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         return preserveSourceFolder;
     }
-    
+
     /**
      * @return the m_isXliff20
      */
@@ -3655,7 +3655,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     }
 
     /**
-     * @param m_isXliff20 the m_isXliff20 to set
+     * @param m_isXliff20
+     *            the m_isXliff20 to set
      */
     public void setIsXliff20(boolean m_isXliff20)
     {

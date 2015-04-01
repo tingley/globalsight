@@ -369,4 +369,14 @@ public final class TuImplVo extends PersistentObject implements Tu,
     {
         this.translate = translate;
     }
+    
+    public int getInddPageNum()
+    {
+        return -1;
+    }
+
+    public void setInddPageNum(int inddPageNum)
+    {
+        
+    }
 }

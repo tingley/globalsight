@@ -113,11 +113,7 @@ public class Tmx2Xliff20Handler
             String strOriginalString)
     {
         Pc pc = new Pc();
-        id = hAttributes.getProperty("i");
-        if (id == null)
-        {
-            id = hAttributes.getProperty("x");
-        }
+        id = getId(hAttributes);
         pc.setId(id);
 
         String internal = hAttributes.getProperty("internal");
@@ -154,11 +150,7 @@ public class Tmx2Xliff20Handler
             String strOriginalString)
     {
         Pc pc = new Pc();
-        id = hAttributes.getProperty("i");
-        if (id == null)
-        {
-            id = hAttributes.getProperty("x");
-        }
+        id = getId(hAttributes);
 
         if (id == null)
         {
@@ -217,6 +209,23 @@ public class Tmx2Xliff20Handler
     {
         elementStack.peek();
     }
+    
+    public static String getId(Properties hAttributes)
+    {
+        String id = hAttributes.getProperty("i");
+        
+        if (id == null)
+        {
+            id = hAttributes.getProperty("id");
+        }
+        
+        if (id == null)
+        {
+            id = hAttributes.getProperty("x");
+        }
+        
+        return id;
+    }
 
     /**
      * Handles the event that start a ph tag.
@@ -229,11 +238,7 @@ public class Tmx2Xliff20Handler
             String strOriginalString)
     {
         Ph ph = new Ph();
-        id = hAttributes.getProperty("i");
-        if (id == null)
-        {
-            id = hAttributes.getProperty("x");
-        }
+        id = getId(hAttributes);
         ph.setId(id);
 
         String internal = hAttributes.getProperty("internal");
@@ -269,11 +274,7 @@ public class Tmx2Xliff20Handler
     private void startIt(String strTmxTagName, Properties hAttributes,
             String strOriginalString)
     {
-        id = hAttributes.getProperty("i");
-        if (id == null)
-        {
-            id = hAttributes.getProperty("x");
-        }
+        id = getId(hAttributes);
 
         String pos = hAttributes.getProperty("pos");
         if ("end".equals(pos))

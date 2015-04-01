@@ -143,12 +143,14 @@ public class ZipIt implements Serializable
             throws FileNotFoundException, IOException
     {
         Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
-        for (File file : entryFiles)
+        if(entryFiles != null)
         {
-            entryFileToFileNameMap.put(file,
-                    getEntryFileName(file, donotIncludePath));
+        	for (File file : entryFiles)
+        	{
+        		entryFileToFileNameMap.put(file,
+        				getEntryFileName(file, donotIncludePath));
+        	}
         }
-
         addEntriesToZipFile(p_zipFile, entryFileToFileNameMap, comment);
     }
 

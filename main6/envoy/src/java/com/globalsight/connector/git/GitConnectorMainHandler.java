@@ -21,7 +21,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 
@@ -37,10 +36,22 @@ public class GitConnectorMainHandler extends PageActionHandler
             Object form) throws Exception
     {
         GitConnector connector = (GitConnector) form;
+        String id = request.getParameter("companyId");
+        if(StringUtil.isNotEmpty(id))
+        {
+        	connector.setCompanyId(Long.parseLong(id));
+        }
         HibernateUtil.saveOrUpdate(connector);
         
         GitConnectorHelper helper = new GitConnectorHelper(connector);
-        helper.gitConnectorClone();
+        File gitFolder = helper.getGitFolder();
+        String gitFolderPath = gitFolder.getPath();
+        int idlength = String.valueOf(connector.getId()).length();
+        File tempFile = new File(gitFolderPath.substring(0, gitFolderPath.length() - idlength) + "-1");
+        if(tempFile.exists())
+        {
+        	tempFile.renameTo(gitFolder);
+        }
     }
 
     @ActionHandler(action = "remove", formClass = "")

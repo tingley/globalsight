@@ -6676,6 +6676,20 @@ window.addEventListener('DOMMouseScroll', handleMouseWheel);
 window.addEventListener('mousewheel', handleMouseWheel);
 
 window.addEventListener('click', function click(evt) {
+
+	var o = evt.target;
+	if (o.nodeName == "DIV" && "textLayer" != o.className && o.id != "segDiv" && o.className.indexOf("segDiv") == -1)
+	{
+		if ("highlight" == o.className || o.className.indexOf("highlight") != -1)
+		{
+			//editSegment(o, true);
+		}
+		else
+		{
+			highlightObjects(o);
+		}
+	}
+
  if ( typeof(parent.parent.source.content.navigateToDiv) != "undefined"
  && evt.button === 0 && PDFViewerApplication.pdfViewer.containsElement(evt.target)) 
  {
@@ -6684,6 +6698,7 @@ var pageLeft = PDFViewerApplication.pdfViewer.location.left;
 var pageTop = PDFViewerApplication.pdfViewer.location.top;
 var curScale = PDFViewerApplication.pdfViewer.currentScale;
 parent.parent.source.content.navigateToDiv(pagennn, pageLeft, pageTop, curScale);
+
 }
 
   if (!PresentationMode.active) {

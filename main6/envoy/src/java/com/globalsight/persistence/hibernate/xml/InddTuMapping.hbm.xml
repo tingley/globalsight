@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.cxe.adapter.adobe.InddTuMapping" table="INDD_TU_MAPPING">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="jobId" column="JOB_ID" type="long"
+			not-null="true" unique="false" />
+		<property name="srcPageId" column="SOURCE_PAGE_ID" type="long"
+			not-null="true" unique="false" />
+		<property name="tuId" column="TU_ID" type="long"
+			not-null="true" unique="false" />
+		<property name="companyId" column="COMPANY_ID" type="long"
+			not-null="true" unique="false" />
+		<property name="pageNum" column="PAGE_NUM" type="int"
+			not-null="true" unique="false" />
+	</class>
+</hibernate-mapping>

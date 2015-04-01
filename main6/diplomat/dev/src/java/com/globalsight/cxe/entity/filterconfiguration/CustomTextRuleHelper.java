@@ -120,15 +120,15 @@ public class CustomTextRuleHelper
                 }
                 else if (LAST.equals(startOcc))
                 {
-                    Matcher lastMatch = null;
+                    int lastEnd = -1;
                     while (m.find())
                     {
-                        lastMatch = m;
+                        lastEnd = m.end();
                     }
 
-                    if (lastMatch != null)
+                    if (lastEnd != -1)
                     {
-                        extractIndexStart = lastMatch.end();
+                        extractIndexStart = lastEnd;
                         startMatch = true;
                     }
                 }

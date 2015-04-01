@@ -179,5 +179,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/QAFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/JobGroup.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/MindTouchConnector.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/InddTuMapping.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

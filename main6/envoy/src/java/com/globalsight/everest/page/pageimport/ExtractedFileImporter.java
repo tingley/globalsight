@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.adobe.InddTuMappingHelper;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -124,6 +125,7 @@ public class ExtractedFileImporter extends FileImporter
             .compile("<fileProfileId>([\\d\\D]*)</fileProfileId>");
 
     public static String EMPTYTARGET = "empty target";
+    boolean haveInddPageNum = false;
 
     //
     // Constructor
@@ -448,6 +450,20 @@ public class ExtractedFileImporter extends FileImporter
             {
                 HibernateUtil.save(pTemplate.getTemplateParts());
             }
+            
+            if (haveInddPageNum)
+            {
+                long srcPageId = srcPage.getId();
+
+                for (Tu tu : tus)
+                {
+                    if (tu.getInddPageNum() != 0)
+                    {
+                        InddTuMappingHelper.saveMapping(jobId, srcPageId, tu.getId(), companyId,
+                                tu.getInddPageNum());
+                    }
+                }
+            }
         }
         catch (Exception e)
         {
@@ -718,6 +734,13 @@ public class ExtractedFileImporter extends FileImporter
 
                     if (isCreateTu)
                     {
+                        int inddPageNumInt = 0;
+                        String inddPageNum = elem.getAttribute("inddPageNum");
+                        if (inddPageNum != null)
+                        {
+                            inddPageNumInt = Integer.parseInt(inddPageNum);
+                        }
+                        
                         ArrayList<Tu> tus = createTranslatableSegments(elem,
                                 p_request, p_page, p_sourceLocale, p_tmId,
                                 pageDataType);
@@ -725,6 +748,13 @@ public class ExtractedFileImporter extends FileImporter
                         for (int j = 0, maxj = tus.size(); j < maxj; j++)
                         {
                             tu = tus.get(j);
+                            
+                            if (inddPageNumInt != 0)
+                            {
+                                tu.setInddPageNum(inddPageNumInt);
+                                haveInddPageNum = true;
+                            }
+                            
                             Tuv tuv = tu.getTuv(p_sourceLocale.getId(), jobId);
                             if (tuv.getSid() == null)
                             {
@@ -987,7 +1017,6 @@ public class ExtractedFileImporter extends FileImporter
         String translate = p_elem.getAttribute("translate");
         String xliffMrkId = p_elem.getAttribute("xliffSegSourceMrkId");
         String xliffMrkIndex = p_elem.getAttribute("xliffSegSourceMrkIndex");
-        String poMsgctxtAsComment = p_elem.getAttribute(POToken.MSGCTXT);
         long pid = Long.parseLong(p_elem
                 .getAttribute(GxmlNames.TRANSLATABLE_BLOCKID));
 
@@ -1059,12 +1088,7 @@ public class ExtractedFileImporter extends FileImporter
                 }
 
                 tuv.setSid(p_elem.getAttribute("sid"));
-                String srcComment = getSrcComment(seg);
-                tuv.setSrcComment(srcComment);
-                if (srcComment == null) {
-                    tuv.setSrcComment(poMsgctxtAsComment);
-                }
-                
+                tuv.setSrcComment(getSrcComment(seg));
                 tu.setXliffMrkId(xliffMrkId);
                 tu.setXliffMrkIndex(xliffMrkIndex);
 

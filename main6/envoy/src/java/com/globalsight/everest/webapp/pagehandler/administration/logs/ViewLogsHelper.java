@@ -211,10 +211,10 @@ public class ViewLogsHelper
             if (files.size() > 0)
             {
                 logFiles = convertToArray(files);
-                zipFile = new File(systemLogDir + ZIP_FILENAME);
-                ZipIt.addEntriesToZipFile(zipFile, logFiles, true,
-                        "Package of all system logs");
             }
+            zipFile = new File(systemLogDir + ZIP_FILENAME);
+            ZipIt.addEntriesToZipFile(zipFile, logFiles, true,
+                    "Package of all system logs");
         }
         catch (Exception e)
         {
@@ -272,8 +272,10 @@ public class ViewLogsHelper
                         end, logs);
             }
 
-            logFiles = convertToArray(files);
-
+            if(files.size() > 0)
+            {
+            	logFiles = convertToArray(files);
+            }
             zipFile = new File(systemLogDir + ZIP_FILENAME);
             ZipIt.addEntriesToZipFile(zipFile, logFiles, true,
                     "Package of all system log files");
@@ -392,14 +394,24 @@ public class ViewLogsHelper
         {
             while ((line = fin.readLine()) != null)
             {
-                if (!line.startsWith(startDate) && !line.startsWith(endDate))
+            	if (!line.startsWith(startDate)
+                        && !line.startsWith(endDate)
+                        && !line.startsWith("<"+startDate)
+                        && !line.startsWith("<"+endDate))
                 {
                     if (hasContent)
                         fout.write(line + "\n");
                 }
                 else
                 {
-                    dateString = line.substring(0, 16);
+                	if("operation.log".equalsIgnoreCase(logType))
+                	{
+                		dateString = line.substring(1, 17);
+                	}
+                	else
+                	{
+                		dateString = line.substring(0, 16);
+                	}
                     if (dateString.compareTo(start) >= 0
                             && dateString.compareTo(end) < 0)
                     {
@@ -525,14 +537,23 @@ public class ViewLogsHelper
                     while ((line = fin.readLine()) != null)
                     {
                         if (!line.startsWith(startDate)
-                                && !line.startsWith(endDate))
+                                && !line.startsWith(endDate)
+                                && !line.startsWith("<"+startDate)
+                                && !line.startsWith("<"+endDate))
                         {
                             if (hasContent)
                                 fout.write(line + "\n");
                         }
                         else
                         {
-                            dateString = line.substring(0, 16);
+                        	if("operation.log".equalsIgnoreCase(log))
+                        	{
+                        		dateString = line.substring(1, 17);
+                        	}
+                        	else
+                        	{
+                        		dateString = line.substring(0, 16);
+                        	}
                             if (dateString.compareTo(start) >= 0
                                     && dateString.compareTo(end) < 0)
                             {

@@ -93,6 +93,8 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
      * multiple segments can belong to the same paragraph.
      */
     private long m_pid = 0;
+    
+    private int inddPageNum = 0;
 
     /**
      * Xliff attribute of "translation-unit" tag.
@@ -744,5 +746,15 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
 		}
     	
     	return null;
+    }
+
+    public int getInddPageNum()
+    {
+        return inddPageNum;
+    }
+
+    public void setInddPageNum(int inddPageNum)
+    {
+        this.inddPageNum = inddPageNum;
     }
 }

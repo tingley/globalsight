@@ -544,12 +544,12 @@ public class Tmx2Xliff20
             else if (o instanceof Sc)
             {
                 Sc sc = (Sc) o;
-                sb.append("[x").append(sc.getId()).append("/]");
+                sb.append("[x").append(sc.getId()).append("]");
             }
             else if (o instanceof Ec)
             {
                 Ec ec = (Ec) o;
-                sb.append("[x").append(ec.getId()).append("/]");
+                sb.append("[x").append(ec.getId()).append("]");
             }
         }
     }
@@ -567,11 +567,7 @@ public class Tmx2Xliff20
     public static String getTag(String p_strTmxTagName,
             Properties p_hAttributes, String p_strOriginalString)
     {
-        String i = (String) p_hAttributes.get("i");
-        if (i == null)
-        {
-            i = (String) p_hAttributes.get("x");
-        }
+        String i = Tmx2Xliff20Handler.getId(p_hAttributes);
 
         if (p_strTmxTagName.equals("bpt"))
         {
@@ -593,8 +589,13 @@ public class Tmx2Xliff20
             {
                 i = (String) p_hAttributes.get("i");
             }
+            
+            if (i == null)
+            {
+                i = p_hAttributes.getProperty("id");
+            }
 
-            return "x" + i + "/";
+            return "x" + i;
         }
     }
 }

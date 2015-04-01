@@ -32,7 +32,6 @@ import com.globalsight.everest.page.TemplatePart;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
-import com.globalsight.ling.docproc.extractor.po.POToken;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -986,15 +985,9 @@ public class TemplateGenerator
 
             case GxmlElement.TRANSLATABLE:
                 String xliffpart = child.getAttribute("xliffPart");
-                boolean isXlfOrPo = false;
-                String msgctxt = child.getAttribute(POToken.MSGCTXT);
-                if (msgctxt != null)
-                {
-                    isXlfOrPo = true;
-                }
                 if(xliffpart == null || "target".equals(xliffpart))
                 {
-                    theRest.append(child.getStartTag(isXlfOrPo)).append("\n");
+                    theRest.append(child.getStartTag()).append("\n");
                     List segments = child.getChildElements(GxmlElement.SEGMENT);
                 
                     for (int k = 0; k < segments.size(); k++)

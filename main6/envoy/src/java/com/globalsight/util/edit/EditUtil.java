@@ -449,27 +449,8 @@ public final class EditUtil
      */
     static public String encodeNTREntities(StringBuffer s)
     {
-        StringBuffer res = new StringBuffer();
-
-        for (int i = 0; i < s.length(); i++)
-        {
-            char c = s.charAt(i);
-
-            switch (c)
-            {
-                case '\t':
-                    res.append("\\t");
-                    break;
-                case '\r':
-                    res.append("\\r");
-                    break;
-                default:
-                    res.append(c);
-                    break;
-            }
-        }
-
-        return res.toString();
+        // GBS-3882, donot specially handle \n, \r, \t any more
+        return s.toString();
     }
 
     /**

@@ -20,7 +20,7 @@
 	String testURL = self.getPageURL() + "&action=test";
 	
 	String helper = bundle.getString("helper_text_git_connector_edit");
-    String errorConnect = bundle.getString("error_mindtouch_connector");
+    String errorConnect = bundle.getString("error_git_connector");
 
     String title = null;
 	String id = "-1";
@@ -31,6 +31,7 @@
 	String url = "";
 	String desc = "";
 	String privateKeyFile = "";
+	long companyId = -1;
 	GitConnector connector = (GitConnector) request.getAttribute("gitConnector");
     boolean edit = false;
 	if (connector != null)
@@ -44,6 +45,7 @@
         branch = connector.getBranch();
         privateKeyFile = connector.getPrivateKeyFile();
         url = connector.getUrl();
+        companyId = connector.getCompanyId();
         desc = connector.getDescription();
         desc = desc == null ? "" : desc;
 	}
@@ -80,6 +82,9 @@ function save()
 {
     if (confirmForm())
     {
+    	<%if(edit){%>
+    	$("#branch").attr("disabled",false);
+    	<%}%>
         testConnect();
     }
 }
@@ -181,7 +186,7 @@ function confirmForm()
 	    	}
     	}
     	
-    	#("#privateKeyFile").val("");
+    	$("#privateKeyFile").val("");
     }
     else
     {
@@ -229,6 +234,9 @@ function validName()
     <div style="float: left;">
     <FORM name="gitForm" id="gitForm" method="post" action="">
     <input type="hidden" name="id" value="<%=id%>" />
+    <%if(edit){%>
+    <input type="hidden" name="companyId" value="<%=companyId%>" />
+    <%}%>
     <table class="standardText">
     	<tr>
     		<td ><%=bundle.getString("lb_name")%> <span class="asterisk">*</span>:</td>
@@ -244,7 +252,7 @@ function validName()
         </tr>
         <tr>
             <td><%=bundle.getString("lb_branch")%><span class="asterisk">*</span>:</td>
-            <td><input type="text" name="branch" id="branch" style="width: 360px;" value="<%=branch%>" maxLength="200"></td>
+            <td><input type="text" name="branch" id="branch" style="width: 360px;" value="<%=branch%>" <% if(edit){%>disabled<%} %> maxLength="200"></td>
         </tr>
         <tr id="usernameTr">
             <td><%=bundle.getString("lb_user_name")%>:</td>

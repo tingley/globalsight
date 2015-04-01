@@ -60,7 +60,9 @@ function formatSelection(){
 		   $("#penalizedReferenceTm").hide();
 		}
 	}
-	
+	$("#tmxTypeSelector").children("span").each(function(){
+		 $(this).children().clone().replaceAll($(this)); 
+		});
 	var key=optionKey[val];
 	key();
 }
@@ -103,6 +105,7 @@ var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 					var ttx=$(".TTX");
 					ttx.each(function(){
 						$(this).hide();
+						$(this).wrap("<span style='display:none'></span>");
 						if($(this).val()==$("#tmxTypeSelector").val()){
 						$("#tmxTypeSelector").val("resInsTmx14b");
 						$(".tmxTypeSelector").show();

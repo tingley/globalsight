@@ -191,8 +191,17 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         }
 
         content = content.substring(i2 + 1);
-
         StringBuffer sb = new StringBuffer(xliff);
+        
+        //update \n to \r\n in first note
+        int i3 = content.indexOf("<unit");
+        if (i3 > 0)
+        {
+            String note = content.substring(0, i3);
+            note = StringUtil.replace(note, "\n", "\r\n");
+            content = note + content.substring(i3);
+        }
+        
         boolean notFormat = false;
         for (int i = 0; i < content.length(); i++)
         {
@@ -613,6 +622,18 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         {
             seg.setId(osd.getDisplaySegmentID());
         }
+        
+        // Add SID
+        String sid = osd.getSourceTuv().getSid();
+        if (sid != null && sid.length() > 0)
+        {
+            Notes notes = new Notes();
+            Note note = new Note();
+            note.setContent(sid);
+            unit.setNotes(notes);
+            notes.getNote().add(note);
+            note.setCategory("SID");
+        }
 
         // Adds source.
         if (srcSegment != null)
@@ -661,11 +682,16 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
             if (StringUtil.isNotEmpty(skeletonMap.get(tuId)))
             {
-                Notes notes = new Notes();
+                Notes notes = unit.getNotes();
+                if (notes == null)
+                {
+                    notes = new Notes();
+                    unit.setNotes(notes);
+                }
+                
                 Note note = new Note();
                 note.setContent(EditUtil.decodeXmlEntities(skeletonMap
                         .get(tuId)));
-                unit.setNotes(notes);
                 notes.getNote().add(note);
             }
         }

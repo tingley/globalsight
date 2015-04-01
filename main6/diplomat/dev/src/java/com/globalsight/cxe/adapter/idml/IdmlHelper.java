@@ -751,7 +751,10 @@ public class IdmlHelper
                 tfcom.setPageNum(pageNumlist);
                 Collections.sort(spreadTextFrameList, tfcom);
                 
-                tfcom.setTextFramePageNum(spreadTextFrameList);
+                if (pageNumlist.size() != 0)
+                {
+                    tfcom.setTextFramePageNum(spreadTextFrameList);
+                }
 
                 for (TextFrameObj textFrameObj : spreadTextFrameList)
                 {

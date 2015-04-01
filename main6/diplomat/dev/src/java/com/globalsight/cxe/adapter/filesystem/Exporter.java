@@ -490,10 +490,13 @@ public class Exporter
 
             // For MindTouch file
             handleMindTouchFiles(finalFileName, fp, wf);
-            
-            //For GitConnector file
-            handleGitConnectorFiles(finalFileName, wf, m_displayName.substring(0,
-                    m_displayName.indexOf(File.separator)));
+
+            // For GitConnector file
+            handleGitConnectorFiles(
+                    finalFileName,
+                    wf,
+                    m_displayName.substring(0,
+                            m_displayName.indexOf(File.separator)));
 
             // Added by Vincent Yan
             HashMap<String, String> infos = CVSUtil.seperateFileInfo(
@@ -667,93 +670,113 @@ public class Exporter
             logger.error(e);
         }
     }
-    
-    
-    private void handleGitConnectorFiles(String finalFileName, Workflow wf, String sourceLocale)
+
+    private void handleGitConnectorFiles(String finalFileName, Workflow wf,
+            String sourceLocale)
     {
-    	try 
-    	{
-    		long jobId = wf.getJob().getJobId();
-    		GitConnectorJob gitConnectorJob = GitConnectorManagerLocal
-					.getGitConnectorJobByJobId(jobId);
-    		if(gitConnectorJob != null)
-    		{
-    			HashMap<String, String> infos = getInfos(finalFileName, wf);
-    			
-    			GitConnector gc = GitConnectorManagerLocal
-    								.getGitConnectorById(gitConnectorJob.getGitConnectorId());
-    			
-    			List<GitConnectorFileMapping> gcfms = (List<GitConnectorFileMapping>) GitConnectorManagerLocal
-    						.getAllFileMappings(gc.getId(), sourceLocale, wf.getTargetLocale().toString());
-    			HashMap<String, String> mappings = getMappings(gcfms);
-    			
-    			GitConnectorHelper helper = new GitConnectorHelper(gc);
-    			File gitFolder = helper.getGitFolder();
-    			String relativeFilePath = infos.get("relativeFilePath");
-    			String sourceFileMappingPath = relativeFilePath;
-    			String sourceFolderMappingPath = sourceFileMappingPath
-    							.substring(0, sourceFileMappingPath.lastIndexOf(File.separator));
-    			String suffix;
-    			if(mappings.size() == 0)
-    			{
-    				suffix = relativeFilePath.substring(0, relativeFilePath.lastIndexOf(".")) 
-		    				+ "(" + wf.getTargetLocale().toString() + ")" 
-		    				+ relativeFilePath.substring(relativeFilePath.lastIndexOf("."));
-    			}
-    			else if(mappings.get(sourceFileMappingPath) != null)
-    			{
-    				suffix = mappings.get(sourceFileMappingPath);
-    			}
-    			else if(mappings.get(sourceFolderMappingPath) != null)
-    			{
-    				suffix = mappings.get(sourceFolderMappingPath) + sourceFileMappingPath.substring(sourceFolderMappingPath.length(), sourceFileMappingPath.length());
-    			}
-    			else
-    			{
-    				suffix = relativeFilePath.substring(0, relativeFilePath.lastIndexOf(".")) 
-		    				+ "(" + wf.getTargetLocale().toString() + ")" 
-		    				+ relativeFilePath.substring(relativeFilePath.lastIndexOf("."));
-    			}
-    			
-    			File dstFile = new File(gitFolder.getPath() + File.separator + suffix);
-    			File srcFile = new File(finalFileName);
-    			FileUtil.copyFile(srcFile, dstFile);
-    			
-    			GitConnectorCacheFile cacheFile = new GitConnectorCacheFile();
-    			cacheFile.setFilePath(suffix);
-    			cacheFile.setGitConnectorId(gitConnectorJob.getGitConnectorId());
-    			HibernateUtil.save(cacheFile);
-    		}
-		} 
-    	catch (Exception e) 
-		{
-			logger.error(e);
-		}
+        try
+        {
+            long jobId = wf.getJob().getJobId();
+            GitConnectorJob gitConnectorJob = GitConnectorManagerLocal
+                    .getGitConnectorJobByJobId(jobId);
+            if (gitConnectorJob != null)
+            {
+                HashMap<String, String> infos = getInfos(finalFileName, wf);
+
+                GitConnector gc = GitConnectorManagerLocal
+                        .getGitConnectorById(gitConnectorJob
+                                .getGitConnectorId());
+
+                List<GitConnectorFileMapping> gcfms = (List<GitConnectorFileMapping>) GitConnectorManagerLocal
+                        .getAllFileMappings(gc.getId(), sourceLocale, wf
+                                .getTargetLocale().toString());
+                HashMap<String, String> mappings = getMappings(gcfms);
+
+                GitConnectorHelper helper = new GitConnectorHelper(gc);
+                File gitFolder = helper.getGitFolder();
+                String relativeFilePath = infos.get("relativeFilePath");
+                String sourceFileMappingPath = relativeFilePath;
+                String sourceFolderMappingPath = sourceFileMappingPath
+                        .substring(0, sourceFileMappingPath
+                                .lastIndexOf(File.separator));
+                String suffix;
+                if (mappings.size() == 0)
+                {
+                    suffix = relativeFilePath.substring(0,
+                            relativeFilePath.lastIndexOf("."))
+                            + "("
+                            + wf.getTargetLocale().toString()
+                            + ")"
+                            + relativeFilePath.substring(relativeFilePath
+                                    .lastIndexOf("."));
+                }
+                else if (mappings.get(sourceFileMappingPath) != null)
+                {
+                    suffix = mappings.get(sourceFileMappingPath);
+                }
+                else if (mappings.get(sourceFolderMappingPath) != null)
+                {
+                    suffix = mappings.get(sourceFolderMappingPath)
+                            + sourceFileMappingPath.substring(
+                                    sourceFolderMappingPath.length(),
+                                    sourceFileMappingPath.length());
+                }
+                else
+                {
+                    suffix = relativeFilePath.substring(0,
+                            relativeFilePath.lastIndexOf("."))
+                            + "("
+                            + wf.getTargetLocale().toString()
+                            + ")"
+                            + relativeFilePath.substring(relativeFilePath
+                                    .lastIndexOf("."));
+                }
+
+                File dstFile = new File(gitFolder.getPath() + File.separator
+                        + suffix);
+                File srcFile = new File(finalFileName);
+                FileUtil.copyFile(srcFile, dstFile);
+
+                GitConnectorCacheFile cacheFile = new GitConnectorCacheFile();
+                cacheFile.setFilePath(suffix);
+                cacheFile
+                        .setGitConnectorId(gitConnectorJob.getGitConnectorId());
+                HibernateUtil.save(cacheFile);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
     }
-    
+
     private HashMap<String, String> getInfos(String finalFileName, Workflow wf)
     {
-    	HashMap<String, String> infos = new HashMap<String, String>();
-    	String prefixStr = m_exportLocation + File.separator + wf.getTargetLocale().toString();
-		String jobIdFilePath = finalFileName.substring(prefixStr.length() + 1);
-		String relativeFilePath = jobIdFilePath.substring(jobIdFilePath.indexOf(File.separator) + 1);
-		infos.put("relativeFilePath", relativeFilePath);
-		return infos;
+        HashMap<String, String> infos = new HashMap<String, String>();
+        String prefixStr = m_exportLocation + File.separator
+                + wf.getTargetLocale().toString();
+        String jobIdFilePath = finalFileName.substring(prefixStr.length() + 1);
+        String relativeFilePath = jobIdFilePath.substring(jobIdFilePath
+                .indexOf(File.separator) + 1);
+        infos.put("relativeFilePath", relativeFilePath);
+        return infos;
     }
-    
-    private HashMap<String, String> getMappings(List<GitConnectorFileMapping> gcfms)
+
+    private HashMap<String, String> getMappings(
+            List<GitConnectorFileMapping> gcfms)
     {
-    	HashMap<String, String> mappings = new HashMap<String, String>();
-    	
-    	if(gcfms != null && gcfms.size() >0)
-    	{
-    		for(GitConnectorFileMapping gcfm: gcfms)
-    		{
-    			mappings.put(gcfm.getSourceMappingPath(), gcfm.getTargetMappingPath());
-    		}
-    	}
-    	
-		return mappings;
+        HashMap<String, String> mappings = new HashMap<String, String>();
+
+        if (gcfms != null && gcfms.size() > 0)
+        {
+            for (GitConnectorFileMapping gcfm : gcfms)
+            {
+                mappings.put(gcfm.getSourceMappingPath(),
+                        gcfm.getTargetMappingPath());
+            }
+        }
+
+        return mappings;
     }
 
     private void handleEloquaFiles(String finalFileName, FileProfile fp,
@@ -1329,7 +1352,6 @@ public class Exporter
             aChar = in[off++];
             if (aChar == '\\')
             {
-                boolean isConvert = true;
                 aChar = in[off++];
                 if (aChar == 'u')
                 {
@@ -1377,26 +1399,8 @@ public class Exporter
                 }
                 else
                 {
-                    if (aChar == 't')
-                        aChar = '\t';
-                    else if (aChar == 'r')
-                        aChar = '\r';
-                    else if (aChar == 'n' && "javaprop".equals(m_formatType))
-                        aChar = '\n';
-                    else if (aChar == 'f')
-                        aChar = '\f';
-                    else
-                        isConvert = false;
-
-                    if (isConvert)
-                    {
-                        out[outLen++] = aChar;
-                    }
-                    else
-                    {
-                        out[outLen++] = '\\';
-                        out[outLen++] = aChar;
-                    }
+                    out[outLen++] = '\\';
+                    out[outLen++] = aChar;
                 }
             }
             else

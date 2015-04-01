@@ -36,6 +36,11 @@ public class GitConnectorMainHandler extends PageActionHandler
             Object form) throws Exception
     {
         GitConnector connector = (GitConnector) form;
+        String id = request.getParameter("companyId");
+        if(StringUtil.isNotEmpty(id))
+        {
+        	connector.setCompanyId(Long.parseLong(id));
+        }
         HibernateUtil.saveOrUpdate(connector);
         
         GitConnectorHelper helper = new GitConnectorHelper(connector);

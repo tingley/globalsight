@@ -16,7 +16,6 @@
  */
 package com.globalsight.cxe.entity.filterconfiguration;
 
-import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,7 +31,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.hibernate.HibernateException;
 import org.json.JSONArray;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
@@ -40,7 +38,6 @@ import com.globalsight.cxe.entity.filterconfiguration.RemoveInfo.FilterInfos;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.everest.jobhandler.JobImpl;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.log.OperationLog;
@@ -317,24 +314,24 @@ public class FilterHelper
     public static void deleteFilter(String filterTableName, long filterId)
             throws Exception
     {
-        
-//        Filter filter = MapOfTableNameAndSpecialFilter
-//                .getFilterInstance(filterTableName);
-       List<Filter> list = getFilterByMapping(filterId, filterTableName);
-       Filter filter = list.get(0);
+
+        // Filter filter = MapOfTableNameAndSpecialFilter
+        // .getFilterInstance(filterTableName);
+        List<Filter> list = getFilterByMapping(filterId, filterTableName);
+        Filter filter = list.get(0);
         String sql = "delete from " + filterTableName + " where id=" + filterId;
         HibernateUtil.executeSql(sql);
-        OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
+        OperationLog.log(OperationLog.EVENT_DELETE,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
     }
-
 
     private static List<Filter> getFilterByMapping(long filterId,
             String filterTableName)
     {
         Filter filter = MapOfTableNameAndSpecialFilter
                 .getFilterInstance(filterTableName);
-        String sql = "select * from " + filterTableName
-                + " where id = ?";
+        String sql = "select * from " + filterTableName + " where id = ?";
 
         return (List<Filter>) HibernateUtil.searchWithSql(filter.getClass(),
                 sql, filterId);
@@ -848,7 +845,8 @@ public class FilterHelper
     {
         HibernateUtil.saveOrUpdate(filter);
         OperationLog.log(OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
         return filter.getId();
     }
 
@@ -868,6 +866,11 @@ public class FilterHelper
     public static XMLRuleFilter getXmlFilter(long filterId)
     {
         return HibernateUtil.get(XMLRuleFilter.class, filterId);
+    }
+
+    public static PlainTextFilter getPlainTextFilter(long filterId)
+    {
+        return HibernateUtil.get(PlainTextFilter.class, filterId);
     }
 
     public static long saveFilter(Filter filter)

@@ -17,6 +17,7 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class GitConnectorBasicHandler extends PageActionHandler
 {
@@ -28,6 +29,11 @@ public class GitConnectorBasicHandler extends PageActionHandler
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         ServletOutputStream out = response.getOutputStream();
         GitConnector gc = (GitConnector) form;
+        String id = request.getParameter("companyId");
+        if(StringUtil.isNotEmpty(id))
+        {
+        	gc.setCompanyId(Long.parseLong(id));
+        }
         
         GitConnectorHelper helper = new GitConnectorHelper(gc);
         File gitFolder = helper.getGitFolder();

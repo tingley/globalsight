@@ -37,6 +37,7 @@
     long gcfmId = gcfm.getId();
     GitConnector connector = (GitConnector) request.getAttribute("gitConnector");
     long gitConnectorId = connector.getId();
+    long companyId = connector.getCompanyId();
     String saveURL = save.getPageURL() + "&action=update&gitConnectorId=" + gitConnectorId + "&id=" + gcfmId;
     String cancelURL = cancel.getPageURL() + "&gitConnectorId=" + gitConnectorId;
     String subFolderMapped = (String)request.getAttribute("subFolderMapped");
@@ -160,7 +161,7 @@ function MappingPathSelect(mode)
     <br>
 
 <form name="currentForm" method="post" action="">
-
+<input type="hidden" name="companyId" value="<%=companyId%>"/>
 <table border="0" cellspacing="4" cellpadding="2" class="standardText">
   <tr><td></td></tr>
   <tr valign="top">

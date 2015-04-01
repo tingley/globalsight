@@ -1316,25 +1316,50 @@ public class Ambassador extends AbstractWebService
             String attributeXml) throws WebServiceException
     {
         Vector fPaths = new Vector();
-        filePaths = filePaths.trim();
         for (String path : filePaths.split("\\|"))
         {
             fPaths.add(path);
         }
 
         Vector fIds = new Vector();
-        fileProfileIds = fileProfileIds.trim();
         for (String fId : fileProfileIds.split("\\|"))
         {
             fIds.add(fId);
         }
 
         Vector tLocales = new Vector();
-        targetLocales = targetLocales.trim();
-        for (String tLocale : targetLocales.split("\\|"))
-        {
-            tLocales.add(tLocale);
-        }
+        String targetLocales2 = targetLocales.replace("|", "");
+		if (StringUtil.isEmpty(targetLocales)
+				|| StringUtil.isEmpty(targetLocales2))
+		{
+			for (int i = 0; i < fIds.size(); i++)
+			{
+				tLocales.add(" ");
+			}
+		}
+		else
+		{
+			for (String tLocale : targetLocales.split("\\|"))
+			{
+				if (tLocale.contains(","))
+				{
+					String locales = "";
+					for (String locale : tLocale.split(","))
+					{
+						locales += locale.trim() + ",";
+					}
+					if (locales != "" && locales.endsWith(","))
+					{
+						tLocales.add(locales.substring(0,
+								locales.lastIndexOf(",")));
+					}
+				}
+				else
+				{
+					tLocales.add(tLocale.trim());
+				}
+			}
+		}
 
         HashMap args = new HashMap();
         args.put("accessToken", accessToken);

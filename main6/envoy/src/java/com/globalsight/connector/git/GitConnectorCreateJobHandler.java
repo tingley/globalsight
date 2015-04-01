@@ -3,7 +3,6 @@ package com.globalsight.connector.git;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.connector.git.form.CreateGitConnectorJobForm;
 import com.globalsight.connector.git.util.GitConnectorHelper;
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.gitconnector.GitConnector;
 import com.globalsight.cxe.entity.gitconnector.GitConnectorFileMapping;
@@ -130,12 +128,11 @@ public class GitConnectorCreateJobHandler extends PageActionHandler
     	String msg = "";
     	if(targetLocales.size() != 0)
     	{
-    		msg = filePath + "(";
     		for(String targetLocale: targetLocales)
     		{
     			msg += targetLocale + ",";
     		}
-    		msg = msg.substring(0, msg.length() - 1) + ")";
+    		msg = msg.substring(0, msg.length() - 1);
     	}
     	
         PrintWriter writer = response.getWriter();

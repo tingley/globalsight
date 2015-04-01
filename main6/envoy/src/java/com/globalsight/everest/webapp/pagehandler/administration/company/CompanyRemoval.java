@@ -3021,9 +3021,8 @@ public class CompanyRemoval
                 removeRemovedPrefixTag(conn, tuIds);
                 removeRemovedSuffixTag(conn, tuIds);
                 removeRemovedTag(conn, tuIds);
-                // 
-				if (tuTableName.equals("TRANSLATION_UNIT_" + companyId)
-						&& DbUtil.isTableExisted("TRANSLATION_TU_TUV_ATTR_"	+ companyId))
+
+				if (DbUtil.isTableExisted("TRANSLATION_TU_TUV_ATTR_" + companyId))
                 {
                 	exec(conn, "delete from TRANSLATION_TU_TUV_ATTR_" + companyId + " where object_type = 'TU' and object_id in ", tuIds);
                 }
@@ -3037,8 +3036,7 @@ public class CompanyRemoval
                 removeXliffAlt(conn, tuvIds);
                 removeIssues(conn, tuvIds);
                 // to be safe, delete again via tuvIds
-				if (tuTableName.equals("TRANSLATION_UNIT_" + companyId)
-						&& DbUtil.isTableExisted("TRANSLATION_TU_TUV_ATTR_"	+ companyId))
+				if (DbUtil.isTableExisted("TRANSLATION_TU_TUV_ATTR_" + companyId))
                 {
                 	exec(conn, "delete from TRANSLATION_TU_TUV_ATTR_" + companyId + " where object_type = 'TUV' and object_id in ", tuvIds);
                 }

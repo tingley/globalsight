@@ -50,7 +50,7 @@ public class GitConnectorFileMappingMainHandler extends PageActionHandler
             String srcMappingPath = request.getParameter("sourceMappingPath");
             String tarLocale = "", targetMappingPath = "", subFolder = "";
             long gcId = Long.parseLong(request.getParameter("gitConnectorId"));
-            long companyId = CompanyWrapper.getCurrentCompanyIdAsLong();
+            long companyId = Long.parseLong(request.getParameter("companyId"));
             boolean createSubFolder = false;
             GitConnector gc = GitConnectorManagerLocal.getGitConnectorById(gcId);
             GitConnectorHelper gcHelper = new GitConnectorHelper(gc);
@@ -144,7 +144,7 @@ public class GitConnectorFileMappingMainHandler extends PageActionHandler
 					.toString();
 			String targetMappingPath = request.getParameter("targetMappingPath");
             boolean subfolder = "1".equals(request.getParameter("subfolder"));
-            long companyId = CompanyWrapper.getCurrentCompanyIdAsLong();
+            long companyId = Long.parseLong(request.getParameter("companyId"));
             long gcId = Long.parseLong(request.getParameter("gitConnectorId"));
             GitConnector gc = GitConnectorManagerLocal.getGitConnectorById(gcId);
             GitConnectorHelper gcHelper = new GitConnectorHelper(gc);

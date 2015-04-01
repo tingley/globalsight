@@ -51,8 +51,7 @@ public class JSEscapeSequence extends NativeEnDecoder
     {
         try
         {
-            m_pattern = new RE(
-                    "\\\\(\\\\|t|r|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2})",
+            m_pattern = new RE("\\\\(\\\\|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2})",
                     RE.MATCH_NORMAL);
         }
         catch (RESyntaxException e)

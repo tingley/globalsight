@@ -44,10 +44,14 @@ import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
+import com.globalsight.everest.projecthandler.ProjectHandler;
+import com.globalsight.everest.projecthandler.ProjectHandlerLocal;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -55,7 +59,10 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class Importer
 {
-    // ////////////////////////////////////
+	private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
+			.getLogger(Importer.class);
+
+	// ////////////////////////////////////
     // Private Members //
     // ////////////////////////////////////
     // private byte[] m_content = null;
@@ -238,9 +245,6 @@ public class Importer
             m_codeset = "UTF-8";
         }
 
-        String l10nProfileId = null;// Fenshid: this via is no use at all
-        String eventFlowXml = null;
-        
         EventFlowXml object = new EventFlowXml();
         object.setPreMergeEvent(m_preMergeEvent);
         object.setPostMergeEvent(CxeMessageType.getCxeMessageType(
@@ -290,14 +294,39 @@ public class Importer
         //target
         Target target = new Target();
         target.setName("FileSystemTargetAdapter");
+
+        target.setLocale(m_targetLocales);
         if (m_targetLocales == null || "".equals(m_targetLocales.trim()))
-        {
-            target.setLocale("unknown");
-        }
-        else
-        {
-            target.setLocale(m_targetLocales);
-        }
+		{
+			L10nProfile profile = null;
+			if (m_l10nProfileId != null)
+			{
+				long l10nProfileId = Long.parseLong(m_l10nProfileId);
+				try
+				{
+					ProjectHandler ph = new ProjectHandlerLocal();
+					profile = ph.getL10nProfile(l10nProfileId);
+				}
+				catch (Exception e)
+				{
+					logger.error("Failed to get l10nProfile object by Id: "
+							+ this.m_l10nProfileId, e);
+				}
+			}
+			if (profile != null)
+			{
+				String locales = "";
+				for (GlobalSightLocale gsl: profile.getTargetLocales())
+				{
+					locales += gsl + ",";
+				}
+				if (locales != "" && locales.endsWith(","))
+				{
+					m_targetLocales = locales.substring(0, locales.lastIndexOf(","));
+					target.setLocale(m_targetLocales);
+				}
+			}
+		}
         target.setCharset("unknown");
        
         Da da2 = new Da();

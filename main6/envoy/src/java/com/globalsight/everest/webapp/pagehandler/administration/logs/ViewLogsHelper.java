@@ -211,10 +211,10 @@ public class ViewLogsHelper
             if (files.size() > 0)
             {
                 logFiles = convertToArray(files);
-                zipFile = new File(systemLogDir + ZIP_FILENAME);
-                ZipIt.addEntriesToZipFile(zipFile, logFiles, true,
-                        "Package of all system logs");
             }
+            zipFile = new File(systemLogDir + ZIP_FILENAME);
+            ZipIt.addEntriesToZipFile(zipFile, logFiles, true,
+                    "Package of all system logs");
         }
         catch (Exception e)
         {
@@ -272,17 +272,13 @@ public class ViewLogsHelper
                         end, logs);
             }
 
-            if(files.size()!=0)
+            if(files.size() > 0)
             {
             	logFiles = convertToArray(files);
-            	zipFile = new File(systemLogDir + ZIP_FILENAME);
-                ZipIt.addEntriesToZipFile(zipFile, logFiles, true,
-                        "Package of all system log files");
             }
-            else
-            {
-            	logger.info("Did not find meet the conditions of system log files, package is null.");
-            }
+            zipFile = new File(systemLogDir + ZIP_FILENAME);
+            ZipIt.addEntriesToZipFile(zipFile, logFiles, true,
+                    "Package of all system log files");
 
             FileUtils.deleteDirectory(tmpLogDir);
         }

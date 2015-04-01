@@ -26,6 +26,7 @@
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     GitConnector connector = (GitConnector) request.getAttribute("gitConnector");
     long gitConnectorId = connector.getId();
+    long companyId = connector.getCompanyId();
 
     // Labels, etc
     String lbcancel = bundle.getString("lb_cancel");
@@ -160,6 +161,7 @@ function changeSourceLocale() {
 
 <form name="currentForm" method="post" action="">
 <input type="hidden" name="gitConnectorId" value="<%=gitConnectorId%>"/>
+<input type="hidden" name="companyId" value="<%=companyId%>"/>
 <table border="0" cellspacing="4" cellpadding="2" class="standardText">
   <tr><td></td></tr>
   <tr valign="top">

@@ -95,7 +95,7 @@ public class Match {
     @XmlSchemaType(name = "NMTOKEN")
     protected String id;
     @XmlAttribute
-    protected BigDecimal matchQuality;
+    protected String matchQuality;
     @XmlAttribute
     protected BigDecimal matchSuitability;
     @XmlAttribute
@@ -273,7 +273,7 @@ public class Match {
      *     {@link BigDecimal }
      *     
      */
-    public BigDecimal getMatchQuality() {
+    public String getMatchQuality() {
         return matchQuality;
     }
 
@@ -285,7 +285,7 @@ public class Match {
      *     {@link BigDecimal }
      *     
      */
-    public void setMatchQuality(BigDecimal value) {
+    public void setMatchQuality(String value) {
         this.matchQuality = value;
     }
 

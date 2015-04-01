@@ -951,7 +951,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             
             Source s = new Source();
             m.setSource(s);
-            m.setMatchQuality(new BigDecimal(leverageMatch.getScoreNum()));
+            String score = StringUtil.formatPercent(leverageMatch.getScoreNum(), 2);
+            m.setMatchQuality(score);
             Tmx2Xliff20Handler handler = new Tmx2Xliff20Handler();
             handler.setSource(true);
             Tmx2Xliff20 tmxXliff = new Tmx2Xliff20();
@@ -1010,7 +1011,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
     private String getTmOrigin(LeverageMatch leverageMatch,
             OfflineSegmentData osd, Tuv sourceTuv, long p_jobId)
     {
-        String tmOrigin = "";
+        String tmOrigin = "TM";
 
         // If target TUV is never changed, adjust the "origin".
         int projectTmIndex = leverageMatch.getProjectTmIndex();
@@ -1018,9 +1019,9 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         {
             if (projectTmIndex == Leverager.MT_PRIORITY)
             {
-                String origin = leverageMatch.getMtName();
+                tmOrigin = leverageMatch.getMtName();
 
-                if ("".equals(origin) || origin == null)
+                if ("".equals(tmOrigin) || tmOrigin == null)
                 {
                     tmOrigin = "MT";
                 }
@@ -1112,6 +1113,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             while (tag != null)
             {
                 Match m = new Match();
+                m.setOrigin("terminology");
                 m.setRef("#" + osd.getDisplaySegmentID());
 
                 Source source = new Source();

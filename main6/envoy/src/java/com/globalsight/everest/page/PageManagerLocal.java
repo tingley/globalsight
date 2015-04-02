@@ -33,6 +33,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.online.OnlineEditorConstants;
@@ -52,6 +53,7 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.LeverageGroupImpl;
 import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.TargetLocaleLgIdsMapper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -1041,12 +1043,12 @@ public final class PageManagerLocal implements PageManager
             ArrayList<Hashtable> otherPages = new ArrayList<Hashtable>();
 
             // loop through all pages....
+			String exportCode = p_exportParameters.getExportCodeset();
             for (int i = 0; i < pageCount; i++)
             {
                 // set the values in a hashtable
                 Hashtable map = new Hashtable();
 
-                map.put(new Integer(EXPORT_PARAMETERS), p_exportParameters);
                 map.put(new Integer(TARGET_PAGE), p_genericPageType);
                 map.put(new Integer(PAGE_COUNT), new Integer(pageCount));
                 map.put(ExportConstants.EXPORT_BATCH_ID, new Long(
@@ -1086,8 +1088,22 @@ public final class PageManagerLocal implements PageManager
                     page = tpage.getSourcePage();
                 }
 
-                if (page != null)
-                {
+				if (page != null)
+				{
+					// GBS-3731
+					if (exportCode != null
+							&& exportCode
+									.equalsIgnoreCase(JobManagementHandler.SAME_AS_SOURCE))
+					{
+						long fileProfileId = page.getRequest()
+								.getFileProfileId();
+						FileProfile fileProfile = (FileProfile) HibernateUtil
+								.get(FileProfileImpl.class, fileProfileId,
+										false);
+						p_exportParameters.setExportCodeset(fileProfile
+								.getCodeSet());
+					}
+                	
                     ExtractedSourceFile sfile = (ExtractedSourceFile) page
                             .getExtractedFile();
                     String path = page.getExternalPageId().toLowerCase();
@@ -1111,7 +1127,7 @@ public final class PageManagerLocal implements PageManager
                     }
 
                 }
-
+				map.put(new Integer(EXPORT_PARAMETERS), p_exportParameters);
                 JmsHelper
                         .sendMessageToQueue(map, JmsHelper.JMS_EXPORTING_QUEUE);
             }

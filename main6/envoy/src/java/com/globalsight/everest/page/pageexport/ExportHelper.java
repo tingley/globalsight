@@ -2459,8 +2459,11 @@ public class ExportHelper
                     p_segment, tuvContent);
         }
 
+        // do not add this id for style issue. 
         if (p_isIncontextReview)
         {
+            ///TODO: add this back later
+            /*
             String gsidMark = "_gsid_" + tuId + "_";
             if (tuvContent != null && !"".equals(tuvContent.trim()))
             {
@@ -2533,6 +2536,7 @@ public class ExportHelper
 
                 tuvContent = segStart + innerContent + segEnd;
             }
+            */
         }
         else if (p_needToAddGsColor)
         {

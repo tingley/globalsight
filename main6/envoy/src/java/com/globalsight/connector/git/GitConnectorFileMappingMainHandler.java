@@ -220,7 +220,7 @@ public class GitConnectorFileMappingMainHandler extends PageActionHandler
     public void remove(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-    	String[] ids = request.getParameterValues("gcfmIds");
+    	String[] ids = request.getParameter("gcfmIds").split(",");
         for (String id : ids)
         {
             long gcfmId = Long.parseLong(id);

@@ -471,7 +471,7 @@ function showFileMapping()
 	
 	var url = "<%=showFileMappingUrl%>";
 		window.open(url, null,
-	    'width = 700,height = 400,status = no,center = yes,left = 300,top = 100');
+	    'width = 700,height = 400,status = no,resizable = yes,center = yes,left = 300,top = 100');
 	
 }
 

@@ -539,7 +539,7 @@ public class Tmx2Xliff20
             else if (o instanceof Ph)
             {
                 Ph ph = (Ph) o;
-                sb.append("[g").append(ph.getId()).append("]");
+                sb.append("[x").append(ph.getId()).append("]");
             }
             else if (o instanceof Sc)
             {
@@ -579,7 +579,7 @@ public class Tmx2Xliff20
         }
         else if (p_strTmxTagName.equals("ph"))
         {
-            return "g" + i;
+            return "x" + i;
         }
         else
         {

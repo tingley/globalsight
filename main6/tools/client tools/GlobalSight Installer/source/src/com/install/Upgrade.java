@@ -92,6 +92,13 @@ public class Upgrade
         RATES.put(DATABASE, 100000);
         RATES.put(SIGN, 200000);
     }
+    
+    private static List<String> COPY_UNCOVER = new ArrayList<String>();
+    static
+    {
+        COPY_UNCOVER.add("createJob.properties");
+        COPY_UNCOVER.add("offlineUpload.properties");
+    }
 
     private static List<String> IGNORE_PROPERTIES = new ArrayList<String>();
     static
@@ -443,15 +450,27 @@ public class Upgrade
         int i = 0;
         for (File f : files)
         {
+        	String name = f.getName();
             ui.addProgress(0, MessageFormat.format(
-                    Resource.get("process.copy"), f.getName(), i + 1, size));
+                    Resource.get("process.copy"), name, i + 1, size));
 
             i++;
             String path = f.getCanonicalPath().replace("\\", "/");
             String serverFilePath = path.replace(upgradePath, serverPath);
-            FileUtil.copyFile(f, new File(serverFilePath));
+            
+            File serverFile = new File(serverFilePath);
+            
+            if (COPY_UNCOVER.contains(name) && serverFile.exists())
+            {
+            	// do nothing.
+            }
+            else
+            {
+            	FileUtil.copyFile(f, serverFile);
+            }       		            
+            
             ui.addProgress(rate, MessageFormat.format(Resource
-                    .get("process.copy"), f.getName(), i + 1, size));
+                    .get("process.copy"), name, i + 1, size));
         }
 
         ui.addProgress(lose, "");
@@ -521,9 +540,6 @@ public class Upgrade
             ignoreFiles.add("run.sh");
             ignoreFiles.add("run.bat");
             ignoreFiles.add("run.conf");
-            
-            ignoreFiles.add("createJob.properties");
-            ignoreFiles.add("offlineUpload.properties");
             
             if (!isUpdateJboss())
             {

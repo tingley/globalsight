@@ -113,6 +113,13 @@ public class Reindexer extends MultiCompanySupportedThread implements
             {
                 synchronized (this)
                 {
+                    if (m_counter < m_segTotalCount)
+                    {
+                        // GBS-3901, counter not equals total because of ignored
+                        // bad data. Set to total to make the percentage
+                        // correct.
+                        m_counter = m_segTotalCount;
+                    }
                     m_message = getStringFromBundle(
                             "lb_tm_index_finish_success",
                             "Indexing has successfully finished.");

@@ -409,21 +409,20 @@ $(document).ready(function ()
                     success: function(data) {
                 	    // Clear every field values
                 	    clearFieldValues();
+                	    $("[name='fileProfile']").each(function(){
+                            addEmptyOption(this);
+                        });
+                        $("[name='fileProfile']").attr("value", "");
+                        $("[name='fileProfile'] option").attr("disabled", false);
+                        $("#targetLocaleArea").show();
+                        $("#targetLocaleArea").html("");
+                        mapped = false;
+                        l10Nid = 0;
+                        $("#attributeButtonDIV").hide();
+                        attributeRequired = false;
+                        $(this).blur();
                 }
         });
-        
-        $("[name='fileProfile']").each(function(){
-            addEmptyOption(this);
-        });
-        $("[name='fileProfile']").attr("value", "");
-        $("[name='fileProfile'] option").attr("disabled", false);
-        $("#targetLocaleArea").show();
-        $("#targetLocaleArea").html("");
-        mapped = false;
-        l10Nid = 0;
-        $("#attributeButtonDIV").hide();
-        attributeRequired = false;
-        $(this).blur();
     });
 
     $("#cancel").click(function()

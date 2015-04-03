@@ -1048,7 +1048,7 @@ public final class PageManagerLocal implements PageManager
             {
                 // set the values in a hashtable
                 Hashtable map = new Hashtable();
-
+                map.put(new Integer(EXPORT_PARAMETERS), p_exportParameters);
                 map.put(new Integer(TARGET_PAGE), p_genericPageType);
                 map.put(new Integer(PAGE_COUNT), new Integer(pageCount));
                 map.put(ExportConstants.EXPORT_BATCH_ID, new Long(
@@ -1091,43 +1091,42 @@ public final class PageManagerLocal implements PageManager
 				if (page != null)
 				{
 					// GBS-3731
-					if (exportCode != null
-							&& exportCode
-									.equalsIgnoreCase(JobManagementHandler.SAME_AS_SOURCE))
+					if (exportCode
+							.startsWith(JobManagementHandler.SAME_AS_SOURCE))
 					{
 						long fileProfileId = page.getRequest()
 								.getFileProfileId();
 						FileProfile fileProfile = (FileProfile) HibernateUtil
 								.get(FileProfileImpl.class, fileProfileId,
 										false);
-						p_exportParameters.setExportCodeset(fileProfile
-								.getCodeSet());
+						p_exportParameters.setExportCodeset(exportCode.replace(
+								JobManagementHandler.SAME_AS_SOURCE,
+								fileProfile.getCodeSet()));
 					}
-                	
-                    ExtractedSourceFile sfile = (ExtractedSourceFile) page
-                            .getExtractedFile();
-                    String path = page.getExternalPageId().toLowerCase();
-                    if (path.endsWith(".pptx") && sfile != null
-                            && "office-xml".equals(sfile.getDataType()))
-                    {
-                        if (path.startsWith("(slide"))
-                        {
-                            slidesPages.add(map);
-                        }
-                        else if (path.startsWith("(notes"))
-                        {
-                            notesPages.add(map);
-                        }
-                        else
-                        {
-                            otherPages.add(map);
-                        }
 
-                        continue;
-                    }
+					ExtractedSourceFile sfile = (ExtractedSourceFile) page
+							.getExtractedFile();
+					String path = page.getExternalPageId().toLowerCase();
+					if (path.endsWith(".pptx") && sfile != null
+							&& "office-xml".equals(sfile.getDataType()))
+					{
+						if (path.startsWith("(slide"))
+						{
+							slidesPages.add(map);
+						}
+						else if (path.startsWith("(notes"))
+						{
+							notesPages.add(map);
+						}
+						else
+						{
+							otherPages.add(map);
+						}
 
-                }
-				map.put(new Integer(EXPORT_PARAMETERS), p_exportParameters);
+						continue;
+					}
+
+				}
                 JmsHelper
                         .sendMessageToQueue(map, JmsHelper.JMS_EXPORTING_QUEUE);
             }

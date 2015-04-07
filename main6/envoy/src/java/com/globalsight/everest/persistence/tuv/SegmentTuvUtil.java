@@ -198,7 +198,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + " AND tuv.locale_id = ?"
             + " AND tplg.tp_id = ?";
     
-    private static final String COUNT_TRANSLATE_TUV_TRANSLATED = "SELECT COUNT(DISTINCT TUV.ID) FROM "
+    private static final String TRANSLATE_TUV_TRANSLATED = "SELECT DISTINCT TUV.ID FROM "
             + TUV_TABLE_PLACEHOLDER
             + " tuv, "
             + TU_TABLE_PLACEHOLDER
@@ -206,12 +206,32 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + " WHERE tuv.tu_id = tu.id"
             + " AND tu.leverage_group_id = tplg.lg_id"
             + " AND (tuv.state = 'LOCALIZED' OR tuv.state = 'APPROVED' OR tuv.state = 'EXACT_MATCH_LOCALIZED')"
-            + " AND tuv.locale_id = ?"
-            + " AND tplg.tp_id = ?"; 
+            + " AND tuv.locale_id = :lid"
+            + " AND tplg.tp_id = :tid";  
  
     private static final String GET_SOURCE_PAGE_ID = "SELECT SOURCE_PAGE_ID FROM TARGET_PAGE WHERE ID = ?";
     private static final String GET_LOCALE_ID = "SELECT TARGET_LOCALE_ID FROM WORKFLOW w, TARGET_PAGE tp "
             + "WHERE tp.WORKFLOW_IFLOW_INSTANCE_ID = w.IFLOW_INSTANCE_ID AND tp.ID = ?";
+    
+    private static final String LEVERAGE_MATCH_TRANSLATED_TUV = "SELECT DISTINCT lm.ORIGINAL_SOURCE_TUV_ID FROM "
+            + LM_TABLE_PLACEHOLDER 
+            + " lm WHERE"
+            + " lm.SCORE_NUM = 100"
+            + " AND lm.MATCH_TYPE != 'UNVERIFIED_EXACT_MATCH'"
+            + " AND lm.SOURCE_PAGE_ID = :sid"
+            + " AND lm.SUB_ID = 0"
+            + " AND lm.TARGET_LOCALE_ID = :lid";
+    
+    private static final String TARGET_TUV_SOURCE_TUV = "SELECT tuv2.id FROM "
+            + TUV_TABLE_PLACEHOLDER
+            + " tuv1, "
+            + TUV_TABLE_PLACEHOLDER
+            + " tuv2 WHERE"
+            + " tuv1.TU_ID = tuv2.TU_ID"
+            + " AND tuv1.ID in (:sids)"
+            + " AND tuv2.LOCALE_ID = :lid"
+            + " AND tuv2.STATE != 'OUT_OF_DATE'"
+            + " AND tuv2.STATE != 'DO_NOT_TRANSLATE'";
 
     /**
      * Save TUVs into DB.
@@ -1490,7 +1510,6 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         int[] result = new int[2];
 
         int total = 0;
-        int translatedCounts = 0;
         try
         {
             Long sourcePageId = ((BigInteger) HibernateUtil.getFirstWithSql(GET_SOURCE_PAGE_ID, targetPageId)).longValue();
@@ -1502,12 +1521,38 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             String sql = COUNT_TRANSLATE_TUV_ALL.replace(TUV_TABLE_PLACEHOLDER,
                     tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
             total = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId)).intValue();
-            sql = COUNT_TRANSLATE_TUV_TRANSLATED.replace(TUV_TABLE_PLACEHOLDER,
+            
+            sql = TRANSLATE_TUV_TRANSLATED.replace(TUV_TABLE_PLACEHOLDER,
                     tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
-            translatedCounts = ((BigInteger) HibernateUtil.getFirstWithSql(sql, localeId, targetPageId)).intValue();
-
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("lid", localeId);
+            map.put("tid", targetPageId);
+            List<Long> tuvId = (List<Long>) HibernateUtil.searchWithSql(sql, map);
+            Set<Long> tids = new HashSet<Long>();
+            tids.addAll(tuvId);
+            
+            String lmTableName = BigTableUtil.getLMTableJobDataInBySourcePageId(sourcePageId);
+            sql = LEVERAGE_MATCH_TRANSLATED_TUV.replace(LM_TABLE_PLACEHOLDER, lmTableName);
+            map = new HashMap<String, Object>();
+            map.put("lid", localeId);
+            map.put("sid", sourcePageId);
+            List<Object> sourceTuvId = (List<Object>) HibernateUtil.searchWithSql(sql, map);
+            
+            if (sourceTuvId.size() > 0)
+            {
+                sql = TARGET_TUV_SOURCE_TUV.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
+                map = new HashMap<String, Object>();
+                map.put("lid", localeId);
+                
+                Map<String, List<Object>> sids = new HashMap<String, List<Object>>();
+                sids.put("sids", sourceTuvId);
+                
+                List<Long> targetTuvId = (List<Long>) HibernateUtil.searchWithSqlWithIn(sql, map, sids);
+                tids.addAll(targetTuvId);
+            }
+            
             result[0] = total;
-            result[1] = translatedCounts;
+            result[1] = tids.size();
         }
         catch (Exception e)
         {

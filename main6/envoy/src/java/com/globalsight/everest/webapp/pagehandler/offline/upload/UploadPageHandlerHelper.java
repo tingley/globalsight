@@ -36,7 +36,6 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.taskmanager.TaskBO;
 import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -69,40 +68,10 @@ public class UploadPageHandlerHelper implements WebAppConstants
     public void uploadStartPrepare(HttpServletRequest p_request,
             HttpSession httpSession, OEMProcessStatus status, String contentType)
     {
-        String state;
         if (contentType != null
                 && contentType.toLowerCase().startsWith("multipart/form-data"))
         {
             processRequest(p_request, status);
-            // now update the task in the session
-            try
-            {
-                User user = TaskHelper.getUser(httpSession);
-                String taskIdParam = p_request.getParameter(TASK_ID);
-                long taskId = TaskHelper.getLong(taskIdParam);
-                state = (String) TaskHelper.retrieveObject(httpSession,
-                        TASK_STATE);
-                if (state == null)
-                {
-                    state = p_request.getParameter(WebAppConstants.TASK_STATE);
-                }
-                TaskImpl task = (TaskImpl) TaskHelper.getTask(user.getUserId(),
-                        taskId, Integer.parseInt(state));
-                TaskHelper.storeObject(httpSession,
-                        WebAppConstants.WORK_OBJECT, task);
-
-                // Set task uploadStatus
-                TaskBO taskBO = new TaskBO(task.getId());
-                taskBO.setUploadStatus(OfflineConstants.TASK_UPLOADSTATUS_UPLOADING);
-                Map<Long, TaskBO> taskBOMap = new HashMap<Long, TaskBO>();
-                taskBOMap.put(taskBO.getId(), taskBO);
-                TaskHelper.storeObject(httpSession, SESSION_MAP_TASKBO,
-                        taskBOMap);
-            }
-            catch (Exception e)
-            {
-                throw new EnvoyServletException(e);
-            }
         }
     }
 

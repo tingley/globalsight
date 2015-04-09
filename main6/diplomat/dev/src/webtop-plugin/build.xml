@@ -48,7 +48,6 @@
 	   </fileset>
 	   -->
 	   <!-- com.sun.net.ssl.internal.ssl.Provider -->
-	   <pathelement path="../../../../tools/j2eeVendor/pramati/lib/pramati_client_all.jar"/>
 	</path>
 	
 	

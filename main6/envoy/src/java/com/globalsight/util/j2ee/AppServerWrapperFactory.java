@@ -19,15 +19,10 @@ package com.globalsight.util.j2ee;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.j2ee.jboss.JBossWrapper;
-import com.globalsight.util.j2ee.pramati.PramatiWrapper;
-import com.globalsight.util.j2ee.websphere.WebSphereWrapper;
 
 public class AppServerWrapperFactory
 {
     //app server types
-    public static final String PRAMATI = "pramati";
-    public static final String WEBLOGIC = "weblogic";
-    public static final String WEBSPHERE = "websphere";
     public static final String JBOSS = "jboss";
 
     /**
@@ -42,15 +37,7 @@ public class AppServerWrapperFactory
             String vendor = config.getStringParameter
                             (SystemConfigParamNames.APPSERVER_VENDOR);
             vendor = JBOSS;
-            if (PRAMATI.equals(vendor))
-            {
-                s_wrapper = new PramatiWrapper();
-            }
-            else if (WEBSPHERE.equals(vendor))
-            {
-                s_wrapper = new WebSphereWrapper();
-            }
-            else if (JBOSS.equals(vendor))
+            if (JBOSS.equals(vendor))
             {
                 s_wrapper = new JBossWrapper();
             }

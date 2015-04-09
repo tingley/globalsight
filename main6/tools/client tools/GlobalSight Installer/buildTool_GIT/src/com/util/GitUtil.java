@@ -217,7 +217,6 @@ public class GitUtil
         IGNORE_FILTER.add(".jupiter");
         IGNORE_FILTER.add("main6/tools/sso/");
         IGNORE_FILTER.add("/ling/test/");
-        IGNORE_FILTER.add("/pramati_client_all.jar");
         IGNORE_FILTER.add("/WEB-INF/lib/xerces.jar");
         IGNORE_FILTER.add("/tm3tool.cmd");
         IGNORE_FILTER.add("/tm3tool.sh");

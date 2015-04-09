@@ -2207,47 +2207,6 @@ public class Install extends installer.EventBroadcaster
         }
     }
 
-    /***************************************************************************
-     * Makes the EAR file for deployment to WebSphere since exploded format
-     * cannot be used with WebSphere *
-     **************************************************************************/
-    public void makeWebSphereEAR() throws Exception
-    {
-        System.out.println("Creating .ear file for WebSphere");
-        String earfile = "makeear.bat";
-        if (m_operatingSystem != OS_WINDOWS)
-            earfile = "makeear.sh";
-        String earcmd = concatPath(GS_HOME + File.separator + "websphere",
-                earfile);
-        execute(earcmd);
-    }
-
-    /***************************************************************************
-     * Sets up the embeddeded JMS for WebSphere. Runs the JACL scripts using
-     * wsadmin. *
-     **************************************************************************/
-    public void setupWebSphereJMS() throws IOException
-    {
-        System.out.println("Setting up JMS for WebSphere");
-        String was_home = getInstallValue("websphere_home");
-        String jaclscript = concatPath(GS_HOME + File.separator + "websphere",
-                "setupJMS.jacl");
-        String wsadmin = "wsadmin.bat";
-
-        if (m_operatingSystem != OS_WINDOWS)
-        {
-            was_home = getInstallValue("websphere_home_forwardslash");
-            String gs_home_forwardslash = getInstallValue("gs_home_forwardslash");
-            jaclscript = concatPath(gs_home_forwardslash + File.separator
-                    + "websphere", "setupJMS.jacl");
-            wsadmin = "wsadmin";
-        }
-
-        String jaclcmd = concatPath(was_home + File.separator + "bin", wsadmin
-                + " -f " + jaclscript);
-        execute(jaclcmd);
-    }
-
     private static String determineGsHome()
     {
         try

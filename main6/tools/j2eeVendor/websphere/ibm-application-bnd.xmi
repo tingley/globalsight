@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<com.ibm.ejs.models.base.bindings.applicationbnd:ApplicationBinding xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:com.ibm.ejs.models.base.bindings.applicationbnd="applicationbnd.xmi" xmi:id="ApplicationBinding_1107534894892">
-  <authorizationTable xmi:id="AuthorizationTable_1107534894892"/>
-  <application href="META-INF/application.xml#ambassador"/>
-</com.ibm.ejs.models.base.bindings.applicationbnd:ApplicationBinding>

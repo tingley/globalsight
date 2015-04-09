@@ -100,16 +100,6 @@ public class ControlServlet extends HttpServlet
         try
         {
             if (s_appServerWrapper.getJ2EEServerName().equals(
-                    AppServerWrapperFactory.WEBSPHERE))
-            {
-                System.out
-                        .println("-----------WebSphere -- GlobalSight starting up------------");
-                AmbassadorServer.getAmbassadorServer().startup("GlobalSight",
-                        null);
-                System.out
-                        .println("-----------WebSphere -- GlobalSight started ------------");
-            }
-            if (s_appServerWrapper.getJ2EEServerName().equals(
                     AppServerWrapperFactory.JBOSS))
             {
                 System.out
@@ -162,16 +152,6 @@ public class ControlServlet extends HttpServlet
         System.out.println("ControlServlet.destroy() called.");
         try
         {
-            if (s_appServerWrapper.getJ2EEServerName().equals(
-                    AppServerWrapperFactory.WEBSPHERE))
-            {
-                System.out
-                        .println("-----------WebSphere -- GlobalSight shutting down------------");
-                AmbassadorServer.getAmbassadorServer().shutdown("GlobalSight",
-                        null);
-                System.out
-                        .println("-----------WebSphere -- GlobalSight stopped ------------");
-            }
             if (s_appServerWrapper.getJ2EEServerName().equals(
                     AppServerWrapperFactory.JBOSS))
             {

@@ -52,7 +52,6 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.taskmanager.TaskBO;
 import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -339,27 +338,6 @@ public class TaskHelper
         }
 
         return pattern;
-    }
-
-    /**
-     * Get the task status
-     * 
-     * @param p_task
-     *            the task
-     * @return
-     */
-    public static String getTaskStatus(TaskBO p_task)
-    {
-        if (p_task == null)
-            return "{}";
-
-        StringBuffer result = new StringBuffer();
-        result.append("{");
-        result.append("\"taskId\":").append(p_task.getId()).append(",");
-        result.append("\"uploadStatus\":").append(
-                "\"" + p_task.getUploadStatus() + "\"");
-        result.append("}");
-        return result.toString();
     }
 
     /**

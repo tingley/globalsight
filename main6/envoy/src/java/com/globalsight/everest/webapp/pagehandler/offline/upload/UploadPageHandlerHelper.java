@@ -36,7 +36,6 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.taskmanager.TaskBO;
 import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -90,14 +89,6 @@ public class UploadPageHandlerHelper implements WebAppConstants
                         taskId, Integer.parseInt(state));
                 TaskHelper.storeObject(httpSession,
                         WebAppConstants.WORK_OBJECT, task);
-
-                // Set task uploadStatus
-                TaskBO taskBO = new TaskBO(task.getId());
-                taskBO.setUploadStatus(OfflineConstants.TASK_UPLOADSTATUS_UPLOADING);
-                Map<Long, TaskBO> taskBOMap = new HashMap<Long, TaskBO>();
-                taskBOMap.put(taskBO.getId(), taskBO);
-                TaskHelper.storeObject(httpSession, SESSION_MAP_TASKBO,
-                        taskBOMap);
             }
             catch (Exception e)
             {

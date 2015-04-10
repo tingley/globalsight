@@ -272,7 +272,7 @@ public class FileImportUtil
         fileName = fileName.replace("\\", "/");
         int n = fileName.lastIndexOf("/");
         fileName = fileName.substring(n);
-        n = fileName.indexOf(".");
+        n = fileName.lastIndexOf(".");
         if (n > 0)
         {
             fileName = fileName.substring(n + 1);

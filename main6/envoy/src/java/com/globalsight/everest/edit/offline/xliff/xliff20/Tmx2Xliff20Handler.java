@@ -212,16 +212,16 @@ public class Tmx2Xliff20Handler
     
     public static String getId(Properties hAttributes)
     {
-        String id = hAttributes.getProperty("i");
+        String id = hAttributes.getProperty("x");
         
         if (id == null)
         {
-            id = hAttributes.getProperty("id");
+            id = hAttributes.getProperty("i");
         }
         
         if (id == null)
         {
-            id = hAttributes.getProperty("x");
+            id = hAttributes.getProperty("id");
         }
         
         return id;

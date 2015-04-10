@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -76,9 +77,22 @@ public class UploadPageHandlerHelper implements WebAppConstants
             // now update the task in the session
             try
             {
+                long taskId = -1;
                 User user = TaskHelper.getUser(httpSession);
                 String taskIdParam = p_request.getParameter(TASK_ID);
-                long taskId = TaskHelper.getLong(taskIdParam);
+                if (taskIdParam == null)
+                {
+                    Task task = (Task) TaskHelper.retrieveObject(httpSession,
+                            WORK_OBJECT);
+                    if (task != null)
+                    {
+                        taskId = task.getId();
+                    }
+                }
+                else
+                {
+                    taskId = TaskHelper.getLong(taskIdParam);
+                }
                 state = (String) TaskHelper.retrieveObject(httpSession,
                         TASK_STATE);
                 if (state == null)
@@ -156,13 +170,13 @@ public class UploadPageHandlerHelper implements WebAppConstants
             {
                 taskId = taskInfo[2];
             }
-            
 
             // Locate current in progress task.
             try
             {
                 long tskId = Long.valueOf(taskId);
-                Task curTaskForReport = ServerProxy.getTaskManager().getTask(tskId);
+                Task curTaskForReport = ServerProxy.getTaskManager().getTask(
+                        tskId);
                 if (curTaskForReport.getState() != Task.STATE_ACCEPTED)
                 {
                     curTaskForReport = locateCurrentTask(tskId);
@@ -218,12 +232,16 @@ public class UploadPageHandlerHelper implements WebAppConstants
     {
         // ProcessStatus m_status =
         // (ProcessStatus)sessionMgr.getAttribute(WebAppConstants.UPLOAD_STATUS);
-        String errorMsg = (String) status.getResults();
-        sessionMgr.setAttribute(OfflineConstants.ERROR_MESSAGE, errorMsg);
         p_response.setContentType("text/html");
         if (status != null)
         {
+            String errorMsg = (String) status.getResults();
+            sessionMgr.setAttribute(OfflineConstants.ERROR_MESSAGE, errorMsg);
             int percentage = status.getPercentage();
+            List<Long> taskIdList = new ArrayList<Long>();
+            Set<Long> taskIds = new HashSet<Long>();
+            taskIdList.addAll(status.getTaskIdList());
+            taskIds.addAll(status.getTaskIds());
 
             Map map = new HashMap();
             map.put("percentage", percentage);
@@ -231,7 +249,6 @@ public class UploadPageHandlerHelper implements WebAppConstants
             map.put("msg", status.giveMessages());
             map.put("taskIdsSet", status.getTaskIds());
             List<String> list = new ArrayList<String>();
-            List<Long> taskIdList = status.getTaskIdList();
             Task task = null;
             ProjectImpl project = null;
             String str = null;
@@ -253,11 +270,9 @@ public class UploadPageHandlerHelper implements WebAppConstants
             }
             else
             {
-                if (status.getTaskIds() != null
-                        && status.getTaskIds().size() > 0)
+                if (taskIds != null && taskIds.size() > 0)
                 {
-                    Set<Long> set = status.getTaskIds();
-                    for (long taskId : set)
+                    for (long taskId : taskIds)
                     {
                         task = (Task) HibernateUtil.get(TaskImpl.class, taskId);
                         if (task != null)
@@ -388,7 +403,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
                 task = ServerProxy.getTaskManager().getTask(id);
             }
 
-            p_OEM.processUploadReportPage(p_tmpFile, p_user, task, p_fileName, p_reportName);
+            p_OEM.processUploadReportPage(p_tmpFile, p_user, task, p_fileName,
+                    p_reportName);
         }
         catch (Exception e)
         {
@@ -411,7 +427,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
     private String[] getReportInfoFromXlsx(String p_fileName, File p_file,
             HttpServletRequest p_request)
     {
-        String[] result = { "", "", "" };
+        String[] result =
+        { "", "", "" };
         try
         {
             String fileSuff = p_fileName.substring(p_fileName.lastIndexOf("."));
@@ -431,16 +448,20 @@ public class UploadPageHandlerHelper implements WebAppConstants
             {
                 String[] infos = taskInfoReport.split("_");
                 String reportInfo = infos[0];
-                if (reportInfo.equals(ReportConstants.TRANSLATIONS_EDIT_REPORT_ABBREVIATION))
+                if (reportInfo
+                        .equals(ReportConstants.TRANSLATIONS_EDIT_REPORT_ABBREVIATION))
                 {
                     reportType = WebAppConstants.TRANSLATION_EDIT;
                 }
-                else if (reportInfo.equals(ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION)
-                        || reportInfo.equals(ReportConstants.REVIEWERS_COMMENTS_REPORT_ABBREVIATION))
+                else if (reportInfo
+                        .equals(ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION)
+                        || reportInfo
+                                .equals(ReportConstants.REVIEWERS_COMMENTS_REPORT_ABBREVIATION))
                 {
                     reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
                 }
-                else if (reportInfo.equals(ReportConstants.POST_REVIEW_REPORT_ABBREVIATION))
+                else if (reportInfo
+                        .equals(ReportConstants.POST_REVIEW_REPORT_ABBREVIATION))
                 {
                     reportType = WebAppConstants.POST_REVIEW_QA;
                 }
@@ -460,19 +481,25 @@ public class UploadPageHandlerHelper implements WebAppConstants
                         ResourceBundleConstants.LOCALE_RESOURCE_NAME,
                         (Locale) p_request.getSession().getAttribute(
                                 WebAppConstants.UILOCALE));
-                if (res.getString("review_reviewers_comments").equals(titleInfo)
-                        || res.getString("review_reviewers_comments_simple").equals(titleInfo)
-                        || res.getString("lb_translation_edit_report").equals(titleInfo))
+                if (res.getString("review_reviewers_comments")
+                        .equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple")
+                                .equals(titleInfo)
+                        || res.getString("lb_translation_edit_report").equals(
+                                titleInfo))
                 {
                     isReport = "yes";
                 }
 
-                if (res.getString("review_reviewers_comments").equals(titleInfo)
-                        || res.getString("review_reviewers_comments_simple").equals(titleInfo))
+                if (res.getString("review_reviewers_comments")
+                        .equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple")
+                                .equals(titleInfo))
                 {
                     reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
                 }
-                else if (res.getString("lb_translation_edit_report").equals(titleInfo))
+                else if (res.getString("lb_translation_edit_report").equals(
+                        titleInfo))
                 {
                     reportType = WebAppConstants.TRANSLATION_EDIT;
                 }

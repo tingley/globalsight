@@ -3231,7 +3231,7 @@ var PageView = function pageView(container, id, scale, defaultViewport,
           }
         }
         // See this.reset()
-        self.annotationLayer.removeAttribute('hidden');
+        // self.annotationLayer.removeAttribute('hidden');
       } else {
         for (i = 0, ii = annotationsData.length; i < ii; i++) {
           data = annotationsData[i];
@@ -3278,7 +3278,7 @@ var PageView = function pageView(container, id, scale, defaultViewport,
             self.annotationLayer = annotationLayerDiv;
           }
 
-          self.annotationLayer.appendChild(element);
+          // self.annotationLayer.appendChild(element);
         }
       }
     });

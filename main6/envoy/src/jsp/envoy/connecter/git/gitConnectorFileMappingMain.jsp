@@ -229,7 +229,7 @@ private String replace(String str) {
 <script language="javascript">
 <%
 if (gitmsg != null && gitmsg.size()>0) {
-	StringBuilder sb = new StringBuilder("These module mapping have existed in the server.\\n");
+	StringBuilder sb = new StringBuilder("Following file mapping rules have already configured in the server.\\n");
 	for (GitConnectorFileMapping m : gitmsg) {
 		sb.append(replace(m.getSourceMappingPath()) + "[" + m.getSourceLocale() + "] <--> " + replace(m.getTargetMappingPath()) + "[" + m.getTargetLocale() + "] \\n");
 	}

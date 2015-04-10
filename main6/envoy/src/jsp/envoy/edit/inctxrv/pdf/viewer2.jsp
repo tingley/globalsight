@@ -62,243 +62,6 @@ switch (iViewMode)
 var inViewerPage = true;
 String.prototype.trim=function(){return this.replace(/(^\s*)|(\s*$)/g, "");}
 
-function findSegment(tuId, segment)
-{
-	// find segment
-	var matchedDiv;
-    var dest = getGlobalSightDest(tuId);
-    if (dest == "")
-    {
-	    for (var i = 1; i < 10;  i++)
-	    {
-	    	dest = getGlobalSightDest(tuId - i);
-	    	
-	    	if (dest != "")
-	    	{
-	    		break;
-	    	}
-	    }
-    }
-    
-    PDFViewerApplication.navigateTo(dest);
-    
-    var find = false;
-    var loPn = PDFViewerApplication.pdfViewer.location.pageNumber;
-    
-    // find by GlobalSight
-    var pageDiv = document.getElementById("pageContainer" + loPn);
-    var pageDivChildrens = pageDiv.childNodes;
-    var textLayerChildrens;
-	var textLayerDiv;
-    
-    if (pageDivChildrens && pageDivChildrens.length > 0)
-    {
-  	  for(var i = 0; i < pageDivChildrens.length; i++)
-  	  {
-  		  var divChild = pageDivChildrens[i];
-  		  
-  		  if (divChild.nodeName == "DIV" && "textLayer" == divChild.className)
-  		  {
-  			  textLayerDiv = divChild;
-  			  break;
-  		  }
-  	  }
-  	  
-  	  textLayerChildrens = textLayerDiv.childNodes;
-  	  // 1 find extract match
-  	  for(var i = 0; i < textLayerChildrens.length; i++)
-  	  {
-  		  var divChild = textLayerChildrens[i];
-  		  var divContent = divChild.textContent;
-  		  var text = divContent.trim();
-			
-  		  if (segment == text)
-  		  {
-  			find = true;
-  			  matchedDiv = divChild;
-  			  var textnode = document.createTextNode(divContent);
-  			  var spannode = document.createElement('span');
-  			  spannode.className = "highlight";
-  			  spannode.appendChild(textnode);
-  			matchedDiv.innerHTML = spannode.outerHTML;
-  			matchedDiv.focus();
-  		  }
-  		  else // clean last match
-  		  {
-  			divChild.innerHTML = divContent;
-  			
-  			var className = divChild.className;
-  			if (className.indexOf("highlight") != -1)
-  			{
-  				className = className.replace("highlight", "");
-  	  			divChild.className = className;
-  			}
-  		  }
-  	  }
-    }
-    
-    // find by PDF.js
-    if (!find)
-    {
-	    var findStr = find ? "" : segment;
-	    var event = document.createEvent('CustomEvent');
-	    event.initCustomEvent('find', true, true, {
-	      query: segment,
-	      caseSensitive: true,
-	      highlightAll: false,
-	      findPrevious: ""
-	    });
-	    
-	    PDFViewerApplication.pdfViewer.findController.dirtyMatch = true;
-	    PDFViewerApplication.pdfViewer.findController.hadMatch = false;
-	    PDFViewerApplication.pdfViewer.findController.pagesToSearch = loPn;
-	    PDFViewerApplication.pdfViewer.findController.handleEvent(event);
-	    
-	    find = PDFViewerApplication.pdfViewer.findController.hadMatch;
-    }
-    
-      if (!find)
-	  {
-		 // find more
-	  	  var startMatch = false;
-		  var endMatch = false;
-	  	  matchedDiv = new Array();
-	  	  var textLayerContent = textLayerDiv.textContent;
-	  	  
-	  	  if (textLayerContent.indexOf(segment) != -1)
-	  	  {
-	  		  var index = textLayerContent.indexOf(segment);
-	  		  var segmentLen = segment.length;
-	  		  var count = 0;
-	  		  for(var i = 0; i < textLayerChildrens.length; i++)
-  	  	  {
-  	  		  var divChild = textLayerChildrens[i];
-  	  		  var divContent = divChild.textContent;
-  			  var divContentLen = divContent.length;
-  			  
-  			  if (index < (count + divContentLen) && index >= count)
-  			  {
-  				  // find segment in one div
-  				  if ((index + segmentLen) <= (count + divContentLen))
-  				  {
-  					  var obj = new Object();
-  					  obj.div = divChild;
-  					  obj.start = index - count;
-  					  obj.end = index + segmentLen - count;
-  					  matchedDiv.push(obj);
-      				  break;
-  				  }
-  				  else
-  				  {
-  					  var obj = new Object();
-  					  obj.div = divChild;
-  					  obj.start = index - count;
-  					  obj.end = divContentLen;
-  					  matchedDiv.push(obj);
-  				  }
-  			  }
-  			  
-  			  if (matchedDiv.length > 0)
-  			  {
-  				  if ((index + segmentLen) <= (count + divContentLen))
-  				  {
-  					  var obj = new Object();
-  					  obj.div = divChild;
-  					  obj.start = 0;
-  					  obj.end = index + segmentLen - count;
-  					  matchedDiv.push(obj);
-      				  break;
-  				  }
-  				  else
-  				  {
-  					  var obj = new Object();
-  					  obj.div = divChild;
-  					  obj.start = 0;
-  					  obj.end = divContentLen;
-  					  matchedDiv.push(obj);
-  				  }
-  			  }
-  			  
-  			  
-  			  count = count + divContentLen;
-  	  	  }
-	  	  }
-	  	  
-	  	  if (matchedDiv.length > 0)
-	  	  {
-	  		  find = true;
-	  		  for(var i = 0; i < matchedDiv.length; i++)
-	  		  {
-	  			  var obj = matchedDiv[i];
-	  			  var cdiv = obj.div;
-	  			  var textContent = cdiv.textContent;
-	  			  var strStart = textContent.substr(0, obj.start);
-	  			  var strMid = textContent.substr(obj.start, obj.end);
-	  			  var strEnd = obj.end < textContent.length ? textContent.substr(obj.end) : "";
-	  			  
-	  			  var newDiv = document.createElement('div');
-	  			  if (strStart.length > 0)
-	  				  {
-	  				var textnode = document.createTextNode(strStart);
-	  				newDiv.appendChild(textnode);
-	  				  }
-	  			  if (strMid.length > 0)
-	  				  {
-	  				var textnode = document.createTextNode(strMid);
-	  				var spannode = document.createElement('span');
-  	  			  spannode.className = "highlight";
-  	  			  spannode.appendChild(textnode);
-  	  			newDiv.appendChild(spannode);
-	  				  }
-	  			  if (strEnd.length > 0)
-	  				  {
-	  				var textnode = document.createTextNode(strEnd);
-	  				newDiv.appendChild(textnode);
-	  				  }
-	  			 
-	  			  
-	  			cdiv.innerHTML = newDiv.innerHTML;
-	  		  }
-	  	  }
-	  }
-}
-
-function getGlobalSightDest(tuId)
-{
-	var allAnchors = document.getElementsByTagName("a");
-    var num = allAnchors.length;
-	for(var iii = 0; iii < num; iii++)
-	{
-		var ele = allAnchors[iii];
-		var gsid = "GlobalSight_" + tuId;
-		
-		if (ele.href.indexOf(gsid) != -1)
-		{
-			var index_s = ele.href.lastIndexOf("#");
-			var dest = ele.href.substring(index_s + 1);
-			dest = dest.replace(/%3A/g, ":");
-			
-			return dest;
-		}
-	}
-	
-	return "";
-}
-
-function navigateToDiv(pageNumber, left, top, curScale)
-{
-	var para = new Array();
-	para[0] = "XYZ";
-	var paraName = new Object();
-	paraName.name = "XYZ";
-	para[1] = paraName;
-	para[2] = left;
-	para[3] = top;
-	para[4] = curScale;
-	
-	PDFViewerApplication.pdfViewer.scrollPageIntoView(pageNumber, para);
-}
-
 function load()
 {
 	ContextMenu.intializeContextMenu();
@@ -316,6 +79,20 @@ function load()
 	$("#messageDiv").show();
 	$("#messageDiv").html("<%= errorMsg %>");
 		<% } %>
+		
+	try{
+		var pages = PDFViewerApplication.pdfViewer.pages;
+		
+		for(var i = 0; i < pages.length; i++)
+		{
+			var ppp = pages[i];
+			
+			if (ppp.annotationLayer && ppp.annotationLayer != null)
+			{
+				ppp.annotationLayer.setAttribute('hidden', 'true');
+			}
+		}
+	}catch (eee) {}
 }
 
 function contextForPage(e)
@@ -364,7 +141,17 @@ var currentSegment;
 
 function highlightObjects(o)
 {
-	var loPn = PDFViewerApplication.pdfViewer.location.pageNumber;
+	var pagennn = PDFViewerApplication.pdfViewer.location.pageNumber;
+	var pageLeft = PDFViewerApplication.pdfViewer.location.left;
+	var pageTop = PDFViewerApplication.pdfViewer.location.top;
+	var curScale = PDFViewerApplication.pdfViewer.currentScale;
+	
+	
+	var loPn = getPageNumberFromParentId(o);
+	if (loPn == -1)
+	{
+		loPn = PDFViewerApplication.pdfViewer._currentPageNumber;
+	}
 // 1 un highlight
     var pageDiv = document.getElementById("pageContainer" + loPn);
     var pageDivChildrens = pageDiv.childNodes;
@@ -410,6 +197,20 @@ function highlightObjects(o)
 //2
 var pageContent = buildPageContent(loPn, window.parent.parent.parent.localData, true);
 
+while (pageContent.segments.length == 0 && pageContent.content.length == 0)
+{
+	var loPn1 = loPn - 1;
+	
+	if (loPn1 > 0)
+	{
+		pageContent = buildPageContent(loPn1, window.parent.parent.parent.localData, true);
+	}
+	else
+	{
+		break;
+	}
+}
+
 var find = false;
 if (divArr && divArr.length > 0)
 {
@@ -424,7 +225,7 @@ if (divArr && divArr.length > 0)
 			{
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516");
+					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true);
 			    }
 				return;
 			}
@@ -435,18 +236,18 @@ if (divArr && divArr.length > 0)
 			{
 				currentSegment = segment;
 				
-				findSegment(segment.tuId, segment.tgtSegmentNoTag);
+				findSegment(segment.tuId, segment.tgtSegmentNoTag, "", true);
 				
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag);
+					parent.parent.source.content.findSegment(segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag, true);
 			    }
 			}
 			else
 			{
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516");
+					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true);
 			    }
 			}
 		}
@@ -456,6 +257,8 @@ else
 {
 	o.className = "highlight";
 }
+
+navigateToDiv(pagennn, pageLeft, pageTop, curScale);
 }
 
 function editSegment(o, donotHighlight)

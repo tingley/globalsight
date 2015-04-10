@@ -35,7 +35,7 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
  * This is an implementation of the ServerRegistry. It helps clients register
  * and lookup servers/services when using Jboss. Note: This does not really
  * support RMI, it simply caches local objects. The RMI interfaces will not work
- * in WebSphere right now.
+ * in Jboss right now.
  */
 public class JBossServerRegistry implements ServerRegistry
 {

@@ -233,8 +233,6 @@ public interface WebAppConstants
     public static final String SOURCE_PAGE = "sourcePage";
     public static final String SSL_FAIL = "sslFail";
     public static final String JOB_ID = "jobId";
-    // TaskBO Map(HashMap<Long, TaskBO>) in Session
-    public static final String SESSION_MAP_TASKBO = "sessionMapTaskBOS";
 
     /**
      * An identifier for a combination of job and workflow name which is used as

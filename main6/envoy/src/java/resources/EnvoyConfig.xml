@@ -679,7 +679,7 @@
         <PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
       </WebPage>
     </WebActivity>
-    <WebActivity webActivityName="createZipJobs" clearSession="false">
+    <WebActivity webActivityName="createZipJobs">
       <WebPage pageName="CZJ" isDefault="true" jspName="/envoy/administration/createjob/createZipJobs.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler">
         <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
         <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>
@@ -1929,7 +1929,8 @@
         <PageLink linkName="splitmerge" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="refresh" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="search" destinationPageName="EDN2Search"></PageLink>
-         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
+        <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
+        <PageLink linkName="self" destinationPageName="EDN1"></PageLink>
       </WebPage>
       <WebPage pageName="EDN2Search" isDefault="false" jspName="/envoy/edit/online2/search.jsp" 
          pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online2.EditorPageHandler"> 

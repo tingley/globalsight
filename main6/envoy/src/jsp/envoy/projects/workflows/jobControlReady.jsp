@@ -458,6 +458,11 @@ function submitForm(buttonClicked, curJobId)
       JobForm.action = "<%=searchURL%>";
       jobActionParam = "search";
    }
+   else if(buttonClicked == "Recreate")
+   {
+	   JobForm.action = "<%=refreshUrl%>";
+       jobActionParam = "reCreateJob";   
+   }
 
    var valuesArray;
    var jobId = "";
@@ -991,6 +996,9 @@ is defined in header.jspIncl which must be included in the body.
 	<amb:permission name="<%=Permission.JOBS_REMOVEJOBFROMGROUP%>" >
   		<INPUT TYPE="BUTTON" NAME=search VALUE="<%=bundle.getString("lb_remove_job_from_group")%>" onClick="removeJobFromGroup();">
 	</amb:permission>
+	 <amb:permission name="<%=Permission.JOBS_RECREATE%>" >
+        <INPUT TYPE="BUTTON" NAME="Recreate" VALUE="<%=bundle.getString("action_recreate")%>" onClick="submitForm('Recreate');">
+    </amb:permission>
 </DIV>
 </TD></TR>
 </TABLE>

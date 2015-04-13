@@ -110,6 +110,12 @@ public class Ambassador4FalconProxy implements com.globalsight.www.webservices.A
     return ambassador4Falcon.taskReassign(p_accessToken, p_taskId, p_users);
   }
   
+  public java.lang.String getWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType, int p_workofflineFileTypeOption) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.getWorkOfflineFiles(p_accessToken, p_taskId, p_workOfflineFileType, p_workofflineFileTypeOption);
+  }
+  
   public java.lang.String getWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador4Falcon == null)
       _initAmbassador4FalconProxy();

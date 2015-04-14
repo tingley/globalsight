@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -71,6 +72,7 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.ListViewWorkXLIFF20Wri
 import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
@@ -91,6 +93,7 @@ import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadF
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -1242,10 +1245,26 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
             uploadedFilePath.append("Offline Files");
             uploadedFilePath.append(File.separator);
-            uploadedFilePath.append(task.getId()
-                    + "_"
-                    + task.getTaskName().substring(0,
-                            task.getTaskName().lastIndexOf("_")));
+            Job job = ServerProxy.getJobHandler().getJobById(task.getJobId());
+            for (Workflow wf : job.getWorkflows())
+            {
+               
+                    Collection tasks = ServerProxy.getTaskManager()
+                            .getCurrentTasks(wf.getId());
+                    if (tasks != null)
+                    {
+                        for (Iterator it = tasks.iterator(); it.hasNext();)
+                        {
+                            Task oriTask = (Task) it.next();
+                            uploadedFilePath.append(oriTask.getId()
+                                    + "_"
+                                    + oriTask.getTaskName().substring(0,
+                                            oriTask.getTaskName().lastIndexOf("_")));
+                        }
+                    }
+                
+            }
+          
         }
         uploadedFilePath.append(File.separator);
         uploadedFilePath.append(p_fileName);

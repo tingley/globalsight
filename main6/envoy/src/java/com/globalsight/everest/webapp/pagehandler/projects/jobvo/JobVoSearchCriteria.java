@@ -343,17 +343,48 @@ public class JobVoSearchCriteria
         if (SearchCriteriaParameters.LESS_THAN.equals(condition))
         {
             sql.append(" and j.id < :jobId ");
+            params.put("jobId", Long.valueOf(jobId));
         }
         else if (SearchCriteriaParameters.GREATER_THAN.equals(condition))
         {
             sql.append(" and j.id > :jobId ");
+            params.put("jobId", Long.valueOf(jobId));
         }
         else
         {
-            sql.append(" and j.id = :jobId ");
-        }
-
-        params.put("jobId", Long.valueOf(jobId));
+			String[] jobIds = jobId.trim().split(",");
+			boolean isFirst = true;
+			for (String jobIdEq : jobIds)
+			{
+				if (!jobIdEq.contains("-"))
+				{
+					if (isFirst)
+					{
+						sql.append(" and (j.id = " + Long.valueOf(jobIdEq));
+					}
+					else
+					{
+						sql.append(" or j.id = " + Long.valueOf(jobIdEq));
+					}
+				}
+				else
+				{
+					String[] jobIdBet = jobIdEq.split("-");
+					if (isFirst)
+					{
+						sql.append(" and (j.id >= " + Long.valueOf(jobIdBet[0])
+								+ " and j.id <= " + jobIdBet[1]);
+					}
+					else
+					{
+						sql.append(" or j.id >= " + Long.valueOf(jobIdBet[0])
+								+ " and j.id <= " + jobIdBet[1]);
+					}
+				}
+				isFirst = false;
+			}
+			sql.append(") ");
+		}
     }
     
     /*

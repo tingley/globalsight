@@ -2359,10 +2359,10 @@ public class AmbassadorHelper extends JsonTypeWebService
      * @throws WebServiceException
      */
 	protected String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
-			int p_workOfflineFileType, Integer p_workofflineFileTypeOption,
+			int p_workOfflineFileType, String p_workofflineFileTypeOption,
 			boolean p_isJson) throws WebServiceException
 	{
-        // Check work offline file type
+		// Check work offline file type
 		if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2
 				&& p_workOfflineFileType != 3 && p_workOfflineFileType != 4
 				&& p_workOfflineFileType != 5 && p_workOfflineFileType != 6
@@ -2377,40 +2377,44 @@ public class AmbassadorHelper extends JsonTypeWebService
 							+ p_workOfflineFileType
 							+ ", it should be limited in 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, or 12.");
 		}
+
+		int workofflineFileTypeOption = -1;
 		// Check work offline file type option
-		if (p_workofflineFileTypeOption == null)
+		if (StringUtil.isEmpty(p_workofflineFileTypeOption))
 		{
-			p_workofflineFileTypeOption = 1;
+			workofflineFileTypeOption = 1;
 		}
 		else
 		{
 			try
 			{
-				p_workofflineFileTypeOption.intValue();
+				Assert.assertIsInteger(p_workofflineFileTypeOption);
 			}
 			catch (Exception e)
 			{
 				return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
-						"Invalid workofflineFileTypeOption format:"
-								+ p_workofflineFileTypeOption);
+						"Invalid workofflineFileTypeOption format : "
+								+ p_workofflineFileTypeOption+",it should be limited in 1, 2, 3, 4, 5, 6 or empty");
 			}
 
-			if (p_workofflineFileTypeOption != 1
-					&& p_workofflineFileTypeOption != 2
-					&& p_workofflineFileTypeOption != 3
-					&& p_workofflineFileTypeOption != 4
-					&& p_workofflineFileTypeOption != 5
-					&& p_workofflineFileTypeOption != 6)
+			workofflineFileTypeOption = Integer
+					.parseInt(p_workofflineFileTypeOption);
+			if (workofflineFileTypeOption != 1
+					&& workofflineFileTypeOption != 2
+					&& workofflineFileTypeOption != 3
+					&& workofflineFileTypeOption != 4
+					&& workofflineFileTypeOption != 5
+					&& workofflineFileTypeOption != 6)
 			{
 				return makeErrorMessage(
 						p_isJson,
 						GET_WORK_OFFLINE_FILES,
-						"Invalid workofflineFileTypeOption "
+						"Invalid workofflineFileTypeOption : "
 								+ p_workofflineFileTypeOption
-								+ ", it should be limited in 1, 2, 3, 4, 5 or 6.");
+								+ ", it should be limited in 1, 2, 3, 4, 5, 6 or empty.");
 			}
 		}
-        
+
 		if (p_workOfflineFileType == 1 || p_workOfflineFileType == 2
 				|| p_workOfflineFileType == 3 || p_workOfflineFileType == 4
 				|| p_workOfflineFileType == 5 || p_workOfflineFileType == 6)
@@ -2418,39 +2422,40 @@ public class AmbassadorHelper extends JsonTypeWebService
 			return getWorkOfflineFiles(p_accessToken, p_taskId,
 					p_workOfflineFileType, p_isJson);
 		}
-		
+
 		Task task = null;
-        try
-        {
-            task = ServerProxy.getTaskManager().getTask(p_taskId);
-        }
-        catch (Exception e)
-        {
-            logger.warn("Can not get task info by taskId " + p_taskId);
-        }
-
-        if (task == null)
-        {
-            return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
-                    "Can not find task by taskId " + p_taskId);
-        }
-
-        if (task.getState() != Task.STATE_ACCEPTED)
-        {
-            return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
-                    "This task should be in ACCEPTED state.");
-        }
-        
-        try
+		try
 		{
-			Activity act = ServerProxy.getJobHandler().getActivity(task.getTaskName());
+			task = ServerProxy.getTaskManager().getTask(p_taskId);
+		}
+		catch (Exception e)
+		{
+			logger.warn("Can not get task info by taskId " + p_taskId);
+		}
+
+		if (task == null)
+		{
+			return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
+					"Can not find task by taskId " + p_taskId);
+		}
+
+		if (task.getState() != Task.STATE_ACCEPTED)
+		{
+			return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
+					"This task should be in ACCEPTED state.");
+		}
+
+		try
+		{
+			Activity act = ServerProxy.getJobHandler().getActivity(
+					task.getTaskName());
 			if (act != null && act.getType() == Activity.TYPE_REVIEW)
 			{
-				if (p_workOfflineFileType == 1 || p_workOfflineFileType == 2
-						|| p_workOfflineFileType == 3
-						|| p_workOfflineFileType == 4
-						|| p_workOfflineFileType == 5
-						|| p_workOfflineFileType == 6)
+				if (p_workOfflineFileType == 7 || p_workOfflineFileType == 8
+						|| p_workOfflineFileType == 9
+						|| p_workOfflineFileType == 10
+						|| p_workOfflineFileType == 11
+						|| p_workOfflineFileType == 12)
 				{
 					return makeErrorMessage(
 							p_isJson,
@@ -2463,7 +2468,7 @@ public class AmbassadorHelper extends JsonTypeWebService
 		{
 			e.printStackTrace();
 		}
-        
+
 		User loggedUser = getUser(getUsernameFromSession(p_accessToken));
 		String userId = loggedUser.getUserId();
 		ProjectImpl project = getProjectByTask(task);
@@ -2477,20 +2482,21 @@ public class AmbassadorHelper extends JsonTypeWebService
 							+ ", current logged user has no previlege to handle it.");
 		}
 
-        String returning = "";
-        String companyName = CompanyWrapper.getCompanyNameById(task.getCompanyId());
-        ActivityLog.Start activityStart = null;
-        try
-        {
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", loggedUser.getUserName());
-            activityArgs.put("taskId", p_taskId);
-            activityArgs.put("workOfflineFileType", p_workOfflineFileType);
-            activityStart = ActivityLog.start(Ambassador4Falcon.class,
-                            "getWorkOfflineFiles", activityArgs);
+		String returning = "";
+		String companyName = CompanyWrapper.getCompanyNameById(task
+				.getCompanyId());
+		ActivityLog.Start activityStart = null;
+		try
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", loggedUser.getUserName());
+			activityArgs.put("taskId", p_taskId);
+			activityArgs.put("workOfflineFileType", p_workOfflineFileType);
+			activityStart = ActivityLog.start(Ambassador4Falcon.class,
+					"getWorkOfflineFiles", activityArgs);
 
-            OfflineEditManager oem = ServerProxy.getOfflineEditManager();
-            String fileType = null;
+			OfflineEditManager oem = ServerProxy.getOfflineEditManager();
+			String fileType = null;
 			// 7:Biligual Trados RTF.
 			if (p_workOfflineFileType == 7)
 			{
@@ -2522,47 +2528,49 @@ public class AmbassadorHelper extends JsonTypeWebService
 				fileType = OfflineConstants.FORMAT_RTF;
 			}
 			DownloadParams params = getDownloadParams(userId, task, fileType,
-					p_workofflineFileTypeOption);
+					workofflineFileTypeOption);
 			File file = oem.getDownloadOfflineFiles(userId, task.getId(),
 					params);
-            StringBuffer root = new StringBuffer();
-            root.append(AmbassadorUtil.getCapLoginOrPublicUrl()).append("/DownloadOfflineKit");
-            if (task.getCompanyId() != 1)
-            {
-                root.append("/").append(companyName); 
-            }
-            root.append("/GlobalSight/CustomerDownload/").append(file.getName());
-            String fileUrl = root.toString();
-            
-            if (p_isJson)
-            {
-                JSONObject jsonObj = new JSONObject();
-                jsonObj.put("path", fileUrl);
-                jsonObj.put("taskId", task.getId());
-                jsonObj.put("targetLocale", task.getTargetLocale().toString());
-                jsonObj.put("acceptorUserId", task.getAcceptor());
-                returning = jsonObj.toString();
-            }
-            else
-            {
-                returning = fileUrl;                
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error(e);
-            String message = "Error when generate translation kit or report.";
-            return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES, message);
-        }
-        finally
-        {
-            if (activityStart != null)
-            {
-                activityStart.end();
-            }
-        }
+			StringBuffer root = new StringBuffer();
+			root.append(AmbassadorUtil.getCapLoginOrPublicUrl()).append(
+					"/DownloadOfflineKit");
+			if (task.getCompanyId() != 1)
+			{
+				root.append("/").append(companyName);
+			}
+			root.append("/GlobalSight/CustomerDownload/")
+					.append(file.getName());
+			String fileUrl = root.toString();
 
-        return returning;
+			if (p_isJson)
+			{
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("path", fileUrl);
+				jsonObj.put("taskId", task.getId());
+				jsonObj.put("targetLocale", task.getTargetLocale().toString());
+				jsonObj.put("acceptorUserId", task.getAcceptor());
+				returning = jsonObj.toString();
+			}
+			else
+			{
+				returning = fileUrl;
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+			String message = "Error when generate translation kit or report.";
+			return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES, message);
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+
+		return returning;
 	}
 	
 	private DownloadParams getDownloadParams(String userId, Task task,

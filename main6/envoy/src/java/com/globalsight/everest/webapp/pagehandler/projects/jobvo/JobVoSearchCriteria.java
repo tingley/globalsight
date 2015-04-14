@@ -352,34 +352,44 @@ public class JobVoSearchCriteria
         }
         else
         {
-			String[] jobIds = jobId.trim().split(",");
+			String[] jobIds = jobId.split(",");
 			boolean isFirst = true;
 			for (String jobIdEq : jobIds)
 			{
-				if (!jobIdEq.contains("-"))
+			    jobIdEq = jobIdEq.trim();
+				if (jobIdEq.contains("-"))
 				{
-					if (isFirst)
-					{
-						sql.append(" and (j.id = " + Long.valueOf(jobIdEq));
-					}
-					else
-					{
-						sql.append(" or j.id = " + Long.valueOf(jobIdEq));
-					}
+				    String[] jobIdBet = jobIdEq.split("-");
+				    long jobIdFrom = Long.valueOf(jobIdBet[0].trim());
+				    long jobIdTo = Long.valueOf(jobIdBet[1].trim());
+
+				    if (jobIdFrom > jobIdTo)
+				    {
+				        jobIdFrom = Long.valueOf(jobIdBet[1]);
+				        jobIdTo = Long.valueOf(jobIdBet[0]);
+				    }
+                    if (isFirst)
+                    {
+                        sql.append(" and (j.id >= " + jobIdFrom
+                                + " and j.id <= " + jobIdTo);
+                    }
+                    else
+                    {
+                        sql.append(" or j.id >= " + jobIdFrom
+                                + " and j.id <= " + jobIdTo);
+                    }
+					
 				}
 				else
 				{
-					String[] jobIdBet = jobIdEq.split("-");
-					if (isFirst)
-					{
-						sql.append(" and (j.id >= " + Long.valueOf(jobIdBet[0])
-								+ " and j.id <= " + jobIdBet[1]);
-					}
-					else
-					{
-						sql.append(" or j.id >= " + Long.valueOf(jobIdBet[0])
-								+ " and j.id <= " + jobIdBet[1]);
-					}
+				    if (isFirst)
+                    {
+                        sql.append(" and (j.id = " + jobIdEq);
+                    }
+                    else
+                    {
+                        sql.append(" or j.id = " + jobIdEq);
+                    }
 				}
 				isFirst = false;
 			}

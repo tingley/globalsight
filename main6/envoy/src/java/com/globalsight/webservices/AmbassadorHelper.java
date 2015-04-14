@@ -2359,7 +2359,7 @@ public class AmbassadorHelper extends JsonTypeWebService
      * @throws WebServiceException
      */
 	protected String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
-			int p_workOfflineFileType, int p_workofflineFileTypeOption,
+			int p_workOfflineFileType, Integer p_workofflineFileTypeOption,
 			boolean p_isJson) throws WebServiceException
 	{
         // Check work offline file type
@@ -2377,20 +2377,38 @@ public class AmbassadorHelper extends JsonTypeWebService
 							+ p_workOfflineFileType
 							+ ", it should be limited in 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, or 12.");
 		}
-        // Check work offline file type option
-		if (p_workofflineFileTypeOption != 1
-				&& p_workofflineFileTypeOption != 2
-				&& p_workofflineFileTypeOption != 3
-				&& p_workofflineFileTypeOption != 4
-				&& p_workofflineFileTypeOption != 5
-				&& p_workofflineFileTypeOption != 6)
+		// Check work offline file type option
+		if (p_workofflineFileTypeOption == null)
 		{
-			return makeErrorMessage(
-					p_isJson,
-					GET_WORK_OFFLINE_FILES,
-					"Invalid workofflineFileTypeOption "
-							+ p_workofflineFileTypeOption
-							+ ", it should be limited in 1, 2, 3, 4, 5 or 6.");
+			p_workofflineFileTypeOption = 1;
+		}
+		else
+		{
+			try
+			{
+				p_workofflineFileTypeOption.intValue();
+			}
+			catch (Exception e)
+			{
+				return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
+						"Invalid workofflineFileTypeOption format:"
+								+ p_workofflineFileTypeOption);
+			}
+
+			if (p_workofflineFileTypeOption != 1
+					&& p_workofflineFileTypeOption != 2
+					&& p_workofflineFileTypeOption != 3
+					&& p_workofflineFileTypeOption != 4
+					&& p_workofflineFileTypeOption != 5
+					&& p_workofflineFileTypeOption != 6)
+			{
+				return makeErrorMessage(
+						p_isJson,
+						GET_WORK_OFFLINE_FILES,
+						"Invalid workofflineFileTypeOption "
+								+ p_workofflineFileTypeOption
+								+ ", it should be limited in 1, 2, 3, 4, 5 or 6.");
+			}
 		}
         
 		if (p_workOfflineFileType == 1 || p_workOfflineFileType == 2
@@ -2422,6 +2440,29 @@ public class AmbassadorHelper extends JsonTypeWebService
             return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
                     "This task should be in ACCEPTED state.");
         }
+        
+        try
+		{
+			Activity act = ServerProxy.getJobHandler().getActivity(task.getTaskName());
+			if (act != null && act.getType() == Activity.TYPE_REVIEW)
+			{
+				if (p_workOfflineFileType == 1 || p_workOfflineFileType == 2
+						|| p_workOfflineFileType == 3
+						|| p_workOfflineFileType == 4
+						|| p_workOfflineFileType == 5
+						|| p_workOfflineFileType == 6)
+				{
+					return makeErrorMessage(
+							p_isJson,
+							GET_WORK_OFFLINE_FILES,
+							"The task type is review status,can't download when workOfflineFileType are 7,8,9,10,11,12.");
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
         
 		User loggedUser = getUser(getUsernameFromSession(p_accessToken));
 		String userId = loggedUser.getUserId();

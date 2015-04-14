@@ -1245,25 +1245,11 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
             uploadedFilePath.append("Offline Files");
             uploadedFilePath.append(File.separator);
-            Job job = ServerProxy.getJobHandler().getJobById(task.getJobId());
-            for (Workflow wf : job.getWorkflows())
-            {
-               
-                    Collection tasks = ServerProxy.getTaskManager()
-                            .getCurrentTasks(wf.getId());
-                    if (tasks != null)
-                    {
-                        for (Iterator it = tasks.iterator(); it.hasNext();)
-                        {
-                            Task oriTask = (Task) it.next();
-                            uploadedFilePath.append(oriTask.getId()
-                                    + "_"
-                                    + oriTask.getTaskName().substring(0,
-                                            oriTask.getTaskName().lastIndexOf("_")));
-                        }
-                    }
-                
-            }
+            Workflow wf = task.getWorkflow();
+            Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(wf.getId());
+            Task oriTask = (Task) tasks.iterator().next();
+            uploadedFilePath.append(oriTask.getId() + "_"
+                  + oriTask.getTaskName().substring(0, oriTask.getTaskName().lastIndexOf("_")));
           
         }
         uploadedFilePath.append(File.separator);

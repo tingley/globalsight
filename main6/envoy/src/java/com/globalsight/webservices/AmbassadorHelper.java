@@ -2392,9 +2392,12 @@ public class AmbassadorHelper extends JsonTypeWebService
 			}
 			catch (Exception e)
 			{
-				return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
+				return makeErrorMessage(
+						p_isJson,
+						GET_WORK_OFFLINE_FILES,
 						"Invalid workofflineFileTypeOption format : "
-								+ p_workofflineFileTypeOption+",it should be limited in 1, 2, 3, 4, 5, 6 or empty");
+								+ p_workofflineFileTypeOption
+								+ ",it should be limited in 1, 2, 3, 4, 5, 6 or empty");
 			}
 
 			workofflineFileTypeOption = Integer

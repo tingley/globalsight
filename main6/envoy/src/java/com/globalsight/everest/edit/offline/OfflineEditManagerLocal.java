@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -71,6 +72,7 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.ListViewWorkXLIFF20Wri
 import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
@@ -91,6 +93,7 @@ import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadF
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -207,7 +210,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
     static private final int UPLOAD_TYPE_XLF = 6;
 
     static private final int UPLOAD_TYPE_TTX = 7;
-    
+
     static private final int UPLOAD_TYPE_XLF20 = 8;
 
     static private int counter = 0;
@@ -421,6 +424,10 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             if (WAITING_FORMS.size() > 0 || RUNNING_FORMS.size() >= MAX_THREAD)
             {
                 WAITING_FORMS.add(form);
+                s_category.info("Putting a Thread in Queue. Max Thread: "
+                        + MAX_THREAD + ", Running Thread: "
+                        + RUNNING_FORMS.size() + ", Waiting Thread: "
+                        + WAITING_FORMS.size());
                 return;
             }
         }
@@ -435,6 +442,10 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 try
                 {
                     RUNNING_FORMS.add(form);
+                    s_category.info("Processing a Running Thread. Max Thread: "
+                            + MAX_THREAD + ", Running Thread: "
+                            + RUNNING_FORMS.size() + ", Waiting Thread: "
+                            + WAITING_FORMS.size());
                     runProcessUploadPage(p_tmpFile, p_user, p_task, p_fileName);
                 }
                 catch (Throwable e)
@@ -480,7 +491,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                                 {
                                     errorMsg = oe.getMessage();
                                 }
-                                
+
                                 if (errorMsg == null)
                                 {
                                     errorMsg = aeMessage;
@@ -515,6 +526,13 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     synchronized (LOCKER)
                     {
                         RUNNING_FORMS.remove(form);
+                        s_category
+                                .info("Cleaned up a Running Thread. Max Thread: "
+                                        + MAX_THREAD
+                                        + ", Running Thread: "
+                                        + RUNNING_FORMS.size()
+                                        + ", Waiting Thread: "
+                                        + WAITING_FORMS.size());
                         if (WAITING_FORMS.size() > 0)
                         {
                             OfflineUploadForm waitForm = WAITING_FORMS
@@ -718,13 +736,15 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     processUploadResult(errorString, processedCounter);
                     break;
                 }
-                
+
                 case UPLOAD_TYPE_XLF20:
                 {
-                    String txt = Tmx2Xliff20.conveterToTxt(FileUtil.readFile(p_tmpFile, ListViewWorkXLIFF20Writer.XLIFF_ENCODING));
+                    String txt = Tmx2Xliff20.conveterToTxt(FileUtil
+                            .readFile(p_tmpFile,
+                                    ListViewWorkXLIFF20Writer.XLIFF_ENCODING));
                     errorString = api.processXliff20(new StringReader(txt),
-                        p_fileName, p_user, taskId, excludedItemTypes,
-                        JmsHelper.JMS_UPLOAD_QUEUE);
+                            p_fileName, p_user, taskId, excludedItemTypes,
+                            JmsHelper.JMS_UPLOAD_QUEUE);
                     m_status.speak(processedCounter, fileName);
                     m_status.speak(processedCounter, m_resource
                             .getString("msg_upld_format_rtf_listview"));
@@ -733,7 +753,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     processUploadResult(errorString, processedCounter);
                     break;
                 }
-
 
                 case UPLOAD_TYPE_TTX:
                 {
@@ -1226,10 +1245,12 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
             uploadedFilePath.append("Offline Files");
             uploadedFilePath.append(File.separator);
-            uploadedFilePath.append(task.getId()
-                    + "_"
-                    + task.getTaskName().substring(0,
-                            task.getTaskName().lastIndexOf("_")));
+            Workflow wf = task.getWorkflow();
+            Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(wf.getId());
+            Task oriTask = (Task) tasks.iterator().next();
+            uploadedFilePath.append(oriTask.getId() + "_"
+                  + oriTask.getTaskName().substring(0, oriTask.getTaskName().lastIndexOf("_")));
+          
         }
         uploadedFilePath.append(File.separator);
         uploadedFilePath.append(p_fileName);

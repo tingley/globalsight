@@ -17,6 +17,7 @@
 package com.globalsight.everest.edit.offline.xliff.xliff20;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 
@@ -491,7 +492,10 @@ public class Tmx2Xliff20
             Unit u = (Unit) o;
             Segment seg = (Segment) u.getSegmentOrIgnorable().get(0);
             Target t = seg.getTarget();
-            sb.append("# ").append(seg.getId()).append("\r\n");
+            String id = seg.getId();
+            id = StringUtil.replace(id, ":-", ":[");
+            id = StringUtil.replace(id, "-:", "]:");
+            sb.append("# ").append(id).append("\r\n");
             getContentAsString(t.getContent(), sb);
             sb.append("\r\n");
         }
@@ -539,7 +543,7 @@ public class Tmx2Xliff20
             else if (o instanceof Ph)
             {
                 Ph ph = (Ph) o;
-                sb.append("[g").append(ph.getId()).append("]");
+                sb.append("[x").append(ph.getId()).append("]");
             }
             else if (o instanceof Sc)
             {
@@ -554,6 +558,23 @@ public class Tmx2Xliff20
         }
     }
 
+    private static String getBptId(Properties p_hAttributes)
+    {
+        String id = p_hAttributes.getProperty("i");
+        
+        if (id == null)
+        {
+            id = p_hAttributes.getProperty("id");
+        }
+        
+        if (id == null)
+        {
+            id = p_hAttributes.getProperty("x");
+        }
+        
+        return id;
+    }
+    
     /**
      * Changes gxml tag to txt tag.
      * 
@@ -565,36 +586,34 @@ public class Tmx2Xliff20
      * @return
      */
     public static String getTag(String p_strTmxTagName,
-            Properties p_hAttributes, String p_strOriginalString)
+            Properties p_hAttributes, String p_strOriginalString, Map<String, String> ept2bpt)
     {
         String i = Tmx2Xliff20Handler.getId(p_hAttributes);
 
         if (p_strTmxTagName.equals("bpt"))
         {
+            String bId = getBptId(p_hAttributes);
+            ept2bpt.put(bId, i);
+            
             return "g" + i;
         }
         else if (p_strTmxTagName.equals("ept"))
         {
-            return "/g" + i + "";
+            if (ept2bpt.containsKey(i))
+            {
+                String bId = ept2bpt.get(i);
+                ept2bpt.remove(i);
+                return "/g" + bId;
+            }
+            
+            return "/g" + i;
         }
         else if (p_strTmxTagName.equals("ph"))
         {
-            return "g" + i;
+            return "x" + i;
         }
         else
         {
-            // it seems that the it lost the i attribute when download.
-            i = (String) p_hAttributes.get("x");
-            if (i == null)
-            {
-                i = (String) p_hAttributes.get("i");
-            }
-            
-            if (i == null)
-            {
-                i = p_hAttributes.getProperty("id");
-            }
-
             return "x" + i;
         }
     }

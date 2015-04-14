@@ -18,6 +18,7 @@ package com.globalsight.ling.tw;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Stack;
@@ -61,6 +62,8 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
     private Vector m_vSubflows = new Vector();
 
     private Hashtable<Object, String> m_hEpt2BptSrcIndexMap = new Hashtable<Object, String>();
+    private HashMap<String, String> ept2bpt = new HashMap();
+    
     private int m_nextUniqIndex = 0;
     private Hashtable m_hTagMap = new Hashtable();
     private Hashtable m_missedhTagMap = new Hashtable();
@@ -287,7 +290,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
         
         if (m_PseudoData.isXliff20File())
         {
-            String PTag = Tmx2Xliff20.getTag(p_strTmxTagName, p_hAttributes, p_strOriginalString);
+            String PTag = Tmx2Xliff20.getTag(p_strTmxTagName, p_hAttributes, p_strOriginalString, ept2bpt);
             
             try
             {

@@ -229,7 +229,7 @@ private String replace(String str) {
 <script language="javascript">
 <%
 if (gitmsg != null && gitmsg.size()>0) {
-	StringBuilder sb = new StringBuilder("These module mapping have existed in the server.\\n");
+	StringBuilder sb = new StringBuilder("Following file mapping rules have already configured in the server.\\n");
 	for (GitConnectorFileMapping m : gitmsg) {
 		sb.append(replace(m.getSourceMappingPath()) + "[" + m.getSourceLocale() + "] <--> " + replace(m.getTargetMappingPath()) + "[" + m.getTargetLocale() + "] \\n");
 	}
@@ -242,5 +242,38 @@ function changePageSize(value)
 {
 	window.location='/globalsight/ControlServlet?linkName=self&pageName=GCFMM&gitConnectorKeyPageNum=1&gitConnectorKeySorting=0&numOfPageSize=' + value + '&gitConnectorId=' + <%=gitConnectorId%>
 }
+
+$('a').click(function(){
+	var href = $(this).attr('href');
+	if(href.indexOf("GCFMM") > 0)
+	{
+		var tempHref = href + "&action=filter&gitConnectorId=<%=gitConnectorId%>";
+		
+		if($("#sourceLocaleFilter").val() != "")
+		{
+			tempHref = tempHref + "&sourceLocaleFilter=" + $("#sourceLocaleFilter").val();
+		}
+		if($("#sourceMappingPathFilter").val() != "")
+		{
+			tempHref = tempHref + "&sourceMappingPathFilter=" + $("#sourceMappingPathFilter").val();
+		}
+		if($("#targetLocaleFilter").val() != "")
+		{
+			tempHref = tempHref + "&targetLocaleFilter=" + $("#targetLocaleFilter").val();
+		}
+		if($("#targetMappingPathFilter").val() != "")
+		{
+			tempHref = tempHref + "&targetMappingPathFilter=" + $("#targetMappingPathFilter").val();
+		}
+		<% if (isSuperAdmin) { %>
+		if($("#companyNameFilter").val() != "")
+		{
+			tempHref = tempHref + "&companyNameFilter=" + $("#companyNameFilter").val();
+		}
+		<%}%>
+		
+    	$(this).attr('href',tempHref);
+	}
+});
 </script>
 </HTML>

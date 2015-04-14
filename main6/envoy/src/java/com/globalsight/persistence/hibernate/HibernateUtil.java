@@ -1404,6 +1404,44 @@ public class HibernateUtil
 
         return result;
     }
+    
+    /**
+     * Execute sql, return the result.
+     * 
+     * @param sql
+     * @param params
+     * @return
+     */
+    public static List<?> searchWithSqlWithIn(String sql, Map<String, ?> params, Map<String, List<Object>> ins)
+            throws HibernateException
+    {
+        Session session = getSession();
+        SQLQuery query = session.createSQLQuery(sql);
+
+        if (params != null)
+        {
+            Iterator<String> iterator = params.keySet().iterator();
+            while (iterator.hasNext())
+            {
+                String key = iterator.next();
+                query.setParameter(key, params.get(key));
+            }
+        }
+        
+        if (ins != null)
+        {
+            Iterator<String> iterator = ins.keySet().iterator();
+            while (iterator.hasNext())
+            {
+                String key = iterator.next();
+                query.setParameterList(key, ins.get(key));
+            }
+        }
+
+        List<?> result = query.list();
+
+        return result;
+    }
 
     public static void update(Collection<?> objects) throws HibernateException
     {

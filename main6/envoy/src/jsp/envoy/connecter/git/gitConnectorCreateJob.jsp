@@ -409,21 +409,20 @@ $(document).ready(function ()
                     success: function(data) {
                 	    // Clear every field values
                 	    clearFieldValues();
+                	    $("[name='fileProfile']").each(function(){
+                            addEmptyOption(this);
+                        });
+                        $("[name='fileProfile']").attr("value", "");
+                        $("[name='fileProfile'] option").attr("disabled", false);
+                        $("#targetLocaleArea").show();
+                        $("#targetLocaleArea").html("");
+                        mapped = false;
+                        l10Nid = 0;
+                        $("#attributeButtonDIV").hide();
+                        attributeRequired = false;
+                        $(this).blur();
                 }
         });
-        
-        $("[name='fileProfile']").each(function(){
-            addEmptyOption(this);
-        });
-        $("[name='fileProfile']").attr("value", "");
-        $("[name='fileProfile'] option").attr("disabled", false);
-        $("#targetLocaleArea").show();
-        $("#targetLocaleArea").html("");
-        mapped = false;
-        l10Nid = 0;
-        $("#attributeButtonDIV").hide();
-        attributeRequired = false;
-        $(this).blur();
     });
 
     $("#cancel").click(function()
@@ -471,7 +470,7 @@ function showFileMapping()
 	
 	var url = "<%=showFileMappingUrl%>";
 		window.open(url, null,
-	    'width = 700,height = 400,status = no,center = yes,left = 300,top = 100');
+	    'width = 700,height = 400,status = no,resizable = yes,center = yes,left = 300,top = 100');
 	
 }
 

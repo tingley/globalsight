@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.servlet.RequestDispatcher;
@@ -39,6 +41,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.tm.searchreplace.TuvInfo;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -186,6 +189,20 @@ public class JobControlReadyHandler extends JobManagementHandler
             performAppropriateOperation(p_request);
         }
 
+        //For "Re-Create" job
+        String recreateJobIds = p_request.getParameter(RECREATE_JOB_PARAM);
+        if (StringUtil.isNotEmpty(recreateJobIds))
+        {
+            if (!isRefresh(sessionMgr, recreateJobIds, RECREATE_JOB_PARAM))
+            {
+                String message = recreateJob(p_request);
+                if (StringUtil.isNotEmpty(message))
+                {
+                    p_request.setAttribute("recreateMessage", message);
+                }
+            }
+        }
+        
         sessionMgr.setMyjobsAttribute("lastState", Job.READY_TO_BE_DISPATCHED);
         JobVoReadySearcher searcher = new JobVoReadySearcher();
         searcher.setJobVos(p_request, true);
@@ -210,6 +227,82 @@ public class JobControlReadyHandler extends JobManagementHandler
         RequestDispatcher dispatcher = p_context
                 .getRequestDispatcher(p_thePageDescriptor.getJspURL());
         dispatcher.forward(p_request, p_response);
+    }
+
+    private String recreateJob(HttpServletRequest p_request)
+    {
+        String message = null;
+
+        HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+
+        Set<Long> allJobIds = new HashSet<Long>();
+        String ids = p_request.getParameter(RECREATE_JOB_PARAM);
+        StringTokenizer tokenizer = new StringTokenizer(ids);
+        while (tokenizer.hasMoreTokens())
+        {
+            allJobIds.add(Long.parseLong(tokenizer.nextToken()));
+        }
+
+        Set<Long> problemJobIds = checkJobs(allJobIds);
+        allJobIds.removeAll(problemJobIds);
+        if (allJobIds.size() > 0)
+        {
+            sessionMgr.setAttribute(RECREATE_JOB_PARAM, ids);
+            for (long id : allJobIds)
+            {
+                WorkflowHandlerHelper.recreateJob(id);
+            }
+            sessionMgr.removeElement(RECREATE_JOB_PARAM);
+        }
+
+        if (problemJobIds.size() > 0)
+        {
+            message = getMessage(problemJobIds);
+        }
+
+        return message;
+    }
+
+    private String getMessage(Set<Long> jobIds)
+    {
+        String message = null;
+
+        StringBuffer msg = new StringBuffer();
+        if (jobIds.size() > 0)
+        {
+            msg.append("Job ");
+            for (long id : jobIds) {
+                msg.append(id).append(",");
+            }
+            message = msg.substring(0, msg.length()-1);
+            message += " can not be re-created because its requests information are not fully generated.";
+        }
+
+        return message;
+    }
+
+    private Set<Long> checkJobs(Set<Long> jobIds)
+    {
+        Set<Long> problemIds = new HashSet<Long>();
+        for (long id : jobIds)
+        {
+            try
+            {
+                Job job = ServerProxy.getJobHandler().getJobById(id);
+                if (!job.getIsAllRequestGenerated())
+                {
+                    problemIds.add(id);
+                }
+            }
+            catch (Exception e)
+            {
+                problemIds.add(id);
+            }
+        }
+
+        return problemIds;
     }
 
     /**

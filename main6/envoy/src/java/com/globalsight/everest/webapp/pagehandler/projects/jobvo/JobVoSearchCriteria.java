@@ -343,17 +343,58 @@ public class JobVoSearchCriteria
         if (SearchCriteriaParameters.LESS_THAN.equals(condition))
         {
             sql.append(" and j.id < :jobId ");
+            params.put("jobId", Long.valueOf(jobId));
         }
         else if (SearchCriteriaParameters.GREATER_THAN.equals(condition))
         {
             sql.append(" and j.id > :jobId ");
+            params.put("jobId", Long.valueOf(jobId));
         }
         else
         {
-            sql.append(" and j.id = :jobId ");
-        }
+			String[] jobIds = jobId.split(",");
+			boolean isFirst = true;
+			for (String jobIdEq : jobIds)
+			{
+			    jobIdEq = jobIdEq.trim();
+				if (jobIdEq.contains("-"))
+				{
+				    String[] jobIdBet = jobIdEq.split("-");
+				    long jobIdFrom = Long.valueOf(jobIdBet[0].trim());
+				    long jobIdTo = Long.valueOf(jobIdBet[1].trim());
 
-        params.put("jobId", Long.valueOf(jobId));
+				    if (jobIdFrom > jobIdTo)
+				    {
+				        jobIdFrom = Long.valueOf(jobIdBet[1]);
+				        jobIdTo = Long.valueOf(jobIdBet[0]);
+				    }
+                    if (isFirst)
+                    {
+                        sql.append(" and (j.id >= " + jobIdFrom
+                                + " and j.id <= " + jobIdTo);
+                    }
+                    else
+                    {
+                        sql.append(" or j.id >= " + jobIdFrom
+                                + " and j.id <= " + jobIdTo);
+                    }
+					
+				}
+				else
+				{
+				    if (isFirst)
+                    {
+                        sql.append(" and (j.id = " + jobIdEq);
+                    }
+                    else
+                    {
+                        sql.append(" or j.id = " + jobIdEq);
+                    }
+				}
+				isFirst = false;
+			}
+			sql.append(") ");
+		}
     }
     
     /*

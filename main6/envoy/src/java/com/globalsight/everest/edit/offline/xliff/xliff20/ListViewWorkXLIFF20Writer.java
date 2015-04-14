@@ -512,6 +512,19 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             }
         }
     }
+    
+    /**
+     * The sub id is like 38305:[l2]:1. The [ and ] is not allowed.
+     * 
+     * @param id
+     * @return
+     */
+    private String getXliffId(String id)
+    {
+        id = StringUtil.replace(id, ":[", ":-");
+        id = StringUtil.replace(id, "]:", "-:");
+        return id;
+    }
 
     /**
      * Adds translation unit to xliff files.
@@ -611,7 +624,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                 translate = YesNo.YES;
         }
         unit.setTranslate(translate);
-        unit.setId("u" + osd.getDisplaySegmentID());
+        unit.setId("u" + getXliffId(osd.getDisplaySegmentID()));
 
         OriginalData od = new OriginalData();
 
@@ -620,7 +633,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         seg.setState(getState(osd));
         if (osd.getDisplaySegmentID() != null)
         {
-            seg.setId(osd.getDisplaySegmentID());
+            seg.setId(getXliffId(osd.getDisplaySegmentID()));
         }
         
         // Add SID
@@ -973,7 +986,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             sourceStr = processInternalText(sourceStr);
             
             Match m = new Match();
-            m.setRef("#" + osd.getDisplaySegmentID());
+            m.setRef("#" + getXliffId(osd.getDisplaySegmentID()));
             
             Source s = new Source();
             m.setSource(s);
@@ -1140,7 +1153,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             {
                 Match m = new Match();
                 m.setOrigin("terminology");
-                m.setRef("#" + osd.getDisplaySegmentID());
+                m.setRef("#" + getXliffId(osd.getDisplaySegmentID()));
 
                 Source source = new Source();
                 source.getContent().add(src);

@@ -215,10 +215,6 @@ public class AppletHelper
             servletConnection.setUseCaches(false);
             servletConnection.setDefaultUseCaches(false);
 
-            //NOTE: This used to use Content-Type=java-internal/java.util.Vector
-            //which fails mysteriously in WebSphere with IBM HTTP Server!!!
-            //changing it to application/octet-stream avoids that
-            //xx servletConnection.setRequestProperty("Content-Type", "java-internal/" + p_outgoingData.getClass().getName());
             servletConnection.setRequestProperty("Content-Type", "application/octet-stream");
 
             ObjectOutputStream outputStreamToServlet =

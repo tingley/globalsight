@@ -417,8 +417,6 @@
                 com.globalsight.util.gxml,
                 com.globalsight.util.j2ee,
                 com.globalsight.util.j2ee.jboss,
-                com.globalsight.util.j2ee.pramati,
-                com.globalsight.util.j2ee.websphere,
                 com.globalsight.util.mail,
                 com.globalsight.util.modules,
                 com.globalsight.util.progress,

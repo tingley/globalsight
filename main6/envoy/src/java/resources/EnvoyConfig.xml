@@ -679,7 +679,7 @@
         <PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
       </WebPage>
     </WebActivity>
-    <WebActivity webActivityName="createZipJobs" clearSession="false">
+    <WebActivity webActivityName="createZipJobs">
       <WebPage pageName="CZJ" isDefault="true" jspName="/envoy/administration/createjob/createZipJobs.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler">
         <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
         <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>

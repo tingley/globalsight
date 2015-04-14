@@ -421,9 +421,10 @@ function addFilters(obj)
 function checkFilters()
 {
 	var tmp = ATrim($("#jobIdFilter").val());
+	var isEffective = /^([1-9]+[-]?[0-9]*[,]?)+/;
 	if (tmp != "") {
-		if (!isAllDigits(tmp)) {
-			alert("Invalid job ID, only integer numbers are allowed.");
+		if(!isEffective.test(tmp)||tmp.charAt(tmp.length - 1)=="-"||tmp.indexOf("-,")>0||tmp.indexOf(",-")>0){
+			alert("Invalid job ID, only integer numbers, comma and en dash are allowed.");
 			return false;
 		}
 	}

@@ -52,6 +52,7 @@ import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.foundation.ContainerRole;
+import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.User;
@@ -78,6 +79,8 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.generat
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
+import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.ConditionNodeTargetInfo;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
@@ -121,7 +124,6 @@ public class AmbassadorHelper extends JsonTypeWebService
     private final int SUCCESS = 0;
     private final int INVALID_ACCESS_TOKEN = 1;
     private final int INVALID_USER_ID = 2;
-    private final int CAN_NOT_CREATE_SUPER_USER = 3;
     private final int USER_EXISTS = 4;
     private final int USER_NOT_EXIST = 5;
     private final int NOT_IN_SAME_COMPANY = 6;
@@ -2319,6 +2321,478 @@ public class AmbassadorHelper extends JsonTypeWebService
         return returning;
     }
 
+    /**
+     *  Offline download to get reviewers comments report, translations edit
+     * report or offline translation kit.
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_taskId
+     *            -- task ID to offline download file for.
+     * @param p_workOfflineFileType
+     *            -- 1 : Reviewer Comments Report or Translations Edit Report (this follows UI settings)
+     *            -- 2 : Offline Translation Kit
+     *            -- 3 : Translation Edit Report
+     *            -- 4 : Reviewer Comments Report
+     *            -- 5 : Reviewer Comments Report (Simplified)
+     *            -- 6 : Post Review QA Report
+     *            -- 7  : Biligual Trados RTF
+	 *			   -- 8  : Trados 7 TTX
+	 *			   -- 9  : OmegaT
+	 *			   -- 10 : XLiff 1.2
+	 *			   -- 11 : Xliff 2.0
+	 *			   -- 12 : RTF List view
+     *@param p_workofflineFileTypeOption
+     *			   --1  : consolidate/split = split per file, include repeated segments = no (Default)
+     *			   --2  : consolidate/split = consolidate (overrides preserve folder structure setting),include repeated segments = no
+     *			   --3  : consolidate/split = split per wordcount of 2000, include repeated segments = no
+     *			   --4  : consolidate/split = split per file, include repeated segments = yes
+     *			   --5  : consolidate/split = consolidate (overrides preserve folder structure setting),include repeated segments = yes
+     *			   --6  : consolidate/split = split per wordcount of 2000, include repeated segments = yes
+     * @return -- JSON string. -- If fail, it is like
+     *         '{"getWorkOfflineFiles":"Corresponding message is here."}'; -- If
+     *         succeed, report returning is like
+     *         '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/ReviewersCommentsReport-(jobname_492637643)(337)-en_US_zh_CN-20140218
+     *         162543.xlsx"}'. -- offline translation kit returning is like
+     *         '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadOfflineKit/[CompanyName]/GlobalSight/CustomerDownload/[jobName_zh_CN.zip]"}'
+     *         .
+     * @throws WebServiceException
+     */
+	protected String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
+			int p_workOfflineFileType, String p_workofflineFileTypeOption,
+			boolean p_isJson) throws WebServiceException
+	{
+		// Check work offline file type
+		if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2
+				&& p_workOfflineFileType != 3 && p_workOfflineFileType != 4
+				&& p_workOfflineFileType != 5 && p_workOfflineFileType != 6
+				&& p_workOfflineFileType != 7 && p_workOfflineFileType != 8
+				&& p_workOfflineFileType != 9 && p_workOfflineFileType != 10
+				&& p_workOfflineFileType != 11 && p_workOfflineFileType != 12)
+		{
+			return makeErrorMessage(
+					p_isJson,
+					GET_WORK_OFFLINE_FILES,
+					"Invalid workOfflineFileType "
+							+ p_workOfflineFileType
+							+ ", it should be limited in 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, or 12.");
+		}
+
+		int workofflineFileTypeOption = -1;
+		// Check work offline file type option
+		if (StringUtil.isEmpty(p_workofflineFileTypeOption))
+		{
+			workofflineFileTypeOption = 1;
+		}
+		else
+		{
+			try
+			{
+				Assert.assertIsInteger(p_workofflineFileTypeOption);
+			}
+			catch (Exception e)
+			{
+				return makeErrorMessage(
+						p_isJson,
+						GET_WORK_OFFLINE_FILES,
+						"Invalid workofflineFileTypeOption format : "
+								+ p_workofflineFileTypeOption
+								+ ",it should be limited in 1, 2, 3, 4, 5, 6 or empty");
+			}
+
+			workofflineFileTypeOption = Integer
+					.parseInt(p_workofflineFileTypeOption);
+			if (workofflineFileTypeOption != 1
+					&& workofflineFileTypeOption != 2
+					&& workofflineFileTypeOption != 3
+					&& workofflineFileTypeOption != 4
+					&& workofflineFileTypeOption != 5
+					&& workofflineFileTypeOption != 6)
+			{
+				return makeErrorMessage(
+						p_isJson,
+						GET_WORK_OFFLINE_FILES,
+						"Invalid workofflineFileTypeOption : "
+								+ p_workofflineFileTypeOption
+								+ ", it should be limited in 1, 2, 3, 4, 5, 6 or empty.");
+			}
+		}
+
+		if (p_workOfflineFileType == 1 || p_workOfflineFileType == 2
+				|| p_workOfflineFileType == 3 || p_workOfflineFileType == 4
+				|| p_workOfflineFileType == 5 || p_workOfflineFileType == 6)
+		{
+			return getWorkOfflineFiles(p_accessToken, p_taskId,
+					p_workOfflineFileType, p_isJson);
+		}
+
+		Task task = null;
+		try
+		{
+			task = ServerProxy.getTaskManager().getTask(p_taskId);
+		}
+		catch (Exception e)
+		{
+			logger.warn("Can not get task info by taskId " + p_taskId);
+		}
+
+		if (task == null)
+		{
+			return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
+					"Can not find task by taskId " + p_taskId);
+		}
+
+		if (task.getState() != Task.STATE_ACCEPTED)
+		{
+			return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
+					"This task should be in ACCEPTED state.");
+		}
+
+		try
+		{
+			Activity act = ServerProxy.getJobHandler().getActivity(
+					task.getTaskName());
+			if (act != null && act.getType() == Activity.TYPE_REVIEW)
+			{
+				if (p_workOfflineFileType == 7 || p_workOfflineFileType == 8
+						|| p_workOfflineFileType == 9
+						|| p_workOfflineFileType == 10
+						|| p_workOfflineFileType == 11
+						|| p_workOfflineFileType == 12)
+				{
+					return makeErrorMessage(
+							p_isJson,
+							GET_WORK_OFFLINE_FILES,
+							"The task type is review status,can't download when workOfflineFileType are 7,8,9,10,11,12.");
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		User loggedUser = getUser(getUsernameFromSession(p_accessToken));
+		String userId = loggedUser.getUserId();
+		ProjectImpl project = getProjectByTask(task);
+		if (!userId.equals(task.getAcceptor())
+				&& !userId.equals(project.getProjectManagerId()))
+		{
+			return makeErrorJson(
+					GET_WORK_OFFLINE_FILES,
+					"This task belongs to user "
+							+ UserUtil.getUserNameById(task.getAcceptor())
+							+ ", current logged user has no previlege to handle it.");
+		}
+
+		String returning = "";
+		String companyName = CompanyWrapper.getCompanyNameById(task
+				.getCompanyId());
+		ActivityLog.Start activityStart = null;
+		try
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", loggedUser.getUserName());
+			activityArgs.put("taskId", p_taskId);
+			activityArgs.put("workOfflineFileType", p_workOfflineFileType);
+			activityStart = ActivityLog.start(Ambassador4Falcon.class,
+					"getWorkOfflineFiles", activityArgs);
+
+			OfflineEditManager oem = ServerProxy.getOfflineEditManager();
+			String fileType = null;
+			// 7:Biligual Trados RTF.
+			if (p_workOfflineFileType == 7)
+			{
+				fileType = OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED;
+			}
+			// 8:Trados 7 TTX
+			else if (p_workOfflineFileType == 8)
+			{
+				fileType = OfflineConstants.FORMAT_TTX_VALUE;
+			}
+			// 9:OmegaT
+			else if (p_workOfflineFileType == 9)
+			{
+				fileType = OfflineConstants.FORMAT_OMEGAT_VALUE;
+			}
+			// 10:XLiff 1.2
+			else if (p_workOfflineFileType == 10)
+			{
+				fileType = OfflineConstants.FORMAT_XLF_NAME_12;
+			}
+			// 11:Xliff 2.0
+			else if (p_workOfflineFileType == 11)
+			{
+				fileType = OfflineConstants.FORMAT_XLF_VALUE_20;
+			}
+			// 12:RTF List view
+			else if (p_workOfflineFileType == 12)
+			{
+				fileType = OfflineConstants.FORMAT_RTF;
+			}
+			DownloadParams params = getDownloadParams(userId, task, fileType,
+					workofflineFileTypeOption);
+			File file = oem.getDownloadOfflineFiles(userId, task.getId(),
+					params);
+			StringBuffer root = new StringBuffer();
+			root.append(AmbassadorUtil.getCapLoginOrPublicUrl()).append(
+					"/DownloadOfflineKit");
+			if (task.getCompanyId() != 1)
+			{
+				root.append("/").append(companyName);
+			}
+			root.append("/GlobalSight/CustomerDownload/")
+					.append(file.getName());
+			String fileUrl = root.toString();
+
+			if (p_isJson)
+			{
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("path", fileUrl);
+				jsonObj.put("taskId", task.getId());
+				jsonObj.put("targetLocale", task.getTargetLocale().toString());
+				jsonObj.put("acceptorUserId", task.getAcceptor());
+				returning = jsonObj.toString();
+			}
+			else
+			{
+				returning = fileUrl;
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+			String message = "Error when generate translation kit or report.";
+			return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES, message);
+		}
+		finally
+		{
+			if (activityStart != null)
+			{
+				activityStart.end();
+			}
+		}
+
+		return returning;
+	}
+	
+	private DownloadParams getDownloadParams(String userId, Task task,
+			String fileType, int workofflineFileTypeOption)
+	{
+		SendDownloadFileHelper helper = new SendDownloadFileHelper();
+		List<Long> pageIdList = new ArrayList<Long>();
+		List<String> pageNameList = new ArrayList<String>();
+		List<Boolean> canUseUrlList = new ArrayList<Boolean>();
+		helper.getAllPageIdList(task, pageIdList, pageNameList);
+		if (pageIdList != null && pageIdList.size() <= 0)
+		{
+			pageIdList = null;
+			pageNameList = null;
+		}
+
+		if (pageIdList != null)
+		{
+			for (int i = 0; i < pageIdList.size(); i++)
+			{
+				canUseUrlList.add(Boolean.FALSE);
+			}
+		}
+		List primarySourceFiles = helper.getAllPSFList(task);
+		List stfList = helper.getAllSTFList(task);
+		List supportFileList = helper.getAllSupportFileList(task);
+		int editorId = helper.getEditorId(null);
+		int platformId = helper.getPlatformId(null, editorId);
+		User user = UserUtil.getUserById(userId);
+		String uiLocale = user.getDefaultUILocale();
+		L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
+		Vector excludeTypes = l10nProfile.getTranslationMemoryProfile()
+				.getJobExcludeTuTypes();
+
+		// Placeholder Format(Deafult--compact)
+		int ptagFormat = helper.getPtagFormat(OfflineConstants.PTAG_COMPACT);
+		// Allow Edit Locked Segments(Deafult--Allow Edit of ICE and 100% matches)
+		int TMEditType = helper.getEditAllState("1", l10nProfile);
+		// TM Options(Deafult--TMX File - 1.4b)
+		int resInsMode = helper
+				.getResourceInsertionMode(OfflineConstants.RES_INS_TMX_14B);
+		// Format
+		int fileFormat = helper.getFileFormat(fileType);
+
+		DownloadParams downloadParams = new DownloadParams(task.getJobName(),
+				null, "", Long.toString(task.getWorkflow().getId()),
+				Long.toString(task.getId()), pageIdList, pageNameList,
+				canUseUrlList, primarySourceFiles, stfList, editorId,
+				platformId, null, ptagFormat, uiLocale, task.getSourceLocale(),
+				task.getTargetLocale(), true, fileFormat, excludeTypes,
+				TMEditType, supportFileList, resInsMode, user);
+
+		// 7:Biligual Trados RTF.
+		if (fileType.equals(OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED))
+		{
+			downloadParams.setPopulate100(true);
+			// Penalized Reference TM Options
+			downloadParams.setPenalizedReferenceTmPre(true);
+			downloadParams.setPenalizedReferenceTmPer(false);
+		}
+		// 8:Trados 7 TTX
+		else if (fileType.equals(OfflineConstants.FORMAT_TTX_VALUE))
+		{
+			downloadParams.setPopulate100(true);
+			// Penalized Reference TM Options
+			downloadParams.setPenalizedReferenceTmPre(true);
+			downloadParams.setPenalizedReferenceTmPer(false);
+		}
+		// 9:OmegaT
+		else if (fileType.equals(OfflineConstants.FORMAT_OMEGAT_VALUE))
+		{
+			downloadParams.setPopulate100(false);
+			// Penalized Reference TM Options
+			downloadParams.setPenalizedReferenceTmPre(false);
+			downloadParams.setPenalizedReferenceTmPer(false);
+		}
+		// 10:XLiff 1.2
+		else if (fileType.equals(OfflineConstants.FORMAT_XLF_NAME_12))
+		{
+			downloadParams.setPopulate100(true);
+			// Penalized Reference TM Options
+			downloadParams.setPenalizedReferenceTmPre(true);
+			downloadParams.setPenalizedReferenceTmPer(false);
+		}
+		// 11:Xliff 2.0
+		else if (fileType.equals(OfflineConstants.FORMAT_XLF_VALUE_20))
+		{
+			downloadParams.setPopulate100(true);
+			// Penalized Reference TM Options
+			downloadParams.setPenalizedReferenceTmPre(true);
+			downloadParams.setPenalizedReferenceTmPer(false);
+		}
+		// 12:RTF List view
+		else if (fileType.equals(OfflineConstants.FORMAT_RTF))
+		{
+			downloadParams.setPopulate100(true);
+			// Penalized Reference TM Options
+			downloadParams.setPenalizedReferenceTmPre(true);
+			downloadParams.setPenalizedReferenceTmPer(false);
+		}
+		Activity act = new Activity();
+		try
+		{
+			act = ServerProxy.getJobHandler().getActivity(task.getTaskName());
+		}
+		catch (Exception e)
+		{
+		}
+	
+		downloadParams.setActivityType(act.getDisplayName());
+		downloadParams.setJob(task.getWorkflow().getJob());
+		// Terminology
+		downloadParams.setTermFormat(OfflineConstants.TERM_TBX);
+		downloadParams.setDisplayExactMatch(null);
+		downloadParams.setConsolidateTermFiles(false);
+		downloadParams.setConsolidateTmxFiles(false);
+		// Include XML Node Context Information 9 10 11
+		downloadParams.setIncludeXmlNodeContextInformation(false);
+		// populate fuzzy target segments = no
+		downloadParams.setPopulateFuzzy(false);
+
+		// 1 : consolidate/split = split per file, include repeated segments =
+		// no (Default)
+		if (workofflineFileTypeOption == 1)
+		{
+			// Consolidate/Split Type
+			downloadParams.setConsolidateFileType("notConsolidate");
+			// Include Repeated Segments as Separate File
+			downloadParams.setIncludeRepetitions(false);
+			// Preserve Source Folder Structure
+			downloadParams.setPreserveSourceFolder(true);
+		}
+		// 2 : consolidate/split = consolidate (overrides preserve folder
+		// structure setting),include repeated segments = no
+		else if (workofflineFileTypeOption == 2)
+		{
+			// Consolidate/Split Type
+			downloadParams.setConsolidateFileType("consolidate");
+			// Include Repeated Segments as Separate File
+			downloadParams.setIncludeRepetitions(false);
+			// Preserve Source Folder Structure
+			downloadParams.setPreserveSourceFolder(false);
+		}
+		// 3 : consolidate/split = split per wordcount of 2000, include repeated
+		// segments = no
+		else if (workofflineFileTypeOption == 3)
+		{
+			// Consolidate/Split Type
+			downloadParams.setConsolidateFileType("consolidateByWordCount");
+			// Include Repeated Segments as Separate File
+			downloadParams.setIncludeRepetitions(false);
+			downloadParams.setWordCountForDownload(2000);
+			// Preserve Source Folder Structure
+			downloadParams.setPreserveSourceFolder(true);
+		}
+		// 4 : consolidate/split = split per file, include repeated segments =
+		// yes
+		else if (workofflineFileTypeOption == 4)
+		{
+			// Consolidate/Split Type
+			downloadParams.setConsolidateFileType("notConsolidate");
+			// Preserve Source Folder Structure
+			downloadParams.setPreserveSourceFolder(true);
+			// Include Repeated Segments as Separate File
+			if (!fileType.equals(OfflineConstants.FORMAT_TTX_VALUE))
+			{
+				downloadParams.setIncludeRepetitions(true);
+			}
+			else
+			{
+				downloadParams.setIncludeRepetitions(false);
+			}
+		}
+		// 5 : consolidate/split = consolidate (overrides preserve folder
+		// structure setting),include repeated segments = yes
+		else if (workofflineFileTypeOption == 5)
+		{
+			// Consolidate/Split Type
+			downloadParams.setConsolidateFileType("consolidate");
+			// Preserve Source Folder Structure
+			downloadParams.setPreserveSourceFolder(false);
+			// Include Repeated Segments as Separate File
+			if (!fileType.equals(OfflineConstants.FORMAT_TTX_VALUE))
+			{
+				downloadParams.setIncludeRepetitions(true);
+			}
+			else
+			{
+				downloadParams.setIncludeRepetitions(false);
+			}
+		}
+		// 6 : consolidate/split = split per wordcount of 2000, include repeated
+		// segments = yes
+		else if (workofflineFileTypeOption == 6)
+		{
+			// Consolidate/Split Type
+			downloadParams.setConsolidateFileType("consolidateByWordCount");
+			// Preserve Source Folder Structure
+			downloadParams.setPreserveSourceFolder(true);
+			downloadParams.setWordCountForDownload(2000);
+			// Include Repeated Segments as Separate File
+			if (!fileType.equals(OfflineConstants.FORMAT_TTX_VALUE))
+			{
+				downloadParams.setIncludeRepetitions(true);
+			}
+			else
+			{
+				downloadParams.setIncludeRepetitions(false);
+			}
+		}
+
+		// NOT include fully leveraged file(s)
+		downloadParams.setExcludeFullyLeveragedFiles(false);
+		// Creation ID to "MT!"
+		downloadParams.setChangeCreationIdForMTSegments(true);
+
+		return downloadParams;
+	}
+	
     String uploadWorkOfflineFiles(String p_accessToken, Long p_taskId,
             int p_workOfflineFileType, String p_fileName, byte[] p_bytes,
             boolean p_isJson) throws WebServiceException

@@ -3005,7 +3005,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * @throws WebServiceException
      */
 	public String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
-			int p_workOfflineFileType, int p_workofflineFileTypeOption)
+			int p_workOfflineFileType, Integer p_workofflineFileTypeOption)
 			throws WebServiceException
 	{
 		checkAccess(p_accessToken, GET_WORK_OFFLINE_FILES);

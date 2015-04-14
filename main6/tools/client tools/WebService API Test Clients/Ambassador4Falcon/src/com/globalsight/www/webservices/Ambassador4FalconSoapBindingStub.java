@@ -291,7 +291,7 @@ public class Ambassador4FalconSoapBindingStub extends org.apache.axis.client.Stu
         oper.addParameter(param);
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("", "p_workOfflineFileType"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
         oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("", "p_workofflineFileTypeOption"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("", "p_workofflineFileTypeOption"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "int"), java.lang.Integer.class, false, false);
         oper.addParameter(param);
         oper.setReturnType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "string"));
         oper.setReturnClass(java.lang.String.class);
@@ -1126,7 +1126,7 @@ public class Ambassador4FalconSoapBindingStub extends org.apache.axis.client.Stu
 }
     }
 
-    public java.lang.String getWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType, int p_workofflineFileTypeOption) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException {
+    public java.lang.String getWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType, java.lang.Integer p_workofflineFileTypeOption) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -1139,7 +1139,7 @@ public class Ambassador4FalconSoapBindingStub extends org.apache.axis.client.Stu
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {p_accessToken, p_taskId, new java.lang.Integer(p_workOfflineFileType), new java.lang.Integer(p_workofflineFileTypeOption)});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {p_accessToken, p_taskId, new java.lang.Integer(p_workOfflineFileType), p_workofflineFileTypeOption});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;

@@ -344,15 +344,6 @@ TR.trodd {
                 <TD><%=bundle.getString("log_jboss_wrapper_file") %></TD>
                 <TD><%=bundle.getString("log_jboss_wrapper")%></TD>
             </TR>
-			<% if (AppServerWrapperFactory.WEBLOGIC.equals(j2eeVendor)) { %>
-			<TR>
-                <td>
-                  <input type="checkbox" id="weblogic" name="weblogic" value="1" />
-                </td>
-				<TD><%=bundle.getString("log_weblogic_file") %></TD>
-				<TD><%=bundle.getString("log_weblogic")%></TD>
-			</TR>
-			<% } %>
 			<TR>
                 <td>
                   <input type="checkbox" id="termAudit" name="termAudit" value="1" />
@@ -360,7 +351,7 @@ TR.trodd {
 				<TD><%=bundle.getString("log_term_audit_file") %></TD>
 				<TD><%=bundle.getString("log_tb_audit")%></TD>
 			</TR>
-			 -->
+-->
 		</TABLE>
         </form>
 </BODY>

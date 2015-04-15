@@ -37,13 +37,16 @@ namespace GlobalSight.InDesignConverter
         public const string EXPORT_FILE_EXT = "*.ex_command";
         public const string IMPORT_FILE_EXT = "*.im_command";
         public const string PEVIEW_FILE_EXT = "*.pv_command";
+        public const string IDML_PEVIEW_FILE_EXT = "*.ip_command";
+        public const string INCTXRV_FILE_EXT = "*.ir_command";
 
         //10 chars after . for both 
         //import(*.im_command), 
         //export(*.ex_command), 
         //preview(*.pv_command)
+        //in context review(*.ir_command)
         private const int FILE_EXT_LEN = 10;
-        public enum ConversionType { IMPORT, EXPORT, PREVIEW};
+        public enum ConversionType { IMPORT, EXPORT, PREVIEW, IDML_PREVIEW, INCTXRV };
 
 
         private string m_originalFileName = null;
@@ -78,8 +81,16 @@ namespace GlobalSight.InDesignConverter
             {
                 m_fileExtensionSearchPattern = PEVIEW_FILE_EXT;
             }
+            else if (m_conversionType == ConversionType.IDML_PREVIEW)
+            {
+                m_fileExtensionSearchPattern = IDML_PEVIEW_FILE_EXT;
+            }
+			else if(m_conversionType == ConversionType.INCTXRV)
+            {
+                m_fileExtensionSearchPattern = INCTXRV_FILE_EXT;
+            }
 			else
-			{
+            {
 				m_fileExtensionSearchPattern = IMPORT_FILE_EXT;
 			}
 		}
@@ -88,7 +99,7 @@ namespace GlobalSight.InDesignConverter
         /// Converts the file from one format to another.
         /// </summary>
         /// <param name="p_filename">The command file 
-        /// (.im_command, .ex_command, .pv_command)</param>
+        /// (.im_command, .ex_command, .pv_command, .ir_command)</param>
         /// <param name="p_language">the language of the directory 
         /// the file was written in</param>
         public void Convert(string p_fileName, string p_language)
@@ -118,6 +129,22 @@ namespace GlobalSight.InDesignConverter
                         m_statusFileName = m_statusFileName.Substring(0,
                                     m_statusFileName.LastIndexOf(".")) + ".pv_status";
                         indesignApp.ConvertInddToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                    }
+                    else if (m_conversionType == ConversionType.IDML_PREVIEW)
+                    {
+                        //The status name will be changed to *.pv_status from *.status
+                        //when execute the preview command(*.pv_command) file
+                        m_statusFileName = m_statusFileName.Substring(0,
+                                    m_statusFileName.LastIndexOf(".")) + ".ip_status";
+                        indesignApp.ConvertIdmlToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                    }
+                    else if (m_conversionType == ConversionType.INCTXRV)
+                    {
+                        //The status name will be changed to *.pv_status from *.status
+                        //when execute the preview command(*.pv_command) file
+                        m_statusFileName = m_statusFileName.Substring(0,
+                                    m_statusFileName.LastIndexOf(".")) + ".ir_status";
+                        indesignApp.ConvertXmlToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
                     }
                     else
                     {

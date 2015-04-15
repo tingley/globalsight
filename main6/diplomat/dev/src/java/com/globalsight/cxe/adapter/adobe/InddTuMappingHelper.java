@@ -75,13 +75,24 @@ public class InddTuMappingHelper
         return m;
     }
 
-    public static void processOutput(Output output)
+    public static void processOutput(Output output, boolean isIdml, boolean isIndd)
     {
         DocumentElement de = null;
         int lastPageNum = 0;
-        Pattern p = Pattern.compile(
-                "&lt;story name=&quot;Stories/[^&]+\\.xml&quot; pageNum=&quot;([\\d]+)&quot;&gt;",
-                Pattern.MULTILINE);
+        Pattern p = null;
+
+        if (isIdml)
+        {
+            p = Pattern
+                    .compile(
+                            "&lt;story name=&quot;Stories/[^&]+\\.xml&quot; pageNum=&quot;([\\d]+)&quot;&gt;",
+                            Pattern.MULTILINE);
+        }
+        
+        if (isIndd)
+        {
+            p = Pattern.compile(" pageNumber=&quot;([\\d]+)&quot;", Pattern.MULTILINE);
+        }
 
         for (Iterator it = output.documentElementIterator(); it.hasNext();)
         {

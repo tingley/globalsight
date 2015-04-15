@@ -12,6 +12,8 @@ namespace InDesignConverter
         static ConverterRunner m_importConverterRunner = null;
         static ConverterRunner m_exportConverterRunner = null;
         static ConverterRunner m_previewConverterRunner = null;
+        static ConverterRunner m_idmlPreviewConverterRunner = null;
+        static ConverterRunner m_inctxrvConverterRunner = null;
 
         public static void start(String dir)
         {
@@ -48,10 +50,18 @@ namespace InDesignConverter
                 m_previewConverterRunner = new ConverterRunner(
                     new InDesignConverterImpl(InDesignConverterImpl.ConversionType.PREVIEW),
                     m_watchDirNames);
+                m_idmlPreviewConverterRunner = new ConverterRunner(
+                    new InDesignConverterImpl(InDesignConverterImpl.ConversionType.IDML_PREVIEW),
+                    m_watchDirNames);
+                m_inctxrvConverterRunner = new ConverterRunner(
+                    new InDesignConverterImpl(InDesignConverterImpl.ConversionType.INCTXRV),
+                    m_watchDirNames);
 
                 m_importConverterRunner.Start();
                 m_exportConverterRunner.Start();
                 m_previewConverterRunner.Start();
+                m_idmlPreviewConverterRunner.Start();
+                m_inctxrvConverterRunner.Start();
 
                 m_InDesignApp = InDesignApplication.getInstance();
             }
@@ -78,6 +88,14 @@ namespace InDesignConverter
             if (m_previewConverterRunner != null)
             {
                 m_previewConverterRunner.Stop();
+            }
+            if (m_idmlPreviewConverterRunner != null)
+            {
+                m_idmlPreviewConverterRunner.Stop();
+            }
+            if (m_inctxrvConverterRunner != null)
+            {
+                m_inctxrvConverterRunner.Stop();
             }
         }
     }

@@ -49,6 +49,7 @@ import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
+import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.segmentationhelper.Segmentation;
@@ -66,6 +67,7 @@ import com.globalsight.ling.docproc.merger.fm.FontMappingHelper;
 import com.globalsight.ling.docproc.merger.html.HtmlPreviewerHelper;
 import com.globalsight.ling.docproc.merger.jsp.JspPostMergeProcessor;
 import com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * The public API for the GXML Extractor Framework.
@@ -1090,6 +1092,21 @@ public class DiplomatAPI implements IFormatNames
             {
                 isIdmlXml = IdmlHelper.isIdmlFileProfile(Long.parseLong(fileProfileId));
                 xmlExtractor.setIsIdmlXml(isIdmlXml);
+
+                if (!isIdmlXml)
+                {
+                    FileProfileImpl f = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(fileProfileId),
+                            false);
+                    if (f != null)
+                    {
+                        long id = f.getKnownFormatTypeId();
+                        KnownFormatTypeImpl type = HibernateUtil.get(KnownFormatTypeImpl.class, id);
+                        if (type != null)
+                        {
+                            isInddXml = type.getFormatType().startsWith("indd_");
+                        }
+                    }
+                }
             }
 
             for (ExtractRule r : rules)
@@ -1238,7 +1255,7 @@ public class DiplomatAPI implements IFormatNames
         
         if (isIdmlXml || isInddXml)
         {
-            InddTuMappingHelper.processOutput(m_output);
+            InddTuMappingHelper.processOutput(m_output, isIdmlXml, isInddXml);
         }
 
         // call GC here to free some memory used in extracting

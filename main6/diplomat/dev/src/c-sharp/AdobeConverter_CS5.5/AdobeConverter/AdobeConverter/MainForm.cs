@@ -23,6 +23,8 @@ namespace GlobalSight.AdobeConverter
 
         public MainForm()
         {
+            Form.CheckForIllegalCrossThreadCalls = false;
+
             InitializeComponent();
 
             InitData();

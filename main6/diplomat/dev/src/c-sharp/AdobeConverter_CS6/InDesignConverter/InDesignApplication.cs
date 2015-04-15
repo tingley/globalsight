@@ -469,11 +469,13 @@ namespace GlobalSight.InDesignConverter
 
                 PreImport(p_xmlFileName);
                 m_inDesignDoc.ImportXML(p_xmlFileName);
-
-                ProcessInddFile(p_masterTranslated, p_translateHiddenLayer, true);
-                UpdateParagraphStyle(true, false);
                 
-                ImportXMP(p_inddFileName);
+                UpdateParagraphStyle(false, false);
+
+                UnmarkInddFile();
+
+                MarkupInddFile2(p_masterTranslated, p_translateHiddenLayer, true);
+
                 RestoreLayers();
 
                 //convert to pdf
@@ -813,7 +815,7 @@ namespace GlobalSight.InDesignConverter
                         {
                             try
                             {
-                                pointSize = "" + (Int32.Parse(pointSize) - 2);
+                                pointSize = "" + (Double.Parse(pointSize) - (double)2);
                             }
                             catch { }
                         }
@@ -1084,7 +1086,7 @@ namespace GlobalSight.InDesignConverter
                     {
                         try
                         {
-                            pointSize = "" + (Int32.Parse(pointSize) - 2);
+                            pointSize = "" + (Double.Parse(pointSize) - (double)2);
                         }
                         catch { }
                     }
@@ -1510,6 +1512,8 @@ namespace GlobalSight.InDesignConverter
 
             if (element != null)
             {
+                List<InDesign.Paragraph> paras = new List<InDesign.Paragraph>();
+
                 for (int ii = 0; ii < element.Paragraphs.Count; ii++)
                 {
                     if (ii == 0)
@@ -1521,10 +1525,62 @@ namespace GlobalSight.InDesignConverter
                         paragraph = (InDesign.Paragraph)element.Paragraphs.NextItem(paragraph);
                     }
 
+                    paras.Add(paragraph);
+                }
 
-                    if (paragraph != null && paragraph.Texts.Count > 0 && addBookmark)
+                foreach(InDesign.Paragraph ppp in paras)
+                {
+                    if (ppp != null && ppp.Texts.Count > 0 && addBookmark)
                     {
-                        AddBookmark4Paragraph(paragraph);
+                        AddBookmark4Paragraph(ppp);
+                    }
+
+                    if (ppp != null && ppp.Tables.Count > 0 && addBookmark)
+                    {
+                        InDesign.Table table = null;
+                        InDesign.Cell cell = null;
+                        InDesign.Paragraph p = null;
+                        // update tables styles if paragraph has tables.
+                        for (int t = 0; t < ppp.Tables.Count; t++)
+                        {
+                            if (t == 0)
+                            {
+                                table = (InDesign.Table)ppp.Tables.FirstItem();
+                            }
+                            else
+                            {
+                                table = (InDesign.Table)ppp.Tables.NextItem(table);
+                            }
+
+                            // update cells one by one
+                            for (int tt = 0; tt < table.Cells.Count; tt++)
+                            {
+                                if (tt == 0)
+                                {
+                                    cell = (InDesign.Cell)table.Cells.FirstItem();
+                                }
+                                else
+                                {
+                                    cell = (InDesign.Cell)table.Cells.NextItem(cell);
+                                }
+
+                                InDesign.Paragraphs ps = cell.Paragraphs;
+
+                                for (int ttt = 0; ttt < ps.Count; ttt++)
+                                {
+                                    if (ttt == 0)
+                                    {
+                                        p = (InDesign.Paragraph)ps.FirstItem();
+                                    }
+                                    else
+                                    {
+                                        p = (InDesign.Paragraph)ps.NextItem(p);
+                                    }
+
+                                    AddBookmark4Paragraph(p);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1633,7 +1689,7 @@ namespace GlobalSight.InDesignConverter
                         // Mark up each text frame for page.
                         foreach (PageItemObj pageItemObj in textFrameList)
                         {
-                            MarkupInddStory2(rootElm, pageItemObj.Stories, addBookmark);
+                            MarkupInddStory2(rootElm, pageItemObj.Stories, addBookmark, 0);
                         }
                     }
                 }
@@ -1667,7 +1723,7 @@ namespace GlobalSight.InDesignConverter
                 // Mark up each text frame for page.
                 foreach (PageItemObj pageItemObj in textFrameList)
                 {
-                    MarkupInddStory2(rootElm, pageItemObj.Stories, addBookmark);
+                    MarkupInddStory2(rootElm, pageItemObj.Stories, addBookmark, pageIndex + 1);
                 }
             }
         }
@@ -1939,7 +1995,7 @@ namespace GlobalSight.InDesignConverter
             }
         }
 
-        private void MarkupInddStory2(InDesign.XMLElement p_parentElm, List<InDesign.Story> p_stories, bool addBookmark)
+        private void MarkupInddStory2(InDesign.XMLElement p_parentElm, List<InDesign.Story> p_stories, bool addBookmark, int pageNum)
         {
             if (p_stories == null || p_stories.Count == 0)
             {
@@ -1950,7 +2006,7 @@ namespace GlobalSight.InDesignConverter
             {
                 if (!IsStoryMarked(story))
                 {
-                    MarkupInddStory(p_parentElm, story, INDD_STORY_TAG, addBookmark);
+                    MarkupInddStory(p_parentElm, story, INDD_STORY_TAG, addBookmark, pageNum);
 
                     MakeStoryMarked(story);
                 }
@@ -1960,7 +2016,7 @@ namespace GlobalSight.InDesignConverter
         /// <summary>
         /// Mark up the story and style of indd file with special xml tags.
         /// </summary>
-        private void MarkupInddStory(InDesign.XMLElement p_parentElm, InDesign.Story p_story, string p_storyTagName, bool addBookmark)
+        private void MarkupInddStory(InDesign.XMLElement p_parentElm, InDesign.Story p_story, string p_storyTagName, bool addBookmark, int pageNum)
         {
             ArrayList paraList = new ArrayList();
             InDesign.Paragraph paragraph = null;
@@ -1993,14 +2049,14 @@ namespace GlobalSight.InDesignConverter
             // Mark up each paragraph.
             foreach (InDesign.Paragraph eachparagraph in paraList)
             {
-                MarkupInddParagraph(xmlElement, eachparagraph, addBookmark);
+                MarkupInddParagraph(xmlElement, eachparagraph, addBookmark, pageNum);
             }
         }
 
         /// <summary>
         /// Mark up the paragraph and style of indd file with special xml tags.
         /// </summary>
-        private void MarkupInddParagraph(InDesign.XMLElement p_parentElm, InDesign.Paragraph p_paragraph, bool addBookmark)
+        private void MarkupInddParagraph(InDesign.XMLElement p_parentElm, InDesign.Paragraph p_paragraph, bool addBookmark, int pageNum)
         {
             if (IsParagraphMarked(p_paragraph))
             {
@@ -2057,7 +2113,7 @@ namespace GlobalSight.InDesignConverter
                     table = (InDesign.Table)p_paragraph.Tables.NextItem(table);
                 }
 
-                MarkupInddTable(paraElement, table, addBookmark);
+                MarkupInddTable(paraElement, table, addBookmark, pageNum);
             }
 
             // Markup Footnote if paragraph includes Footnotes.
@@ -2072,10 +2128,22 @@ namespace GlobalSight.InDesignConverter
                     footnote = (InDesign.Footnote)p_paragraph.Footnotes.NextItem(footnote);
                 }
 
-                MarkupInddFootnote(paraElement, footnote, addBookmark);
+                MarkupInddFootnote(paraElement, footnote, addBookmark, pageNum);
             }
 
-            p_paragraph.Markup(paraElement);
+            // add page number for in context review
+            paraElement.XMLAttributes.Add("pageNumber", "" + pageNum);
+
+            try
+            {
+                p_paragraph.Markup(paraElement);
+            }
+            catch (Exception ex)
+            {
+                String msg = "Cannot markup paragraph (" + p_paragraph.Contents + ") with exception " + ex.ToString();
+                m_log.Log(msg);
+            }
+
             MakeParagraphMarked(p_paragraph);
 
             if (p_paragraph.Texts.Count > 0 && addBookmark)
@@ -2475,7 +2543,7 @@ namespace GlobalSight.InDesignConverter
         /// <summary>
         /// Mark up the table and style of indd file with special xml tags.
         /// </summary>
-        private void MarkupInddTable(InDesign.XMLElement p_parentElm, InDesign.Table p_table, bool addBookmark)
+        private void MarkupInddTable(InDesign.XMLElement p_parentElm, InDesign.Table p_table, bool addBookmark, int pageNum)
         {
             // Table in indd file will be markup automatically with "Table" and "Cell" xml notes,
             // here "Inddgstable" will not be used to markup the Table in indd file.
@@ -2537,7 +2605,7 @@ namespace GlobalSight.InDesignConverter
                                 text = (InDesign.Text)cell.Texts.NextItem(text);
                             }
 
-                            AddBookmark4Text(text);
+                            AddBookmark4Text(text, null);
                         }
                     }
                 }
@@ -2547,7 +2615,7 @@ namespace GlobalSight.InDesignConverter
         /// <summary>
         /// Mark up the Footnote and style of indd file with special xml tags.
         /// </summary>
-        private void MarkupInddFootnote(InDesign.XMLElement p_parentElm, InDesign.Footnote p_footnote, bool addBookmark)
+        private void MarkupInddFootnote(InDesign.XMLElement p_parentElm, InDesign.Footnote p_footnote, bool addBookmark, int pageNum)
         {
             InDesign.Text tempText = null;
             InDesign.XMLElement elm = null;
@@ -2585,7 +2653,7 @@ namespace GlobalSight.InDesignConverter
 
             if (addBookmark)
             {
-                AddBookmark4Text(tempText);
+                AddBookmark4Text(tempText, null);
             }
 
             // Delete the Footnote because the XML tag doesn't recognise the Footnote.
@@ -2607,7 +2675,7 @@ namespace GlobalSight.InDesignConverter
                     p_text = (InDesign.Text)p_paragraph.Texts.NextItem(p_text);
                 }
 
-                AddBookmark4Text(p_text);
+                AddBookmark4Text(p_text, ( p_paragraph.Texts.Count == 1 ? p_paragraph : null));
             }
         }
 
@@ -2616,9 +2684,9 @@ namespace GlobalSight.InDesignConverter
         private static String RE_WHITESPACE = "[ \t]{2,}";
         private static Regex regWHITESPACE = new Regex(RE_WHITESPACE);
 
-        
 
-        private void AddBookmark4Text(InDesign.Text p_text)
+
+        private void AddBookmark4Text(InDesign.Text p_text, InDesign.Paragraph p_paragraph)
         {
             try
             {
@@ -2630,23 +2698,125 @@ namespace GlobalSight.InDesignConverter
                 m_log.Log("Cannot change Hyphenation: " + msg);
             }
 
-            Object contents = p_text.Contents;
             string content = p_text.Contents.ToString();
+            /*
+            if (p_text.Paragraphs.Count > 1)
+            {
+                InDesign.Paragraph ppp = null;
+
+                for (int i = 0; i < p_text.Paragraphs.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        ppp = (InDesign.Paragraph)p_text.Paragraphs.FirstItem();
+                    }
+                    else
+                    {
+                        ppp = (InDesign.Paragraph)p_text.Paragraphs.NextItem(ppp);
+                    }
+
+                    InDesign.Text text = (InDesign.Text) ppp.Texts.FirstItem();
+
+                    if (content.CompareTo(text.Contents.ToString()) == 0)
+                    {
+                        p_text = text;
+                        break;
+                    }
+                }
+            } */
 
             bool matched = false;
             string gsid = "";
+            List<int> m_starts = new List<int>();
+            List<int> m_ends = new List<int>();
             Match m = regGSID.Match(content);
+            int allLength = 0;
             if (m != null && m.Success)
             {
                 matched = true;
                 gsid = m.Groups[1].Value;
+
+                allLength += m.Length;
+                m_starts.Add(m.Index);
+                m_ends.Add(m.Index + m.Length);
+                m = m.NextMatch();
+
+                while (m != null && m.Success)
+                {
+                    allLength += m.Length;
+                    m_starts.Add(m.Index);
+                    m_ends.Add(m.Index + m.Length);
+                    m = m.NextMatch();
+                }
             }
 
             if (matched)
             {
+                /*
+                InDesign.Characters oldChars = (InDesign.Characters)p_text.Characters;
+                List<InDesign.Font> fonts = new List<InDesign.Font>();
+                InDesign.Character ccc = null;
+
+                for (int i = 0; i < oldChars.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        ccc = (InDesign.Character)oldChars.FirstItem();
+                    }
+                    else
+                    {
+                        ccc = (InDesign.Character)oldChars.NextItem(ccc);
+                    }
+
+                    bool isGSID = false;
+                    for (int j = 0; j < m_starts.Count; j++)
+                    {
+                        int start = m_starts[j];
+                        int end = m_ends[j];
+
+                        if (i >= start && i < end)
+                        {
+                            isGSID = true;
+                            break;
+                        }
+                    }
+
+                    if (!isGSID)
+                    {
+                        fonts.Add((InDesign.Font)ccc.AppliedFont);
+                    }
+                }
+                InDesign.Characters newChars = (InDesign.Characters)p_text.Characters;
+                
+                if (fonts.Count > 0)
+                {
+                    for (int i = 0; i < newChars.Count; i++)
+                    {
+                        if (i == 0)
+                        {
+                            ccc = (InDesign.Character)newChars.FirstItem();
+                        }
+                        else
+                        {
+                            ccc = (InDesign.Character)newChars.NextItem(ccc);
+                        }
+
+
+                        InDesign.Font f = i >= fonts.Count ? fonts[fonts.Count - 1] : fonts[i];
+                        ccc.AppliedFont = f;
+                    }
+                } */
+
                 string newContent = regGSID.Replace(content, "");
                 newContent = newContent.Replace("\t", " ");
                 newContent = regWHITESPACE.Replace(newContent, " ");
+                /*
+                for (int i = 0; i < allLength; i++)
+                {
+                    newContent = newContent + " ";
+                }
+                */
+
                 p_text.Contents = newContent;
 
                 string htdid = "GlobalSight_" + gsid;
@@ -2690,7 +2860,6 @@ namespace GlobalSight.InDesignConverter
             {
                 preset = presets.Add();
             }
-
             // By setting "isInddappBlocked = true",
             // make sure another thread continuously check the pop up dialog
             // which will block InDesign Application when exporting a tagged indd file

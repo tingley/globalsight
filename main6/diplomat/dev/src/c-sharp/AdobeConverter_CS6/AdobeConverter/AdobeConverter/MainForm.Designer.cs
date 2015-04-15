@@ -178,7 +178,7 @@ namespace GlobalSight.AdobeConverter
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.ShowInTaskbar = false;
-            this.Text = "Adobe CS6 Converter - Version: 8.6";
+            this.Text = "Adobe CS6 Converter - Version: 8.6.2";
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.ResumeLayout(false);

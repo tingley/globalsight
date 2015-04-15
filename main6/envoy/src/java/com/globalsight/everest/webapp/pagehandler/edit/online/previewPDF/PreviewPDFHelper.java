@@ -170,12 +170,17 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             Workflow workflow = ServerProxy.getWorkflowManager().getWorkflowById(workflowId);
             long companyId = workflow.getCompanyId();
             for (TargetPage tp : workflow.getTargetPages())
-            {
-                String trgPagePath = getTargetPagePath(tp);
-                File pdf = getPreviewPdf(trgPagePath, companyId, p_userId);
-                if (!pdf.exists())
-                    createPDF(tp, p_userId);
-            }
+			{
+				String trgPagePath = getTargetPagePath(tp);
+				int index = trgPagePath.lastIndexOf(".");
+				String extension = trgPagePath.substring(index);
+				if (extensionSet.contains(extension.toLowerCase()))
+				{
+					File pdf = getPreviewPdf(trgPagePath, companyId, p_userId);
+					if (!pdf.exists())
+						createPDF(tp, p_userId);
+				}
+			}
         }
     }
 
@@ -1295,10 +1300,15 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 for (TargetPage tp : wf.getTargetPages())
                 {
                     String trgPagePath = getTargetPagePath(tp);
-                    File pdf = getPreviewPdf(trgPagePath, companyId, p_userid);
-                    if (pdf.exists())
-                    	pdf = setCopyOnlyPermission(pdf);
-                        pdfs.add(pdf);
+                    int index = trgPagePath.lastIndexOf(".");
+    				String extension = trgPagePath.substring(index);
+    				if (extensionSet.contains(extension.toLowerCase()))
+    				{
+    					File pdf = getPreviewPdf(trgPagePath, companyId, p_userid);
+    					if (pdf.exists())
+    						pdf = setCopyOnlyPermission(pdf);
+    					pdfs.add(pdf);
+    				}
                 }
             }
         }

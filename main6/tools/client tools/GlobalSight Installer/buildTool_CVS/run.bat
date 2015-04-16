@@ -1,1 +1,0 @@
-java -classpath .;lib/log4j.jar com.Main

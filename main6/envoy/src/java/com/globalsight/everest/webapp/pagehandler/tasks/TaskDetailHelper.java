@@ -446,7 +446,7 @@ public class TaskDetailHelper
 
     // Prints file name with full path
     public static String printPageLink(JspWriter out, String p_page,
-            String p_url, boolean hasEditPerm) throws IOException
+            String p_url, boolean hasEditPerm, int pageNum) throws IOException
     {
         // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
         // show them last so the main file names are grouped together
@@ -469,7 +469,7 @@ public class TaskDetailHelper
             out.print(" oncontextmenu=\"contextForPage('");
             out.print(p_url);
             out.print("', event, '");
-            out.print(pageName);
+            out.print( pageNum);
             out.print("')\"");
             out.print(" onfocus='this.blur();'");
             out.print(" page='");
@@ -494,7 +494,7 @@ public class TaskDetailHelper
 
     // Prints short file name with full path in tooltip
     public static String printPageLinkShort(JspWriter out, String p_page,
-            String p_url, boolean hasEditPerm) throws IOException
+            String p_url, boolean hasEditPerm, int pageNum) throws IOException
     {
         // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
         // show them last so the main file names are grouped together
@@ -529,7 +529,7 @@ public class TaskDetailHelper
             out.print(" oncontextmenu=\"contextForPage('");
             out.print(p_url);
             out.print("', event, '");
-            out.print(pageName);
+            out.print(pageNum);
             out.print("')\"");
             out.print(" onfocus='this.blur();'");
             out.print(" page='");

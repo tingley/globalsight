@@ -209,6 +209,8 @@
 }
 </style>
 <script type="text/javascript">
+var pageNames = new Array();
+
 function contorlTargetLocale(){
 	var localeSelect = document.getElementById("<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>");
     var locale = localeSelect.options[localeSelect.selectedIndex].value;
@@ -330,7 +332,7 @@ function searchPages(){
 	    </thead>
 	    <tbody id="sourceFilesTbody">
 	    	<!-- SourcePages -->
-		    <c:forEach items="${JobSourcePageDisplayList}" var="item">
+		    <c:forEach items="${JobSourcePageDisplayList}" var="item" varStatus="s">
 		    	<tr>
 		    		<td style="word-wrap: break-word;word-break:break-all;text-align:left;">
 			    		<c:if test="${addCheckBox}">
@@ -361,7 +363,10 @@ function searchPages(){
 											<a class="standardHREF" href="${item.pageUrl}" target="_blank" title="${item.sourcePage.displayPageName}">
 										</c:when>
 										<c:otherwise>
-											<a class="standardHREF" href="#" onclick="openViewerWindow('${item.pageUrl}');return false;" oncontextmenu="contextForPage('${item.pageUrl}',event, '${item.sourcePage.displayPageName}')" onfocus="this.blur();" title="${item.sourcePage.displayPageName}">
+											<script type="text/javascript">
+											pageNames[${ status.index}] = "${item.sourcePage.displayPageName}";
+											</script>
+											<a class="standardHREF" href="#" onclick="openViewerWindow('${item.pageUrl}');return false;" oncontextmenu="contextForPage('${item.pageUrl}',event, '${ status.index}')" onfocus="this.blur();" title="${item.sourcePage.displayPageName}">
 										</c:otherwise>
 									</c:choose>
 								</amb:permission>
@@ -672,6 +677,7 @@ function contextForPage(url, e, displayName)
 
     var allowEditSource = eval('${allowEditSourcePage}');
     var canEditSource = eval('${canEditSourcePage}');
+    displayName = pageNames[displayName];
     
     var showInContextReview = displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/));
     

@@ -626,10 +626,11 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 sb.append(" WHERE tu.tmId = ?").addValue(tmId);
             }
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+			{
+				String projectValue = getProjects((String) e.getValue());
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append(" in (").append(projectValue).append(")");
+			}
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -684,10 +685,11 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 }
             }
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+			{
+				String projectValue = getProjects((String) e.getValue());
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append(" in (").append(projectValue).append(")");
+			}
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -736,10 +738,11 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         tmId);
             }
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+			{
+				String projectValue = getProjects((String) e.getValue());
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append("  in (").append(projectValue).append(")");
+			}
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -989,10 +992,11 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         .append(" AND tu.id > ?").addValues(startId);
             }
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+			{
+				String projectValue = getProjects((String) e.getValue());
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append("  in (").append(projectValue).append(")");
+			}
             if (start != null && end != null)
             {
                 sb.append(" ORDER BY tuv.tuId ASC LIMIT ?").addValues(count);
@@ -1058,10 +1062,11 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 }
             }
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+			{
+				String projectValue = getProjects((String) e.getValue());
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append("  in (").append(projectValue).append(")");
+			}
             if (start != null && end != null)
             {
                 sb.append(" ORDER BY tuv.tuId ASC LIMIT ?").addValues(count);
@@ -1200,5 +1205,16 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			localeIds = localeIds.substring(0, localeIds.lastIndexOf(","));
 		}
 		return localeIds;
+	}
+	
+	private String getProjects(String values)
+	{
+		String[] valueArr = values.split(",");
+		String projectValue = "";
+		for (String value : valueArr)
+		{
+			projectValue += "'" + value + "'" + ",";
+		}
+		return projectValue.substring(0, projectValue.lastIndexOf(","));
 	}
 }

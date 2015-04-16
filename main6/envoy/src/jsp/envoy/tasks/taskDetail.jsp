@@ -771,6 +771,7 @@ var b_canEditInSameWindow = eval("<%=canEditInSameWindow%>");
 var b_isReviewActivity = eval("<%=isReviewActivity%>");
 var needWarning = false;
 var helpFile = "<%=helpFile%>";
+var pageNames = new Array();
 
 var openIssuesDom = XmlDocument.create();
 var taskId = <%=task_id%>;
@@ -815,6 +816,7 @@ function contextForPage(url, e, displayName)
     var lb_context_item_inline_editor;
     var lb_context_item_popup_editor ;
     var fontB1 = "<B>", fontB2 = "</B>";
+    displayName = pageNames[displayName];
     var showInContextReview = (displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/)));
     var inctxTitle = "Open In Context Review";
     
@@ -1230,11 +1232,21 @@ function searchPages(){
 	                    // print page name and editor link
 	                    if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_FULL))
 	                    {
-	                    	treeParam=TaskDetailHelper.printPageLink(out, pageName, pageUrl, hasEditPerm);
+	                    	treeParam=TaskDetailHelper.printPageLink(out, pageName, pageUrl, hasEditPerm, i);
+	                    	%>
+	                    	<script type="text/javascript">
+	                    	pageNames[<%=i%>] = "<%=pageName%>";
+	                    	</script>
+	                    	<% 
 	                    }
 	                    else if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_SHORT))
 	                    {
-	                    	treeParam=TaskDetailHelper.printPageLinkShort(out, pageName, pageUrl, hasEditPerm);
+	                    	treeParam=TaskDetailHelper.printPageLinkShort(out, pageName, pageUrl, hasEditPerm, i);
+	                    	%>
+	                    	<script type="text/javascript">
+	                    	pageNames[<%=i%>] = "<%=pageName%>";
+	                    	</script>
+	                    	<% 
 	                    }
 	                    treeLink.append(treeParam+"?");
 						%>

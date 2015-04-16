@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="com.adobe.cq.sling.SimpleDSComponent" name="%com.adobe.cq.sling.SimpleDSComponent.name" description="%com.adobe.cq.sling.SimpleDSComponent.description"/>
+    <OCD id="com.adobe.cq.sling.DownLoadFile" name="%com.adobe.cq.sling.DownLoadFile.name" description="%com.adobe.cq.sling.DownLoadFile.description">
+        <AD id="sling.servlet.paths" type="String" default="/bin/downloadServlet" name="%sling.servlet.paths.name" description="%sling.servlet.paths.description"/>
+        <AD id="sling.servlet.methods" type="String" default="GET" name="%sling.servlet.methods.name" description="%sling.servlet.methods.description"/>
+    </OCD>
+    <OCD id="com.adobe.cq.sling.HandleClaim" name="%com.adobe.cq.sling.HandleClaim.name" description="%com.adobe.cq.sling.HandleClaim.description">
+        <AD id="sling.servlet.paths" type="String" default="/bin/mySearchServlet" name="%sling.servlet.paths.name" description="%sling.servlet.paths.description"/>
+        <AD id="sling.servlet.methods" type="String" default="POST" name="%sling.servlet.methods.name" description="%sling.servlet.methods.description"/>
+    </OCD>
+    <OCD id="com.adobe.cq.sling.HandleFile" name="%com.adobe.cq.sling.HandleFile.name" description="%com.adobe.cq.sling.HandleFile.description">
+        <AD id="sling.servlet.paths" type="String" default="/bin/upfile" name="%sling.servlet.paths.name" description="%sling.servlet.paths.description"/>
+        <AD id="sling.servlet.methods" type="String" default="POST" name="%sling.servlet.methods.name" description="%sling.servlet.methods.description"/>
+        <AD id="sling.auth.requirements" type="String" default="-/bin/upfile" name="%sling.auth.requirements.name" description="%sling.auth.requirements.description"/>
+    </OCD>
+    <OCD id="com.adobe.cq.sling.UpdateCart" name="%com.adobe.cq.sling.UpdateCart.name" description="%com.adobe.cq.sling.UpdateCart.description">
+        <AD id="sling.servlet.paths" type="String" default="/bin/updateCartServlet" name="%sling.servlet.paths.name" description="%sling.servlet.paths.description"/>
+        <AD id="sling.servlet.methods" type="String" default="POST" name="%sling.servlet.methods.name" description="%sling.servlet.methods.description"/>
+    </OCD>
+    <Designate pid="com.adobe.cq.sling.SimpleDSComponent">
+        <Object ocdref="com.adobe.cq.sling.SimpleDSComponent"/>
+    </Designate>
+    <Designate pid="com.adobe.cq.sling.DownLoadFile">
+        <Object ocdref="com.adobe.cq.sling.DownLoadFile"/>
+    </Designate>
+    <Designate pid="com.adobe.cq.sling.HandleClaim">
+        <Object ocdref="com.adobe.cq.sling.HandleClaim"/>
+    </Designate>
+    <Designate pid="com.adobe.cq.sling.HandleFile">
+        <Object ocdref="com.adobe.cq.sling.HandleFile"/>
+    </Designate>
+    <Designate pid="com.adobe.cq.sling.UpdateCart">
+        <Object ocdref="com.adobe.cq.sling.UpdateCart"/>
+    </Designate>
+</metatype:MetaData>

@@ -55,13 +55,13 @@ public class FileUploadThread extends Thread
             List<String> files = new ArrayList<String>();
             if (CreateJobUtil.isZipFile(file))
             {
-                List<ZipEntry> entries = CreateJobUtil.getFilesInZipFile(file);
+                List<net.lingala.zip4j.model.FileHeader> entries = CreateJobUtil.getFilesInZipFile(file);
                 String zipFileFullPath = file.getPath();
                 String zipFilePath = zipFileFullPath.substring(0,
                         zipFileFullPath.indexOf(file.getName()));
-                for (ZipEntry entry : entries)
+                for (net.lingala.zip4j.model.FileHeader entry : entries)
                 {
-                    String zipEntryName = entry.getName();
+                    String zipEntryName = entry.getFileName();
                     files.add(zipFilePath
                             + file.getName().substring(0,
                                     file.getName().lastIndexOf("."))
@@ -70,13 +70,21 @@ public class FileUploadThread extends Thread
             }
             else if (CreateJobUtil.isRarFile(file))
             {
+                String rarEntryName = null;
                 List<FileHeader> entriesInRar = CreateJobUtil.getFilesInRarFile(file);
                 String zipFileFullPath = file.getPath();
                 String zipFilePath = zipFileFullPath.substring(0,
                         zipFileFullPath.indexOf(file.getName()));
                 for (FileHeader header : entriesInRar)
                 {
-                    String rarEntryName = header.getFileNameString();
+                    if (header.isUnicode())
+                    {
+                        rarEntryName = header.getFileNameW();
+                    }
+                    else
+                    {
+                        rarEntryName = header.getFileNameString();
+                    }
                     files.add(zipFilePath
                             + file.getName().substring(0,
                                     file.getName().lastIndexOf("."))

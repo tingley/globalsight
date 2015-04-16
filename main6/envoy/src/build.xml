@@ -255,6 +255,7 @@
 				<include name="java-unrar-0.5.jar" />
                 <include name="commons-compress-1.9.jar" />
 				<include name="xz.jar" />
+				<include name="zip4j_1.3.2.jar"/>
 			</fileset>
 			<fileset dir="../../diplomat/dev/src/webtop-plugin/lib">
 	            <include name="jaxrpc.jar" />

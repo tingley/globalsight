@@ -2029,23 +2029,24 @@ public class CreateJobsMainHandler extends PageHandler
     /**
      * Add a progress bar for each files within a zip file.
      * @param file
+     * @throws Exception 
      */
-    private String addZipFile(File file)
+    private String addZipFile(File file) throws Exception
     {
         String zipFileFullPath = file.getPath();
         String zipFilePath = zipFileFullPath.substring(0,
                 zipFileFullPath.indexOf(file.getName()));
         
-        List<ZipEntry> entriesInZip = CreateJobUtil.getFilesInZipFile(file);
+        List<net.lingala.zip4j.model.FileHeader> entriesInZip = CreateJobUtil.getFilesInZipFile(file);
         
         StringBuffer ret = new StringBuffer("");
-        for (ZipEntry entry : entriesInZip)
+        for (net.lingala.zip4j.model.FileHeader entry : entriesInZip)
         {
             if (ret.length() > 0)
             {
                 ret.append(",");
             }
-            String zipEntryName = entry.getName();
+            String zipEntryName = entry.getFileName();
             /*
              * The unzipped files are in folders named by the zip file name
              */
@@ -2054,12 +2055,12 @@ public class CreateJobsMainHandler extends PageHandler
                             file.getName().lastIndexOf(".")) + File.separator
                     + zipEntryName;
             // if zip file contains subfolders, entry name will contains "/" or "\"
-            if (zipEntryName.indexOf("/") != 0)
+            if (zipEntryName.indexOf("/") != -1)
             {
                 zipEntryName = zipEntryName.substring(zipEntryName
                         .lastIndexOf("/") + 1);
             }
-            else if (zipEntryName.indexOf("\\") != 0)
+            else if (zipEntryName.indexOf("\\") != -1)
             {
                 zipEntryName = zipEntryName.substring(zipEntryName
                         .lastIndexOf("\\") + 1);
@@ -2073,7 +2074,7 @@ public class CreateJobsMainHandler extends PageHandler
                     .append(unzippedFileFullPath.replace("\\", File.separator)
                             .replace("/", File.separator).replace("\\", "\\\\").replace("'", "\\'"))
                     .append("',name:'").append(zipEntryName.replace("'", "\\'")).append("',size:'")
-                    .append(entry.getSize()).append("'}");
+                    .append(entry.getUncompressedSize()).append("'}");
         }
         return ret.toString();
     }
@@ -2084,6 +2085,7 @@ public class CreateJobsMainHandler extends PageHandler
      */
     private String addRarFile(File file) throws Exception
     {
+        String rarEntryName = null;
         String rarFileFullPath = file.getPath();
         String rarFilePath = rarFileFullPath.substring(0,
                 rarFileFullPath.indexOf(file.getName()));
@@ -2097,7 +2099,14 @@ public class CreateJobsMainHandler extends PageHandler
             {
                 ret.append(",");
             }
-            String rarEntryName = header.getFileNameString();
+            if (header.isUnicode())
+            {
+                rarEntryName = header.getFileNameW();
+            }
+            else
+            {
+                rarEntryName = header.getFileNameString();
+            }
             /*
              * The unzipped files are in folders named by the zip file name
              */
@@ -2106,12 +2115,12 @@ public class CreateJobsMainHandler extends PageHandler
                             file.getName().lastIndexOf(".")) + File.separator
                     + rarEntryName;
             // if zip file contains subfolders, entry name will contains "/" or "\"
-            if (rarEntryName.indexOf("/") != 0)
+            if (rarEntryName.indexOf("/") != -1)
             {
                 rarEntryName = rarEntryName.substring(rarEntryName
                         .lastIndexOf("/") + 1);
             }
-            else if (rarEntryName.indexOf("\\") != 0)
+            else if (rarEntryName.indexOf("\\") != -1)
             {
                 rarEntryName = rarEntryName.substring(rarEntryName
                         .lastIndexOf("\\") + 1);
@@ -2161,12 +2170,12 @@ public class CreateJobsMainHandler extends PageHandler
                     + zip7zEntryName;
             // if zip file contains subf,olders, entry name will contains "/" or
             // "\"
-            if (zip7zEntryName.indexOf("/") != 0)
+            if (zip7zEntryName.indexOf("/") != -1)
             {
                 zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
                         .lastIndexOf("/") + 1);
             }
-            else if (zip7zEntryName.indexOf("\\") != 0)
+            else if (zip7zEntryName.indexOf("\\") != -1)
             {
                 zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
                         .lastIndexOf("\\") + 1);

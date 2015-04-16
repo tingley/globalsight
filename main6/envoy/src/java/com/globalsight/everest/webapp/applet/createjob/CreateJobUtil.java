@@ -1,9 +1,6 @@
 package com.globalsight.everest.webapp.applet.createjob;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,14 +10,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 
 import de.innosystec.unrar.Archive;
 import de.innosystec.unrar.rarfile.FileHeader;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.ZipInputStream;
+import net.lingala.zip4j.unzip.UnzipUtil;
 import netscape.javascript.JSObject;
 
 public class CreateJobUtil
@@ -108,41 +107,21 @@ public class CreateJobUtil
         }
     }
     
-    public static List<ZipEntry> getFilesInZipFile(File file)
+    public static List<net.lingala.zip4j.model.FileHeader> getFilesInZipFile(File file) throws Exception
     {
-        List<ZipEntry> filesInZip = new ArrayList<ZipEntry>();
-        ZipInputStream zin = null;
-        try
+        List<net.lingala.zip4j.model.FileHeader> filesInZip = new ArrayList<net.lingala.zip4j.model.FileHeader>();
+        ZipFile zipFile = new ZipFile(file);
+        List fileHeaderList = zipFile.getFileHeaders();
+        for (int i = 0; i < fileHeaderList.size(); i++)
         {
-            String zipFileFullPath = file.getPath();
-            zin = new ZipInputStream(new FileInputStream(zipFileFullPath));
-            ZipEntry zipEntry = null;
-            while ((zipEntry = zin.getNextEntry()) != null)
+            net.lingala.zip4j.model.FileHeader fileHeader = (net.lingala.zip4j.model.FileHeader) fileHeaderList
+                    .get(i);
+            if (fileHeader.isDirectory())
             {
-                if (zipEntry.isDirectory())
-                {
-                    continue;
-                }
-                filesInZip.add(zipEntry);
+                continue;
             }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if (zin != null)
-            {
-                try
-                {
-                    zin.close();
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
+            filesInZip.add(fileHeader);
+
         }
         return filesInZip;
     }
@@ -294,87 +273,97 @@ public class CreateJobUtil
      * decompress a zip file
      * @param file---a zip file
      * @return
+     * @throws ZipException 
      */
-    public static boolean unzipFile(File file)
+    public static boolean unzipFile(File zipFile) throws ZipException
     {
-        String zipFileFullPath = file.getPath();// path contains file name
+        ZipFile file = new ZipFile(zipFile);
+        final int BUFF_SIZE = 4096;
+        ZipInputStream is = null;
+        OutputStream os = null;
+        String zipFileFullPath = zipFile.getPath();
         String zipFilePath = zipFileFullPath.substring(0,
-                zipFileFullPath.indexOf(file.getName()));// path without file name
-        ZipInputStream zin = null;
+                zipFileFullPath.indexOf(zipFile.getName()));// path without file
+                                                            // name
+        List fileHeaderList = file.getFileHeaders();
         try
         {
-            FileInputStream fis=new FileInputStream(zipFileFullPath);
-            zin = new ZipInputStream(new BufferedInputStream(fis));
-            ZipEntry zipEntry = null;
-            byte[] buf = new byte[1024];
-            
-            while ((zipEntry = zin.getNextEntry()) != null)
+            for (int i = 0; i < fileHeaderList.size(); i++)
             {
-                String zipEntryName = zipEntry.getName();
-                String newPath = zipFilePath
-                        + File.separator
-                        + file.getName().substring(0,
-                                file.getName().lastIndexOf("."))
-                        + File.separator
-                        + zipEntryName;// original path + zipfile Name + entry name
-                File outfile = new File(newPath);
-                if (zipEntry.isDirectory())
+                net.lingala.zip4j.model.FileHeader fileHeader = (net.lingala.zip4j.model.FileHeader) fileHeaderList
+                        .get(i);
+                if (fileHeader != null)
                 {
-                    outfile.mkdirs();
-                    continue;
-                }
-                else 
-                {
-                    if (!outfile.getParentFile().exists())
+                    String outFilePath = zipFilePath + File.separator
+                            + zipFile.getName().substring(0, zipFile.getName().lastIndexOf("."))
+                            + File.separator + fileHeader.getFileName();
+                    File outFile = new File(outFilePath);
+
+                    if (fileHeader.isDirectory())
                     {
-                        outfile.getParentFile().mkdirs();
+                        outFile.mkdirs();
+                        continue;
                     }
-                }
-                
-                OutputStream os = new BufferedOutputStream(
-                        new FileOutputStream(outfile));
-                int readLen = 0;
-                try
-                {
-                    readLen = zin.read(buf, 0, 1024);
-                }
-                catch (IOException ioe)
-                {
-                    readLen = -1;
-                }
-                while (readLen != -1)
-                {
-                    os.write(buf, 0, readLen);
-                    try
+                    else
                     {
-                        readLen = zin.read(buf, 0, 1024);
+                        if (!outFile.getParentFile().exists())
+                        {
+                            outFile.getParentFile().mkdirs();
+                        }
                     }
-                    catch (IOException ioe)
+                    is = file.getInputStream(fileHeader);
+                    os = new FileOutputStream(outFile);
+
+                    int readLen = -1;
+                    byte[] buff = new byte[BUFF_SIZE];
+
+                    while ((readLen = is.read(buff)) != -1)
                     {
-                        readLen = -1;
+                        os.write(buff, 0, readLen);
                     }
+
+                    if (os != null)
+                    {
+                        os.close();
+                        os = null;
+                    }
+                    if (is != null)
+                    {
+                        is.close();
+                        is = null;
+                    }
+                    UnzipUtil.applyFileAttributes(fileHeader, outFile);
                 }
-                os.close();
+                else
+                {
+                    System.err.println("fileheader is null. Shouldn't be here");
+                }
             }
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             return false;
         }
         finally
         {
-            if (zin != null)
+            try
             {
-                try
+                if (os != null)
                 {
-                    zin.close();
+                    os.close();
+                    os = null;
                 }
-                catch (IOException e)
+                if (is != null)
                 {
+                    is.close();
+                    is = null;
                 }
             }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
-
         return true;
     }
     
@@ -386,6 +375,7 @@ public class CreateJobUtil
     {
         Archive archive = null;
         FileOutputStream fos = null;
+        String compressFileName = null;
         String pathname = rarFile.getAbsolutePath();
         String destDir = pathname.substring(0, pathname.lastIndexOf("."));
         try
@@ -398,8 +388,14 @@ public class CreateJobUtil
             {
                 if (!fileHeader.isDirectory())
                 {
-                    String compressFileName = fileHeader.getFileNameString()
-                            .trim();
+                    if (fileHeader.isUnicode())
+                    {
+                        compressFileName = fileHeader.getFileNameW().trim();
+                    }
+                    else
+                    {
+                        compressFileName = fileHeader.getFileNameString().trim();
+                    }
                     File file = new File(destDirFile, compressFileName);
                     file.getParentFile().mkdirs();
 

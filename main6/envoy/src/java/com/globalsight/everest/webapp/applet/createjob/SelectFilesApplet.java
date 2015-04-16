@@ -154,16 +154,16 @@ public class SelectFilesApplet extends EnvoyJApplet
             }
             else if (CreateJobUtil.isZipFile(file))
             {
-                List<ZipEntry> entries = CreateJobUtil.getFilesInZipFile(file);
+                List<net.lingala.zip4j.model.FileHeader> entries = CreateJobUtil.getFilesInZipFile(file);
                 String zipFileFullPath = file.getPath();
                 String zipFilePath = zipFileFullPath.substring(0,
                         zipFileFullPath.indexOf(file.getName()));
-                for (ZipEntry entry : entries)
+                for (net.lingala.zip4j.model.FileHeader entry : entries)
                 {
                     String unzippedFileFullPath = zipFilePath
                             + file.getName().substring(0,
                                     file.getName().lastIndexOf("."))
-                            + File.separator + entry.getName();
+                            + File.separator + entry.getFileName();
                     String id = CreateJobUtil.getFileId(unzippedFileFullPath);
                     if (fileList.contains(id))
                     {
@@ -434,23 +434,24 @@ public class SelectFilesApplet extends EnvoyJApplet
     /**
      * Add a progress bar for each files within a zip file.
      * @param file
+     * @throws Exception 
      */
-    private String addZipFile(File file)
+    private String addZipFile(File file) throws Exception
     {
         String zipFileFullPath = file.getPath();
         String zipFilePath = zipFileFullPath.substring(0,
                 zipFileFullPath.indexOf(file.getName()));
         
-        List<ZipEntry> entriesInZip = CreateJobUtil.getFilesInZipFile(file);
+        List<net.lingala.zip4j.model.FileHeader> entriesInZip = CreateJobUtil.getFilesInZipFile(file);
         
         StringBuffer ret = new StringBuffer("");
-        for (ZipEntry entry : entriesInZip)
+        for (net.lingala.zip4j.model.FileHeader entry : entriesInZip)
         {
             if (ret.length() > 0)
             {
                 ret.append(",");
             }
-            String zipEntryName = entry.getName();
+            String zipEntryName = entry.getFileName();
             
             /* The unzipped files are in folders named by the zip file name*/
              
@@ -459,12 +460,12 @@ public class SelectFilesApplet extends EnvoyJApplet
                             file.getName().lastIndexOf(".")) + File.separator
                     + zipEntryName;
             // if zip file contains subfolders, entry name will contains "/" or "\"
-            if (zipEntryName.indexOf("/") != 0)
+            if (zipEntryName.indexOf("/") != -1)
             {
                 zipEntryName = zipEntryName.substring(zipEntryName
                         .lastIndexOf("/") + 1);
             }
-            else if (zipEntryName.indexOf("\\") != 0)
+            else if (zipEntryName.indexOf("\\") != -1)
             {
                 zipEntryName = zipEntryName.substring(zipEntryName
                         .lastIndexOf("\\") + 1);
@@ -476,13 +477,14 @@ public class SelectFilesApplet extends EnvoyJApplet
                     .append(unzippedFileFullPath.replace("\\", File.separator)
                             .replace("/", File.separator).replace("\\", "\\\\").replace("'", "\\'"))
                     .append("',name:'").append(zipEntryName.replace("'", "\\'")).append("',size:'")
-                    .append(entry.getSize()).append("'}");
+                    .append(entry.getUncompressedSize()).append("'}");
         }
         return ret.toString();
     }
     
     private String addRarFile(File file) throws Exception
     {
+        String zipEntryName = null;
         String rarFileFullPath = file.getPath();
         String rarFilePath = rarFileFullPath.substring(0,
                 rarFileFullPath.indexOf(file.getName()));
@@ -496,7 +498,14 @@ public class SelectFilesApplet extends EnvoyJApplet
             {
                 ret.append(",");
             }
-            String zipEntryName = header.getFileNameString();
+            if (header.isUnicode())
+            {
+                zipEntryName = header.getFileNameW();
+            }
+            else
+            {
+                zipEntryName = header.getFileNameString();
+            }
             /*
              * The unzipped files are in folders named by the zip file name
              */
@@ -505,12 +514,12 @@ public class SelectFilesApplet extends EnvoyJApplet
                             file.getName().lastIndexOf(".")) + File.separator
                     + zipEntryName;
             // if zip file contains subfolders, entry name will contains "/" or "\"
-            if (zipEntryName.indexOf("/") != 0)
+            if (zipEntryName.indexOf("/") != -1)
             {
                 zipEntryName = zipEntryName.substring(zipEntryName
                         .lastIndexOf("/") + 1);
             }
-            else if (zipEntryName.indexOf("\\") != 0)
+            else if (zipEntryName.indexOf("\\") != -1)
             {
                 zipEntryName = zipEntryName.substring(zipEntryName
                         .lastIndexOf("\\") + 1);
@@ -553,12 +562,12 @@ public class SelectFilesApplet extends EnvoyJApplet
                     + zip7zEntryName;
             // if zip file contains subf,olders, entry name will contains "/" or
             // "\"
-            if (zip7zEntryName.indexOf("/") != 0)
+            if (zip7zEntryName.indexOf("/") != -1)
             {
                 zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
                         .lastIndexOf("/") + 1);
             }
-            else if (zip7zEntryName.indexOf("\\") != 0)
+            else if (zip7zEntryName.indexOf("\\") != -1)
             {
                 zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
                         .lastIndexOf("\\") + 1);

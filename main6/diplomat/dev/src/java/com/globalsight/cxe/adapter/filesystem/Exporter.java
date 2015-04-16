@@ -778,6 +778,7 @@ public class Exporter
 
         return mappings;
     }
+    
 
     private void handleEloquaFiles(String finalFileName, FileProfile fp,
             Workflow wf, boolean hasScript)
@@ -838,6 +839,12 @@ public class Exporter
 
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
+                        
+                        String targetLocale = wf.getTargetLocale()
+                                .toString();
+                        String html = m.getHtml();
+                        String newContent = h.updateDynamicContent(html, targetLocale);
+                        m.setHtml(newContent);
 
                         if (uploaded && h.getEmail(m.getId()) != null)
                         {
@@ -848,14 +855,13 @@ public class Exporter
                             if (!uploaded)
                             {
                                 String eloquaName = m.getName();
-                                String targetLocale = wf.getTargetLocale()
-                                        .toString();
+                                
                                 eloquaName = eloquaName + "(" + targetLocale
                                         + ")";
                                 m.setName(eloquaName);
                             }
 
-                            m.setId("");
+                            m.setId("");                            
                             m = h.saveEmail(m);
                         }
 
@@ -877,6 +883,11 @@ public class Exporter
                         m.updateFromFile(saveFile);
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
+                        
+                        String targetLocale = wf.getTargetLocale().toString();
+                        String html = m.getHtml();
+                        String newContent = h.updateDynamicContent(html, targetLocale);
+                        m.setHtml(newContent);
 
                         if (uploaded && h.getLandingPage(m.getId()) != null)
                         {
@@ -887,8 +898,7 @@ public class Exporter
                             if (!uploaded)
                             {
                                 String eloquaName = m.getName();
-                                String targetLocale = wf.getTargetLocale()
-                                        .toString();
+                                
                                 eloquaName = eloquaName + "(" + targetLocale
                                         + ")";
                                 m.setName(eloquaName);

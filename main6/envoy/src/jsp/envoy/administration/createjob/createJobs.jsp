@@ -70,7 +70,7 @@ $(document).ready(function() {
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
                         "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar,"+
                         "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar,"+
-                        "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar'>" +
+                        "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar,applet/lib/zip4j_1.3.2.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
                         "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'CODE' VALUE = 'com.globalsight.everest.webapp.applet.createjob.SelectFilesApplet.class' >" +
@@ -87,7 +87,7 @@ $(document).ready(function() {
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
                         "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar,"+
                         "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar,"+
-                        "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar'>" +
+                        "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar,applet/lib/zip4j_1.3.2.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
                         "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'CODE' VALUE = 'com.globalsight.everest.webapp.applet.createjob.UploadAttachment.class' >" +
@@ -102,7 +102,7 @@ $(document).ready(function() {
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
                         "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar,"+
                         "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar,"+
-                        "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar'>" +
+                        "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar,applet/lib/zip4j_1.3.2.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
                         "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'folderName' VALUE = <c:out value='${tmpFolderName}'/>>" +
@@ -117,7 +117,7 @@ $(document).ready(function() {
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
                         "applet/lib/customer.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar,"+
                         "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar,"+
-                        "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar'>" +
+                        "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar,applet/lib/zip4j_1.3.2.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
                         "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'folderName' VALUE = <c:out value='${tmpFolderName}'/>>" +

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+    <scr:component enabled="true" name="com.adobe.cq.sling.CartServiceImpl">
+        <implementation class="com.adobe.cq.sling.CartServiceImpl"/>
+        <service servicefactory="false">
+            <provide interface="com.adobe.cq.sling.CartService"/>
+        </service>
+        <property name="service.pid" value="com.adobe.cq.sling.CartServiceImpl"/>
+        <reference name="resolverFactory" interface="org.apache.sling.api.resource.ResourceResolverFactory" cardinality="1..1" policy="static" bind="bindResolverFactory" unbind="unbindResolverFactory"/>
+    </scr:component>
+    <scr:component enabled="true" name="com.adobe.cq.sling.SimpleDSComponent">
+        <implementation class="com.adobe.cq.sling.SimpleDSComponent"/>
+        <service servicefactory="false">
+            <provide interface="java.lang.Runnable"/>
+        </service>
+        <property name="service.pid" value="com.adobe.cq.sling.SimpleDSComponent"/>
+    </scr:component>
+    <scr:component enabled="true" name="com.adobe.cq.sling.DownLoadFile">
+        <implementation class="com.adobe.cq.sling.DownLoadFile"/>
+        <service servicefactory="false">
+            <provide interface="javax.servlet.Servlet"/>
+        </service>
+        <property name="sling.servlet.paths" value="/bin/downloadServlet"/>
+        <property name="sling.servlet.methods" value="GET"/>
+        <property name="service.pid" value="com.adobe.cq.sling.DownLoadFile"/>
+    </scr:component>
+    <scr:component enabled="true" name="com.adobe.cq.sling.HandleClaim">
+        <implementation class="com.adobe.cq.sling.HandleClaim"/>
+        <service servicefactory="false">
+            <provide interface="javax.servlet.Servlet"/>
+        </service>
+        <property name="sling.servlet.paths" value="/bin/mySearchServlet"/>
+        <property name="sling.servlet.methods" value="POST"/>
+        <property name="service.pid" value="com.adobe.cq.sling.HandleClaim"/>
+        <reference name="repository" interface="org.apache.sling.jcr.api.SlingRepository" cardinality="1..1" policy="static" bind="bindRepository" unbind="unbindRepository"/>
+    </scr:component>
+    <scr:component enabled="true" name="com.adobe.cq.sling.HandleFile">
+        <implementation class="com.adobe.cq.sling.HandleFile"/>
+        <service servicefactory="false">
+            <provide interface="javax.servlet.Servlet"/>
+        </service>
+        <property name="sling.servlet.paths" value="/bin/upfile"/>
+        <property name="sling.servlet.methods" value="POST"/>
+        <property name="sling.auth.requirements" type="String" value="-/bin/upfile"/>
+        <property name="service.pid" value="com.adobe.cq.sling.HandleFile"/>
+        <reference name="resolverFactory" interface="org.apache.sling.api.resource.ResourceResolverFactory" cardinality="1..1" policy="static" bind="bindResolverFactory" unbind="unbindResolverFactory"/>
+    </scr:component>
+    <scr:component enabled="true" name="com.adobe.cq.sling.UpdateCart">
+        <implementation class="com.adobe.cq.sling.UpdateCart"/>
+        <service servicefactory="false">
+            <provide interface="javax.servlet.Servlet"/>
+        </service>
+        <property name="sling.servlet.paths" value="/bin/updateCartServlet"/>
+        <property name="sling.servlet.methods" value="POST"/>
+        <property name="service.pid" value="com.adobe.cq.sling.UpdateCart"/>
+    </scr:component>
+</components>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="com.adobe.cq.SimpleDSComponent" name="%com.adobe.cq.SimpleDSComponent.name" description="%com.adobe.cq.SimpleDSComponent.description"/>
+    <OCD id="com.adobe.cq.ConnectorServlet" name="%com.adobe.cq.ConnectorServlet.name" description="%com.adobe.cq.ConnectorServlet.description">
+        <AD id="sling.servlet.paths" type="String" default="/bin/connector" name="%sling.servlet.paths.name" description="%sling.servlet.paths.description"/>
+        <AD id="sling.servlet.methods" type="String" default="GET" name="%sling.servlet.methods.name" description="%sling.servlet.methods.description"/>
+    </OCD>
+    <OCD id="com.adobe.cq.CreateJobServlet" name="%com.adobe.cq.CreateJobServlet.name" description="%com.adobe.cq.CreateJobServlet.description">
+        <AD id="sling.servlet.paths" type="String" default="/bin/createJob" name="%sling.servlet.paths.name" description="%sling.servlet.paths.description"/>
+        <AD id="sling.servlet.methods" type="String" default="POST" name="%sling.servlet.methods.name" description="%sling.servlet.methods.description"/>
+    </OCD>
+    <OCD id="com.adobe.cq.CustomerServlet" name="%com.adobe.cq.CustomerServlet.name" description="%com.adobe.cq.CustomerServlet.description">
+        <AD id="sling.servlet.paths" type="String" default="/bin/customer" name="%sling.servlet.paths.name" description="%sling.servlet.paths.description"/>
+        <AD id="sling.servlet.methods" type="String" default="GET" name="%sling.servlet.methods.name" description="%sling.servlet.methods.description"/>
+    </OCD>
+    <OCD id="com.adobe.cq.FileProfileServlet" name="%com.adobe.cq.FileProfileServlet.name" description="%com.adobe.cq.FileProfileServlet.description">
+        <AD id="sling.servlet.paths" type="String" default="/bin/fileProfile" name="%sling.servlet.paths.name" description="%sling.servlet.paths.description"/>
+        <AD id="sling.servlet.methods" type="String" default="GET" name="%sling.servlet.methods.name" description="%sling.servlet.methods.description"/>
+    </OCD>
+    <Designate pid="com.adobe.cq.SimpleDSComponent">
+        <Object ocdref="com.adobe.cq.SimpleDSComponent"/>
+    </Designate>
+    <Designate pid="com.adobe.cq.ConnectorServlet">
+        <Object ocdref="com.adobe.cq.ConnectorServlet"/>
+    </Designate>
+    <Designate pid="com.adobe.cq.CreateJobServlet">
+        <Object ocdref="com.adobe.cq.CreateJobServlet"/>
+    </Designate>
+    <Designate pid="com.adobe.cq.CustomerServlet">
+        <Object ocdref="com.adobe.cq.CustomerServlet"/>
+    </Designate>
+    <Designate pid="com.adobe.cq.FileProfileServlet">
+        <Object ocdref="com.adobe.cq.FileProfileServlet"/>
+    </Designate>
+</metatype:MetaData>

@@ -362,7 +362,8 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
 
         if (state == s_TEXT
                 && !OfficeXmlHelper.OFFICE_XML.equalsIgnoreCase(formatName)
-                && !OfficeContentPostFilterHelper.isOfficeFormat(formatName))
+                && !OfficeContentPostFilterHelper.isOfficeFormat(formatName)
+                && !IFormatNames.FORMAT_JAVAPROP.equalsIgnoreCase(formatName))
         {
             m_currentSegment.append(wrapNbsp(p_text));
         }

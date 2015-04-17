@@ -752,7 +752,7 @@ span.taskComplDialog {
 </style>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<%@ include file="/includes/compatibility.jspIncl" %>
+<jsp:include flush="true" page="/includes/compatibility.jspIncl"></jsp:include>
 <script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
 <script type="text/javascript" src="/globalsight/includes/modalDialog.js"></script>
 <script type="text/javascript" src="/globalsight/includes/ContextMenu.js"></script>

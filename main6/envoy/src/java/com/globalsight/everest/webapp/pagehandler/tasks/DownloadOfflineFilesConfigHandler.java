@@ -113,7 +113,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             // populate 100
             DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 10
             // populate fuzzy target segments (only for bilingual RTF)
-            DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 11
+            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 11
             // need consolidate output file (for XLF format)
             DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 12
             DOWNLOAD_OPTIONS_DEFAULT

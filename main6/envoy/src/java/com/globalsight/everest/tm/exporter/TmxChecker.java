@@ -21,13 +21,15 @@ import java.util.*;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Attribute;
+import org.dom4j.tree.DefaultAttribute;
 
 import com.globalsight.ling.tm2.SegmentTmTuv;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.XmlParser;
 
 public class TmxChecker
 {
-    private HashMap<String, ArrayList> dtdMap = new HashMap<String, ArrayList>();
+    private HashMap<String, ArrayList<String>> dtdMap = new HashMap<String, ArrayList<String>>();
     private ArrayList<String> needCheckXAttribute = new ArrayList<String>();
 
     public TmxChecker()
@@ -39,13 +41,13 @@ public class TmxChecker
     /*
      * Remove all attributes not belong their element in the TMX 1.4 DTD
      */
-    public String fixSegment(String segment)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public String fixSegment(String segment)
     {
         Document dom = getDom(segment);
         Element root = dom.getRootElement();
 
         Iterator ite = dtdMap.entrySet().iterator();
-
         while (ite.hasNext())
         {
             Map.Entry entry = (Map.Entry) ite.next();
@@ -58,6 +60,8 @@ public class TmxChecker
             for (int x = 0; x < nodes.size(); x++)
             {
                 Element node = (Element) nodes.get(x);
+                Attribute internalAttr = node.attribute("internal");
+                Attribute typeAttr = node.attribute("type");
                 ArrayList list = new ArrayList();
                 list.addAll(node.attributes());
                 resetXAttribute(key, list);
@@ -71,6 +75,66 @@ public class TmxChecker
                     {
                         node.remove(temp);
                     }
+                }
+                // GBS-3537 & GBS-3691
+				if (internalAttr != null
+						&& "yes".equalsIgnoreCase(internalAttr.getValue()))
+				{
+					String exportedType = "x-internal";
+					if (typeAttr != null)
+					{
+						String type = typeAttr.getValue();
+						if (StringUtil.isNotEmpty(type))
+						{
+							exportedType += "-" + type.trim().toLowerCase();
+						}
+						typeAttr.setValue(exportedType);
+					}
+					else
+					{
+						node.add(new DefaultAttribute("type", exportedType));
+					}
+				}
+            }
+        }
+
+        return root.asXML();
+    }
+
+    /**
+	 * When export TM, "internal='yes' type='style'" will be merged to
+	 * "type='x-internal-style'"; When import back, need revert back.
+	 * 
+	 * @param segment
+	 * @return
+	 */
+    public String revertInternalTag(String segment)
+    {
+        Document dom = getDom(segment);
+        Element root = dom.getRootElement();
+        for (String tag : dtdMap.keySet())
+        {
+            String nodeName = "//" + tag;
+            List nodes = root.selectNodes(nodeName);
+            for (int x = 0; x < nodes.size(); x++)
+            {
+                Element node = (Element) nodes.get(x);
+				if (node.attribute("type") != null
+						&& node.attribute("type").getValue() != null)
+                {
+					Attribute typeAttr = node.attribute("type");
+					String type = typeAttr.getValue();
+					if ("x-internal".equalsIgnoreCase(type))
+					{
+						node.remove(typeAttr);
+						node.add(new DefaultAttribute("internal", "yes"));
+					}
+					else if (type.startsWith("x-internal"))
+					{
+						String realTypeValue = type.substring("x-internal".length() + 1);
+						typeAttr.setValue(realTypeValue);
+						node.add(new DefaultAttribute("internal", "yes"));
+					}
                 }
             }
         }

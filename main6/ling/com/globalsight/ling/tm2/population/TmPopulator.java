@@ -35,6 +35,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.exporter.TmxChecker;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -286,6 +287,7 @@ public class TmPopulator
         // sort Tus by source locale
         SegmentTuCollector segmentTuCollector = new SegmentTuCollector();
 
+        TmxChecker tmxChecker = new TmxChecker();
         Iterator<SegmentTmTu> itTu = p_segmentsToSave.iterator();
         while (itTu.hasNext())
         {
@@ -293,6 +295,12 @@ public class TmPopulator
             if (StringUtil.isNotEmpty(p_sourceTmName))
             {
                 tu.setSourceTmName(p_sourceTmName);
+            }
+            //
+            List<BaseTmTuv> tuvs = tu.getTuvs();
+            for (BaseTmTuv tuv : tuvs)
+            {
+            	tuv.setSegment(tmxChecker.revertInternalTag(tuv.getSegment()));
             }
             segmentTuCollector.addTu(tu);
         }

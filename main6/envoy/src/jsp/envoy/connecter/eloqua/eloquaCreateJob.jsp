@@ -808,6 +808,21 @@ function callBackToPageEmail(data)
      updateEmailFile(ob.emails);
 }
 
+function toPageEmailSet(page)
+{
+	$("#idDiv").mask("<%=bundle.getString("msg_loading")%>");
+    $.post('<%=self.getPageURL()%>' + "&emailSet=" + page + "&action=getEmails&type=8", 
+    		callBackToPageEmail,"text");
+}
+
+
+function toPageLandingPageSet(page)
+{
+	$("#idDiv").mask("<%=bundle.getString("msg_loading")%>");
+    $.post('<%=self.getPageURL()%>' + "&landingPageSet=" + page + "&action=getLandingPages&type=8",            
+    		callBackToPageLandingPage, "text");
+}
+
 function toPageEmail(page)
 {
 	$("#idDiv").mask("<%=bundle.getString("msg_eloqua_wait_filter")%>");

@@ -44,6 +44,7 @@ import org.json.JSONObject;
 
 import com.globalsight.connector.eloqua.form.CreateEloquaForm;
 import com.globalsight.connector.eloqua.form.EloquaFileFilter;
+import com.globalsight.connector.eloqua.models.Alls;
 import com.globalsight.connector.eloqua.models.Email;
 import com.globalsight.connector.eloqua.models.LandingPage;
 import com.globalsight.connector.eloqua.util.EloquaHelper;
@@ -82,9 +83,16 @@ public class EloquaCreateJobHandler extends PageActionHandler
 {
     static private final Logger logger = Logger
             .getLogger(EloquaCreateJobHandler.class);
-//    public static final String TMP_FOLDER_NAME = "createEloquaJob_tmp";
+    // public static final String TMP_FOLDER_NAME = "createEloquaJob_tmp";
     private final static int EMAIL = 1;
     private final static int LANDING_PAGE = 2;
+    
+    private final static String EMAIL_SET  = "emailSet";
+    private final static String EMAIL_SET_TOTAL  = "emailSetTotal";
+    
+    private final static String LANDING_PAGE_SET  = "landingPageSet";
+    private final static String LANDING_PAGE_SET_TOTAL  = "landingPageSetTotal";
+    
     private final static Map<String, String> l10NToTargetLocalesMap = new HashMap<String, String>();
 
     @ActionHandler(action = "updateTargetLocales", formClass = "")
@@ -106,7 +114,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
         queryTargetLocales(request, response, user);
         pageReturn();
     }
-    
+
     private List subPage(List ls, int page, int perPage)
     {
         int total = ls.size();
@@ -115,7 +123,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
         end = end > total ? total : end;
         return ls.subList(start, end);
     }
-    
+
     @ActionHandler(action = "getLandingPages", formClass = "")
     public void getLandingPages(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
@@ -152,19 +160,30 @@ public class EloquaCreateJobHandler extends PageActionHandler
         case 6: // filter
             page = 1;
             EloquaFileFilter filter = getFilter(request);
-            
-            ps = reloadLandingPages(request);
+
+            ps = reloadLandingPages(request).getElements();
             ps = filter.filter(ps);
             sessionManager.setAttribute("eloquaLandingPages", ps);
             break;
         case 7: // update the page size
             page = 1;
             break;
+        case 8: // update the page set
+            page = 1;
+            EloquaFileFilter filter2 = getFilter(request);
+            ps = reloadLandingPages(request).getElements();
+            ps = filter2.filter(ps);
+            sessionManager.setAttribute("eloquaLandingPages", ps);
+            break;
         default:
             break;
         }
-        
+
         List<LandingPage> p1 = subPage(ps, page, perPage);
+        
+        String pageSet = getPageSetNavString("LandingPage",
+                getEloquaPageSet(request, LANDING_PAGE_SET),
+                getEloquaPageSet(request, LANDING_PAGE_SET_TOTAL), request);
 
         sessionManager.setAttribute("landingpage_page", page);
         String nav = getNavString("LandingPage", ps.size(), page, request, 1);
@@ -172,7 +191,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
 
         JSONObject result = new JSONObject();
         result.put("nav", nav);
-        result.put("nav2", nav2);
+        result.put("nav2", nav2 + pageSet);
 
         JSONArray files = new JSONArray();
         for (LandingPage e : p1)
@@ -193,48 +212,62 @@ public class EloquaCreateJobHandler extends PageActionHandler
 
         pageReturn();
     }
-    
-    private List<LandingPage> reloadLandingPages(HttpServletRequest request)
+
+    private Alls reloadLandingPages(HttpServletRequest request)
     {
-    	 HttpSession session = request.getSession(false);
-    	 SessionManager sessionManager = (SessionManager) session
-                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-    	 Locale uiLocale = (Locale) session
-                 .getAttribute(WebAppConstants.UILOCALE);
-         EloquaConnector conn = (EloquaConnector) sessionManager
-                 .getAttribute("EloquaConnector");
-         EloquaHelper helper = new EloquaHelper(conn);
-         List<LandingPage> ps = helper.getPages();
-         EloquaObjectComparator c = new EloquaObjectComparator(EloquaObjectComparator.NAME, uiLocale);
-         Collections.sort(ps, c);
-         
-         return ps;
+        int page = getEloquaPageSet(request, LANDING_PAGE_SET);
+        
+        HttpSession session = request.getSession(false);
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
+        EloquaConnector conn = (EloquaConnector) sessionManager
+                .getAttribute("EloquaConnector");
+        EloquaHelper helper = new EloquaHelper(conn);
+        Alls all = helper.getPages(page, 1000);
+        List<LandingPage> ps = all.getElements();
+        EloquaObjectComparator c = new EloquaObjectComparator(
+                EloquaObjectComparator.NAME, uiLocale);
+        Collections.sort(ps, c);
+        
+        sessionManager.setAttribute(LANDING_PAGE_SET_TOTAL, all.getTotal() / 1000 + 1);
+
+        return all;
     }
-    
-    private List<Email> reloadEmails(HttpServletRequest request)
+
+    private Alls reloadEmails(HttpServletRequest request)
     {
-    	 HttpSession session = request.getSession(false);
-    	 SessionManager sessionManager = (SessionManager) session
-                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-    	 Locale uiLocale = (Locale) session
-                 .getAttribute(WebAppConstants.UILOCALE);
-         EloquaConnector conn = (EloquaConnector) sessionManager
-                 .getAttribute("EloquaConnector");
-         EloquaHelper helper = new EloquaHelper(conn);
-         List<Email> es = helper.getEmails();
-         EloquaObjectComparator c = new EloquaObjectComparator(EloquaObjectComparator.NAME, uiLocale);
-         Collections.sort(es, c);
-         return es;
+        int page = getEloquaPageSet(request, EMAIL_SET);
+        HttpSession session = request.getSession(false);
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
+        EloquaConnector conn = (EloquaConnector) sessionManager
+                .getAttribute("EloquaConnector");
+        EloquaHelper helper = new EloquaHelper(conn);
+        Alls all = helper.getEmails(page, 1000);
+        List<Email> es = (List<Email>) all.getElements();
+        EloquaObjectComparator c = new EloquaObjectComparator(
+                EloquaObjectComparator.NAME, uiLocale);
+        Collections.sort(es, c);
+
+        sessionManager.setAttribute(EMAIL_SET_TOTAL, all.getTotal() / 1000 + 1);
+
+        return all;
     }
-    
+
     private EloquaFileFilter getFilter(HttpServletRequest request)
     {
-    	EloquaFileFilter filter = new EloquaFileFilter();
+        EloquaFileFilter filter = new EloquaFileFilter();
         filter.setNameFilter((String) request.getParameter("nameFilter"));
-        filter.setCreatedAtFilter((String) request.getParameter("createdAtFilter"));
-        filter.setCreatedByFilter((String) request.getParameter("createdByFilter"));
+        filter.setCreatedAtFilter((String) request
+                .getParameter("createdAtFilter"));
+        filter.setCreatedByFilter((String) request
+                .getParameter("createdByFilter"));
         filter.setStatusFilter((String) request.getParameter("statusFilter"));
-        
+
         return filter;
     }
 
@@ -275,30 +308,41 @@ public class EloquaCreateJobHandler extends PageActionHandler
         case 6: // filter
             page = 1;
             EloquaFileFilter filter = getFilter(request);
-            
-            es = reloadEmails(request);
+            Alls alls = reloadEmails(request);
+            es = alls.getElements();
             es = filter.filter(es);
             sessionManager.setAttribute("eloquaEmails", es);
-            
+
             break;
         case 7: // update the page size
             page = 1;
-            
+
+            break;
+        case 8: // update the page set
+            page = 1;
+            EloquaFileFilter filter2 = getFilter(request);
+            Alls alls2 = reloadEmails(request);
+            es = alls2.getElements();
+            sessionManager.setAttribute("eloquaEmails", es);
             break;
         default:
             break;
         }
 
         List<Email> e1 = subPage(es, page, perPage);
-        
+
         sessionManager.setAttribute("email_page", page);
         String nav = getNavString("Email", es.size(), page, request, 1);
         String nav2 = getNavString("Email", es.size(), page, request, 2);
 
+        String pageSet = getPageSetNavString("Email",
+                getEloquaPageSet(request, EMAIL_SET),
+                getEloquaPageSet(request, EMAIL_SET_TOTAL), request);
+
         JSONObject result = new JSONObject();
         result.put("nav", nav);
-        result.put("nav2", nav2);
-        
+        result.put("nav2", nav2 + pageSet);
+
         JSONArray emails = new JSONArray();
         for (Email e : e1)
         {
@@ -312,7 +356,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
         }
 
         result.put("emails", emails);
-//        response.setCharacterEncoding("utf-8");
+        // response.setCharacterEncoding("utf-8");
         PrintWriter writer = response.getWriter();
         writer.write(result.toString());
         writer.close();
@@ -352,7 +396,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
                 uuid);
         Thread t = new MultiCompanySupportedThread(runnable);
         t.start();
-        
+
         request.setAttribute("isCreate", true);
     }
 
@@ -667,13 +711,16 @@ public class EloquaCreateJobHandler extends PageActionHandler
     private void dataForTable(HttpServletRequest request)
             throws GeneralException
     {
-    	HttpSession session = request.getSession();
+        HttpSession session = request.getSession();
         int perPage = getPerPage(request);
         SessionManager sessionManager = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
 
-        List<Email> es = reloadEmails(request);
-        List<LandingPage> ps = reloadLandingPages(request);
+        Alls alls = reloadEmails(request);
+        List<Email> es = alls.getElements();
+        
+        Alls pageAlls = reloadLandingPages(request);
+        List<LandingPage> ps = pageAlls.getElements();
 
         sessionManager.setAttribute("eloquaEmails", es);
         sessionManager.setAttribute("eloquaLandingPages", ps);
@@ -687,22 +734,39 @@ public class EloquaCreateJobHandler extends PageActionHandler
         List<LandingPage> p1 = ps.size() > perPage ? ps.subList(0, perPage)
                 : ps;
 
+        sessionManager.setAttribute(EMAIL_SET, 1);
+        sessionManager.setAttribute(LANDING_PAGE_SET, 1);
+        
+        int n = alls.getTotal() / 1000 + 1;
+        sessionManager.setAttribute(EMAIL_SET_TOTAL, n);
+        
+        n = pageAlls.getTotal() / 1000 + 1;
+        sessionManager.setAttribute(LANDING_PAGE_SET_TOTAL, n);
+        
+        String pageSet = getPageSetNavString("Email",
+                getEloquaPageSet(request, EMAIL_SET),
+                getEloquaPageSet(request, EMAIL_SET_TOTAL), request);
+        
+        String pageSet2 = getPageSetNavString("LandingPage",
+                getEloquaPageSet(request, LANDING_PAGE_SET),
+                getEloquaPageSet(request, LANDING_PAGE_SET_TOTAL), request);
+
         request.setAttribute("email_nav",
                 getNavString("Email", es.size(), 1, request, 1));
         request.setAttribute("email_nav2",
-                getNavString("Email", es.size(), 1, request, 2));
+                getNavString("Email", es.size(), 1, request, 2) + pageSet);
         request.setAttribute("email_list", e1);
 
         request.setAttribute("page_nav",
                 getNavString("LandingPage", ps.size(), 1, request, 1));
         request.setAttribute("page_nav2",
-                getNavString("LandingPage", ps.size(), 1, request, 2));
+                getNavString("LandingPage", ps.size(), 1, request, 2) + pageSet2);
         request.setAttribute("page_list", p1);
-        
+
         Integer creatingJobsNum = getCreatingJobsNum();
         request.setAttribute("creatingJobsNum", creatingJobsNum);
     }
-    
+
     public Integer getCreatingJobsNum()
     {
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
@@ -710,14 +774,16 @@ public class EloquaCreateJobHandler extends PageActionHandler
         try
         {
             String sql = CreateJobsMainHandler.CREATING_JOBS_NUM_SQL;
-            boolean isSuperCompany = CompanyWrapper.isSuperCompany(currentCompanyId);
-            if(isSuperCompany)
-            {           
+            boolean isSuperCompany = CompanyWrapper
+                    .isSuperCompany(currentCompanyId);
+            if (isSuperCompany)
+            {
                 creatingJobsNum = HibernateUtil.count(sql);
             }
             else
             {
-                creatingJobsNum = HibernateUtil.count(sql + " and COMPANY_ID = " + currentCompanyId);
+                creatingJobsNum = HibernateUtil.count(sql
+                        + " and COMPANY_ID = " + currentCompanyId);
             }
         }
         catch (Exception e)
@@ -726,6 +792,32 @@ public class EloquaCreateJobHandler extends PageActionHandler
             // not blocking the following processes.
         }
         return creatingJobsNum;
+    }
+
+    private int getEloquaPageSet(HttpServletRequest request, String key)
+    {
+        HttpSession session = request.getSession(false);
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        
+        Integer orgSize = (Integer) sessionManager.getAttribute(key);
+        int size = orgSize == null ? 1 : orgSize;
+        String numOfPerPage = request.getParameter(key);
+        if (StringUtil.isNotEmpty(numOfPerPage))
+        {
+            try
+            {
+                size = Integer.parseInt(numOfPerPage);
+            }
+            catch (Exception e)
+            {
+                size = 1;
+            }
+
+            sessionManager.setAttribute(key, size);
+        }
+
+        return size;
     }
 
     private int getPerPage(HttpServletRequest request)
@@ -759,7 +851,8 @@ public class EloquaCreateJobHandler extends PageActionHandler
         os.add(50);
 
         sb.append("Display #: ");
-        sb.append("<select id='numOfPageSize' onchange='changePageSize(\"" + type + "\", this.value);'>");
+        sb.append("<select id='numOfPageSize' onchange='changePageSize(\""
+                + type + "\", this.value);'>");
 
         boolean found = false;
         for (Integer o : os)
@@ -787,6 +880,43 @@ public class EloquaCreateJobHandler extends PageActionHandler
         }
 
         sb.append("</select>&nbsp;&nbsp;");
+    }
+
+    private String getPageSetNavString(String type, int set, int setTotal,
+            HttpServletRequest request)
+    {
+        if (setTotal <= 1)
+            return "";
+
+        ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+
+        StringBuilder url = new StringBuilder();
+        url.append("<div style=\"float:right; padding-top:15px;\">");
+
+        for (int i = 1; i <= setTotal; i++)
+        {
+            int start = (i - 1) * 1000 + 1;
+            int end = i * 1000;
+            
+            String startString = start == 1 ? "0001" : "" + start;
+
+            if (i == set)
+            {
+                url.append(bundle.getString("lb_asset")).append(" ");
+                url.append(startString).append(" - ").append(end).append("<br><br> ");
+            }
+            else
+            {
+                url.append(
+                        "<a href=\"#\" onclick=\"toPage" + type + "Set(" + i
+                                + ")\">").append(bundle.getString("lb_asset"))
+                        .append(" ").append(startString).append(" - ")
+                        .append(end).append("</a> <br><br> ");
+            }
+        }
+
+        url.append("</div>");
+        return url.toString();
     }
 
     /**
@@ -985,12 +1115,12 @@ public class EloquaCreateJobHandler extends PageActionHandler
 
         pageReturn();
     }
-    
+
     @ActionHandler(action = "preview2", formClass = "")
     public void preview2(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-    	ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+        ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         response.setCharacterEncoding("utf-8");
         String id = request.getParameter("id");
         if (id != null)
@@ -1026,14 +1156,18 @@ public class EloquaCreateJobHandler extends PageActionHandler
                 sb.append("<div id=\"previewAttribute\" style=\"width:750px;background-color:rgb(240, 248, 240) ;border-bottom: 1px dashed #d7d7d7; border-left: 0px; border-right: 0px; border-top: opx;\">");
                 sb.append("<table class=standardText cellpadding=\"5\">");
                 sb.append("<tr style=\"font-size:150%\">");
-                sb.append("<td colspan=\"2\" id=\"previewSubject\">" + subject + "</td>");
+                sb.append("<td colspan=\"2\" id=\"previewSubject\">" + subject
+                        + "</td>");
                 sb.append("</tr>");
                 sb.append("<tr style=\"color:#999;\">");
-                sb.append("<td>" + bundle.getString("lb_from_address")+ " : </td>");
-                sb.append("<td id=\"previewFrom\">" + e.getString("senderEmail") +"</td>");
+                sb.append("<td>" + bundle.getString("lb_from_address")
+                        + " : </td>");
+                sb.append("<td id=\"previewFrom\">"
+                        + e.getString("senderEmail") + "</td>");
                 sb.append("</tr>");
                 sb.append("<tr style=\"color:#999;\">");
-                sb.append("<td>" + bundle.getString("lb_create_at") + " : </td>");
+                sb.append("<td>" + bundle.getString("lb_create_at")
+                        + " : </td>");
                 sb.append("<td id=\"previewCreateAt\">" + createAt + "</td>");
                 sb.append("</tr>");
                 sb.append("</table>");
@@ -1044,7 +1178,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
                 LandingPage e = helper.getLandingPage(id.substring(1));
                 html = e.getHtml();
             }
-            
+
             sb.append("<div id=\"previewContent\" style=\"width:750px\">");
             sb.append(html);
             sb.append("</div>");
@@ -1053,7 +1187,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
             writer.write(sb.toString());
             writer.close();
         }
-    
+
         pageReturn();
     }
 
@@ -1141,10 +1275,10 @@ public class EloquaCreateJobHandler extends PageActionHandler
             {
                 s.append("<option class=\"").append(fp.getL10nProfileId())
                         .append("\" value=\"").append(fp.getId()).append("\"");
-                
+
                 if (fps.size() == 1)
                     s.append(" selected=\"selected\" ");
-                
+
                 s.append(">");
                 s.append(fp.getName()).append("</option>");
             }
@@ -1160,6 +1294,6 @@ public class EloquaCreateJobHandler extends PageActionHandler
     public void beforeAction(HttpServletRequest request,
             HttpServletResponse response)
     {
-    	response.setCharacterEncoding("utf-8");
+        response.setCharacterEncoding("utf-8");
     }
 }

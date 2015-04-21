@@ -22,6 +22,7 @@ import com.globalsight.connector.eloqua.models.Form;
 import com.globalsight.connector.eloqua.models.LandingPage;
 import com.globalsight.connector.eloqua.models.SearchResponse;
 import com.globalsight.cxe.entity.eloqua.EloquaConnector;
+import com.globalsight.util.StringUtil;
 //import com.google.gson.Gson;
 
 public class EloquaHelper
@@ -32,7 +33,9 @@ public class EloquaHelper
     private final String DYNAMIC_CONTENT = "dynamicContent";
     private static final Logger logger = Logger.getLogger(EloquaHelper.class);
     public static Map<String, String> USERS = new HashMap<String, String>();
-    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(><span elqid=\")([^\"]*)(\" elqtype=\"DynamicContent\"[^>]*>)([\\d\\D]*?)(</span><)");
+//    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(><span )(elqid=\"[^\"]*\" elqtype=\"DynamicContent\")([^>]*>[\\d\\D]*?</span><)");
+    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(<span )elqid=\"[^\"]*\" elqtype=\"DynamicContent\"([^>]*>)([\\d\\D]*?)</span>");
+//    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(><span elqid=\")([^\"]*)(\" elqtype=\"DynamicContent\"[^>]*>)([\\d\\D]*?)(</span><)");
     
     static
     {
@@ -422,25 +425,7 @@ public class EloquaHelper
     
     public String updateDynamicContent(String content, String targetLocale)
     {
-        StringBuilder output = new StringBuilder();
-        int start = 0;
-       
-        Matcher m = DYNAMIC_PATTERN.matcher(content);
-        
-        while (m.find(start))
-        {
-            output.append(content.substring(start, m.start()));
-            
-            String id = m.group(2);
-            String dynamic = m.group(4);
-//            String newId = newDynamicContent(id, targetLocale, dynamic);
-//            output.append(m.group(1)).append(newId).append(m.group(3)).append(m.group(4)).append(m.group(5));
-            output.append(dynamic);
-            
-            start = m.end();
-        }
-        
-        return output.toString();
+        return StringUtil.replaceWithRE(content, "<span elqid=\"[^\"]*\" elqtype=\"[^\"]*\"", "<span");
     }
 
     public LandingPage saveLandingPage(LandingPage page)

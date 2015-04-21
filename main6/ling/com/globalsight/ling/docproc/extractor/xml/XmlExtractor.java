@@ -2229,7 +2229,7 @@ public class XmlExtractor extends AbstractExtractor implements
         {
             try
             {
-                String replaced = specialPreReplacement(isCdata);
+                String replaced = preReplaceForAll(isCdata);
                 Output output = switchExtractor(replaced, otherFormat,
                         otherFilter);
                 Iterator it = output.documentElementIterator();
@@ -2243,7 +2243,7 @@ public class XmlExtractor extends AbstractExtractor implements
                             Segmentable segmentableElement = (Segmentable) element;
                             segmentableElement.setDataType(otherFormat);
                             String chunk = segmentableElement.getChunk();
-                            chunk = specialPostReplacement(chunk,
+                            chunk = postReplaceForTransElement(chunk,
                                     (isCdata || m_isOriginalXmlNode));
                             if (isEntityOrSpaceOnly(chunk))
                             {
@@ -2261,8 +2261,7 @@ public class XmlExtractor extends AbstractExtractor implements
                         case DocumentElement.SKELETON:
                             String skeleton = ((SkeletonElement) element)
                                     .getSkeleton();
-                            skeleton = specialPostReplacement(skeleton,
-                                    (isCdata || m_isOriginalXmlNode));
+                            skeleton = postReplaceForSkeletonElement(skeleton);
                             if (isCdata)
                             {
                                 skeleton = StringUtil.replace(skeleton, "�",
@@ -2298,22 +2297,18 @@ public class XmlExtractor extends AbstractExtractor implements
      * 
      * Note: maybe we should fix such issue in html extractor instead of here.
      */
-    private String specialPreReplacement(boolean isCdata)
+    private String preReplaceForAll(boolean isCdata)
     {
         String replaced = m_switchExtractionBuffer;
         if (isCdata)
         {
             replaced = StringUtil.replace(replaced, "&copy;", "_ampcopyright_");
-        }
-        replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
-        // GBS-3577
-        if (!isCdata)
-        {
-            replaced = StringUtil.replace(replaced, "&nbsp;", "_amp_amp_nbsp_");
+            replaced = StringUtil.replace(replaced, "&nbsp;", "_cdata_nbsp_");
         }
         else
         {
-            replaced = StringUtil.replace(replaced, "&nbsp;", "_cdata_nbsp_");
+            replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
+            replaced = StringUtil.replace(replaced, "&nbsp;", "_amp_amp_nbsp_");
         }
 
         // To send to html filter, need encode again
@@ -2325,26 +2320,48 @@ public class XmlExtractor extends AbstractExtractor implements
         return replaced;
     }
 
-    private String specialPostReplacement(String chunk, boolean isCdata)
+    // For translatable elements
+    private String postReplaceForTransElement(String chunk, boolean isCdata)
     {
         // &copy;
         chunk = StringUtil.replace(chunk, "_copyright_",
                 wrapAsEntity("copy", "&copy;"));
         chunk = StringUtil.replace(chunk, "_ampcopyright_",
                 wrapAsEntity("copy", "&amp;copy;"));
-        if (!isCdata)
+
+        if (isCdata)
+        {
+        	if ("_cdata_nbsp_".equals(chunk)) {
+        		chunk = "&nbsp;";//output to skeleton, not encoded
+        	} else if ("&amp;nbsp;".equals(chunk)) {
+        		chunk = "&amp;nbsp;";//output to skeleton, not encoded
+        	} else {
+				chunk = StringUtil.replace(chunk, "&amp;nbsp;",
+						wrapAsEntity("nbsp", "&amp;amp;nbsp;"));
+				chunk = StringUtil.replace(chunk, "_cdata_nbsp_",
+						wrapAsEntity("nbsp", "&amp;nbsp;"));
+        	}
+        }
+        else
         {
             // &nbsp; for GBS-3577
             chunk = StringUtil.replace(chunk, "&amp;nbsp;",
                     wrapAsEntity("nbsp", "&nbsp;"));
             chunk = StringUtil.replace(chunk, "_amp_amp_nbsp_",
-                    wrapAsEntity("nbsp", "&amp;nbsp;"));
-        }
-        else
-        {
-            chunk = StringUtil.replace(chunk, "_cdata_nbsp_", "&amp;nbsp;");
+                    wrapAsEntity("nbsp", "&amp;nbsp;"));        	
         }
 
+        return chunk;
+    }
+
+    // For skeleton elements
+    private String postReplaceForSkeletonElement(String chunk)
+    {
+        // &copy;
+        chunk = StringUtil.replace(chunk, "_copyright_", "&copy;");
+        chunk = StringUtil.replace(chunk, "_ampcopyright_", "&amp;copy;");
+        chunk = StringUtil.replace(chunk, "_cdata_nbsp_", "&nbsp;");
+        chunk = StringUtil.replace(chunk, "_amp_amp_nbsp_", "&nbsp;");
         return chunk;
     }
 

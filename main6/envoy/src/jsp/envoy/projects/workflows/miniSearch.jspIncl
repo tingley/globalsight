@@ -422,9 +422,28 @@ function checkFilters()
 {
 	var tmp = ATrim($("#jobIdFilter").val());
 	var isEffective = /^([1-9]+[-]?[0-9]*[,]?)+/;
-	if (tmp != "") {
-		if(!isEffective.test(tmp)||tmp.charAt(tmp.length - 1)=="-"||tmp.indexOf("-,")>0||tmp.indexOf(",-")>0){
+	var isLetter = /^[a-zA-Z]/;
+	var isInteger = /^[0-9]/;
+	var containLetterSpace = "no";
+	tmp = tmp.replace(/\s+/g," ");
+	if (tmp != "" && $("#jobIdOption").val()=="EQ") {
+		for(var i=0;i<tmp.length;i++)
+		{
+			if(isLetter.test(tmp.charAt(i))||isInteger.test(tmp.charAt(i))&&i<tmp.length-2 && tmp.charAt(i+1)==" "&&isInteger.test(tmp.charAt(i+2)))
+			{
+				containLetterSpace = "yes";
+				break;
+			}
+		}
+		if(!isEffective.test(tmp)||containLetterSpace == "yes"||tmp.charAt(tmp.length - 1)=="-"||tmp.indexOf("-,")>0
+			||tmp.indexOf(",-")>0||tmp.indexOf("--")>0||tmp.indexOf(",,")>0){
 			alert("Invalid job ID, only integer numbers, comma and en dash are allowed.");
+			return false;
+		}
+	}
+	if (tmp != "" && $("#jobIdOption").val()!="EQ") {
+		if (!isAllDigits(tmp)) {
+			alert("Invalid job ID, only integer numbers are allowed.");
 			return false;
 		}
 	}

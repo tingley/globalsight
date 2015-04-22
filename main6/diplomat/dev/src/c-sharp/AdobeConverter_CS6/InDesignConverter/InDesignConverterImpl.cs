@@ -89,7 +89,7 @@ namespace GlobalSight.InDesignConverter
             {
                 m_fileExtensionSearchPattern = INCTXRV_FILE_EXT;
             }
-			else 
+			else
             {
 				m_fileExtensionSearchPattern = IMPORT_FILE_EXT;
 			}

@@ -260,7 +260,7 @@ function switchRadio(penalizedReferenceTmRadio)
              <TR id="populatefuzzy" class="formatAcces">
                 <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_populate_fuzzy_target_segment") %></SPAN></TD>
                 <TD><SPAN CLASS="standardText">
-                <input id="populatefuzzyCheckBox" type="checkbox" name="<%=OfflineConstants.POPULATE_FUZZY%>" checked="checked" value="true"/></SPAN>
+                <input id="populatefuzzyCheckBox" type="checkbox" name="<%=OfflineConstants.POPULATE_FUZZY%>"  value="true"/></SPAN>
                 </TD>
             </TR>
             <TR id="preserveSourceFolderBox" class="standardText">

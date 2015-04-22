@@ -555,11 +555,9 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
                 getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
                 sb.append(" WHERE 1");
             }
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+            
+            getInlineAttrsSql(sb,inlineAttrs);
+            
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -604,11 +602,9 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
                 getStorage().attributeJoinFilter(sb, "tuv.tuId", customAttrs);
                 sb.append(" WHERE 1");
             }
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+            
+            getInlineAttrsSql(sb,inlineAttrs);
+            
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -740,11 +736,9 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
                 getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
                 sb.append(" WHERE tu.id > ?").addValues(startId);
             }
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+            
+            getInlineAttrsSql(sb,inlineAttrs);
+            
             if (start != null && end != null)
             {
                 sb.append(" ORDER BY tuv.tuId ASC LIMIT ?").addValues(count);
@@ -841,6 +835,36 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 			localeIds = localeIds.substring(0, localeIds.lastIndexOf(","));
 		}
 		return localeIds;
+	}
+	
+	private void getInlineAttrsSql(StatementBuilder sb,
+			Map<TM3Attribute, Object> inlineAttrs)
+	{
+		for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
+		{
+			if (e.getKey().getColumnName().equalsIgnoreCase("project"))
+			{
+				String projectValue = getProjects((String) e.getValue());
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append(" in (").append(projectValue).append(")");
+			}
+			else
+			{
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append(" = ?").addValues(e.getValue());
+			}
+		}
+	}
+	
+	private String getProjects(String values)
+	{
+		String[] valueArr = values.split(",");
+		String projectValue = "";
+		for (String value : valueArr)
+		{
+			projectValue += "'" + value + "'" + ",";
+		}
+		return projectValue.substring(0, projectValue.lastIndexOf(","));
 	}
 	
 	@Override

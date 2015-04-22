@@ -625,11 +625,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
                 sb.append(" WHERE tu.tmId = ?").addValue(tmId);
             }
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+            
+            getInlineAttrsSql(sb,inlineAttrs);
+            
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -683,11 +681,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 	appendAttributeSql(jobAttributeSet, sb, false);
                 }
             }
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+            
+            getInlineAttrsSql(sb,inlineAttrs);
+            
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -735,11 +731,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 sb.append(" WHERE tuv.tuid=tu.id AND tuv.tmId = ?").addValue(
                         tmId);
             }
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+            
+            getInlineAttrsSql(sb,inlineAttrs);
+
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -988,11 +982,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 sb.append(" WHERE tu.tmId = ? ").addValue(tmId)
                         .append(" AND tu.id > ?").addValues(startId);
             }
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+            
+            getInlineAttrsSql(sb,inlineAttrs);
+            
             if (start != null && end != null)
             {
                 sb.append(" ORDER BY tuv.tuId ASC LIMIT ?").addValues(count);
@@ -1057,11 +1049,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 	appendAttributeSql(jobAttributeSet, sb, false);
                 }
             }
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                sb.append(" AND tu.").append(e.getKey().getColumnName())
-                        .append(" = ?").addValues(e.getValue());
-            }
+            
+            getInlineAttrsSql(sb,inlineAttrs);
+            
             if (start != null && end != null)
             {
                 sb.append(" ORDER BY tuv.tuId ASC LIMIT ?").addValues(count);
@@ -1200,5 +1190,35 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			localeIds = localeIds.substring(0, localeIds.lastIndexOf(","));
 		}
 		return localeIds;
+	}
+	
+	private void getInlineAttrsSql(StatementBuilder sb,
+			Map<TM3Attribute, Object> inlineAttrs)
+	{
+		for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
+		{
+			if (e.getKey().getColumnName().equalsIgnoreCase("project"))
+			{
+				String projectValue = getProjects((String) e.getValue());
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append(" in (").append(projectValue).append(")");
+			}
+			else
+			{
+				sb.append(" AND tu.").append(e.getKey().getColumnName())
+						.append(" = ?").addValues(e.getValue());
+			}
+		}
+	}
+	
+	private String getProjects(String values)
+	{
+		String[] valueArr = values.split(",");
+		String projectValue = "";
+		for (String value : valueArr)
+		{
+			projectValue += "'" + value + "'" + ",";
+		}
+		return projectValue.substring(0, projectValue.lastIndexOf(","));
 	}
 }

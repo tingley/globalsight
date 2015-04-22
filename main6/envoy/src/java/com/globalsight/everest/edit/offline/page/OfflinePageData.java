@@ -2513,7 +2513,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     }
 
     /*
-     * because the soruce or target tuv content maybe have ilegal attribute to
+     * because the source or target tuv content maybe have illegal attribute to
      * TMX 1.4, so must check and remove them
      */
     private String getFixResultForTMX(String p_str)

@@ -70,7 +70,11 @@ public class GitConnectorCreateJobHandler extends PageActionHandler
             GitConnector gc = GitConnectorManagerLocal
                     .getGitConnectorById(Long.parseLong(gcId));
             GitConnectorHelper helper = new GitConnectorHelper(gc);
-            helper.gitConnectorPull();
+            String checkout = p_request.getParameter("checkout");
+            if(checkout != null && checkout.equals("yes"))
+            {
+            	helper.gitConnectorPull();
+            }
             out.write(helper.getGitConnectorFilesJson().getBytes("UTF-8"));
         }
         catch (Exception e)

@@ -121,6 +121,7 @@ var attributeRequired = false;
 var isUploading = false;
 var uploadedFiles = new Array();
 var defaultFileProfile = "-1";
+var checkout = "no";
 
 function confirmJump() {
     return true;
@@ -145,22 +146,17 @@ $(
     }
 )
 
-$(document).ready(function ()
+function initTree()
 {
-    // Set CSS Value
-	var defaultWidth = "100%";
-	var defaultHeight = $(window).height() * 0.65;
-    $("#treeDIV").width(defaultWidth);
-    $("#treeDIV").height(defaultHeight);
-
-    // Initialize MindTouch Pages tree
+	// Initialize MindTouch Pages tree
     $("#treeDIV").dynatree({
         title: "Loading Git Connector tree",
         persist: false,
         checkbox: true,
         selectMode: 3,
         initAjax: {
-            url: "<%=initURL%>"
+            url: "<%=initURL%>",
+            data: { checkout: checkout}
         },
         onSelect: function(select, node) {
             // Get a list of all selected nodes, and convert to a key array:
@@ -185,6 +181,17 @@ $(document).ready(function ()
             }
         }
     });
+}
+
+$(document).ready(function ()
+{
+    // Set CSS Value
+	var defaultWidth = "100%";
+	var defaultHeight = $(window).height() * 0.65;
+    $("#treeDIV").width(defaultWidth);
+    $("#treeDIV").height(defaultHeight);
+
+    initTree();
 
     // Expand All Button
     $("#expandBtn").click(function () {
@@ -819,11 +826,13 @@ function fnSelectAll2(isChecked) {
 }
 
 function fnReload() {
+	checkout = "yes";
     // Close page information dialog first
 	$("#currentNodeDiv").dialog("close");
     $("#currentNodeDiv").hide();
 
-    $("#treeDIV").dynatree("getTree").reload();
+    $("#treeDIV").dynatree("destroy");
+    initTree();
 }
 
 function showCreatePage() {

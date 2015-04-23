@@ -1141,6 +1141,11 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             m_status.setResults(errorString);
             m_status.setCounter(1);
             m_status.setPercentage(100);
+
+            if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName))
+            {
+                logUploadResultForReport(p_user, p_task, p_fileName);
+            }
         }
         catch (Exception ex)
         {

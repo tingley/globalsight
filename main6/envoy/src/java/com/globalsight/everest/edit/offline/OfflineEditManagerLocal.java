@@ -53,7 +53,6 @@ import com.globalsight.config.UserParameter;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
-import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.SynchronizationManager;
 import com.globalsight.everest.edit.offline.download.DownLoadApi;
@@ -72,13 +71,11 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.ListViewWorkXLIFF20Wri
 import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
-import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
@@ -880,14 +877,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
                 status.addFileState(taskId, p_fileName, "Handled");
 
-                // As the tuvs in normal page are saved through the jms
-                // (PageSaverMDB, see UploadApi.save()), the translated
-                // percentages may not be consistent if the mdb has not finished
-                // the save process in another thread. I am using
-                // Thread.sleep(1000)
-                // for a short-term solution because I think this feature is not
-                // THAT important.
-                Thread.sleep(1000);
                 if (TaskHelper.getTask(taskId) != null)
                 {
                     logUploadResult(data, p_fileName, p_user);
@@ -970,21 +959,11 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         try
         {
             Task tsk = ServerProxy.getTaskManager().getTask(task.getId());
-            List<TargetPage> targetPages = tsk.getTargetPages();
-            int percentageSum = 0;
-            for (TargetPage tp : targetPages)
-            {
-                percentageSum += SegmentTuvUtil
-                        .getTranslatedPercentageForTargetPage(tp.getId());
-            }
-            int filePercentage = Math.round(BigDecimalHelper.divide(
-                    percentageSum * 100, targetPages.size() * 100));
             long jobId = tsk.getJobId();
             String locale = tsk.getTargetLocale().toString();
 
-            s_category.info(user.getUserName() + " uploaded " + fileName + ", "
-                    + filePercentage + "% translated, job id: " + jobId
-                    + ", locale: " + locale);
+            s_category.info(user.getUserName() + " uploaded " + fileName
+                    + ", job id: " + jobId + ", locale: " + locale);
         }
         catch (Exception e)
         {
@@ -1008,31 +987,24 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         String taskId = data.getTaskId();
         Task task = TaskHelper.getTask(Long.parseLong(taskId));
         GlobalSightLocale targetLocale = task.getTargetLocale();
-        List<Long> taskIdList = data.getTaskIds();
-        int filePercentage = 0;
-        if (taskIdList != null)
+        List<Long> taskIdList = new ArrayList<Long>();
+        if (data.getTaskIds() != null)
         {
+            taskIdList.addAll(data.getTaskIds());
             for (Long taskID : taskIdList)
             {
                 Long jobID = TaskHelper.getTask(taskID).getJobId();
-                filePercentage = SegmentTuvUtil
-                        .getTranslatedPercentageForTask((TaskHelper
-                                .getTask(taskID)));
                 s_category.info(user.getUserName() + " uploaded " + fileName
-                        + ", " + filePercentage + "% translated, job id: "
-                        + jobID + ", locale: " + targetLocale.toString());
+                        + ", job id: " + jobID + ", locale: "
+                        + targetLocale.toString());
             }
         }
         else
         {
-            Long jobId = task.getJobId();
-            filePercentage = SegmentTuvUtil
-                    .getTranslatedPercentageForTask(task);
-            s_category.info(user.getUserName() + " uploaded " + fileName + ", "
-                    + filePercentage + "% translated, job id: " + jobId
-                    + ", locale: " + targetLocale.toString());
+            s_category.info(user.getUserName() + " uploaded " + fileName
+                    + ", job id: " + task.getJobId() + ", locale: "
+                    + targetLocale.toString());
         }
-
     }
 
     private void processUploadResult(String errorString, int processedCounter)
@@ -1246,11 +1218,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             uploadedFilePath.append("Offline Files");
             uploadedFilePath.append(File.separator);
             Workflow wf = task.getWorkflow();
-            Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(wf.getId());
+            Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(
+                    wf.getId());
             Task oriTask = (Task) tasks.iterator().next();
-            uploadedFilePath.append(oriTask.getId() + "_"
-                  + oriTask.getTaskName().substring(0, oriTask.getTaskName().lastIndexOf("_")));
-          
+            uploadedFilePath.append(oriTask.getId()
+                    + "_"
+                    + oriTask.getTaskName().substring(0,
+                            oriTask.getTaskName().lastIndexOf("_")));
+
         }
         uploadedFilePath.append(File.separator);
         uploadedFilePath.append(p_fileName);

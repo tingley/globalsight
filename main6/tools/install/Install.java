@@ -36,10 +36,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -47,6 +49,7 @@ import util.Action;
 import util.FileUtil;
 import util.InstallUtil;
 import util.JarSignUtil;
+import util.CodeUtil;
 import util.Page;
 
 public class Install extends installer.EventBroadcaster
@@ -187,6 +190,8 @@ public class Install extends installer.EventBroadcaster
     private static final String Line_CHAR = "*";
     
     private String JKS, keyPass, keyAlias;
+    
+    private static final Set<String> keys = new HashSet<String>();
 
     public final static Action QUIT_ACTION = new Action(
             RESOURCE.getString("quit_key"), RESOURCE.getString("quit_name"), 0)
@@ -895,6 +900,11 @@ public class Install extends installer.EventBroadcaster
         InputStream inputstream = getResource(p_propertyFileName);
         p_properties.load(inputstream);
         inputstream.close();
+        
+        if (p_propertyFileName.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE))
+        {
+           decode();
+        }
     }
 
     /**
@@ -1112,7 +1122,18 @@ public class Install extends installer.EventBroadcaster
             System.out.print("\nSaving your settings to " + p_fileName
                     + ".\n\n");
             addAdditionalInstallValues();
+            String p_fileName_forwardslash= replace(p_fileName.toString(), BACKSLASH, FORWARDSLASH);
+            if (p_fileName_forwardslash.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE))
+            {
+                encode();
+            }
+            
             m_installValues.store(new FileOutputStream(p_fileName), null);
+            
+            if (p_fileName_forwardslash.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE))
+            {
+                decode();
+            } 
         }
         catch (IOException e)
         {
@@ -2243,4 +2264,51 @@ public class Install extends installer.EventBroadcaster
         String os = System.getProperty("os.arch");
         return os.endsWith("64");
     }
+    
+    private void decode()
+    {
+        for (String key : keys)
+        {
+            String value = getInstallValue(key);
+            if (value != null && !value.trim().equals(""))
+            {
+                try
+                {
+                    value = CodeUtil.getDecryptionString(value);
+                    m_installValues.put(key, value);
+                }
+                catch (Exception ignore)
+                {
+                }
+            }
+        }
+    }
+    
+    private void encode()
+    {
+        for (String key : keys)
+        {
+            String value = getInstallValue(key);
+            if (value != null && !value.trim().equals(""))
+            {
+                try
+                {
+                    value = CodeUtil.encryptionString(value);
+                    m_installValues.put(key, value);
+                }
+                catch (Exception ignore)
+                {
+                }
+            }
+        }
+    }
+    
+    public Install(){
+        keys.add("server_ssl_ks_pwd");
+        keys.add("jar_sign_pwd");
+        keys.add("system4_admin_password");
+        keys.add("database_password");
+        keys.add("account_password");
+    }
+  
 }

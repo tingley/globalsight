@@ -160,9 +160,11 @@ public class StopWord
         }
         else
         {
-            c_logger.warn("Couldn't find a stop word file for "
-                + p_locale.toString());
+        	if (c_logger.isDebugEnabled()) {
+                c_logger.warn("Couldn't find a stop word file for "
+                        + p_locale.toString());        		
+        	}
         }
     }
-    
+
 }

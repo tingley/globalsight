@@ -336,8 +336,8 @@ public class AmbFileStoragePathUtils
         String companyId = CompanyThreadLocal.getInstance().getValue();
         if (unextractedParentDirs.get(companyId) == null)
         {
-            File unextractedParentDir = new File(getFileStorageDirPath(),
-                    UNEXTRACTED_SUB_DIRECTORY);
+			File unextractedParentDir = new File(
+					getFileStorageDirPath(companyId), UNEXTRACTED_SUB_DIRECTORY);
             unextractedParentDir.mkdirs();
             unextractedParentDirs.put(companyId, unextractedParentDir);
         }

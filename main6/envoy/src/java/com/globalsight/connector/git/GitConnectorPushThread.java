@@ -38,6 +38,7 @@ public class GitConnectorPushThread implements Runnable
 						GitConnector gc = GitConnectorManagerLocal
 								.getGitConnectorById(cacheFile.getGitConnectorId());
 						GitConnectorHelper helper = new GitConnectorHelper(gc);
+						helper.gitConnectorPull();
 						helper.gitConnectorPush(cacheFile.getFilePath());
 						HibernateUtil.delete(cacheFile);
 					}

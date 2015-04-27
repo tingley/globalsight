@@ -901,9 +901,11 @@ public class Install extends installer.EventBroadcaster
         p_properties.load(inputstream);
         inputstream.close();
         
-        if (p_propertyFileName.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE))
+        if (p_propertyFileName.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE)
+                || p_propertyFileName
+                        .equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
         {
-           decode();
+            decode();
         }
     }
 
@@ -1123,14 +1125,20 @@ public class Install extends installer.EventBroadcaster
                     + ".\n\n");
             addAdditionalInstallValues();
             String p_fileName_forwardslash= replace(p_fileName.toString(), BACKSLASH, FORWARDSLASH);
-            if (p_fileName_forwardslash.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE))
+            if (p_fileName_forwardslash
+                    .equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE)
+                    || p_fileName
+                            .equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
             {
                 encode();
             }
             
             m_installValues.store(new FileOutputStream(p_fileName), null);
             
-            if (p_fileName_forwardslash.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE))
+            if (p_fileName_forwardslash
+                    .equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE)
+                    || p_fileName
+                            .equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
             {
                 decode();
             } 

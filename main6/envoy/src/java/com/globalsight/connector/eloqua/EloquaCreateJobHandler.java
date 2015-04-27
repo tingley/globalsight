@@ -164,15 +164,20 @@ public class EloquaCreateJobHandler extends PageActionHandler
             ps = reloadLandingPages(request).getElements();
             ps = filter.filter(ps);
             sessionManager.setAttribute("eloquaLandingPages", ps);
+            sessionManager.setAttribute("eloquaLandingPageFilter", filter);
             break;
         case 7: // update the page size
             page = 1;
             break;
         case 8: // update the page set
             page = 1;
-            EloquaFileFilter filter2 = getFilter(request);
+            EloquaFileFilter filter2 = (EloquaFileFilter) sessionManager.getAttribute("eloquaLandingPageFilter");
             ps = reloadLandingPages(request).getElements();
-            ps = filter2.filter(ps);
+            if (filter2 != null)
+            {
+                ps = filter2.filter(ps);
+            }
+            
             sessionManager.setAttribute("eloquaLandingPages", ps);
             break;
         default:
@@ -312,6 +317,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
             es = alls.getElements();
             es = filter.filter(es);
             sessionManager.setAttribute("eloquaEmails", es);
+            sessionManager.setAttribute("eloquaEmailFilter", filter);
 
             break;
         case 7: // update the page size
@@ -320,9 +326,13 @@ public class EloquaCreateJobHandler extends PageActionHandler
             break;
         case 8: // update the page set
             page = 1;
-            EloquaFileFilter filter2 = getFilter(request);
+            EloquaFileFilter filter2 = (EloquaFileFilter) sessionManager.getAttribute("eloquaEmailFilter");
             Alls alls2 = reloadEmails(request);
             es = alls2.getElements();
+            if (filter2 != null)
+            {
+                es = filter2.filter(es);
+            }
             sessionManager.setAttribute("eloquaEmails", es);
             break;
         default:
@@ -715,6 +725,11 @@ public class EloquaCreateJobHandler extends PageActionHandler
         int perPage = getPerPage(request);
         SessionManager sessionManager = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
+        
+        sessionManager.setAttribute(EMAIL_SET, 1);
+        sessionManager.setAttribute(LANDING_PAGE_SET, 1);
+        sessionManager.setAttribute("eloquaLandingPageFilter", null);
+        sessionManager.setAttribute("eloquaEmailFilter", null);
 
         Alls alls = reloadEmails(request);
         List<Email> es = alls.getElements();
@@ -733,9 +748,6 @@ public class EloquaCreateJobHandler extends PageActionHandler
         List<Email> e1 = es.size() > perPage ? es.subList(0, perPage) : es;
         List<LandingPage> p1 = ps.size() > perPage ? ps.subList(0, perPage)
                 : ps;
-
-        sessionManager.setAttribute(EMAIL_SET, 1);
-        sessionManager.setAttribute(LANDING_PAGE_SET, 1);
         
         int n = alls.getTotal() / 1000 + 1;
         sessionManager.setAttribute(EMAIL_SET_TOTAL, n);

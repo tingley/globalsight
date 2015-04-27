@@ -20,12 +20,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.util.Assert;
+import com.util.CodeUtil;
 import com.util.FileUtil;
 import com.util.PropertyUtil;
 import com.util.ServerUtil;
@@ -60,6 +63,7 @@ public class InstallValues
                 in = new FileInputStream(ServerUtil.getPath() + File.separator
                         + RESOURCE_FILE);
                 PROPERTIES.load(in);
+                decode();
                 log.debug("Loading installValues from " + ServerUtil.getPath()
                         + File.separator + RESOURCE_FILE);
             }
@@ -86,6 +90,32 @@ public class InstallValues
         }
 
         return PROPERTIES;
+    }
+
+    private static void decode()
+    {
+        final Set<String> keys = new HashSet<String>();
+        keys.add("server_ssl_ks_pwd");
+        keys.add("jar_sign_pwd");
+        keys.add("system4_admin_password");
+        keys.add("database_password");
+        keys.add("account_password");
+        for (String key : keys)
+        {
+            String value = PROPERTIES.getProperty(key);
+            if (value != null && !value.trim().equals(""))
+            {
+                try
+                {
+                    value = CodeUtil.getDecryptionString(value);
+                    PROPERTIES.put(key, value);
+                }
+                catch (Exception ignore)
+                {
+                }
+            }
+        }
+
     }
 
     /**

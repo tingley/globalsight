@@ -151,9 +151,8 @@ public class Importer
                 .getAlignerExtractor(alignerExtractorName);
         String priority = (String) params.get("priority");
 
-        String fullname = AmbFileStoragePathUtils.getCxeDocDirPath()
+        String fullname = AmbFileStoragePathUtils.getCxeDocDirPath(companyId)
                 + File.separator + filename;
-        File f = new File(fullname);
         String displayName = filename;
         m_filename = fullname;
         m_displayName = displayName;

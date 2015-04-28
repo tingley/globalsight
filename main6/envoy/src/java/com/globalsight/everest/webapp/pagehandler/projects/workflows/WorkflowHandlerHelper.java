@@ -968,7 +968,6 @@ public class WorkflowHandlerHelper
                     trgLocales += workflow.getTargetLocale().toString() + ",";
                 }
             }
-          targetLocales.add(trgLocales);
             for (Request request : requests)
             {
                 long fpId = request.getFileProfileId();
@@ -1018,6 +1017,7 @@ public class WorkflowHandlerHelper
 
                 filePaths.add(getSourceFileLocalPathName(srcFilePathName));
                 fileProfileIds.add(String.valueOf(fpId));
+                targetLocales.add(trgLocales);
             }
 
             // try to re-create job only when it has at least one valid source file.

@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -957,6 +958,17 @@ public class WorkflowHandlerHelper
 
             Set<String> realFiles = new HashSet<String>();
             Collection<Request> requests = job.getRequestList();
+            Iterator it = job.getWorkflows().iterator();
+            String trgLocales = "";
+            while (it.hasNext())
+            {
+                Workflow workflow = (Workflow) it.next();
+                if (!Workflow.CANCELLED.equals(workflow.getState()))
+                {
+                    trgLocales += workflow.getTargetLocale().toString() + ",";
+                }
+            }
+          targetLocales.add(trgLocales);
             for (Request request : requests)
             {
                 long fpId = request.getFileProfileId();
@@ -964,7 +976,6 @@ public class WorkflowHandlerHelper
 
                 EventFlowXmlParser parser = new EventFlowXmlParser();
                 parser.parse(request.getEventFlowXml());
-                String trgLocales = parser.getTargetLocale();
                 String srcFilePathName = parser.getDataValue("source", "Filename");
 
                 File srcFile = new File(docDir, srcFilePathName);
@@ -1007,7 +1018,6 @@ public class WorkflowHandlerHelper
 
                 filePaths.add(getSourceFileLocalPathName(srcFilePathName));
                 fileProfileIds.add(String.valueOf(fpId));
-                targetLocales.add(trgLocales);
             }
 
             // try to re-create job only when it has at least one valid source file.

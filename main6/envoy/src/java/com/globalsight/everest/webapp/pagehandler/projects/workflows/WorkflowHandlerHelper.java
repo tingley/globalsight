@@ -968,6 +968,7 @@ public class WorkflowHandlerHelper
                     trgLocales += workflow.getTargetLocale().toString() + ",";
                 }
             }
+            trgLocales = trgLocales.substring(0,trgLocales.length()-1);
             for (Request request : requests)
             {
                 long fpId = request.getFileProfileId();

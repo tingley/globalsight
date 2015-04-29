@@ -34,12 +34,14 @@ import java.util.Vector;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
+import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.cxe.util.EventFlowXmlParser;
@@ -977,7 +979,7 @@ public class WorkflowHandlerHelper
                 EventFlowXmlParser parser = new EventFlowXmlParser();
                 parser.parse(request.getEventFlowXml());
                 String srcFilePathName = parser.getDataValue("source", "Filename");
-
+                
                 File srcFile = new File(docDir, srcFilePathName);
                 if (XliffFileUtil.isXliffFile(srcFile.getName()))
                 {
@@ -989,6 +991,33 @@ public class WorkflowHandlerHelper
                         String docDirTmp = docDir.replace("\\", "/");
                         srcFilePathName = path.substring(docDirTmp.length() + 1);
                     }
+                }
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                        .getFileProfileById(fpId, true);
+                String scriptOnImport = fp.getScriptOnImport();
+                
+                String scriptedFolderNamePrefix = FileSystemUtil
+                        .getScriptedFolderNamePrefixByJob(jobId);
+                String srcFileName = srcFile.getName();
+                String name = srcFileName.substring(
+                        srcFileName.lastIndexOf(File.separator) + 1,
+                        srcFileName.lastIndexOf("."));
+                String extension = srcFileName.substring(srcFileName.lastIndexOf(".")+1);
+                String folderName = scriptedFolderNamePrefix+"_"+name+"_"+extension;
+                if (StringUtils.isNotEmpty(scriptOnImport)
+                        && srcFile.getParentFile().getName()
+                                .equalsIgnoreCase(folderName))
+                {
+                    File parentFile = srcFile.getParentFile().getParentFile();
+                    String path = parentFile.getAbsolutePath() + File.separator
+                            + srcFileName;
+                    File file = new File(path);
+                    if (file.exists())
+                    {
+                        srcFilePathName = file.getAbsolutePath().substring(
+                                docDir.length() + 1);
+                    }
+                    srcFile = new File(docDir, srcFilePathName);
                 }
 
                 // For office 2010 formats, multiple requests may be from the

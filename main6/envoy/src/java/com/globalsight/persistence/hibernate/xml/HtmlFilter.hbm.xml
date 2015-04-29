@@ -22,6 +22,8 @@
             not-null="false" />
         <property name="ignoreInvalideHtmlTags" column="IGNORE_INVALIDE_HTML_TAGS" type="yes_no"
             not-null="false" />
+        <property name="whitespacePreserve" column="WHITESPACE_PRESERVE" type="yes_no"
+            not-null="false" />
         <property name="jsFunctionText" length="1000" column="JS_FUNCTION_FILTER"
             type="string" not-null="true" unique="false" />
             

@@ -499,6 +499,13 @@ public class DiplomatSegmenter
             BreakPosition pos = new BreakPosition(iEnd);
             breakPositions.add(pos);
         }
+        
+        // remove these index for GBS-3794
+        /*
+         * <rule break="no"> <beforebreak>\w\n</beforebreak>
+         * <afterbreak>[\s]+</afterbreak> </rule>
+         */
+        
 
         // Now go back and split the string with tags into segments.
         List<String> segments = splitOriSegment(breakPositions);

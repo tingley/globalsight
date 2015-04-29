@@ -1944,6 +1944,11 @@ public class FilterConfigurationImportHandler extends PageHandler
                     htmlFilter.setIgnoreInvalideHtmlTags(Boolean
                             .parseBoolean(valueField));
                 }
+                else if (keyField.equalsIgnoreCase("WHITESPACE_PRESERVE"))
+                {
+                    htmlFilter.setWhitespacePreserve(Boolean
+                            .parseBoolean(valueField));
+                }
                 else if (keyField.equalsIgnoreCase("JS_FUNCTION_FILTER"))
                 {
                     htmlFilter.setJsFunctionText(valueField);

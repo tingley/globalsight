@@ -139,6 +139,7 @@ public class Extractor
             jsFunctionText = htmlFilte.getJsFunctionText();
             isIgnoreInvalidHtmlTags = htmlFilte.isIgnoreInvalideHtmlTags();
             extractor.setHtmlInternalTags(htmlFilte.getInternalTags());
+            extractor.setPreserveAllWhite(htmlFilte.getWhitespacePreserve());
         }
         
         extractor.setIgnoreInvalidHtmlTags(isIgnoreInvalidHtmlTags);

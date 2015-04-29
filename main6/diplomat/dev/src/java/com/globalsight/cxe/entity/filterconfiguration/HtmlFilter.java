@@ -28,6 +28,7 @@ public class HtmlFilter implements Filter
     private long companyId;
     private boolean convertHtmlEntry;
     private boolean ignoreInvalideHtmlTags;
+    private boolean whitespacePreserve = false;
     private String jsFunctionText;
     private String defaultPairedTags;
     private String pairedTags;
@@ -229,6 +230,16 @@ public class HtmlFilter implements Filter
     public void setIgnoreInvalideHtmlTags(boolean ignoreInvalideHtmlTags)
     {
         this.ignoreInvalideHtmlTags = ignoreInvalideHtmlTags;
+    }
+    
+    public boolean getWhitespacePreserve()
+    {
+        return whitespacePreserve;
+    }
+
+    public void setWhitespacePreserve(boolean whitespacePreserve)
+    {
+        this.whitespacePreserve = whitespacePreserve;
     }
 
     public HtmlFilter(String filterName, String filterDescription,
@@ -489,7 +500,8 @@ public class HtmlFilter implements Filter
         sb.append("\"convertHtmlEntry\":").append(convertHtmlEntry).append(",");
         sb.append("\"ignoreInvalideHtmlTags\":").append(ignoreInvalideHtmlTags)
                 .append(",");
-        ;
+        sb.append("\"whitespacePreserve\":").append(whitespacePreserve)
+                .append(",");
         sb.append("\"baseFilterId\":").append("\"").append(baseFilterId)
                 .append("\"");
         sb.append("}");

@@ -1018,7 +1018,12 @@ HtmlFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("<td class='htmlFilter_left_td'>" + jsIgnoreInvalidHTMLTags + "</td>");
 	str.append("<td class='htmlFilter_right_td'><input id='ignoreInvalideHtmlTags' type='checkbox' name='ignoreInvalideHtmlTags' checked></td>");
 	str.append("</tr>");
-
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsWhitespaceHandling + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateWhitespaceHandling() + "</td>");
+	str.append("</tr>");
+	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsLocalizeFunction + "</td>");
 	str.append("<td class='htmlFilter_right_td'><input id='localizeFunction' type='text' name='localizeFunction'></td>");
@@ -1111,6 +1116,17 @@ HtmlFilter.prototype.generateDiv = function(topFilterId, color)
 	saveHtmlFilter.htmlFilter = htmlFilter;
 }
 
+HtmlFilter.prototype.generateWhitespaceHandling = function (filter)
+{
+	var str = new StringBuffer("");
+	str.append("<nobr><input value='1' type='radio' name='wsHandleModeHTML'" + ((filter) ? ((filter && !filter.whitespacePreserve) ? " checked" : "") : " checked") + ">" 
+			+ fontTagS + "Collapse" +fontTagE);
+	str.append("&nbsp;&nbsp;");
+	str.append("<nobr><input value='2' type='radio' name='wsHandleModeHTML'" + ((filter) ? (( filter.whitespacePreserve) ? " checked" : "") : "") + ">" 
+			+ fontTagS + jsWsHandlingPreserve +fontTagE);
+	return str.toString();
+}
+
 HtmlFilter.prototype.init = function()
 {
 	this.currentOption = "embeddable_tags";
@@ -1178,6 +1194,11 @@ HtmlFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsIgnoreInvalidHTMLTags + "</td>");
 	str.append("<td class='htmlFilter_right_td'><input id='ignoreInvalideHtmlTags' type='checkbox' name='ignoreInvalideHtmlTags' "+isCheckIgnoreInvalideHtmlTags+"></input></td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsWhitespaceHandling + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateWhitespaceHandling(this.filter) + "</td>");
 	str.append("</tr>");
 
 	str.append("<tr>");
@@ -1327,6 +1348,9 @@ function saveHtmlFilter()
 	var localizeFunction = document.getElementById("localizeFunction").value;
 	var baseFilterId = document.getElementById("html_filter_baseFilterSelect").value;
 	
+	var wsHandleModeHtml = getRadioValue(fpForm.wsHandleModeHTML);
+	var whitespacePreserve = (wsHandleModeHtml == 2);
+	
 	// do not add this alert as there is no secondary or post filter in html filter
 	//alertUserBaseFilter(baseFilterId);
 	
@@ -1338,6 +1362,7 @@ function saveHtmlFilter()
 		filterDesc : filterDesc,
 		convertHtmlEntry : convertHtmlEntry,
 		ignoreInvalideHtmlTags : ignoreInvalideHtmlTags,
+		whitespacePreserve : whitespacePreserve,
 //		extractCharset : extractCharset,
 		localizeFunction : localizeFunction,
 		defaultEmbeddableTags : htmlFilter.defaultEmbeddableTags,
@@ -1416,6 +1441,7 @@ function updateHtmlFilterCallback(data)
 		//htFilter.placeHolderTrim = checkExistHtmlFilterCallback.obj.
 		htFilter.convertHtmlEntry = checkExistHtmlFilterCallback.obj.convertHtmlEntry;
 		htFilter.ignoreInvalideHtmlTags = checkExistHtmlFilterCallback.obj.ignoreInvalideHtmlTags;
+		htFilter.whitespacePreserve = checkExistHtmlFilterCallback.obj.whitespacePreserve;
 //		htFilter.extractCharset = checkExistHtmlFilterCallback.obj.extractCharset;
 		htFilter.jsFunctionText = checkExistHtmlFilterCallback.obj.localizeFunction;
 		
@@ -1463,6 +1489,7 @@ function saveHtmlFilterCallback(data)
 		//htFilter.placeHolderTrim = checkExistHtmlFilterCallback.obj.
 		htFilter.convertHtmlEntry = checkExistHtmlFilterCallback.obj.convertHtmlEntry;
 		htFilter.ignoreInvalideHtmlTags = checkExistHtmlFilterCallback.obj.ignoreInvalideHtmlTags;
+		htFilter.whitespacePreserve = checkExistHtmlFilterCallback.obj.whitespacePreserve;
 		htFilter.jsFunctionText = checkExistHtmlFilterCallback.obj.localizeFunction;
 		
 		htFilter.defaultEmbeddableTags = checkExistHtmlFilterCallback.obj.defaultEmbeddableTags;

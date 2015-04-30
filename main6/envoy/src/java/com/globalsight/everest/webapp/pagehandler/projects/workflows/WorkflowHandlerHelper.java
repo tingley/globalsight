@@ -971,6 +971,8 @@ public class WorkflowHandlerHelper
                 }
             }
             trgLocales = trgLocales.substring(0,trgLocales.length()-1);
+            FileProfilePersistenceManager fpManager = ServerProxy
+                    .getFileProfilePersistenceManager();
             for (Request request : requests)
             {
                 long fpId = request.getFileProfileId();
@@ -992,33 +994,35 @@ public class WorkflowHandlerHelper
                         srcFilePathName = path.substring(docDirTmp.length() + 1);
                     }
                 }
-                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                        .getFileProfileById(fpId, true);
-                String scriptOnImport = fp.getScriptOnImport();
-                
-                String scriptedFolderNamePrefix = FileSystemUtil
-                        .getScriptedFolderNamePrefixByJob(jobId);
-                String srcFileName = srcFile.getName();
-                String name = srcFileName.substring(
-                        srcFileName.lastIndexOf(File.separator) + 1,
-                        srcFileName.lastIndexOf("."));
-                String extension = srcFileName.substring(srcFileName.lastIndexOf(".")+1);
-                String folderName = scriptedFolderNamePrefix+"_"+name+"_"+extension;
-                if (StringUtils.isNotEmpty(scriptOnImport)
-                        && srcFile.getParentFile().getName()
-                                .equalsIgnoreCase(folderName))
-                {
-                    File parentFile = srcFile.getParentFile().getParentFile();
-                    String path = parentFile.getAbsolutePath() + File.separator
-                            + srcFileName;
-                    File file = new File(path);
-                    if (file.exists())
-                    {
-                        srcFilePathName = file.getAbsolutePath().substring(
-                                docDir.length() + 1);
-                    }
-                    srcFile = new File(docDir, srcFilePathName);
-                }
+
+                // Get the real source file if it has script on import.
+				FileProfile fp = fpManager.getFileProfileById(fpId, true);
+				if (StringUtils.isNotEmpty(fp.getScriptOnImport()))
+				{
+					String scriptedFolderNamePrefix = FileSystemUtil
+							.getScriptedFolderNamePrefixByJob(jobId);
+					String srcFileName = srcFile.getName();
+					int index = srcFileName.lastIndexOf(".");
+					String name = srcFileName.substring(0, index);
+					String extension = srcFileName.substring(index + 1);
+					String folderName = scriptedFolderNamePrefix + "_" + name
+							+ "_" + extension;
+					if (srcFile.getParentFile().getName()
+							.equalsIgnoreCase(folderName))
+					{
+						File parentFile = srcFile.getParentFile()
+								.getParentFile();
+						String path = parentFile.getAbsolutePath()
+								+ File.separator + srcFileName;
+						File file = new File(path);
+						if (file.exists())
+						{
+							srcFilePathName = file.getAbsolutePath().substring(
+									docDir.length() + 1);
+						}
+						srcFile = new File(docDir, srcFilePathName);
+					}
+				}
 
                 // For office 2010 formats, multiple requests may be from the
                 // same real file

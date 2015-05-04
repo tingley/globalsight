@@ -45,6 +45,7 @@ import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.dom4j.tree.DefaultAttribute;
 import org.dom4j.tree.DefaultText;
 import org.hibernate.Transaction;
 import org.jboss.util.Strings;
@@ -1552,6 +1553,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         return errMsg;
     }
 
+    /**
+     * Re-wrap the offline XLF segments.
+     */
     private void reWrapXliff(Document doc)
     {
         Element root = doc.getRootElement();
@@ -1563,6 +1567,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         xliffString.append("<file>");
         xliffString.append("<body>");
 
+        ArrayList<String> trgStates = new ArrayList<String>();
+        Attribute stateAttr = null;
         for (Iterator i = bodyElement
                 .elementIterator(XliffConstants.TRANS_UNIT); i.hasNext();)
         {
@@ -1573,18 +1579,24 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     + XliffConstants.SOURCE + "[^>]*>", "");
             sourceContent = sourceContent.replace("</" + XliffConstants.SOURCE
                     + ">", "");
+
             Element targetElement = foo.element(XliffConstants.TARGET);
+            stateAttr = targetElement.attribute(XliffConstants.STATE);
+            if (stateAttr == null) {
+            	trgStates.add("");
+            } else {
+            	trgStates.add(stateAttr.getValue());
+            }
             String targetContent = targetElement.asXML();
             targetContent = targetContent.replaceFirst("<"
                     + XliffConstants.TARGET + "[^>]*>", "");
             targetContent = targetContent.replace("</" + XliffConstants.TARGET
                     + ">", "");
 
-            xliffString.append("<trans-unit><source>" + sourceContent
-                    + "</source>");
-            xliffString.append("<target>" + targetContent
-                    + "</target></trans-unit>");
-
+            xliffString.append("<trans-unit>");
+            xliffString.append("<source>").append(sourceContent).append("</source>");
+            xliffString.append("<target>").append(targetContent).append("</target>");
+            xliffString.append("</trans-unit>");
         }
         xliffString.append("</body>");
         xliffString.append("</file>");
@@ -1592,7 +1604,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
         DiplomatAPI api = new DiplomatAPI();
         api.setEncoding("UTF-8");
-        api.setLocale(m_resource.getLocale());
+        api.setLocale(new Locale("en_US"));
         api.setInputFormat("xlf");
         api.setSentenceSegmentation(false);
         api.setSegmenterPreserveWhitespace(true);
@@ -1617,21 +1629,20 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     SegmentNode src = (SegmentNode) (trans.getSegments().get(0));
                     if (trans.getXliffPartByName().equals("source"))
                     {
-                        sourceArray
-                                .add("<source>"
-                                        + replaceEntity(src.getSegment())
-                                        + "</source>");
+						sourceArray
+								.add("<source>"
+										+ replaceEntity(src.getSegment())
+										+ "</source>");
                     }
                     else if (trans.getXliffPartByName().equals("target"))
                     {
-                        targetArray
-                                .add("<target>"
-                                        + replaceEntity(src.getSegment())
-                                        + "</target>");
+						targetArray
+								.add("<target>"
+										+ replaceEntity(src.getSegment())
+										+ "</target>");
                     }
                 }
             }
-
         }
         catch (Exception e)
         {
@@ -1642,7 +1653,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         }
 
         int index = 0;
-
         if (sourceArray != null && targetArray != null)
         {
             for (Iterator i = bodyElement
@@ -1664,6 +1674,16 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 Element newTargetElement = getDom(targetArray.get(index))
                         .getRootElement();
                 foo.remove(targetElement);
+				// If target has "state" attribute, it should be preserved.
+				try {
+					if (!"".equals(trgStates.get(index))) {
+						newTargetElement.add(new DefaultAttribute(
+								XliffConstants.STATE, trgStates.get(index)));
+					}
+				} catch (Exception ignore) {
+
+				}
+
                 foo.add(newTargetElement);
                 index++;
             }

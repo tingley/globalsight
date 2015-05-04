@@ -27,6 +27,17 @@ public class OfflineUploadForm
     private User user;
     private Task task;
     private String fileName;
+    private OEMProcessStatus status = null;
+
+    public OEMProcessStatus getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(OEMProcessStatus status)
+    {
+        this.status = status;
+    }
 
     public OfflineUploadForm(File tmpFile, User user, Task task, String fileName)
     {

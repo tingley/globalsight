@@ -25,10 +25,10 @@ public class XlfParser
 		{
 			TransUnitInner transUnit = (TransUnitInner) iterator.next();
 			result.append(XliffConstants.WARN_SIGN).append(transUnit.getId());
-			result.append(XliffConstants.NEW_LINE);
             if (transUnit.getTargetState() != null
                     && transUnit.getTargetState().trim().length() > 0)
 			{
+    			result.append(XliffConstants.NEW_LINE);
                 result.append(
                         AmbassadorDwUpConstants.SEGMENT_XLF_TARGET_STATE_KEY
                                 + " ").append(transUnit.getTargetState());

@@ -605,7 +605,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                             segmentPair.getTargetTuv().setState(TuvState.APPROVED);
                             segmentPair.setModified();
                         }
-                        else
+                        else if (uploadSegment.hasTargetBeenEdited())
                         {
                         	segmentPair.getTargetTuv().setState(TuvState.LOCALIZED);
                         	segmentPair.setModified();

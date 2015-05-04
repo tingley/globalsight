@@ -1069,9 +1069,12 @@ public class DiplomatSegmenter
         boolean needDoSegmentation = false;
         String xliffChunk = elem.getChunk();
         String key = getKeyFromElement(elem);
-        // if target is empty or same with source or composed of pure tags,
-        // source need segmentation.
-        if ("source".equals(elem.getXliffPartByName()) && key != null)
+        // If segment has tag, do not do segmentation anyway.
+		boolean hasTag = (xliffChunk.indexOf("<") > -1 || xliffChunk
+				.indexOf(">") > -1);
+		// if target is empty or same with source or composed of pure tags,
+		// source need segmentation.
+        if (!hasTag && "source".equals(elem.getXliffPartByName()) && key != null)
         {
             String trgTrunk = trgTrunks.get(key);
             if (StringUtil.isEmpty(trgTrunk)

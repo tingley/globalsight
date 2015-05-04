@@ -29,5 +29,13 @@
 			type="string" not-null="false" unique="false" />
 		<property name="runDitaQAChecks" column="RUN_DITA_QA_CHECKS"
 			type="yes_no" not-null="true" unique="false" />
+		<property name="autoCompleteActivity" column="AUTO_COMPLETE_ACTIVITY" type="yes_no"
+			not-null="true" unique="false" />
+		<property name="afterJobCreation" length="40" column="AFTER_JOB_CREATION"
+			type="string" not-null="false" unique="false" />
+		<property name="afterJobDispatch" length="40" column="AFTER_JOB_DISPATCH"
+			type="string" not-null="false" unique="false" />
+		<property name="afterActivityStart" length="40" column="AFTER_ACTIVITY_START"
+			type="string" not-null="false" unique="false" />	
 	</class>
 </hibernate-mapping>

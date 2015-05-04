@@ -406,19 +406,25 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         }
     }
 
-    /****** END: PROCESS DOWNLOAD REQUEST ******/
-
-    /****** START: PROCESS UPLOAD PAGE ******/
     public void processUploadPage(final File p_tmpFile, final User p_user,
             final Task p_task, final String p_fileName)
             throws AmbassadorDwUpException, RemoteException
     {
         final OfflineUploadForm form = new OfflineUploadForm(p_tmpFile, p_user,
                 p_task, p_fileName);
+        processUploadPage(form);
+    }
+
+    public void processUploadPage(final OfflineUploadForm form)
+    {
+        if (form.getStatus() == null)
+        {
+            form.setStatus(m_status);
+        }
 
         synchronized (LOCKER)
         {
-            if (WAITING_FORMS.size() > 0 || RUNNING_FORMS.size() >= MAX_THREAD)
+            if (RUNNING_FORMS.size() >= MAX_THREAD)
             {
                 WAITING_FORMS.add(form);
                 s_category.info("Putting a Thread in Queue. Max Thread: "
@@ -439,11 +445,13 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 try
                 {
                     RUNNING_FORMS.add(form);
+                    m_status = form.getStatus();
                     s_category.info("Processing a Running Thread. Max Thread: "
                             + MAX_THREAD + ", Running Thread: "
                             + RUNNING_FORMS.size() + ", Waiting Thread: "
                             + WAITING_FORMS.size());
-                    runProcessUploadPage(p_tmpFile, p_user, p_task, p_fileName);
+                    runProcessUploadPage(form.getTmpFile(), form.getUser(),
+                            form.getTask(), form.getFileName());
                 }
                 catch (Throwable e)
                 {
@@ -536,15 +544,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                                     .remove(0);
                             try
                             {
-                                processUploadPage(waitForm.getTmpFile(),
-                                        waitForm.getUser(), waitForm.getTask(),
-                                        waitForm.getFileName());
+                                processUploadPage(waitForm);
                             }
                             catch (AmbassadorDwUpException e1)
-                            {
-                                s_category.error(e1);
-                            }
-                            catch (RemoteException e1)
                             {
                                 s_category.error(e1);
                             }

@@ -161,6 +161,11 @@ public class ActivityMainHandler extends PageHandler implements
         act.setUseType(p_request.getParameter("useTypeField"));
         act.setQaChecks("on".equalsIgnoreCase(p_request
                 .getParameter("qaChecks")));
+        act.setAutoCompleteActivity("true".equalsIgnoreCase(p_request
+                .getParameter("isAutoCompleteActivity")));
+        act.setAfterJobCreation(p_request.getParameter("afterJobCreation"));
+        act.setAfterJobDispatch(p_request.getParameter("afterJobDispatch"));
+        act.setAfterActivityStart(p_request.getParameter("afterActivityStart"));
 
         if (getType(p_request) == Activity.TYPE_AUTOACTION)
         {
@@ -201,6 +206,11 @@ public class ActivityMainHandler extends PageHandler implements
         act.setDescription(p_request.getParameter(ActivityConstants.DESC));
         act.setType(getType(p_request));
         act.setIsEditable(getIsEditable(p_request));
+        act.setAutoCompleteActivity("true".equalsIgnoreCase(p_request
+                .getParameter("isAutoCompleteActivity")));
+        act.setAfterJobCreation(p_request.getParameter("afterJobCreation"));
+        act.setAfterJobDispatch(p_request.getParameter("afterJobDispatch"));
+        act.setAfterActivityStart(p_request.getParameter("afterActivityStart"));
 
         if (getType(p_request) == Activity.TYPE_AUTOACTION)
         {

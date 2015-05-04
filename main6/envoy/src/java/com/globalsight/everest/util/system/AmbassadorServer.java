@@ -65,6 +65,7 @@ import com.globalsight.everest.util.system.migration.Migrate820InternalText;
 import com.globalsight.everest.util.system.migration.Migrate852UpgradeLucene;
 import com.globalsight.everest.util.system.migration.MigrateObj;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
+import com.globalsight.everest.webapp.pagehandler.tasks.AutoCompleteActivityThread;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
@@ -318,6 +319,10 @@ public class AmbassadorServer
             GitConnectorPushThread runnable = new GitConnectorPushThread();
             Thread t = new MultiCompanySupportedThread(runnable);
             t.start();
+
+            AutoCompleteActivityThread actrunnable = new AutoCompleteActivityThread();
+            Thread thread = new MultiCompanySupportedThread(actrunnable);
+            thread.start();
         }
         catch (Exception e)
         {

@@ -4,16 +4,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobHandlerLocal;
+import com.globalsight.everest.jobhandler.JobHandler;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.workflow.Activity;
@@ -29,85 +25,85 @@ public class AutoCompleteActivityThread implements Runnable
         super();
     }
 
-    @SuppressWarnings(
-    { "unused", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     public void start() throws Exception
     {
-        try
+        while (true)
         {
-            while (true)
+			String taskhql = "from TaskImpl t where t.stateStr='"
+					+ Task.STATE_ACCEPTED_STR + "'";
+            ArrayList<Task> listTask = (ArrayList<Task>) HibernateUtil
+                    .search(taskhql);
+            String acceptor = null;
+            if (listTask != null && listTask.size() > 0)
             {
-                String taskhql = "from TaskImpl t where t.stateStr='accepted' ";
-                ArrayList<Task> listTask = (ArrayList<Task>) HibernateUtil
-                        .search(taskhql);
-                StringBuffer taskIds = null;
-                String userId = null;
-                if (listTask != null && listTask.size() > 0)
+            	JobHandler jobHandler = ServerProxy.getJobHandler();
+                for (Task t : listTask)
                 {
-                    for (Task t : listTask)
-                    {
-                        Date nowTime = new Timestamp(Calendar.getInstance()
-                                .getTimeInMillis());
-                        CompanyThreadLocal.getInstance().setIdValue(t.getCompanyId());
-                        Activity act = ServerProxy.getJobHandler().getActivity(
-                                t.getTaskName());
+                	try
+                	{
+                        Activity act = jobHandler.getActivity(t.getTaskName());
                         if (act.getAutoCompleteActivity())
                         {
-                            userId = t.getAcceptor();
-                            JobHandlerLocal jobHL = new JobHandlerLocal();
-                            Job job = jobHL.getJobById(t.getJobId());
+							CompanyThreadLocal.getInstance().setIdValue(
+									t.getCompanyId());
+                            acceptor = t.getAcceptor();
+                            Job job = jobHandler.getJobById(t.getJobId());
 
                             String afterJobCreation = act.getAfterJobCreation();
                             String afterJobDispatch = act.getAfterJobDispatch();
-                            String afterActivityStart = act
-                                    .getAfterActivityStart();
+                            String afterActivityStart = act.getAfterActivityStart();
 
                             String[] arr;
                             long d;
                             long h;
                             long m;
-                            long temp;
-                            long temp2;
+                            long minutes1;
+                            long minutes2;
+                            Date nowTime = new Timestamp(Calendar.getInstance()
+                                    .getTimeInMillis());
                             if (afterJobCreation != null
                                     && afterJobCreation.length() > 0)
                             {
-                                temp = (nowTime.getTime() - job.getCreateDate()
+                                minutes1 = (nowTime.getTime() - job.getCreateDate()
                                         .getTime()) / (1000 * 60);
                                 arr = afterJobCreation.split("-");
                             }
                             else if (afterJobDispatch != null
                                     && afterJobDispatch.length() > 0)
                             {
-                                temp = (nowTime.getTime() - t.getWorkflow()
+                                minutes1 = (nowTime.getTime() - t.getWorkflow()
                                         .getDispatchedDate().getTime())
                                         / (1000 * 60);
                                 arr = afterJobDispatch.split("-");
                             }
                             else
                             {
-                                temp = (nowTime.getTime() - t.getAcceptedDate()
+                                minutes1 = (nowTime.getTime() - t.getAcceptedDate()
                                         .getTime()) / (1000 * 60);
                                 arr = afterActivityStart.split("-");
                             }
                             d = Long.parseLong(arr[0].trim());
                             h = Long.parseLong(arr[1].trim());
                             m = Long.parseLong(arr[2].trim());
-                            temp2 = d * 24 * 60 + h * 60 + m;
+                            minutes2 = d * 24 * 60 + h * 60 + m;
 
-                            if (temp > temp2)
+                            if (minutes1 > minutes2)
                             {
                                 ServerProxy.getTaskManager().completeTask(
-                                        userId, t, null, null);
+                                        acceptor, t, null, null);
                             }
                         }
-                    }
+                	}
+                	catch (Exception e)
+                	{
+                		logger.error("Fail to auto complete task:" + t.getId(), e);
+                	}
                 }
-                Thread.sleep(5 * 60 * 1000);
             }
-        }
-        catch (Exception e)
-        {
-            logger.error(e);
+
+            // Check interval time is fixed 5 minutes.
+            Thread.sleep(5 * 60 * 1000);
         }
     }
 
@@ -117,6 +113,10 @@ public class AutoCompleteActivityThread implements Runnable
         try
         {
             start();
+        }
+        catch (InterruptedException ie)
+        {
+			logger.error("The auto-complete activity thread is interrupted", ie);
         }
         catch (Exception e)
         {

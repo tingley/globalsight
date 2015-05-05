@@ -70,6 +70,11 @@ public class Activity extends PersistentObject
 
     private boolean m_qaChecks = false;
 
+    private boolean autoCompleteActivity = false;
+    private String afterJobCreation;
+    private String afterJobDispatch;
+    private String afterActivityStart;
+    
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
     // ////////////////////////////////////////////////////////////////////////////////
@@ -239,6 +244,46 @@ public class Activity extends PersistentObject
     public boolean getQaChecks()
     {
         return m_qaChecks;
+    }
+
+    public boolean getAutoCompleteActivity()
+    {
+        return autoCompleteActivity;
+    }
+
+    public void setAutoCompleteActivity(boolean autoCompleteActivity)
+    {
+        this.autoCompleteActivity = autoCompleteActivity;
+    }
+
+    public String getAfterJobCreation()
+    {
+        return afterJobCreation;
+    }
+
+    public void setAfterJobCreation(String afterJobCreation)
+    {
+        this.afterJobCreation = afterJobCreation;
+    }
+
+    public String getAfterJobDispatch()
+    {
+        return afterJobDispatch;
+    }
+
+    public void setAfterJobDispatch(String afterJobDispatch)
+    {
+        this.afterJobDispatch = afterJobDispatch;
+    }
+
+    public String getAfterActivityStart()
+    {
+        return afterActivityStart;
+    }
+
+    public void setAfterActivityStart(String afterActivityStart)
+    {
+        this.afterActivityStart = afterActivityStart;
     }
 
     // ////////////////////////////////////////////////////////////////////////////////

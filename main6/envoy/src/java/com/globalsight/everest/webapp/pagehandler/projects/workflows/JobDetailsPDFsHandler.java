@@ -37,6 +37,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -196,6 +197,7 @@ public class JobDetailsPDFsHandler extends PageActionHandler implements JobDetai
         ts.setLocale(uiLocale);
         List<Workflow> workflows = new ArrayList<Workflow>(p_job.getWorkflows());
         Collections.sort(workflows, new WorkflowComparator(Locale.getDefault()));
+        int wordCount = 0;
         for (Workflow workflow : workflows)
         {
             if (workflow.getState().equals(Workflow.CANCELLED))
@@ -209,8 +211,21 @@ public class JobDetailsPDFsHandler extends PageActionHandler implements JobDetai
                 continue;
 
             JobDetailsPDFsBO data = new JobDetailsPDFsBO(workflow);
-            int wordCount = JobManagementHandler.getTotalWordCount(workflow,
-                    JobManagementHandler.TOTAL_WF_WORD_CNT);
+
+            if (wordCount == 0)
+            {
+                for (TargetPage tp : workflow.getAllTargetPages())
+                {
+                	String externalPageId = tp.getExternalPageId();
+    				String extension = externalPageId.substring(
+    						externalPageId.lastIndexOf(".")).toLowerCase();
+                	if (PreviewPDFHelper.extensionSet.contains(extension))
+                	{
+                		wordCount += tp.getWordCount().getTotalWordCount();
+                	}
+                }
+            }
+
             data.setTargetLocaleDisplayName(workflow
                     .getTargetLocale().getDisplayName(uiLocale));
             data.setTotalWordCount(wordCount);

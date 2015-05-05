@@ -483,23 +483,12 @@ public class ExportHelper
     private String getAbsolutePathOfUnextractedFile(String p_relativePath)
             throws Exception
     {
-        // String fileStorageRoot = SystemConfiguration.getInstance().
-        // getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR);
-        // for super user
-        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        String fileStorageRoot = null;
-        if (currentCompanyId.equals("1"))
-        {
-            String companyId = String.valueOf(((TargetPage) m_page)
-                    .getSourcePage().getCompanyId());
-            fileStorageRoot = AmbFileStoragePathUtils
-                    .getFileStorageDirPath(companyId);
-        }
-        else
-        {
-            fileStorageRoot = AmbFileStoragePathUtils.getFileStorageDirPath();
-        }
-        StringBuffer sb = new StringBuffer();
+		long jobCompanyId = ((TargetPage) m_page).getSourcePage()
+				.getCompanyId();
+		String fileStorageRoot = AmbFileStoragePathUtils
+				.getFileStorageDirPath(jobCompanyId);
+
+		StringBuffer sb = new StringBuffer();
         sb.append(fileStorageRoot);
         if (!fileStorageRoot.endsWith(File.separator))
         {

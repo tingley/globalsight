@@ -32,6 +32,7 @@
 	String helperText = bundle
 			.getString("helper_text_eloqua_create_job");
 	String updateTargetLocalesUrl = self.getPageURL() + "&action=updateTargetLocales";
+	String queryJobAttributesUrl = self.getPageURL() + "&action=queryJobAttributes";
 	String createEloquaJobUrl = self.getPageURL() + "&action=createEloquaJob";
 	Integer creatingJobsNum = (Integer)request.getAttribute("creatingJobsNum");
     if (creatingJobsNum == null)
@@ -525,7 +526,7 @@ function updateLocales()
                 
     });
 
-	$.get("/globalsight/ControlServlet?activityName=createZipJobs", 
+	$.get("<%=queryJobAttributesUrl%>", 
             {"uploadAction":"getAttributes","l10Nid":l10Nid,"no":Math.random()}, 
             function(ret){
                 if (ret == "true" || ret == "required") {

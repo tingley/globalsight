@@ -216,7 +216,7 @@ public class DiplomatSegmenter
     /**
      * <p>
      * Takes GXML input from an <code>Output</code> object, segments each
-     * "TranslatableElement" node according to setmenatation rule and keeps the
+     * "TranslatableElement" node according to segmentation rule and keeps the
      * result in an internal <code>Output</code>object.
      * 
      * <p>
@@ -499,6 +499,13 @@ public class DiplomatSegmenter
             BreakPosition pos = new BreakPosition(iEnd);
             breakPositions.add(pos);
         }
+        
+        // remove these index for GBS-3794
+        /*
+         * <rule break="no"> <beforebreak>\w\n</beforebreak>
+         * <afterbreak>[\s]+</afterbreak> </rule>
+         */
+        
 
         // Now go back and split the string with tags into segments.
         List<String> segments = splitOriSegment(breakPositions);
@@ -696,7 +703,8 @@ public class DiplomatSegmenter
      * Then converts all <bpt>, <ept> tags to <it> tags if they were split by
      * segment boundaries.
      */
-    private List<String> fixTmxTags(List<String> p_segments)
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	private List<String> fixTmxTags(List<String> p_segments)
     {
         String segment;
         int offset;
@@ -728,17 +736,13 @@ public class DiplomatSegmenter
 
                 // reset loop variable
                 input = p_segments.get(i);
-
-                // System.err.println("seg i  : " + (String)p_segments.get(i));
-                // System.err.println("seg i+1: " + (String)p_segments.get(i+1)
-                // + "\n");
             }
         }
 
         // Convert all <bpt>, <ept> tags to <it> tags if they were
         // split by segment boundaries.
         Hashtable tag_index = new Hashtable();
-
+        String paren2, paren3, paren4, xKey, substitute;
         for (int i = 0; i < p_segments.size(); ++i)
         {
             int start = 0;
@@ -751,9 +755,9 @@ public class DiplomatSegmenter
 
                 if (tag_index.get(key) == null)
                 {
-                    tag_index
-                            .put(key, m_matchAllBptEpt.getParen(1)
-                                    .equals("bpt") ? "begin" : "end");
+					tag_index
+							.put(key, m_matchAllBptEpt.getParen(1)
+									.equals("bpt") ? "begin" : "end");
                 }
                 else
                 {
@@ -787,16 +791,27 @@ public class DiplomatSegmenter
                 }
 
                 start = 0;
+                xKey = "x=\"" + key + "\"";
                 while (matchAllBptEpt.match(replaced, start))
                 {
-                    String substitute = "<it " + matchAllBptEpt.getParen(2)
-                            + "pos=\"" + value + "\" " + "x=\"" + key
-                            + "\" i=\"" + key + "\""
-                            + matchAllBptEpt.getParen(3) + ">"
-                            + matchAllBptEpt.getParen(4) + "</it>";
-
-                    // System.err.println("M--> " + matchAllBptEpt.getParen(0));
-                    // System.err.println("S--> " + substitute);
+                	paren2 = matchAllBptEpt.getParen(2);
+                	paren3 = matchAllBptEpt.getParen(3);
+                	paren4 = matchAllBptEpt.getParen(4);
+                	// if x="key" has already existed (XLF case), not add duplicate one.
+					if (paren2.indexOf(xKey) > -1 || paren3.indexOf(xKey) > -1
+							|| paren4.indexOf(xKey) > -1) {
+                        substitute = "<it " + matchAllBptEpt.getParen(2)
+                                + "pos=\"" + value + "\" "
+                        		+ "i=\"" + key + "\""
+                                + matchAllBptEpt.getParen(3) + ">"
+                                + matchAllBptEpt.getParen(4) + "</it>";
+                	} else {
+                        substitute = "<it " + matchAllBptEpt.getParen(2)
+                                + "pos=\"" + value + "\" " + "x=\"" + key
+                                + "\" i=\"" + key + "\""
+                                + matchAllBptEpt.getParen(3) + ">"
+                                + matchAllBptEpt.getParen(4) + "</it>";
+                	}
 
                     replaced = matchAllBptEpt.subst(replaced, substitute,
                             RE.REPLACE_FIRSTONLY);
@@ -1054,9 +1069,12 @@ public class DiplomatSegmenter
         boolean needDoSegmentation = false;
         String xliffChunk = elem.getChunk();
         String key = getKeyFromElement(elem);
-        // if target is empty or same with source or composed of pure tags,
-        // source need segmentation.
-        if ("source".equals(elem.getXliffPartByName()) && key != null)
+        // If segment has tag, do not do segmentation anyway.
+		boolean hasTag = (xliffChunk.indexOf("<") > -1 || xliffChunk
+				.indexOf(">") > -1);
+		// if target is empty or same with source or composed of pure tags,
+		// source need segmentation.
+        if (!hasTag && "source".equals(elem.getXliffPartByName()) && key != null)
         {
             String trgTrunk = trgTrunks.get(key);
             if (StringUtil.isEmpty(trgTrunk)

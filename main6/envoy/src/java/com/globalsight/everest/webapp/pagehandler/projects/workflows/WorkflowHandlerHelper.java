@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,12 +34,14 @@ import java.util.Vector;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
+import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.cxe.util.EventFlowXmlParser;
@@ -957,6 +960,19 @@ public class WorkflowHandlerHelper
 
             Set<String> realFiles = new HashSet<String>();
             Collection<Request> requests = job.getRequestList();
+            Iterator it = job.getWorkflows().iterator();
+            String trgLocales = "";
+            while (it.hasNext())
+            {
+                Workflow workflow = (Workflow) it.next();
+                if (!Workflow.CANCELLED.equals(workflow.getState()))
+                {
+                    trgLocales += workflow.getTargetLocale().toString() + ",";
+                }
+            }
+            trgLocales = trgLocales.substring(0,trgLocales.length()-1);
+            FileProfilePersistenceManager fpManager = ServerProxy
+                    .getFileProfilePersistenceManager();
             for (Request request : requests)
             {
                 long fpId = request.getFileProfileId();
@@ -964,9 +980,8 @@ public class WorkflowHandlerHelper
 
                 EventFlowXmlParser parser = new EventFlowXmlParser();
                 parser.parse(request.getEventFlowXml());
-                String trgLocales = parser.getTargetLocale();
                 String srcFilePathName = parser.getDataValue("source", "Filename");
-
+                
                 File srcFile = new File(docDir, srcFilePathName);
                 if (XliffFileUtil.isXliffFile(srcFile.getName()))
                 {
@@ -979,6 +994,35 @@ public class WorkflowHandlerHelper
                         srcFilePathName = path.substring(docDirTmp.length() + 1);
                     }
                 }
+
+                // Get the real source file if it has script on import.
+				FileProfile fp = fpManager.getFileProfileById(fpId, true);
+				if (StringUtils.isNotEmpty(fp.getScriptOnImport()))
+				{
+					String scriptedFolderNamePrefix = FileSystemUtil
+							.getScriptedFolderNamePrefixByJob(jobId);
+					String srcFileName = srcFile.getName();
+					int index = srcFileName.lastIndexOf(".");
+					String name = srcFileName.substring(0, index);
+					String extension = srcFileName.substring(index + 1);
+					String folderName = scriptedFolderNamePrefix + "_" + name
+							+ "_" + extension;
+					if (srcFile.getParentFile().getName()
+							.equalsIgnoreCase(folderName))
+					{
+						File parentFile = srcFile.getParentFile()
+								.getParentFile();
+						String path = parentFile.getAbsolutePath()
+								+ File.separator + srcFileName;
+						File file = new File(path);
+						if (file.exists())
+						{
+							srcFilePathName = file.getAbsolutePath().substring(
+									docDir.length() + 1);
+						}
+						srcFile = new File(docDir, srcFilePathName);
+					}
+				}
 
                 // For office 2010 formats, multiple requests may be from the
                 // same real file

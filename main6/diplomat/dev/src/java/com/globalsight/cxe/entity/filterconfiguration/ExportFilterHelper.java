@@ -1729,6 +1729,10 @@ public class ExportFilterHelper
                     .append(".IGNORE_INVALIDE_HTML_TAGS = ")
                     .append(htmlFilter.isIgnoreInvalideHtmlTags())
                     .append(NEW_LINE);
+            buffer.append("html_filter.").append(htmlFilter.getId())
+                    .append(".WHITESPACE_PRESERVE = ")
+                    .append(htmlFilter.getWhitespacePreserve())
+                    .append(NEW_LINE);
             buffer.append("html_filter.")
                     .append(htmlFilter.getId())
                     .append(".JS_FUNCTION_FILTER = ")

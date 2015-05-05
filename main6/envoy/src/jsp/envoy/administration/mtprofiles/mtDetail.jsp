@@ -782,7 +782,7 @@
 										color="red">*</font>:</td>
 									<td><INPUT CLASS="standardText" ID="idMsMtUrl"
 										NAME="<%=MTProfileConstants.MT_MS_URL%>"
-										value="http://api.microsofttranslator.com/V2/Soap.svc" TYPE="text"
+										value="<%=mtProfile4val.getUrl()%>" TYPE="text"
 										MAXLENGTH="99" SIZE="90" /></td>
 								</tr>
 								<tr>

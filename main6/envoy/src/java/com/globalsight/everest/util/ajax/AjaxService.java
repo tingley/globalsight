@@ -1401,6 +1401,8 @@ public class AjaxService extends HttpServlet
                 .getParameter("convertHtmlEntry"));
         boolean ignoreInvalideHtmlTags = Boolean.parseBoolean(request
                 .getParameter("ignoreInvalideHtmlTags"));
+        boolean whitespacePreserve = Boolean.parseBoolean(request
+                .getParameter("whitespacePreserve"));
         String localizeFunction = request.getParameter("localizeFunction");
 
         String defaultEmbeddableTags = getValue("defaultEmbeddableTags");
@@ -1456,6 +1458,7 @@ public class AjaxService extends HttpServlet
 
         htmlFilter.setDefaultInternalTagMaps(defaultInternalTags);
         htmlFilter.setInternalTagMaps(internalTags);
+        htmlFilter.setWhitespacePreserve(whitespacePreserve);
 
         return htmlFilter;
     }

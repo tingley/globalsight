@@ -193,7 +193,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     /**
      * keep all whitespace from GBS-3663
      */
-    private boolean m_preserveAllWhite = true;
+    private boolean m_preserveAllWhite = false;
 
     /**
      * <p>

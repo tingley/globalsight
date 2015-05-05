@@ -27,6 +27,7 @@ import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
 
+import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
@@ -692,12 +693,12 @@ public class TmUtil
         try
         {
             GlobalSightLocale locale = p_tuv.getGlobalSightLocale();
-
-            PageTmTu tu = new PageTmTu(p_tuv.getTu(p_jobId).getId(), 0,
-                    "unknown", p_tuv.getTu(p_jobId).getTuType(),
-                    !p_tuv.isLocalizable(p_jobId));
-            PageTmTuv tuv = new PageTmTuv(p_tuv.getId(), p_tuv.getGxml(),
-                    locale);
+            Tu originalTu = p_tuv.getTu(p_jobId);
+			PageTmTu tu = new PageTmTu(originalTu.getId(), 0,
+					originalTu.getDataType(), originalTu.getTuType(),
+					!originalTu.isLocalizable());
+			PageTmTuv tuv = new PageTmTuv(p_tuv.getId(), p_tuv.getGxml(),
+					locale);
             tuv.setSid(p_tuv.getSid());
             tu.addTuv(tuv);
 

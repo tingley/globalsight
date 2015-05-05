@@ -152,26 +152,27 @@ public class PageJobData
     }
     
     //To Project TM
-    private Collection getTusToSave(boolean p_saveUntranslated, boolean p_saveApproved,
-    		boolean p_saveExactMatch)throws Exception
+	private Collection getTusToSave(boolean p_saveUntranslated,
+			boolean p_saveApproved, boolean p_saveExactMatch) throws Exception
 	{
 		populateMergedTus();
 		
 		Collection tuList = null;
+		Set<String> excludeStates = new HashSet<String>();
+		excludeStates.add(TuvState.COMPLETE.getName());
 		if (p_saveUntranslated)
 		{
-			Set<String> states = new HashSet<String>();
 			if(!p_saveExactMatch)
 			{	
-				states.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
+				excludeStates.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
 			}
 			if(p_saveApproved)
 		    {	
-				states.add(TuvState.NOT_LOCALIZED.getName());
+				excludeStates.add(TuvState.NOT_LOCALIZED.getName());
 		    }
-			if(states.size() > 0)
+			if(excludeStates.size() > 0)
 			{				
-				tuList = getTusByState(states, EXCLUDE_STATE);
+				tuList = getTusByState(excludeStates, EXCLUDE_STATE);
 			}
 			else 
 			{
@@ -180,15 +181,14 @@ public class PageJobData
 		}
 		else
 		{
-		    Set<String> states = new HashSet<String>();
 		    if(!p_saveExactMatch)
 		    {
-		    	states.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
+		    	excludeStates.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
 		    }
-		    states.add(TuvState.APPROVED.getName());
-		    states.add(TuvState.NOT_LOCALIZED.getName());
-		    states.add(TuvState.DO_NOT_TRANSLATE.getName());
-		    tuList = getTusByState(states, EXCLUDE_STATE);
+		    excludeStates.add(TuvState.APPROVED.getName());
+		    excludeStates.add(TuvState.NOT_LOCALIZED.getName());
+		    excludeStates.add(TuvState.DO_NOT_TRANSLATE.getName());
+		    tuList = getTusByState(excludeStates, EXCLUDE_STATE);
 		}
 		
 		return tuList;

@@ -644,20 +644,15 @@ public class OfflinePtagErrorChecker implements Cancelable
                             tuvPtagData.setMode(uploadPagePtagDisplayMode);
                             convertor.tmx2Pseudo(oriSource, tuvPtagData);
 
-                            String sourceLocal = p_uploadPage
-                                    .getSourceLocaleName();
-                            oriSource = SegmentUtil.restoreSegment(refSeg
-                                    .getSourceTuv().getGxml(), sourceLocal);
-                            String targetLocal = p_uploadPage
-                                    .getTargetLocaleName();
-                            oriTarget = SegmentUtil.restoreSegment(refSeg
-                                    .getTargetTuv().getGxml(), targetLocal);
-
                             // convert xliff standard to tmx standard
                             oriSource = XLIFFStandardUtil
                                     .convertToTmx(oriSource);
                             oriTarget = XLIFFStandardUtil
                                     .convertToTmx(oriTarget);
+
+                            // avoid entity difference impacting
+                            tempUploadTargetDisplayText = xmlEncoder
+									.decodeStringBasic(tempUploadTargetDisplayText);
                         }
 
                         pTagData.setIsXliffXlfFile(isXliff);

@@ -696,9 +696,12 @@ public class Exporter
                 File gitFolder = helper.getGitFolder();
                 String relativeFilePath = infos.get("relativeFilePath");
                 String sourceFileMappingPath = relativeFilePath;
-                String sourceFolderMappingPath = sourceFileMappingPath
-                        .substring(0, sourceFileMappingPath
-                                .lastIndexOf(File.separator));
+                String sourceFolderMappingPath = "";
+                if(sourceFileMappingPath.indexOf(File.separator) > 0)
+                {
+                	sourceFolderMappingPath = sourceFileMappingPath
+                				.substring(0, sourceFileMappingPath.lastIndexOf(File.separator));
+                }
                 String suffix;
                 if (mappings.size() == 0)
                 {

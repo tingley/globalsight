@@ -23,8 +23,6 @@ public class GitConnectorPushThread implements Runnable
 
     public void startPush() throws Exception
     {
-		try 
-		{
 			while (true) 
 			{
 				Transaction tx = HibernateUtil.getTransaction();
@@ -38,8 +36,16 @@ public class GitConnectorPushThread implements Runnable
 						GitConnector gc = GitConnectorManagerLocal
 								.getGitConnectorById(cacheFile.getGitConnectorId());
 						GitConnectorHelper helper = new GitConnectorHelper(gc);
-						helper.gitConnectorPull();
-						helper.gitConnectorPush(cacheFile.getFilePath());
+						try
+						{
+							helper.gitConnectorPull();
+							helper.gitConnectorPush(cacheFile.getFilePath());
+						}
+						catch (Exception e)
+						{
+							logger.error("Push git file failed.Git connector id : " + cacheFile.getGitConnectorId() 
+									+ ", file path : " + cacheFile.getFilePath() + ".", e);
+						}
 						HibernateUtil.delete(cacheFile);
 					}
 				}
@@ -47,11 +53,6 @@ public class GitConnectorPushThread implements Runnable
 				
 				Thread.sleep(60 * 1000);
 			}
-		}
-        catch (Exception e)
-        {
-            logger.error("Push git file failed.", e);
-        }
     }
 
     @Override

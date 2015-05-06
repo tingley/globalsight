@@ -40,15 +40,19 @@ import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoErrorChecker;
 import com.globalsight.ling.tw.Tmx2PseudoHandler;
+
 import java.util.Locale;
+
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
+import com.globalsight.util.gxml.TextNode;
 
 public class SegmentUtil2
 {
     private static String TAGS;
     private static SegmentUtil UTIL;
+    private int count = 0;
 
     private static final String STYLE_KEY = "untranslatableWordCharacterStyles";
     private static final String PROPERTY_PATH = "/properties/WordExtractor.properties";
@@ -335,5 +339,108 @@ public class SegmentUtil2
         parser.parse(s);
         pseudoData = eventHandler.getResult();
         return eventHandler.getResult();
+    }
+
+    /**
+	 * The attribute values should keep same in 2 Gxml Elements.
+	 * 
+	 * @param sourceGxmlElement
+	 * @param targetGxmlElement
+	 * @param dataType
+	 * @return
+	 */
+	public String adjustSegmentAttributeValues(
+			GxmlElement sourceGxmlElement, GxmlElement targetGxmlElement,
+			String dataType)
+    {
+		// Get values in list for "id" and "x" attributes
+        List<String> idList = new ArrayList<String>();
+        List<String> xList = new ArrayList<String>();
+        List<String> iList = new ArrayList<String>();
+
+        idList = SegmentUtil2.getAttValuesByName(sourceGxmlElement, "id");
+        xList = SegmentUtil2.getAttValuesByName(sourceGxmlElement, "x");
+        iList = SegmentUtil2.getAttValuesByName(sourceGxmlElement, "i");
+
+        count = 0;
+        resetAttributeValues(targetGxmlElement, idList, "id");
+
+        count = 0;
+        resetAttributeValues(targetGxmlElement, xList, "x");
+
+        count = 0;
+        resetAttributeValues(targetGxmlElement, iList, "i");
+
+        return targetGxmlElement.toGxml(dataType);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void resetAttributeValues(GxmlElement element,
+            List<String> attValueList, String p_attName)
+    {
+        if (element == null)
+        {
+            return;
+        }
+
+        String currentAttValue = element.getAttribute(p_attName);
+        if (currentAttValue != null)
+        {
+            // Set new attribute value
+            String newAttValue = null;
+            if (attValueList != null && attValueList.size() > count)
+            {
+                newAttValue = (String) attValueList.get(count);
+            }
+            else
+            {
+                newAttValue = String.valueOf(count + 1);
+            }
+            element.setAttribute(p_attName, newAttValue);
+            // Set new text node value
+            if (element.getChildElements() != null)
+            {
+                Iterator it = element.getChildElements().iterator();
+                while (it.hasNext())
+                {
+                    GxmlElement ele = (GxmlElement) it.next();
+                    if (ele.getType() == GxmlElement.TEXT_NODE)
+                    {
+                        TextNode textNode = (TextNode) ele;
+                        String nodeValue = textNode.getTextNodeValue();
+                        String currentTextNodeValue = "{" + currentAttValue
+                                + "}";
+                        if (nodeValue.equals(currentTextNodeValue))
+                        {
+                            StringBuffer newNodeValue = new StringBuffer();
+                            newNodeValue.append("{").append(newAttValue)
+                                    .append("}");
+                            textNode.setTextBuffer(newNodeValue);
+                        }
+                    }
+                }
+            }
+
+            count++;
+        }
+        // add missing first X, X=1
+        else if ("bpt".equals(element.getName()) && attValueList != null
+                && attValueList.size() > count && "x".equals(p_attName))
+        {
+            String newAttValue = (String) attValueList.get(count);
+            element.setAttribute(p_attName, newAttValue);
+            count++;
+        }
+
+        // Loop deeper
+        if (element.getChildElements() != null)
+        {
+            Iterator childIt = element.getChildElements().iterator();
+            while (childIt.hasNext())
+            {
+                GxmlElement ele = (GxmlElement) childIt.next();
+                resetAttributeValues(ele, attValueList, p_attName);
+            }
+        }
     }
 }

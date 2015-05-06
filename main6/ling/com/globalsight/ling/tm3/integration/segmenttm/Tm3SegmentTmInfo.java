@@ -24,6 +24,7 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
 
 import java.io.File;
+import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -444,6 +445,44 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
 
+	@Override
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, String> paramMap, Connection conn)
+			throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm));
+
+			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
+					.getAllDataByParamMap(paramMap).iterator());
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, String> paramMap, Connection conn,
+			Set<String> jobAttributeSet) throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm));
+
+			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
+					.getAllDataByParamMap(paramMap, jobAttributeSet).iterator());
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
     @Override
     public int getSegmentCountForReindex(Tm tm)
     {
@@ -491,93 +530,218 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
 
+	@Override
+	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, String> paramMap)
+			throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm)
+					+ " paramMap " + paramMap);
+
+			return Long.valueOf(
+					tm3tm.getAllDataByParamMap(paramMap).getCountByParameter())
+					.intValue();
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public int getAllSegmentsCountByParamMap(Tm tm,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm));
+
+			return Long.valueOf(
+					tm3tm.getAllDataByParamMap(paramMap, jobAttributeSet)
+							.getCountByParameter()).intValue();
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
     @Override
     public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeCodeList,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsByLocales(" + getLocaleCodeStr(localeCodeList) + "): "
-                    + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-                    + " createdAfter " + createdAfter);
-            List localeList = getLocaleList(localeCodeList);
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsByLocales("
+					+ getLocaleCodeStr(localeCodeList) + "): "
+					+ describeTm(tm, tm3tm) + " createdBefore " + createdBefore
+					+ " createdAfter " + createdAfter);
+			List localeList = getLocaleList(localeCodeList);
 			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocales(
 					localeList, parseDate(createdAfter),
 					parseDate(createdBefore)).iterator());
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
     
     public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeCodeList,
             String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
             throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsByLocale(" + getLocaleCodeStr(localeCodeList) + "): "
-                    + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-                    + " createdAfter " + createdAfter);
-            List localeList = getLocaleList(localeCodeList);
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsByLocale("
+					+ getLocaleCodeStr(localeCodeList) + "): "
+					+ describeTm(tm, tm3tm) + " createdBefore " + createdBefore
+					+ " createdAfter " + createdAfter);
+			List localeList = getLocaleList(localeCodeList);
 			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocales(
 					localeList, parseDate(createdAfter),
 					parseDate(createdBefore), jobAttributeSet).iterator());
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
 
+	@Override
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeCodeList, Map<String, String> paramMap,
+			Connection conn) throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsByLocalesAndParamMap("
+					+ getLocaleCodeStr(localeCodeList) + "): "
+					+ describeTm(tm, tm3tm));
+			List localeList = getLocaleList(localeCodeList);
+			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
+					.getDataByLocalesAndParamMap(localeList, paramMap)
+					.iterator());
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeCodeList, Map<String, String> paramMap,
+			Connection conn, Set<String> jobAttributeSet)
+			throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsByLocalesAndParamMap("
+					+ getLocaleCodeStr(localeCodeList) + "): "
+					+ describeTm(tm, tm3tm));
+			List localeList = getLocaleList(localeCodeList);
+			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
+					.getDataByLocalesAndParamMap(localeList, paramMap,
+							jobAttributeSet).iterator());
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+	
     @Override
 	public int getSegmentsCountByLocales(Tm tm, List<String> localeCodeList,
 			String createdBefore, String createdAfter)
 			throws LingManagerException
 	{
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsCountByLocale(" + getLocaleCodeStr(localeCodeList) + "): "
-                    + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-                    + " createdAfter " + createdAfter);
-            List localeList = getLocaleList(localeCodeList);
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsCountByLocale("
+					+ getLocaleCodeStr(localeCodeList) + "): "
+					+ describeTm(tm, tm3tm) + " createdBefore " + createdBefore
+					+ " createdAfter " + createdAfter);
+			List localeList = getLocaleList(localeCodeList);
 			return Long.valueOf(
 					tm3tm.getDataByLocales(localeList, parseDate(createdAfter),
 							parseDate(createdBefore)).getCount()).intValue();
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
     
     public int getSegmentsCountByLocales(Tm tm, List<String> localeCodeList,
             String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsCountByLocales(" + getLocaleCodeStr(localeCodeList) + "): "
-                    + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-                    + " createdAfter " + createdAfter);
-            List localeList = getLocaleList(localeCodeList);
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsCountByLocales("
+					+ getLocaleCodeStr(localeCodeList) + "): "
+					+ describeTm(tm, tm3tm) + " createdBefore " + createdBefore
+					+ " createdAfter " + createdAfter);
+			List localeList = getLocaleList(localeCodeList);
 			return Long.valueOf(
 					tm3tm.getDataByLocales(localeList, parseDate(createdAfter),
 							parseDate(createdBefore), jobAttributeSet)
 							.getCount()).intValue();
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
 
+	@Override
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeCodeList, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsCountByLocalesAndParamMap("
+					+ getLocaleCodeStr(localeCodeList) + ")");
+			List localeList = getLocaleList(localeCodeList);
+			return Long.valueOf(
+					tm3tm.getDataByLocalesAndParamMap(localeList, paramMap)
+							.getCountByParameter()).intValue();
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeCodeList, Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException
+	{
+		TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+		LOGGER.info("getSegmentsCountByLocalesAndParamMap("
+				+ getLocaleCodeStr(localeCodeList) + "): ");
+		List localeList = getLocaleList(localeCodeList);
+		return Long.valueOf(
+				tm3tm.getDataByLocalesAndParamMap(localeList, paramMap,
+						jobAttributeSet).getCountByParameter()).intValue();
+	}
+	
     @Override
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Connection conn)
@@ -627,6 +791,52 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
 
+	@Override
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap, Connection conn)
+			throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsByProjectNameAndParamMap(" + projectName
+					+ "): " + describeTm(tm, tm3tm));
+			TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+					UPDATED_BY_PROJECT);
+			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
+					.getDataByAttributesAndParamMap(
+							TM3Attributes.one(projectAttr, projectName),
+							paramMap).iterator());
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap, Connection conn,
+			Set<String> jobAttributeSet) throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			LOGGER.info("getSegmentsByProjectName(" + projectName + "): "
+					+ describeTm(tm, tm3tm));
+			TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+					UPDATED_BY_PROJECT);
+			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
+					.getDataByAttributesAndParamMap(
+							TM3Attributes.one(projectAttr, projectName),
+							paramMap, jobAttributeSet).iterator());
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+	
     @Override
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter)
@@ -681,6 +891,60 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+
+	@Override
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			if (LOGGER.isDebugEnabled())
+			{
+				LOGGER.debug("getSegmentsCountByProjectName(" + projectName
+						+ "): " + describeTm(tm, tm3tm));
+			}
+			TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+					UPDATED_BY_PROJECT);
+			return Long.valueOf(
+					tm3tm.getDataByAttributesAndParamMap(
+							TM3Attributes.one(projectAttr, projectName),
+							paramMap).getCountByParameter()).intValue();
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+			if (LOGGER.isDebugEnabled())
+			{
+				LOGGER.debug("getSegmentsCountByProjectName(" + projectName
+						+ "): " + describeTm(tm, tm3tm));
+			}
+			TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+					UPDATED_BY_PROJECT);
+			return Long.valueOf(
+					tm3tm.getDataByAttributesAndParamMap(
+							TM3Attributes.one(projectAttr, projectName),
+							paramMap, jobAttributeSet).getCountByParameter())
+					.intValue();
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
 
     @Override
     public String getSidByTuvId(Tm tm, long tuvId)

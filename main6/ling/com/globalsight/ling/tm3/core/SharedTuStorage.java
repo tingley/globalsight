@@ -17,13 +17,19 @@
 package com.globalsight.ling.tm3.core;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.BatchStatementBuilder;
@@ -327,6 +333,104 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
     }
     
+	@Override
+	public long getTuCountByParamMap(Map<String, String> paramMap)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			long count = 0;
+			conn = DbUtil.getConnection();
+			StatementBuilder sb = new StatementBuilder();
+
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, null, null, null, null, -1, -1);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				}
+				else
+				{
+					count = getIdList(conn, sb).size();
+				}
+			}
+			else
+			{
+				sb.append("SELECT COUNT(id) FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" WHERE tmId = ?").addValue(tmId);
+				count = SQLUtil.execCountQuery(conn, sb);
+			}
+
+			return count;
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	public long getTuCountByParamMap(Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			StatementBuilder sb = new StatementBuilder();
+			long count = 0;
+
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, jobAttributeSet, null, null,
+						null, -1, -1);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				}
+				else
+				{
+					count = getIdList(conn, sb).size();
+				}
+			}
+			else
+			{
+				sb.append("SELECT COUNT(tu.id) FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" as tu ").append(" WHERE tu.tmId = ?")
+						.addValue(tmId);
+
+				if (jobAttributeSet != null && jobAttributeSet.size() > 0)
+				{
+					appendAttributeSql(jobAttributeSet, sb, false);
+				}
+				count = SQLUtil.execCountQuery(conn, sb);
+			}
+
+			return count;
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
     private void appendAttributeSql(Set<String> jobAttributeSet, StatementBuilder sb,
     		boolean forTuv)
     {
@@ -519,6 +623,111 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		}
 	}
 
+	@Override
+	public long getTuCountByLocalesAndParamMap(List<TM3Locale> localeList,
+			Map<String, String> paramMap) throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			String localeIds = getLocaleIds(localeList);
+			conn = DbUtil.getConnection();
+			long count = 0;
+			StatementBuilder sb = new StatementBuilder();
+
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, null, localeIds, null, null, -1,
+						-1);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				}
+				else
+				{
+					count = getIdList(conn, sb).size();
+				}
+			}
+			else
+			{
+				sb.append("SELECT COUNT(DISTINCT tuId) FROM ")
+						.append(getStorage().getTuvTableName())
+						.append(" WHERE tmId = ? ").addValues(tmId)
+						.append(" AND localeId in (").append(localeIds)
+						.append(")");
+				count = SQLUtil.execCountQuery(conn, sb);
+			}
+
+			return count;
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
+	public long getTuCountByLocalesAndParamMap(List<TM3Locale> localeList,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			String localeIds = getLocaleIds(localeList);
+			conn = DbUtil.getConnection();
+			long count = 0;
+			StatementBuilder sb = new StatementBuilder();
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, jobAttributeSet, localeIds,
+						null, null, -1, -1);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				}
+				else
+				{
+					count = getIdList(conn, sb).size();
+				}
+			}
+			else
+			{
+				sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
+						.append(getStorage().getTuvTableName())
+						.append(" as tuv ").append(" WHERE tuv.tmId = ?")
+						.addValue(tmId).append(" AND tuv.localeId in (")
+						.append(localeIds).append(")");
+
+				if (jobAttributeSet != null && jobAttributeSet.size() > 0)
+				{
+					appendAttributeSql(jobAttributeSet, sb, true);
+				}
+				count = SQLUtil.execCountQuery(conn, sb);
+			}
+
+			return count;
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
     @Override
     public long getTuvCountByLocales(List<TM3Locale> localeList, Date start, Date end)
             throws SQLException
@@ -604,19 +813,19 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             conn = DbUtil.getConnection();
             StatementBuilder sb = new StatementBuilder();
             if (start != null && end != null)
-            {
-                sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu ,")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ").append("TM3_EVENTS as event ");
-                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-                sb.append(
-                        "WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
-                        .append("AND tu.tmId = ? ").addValue(tmId)
-                        .append(" AND event.time >= ? AND event.time <= ? ")
-                        .addValues(parseStartDate(start), parseEndDate(end));
-            }
+			{
+				sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" as tu ,")
+						.append(getStorage().getTuvTableName())
+						.append(" as tuv, ").append("TM3_EVENTS as event ");
+				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+				sb.append(
+						"WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
+						.append("AND tu.tmId = ? ").addValue(tmId)
+						.append(" AND event.time >= ? AND event.time <= ? ")
+						.addValues(parseStartDate(start), parseEndDate(end));
+			}
             else
             {
                 sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
@@ -697,6 +906,116 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
     }
 
     @Override
+	public long getTuCountByAttributesAndParamMap(
+			Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs, Map<String, String> paramMap)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			long count = 0;
+			StatementBuilder sb = new StatementBuilder();
+
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, null, null, inlineAttrs,
+						customAttrs, -1, -1);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				}
+				else
+				{
+					count = getIdList(conn, sb).size();
+				}
+			}
+			else
+			{
+				sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" as tu ");
+				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+				sb.append(" WHERE tu.tmId = ?").addValue(tmId);
+				getInlineAttrsSql(sb, inlineAttrs);
+				count = SQLUtil.execCountQuery(conn, sb);
+			}
+
+			return count;
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
+	public long getTuCountByAttributesAndParamMap(
+			Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			long count = 0;
+			StatementBuilder sb = new StatementBuilder();
+
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, jobAttributeSet, null,
+						inlineAttrs, customAttrs, -1, -1);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				}
+				else
+				{
+					count = getIdList(conn, sb).size();
+				}
+			}
+			else
+			{
+				sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" as tu ");
+				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+				sb.append(" WHERE tu.tmId = ?").addValue(tmId);
+				if (jobAttributeSet != null && jobAttributeSet.size() > 0)
+				{
+					appendAttributeSql(jobAttributeSet, sb, false);
+				}
+				getInlineAttrsSql(sb, inlineAttrs);
+
+				count = SQLUtil.execCountQuery(conn, sb);
+			}
+
+			return count;
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
     public long getTuvCountByAttributes(Map<TM3Attribute, Object> inlineAttrs,
             Map<TM3Attribute, String> customAttrs, Date start, Date end)
             throws SQLException
@@ -841,6 +1160,99 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
     }
 
+	@Override
+	public List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
+			Map<String, String> paramMap) throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			List<Long> ids = null;
+			conn = DbUtil.getConnection();
+			StatementBuilder sb = new StatementBuilder();
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, null, null, null, null, startId,
+						count);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					ids = getMapWithSID(conn, sb, stringId, isRegex);
+				}
+				else
+				{
+					ids = getIdList(conn, sb);
+				}
+			}
+			else
+			{
+				sb.append("SELECT id FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" WHERE tmId = ? AND id > ? ORDER BY id ASC LIMIT ?")
+						.addValues(tmId, startId, count);
+				ids = SQLUtil.execIdsQuery(conn, sb);
+			}
+			return getTu(ids, false);
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
+	public List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			List<Long> ids = null;
+			conn = DbUtil.getConnection();
+			StatementBuilder sb = new StatementBuilder();
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, jobAttributeSet, null, null,
+						null, startId, count);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					ids = getMapWithSID(conn, sb, stringId, isRegex);
+				}
+				else
+				{
+					ids = getIdList(conn, sb);
+				}
+			}
+			else
+			{
+				sb.append("SELECT id FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" WHERE tmId = ? AND id > ? ORDER BY id ASC LIMIT ?")
+						.addValues(tmId, startId, count);
+				ids = SQLUtil.execIdsQuery(conn, sb);
+			}
+			return getTu(ids, false);
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
     @Override
     public List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
             List<TM3Locale> localeList, Date start, Date end) throws SQLException
@@ -946,6 +1358,105 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             DbUtil.silentReturnConnection(conn);
         }
     }
+
+	@Override
+	public List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
+			int count, List<TM3Locale> localeList, Map<String, String> paramMap)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			String localeIds = getLocaleIds(localeList);
+			List<Long> ids = null;
+			conn = DbUtil.getConnection();
+			StatementBuilder sb = new StatementBuilder();
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, null, localeIds, null, null,
+						startId, count);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					ids = getMapWithSID(conn, sb, stringId, isRegex);
+				}
+				else
+				{
+					ids = getIdList(conn, sb);
+				}
+			}
+			else
+			{
+				sb.append("SELECT id FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" WHERE tmId = ? AND id > ? ORDER BY id ASC LIMIT ?")
+						.addValues(tmId, startId, count);
+				ids = SQLUtil.execIdsQuery(conn, sb);
+			}
+
+			return getTu(ids, false);
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
+	public List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
+			int count, List<TM3Locale> localeList,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			String localeIds = getLocaleIds(localeList);
+			List<Long> ids = null;
+			conn = DbUtil.getConnection();
+			StatementBuilder sb = new StatementBuilder();
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, jobAttributeSet, localeIds,
+						null, null, startId, count);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					ids = getMapWithSID(conn, sb, stringId, isRegex);
+				}
+				else
+				{
+					ids = getIdList(conn, sb);
+				}
+			}
+			else
+			{
+				sb.append("SELECT id FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" WHERE tmId = ? AND id > ? ORDER BY id ASC LIMIT ?")
+						.addValues(tmId, startId, count);
+				ids = SQLUtil.execIdsQuery(conn, sb);
+			}
+
+			return getTu(ids, false);
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
 
     @Override
     public List<TM3Tu<T>> getTuPageByAttributes(long startId, int count,
@@ -1071,6 +1582,105 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             DbUtil.silentReturnConnection(conn);
         }
     }
+
+	@Override
+	public List<TM3Tu<T>> getTuPageByAttributesAndParamMap(long startId,
+			int count, Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs, Map<String, String> paramMap)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			List<Long> ids = null;
+			conn = DbUtil.getConnection();
+			StatementBuilder sb = new StatementBuilder();
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, null, null, inlineAttrs,
+						customAttrs, startId, count);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					ids = getMapWithSID(conn, sb, stringId, isRegex);
+				}
+				else
+				{
+					ids = getIdList(conn, sb);
+				}
+			}
+			else
+			{
+				sb.append("SELECT id FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" WHERE tmId = ? AND id > ? ORDER BY id ASC LIMIT ?")
+						.addValues(tmId, startId, count);
+				ids = SQLUtil.execIdsQuery(conn, sb);
+			}
+
+			return getTu(ids, false);
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
+	public List<TM3Tu<T>> getTuPageByAttributesAndParamMap(long startId,
+			int count, Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+			List<Long> ids = null;
+			conn = DbUtil.getConnection();
+			StatementBuilder sb = new StatementBuilder();
+			if (!paramMap.isEmpty())
+			{
+				String stringId = paramMap.get("stringId");
+				String isRegex = paramMap.get("isRegex");
+				getSqlByParamMap(sb, paramMap, jobAttributeSet, null,
+						inlineAttrs, customAttrs, startId, count);
+
+				if (StringUtil.isNotEmpty(stringId))
+				{
+					ids = getMapWithSID(conn, sb, stringId, isRegex);
+				}
+				else
+				{
+					ids = getIdList(conn, sb);
+				}
+			}
+			else
+			{
+				sb.append("SELECT id FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" WHERE tmId = ? AND id > ? ORDER BY id ASC LIMIT ?")
+						.addValues(tmId, startId, count);
+				ids = SQLUtil.execIdsQuery(conn, sb);
+			}
+
+			return getTu(ids, false);
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
 
     @Override
     public Set<TM3Locale> getTuvLocales() throws SQLException
@@ -1221,4 +1831,241 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		}
 		return projectValue.substring(0, projectValue.lastIndexOf(","));
 	}
+
+	private void getSqlByParamMap(StatementBuilder sb,
+			Map<String, String> paramMap, Set<String> jobAttributeSet,
+			String localeIds, Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs, long startId, int count)
+	{
+		String stringId = paramMap.get("stringId");
+
+		if (StringUtil.isNotEmpty(stringId))
+		{
+			if (startId != -1 && count != -1)
+			{
+				sb.append("SELECT tuId,sid FROM (");
+			}
+			sb.append(
+					"SELECT DISTINCT tuv.tuId AS tuId, attr.TEXT_VALUE AS sid FROM ")
+					.append(getStorage().getTuvTableName()).append(" as tuv, ")
+					.append(getStorage().getTuTuvAttrTableName())
+					.append(" as attr ");
+			if (inlineAttrs != null && !inlineAttrs.isEmpty())
+			{
+				sb.append(",").append(getStorage().getTuTableName())
+						.append(" as tu ");
+				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+			}
+			getParameterSql(sb, paramMap, jobAttributeSet, localeIds,
+					inlineAttrs);
+			sb.append(" AND attr.OBJECT_TYPE = 'TU' ")
+					.append(" AND attr.NAME = 'SID' ")
+					.append(" AND attr.OBJECT_ID = tuv.tuId")
+					.append(" AND attr.TEXT_VALUE IS NOT NULL ");
+			if (startId != -1 && count != -1)
+			{
+				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
+						.addValues(startId, count);
+				sb.append(") aa");
+			}
+			sb.append(" UNION ");
+			if (startId != -1 && count != -1)
+			{
+				sb.append("SELECT tuId,sid FROM (");
+			}
+			sb.append("SELECT DISTINCT tuv.tuId AS tuId, tu.sid AS sid  FROM ")
+					.append(getStorage().getTuvTableName()).append(" as tuv, ")
+					.append(getStorage().getTuTableName()).append(" as tu ");
+			if (customAttrs != null && !customAttrs.isEmpty())
+			{
+				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+			}
+
+			getParameterSql(sb, paramMap, jobAttributeSet, localeIds,
+					inlineAttrs);
+			sb.append(" AND tuv.tuId = tu.id ").append(
+					" AND tu.sid IS NOT NULL");
+			if (startId != -1 && count != -1)
+			{
+				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
+						.addValues(startId, count);
+				sb.append(") bb");
+			}
+		}
+		else
+		{
+			sb.append("SELECT DISTINCT tuv.tuId FROM ")
+					.append(getStorage().getTuvTableName()).append(" as tuv ");
+			if (customAttrs != null && !customAttrs.isEmpty())
+			{
+				sb.append(",").append(getStorage().getTuTableName())
+						.append(" as tu ");
+				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+			}
+			getParameterSql(sb, paramMap, jobAttributeSet, localeIds,
+					inlineAttrs);
+		}
+	}
+
+	private void getParameterSql(StatementBuilder sb,
+			Map<String, String> paramMap, Set<String> jobAttributeSet,
+			String localeIds, Map<TM3Attribute, Object> inlineAttrs)
+	{
+		String createUser = paramMap.get("createUser");
+		String modifyUser = paramMap.get("modifyUser");
+		String modifyAfter = paramMap.get("modifyAfter");
+		String modifyBefore = paramMap.get("modifyBefore");
+		String createdAfter = paramMap.get("createdAfter");
+		String createdBefore = paramMap.get("createdBefore");
+		String tuIds = paramMap.get("tuIds");
+
+		sb.append("WHERE tuv.tmId = ?").addValue(tmId);
+		if (inlineAttrs != null && !inlineAttrs.isEmpty())
+		{
+			sb.append(" AND tu.id = tuv.tuId ");
+		}
+		if (StringUtil.isNotEmpty(createdAfter)
+				&& StringUtil.isNotEmpty(createdBefore))
+		{
+			sb.append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ?")
+					.addValues(parseStartDate(new Date(createdAfter)),
+							parseEndDate(new Date(createdBefore)));
+		}
+		if (StringUtil.isNotEmpty(modifyAfter)
+				&& StringUtil.isNotEmpty(modifyBefore))
+		{
+			sb.append(" AND tuv.modifyDate >= ? AND tuv.modifyDate <= ?")
+					.addValues(parseStartDate(new Date(modifyAfter)),
+							parseEndDate(new Date(modifyBefore)));
+		}
+		if (StringUtil.isNotEmpty(createUser))
+		{
+			sb.append(" AND tuv.creationUser = ? ").addValues(createUser);
+		}
+		if (StringUtil.isNotEmpty(modifyUser))
+		{
+			sb.append(" AND tuv.modifyUser = ? ").addValues(modifyUser);
+		}
+		if (StringUtil.isNotEmpty(tuIds))
+		{
+			getTuIds(sb, tuIds);
+		}
+
+		if (jobAttributeSet != null && jobAttributeSet.size() > 0)
+		{
+			appendAttributeSql(jobAttributeSet, sb, true);
+		}
+
+		if (StringUtil.isNotEmpty(localeIds))
+		{
+			sb.append(" AND tuv.localeId in (").append(localeIds).append(") ");
+		}
+		if (inlineAttrs != null && !inlineAttrs.isEmpty())
+		{
+			getInlineAttrsSql(sb, inlineAttrs);
+		}
+	}
+
+	private void getTuIds(StatementBuilder sb, String tuIds)
+	{
+		String tuIdStr = "";
+		String[] tuIdsArr = tuIds.split(",");
+		int count = 0;
+		sb.append("AND (");
+		for (String tuId : tuIdsArr)
+		{
+			if (tuId.contains("-"))
+			{
+				String[] tuIdArr = tuId.split("-");
+				if (count == 0)
+				{
+					sb.append(" tuv.tuId >= ? ").addValue(tuIdArr[0])
+							.append(" AND tuv.tuId <= ? ").addValue(tuIdArr[1]);
+				}
+				else
+				{
+					sb.append(" OR tuv.tuId >= ? ").addValue(tuIdArr[0])
+							.append(" AND tuv.tuId <= ? ").addValue(tuIdArr[1]);
+				}
+				count++;
+			}
+			else
+			{
+				tuIdStr += tuId + ",";
+			}
+		}
+		if (StringUtil.isNotEmpty(tuIdStr))
+		{
+			if (count == 0)
+			{
+				sb.append(" tuv.tuId in (")
+						.append(tuIdStr.substring(0, tuIdStr.lastIndexOf(",")))
+						.append(") ");
+			}
+			else
+			{
+				sb.append("OR tuv.tuId in (")
+						.append(tuIdStr.substring(0, tuIdStr.lastIndexOf(",")))
+						.append(") ");
+			}
+		}
+		sb.append(") ");
+	}
+
+	private List<Long> getMapWithSID(Connection conn, StatementBuilder sb,
+			String stringId, String isRegex) throws SQLException
+	{
+		List<Long> tuIdList = new ArrayList<Long>();
+		Map<Long, String> map = new HashMap<Long, String>();
+		PreparedStatement ps = sb.toPreparedStatement(conn);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next())
+		{
+			map.put(rs.getLong(1), rs.getString(2));
+		}
+		ps.close();
+		rs.close();
+
+		boolean regex = Boolean.parseBoolean(isRegex);
+		Pattern pattern = Pattern.compile(stringId);
+		Matcher matcher = null;
+		Iterator it = map.keySet().iterator();
+		while (it.hasNext())
+		{
+			long key = Long.valueOf(String.valueOf(it.next()));
+			String sid = map.get(key);
+			if (regex)
+			{
+				matcher = pattern.matcher(sid);
+				if (matcher.matches())
+				{
+					tuIdList.add(key);
+				}
+			}
+			else
+			{
+				if (stringId.equalsIgnoreCase(sid))
+				{
+					tuIdList.add(key);
+				}
+			}
+		}
+
+		return tuIdList;
+	}
+
+	private List<Long> getIdList(Connection conn, StatementBuilder sb)
+			throws SQLException
+	{
+		List<Long> idList = new ArrayList<Long>();
+		PreparedStatement ps = sb.toPreparedStatement(conn);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next())
+		{
+			idList.add(rs.getLong(1));
+		}
+		ps.close();
+		return idList;
+	}
+
 }

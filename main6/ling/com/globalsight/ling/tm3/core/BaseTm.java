@@ -54,6 +54,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     private String indexTableName;
     private String attrValTableName;
     private String tuTuvAttrTableName;
+    private String tuSharedTableName;
     private Set<TM3Attribute> attributes = new HashSet<TM3Attribute>();
 
     // Injected
@@ -1143,6 +1144,18 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new AllTusDataHandle<T>(this, start, end, jobAttributeSet);
     }
 
+	@Override
+	public TM3Handle<T> getAllDataByParamMap(Map<String, String> paramMap)
+	{
+		return new AllTusDataHandle<T>(this, paramMap);
+	}
+
+	public TM3Handle<T> getAllDataByParamMap(Map<String, String> paramMap,
+			Set<String> jobAttributeSet)
+	{
+		return new AllTusDataHandle<T>(this, paramMap, jobAttributeSet);
+	}
+    
     @Override
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end)
     {
@@ -1155,6 +1168,20 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         checkDateRange(start, end);
         return new LocaleDataHandle<T>(this, localeList, start, end, jobAttributeSet);
     }
+
+	@Override
+	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
+			Map<String, String> paramMap)
+	{
+		return new LocaleDataHandle<T>(this, localeList, paramMap);
+	}
+
+	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+	{
+		return new LocaleDataHandle<T>(this, localeList, paramMap,
+				jobAttributeSet);
+	}
 
     @Override
     public TM3Handle<T> getDataById(List<Long> tuIds)
@@ -1179,6 +1206,22 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 getCustomAttributes(attrs), start, end, jobAttributeSet);
     }
 
+	@Override
+	public TM3Handle<T> getDataByAttributesAndParamMap(
+			Map<TM3Attribute, Object> attrs, Map<String, String> paramMap)
+	{
+		return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
+				getCustomAttributes(attrs), paramMap);
+	}
+
+	public TM3Handle<T> getDataByAttributesAndParamMap(
+			Map<TM3Attribute, Object> attrs, Map<String, String> paramMap,
+			Set<String> jobAttributeSet)
+	{
+		return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
+				getCustomAttributes(attrs), paramMap, jobAttributeSet);
+	}
+    
     @Override
     public void removeDataByLocale(TM3Locale locale)
     {

@@ -823,6 +823,22 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm)
                 .getAllSegments(tm, createdBefore, createdAfter, conn, jobAttributeSet);
     }
+    
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, String> paramMap, Connection conn)
+			throws RemoteException
+	{
+		return getInfo(tm).getAllSegmentsByParamMap(tm, paramMap, conn);
+	}
+
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, String> paramMap, Connection conn,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException
+	{
+		return getInfo(tm).getAllSegmentsByParamMap(tm, paramMap, conn,
+				jobAttributeSet);
+	}
 
     /**
      * WARNING: This routine will leak a session object to the SegmentResultSet
@@ -847,6 +863,25 @@ public class TmCoreManagerLocal implements TmCoreManager
                 createdAfter, conn, jobAttributeSet);
     }
 
+	@Override
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Connection conn) throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsByLocalesAndParamMap(tm, localeList,
+				paramMap, conn);
+	}
+
+	@Override
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Connection conn, Set<String> jobAttributeSet)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsByLocalesAndParamMap(tm, localeList,
+				paramMap, conn, jobAttributeSet);
+	}
+
     /**
      * WARNING: This routine will leak a session object to the SegmentResultSet
      * that it creates. The caller must call SegmentResultSet.finish() in order
@@ -868,7 +903,24 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsByProjectName(tm, projectName,
                 createdBefore, createdAfter, conn, jobAttributeSet);
     }
+    
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap, Connection conn)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsByProjectNameAndParamMap(tm, projectName,
+				paramMap, conn);
+	}
 
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap,
+			Connection conn, Set<String> jobAttributeSet)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsByProjectNameAndParamMap(tm, projectName,
+				paramMap, conn, jobAttributeSet);
+	}
+	
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException
@@ -882,6 +934,19 @@ public class TmCoreManagerLocal implements TmCoreManager
     {
         return getInfo(tm).getAllSegmentsCount(tm, createdBefore, createdAfter, jobAttributeSet);
     }
+    
+	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getAllSegmentsCountByParamMap(tm, paramMap);
+	}
+
+	public int getAllSegmentsCountByParamMap(Tm tm,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getAllSegmentsCountByParamMap(tm, paramMap, jobAttributeSet);
+	}
 
     @Override
     public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
@@ -899,6 +964,22 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsCountByLocales(tm, localeList, createdBefore,
                 createdAfter,jobAttributeSet);
     }
+    
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsCountByLocalesAndParamMap(tm, localeList, paramMap);
+	}
+
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException
+	{
+		return getInfo(tm).getSegmentsCountByLocalesAndParamMap(tm, localeList, paramMap,
+				jobAttributeSet);
+	}
 
     @Override
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
@@ -916,6 +997,23 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsCountByProjectName(tm, projectName,
                 createdBefore, createdAfter, jobAttributeSet);
     }
+
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsCountByProjectNameAndParamMap(tm,
+				projectName, paramMap);
+	}
+
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException
+	{
+		return getInfo(tm).getSegmentsCountByProjectNameAndParamMap(tm,
+				projectName, paramMap, jobAttributeSet);
+	}
 
     // TODO: this needs to have session handling code added
     // tmPriority param is stupid--just pass the tms in order!

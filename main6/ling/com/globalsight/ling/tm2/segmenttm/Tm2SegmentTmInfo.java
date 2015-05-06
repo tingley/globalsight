@@ -23,6 +23,7 @@ import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TUV
 import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TU_L;
 import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TU_T;
 
+import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -434,6 +436,40 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+    
+	@Override
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, String> paramMap, Connection conn)
+			throws LingManagerException
+	{
+		try
+		{
+			return new Tm2SegmentResultSet(conn,
+					TmExportHelper.getAllTuIdsByParamMap(conn, tm, paramMap),
+					EXPORT_BATCH_SIZE);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, String> paramMap, Connection conn,
+			Set<String> jobAttributeSet) throws LingManagerException
+	{
+		try
+		{
+			return new Tm2SegmentResultSet(conn,
+					TmExportHelper.getAllTuIdsByParamMap(conn, tm, paramMap,
+							jobAttributeSet), EXPORT_BATCH_SIZE);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
 
     @Override
     public SegmentResultSet getAllSegments(Tm tm, long startTUId,
@@ -491,6 +527,48 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
 
+	@Override
+	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, String> paramMap)
+			throws LingManagerException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			return TmExportHelper.getAllTuCountByParamMap(conn, tm, paramMap);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
+	public int getAllSegmentsCountByParamMap(Tm tm,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws LingManagerException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			return TmExportHelper.getAllTuCountByParamMap(conn, tm, paramMap,
+					jobAttributeSet);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
     @Override
     public int getAllSegmentsCount(Tm tm, long startTUId)
             throws LingManagerException
@@ -543,6 +621,33 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+    
+	@Override
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Connection conn) throws LingManagerException
+	{
+		try
+		{
+			return new Tm2SegmentResultSet(conn,
+					TmExportHelper.getFilteredTuIdsByParamMap(conn, tm,
+							localeList, paramMap), EXPORT_BATCH_SIZE);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Connection conn, Set<String> jobAttributeSet)
+			throws LingManagerException
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 
     @Override
     public int getSegmentsCountByLocales(Tm tm, List<String> locales,
@@ -574,6 +679,51 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+
+	@Override
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			return TmExportHelper.getFilteredTuCountByParamMap(conn, tm,
+					localeList, paramMap);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			return TmExportHelper.getFilteredTuCountByParamMap(conn, tm,
+					localeList, paramMap, jobAttributeSet);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
 
     @Override
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
@@ -608,6 +758,41 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
 
+	@Override
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap, Connection conn)
+			throws LingManagerException
+	{
+		try
+		{
+			return new Tm2SegmentResultSet(conn,
+					TmExportHelper.getProjectNameTuIdsByParamMap(conn, tm,
+							projectName, paramMap), EXPORT_BATCH_SIZE);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+
+	@Override
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap, Connection conn,
+			Set<String> jobAttributeSet) throws LingManagerException
+	{
+		try
+		{
+			return new Tm2SegmentResultSet(conn,
+					TmExportHelper.getProjectNameTuIdsByParamMap(conn, tm,
+							projectName, paramMap, jobAttributeSet),
+					EXPORT_BATCH_SIZE);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+	
     @Override
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter)
@@ -638,6 +823,51 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+
+	@Override
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			return TmExportHelper.getProjectTuCountByParamMap(conn, tm,
+					projectName, paramMap);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
+
+	@Override
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException
+	{
+		Connection conn = null;
+		try
+		{
+			conn = DbUtil.getConnection();
+			return TmExportHelper.getProjectTuCountByParamMap(conn, tm,
+					projectName, paramMap, jobAttributeSet);
+		}
+		catch (Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+		finally
+		{
+			DbUtil.silentReturnConnection(conn);
+		}
+	}
 
     @Override
     public List<TMidTUid> tmConcordanceQuery(List<Tm> tms, String query,

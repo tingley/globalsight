@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import com.globalsight.everest.jobhandler.Job;
@@ -131,6 +132,14 @@ public interface SegmentTmInfo
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn, Set<String> jobAttributeSet) 
     		throws LingManagerException;
+    
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, String> paramMap, Connection conn)
+			throws LingManagerException;
+
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, String> paramMap, Connection conn,
+			Set<String> jobAttributeSet) throws LingManagerException;
 
     public SegmentResultSet getAllSegments(Tm tm, long startTUId,
             Connection conn) throws LingManagerException;
@@ -143,19 +152,43 @@ public interface SegmentTmInfo
             String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
             throws LingManagerException;
 
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Connection conn) throws LingManagerException;
+
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Connection conn, Set<String> jobAttributeSet)
+			throws LingManagerException;
+
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException;
             
-    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
-            throws LingManagerException;
+	public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
+			String createdBefore, String createdAfter, Connection conn,
+			Set<String> jobAttributeSet) throws LingManagerException;
+
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap, Connection conn)
+			throws LingManagerException;
+
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap, Connection conn,
+			Set<String> jobAttributeSet) throws LingManagerException;
 
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws LingManagerException;
     
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter, Set<String> jobAttributeSet) throws LingManagerException;
+
+	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, String> paramMap)
+			throws LingManagerException;
+
+	public int getAllSegmentsCountByParamMap(Tm tm,
+			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			throws LingManagerException;
 
     public int getAllSegmentsCount(Tm tm, long startTUId)
             throws LingManagerException;
@@ -168,6 +201,15 @@ public interface SegmentTmInfo
             String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException;
 
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException;
+
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException;
+
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter)
             throws LingManagerException;
@@ -175,6 +217,15 @@ public interface SegmentTmInfo
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException;
+
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap)
+			throws RemoteException, LingManagerException;
+
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, String> paramMap,
+			Set<String> jobAttributeSet) throws RemoteException,
+			LingManagerException;
 
     public List<TMidTUid> tmConcordanceQuery(List<Tm> tms, String query,
             GlobalSightLocale sourceLocale, GlobalSightLocale targetLocale,

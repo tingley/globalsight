@@ -83,6 +83,9 @@ LEGEND        { font-size: smaller; font-weight: bold; }
 <SCRIPT type="text/javascript" src="/globalsight/includes/report/calendar.js"></SCRIPT>
 <SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT type="text/javascript" src="/globalsight/jquery/jquery.xmlext.js"></SCRIPT>
+<script type="text/javascript" SRC="/globalsight/includes/utilityScripts.js"></script>
+<link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <SCRIPT type="text/javascript">
 var needWarning = false;
 var objectName = "";
@@ -105,7 +108,7 @@ function parseExportOptions()
 {
   var form = document.oDummyForm;
   var node;
-  var createdAfter, createdBefore;
+  var createdAfter, createdBefore,modifyAfter,modifyBefore,createUser,modifyUser,tuId,sId,isRegex;
   var selectMode, selectLanguage, duplicateHandling, fileType, fileEncoding, selectChangeCreationId;
 
   var $xml = $( $.parseXML( xmlExportOptions ) );
@@ -120,7 +123,14 @@ function parseExportOptions()
   node = $xml.find("exportOptions > filterOptions");
   createdAfter = node.find("createdafter").text();
   createdBefore = node.find("createdbefore").text();
-
+  modifyAfter = node.find("modifiedafter").text();
+  modifyBefore = node.find("modifiedbefore").text();
+  createUser = node.find("createdby").text();
+  modifyUser = node.find("modifiedby").text();
+  tuId = node.find("tuId").text();
+  sId = node.find("stringId").text();
+  isRegex = node.find("regex").text();
+  
   node = $xml.find("exportOptions > fileOptions");
   fileType = node.find("fileType").text();
   fileEncoding = node.find("fileEncoding").text();
@@ -130,9 +140,18 @@ function parseExportOptions()
     form.oEntries[1].checked = true;
     form.oEntryLang.disabled = false;
   }
-  
+
   form.fltCreatedAfter.value = createdAfter;
   form.fltCreatedBefore.value = createdBefore;
+  form.fltModifiedAfter.value = modifyAfter;
+  form.fltModifiedBefore.value = modifyBefore;
+  form.fltCreatedUser.value = createUser;
+  form.fltModifiedUser.value = modifyUser;
+  form.fltTuId.value = tuId;
+  form.fltSID.value = sId;
+  if(isRegex == "true"){
+	  form.fltIsRegex.checked = true;
+  }
 
   selectValue(form.oEntryLang, selectLanguage);
   selectValue(form.oEncoding, fileEncoding);
@@ -249,9 +268,27 @@ function buildExportOptions()
 
   // FILTER OPTIONS
   node = $xml.find("exportOptions > filterOptions");
+  //Create Date
   node.find("createdafter").text(form.fltCreatedAfter.value);
   node.find("createdbefore").text(form.fltCreatedBefore.value);
-  
+  //Modify Date
+  node.find("modifiedafter").text(form.fltModifiedAfter.value);
+  node.find("modifiedbefore").text(form.fltModifiedBefore.value);
+  //Create User
+  node.find("createdby").text(form.fltCreatedUser.value);
+  //Modify User
+  node.find("modifiedby").text(form.fltModifiedUser.value);
+  //TU ID
+  node.find("tuId").text(form.fltTuId.value);
+  //SID
+  node.find("stringId").text(form.fltSID.value);
+ //regex fltIsRegex
+ if(form.fltIsRegex.checked){
+	 node.find("regex").text("true");
+ }else{
+	 node.find("regex").text("false");
+ }
+ 
   // FILE OPTIONS
   node = $xml.find("exportOptions > fileOptions");
   if (form.oType[0].checked)
@@ -310,6 +347,7 @@ function selectMulti(selects){
 function doNext()
 {
     var form = document.oDummyForm;
+    //Create Date
     if (form.fltCreatedAfter.value != "") {
         if (form.fltCreatedBefore.value == "") {
             alert("Please select the end of creation date");
@@ -321,7 +359,88 @@ function doNext()
             return;
     	}
     }
-
+	
+    //Modify Date
+    if (form.fltModifiedAfter.value != "") {
+        if (form.fltModifiedBefore.value == "") {
+            alert("Please select the end of modify date");
+            return;
+        }
+    } else {
+    	if (form.fltModifiedBefore.value != "") {
+            alert("Please select the start of modify date");
+            return;
+    	}
+    }
+    
+    //Create User
+    if(hasSpecialChars(form.fltCreatedUser.value))
+    {
+    	alert("<%= bundle.getString("lb_create_user") %>" + "<%=bundle.getString("msg_invalid_entry")%>");
+    	return false;	
+    }
+    //Modify User
+    if(hasSpecialChars(form.fltModifiedUser.value))
+    {
+    	alert("<%= bundle.getString("lb_modify_user") %>" + "<%=bundle.getString("msg_invalid_entry")%>");
+    	return false;	
+    }
+    
+    //tu id
+    var tuIds = form.fltTuId.value;
+    if(tuIds != "" && tuIds != null)
+    {
+	    if (checkSpecialChars(tuIds))
+	    {
+	        alert("TU ID" + "<%= bundle.getString("msg_invalid_entry5") %>");
+	        return false;
+	    }
+	    
+	    var tuIdArr = tuIds.split(",");
+	    if(tuIdArr.length > 0)
+	    {
+	    	for(var i = 0;i < tuIdArr.length; i++)
+	    	{
+	    		var tuId = tuIdArr[i];
+	    		if(tuId.indexOf("-") > -1)
+	    		{
+	    			var startIndex = tuId.indexOf("-");
+	    			var lastIndex = tuId.lastIndexOf("-");
+	    			if(startIndex != lastIndex)
+	    			{
+	    				alert("TU ID" + "<%=bundle.getString("msg_invalid_entry6")%>");
+	    				return false;
+	    			}
+	    			else
+	    			{
+	    				var idArr = tuId.split("-");
+	    				for(var j=0;j<idArr.length;j++)
+	    				{
+	    					if(!isInteger(idArr[j]))
+	    	    			{
+	    	    				alert("TU ID" + "<%=bundle.getString("msg_invalid_entry5")%>");
+	    	    				return false;
+	    	    			}
+	    				}
+	    				if(idArr.length == 2 && isInteger(idArr[0]) > isInteger(idArr[1]))
+	    				{
+	    					alert("TU ID" + "<%=bundle.getString("msg_invalid_entry7")%>");
+    	    				return false;
+	    				}
+	    			}
+	    		}
+	    		else
+	    		{
+	    			if(!isInteger(tuId))
+	    			{
+	    				alert("TU ID" + "<%=bundle.getString("msg_invalid_entry5")%>");
+	    				return false;
+	    			}
+	    		}
+	    	}
+	    }
+    }
+    
     var result = buildExportOptions();
     if(result == ""){
         return;
@@ -342,6 +461,11 @@ function doNext()
 
         oForm.submit();
     }
+}
+
+function isInteger(obj)
+{
+    return Math.floor(obj) == obj;
 }
 
 function doByEntry()
@@ -613,16 +737,42 @@ function checkEmptyTM()
   }
 }
 
-function showCalendar(id) {
-    var cal1 = new calendar2(document.getElementById(id));
-    cal1.year_scroll = true;
-    cal1.time_comp = false;
-    cal1.popup();
-}
-
 function doOnLoad()
 {
-
+	$("#idCos").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#idCoe").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#idCoe").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#idCos").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
+	
+	$("#idMos").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#idMoe").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#idMoe").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#idMos").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
+	
    // Load the Guides
    loadGuides();
 
@@ -674,8 +824,8 @@ function doOnLoad()
             </td>
           </tr>
           <tr>
-	    <td>
-	       <input type="radio" name="oEntries" id="idEntries2"
+	    	<td>
+	       		<input type="radio" name="oEntries" id="idEntries2"
                  onclick="idLanguageList.disabled = false;idPropTypeList.disabled = true;idLanguageList.focus();">
                <label for="idEntries2"><%= bundle.getString("lb_by_language")%></label>
             </td>
@@ -702,17 +852,58 @@ function doOnLoad()
     <col align="right" valign="baseline" class="standardText">
     <col align="left"  valign="baseline" class="standardText">
    </thead>
+   <%--TU ID --%>
+   <tr>
+ 	<td><%=bundle.getString("lb_export_tu_id") %>:</td>
+    <td>
+      <input name="fltTuId" id="fltTuId" type="text" size="30">
+    </td>
+   </tr>
+   <%-- SID --%>
+   <tr>
+ 	<td><%=bundle.getString("lb_export_sid") %>:</td>
+    <td>
+      <input name="fltSID" id="fltSID" type="text" size="30">
+      <input name="fltIsRegex" id="fltIsRegex" type="checkbox"><%=bundle.getString("lb_export_regex") %>
+    </td>
+   </tr>
+    <%--Create User --%>
+   <tr>
+ 	<td><%=bundle.getString("lb_create_user") %> :</td>
+    <td>
+      <input name="fltCreatedUser" id="fltCreatedUser" type="text" size="30">
+    </td>
+   </tr>
+    <%--Modify User --%>
+   <tr>
+ 	<td><%=bundle.getString("lb_modify_user") %>:</td>
+    <td>
+      <input name="fltModifiedUser" id="fltModifiedUser" type="text" size="30">
+    </td>
+   </tr>
+   <%-- Creation date --%>
    <tr>
  	<td><%=bundle.getString("lb_creation_date") %>:</td>
     <td>
-      <%=bundle.getString("lb_after").toLowerCase() %> <input name="fltCreatedAfter" id="idCos" type="text" size="15" readonly="true">
-      <img src="/globalsight/includes/Calendar.gif" class="calendar" title="<%=lb_calendar_title %>" onclick="showCalendar('idCos')"> &nbsp;
-      <%=bundle.getString("lb_and_or") %>
-      <%=bundle.getString("lb_before").toLowerCase() %> <input name="fltCreatedBefore" id="idCoe" type="text" size="15" readonly="true">
-      <img src="/globalsight/includes/Calendar.gif" class="calendar" title="<%=lb_calendar_title %>" onclick="showCalendar('idCoe')"> &nbsp;
+      <%=bundle.getString("lb_start").toLowerCase() %>: 
+      <input name="fltCreatedAfter" id="idCos" type="text" size="15" readonly="true">
+      <%=bundle.getString("lb_end").toLowerCase() %>: 
+      <input name="fltCreatedBefore" id="idCoe" type="text" size="15" readonly="true">
       <span class='info'>(MM/DD/YYYY)</span>
     </td>
    </tr>
+   <%-- Modify date --%>
+   <tr>
+ 	<td><%=bundle.getString("lb_modify_date") %>:</td>
+    <td>
+      <%=bundle.getString("lb_start").toLowerCase() %>: 
+      <input name="fltModifiedAfter" id="idMos" type="text" size="15" readonly="true">
+      <%=bundle.getString("lb_end").toLowerCase() %>: 
+      <input name="fltModifiedBefore" id="idMoe" type="text" size="15" readonly="true">
+      <span class='info'>(MM/DD/YYYY)</span>
+    </td>
+   </tr>
+   
   </TABLE>
  </div>
  <div style="margin-bottom:10px">

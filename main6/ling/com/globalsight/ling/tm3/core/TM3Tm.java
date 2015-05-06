@@ -283,6 +283,11 @@ public interface TM3Tm<T extends TM3Data> {
     
     public TM3Handle<T> getAllData(Date start, Date end, Set<String> jobAttributeSet);
     
+	public TM3Handle<T> getAllDataByParamMap(Map<String, String> paramMap);
+
+	public TM3Handle<T> getAllDataByParamMap(Map<String, String> paramMap,
+			Set<String> jobAttributeSet);
+    
     /**
      * Get a handle to all the TU data in this TM that includes 
      * a TUV with the specified locale, optionally
@@ -301,6 +306,12 @@ public interface TM3Tm<T extends TM3Data> {
     
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end,  Set<String> jobAttributeSet);
     
+	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
+			Map<String, String> paramMap);
+
+	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
+			Map<String, String> paramMap, Set<String> jobAttributeSet);
+
     /**
      * Get a handle to all segments in this TM whose IDs are included
      * in the specified set of ids.
@@ -325,6 +336,12 @@ public interface TM3Tm<T extends TM3Data> {
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
             Date start, Date end,  Set<String> jobAttributeSet);
 
+	public TM3Handle<T> getDataByAttributesAndParamMap(
+			Map<TM3Attribute, Object> attrs, Map<String, String> paramMap);
+
+	public TM3Handle<T> getDataByAttributesAndParamMap(
+			Map<TM3Attribute, Object> attrs, Map<String, String> paramMap,
+			Set<String> jobAttributeSet);
 
     /**
      * Remove TUVs by locale.

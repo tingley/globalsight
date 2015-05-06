@@ -59,11 +59,11 @@ public class AutoCompleteActivityThread implements Runnable
                 {
                 	try
                 	{
+                        CompanyThreadLocal.getInstance().setIdValue(
+                                t.getCompanyId());
                         Activity act = jobHandler.getActivity(t.getTaskName());
                         if (act.getAutoCompleteActivity())
                         {
-							CompanyThreadLocal.getInstance().setIdValue(
-									t.getCompanyId());
                             acceptor = t.getAcceptor();
                             Job job = jobHandler.getJobById(t.getJobId());
 

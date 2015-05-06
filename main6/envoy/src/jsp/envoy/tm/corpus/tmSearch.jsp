@@ -174,11 +174,21 @@ var searchText;
 var advancedSearch = false;
 var searchIn = "source";
 var replaceText;
-var searchByDataType;
-var startDateOption;
-var startDate;
-var endDateOption;
-var endDate;
+var createStartDateOption;
+var createStartDate;
+var createEndDateOption;
+var createEndDate;
+var modifyStartDateOption;
+var modifyStartDate;
+var modifyEndDateOption;
+var modifyEndDate;
+var tuIds;
+var sids;
+var createUser;
+var modifyUser;
+var attributeName;
+var attributeValue;
+var isRegex;
 
 var result = new Array();
 var searchType;
@@ -698,6 +708,24 @@ $(document).ready(function(){
 			$("#csf").datepicker( "option", "maxDate", selectedDate );
 		}
 	});
+	
+	$("#msf").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#mef").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#mef").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#msf").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
+	
 	 loadGuides();  
 	 init();
 	 shareConditionTMAndTermSearch();
@@ -891,18 +919,29 @@ $(document).ready(function(){
    	     $("#revertTD").show();
    	     $("#searchInTD").show();
    	     $("#information").html("${lb_tm_search_hint2}");
-   	     $("#dateSearch").show();
-   	 	 startDateOption = $("#startDateOption").val();
-	  	if(startDateOption == "eq")
-	  	{
-	  		$("#endDateOption").attr("disabled",true);
-	  		$("#cef").attr("disabled",true);
-	  	}
-	  	else if(startDateOption == "neq")
-		{
-			$("#endDateOption").attr("disabled",true);
-			$("#cef").attr("disabled",true);
-		}
+   	     $("#advancedSearch").show();
+   	  	 createStartDateOption = $("#createStartDateOption").val();
+	  	 if(createStartDateOption == "eq")
+	  	 {
+	  	 	 $("#createEndDateOption").attr("disabled",true);
+	  		 $("#cef").attr("disabled",true);
+	  	 }
+	  	 else if(createStartDateOption == "neq")
+		 {
+			 $("#createEndDateOption").attr("disabled",true);
+			 $("#cef").attr("disabled",true);
+		 }
+	  	 modifyStartDateOption = $("#modifyStartDateOption").val();
+	  	 if(modifyStartDateOption == "eq")
+	  	 {
+	  		 $("#modifyEndDateOption").attr("disabled",true);
+	  		 $("#mef").attr("disabled",true);
+	  	 }
+	  	 else if(modifyStartDateOption == "neq")
+		 {
+			 $("#modifyEndDateOption").attr("disabled",true);
+			 $("#mef").attr("disabled",true);
+		 }
    	     advancedSearch = true;
    	     searchClick();
      })
@@ -915,7 +954,7 @@ $(document).ready(function(){
    	     $("#revertTD").hide();
    	     $("#searchInTD").hide();
    	     $("#information").html("");
-   	 	 $("#dateSearch").hide();
+   	 	 $("#advancedSearch").hide();
    	 	 
    	     advancedSearch = false;
    	     searchClick();
@@ -945,38 +984,149 @@ $(document).ready(function(){
     		 //search in source or target can be allowed for AdvancedSearch
     		 searchIn = $("#searchIn").val();
     		 replaceText = $("#replaceText").val();
-    		 searchByDataType = $("#dateTypeOption").val();
-    		 startDateOption = $("#startDateOption").val();
-    		 startDate = $("#csf").val();
-    		 endDateOption = $("#endDateOption").val();
-    		 endDate = $("#cef").val();
+    		 tuIds = $("#tuIds").val();
+   			 if(tuIds.length > 0)
+   		     {
+   				if(tuIds.indexOf(",") >0)
+   				{
+   					temp = tuIds.split(",");
+   					for(i=0; i<temp.length; i++)
+   					{
+   						if(temp[i].indexOf("-") > 0)
+	   	   				{
+	   	   					temp2 = temp[i].split("-");
+	   	   					if(temp2.length != 2)
+	   	   					{
+	   	   					alert("TU ID" + "<%=bundle.getString("msg_invalid_entry6")%>");
+	   	   						return false;
+	   	   					}
+	   	   					else
+	   	   					{
+	   	   						var min = temp2[0];
+	   	   						var max = temp2[1];
+	   	   						if(!isInteger(min) || !isInteger(max))
+	   	   						{
+	   	   							alert("TU ID" + "<%=bundle.getString("msg_invalid_entry5")%>");
+	   	   							return false;
+	   	   						}
+	   	   						else if(Number(min) > Number(max))
+	   	   						{
+	   	   						alert("TU ID" + "<%=bundle.getString("msg_invalid_entry7")%>");
+	   	   							return false;
+	   	   						}
+	   	   					}
+	   	   				}
+   						else if(!isInteger(temp[i]))
+   						{
+   							alert("TU ID" + "<%=bundle.getString("msg_invalid_entry5")%>");
+   							return false;
+   						}
+   					}
+   				}
+   				else if (tuIds.indexOf("-") > 0)
+   				{
+   					temp2 = tuIds.split("-");
+   					if(temp2.length != 2)
+   					{
+   						alert("TU ID" + "<%=bundle.getString("msg_invalid_entry6")%>");
+   						return false;
+   					}
+   					else
+   					{
+   						var min = temp2[0];
+   						var max = temp2[1];
+   						if(!isInteger(min) || !isInteger(max))
+   						{
+   							alert("TU ID" + "<%=bundle.getString("msg_invalid_entry5")%>");
+   							return false;
+   						}
+   						else if(Number(min) > Number(max))
+   						{
+   							alert("TU ID" + "<%=bundle.getString("msg_invalid_entry7")%>");
+   							return false;
+   						}
+   					}
+   				}
+   				else if(!isInteger(tuIds))
+   				{
+   					alert("TU ID" + "<%=bundle.getString("msg_invalid_entry5")%>");
+   					return false;
+   				}
+   		     }
+    		 sids = $("#sids").val();
+    		 isRegex = document.getElementById("isRegex").checked;
+    		 createUser = $("#createUser").val();
+    		 if(hasSomeSpecialChars(createUser))
+    		 {
+    			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_create_user"))%> " +
+   		              "<%=EditUtil.toJavascript(bundle
+   									.getString("msg_invalid_entry3"))%>");
+    		 }
+    		 modifyUser = $("#modifyUser").val();
+    		 if(hasSomeSpecialChars(modifyUser))
+    		 {
+    			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_modify"))%> " +
+    				  "<%=EditUtil.toJavascript(bundle.getString("lb_user"))%> " +
+   		              "<%=EditUtil.toJavascript(bundle
+   									.getString("msg_invalid_entry3"))%>");
+    		     return false; 
+    		 }
+    		 attributeName = $("#attributeName").val();
+    		 if(hasHtmlSpecialChars(attributeName))
+    		 {
+    			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_attributename"))%> " +
+    		              "<%=EditUtil.toJavascript(bundle
+    									.getString("msg_html_special_char"))%>");
+    			 return false;
+    		 }
+    		 attributeValue = $("#attributeValue").val();
     		 
-    		 startDateOption = $("#startDateOption").val();
-    		 endDateOption = $("#endDateOption").val();
-    		 if(startDateOption == "gt" && endDateOption == "lt"){
-    			startDate = $("#csf").val();
-    			endDate = $("#cef").val();
-    			if(startDate == endDate){
+    		 createStartDateOption = $("#createStartDateOption").val();
+    		 createStartDate = $("#csf").val();
+    		 createEndDateOption = $("#createEndDateOption").val();
+    		 createEndDate = $("#cef").val();
+    		 if(createStartDateOption == "gt" && createEndDateOption == "lt"){
+    			if(createStartDate == createEndDate){
     				alert("${lb_tm_check_date_greater_less}");
     				return;
     			}
     		}
-    		 if(startDateOption == "gt" && endDateOption == "lteq"){
-     			startDate = $("#csf").val();
-     			endDate = $("#cef").val();
-     			if(startDate == endDate){
+    		 if(createStartDateOption == "gt" && createEndDateOption == "lteq"){
+     			if(createStartDate == createEndDate){
      				alert("${lb_tm_check_date_greater_less_equal}");
      				return;
      			}
      		}
-    		 if(startDateOption == "gteq" && endDateOption == "lt"){
-     			startDate = $("#csf").val();
-     			endDate = $("#cef").val();
-     			if(startDate == endDate){
+    		 if(createStartDateOption == "gteq" && createEndDateOption == "lt"){
+     			if(createStartDate == createEndDate){
      				alert("${lb_tm_check_date_greater_equal_less}");
      				return;
      			}
      		}
+    		 
+    		 modifyStartDateOption = $("#modifyStartDateOption").val();
+    		 modifyStartDate = $("#msf").val();
+    		 modifyEndDateOption = $("#modifyEndDateOption").val();
+    		 modifyEndDate = $("#mef").val();
+    		 if(modifyStartDateOption == "gt" && modifyEndDateOption == "lt"){
+    			if(modifyStartDate == modifyEndDate){
+    				alert("${lb_tm_check_date_greater_less}");
+    				return;
+    			}
+    		}
+    		 if(modifyStartDateOption == "gt" && modifyEndDateOption == "lteq"){
+     			if(modifyStartDate == modifyEndDate){
+     				alert("${lb_tm_check_date_greater_less_equal}");
+     				return;
+     			}
+     		}
+    		 if(modifyStartDateOption == "gteq" && modifyEndDateOption == "lt"){
+     			if(modifyStartDate == modifyEndDate){
+     				alert("${lb_tm_check_date_greater_equal_less}");
+     				return;
+     			}
+     		}
+    		 
        	 }
 
     	 var searchParams;
@@ -1039,11 +1189,21 @@ $(document).ready(function(){
 			           "searchIn":searchIn,
 			           "advancedSearch":advancedSearch,
 			           "replaceText":replaceText,
-			           "searchByDataType":searchByDataType,
-			           "startDateOption":startDateOption,
-			           "startDate":startDate,
-			           "endDateOption":endDateOption,
-			           "endDate":endDate};
+			           "createStartDateOption":createStartDateOption,
+			           "createStartDate":createStartDate,
+			           "createEndDateOption":createEndDateOption,
+			           "createEndDate":createEndDate,
+			           "modifyStartDateOption":modifyStartDateOption,
+			           "modifyStartDate":modifyStartDate,
+			           "modifyEndDateOption":modifyEndDateOption,
+			           "modifyEndDate":modifyEndDate,
+			           "tuIds":tuIds,
+			           "sids":sids,
+			           "isRegex":isRegex,
+			           "createUser":createUser,
+			           "modifyUser":modifyUser,
+			           "attributeName":attributeName,
+			           "attributeValue":attributeValue};
     	 }
     	 else
          {
@@ -1056,11 +1216,21 @@ $(document).ready(function(){
 			           "searchIn":searchIn,
 			           "advancedSearch":advancedSearch,
 			           "replaceText":replaceText,
-			           "searchByDataType":searchByDataType,
-			           "startDateOption":startDateOption,
-			           "startDate":startDate,
-			           "endDateOption":endDateOption,
-			           "endDate":endDate};
+			           "createStartDateOption":createStartDateOption,
+			           "createStartDate":createStartDate,
+			           "createEndDateOption":createEndDateOption,
+			           "createEndDate":createEndDate,
+			           "modifyStartDateOption":modifyStartDateOption,
+			           "modifyStartDate":modifyStartDate,
+			           "modifyEndDateOption":modifyEndDateOption,
+			           "modifyEndDate":modifyEndDate,
+			           "tuIds":tuIds,
+			           "sids":sids,
+			           "isRegex":isRegex,
+			           "createUser":createUser,
+			           "modifyUser":modifyUser,
+			           "attributeName":attributeName,
+			           "attributeValue":attributeValue};
     	 }
     	 
     	 $("#pageNavigationHeader").html("");
@@ -1100,6 +1270,10 @@ $(document).ready(function(){
 		 });
 	});
 });
+function isInteger(obj)
+{
+    return Math.floor(obj) == obj;
+}
 $(window).unload(function(){
 	if(editWindow)
 	{
@@ -1110,25 +1284,46 @@ $(window).unload(function(){
 		addWindow.close();
 	}
 });
-function disableOption(){
-	startDateOption = $("#startDateOption").val();
-	if(startDateOption == "eq")
+function disableCreateOption(){
+	createStartDateOption = $("#createStartDateOption").val();
+	if(createStartDateOption == "eq")
 	{
-		$("#endDateOption").attr("disabled",true);
+		$("#createEndDateOption").attr("disabled",true);
 		$("#cef").attr("value","");
 		$("#cef").attr("disabled",true);
 	}
-	else if(startDateOption == "neq")
+	else if(createStartDateOption == "neq")
 	{
-		$("#endDateOption").attr("disabled",true);
+		$("#createEndDateOption").attr("disabled",true);
 		$("#cef").attr("value","");
 		$("#cef").attr("disabled",true);
 	}
 	else
 	{
-		$("#endDateOption").attr("disabled",false);
+		$("#createEndDateOption").attr("disabled",false);
 		$("#cef").attr("value","");
 		$("#cef").attr("disabled",false);
+	}
+}
+function disableModifyOption(){
+	modifyStartDateOption = $("#modifyStartDateOption").val();
+	if(modifyStartDateOption == "eq")
+	{
+		$("#modifyEndDateOption").attr("disabled",true);
+		$("#mef").attr("value","");
+		$("#mef").attr("disabled",true);
+	}
+	else if(modifyStartDateOption == "neq")
+	{
+		$("#modifyEndDateOption").attr("disabled",true);
+		$("#mef").attr("value","");
+		$("#mef").attr("disabled",true);
+	}
+	else
+	{
+		$("#modifyEndDateOption").attr("disabled",false);
+		$("#mef").attr("value","");
+		$("#mef").attr("disabled",false);
 	}
 }
 </script>
@@ -1215,19 +1410,56 @@ function disableOption(){
 							</table>
 						  </td>
 						</tr>
-						<tr style="background: none repeat scroll 0 0 #DEE3ED;display: none;" id ="dateSearch">
+						<tr style="background: none repeat scroll 0 0 #DEE3ED;display: none;" id ="advancedSearch">
 						  <td>
 							<table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
 							  <tr>
-							    <td class="search_content" id="dateType" nowrap>${lb_search_by}:
-							       <select id="dateTypeOption" style="width:100px">
-							       		<option value="create">${lb_created_on }</option>
-							       		<option value="modify">${lb_modified_on}</option>
-							       </select>
+							    <td class="search_content"nowrap>
+							       TU ID's
 							    </td>
-							    <td class="search_content" id="" nowrap>${lb_report_startDate}:</td>
-							    <td class="search_content" id="startDate" nowrap>
-							    	<select id="startDateOption" onchange="disableOption()">
+							    <td class="search_content" nowrap>
+							    	<input type="text" id="tuIds" name="tuIds" value=""/>
+							    </td>
+							    <td class="search_content" nowrap>
+							    	String ID's
+							    </td>
+							    <td class="search_content">
+							   	    <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/>Is Regex
+      							</td>
+							    <td class="search_content" nowrap>
+							     	Create User
+							    </td>
+							    <td class="search_content">
+							    	<input type="text" id="createUser" name="createUser" value=""/>
+      							</td>
+      							<td class="search_content" nowrap>
+							     	Modify User
+							    </td>
+							    <td class="search_content">
+							    	<input type="text" id="modifyUser" name="modifyUser" value=""/>
+      							</td>
+      							<td class="search_content" nowrap>
+							     	Attribute Name
+							    </td>
+							    <td class="search_content">
+							    	<input type="text" id="attributeName" name="attributeName" value=""/>
+      							</td>
+      							<td class="search_content" nowrap>
+							     	Attribute value
+							    </td>
+							    <td class="search_content">
+							    	<input type="text" id="attributeValue" name="attributeValue" value=""/>
+      							</td>
+							  </tr>
+							 </table>
+							 <table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
+							  <tr>
+							    <td class="search_content" nowrap>
+							    	${lb_created_on }
+							    </td>
+							    <td class="search_content" nowrap>${lb_report_startDate}:</td>
+							    <td class="search_content" nowrap>
+							    	<select id="createStartDateOption" onchange="disableCreateOption()">
 							       		<option value="eq" id="eqStart">${lb_equal_to}</option>
 							       		<option value="neq">${lb_not_equal_to}</option>
 							       		<option value="gt"  id="gtStart">${lb_greater_than}</option>
@@ -1237,15 +1469,45 @@ function disableOption(){
 							    <td class="search_content">
 							   	    <input type="text" name="csf" id="csf">
       							</td>
-							    <td class="search_content" id="" nowrap>${lb_report_endDate}:
-							     <td class="search_content" id="endDate" nowrap>
-							   		<select id="endDateOption">
+							    <td class="search_content" nowrap>${lb_report_endDate}:
+							     <td class="search_content" nowrap>
+							   		<select id="createEndDateOption">
 							       		<option value="lt" id="ltEnd">${lb_less_than}</option>
 							       		<option value="lteq" id="lteqEnd">${lb_less_than_or_equal_to}</option>
 							       </select>
 							    </td>
 							    <td class="search_content">
 							    	<input type="text" name="cef"  id="cef"">
+      							</td>
+      							<td class="search_content">
+      								<span class='info'>(MM/DD/YYYY)</span>
+      							</td>
+							  </tr>
+							  <tr>
+							  	<td class="search_content" nowrap>
+							  		${lb_modified_on}
+							    </td>
+							    <td class="search_content" nowrap>${lb_report_startDate}:</td>
+							    <td class="search_content" nowrap>
+							    	<select id="modifyStartDateOption" onchange="disableModifyOption()">
+							       		<option value="eq" id="eqStart">${lb_equal_to}</option>
+							       		<option value="neq">${lb_not_equal_to}</option>
+							       		<option value="gt"  id="gtStart">${lb_greater_than}</option>
+							       		<option value="gteq"  id="gteqStart">${lb_greater_than_or_equal_to}</option>
+							       </select>
+							    </td>
+							    <td class="search_content">
+							   	    <input type="text" name="msf" id="msf">
+      							</td>
+							    <td class="search_content" nowrap>${lb_report_endDate}:
+							     <td class="search_content" nowrap>
+							   		<select id="modifyEndDateOption">
+							       		<option value="lt" id="ltEnd">${lb_less_than}</option>
+							       		<option value="lteq" id="lteqEnd">${lb_less_than_or_equal_to}</option>
+							       </select>
+							    </td>
+							    <td class="search_content">
+							    	<input type="text" name="mef"  id="mef"">
       							</td>
       							<td class="search_content">
       								<span class='info'>(MM/DD/YYYY)</span>

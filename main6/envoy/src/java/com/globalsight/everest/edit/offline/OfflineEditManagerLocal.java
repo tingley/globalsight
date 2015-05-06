@@ -137,8 +137,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
     private static Object LOCKER = new Object();
     private static int MAX_THREAD = 5;
-    private static List<OfflineUploadForm> WAITING_FORMS = new ArrayList<OfflineUploadForm>();
-    private static List<OfflineUploadForm> RUNNING_FORMS = new ArrayList<OfflineUploadForm>();
+    public static List<OfflineUploadForm> WAITING_FORMS = new ArrayList<OfflineUploadForm>();
+    public static List<OfflineUploadForm> RUNNING_FORMS = new ArrayList<OfflineUploadForm>();
 
     // initialize the RUN_MAX_THREAD from
     // "properties/offlineUpload.properties"
@@ -2343,5 +2343,10 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
         }
         return jobIds;
+    }
+
+    public OEMProcessStatus getStatus()
+    {
+        return m_status;
     }
 }

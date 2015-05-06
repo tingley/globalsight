@@ -429,14 +429,14 @@ function checkFilters()
 	if (tmp != "" && $("#jobIdOption").val()=="EQ") {
 		for(var i=0;i<tmp.length;i++)
 		{
-			if(isLetter.test(tmp.charAt(i))||isInteger.test(tmp.charAt(i))&&i<tmp.length-2 && tmp.charAt(i+1)==" "&&isInteger.test(tmp.charAt(i+2)))
+			if(!isEffective.test(tmp.charAt(i))||isLetter.test(tmp.charAt(i))||isInteger.test(tmp.charAt(i))&&i<tmp.length-2 && tmp.charAt(i+1)==" "&&isInteger.test(tmp.charAt(i+2)))
 			{
 				containLetterSpace = "yes";
 				break;
 			}
 		}
-		if(!isEffective.test(tmp)||containLetterSpace == "yes"||tmp.charAt(tmp.length - 1)=="-"||tmp.indexOf("-,")>0
-			||tmp.indexOf(",-")>0||tmp.indexOf("--")>0||tmp.indexOf(",,")>0){
+		if(containLetterSpace == "yes"||!isEffective.test(tmp)||tmp.charAt(tmp.length - 1)=="-"||tmp.indexOf("-,")>0
+			||tmp.indexOf(",-")>0||tmp.indexOf("--")>0||tmp.indexOf(",,")>0||tmp.indexOf(".")>0){
 			alert("Invalid job ID, only integer numbers, comma and en dash are allowed.");
 			return false;
 		}

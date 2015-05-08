@@ -907,7 +907,7 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 	}
 
 	@Override
-	public long getTuCountByParamMap(Map<String, String> paramMap)
+	public long getTuCountByParamMap(Map<String, Object> paramMap)
 			throws SQLException
 	{
 		// TODO Auto-generated method stub
@@ -915,25 +915,8 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 	}
 
 	@Override
-	public long getTuCountByParamMap(Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws SQLException
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public long getTuCountByLocalesAndParamMap(List<TM3Locale> localeList,
-			Map<String, String> paramMap) throws SQLException
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long getTuCountByLocalesAndParamMap(List<TM3Locale> localeList,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
-			throws SQLException
+			Map<String, Object> paramMap) throws SQLException
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -942,18 +925,7 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 	@Override
 	public long getTuCountByAttributesAndParamMap(
 			Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs, Map<String, String> paramMap)
-			throws SQLException
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long getTuCountByAttributesAndParamMap(
-			Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
 			throws SQLException
 	{
 		// TODO Auto-generated method stub
@@ -962,16 +934,7 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 
 	@Override
 	public List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
-			Map<String, String> paramMap) throws SQLException
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
-			throws SQLException
+			Map<String, Object> paramMap) throws SQLException
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -979,17 +942,7 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 
 	@Override
 	public List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
-			int count, List<TM3Locale> localeList, Map<String, String> paramMap)
-			throws SQLException
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
-			int count, List<TM3Locale> localeList,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			int count, List<TM3Locale> localeList, Map<String, Object> paramMap)
 			throws SQLException
 	{
 		// TODO Auto-generated method stub
@@ -999,18 +952,7 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 	@Override
 	public List<TM3Tu<T>> getTuPageByAttributesAndParamMap(long startId,
 			int count, Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs, Map<String, String> paramMap)
-			throws SQLException
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<TM3Tu<T>> getTuPageByAttributesAndParamMap(long startId,
-			int count, Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
+			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
 			throws SQLException
 	{
 		// TODO Auto-generated method stub

@@ -11,7 +11,7 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     private List<TM3Locale> localeList;
     private Set<String> m_jobAttrinbuteSet;
     private int increment = 100; // Load 100 at a time
-    private Map<String,String> m_paramMap;
+    private Map<String,Object> m_paramMap;
     
     LocaleDataHandle(BaseTm<T> tm, List<TM3Locale> localeList, 
                      Date start, Date end) {
@@ -27,19 +27,10 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 	}
     
 	LocaleDataHandle(BaseTm<T> tm, List<TM3Locale> localeList,
-			Map<String, String> paramMap)
+			Map<String, Object> paramMap)
 	{
 		super(tm);
 		this.localeList = localeList;
-		this.m_paramMap = paramMap;
-	}
-
-	LocaleDataHandle(BaseTm<T> tm, List<TM3Locale> localeList,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
-	{
-		super(tm);
-		this.localeList = localeList;
-		m_jobAttrinbuteSet = jobAttributeSet;
 		this.m_paramMap = paramMap;
 	}
 
@@ -71,19 +62,8 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 	{
 		try
 		{
-			if (m_jobAttrinbuteSet == null || m_jobAttrinbuteSet.size() == 0)
-			{
-				return getTm().getStorageInfo().getTuStorage()
-						.getTuCountByLocalesAndParamMap(localeList, m_paramMap);
-			}
-			else
-			{
-				return getTm()
-						.getStorageInfo()
-						.getTuStorage()
-						.getTuCountByLocalesAndParamMap(localeList, m_paramMap,
-								m_jobAttrinbuteSet);
-			}
+			return getTm().getStorageInfo().getTuStorage()
+					.getTuCountByLocalesAndParamMap(localeList, m_paramMap);
 		}
 		catch (SQLException e)
 		{
@@ -120,24 +100,11 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 		{
 			try
 			{
-				List<TM3Tu<T>> page;
-				if (m_jobAttrinbuteSet == null
-						|| m_jobAttrinbuteSet.size() == 0)
-				{
-					page = getTm()
-							.getStorageInfo()
-							.getTuStorage()
-							.getTuPageByLocalesAndParamMap(startId, increment,
-									localeList, m_paramMap);
-				}
-				else
-				{
-					page = getTm()
-							.getStorageInfo()
-							.getTuStorage()
-							.getTuPageByLocalesAndParamMap(startId, increment,
-									localeList, m_paramMap, m_jobAttrinbuteSet);
-				}
+				List<TM3Tu<T>> page = getTm()
+						.getStorageInfo()
+						.getTuStorage()
+						.getTuPageByLocalesAndParamMap(startId, increment,
+								localeList, m_paramMap);
 				if (page.size() > 0)
 				{
 					startId = page.get(page.size() - 1).getId();

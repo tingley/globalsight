@@ -126,106 +126,115 @@ public interface SegmentTmInfo
     public List<SegmentTmTu> getSegmentsById(Tm tm, List<Long> tuIds)
             throws LingManagerException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn) throws LingManagerException;
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn, Set<String> jobAttributeSet) 
     		throws LingManagerException;
     
 	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
-			Map<String, String> paramMap, Connection conn)
+			Map<String, Object> paramMap, Connection conn)
 			throws LingManagerException;
-
-	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
-			Map<String, String> paramMap, Connection conn,
-			Set<String> jobAttributeSet) throws LingManagerException;
 
     public SegmentResultSet getAllSegments(Tm tm, long startTUId,
             Connection conn) throws LingManagerException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException;
-            
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
             throws LingManagerException;
 
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, String> paramMap,
+			List<String> localeList, Map<String, Object> paramMap,
 			Connection conn) throws LingManagerException;
 
-	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, String> paramMap,
-			Connection conn, Set<String> jobAttributeSet)
-			throws LingManagerException;
-
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException;
-            
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */   
 	public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
 			String createdBefore, String createdAfter, Connection conn,
 			Set<String> jobAttributeSet) throws LingManagerException;
 
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, String> paramMap, Connection conn)
+			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws LingManagerException;
 
-	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, String> paramMap, Connection conn,
-			Set<String> jobAttributeSet) throws LingManagerException;
-
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws LingManagerException;
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter, Set<String> jobAttributeSet) throws LingManagerException;
 
-	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, String> paramMap)
-			throws LingManagerException;
-
-	public int getAllSegmentsCountByParamMap(Tm tm,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
+	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, Object> paramMap)
 			throws LingManagerException;
 
     public int getAllSegmentsCount(Tm tm, long startTUId)
             throws LingManagerException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getSegmentsCountByLocales(Tm tm, List<String> locales,
             String createdBefore, String createdAfter)
             throws LingManagerException;
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getSegmentsCountByLocales(Tm tm, List<String> locales,
             String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException;
 
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, String> paramMap)
+			List<String> localeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;
 
-	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws RemoteException,
-			LingManagerException;
-
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter)
             throws LingManagerException;
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException;
 
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, String> paramMap)
+			String projectName, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;
-
-	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws RemoteException,
-			LingManagerException;
 
     public List<TMidTUid> tmConcordanceQuery(List<Tm> tms, String query,
             GlobalSightLocale sourceLocale, GlobalSightLocale targetLocale,

@@ -12,7 +12,7 @@ class AttributeDataHandle<T extends TM3Data> extends
     private Map<TM3Attribute, Object> inlineAttrs;
     private Map<TM3Attribute, String> customAttrs;
     private Set<String> m_jobAttributeSet;
-    private Map<String,String> m_paramMap;
+    private Map<String,Object> m_paramMap;
     
     AttributeDataHandle(BaseTm<T> tm,
                         Map<TM3Attribute, Object> inlineAttrs,
@@ -34,22 +34,11 @@ class AttributeDataHandle<T extends TM3Data> extends
 	}
 
 	AttributeDataHandle(BaseTm<T> tm, Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs, Map<String, String> paramMap)
+			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
 	{
 		super(tm);
 		this.inlineAttrs = inlineAttrs;
 		this.customAttrs = customAttrs;
-		this.m_paramMap = paramMap;
-	}
-
-	AttributeDataHandle(BaseTm<T> tm, Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
-	{
-		super(tm);
-		this.inlineAttrs = inlineAttrs;
-		this.customAttrs = customAttrs;
-		m_jobAttributeSet = jobAttributeSet;
 		this.m_paramMap = paramMap;
 	}
 
@@ -78,22 +67,11 @@ class AttributeDataHandle<T extends TM3Data> extends
 	{
 		try
 		{
-			if (m_jobAttributeSet == null || m_jobAttributeSet.size() == 0)
-			{
-				return getTm()
-						.getStorageInfo()
-						.getTuStorage()
-						.getTuCountByAttributesAndParamMap(inlineAttrs,
-								customAttrs, m_paramMap);
-			}
-			else
-			{
-				return getTm()
-						.getStorageInfo()
-						.getTuStorage()
-						.getTuCountByAttributesAndParamMap(inlineAttrs,
-								customAttrs, m_paramMap, m_jobAttributeSet);
-			}
+			return getTm()
+					.getStorageInfo()
+					.getTuStorage()
+					.getTuCountByAttributesAndParamMap(inlineAttrs,
+							customAttrs, m_paramMap);
 		}
 		catch (SQLException e)
 		{
@@ -130,25 +108,11 @@ class AttributeDataHandle<T extends TM3Data> extends
 			try
 			{
 				// Load 100 at a time
-				List<TM3Tu<T>> page;
-
-				if (m_jobAttributeSet == null || m_jobAttributeSet.size() == 0)
-				{
-					page = getTm()
-							.getStorageInfo()
-							.getTuStorage()
-							.getTuPageByAttributesAndParamMap(startId, 100,
-									inlineAttrs, customAttrs, m_paramMap);
-				}
-				else
-				{
-					page = getTm()
-							.getStorageInfo()
-							.getTuStorage()
-							.getTuPageByAttributesAndParamMap(startId, 100,
-									inlineAttrs, customAttrs, m_paramMap,
-									m_jobAttributeSet);
-				}
+				List<TM3Tu<T>> page = getTm()
+						.getStorageInfo()
+						.getTuStorage()
+						.getTuPageByAttributesAndParamMap(startId, 100,
+								inlineAttrs, customAttrs, m_paramMap);
 
 				if (page.size() > 0)
 				{

@@ -180,25 +180,18 @@ public class Reader implements IReader
 			int count = -1;
 			FilterOptions filterString = options.getFilterOptions();
 			identifyKey = options.getIdentifyKey();
-			Map<String, String> paramMap = getParamMap(filterString);
 
 			TmCoreManager mgr = LingServerProxy.getTmCoreManager();
 			JobAttributeOptions jobAttributes = options
 					.getJobAttributeOptions();
 			Set<String> jobAttributeSet = jobAttributes.jobAttributeSet;
 
+			Map<String, Object> paramMap = getParamMap(filterString);
+			paramMap.put("jobAttributeSet", jobAttributeSet);
+
 			if (mode.equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_ALL))
 			{
-				if (jobAttributeSet != null && jobAttributeSet.size() > 0)
-				{
-					count = mgr.getAllSegmentsCountByParamMap(m_database,
-							paramMap, jobAttributeSet);
-				}
-				else
-				{
-					count = mgr.getAllSegmentsCountByParamMap(m_database,
-							paramMap);
-				}
+				count = mgr.getAllSegmentsCountByParamMap(m_database, paramMap);
 
 				m_options.setStatus(ExportOptions.ANALYZED);
 				m_options.setExpectedEntryCount(count);
@@ -206,33 +199,16 @@ public class Reader implements IReader
 			else if (mode
 					.equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED))
 			{
-				if (jobAttributeSet != null && jobAttributeSet.size() > 0)
-				{
-					count = mgr.getSegmentsCountByLocalesAndParamMap(
-							m_database, langList, paramMap, jobAttributeSet);
-				}
-				else
-				{
-					count = mgr.getSegmentsCountByLocalesAndParamMap(
-							m_database, langList, paramMap);
-				}
+				count = mgr.getSegmentsCountByLocalesAndParamMap(m_database,
+						langList, paramMap);
 
 				m_options.setStatus(ExportOptions.ANALYZED);
 				m_options.setExpectedEntryCount(count);
 			}
 			else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
 			{
-				if (jobAttributeSet != null && jobAttributeSet.size() > 0)
-				{
-					count = mgr.getSegmentsCountByProjectNameAndParamMap(
-							m_database, propType, paramMap, jobAttributeSet);
-				}
-				else
-				{
-					count = mgr.getSegmentsCountByProjectNameAndParamMap(
-							m_database, propType, paramMap);
-				}
-
+				count = mgr.getSegmentsCountByProjectNameAndParamMap(
+						m_database, propType, paramMap);
 				m_options.setStatus(m_options.ANALYZED);
 				m_options.setExpectedEntryCount(count);
 			}
@@ -255,9 +231,9 @@ public class Reader implements IReader
         return m_options;
     }
 
-	private Map<String, String> getParamMap(FilterOptions filterString)
+	private Map<String, Object> getParamMap(FilterOptions filterString)
 	{
-		Map<String, String> paramMap = new HashMap<String, String>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 		String createdAfter = filterString.m_createdAfter;
 		String createdBefore = filterString.m_createdBefore;
 		String modifyAfter = filterString.m_modifiedAfter;

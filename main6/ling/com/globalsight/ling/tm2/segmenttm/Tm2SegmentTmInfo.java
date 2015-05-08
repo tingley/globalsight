@@ -407,6 +407,9 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
     static final int EXPORT_BATCH_SIZE = 200;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn) throws LingManagerException
@@ -421,7 +424,10 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn, Set<String> jobAttributeSet) 
     		throws LingManagerException
@@ -439,7 +445,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     
 	@Override
 	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
-			Map<String, String> paramMap, Connection conn)
+			Map<String, Object> paramMap, Connection conn)
 			throws LingManagerException
 	{
 		try
@@ -447,23 +453,6 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 			return new Tm2SegmentResultSet(conn,
 					TmExportHelper.getAllTuIdsByParamMap(conn, tm, paramMap),
 					EXPORT_BATCH_SIZE);
-		}
-		catch (Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-	}
-
-	@Override
-	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
-			Map<String, String> paramMap, Connection conn,
-			Set<String> jobAttributeSet) throws LingManagerException
-	{
-		try
-		{
-			return new Tm2SegmentResultSet(conn,
-					TmExportHelper.getAllTuIdsByParamMap(conn, tm, paramMap,
-							jobAttributeSet), EXPORT_BATCH_SIZE);
 		}
 		catch (Exception e)
 		{
@@ -486,6 +475,9 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws LingManagerException
@@ -506,7 +498,10 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             DbUtil.silentReturnConnection(conn);
         }
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter, Set<String> jobAttributeSet) throws LingManagerException
     {
@@ -528,7 +523,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     }
 
 	@Override
-	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, String> paramMap)
+	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, Object> paramMap)
 			throws LingManagerException
 	{
 		Connection conn = null;
@@ -536,28 +531,6 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 		{
 			conn = DbUtil.getConnection();
 			return TmExportHelper.getAllTuCountByParamMap(conn, tm, paramMap);
-		}
-		catch (Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-		finally
-		{
-			DbUtil.silentReturnConnection(conn);
-		}
-	}
-
-	@Override
-	public int getAllSegmentsCountByParamMap(Tm tm,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
-			throws LingManagerException
-	{
-		Connection conn = null;
-		try
-		{
-			conn = DbUtil.getConnection();
-			return TmExportHelper.getAllTuCountByParamMap(conn, tm, paramMap,
-					jobAttributeSet);
 		}
 		catch (Exception e)
 		{
@@ -589,6 +562,9 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn)
@@ -605,7 +581,10 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
             throws LingManagerException
@@ -624,7 +603,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     
 	@Override
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, String> paramMap,
+			List<String> localeList, Map<String, Object> paramMap,
 			Connection conn) throws LingManagerException
 	{
 		try
@@ -639,16 +618,9 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
-	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, String> paramMap,
-			Connection conn, Set<String> jobAttributeSet)
-			throws LingManagerException
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public int getSegmentsCountByLocales(Tm tm, List<String> locales,
             String createdBefore, String createdAfter)
@@ -664,7 +636,10 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter,Set<String> jobAttributeSet)
             throws LingManagerException
@@ -682,7 +657,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
 	@Override
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, String> paramMap)
+			List<String> localeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException
 	{
 		Connection conn = null;
@@ -702,29 +677,9 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
-	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws RemoteException,
-			LingManagerException
-	{
-		Connection conn = null;
-		try
-		{
-			conn = DbUtil.getConnection();
-			return TmExportHelper.getFilteredTuCountByParamMap(conn, tm,
-					localeList, paramMap, jobAttributeSet);
-		}
-		catch (Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-		finally
-		{
-			DbUtil.silentReturnConnection(conn);
-		}
-	}
-
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Connection conn)
@@ -741,7 +696,10 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
             throws LingManagerException
@@ -760,7 +718,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
 	@Override
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, String> paramMap, Connection conn)
+			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws LingManagerException
 	{
 		try
@@ -775,24 +733,9 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
-	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, String> paramMap, Connection conn,
-			Set<String> jobAttributeSet) throws LingManagerException
-	{
-		try
-		{
-			return new Tm2SegmentResultSet(conn,
-					TmExportHelper.getProjectNameTuIdsByParamMap(conn, tm,
-							projectName, paramMap, jobAttributeSet),
-					EXPORT_BATCH_SIZE);
-		}
-		catch (Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-	}
-	
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter)
@@ -808,7 +751,10 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException
@@ -826,7 +772,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
 	@Override
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, String> paramMap)
+			String projectName, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException
 	{
 		Connection conn = null;
@@ -835,29 +781,6 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 			conn = DbUtil.getConnection();
 			return TmExportHelper.getProjectTuCountByParamMap(conn, tm,
 					projectName, paramMap);
-		}
-		catch (Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-		finally
-		{
-			DbUtil.silentReturnConnection(conn);
-		}
-	}
-
-	@Override
-	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws RemoteException,
-			LingManagerException
-	{
-		Connection conn = null;
-		try
-		{
-			conn = DbUtil.getConnection();
-			return TmExportHelper.getProjectTuCountByParamMap(conn, tm,
-					projectName, paramMap, jobAttributeSet);
 		}
 		catch (Exception e)
 		{

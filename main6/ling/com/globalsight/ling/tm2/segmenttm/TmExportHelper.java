@@ -36,6 +36,7 @@ public class TmExportHelper {
     static private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     /**
      * Get the count of all TUs in the TM.
+     * @deprecated Not in use since 8.6.2
      */
     static int getAllTuCount(Connection conn, Tm tm, String createdAfter, String createdBefore)
             throws SQLException
@@ -43,15 +44,10 @@ public class TmExportHelper {
         int result = getAllCount(conn, tm, createdAfter, createdBefore, "TU");
         return result;
     }
-    
-	static int getAllTuCountByParamMap(Connection conn, Tm tm,
-			Map<String, String> paramMap) throws SQLException
-	{
-		int result = getTuIdsByParamMap(conn, tm, paramMap, null, null, null)
-				.size();
-		return result;
-	}
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     static int getAllTuCount(Connection conn, Tm tm, String createdAfter, String createdBefore,Set<String> attributeSet)
     		throws SQLException
 	{
@@ -60,14 +56,11 @@ public class TmExportHelper {
 		return result;
 	}
     
-    static int getAllTuCountByParamMap(Connection conn, Tm tm, Map<String,String> paramMap,Set<String> attributeSet)
-    		throws SQLException
+    static int getAllTuCountByParamMap(Connection conn, Tm tm,
+			Map<String, Object> paramMap) throws SQLException
 	{
-		int result = getTuIdsByParamMap(conn, tm, paramMap, attributeSet, null,
-				null).size();
-		return result;
+		return getTuIdsByParamMap(conn, tm, paramMap, null, null).size();
 	}
-    
     /**
      * Get the count of all TUs in the TM.
      */
@@ -150,77 +143,7 @@ public class TmExportHelper {
         return result;
     }
 
-	private static List<Long> getTuIdsByParamMap(Connection conn, Tm tm,
-			Map<String, String> paramMap, Set<String> attributeSet,
-			String localeIds, String projectName) throws SQLException
-	{
-		List<Long> result = null;
-		try
-		{
-			String sql = "";
-			String tableSql = "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
-					+ "  WHERE tu.id = tuv.tu_id and tu.tm_id = " + tm.getId();
-			if (attributeSet != null && attributeSet.size() > 0)
-			{
-				tableSql += getAttributeSql(attributeSet);
-			}
-			if (StringUtils.isNotBlank(localeIds))
-			{
-				tableSql += " AND tuv.locale_id in ( " + localeIds + " )";
-			}
-			if (StringUtils.isNotBlank(projectName))
-			{
-				tableSql += " AND tuv.updated_by_project is NOT NULL AND ("
-						+ buildCondition(projectName) + ")";
-			}
-
-			String orderSql = " ORDER BY tu.id ASC";
-			if (!paramMap.isEmpty())
-			{
-				String stringId = paramMap.get("stringId");
-				String isRegex = paramMap.get("isRegex");
-				if (StringUtils.isNotBlank(stringId))
-				{
-					sql = "SELECT DISTINCT tu.id,tuv.sid ";
-					sql += tableSql;
-					sql += getSqlByParamMap("tuv", paramMap);
-					sql += orderSql;
-					result = getMapWithSID(conn, sql, stringId, isRegex);
-				}
-				else
-				{
-					sql = "SELECT DISTINCT tu.id ";
-					sql += tableSql;
-					sql += getSqlByParamMap("tuv", paramMap);
-					sql += orderSql;
-					result = getIdList(conn, sql);
-				}
-
-			}
-			else
-			{
-				sql = "SELECT DISTINCT tu.id ";
-				sql += tableSql;
-				sql += orderSql;
-				result = getIdList(conn, sql);
-			}
-		}
-		catch (SQLException e)
-		{
-			try
-			{
-				conn.rollback();
-			}
-			catch (Throwable ignore)
-			{
-			}
-			CATEGORY.warn("can't read TM data", e);
-
-			throw e;
-		}
-
-		return result;
-	}
+	
 
     private static int getAllCount(Connection conn, Tm tm, String createdAfter,
             String createdBefore, String type,Set<String> jobAttributeSet) throws SQLException
@@ -373,6 +296,7 @@ public class TmExportHelper {
 
     /**
      * Gets all TU IDs in the TM.
+     * @deprecated Not in use since 8.6.2
      */
     static List<Long> getAllTuIds(Connection conn, Tm tm, String createdAfter, String createdBefore)
             throws SQLException
@@ -426,7 +350,10 @@ public class TmExportHelper {
 
         return result;
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     static List<Long> getAllTuIds(Connection conn, Tm tm, String createdAfter, String createdBefore,Set<String> jobAttributeSet)
     			throws SQLException
 	{
@@ -486,17 +413,9 @@ public class TmExportHelper {
 	}
     
 	static List<Long> getAllTuIdsByParamMap(Connection conn, Tm tm,
-			Map<String, String> paramMap) throws SQLException
+			Map<String, Object> paramMap) throws SQLException
 	{
-		return getTuIdsByParamMap(conn, tm, paramMap, null, null, null);
-	}
-
-	static List<Long> getAllTuIdsByParamMap(Connection conn, Tm tm,
-			Map<String, String> paramMap, Set<String> jobAttributeSet)
-			throws SQLException
-	{
-		return getTuIdsByParamMap(conn, tm, paramMap, jobAttributeSet, null,
-				null);
+		return getTuIdsByParamMap(conn, tm, paramMap, null, null);
 	}
 
     /**
@@ -557,26 +476,9 @@ public class TmExportHelper {
         return result;
     }
     
-	static int getFilteredTuCountByParamMap(Connection conn, Tm tm,
-			List<String> localeList, Map<String, String> paramMap)
-			throws Exception
-	{
-		String localeIds = getLocaleIds(localeList);
-		return getTuIdsByParamMap(conn, tm, paramMap, null, localeIds, null)
-				.size();
-	}
-
-	static int getFilteredTuCountByParamMap(Connection conn, Tm tm,
-			List<String> localeList, Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws Exception
-	{
-		String localeIds = getLocaleIds(localeList);
-		return getTuIdsByParamMap(conn, tm, paramMap, jobAttributeSet,
-				localeIds, null).size();
-	}
-	
     /**
      * Gets the count of TUs that have a TUV in a given language.
+     * @deprecated Not in use since 8.6.2
      */
     static int getFilteredTuCount(Tm tm, List<String> localeList, String createdAfter,
                                  String createdBefore) throws Exception
@@ -635,8 +537,10 @@ public class TmExportHelper {
 
         return result;
      }
-    
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
 	static int getFilteredTuCount(Tm tm, List<String> localeList,
 			String createdAfter, String createdBefore,
 			Set<String> jobAttributeSet) throws Exception
@@ -701,12 +605,21 @@ public class TmExportHelper {
 
 		return result;
 	}
+	
+	static int getFilteredTuCountByParamMap(Connection conn, Tm tm,
+			List<String> localeList, Map<String, Object> paramMap)
+			throws Exception
+	{
+		String localeIds = getLocaleIds(localeList);
+		return getTuIdsByParamMap(conn, tm, paramMap, localeIds, null).size();
+	}
     
     /**
      * Gets the number of TUs that have a TUV in a given language.
      * 
      * @param p_locale
      *            a locale string like "en_US".
+     * @deprecated Not in use since 8.6.2
      */
 	static List<Long> getFilteredTuIds(Tm tm, List<String> localeList,
 			String createdAfter, String createdBefore) throws Exception
@@ -759,6 +672,9 @@ public class TmExportHelper {
         return result;
     }
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     static List<Long> getFilteredTuIds(Tm tm, List<String> localeList, String createdAfter,
             String createdBefore,Set<String> jobAttributeSet) throws Exception
     {
@@ -817,38 +733,16 @@ public class TmExportHelper {
     }
 
 	static List<Long> getFilteredTuIdsByParamMap(Connection conn, Tm tm,
-			List<String> localeList, Map<String, String> paramMap)
+			List<String> localeList, Map<String, Object> paramMap)
 			throws Exception
 	{
 		String localeIds = getLocaleIds(localeList);
-		return getTuIdsByParamMap(conn, tm, paramMap, null, localeIds, null);
+		return getTuIdsByParamMap(conn, tm, paramMap, localeIds, null);
 	}
 
-	static List<Long> getFilteredTuIdsByParamMap(Connection conn, Tm tm,
-			List<String> localeList, Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws Exception
-	{
-		String localeIds = getLocaleIds(localeList);
-		return getTuIdsByParamMap(conn, tm, paramMap, jobAttributeSet,
-				localeIds, null);
-	}
-
-	static int getProjectTuCountByParamMap(Connection conn, Tm tm,
-			String projectName, Map<String, String> paramMap) throws Exception
-	{
-
-		return getTuIdsByParamMap(conn, tm, paramMap, null, null, projectName)
-				.size();
-	}
-
-	static int getProjectTuCountByParamMap(Connection conn, Tm tm,
-			String projectName, Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws Exception
-	{
-		return getTuIdsByParamMap(conn, tm, paramMap, jobAttributeSet, null,
-				projectName).size();
-	}
-	
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     static int getProjectTuCount(Tm tm, String projectName, String createdAfter,
             String createdBefore) throws Exception  
     {
@@ -894,7 +788,10 @@ public class TmExportHelper {
 
         return result;
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     static int getProjectTuCount(Tm tm, String projectName, String createdAfter,
             String createdBefore,Set<String> jobAttributeSet) throws Exception  
     {
@@ -947,6 +844,15 @@ public class TmExportHelper {
         return result;
     }
     
+	static int getProjectTuCountByParamMap(Connection conn, Tm tm,
+			String projectName, Map<String, Object> paramMap) throws Exception
+	{
+		return getTuIdsByParamMap(conn, tm, paramMap, null, projectName).size();
+	}
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     static List<Long> getProjectNameTuIds(Tm tm, String propType,
             String createdAfter, String createdBefore) throws Exception 
     {
@@ -994,7 +900,10 @@ public class TmExportHelper {
 
         return result;
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     static List<Long> getProjectNameTuIds(Tm tm, String propType,
             String createdAfter, String createdBefore, Set<String> jobAttributeSet) throws Exception 
     {
@@ -1050,19 +959,75 @@ public class TmExportHelper {
     }
     
 	static List<Long> getProjectNameTuIdsByParamMap(Connection conn, Tm tm,
-			String projectName, Map<String, String> paramMap) throws Exception
+			String projectName, Map<String, Object> paramMap) throws Exception
 	{
-		return getTuIdsByParamMap(conn, tm, paramMap, null, null, projectName);
+		return getTuIdsByParamMap(conn, tm, paramMap, null, projectName);
 	}
-
-	static List<Long> getProjectNameTuIdsByParamMap(Connection conn, Tm tm,
-			String projectName, Map<String, String> paramMap,
-			Set<String> jobAttributeSet) throws Exception
+	
+	private static List<Long> getTuIdsByParamMap(Connection conn, Tm tm,
+			Map<String, Object> paramMap,
+			String localeIds, String projectName) throws SQLException
 	{
-		return getTuIdsByParamMap(conn, tm, paramMap, jobAttributeSet, null,
-				projectName);
-	}
+		List<Long> result = null;
+		try
+		{
+			String sql = "";
+			Set<String> jobAttributeSet = (Set<String>) paramMap
+					.get("jobAttributeSet");
+			String tableSql = "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
+					+ "  WHERE tu.id = tuv.tu_id and tu.tm_id = " + tm.getId();
+			if (jobAttributeSet != null && jobAttributeSet.size() > 0)
+			{
+				tableSql += getAttributeSql(jobAttributeSet);
+			}
+			if (StringUtils.isNotBlank(localeIds))
+			{
+				tableSql += " AND tuv.locale_id in ( " + localeIds + " )";
+			}
+			if (StringUtils.isNotBlank(projectName))
+			{
+				tableSql += " AND tuv.updated_by_project is NOT NULL AND ("
+						+ buildCondition(projectName) + ")";
+			}
 
+			String orderSql = " ORDER BY tu.id ASC";
+			String stringId = (String) paramMap.get("stringId");
+			String isRegex = (String) paramMap.get("isRegex");
+			if (StringUtils.isNotBlank(stringId))
+			{
+				sql = "SELECT DISTINCT tu.id,tuv.sid ";
+				sql += tableSql;
+				sql += getSqlByParamMap("tuv", paramMap);
+				sql += orderSql;
+				result = getMapWithSID(conn, sql, stringId, isRegex);
+			}
+			else
+			{
+				sql = "SELECT DISTINCT tu.id ";
+				sql += tableSql;
+				sql += getSqlByParamMap("tuv", paramMap);
+				sql += orderSql;
+				result = getIdList(conn, sql);
+			}
+
+		}
+		catch (SQLException e)
+		{
+			try
+			{
+				conn.rollback();
+			}
+			catch (Throwable ignore)
+			{
+			}
+			CATEGORY.warn("can't read TM data", e);
+
+			throw e;
+		}
+
+		return result;
+	}
+	
     private static String buildCondition(String propType) 
     {
         if (propType==null || propType.trim().length() == 0)
@@ -1114,17 +1079,17 @@ public class TmExportHelper {
     }
     
 	private static String getSqlByParamMap(String p_table,
-			Map<String, String> paramMap)
+			Map<String, Object> paramMap)
 	{
 		StringBuffer result = new StringBuffer();
-		String createUser = paramMap.get("createUser");
-		String modifyUser = paramMap.get("modifyUser");
-		String modifyAfter = paramMap.get("modifyAfter");
-		String modifyBefore = paramMap.get("modifyBefore");
-		String createdAfter = paramMap.get("createdAfter");
-		String createdBefore = paramMap.get("createdBefore");
-		String tuIds = paramMap.get("tuIds");
-		String stringId = paramMap.get("stringId");
+		String createUser = (String) paramMap.get("createUser");
+		String modifyUser = (String) paramMap.get("modifyUser");
+		String modifyAfter = (String) paramMap.get("modifyAfter");
+		String modifyBefore = (String) paramMap.get("modifyBefore");
+		String createdAfter = (String) paramMap.get("createdAfter");
+		String createdBefore = (String) paramMap.get("createdBefore");
+		String tuIds = (String) paramMap.get("tuIds");
+		String stringId = (String) paramMap.get("stringId");
 
 		if (StringUtils.isNotBlank(createdAfter))
 		{

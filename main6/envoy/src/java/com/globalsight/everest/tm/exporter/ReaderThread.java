@@ -145,50 +145,27 @@ public class ReaderThread extends Thread
 		}
 		String propType = options.getSelectPropType();
 		FilterOptions filterString = options.getFilterOptions();
-		Map<String, String> paramterMap = getParamMap(filterString);
 
 		JobAttributeOptions jobAttributes = options.getJobAttributeOptions();
 		Set<String> jobAttributeSet = jobAttributes.jobAttributeSet;
 		TmCoreManager mgr = LingServerProxy.getTmCoreManager();
 
+		Map<String, Object> paramterMap = getParamMap(filterString);
+		paramterMap.put("jobAttributeSet", jobAttributeSet);
+
 		if (mode.equals(ExportOptions.SELECT_ALL))
 		{
-			if (jobAttributeSet == null || jobAttributeSet.size() == 0)
-			{
-				return mgr.getAllSegmentsByParamMap(m_database, paramterMap,
-						conn);
-			}
-			else
-			{
-				return mgr.getAllSegmentsByParamMap(m_database, paramterMap,
-						conn, jobAttributeSet);
-			}
+			return mgr.getAllSegmentsByParamMap(m_database, paramterMap, conn);
 		}
 		else if (mode.equals(ExportOptions.SELECT_FILTERED))
 		{
-			if (jobAttributeSet == null || jobAttributeSet.size() == 0)
-			{
-				return mgr.getSegmentsByLocalesAndParamMap(m_database,
-						langList, paramterMap, conn);
-			}
-			else
-			{
-				return mgr.getSegmentsByLocalesAndParamMap(m_database,
-						langList, paramterMap, conn, jobAttributeSet);
-			}
+			return mgr.getSegmentsByLocalesAndParamMap(m_database, langList,
+					paramterMap, conn);
 		}
 		else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
 		{
-			if (jobAttributeSet == null || jobAttributeSet.size() == 0)
-			{
-				return mgr.getSegmentsByProjectNameAndParamMap(m_database,
-						propType, paramterMap, conn);
-			}
-			else
-			{
-				return mgr.getSegmentsByProjectNameAndParamMap(m_database,
-						propType, paramterMap, conn, jobAttributeSet);
-			}
+			return mgr.getSegmentsByProjectNameAndParamMap(m_database,
+					propType, paramterMap, conn);
 		}
 		else
 		{
@@ -200,9 +177,9 @@ public class ReaderThread extends Thread
 		}
 	}
     
-	private Map<String, String> getParamMap(FilterOptions filterString)
+	private Map<String, Object> getParamMap(FilterOptions filterString)
 	{
-		Map<String, String> paramMap = new HashMap<String, String>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 		String createdAfter = filterString.m_createdAfter;
 		String createdBefore = filterString.m_createdBefore;
 		String modifyAfter = filterString.m_modifiedAfter;

@@ -1687,15 +1687,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             		continue;
             	}
 
-				SegmentUtil2 segUtil = new SegmentUtil2();
 				TuImpl tu = getTu(foo, jobIds);
 				GxmlElement srcGxmlElement = tu.getSourceTuv().getGxmlElement();
 				String newSrc = "<segment>"
 						+ GxmlUtil.stripRootTag(sourceArray.get(index))
 						+ "</segment>";
 				GxmlElement trgGxmlElement = SegmentUtil2.getGxmlElement(newSrc);
-				newSrc = segUtil.adjustSegmentAttributeValues(srcGxmlElement,
-						trgGxmlElement, "xlf");
+				newSrc = SegmentUtil2.adjustSegmentAttributeValues(
+						srcGxmlElement, trgGxmlElement, "xlf");
 				newSrc = "<source>" + GxmlUtil.stripRootTag(newSrc) + "</source>";
 		        Element sourceElement = foo.element(XliffConstants.SOURCE);
                 Element newSourceElement = getDom(newSrc).getRootElement();
@@ -1704,8 +1703,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
 				String newTrg = "<segment>" + GxmlUtil.stripRootTag(targetArray.get(index)) + "</segment>";
 				trgGxmlElement = SegmentUtil2.getGxmlElement(newTrg);
-				newTrg = segUtil.adjustSegmentAttributeValues(srcGxmlElement,
-						trgGxmlElement, "xlf");
+				newTrg = SegmentUtil2.adjustSegmentAttributeValues(
+						srcGxmlElement, trgGxmlElement, "xlf");
 				newTrg = "<target>" + GxmlUtil.stripRootTag(newTrg) + "</target>";
                 Element newTargetElement = getDom(newTrg).getRootElement();
                 Element targetElement = foo.element(XliffConstants.TARGET);

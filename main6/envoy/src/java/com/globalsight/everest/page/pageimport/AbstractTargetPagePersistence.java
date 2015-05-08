@@ -694,8 +694,21 @@ public abstract class AbstractTargetPagePersistence implements
                     for (LeverageSegment segment : lss)
                     {
                         hasOneHundredMatch = true;
-                        if (SegmentUtil2.canBeModified(targetTuv,
-                                segment.getSegment(), jobId))
+						boolean isTagMatched = SegmentUtil2.canBeModified(
+								targetTuv, segment.getSegment(), jobId);
+						if (!isTagMatched)
+						{
+							String segment2 = SegmentUtil2.adjustSegmentAttributeValues(
+									targetTuv.getGxmlElement(), 
+									SegmentUtil2.getGxmlElement(segment.getSegment()), tu.getDataType());
+							isTagMatched = SegmentUtil2.canBeModified(
+									targetTuv, segment2, jobId);
+							if (isTagMatched)
+							{
+								segment.setSegment(segment2);
+							}
+						}
+                        if (isTagMatched)
                         {
                             targetTuv = modifyTUV(targetTuv, segment);
                             tuvGotChanged = true;

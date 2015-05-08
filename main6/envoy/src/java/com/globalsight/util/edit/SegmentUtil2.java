@@ -52,7 +52,7 @@ public class SegmentUtil2
 {
     private static String TAGS;
     private static SegmentUtil UTIL;
-    private int count = 0;
+    private static int count = 0;
 
     private static final String STYLE_KEY = "untranslatableWordCharacterStyles";
     private static final String PROPERTY_PATH = "/properties/WordExtractor.properties";
@@ -60,7 +60,8 @@ public class SegmentUtil2
     private static final Logger LOG = Logger.getLogger(SegmentUtil2.class
             .getName());
 
-    public static List getNotTranslateWords(String src)
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public static List getNotTranslateWords(String src)
     {
         List words = getUTIL().getNotTranslateWords(src);
         words.addAll(getUTIL().getInternalWords(src));
@@ -349,7 +350,7 @@ public class SegmentUtil2
 	 * @param dataType
 	 * @return
 	 */
-	public String adjustSegmentAttributeValues(
+	public static String adjustSegmentAttributeValues(
 			GxmlElement sourceGxmlElement, GxmlElement targetGxmlElement,
 			String dataType)
     {
@@ -374,11 +375,13 @@ public class SegmentUtil2
         return targetGxmlElement.toGxml(dataType);
     }
 
+	// Require "synchronized" for "count", believe this will not impact job
+	// creation and offline uploading.
     @SuppressWarnings("rawtypes")
-    private void resetAttributeValues(GxmlElement element,
-            List<String> attValueList, String p_attName)
+	private synchronized static void resetAttributeValues(GxmlElement element,
+			List<String> attValueList, String p_attName)
     {
-        if (element == null)
+		if (element == null || attValueList == null || attValueList.size() == 0)
         {
             return;
         }

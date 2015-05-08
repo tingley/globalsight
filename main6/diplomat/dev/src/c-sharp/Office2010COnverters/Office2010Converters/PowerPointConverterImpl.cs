@@ -35,6 +35,7 @@ namespace GlobalSight.Office2010Converters
 		public const string HTML = "html";
         public const string PPT = "ppt";
         public const string PPTX = "pptx";
+        public const string PDF = "pdf";
 
         private bool m_handleGfxdata = true;
 
@@ -78,19 +79,23 @@ namespace GlobalSight.Office2010Converters
 
 				m_log.Log("Processing file " + m_originalFileName);
 
-                string htmFile = m_conversionType == ConversionType.IMPORT ? m_newFileName : m_originalFileName;
-                GfxdataHandler handler = new GfxdataHandler(htmFile, OfficeFormat.Pptx, m_log);
-
-                if (m_handleGfxdata && m_conversionType == ConversionType.EXPORT)
+                GfxdataHandler handler = null;
+                if (!m_newFileName.EndsWith(".pdf"))
                 {
-                    handler.HandleConvertBack();
+                    string htmFile = m_conversionType == ConversionType.IMPORT ? m_newFileName : m_originalFileName;
+                    handler = new GfxdataHandler(htmFile, OfficeFormat.Pptx, m_log);
+
+                    if (m_handleGfxdata && m_conversionType == ConversionType.EXPORT)
+                    {
+                        handler.HandleConvertBack();
+                    }
                 }
 
 				CreatePowerPointAppClass();
 				OpenDocument();
 				SaveDocument();
 
-                if (m_handleGfxdata && m_conversionType == ConversionType.IMPORT)
+                if (handler != null && m_handleGfxdata && m_conversionType == ConversionType.IMPORT)
                 {
                     handler.HandleConvert();
                 }
@@ -265,6 +270,11 @@ namespace GlobalSight.Office2010Converters
             {
                 m_newFormatType = PowerPoint_Class.PpSaveAsFileType.ppSaveAsOpenXMLPresentation;
                 m_newFileName = baseFileName + PPTX;
+            }
+            else if (p_convertTo.Equals(PDF))
+            {
+                m_newFormatType = PowerPoint_Class.PpSaveAsFileType.ppSaveAsPDF;
+                m_newFileName = baseFileName + PDF;
             }
 		}
 

@@ -60,6 +60,14 @@ public class CreatePDFTask implements Callable<File>, PreviewPDFConstants
                     pdfFile = helper.createPDF4IDML(m_page, m_userId,
                             m_isTarget);
                     break;
+                    
+                case TYPE_OFFICE_DOCX:
+                case TYPE_OFFICE_PPTX:
+                case TYPE_OFFICE_XLSX:
+                    pdfFile = helper.createPDF4Office(m_page, m_userId,
+                            m_isTarget);
+                    break;
+                    
                 default:
                     pdfFile = helper.createPDF4INDDAndInx(m_page, m_userId,
                             m_isTarget);

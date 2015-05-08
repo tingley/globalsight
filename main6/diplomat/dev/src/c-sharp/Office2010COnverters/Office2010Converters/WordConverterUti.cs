@@ -34,7 +34,7 @@ namespace GlobalSight.Office2010Converters
         {
             try
             {
-                String wordDir = dir + "\\word2010";
+                String wordDir = dir + "\\word";
                 DirectoryInfo watchDir = new DirectoryInfo(wordDir);
                 watchDir.Create();
 

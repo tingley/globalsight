@@ -332,7 +332,7 @@ function searchPages(){
 	    </thead>
 	    <tbody id="sourceFilesTbody">
 	    	<!-- SourcePages -->
-		    <c:forEach items="${JobSourcePageDisplayList}" var="item" varStatus="s">
+		    <c:forEach items="${JobSourcePageDisplayList}" var="item" varStatus="status">
 		    	<tr>
 		    		<td style="word-wrap: break-word;word-break:break-all;text-align:left;">
 			    		<c:if test="${addCheckBox}">
@@ -679,7 +679,18 @@ function contextForPage(url, e, displayName)
     var canEditSource = eval('${canEditSourcePage}');
     displayName = pageNames[displayName];
     
-    var showInContextReview = displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/));
+    var fileName = displayName;
+    if (fileName.match(/\)$/))
+    {
+    	fileName = displayName.substr(0, displayName.lastIndexOf("("));
+    	if (fileName.match(/ $/))
+    	{
+    		fileName = fileName.substr(0, fileName.length - 1);
+    	}
+    }
+    
+    var showInContextReview = displayName && (fileName.toLowerCase().match(/\.indd$/) || fileName.toLowerCase().match(/\.idml$/)
+    		|| fileName.toLowerCase().match(/\.docx$/) || fileName.toLowerCase().match(/\.pptx$/) || fileName.toLowerCase().match(/\.xlsx$/));
     
     <% if (!enabledInContextReview) {%>
     showInContextReview = false;

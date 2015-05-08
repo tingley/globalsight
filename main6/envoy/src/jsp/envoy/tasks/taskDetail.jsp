@@ -817,7 +817,19 @@ function contextForPage(url, e, displayName)
     var lb_context_item_popup_editor ;
     var fontB1 = "<B>", fontB2 = "</B>";
     displayName = pageNames[displayName];
-    var showInContextReview = (displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/)));
+    
+    var fileName = displayName;
+    if (fileName.match(/\)$/))
+    {
+    	fileName = displayName.substr(0, displayName.lastIndexOf("("));
+    	if (fileName.match(/ $/))
+    	{
+    		fileName = fileName.substr(0, fileName.length - 1);
+    	}
+    }
+    
+    var showInContextReview = displayName && (fileName.toLowerCase().match(/\.indd$/) || fileName.toLowerCase().match(/\.idml$/)
+    		|| fileName.toLowerCase().match(/\.docx$/) || fileName.toLowerCase().match(/\.pptx$/) || fileName.toLowerCase().match(/\.xlsx$/));
     var inctxTitle = "Open In Context Review";
     
     <% if (!enabledInContextReview) {%>

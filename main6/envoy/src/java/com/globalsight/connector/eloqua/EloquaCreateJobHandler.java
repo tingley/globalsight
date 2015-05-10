@@ -208,7 +208,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
             page = 1;
             EloquaFileFilter filter = getFilter(request);
 
-            ps = reloadLandingPages(request).getElements();
+//            ps = reloadLandingPages(request).getElements();
             ps = filter.filter(ps);
             sessionManager.setAttribute("eloquaLandingPages", ps);
             sessionManager.setAttribute("eloquaLandingPageFilter", filter);
@@ -362,8 +362,8 @@ public class EloquaCreateJobHandler extends PageActionHandler
         case 6: // filter
             page = 1;
             EloquaFileFilter filter = getFilter(request);
-            Alls alls = reloadEmails(request);
-            es = alls.getElements();
+//            Alls alls = reloadEmails(request);
+//            es = alls.getElements();
             es = filter.filter(es);
             sessionManager.setAttribute("eloquaEmails", es);
             sessionManager.setAttribute("eloquaEmailFilter", filter);

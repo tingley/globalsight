@@ -838,16 +838,19 @@ public class Exporter
                     m.loadFromFile(f);
                     if (m.getName() != null)
                     {
-                        m.updateFromFile(emailFile);
-
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
                         
                         String targetLocale = wf.getTargetLocale()
                                 .toString();
-                        String html = m.getHtml();
-                        String newContent = h.updateDynamicContent(html, targetLocale);
-                        m.setHtml(newContent);
+                        
+                        boolean isHtml = m.updateFromFile(emailFile, uploaded, targetLocale);
+                        if (isHtml)
+                        {
+                            String html = m.getHtml();
+                            String newContent = h.updateDynamicContent(html, targetLocale);
+                            m.setHtml(newContent);
+                        }
 
                         if (uploaded && h.getEmail(m.getId()) != null)
                         {
@@ -858,7 +861,6 @@ public class Exporter
                             if (!uploaded)
                             {
                                 String eloquaName = m.getName();
-                                
                                 eloquaName = eloquaName + "(" + targetLocale
                                         + ")";
                                 m.setName(eloquaName);
@@ -883,14 +885,17 @@ public class Exporter
                     m.loadFromFile(f);
                     if (m.getName() != null)
                     {
-                        m.updateFromFile(saveFile);
+                        String targetLocale = wf.getTargetLocale().toString();
+                        boolean isHtml = m.updateFromFile(saveFile, uploaded, targetLocale);
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
                         
-                        String targetLocale = wf.getTargetLocale().toString();
-                        String html = m.getHtml();
-                        String newContent = h.updateDynamicContent(html, targetLocale);
-                        m.setHtml(newContent);
+                        if (isHtml)
+                        {
+                            String html = m.getHtml();
+                            String newContent = h.updateDynamicContent(html, targetLocale);
+                            m.setHtml(newContent);
+                        }
 
                         if (uploaded && h.getLandingPage(m.getId()) != null)
                         {

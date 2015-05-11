@@ -31,7 +31,9 @@ public class CodeUtil
         String str = content;
 
         keygen = KeyGenerator.getInstance("AES");
-        keygen.init(128, new SecureRandom(strKey.getBytes()));
+        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG" );
+        secureRandom.setSeed(strKey.getBytes());
+        keygen.init(128, secureRandom);
 
         desKey = keygen.generateKey();
         c = Cipher.getInstance("AES");
@@ -51,7 +53,9 @@ public class CodeUtil
         byte[] cByte;
 
         keygen = KeyGenerator.getInstance("AES");
-        keygen.init(128, new SecureRandom(strKey.getBytes()));
+        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG" );
+        secureRandom.setSeed(strKey.getBytes());
+        keygen.init(128, secureRandom);
 
         desKey = keygen.generateKey();
         c = Cipher.getInstance("AES");

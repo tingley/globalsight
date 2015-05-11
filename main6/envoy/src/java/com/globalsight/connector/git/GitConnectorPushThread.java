@@ -39,11 +39,11 @@ public class GitConnectorPushThread implements Runnable
 						try
 						{
 							helper.gitConnectorPull();
-							helper.gitConnectorPush(cacheFile.getFilePath());
+							helper.gitConnectorPush(cacheFile);
 						}
 						catch (Exception e)
 						{
-							String errorMsg = "Git push failed. Please try to manual push. Git connector folder: "
+							String errorMsg = "Git push failed. Git connector folder: "
 	    							+ helper.getGitFolder() + ", file path: " + helper.getGitFolder() + File.separator + cacheFile.getFilePath() + ".";
 							logger.error(errorMsg, e);
 						}

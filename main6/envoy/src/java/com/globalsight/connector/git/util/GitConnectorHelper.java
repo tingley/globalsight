@@ -45,6 +45,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
 import com.globalsight.connector.git.vo.GitConnectorFile;
 import com.globalsight.cxe.entity.gitconnector.GitConnector;
+import com.globalsight.cxe.entity.gitconnector.GitConnectorCacheFile;
 import com.globalsight.everest.util.comparator.FileComparator;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -209,15 +210,18 @@ public class GitConnectorHelper
     	repository.close();
     }
     
-    public void gitConnectorPush(String filePath) throws InvalidRemoteException, 
+    public void gitConnectorPush(GitConnectorCacheFile cacheFile) throws InvalidRemoteException, 
     			TransportException, GitAPIException, IOException
     {
+    		FileUtil.copyFile(new File(cacheFile.getSrcFilePath()), new File(cacheFile.getDstFilePath()));
+    	
     		FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
     		repositoryBuilder.setMustExist(true);
     		repositoryBuilder.setGitDir(new File(getGitFolder() + File.separator + ".git"));
     		Repository repository = repositoryBuilder.build();
     		
     		Git git = new Git(repository);
+    		String filePath = cacheFile.getFilePath();
     		
     		DiffCommand diffCommand = git.diff();
     		List<DiffEntry> diffEntrys = diffCommand.call();

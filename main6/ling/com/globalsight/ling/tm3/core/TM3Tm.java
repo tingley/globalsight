@@ -275,7 +275,6 @@ public interface TM3Tm<T extends TM3Data> {
      * qualified by a date range.  If specified, the date range
      * will be compared against the modification time for the 
      * individual TUs.
-     * @deprecated Not in use since 8.6.2
      * @param start (optional) start point of data range
      * @param end (optional) end point of data range
      * @return handle to the requested TU data
@@ -297,7 +296,6 @@ public interface TM3Tm<T extends TM3Data> {
      * individual TUs.
      *
      * Note this TM3Handle does not support the purge method.
-     * @deprecated Not in use since 8.6.2
      * @param locale TUV locale with which to select TUs
      * @param start (optional) start point of data range
      * @param end (optional) end point of data range
@@ -325,7 +323,6 @@ public interface TM3Tm<T extends TM3Data> {
     /**
      * Get a handle to all segments in this TM that satisfy a given set of
      * attribute criteria.
-     * @deprecated Not in use since 8.6.2
      * @param attrs map of attribute/value pairs
      * @param start (optional) start point of the data range, or null
      * @param end (optional) start point of the data range, or null

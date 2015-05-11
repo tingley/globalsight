@@ -910,11 +910,8 @@ abstract class TuStorage<T extends TM3Data>
     // Data Handle backends
     //
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract long getTuCount(Date start, Date end) throws SQLException;
 
+    public abstract long getTuCount(Date start, Date end) throws SQLException;
 	/**
 	 * @deprecated Not in use since 8.6.2
 	 * */

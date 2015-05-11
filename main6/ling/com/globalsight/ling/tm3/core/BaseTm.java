@@ -1131,9 +1131,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         }
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public TM3Handle<T> getAllData(Date start, Date end)
     {

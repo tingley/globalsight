@@ -126,9 +126,6 @@ public interface SegmentTmInfo
     public List<SegmentTmTu> getSegmentsById(Tm tm, List<Long> tuIds)
             throws LingManagerException;
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn) throws LingManagerException;
 
@@ -182,9 +179,6 @@ public interface SegmentTmInfo
 			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws LingManagerException;
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws LingManagerException;
 

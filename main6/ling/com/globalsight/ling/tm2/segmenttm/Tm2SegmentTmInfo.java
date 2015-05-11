@@ -407,9 +407,6 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
     static final int EXPORT_BATCH_SIZE = 200;
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn) throws LingManagerException
@@ -475,9 +472,6 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws LingManagerException

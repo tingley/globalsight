@@ -78,11 +78,4 @@ class ByIdDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
             }
         }
     }
-
-	@Override
-	public long getCountByParameter() throws TM3Exception
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }

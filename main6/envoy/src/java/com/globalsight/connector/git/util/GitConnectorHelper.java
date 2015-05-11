@@ -209,24 +209,15 @@ public class GitConnectorHelper
     	repository.close();
     }
     
-    public void gitConnectorPush(String filePath)
+    public void gitConnectorPush(String filePath) throws InvalidRemoteException, 
+    			TransportException, GitAPIException, IOException
     {
-    	try 
-    	{
-    		
     		FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
     		repositoryBuilder.setMustExist(true);
     		repositoryBuilder.setGitDir(new File(getGitFolder() + File.separator + ".git"));
     		Repository repository = repositoryBuilder.build();
     		
     		Git git = new Git(repository);
-    		
-    		File indexFile = new File(getGitFolder() + File.separator + ".git" + File.separator + "index");
-    		while(!indexFile.renameTo(indexFile)) 
-    		{
-    			long sleepTime = (long) (1000 + Math.random() * 5000);
-				Thread.sleep(sleepTime);
-			}
     		
     		DiffCommand diffCommand = git.diff();
     		List<DiffEntry> diffEntrys = diffCommand.call();
@@ -289,11 +280,6 @@ public class GitConnectorHelper
 			}
     		pushCommand.call();
     		repository.close();
-		}
-    	catch (Exception e) 
-    	{
-			e.printStackTrace();
-		}
     }
     
     public String getGitConnectorFilesJson()

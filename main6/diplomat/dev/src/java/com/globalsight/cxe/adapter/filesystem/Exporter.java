@@ -735,15 +735,14 @@ public class Exporter
                                     .lastIndexOf("."));
                 }
 
-                File dstFile = new File(gitFolder.getPath() + File.separator
-                        + suffix);
-                File srcFile = new File(finalFileName);
-                FileUtil.copyFile(srcFile, dstFile);
+                String dstFilePath = gitFolder.getPath() + File.separator + suffix;
+                String srcFilePath = finalFileName;
 
                 GitConnectorCacheFile cacheFile = new GitConnectorCacheFile();
                 cacheFile.setFilePath(suffix);
-                cacheFile
-                        .setGitConnectorId(gitConnectorJob.getGitConnectorId());
+                cacheFile.setGitConnectorId(gitConnectorJob.getGitConnectorId());
+                cacheFile.setSrcFilePath(srcFilePath);
+                cacheFile.setDstFilePath(dstFilePath);
                 HibernateUtil.save(cacheFile);
             }
         }

@@ -1,5 +1,6 @@
 package com.globalsight.connector.git;
 
+import java.io.File;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -9,7 +10,6 @@ import com.globalsight.connector.git.util.GitConnectorHelper;
 import com.globalsight.cxe.entity.gitconnector.GitConnector;
 import com.globalsight.cxe.entity.gitconnector.GitConnectorCacheFile;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-
 
 public class GitConnectorPushThread implements Runnable
 {
@@ -39,12 +39,13 @@ public class GitConnectorPushThread implements Runnable
 						try
 						{
 							helper.gitConnectorPull();
-							helper.gitConnectorPush(cacheFile.getFilePath());
+							helper.gitConnectorPush(cacheFile);
 						}
 						catch (Exception e)
 						{
-							logger.error("Push git file failed.Git connector id : " + cacheFile.getGitConnectorId() 
-									+ ", file path : " + cacheFile.getFilePath() + ".", e);
+							String errorMsg = "Git push failed. Git connector folder: "
+	    							+ helper.getGitFolder() + ", file path: " + helper.getGitFolder() + File.separator + cacheFile.getFilePath() + ".";
+							logger.error(errorMsg, e);
 						}
 						HibernateUtil.delete(cacheFile);
 					}

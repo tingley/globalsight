@@ -421,18 +421,32 @@ function addFilters(obj)
 function checkFilters()
 {
 	var tmp = ATrim($("#jobIdFilter").val());
-	var isEffective = /^([1-9]+[-]?[0-9]*[,]?)+/;
+	var isEffective = /^([0-9]+[-]?[0-9]*[,]?)+/;
 	var isLetter = /^[a-zA-Z]/;
 	var isInteger = /^[0-9]/;
 	var containLetterSpace = "no";
 	tmp = tmp.replace(/\s+/g," ");
+	var t= tmp.replace(/\-/g,"");
+	t = t.replace(/\,/g,"");
+	t = t.replace(/\s+/g,"");
 	if (tmp != "" && $("#jobIdOption").val()=="EQ") {
-		for(var i=0;i<tmp.length;i++)
+		for(var i=0;i<t.length;i++)
 		{
-			if(!isEffective.test(tmp.charAt(i))||isLetter.test(tmp.charAt(i))||isInteger.test(tmp.charAt(i))&&i<tmp.length-2 && tmp.charAt(i+1)==" "&&isInteger.test(tmp.charAt(i+2)))
+			if(!isEffective.test(t.charAt(i)))
 			{
 				containLetterSpace = "yes";
 				break;
+			}
+		}
+		if(containLetterSpace != "yes")
+		{
+			for(var i=0;i<tmp.length;i++)
+			{
+				if(isLetter.test(tmp.charAt(i))||isInteger.test(tmp.charAt(i))&&i<tmp.length-2 && tmp.charAt(i+1)==" "&&isInteger.test(tmp.charAt(i+2)))
+				{
+					containLetterSpace = "yes";
+					break;
+				}
 			}
 		}
 		if(containLetterSpace == "yes"||!isEffective.test(tmp)||tmp.charAt(tmp.length - 1)=="-"||tmp.indexOf("-,")>0

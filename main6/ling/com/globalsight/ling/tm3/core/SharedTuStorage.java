@@ -1599,7 +1599,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			Map<String, Object> paramMap, String localeIds,
 			Map<TM3Attribute, Object> inlineAttrs)
 	{
-		sb.append("WHERE tuv.tmId = ?").addValue(tmId);
+		sb.append(" WHERE tuv.tmId = ?").addValue(tmId);
 		if (inlineAttrs != null && !inlineAttrs.isEmpty())
 		{
 			sb.append(" AND tu.id = tuv.tuId ");
@@ -1666,7 +1666,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		String tuIdStr = "";
 		String[] tuIdsArr = tuIds.split(",");
 		int count = 0;
-		sb.append("AND (");
+		sb.append(" AND (");
 		for (String tuId : tuIdsArr)
 		{
 			if (tuId.contains("-"))
@@ -1699,7 +1699,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			}
 			else
 			{
-				sb.append("OR tuv.tuId in (")
+				sb.append(" OR tuv.tuId in (")
 						.append(tuIdStr.substring(0, tuIdStr.lastIndexOf(",")))
 						.append(") ");
 			}

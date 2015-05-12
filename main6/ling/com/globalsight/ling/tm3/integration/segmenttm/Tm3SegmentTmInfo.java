@@ -403,9 +403,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         return getAllSegments(tm, null, null, null);
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn) throws LingManagerException
@@ -476,9 +473,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         return getAllSegmentsCount(tm, null, null);
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws LingManagerException
@@ -534,7 +528,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 					+ " paramMap " + paramMap);
 
 			return Long.valueOf(
-					tm3tm.getAllDataByParamMap(paramMap).getCountByParameter())
+					tm3tm.getAllDataByParamMap(paramMap).getCount())
 					.intValue();
 		}
 		catch (TM3Exception e)
@@ -681,7 +675,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 			List localeList = getLocaleList(localeCodeList);
 			return Long.valueOf(
 					tm3tm.getDataByLocalesAndParamMap(localeList, paramMap)
-							.getCountByParameter()).intValue();
+							.getCount()).intValue();
 		}
 		catch (TM3Exception e)
 		{
@@ -846,7 +840,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 			return Long.valueOf(
 					tm3tm.getDataByAttributesAndParamMap(
 							TM3Attributes.one(projectAttr, projectName),
-							paramMap).getCountByParameter()).intValue();
+							paramMap).getCount()).intValue();
 		}
 		catch (TM3Exception e)
 		{

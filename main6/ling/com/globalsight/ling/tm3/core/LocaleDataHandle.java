@@ -40,25 +40,7 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     }
 
     @Override
-    public long getCount() throws TM3Exception {
-        try {
-        	if(m_jobAttrinbuteSet == null || m_jobAttrinbuteSet.size() == 0)
-        	{
-        		return getTm().getStorageInfo().getTuStorage()
-                .getTuCountByLocales(localeList, getStart(), getEnd());
-        	}
-        	else
-        	{
-        		return getTm().getStorageInfo().getTuStorage()
-                .getTuCountByLocales(localeList, getStart(), getEnd(),m_jobAttrinbuteSet);
-        	}
-        } catch (SQLException e) {
-            throw new TM3Exception(e);
-        }
-    }
-
-	@Override
-	public long getCountByParameter() throws TM3Exception
+	public long getCount() throws TM3Exception
 	{
 		try
 		{

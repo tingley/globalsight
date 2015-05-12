@@ -36,7 +36,6 @@ public class TmExportHelper {
     static private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     /**
      * Get the count of all TUs in the TM.
-     * @deprecated Not in use since 8.6.2
      */
     static int getAllTuCount(Connection conn, Tm tm, String createdAfter, String createdBefore)
             throws SQLException
@@ -296,7 +295,6 @@ public class TmExportHelper {
 
     /**
      * Gets all TU IDs in the TM.
-     * @deprecated Not in use since 8.6.2
      */
     static List<Long> getAllTuIds(Connection conn, Tm tm, String createdAfter, String createdBefore)
             throws SQLException

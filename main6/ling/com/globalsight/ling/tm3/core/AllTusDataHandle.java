@@ -35,25 +35,7 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 	}
 
     @Override
-    public long getCount() throws TM3Exception {
-        try {
-        	if(m_jobAttributeSet == null || m_jobAttributeSet.size() == 0)
-        	{
-        		return getTm().getStorageInfo().getTuStorage()
-        			.getTuCount(getStart(), getEnd());
-        	}
-        	else
-        	{
-        		return getTm().getStorageInfo().getTuStorage()
-        			.getTuCount(getStart(), getEnd(), m_jobAttributeSet);
-        	}
-        } catch (SQLException e) {
-            throw new TM3Exception(e);
-        }
-    }
-
-	@Override
-	public long getCountByParameter() throws TM3Exception
+	public long getCount() throws TM3Exception
 	{
 		try
 		{

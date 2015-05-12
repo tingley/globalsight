@@ -14,6 +14,10 @@
             type="long" not-null="true" />
         <property name="filePath" column="FILE_PATH" length="300"  type="string"
             not-null="true" unique="false" />
+        <property name="srcFilePath" column="SRC_FILE_PATH" length="300"  type="string"
+            not-null="true" unique="false" />
+        <property name="dstFilePath" column="DST_FILE_PATH" length="300"  type="string"
+            not-null="true" unique="false" />
     </class>
 
 </hibernate-mapping>

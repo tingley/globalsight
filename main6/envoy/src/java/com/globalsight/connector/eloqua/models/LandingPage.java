@@ -42,6 +42,9 @@ public class LandingPage extends EloquaObject
         {
             if (isStructuredHtmlContent())
             {
+                String path = f.getAbsolutePath() + ".preview.html";
+                FileUtil.writeFile(new File(path), html, "utf-8");
+                
                 JSONObject js = getJson();
                 JSONObject cont = js.getJSONObject("htmlContent");
                 String root = cont.getString("root");
@@ -53,9 +56,7 @@ public class LandingPage extends EloquaObject
             }
             else
             {
-                StringBuffer sb = new StringBuffer();
-                sb.append(html);
-                FileUtil.writeFile(f, sb.toString(), "utf-8");
+                FileUtil.writeFile(f, html, "utf-8");
             }
         }
         catch (Exception e)

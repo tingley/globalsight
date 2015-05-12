@@ -64,8 +64,19 @@ public class Email extends EloquaObject
     {
         try
         {
+            StringBuffer sb = new StringBuffer();
+            if (subject == null)
+                sb.append("<titel/><hr>");
+            else
+                sb.append("<titel>").append(subject).append("</titel><hr>");
+            sb.append(html);
+            
             if (isStructuredHtmlContent())
             {
+                // just for preview
+                String path = f.getAbsolutePath() + ".preview.html";
+                FileUtil.writeFile(new File(path), sb.toString(), "utf-8");
+                
                 JSONObject js = getJson();
                 JSONObject cont = js.getJSONObject("htmlContent");
                 String root = cont.getString("root");
@@ -77,12 +88,6 @@ public class Email extends EloquaObject
             }
             else
             {
-                StringBuffer sb = new StringBuffer();
-                if (subject == null)
-                    sb.append("<titel/><hr>");
-                else
-                    sb.append("<titel>").append(subject).append("</titel><hr>");
-                sb.append(html);
                 FileUtil.writeFile(f, sb.toString(), "utf-8");
             }
         }

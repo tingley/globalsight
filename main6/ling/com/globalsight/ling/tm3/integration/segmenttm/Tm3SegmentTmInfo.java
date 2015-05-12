@@ -1619,7 +1619,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                     // Source index is always created, so only for target here.
                     recreateFuzzyIndex(tm3Tm, tus, indexTarget);
 
-                    LOGGER.info("Finished to reindex TUs : 1000");
+                    LOGGER.info("Finished to reindex TUs : " + max);
                     reindexer.incrementCounter(max);
                 }
                 catch (Exception e)

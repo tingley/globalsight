@@ -54,7 +54,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     private String indexTableName;
     private String attrValTableName;
     private String tuTuvAttrTableName;
-    private String tuSharedTableName;
     private Set<TM3Attribute> attributes = new HashSet<TM3Attribute>();
 
     // Injected
@@ -467,38 +466,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     {
         return new BaseSaver<T>(this);
     }
-
-//    @Override
-//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-//            Map<TM3Attribute, Object> attributes, TM3Locale tgtLocale,
-//            T target, TM3SaveMode mode, TM3Event event) throws TM3Exception
-//    {
-//        if (event == null)
-//        {
-//            throw new IllegalArgumentException("Null event value");
-//        }
-//        TM3Saver<T> saver = createSaver();
-//        // TODO:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        saver.tu(source, srcLocale, event).attrs(attributes)
-//                .target(target, tgtLocale, event);
-//        return saver.save(mode).get(0);
-//    }
-
-//    @Override
-//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-//            Map<TM3Attribute, Object> attributes, Map<TM3Locale, T> targets,
-//            TM3SaveMode mode, TM3Event event) throws TM3Exception
-//    {
-//        if (event == null)
-//        {
-//            throw new IllegalArgumentException("Null event value");
-//        }
-//        TM3Saver<T> saver = createSaver();
-//        // TODO:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        saver.tu(source, srcLocale, event).attrs(attributes)
-//                .targets(targets, event);
-//        return saver.save(mode).get(0);
-//    }
 
     /**
      * Save one or more TUs containing arbitary quantities of data.

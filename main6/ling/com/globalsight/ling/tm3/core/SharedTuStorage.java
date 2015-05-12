@@ -37,8 +37,6 @@ import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.util.StringUtil;
 
-// TODO: a lot of refactoring could be done to move this code + 
-// DedicatedTuStorage up to TuStorage (just wrap the queries, essentially)
 class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 {
     private long tmId;

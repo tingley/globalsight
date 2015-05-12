@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 
 import com.globalsight.ling.tm3.core.TM3Attribute;
-import com.globalsight.ling.tm3.core.TM3BilingualTm;
 import com.globalsight.ling.tm3.core.TM3Data;
 import com.globalsight.ling.tm3.core.TM3DataFactory;
 import com.globalsight.ling.tm3.core.TM3SharedTm;
@@ -99,17 +98,7 @@ class ShowTmCommand extends TM3Command
         f.format("%-12s%s\n", "Id", "Type");
         for (TM3Tm tm : tms)
         {
-            switch (tm.getType())
-            {
-                case BILINGUAL:
-                    TM3BilingualTm btm = (TM3BilingualTm) tm;
-                    f.format("%-12d%s (%s -> %s)\n", btm.getId(),
-                            btm.getType(), btm.getSrcLocale().getLocaleCode(),
-                            btm.getTgtLocale().getLocaleCode());
-                    break;
-                default:
-                    f.format("%-12d%s\n", tm.getId(), tm.getType());
-            }
+        	f.format("%-12d%s\n", tm.getId(), tm.getType());
         }
     }
 
@@ -117,13 +106,6 @@ class ShowTmCommand extends TM3Command
     {
         f.format("%-12s%d\n", "Id:", tm.getId());
         f.format("%-12s%s\n", "Type:", tm.getType());
-        if (tm instanceof TM3BilingualTm)
-        {
-            f.format("%-12s%s\n", "Source:",
-                    ((TM3BilingualTm) tm).getSrcLocale());
-            f.format("%-12s%s\n", "Target:",
-                    ((TM3BilingualTm) tm).getTgtLocale());
-        }
         if (tm instanceof TM3SharedTm)
         {
             f.format("%-12s%d\n", "Storage Id:",

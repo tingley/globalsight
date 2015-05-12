@@ -63,8 +63,6 @@ public class TM3Tool {
         commands.put("delete-attr", DeleteAttributeCommand.class);
         commands.put("add-attr", AddAttributeCommand.class);
         commands.put("create-shared", CreateSharedTmCommand.class);
-        commands.put("create-multilingual", CreateMultilingualTmCommand.class);
-        commands.put("create-bilingual", CreateBilingualTmCommand.class);
         commands.put("history", HistoryCommand.class);
     }
     

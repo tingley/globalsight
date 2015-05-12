@@ -376,13 +376,13 @@ function doNext()
     //Create User
     if(hasSpecialChars(form.fltCreatedUser.value))
     {
-    	alert("<%= bundle.getString("lb_create_user") %>" + "<%=bundle.getString("msg_invalid_entry")%>");
+    	alert("<%= bundle.getString("lb_export_create_user") %>" + "<%=bundle.getString("msg_invalid_entry")%>");
     	return false;	
     }
     //Modify User
     if(hasSpecialChars(form.fltModifiedUser.value))
     {
-    	alert("<%= bundle.getString("lb_modify_user") %>" + "<%=bundle.getString("msg_invalid_entry")%>");
+    	alert("<%= bundle.getString("lb_export_modify_user") %>" + "<%=bundle.getString("msg_invalid_entry")%>");
     	return false;	
     }
     
@@ -869,14 +869,14 @@ function doOnLoad()
    </tr>
     <%--Create User --%>
    <tr>
- 	<td><%=bundle.getString("lb_create_user") %> :</td>
+ 	<td><%=bundle.getString("lb_export_create_user") %> :</td>
     <td>
       <input name="fltCreatedUser" id="fltCreatedUser" type="text" size="30">
     </td>
    </tr>
     <%--Modify User --%>
    <tr>
- 	<td><%=bundle.getString("lb_modify_user") %>:</td>
+ 	<td><%=bundle.getString("lb_export_modify_user") %>:</td>
     <td>
       <input name="fltModifiedUser" id="fltModifiedUser" type="text" size="30">
     </td>

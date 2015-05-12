@@ -1058,7 +1058,7 @@ $(document).ready(function(){
     		 createUser = $("#createUser").val();
     		 if(hasSomeSpecialChars(createUser))
     		 {
-    			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_create_user"))%> " +
+    			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_export_create_user"))%> " +
    		              "<%=EditUtil.toJavascript(bundle
    									.getString("msg_invalid_entry3"))%>");
     		 }
@@ -1415,25 +1415,25 @@ function disableModifyOption(){
 							<table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
 							  <tr>
 							    <td class="search_content"nowrap>
-							       TU ID's
+							       <%=bundle.getString("lb_export_tu_id") %> 
 							    </td>
 							    <td class="search_content" nowrap>
 							    	<input type="text" id="tuIds" name="tuIds" value=""/>
 							    </td>
 							    <td class="search_content" nowrap>
-							    	String ID's
+							    	<%=bundle.getString("lb_export_sid") %> 
 							    </td>
 							    <td class="search_content">
-							   	    <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/>Is Regex
+							   	    <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/><%=bundle.getString("lb_export_regex") %> 
       							</td>
 							    <td class="search_content" nowrap>
-							     	Create User
+							     	<%=bundle.getString("lb_export_create_user") %> 
 							    </td>
 							    <td class="search_content">
 							    	<input type="text" id="createUser" name="createUser" value=""/>
       							</td>
       							<td class="search_content" nowrap>
-							     	Modify User
+							     	<%=bundle.getString("lb_export_modify_user") %> 
 							    </td>
 							    <td class="search_content">
 							    	<input type="text" id="modifyUser" name="modifyUser" value=""/>

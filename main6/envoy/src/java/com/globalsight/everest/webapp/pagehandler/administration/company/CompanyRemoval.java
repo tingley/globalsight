@@ -561,7 +561,7 @@ public class CompanyRemoval
             removeUpdatedSourcePage(conn, jobIds);
             
             removeScoreByJobId(conn, jobIds);
-            removeGitConnectorJobByJobId(conn, jobIds);
+            
             removeWorkflowRequest(conn, jobIds);
             removeIpTmIndex(conn, jobIds);
             removeIpTmSrcL(conn, jobIds);
@@ -591,6 +591,7 @@ public class CompanyRemoval
             if (!isRecreateJob)
             {
                 removeJobComments(conn, jobId);
+                removeGitConnectorJobByJobId(conn, jobIds);
             }
 
             // remove requests

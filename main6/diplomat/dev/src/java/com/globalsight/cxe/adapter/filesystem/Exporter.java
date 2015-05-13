@@ -785,8 +785,8 @@ public class Exporter
     private void handleEloquaFiles(String finalFileName, FileProfile fp,
             Workflow wf, boolean hasScript)
     {
-        if (finalFileName.endsWith(".email.html")
-                || finalFileName.endsWith(".landingPage.html"))
+        if (finalFileName.toLowerCase().endsWith(".email.html")
+                || finalFileName.toLowerCase().endsWith(".landingpage.html"))
         {
             String name = finalFileName.substring(
                     finalFileName.lastIndexOf(File.separator) + 1,

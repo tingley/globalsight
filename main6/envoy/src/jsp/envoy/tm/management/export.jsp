@@ -834,7 +834,7 @@ function doOnLoad()
           <tr>
             <td><input type="radio" name="oEntries" id="idEntries3"
                 onclick="idPropTypeList.disabled = false;idLanguageList.disabled = true;idPropTypeList.focus();">
-                <label for="idEntries2"><%= propTypeTitle%></label>
+                <label for="idEntries3"><%= propTypeTitle%></label>
             </td>
             <td><select name="oEntryPropType" id="idPropTypeList" disabled onchange="doByProject()" MULTIPLE></select></td>
           </tr>
@@ -886,9 +886,9 @@ function doOnLoad()
  	<td><%=bundle.getString("lb_creation_date") %>:</td>
     <td>
       <%=bundle.getString("lb_start").toLowerCase() %>: 
-      <input name="fltCreatedAfter" id="idCos" type="text" size="15" readonly="true">
+      <input name="fltCreatedAfter" id="idCos" type="text" size="15" >
       <%=bundle.getString("lb_end").toLowerCase() %>: 
-      <input name="fltCreatedBefore" id="idCoe" type="text" size="15" readonly="true">
+      <input name="fltCreatedBefore" id="idCoe" type="text" size="15">
       <span class='info'>(MM/DD/YYYY)</span>
     </td>
    </tr>
@@ -897,9 +897,9 @@ function doOnLoad()
  	<td><%=bundle.getString("lb_modify_date") %>:</td>
     <td>
       <%=bundle.getString("lb_start").toLowerCase() %>: 
-      <input name="fltModifiedAfter" id="idMos" type="text" size="15" readonly="true">
+      <input name="fltModifiedAfter" id="idMos" type="text" size="15">
       <%=bundle.getString("lb_end").toLowerCase() %>: 
-      <input name="fltModifiedBefore" id="idMoe" type="text" size="15" readonly="true">
+      <input name="fltModifiedBefore" id="idMoe" type="text" size="15">
       <span class='info'>(MM/DD/YYYY)</span>
     </td>
    </tr>

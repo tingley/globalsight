@@ -447,8 +447,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         String.valueOf(p_lastOutputChar));
             }
             // For GBS-3795. Don't change "OxA0" to &nbsp; It is not xml entity.
-            else if (ExtractorRegistry.FORMAT_XML
-                    .equalsIgnoreCase(p_mainFormat)
+            // GBS-3906, do not change "\u00a0" to &nbsp;
+            else if ((IFormatNames.FORMAT_XML.equalsIgnoreCase(p_mainFormat) || IFormatNames.FORMAT_JAVAPROP
+                    .equalsIgnoreCase(p_mainFormat))
                     && encoder instanceof HtmlEscapeSequence)
             {
                 HtmlEscapeSequence htmlEscapeSequence = (HtmlEscapeSequence) encoder;

@@ -80,6 +80,138 @@ function load()
 	PDFViewerApplication.pdfViewer.annotationLayer.setAttribute('hidden', 'true');
 	}catch (eee) {}
 }
+
+var currentSegment;
+
+function highlightObjects(o)
+{
+	var pagennn = PDFViewerApplication.pdfViewer.location.pageNumber;
+	var pageLeft = PDFViewerApplication.pdfViewer.location.left;
+	var pageTop = PDFViewerApplication.pdfViewer.location.top;
+	var curScale = PDFViewerApplication.pdfViewer.currentScale;
+	
+	
+	var loPn = getPageNumberFromParentId(o);
+	if (loPn == -1)
+	{
+		loPn = PDFViewerApplication.pdfViewer._currentPageNumber;
+	}
+// 1 un highlight
+    var pageDiv = document.getElementById("pageContainer" + loPn);
+    var pageDivChildrens = pageDiv.childNodes;
+    var textLayerChildrens;
+	var textLayerDiv;
+	var divArr;
+    
+    if (pageDivChildrens && pageDivChildrens.length > 0)
+    {
+  	  for(var i = 0; i < pageDivChildrens.length; i++)
+  	  {
+  		  var divChild = pageDivChildrens[i];
+  		  
+  		  if (divChild.nodeName == "DIV" && "textLayer" == divChild.className)
+  		  {
+  			  textLayerDiv = divChild;
+  			  break;
+  		  }
+  	  }
+  	  
+  	  textLayerChildrens = textLayerDiv.childNodes;
+  	  divArr = new Array(textLayerChildrens.length);
+  	  // 1 find extract match
+  	  for(var i = 0; i < textLayerChildrens.length; i++)
+  	  {
+  		  var divChild = textLayerChildrens[i];
+  		  divArr[i] = divChild;
+  		  var divContent = divChild.textContent;
+  		  
+  			divChild.innerHTML = divContent;
+  			
+  			var className = divChild.className;
+  			if (className.indexOf("highlight") != -1)
+  			{
+  				className = className.replace("highlight", "");
+  	  			divChild.className = className;
+  			}
+  	  }
+  	  
+  	divArr.sort(sortDivByOffset);
+    }
+
+//2
+var pageContent = buildPageContent(loPn, window.parent.parent.parent.localData, true);
+
+while (pageContent.segments.length == 0 && pageContent.content.length == 0)
+{
+	var loPn1 = loPn - 1;
+	
+	if (loPn1 > 0)
+	{
+		pageContent = buildPageContent(loPn1, window.parent.parent.parent.localData, true);
+	}
+	else
+	{
+		break;
+	}
+}
+
+var find = false;
+if (divArr && divArr.length > 0)
+{
+	var repIndex = 1;
+	for(var i = 0; i < divArr.length; i++)
+	{
+		var divChild = divArr[i];
+		
+		if (o == divChild)
+		{
+			var otext = o.textContent;
+			if (otext == "")
+			{
+				if (typeof(parent.parent.target.content.findSegment) != "undefined")
+			    {
+					parent.parent.target.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
+			    }
+				return;
+			}
+			
+			var segment = getSegment(pageContent, o, i, divArr);
+			
+			if (segment)
+			{
+				currentSegment = segment;
+				
+				findSegment(segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag, true, loPn, repIndex);
+				
+				if (typeof(parent.parent.target.content.findSegment) != "undefined")
+			    {
+					parent.parent.target.content.findSegment(segment.tuId, segment.tgtSegmentNoTag, "", true, loPn, repIndex);
+			    }
+			}
+			else
+			{
+				if (typeof(parent.parent.target.content.findSegment) != "undefined")
+			    {
+					parent.parent.target.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
+			    }
+			}
+			
+			break;
+		}
+		else if (o.textContent == divChild.textContent)
+		{
+			repIndex = repIndex + 1;
+		}
+	}
+}
+else
+{
+	o.className = "highlight";
+}
+
+navigateToDiv(pagennn, pageLeft, pageTop, curScale);
+}
+
 </script>
   </head>
 

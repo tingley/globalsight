@@ -1,4 +1,4 @@
-function findSegment(tuId, sourceSegment, targetSegment, donotMove)
+function findSegment(tuId, sourceSegment, targetSegment, donotMove, p_lnPn, p_repIndex)
 {
 	// check is source or target
 	var segment = sourceSegment;
@@ -43,9 +43,59 @@ function findSegment(tuId, sourceSegment, targetSegment, donotMove)
 	    PDFViewerApplication.navigateTo(dest);
     }
     
+    // clean other color
+    var pages = PDFViewerApplication.pdfViewer.pages;
+    for(var ii = 0; ii < pages.length; ii++)
+  	{
+  		var page = pages[ii];
+  		
+	  	var pageDiv1 = document.getElementById("pageContainer" + page.id);
+	  	
+	  	if (typeof(pageDiv1) == "undefined")
+	  	{
+	  		continue;
+	  	}
+	  	
+	    var pageDivChildrens1 = pageDiv1.childNodes;
+	    var textLayerChildrens1;
+		var textLayerDiv1;
+	    
+	    if (pageDivChildrens1 && pageDivChildrens1.length > 0)
+	    {
+	  	  for(var i = 0; i < pageDivChildrens1.length; i++)
+	  	  {
+	  		  var divChild1 = pageDivChildrens1[i];
+	  		  
+	  		  if (divChild1.nodeName == "DIV" && "textLayer" == divChild1.className)
+	  		  {
+	  			  textLayerDiv1 = divChild1;
+	  			  break;
+	  		  }
+	  	  }
+	  	  
+	  	  textLayerChildrens1 = textLayerDiv1.childNodes;
+	
+	  	  for(var i = 0; i < textLayerChildrens1.length; i++)
+	  	  {
+	  		  var divChild = textLayerChildrens1[i];
+	  		  var divContent = divChild.textContent;
+	  		  
+			divChild.innerHTML = divContent;
+			
+			var className = divChild.className;
+			if (className.indexOf("highlight") != -1)
+			{
+				className = className.replace("highlight", "");
+	  			divChild.className = className;
+			}
+	  	  }
+	    }
+  	}
+    
+    
     // find segment
     var find = false;
-    var loPn = PDFViewerApplication.pdfViewer.location.pageNumber;
+    var loPn = p_lnPn ? p_lnPn : PDFViewerApplication.pdfViewer.location.pageNumber;
     
     // find by GlobalSight
     var pageDiv = document.getElementById("pageContainer" + loPn);
@@ -68,22 +118,38 @@ function findSegment(tuId, sourceSegment, targetSegment, donotMove)
   	  
   	  textLayerChildrens = textLayerDiv.childNodes;
   	  // 1 find extract match
+  	  var repIndex = 1;
   	  for(var i = 0; i < textLayerChildrens.length; i++)
   	  {
   		  var divChild = textLayerChildrens[i];
   		  var divContent = divChild.textContent;
   		  var text = divContent.trim();
 			
-  		  if (segment == text)
+  		  if (segment == text && !find)
   		  {
-  			find = true;
-  			  matchedDiv = divChild;
-  			  var textnode = document.createTextNode(divContent);
-  			  var spannode = document.createElement('span');
-  			  spannode.className = "highlight";
-  			  spannode.appendChild(textnode);
-  			matchedDiv.innerHTML = spannode.outerHTML;
-  			matchedDiv.focus();
+	  		  if (repIndex == p_repIndex)
+	  		  {
+	  		  	find = true;
+				matchedDiv = divChild;
+				var textnode = document.createTextNode(divContent);
+				var spannode = document.createElement('span');
+				spannode.className = "highlight";
+				spannode.appendChild(textnode);
+				matchedDiv.innerHTML = spannode.outerHTML;
+				matchedDiv.focus();
+	  		  }
+	  		  else
+	  		  {
+	  		  	repIndex = repIndex + 1;
+	  		  	
+	  		  	divChild.innerHTML = divContent;
+	  			var className = divChild.className;
+	  			if (className.indexOf("highlight") != -1)
+	  			{
+	  				className = className.replace("highlight", "");
+	  	  			divChild.className = className;
+	  			}
+	  		  }
   		  }
   		  else // clean last match
   		  {
@@ -98,6 +164,115 @@ function findSegment(tuId, sourceSegment, targetSegment, donotMove)
   		  }
   	  }
     }
+    
+  if (!find)
+  {
+	 // find more
+  	  var startMatch = false;
+	  var endMatch = false;
+  	  matchedDiv = new Array();
+  	  var textLayerContent = textLayerDiv.textContent;
+  	  
+  	  if (textLayerContent.indexOf(segment) != -1)
+  	  {
+  		  var index = textLayerContent.indexOf(segment);
+  		  var segmentLen = segment.length;
+  		  var count = 0;
+  		  for(var i = 0; i < textLayerChildrens.length; i++)
+  	      {// for
+  		  var divChild = textLayerChildrens[i];
+  		  var divContent = divChild.textContent;
+		  var divContentLen = divContent.length;
+		  var donotAddMe = false;
+		  
+		  if (index < (count + divContentLen) && index >= count)
+		  {
+			  // find segment in one div
+			  if ((index + segmentLen) <= (count + divContentLen))
+			  {
+				  var obj = new Object();
+				  obj.div = divChild;
+				  obj.start = index - count;
+				  obj.end = index + segmentLen - count;
+				  matchedDiv.push(obj);
+  				  break;
+			  }
+			  else
+			  {
+				  var obj = new Object();
+				  obj.div = divChild;
+				  obj.start = index - count;
+				  obj.end = divContentLen;
+				  matchedDiv.push(obj);
+				  donotAddMe = true;
+			  }
+		  }
+		  
+		  if (matchedDiv.length > 0)
+		  {
+			  if ((index + segmentLen) <= (count + divContentLen))
+			  {
+				  var obj = new Object();
+				  obj.div = divChild;
+				  obj.start = 0;
+				  obj.end = index + segmentLen - count;
+				  matchedDiv.push(obj);
+  				  break;
+			  }
+			  else
+			  {
+			  if (!donotAddMe)
+			  {
+				  var obj = new Object();
+				  obj.div = divChild;
+				  obj.start = 0;
+				  obj.end = divContentLen;
+				  matchedDiv.push(obj);
+			  }
+			  }
+		  }
+		  
+		  count = count + divContentLen;
+  	  }// for
+  	  }// if
+  	  
+  	  if (matchedDiv.length > 0)
+  	  {
+  		  find = true;
+  		  for(var i = 0; i < matchedDiv.length; i++)
+  		  {
+  			  var obj = matchedDiv[i];
+  			  var cdiv = obj.div;
+  			  var textContent = cdiv.textContent;
+  			  var strStart = textContent.substr(0, obj.start);
+  			  var strMid = textContent.substr(obj.start, obj.end);
+  			  var strEnd = obj.end < textContent.length ? textContent.substr(obj.end) : "";
+  			  
+  			  var newDiv = document.createElement('div');
+  			  if (strStart.length > 0)
+  			  {
+  				var textnode = document.createTextNode(strStart);
+  				newDiv.appendChild(textnode);
+  			  }
+  			  if (strMid.length > 0)
+  			  {
+  				var textnode = document.createTextNode(strMid);
+  				var spannode = document.createElement('span');
+  			  	spannode.className = "highlight";
+  			  	spannode.appendChild(textnode);
+  				newDiv.appendChild(spannode);
+  			  }
+  			  if (strEnd.length > 0)
+  			  {
+  				var textnode = document.createTextNode(strEnd);
+  				newDiv.appendChild(textnode);
+  			  }
+  			 
+  			  
+  			cdiv.innerHTML = newDiv.innerHTML;
+  		  }
+  	  }
+  }
     
     // find by PDF.js
     if (!find)
@@ -118,111 +293,6 @@ function findSegment(tuId, sourceSegment, targetSegment, donotMove)
 	    
 	    find = PDFViewerApplication.pdfViewer.findController.hadMatch;
     }
-    
-      if (!find)
-	  {
-		 // find more
-	  	  var startMatch = false;
-		  var endMatch = false;
-	  	  matchedDiv = new Array();
-	  	  var textLayerContent = textLayerDiv.textContent;
-	  	  
-	  	  if (textLayerContent.indexOf(segment) != -1)
-	  	  {
-	  		  var index = textLayerContent.indexOf(segment);
-	  		  var segmentLen = segment.length;
-	  		  var count = 0;
-	  		  for(var i = 0; i < textLayerChildrens.length; i++)
-  	  	      {// for
-  	  		  var divChild = textLayerChildrens[i];
-  	  		  var divContent = divChild.textContent;
-  			  var divContentLen = divContent.length;
-  			  
-  			  if (index < (count + divContentLen) && index >= count)
-  			  {
-  				  // find segment in one div
-  				  if ((index + segmentLen) <= (count + divContentLen))
-  				  {
-  					  var obj = new Object();
-  					  obj.div = divChild;
-  					  obj.start = index - count;
-  					  obj.end = index + segmentLen - count;
-  					  matchedDiv.push(obj);
-      				  break;
-  				  }
-  				  else
-  				  {
-  					  var obj = new Object();
-  					  obj.div = divChild;
-  					  obj.start = index - count;
-  					  obj.end = divContentLen;
-  					  matchedDiv.push(obj);
-  				  }
-  			  }
-  			  
-  			  if (matchedDiv.length > 0)
-  			  {
-  				  if ((index + segmentLen) <= (count + divContentLen))
-  				  {
-  					  var obj = new Object();
-  					  obj.div = divChild;
-  					  obj.start = 0;
-  					  obj.end = index + segmentLen - count;
-  					  matchedDiv.push(obj);
-      				  break;
-  				  }
-  				  else
-  				  {
-  					  var obj = new Object();
-  					  obj.div = divChild;
-  					  obj.start = 0;
-  					  obj.end = divContentLen;
-  					  matchedDiv.push(obj);
-  				  }
-  			  }
-  			  
-  			  
-  			  count = count + divContentLen;
-  	  	  }// for
-	  	  }// if
-	  	  
-	  	  if (matchedDiv.length > 0)
-	  	  {
-	  		  find = true;
-	  		  for(var i = 0; i < matchedDiv.length; i++)
-	  		  {
-	  			  var obj = matchedDiv[i];
-	  			  var cdiv = obj.div;
-	  			  var textContent = cdiv.textContent;
-	  			  var strStart = textContent.substr(0, obj.start);
-	  			  var strMid = textContent.substr(obj.start, obj.end);
-	  			  var strEnd = obj.end < textContent.length ? textContent.substr(obj.end) : "";
-	  			  
-	  			  var newDiv = document.createElement('div');
-	  			  if (strStart.length > 0)
-	  				  {
-	  				var textnode = document.createTextNode(strStart);
-	  				newDiv.appendChild(textnode);
-	  				  }
-	  			  if (strMid.length > 0)
-	  				  {
-	  				var textnode = document.createTextNode(strMid);
-	  				var spannode = document.createElement('span');
-  	  			  spannode.className = "highlight";
-  	  			  spannode.appendChild(textnode);
-  	  			newDiv.appendChild(spannode);
-	  				  }
-	  			  if (strEnd.length > 0)
-	  				  {
-	  				var textnode = document.createTextNode(strEnd);
-	  				newDiv.appendChild(textnode);
-	  				  }
-	  			 
-	  			  
-	  			cdiv.innerHTML = newDiv.innerHTML;
-	  		  }
-	  	  }
-	  }
 }
 
 function getGlobalSightDest(tuId)

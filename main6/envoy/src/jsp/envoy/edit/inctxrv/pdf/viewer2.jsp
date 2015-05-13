@@ -214,6 +214,7 @@ while (pageContent.segments.length == 0 && pageContent.content.length == 0)
 var find = false;
 if (divArr && divArr.length > 0)
 {
+	var repIndex = 1;
 	for(var i = 0; i < divArr.length; i++)
 	{
 		var divChild = divArr[i];
@@ -225,7 +226,7 @@ if (divArr && divArr.length > 0)
 			{
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true);
+					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
 			    }
 				return;
 			}
@@ -236,20 +237,26 @@ if (divArr && divArr.length > 0)
 			{
 				currentSegment = segment;
 				
-				findSegment(segment.tuId, segment.tgtSegmentNoTag, "", true);
+				findSegment(segment.tuId, segment.tgtSegmentNoTag, "", true, loPn, repIndex);
 				
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag, true);
+					parent.parent.source.content.findSegment(segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag, true, loPn, repIndex);
 			    }
 			}
 			else
 			{
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true);
+					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
 			    }
 			}
+			
+			break;
+		}
+		else if (o.textContent == divChild.textContent)
+		{
+			repIndex = repIndex + 1;
 		}
 	}
 }

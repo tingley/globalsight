@@ -26,7 +26,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,11 +52,9 @@ import com.globalsight.everest.jobhandler.jobmanagement.JobDispatchEngine;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
-import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -75,7 +72,6 @@ import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.persistence.jobcreation.InsertDtpJobCommand;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -581,120 +577,6 @@ public class JobAdditionEngine
         }
     }
 
-    public void addDtpWorkflowToJob(List p_wfList) throws JobCreationException
-    {
-        if (p_wfList == null)
-        {
-            return;
-        }
-        Job p_job = ((Workflow) p_wfList.iterator().next()).getJob();
-        Connection connection = null;
-        List listOfWorkflows = null;
-        try
-        {
-            connection = PersistenceService.getInstance()
-                    .getConnectionForImport();
-            connection.setAutoCommit(false);
-            listOfWorkflows = createDtpWorkflowInstances(p_job, p_wfList);
-            // All DTP Workflow
-            if (listOfWorkflows.size() == 0)
-            {
-                return;
-            }
-            InsertDtpJobCommand ijc = new InsertDtpJobCommand(p_job,
-                    listOfWorkflows);
-            ijc.persistObjects(connection);
-
-            connection.commit();
-
-            // Just for reflush the cache of the toplink
-            ServerProxy.getJobHandler().refreshJob(p_job);
-
-        }
-        catch (Exception e)
-        {
-            try
-            {
-                c_logger.error(
-                        "Failed to create a Dtp Workflow Instance for job "
-                                + p_job.getId(), e);
-                String args[] = new String[1];
-                args[0] = Long.toString(p_job.getId());
-                connection.rollback();
-                throw new JobCreationException(
-                        JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
-                        args, e);
-            }
-            catch (Exception sqle)
-            {
-                String args[] = new String[1];
-                args[0] = Long.toString(p_job.getId());
-                throw new JobCreationException(
-                        JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
-                        args, e);
-            }
-        }
-        finally
-        {
-            try
-            {
-                PersistenceService.getInstance().returnConnection(connection);
-            }
-            catch (Exception e)
-            {
-                c_logger.error("Could not return connection to the pool");
-            }
-        }
-
-        try
-        {
-            Iterator it = listOfWorkflows.iterator();
-            while (it.hasNext())
-            {
-                Workflow workflow = (Workflow) it.next();
-
-                if (workflow.getState().equals(Workflow.PENDING))
-                {
-                    workflow = ServerProxy.getWorkflowManager()
-                            .getWorkflowByIdRefresh(workflow.getId());
-                    ServerProxy.getWorkflowManager().dispatch(workflow);
-                }
-
-            }
-
-        }
-        catch (Exception e)
-        {
-            c_logger.error(
-                    "Failed to create a dispatcher for the job "
-                            + p_job.getId(), e);
-        }
-    }
-
-    /*
-     * connection.commit(); // Just for reflush the cache of the toplink
-     * ServerProxy.getJobHandler().refreshJob(p_job); } catch (Exception e) {
-     * try { c_logger.error( "Failed to create a Dtp Workflow Instance for job "
-     * + p_job.getId(), e); String args[] = new String[1]; args[0] =
-     * Long.toString(p_job.getId()); connection.rollback(); throw new
-     * JobCreationException(
-     * JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES, args,
-     * e); } catch (Exception sqle) { String args[] = new String[1]; args[0] =
-     * Long.toString(p_job.getId()); throw new JobCreationException(
-     * JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES, args,
-     * e); } } finally { try { ps.returnConnection(connection); } catch
-     * (Exception e) { c_logger.error("Could not return connection to the
-     * pool"); } }
-     * 
-     * try { Iterator it = listOfWorkflows.iterator(); while (it.hasNext()) {
-     * Workflow workflow = (Workflow) it.next();
-     * 
-     * if (workflow.getState().equals(Workflow.PENDING)) { workflow =
-     * ServerProxy.getWorkflowManager() .getWorkflowById(p_seesionId,
-     * workflow.getId()); ServerProxy.getWorkflowManager().dispatch(workflow); }
-     * } } catch (Exception e) { c_logger.error("Failed to create a dispatcher
-     * for the job " + p_job.getId(), e); } } /* Generate a unique job name.
-     */
     String generateJobName(Request p_request)
     {
         String jobName = new String();
@@ -702,100 +584,6 @@ public class JobAdditionEngine
         jobName += " " + p_request.getDataSourceType();
         jobName += " " + p_request.getId();
         return jobName;
-    }
-
-    /**
-     * Create the Dtp workflow instances that are part of the new job.
-     */
-    private List createDtpWorkflowInstances(Job p_job, List p_wfList)
-            throws JobCreationException
-    {
-        L10nProfile l10n = p_job.getL10nProfile();
-        ArrayList listOfWorkflows = new ArrayList();
-        try
-        {
-            GlobalSightLocale[] targetLocales = new GlobalSightLocale[p_wfList
-                    .size()];// l10n.getTargetLocales();
-            int i = 0;
-            for (Iterator it = p_wfList.iterator(); it.hasNext();)
-            {
-                Workflow workflow = (Workflow) it.next();
-                if (WorkflowTypeConstants.TYPE_DTP.equals(workflow
-                        .getWorkflowType())
-                        || !Workflow.LOCALIZED.equals(workflow.getState()))
-                {
-                    continue;
-
-                }
-                targetLocales[i] = workflow.getTargetLocale();
-                i++;
-            }
-            // ignore DTP workflow
-            if (i < 1)
-            {
-                return listOfWorkflows;
-            }
-            for (i = 0; i < targetLocales.length; i++)
-            {
-                WorkflowTemplateInfo wfInfo = l10n
-                        .getDtpWorkflowTemplateInfo(targetLocales[i]);
-                // just make DTP workflow instance
-                // wfInfo maybe null here.
-                if (wfInfo == null
-                        || !WorkflowTemplateInfo.TYPE_DTP.equals(wfInfo
-                                .getWorkflowType()))
-                {
-                    continue;
-                }
-                long wfTemplateId = wfInfo.getWorkflowTemplateId();
-                WorkflowInstance wfInstance = c_wfServer
-                        .createWorkflowInstance(wfTemplateId);
-
-                Workflow wf = new WorkflowImpl();
-                wf.setWorkflowType(wfInfo.getWorkflowType());
-                wf.setScorecardShowType(wfInfo.getScorecardShowType());
-                wf.setId(wfInstance.getId());
-                wf.setIflowInstance(wfInstance);
-                wf.setState(Workflow.PENDING);
-                wf.setTargetLocale(targetLocales[i]);
-                wf.setDuration(calculateDuration(wfInstance));
-                wf.setJob(p_job);
-                wf.setCompanyId(p_job.getCompanyId());
-
-                // set workflow owners (PM and WFM)
-                wf.addWorkflowOwner(new WorkflowOwner(wfInfo
-                        .getProjectManagerId(),
-                        Permission.GROUP_PROJECT_MANAGER));
-
-                List wfms = wfInfo.getWorkflowManagerIds();
-                if (wfms != null)
-                {
-                    for (Iterator wfi = wfms.iterator(); wfi.hasNext();)
-                    {
-                        wf.addWorkflowOwner(new WorkflowOwner((String) wfi
-                                .next(), Permission.GROUP_WORKFLOW_MANAGER));
-                    }
-                }
-
-                // create the tasks and add them to the workflow
-                createTasks(wf);
-                listOfWorkflows.add(wf);
-            }
-
-        }
-        catch (Exception e)
-        {
-            c_logger.error(
-                    "Failed to create dtp workflow instances for the new "
-                            + "of job " + p_job.getId(), e);
-            String args[] = new String[1];
-            args[0] = Long.toString(p_job.getId());
-            throw new JobCreationException(
-                    JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
-                    args, e);
-        }
-
-        return listOfWorkflows;
     }
 
     /*
@@ -978,29 +766,6 @@ public class JobAdditionEngine
                     e);
         }
         return minutes;
-    }
-
-    /**
-     * Converts the tasks to the
-     * 
-     * @{code WorkflowInstance} array.
-     * 
-     * @param tasks
-     *            The vector of the {@code WorkflowInstance}
-     * @return
-     */
-    private WorkflowTaskInstance[] convertToArray(Vector tasks)
-    {
-        WorkflowTaskInstance[] taskInstances = new WorkflowTaskInstance[tasks
-                .size()];
-
-        int i = 0;
-        for (Enumeration e = tasks.elements(); e.hasMoreElements();)
-        {
-            taskInstances[i++] = (WorkflowTaskInstance) e.nextElement();
-        }
-
-        return taskInstances;
     }
 
     /*

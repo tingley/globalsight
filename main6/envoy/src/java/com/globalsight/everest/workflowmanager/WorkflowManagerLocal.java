@@ -4669,17 +4669,8 @@ public class WorkflowManagerLocal implements WorkflowManager
 
                     try
                     {
-                        exportLocalizedWorkflow(wfClone.getId(),
-                                projectMgrUserId, isDbJob, isCompleted);
-
-                        // instance DTP Workflow
-                        // JobAdditionEngine m_jobAdditionEngine = new
-                        // JobAdditionEngine();
-                        // List<Workflow> wfList = new ArrayList<Workflow>();
-                        // wfList.add(wfClone);
-                        // m_jobAdditionEngine.addDtpWorkflowToJob(
-                        // wfList);
-
+						exportLocalizedWorkflow(wfClone.getId(),
+								projectMgrUserId, isDbJob, isCompleted);
                     }
                     catch (Throwable t)
                     {

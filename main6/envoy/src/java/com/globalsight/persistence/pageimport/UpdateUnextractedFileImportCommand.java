@@ -30,14 +30,12 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 
 /**
- * Updates the unextracted file information that needs to be updated on
- * import.  This is both on a SourcePage and all its TargetPages.
- * On import the updates to both are the same since the file is essentially
- * the same at this time.
+ * Updates the unextracted file information that needs to be updated on import.
+ * This is both on a SourcePage and all its TargetPages. On import the updates
+ * to both are the same since the file is essentially the same at this time.
  *
- * The un-extracted file information is initially inserted during "InsertSourcePageCommand"
- * and "TargetPagePersistenceCommand."  This command handles the updates to it that are
- * necessary later on in the import process.
+ * This command handles the updates to it that are necessary later on in the
+ * import process.
  */
 public class UpdateUnextractedFileImportCommand extends PersistenceCommand
 {

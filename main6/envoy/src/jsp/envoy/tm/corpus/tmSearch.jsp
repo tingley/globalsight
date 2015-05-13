@@ -1415,40 +1415,26 @@ function disableModifyOption(){
 							<table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
 							  <tr>
 							    <td class="search_content"nowrap>
-							       <%=bundle.getString("lb_export_tu_id") %> 
+							       <%=bundle.getString("lb_export_tu_id") %>: <input type="text" id="tuIds" name="tuIds" value=""/>
 							    </td>
 							    <td class="search_content" nowrap>
-							    	<input type="text" id="tuIds" name="tuIds" value=""/>
-							    </td>
-							    <td class="search_content" nowrap>
-							    	<%=bundle.getString("lb_export_sid") %> 
-							    </td>
-							    <td class="search_content">
-							   	    <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/><%=bundle.getString("lb_export_regex") %> 
-      							</td>
-							    <td class="search_content" nowrap>
-							     	<%=bundle.getString("lb_export_create_user") %> 
-							    </td>
-							    <td class="search_content">
-							    	<input type="text" id="createUser" name="createUser" value=""/>
+							    	<%=bundle.getString("lb_export_sid") %>: <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/><%=bundle.getString("lb_export_regex") %> 
       							</td>
       							<td class="search_content" nowrap>
-							     	<%=bundle.getString("lb_export_modify_user") %> 
-							    </td>
-							    <td class="search_content">
-							    	<input type="text" id="modifyUser" name="modifyUser" value=""/>
+							     	Attribute Name: <input type="text" id="attributeName" name="attributeName" value=""/>
       							</td>
-      							<td class="search_content" nowrap>
-							     	Attribute Name
-							    </td>
-							    <td class="search_content">
-							    	<input type="text" id="attributeName" name="attributeName" value=""/>
+      							<td class="search_content" width="100%" nowrap>
+							     	Attribute Value: <input type="text" id="attributeValue" name="attributeValue" value=""/>
       							</td>
-      							<td class="search_content" nowrap>
-							     	Attribute value
-							    </td>
-							    <td class="search_content">
-							    	<input type="text" id="attributeValue" name="attributeValue" value=""/>
+							  </tr>
+							 </table>
+							 <table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
+							  <tr>
+							  	<td class="search_content" nowrap>
+							     	<%=bundle.getString("lb_export_create_user") %>: <input type="text" id="createUser" name="createUser" value=""/>
+      							</td>
+      							<td class="search_content"  width="100%" nowrap>
+							     	<%=bundle.getString("lb_export_modify_user") %>: <input type="text" id="modifyUser" name="modifyUser" value=""/>
       							</td>
 							  </tr>
 							 </table>
@@ -1457,8 +1443,7 @@ function disableModifyOption(){
 							    <td class="search_content" nowrap>
 							    	${lb_created_on }
 							    </td>
-							    <td class="search_content" nowrap>${lb_report_startDate}:</td>
-							    <td class="search_content" nowrap>
+							    <td class="search_content" nowrap>${lb_report_startDate}: 
 							    	<select id="createStartDateOption" onchange="disableCreateOption()">
 							       		<option value="eq" id="eqStart">${lb_equal_to}</option>
 							       		<option value="neq">${lb_not_equal_to}</option>
@@ -1469,8 +1454,7 @@ function disableModifyOption(){
 							    <td class="search_content">
 							   	    <input type="text" name="csf" id="csf">
       							</td>
-							    <td class="search_content" nowrap>${lb_report_endDate}:
-							     <td class="search_content" nowrap>
+							    <td class="search_content" nowrap>${lb_report_endDate}: 
 							   		<select id="createEndDateOption">
 							       		<option value="lt" id="ltEnd">${lb_less_than}</option>
 							       		<option value="lteq" id="lteqEnd">${lb_less_than_or_equal_to}</option>
@@ -1479,7 +1463,7 @@ function disableModifyOption(){
 							    <td class="search_content">
 							    	<input type="text" name="cef"  id="cef"">
       							</td>
-      							<td class="search_content">
+      							<td class="search_content"  width="100%">
       								<span class='info'>(MM/DD/YYYY)</span>
       							</td>
 							  </tr>
@@ -1487,8 +1471,7 @@ function disableModifyOption(){
 							  	<td class="search_content" nowrap>
 							  		${lb_modified_on}
 							    </td>
-							    <td class="search_content" nowrap>${lb_report_startDate}:</td>
-							    <td class="search_content" nowrap>
+							    <td class="search_content" nowrap>${lb_report_startDate}: 
 							    	<select id="modifyStartDateOption" onchange="disableModifyOption()">
 							       		<option value="eq" id="eqStart">${lb_equal_to}</option>
 							       		<option value="neq">${lb_not_equal_to}</option>
@@ -1499,8 +1482,7 @@ function disableModifyOption(){
 							    <td class="search_content">
 							   	    <input type="text" name="msf" id="msf">
       							</td>
-							    <td class="search_content" nowrap>${lb_report_endDate}:
-							     <td class="search_content" nowrap>
+							    <td class="search_content" nowrap>${lb_report_endDate}: 
 							   		<select id="modifyEndDateOption">
 							       		<option value="lt" id="ltEnd">${lb_less_than}</option>
 							       		<option value="lteq" id="lteqEnd">${lb_less_than_or_equal_to}</option>
@@ -1509,7 +1491,7 @@ function disableModifyOption(){
 							    <td class="search_content">
 							    	<input type="text" name="mef"  id="mef"">
       							</td>
-      							<td class="search_content">
+      							<td class="search_content"  width="100%">
       								<span class='info'>(MM/DD/YYYY)</span>
       							</td>
 							  </tr>

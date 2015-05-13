@@ -680,6 +680,8 @@ public class StandardExtractor
                         String temp = node.getSegment();
                         boolean hasLtGt = temp.contains("&lt;")
                                 || temp.contains("&gt;");
+                        // GBS-3906
+                        temp = temp.replace("&amp;", m_tag_amp);
                         List<String> internalTexts = new ArrayList<String>();
                         temp = InternalTextHelper.protectInternalTexts(temp,
                                 internalTexts);
@@ -724,6 +726,9 @@ public class StandardExtractor
                         catch (Exception ex)
                         {
                             TranslatableElement newElement = new TranslatableElement();
+                            String text = node.getSegment();
+                            text = text.replace(m_tag_amp, "&amp;");
+                            node.setSegment(text);
                             newElement.addSegment(node);
                             extractedOutPut.addDocumentElement(newElement);
                             continue;
@@ -744,6 +749,7 @@ public class StandardExtractor
                                 {
                                     text = xe.encodeStringBasic(text);
                                 }
+                                text = text.replace(m_tag_amp, "&amp;");
                                 ((SkeletonElement) element2).setSkeleton(text);
                             }
                             else if (element2 instanceof LocalizableElement)
@@ -752,6 +758,19 @@ public class StandardExtractor
                                         .getChunk();
                                 text = xe.encodeStringBasic(text);
                                 ((LocalizableElement) element2).setChunk(text);
+                            }
+                            else if (element2 instanceof TranslatableElement)
+                            {
+                                List segs = ((TranslatableElement) element2)
+                                        .getSegments();
+                                String text;
+                                for (int j = 0; j < segs.size(); j++)
+                                {
+                                    SegmentNode sn = (SegmentNode) segs.get(j);
+                                    text = sn.getSegment();
+                                    text = text.replace(m_tag_amp, "&amp;");
+                                    sn.setSegment(text);
+                                }
                             }
                             extractedOutPut.addDocumentElement(element2);
                         }

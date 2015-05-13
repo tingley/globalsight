@@ -32,11 +32,8 @@ import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Escaping;
 import com.globalsight.cxe.entity.filterconfiguration.EscapingHelper;
-import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
-import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
-import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
@@ -113,7 +110,6 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     private CxeMessage cxeMessage = null;
     private boolean m_convertHtmlEntityForHtml;
     private boolean m_convertHtmlEntityForXml;
-    private boolean m_convertHtmlEntityForPlainText;
     private long m_filterId;
     private String m_filterTableName;
     private BaseFilter m_baseFilter;
@@ -447,9 +443,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         String.valueOf(p_lastOutputChar));
             }
             // For GBS-3795. Don't change "OxA0" to &nbsp; It is not xml entity.
-            // GBS-3906, do not change "\u00a0" to &nbsp;
-            else if ((IFormatNames.FORMAT_XML.equalsIgnoreCase(p_mainFormat) || IFormatNames.FORMAT_JAVAPROP
-                    .equalsIgnoreCase(p_mainFormat))
+            else if (ExtractorRegistry.FORMAT_XML
+                    .equalsIgnoreCase(p_mainFormat)
                     && encoder instanceof HtmlEscapeSequence)
             {
                 HtmlEscapeSequence htmlEscapeSequence = (HtmlEscapeSequence) encoder;
@@ -661,8 +656,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
             if (isContent() && !FORMAT_XLIFF.equals(format)
                     && !FORMAT_PO.equals(mainFormat)
-                    && !FORMAT_HTML.equals(mainFormat)
-                    && !FORMAT_PLAINTEXT.equals(mainFormat))
+                    && !FORMAT_HTML.equals(mainFormat))
             {
                 // Do not encode CDATA content from XML and passing HTML.
                 if (!(ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
@@ -763,22 +757,20 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             ExtractorRegistry.FORMAT_PO, false, false);
                 }
             }
-            // GBS-3881, html post-filter in plaintext filter
-            if (m_convertHtmlEntityForPlainText)
-            {
-                tmp = m_xmlEntityConverter.encodeStringBasic(tmp);
-            }
 
             // Only for JavaProperties file
-            if (this.isUseSecondaryFilter
-                    && this.convertHtmlEntityFromSecondFilter
-                    && ExtractorRegistry.FORMAT_JAVAPROP
-                            .equalsIgnoreCase(mainFormat))
+            if (ExtractorRegistry.FORMAT_JAVAPROP.equalsIgnoreCase(mainFormat)
+                    && this.isUseSecondaryFilter)
             {
-                char[] specXmlEncodeChar =
-                { '<', '>', '&', '"' };
-                tmp = XmlFilterHelper.encodeSpecifiedEntities(tmp,
-                        specXmlEncodeChar);
+                // GBS-3906
+                tmp = tmp.replace("&amp;", "&");
+                if (this.convertHtmlEntityFromSecondFilter)
+                {
+                    char[] specXmlEncodeChar =
+                    { '<', '>', '&', '"' };
+                    tmp = XmlFilterHelper.encodeSpecifiedEntities(tmp,
+                            specXmlEncodeChar);
+                }
             }
             m_l10nContent.addContent(tmp);
         }
@@ -1136,112 +1128,76 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return skeleton;
     }
 
-    private void applyFilterConfiguration() throws DiplomatMergerException
+    private void applyFilterConfiguration()
     {
-        try
+        // set m_convertHtmlEntity
+        if (m_filterId > 0)
         {
-            // set m_convertHtmlEntity
-            if (m_filterId > 0)
+            boolean getValueOfconvertHtmlEntity = false;
+            String format = getDocumentFormat();
+            boolean isXmlFormat = ExtractorRegistry.FORMAT_XML
+                    .equalsIgnoreCase(format);
+            boolean isHtmlFormat = ExtractorRegistry.FORMAT_HTML
+                    .equalsIgnoreCase(format);
+
+            if (isHtmlFormat)
             {
-                boolean getValueOfconvertHtmlEntity = false;
-                String format = getDocumentFormat();
-                boolean isXmlFormat = ExtractorRegistry.FORMAT_XML
-                        .equalsIgnoreCase(format);
-                boolean isHtmlFormat = ExtractorRegistry.FORMAT_HTML
-                        .equalsIgnoreCase(format);
-                boolean isPlainTextFormat = FORMAT_PLAINTEXT
-                        .equalsIgnoreCase(format);
-
-                if (isHtmlFormat)
+                HtmlFilter htmlFilter = FilterHelper.getHtmlFilter(m_filterId);
+                if (htmlFilter != null)
                 {
-                    HtmlFilter htmlFilter = FilterHelper
-                            .getHtmlFilter(m_filterId);
-                    if (htmlFilter != null)
-                    {
-                        m_convertHtmlEntityForHtml = htmlFilter
-                                .isConvertHtmlEntry();
-                        getValueOfconvertHtmlEntity = true;
-                    }
-                }
-
-                if (isXmlFormat)
-                {
-                    XMLRuleFilter xmlFilter = FilterHelper
-                            .getXmlFilter(m_filterId);
-                    if (xmlFilter != null)
-                    {
-                        m_convertHtmlEntityForXml = xmlFilter
-                                .isConvertHtmlEntity();
-                        getValueOfconvertHtmlEntity = true;
-                        isXmlFilterConfigured = true;
-                    }
-                }
-
-                // GBS-3881
-                if (isPlainTextFormat)
-                {
-                    PlainTextFilter pf = FilterHelper
-                            .getPlainTextFilter(m_filterId);
-                    if (pf != null)
-                    {
-                        PlainTextFilterParser parser = new PlainTextFilterParser(
-                                pf);
-                        parser.parserXml();
-                        Filter postFilter = parser.getElementPostFilter();
-                        if (postFilter != null)
-                        {
-                            if (postFilter instanceof HtmlFilter)
-                            {
-                                m_convertHtmlEntityForPlainText = ((HtmlFilter) postFilter)
-                                        .isConvertHtmlEntry();
-                                getValueOfconvertHtmlEntity = true;
-                            }
-                        }
-                    }
-                }
-
-                if (!getValueOfconvertHtmlEntity)
-                {
-                    SystemConfiguration tagsProperties = SystemConfiguration
-                            .getInstance("/properties/Tags.properties");
-                    String convertHtml = tagsProperties
-                            .getStringParameter("convertHtmlEntity");
-                    if (convertHtml != null)
-                    {
-                        if (isHtmlFormat)
-                        {
-                            m_convertHtmlEntityForHtml = Boolean
-                                    .valueOf(convertHtml.trim());
-                        }
-                        else if (isXmlFormat)
-                        {
-                            m_convertHtmlEntityForXml = Boolean
-                                    .valueOf(convertHtml.trim());
-                        }
-                    }
-                    else
-                    {
-                        m_convertHtmlEntityForHtml = false;
-                        m_convertHtmlEntityForXml = false;
-                    }
-                }
-
-                m_baseFilter = BaseFilterManager.getBaseFilterByMapping(
-                        m_filterId, m_filterTableName);
-                try
-                {
-                    m_escapings = BaseFilterManager.getEscapings(m_baseFilter);
-                }
-                catch (Exception e)
-                {
-                    m_escapings = null;
+                    m_convertHtmlEntityForHtml = htmlFilter
+                            .isConvertHtmlEntry();
+                    getValueOfconvertHtmlEntity = true;
                 }
             }
-        }
-        catch (Exception e)
-        {
-            throw new DiplomatMergerException(
-                    ExtractorExceptionConstants.INTERNAL_ERROR, e);
+
+            if (isXmlFormat)
+            {
+                XMLRuleFilter xmlFilter = FilterHelper.getXmlFilter(m_filterId);
+                if (xmlFilter != null)
+                {
+                    m_convertHtmlEntityForXml = xmlFilter.isConvertHtmlEntity();
+                    getValueOfconvertHtmlEntity = true;
+                    isXmlFilterConfigured = true;
+                }
+            }
+
+            if (!getValueOfconvertHtmlEntity)
+            {
+                SystemConfiguration tagsProperties = SystemConfiguration
+                        .getInstance("/properties/Tags.properties");
+                String convertHtml = tagsProperties
+                        .getStringParameter("convertHtmlEntity");
+                if (convertHtml != null)
+                {
+                    if (isHtmlFormat)
+                    {
+                        m_convertHtmlEntityForHtml = Boolean
+                                .valueOf(convertHtml.trim());
+                    }
+                    else if (isXmlFormat)
+                    {
+                        m_convertHtmlEntityForXml = Boolean.valueOf(convertHtml
+                                .trim());
+                    }
+                }
+                else
+                {
+                    m_convertHtmlEntityForHtml = false;
+                    m_convertHtmlEntityForXml = false;
+                }
+            }
+
+            m_baseFilter = BaseFilterManager.getBaseFilterByMapping(m_filterId,
+                    m_filterTableName);
+            try
+            {
+                m_escapings = BaseFilterManager.getEscapings(m_baseFilter);
+            }
+            catch (Exception e)
+            {
+                m_escapings = null;
+            }
         }
     }
 

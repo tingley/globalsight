@@ -451,7 +451,7 @@ function checkFilters()
 		}
 		if(containLetterSpace == "yes"||!isEffective.test(tmp)||tmp.charAt(tmp.length - 1)=="-"||tmp.indexOf("-,")>0
 			||tmp.indexOf(",-")>0||tmp.indexOf("--")>0||tmp.indexOf(",,")>0||tmp.indexOf(".")>0){
-			alert("Invalid job ID, only integer numbers, comma and en dash are allowed.");
+			alert("Invalid job id or value. Type definite id for individual job, ids separated by comma for multiple jobs, or ids with en dash (-) for a job range.");
 			return false;
 		}
 	}

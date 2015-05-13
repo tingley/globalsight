@@ -698,8 +698,10 @@ public class TMSearchBroswerHandlerHelper
                 .leverageResultIterator();
         List<Map<String, Object>> leverageResult = new ArrayList<Map<String, Object>>();
         Set<Long> attributeFilterTuIds = new HashSet<Long>();
+        boolean attributeFilter = false;
         if(advancedSearch && StringUtil.isNotEmpty(attributeName) && StringUtil.isNotEmpty(attributeValue))
         {
+        	attributeFilter = true;
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(itLeverageMatches), attributeName, attributeValue);
         }
         long jobId = -1; // -1 is fine here
@@ -719,10 +721,13 @@ public class TMSearchBroswerHandlerHelper
                 while (itMatch.hasNext())
                 {
                     LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
-                    if(attributeFilterTuIds.size() > 0 && 
-                    		!attributeFilterTuIds.contains(matchedTuv.getTu().getId()))
+                    if(attributeFilter)
                     {
-                    	continue;
+                    	if(attributeFilterTuIds.size() == 0 || 
+                    			!attributeFilterTuIds.contains(matchedTuv.getTu().getId()))
+                    	{
+                    		continue;
+                    	}
                     }
             		if (advancedSearch && !searchInSource)
     				{
@@ -916,8 +921,10 @@ public class TMSearchBroswerHandlerHelper
         String findText = EditUtil.encodeHtmlEntities(searchText);
         replaceText = EditUtil.encodeHtmlEntities(replaceText);
         Set<Long> attributeFilterTuIds = new HashSet<Long>();
+        boolean attributeFilter = false;
         if(advancedSearch && StringUtil.isNotEmpty(attributeName) && StringUtil.isNotEmpty(attributeValue))
         {
+        	attributeFilter = true;
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
         }
         for (int i = 0, max = tus.size(); i < max; i++)
@@ -930,9 +937,12 @@ public class TMSearchBroswerHandlerHelper
                     continue;
                 }
                 long tuId = tu.getId();
-                if(attributeFilterTuIds.size() > 0 && !attributeFilterTuIds.contains(tuId))
+                if(attributeFilter)
                 {
-                	continue;
+                	if( attributeFilterTuIds.size() ==0 || !attributeFilterTuIds.contains(tuId))
+                	{
+                		continue;
+                	}
                 }
                 BaseTmTuv srcTuv = tu.getFirstTuv(sourceGSL);
 				if (advancedSearch && searchInSource)
@@ -1076,8 +1086,6 @@ public class TMSearchBroswerHandlerHelper
     		StatementBuilder sbTm2 = new StatementBuilder();
     		if(ids.length() > 0)
     		{
-    			ids = ids.substring(0, ids.length() -1);
-    			
     			sbTm3.append(" SELECT DISTINCT tuId from tm3_attr_val_shared_").append(CompanyThreadLocal.getInstance().getValue())
     					.append(" as value, tm3_attr as attr where attr.name = '").append(attributeName).append("' and value.value = '")
     					.append(attributeValue).append("' and value.attrId = attr.id and tuId in (").append(ids).append(")");

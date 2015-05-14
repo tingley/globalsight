@@ -443,8 +443,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         String.valueOf(p_lastOutputChar));
             }
             // For GBS-3795. Don't change "OxA0" to &nbsp; It is not xml entity.
-            else if (ExtractorRegistry.FORMAT_XML
-                    .equalsIgnoreCase(p_mainFormat)
+            // GBS-3906, do not change "\u00a0" to &nbsp;
+            else if ((IFormatNames.FORMAT_XML.equalsIgnoreCase(p_mainFormat) || IFormatNames.FORMAT_JAVAPROP
+                    .equalsIgnoreCase(p_mainFormat))
                     && encoder instanceof HtmlEscapeSequence)
             {
                 HtmlEscapeSequence htmlEscapeSequence = (HtmlEscapeSequence) encoder;
@@ -715,11 +716,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             {
                 tmp = encoding(tmp, false);
                 // GBS-3805: revert ", ' and & back.
-                if (!m_convertHtmlEntityForHtml) {
-                	tmp = StringUtil.replace(tmp, "&quot;", "\"");
-                	tmp = StringUtil.replace(tmp, "&apos;", "'");
-                	tmp = StringUtil.replace(tmp, "&#39;", "'");
-                	tmp = StringUtil.replace(tmp, "&amp;", "&");
+                if (!m_convertHtmlEntityForHtml)
+                {
+                    tmp = StringUtil.replace(tmp, "&quot;", "\"");
+                    tmp = StringUtil.replace(tmp, "&apos;", "'");
+                    tmp = StringUtil.replace(tmp, "&#39;", "'");
+                    tmp = StringUtil.replace(tmp, "&amp;", "&");
                 }
             }
 

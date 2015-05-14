@@ -36,6 +36,10 @@ public interface PreviewPDFConstants
     public static final String PV_COMMAND_SUFFIX = ".pv_command";
     public static final String FM_COMMAND_SUFFIX = ".fm_command";
 
+    public static final String DOCX_SUFFIX = ".docx";
+    public static final String PPTX_SUFFIX = ".pptx";
+    public static final String XLSX_SUFFIX = ".xlsx";
+    
     public static final String LOCALE_PRE_CONVERTED = "iw_IL";
     public static final String LOCALE_POST_CONVERTED = "he_IL";
 

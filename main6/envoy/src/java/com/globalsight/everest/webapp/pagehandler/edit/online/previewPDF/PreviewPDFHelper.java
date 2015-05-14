@@ -366,7 +366,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             
             // delete in context review file
             if (INDD_SUFFIX.equalsIgnoreCase(fileSuffix)
-                    || IDML_SUFFIX.equalsIgnoreCase(fileSuffix))
+                    || IDML_SUFFIX.equalsIgnoreCase(fileSuffix)
+                    || DOCX_SUFFIX.equalsIgnoreCase(fileSuffix)
+                    || PPTX_SUFFIX.equalsIgnoreCase(fileSuffix)
+                    || XLSX_SUFFIX.equalsIgnoreCase(fileSuffix))
             {
                 String fullTargetPdfFileName = previewDir + "_inctx" + File.separator
                         + targetPdfFileName;

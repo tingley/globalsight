@@ -567,7 +567,7 @@ public class CompanyRemoval
             removeIpTmSrcL(conn, jobIds);
             removeIpTmSrcT(conn, jobIds);
             removeJobGsEditionInfo(conn, jobIds);
-            removeJobAttribute(conn, jobIds);
+            
             
             //remove job cost
             removeJobCost(conn, jobId);
@@ -591,6 +591,7 @@ public class CompanyRemoval
             if (!isRecreateJob)
             {
                 removeJobComments(conn, jobId);
+                removeJobAttribute(conn, jobIds);
                 removeGitConnectorJobByJobId(conn, jobIds);
             }
 

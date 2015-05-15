@@ -20,6 +20,9 @@ public interface PreviewPDFConstants
 {
     public static final String ADOBE_INDD = "indd";
     public static final String ADOBE_IDML = "idml";
+    public static final String OFFICE_DOCX = "docx";
+    public static final String OFFICE_PPTX = "pptx";
+    public static final String OFFICE_XLSX = "xlsx";
 
     public static final String PDF_SUFFIX = ".pdf";
     public static final String XML_SUFFIX = ".xml";
@@ -29,6 +32,9 @@ public interface PreviewPDFConstants
     public static final String STATUS_SUFFIX = ".status";
     public static final String COMMAND_STATUS_SUFFIX = ".ir_status";
     public static final String IR_COMMAND_SUFFIX = ".ir_command";
+    public static final String DOCX_SUFFIX = ".docx";
+    public static final String PPTX_SUFFIX = ".pptx";
+    public static final String XLSX_SUFFIX = ".xlsx";
 
     public static final String LOCALE_PRE_CONVERTED = "iw_IL";
     public static final String LOCALE_POST_CONVERTED = "he_IL";
@@ -40,5 +46,9 @@ public interface PreviewPDFConstants
     public static final int ADOBE_CS5 = 5;
     public static final int ADOBE_CS6 = 6;
     public static final int ADOBE_CS5_5 = 55;
+    
+    public static final int TYPE_OFFICE_DOCX = 1001;
+    public static final int TYPE_OFFICE_PPTX = 1002;
+    public static final int TYPE_OFFICE_XLSX = 1003;
     
 }

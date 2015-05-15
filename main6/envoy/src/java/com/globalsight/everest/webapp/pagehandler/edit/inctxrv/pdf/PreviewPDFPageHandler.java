@@ -284,8 +284,15 @@ public class PreviewPDFPageHandler extends PageHandler implements
             String action)
     {
         String filePath = p_request.getParameter("file");
+        if (filePath.startsWith("("))
+        {
+            filePath = filePath.substring(filePath.indexOf(") ") + 2);
+        }
+        
         int index = filePath.lastIndexOf(".");
-        String pdfPath = filePath.substring(0, index) + PDF_SUFFIX;
+        String ext = filePath.substring(index).toLowerCase();
+        
+        String pdfPath = filePath.substring(0, index) + ext + PDF_SUFFIX;
         StringBuffer pdfFullPath = new StringBuffer(AmbFileStoragePathUtils
                 .getPdfPreviewDir(m_company_id).getAbsolutePath());
         pdfFullPath.append("_inctx");

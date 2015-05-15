@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.CommitCommand;
+import org.eclipse.jgit.api.DiffCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PushCommand;
@@ -25,6 +26,7 @@ import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -43,6 +45,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
 import com.globalsight.connector.git.vo.GitConnectorFile;
 import com.globalsight.cxe.entity.gitconnector.GitConnector;
+import com.globalsight.cxe.entity.gitconnector.GitConnectorCacheFile;
 import com.globalsight.everest.util.comparator.FileComparator;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -207,31 +210,51 @@ public class GitConnectorHelper
     	repository.close();
     }
     
-    public void gitConnectorPush(String filePath)
+    public void gitConnectorPush(GitConnectorCacheFile cacheFile) throws InvalidRemoteException, 
+    			TransportException, GitAPIException, IOException
     {
-    	try 
-    	{
-    		
+    		FileUtil.copyFile(new File(cacheFile.getSrcFilePath()), new File(cacheFile.getDstFilePath()));
+    	
     		FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
     		repositoryBuilder.setMustExist(true);
     		repositoryBuilder.setGitDir(new File(getGitFolder() + File.separator + ".git"));
     		Repository repository = repositoryBuilder.build();
     		
     		Git git = new Git(repository);
+    		String filePath = cacheFile.getFilePath();
     		
-    		File indexFile = new File(getGitFolder() + File.separator + ".git" + File.separator + "index");
-    		while(!indexFile.renameTo(indexFile)) 
+    		DiffCommand diffCommand = git.diff();
+    		List<DiffEntry> diffEntrys = diffCommand.call();
+    		filePath = filePath.replaceAll("\\\\", "/");
+    		boolean changed = false;
+    		for(DiffEntry diffEntry:diffEntrys)
     		{
-    			long sleepTime = (long) (1000 + Math.random() * 5000);
-				Thread.sleep(sleepTime);
-			}
+    			if(diffEntry.getNewPath().equals(filePath))
+    			{
+    				changed = true;
+    				break;
+    			}
+    		}
+    		if(!changed)
+    		{
+    			repository.close();
+    			return;
+    		}
     		
     		AddCommand addCommand = git.add();
-    		addCommand.addFilepattern(filePath.replaceAll("\\\\", "/"));
+    		addCommand.addFilepattern(filePath);
     		addCommand.call();
     		
     		CommitCommand commitCommand = git.commit();
-    		commitCommand.setMessage("GlobalSight Translation").setCommitter(gc.getUsername(), "");
+    		commitCommand.setMessage("GlobalSight Translation");
+    		if(StringUtil.isEmpty(gc.getUsername()))
+    		{
+    			commitCommand.setCommitter("GlobalSight", "");
+    		}
+    		else
+    		{
+    			commitCommand.setCommitter(gc.getUsername(), "");
+    		}
     		commitCommand.call();
     		
     		Set<String> remoteNames = repository.getRemoteNames();
@@ -261,11 +284,6 @@ public class GitConnectorHelper
 			}
     		pushCommand.call();
     		repository.close();
-		}
-    	catch (Exception e) 
-    	{
-			e.printStackTrace();
-		}
     }
     
     public String getGitConnectorFilesJson()

@@ -14,17 +14,17 @@
  *  limitations under the License.
  *  
  */
+package com.globalsight.connector.eloqua.models.view;
 
+import org.json.JSONException;
 
-
-package com.globalsight.everest.integration.ling.tm;
-
-import java.rmi.Remote;
-
-import com.globalsight.ling.tm.fuzzy.FuzzyIndexManager;
-
-public interface FuzzyIndexManagerWLRemote
-    extends FuzzyIndexManager, Remote
+public interface ViewHandler
 {
-     public static final String SERVICE_NAME = "FuzzyIndexManager";
+    public String getTyle();
+
+    public void handContent(String content) throws JSONException;
+
+    public void readContentFromFile(String content);
+
+    public String updateContentFromFile(String content) throws JSONException;
 }

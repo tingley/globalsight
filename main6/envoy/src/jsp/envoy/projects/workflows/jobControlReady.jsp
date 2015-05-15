@@ -460,6 +460,9 @@ function submitForm(buttonClicked, curJobId)
    }
    else if(buttonClicked == "Recreate")
    {
+	   if (!(confirm("<%=bundle.getString("readyJob_recreate")%>"))) {
+	    	return false;
+	    }
 	   JobForm.action = "<%=refreshUrl%>";
        jobActionParam = "reCreateJob";   
    }

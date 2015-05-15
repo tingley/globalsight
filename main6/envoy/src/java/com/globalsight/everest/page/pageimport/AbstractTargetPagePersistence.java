@@ -68,6 +68,7 @@ import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.tuv.XliffProcessor;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.IFormatNames;
@@ -694,9 +695,26 @@ public abstract class AbstractTargetPagePersistence implements
                     for (LeverageSegment segment : lss)
                     {
                         hasOneHundredMatch = true;
-                        if (SegmentUtil2.canBeModified(targetTuv,
-                                segment.getSegment(), jobId))
+						boolean isTagMatched = SegmentUtil2.canBeModified(
+								targetTuv, segment.getSegment(), jobId);
+						if (!isTagMatched)
+						{
+							String segment2 = SegmentUtil2.adjustSegmentAttributeValues(
+									targetTuv.getGxmlElement(), 
+									SegmentUtil2.getGxmlElement(segment.getSegment()),
+									tu.getDataType());
+							isTagMatched = SegmentUtil2.canBeModified(
+									targetTuv, segment2, jobId);
+							if (isTagMatched)
+							{
+								segment.setSegment(segment2);
+							}
+						}
+                        if (isTagMatched)
                         {
+							String segment2 = getTargetGxmlFitForItsOwnSourceContent(
+									sourceTuv, segment.getSegment(), jobId);
+							segment.setSegment(segment2);
                             targetTuv = modifyTUV(targetTuv, segment);
                             tuvGotChanged = true;
                             break;
@@ -1612,5 +1630,34 @@ public abstract class AbstractTargetPagePersistence implements
                 MTHelper2.removeValue(key);
             }
         }
+    }
+
+    private String getTargetGxmlFitForItsOwnSourceContent(Tuv p_sourceTuv,
+            String p_gxml, long p_jobId)
+    {
+    	try
+    	{
+            String srcGxml = p_sourceTuv.getGxml();
+            int index = srcGxml.indexOf(">");
+            String startSegment = srcGxml.substring(0, index + 1);
+
+            OnlineTagHelper sourceTagHelper = new OnlineTagHelper();
+            sourceTagHelper.setInputSegment(p_sourceTuv.getGxmlExcludeTopTags(),
+                    "", p_sourceTuv.getDataType(p_jobId));
+            sourceTagHelper.getCompact();// This step is required
+
+            OnlineTagHelper targetTagHelper = new OnlineTagHelper();
+            targetTagHelper.setInputSegment(GxmlUtil.stripRootTag(p_gxml), "",
+                    p_sourceTuv.getDataType(p_jobId));
+            String compact = targetTagHelper.getCompact();
+            // Combine source tag info and target content info
+            String targetGxml = sourceTagHelper.getTargetDiplomat(compact);
+
+            return startSegment + targetGxml + "</segment>";
+    	}
+    	catch (Exception e)
+    	{
+    		return p_gxml;
+    	}
     }
 }

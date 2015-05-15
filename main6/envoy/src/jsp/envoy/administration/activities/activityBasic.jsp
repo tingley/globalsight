@@ -281,7 +281,7 @@ function checkEmpty(d,h,m)
 	d=ATrim(d);
 	h=ATrim(h);
 	m=ATrim(m);
-	
+
 	if (h.length==0)
 	{
 		h="0";
@@ -336,19 +336,19 @@ function checkACA()
 				testH = checkE[1];
 				testM = checkE[2];
 
-				if(parseInt(testD)==0 && parseInt(testH)==0 && parseInt(testM)==0 && "afterActivityStart" != radioValue[j].value)
+				if(testD=="0" && testH=="0" && testM=="0" && "afterActivityStart" != radioValue[j].value)
 				{
 					alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_activity_time_all_zero_check"))%>");
 					return false;
 				}
-				else if(parseInt(testD)==0 && parseInt(testH)==0 && parseInt(testM)==0 && "afterActivityStart" == radioValue[j].value)
+				else if(testD=="0" && testH=="0" && testM=="0" && "afterActivityStart" == radioValue[j].value)
 				{
 					if(!confirm("<%=EditUtil.toJavascript(bundle.getString("jsmsg_activity_time_all_zero"))%>"))
 					{
 						return false;
 					}
-				}	
-				if(!isAllDigits(testD)||!isAllDigits(testH)||!isAllDigits(testM)||parseInt(testH)>23||parseInt(testM)>59)
+				}
+				if(!isAllDigits(testD)||!isAllDigits(testH)||!isAllDigits(testM)||parseInt(testH)>23||parseInt(testM)>59||parseInt(testD)>365)
 				{
 					alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_activity_time_invalid"))%>");
 					return false; 
@@ -643,21 +643,24 @@ function setDisableTR(trId, isDisabled)
 	<TD colspan="3"><%=bundle.getString("lb_activity_auto_complete")%>:&nbsp;&nbsp;
 	<input type="checkbox" name="autoCompleteActivityName" id ="autoCompleteActivity" value="true" <%=isAutoCompleteActivity ? "checked" : ""%> >
 	</TD></TR>
-	<TR id="ACA1"><TD colspan="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<TR id="ACA1"><TD>&nbsp;&nbsp;&nbsp;</TD><TD>
 	<input type="radio" name="autoCompleteActivity" id ="afterJobCreation" value="afterJobCreation" <%=isAfterJobCreation ? "checked" : ""%> onclick="radioClick()">
-     <%=bundle.getString("lb_activity_after_job_creation")%>&nbsp;&nbsp;<input type="text" name="afterJobCreationD" id ="afterJobCreationD" size="3" value="<%=afterJobCreationD%>">&nbsp;d&nbsp;
+     <%=bundle.getString("lb_activity_after_job_creation")%>&nbsp;&nbsp;</TD><TD>
+     <input type="text" name="afterJobCreationD" id ="afterJobCreationD" size="3" value="<%=afterJobCreationD%>">&nbsp;d&nbsp;
      <input type="text" name="afterJobCreationH" id ="afterJobCreationH" size="3" value="<%=afterJobCreationH%>">&nbsp;h&nbsp;
      <input type="text" name="afterJobCreationM" id ="afterJobCreationM" size="3" value="<%=afterJobCreationM%>">&nbsp;m&nbsp;
 	</TD></TR>
-	<TR id="ACA2"><TD colspan="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<TR id="ACA2"><TD>&nbsp;&nbsp;&nbsp;</TD><TD>
 	<input type="radio" name="autoCompleteActivity" id ="afterJobDispatch" value="afterJobDispatch" <%=isAfterJobDispatch ? "checked" : ""%> onclick="radioClick()">
-     <%=bundle.getString("lb_activity_after_job_dispatch")%>&nbsp;&nbsp;<input type="text" name="afterJobDispatchD" id ="afterJobDispatchD" size="3" value="<%=afterJobDispatchD%>">&nbsp;d&nbsp;
+     <%=bundle.getString("lb_activity_after_job_dispatch")%></TD><TD>
+     <input type="text" name="afterJobDispatchD" id ="afterJobDispatchD" size="3" value="<%=afterJobDispatchD%>">&nbsp;d&nbsp;
      <input type="text" name="afterJobDispatchH" id ="afterJobDispatchH" size="3" value="<%=afterJobDispatchH%>">&nbsp;h&nbsp;
      <input type="text" name="afterJobDispatchM" id ="afterJobDispatchM" size="3" value="<%=afterJobDispatchM%>">&nbsp;m&nbsp;
 	</TD></TR>
-	<TR id="ACA3"><TD colspan="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<TR id="ACA3"><TD>&nbsp;&nbsp;&nbsp;</TD><TD>
 	<input type="radio" name="autoCompleteActivity" id ="afterActivityStart" value="afterActivityStart" <%=isAfterActivityStart ? "checked" : ""%> onclick="radioClick()">
-     <%=bundle.getString("lb_activity_after_activity_start")%>&nbsp;&nbsp;&nbsp;<input type="text" name="afterActivityStartD" id ="afterActivityStartD" size="3" value="<%=afterActivityStartD%>">&nbsp;d&nbsp;
+     <%=bundle.getString("lb_activity_after_activity_start")%></TD><TD>
+     <input type="text" name="afterActivityStartD" id ="afterActivityStartD" size="3" value="<%=afterActivityStartD%>">&nbsp;d&nbsp;
      <input type="text" name="afterActivityStartH" id ="afterActivityStartH" size="3" value="<%=afterActivityStartH%>">&nbsp;h&nbsp;
      <input type="text" name="afterActivityStartM" id ="afterActivityStartM" size="3" value="<%=afterActivityStartM%>">&nbsp;m&nbsp;
 	</TD></TR>

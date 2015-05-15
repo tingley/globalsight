@@ -459,15 +459,15 @@
               <permission id="<%=Permission.JOB_WORKFLOWS_PRIORITY%>"/>
           </permission>
           <permission id="<%=Permission.VIEW_SCORECARD%>">
-          	   <permission id="<%=Permission.EDIT_SCORECARD%>"/>
+              <permission id="<%=Permission.EDIT_SCORECARD%>"/>
           </permission>
       </permission>
   </permission>
   <permission id="<%=Permission.JOBS_GROUP%>">
-  	<permission id="<%=Permission.JOBS_NEWGROUP%>"/>
-  	<permission id="<%=Permission.JOBS_REMOVEGROUP%>"/>
-  	<permission id="<%=Permission.JOBS_ADDJOBTOGROUP%>"/>
-  	<permission id="<%=Permission.JOBS_REMOVEJOBFROMGROUP%>"/>
+      <permission id="<%=Permission.JOBS_NEWGROUP%>"/>
+      <permission id="<%=Permission.JOBS_REMOVEGROUP%>"/>
+      <permission id="<%=Permission.JOBS_ADDJOBTOGROUP%>"/>
+      <permission id="<%=Permission.JOBS_REMOVEJOBFROMGROUP%>"/>
   </permission>
 </category>
 <category id="lb_my_activities">

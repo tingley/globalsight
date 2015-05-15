@@ -806,6 +806,7 @@ public class TmCoreManagerLocal implements TmCoreManager
      * WARNING: This routine will leak a session object to the SegmentResultSet
      * that it creates. The caller must call SegmentResultSet.finish() in order
      * to clean it up.
+     * @deprecated Not in use since 8.6.2
      */
     @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
@@ -815,7 +816,10 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm)
                 .getAllSegments(tm, createdBefore, createdAfter, conn);
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn, Set<String> jobAttributeSet) 
     		throws RemoteException, LingManagerException
@@ -823,11 +827,19 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm)
                 .getAllSegments(tm, createdBefore, createdAfter, conn, jobAttributeSet);
     }
+    
+	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
+			Map<String, Object> paramMap, Connection conn)
+			throws RemoteException
+	{
+		return getInfo(tm).getAllSegmentsByParamMap(tm, paramMap, conn);
+	}
 
     /**
      * WARNING: This routine will leak a session object to the SegmentResultSet
      * that it creates. The caller must call SegmentResultSet.finish() in order
      * to clean it up.
+     * @deprecated Not in use since 8.6.2
      */
     @Override
     public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
@@ -837,7 +849,10 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsByLocales(tm, localeList, createdBefore,
                 createdAfter, conn);
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
@@ -847,10 +862,20 @@ public class TmCoreManagerLocal implements TmCoreManager
                 createdAfter, conn, jobAttributeSet);
     }
 
+	@Override
+	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, Object> paramMap,
+			Connection conn) throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsByLocalesAndParamMap(tm, localeList,
+				paramMap, conn);
+	}
+
     /**
      * WARNING: This routine will leak a session object to the SegmentResultSet
      * that it creates. The caller must call SegmentResultSet.finish() in order
      * to clean it up.
+     * @deprecated Not in use since 8.6.2
      */
     @Override
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
@@ -860,7 +885,10 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsByProjectName(tm, projectName,
                 createdBefore, createdAfter, conn);
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
             throws RemoteException, LingManagerException
@@ -868,21 +896,44 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsByProjectName(tm, projectName,
                 createdBefore, createdAfter, conn, jobAttributeSet);
     }
+    
+	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, Object> paramMap, Connection conn)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsByProjectNameAndParamMap(tm, projectName,
+				paramMap, conn);
+	}
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException
     {
         return getInfo(tm).getAllSegmentsCount(tm, createdBefore, createdAfter);
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter, Set<String> jobAttributeSet) 
     		throws RemoteException, LingManagerException
     {
         return getInfo(tm).getAllSegmentsCount(tm, createdBefore, createdAfter, jobAttributeSet);
     }
+    
+	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, Object> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getAllSegmentsCountByParamMap(tm, paramMap);
+	}
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter) throws RemoteException,
@@ -891,7 +942,10 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsCountByLocales(tm, localeList, createdBefore,
                 createdAfter);
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter,Set<String> jobAttributeSet) 
     		throws RemoteException,LingManagerException
@@ -899,7 +953,17 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsCountByLocales(tm, localeList, createdBefore,
                 createdAfter,jobAttributeSet);
     }
+    
+	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
+			List<String> localeList, Map<String, Object> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsCountByLocalesAndParamMap(tm, localeList, paramMap);
+	}
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter) throws RemoteException,
@@ -908,7 +972,10 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsCountByProjectName(tm, projectName,
                 createdBefore, createdAfter);
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter,Set<String> jobAttributeSet)
     		throws RemoteException, LingManagerException
@@ -916,6 +983,14 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsCountByProjectName(tm, projectName,
                 createdBefore, createdAfter, jobAttributeSet);
     }
+
+	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+			String projectName, Map<String, Object> paramMap)
+			throws RemoteException, LingManagerException
+	{
+		return getInfo(tm).getSegmentsCountByProjectNameAndParamMap(tm,
+				projectName, paramMap);
+	}
 
     // TODO: this needs to have session handling code added
     // tmPriority param is stupid--just pass the tms in order!

@@ -18,7 +18,9 @@
 package com.globalsight.everest.tm.exporter;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -166,79 +168,59 @@ public class Reader implements IReader
         com.globalsight.everest.tm.exporter.ExportOptions options = (com.globalsight.everest.tm.exporter.ExportOptions) m_options;
         String identifyKey = null;
         try
-        {
-            String mode = options.getSelectMode();
-            String lang = options.getSelectLanguage();
+		{
+			String mode = options.getSelectMode();
+			String lang = options.getSelectLanguage();
 			List<String> langList = null;
 			if (StringUtil.isNotEmpty(lang))
 			{
 				langList = Arrays.asList(lang.split(","));
 			}
-            String propType = options.getSelectPropType();
-            int count = -1;
-            FilterOptions filterString = options.getFilterOptions();
-            identifyKey = options.getIdentifyKey();
-            String createdAfter = filterString.m_createdAfter;
-            String createdBefore = filterString.m_createdBefore;
+			String propType = options.getSelectPropType();
+			int count = -1;
+			FilterOptions filterString = options.getFilterOptions();
+			identifyKey = options.getIdentifyKey();
 
-            TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-            
-            JobAttributeOptions jobAttributes = options.getJobAttributeOptions();
-            Set<String> jobAttributeSet = jobAttributes.jobAttributeSet;
-            
-            if (mode
-                    .equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_ALL))
-            {
-            	if(jobAttributeSet != null && jobAttributeSet.size() >0)
-            	{
-            		count = mgr.getAllSegmentsCount(m_database, createdBefore, createdAfter, jobAttributeSet);
-            	}
-            	else
-            	{
-            		count = mgr.getAllSegmentsCount(m_database, createdBefore, createdAfter);
-            	}
+			TmCoreManager mgr = LingServerProxy.getTmCoreManager();
+			JobAttributeOptions jobAttributes = options
+					.getJobAttributeOptions();
+			Set<String> jobAttributeSet = jobAttributes.jobAttributeSet;
 
-                m_options.setStatus(ExportOptions.ANALYZED);
-                m_options.setExpectedEntryCount(count);
-            }
-            else if (mode
-                    .equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED))
-            {
-            	if(jobAttributeSet != null && jobAttributeSet.size() >0)
-            	{
-            		count = mgr.getSegmentsCountByLocales(m_database, langList, createdBefore, createdAfter, jobAttributeSet);
-            	}
-            	else
-            	{
-            		count = mgr.getSegmentsCountByLocales(m_database, langList, createdBefore, createdAfter);
-            	}
+			Map<String, Object> paramMap = getParamMap(filterString);
+			paramMap.put("jobAttributeSet", jobAttributeSet);
 
-                m_options.setStatus(ExportOptions.ANALYZED);
-                m_options.setExpectedEntryCount(count);
-            }
-            else if (mode.equals(options.SELECT_FILTER_PROP_TYPE)) 
-            {    
-            	if(jobAttributeSet != null && jobAttributeSet.size() >0)
-            	{
-            		 count = mgr.getSegmentsCountByProjectName(m_database, propType, createdBefore, createdAfter, jobAttributeSet);
-            	}
-            	else
-            	{
-            		 count = mgr.getSegmentsCountByProjectName(m_database, propType, createdBefore, createdAfter);
-            	}
+			if (mode.equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_ALL))
+			{
+				count = mgr.getAllSegmentsCountByParamMap(m_database, paramMap);
 
-                m_options.setStatus(m_options.ANALYZED);
-                m_options.setExpectedEntryCount(count);                             
-            }
-            else
-            {
-                String msg = "invalid select mode `" + mode + "'";
+				m_options.setStatus(ExportOptions.ANALYZED);
+				m_options.setExpectedEntryCount(count);
+			}
+			else if (mode
+					.equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED))
+			{
+				count = mgr.getSegmentsCountByLocalesAndParamMap(m_database,
+						langList, paramMap);
 
-                CATEGORY.error(msg);
+				m_options.setStatus(ExportOptions.ANALYZED);
+				m_options.setExpectedEntryCount(count);
+			}
+			else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
+			{
+				count = mgr.getSegmentsCountByProjectNameAndParamMap(
+						m_database, propType, paramMap);
+				m_options.setStatus(m_options.ANALYZED);
+				m_options.setExpectedEntryCount(count);
+			}
+			else
+			{
+				String msg = "invalid select mode `" + mode + "'";
 
-                m_options.setError(msg);
-            }
-        }
+				CATEGORY.error(msg);
+
+				m_options.setError(msg);
+			}
+		}
         catch (/* Exporter */Exception ex)
 		{
             ExportUtil.handleTmExportFlagFile(identifyKey, "failed", true);
@@ -249,4 +231,52 @@ public class Reader implements IReader
         return m_options;
     }
 
+	private Map<String, Object> getParamMap(FilterOptions filterString)
+	{
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		String createdAfter = filterString.m_createdAfter;
+		String createdBefore = filterString.m_createdBefore;
+		String modifyAfter = filterString.m_modifiedAfter;
+		String modifyBefore = filterString.m_modifiedBefore;
+		String modifyUser = filterString.m_modifiedBy;
+		String createUser = filterString.m_createdBy;
+		String tuIds = filterString.m_tuId;
+		String stringId = filterString.m_sid;
+		String isRegex = filterString.m_regex;
+
+		if (StringUtil.isNotEmpty(createUser))
+		{
+			paramMap.put("createUser", createUser);
+		}
+		if (StringUtil.isNotEmpty(modifyUser))
+		{
+			paramMap.put("modifyUser", modifyUser);
+		}
+		if (StringUtil.isNotEmpty(modifyAfter))
+		{
+			paramMap.put("modifyAfter", modifyAfter);
+		}
+		if (StringUtil.isNotEmpty(modifyBefore))
+		{
+			paramMap.put("modifyBefore", modifyBefore);
+		}
+		if (StringUtil.isNotEmpty(createdAfter))
+		{
+			paramMap.put("createdAfter", createdAfter);
+		}
+		if (StringUtil.isNotEmpty(createdBefore))
+		{
+			paramMap.put("createdBefore", createdBefore);
+		}
+		if (StringUtil.isNotEmpty(tuIds))
+		{
+			paramMap.put("tuIds", tuIds);
+		}
+		if (StringUtil.isNotEmpty(stringId))
+		{
+			paramMap.put("stringId", stringId);
+			paramMap.put("isRegex", isRegex);
+		}
+		return paramMap;
+	}
 }

@@ -90,47 +90,6 @@ public interface TM3Manager
             throws TM3Exception;
 
     /**
-     * Load a bilingual TM from the database. This is equivalent to casting the
-     * result of getTm(), except that null is returned if the TM requested is
-     * not bilingual.
-     * 
-     * @param factory
-     *            factory object to deserialize TUV data
-     * @param id
-     *            TM id
-     * @return TM, or null if no TM with that id exists (or if the TM is not
-     *         bilingual)
-     * @throws TM3Exception
-     *             If an error occurs while the TM is being loaded.
-     */
-    public <T extends TM3Data> TM3BilingualTm<T> getBilingualTm(
-            TM3DataFactory<T> factory, long id) throws TM3Exception;
-
-    /**
-     * Create a new bilingual TM with its own dedicated storage space.
-     * 
-     * @param factory
-     * @param srcLocale
-     * @param tgtLocale
-     * @return
-     * @throws TM3Exception
-     */
-    public <T extends TM3Data> TM3BilingualTm<T> createBilingualTm(
-            TM3DataFactory<T> factory, Set<TM3Attribute> inlineAttributes,
-            TM3Locale srcLocale, TM3Locale tgtLocale) throws TM3Exception;
-
-    /**
-     * Create a new multilingual TM with its own dedicate storage space.
-     * 
-     * @param factory
-     * @return
-     * @throws TM3Exception
-     */
-    public <T extends TM3Data> TM3Tm<T> createMultilingualTm(
-            TM3DataFactory<T> factory, Set<TM3Attribute> inlineAttributes)
-            throws TM3Exception;
-
-    /**
      * Create a new multilingual TM, using shared storage identified by
      * <tt>sharedStorageId</tt>.
      * 

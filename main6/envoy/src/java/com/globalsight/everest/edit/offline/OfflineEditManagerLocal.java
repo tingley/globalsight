@@ -116,7 +116,10 @@ import com.globalsight.util.PropertiesFactory;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.edit.SegmentUtil2;
 import com.globalsight.util.file.XliffFileUtil;
+import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -134,8 +137,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
     private static Object LOCKER = new Object();
     private static int MAX_THREAD = 5;
-    private static List<OfflineUploadForm> WAITING_FORMS = new ArrayList<OfflineUploadForm>();
-    private static List<OfflineUploadForm> RUNNING_FORMS = new ArrayList<OfflineUploadForm>();
+    public static List<OfflineUploadForm> WAITING_FORMS = new ArrayList<OfflineUploadForm>();
+    public static List<OfflineUploadForm> RUNNING_FORMS = new ArrayList<OfflineUploadForm>();
 
     // initialize the RUN_MAX_THREAD from
     // "properties/offlineUpload.properties"
@@ -1505,15 +1508,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         errWriter.setTaskId(XliffFileUtil.getTaskId(doc));
         errWriter.setWorkflowId(XliffFileUtil.getWorkflowId(doc));
 
-        // Only when the source file is XLF, need re-wrap the off-line
-        // down-loaded XLIFF file.
-        String sourceFileType = XliffFileUtil.getSourceFileType(doc);
-        if (sourceFileType != null
-                && ("xlf".equalsIgnoreCase(sourceFileType) || "xliff"
-                        .equalsIgnoreCase(sourceFileType)))
-        {
-            reWrapXliff(doc);
-        }
+        reWrapXliff(doc, jobIds);
 
         errMsg = convertNode2Pseudo(doc, XliffConstants.SOURCE, p_fileName,
                 jobIds, errWriter);
@@ -1554,25 +1549,40 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
     }
 
     /**
-     * Re-wrap the offline XLF segments.
-     */
-    private void reWrapXliff(Document doc)
+	 * Only when the source file is XLF, need re-wrap the off-line down-loaded
+	 * XLIFF file.
+	 */
+    private void reWrapXliff(Document doc, HashSet<Long> jobIds)
     {
         Element root = doc.getRootElement();
         Element bodyElement = root.element(XliffConstants.FILE).element(
                 XliffConstants.BODY);
+
+        // Find TU elements that are from XLF source file.
+        List<Element> xlfTuElements = new ArrayList<Element>();
+		for (Iterator i = bodyElement
+				.elementIterator(XliffConstants.TRANS_UNIT); i.hasNext();)
+        {
+            Element foo = (org.dom4j.Element) i.next();
+			if (isSrcFileXlf(foo, jobIds))
+            {
+				xlfTuElements.add(foo);
+            }
+        }
+
+		if (xlfTuElements.size() == 0)
+			return;
+
+		//
         StringBuffer xliffString = new StringBuffer();
         xliffString.append("<?xml version=\"1.0\"?>");
         xliffString.append("<xliff version=\"1.2\">");
         xliffString.append("<file>");
         xliffString.append("<body>");
-
-        ArrayList<String> trgStates = new ArrayList<String>();
         Attribute stateAttr = null;
-        for (Iterator i = bodyElement
-                .elementIterator(XliffConstants.TRANS_UNIT); i.hasNext();)
+        ArrayList<String> trgStates = new ArrayList<String>();
+        for (Element foo : xlfTuElements)
         {
-            Element foo = (org.dom4j.Element) i.next();
             Element sourceElement = foo.element(XliffConstants.SOURCE);
             String sourceContent = sourceElement.asXML();
             sourceContent = sourceContent.replaceFirst("<"
@@ -1581,12 +1591,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     + ">", "");
 
             Element targetElement = foo.element(XliffConstants.TARGET);
-            stateAttr = targetElement.attribute(XliffConstants.STATE);
-            if (stateAttr == null) {
-            	trgStates.add("");
-            } else {
-            	trgStates.add(stateAttr.getValue());
-            }
+
             String targetContent = targetElement.asXML();
             targetContent = targetContent.replaceFirst("<"
                     + XliffConstants.TARGET + "[^>]*>", "");
@@ -1597,11 +1602,23 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             xliffString.append("<source>").append(sourceContent).append("</source>");
             xliffString.append("<target>").append(targetContent).append("</target>");
             xliffString.append("</trans-unit>");
+
+            // Store the state attributes in sequence
+            stateAttr = targetElement.attribute(XliffConstants.STATE);
+            if (stateAttr == null)
+            {
+            	trgStates.add("");
+            }
+            else
+            {
+            	trgStates.add(stateAttr.getValue());
+            }
         }
         xliffString.append("</body>");
         xliffString.append("</file>");
         xliffString.append("</xliff>");
 
+        // Extract it to get re-wrapped segments.
         DiplomatAPI api = new DiplomatAPI();
         api.setEncoding("UTF-8");
         api.setLocale(new Locale("en_US"));
@@ -1652,6 +1669,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
         }
 
+        // Replace source/target elements
         int index = 0;
         if (sourceArray != null && targetArray != null)
         {
@@ -1664,15 +1682,32 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 }
 
                 Element foo = (org.dom4j.Element) i.next();
-                Element sourceElement = foo.element(XliffConstants.SOURCE);
-                Element targetElement = foo.element(XliffConstants.TARGET);
-                Element newSourceElement = getDom(sourceArray.get(index))
-                        .getRootElement();
+				if (!isSrcFileXlf(foo, jobIds))
+            	{
+            		continue;
+            	}
+
+				TuImpl tu = getTu(foo, jobIds);
+				GxmlElement srcGxmlElement = tu.getSourceTuv().getGxmlElement();
+				String newSrc = "<segment>"
+						+ GxmlUtil.stripRootTag(sourceArray.get(index))
+						+ "</segment>";
+				GxmlElement trgGxmlElement = SegmentUtil2.getGxmlElement(newSrc);
+				newSrc = SegmentUtil2.adjustSegmentAttributeValues(
+						srcGxmlElement, trgGxmlElement, "xlf");
+				newSrc = "<source>" + GxmlUtil.stripRootTag(newSrc) + "</source>";
+		        Element sourceElement = foo.element(XliffConstants.SOURCE);
+                Element newSourceElement = getDom(newSrc).getRootElement();
                 foo.remove(sourceElement);
                 foo.add(newSourceElement);
 
-                Element newTargetElement = getDom(targetArray.get(index))
-                        .getRootElement();
+				String newTrg = "<segment>" + GxmlUtil.stripRootTag(targetArray.get(index)) + "</segment>";
+				trgGxmlElement = SegmentUtil2.getGxmlElement(newTrg);
+				newTrg = SegmentUtil2.adjustSegmentAttributeValues(
+						srcGxmlElement, trgGxmlElement, "xlf");
+				newTrg = "<target>" + GxmlUtil.stripRootTag(newTrg) + "</target>";
+                Element newTargetElement = getDom(newTrg).getRootElement();
+                Element targetElement = foo.element(XliffConstants.TARGET);
                 foo.remove(targetElement);
 				// If target has "state" attribute, it should be preserved.
 				try {
@@ -1690,7 +1725,75 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         }
     }
 
-    /*
+    /**
+     * If the TU element is from XLF source file, return true;
+     * @param tuElement
+     * @param jobIds
+     * @return
+     */
+	private boolean isSrcFileXlf(Element tuElement, HashSet<Long> jobIds)
+    {
+        TuImpl tu = getTu(tuElement, jobIds);
+        if (tu != null)
+        {
+            if ("xlf".equals(tu.getDataType()))
+            {
+            	return true;
+            }
+        }
+
+        return false;
+    }
+
+	private TuImpl getTu(Element tuElement, HashSet<Long> jobIds)
+	{
+		TuImpl tu = null;
+        try
+        {
+            String tuId = getTuId(tuElement);
+            if (tuId != null)
+            {
+                if (tuId.indexOf(":") > 0)
+                {
+                	tuId = tuId.substring(0, tuId.indexOf(":"));
+                }
+
+                for (long id : jobIds)
+                {
+					tu = SegmentTuUtil.getTuById(Long.parseLong(tuId), id);
+                    if (tu != null)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+        	if (s_category.isDebugEnabled()) {
+            	s_category.error("isSrcFileXlf(..) error:", e);        		
+        	}
+        }
+
+        return tu;
+	}
+
+	/**
+	 * Get "id" attribute from a "<trans-unit id="2328958" ...>".
+	 * @param tuElement
+	 * @return 
+	 */
+	private String getTuId(Element tuElement)
+	{
+		Attribute tuIdAtt = tuElement.attribute("id");
+		if (tuIdAtt != null)
+		{
+			return tuIdAtt.getValue();
+		}
+		return null;
+	}
+
+	/*
      * Because the getDom will deEntity the code when parse, so before parse,
      * first entity the code.
      */
@@ -1742,54 +1845,16 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         for (Iterator i = bodyElement
                 .elementIterator(XliffConstants.TRANS_UNIT); i.hasNext();)
         {
-            // Add "try...catch" to ensure all TUs are checked and report errors
-            // to user.
             try
             {
                 foo = (org.dom4j.Element) i.next();
-                Attribute tuIdAtt = foo.attribute("id");
-                if (tuIdAtt != null)
-                {
-                    tuId = tuIdAtt.getValue();
-                }
-
-                boolean isXliffXlf = false;
-                if (p_fileName != null
-                        && p_fileName.toLowerCase().endsWith(".xlf")
-                        && tuId != null)
-                {
-                    TuImpl tu = null;
-                    String realId = tuId;
-                    if (tuId.indexOf(":") > 0)
-                    {
-                        realId = tuId.substring(0, tuId.indexOf(":"));
-                    }
-
-                    for (long id : jobIds)
-                    {
-                        tu = SegmentTuUtil
-                                .getTuById(Long.parseLong(realId), id);
-
-                        if (tu != null)
-                        {
-                            break;
-                        }
-                    }
-
-                    String tuDataType = tu.getDataType();
-
-                    if ("xlf".equals(tuDataType))
-                    {
-                        isXliffXlf = true;
-                    }
-                }
-
                 Element sourceElement = foo.element(tagName);
                 String textContent = sourceElement.asXML();
                 textContent = textContent.replaceFirst(
                         "<" + tagName + "[^>]*>", "");
                 textContent = textContent.replace("</" + tagName + ">", "");
-                textContent = convertSegment2Pseudo(textContent, isXliffXlf);
+				textContent = convertSegment2Pseudo(textContent,
+						isSrcFileXlf(foo, jobIds));
                 sourceElement.setText(textContent);
             }
             catch (Exception e)
@@ -2277,5 +2342,10 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
         }
         return jobIds;
+    }
+
+    public OEMProcessStatus getStatus()
+    {
+        return m_status;
     }
 }

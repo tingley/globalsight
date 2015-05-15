@@ -467,38 +467,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new BaseSaver<T>(this);
     }
 
-//    @Override
-//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-//            Map<TM3Attribute, Object> attributes, TM3Locale tgtLocale,
-//            T target, TM3SaveMode mode, TM3Event event) throws TM3Exception
-//    {
-//        if (event == null)
-//        {
-//            throw new IllegalArgumentException("Null event value");
-//        }
-//        TM3Saver<T> saver = createSaver();
-//        // TODO:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        saver.tu(source, srcLocale, event).attrs(attributes)
-//                .target(target, tgtLocale, event);
-//        return saver.save(mode).get(0);
-//    }
-
-//    @Override
-//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-//            Map<TM3Attribute, Object> attributes, Map<TM3Locale, T> targets,
-//            TM3SaveMode mode, TM3Event event) throws TM3Exception
-//    {
-//        if (event == null)
-//        {
-//            throw new IllegalArgumentException("Null event value");
-//        }
-//        TM3Saver<T> saver = createSaver();
-//        // TODO:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        saver.tu(source, srcLocale, event).attrs(attributes)
-//                .targets(targets, event);
-//        return saver.save(mode).get(0);
-//    }
-
     /**
      * Save one or more TUs containing arbitary quantities of data.
      * 
@@ -1137,24 +1105,46 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new AllTusDataHandle<T>(this, start, end);
     }
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public TM3Handle<T> getAllData(Date start, Date end,Set<String> jobAttributeSet)
     {
         checkDateRange(start, end);
         return new AllTusDataHandle<T>(this, start, end, jobAttributeSet);
     }
 
+	@Override
+	public TM3Handle<T> getAllDataByParamMap(Map<String, Object> paramMap)
+	{
+		return new AllTusDataHandle<T>(this, paramMap);
+	}
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end)
     {
         checkDateRange(start, end);
         return new LocaleDataHandle<T>(this, localeList, start, end);
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end, Set<String> jobAttributeSet)
     {
         checkDateRange(start, end);
         return new LocaleDataHandle<T>(this, localeList, start, end, jobAttributeSet);
     }
+
+	@Override
+	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
+			Map<String, Object> paramMap)
+	{
+		return new LocaleDataHandle<T>(this, localeList, paramMap);
+	}
 
     @Override
     public TM3Handle<T> getDataById(List<Long> tuIds)
@@ -1162,6 +1152,9 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new ByIdDataHandle<T>(this, tuIds);
     }
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     @Override
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
             Date start, Date end)
@@ -1170,7 +1163,10 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
                 getCustomAttributes(attrs), start, end);
     }
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
             Date start, Date end, Set<String> jobAttributeSet)
     {
@@ -1178,6 +1174,14 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
                 getCustomAttributes(attrs), start, end, jobAttributeSet);
     }
+
+	@Override
+	public TM3Handle<T> getDataByAttributesAndParamMap(
+			Map<TM3Attribute, Object> attrs, Map<String, Object> paramMap)
+	{
+		return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
+				getCustomAttributes(attrs), paramMap);
+	}
 
     @Override
     public void removeDataByLocale(TM3Locale locale)

@@ -41,8 +41,10 @@ import org.hibernate.Session;
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
+import com.globalsight.connector.git.GitConnectorManagerLocal;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.gitconnector.GitConnectorJob;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.foundation.Timestamp;
@@ -956,21 +958,25 @@ public class WorkflowHandlerHelper
             String jobName = job.getJobName();
             String priority = String.valueOf(job.getPriority());
             String createUserId = job.getCreateUserId();
+            String state = job.getState();
             String docDir = AmbFileStoragePathUtils.getCxeDocDirPath(job.getCompanyId());
 
             Set<String> realFiles = new HashSet<String>();
             Collection<Request> requests = job.getRequestList();
             Iterator it = job.getWorkflows().iterator();
             String trgLocales = "";
-            while (it.hasNext())
+            if (job.READY_TO_BE_DISPATCHED.equals(state))
             {
-                Workflow workflow = (Workflow) it.next();
-                if (!Workflow.CANCELLED.equals(workflow.getState()))
+                while (it.hasNext())
                 {
-                    trgLocales += workflow.getTargetLocale().toString() + ",";
+                    Workflow workflow = (Workflow) it.next();
+                    if (!Workflow.CANCELLED.equals(workflow.getState()))
+                    {
+                        trgLocales += workflow.getTargetLocale().toString() + ",";
+                    }
                 }
+                trgLocales = trgLocales.substring(0, trgLocales.length() - 1);
             }
-            trgLocales = trgLocales.substring(0,trgLocales.length()-1);
             FileProfilePersistenceManager fpManager = ServerProxy
                     .getFileProfilePersistenceManager();
             for (Request request : requests)
@@ -980,6 +986,10 @@ public class WorkflowHandlerHelper
 
                 EventFlowXmlParser parser = new EventFlowXmlParser();
                 parser.parse(request.getEventFlowXml());
+                if (job.IMPORTFAILED.equals(state))
+                {
+                    trgLocales = parser.getTargetLocale();
+                }
                 String srcFilePathName = parser.getDataValue("source", "Filename");
                 
                 File srcFile = new File(docDir, srcFilePathName);
@@ -1047,6 +1057,24 @@ public class WorkflowHandlerHelper
                     logger.warn("Can not find the source file for recreate: "
                             + srcFile.getAbsolutePath());
                     continue;
+                }
+                
+                // For eloqua file
+                if (srcFilePathName.toLowerCase().endsWith(".email.html")
+                        || srcFilePathName.toLowerCase().endsWith(".landingpage.html"))
+                {
+                    String name = srcFilePathName.substring(0,
+                            srcFilePathName.lastIndexOf("."));
+                    name = name.substring(0, name.lastIndexOf("."))+".obj";
+                    File objSrcFile = new File(docDir, name);
+                    File objBackupFile = new File(docDir + File.separator
+                            + "recreateJob_tmp" + name);
+                    if (objSrcFile.exists() && objSrcFile.isFile())
+                    {
+                        FileUtil.copyFile(objSrcFile, objBackupFile);
+                        sourceFiles.add(objSrcFile);
+                        backupFiles.add(objBackupFile);
+                    }
                 }
 
                 filePaths.add(getSourceFileLocalPathName(srcFilePathName));

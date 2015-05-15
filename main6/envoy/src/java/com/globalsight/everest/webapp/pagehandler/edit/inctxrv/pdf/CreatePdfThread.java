@@ -50,8 +50,10 @@ public class CreatePdfThread extends MultiCompanySupportedThread
 
             for (SourcePage sourcePage : sourcePages)
             {
-                String pageName = sourcePage.getDisplayPageName().toLowerCase();
-                if (pageName.endsWith(".indd") || pageName.endsWith(".idml"))
+                String pageName = sourcePage.getExternalPageId().toLowerCase();
+                if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
+                        || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
+                        || pageName.endsWith(".xlsx"))
                 {
                     PreviewPDFHelper previewHelper = new PreviewPDFHelper();
                     File pdfFile = previewHelper.createPDF(sourcePage.getId(),

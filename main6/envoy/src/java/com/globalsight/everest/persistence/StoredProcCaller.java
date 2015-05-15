@@ -33,7 +33,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.persistence.pageimport.InsertLeverageMatchPersistenceCommand;
 
 public class StoredProcCaller implements TuvQueryConstants
 {
@@ -595,50 +594,6 @@ public class StoredProcCaller implements TuvQueryConstants
         }
 
         return result;
-    }
-
-    public static void insertLeverageMatches(long p_sourcePageId,
-            Collection p_leverageMatches) throws PersistenceException
-    {
-        Connection connection = null;
-
-        try
-        {
-            connection = PersistenceService.getInstance()
-                    .getConnectionForImport();
-
-            InsertLeverageMatchPersistenceCommand cmd = new InsertLeverageMatchPersistenceCommand(
-                    p_sourcePageId, p_leverageMatches);
-
-            cmd.persistObjects(connection);
-
-            connection.commit();
-        }
-        catch (Exception pe)
-        {
-            CATEGORY.error("cannot insert leverage matches", pe);
-
-            try
-            {
-                connection.rollback();
-            }
-            catch (Exception ignore)
-            {
-            }
-
-            throw new PersistenceException(pe);
-        }
-        finally
-        {
-            try
-            {
-                PersistenceService.getInstance().returnConnection(connection);
-            }
-            catch (Exception pe)
-            {
-                CATEGORY.error("unable to return to connection pool", pe);
-            }
-        }
     }
 
 }

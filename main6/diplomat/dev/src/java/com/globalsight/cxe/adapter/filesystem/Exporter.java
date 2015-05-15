@@ -696,9 +696,12 @@ public class Exporter
                 File gitFolder = helper.getGitFolder();
                 String relativeFilePath = infos.get("relativeFilePath");
                 String sourceFileMappingPath = relativeFilePath;
-                String sourceFolderMappingPath = sourceFileMappingPath
-                        .substring(0, sourceFileMappingPath
-                                .lastIndexOf(File.separator));
+                String sourceFolderMappingPath = "";
+                if(sourceFileMappingPath.indexOf(File.separator) > 0)
+                {
+                	sourceFolderMappingPath = sourceFileMappingPath
+                				.substring(0, sourceFileMappingPath.lastIndexOf(File.separator));
+                }
                 String suffix;
                 if (mappings.size() == 0)
                 {
@@ -732,15 +735,14 @@ public class Exporter
                                     .lastIndexOf("."));
                 }
 
-                File dstFile = new File(gitFolder.getPath() + File.separator
-                        + suffix);
-                File srcFile = new File(finalFileName);
-                FileUtil.copyFile(srcFile, dstFile);
+                String dstFilePath = gitFolder.getPath() + File.separator + suffix;
+                String srcFilePath = finalFileName;
 
                 GitConnectorCacheFile cacheFile = new GitConnectorCacheFile();
                 cacheFile.setFilePath(suffix);
-                cacheFile
-                        .setGitConnectorId(gitConnectorJob.getGitConnectorId());
+                cacheFile.setGitConnectorId(gitConnectorJob.getGitConnectorId());
+                cacheFile.setSrcFilePath(srcFilePath);
+                cacheFile.setDstFilePath(dstFilePath);
                 HibernateUtil.save(cacheFile);
             }
         }
@@ -783,8 +785,8 @@ public class Exporter
     private void handleEloquaFiles(String finalFileName, FileProfile fp,
             Workflow wf, boolean hasScript)
     {
-        if (finalFileName.endsWith(".email.html")
-                || finalFileName.endsWith(".landingPage.html"))
+        if (finalFileName.toLowerCase().endsWith(".email.html")
+                || finalFileName.toLowerCase().endsWith(".landingpage.html"))
         {
             String name = finalFileName.substring(
                     finalFileName.lastIndexOf(File.separator) + 1,
@@ -814,20 +816,6 @@ public class Exporter
 
             if (f.exists())
             {
-                // It seems that there is a issue with html export. Need do
-                // unescape again
-                File sf = new File(finalFileName);
-                try
-                {
-                    String content = FileUtil.readFile(sf, "utf-8");
-                    content = XmlUtil.unescapeString(content);
-                    FileUtil.writeFile(sf, content, "utf-8");
-                }
-                catch (IOException e)
-                {
-                    m_logger.error(e);
-                }
-
                 if (finalFileName.endsWith(".email.html"))
                 {
                     File emailFile = new File(finalFileName);
@@ -835,16 +823,19 @@ public class Exporter
                     m.loadFromFile(f);
                     if (m.getName() != null)
                     {
-                        m.updateFromFile(emailFile);
-
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
                         
                         String targetLocale = wf.getTargetLocale()
                                 .toString();
-                        String html = m.getHtml();
-                        String newContent = h.updateDynamicContent(html, targetLocale);
-                        m.setHtml(newContent);
+                        
+                        boolean isHtml = m.updateFromFile(emailFile, uploaded, targetLocale);
+                        if (isHtml)
+                        {
+                            String html = m.getHtml();
+                            String newContent = h.updateDynamicContent(html, targetLocale);
+                            m.setHtml(newContent);
+                        }
 
                         if (uploaded && h.getEmail(m.getId()) != null)
                         {
@@ -855,7 +846,6 @@ public class Exporter
                             if (!uploaded)
                             {
                                 String eloquaName = m.getName();
-                                
                                 eloquaName = eloquaName + "(" + targetLocale
                                         + ")";
                                 m.setName(eloquaName);
@@ -880,14 +870,17 @@ public class Exporter
                     m.loadFromFile(f);
                     if (m.getName() != null)
                     {
-                        m.updateFromFile(saveFile);
+                        String targetLocale = wf.getTargetLocale().toString();
+                        boolean isHtml = m.updateFromFile(saveFile, uploaded, targetLocale);
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
                         
-                        String targetLocale = wf.getTargetLocale().toString();
-                        String html = m.getHtml();
-                        String newContent = h.updateDynamicContent(html, targetLocale);
-                        m.setHtml(newContent);
+                        if (isHtml)
+                        {
+                            String html = m.getHtml();
+                            String newContent = h.updateDynamicContent(html, targetLocale);
+                            m.setHtml(newContent);
+                        }
 
                         if (uploaded && h.getLandingPage(m.getId()) != null)
                         {
@@ -969,7 +962,7 @@ public class Exporter
                 String f = m.group();
                 String target = m.group(1);
                 String locale = m.group(2);
-                String rTarget = StringUtil.replace(target, locale, r1);
+                String rTarget = target.replaceFirst(locale, r1);
                 String rf = StringUtil.replace(f, target, rTarget);
                 return rf;
             }

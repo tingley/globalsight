@@ -37,6 +37,7 @@ namespace GlobalSight.Office2010Converters
 		public const string HTML = "html";
         public const string XLS = "xls";
         public const string XLSX = "xlsx";
+        public const string PDF = "pdf";
 		
 		/// <summary>
 		/// Creates an ExcelConverterImpl to be used for import or export.
@@ -188,9 +189,18 @@ namespace GlobalSight.Office2010Converters
 			Excel_Class.XlSaveAsAccessMode accessMode = Excel_Class.XlSaveAsAccessMode.xlNoChange;
 			object conflictResolution =  Excel_Class.XlSaveConflictResolution.xlOtherSessionChanges;
 
-			m_workbook.SaveAs(m_newFileName, m_newFormatType, missing, 
-				missing, missing, missing, accessMode, 
-				conflictResolution, missing, missing, missing, missing);				
+            if (m_newFormatType.Equals(Excel_Class.XlFixedFormatType.xlTypePDF))
+            {
+                m_workbook.ExportAsFixedFormat(Excel_Class.XlFixedFormatType.xlTypePDF, m_newFileName, missing,
+                    missing, missing, missing, missing,
+                    missing, missing);
+            }
+            else
+            {
+                m_workbook.SaveAs(m_newFileName, m_newFormatType, missing,
+                    missing, missing, missing, accessMode,
+                    conflictResolution, missing, missing, missing, missing);
+            }
 			
 			object saveChanges = false;
 			object routeWb= false;
@@ -307,6 +317,11 @@ namespace GlobalSight.Office2010Converters
             {
                 m_newFormatType = Excel_Class.XlFileFormat.xlOpenXMLWorkbook;
                 m_newFileName = baseFileName + XLSX;
+            }
+            else if (p_convertTo.Equals(PDF))
+            {
+                m_newFormatType = Excel_Class.XlFixedFormatType.xlTypePDF;
+                m_newFileName = baseFileName + PDF;
             }
 		}
 

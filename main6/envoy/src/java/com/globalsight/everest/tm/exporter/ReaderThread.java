@@ -19,7 +19,9 @@ package com.globalsight.everest.tm.exporter;
 
 import java.sql.Connection;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -132,64 +134,40 @@ public class ReaderThread extends Thread
      * from the TM.
      */
     private SegmentResultSet getTuSegments(Connection conn) throws Exception
-    {
-        com.globalsight.everest.tm.exporter.ExportOptions options = m_options;
-
-        String mode = options.getSelectMode();
-        String lang = options.getSelectLanguage();
-        List<String> langList = null;
+	{
+		com.globalsight.everest.tm.exporter.ExportOptions options = m_options;
+		String mode = options.getSelectMode();
+		String lang = options.getSelectLanguage();
+		List<String> langList = null;
 		if (StringUtil.isNotEmpty(lang))
 		{
 			langList = Arrays.asList(lang.split(","));
 		}
-        String propType = options.getSelectPropType();
-        FilterOptions filterString = options.getFilterOptions();
-        String createdAfter = filterString.m_createdAfter;
-        String createdBefore = filterString.m_createdBefore;
-        JobAttributeOptions jobAttributes = options.getJobAttributeOptions();
-        Set<String> jobAttributeSet = jobAttributes.jobAttributeSet;
-        TmCoreManager mgr = LingServerProxy.getTmCoreManager();
+		String propType = options.getSelectPropType();
+		FilterOptions filterString = options.getFilterOptions();
 
-        if (mode.equals(ExportOptions.SELECT_ALL))
-        {
-        	if(jobAttributeSet == null || jobAttributeSet.size() == 0)
-        	{
-        		return mgr.getAllSegments(m_database, createdBefore, createdAfter,
-        				conn);
-        	}
-        	else 
-        	{
-        		return mgr.getAllSegments(m_database, createdBefore, createdAfter,
-        				conn, jobAttributeSet);
-			}
-        }
-        else if (mode.equals(ExportOptions.SELECT_FILTERED))
-        {
-        	if(jobAttributeSet == null || jobAttributeSet.size() == 0)
-			{
-				return mgr.getSegmentsByLocales(m_database, langList, createdBefore,
-						createdAfter, conn);
-        	}
-        	else
-        	{
-        		return mgr.getSegmentsByLocales(m_database, langList, createdBefore,
-	                    createdAfter, conn,jobAttributeSet);
-        	}
-        }
-        else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
-        {
-        	if(jobAttributeSet == null || jobAttributeSet.size() == 0)
-        	{
-        		return mgr.getSegmentsByProjectName(m_database, propType,
-        				createdBefore, createdAfter, conn);
-        	}
-        	else
-        	{
-        		return mgr.getSegmentsByProjectName(m_database, propType,
-        				createdBefore, createdAfter, conn,jobAttributeSet);
-        	}
-        }
-        else
+		JobAttributeOptions jobAttributes = options.getJobAttributeOptions();
+		Set<String> jobAttributeSet = jobAttributes.jobAttributeSet;
+		TmCoreManager mgr = LingServerProxy.getTmCoreManager();
+
+		Map<String, Object> paramterMap = getParamMap(filterString);
+		paramterMap.put("jobAttributeSet", jobAttributeSet);
+
+		if (mode.equals(ExportOptions.SELECT_ALL))
+		{
+			return mgr.getAllSegmentsByParamMap(m_database, paramterMap, conn);
+		}
+		else if (mode.equals(ExportOptions.SELECT_FILTERED))
+		{
+			return mgr.getSegmentsByLocalesAndParamMap(m_database, langList,
+					paramterMap, conn);
+		}
+		else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
+		{
+			return mgr.getSegmentsByProjectNameAndParamMap(m_database,
+					propType, paramterMap, conn);
+		}
+		else
 		{
 			String msg = "invalid select mode `" + mode + "'";
 			CATEGORY.error(msg);
@@ -197,5 +175,54 @@ public class ReaderThread extends Thread
 
 			return null;
 		}
-    }
+	}
+    
+	private Map<String, Object> getParamMap(FilterOptions filterString)
+	{
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		String createdAfter = filterString.m_createdAfter;
+		String createdBefore = filterString.m_createdBefore;
+		String modifyAfter = filterString.m_modifiedAfter;
+		String modifyBefore = filterString.m_modifiedBefore;
+		String modifyUser = filterString.m_modifiedBy;
+		String createUser = filterString.m_createdBy;
+		String tuIds = filterString.m_tuId;
+		String stringId = filterString.m_sid;
+		String isRegex = filterString.m_regex;
+
+		if (StringUtil.isNotEmpty(createUser))
+		{
+			paramMap.put("createUser", createUser);
+		}
+		if (StringUtil.isNotEmpty(modifyUser))
+		{
+			paramMap.put("modifyUser", modifyUser);
+		}
+		if (StringUtil.isNotEmpty(modifyAfter))
+		{
+			paramMap.put("modifyAfter", modifyAfter);
+		}
+		if (StringUtil.isNotEmpty(modifyBefore))
+		{
+			paramMap.put("modifyBefore", modifyBefore);
+		}
+		if (StringUtil.isNotEmpty(createdAfter))
+		{
+			paramMap.put("createdAfter", createdAfter);
+		}
+		if (StringUtil.isNotEmpty(createdBefore))
+		{
+			paramMap.put("createdBefore", createdBefore);
+		}
+		if (StringUtil.isNotEmpty(tuIds))
+		{
+			paramMap.put("tuIds", tuIds);
+		}
+		if (StringUtil.isNotEmpty(stringId))
+		{
+			paramMap.put("stringId", stringId);
+			paramMap.put("isRegex", isRegex);
+		}
+		return paramMap;
+	}
 }

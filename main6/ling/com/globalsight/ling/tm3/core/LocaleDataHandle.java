@@ -4,12 +4,14 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     private List<TM3Locale> localeList;
     private Set<String> m_jobAttrinbuteSet;
     private int increment = 100; // Load 100 at a time
+    private Map<String,Object> m_paramMap;
     
     LocaleDataHandle(BaseTm<T> tm, List<TM3Locale> localeList, 
                      Date start, Date end) {
@@ -24,28 +26,32 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 		m_jobAttrinbuteSet = jobAttributeSet;
 	}
     
+	LocaleDataHandle(BaseTm<T> tm, List<TM3Locale> localeList,
+			Map<String, Object> paramMap)
+	{
+		super(tm);
+		this.localeList = localeList;
+		this.m_paramMap = paramMap;
+	}
+
     @Override
     public void purgeData() throws TM3Exception {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long getCount() throws TM3Exception {
-        try {
-        	if(m_jobAttrinbuteSet == null || m_jobAttrinbuteSet.size() == 0)
-        	{
-        		return getTm().getStorageInfo().getTuStorage()
-                .getTuCountByLocales(localeList, getStart(), getEnd());
-        	}
-        	else
-        	{
-        		return getTm().getStorageInfo().getTuStorage()
-                .getTuCountByLocales(localeList, getStart(), getEnd(),m_jobAttrinbuteSet);
-        	}
-        } catch (SQLException e) {
-            throw new TM3Exception(e);
-        }
-    }
+	public long getCount() throws TM3Exception
+	{
+		try
+		{
+			return getTm().getStorageInfo().getTuStorage()
+					.getTuCountByLocalesAndParamMap(localeList, m_paramMap);
+		}
+		catch (SQLException e)
+		{
+			throw new TM3Exception(e);
+		}
+	}
 
     @Override
     public long getTuvCount() throws TM3Exception {
@@ -69,29 +75,28 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
         this.increment = increment;
     }
         
-    class LocaleTusIterator extends AbstractDataHandle<T>.TuIterator {
-        @Override
-        protected void loadPage() {
-            try {
-                List<TM3Tu<T>> page;
-                if(m_jobAttrinbuteSet == null || m_jobAttrinbuteSet.size() == 0)
-            	{
-                	page= getTm().getStorageInfo().getTuStorage()
-                    	.getTuPageByLocales(startId, increment, localeList, getStart(), getEnd());
-            	}
-                else
-                {
-                	page= getTm().getStorageInfo().getTuStorage()
-                		.getTuPageByLocales(startId, increment, localeList, getStart(), getEnd(),m_jobAttrinbuteSet);
-                }
-                if (page.size() > 0) {
-                    startId = page.get(page.size() - 1).getId();
-                    currentPage = page.iterator();
-                }
-            }
-            catch (SQLException e) {
-                throw new TM3Exception(e);
-            }
-        }
-    }
+	class LocaleTusIterator extends AbstractDataHandle<T>.TuIterator
+	{
+		@Override
+		protected void loadPage()
+		{
+			try
+			{
+				List<TM3Tu<T>> page = getTm()
+						.getStorageInfo()
+						.getTuStorage()
+						.getTuPageByLocalesAndParamMap(startId, increment,
+								localeList, m_paramMap);
+				if (page.size() > 0)
+				{
+					startId = page.get(page.size() - 1).getId();
+					currentPage = page.iterator();
+				}
+			}
+			catch (SQLException e)
+			{
+				throw new TM3Exception(e);
+			}
+		}
+	}
 }

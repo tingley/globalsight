@@ -280,9 +280,14 @@ public interface TM3Tm<T extends TM3Data> {
      * @return handle to the requested TU data
      */
     public TM3Handle<T> getAllData(Date start, Date end);
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public TM3Handle<T> getAllData(Date start, Date end, Set<String> jobAttributeSet);
     
+	public TM3Handle<T> getAllDataByParamMap(Map<String, Object> paramMap);
+
     /**
      * Get a handle to all the TU data in this TM that includes 
      * a TUV with the specified locale, optionally
@@ -291,16 +296,21 @@ public interface TM3Tm<T extends TM3Data> {
      * individual TUs.
      *
      * Note this TM3Handle does not support the purge method.
-     * 
      * @param locale TUV locale with which to select TUs
      * @param start (optional) start point of data range
      * @param end (optional) end point of data range
      * @return handle to the requested TU data
      */
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end);
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end,  Set<String> jobAttributeSet);
     
+	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
+			Map<String, Object> paramMap);
+
     /**
      * Get a handle to all segments in this TM whose IDs are included
      * in the specified set of ids.
@@ -313,7 +323,6 @@ public interface TM3Tm<T extends TM3Data> {
     /**
      * Get a handle to all segments in this TM that satisfy a given set of
      * attribute criteria.
-     * 
      * @param attrs map of attribute/value pairs
      * @param start (optional) start point of the data range, or null
      * @param end (optional) start point of the data range, or null
@@ -321,10 +330,15 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
                                             Date start, Date end);
-    
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
             Date start, Date end,  Set<String> jobAttributeSet);
 
+	public TM3Handle<T> getDataByAttributesAndParamMap(
+			Map<TM3Attribute, Object> attrs, Map<String, Object> paramMap);
 
     /**
      * Remove TUVs by locale.

@@ -817,7 +817,19 @@ function contextForPage(url, e, displayName)
     var lb_context_item_popup_editor ;
     var fontB1 = "<B>", fontB2 = "</B>";
     displayName = pageNames[displayName];
-    var showInContextReview = (displayName && (displayName.toLowerCase().match(/\.indd$/) || displayName.toLowerCase().match(/\.idml$/)));
+    
+    var fileName = displayName;
+    if (fileName.match(/\)$/))
+    {
+    	fileName = displayName.substr(0, displayName.lastIndexOf("("));
+    	if (fileName.match(/ $/))
+    	{
+    		fileName = fileName.substr(0, fileName.length - 1);
+    	}
+    }
+    
+    var showInContextReview = displayName && (fileName.toLowerCase().match(/\.indd$/) || fileName.toLowerCase().match(/\.idml$/)
+    		|| fileName.toLowerCase().match(/\.docx$/) || fileName.toLowerCase().match(/\.pptx$/) || fileName.toLowerCase().match(/\.xlsx$/));
     var inctxTitle = "Open In Context Review";
     
     <% if (!enabledInContextReview) {%>
@@ -1233,20 +1245,10 @@ function searchPages(){
 	                    if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_FULL))
 	                    {
 	                    	treeParam=TaskDetailHelper.printPageLink(out, pageName, pageUrl, hasEditPerm, i);
-	                    	%>
-	                    	<script type="text/javascript">
-	                    	pageNames[<%=i%>] = "<%=pageName%>";
-	                    	</script>
-	                    	<% 
 	                    }
 	                    else if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_SHORT))
 	                    {
 	                    	treeParam=TaskDetailHelper.printPageLinkShort(out, pageName, pageUrl, hasEditPerm, i);
-	                    	%>
-	                    	<script type="text/javascript">
-	                    	pageNames[<%=i%>] = "<%=pageName%>";
-	                    	</script>
-	                    	<% 
 	                    }
 	                    treeLink.append(treeParam+"?");
 						%>
@@ -1632,5 +1634,33 @@ function translatedText()
     	}
 	},10);
 }
+<%
+int targetPgsSize = targetPgs == null ? 0 : targetPgs.size();
+if (targetPgsSize > 0)
+{
+	TargetPage tPage = null;
+    String pageName = null;
+    for (int i = 0; i < targetPgs.size(); i++)
+    {
+    	tPage = (TargetPage)targetPgs.get(i);
+        boolean isExtracted =
+          tPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE;
+
+        if (isExtracted)
+        {
+            pageName = tPage.getExternalPageId().replace("\\", "/");
+        }
+        else
+        {
+            UnextractedFile unextractedFile =
+              (UnextractedFile)tPage.getPrimaryFile();
+            pageName = unextractedFile.getStoragePath().replace("\\", "/");
+        }
+        if (isExtracted)
+        {%>
+           	pageNames[<%=i%>] = "<%=pageName%>";
+      <%}
+    }
+}%>
 
 </SCRIPT>

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -12,6 +13,7 @@ import java.util.Set;
 class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 	
 	private Set<String> m_jobAttributeSet;
+	private Map<String, Object> m_paramMap;
 
     AllTusDataHandle(BaseTm<T> tm) {
         super(tm);
@@ -26,23 +28,25 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
         m_jobAttributeSet = jobAttributeSet;
     }
 
+	AllTusDataHandle(BaseTm<T> tm, Map<String, Object> paramMap)
+	{
+		super(tm);
+		m_paramMap = paramMap;
+	}
+
     @Override
-    public long getCount() throws TM3Exception {
-        try {
-        	if(m_jobAttributeSet == null || m_jobAttributeSet.size() == 0)
-        	{
-        		return getTm().getStorageInfo().getTuStorage()
-        			.getTuCount(getStart(), getEnd());
-        	}
-        	else
-        	{
-        		return getTm().getStorageInfo().getTuStorage()
-        			.getTuCount(getStart(), getEnd(), m_jobAttributeSet);
-        	}
-        } catch (SQLException e) {
-            throw new TM3Exception(e);
-        }
-    }
+	public long getCount() throws TM3Exception
+	{
+		try
+		{
+			return getTm().getStorageInfo().getTuStorage()
+					.getTuCountByParamMap(m_paramMap);
+		}
+		catch (SQLException e)
+		{
+			throw new TM3Exception(e);
+		}
+	}
 
     @Override
     public long getTuvCount() throws TM3Exception {
@@ -72,24 +76,17 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     class AllTusIterator extends AbstractDataHandle<T>.TuIterator {
         @Override
         protected void loadPage() {
-            try {
-                // Load 100 at a time
-                List<TM3Tu<T>> page;
-                if(m_jobAttributeSet == null || m_jobAttributeSet.size() == 0)
-                {
-                	page= getTm().getStorageInfo().getTuStorage()
-                		.getTuPage(startId, 100, getStart(), getEnd());
-                }
-                else
-                {
-                	page= getTm().getStorageInfo().getTuStorage()
-            			.getTuPage(startId, 100, getStart(), getEnd(), m_jobAttributeSet);
-                }
-                if (page.size() > 0) {
-                    startId = page.get(page.size() - 1).getId();
-                    currentPage = page.iterator();
-                }
-            }
+			try
+			{
+				// Load 100 at a time
+				List<TM3Tu<T>> page = getTm().getStorageInfo().getTuStorage()
+						.getTuPageByParamMap(startId, 100, m_paramMap);
+				if (page.size() > 0)
+				{
+					startId = page.get(page.size() - 1).getId();
+					currentPage = page.iterator();
+				}
+			}
             catch (SQLException e) {
                 throw new TM3Exception(e);
             }

@@ -910,21 +910,37 @@ abstract class TuStorage<T extends TM3Data>
     // Data Handle backends
     //
 
-    public abstract long getTuCount(Date start, Date end) throws SQLException;
 
+    public abstract long getTuCount(Date start, Date end) throws SQLException;
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract long getTuCount(Date start, Date end,
             Set<String> jobAttributeSet) throws SQLException;
+
+	public abstract long getTuCountByParamMap(Map<String, Object> paramMap)
+			throws SQLException;
 
     public abstract long getTuvCount(Date start, Date end) throws SQLException;
 
     public abstract void deleteTus(Date start, Date end) throws SQLException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract long getTuCountByLocales(List<TM3Locale> localeList,
             Date start, Date end) throws SQLException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract long getTuCountByLocales(List<TM3Locale> localeList,
             Date start, Date end, Set<String> jobAttributeSet)
             throws SQLException;
+
+	public abstract long getTuCountByLocalesAndParamMap(
+			List<TM3Locale> localeList, Map<String, Object> paramMap)
+			throws SQLException;
 
     public abstract long getTuvCountByLocales(List<TM3Locale> localeList,
             Date start, Date end) throws SQLException;
@@ -932,15 +948,26 @@ abstract class TuStorage<T extends TM3Data>
     public abstract void deleteTuvsByLocale(TM3Locale locale)
             throws SQLException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract long getTuCountByAttributes(
             Map<TM3Attribute, Object> inlineAttrs,
             Map<TM3Attribute, String> customAttrs, Date start, Date end)
             throws SQLException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract long getTuCountByAttributes(
             Map<TM3Attribute, Object> inlineAttrs,
             Map<TM3Attribute, String> customAttrs, Date start, Date end,
             Set<String> jobAttributeSet) throws SQLException;
+
+	public abstract long getTuCountByAttributesAndParamMap(
+			Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
+			throws SQLException;
 
     public abstract long getTuvCountByAttributes(
             Map<TM3Attribute, Object> inlineAttrs,
@@ -948,30 +975,60 @@ abstract class TuStorage<T extends TM3Data>
             throws SQLException;
 
     // Paging interface for data handles
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract List<TM3Tu<T>> getTuPage(long startId, int count,
             Date start, Date end) throws SQLException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract List<TM3Tu<T>> getTuPage(long startId, int count,
             Date start, Date end, Set<String> jobAttributeSet)
             throws SQLException;
 
+	public abstract List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
+			Map<String, Object> paramMap) throws SQLException;
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
             List<TM3Locale> localeList, Date start, Date end)
             throws SQLException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
             List<TM3Locale> localeList, Date start, Date end,
             Set<String> jobAttributeSet) throws SQLException;
 
+	public abstract List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
+			int count, List<TM3Locale> localeList, Map<String, Object> paramMap)
+			throws SQLException;
+
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract List<TM3Tu<T>> getTuPageByAttributes(long startId,
             int count, Map<TM3Attribute, Object> inlineAttrs,
             Map<TM3Attribute, String> customAttrs, Date start, Date end)
             throws SQLException;
 
+	/**
+	 * @deprecated Not in use since 8.6.2
+	 * */
     public abstract List<TM3Tu<T>> getTuPageByAttributes(long startId,
             int count, Map<TM3Attribute, Object> inlineAttrs,
             Map<TM3Attribute, String> customAttrs, Date start, Date end,
             Set<String> jobAttributeSet) throws SQLException;
+
+	public abstract List<TM3Tu<T>> getTuPageByAttributesAndParamMap(
+			long startId, int count, Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
+			throws SQLException;
 
     // Support for the "get tu by tuv" hack.
     protected abstract long getTuIdByTuvId(Long tuvId) throws SQLException;

@@ -209,6 +209,12 @@ public class ExportOptions
         public String m_domain = "";
         public String m_project = "";
         public String m_identifyKey = "";
+        //tu id 
+        public String m_tuId = "";
+        //sid
+        public String m_sid = "";
+        //is regex
+        public String m_regex = "";
         /**
          * List of FilterCondition objects that describe filters that
          * are not applicable in the database but need to be evaluated
@@ -243,6 +249,15 @@ public class ExportOptions
             result.append("<modifiedbefore>");
             result.append(EditUtil.encodeXmlEntities(m_modifiedBefore));
             result.append("</modifiedbefore>");
+            result.append("<tuId>");
+            result.append(EditUtil.encodeXmlEntities(m_tuId));
+            result.append("</tuId>");
+            result.append("<stringId>");
+            result.append(EditUtil.encodeXmlEntities(m_sid));
+            result.append("</stringId>");
+            result.append("<regex>");
+            result.append(EditUtil.encodeXmlEntities(m_regex));
+            result.append("</regex>");
             result.append("<status>");
             result.append(EditUtil.encodeXmlEntities(m_status));
             result.append("</status>");
@@ -443,6 +458,13 @@ public class ExportOptions
             elem = (Element)p_root.selectSingleNode("//filterOptions");
             m_filterOptions.m_createdAfter = elem.elementText("createdafter");
             m_filterOptions.m_createdBefore = elem.elementText("createdbefore");
+            m_filterOptions.m_modifiedAfter = elem.elementText("modifiedafter");
+            m_filterOptions.m_modifiedBefore = elem.elementText("modifiedbefore");
+            m_filterOptions.m_createdBy = elem.elementText("createdby");
+            m_filterOptions.m_modifiedBy = elem.elementText("modifiedby");
+            m_filterOptions.m_tuId = elem.elementText("tuId");
+            m_filterOptions.m_sid = elem.elementText("stringId");
+            m_filterOptions.m_regex = elem.elementText("regex");
             m_filterOptions.m_identifyKey = elem.elementText("identifyKey");
             m_filterOptions.m_conditions.clear();
             

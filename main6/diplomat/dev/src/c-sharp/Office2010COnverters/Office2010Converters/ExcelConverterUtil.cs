@@ -34,7 +34,7 @@ namespace GlobalSight.Office2010Converters
         {
             try
             {
-                String excelDir = dir + "\\excel2010";
+                String excelDir = dir + "\\excel";
                 DirectoryInfo watchDir = new DirectoryInfo(excelDir);
                 watchDir.Create();
 

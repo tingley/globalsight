@@ -34,7 +34,7 @@ namespace GlobalSight.Office2010Converters
         {
             try
             {
-                String pptDir = dir + "\\powerpoint2010";
+                String pptDir = dir + "\\powerpoint";
                 DirectoryInfo watchDir = new DirectoryInfo(pptDir);
                 watchDir.Create();
 

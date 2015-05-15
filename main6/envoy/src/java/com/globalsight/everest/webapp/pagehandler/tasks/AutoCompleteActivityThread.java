@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Transaction;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
@@ -47,10 +48,12 @@ public class AutoCompleteActivityThread implements Runnable
     {
         while (true)
         {
+            Transaction tx = HibernateUtil.getTransaction();
 			String taskhql = "from TaskImpl t where t.stateStr='"
 					+ Task.STATE_ACCEPTED_STR + "'";
             ArrayList<Task> listTask = (ArrayList<Task>) HibernateUtil
                     .search(taskhql);
+            HibernateUtil.commit(tx);
             String acceptor = null;
             if (listTask != null && listTask.size() > 0)
             {
@@ -59,11 +62,11 @@ public class AutoCompleteActivityThread implements Runnable
                 {
                 	try
                 	{
+                        CompanyThreadLocal.getInstance().setIdValue(
+                                t.getCompanyId());
                         Activity act = jobHandler.getActivity(t.getTaskName());
                         if (act.getAutoCompleteActivity())
                         {
-							CompanyThreadLocal.getInstance().setIdValue(
-									t.getCompanyId());
                             acceptor = t.getAcceptor();
                             Job job = jobHandler.getJobById(t.getJobId());
 

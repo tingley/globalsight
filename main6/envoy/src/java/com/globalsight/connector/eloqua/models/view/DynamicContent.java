@@ -14,17 +14,33 @@
  *  limitations under the License.
  *  
  */
+package com.globalsight.connector.eloqua.models.view;
 
+import java.util.ArrayList;
+import java.util.List;
 
-
-package com.globalsight.everest.integration.ling.tm;
-
-import java.rmi.Remote;
-
-import com.globalsight.ling.tm.Indexer;
-
-public interface IndexerWLRemote
-    extends Indexer, Remote
+public class DynamicContent
 {
-    public static final String SERVICE_NAME = "Indexer";
+    private String defaultContent = "";
+    private List<String> roles = new ArrayList<String>();
+
+    public String getDefaultContent()
+    {
+        return defaultContent;
+    }
+
+    public void setDefaultContent(String defaultContent)
+    {
+        this.defaultContent = defaultContent;
+    }
+
+    public List<String> getRoles()
+    {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles)
+    {
+        this.roles = roles;
+    }
 }

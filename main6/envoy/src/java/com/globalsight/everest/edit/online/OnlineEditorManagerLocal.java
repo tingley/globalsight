@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.edit.online;
 
+import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -108,6 +109,8 @@ import com.globalsight.terminology.Hitlist.Hit;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -832,7 +835,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         try
         {
             SourcePage srcPage = getSourcePage(p_srcPageId);
-
+            File previewFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath()  + "/" + srcPage.getExternalPageId() + ".preview.html");
+            if (p_options.getViewMode() == VIEWMODE_PREVIEW && previewFile.exists())
+            {
+                result = GxmlUtil.cleanUpDisplayHtml(FileUtil.readFile(previewFile, "UTF-8"));
+                return result;
+            }
             // Load the TUs into the Toplink cache to prevent called
             // code from loading each TU individually.
             getPageTus(srcPage);

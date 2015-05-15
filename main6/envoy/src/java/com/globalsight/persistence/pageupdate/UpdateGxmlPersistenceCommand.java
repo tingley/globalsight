@@ -37,7 +37,6 @@ import com.globalsight.util.database.PreparedStatementBatch;
  * TUVs are updated, unmodified but reordered TUs and TUVs are ordered into
  * their new place, and template parts are re-created.
  * 
- * @deprecated
  */
 public class UpdateGxmlPersistenceCommand extends PersistenceCommand
 {

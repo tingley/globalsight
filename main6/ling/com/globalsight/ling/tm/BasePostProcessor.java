@@ -24,18 +24,13 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.persistence.StoredProcCaller;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.tm2.BaseTmTuv;
 
 abstract class BasePostProcessor
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            BasePostProcessor.class);
-
-    private static final String LEV_MATCH_SAVE_SP = "fuzzy_idx.ins_lev_match";
+	private static final Logger CATEGORY = Logger
+			.getLogger(BasePostProcessor.class);
 
     private static final String BATCH_INSERT_UNIT_PROP_NAME =
         "leverager.batchInsertUnit";
@@ -132,42 +127,6 @@ abstract class BasePostProcessor
     {
         return (BaseTmTuv)m_originalTuvs.get(new Long(p_tuvId));
     }
-
-    /**
-     * Save a collection of CandidateMatch to the database.
-    */
-    public void saveHits()
-        throws LingManagerException
-    {
-        Collection leverageMatches = m_lmToBeSaved.getLeverageMatches();
-        // save all the leverage matches for this leverage group
-        try
-        {
-            StoredProcCaller.insertLeverageMatches(m_sourcePageId,
-                                                         leverageMatches);
-        }
-        catch (PersistenceException ex)
-        {
-            CATEGORY.error("problem with stored procedure: " +
-                LEV_MATCH_SAVE_SP, ex);
-            throw new LingManagerException(ex);
-        }
-
-        // clear the cache
-        m_lmToBeSaved.clear();
-
-
-    }
-
-    public void saveHitsIfNecessary()
-        throws LingManagerException
-    {
-        if (m_lmToBeSaved.size() >= BATCH_INSERT_UNIT)
-        {
-            saveHits();
-        }
-    }
-
 
     protected void storeHits(Collection p_hits)
     {

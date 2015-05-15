@@ -29,19 +29,5 @@
                     type="long"/>
         </subclass>
 
-        <subclass name="com.globalsight.ling.tm3.core.MultilingualTm" 
-                discriminator-value="1" />
-
-        <subclass name="com.globalsight.ling.tm3.core.BilingualTm" 
-                discriminator-value="2" >
-
-            <!-- Because TM3 is only loosely coupled to a locale 
-                 implementation, we can't use many-to-one here. -->
-            <property name="srcLocaleId" column="srcLocaleId"
-                type="long"/>
-            <property name="tgtLocaleId" column="tgtLocaleId"
-                type="long"/>
-
-        </subclass>
     </class>
 </hibernate-mapping>

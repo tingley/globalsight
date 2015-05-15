@@ -54,11 +54,15 @@ import com.globalsight.cxe.adapter.adobe.AdobeConfiguration;
 import com.globalsight.cxe.adapter.adobe.AdobeHelper;
 import com.globalsight.cxe.adapter.idml.IdmlConverter;
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlConverter;
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
+import com.globalsight.cxe.adapter.msoffice.PptxFileManager;
 import com.globalsight.cxe.adapter.quarkframe.FrameHelper;
 import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
 import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.cxe.util.fileImport.eventFlow.Category;
@@ -103,22 +107,18 @@ import com.lowagie.text.pdf.PdfWriter;
 
 public class PreviewPDFHelper implements PreviewPDFConstants
 {
-    private static final Logger LOGGER = Logger
-            .getLogger(PreviewPDFHelper.class);
+    private static final Logger LOGGER = Logger.getLogger(PreviewPDFHelper.class);
     private static SystemConfiguration m_sc = SystemConfiguration.getInstance();
     public static final Set<String> extensionSet = new HashSet<String>();
     // The Map for storing PDF future, the key is TargetPageID, the value is PDF
     // Future.
     private static final Map<String, Future<File>> createPDFMap = new ConcurrentHashMap<String, Future<File>>();
-    private static final ExecutorService serviceForINDD = Executors
-            .newSingleThreadExecutor();
-    private static final ExecutorService serviceForIDML = Executors
-            .newSingleThreadExecutor();
+    private static final ExecutorService serviceForINDD = Executors.newSingleThreadExecutor();
+    private static final ExecutorService serviceForIDML = Executors.newSingleThreadExecutor();
 
     private static final int BUFFERSIZE = 4096;
 
-    private static final String[] PROPERTY_FILES = {
-            "/properties/Logger.properties",
+    private static final String[] PROPERTY_FILES = { "/properties/Logger.properties",
             "/properties/AdobeAdapter.properties" };
 
     static
@@ -161,8 +161,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     {
         for (long workflowId : p_workflowIdSet)
         {
-            Workflow workflow = ServerProxy.getWorkflowManager()
-                    .getWorkflowById(workflowId);
+            Workflow workflow = ServerProxy.getWorkflowManager().getWorkflowById(workflowId);
             for (TargetPage tp : workflow.getTargetPages())
             {
                 String key = getKey(tp, p_userId);
@@ -184,15 +183,13 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             Page page = null;
             if (isTarget)
             {
-                TargetPage targetPage = ServerProxy.getPageManager()
-                        .getTargetPage(p_pageId);
+                TargetPage targetPage = ServerProxy.getPageManager().getTargetPage(p_pageId);
 
                 page = targetPage;
             }
             else
             {
-                SourcePage sourcePage = ServerProxy.getPageManager()
-                        .getSourcePage(p_pageId);
+                SourcePage sourcePage = ServerProxy.getPageManager().getSourcePage(p_pageId);
 
                 page = sourcePage;
             }
@@ -219,8 +216,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
         catch (Exception e)
         {
-            String msg = "Getting PDF File Error, with target page id:"
-                    + p_pageId;
+            String msg = "Getting PDF File Error, with target page id:" + p_pageId;
             msg += ", and by userId:" + p_userId;
             LOGGER.error(msg, e);
         }
@@ -248,8 +244,25 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
         else if (externalPageId.endsWith(IDML_SUFFIX))
         {
-            task = new CreatePDFTask(p_page, p_userId, ADOBE_TYPE_IDML,
-                    isTarget);
+            task = new CreatePDFTask(p_page, p_userId, ADOBE_TYPE_IDML, isTarget);
+            future = serviceForIDML.submit(task);
+            createPDFMap.put(key, future);
+        }
+        else if (externalPageId.endsWith(DOCX_SUFFIX))
+        {
+            task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_DOCX, isTarget);
+            future = serviceForIDML.submit(task);
+            createPDFMap.put(key, future);
+        }
+        else if (externalPageId.endsWith(PPTX_SUFFIX))
+        {
+            task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_PPTX, isTarget);
+            future = serviceForIDML.submit(task);
+            createPDFMap.put(key, future);
+        }
+        else if (externalPageId.endsWith(XLSX_SUFFIX))
+        {
+            task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_XLSX, isTarget);
             future = serviceForIDML.submit(task);
             createPDFMap.put(key, future);
         }
@@ -265,8 +278,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_userId
      *            User ID
      */
-    public void setJobDetailsPDFsBO(Workflow p_wf, JobDetailsPDFsBO p_pdfBO,
-            String p_userId)
+    public void setJobDetailsPDFsBO(Workflow p_wf, JobDetailsPDFsBO p_pdfBO, String p_userId)
     {
         long totalPDFFileNumber = 0, existPDFFileNumber = 0;
         long companyId = p_wf.getCompanyId();
@@ -305,8 +317,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_pdfFile
      * @param p_response
      */
-    public static void writeOutFile(File p_pdfFile,
-            HttpServletResponse p_response, String p_action)
+    public static void writeOutFile(File p_pdfFile, HttpServletResponse p_response, String p_action)
     {
         BufferedInputStream bis = null;
         try
@@ -327,20 +338,18 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
     }
 
-    public static File setCopyOnlyPermission(File p_file)
-            throws DocumentException, IOException
+    public static File setCopyOnlyPermission(File p_file) throws DocumentException, IOException
     {
         PdfReader reader = new PdfReader(p_file.getAbsolutePath());
-        String outPutFile = FileUtils.getPrefix(p_file.getAbsolutePath())
-                + "_hidebars.pdf";
+        String outPutFile = FileUtils.getPrefix(p_file.getAbsolutePath()) + "_hidebars.pdf";
         int n = reader.getNumberOfPages();
         Rectangle psize = reader.getPageSize(1);
         float width = psize.height();
         float height = psize.width();
         Document document = new Document(new Rectangle(width, height));
         PdfCopy writer = new PdfCopy(document, new FileOutputStream(outPutFile));
-        writer.setEncryption(PdfWriter.STRENGTH40BITS, null, null,
-                PdfWriter.ALLOW_COPY | PdfWriter.ALLOW_PRINTING);
+        writer.setEncryption(PdfWriter.STRENGTH40BITS, null, null, PdfWriter.ALLOW_COPY
+                | PdfWriter.ALLOW_PRINTING);
         try
         {
             document.open();
@@ -356,8 +365,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
         catch (IllegalArgumentException e)
         {
-            if (!e.getMessage().equals(
-                    "PdfReader not opened with owner password"))
+            if (!e.getMessage().equals("PdfReader not opened with owner password"))
             {
                 throw new EnvoyServletException(e);
             }
@@ -392,16 +400,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         int fileVersionType = p_params.getVersionType();
         if (ADOBE_CS2 == fileVersionType || ADOBE_CS3 == fileVersionType
                 || ADOBE_CS4 == fileVersionType || ADOBE_CS5 == fileVersionType
-                || ADOBE_CS5_5 == fileVersionType
-                || ADOBE_CS6 == fileVersionType)
+                || ADOBE_CS5_5 == fileVersionType || ADOBE_CS6 == fileVersionType)
             return true;
 
         return false;
     }
 
-    File createPDF4INDDAndInx(Page p_page, String p_userId, boolean isTarget)
-            throws JobException, RemoteException, GeneralException,
-            NamingException
+    File createPDF4INDDAndInx(Page p_page, String p_userId, boolean isTarget) throws JobException,
+            RemoteException, GeneralException, NamingException
     {
         TargetPage tp = isTarget ? (TargetPage) p_page : null;
         SourcePage sp = isTarget ? null : (SourcePage) p_page;
@@ -410,14 +416,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         String pagePath = getPagePath(p_page, isTarget);
         long pageId = p_page.getId();
         long companyId = isTarget ? tp.getCompanyId() : sp.getCompanyId();
-        Job job = isTarget ? tp.getWorkflowInstance().getJob() : ServerProxy
-                .getJobHandler().getJobById(sp.getJobId());
+        Job job = isTarget ? tp.getWorkflowInstance().getJob() : ServerProxy.getJobHandler()
+                .getJobById(sp.getJobId());
         File pdfFile = getPreviewPdf(pagePath, companyId, null);
         File oldPdfFile = getOldPreviewPdf(pagePath, companyId);
         PreviewPDFBO params = determineConversionParameters(spId);
 
-        return createPDF4INDDAndInx(pagePath, pdfFile, oldPdfFile, job,
-                p_userId, companyId, p_page, params, isTarget);
+        return createPDF4INDDAndInx(pagePath, pdfFile, oldPdfFile, job, p_userId, companyId,
+                p_page, params, isTarget);
     }
 
     /**
@@ -438,9 +444,9 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      *            parameters for creating preview pdf.
      * @return
      */
-    private File createPDF4INDDAndInx(String p_pageName, File p_pdfFile,
-            File p_oldPdfFile, Job p_job, String p_userId, long p_companyId,
-            Page p_page, PreviewPDFBO p_params, boolean isTarget)
+    private File createPDF4INDDAndInx(String p_pageName, File p_pdfFile, File p_oldPdfFile,
+            Job p_job, String p_userId, long p_companyId, Page p_page, PreviewPDFBO p_params,
+            boolean isTarget)
     {
         String converterDir = null;
         Map<String, String> newFileNameMap = new HashMap<String, String>();
@@ -452,8 +458,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             long spId = isTarget ? tp.getSourcePage().getId() : sp.getId();
             long pageId = p_page.getId();
 
-            String trgLocale = isTarget ? tp.getGlobalSightLocale().toString()
-                    : sp.getGlobalSightLocale().toString();
+            String trgLocale = isTarget ? tp.getGlobalSightLocale().toString() : sp
+                    .getGlobalSightLocale().toString();
             converterDir = getConvertDir(p_params, true) + trgLocale;
             new File(converterDir).mkdirs();
 
@@ -463,31 +469,27 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             if (!f.exists())
             {
                 f.mkdirs();
-                copyFilesToNewTargetLocale(p_job, trgLocale, p_pageName,
-                        targetPageFolder, statusPageFolder, p_params,
-                        p_companyId);
+                copyFilesToNewTargetLocale(p_job, trgLocale, p_pageName, targetPageFolder,
+                        statusPageFolder, p_params, p_companyId);
             }
-            File previewDir = new File(AmbFileStoragePathUtils
-                    .getPdfPreviewDir(p_companyId).getAbsolutePath() + "");
-            String oriXmlFileName = getConvertedFileName(previewDir,
-                    p_pageName, trgLocale, p_job.getL10nProfile()
-                            .getTargetLocales());
+            File previewDir = new File(AmbFileStoragePathUtils.getPdfPreviewDir(p_companyId)
+                    .getAbsolutePath() + "");
+            String oriXmlFileName = getConvertedFileName(previewDir, p_pageName, trgLocale, p_job
+                    .getL10nProfile().getTargetLocales());
 
             // Upload indd and xmp file to converter.
             backupInddFile(newFileNameMap, getConvertDir(p_params, false),
-                    getConvertDir(p_params, true), trgLocale, oriXmlFileName,
-                    p_fileSuffix, p_job);
+                    getConvertDir(p_params, true), trgLocale, oriXmlFileName, p_fileSuffix, p_job);
             // Upload XML file to converter
             String xmlFilePath = converterDir + File.separator
                     + (String) newFileNameMap.get(XML_SUFFIX);
-            writeXMLFileToConvertDir(xmlFilePath, trgLocale, pageId, p_params,
-                    p_userId, isTarget);
+            writeXMLFileToConvertDir(xmlFilePath, trgLocale, pageId, p_params, p_userId, isTarget);
             // Upload command file to converter
             writeCommandFile(xmlFilePath, p_params);
 
             // Wait for Adobe Converter to convert
-            return readTargetPdfFile(xmlFilePath, p_pageName, trgLocale,
-                    p_userId, p_companyId, isTarget);
+            return readTargetPdfFile(xmlFilePath, p_pageName, trgLocale, p_userId, p_companyId,
+                    isTarget);
         }
         catch (InterruptedException e)
         {
@@ -534,23 +536,18 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         try
         {
-            String converterDir = getConvertDir(params, true) + File.separator
-                    + locale;
+            String converterDir = getConvertDir(params, true) + File.separator + locale;
             new File(converterDir).mkdirs();
 
-            String xmlFilePath = converterDir + File.separator
-                    + params.getRelSafeName();
-            File zipDir = getZipDir(new File(xmlFilePath),
-                    params.getSafeBaseFileName());
+            String xmlFilePath = converterDir + File.separator + params.getRelSafeName();
+            File zipDir = getZipDir(new File(xmlFilePath), params.getSafeBaseFileName());
             // write xml file
-            writeXMLFileToConvertDir(xmlFilePath, locale, pageid, params,
-                    p_userId, isTarget);
+            writeXMLFileToConvertDir(xmlFilePath, locale, pageid, params, p_userId, isTarget);
             IdmlHelper.split(zipDir.getAbsolutePath());
             IDMLFontMappingHelper idmlFontMappinghelper = new IDMLFontMappingHelper();
-            idmlFontMappinghelper.processIDMLFont(zipDir.getAbsolutePath(),
-                    locale);
-            String idmlPath = converter.convertXmlToIdml(
-                    params.getSafeBaseFileName(), zipDir.getAbsolutePath());
+            idmlFontMappinghelper.processIDMLFont(zipDir.getAbsolutePath(), locale);
+            String idmlPath = converter.convertXmlToIdml(params.getSafeBaseFileName(),
+                    zipDir.getAbsolutePath());
             IDMLFontMappingHelper.restoreIDMLFont(zipDir.getAbsolutePath());
             converter.convertToPdf(new File(idmlPath), pdfFile, locale);
         }
@@ -567,26 +564,161 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         return pdfFile;
     }
 
+    File createPDF4Office(Page p_page, String p_userId, boolean isTarget)
+    {
+        TargetPage tp = isTarget ? (TargetPage) p_page : null;
+        SourcePage sp = isTarget ? null : (SourcePage) p_page;
+        long spId = isTarget ? tp.getSourcePage().getId() : sp.getId();
+
+        OfficeXmlConverter oxc = new OfficeXmlConverter();
+        String trgPagePath = getPagePath(p_page, isTarget);
+        if (trgPagePath.startsWith("("))
+        {
+            int index = trgPagePath.indexOf(") ");
+
+            if (index != -1)
+            {
+                trgPagePath = trgPagePath.substring(index + 2);
+            }
+        }
+
+        long pageid = p_page.getId();
+        long companyId = isTarget ? tp.getCompanyId() : sp.getCompanyId();
+        String locale = p_page.getGlobalSightLocale().toString();
+        String srcLocale = isTarget ? tp.getSourcePage().getGlobalSightLocale().toString() : sp
+                .getGlobalSightLocale().toString();
+        File pdfFile = getPreviewPdf(trgPagePath, companyId, null);
+        PreviewPDFBO params = determineConversionParameters(spId);
+        File zipDir = null;
+        File officeFile = null;
+
+        try
+        {
+            String converterDir = getConvertDir(params, true) + File.separator + locale;
+            new File(converterDir).mkdirs();
+            String xmlFilePath = converterDir + File.separator + params.getRelSafeName();
+            zipDir = getZipDir(new File(xmlFilePath), params.getSafeBaseFileName());
+            if (!zipDir.exists())
+            {
+                zipDir.mkdirs();
+            }
+
+            String o2010path = AmbFileStoragePathUtils.getOffice2010ConversionPath();
+            String o2010DirSrc = o2010path + File.separator + srcLocale + File.separator
+                    + zipDir.getName();
+            String o2010Dir = o2010path + File.separator + locale + File.separator
+                    + zipDir.getName();
+            File f_o2010DirSrc = new File(o2010DirSrc);
+            File f_o2010Dir = new File(o2010Dir);
+            File f_src = f_o2010Dir;
+
+            if (!f_o2010Dir.exists())
+            {
+                f_src = f_o2010DirSrc;
+            }
+
+            // copy all files to converter dir
+            FileCopier.copyDir(f_src, zipDir.getPath());
+
+            // write xml file
+            writeXMLFileToConvertDir(xmlFilePath, locale, pageid, params, p_userId, isTarget);
+
+            if ("pptx".equals(params.getFileType()))
+            {
+                PptxFileManager pptxFileManager = new PptxFileManager();
+                MSOffice2010Filter msf = new MSOffice2010Filter();
+
+                pptxFileManager.setFilter(msf);
+                pptxFileManager.splitFile(zipDir.getPath());
+            }
+
+            String officePath = oxc.convertXmlToOffice(params.getSafeBaseFileName(),
+                    zipDir.getAbsolutePath());
+            officeFile = new File(officePath);
+            oxc.convertToPdf(params.getFileType(), officeFile, pdfFile, locale);
+        }
+        catch (Exception e)
+        {
+            StringBuffer msg = new StringBuffer("Create PDF error for page:");
+            msg.append(trgPagePath).append(", by user:").append(p_userId);
+            LOGGER.error(msg.toString(), e);
+        }
+        finally
+        {
+            if (zipDir != null && zipDir.exists())
+            {
+                try
+                {
+                    FileUtil.deleteFile(zipDir);
+                }
+                catch (Exception e2)
+                {
+                    // ignore
+                }
+            }
+            
+            if (officeFile != null && officeFile.exists())
+            {
+                try
+                {
+                    FileUtil.deleteFile(officeFile);
+                }
+                catch (Exception e2)
+                {
+                    // ignore
+                }
+            }
+        }
+
+        return pdfFile;
+    }
+
     /**
      * Returns the convert directory
      * 
      * @return
      * @throws Exception
      */
-    public String getConvertDir(PreviewPDFBO p_params, boolean isIncontextReview)
-            throws Exception
+    public String getConvertDir(PreviewPDFBO p_params, boolean isIncontextReview) throws Exception
     {
         int fileVersionType = p_params.getVersionType();
         if (fileVersionType == ADOBE_TYPE_IDML)
         {
             return IdmlHelper.getConversionDir();
         }
+        else if (fileVersionType == TYPE_OFFICE_DOCX || fileVersionType == TYPE_OFFICE_PPTX
+                || fileVersionType == TYPE_OFFICE_XLSX)
+        {
+            StringBuffer convDir = null;
+            convDir = new StringBuffer(
+                    m_sc.getStringParameter(SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE));
+
+            convDir.append(File.separator);
+
+            switch (fileVersionType)
+            {
+                case TYPE_OFFICE_DOCX:
+                    convDir.append("word");
+                    break;
+
+                case TYPE_OFFICE_PPTX:
+                    convDir.append("powerpoint");
+                    break;
+
+                case TYPE_OFFICE_XLSX:
+                    convDir.append("excel");
+                    break;
+            }
+            convDir.append(File.separator);
+
+            return convDir.toString();
+
+        }
         else if (isIncontextReview)
         {
             StringBuffer convDir = null;
             if (fileVersionType == ADOBE_CS2 || fileVersionType == ADOBE_CS4
-                    || fileVersionType == ADOBE_CS5
-                    || fileVersionType == ADOBE_CS5_5
+                    || fileVersionType == ADOBE_CS5 || fileVersionType == ADOBE_CS5_5
                     || fileVersionType == ADOBE_CS6)
             {
                 convDir = new StringBuffer(
@@ -664,29 +796,25 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_trgPageName
      * @throws Exception
      */
-    private void copyFilesToNewTargetLocale(Job p_job, String p_trgLocale,
-            String p_trgPageName, String p_trgPageFolder,
-            String p_statusFolder, PreviewPDFBO p_params, long p_companyId)
+    private void copyFilesToNewTargetLocale(Job p_job, String p_trgLocale, String p_trgPageName,
+            String p_trgPageFolder, String p_statusFolder, PreviewPDFBO p_params, long p_companyId)
             throws Exception
     {
         String existedLocale = null;
         String tarName = null;
         String prefix = FileUtils.getPrefix(p_trgPageName);
-        File previewDir = new File(AmbFileStoragePathUtils.getPdfPreviewDir(
-                p_companyId).getAbsolutePath());
-        File previewDir_inctx = new File(AmbFileStoragePathUtils
-                .getPdfPreviewDir(p_companyId).getAbsolutePath() + "_inctx");
+        File previewDir = new File(AmbFileStoragePathUtils.getPdfPreviewDir(p_companyId)
+                .getAbsolutePath());
+        File previewDir_inctx = new File(AmbFileStoragePathUtils.getPdfPreviewDir(p_companyId)
+                .getAbsolutePath() + "_inctx");
         String srcLocale = p_job.getSourceLocale().toString();
-        GlobalSightLocale[] allTrgLocales = p_job.getL10nProfile()
-                .getTargetLocales();
+        GlobalSightLocale[] allTrgLocales = p_job.getL10nProfile().getTargetLocales();
         for (GlobalSightLocale globalSightLocale : allTrgLocales)
         {
             existedLocale = globalSightLocale.toString();
 
-            String existedFolder = prefix.replaceFirst(p_trgLocale,
-                    existedLocale);
-            tarName = previewDir + File.separator + existedFolder
-                    + STATUS_SUFFIX;
+            String existedFolder = prefix.replaceFirst(p_trgLocale, existedLocale);
+            tarName = previewDir + File.separator + existedFolder + STATUS_SUFFIX;
 
             if (new File(tarName).exists())
             {
@@ -708,8 +836,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             return;
         }
 
-        String existedTpFolder = p_statusFolder.replaceFirst(p_trgLocale,
-                existedLocale);
+        String existedTpFolder = p_statusFolder.replaceFirst(p_trgLocale, existedLocale);
         File file = new File(existedTpFolder);
         File[] files = file.listFiles();
         if (files != null)
@@ -717,17 +844,15 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             for (int i = 0; i < files.length; i++)
             {
                 File f = files[i];
-                if (STATUS_SUFFIX.equalsIgnoreCase(f.getAbsolutePath()
-                        .substring(f.getAbsolutePath().lastIndexOf("."))))
+                if (STATUS_SUFFIX.equalsIgnoreCase(f.getAbsolutePath().substring(
+                        f.getAbsolutePath().lastIndexOf("."))))
                     FileCopier.copy(f, p_trgPageFolder);
             }
         }
 
-        copyAdobeFiles(
-                srcLocale,
-                p_trgLocale,
-                getConvertedFileName(previewDir, p_trgPageName, p_trgLocale,
-                        allTrgLocales), p_params);
+        copyAdobeFiles(srcLocale, p_trgLocale,
+                getConvertedFileName(previewDir, p_trgPageName, p_trgLocale, allTrgLocales),
+                p_params);
     }
 
     /**
@@ -737,19 +862,16 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @return
      * @throws IOException
      */
-    private String getConvertedFileName(File p_previewDir,
-            String p_targetPageName, String targetLocale,
-            GlobalSightLocale[] p_allTrgLocales) throws IOException
+    private String getConvertedFileName(File p_previewDir, String p_targetPageName,
+            String targetLocale, GlobalSightLocale[] p_allTrgLocales) throws IOException
     {
         String tarName = null;
         String prefix = FileUtils.getPrefix(p_targetPageName);
         for (GlobalSightLocale globalSightLocale : p_allTrgLocales)
         {
             String existedLocale = globalSightLocale.toString();
-            String existedFolder = prefix.replaceFirst(targetLocale,
-                    existedLocale);
-            tarName = p_previewDir + File.separator + existedFolder
-                    + STATUS_SUFFIX;
+            String existedFolder = prefix.replaceFirst(targetLocale, existedLocale);
+            tarName = p_previewDir + File.separator + existedFolder + STATUS_SUFFIX;
 
             if (new File(tarName).exists())
             {
@@ -770,9 +892,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             tarName = p_previewDir + File.separator + prefix + STATUS_SUFFIX;
 
             // CATEGORY.error(tarName + " does not exist");
-            throw new EnvoyServletException(
-                    EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF, tarName
-                            + " does not exist");
+            throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
+                    tarName + " does not exist");
         }
 
         BufferedReader br = null;
@@ -796,8 +917,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 br.close();
         }
 
-        return FileUtils.getPrefix(convertedFileName
-                .substring(convertedFileName.indexOf("=") + 1)) + XML_SUFFIX;
+        return FileUtils.getPrefix(convertedFileName.substring(convertedFileName.indexOf("=") + 1))
+                + XML_SUFFIX;
     }
 
     private void copyAdobeFiles(String p_existedLocale, String p_trgLocale,
@@ -808,21 +929,16 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         String fileName = FileUtils.getPrefix(p_convertedFileName);
 
         StringBuffer inddFile = new StringBuffer(conDir);
-        inddFile.append(p_existedLocale).append(File.separator)
-                .append(fileName).append(p_params.getFileSuffix());
+        inddFile.append(p_existedLocale).append(File.separator).append(fileName)
+                .append(p_params.getFileSuffix());
         StringBuffer xmpFile = new StringBuffer(conDir);
-        xmpFile.append(p_existedLocale).append(File.separator).append(fileName)
-                .append(XMP_SUFFIX);
+        xmpFile.append(p_existedLocale).append(File.separator).append(fileName).append(XMP_SUFFIX);
         StringBuffer pdfFile = new StringBuffer(conDir);
-        pdfFile.append(p_existedLocale).append(File.separator).append(fileName)
-                .append(PDF_SUFFIX);
+        pdfFile.append(p_existedLocale).append(File.separator).append(fileName).append(PDF_SUFFIX);
 
-        FileCopier.copy(new File(inddFile.toString()), conDir_inctxrv
-                + p_trgLocale);
-        FileCopier.copy(new File(xmpFile.toString()), conDir_inctxrv
-                + p_trgLocale);
-        FileCopier.copy(new File(pdfFile.toString()), conDir_inctxrv
-                + p_trgLocale);
+        FileCopier.copy(new File(inddFile.toString()), conDir_inctxrv + p_trgLocale);
+        FileCopier.copy(new File(xmpFile.toString()), conDir_inctxrv + p_trgLocale);
+        FileCopier.copy(new File(pdfFile.toString()), conDir_inctxrv + p_trgLocale);
     }
 
     /**
@@ -831,16 +947,13 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_conDir
      * @param p_xmlFileName
      */
-    private void backupInddFile(Map<String, String> fileMap,
-            String p_oriConDir, String p_conDir, String targetLocale,
-            String p_xmlFileName, String p_fileSuffix, Job p_job)
+    private void backupInddFile(Map<String, String> fileMap, String p_oriConDir, String p_conDir,
+            String targetLocale, String p_xmlFileName, String p_fileSuffix, Job p_job)
     {
         String fileNameWithoutSuffix = FileUtils.getPrefix(p_xmlFileName);
         String currentTime = String.valueOf(System.currentTimeMillis());
-        String targetInddName = currentTime + "_" + fileNameWithoutSuffix
-                + p_fileSuffix;
-        String targetXmpName = currentTime + "_" + fileNameWithoutSuffix
-                + XMP_SUFFIX;
+        String targetInddName = currentTime + "_" + fileNameWithoutSuffix + p_fileSuffix;
+        String targetXmpName = currentTime + "_" + fileNameWithoutSuffix + XMP_SUFFIX;
         String targetXmlName = currentTime + "_" + p_xmlFileName;
 
         L10nProfile lp = p_job.getL10nProfile();
@@ -850,8 +963,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         // get from target locale first
         String oriInddFileName = p_oriConDir + targetLocale + File.separator
                 + fileNameWithoutSuffix + p_fileSuffix;
-        String oriXmpFileName = p_oriConDir + targetLocale + File.separator
-                + fileNameWithoutSuffix + XMP_SUFFIX;
+        String oriXmpFileName = p_oriConDir + targetLocale + File.separator + fileNameWithoutSuffix
+                + XMP_SUFFIX;
         oriInddFile = new File(oriInddFileName);
         oriXmpFile = new File(oriXmpFileName);
         if (!oriInddFile.exists() || !oriXmpFile.exists())
@@ -864,10 +977,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         if (oriInddFile == null || oriXmpFile == null)
         {
             String srcLocale = lp.getSourceLocale().toString();
-            oriInddFileName = p_oriConDir + srcLocale + File.separator
-                    + fileNameWithoutSuffix + p_fileSuffix;
-            oriXmpFileName = p_oriConDir + srcLocale + File.separator
-                    + fileNameWithoutSuffix + XMP_SUFFIX;
+            oriInddFileName = p_oriConDir + srcLocale + File.separator + fileNameWithoutSuffix
+                    + p_fileSuffix;
+            oriXmpFileName = p_oriConDir + srcLocale + File.separator + fileNameWithoutSuffix
+                    + XMP_SUFFIX;
             oriInddFile = new File(oriInddFileName);
             oriXmpFile = new File(oriXmpFileName);
 
@@ -910,22 +1023,17 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         if (oriInddFile == null || oriXmpFile == null)
         {
-            oriInddFileName = p_oriConDir + targetLocale + File.separator
-                    + fileNameWithoutSuffix + p_fileSuffix;
-            LOGGER.error("Cannot find original indd and xmp file: "
-                    + oriInddFileName);
-            throw new EnvoyServletException(
-                    EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
-                    "Cannot find original indd and xmp file: "
-                            + oriInddFileName);
+            oriInddFileName = p_oriConDir + targetLocale + File.separator + fileNameWithoutSuffix
+                    + p_fileSuffix;
+            LOGGER.error("Cannot find original indd and xmp file: " + oriInddFileName);
+            throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
+                    "Cannot find original indd and xmp file: " + oriInddFileName);
         }
 
         // back up indd file
-        FileCopier.copyFile(oriInddFile, new File(p_conDir + targetLocale),
-                targetInddName);
+        FileCopier.copyFile(oriInddFile, new File(p_conDir + targetLocale), targetInddName);
         // back up xml file
-        FileCopier.copyFile(oriXmpFile, new File(p_conDir + targetLocale),
-                targetXmpName);
+        FileCopier.copyFile(oriXmpFile, new File(p_conDir + targetLocale), targetXmpName);
 
         fileMap.put(p_fileSuffix, targetInddName);
         fileMap.put(XMP_SUFFIX, targetXmpName);
@@ -937,9 +1045,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * 
      * @param p_request
      */
-    private void writeXMLFileToConvertDir(String p_xmlFilePath,
-            String p_trgLocale, long p_trgPageId, PreviewPDFBO p_params,
-            String uid, boolean isTarget) throws Exception
+    private void writeXMLFileToConvertDir(String p_xmlFilePath, String p_trgLocale,
+            long p_trgPageId, PreviewPDFBO p_params, String uid, boolean isTarget) throws Exception
     {
         ExportHelper ex = new ExportHelper();
         ex.setUserId(uid);
@@ -947,12 +1054,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             if (p_trgPageId == 0)
             {
-                throw new EnvoyServletException(
-                        EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
+                throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
                         "No target page found");
             }
-            String xml = ex.exportForPdfPreview(p_trgPageId, "UTF-8", false,
-                    true, isTarget);
+            String xml = ex.exportForPdfPreview(p_trgPageId, "UTF-8", false, true, isTarget);
             // GBS-2955
             if (isINDDAndInx(p_params))
             {
@@ -965,17 +1070,21 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             {
                 processed = xml;
             }
+            else if (p_params.getVersionType() == TYPE_OFFICE_DOCX
+                    || p_params.getVersionType() == TYPE_OFFICE_PPTX
+                    || p_params.getVersionType() == TYPE_OFFICE_XLSX)
+            {
+                processed = xml;
+            }
             // indd inx
             else
             {
                 FontMappingHelper fontMappinghelper = new FontMappingHelper();
-                processed = fontMappinghelper.processInddXml(p_trgLocale,
-                        processed);
+                processed = fontMappinghelper.processInddXml(p_trgLocale, processed);
             }
 
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(p_xmlFilePath.toString()),
-                    ExportConstants.UTF8), processed.length());
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                    p_xmlFilePath.toString()), ExportConstants.UTF8), processed.length());
             writer.write(processed);
             writer.close();
         }
@@ -990,22 +1099,18 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * 
      * @param p_xmlFileName
      */
-    private void writeCommandFile(String p_xmlFileName, PreviewPDFBO p_params)
-            throws IOException
+    private void writeCommandFile(String p_xmlFileName, PreviewPDFBO p_params) throws IOException
     {
-        String commandFileName = FileUtils.getPrefix(p_xmlFileName)
-                + IR_COMMAND_SUFFIX;
+        String commandFileName = FileUtils.getPrefix(p_xmlFileName) + IR_COMMAND_SUFFIX;
         StringBuffer text = new StringBuffer();
         text.append("ConvertFrom=xml").append("\r\n");
         text.append("ConvertTo=indd").append("\r\n");
         text.append("AcceptChanges=true").append("\r\n");
-        text.append("MasterTranslated=").append(p_params.isTranslateMaster())
+        text.append("MasterTranslated=").append(p_params.isTranslateMaster()).append("\r\n");
+        text.append("TranslateHiddenLayer=").append(p_params.isTranslateHiddenLayer())
                 .append("\r\n");
-        text.append("TranslateHiddenLayer=")
-                .append(p_params.isTranslateHiddenLayer()).append("\r\n");
 
-        FileUtil.writeFileAtomically(new File(commandFileName),
-                text.toString(), "US-ASCII");
+        FileUtil.writeFileAtomically(new File(commandFileName), text.toString(), "US-ASCII");
     }
 
     /**
@@ -1020,10 +1125,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             Properties m_adobeProperties = ((DynamicPropertiesSystemConfiguration) SystemConfiguration
                     .getInstance(PROPERTY_FILES[1])).getProperties();
-            m_adobeProperties.load(AdobeConfiguration.class
-                    .getResourceAsStream(PROPERTY_FILES[0]));
-            maxWaitTime = m_adobeProperties
-                    .getProperty(AdobeConfiguration.MAX_TIME_TO_WAIT);
+            m_adobeProperties.load(AdobeConfiguration.class.getResourceAsStream(PROPERTY_FILES[0]));
+            maxWaitTime = m_adobeProperties.getProperty(AdobeConfiguration.MAX_TIME_TO_WAIT);
 
         }
         catch (IOException e)
@@ -1080,16 +1183,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_targetPageName
      * @return
      */
-    private File readTargetPdfFile(String p_xmlFileName,
-            String p_targetPageName, String p_trgLocale, String p_userId,
-            long p_companyId, boolean isTarget)
+    private File readTargetPdfFile(String p_xmlFileName, String p_targetPageName,
+            String p_trgLocale, String p_userId, long p_companyId, boolean isTarget)
     {
-        String statusFileName = FileUtils.getPrefix(p_xmlFileName)
-                + COMMAND_STATUS_SUFFIX;
+        String statusFileName = FileUtils.getPrefix(p_xmlFileName) + COMMAND_STATUS_SUFFIX;
         File statusFile = new File(statusFileName);
         String[] status = null;
-        FileWaiter fileWaiter = new FileWaiter(AdobeConfiguration.SLEEP_TIME,
-                getMaxWaitTime(), statusFileName);
+        FileWaiter fileWaiter = new FileWaiter(AdobeConfiguration.SLEEP_TIME, getMaxWaitTime(),
+                statusFileName);
         StringBuffer tarDir = new StringBuffer(AmbFileStoragePathUtils
                 .getPdfPreviewDir(p_companyId).getAbsolutePath() + "_inctx");
         String pdfFileName = FileUtils.getPrefix(p_xmlFileName) + PDF_SUFFIX;
@@ -1103,17 +1204,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             {
                 FileUtils.deleteSilently(statusFileName);
                 FileUtils.deleteSilently(p_xmlFileName);
-                LOGGER.error("Adobe convertion failed: "
-                        + "Cannot convert to PDF file correctly.");
-                throw new EnvoyServletException(
-                        EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
+                LOGGER.error("Adobe convertion failed: " + "Cannot convert to PDF file correctly.");
+                throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
                         "Cannot convert to PDF file correctly.");
             }
             else
             {
                 tarDir.append(File.separator).append(p_trgLocale);
-                String splitChar = p_targetPageName.lastIndexOf("/") > 0 ? "/"
-                        : "\\\\";
+                String splitChar = p_targetPageName.lastIndexOf("/") > 0 ? "/" : "\\\\";
                 String[] tarDisplayName = p_targetPageName.split(splitChar);
 
                 for (int j = 1; j < tarDisplayName.length - 1; j++)
@@ -1128,14 +1226,13 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 // prefixed.
                 StringBuffer folderPath = new StringBuffer(tarDir.toString());
                 File pre_pdfFile = new File(folderPath.append(
-                        pdfFileName.substring(pdfFileName
-                                .lastIndexOf(File.separator))).toString());
+                        pdfFileName.substring(pdfFileName.lastIndexOf(File.separator))).toString());
                 folderPath = new StringBuffer(tarDir.toString());
                 String basicFileName = tarDisplayName[tarDisplayName.length - 1];
-                basicFileName = basicFileName.substring(0,
-                        basicFileName.lastIndexOf("."));
-                post_pdfFile = new File(folderPath.append(File.separator)
-                        .append(basicFileName).append(PDF_SUFFIX).toString());
+                String ext = basicFileName.substring(basicFileName.lastIndexOf(".")).toLowerCase();
+                basicFileName = basicFileName.substring(0, basicFileName.lastIndexOf("."));
+                post_pdfFile = new File(folderPath.append(File.separator).append(basicFileName)
+                        .append(ext).append(PDF_SUFFIX).toString());
                 pre_pdfFile.renameTo(post_pdfFile);
             }
         }
@@ -1158,13 +1255,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_request
      * @return
      */
-    public static File getPreviewPdf(String p_filePath, long p_companyId,
-            String p_userid)
+    public static File getPreviewPdf(String p_filePath, long p_companyId, String p_userid)
     {
         int index = p_filePath.lastIndexOf(".");
-        String pdfPath = p_filePath.substring(0, index) + PDF_SUFFIX;
-        StringBuffer pdfFullPath = new StringBuffer(AmbFileStoragePathUtils
-                .getPdfPreviewDir(p_companyId).getAbsolutePath() + "_inctx");
+        String ext = p_filePath.substring(index).toLowerCase();
+        String pdfPath = p_filePath.substring(0, index) + ext + PDF_SUFFIX;
+        StringBuffer pdfFullPath = new StringBuffer(AmbFileStoragePathUtils.getPdfPreviewDir(
+                p_companyId).getAbsolutePath()
+                + "_inctx");
 
         if (StringUtil.isNotEmpty(p_userid))
         {
@@ -1179,16 +1277,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         return pdfFile;
     }
 
-    public static Set<File> getPreviewPdf(Set<Long> workflowIdSet,
-            String p_userid)
+    public static Set<File> getPreviewPdf(Set<Long> workflowIdSet, String p_userid)
     {
         Set<File> pdfs = new HashSet<File>();
         try
         {
             for (long wfId : workflowIdSet)
             {
-                Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
-                        wfId);
+                Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId);
                 long companyId = wf.getCompanyId();
                 for (TargetPage tp : wf.getTargetPages())
                 {
@@ -1202,8 +1298,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
         catch (Exception e)
         {
-            String message = "Get Preview pdf error, with workflowId set:"
-                    + workflowIdSet;
+            String message = "Get Preview pdf error, with workflowId set:" + workflowIdSet;
             message += (", and userId:" + p_userid);
             LOGGER.error(message, e);
         }
@@ -1226,8 +1321,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         String relSafeName = null;
         String safeBaseFileName = null;
 
-        EventFlowXml eventFlow = XmlUtil.string2Object(EventFlowXml.class,
-                sourcePage.getRequest().getEventFlowXml());
+        EventFlowXml eventFlow = XmlUtil.string2Object(EventFlowXml.class, sourcePage.getRequest()
+                .getEventFlowXml());
 
         String formatType = eventFlow.getValue("formatType");
         String displayNameLower = eventFlow.getDisplayName().toLowerCase();
@@ -1282,11 +1377,38 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             {
                 formatType = "idml";
             }
+            else if (displayNameLower.endsWith(".docx"))
+            {
+                formatType = "docx";
+            }
+            else if (displayNameLower.endsWith(".pptx"))
+            {
+                formatType = "pptx";
+            }
+            else if (displayNameLower.endsWith(".xlsx"))
+            {
+                formatType = "xlsx";
+            }
         }
 
         formatType = formatType.trim();
 
-        if ("indd_cs4".equals(formatType))
+        if ("office-xml".equals(formatType))
+        {
+            if (displayNameLower.endsWith(".docx"))
+            {
+                fileVersionType = TYPE_OFFICE_DOCX;
+            }
+            else if (displayNameLower.endsWith(".pptx"))
+            {
+                fileVersionType = TYPE_OFFICE_PPTX;
+            }
+            else if (displayNameLower.endsWith(".xlsx"))
+            {
+                fileVersionType = TYPE_OFFICE_XLSX;
+            }
+        }
+        else if ("indd_cs4".equals(formatType))
         {
             fileVersionType = ADOBE_CS4;
         }
@@ -1304,28 +1426,46 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
         else
         {
-            fileVersionType = (formatType.equals("indd") || formatType
-                    .equals("inx")) ? ADOBE_CS2 : ADOBE_CS3;
+            fileVersionType = (formatType.equals("indd") || formatType.equals("inx")) ? ADOBE_CS2
+                    : ADOBE_CS3;
         }
 
-        if (displayNameLower.endsWith("idml"))
+        if (displayNameLower.endsWith(".docx"))
+        {
+            fileType = OFFICE_DOCX;
+            fileSuffix = DOCX_SUFFIX;
+            return new PreviewPDFBO(fileVersionType, fileType, fileSuffix, isTranslateMaster,
+                    isTranslateHiddenLayer, relSafeName, safeBaseFileName);
+        }
+        else if (displayNameLower.endsWith(".pptx"))
+        {
+            fileType = OFFICE_PPTX;
+            fileSuffix = PPTX_SUFFIX;
+            return new PreviewPDFBO(fileVersionType, fileType, fileSuffix, isTranslateMaster,
+                    isTranslateHiddenLayer, relSafeName, safeBaseFileName);
+        }
+        else if (displayNameLower.endsWith(".xlsx"))
+        {
+            fileType = OFFICE_XLSX;
+            fileSuffix = XLSX_SUFFIX;
+            return new PreviewPDFBO(fileVersionType, fileType, fileSuffix, isTranslateMaster,
+                    isTranslateHiddenLayer, relSafeName, safeBaseFileName);
+        }
+        else if (displayNameLower.endsWith("idml"))
         {
             fileType = ADOBE_IDML;
             fileSuffix = IDML_SUFFIX;
             fileVersionType = ADOBE_TYPE_IDML;
-            return new PreviewPDFBO(fileVersionType, fileType, fileSuffix,
-                    isTranslateMaster, isTranslateHiddenLayer, relSafeName,
-                    safeBaseFileName);
+            return new PreviewPDFBO(fileVersionType, fileType, fileSuffix, isTranslateMaster,
+                    isTranslateHiddenLayer, relSafeName, safeBaseFileName);
         }
         else
         {
             fileType = ADOBE_INDD;
             fileSuffix = INDD_SUFFIX;
 
-            String inddHiddenTranslated = eventFlow.getBatchInfo()
-                    .getInddHiddenTranslated();
-            if (inddHiddenTranslated != null
-                    && !"".equals(inddHiddenTranslated))
+            String inddHiddenTranslated = eventFlow.getBatchInfo().getInddHiddenTranslated();
+            if (inddHiddenTranslated != null && !"".equals(inddHiddenTranslated))
             {
                 isTranslateHiddenLayer = "true".equals(inddHiddenTranslated);
             }
@@ -1334,17 +1474,15 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 isTranslateHiddenLayer = true;
             }
 
-            String masterTranslated = eventFlow.getBatchInfo()
-                    .getMasterTranslated();
+            String masterTranslated = eventFlow.getBatchInfo().getMasterTranslated();
             if (masterTranslated != null && !"".equals(masterTranslated))
             {
                 isTranslateMaster = "true".equals(masterTranslated);
             }
         }
 
-        return new PreviewPDFBO(fileVersionType, fileType, fileSuffix,
-                isTranslateMaster, isTranslateHiddenLayer, relSafeName,
-                safeBaseFileName);
+        return new PreviewPDFBO(fileVersionType, fileType, fileSuffix, isTranslateMaster,
+                isTranslateHiddenLayer, relSafeName, safeBaseFileName);
     }
 
     public PreviewPDFBO determineConversionParameters(long p_srcPageId)
@@ -1352,8 +1490,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         SourcePage sourcePage = null;
         try
         {
-            sourcePage = ServerProxy.getPageManager()
-                    .getSourcePage(p_srcPageId);
+            sourcePage = ServerProxy.getPageManager().getSourcePage(p_srcPageId);
         }
         catch (Exception e)
         {
@@ -1373,8 +1510,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
             if (isTarget)
             {
-                srcLocale = ((TargetPage) p_tp).getSourcePage()
-                        .getGlobalSightLocale().toString();
+                srcLocale = ((TargetPage) p_tp).getSourcePage().getGlobalSightLocale().toString();
             }
             else
             {
@@ -1419,8 +1555,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         File srcFile = null;
         try
         {
-            SourcePage srcPage = ServerProxy.getPageManager().getSourcePage(
-                    srcPageId);
+            SourcePage srcPage = ServerProxy.getPageManager().getSourcePage(srcPageId);
             srcFile = srcPage.getFile();
 
             // for super translater

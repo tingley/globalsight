@@ -6676,6 +6676,20 @@ window.addEventListener('DOMMouseScroll', handleMouseWheel);
 window.addEventListener('mousewheel', handleMouseWheel);
 
 window.addEventListener('click', function click(evt) {
+
+var o = evt.target;
+	if (o.nodeName == "DIV" && "textLayer" != o.className && o.id != "segDiv" && o.className.indexOf("segDiv") == -1)
+	{
+		if ("highlight" == o.className || o.className.indexOf("highlight") != -1)
+		{
+			//editSegment(o, true);
+		}
+		else
+		{
+			highlightObjects(o);
+		}
+	}
+
  if ( typeof(parent.parent.target.content.navigateToDiv) != "undefined"
  && evt.button === 0 && PDFViewerApplication.pdfViewer.containsElement(evt.target))
  {

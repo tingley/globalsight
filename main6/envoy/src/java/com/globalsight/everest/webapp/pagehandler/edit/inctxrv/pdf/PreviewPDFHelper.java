@@ -1229,9 +1229,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                         pdfFileName.substring(pdfFileName.lastIndexOf(File.separator))).toString());
                 folderPath = new StringBuffer(tarDir.toString());
                 String basicFileName = tarDisplayName[tarDisplayName.length - 1];
+                String ext = basicFileName.substring(basicFileName.lastIndexOf(".")).toLowerCase();
                 basicFileName = basicFileName.substring(0, basicFileName.lastIndexOf("."));
                 post_pdfFile = new File(folderPath.append(File.separator).append(basicFileName)
-                        .append(PDF_SUFFIX).toString());
+                        .append(ext).append(PDF_SUFFIX).toString());
                 pre_pdfFile.renameTo(post_pdfFile);
             }
         }
@@ -1257,7 +1258,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     public static File getPreviewPdf(String p_filePath, long p_companyId, String p_userid)
     {
         int index = p_filePath.lastIndexOf(".");
-        String pdfPath = p_filePath.substring(0, index) + PDF_SUFFIX;
+        String ext = p_filePath.substring(index).toLowerCase();
+        String pdfPath = p_filePath.substring(0, index) + ext + PDF_SUFFIX;
         StringBuffer pdfFullPath = new StringBuffer(AmbFileStoragePathUtils.getPdfPreviewDir(
                 p_companyId).getAbsolutePath()
                 + "_inctx");

@@ -371,8 +371,20 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     || PPTX_SUFFIX.equalsIgnoreCase(fileSuffix)
                     || XLSX_SUFFIX.equalsIgnoreCase(fileSuffix))
             {
-                String fullTargetPdfFileName = previewDir + "_inctx" + File.separator
-                        + targetPdfFileName;
+
+                if (targetLocale == null)
+                {
+                    targetLocale = ServerProxy.getLocaleManager().getLocaleById(p_targetLocaleId)
+                            .getLocale().toString();
+                    targetFileName = targetLocale
+                            + filename.substring(filename.indexOf(File.separator));
+                }
+                String ext = "." + FileUtils.getSuffix(targetFileName);
+                String pdfFileName = FileUtils.getPrefix(targetFileName) + ext + PDF_SUFFIX;
+                String previewInctxrv = AmbFileStoragePathUtils.getPdfPreviewDir(company_id)
+                        + "_inctx";
+
+                String fullTargetPdfFileName = previewInctxrv + File.separator + pdfFileName;
                 FileUtils.deleteSilently(fullTargetPdfFileName);
             }
         }

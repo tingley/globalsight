@@ -50,7 +50,7 @@ public class CreatePdfThread extends MultiCompanySupportedThread
 
             for (SourcePage sourcePage : sourcePages)
             {
-                String pageName = sourcePage.getDisplayPageName().toLowerCase();
+                String pageName = sourcePage.getExternalPageId().toLowerCase();
                 if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
                         || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
                         || pageName.endsWith(".xlsx"))

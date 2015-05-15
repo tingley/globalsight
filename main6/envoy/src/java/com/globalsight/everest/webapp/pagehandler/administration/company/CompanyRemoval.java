@@ -568,7 +568,6 @@ public class CompanyRemoval
             removeIpTmSrcT(conn, jobIds);
             removeJobGsEditionInfo(conn, jobIds);
             
-            
             //remove job cost
             removeJobCost(conn, jobId);
             
@@ -587,11 +586,15 @@ public class CompanyRemoval
                 // this should be after "removeWorkflow(..)".
             removeExportBatchEvent(conn, jobIds);
 
-            //remove job comments
             if (!isRecreateJob)
             {
+                // remove job comments
                 removeJobComments(conn, jobId);
+                
+                // remove job attribute
                 removeJobAttribute(conn, jobIds);
+                
+                // for git files
                 removeGitConnectorJobByJobId(conn, jobIds);
             }
 

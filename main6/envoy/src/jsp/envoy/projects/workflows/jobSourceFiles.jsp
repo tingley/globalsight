@@ -2,7 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="com.globalsight.everest.jobhandler.Job,com.globalsight.everest.permission.Permission,com.globalsight.everest.permission.PermissionSet,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.util.system.SystemConfigParamNames,com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,com.globalsight.everest.util.system.SystemConfiguration,com.globalsight.everest.company.CompanyThreadLocal,com.globalsight.everest.foundation.User,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.webapp.pagehandler.PageHandler,java.text.MessageFormat,java.util.*"
+    import="com.globalsight.everest.jobhandler.Job,com.globalsight.everest.permission.Permission,com.globalsight.everest.permission.PermissionSet,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.util.system.SystemConfigParamNames,com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,com.globalsight.everest.util.system.SystemConfiguration,com.globalsight.everest.company.CompanyThreadLocal,com.globalsight.everest.page.JobSourcePageDisplay,com.globalsight.everest.foundation.User,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.webapp.pagehandler.PageHandler,java.text.MessageFormat,java.util.*"
     session="true"
 %>
 <jsp:useBean id="jobDetails" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -96,6 +96,8 @@
 
 	Job jobImpl = (Job) request.getAttribute("Job");
 	boolean isIE = request.getHeader("User-Agent").indexOf("MSIE") != -1;
+	
+	List<JobSourcePageDisplay> jobSourcePageDisplayList = (List<JobSourcePageDisplay>)request.getAttribute("JobSourcePageDisplayList");
 
 	SystemConfiguration sysConfig = SystemConfiguration.getInstance();
 	boolean useSSL = sysConfig
@@ -363,9 +365,6 @@ function searchPages(){
 											<a class="standardHREF" href="${item.pageUrl}" target="_blank" title="${item.sourcePage.displayPageName}">
 										</c:when>
 										<c:otherwise>
-											<script type="text/javascript">
-											pageNames[${ status.index}] = "${item.sourcePage.displayPageName}";
-											</script>
 											<a class="standardHREF" href="#" onclick="openViewerWindow('${item.pageUrl}');return false;" oncontextmenu="contextForPage('${item.pageUrl}',event, '${ status.index}')" onfocus="this.blur();" title="${item.sourcePage.displayPageName}">
 										</c:otherwise>
 									</c:choose>
@@ -981,6 +980,17 @@ function showUpdateProgress(num, randomNum)
 function closeDialog(){
 	document.getElementById('addSourceDiv').parentNode.style.display = "none";
 }
+
+<%
+JobSourcePageDisplay jobSourcePageDisplay = null;
+for (int i = 0; i < jobSourcePageDisplayList.size(); i++)
+{
+	jobSourcePageDisplay = jobSourcePageDisplayList.get(i);
+    {%>
+       	pageNames[<%=i%>] = "<%=jobSourcePageDisplay.getSourcePage().getDisplayPageName().replace("\\","/")%>";
+  <%}
+}
+%>
 </script>
 </body>
 </html>

@@ -24,11 +24,15 @@ import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.globalsight.ling.common.HtmlEntities;
+
 public class ImageViewHandler implements ViewHandler
 {
-    private static Pattern P = Pattern.compile("<a title=\"(.*?)\"/>");
+    private static Pattern P = Pattern.compile("<eloquaImg>([\\d\\D]*?)</eloquaImg>");
     
     List<String> values = new ArrayList<String>();
+    
+    
     
     @Override
     public String getTyle()
@@ -43,9 +47,11 @@ public class ImageViewHandler implements ViewHandler
         
         if (tt.has("toolTip"))
         {
+            HtmlEntities en = new HtmlEntities();
             String hyperlinkHoverValue = tt.getString("toolTip");
             if (hyperlinkHoverValue != null && hyperlinkHoverValue.length() > 0 && !"null".equals(hyperlinkHoverValue))
             {
+                hyperlinkHoverValue = en.encodeStringBasic(hyperlinkHoverValue);
                 values.add(hyperlinkHoverValue);
             }
         }
@@ -83,8 +89,14 @@ public class ImageViewHandler implements ViewHandler
         
         start += "toolTip: \"".length();
         int end = content.indexOf("\",naturalSize:");
+        String value = values.remove(0);
+        HtmlEntities en = new HtmlEntities();
+        value = en.decodeStringBasic(value);
         
-        return content.substring(0, start - 1) + JSONObject.quote(values.remove(0)) + content.substring(end + 1);
+        value = JSONObject.quote(value);
+        value = value.replace("\\\\/", "\\/");
+        String all = content.substring(0, start - 1) + value + content.substring(end + 1);
+        return all;
     }
 
 }

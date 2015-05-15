@@ -99,6 +99,7 @@ public class EloquaHelper
         catch (JSONException e)
         {
             logger.error(e);
+            logger.error(response.body);
         }
         
         return null;
@@ -114,6 +115,7 @@ public class EloquaHelper
         catch (JSONException e)
         {
             logger.error(e);
+            logger.error(response.body);
         }
         
         return null;
@@ -129,6 +131,7 @@ public class EloquaHelper
         catch (JSONException e)
         {
             logger.error(e);
+            logger.error(response.body);
         }
         
         return null;
@@ -145,6 +148,7 @@ public class EloquaHelper
         catch (JSONException e)
         {
             logger.error(e);
+            logger.error(response.body);
         }
         
         return null;
@@ -165,15 +169,33 @@ public class EloquaHelper
     
     public JSONObject save(String className, JSONObject ob)
     {
+        Response response = _client.post("/assets/" + className,
+                ob.toString());
         try
         {
-            Response response = _client.post("/assets/" + className,
-                    ob.toString());
             return new JSONObject(response.body);
         }
         catch (Exception e)
         {
             logger.error(e);
+            logger.error(response.body);
+        }
+        
+        return null;
+    }
+    
+    public JSONObject save(String className, String ob)
+    {
+        Response response = _client.post("/assets/" + className,
+                ob);
+        try
+        {
+            return new JSONObject(response.body);
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            logger.error(response.body);
         }
         
         return null;
@@ -411,6 +433,7 @@ public class EloquaHelper
         catch (Exception e)
         {
             logger.error(e);
+            logger.error(response.body);
         }
         
         return null;
@@ -463,6 +486,7 @@ public class EloquaHelper
         catch (Exception e)
         {
             logger.error(e);
+            logger.error(response.body);
         }
         
         return null;
@@ -470,15 +494,16 @@ public class EloquaHelper
     
     public String getUser(String id)
     {
+        Response response = _client.get("/system/user/" + id);
         try
         {
-            Response response = _client.get("/system/user/" + id);
             JSONObject json = new JSONObject(response.body);
             return json.getString("name");
         }
         catch (Exception e)
         {
             logger.error(e);
+            logger.error(response.body);
         }
         return null;
     }

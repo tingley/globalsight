@@ -39,8 +39,10 @@ public class TextBoxViewHandler implements ViewHandler
     @Override
     public void handContent(String content) throws JSONException
     {
-        JSONObject tt = new JSONObject(content);
-        values.add(tt.getString("value"));
+        int start = content.indexOf("},value: \"") + "},value: \"".length();
+        int end = content.indexOf("\",inlineStyles:");
+        
+        values.add(content.substring(start, end));
     }
 
     public List<String> getValues()
@@ -70,7 +72,9 @@ public class TextBoxViewHandler implements ViewHandler
     {
         int start = content.indexOf("},value: \"") + "},value: \"".length();
         int end = content.indexOf("\",inlineStyles:");
+        String value = values.remove(0);
+        value = value.replace("&amp;gt;", "&gt;");
         
-        return content.substring(0, start - 1) + JSONObject.quote(values.remove(0)) + content.substring(end + 1);
+        return content.substring(0, start) + value + content.substring(end);
     }
 }

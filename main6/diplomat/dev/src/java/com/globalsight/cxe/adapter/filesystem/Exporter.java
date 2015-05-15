@@ -816,20 +816,6 @@ public class Exporter
 
             if (f.exists())
             {
-                // It seems that there is a issue with html export. Need do
-                // unescape again
-                File sf = new File(finalFileName);
-                try
-                {
-                    String content = FileUtil.readFile(sf, "utf-8");
-                    content = XmlUtil.unescapeString(content);
-                    FileUtil.writeFile(sf, content, "utf-8");
-                }
-                catch (IOException e)
-                {
-                    m_logger.error(e);
-                }
-
                 if (finalFileName.endsWith(".email.html"))
                 {
                     File emailFile = new File(finalFileName);

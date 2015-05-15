@@ -66,7 +66,7 @@ public class ViewUtil
         sb.append("<eloquaImgTitles>").append("\n");
         for (String txt : handler.getValues())
         {
-            sb.append("<a title=\"").append(txt).append("\"/>").append("\n");
+            sb.append("<eloquaImg>").append(txt).append("</eloquaImg>").append("\n");
         }
         sb.append("</eloquaImgTitles>").append("\n");
     }

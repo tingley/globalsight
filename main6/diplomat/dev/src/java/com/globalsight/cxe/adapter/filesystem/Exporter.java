@@ -976,7 +976,7 @@ public class Exporter
                 String f = m.group();
                 String target = m.group(1);
                 String locale = m.group(2);
-                String rTarget = StringUtil.replace(target, locale, r1);
+                String rTarget = target.replaceFirst(locale, r1);
                 String rf = StringUtil.replace(f, target, rTarget);
                 return rf;
             }

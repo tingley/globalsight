@@ -89,11 +89,11 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Calibri", 15F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(114, 20);
+            this.label1.Location = new System.Drawing.Point(44, 20);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(231, 24);
+            this.label1.Size = new System.Drawing.Size(388, 24);
             this.label1.TabIndex = 9;
-            this.label1.Text = "MS Office 2010 Converters";
+            this.label1.Text = "MS Office 2010 In Context Review Converters";
             // 
             // label2
             // 
@@ -262,7 +262,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MS Office 2010 Converters - Version: 8.6.2";
+            this.Text = "In Context Review Converter - Version: 8.6.2";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -17,28 +17,6 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.management;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.tm.StatisticsInfo;
-import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.tm.TmManagerLocal;
-import com.globalsight.everest.projecthandler.ProjectHandler;
-
-import com.globalsight.exporter.IExportManager;
-
-import com.globalsight.everest.integration.ling.LingServerProxy;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.ling.common.XmlEntities;
-import com.globalsight.persistence.hibernate.HibernateUtil;
-
-import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.progress.ProcessStatus;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,6 +30,30 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+
+import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.projecthandler.ProjectHandler;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.tm.StatisticsInfo;
+import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.TmManagerLocal;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.exporter.IExportManager;
+import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.XmlParser;
+import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.progress.ProcessStatus;
 
 /**
  * <p>This PageHandler is responsible for exporting data from TMs.</p>
@@ -253,7 +255,17 @@ public class TmExportPageHandler
                 {
                     CATEGORY.debug("options = " + options);
                 }
-
+				Document dom = DocumentHelper.parseText(options);
+				Element root = dom.getRootElement();
+				Element elem = (Element) root
+						.selectSingleNode("//filterOptions/stringId");
+				String sid = elem.getText();
+				if (StringUtils.isNotBlank(sid) && sid.indexOf("\\") != -1)
+				{
+					sid = sid.replace("\\", "\\\\");
+				}
+				elem.setText(sid);
+				options = dom.asXML().substring(dom.asXML().indexOf("<exportOptions>"));
                 sessionMgr.setAttribute(TM_EXPORT_OPTIONS, options);
             }
             else if (action.equals(TM_ACTION_START_EXPORT))

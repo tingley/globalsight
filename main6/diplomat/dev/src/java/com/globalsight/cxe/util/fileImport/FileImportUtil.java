@@ -152,17 +152,18 @@ public class FileImportUtil
         String fileProfileId = (String) map.get("FileProfileId");
         FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class,
                 Long.parseLong(fileProfileId));
+        // Check if it is from XLZ file
         if (fp == null)
         {
             String hql = "from FileProfileImpl fp where fp.referenceFP = ?";
             fp = (FileProfileImpl) HibernateUtil.getFirst(hql, Long.parseLong(fileProfileId));
             
-            if (48 == fp.getKnownFormatTypeId())
+            if (fp != null && 48 == fp.getKnownFormatTypeId())
             {
                 name = "xlz";
             }
         }
-        
+
         if (name == null)
         {
             String file = (String) map.get("Filename");

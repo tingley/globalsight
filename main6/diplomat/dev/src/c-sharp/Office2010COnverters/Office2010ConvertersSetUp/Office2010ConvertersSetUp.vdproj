@@ -305,7 +305,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:GlobalSight.Common, Version=1.0.5606.41030, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:GlobalSight.Common, Version=1.0.5612.32169, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_6B3DF22A4C346F2A488F65C54168B3E6"
@@ -522,7 +522,7 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:Office 2010 Converters"
+        "ProductName" = "8:MS Office 2010 In Context Review Converter"
         "ProductCode" = "8:{E69B7C82-B4AA-404E-B351-6A11782CA8DC}"
         "PackageCode" = "8:{F07EE57F-15C4-46D4-8232-0C5BCF2B9277}"
         "UpgradeCode" = "8:{EF96D285-5516-405B-833B-B9E2DAC6BBCF}"
@@ -534,7 +534,7 @@
         "Manufacturer" = "8:Welocalize Inc."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:Office 2010 Converters"
+        "Title" = "8:MS Office 2010 In Context Review Converter"
         "Subject" = "8:"
         "ARPCONTACT" = "8:Welocalize Inc."
         "Keywords" = "8:"

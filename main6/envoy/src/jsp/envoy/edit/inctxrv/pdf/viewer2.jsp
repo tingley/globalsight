@@ -226,7 +226,7 @@ if (divArr && divArr.length > 0)
 			{
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
+					parent.parent.source.content.findSegment(pageContent.format, 1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
 			    }
 				return;
 			}
@@ -237,18 +237,18 @@ if (divArr && divArr.length > 0)
 			{
 				currentSegment = segment;
 				
-				findSegment(segment.tuId, segment.tgtSegmentNoTag, "", true, loPn, repIndex);
+				findSegment(pageContent.format, segment.tuId, segment.tgtSegmentNoTag, "", true, loPn, repIndex);
 				
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag, true, loPn, repIndex);
+					parent.parent.source.content.findSegment(pageContent.format, segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag, true, loPn, repIndex);
 			    }
 			}
 			else
 			{
 				if (typeof(parent.parent.source.content.findSegment) != "undefined")
 			    {
-					parent.parent.source.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
+					parent.parent.source.content.findSegment(pageContent.format, 1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
 			    }
 			}
 			

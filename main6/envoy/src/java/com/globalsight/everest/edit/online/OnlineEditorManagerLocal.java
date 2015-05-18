@@ -6318,6 +6318,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             TargetPage targetPage = getTargetPage(p_trgPageId);
             SourcePage sourcePage = targetPage.getSourcePage();
+                
             long jobId = sourcePage.getJobId();
 
             List<Tuv> sourceTuvs = getPageTuvs(sourcePage);
@@ -6413,31 +6414,31 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (filterResult != null
                     && filterResult.get(SegmentFilter.KEY_SOURCE) != null)
             {
-            	filteredSourceTuvs = (List<Tuv>) filterResult
+                filteredSourceTuvs = (List<Tuv>) filterResult
                         .get(SegmentFilter.KEY_SOURCE);
-            	filteredTargetTuvs = (List<Tuv>) filterResult
+                filteredTargetTuvs = (List<Tuv>) filterResult
                         .get(SegmentFilter.KEY_TARGET);
             }
 
             for (int i = beginIndex, max = sourceTuvs.size(), _count = 0; _count < segmentNumPerPage
                     && i < max; i++)
             {
-            	Tuv srcTuv = (Tuv) sourceTuvs.get(i);
-            	Tuv trgTuv = (Tuv) targetTuvs.get(i);
-            	if(filteredSourceTuvs.size() > 0)
-            	{
-            		if(!filteredSourceTuvs.contains(srcTuv))
-            		{
-            			continue;
-            		}
-            	}
-            	if(filteredTargetTuvs.size() > 0)
-            	{
-            		if(!filteredTargetTuvs.contains(trgTuv))
-            		{
-            			continue;
-            		}
-            	}
+                Tuv srcTuv = (Tuv) sourceTuvs.get(i);
+                Tuv trgTuv = (Tuv) targetTuvs.get(i);
+                if(filteredSourceTuvs.size() > 0)
+                {
+                    if(!filteredSourceTuvs.contains(srcTuv))
+                    {
+                        continue;
+                    }
+                }
+                if(filteredTargetTuvs.size() > 0)
+                {
+                    if(!filteredTargetTuvs.contains(trgTuv))
+                    {
+                        continue;
+                    }
+                }
                 _count++;
                 int readyCase = 3;
                 boolean isShowDefaultContext = showDefaultContext(targetPage,
@@ -6461,17 +6462,21 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 if (fromInCtxRv)
                 {
                     InddTuMapping mp = InddTuMappingHelper.getMappingByTu(jobId, srcTuv.getTuId());
-                    
+
                     if (mp != null)
                     {
                         targetj.put("pageNum", mp.getPageNum());
                         sourcej.put("pageNum", mp.getPageNum());
                     }
+
+                    targetj.put("format", p_state.getPageFormat());
+                    sourcej.put("format", p_state.getPageFormat());
                 }
                 
                 targetjArray.put(targetj);
                 sourcejArray.put(sourcej);
             }
+            
             mainJson.put("target", targetjArray);
             mainJson.put("source", sourcejArray);
         }

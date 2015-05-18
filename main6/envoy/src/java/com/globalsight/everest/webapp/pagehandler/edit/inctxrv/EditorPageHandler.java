@@ -37,6 +37,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.comment.Issue;
@@ -75,6 +77,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportC
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
+import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
@@ -432,7 +435,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
     private void renderJson(HttpServletRequest p_request,
             HttpServletResponse p_response, EditorState state,
-            boolean isAssignee) throws IOException
+            boolean isAssignee) throws IOException, EnvoyServletException
     {
         EditorState.Layout layout = state.getLayout();
 
@@ -514,8 +517,106 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         if (isGetJsonData)
         {
-            jsonStr = state.getEditorManager().getTargetJsonData(state,
-                    isAssignee, getSearchParamsInMap(p_request), true);
+            long _trgPageId = state.getTargetPageId().longValue();
+            TargetPage _targetPage = ServerProxy.getPageManager().getTargetPage(_trgPageId);
+            SourcePage _sourcePage = _targetPage.getSourcePage();
+
+            List<TargetPage> tPages = new ArrayList<TargetPage>();
+            List<SourcePage> sPages = new ArrayList<SourcePage>();
+
+            Collection<SourcePage> sourcePages = _sourcePage.getRequest().getJob().getSourcePages();
+            for (SourcePage sourcePage : sourcePages)
+            {
+                if (sourcePage.isActive() && !sourcePage.hasRemoved())
+                {
+                    String eid = sourcePage.getExternalPageId();
+                    String p_eid = _sourcePage.getExternalPageId();
+
+                    if (eid.startsWith("("))
+                    {
+                        eid = eid.substring(eid.indexOf(") ") + 2);
+                    }
+                    if (p_eid.startsWith("("))
+                    {
+                        p_eid = p_eid.substring(p_eid.indexOf(") ") + 2);
+                    }
+
+                    if (eid.equals(p_eid))
+                    {
+                        sPages.add(sourcePage);
+                        tPages.add(sourcePage.getTargetPageByLocaleId(_targetPage
+                                .getGlobalSightLocale().getId()));
+                    }
+                }
+            }
+            
+            if (sPages.size() == 1)
+            {
+                jsonStr = state.getEditorManager().getTargetJsonData(state, isAssignee,
+                        getSearchParamsInMap(p_request), true);
+            }
+            else
+            {
+
+                JSONObject mainJson = null;
+                JSONArray targetjArray = new JSONArray();
+                JSONArray sourcejArray = new JSONArray();
+                PagePair currentPage = state.getCurrentPage();
+
+                try
+                {
+                    for (int i = 0; i < sPages.size(); i++)
+                    {
+                        TargetPage targetPage = tPages.get(i);
+                        SourcePage sourcePage = sPages.get(i);
+
+                        ArrayList<PagePair> pagePairs = state.getPages();
+                        for (PagePair pagePair : pagePairs)
+                        {
+                            if (pagePair.getSourcePageId() == sourcePage.getIdAsLong())
+                            {
+                                state.setCurrentPage(pagePair);
+                                break;
+                            }
+                        }
+
+                        String _jsonStr = state.getEditorManager().getTargetJsonData(state,
+                                isAssignee, getSearchParamsInMap(p_request), true);
+
+                        if (_jsonStr != null && _jsonStr.length() > 0)
+                        {
+                            mainJson = new JSONObject(_jsonStr);
+
+                            JSONArray _targetjArray = (JSONArray) mainJson.get("target");
+                            JSONArray _sourcejArray = (JSONArray) mainJson.get("source");
+
+                            if (_targetjArray != null && _sourcejArray != null)
+                            {
+                                for (int ii = 0; ii < _targetjArray.length(); ii++)
+                                {
+                                    JSONObject _targetO = _targetjArray.getJSONObject(ii);
+                                    JSONObject _sourceO = _sourcejArray.getJSONObject(ii);
+
+                                    targetjArray.put(_targetO);
+                                    sourcejArray.put(_sourceO);
+                                }
+                            }
+                        }
+                    }
+
+                    state.setCurrentPage(currentPage);
+                    mainJson = new JSONObject();
+                    mainJson.put("target", targetjArray);
+                    mainJson.put("source", sourcejArray);
+
+                }
+                catch (Exception e)
+                {
+                    throw new EnvoyServletException(e);
+
+                }
+                jsonStr = mainJson.toString();
+            }
         }
         p_response.getWriter().write(jsonStr);
     }

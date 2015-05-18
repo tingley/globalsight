@@ -1,4 +1,4 @@
-function findSegment(tuId, sourceSegment, targetSegment, donotMove, p_lnPn, p_repIndex)
+function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_lnPn, p_repIndex)
 {
 	// check is source or target
 	var segment = sourceSegment;
@@ -94,6 +94,7 @@ function findSegment(tuId, sourceSegment, targetSegment, donotMove, p_lnPn, p_re
     
     
     // find segment
+    var isOfficeXml = ("office-xml" == format);
     var find = false;
     var loPn = p_lnPn ? p_lnPn : PDFViewerApplication.pdfViewer.location.pageNumber;
     
@@ -172,6 +173,13 @@ function findSegment(tuId, sourceSegment, targetSegment, donotMove, p_lnPn, p_re
 	  var endMatch = false;
   	  matchedDiv = new Array();
   	  var textLayerContent = textLayerDiv.textContent;
+  	  
+  	  if (isOfficeXml)
+  	  {
+  	      textLayerContent = textLayerDiv.innerText;
+  	      textLayerContent = textLayerContent.replace(/\r\n /g, " ");
+  	      textLayerContent = textLayerContent.replace(/\r\n/g, " ");
+  	  }
   	  
   	  if (textLayerContent.indexOf(segment) != -1)
   	  {
@@ -390,14 +398,18 @@ function buildPageContent(pageNum, localData, isTarget)
 {
 	var content = "";
 	var segments = new Array();
+	var format1 = "";
 	
 	for (var i = 0; i < localData.source.length; i++)
 	{
 		var seg = isTarget ? localData.target[i] : localData.source[i];
+		var isOfficeXml = "office-xml" == seg.format;
+		format1 = seg.format;
 		
-		if (seg.pageNum && seg.pageNum == pageNum)
+		if (isOfficeXml || (seg.pageNum && seg.pageNum == pageNum))
 		{
 			var segment = new Object();
+			segment.format = seg.format;
 			segment.tuId = seg.tuId;
 			segment.subId = seg.subId;
 			segment.srcTuvId = localData.source[i].tuvId;
@@ -408,7 +420,7 @@ function buildPageContent(pageNum, localData, isTarget)
 			segment.tgtSegment = localData.target[i].segment;
 			segment.tgtSegmentNoTag = handleSpecialChar(localData.target[i].segmentNoTag);
 			
-			segment.pageNum = seg.pageNum;
+			segment.pageNum = isOfficeXml ? 1 : seg.pageNum;
 			
 			segment.start = content.length;
 			content = content + handleSpecialChar(seg.segmentNoTag) + " ";
@@ -421,6 +433,7 @@ function buildPageContent(pageNum, localData, isTarget)
 	var result = new Object();
 	result.segments = segments;
 	result.content = content;
+	result.format = format1;
 	
 	return result;
 }
@@ -496,23 +509,25 @@ function sendAjax(obj)
 
 function getSegment(pageContent, o, i, divArr)
 {
-	if (i == 0)
+    var isOfficeXml = "office-xml" == pageContent.format;
+    
+	if (i == 0 && !isOfficeXml)
 	{
 		return pageContent.segments[0];
 	}
-	else if (i == (divArr.length - 1))
+	
+	if (i == (divArr.length - 1) && !isOfficeXml )
 	{
 		return pageContent.segments[pageContent.segments.length - 1];
 	}
-	else
-	{
-		var o_0 = divArr[i-1];
+	
+		var o_0 = i == 0 ? false : divArr[i-1];
 		var o_1 = o;
-		var o_2 =  divArr[i+1];
+		var o_2 = i == (divArr.length - 1)? false : divArr[i+1];
 		
-		var o0text = o_0.textContent;
+		var o0text = o_0 ? o_0.textContent : "you can not find me 1314151617181910";
 		var o1text = o_1.textContent;
-		var o2text = o_2.textContent;
+		var o2text = o_2 ? o_2.textContent : "you can not find me 1314151617181910";
 		
 		// 1 find before current next
 		var index = pageContent.content.indexOf(o1text);
@@ -611,5 +626,4 @@ function getSegment(pageContent, o, i, divArr)
 		{
 			return false;
 		}
-	}
 }

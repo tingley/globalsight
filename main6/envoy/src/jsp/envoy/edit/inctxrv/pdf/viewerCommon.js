@@ -73,6 +73,11 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
 	  		  }
 	  	  }
 	  	  
+	  	  if (typeof(textLayerDiv1) == "undefined")
+	  	  {
+	  	      continue;
+	  	  }
+	  	  
 	  	  textLayerChildrens1 = textLayerDiv1.childNodes;
 	
 	  	  for(var i = 0; i < textLayerChildrens1.length; i++)
@@ -173,12 +178,12 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
 	  var endMatch = false;
   	  matchedDiv = new Array();
   	  var textLayerContent = textLayerDiv.textContent;
+  	  var rnIndex = new Array();
   	  
   	  if (isOfficeXml)
   	  {
   	      textLayerContent = textLayerDiv.innerText;
-  	      textLayerContent = textLayerContent.replace(/\r\n /g, " ");
-  	      textLayerContent = textLayerContent.replace(/\r\n/g, " ");
+  	      textLayerContent = handleStringForOffice(textLayerContent, rnIndex);
   	  }
   	  
   	  if (textLayerContent.indexOf(segment) != -1)
@@ -192,6 +197,32 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
   		  var divContent = divChild.textContent;
 		  var divContentLen = divContent.length;
 		  var donotAddMe = false;
+		  
+		  var addRnCount = 0;
+		  for(var rnI = 0; rnI < rnIndex.length; rnI++)
+		  {
+		      var _rnIndex = rnIndex[rnI];
+		      
+		      if (_rnIndex == count)
+		      {
+		          addRnCount = addRnCount + 1;
+		      }
+		      if (_rnIndex > count && _rnIndex < count + divContentLen)
+		      {
+		          addRnCount = addRnCount + 1;
+		      }
+		      if (_rnIndex == count + divContentLen)
+		      {
+		          addRnCount = addRnCount + 1;
+		      }
+		      
+		      if (_rnIndex > count + divContentLen)
+		      {
+		          break;
+		      }
+		  }
+		  
+		  divContentLen = divContentLen + addRnCount;
 		  
 		  if (index < (count + divContentLen) && index >= count)
 		  {
@@ -210,6 +241,12 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
 				  var obj = new Object();
 				  obj.div = divChild;
 				  obj.start = index - count;
+				  
+				  if (obj.start == 1)
+				  {
+				      obj.start = isOfficeXml ? ((segment.indexOf(divContent) == 0) ? 0 : 1) : 1;
+				  }
+				  
 				  obj.end = divContentLen;
 				  matchedDiv.push(obj);
 				  donotAddMe = true;
@@ -229,14 +266,14 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
 			  }
 			  else
 			  {
-			  if (!donotAddMe)
-			  {
-				  var obj = new Object();
-				  obj.div = divChild;
-				  obj.start = 0;
-				  obj.end = divContentLen;
-				  matchedDiv.push(obj);
-			  }
+				  if (!donotAddMe)
+				  {
+					  var obj = new Object();
+					  obj.div = divChild;
+					  obj.start = 0;
+					  obj.end = divContentLen;
+					  matchedDiv.push(obj);
+				  }
 			  }
 		  }
 		  
@@ -253,7 +290,7 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
   			  var cdiv = obj.div;
   			  var textContent = cdiv.textContent;
   			  var strStart = textContent.substr(0, obj.start);
-  			  var strMid = textContent.substr(obj.start, obj.end);
+  			  var strMid = textContent.substr(obj.start, obj.end <= textContent.length ? obj.end : textContent.length);
   			  var strEnd = obj.end < textContent.length ? textContent.substr(obj.end) : "";
   			  
   			  var newDiv = document.createElement('div');
@@ -453,6 +490,25 @@ function getPageNumberFromParentId(o)
 	}
 	
 	return -1;
+}
+
+function handleStringForOffice(sss, rnIndex)
+{
+	var result = sss.replace(/\r\n /g, " ");
+	result = result.replace(/ \r\n/g, " ");
+	
+	var index = result.indexOf("\r\n");
+	
+	while(index != -1)
+	{
+		rnIndex[rnIndex.length] = index;
+		index = result.indexOf("\r\n", index + 1);
+	}
+	
+	
+	result = result.replace(/\r\n/g, " ");
+	
+	return result;
 }
 
 function handleSpecialChar(seg)

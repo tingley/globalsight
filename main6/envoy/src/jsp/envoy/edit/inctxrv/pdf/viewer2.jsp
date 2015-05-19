@@ -197,9 +197,10 @@ function highlightObjects(o)
 //2
 var pageContent = buildPageContent(loPn, window.parent.parent.parent.localData, true);
 
+var loPn1 = loPn;
 while (pageContent.segments.length == 0 && pageContent.content.length == 0)
 {
-	var loPn1 = loPn - 1;
+	loPn1 = loPn1 - 1;
 	
 	if (loPn1 > 0)
 	{

@@ -94,8 +94,10 @@ public class AutoCompleteActivityThread implements Runnable
         		DbUtil.silentReturnConnection(conn);
         	}
 
-			logger.info("There are " + taskIds.size()
-					+ " tasks that need to be auto-compleleted.");
+        	if (taskIds.size() > 0) {
+				logger.info("There are " + taskIds.size()
+						+ " tasks which are configured to be auto-compleleted.");        		
+        	}
             String acceptor = null;
             Task t = null;
             for (Long taskId : taskIds)

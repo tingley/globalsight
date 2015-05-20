@@ -317,7 +317,7 @@ $(document).ready(function() {
     // *************************************cancel button*************************************
     $("#cancel").click(function()
     {
-        document.location.href="<%=self.getPageURL()%>";
+        document.location.href="<%=self.getPageURL()%>&isCancel=true";
     });
     
     // *************************************create result*************************************

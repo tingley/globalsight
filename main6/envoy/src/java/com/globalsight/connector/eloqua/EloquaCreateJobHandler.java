@@ -800,7 +800,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
         List<Email> es;
         
         // is after create job.
-        if (request.getAttribute("isCreate") != null)
+        if (request.getAttribute("isCreate") != null || request.getParameter("isCancel") != null)
         {
             es = loadEmailFromSession(sessionManager);
         }

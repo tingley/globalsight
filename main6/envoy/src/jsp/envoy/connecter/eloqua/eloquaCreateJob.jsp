@@ -104,6 +104,7 @@ var isUploading = false;
 var uploadedFiles = new Array();
 var type = "";
 var helpFile = "<%=bundle.getString("help_eloqua_assets")%>";
+var initPage = false;
 
 function confirmJump()
 {
@@ -555,8 +556,14 @@ $(document).ready(function(){
     $("#jobAttributesTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
 })
 
+function initLandingPage() {
+	$("#idDiv").mask("<%=bundle.getString("msg_loading")%>");
+    $.post('<%=self.getPageURL()%>' + "&action=getLandingPages&type=9",            
+    		callBackToPageLandingPage, "text");
+}
+
 function showTab(id)
-{
+{	
 	hideTab("emailTab");
 	hideTab("landingPageTab");
 	hideTab("formTab");
@@ -573,6 +580,12 @@ function showTab(id)
 
     $("#navDiv").html($("#" + id + "NavDiv").html());
     $("#navDiv2").html($("#" + id + "NavDiv2").html());
+    
+	if ("landingPage" == id && !initPage)
+	{
+		initLandingPage();
+		initPage = true;
+	}
 }
 
 function hideTab(id)

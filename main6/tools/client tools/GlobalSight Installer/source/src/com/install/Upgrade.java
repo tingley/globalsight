@@ -217,7 +217,7 @@ public class Upgrade
     
     private void backup() throws Exception
     {
-        log.info("Backuping files.");
+        log.info("Backing up files.");
 
         String backupName = ServerUtil.getServerName() + "("
                 + ServerUtil.getVersion() + ")";
@@ -277,7 +277,7 @@ public class Upgrade
             i++;
         }
         ui.addProgress(lose, "");
-        log.info("Backuping files finished");
+        log.info("Backing up files finished");
     }
 
 //    private FileFilter getClassFilter()

@@ -16,72 +16,83 @@
  */
 package com.globalsight.ling.common;
 
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * An abstract class to encode/decode character entities or
- * numeric character references.
+ * An abstract class to encode/decode character entities or numeric character
+ * references.
  */
 public abstract class Entities
 {
     /**
-     * Decode a character entity or a numeric character reference into
-     * a character
-     * @param ent a character entity or a numeric character reference
-     * @return decoded character. If <tt>ent</tt> is mal formed or
-     * cannot be found in the character entity list, the method
-     * returns U+FFFF, non-existing code in Unicode.
+     * Decode a character entity or a numeric character reference into a
+     * character
+     * 
+     * @param ent
+     *            a character entity or a numeric character reference
+     * @return decoded character. If <tt>ent</tt> is mal formed or cannot be
+     *         found in the character entity list, the method returns U+FFFF,
+     *         non-existing code in Unicode.
      */
     public abstract char decode(String ent);
 
     /**
      * Decode only a basic character entity into a character
-     * @param ent a character entity or a numeric character reference
-     * @return decoded character. If <tt>ent</tt> is mal formed or
-     * cannot be found in the character entity list, the method
-     * returns U+FFFF, non-existing code in Unicode.
+     * 
+     * @param ent
+     *            a character entity or a numeric character reference
+     * @return decoded character. If <tt>ent</tt> is mal formed or cannot be
+     *         found in the character entity list, the method returns U+FFFF,
+     *         non-existing code in Unicode.
      */
     public abstract char decodeBasicEntity(String ent);
 
     /**
      * Decode a numeric character reference to a character
-     * @param s numeric character reference to be encoded
-     * @param prefix prefix string of the nemeric character reference
-     * @param postfix postfix string of the nemeric character reference
-     * @param radix radix for encoding (i.e. 16 for hex, 10 for decimal)
-     * @param caseSensitive indicates the case sensitibity of the
-     * prefix and postfix string
-     * @return decoded character. If <tt>s</tt> is not a valid char
-     * ref, the function returns <tt>null</tt>.
+     * 
+     * @param s
+     *            numeric character reference to be encoded
+     * @param prefix
+     *            prefix string of the nemeric character reference
+     * @param postfix
+     *            postfix string of the nemeric character reference
+     * @param radix
+     *            radix for encoding (i.e. 16 for hex, 10 for decimal)
+     * @param caseSensitive
+     *            indicates the case sensitibity of the prefix and postfix
+     *            string
+     * @return decoded character. If <tt>s</tt> is not a valid char ref, the
+     *         function returns <tt>null</tt>.
      */
     final protected Character decodeNumRef(String s, String prefix,
-        String postfix, int radix, boolean caseSensitive)
+            String postfix, int radix, boolean caseSensitive)
     {
         Character c = null;
         boolean b;
 
         if (caseSensitive)
         {
-            b = s.substring(0, prefix.length()).equals(prefix) &&
-                s.substring(s.length() - postfix.length()).equals(postfix);
+            b = s.substring(0, prefix.length()).equals(prefix)
+                    && s.substring(s.length() - postfix.length()).equals(
+                            postfix);
         }
         else
         {
-            b = s.substring(0, prefix.length()).equalsIgnoreCase(prefix) &&
-                s.substring(s.length() - postfix.length()).
-                  equalsIgnoreCase(postfix);
+            b = s.substring(0, prefix.length()).equalsIgnoreCase(prefix)
+                    && s.substring(s.length() - postfix.length())
+                            .equalsIgnoreCase(postfix);
         }
 
         if (b)
         {
             try
             {
-                c = new Character((char)Integer.parseInt(
-                    s.substring(prefix.length(),
-                        s.length() - postfix.length()), radix));
+                c = new Character((char) Integer.parseInt(
+                        s.substring(prefix.length(),
+                                s.length() - postfix.length()), radix));
             }
-            catch(NumberFormatException e)
+            catch (NumberFormatException e)
             {
                 c = null;
             }
@@ -92,40 +103,45 @@ public abstract class Entities
     }
 
     /**
-     * Decode characters in the given string. The character entities
-     * included in <tt>decodeExcludeList</tt> will not be decoded. All
-     * numeric character references will be decoded.
-     * @param s a string to be decoded
-     * @param decodeExcludeList a list of character entities that will
-     * not be decoded
+     * Decode characters in the given string. The character entities included in
+     * <tt>decodeExcludeList</tt> will not be decoded. All numeric character
+     * references will be decoded.
+     * 
+     * @param s
+     *            a string to be decoded
+     * @param decodeExcludeList
+     *            a list of character entities that will not be decoded
      * @return decoded string
      */
-    public abstract String decodeString(String s,
-        String[] decodeExcludeList);
+    public abstract String decodeString(String s, String[] decodeExcludeList);
 
     /**
-     * Decode characters in the given string. The character entities
-     * included in <tt>decodeExcludeList</tt> will not be decoded. All
-     * numeric character references will be decoded. <p> This function
-     * is intended to be used in <tt>public static String
+     * Decode characters in the given string. The character entities included in
+     * <tt>decodeExcludeList</tt> will not be decoded. All numeric character
+     * references will be decoded.
+     * <p>
+     * This function is intended to be used in <tt>public static String
      * decodeString(String s, String[] decodeExcludeList)</tt>
-     * @param s a string to be decoded
-     * @param decodeExcludeList a list of character entities that will
-     * not be decoded
-     * @param patternString regular expression to search for entities
-     * in <tt>s</tt>
-     * @param basic if <tt>basic</tt> is <tt>true</tt>, only basic
-     * character entities are decoded
+     * 
+     * @param s
+     *            a string to be decoded
+     * @param decodeExcludeList
+     *            a list of character entities that will not be decoded
+     * @param patternString
+     *            regular expression to search for entities in <tt>s</tt>
+     * @param basic
+     *            if <tt>basic</tt> is <tt>true</tt>, only basic character
+     *            entities are decoded
      * @return decoded string
      */
     final protected String decodeString(String s, String[] decodeExcludeList,
-        String patternString, boolean basic)
+            String patternString, boolean basic)
     {
         RE pattern = null;
 
         try
         {
-            pattern = new RE (patternString, RE.MATCH_NORMAL);
+            pattern = new RE(patternString, RE.MATCH_NORMAL);
         }
         catch (RESyntaxException e)
         {
@@ -180,36 +196,46 @@ public abstract class Entities
     }
 
     /**
-     * Decode only basic entities in the given string. No numeric
-     * character regerences are decoded.
-     * @param s a string to be decoded
+     * Decode only basic entities in the given string. No numeric character
+     * regerences are decoded.
+     * 
+     * @param s
+     *            a string to be decoded
      * @return decoded string
      */
     public abstract String decodeStringBasic(String s);
 
     /**
-     * Encode a character to a numeric character reference or a
-     * cahracter entity.
-     * @param c a character to be encoded
-     * @param entity <tt>c</tt> will be encoded as a character
-     * entity if <tt>entiry</tt> is <tt>true</tt>, otherwise
-     * <tt>c</tt> will be a numeric character reference. If
-     * <tt>entity</tt> is true and the corresponding entity can not be
-     * found, the function returns a numeric character reference.
+     * Encode a character to a numeric character reference or a cahracter
+     * entity.
+     * 
+     * @param c
+     *            a character to be encoded
+     * @param entity
+     *            <tt>c</tt> will be encoded as a character entity if
+     *            <tt>entiry</tt> is <tt>true</tt>, otherwise <tt>c</tt> will be
+     *            a numeric character reference. If <tt>entity</tt> is true and
+     *            the corresponding entity can not be found, the function
+     *            returns a numeric character reference.
      * @return the result of encode.
      */
     public abstract String encode(char c, boolean entity);
 
     /**
      * Encode a character to a numeric character reference
-     * @param c character to be encoded
-     * @param prefix prefix string of the nemeric character reference
-     * @param postfix postfix string of the nemeric character reference
-     * @param radix radix for encoding (i.e. 16 for hex, 10 for decimal)
+     * 
+     * @param c
+     *            character to be encoded
+     * @param prefix
+     *            prefix string of the nemeric character reference
+     * @param postfix
+     *            postfix string of the nemeric character reference
+     * @param radix
+     *            radix for encoding (i.e. 16 for hex, 10 for decimal)
      * @return nemeric character reference
      */
-    final protected String encodeNumRef(char c, String prefix,
-        String postfix, int radix)
+    final protected String encodeNumRef(char c, String prefix, String postfix,
+            int radix)
     {
         StringBuffer result = new StringBuffer();
 
@@ -222,11 +248,13 @@ public abstract class Entities
 
     /**
      * Encode characters in the given string. Only characters given in
-     * <tt>encodeCarList</tt> will be encoded. Characters will be
-     * encoded as numeric character references or character entities.
-     * @param s a string to be encoded
-     * @param encodeCharList a list of characters which will be
-     * encoded .
+     * <tt>encodeCarList</tt> will be encoded. Characters will be encoded as
+     * numeric character references or character entities.
+     * 
+     * @param s
+     *            a string to be encoded
+     * @param encodeCharList
+     *            a list of characters which will be encoded .
      * @return encoded string
      */
     public String encodeString(String s, char[] encodeCharList)
@@ -252,17 +280,20 @@ public abstract class Entities
     }
 
     /**
-     * Encode characters in the given string. Only a range of
-     * characters given by <tt>first</tt> and <tt>last</tt> will be
-     * encoded. Characters will be encoded as numeric character
-     * references or character entities.
-     * @param s a string to be encoded
-     * @param first a first character to be included in the range of
-     * characters to be encoded. If <tt>first</tt> is greater than
-     * <tt>last</tt>, no any characters will be encoded.
-     * @param last a last character to be included in the range of
-     * characters to be encoded. If <tt>last</tt> is less than
-     * <tt>first</tt>, no any characters will be encoded.
+     * Encode characters in the given string. Only a range of characters given
+     * by <tt>first</tt> and <tt>last</tt> will be encoded. Characters will be
+     * encoded as numeric character references or character entities.
+     * 
+     * @param s
+     *            a string to be encoded
+     * @param first
+     *            a first character to be included in the range of characters to
+     *            be encoded. If <tt>first</tt> is greater than <tt>last</tt>,
+     *            no any characters will be encoded.
+     * @param last
+     *            a last character to be included in the range of characters to
+     *            be encoded. If <tt>last</tt> is less than <tt>first</tt>, no
+     *            any characters will be encoded.
      * @return encoded string
      */
     public String encodeString(String s, char first, char last)
@@ -289,50 +320,61 @@ public abstract class Entities
     }
 
     /**
-     * Encode characters in the given string acording to
-     * <tt>codeset</tt>. Only the characters that cannot be converted
-     * into <tt>codeset</tt> will be encoded. Characters will be
-     * encoded as numeric character references or character entities.
-     * @param s a string to be encoded
-     * @param codeset codeset to be used to determine the characters
-     * that doesn't exist in it. <tt>codeset</tt> must be either IANA
-     * registered character set name or Java supported character
-     * encoding name.
+     * Encode characters in the given string acording to <tt>codeset</tt>. Only
+     * the characters that cannot be converted into <tt>codeset</tt> will be
+     * encoded. Characters will be encoded as numeric character references or
+     * character entities.
+     * 
+     * @param s
+     *            a string to be encoded
+     * @param codeset
+     *            codeset to be used to determine the characters that doesn't
+     *            exist in it. <tt>codeset</tt> must be either IANA registered
+     *            character set name or Java supported character encoding name.
      * @return encoded string
      */
-    final public String encodeString(String s, String codeset)
-        throws Exception
+    final public String encodeString(String s, String codeset) throws Exception
     {
-        throw new Exception("Entities.encodeString(String s, String codeset) is not yet implemented!");
+        throw new Exception(
+                "Entities.encodeString(String s, String codeset) is not yet implemented!");
     }
 
     /**
      * Encode basic character entities in the given string.
-     * @param s a string to be encoded
+     * 
+     * @param s
+     *            a string to be encoded
      * @return encoded string
      */
     public abstract String encodeStringBasic(String s);
 
     /**
      * Test if a character is in the range of conversion
-     * @param c character to be tested.
-     * @param charList list of character to be converted
-     * @return <tt>true</tt> if the character is in the range,
-     * otherwise <tt>false</tt>
+     * 
+     * @param c
+     *            character to be tested.
+     * @param charList
+     *            list of character to be converted
+     * @return <tt>true</tt> if the character is in the range, otherwise
+     *         <tt>false</tt>
      */
     protected abstract boolean testRange(char c, char[] charList);
 
     /**
      * Test if a character is in the range of conversion
-     * @param c character to be tested.
-     * @param first a first character to be included in the range of
-     * characters to be encoded. If <tt>first</tt> is greater than
-     * <tt>last</tt>, no any characters will be encoded.
-     * @param last a last character to be included in the range of
-     * characters to be encoded. If <tt>last</tt> is less than
-     * <tt>first</tt>, no any characters will be encoded.
-     * @return <tt>true</tt> if the character is in the range,
-     * otherwise <tt>false</tt>
+     * 
+     * @param c
+     *            character to be tested.
+     * @param first
+     *            a first character to be included in the range of characters to
+     *            be encoded. If <tt>first</tt> is greater than <tt>last</tt>,
+     *            no any characters will be encoded.
+     * @param last
+     *            a last character to be included in the range of characters to
+     *            be encoded. If <tt>last</tt> is less than <tt>first</tt>, no
+     *            any characters will be encoded.
+     * @return <tt>true</tt> if the character is in the range, otherwise
+     *         <tt>false</tt>
      */
     protected abstract boolean testRange(char c, char first, char last);
 }

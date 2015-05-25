@@ -17,50 +17,40 @@
 
 package com.globalsight.everest.page;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.snippet.Snippet;
-import com.globalsight.everest.snippet.SnippetImpl;
-import com.globalsight.everest.snippet.SnippetLibrary;
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.util.GlobalSightLocale;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-import org.apache.regexp.RESyntaxException;
-
-import java.io.IOException;
-import java.io.Serializable;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.snippet.Snippet;
+import com.globalsight.everest.snippet.SnippetLibrary;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * <p>SnippetPageTemplate extends PageTemplate for pages containing
- * snippets. This class builds additional indexes on top of the
- * template to record the locations of GS tags for a specific target
- * language. This means there needs to be one SnippetPageTemplate per
- * (source or target) locale, not just one per source page.</p>
+ * <p>
+ * SnippetPageTemplate extends PageTemplate for pages containing snippets. This
+ * class builds additional indexes on top of the template to record the
+ * locations of GS tags for a specific target language. This means there needs
+ * to be one SnippetPageTemplate per (source or target) locale, not just one per
+ * source page.
+ * </p>
  *
- * <p>This class behaves like a data class and instead of throwing
- * exceptions assumes all tags are syntactically correct.</p>
+ * <p>
+ * This class behaves like a data class and instead of throwing exceptions
+ * assumes all tags are syntactically correct.
+ * </p>
  */
-public class SnippetPageTemplate
-    extends PageTemplate
+public class SnippetPageTemplate extends PageTemplate
 {
-    private static final Logger c_logger =
-        Logger.getLogger(
-            SnippetPageTemplate.class);
+    private static final Logger c_logger = Logger
+            .getLogger(SnippetPageTemplate.class);
 
     static private REProgram s_reGSTags;
 
@@ -81,16 +71,16 @@ public class SnippetPageTemplate
         {
             RECompiler dragon = new RECompiler();
 
-            s_reGSTags       = dragon.compile("<((GS\\s[^>]+)|(/GS))>");
+            s_reGSTags = dragon.compile("<((GS\\s[^>]+)|(/GS))>");
 
-            s_reIsAddTag     = dragon.compile("ADD=[\"']");
-            s_reIsAddedTag   = dragon.compile("ADDED=[\"']");
-            s_reIsDeleteTag  = dragon.compile("DELETE=[\"']");
+            s_reIsAddTag = dragon.compile("ADD=[\"']");
+            s_reIsAddedTag = dragon.compile("ADDED=[\"']");
+            s_reIsDeleteTag = dragon.compile("DELETE=[\"']");
 
-            s_reAddValue     = dragon.compile("ADD=[\"']([^\"']+)[\"']");
-            s_reAddedValue   = dragon.compile("ADDED=[\"']([^\"']+)[\"']");
+            s_reAddValue = dragon.compile("ADD=[\"']([^\"']+)[\"']");
+            s_reAddedValue = dragon.compile("ADDED=[\"']([^\"']+)[\"']");
             s_reDeletedValue = dragon.compile("DELETED=[\"']([^\"']+)[\"']");
-            s_reNameValue    = dragon.compile("NAME=[\"']([^\"']+)[\"']");
+            s_reNameValue = dragon.compile("NAME=[\"']([^\"']+)[\"']");
             s_reVersionValue = dragon.compile("ID=[\"']([^\"']+)[\"']");
         }
         catch (RESyntaxException e)
@@ -128,7 +118,7 @@ public class SnippetPageTemplate
         public long m_version;
 
         public Position(TemplatePart p_part, int p_type, int p_start,
-            int p_end, boolean p_isRelevant, String p_name, long p_version)
+                int p_end, boolean p_isRelevant, String p_name, long p_version)
         {
             m_part = p_part;
             m_snippetKey = null;
@@ -141,7 +131,7 @@ public class SnippetPageTemplate
         }
 
         public Position(String p_snippetKey, int p_type, int p_start,
-            int p_end, boolean p_isRelevant, String p_name, long p_version)
+                int p_end, boolean p_isRelevant, String p_name, long p_version)
         {
             m_part = null;
             m_snippetKey = p_snippetKey;
@@ -167,22 +157,27 @@ public class SnippetPageTemplate
         {
             switch (p_type)
             {
-            case ADD: return "ADD";
-            case ADDED: return "ADDED";
-            case DELETE: return "DELETE";
-            case DELETED: return "DELETED";
-            case ENDTAG: return "ENDTAG";
-            default: return "!SNAFU!";
+                case ADD:
+                    return "ADD";
+                case ADDED:
+                    return "ADDED";
+                case DELETE:
+                    return "DELETE";
+                case DELETED:
+                    return "DELETED";
+                case ENDTAG:
+                    return "ENDTAG";
+                default:
+                    return "!SNAFU!";
             }
         }
 
         public String toString()
         {
-            return "Position " + (m_part != null ? "(TP)" : "(SN)") +
-                " type=" + typeToString(m_type) +
-                " start=" + m_start + " end=" + m_end +
-                " relevant=" + m_isRelevant +
-                " name=" + m_name + " version=" + m_version;
+            return "Position " + (m_part != null ? "(TP)" : "(SN)") + " type="
+                    + typeToString(m_type) + " start=" + m_start + " end="
+                    + m_end + " relevant=" + m_isRelevant + " name=" + m_name
+                    + " version=" + m_version;
         }
     }
 
@@ -199,7 +194,6 @@ public class SnippetPageTemplate
     protected HashMap m_snippets = null;
 
     private SnippetPageTemplateInterpreter m_engine = null;
-
 
     //
     // Constructors
@@ -223,7 +217,6 @@ public class SnippetPageTemplate
         computePositions();
     }
 
-
     //
     // Public Methods
     //
@@ -238,14 +231,14 @@ public class SnippetPageTemplate
         return m_positions.size() + m_snippetPositions.size();
     }
 
-
     //
     // Overwritten Public Methods
     //
 
     /**
-     * Set the template parts of this PageTemplate and recomputes the
-     * GS positions.
+     * Set the template parts of this PageTemplate and recomputes the GS
+     * positions.
+     * 
      * @see PageTemplate.setTemplateParts(Collection)
      */
     public void setTemplateParts(ArrayList p_templateParts)
@@ -256,21 +249,20 @@ public class SnippetPageTemplate
     }
 
     /**
-     * Get the string representation of page template with TU ID data
-     * replaced by Tuv content, and GS instructions executed (for the
-     * locale given in the constructor).
+     * Get the string representation of page template with TU ID data replaced
+     * by Tuv content, and GS instructions executed (for the locale given in the
+     * constructor).
      *
      * @return The template of the page as a string.
      */
-    public String getPageData(RenderingOptions p_options)
-        throws PageException
+    public String getPageData(RenderingOptions p_options) throws PageException
     {
         // if no skeleton in the page
         if (m_templateParts == null)
         {
             throw new PageException(
-                PageException.MSG_PAGETEMPLATE_GETPAGEDATA_INVALID_PARTS,
-                null, null);
+                    PageException.MSG_PAGETEMPLATE_GETPAGEDATA_INVALID_PARTS,
+                    null, null);
         }
 
         int partsSize = m_templateParts.size();
@@ -280,8 +272,8 @@ public class SnippetPageTemplate
         if (m_tuvContents == null && partsSize > 1)
         {
             throw new PageException(
-                PageException.MSG_PAGETEMPLATE_GETPAGEDATA_TUVS_NOT_FILLED,
-                null, null);
+                    PageException.MSG_PAGETEMPLATE_GETPAGEDATA_TUVS_NOT_FILLED,
+                    null, null);
         }
 
         if (m_positions.size() == 0)
@@ -298,19 +290,18 @@ public class SnippetPageTemplate
         return m_engine.interpret(p_options);
     }
 
-   /**
-    * Gets the Set of valid (interpreted) Tu ids for a given page.
-    * Called by upload/download and the online editor.
-    */
-    public HashSet getInterpretedTuIds()
-        throws PageException
+    /**
+     * Gets the Set of valid (interpreted) Tu ids for a given page. Called by
+     * upload/download and the online editor.
+     */
+    public HashSet getInterpretedTuIds() throws PageException
     {
         // if no skeleton in the page
         if (m_templateParts == null)
         {
             throw new PageException(
-                PageException.MSG_PAGETEMPLATE_GETPAGEDATA_INVALID_PARTS,
-                null, null);
+                    PageException.MSG_PAGETEMPLATE_GETPAGEDATA_INVALID_PARTS,
+                    null, null);
         }
 
         // delegate the hairy execution of GS tags to a separate class
@@ -322,19 +313,21 @@ public class SnippetPageTemplate
         return m_engine.getInterpretedTuIds();
     }
 
-
     //
     // Private Methods
     //
 
     /**
-     * <p>Computes the locations of GS tags in the templates and
-     * snippets to keep an index that speeds up later execution of the
-     * tags.</p>
+     * <p>
+     * Computes the locations of GS tags in the templates and snippets to keep
+     * an index that speeds up later execution of the tags.
+     * </p>
      *
-     * <p>A position tracks the start/end of each GS tag and start/end
-     * of content if applicable; the type of the tag; and whether it
-     * is relevant in the locale given in the constructor.</p>
+     * <p>
+     * A position tracks the start/end of each GS tag and start/end of content
+     * if applicable; the type of the tag; and whether it is relevant in the
+     * locale given in the constructor.
+     * </p>
      */
     private void computePositions()
     {
@@ -361,12 +354,13 @@ public class SnippetPageTemplate
             m_snippetPositions.addAll(newPositions);
 
             oldPositions = newPositions;
-        }
-        while (newPositions.size() > 0);
+        } while (newPositions.size() > 0);
     }
 
     /**
-     * <p>Computes the locations of GS tags in template parts.</p>
+     * <p>
+     * Computes the locations of GS tags in template parts.
+     * </p>
      */
     private ArrayList getPositionsInParts()
     {
@@ -376,9 +370,9 @@ public class SnippetPageTemplate
 
         Collection parts = super.getTemplateParts();
 
-        for (Iterator it = parts.iterator(); it.hasNext(); )
+        for (Iterator it = parts.iterator(); it.hasNext();)
         {
-            TemplatePart part = (TemplatePart)it.next();
+            TemplatePart part = (TemplatePart) it.next();
             String skel = part.getSkeleton();
 
             if (skel != null && skel.length() > 0)
@@ -400,16 +394,18 @@ public class SnippetPageTemplate
     }
 
     /**
-     * <p>Loads all snippets referenced in the given positions and
-     * retrieves a list of new positions in the snippets.</p>
+     * <p>
+     * Loads all snippets referenced in the given positions and retrieves a list
+     * of new positions in the snippets.
+     * </p>
      */
     private ArrayList getPositionsInSnippets(ArrayList p_positions)
     {
         ArrayList result = new ArrayList();
 
-        for (Iterator it = p_positions.iterator(); it.hasNext(); )
+        for (Iterator it = p_positions.iterator(); it.hasNext();)
         {
-            Position pos = (Position)it.next();
+            Position pos = (Position) it.next();
 
             if (refersToSnippet(pos) && !haveSnippet(pos))
             {
@@ -467,37 +463,36 @@ public class SnippetPageTemplate
      * Turns a regular expression match of a <GS> tag into a Position.
      */
     private Position makePosition(RE p_re, TemplatePart p_part,
-        Snippet p_snippet)
+            Snippet p_snippet)
     {
         Position result;
 
         String match = p_re.getParen(0);
 
         int start = p_re.getParenStart(0);
-        int end   = p_re.getParenEnd(0);
-        int type  = getTagType(match, m_locale);
-        boolean isRelevant  = getTagRelevance(match, type, m_locale);
-        String snippetName  = getSnippetName(match, type);
+        int end = p_re.getParenEnd(0);
+        int type = getTagType(match, m_locale);
+        boolean isRelevant = getTagRelevance(match, type, m_locale);
+        String snippetName = getSnippetName(match, type);
         long snippetVersion = getSnippetVersion(match, type);
 
         if (p_part != null)
         {
-            result = new Position(p_part, type, start, end,
-                isRelevant, snippetName, snippetVersion);
+            result = new Position(p_part, type, start, end, isRelevant,
+                    snippetName, snippetVersion);
         }
         else
         {
             result = new Position(getKey(p_snippet), type, start, end,
-                isRelevant, snippetName, snippetVersion);
+                    isRelevant, snippetName, snippetVersion);
         }
 
         return result;
     }
 
-
     /**
-     * Examines the matched GS tag and returns the appropriate tag
-     * type (or position type): ADD, ADDED, DELETE, DELETED, ENDTAG.
+     * Examines the matched GS tag and returns the appropriate tag type (or
+     * position type): ADD, ADDED, DELETE, DELETED, ENDTAG.
      */
     private int getTagType(String p_tag, String p_locale)
     {
@@ -536,36 +531,39 @@ public class SnippetPageTemplate
     }
 
     /**
-     * Examines the matched GS tag and returns true if the tag is
-     * relevant in the given locale, i.e. if it is ADDED in, or
-     * DELETED from, this locale.
+     * Examines the matched GS tag and returns true if the tag is relevant in
+     * the given locale, i.e. if it is ADDED in, or DELETED from, this locale.
      */
     private boolean getTagRelevance(String p_tag, int p_type, String p_locale)
     {
         switch (p_type)
         {
-        case Position.ADD:     return true;
-        case Position.DELETE:  return true;
-        case Position.DELETED: return true;
-        case Position.ENDTAG:  return false;
+            case Position.ADD:
+                return true;
+            case Position.DELETE:
+                return true;
+            case Position.DELETED:
+                return true;
+            case Position.ENDTAG:
+                return false;
 
-        case Position.ADDED:
-        {
-            RE re = new RE(s_reAddedValue, RE.MATCH_CASEINDEPENDENT);
-            if (re.match(p_tag, 0))
+            case Position.ADDED:
             {
-                String locales = re.getParen(1);
-                if (locales.indexOf(p_locale) >= 0)
+                RE re = new RE(s_reAddedValue, RE.MATCH_CASEINDEPENDENT);
+                if (re.match(p_tag, 0))
                 {
-                    return true;
+                    String locales = re.getParen(1);
+                    if (locales.indexOf(p_locale) >= 0)
+                    {
+                        return true;
+                    }
                 }
+
+                return false;
             }
 
-            return false;
-        }
-
-        default:
-            return false;
+            default:
+                return false;
         }
     }
 
@@ -619,12 +617,10 @@ public class SnippetPageTemplate
         return p_pos.m_type == Position.ADDED && p_pos.m_isRelevant == true;
     }
 
-
     private void addSnippet(Snippet p_snippet)
     {
         m_snippets.put(getKey(p_snippet), p_snippet);
     }
-
 
     /**
      * Retrieves the snippet this position is contained in.
@@ -633,7 +629,7 @@ public class SnippetPageTemplate
     {
         if (p_pos.isInSnippet())
         {
-            return (Snippet)m_snippets.get(p_pos.m_snippetKey);
+            return (Snippet) m_snippets.get(p_pos.m_snippetKey);
         }
 
         return null;
@@ -644,12 +640,12 @@ public class SnippetPageTemplate
      */
     protected Snippet getTargetSnippet(Position p_pos)
     {
-        return (Snippet)m_snippets.get(getKey(p_pos));
+        return (Snippet) m_snippets.get(getKey(p_pos));
     }
 
     /**
-     * Returns true if the snippet this position points to has been
-     * loaded from the database.
+     * Returns true if the snippet this position points to has been loaded from
+     * the database.
      */
     private boolean haveSnippet(Position p_pos)
     {
@@ -683,23 +679,25 @@ public class SnippetPageTemplate
         }
         else
         {
-            result = p_snippet.getName() +
-                p_snippet.getLocale().toString() + p_snippet.getId();
+            result = p_snippet.getName() + p_snippet.getLocale().toString()
+                    + p_snippet.getId();
         }
 
         return result.toUpperCase();
     }
 
-
     /**
-     * <p>Returns true if the snippet contains an ADD position that
-     * points to itself (generic or otherwise). This test helps to
-     * prevent endless recursion in case a snippet includes itself.</p>
+     * <p>
+     * Returns true if the snippet contains an ADD position that points to
+     * itself (generic or otherwise). This test helps to prevent endless
+     * recursion in case a snippet includes itself.
+     * </p>
      *
-     * <p>We test only direct recursions here. If it turns out that
-     * people manage to write indirect recursions, we need to address
-     * this in the UI in which pages and snippets get authored.
-     * Performing the test here is too late.</p>
+     * <p>
+     * We test only direct recursions here. If it turns out that people manage
+     * to write indirect recursions, we need to address this in the UI in which
+     * pages and snippets get authored. Performing the test here is too late.
+     * </p>
      */
     private boolean snippetAddsItself(Snippet p_snippet, Position p_pos)
     {
@@ -714,11 +712,10 @@ public class SnippetPageTemplate
         return false;
     }
 
-
     /**
-     * Loads a snippet from the database.  No error handling is
-     * performed since we don't want to throw exceptions from a data
-     * class.  We need to revisit this code and all its callers L8TER.
+     * Loads a snippet from the database. No error handling is performed since
+     * we don't want to throw exceptions from a data class. We need to revisit
+     * this code and all its callers L8TER.
      */
     private Snippet loadSnippet(Position p_pos)
     {
@@ -734,15 +731,15 @@ public class SnippetPageTemplate
             }
             else
             {
-                result = mgr.getSnippet(p_pos.m_name, m_locale,
-                    p_pos.m_version);
+                result = mgr
+                        .getSnippet(p_pos.m_name, m_locale, p_pos.m_version);
             }
         }
         catch (Throwable ex)
         {
             // Not a fatal error.
-            c_logger.error("can't load snippet " + p_pos.m_name +
-                " id " + p_pos.m_version, ex);
+            c_logger.error("can't load snippet " + p_pos.m_name + " id "
+                    + p_pos.m_version, ex);
         }
 
         return result;

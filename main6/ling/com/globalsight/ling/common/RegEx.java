@@ -16,40 +16,43 @@
  */
 package com.globalsight.ling.common;
 
-//jakarta regexp package
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * This class encapsulate the ORO Perl5 regular expresion engine
- * offering a much simpler interface.
+ * This class encapsulate the ORO Perl5 regular expresion engine offering a much
+ * simpler interface.
  */
 public final class RegEx
 {
     /**
-     * Does the Perl pattern generates a match in the string (case
-     * sensitive)?
+     * Does the Perl pattern generates a match in the string (case sensitive)?
+     * 
      * @return boolean
-     * @param p_strText String
-     * @param p_strPattern String. Perl style, don't forget that for
-     * example \s becomes \\s...
+     * @param p_strText
+     *            String
+     * @param p_strPattern
+     *            String. Perl style, don't forget that for example \s becomes
+     *            \\s...
      */
     public static boolean matchExact(String p_strText, String p_strPattern)
-        throws RegExException
+            throws RegExException
     {
         return matchExact(p_strText, p_strPattern, true);
     }
 
     /**
      * Does the Perl pattern generates a match in the string?
+     * 
      * @return boolean
-     * @param p_strText String
-     * @param p_strPattern String. Perl style don't forget that for
-     * example \s becomes \\s...
+     * @param p_strText
+     *            String
+     * @param p_strPattern
+     *            String. Perl style don't forget that for example \s becomes
+     *            \\s...
      */
     public static boolean matchExact(String p_strText, String p_strPattern,
-        boolean p_bCaseSensitive)
-        throws RegExException
+            boolean p_bCaseSensitive) throws RegExException
     {
 
         RE pattern = null;
@@ -82,7 +85,7 @@ public final class RegEx
         // string
         if (pattern.match(p_strText))
         {
-            if (pattern.getParenEnd(0) == (p_strText.length()-1))
+            if (pattern.getParenEnd(0) == (p_strText.length() - 1))
             {
                 match = true;
             }
@@ -92,34 +95,42 @@ public final class RegEx
     }
 
     /**
-     * Does a substitution of all occurences of the pattern (/g
-     * equivalent in Perl). It is case sensitive
-     * @param p_strText the original String
-     * @param p_strRegEx the regular expression
-     * @param p_strSubWith the substitution text
-     * @return a string in which all occurences of the regular
-     * expression have been replaced.
+     * Does a substitution of all occurences of the pattern (/g equivalent in
+     * Perl). It is case sensitive
+     * 
+     * @param p_strText
+     *            the original String
+     * @param p_strRegEx
+     *            the regular expression
+     * @param p_strSubWith
+     *            the substitution text
+     * @return a string in which all occurences of the regular expression have
+     *         been replaced.
      */
     public static String substituteAll(String p_strText, String p_strRegEx,
-        String p_strSubWith)
-        throws RegExException
+            String p_strSubWith) throws RegExException
     {
         return substituteAll(p_strText, p_strRegEx, p_strSubWith, true);
     }
 
     /**
-     * Does a substitution of all occurences of the pattern (/g
-     * equivalent in Perl).
-     * @param p_strText the original String
-     * @param p_strRegEx the regular expression
-     * @param p_strSubWith the substitution text
-     * @param p_bCaseSensitive boolean case sensitive?
-     * @return a string in which all occurences of the regular
-     * expression have been replaced.
+     * Does a substitution of all occurences of the pattern (/g equivalent in
+     * Perl).
+     * 
+     * @param p_strText
+     *            the original String
+     * @param p_strRegEx
+     *            the regular expression
+     * @param p_strSubWith
+     *            the substitution text
+     * @param p_bCaseSensitive
+     *            boolean case sensitive?
+     * @return a string in which all occurences of the regular expression have
+     *         been replaced.
      */
     public static String substituteAll(String p_strText, String p_strRegEx,
-        String p_strSubWith, boolean p_bCaseSensitive)
-        throws RegExException
+            String p_strSubWith, boolean p_bCaseSensitive)
+            throws RegExException
     {
         if (p_strText == null || p_strRegEx == null)
         {
@@ -143,56 +154,63 @@ public final class RegEx
             throw new RegExException(e.getMessage());
         }
 
-
         return pattern.subst(p_strText, p_strSubWith);
     }
 
     /**
-     * Match the Perl pattern with the substring in the given string
-     * (case sensitive)
+     * Match the Perl pattern with the substring in the given string (case
+     * sensitive)
+     * 
      * @return MatchResult or null if the pattern did not match
-     * @param p_strText string to search in
-     * @param p_strPattern a Perl-style regex pattern. Don't forget
-     * that for example \s becomes \\s...
+     * @param p_strText
+     *            string to search in
+     * @param p_strPattern
+     *            a Perl-style regex pattern. Don't forget that for example \s
+     *            becomes \\s...
      */
     public static RegExMatchInterface matchSubstring(String p_strText,
-        String p_strPattern)
-        throws RegExException
+            String p_strPattern) throws RegExException
     {
         return matchSubstring(p_strText, p_strPattern, true);
     }
 
     /**
      * Match the Perl pattern with the substring in the given string
+     * 
      * @return MatchResult or null if the pattern did not match
-     * @param p_strText string to search in
-     * @param p_strPattern a Perl-style pattern. Don't forget that for
-     * example \s becomes \\s...
-     * @param p_bCaseSensitive do a case sensitive match if this is true
+     * @param p_strText
+     *            string to search in
+     * @param p_strPattern
+     *            a Perl-style pattern. Don't forget that for example \s becomes
+     *            \\s...
+     * @param p_bCaseSensitive
+     *            do a case sensitive match if this is true
      */
     public static RegExMatchInterface matchSubstring(String p_strText,
-        String p_strPattern, boolean p_bCaseSensitive)
-        throws RegExException
+            String p_strPattern, boolean p_bCaseSensitive)
+            throws RegExException
     {
-        return matchSubstring(p_strText, p_strPattern,
-                              p_bCaseSensitive, false);
+        return matchSubstring(p_strText, p_strPattern, p_bCaseSensitive, false);
     }
 
     /**
      * Match the Perl pattern with the substring in the given string
+     * 
      * @return MatchResult or null if the pattern did not match
-     * @param p_strText string to search in
-     * @param p_strPattern a Perl-style pattern. Don't forget that for
-     * example \s becomes \\s...
-     * @param p_bCaseSensitive do a case sensitive match if this is true
-     * @param p_singleLineMatch if this is set to true, input string
-     * is considered as a single line. "^" and "$" ignore \n, but "."
-     * matches with \n.
+     * @param p_strText
+     *            string to search in
+     * @param p_strPattern
+     *            a Perl-style pattern. Don't forget that for example \s becomes
+     *            \\s...
+     * @param p_bCaseSensitive
+     *            do a case sensitive match if this is true
+     * @param p_singleLineMatch
+     *            if this is set to true, input string is considered as a single
+     *            line. "^" and "$" ignore \n, but "." matches with \n.
      */
     public static RegExMatchInterface matchSubstring(String p_strText,
-        String p_strPattern, boolean p_bCaseSensitive,
-        boolean p_singleLineMatch)
-        throws RegExException
+            String p_strPattern, boolean p_bCaseSensitive,
+            boolean p_singleLineMatch) throws RegExException
     {
 
         if (p_strText == null || p_strPattern == null)
@@ -210,7 +228,7 @@ public final class RegEx
             matchFlags |= RE.MATCH_CASEINDEPENDENT;
         }
 
-        if(p_singleLineMatch)
+        if (p_singleLineMatch)
         {
             matchFlags |= RE.MATCH_SINGLELINE;
         }
@@ -218,7 +236,7 @@ public final class RegEx
         {
             matchFlags |= RE.MATCH_MULTILINE;
         }
-                
+
         // Attempt to compile the pattern. If the pattern is not
         // valid, report the error and exit.
         RE pattern = null;

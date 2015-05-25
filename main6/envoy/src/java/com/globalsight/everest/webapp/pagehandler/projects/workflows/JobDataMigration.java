@@ -47,7 +47,7 @@ public class JobDataMigration
 
     // Move leverage match data to leverage match archived table.
     private static final String LM_ARCHIVED_INSERT =
-            "INSERT INTO " + TO_LM_TABLE + " ("
+            "REPLACE INTO " + TO_LM_TABLE + " ("
             + "SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, MATCHED_TEXT_STRING, MATCHED_TEXT_CLOB, "
             + "TARGET_LOCALE_ID, MATCH_TYPE, ORDER_NUM, SCORE_NUM, MATCHED_TUV_ID, "
             + "MATCHED_TABLE_TYPE, PROJECT_TM_INDEX, TM_ID, TM_PROFILE_ID, MT_NAME, "
@@ -70,7 +70,7 @@ public class JobDataMigration
 
     // Move TUV data to TUV archived table.
     private static final String TUV_ARCHIVED_INSERT =
-            "INSERT INTO " + TO_TUV_TABLE + " ("
+            "REPLACE INTO " + TO_TUV_TABLE + " ("
             + "ID, ORDER_NUM, LOCALE_ID, TU_ID, IS_INDEXED, "
             + "SEGMENT_CLOB, SEGMENT_STRING, WORD_COUNT, EXACT_MATCH_KEY, STATE, "
             + "MERGE_STATE, TIMESTAMP, LAST_MODIFIED, MODIFY_USER, CREATION_DATE, "
@@ -99,7 +99,7 @@ public class JobDataMigration
 
     // Move TUV data to "translation_unit_archived" table.
     private static final String TU_ARCHIVED_INSERT =
-            "INSERT INTO " + TO_TU_TABLE + " ( "
+            "REPLACE INTO " + TO_TU_TABLE + " ( "
             + "ID, ORDER_NUM, TM_ID, DATA_TYPE, TU_TYPE, "
             + "LOCALIZE_TYPE, LEVERAGE_GROUP_ID, PID, SOURCE_TM_NAME, XLIFF_TRANSLATION_TYPE, "
             + "XLIFF_LOCKED, IWS_SCORE, XLIFF_TARGET_SEGMENT, XLIFF_TARGET_LANGUAGE, GENERATE_FROM, "
@@ -123,7 +123,7 @@ public class JobDataMigration
 
     // Move TUV data to "template_part_archived" table.
     private static final String TEMPLATE_PART_ARCHIVED_INSERT =
-            "INSERT INTO TEMPLATE_PART_ARCHIVED ( "
+            "REPLACE INTO TEMPLATE_PART_ARCHIVED ( "
             + "ID, TEMPLATE_ID, ORDER_NUM, SKELETON_CLOB, SKELETON_STRING, TU_ID) "
             + "SELECT part.ID, part.TEMPLATE_ID, part.ORDER_NUM, part.SKELETON_CLOB, part.SKELETON_STRING, part.TU_ID "
             + "FROM template_part part, template tem, request req "

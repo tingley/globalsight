@@ -16,12 +16,12 @@
  */
 package com.globalsight.ling.docproc.extractor.xliff;
 
-// jakarta regexp package
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-import java.util.*;
+import java.util.Map;
+
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * Utility class used in the XML Extractor.
@@ -40,10 +40,10 @@ public abstract class OutputWriter
     private static final REProgram CLOSING_PH = createCommentsSearchPattern("</ph>");
 
     private String sid = null;
-    
+
     /**
-     * For xliff source file,target content may be blank.In this case,
-     * the blank target content should be added to translatable instead of skeleton.
+     * For xliff source file,target content may be blank.In this case, the blank
+     * target content should be added to translatable instead of skeleton.
      * 
      * Default "true",this is the default behaviour.
      */
@@ -58,15 +58,15 @@ public abstract class OutputWriter
     {
         this.sid = sid;
     }
-    
+
     public void setBlankTextAsSkeleton(boolean p_blankTextAsSkeleton)
     {
-    	this.blankTextAsSkeleton = p_blankTextAsSkeleton;
+        this.blankTextAsSkeleton = p_blankTextAsSkeleton;
     }
-    
+
     public boolean getBlankTextAsSkeleton()
     {
-    	return this.blankTextAsSkeleton;
+        return this.blankTextAsSkeleton;
     }
 
     private static REProgram createCommentsSearchPattern(String p_pattern)
@@ -86,11 +86,11 @@ public abstract class OutputWriter
     }
 
     abstract public void flush();
-    
+
     abstract public int getOutputType();
 
     abstract public void append(String content);
-    
+
     abstract public void setXliffTransPart(Map attributes);
 
     protected boolean isXmlCommentsOnly(String p_content)

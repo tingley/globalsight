@@ -1,97 +1,86 @@
 <project name="Linguistics" default="build" basedir=".">
-  <target name="init">
-    <echo message="***** Ling build file *****"/>
-    <tstamp/>
+	<target name="init">
+		<echo message="***** Ling build file *****" />
+		<tstamp />
 
-    <!--  Specify the individual source directories.  -->
-    <property name="lingBase" value="../../ling"/>
-    <property name="lingSrc" value="${lingBase}"/>
-    <property name="lingToolsDir" value="${lingBase}/tools"/>
-    <property name="lingToolsBinDir" value="${lingBase}/tools/bin"/>
-    <property name="envoySrc" value="../../envoy/src"/>
+		<!--  Specify the individual source directories.  -->
+		<property name="lingBase" value="../../ling" />
+		<property name="lingSrc" value="${lingBase}" />
+		<property name="lingToolsDir" value="${lingBase}/tools" />
+		<property name="lingToolsBinDir" value="${lingBase}/tools/bin" />
+		<property name="envoySrc" value="../../envoy/src" />
 
-    <!--  Build destination directories  -->
-    <property name="onlineJar" value="${appletLib}/online.jar"/>
-    <property name="lingRoot" value="com/globalsight/ling"/>
-    <property name="common" value="${lingRoot}/common"/>
-    <property name="docproc" value="${lingRoot}/docproc"/>
-    <property name="tw" value="${lingRoot}/tw"/>
-    <property name="tm" value="${lingRoot}/tm"/>
-    <property name="util" value="${lingRoot}/util"/>
-    <property name="online" value="${lingRoot}/online"/>
-    <property name="applet" value="${lingRoot}/tw/online"/>
+		<!--  Build destination directories  -->
+		<property name="onlineJar" value="${appletLib}/online.jar" />
+		<property name="lingRoot" value="com/globalsight/ling" />
+		<property name="common" value="${lingRoot}/common" />
+		<property name="docproc" value="${lingRoot}/docproc" />
+		<property name="tw" value="${lingRoot}/tw" />
+		<property name="tm" value="${lingRoot}/tm" />
+		<property name="util" value="${lingRoot}/util" />
+		<property name="online" value="${lingRoot}/online" />
+		<property name="applet" value="${lingRoot}/tw/online" />
 
-    <!--  Generated file names  -->
-    <property name="parser.java" value="Parser.java"/>
-    <property name="ParseException.java" value="ParseException.java"/>
-    <property name="ParserConstants.java" value="ParserConstants.java"/>
-    <property name="ParserTokenManager.java" value="ParserTokenManager.java"/>
-    <property name="Token.java" value="Token.java"/>
-    <property name="TokenMgrError.java" value="TokenMgrError.java"/>
-    <property name="UCode_CharStream.java" value="UCode_CharStream.java"/>
-    <property name="SimpleCharStream.java" value="SimpleCharStream.java"/>
-    <property name="JavaCharStream.java" value="JavaCharStream.java"/>
-    <property name="dwupparser.java" value="AmbassadorDwUpParser.java"/>
-    <property name="AmbassadorDwUpParserConstants.java" value="AmbassadorDwUpParserConstants.java"/>
-    <property name="AmbassadorDwUpParserTokenManager.java" value="AmbassadorDwUpParserTokenManager.java"/>
-    <property name="segmenter_regexp" value="SegmenterRegexps"/>
-    <property name="segmenter_regexp_path" value="${lingBase}/${docproc}/${segmenter_regexp}.java"/>
-    <property name="segmenter_regexp_file" value="${segmenter_regexp}.java"/>
-    <filter token="version" value="1.0"/>
+		<!--  Generated file names  -->
+		<property name="parser.java" value="Parser.java" />
+		<property name="ParseException.java" value="ParseException.java" />
+		<property name="ParserConstants.java" value="ParserConstants.java" />
+		<property name="ParserTokenManager.java" value="ParserTokenManager.java" />
+		<property name="Token.java" value="Token.java" />
+		<property name="TokenMgrError.java" value="TokenMgrError.java" />
+		<property name="UCode_CharStream.java" value="UCode_CharStream.java" />
+		<property name="SimpleCharStream.java" value="SimpleCharStream.java" />
+		<property name="JavaCharStream.java" value="JavaCharStream.java" />
+		<property name="dwupparser.java" value="AmbassadorDwUpParser.java" />
+		<property name="AmbassadorDwUpParserConstants.java" value="AmbassadorDwUpParserConstants.java" />
+		<property name="AmbassadorDwUpParserTokenManager.java" value="AmbassadorDwUpParserTokenManager.java" />
+		<property name="segmenter_regexp" value="SegmenterRegexps" />
+		<property name="segmenter_regexp_path" value="${lingBase}/${docproc}/${segmenter_regexp}.java" />
+		<property name="segmenter_regexp_file" value="${segmenter_regexp}.java" />
+		<filter token="version" value="1.0" />
 
-    <!--  Compile our ant tasks  -->
-    <mkdir dir="${lingToolsBinDir}"/>
-    <javac verbose="${javacverbose}" debug="on" target="${javactarget}" srcdir="${lingToolsDir}" destdir="${lingToolsBinDir}" 
-     includes="com/**/*.java"/>
+		<!--  Compile our ant tasks  -->
+		<mkdir dir="${lingToolsBinDir}" />
+		<javac verbose="${javacverbose}" debug="on" target="${javactarget}" srcdir="${lingToolsDir}" destdir="${lingToolsBinDir}" includes="com/**/*.java" />
 
-    <!--  Define new tasks  -->
-    <property name="antTasksPackage" value="com.globalsight.tools.ant"/>
-    <taskdef name="appendfile" classname="${antTasksPackage}.AppendFile" classpath="${lingToolsBinDir}"/>
-    <taskdef name="foreach" classname="${antTasksPackage}.ForEach" classpath="${lingToolsBinDir}"/>
-    <taskdef name="getparent" classname="${antTasksPackage}.GetParent" classpath="${lingToolsBinDir}"/>
-  </target>
+		<!--  Define new tasks  -->
+		<property name="antTasksPackage" value="com.globalsight.tools.ant" />
+		<taskdef name="appendfile" classname="${antTasksPackage}.AppendFile" classpath="${lingToolsBinDir}" />
+		<taskdef name="foreach" classname="${antTasksPackage}.ForEach" classpath="${lingToolsBinDir}" />
+		<taskdef name="getparent" classname="${antTasksPackage}.GetParent" classpath="${lingToolsBinDir}" />
+	</target>
 
-  <target name="compile" depends="precompile">
-    <echo message="***** Copying properties files"/>
-    <copy todir="${serverclassesDest}">
-      <fileset dir="${lingSrc}"
-               includes="com/globalsight/resources/messages/*" />
-    </copy>
-    <copy todir="${serverclassesDest}/properties/tm">
-      <fileset dir="${lingSrc}/com/globalsight/ling/tm2/tm_properties"
-        		excludes="**/StopWordList_*" />
-    </copy>
-    <copy todir="${serverclassesDest}/properties/aligner">
-      <fileset dir="${lingSrc}/com/globalsight/ling/aligner/aligner_properties" />
-    </copy>
-    <copy todir="${serverclassesDest}">
-      <fileset dir="${lingSrc}"
-               includes="com/globalsight/ling/lucene/analysis/**/*"
-               excludes="**/*.java, **/*.jjj, **/*.class" />
-    </copy>
-    <copy todir="${serverclassesDest}">
-      <fileset dir="${lingSrc}"
-               includes="com/globalsight/ling/sgml/sgmldtd/*.properties" />
-    </copy>
-    <copy todir="${serverclassesDest}">
-      <fileset dir="${lingSrc}"
-               includes="com/globalsight/ling/jtidy/*.properties" />
-    </copy>
-    <copy todir="${serverclassesDest}">
-      <fileset dir="${lingSrc}"
-               includes="com/globalsight/ling/tm3/core/persistence/xml/*.hbm.xml" />
-    </copy>
-    <copy todir="${serverclassesDest}">
-      <fileset dir="${lingSrc}"
-               includes="com/globalsight/ling/tm2/persistence/error/html/*.htm" />
-    </copy>
-    <copy todir="${globalsight_home}/globalsight-web.war/resources">
-      <fileset dir="${lingSrc}/com/globalsight/resources"
-               includes="globalsight.srx, srx.dtd" />
-    </copy>
-    <copy todir="${serverclassesDest}/properties" flatten="yes">
-      <fileset dir="${lingSrc}" 
-      includes="com/**/docproc/abbreviation*.properties, 
+	<target name="compile" depends="precompile">
+		<echo message="***** Copying properties files" />
+		<copy todir="${serverclassesDest}">
+			<fileset dir="${lingSrc}" includes="com/globalsight/resources/messages/*" />
+		</copy>
+		<copy todir="${serverclassesDest}/properties/tm">
+			<fileset dir="${lingSrc}/com/globalsight/ling/tm2/tm_properties" excludes="**/StopWordList_*" />
+		</copy>
+		<copy todir="${serverclassesDest}/properties/aligner">
+			<fileset dir="${lingSrc}/com/globalsight/ling/aligner/aligner_properties" />
+		</copy>
+		<copy todir="${serverclassesDest}">
+			<fileset dir="${lingSrc}" includes="com/globalsight/ling/lucene/analysis/**/*" excludes="**/*.java, **/*.jjj, **/*.class" />
+		</copy>
+		<copy todir="${serverclassesDest}">
+			<fileset dir="${lingSrc}" includes="com/globalsight/ling/sgml/sgmldtd/*.properties" />
+		</copy>
+		<copy todir="${serverclassesDest}">
+			<fileset dir="${lingSrc}" includes="com/globalsight/ling/jtidy/*.properties" />
+		</copy>
+		<copy todir="${serverclassesDest}">
+			<fileset dir="${lingSrc}" includes="com/globalsight/ling/tm3/core/persistence/xml/*.hbm.xml" />
+		</copy>
+		<copy todir="${serverclassesDest}">
+			<fileset dir="${lingSrc}" includes="com/globalsight/ling/tm2/persistence/error/html/*.htm" />
+		</copy>
+		<copy todir="${globalsight_home}/globalsight-web.war/resources">
+			<fileset dir="${lingSrc}/com/globalsight/resources" includes="globalsight.srx, srx.dtd" />
+		</copy>
+		<copy todir="${serverclassesDest}/properties" flatten="yes">
+			<fileset dir="${lingSrc}" includes="com/**/docproc/abbreviation*.properties, 
                 com/**/docproc/Diplomat.properties,
                 com/**/docproc/Wordcounter.properties,
                 com/globalsight/ling/common/LCID.properties,
@@ -101,18 +90,17 @@
                 com/**/html/Tags.properties,
 		com/**/css/Styles.properties,
 		com/**/msoffice/*.properties">
-      </fileset>
-    </copy>
+			</fileset>
+		</copy>
 
-  </target>
+	</target>
 
-  <target name="build" depends="compile">
-    <echo message="***** Building LING jar files"/>
+	<target name="build" depends="compile">
+		<echo message="***** Building LING jar files" />
 
-    <mkdir dir="${appletLib}" />
-    <jar update="true" duplicate="preserve" filesonly="true" jarfile="${onlineJar}">
-      <fileset dir="${serverclassesDest}" 
-               includes="${common}/DiplomatBasic*.class,
+		<mkdir dir="${appletLib}" />
+		<jar update="true" duplicate="preserve" filesonly="true" jarfile="${onlineJar}">
+			<fileset dir="${serverclassesDest}" includes="${common}/DiplomatBasic*.class,
                          ${docproc}/TmxTagGenerator.class,
                          ${tw}/*.class,
                          ${tw}/*.properties,
@@ -122,71 +110,69 @@
                          ${applet}/OnlineApplet.class,
                          com/globalsight/util/edit/SegmentUtil.class,
                          com/globalsight/util/StringUtil.class,
-                         com/globalsight/cxe/adapter/openoffice/StringIndex.class"/>
-    </jar>
-  </target>
+                         com/globalsight/cxe/adapter/openoffice/StringIndex.class" />
+		</jar>
+	</target>
 
-  <target name="precompile" depends="init">
-    <!--  Generate java source from .jj files  -->
-    <foreach target="precompile.jj" property="jj.file">
-      <fileset dir="${lingBase}/${lingRoot}" includes="**/*.jj"/>
-    </foreach>
+	<target name="precompile" depends="init">
+		<!--  Generate java source from .jj files  -->
+		<foreach target="precompile.jj" property="jj.file">
+			<fileset dir="${lingBase}/${lingRoot}" includes="**/*.jj" />
+		</foreach>
 
-    <!--  Precompile regular expression for the segmenter  -->
-    <property name="regexp_properties_file" value="regexp.properties"/>
-    <property name="regexp_properties_path" value="${lingBase}/${docproc}/${regexp_properties_file}"/>
-    <uptodate property="make_regexps_not_required" targetfile="${segmenter_regexp_path}">
-      <srcfiles dir="${lingBase}/${docproc}" includes="${regexp_properties_file}"/>
-    </uptodate>
-    <antcall target="make_regexps"/>
-  </target>
+		<!--  Precompile regular expression for the segmenter  -->
+		<property name="regexp_properties_file" value="regexp.properties" />
+		<property name="regexp_properties_path" value="${lingBase}/${docproc}/${regexp_properties_file}" />
+		<uptodate property="make_regexps_not_required" targetfile="${segmenter_regexp_path}">
+			<srcfiles dir="${lingBase}/${docproc}" includes="${regexp_properties_file}" />
+		</uptodate>
+		<antcall target="make_regexps" />
+	</target>
 
-  <!--  sub target of precompile  -->
-  <target name="precompile.jj">
-    <getparent file="${jj.file}" property="jj.dir"/>
-    <uptodate property="do_precompile.jj_not_required" targetfile="${jj.dir}/${dwupparser.java}">
-      <srcfiles dir="${jj.dir}" includes="*.jj"/>
-    </uptodate>
-    <uptodate property="do_precompile.jj_not_required" targetfile="${jj.dir}/${parser.java}">
-      <srcfiles dir="${jj.dir}" includes="*.jj"/>
-    </uptodate>
-    <antcall target="do_precompile.jj">
-      <param name="jj.dir" value="${jj.dir}"/>
-      <param name="jj.file" value="${jj.file}"/>
-    </antcall>
-  </target>
+	<!--  sub target of precompile  -->
+	<target name="precompile.jj">
+		<getparent file="${jj.file}" property="jj.dir" />
+		<uptodate property="do_precompile.jj_not_required" targetfile="${jj.dir}/${dwupparser.java}">
+			<srcfiles dir="${jj.dir}" includes="*.jj" />
+		</uptodate>
+		<uptodate property="do_precompile.jj_not_required" targetfile="${jj.dir}/${parser.java}">
+			<srcfiles dir="${jj.dir}" includes="*.jj" />
+		</uptodate>
+		<antcall target="do_precompile.jj">
+			<param name="jj.dir" value="${jj.dir}" />
+			<param name="jj.file" value="${jj.file}" />
+		</antcall>
+	</target>
 
-  <!--  sub target of precompile  -->
-  <target name="do_precompile.jj" unless="do_precompile.jj_not_required">
-    <echo message="Compiling ${jj.file} ..."/>
-    <property name="javaCCJar" value="${commonJarLib}/javacc.jar"/>
-    <property name="javacc.output" value="javacc.output"/>
-    <java classname="org.javacc.parser.Main" classpath="${javaCCJar}" 
-          fork="true" failonerror="true">
-      <arg value="-OUTPUT_DIRECTORY=${jj.dir}"/>
-      <arg value="${jj.file}"/>
-    </java>
-<!--  javacc task is optional, required to install optional.jar
+	<!--  sub target of precompile  -->
+	<target name="do_precompile.jj" unless="do_precompile.jj_not_required">
+		<echo message="Compiling ${jj.file} ..." />
+		<property name="javaCCJar" value="${commonJarLib}/javacc.jar" />
+		<property name="javacc.output" value="javacc.output" />
+		<java classname="org.javacc.parser.Main" classpath="${javaCCJar}" fork="true" failonerror="true">
+			<arg value="-OUTPUT_DIRECTORY=${jj.dir}" />
+			<arg value="${jj.file}" />
+		</java>
+		<!--  javacc task is optional, required to install optional.jar
     <javacc target="${jj.file}" javacchome="${commonJarLib}"/>
  -->
-    <property name="UCode_CharStream" value="UCode_CharStream"/>
-    <copy file="${jj.dir}/${UCode_CharStream}_patched.txt" 
-        tofile="${jj.dir}/${UCode_CharStream}.java" overwrite="true"/>
-    <property name="replaced_token" value="return new ParseException(token, exptokseq, tokenImage);"/>
-    <property name="replacing_text" value="token.next.beginColumn = jj_input_stream.column;
+		<property name="UCode_CharStream" value="UCode_CharStream" />
+		<copy file="${jj.dir}/${UCode_CharStream}_patched.txt" tofile="${jj.dir}/${UCode_CharStream}.java" overwrite="true" />
+		<property name="replaced_token" value="return new ParseException(token, exptokseq, tokenImage);" />
+		<property name="replacing_text" value="token.next.beginColumn = jj_input_stream.column;
     token.next.beginLine = jj_input_stream.line;
-    ${replaced_token}"/>
-    <available file="${jj.dir}/${parser.java}" property="parser_name" value="${jj.dir}/${parser.java}"/>
-    <available file="${jj.dir}/${dwupparser.java}" property="parser_name" value="${jj.dir}/${dwupparser.java}"/>
-    <replace file="${parser_name}" token="${replaced_token}" value="${replacing_text}"/>
-  </target>
+    ${replaced_token}" />
+		<available file="${jj.dir}/${parser.java}" property="parser_name" value="${jj.dir}/${parser.java}" />
+		<available file="${jj.dir}/${dwupparser.java}" property="parser_name" value="${jj.dir}/${dwupparser.java}" />
+		<replace file="${parser_name}" token="${replaced_token}" value="${replacing_text}" />
+	</target>
 
-  <!--  sub target of precompile  -->
-  <target name="make_regexps" unless="make_regexps_not_required">
-    <property name="tmpfile" value="regexp.tmp"/>
-    <property name="target_tmpfile" value="target_regexp.tmp"/>
-    <property file="${regexp_properties_path}"/>
-    <echo file="${target_tmpfile}">/*
+	<!--  sub target of precompile  -->
+	<target name="make_regexps" unless="make_regexps_not_required">
+		<property name="tmpfile" value="regexp.tmp" />
+		<property name="target_tmpfile" value="target_regexp.tmp" />
+		<property file="${regexp_properties_path}" />
+		<echo file="${target_tmpfile}">/*
  * ${segmenter_regexp_file}
  * This file has been automatically generated by Ant.
  * ***** DO NOT EDIT ***** 
@@ -194,99 +180,99 @@
 
 package com.globalsight.ling.docproc;
 
-import org.apache.regexp.*;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.REProgram;
 
 public class ${segmenter_regexp}
 {
 </echo>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name1}"/>
-      <param name="compile_regexp_arg2" value="${regexp1}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name2}"/>
-      <param name="compile_regexp_arg2" value="${regexp2}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name3}"/>
-      <param name="compile_regexp_arg2" value="${regexp3}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name4}"/>
-      <param name="compile_regexp_arg2" value="${regexp4}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name5}"/>
-      <param name="compile_regexp_arg2" value="${regexp5}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name6}"/>
-      <param name="compile_regexp_arg2" value="${regexp6}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name7}"/>
-      <param name="compile_regexp_arg2" value="${regexp7}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name8}"/>
-      <param name="compile_regexp_arg2" value="${regexp8}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name9}"/>
-      <param name="compile_regexp_arg2" value="${regexp9}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name10}"/>
-      <param name="compile_regexp_arg2" value="${regexp10}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <antcall target="compile_regexp">
-      <param name="compile_regexp_arg1" value="${regexp_name11}"/>
-      <param name="compile_regexp_arg2" value="${regexp11}"/>
-    </antcall>
-    <appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}"/>
-    <echo file="${target_tmpfile}" append="true">
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name1}" />
+			<param name="compile_regexp_arg2" value="${regexp1}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name2}" />
+			<param name="compile_regexp_arg2" value="${regexp2}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name3}" />
+			<param name="compile_regexp_arg2" value="${regexp3}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name4}" />
+			<param name="compile_regexp_arg2" value="${regexp4}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name5}" />
+			<param name="compile_regexp_arg2" value="${regexp5}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name6}" />
+			<param name="compile_regexp_arg2" value="${regexp6}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name7}" />
+			<param name="compile_regexp_arg2" value="${regexp7}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name8}" />
+			<param name="compile_regexp_arg2" value="${regexp8}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name9}" />
+			<param name="compile_regexp_arg2" value="${regexp9}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name10}" />
+			<param name="compile_regexp_arg2" value="${regexp10}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<antcall target="compile_regexp">
+			<param name="compile_regexp_arg1" value="${regexp_name11}" />
+			<param name="compile_regexp_arg2" value="${regexp11}" />
+		</antcall>
+		<appendfile fromfile="${tmpfile}" tofile="${target_tmpfile}" />
+		<echo file="${target_tmpfile}" append="true">
 }
 </echo>
-    <replace file="${target_tmpfile}" token="private" value="public"/>
-    <fixcrlf srcdir="." includes="${target_tmpfile}"/>
-    <move file="${target_tmpfile}" tofile="${segmenter_regexp_path}"/>
-    <delete file="${tmpfile}"/>
-  </target>
-  <!--  sub target of precompile  -->
-  <target name="compile_regexp">
-    <echo message="Compiling ${compile_regexp_arg2} ..."/>
-    <java classname="org.apache.regexp.recompile" classpath="${classpath}" output="${tmpfile}">
-      <arg value="${compile_regexp_arg1}"/>
-      <arg value="${compile_regexp_arg2}"/>
-    </java>
-  </target>
-  <!--  Delete all the generated target files  -->
-  <target name="clean" depends="init">
-    <delete dir="${lingToolsBinDir}"/>
-    <delete>
-      <fileset dir="${lingBase}" includes="*.jar"/>
-    </delete>
-    <property name="common_target" value="cleanbuild"/>
-    <delete file="${segmenter_regexp_path}"/>
-    <foreach target="clean_generated_files" property="jj.file">
-      <fileset dir="${lingBase}/${lingRoot}" includes="**/*.jj"/>
-    </foreach>
-  </target>
-  <target name="clean_generated_files">
-    <getparent file="${jj.file}" property="jj.dir"/>
-    <delete>
-      <fileset dir="${jj.dir}" 
-      includes="${parser.java}, 
+		<replace file="${target_tmpfile}" token="private" value="public" />
+		<fixcrlf srcdir="." includes="${target_tmpfile}" />
+		<move file="${target_tmpfile}" tofile="${segmenter_regexp_path}" />
+		<delete file="${tmpfile}" />
+	</target>
+	<!--  sub target of precompile  -->
+	<target name="compile_regexp">
+		<echo message="Compiling ${compile_regexp_arg2} ..." />
+		<java fork="true" classname="com.sun.org.apache.regexp.internal.recompile" classpath="${classpath}" output="${tmpfile}">
+			<arg value="${compile_regexp_arg1}" />
+			<arg value="${compile_regexp_arg2}" />
+		</java>
+	</target>
+	<!--  Delete all the generated target files  -->
+	<target name="clean" depends="init">
+		<delete dir="${lingToolsBinDir}" />
+		<delete>
+			<fileset dir="${lingBase}" includes="*.jar" />
+		</delete>
+		<property name="common_target" value="cleanbuild" />
+		<delete file="${segmenter_regexp_path}" />
+		<foreach target="clean_generated_files" property="jj.file">
+			<fileset dir="${lingBase}/${lingRoot}" includes="**/*.jj" />
+		</foreach>
+	</target>
+	<target name="clean_generated_files">
+		<getparent file="${jj.file}" property="jj.dir" />
+		<delete>
+			<fileset dir="${jj.dir}" includes="${parser.java}, 
                 ${dwupparser.java}, 
 		${ParseException.java},
 		${ParserConstants.java},
@@ -297,159 +283,125 @@ public class ${segmenter_regexp}
 		${SimpleCharStream.java},
 		${JavaCharStream.java},
 		${AmbassadorDwUpParserConstants.java},
-		${AmbassadorDwUpParserTokenManager.java}"/>
-    </delete>
-  </target>
+		${AmbassadorDwUpParserTokenManager.java}" />
+		</delete>
+	</target>
 
-  <!--  Build the component from scratch  -->
-  <target name="cleanbuild" depends="clean, build"/>
+	<!--  Build the component from scratch  -->
+	<target name="cleanbuild" depends="clean, build" />
 
-  <!-- TM3-specific build targets are all prefixed with tm3.*  These
+	<!-- TM3-specific build targets are all prefixed with tm3.*  These
      - allow a standalone form of TM3 to be build to ling/build/tm3.
      - They also run the TM3 unittests, until they can be integrated
      - into a larger unittest framework. -->
-  
-  <target name="tm3.init" depends="init">
-    <property name="tm3.src.dir"        
-          value="${lingSrc}/com/globalsight/ling/tm3/core"/>
-    <property name="tm3.src.dir"        
-          value="${lingSrc}/com/globalsight/ling/tm3/core"/>
-    <property name="tm3.tools.src.dir"        
-          value="${lingSrc}/com/globalsight/ling/tm3/tools"/>
-    <property name="tm3.test.dir"           value="${lingBase}/test/tm3"/>
-    <property name="tm3.build.dir"          value="${basedir}/tm3"/>
-    <property name="tm3.src.classes.dir"    value="${tm3.build.dir}/classes"/>
-    <property name="tm3.test.classes.dir"   value="${tm3.build.dir}/test"/>
-    <property name="tm3.jar"                value="${tm3.build.dir}/tm3.jar" />
-    <property name="tm3.javadoc.dir"        value="${tm3.build.dir}/javadoc"/>
 
-    <!-- I would really like to load tools/build/build.properties to get
+	<target name="tm3.init" depends="init">
+		<property name="tm3.src.dir" value="${lingSrc}/com/globalsight/ling/tm3/core" />
+		<property name="tm3.src.dir" value="${lingSrc}/com/globalsight/ling/tm3/core" />
+		<property name="tm3.tools.src.dir" value="${lingSrc}/com/globalsight/ling/tm3/tools" />
+		<property name="tm3.test.dir" value="${lingBase}/test/tm3" />
+		<property name="tm3.build.dir" value="${basedir}/tm3" />
+		<property name="tm3.src.classes.dir" value="${tm3.build.dir}/classes" />
+		<property name="tm3.test.classes.dir" value="${tm3.build.dir}/test" />
+		<property name="tm3.jar" value="${tm3.build.dir}/tm3.jar" />
+		<property name="tm3.javadoc.dir" value="${tm3.build.dir}/javadoc" />
+
+		<!-- I would really like to load tools/build/build.properties to get
        - the jar locations.  But that really requires ant 1.8.1 for 
        - the 'prefix' attribute on the loadproperties builtin task, which
        - I can't count on.  So I'm doing this by hand.
       -->
-    <property name="tm3.libroot" value="${lingBase}/../tools/lib" />
+		<property name="tm3.libroot" value="${lingBase}/../tools/lib" />
 
-    <path id="tm3.standalone.classpath">
-      <pathelement location="${tm3.src.classes.dir}" />
-      <fileset dir="${tm3.libroot}/hibernate">
-          <include name="**/*.jar"/>
-      </fileset>
-      <fileset dir="${tm3.libroot}/common">
-          <include name="junit-4.8.2.jar"/>
-          <include name="commons-cli-1.2.jar"/>
-          <include name="log4j.jar"/>
-      </fileset>
-    </path>
+		<path id="tm3.standalone.classpath">
+			<pathelement location="${tm3.src.classes.dir}" />
+			<fileset dir="${tm3.libroot}/hibernate">
+				<include name="**/*.jar" />
+			</fileset>
+			<fileset dir="${tm3.libroot}/common">
+				<include name="junit-4.8.2.jar" />
+				<include name="commons-cli-1.2.jar" />
+				<include name="log4j.jar" />
+			</fileset>
+		</path>
 
-    <path id="tm3.test.classpath">
-      <path refid="tm3.standalone.classpath"/>
-      <pathelement location="${tm3.test.classes.dir}" />
-      <fileset dir="${tm3.libroot}/jbpm">
-          <include name="ehcache-1.2.3.jar"/>
-      </fileset>
-      <fileset dir="${tm3.libroot}/mysql">
-          <include name="mysql-connector-java-5.1.6-bin.jar"/>
-      </fileset>
-    </path>
-  </target>
+		<path id="tm3.test.classpath">
+			<path refid="tm3.standalone.classpath" />
+			<pathelement location="${tm3.test.classes.dir}" />
+			<fileset dir="${tm3.libroot}/jbpm">
+				<include name="ehcache-1.2.3.jar" />
+			</fileset>
+			<fileset dir="${tm3.libroot}/mysql">
+				<include name="mysql-connector-java-5.1.6-bin.jar" />
+			</fileset>
+		</path>
+	</target>
 
-  <target name="tm3.clean" depends="tm3.init">
-      <delete failonerror="false" dir="${tm3.build.dir}"/>
-      <delete failonerror="false" dir="${tm3.javadoc.dir}"/>
-  </target>
+	<target name="tm3.clean" depends="tm3.init">
+		<delete failonerror="false" dir="${tm3.build.dir}" />
+		<delete failonerror="false" dir="${tm3.javadoc.dir}" />
+	</target>
 
-  <target name="tm3.dist" depends="tm3.clean, tm3.standalone, tm3.javadoc" />
+	<target name="tm3.dist" depends="tm3.clean, tm3.standalone, tm3.javadoc" />
 
-  <target name="tm3.javadoc" depends="tm3.init">
-      <echo message="src=${lingSrc}" />
-      <echo message="Generating javadoc in ${tm3.javadoc.dir}" />
-      <javadoc access="public" 
-          author="false" 
-          destdir="${tm3.javadoc.dir}" 
-          windowtitle="TM3 Javadoc"
-          nodeprecated="false" 
-          nodeprecatedlist="false" 
-          noindex="false" 
-          nonavbar="false" 
-          notree="false" 
-          source="1.6" 
-          sourcepath="${lingSrc}"
-          packagenames="com.globalsight.ling.tm3.core"
-          splitindex="true" 
-          use="true" 
-          version="true">
-            <link href="http://java.sun.com/javase/6/docs/api/"/>
-            <doctitle><![CDATA[<h1>TM3</h1>]]></doctitle>
-      </javadoc>
-  </target>
+	<target name="tm3.javadoc" depends="tm3.init">
+		<echo message="src=${lingSrc}" />
+		<echo message="Generating javadoc in ${tm3.javadoc.dir}" />
+		<javadoc access="public" author="false" destdir="${tm3.javadoc.dir}" windowtitle="TM3 Javadoc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.6" sourcepath="${lingSrc}" packagenames="com.globalsight.ling.tm3.core" splitindex="true" use="true" version="true">
+			<link href="http://java.sun.com/javase/6/docs/api/" />
+			<doctitle>
+				<![CDATA[<h1>TM3</h1>]]></doctitle>
+	</javadoc>
+</target>
 
-  <target name="tm3.standalone" depends="tm3.init">
-    <echo message="Compiling source from ${tm3.src.dir} to ${tm3.src.classes.dir}."/>
-    <mkdir dir="${tm3.src.classes.dir}" />
-    <javac 
-           destdir="${tm3.src.classes.dir}"
-           debug="on"
-           optimize="on"
-           deprecation="on"
-           fork="yes"
-           memoryMaximumSize="256m"
-           encoding="UTF-8"
-           source="1.6"
-           target="1.6" >
-      <src path="${tm3.src.dir}" />
-      <src path="${tm3.tools.src.dir}" />
-      <classpath refid="tm3.standalone.classpath"/>
-      <compilerarg value="-Xswitchcheck" compiler="modern"/>
-      <compilerarg value="-nowarn" compiler="modern"/>
-    </javac>
+<target name="tm3.standalone" depends="tm3.init">
+	<echo message="Compiling source from ${tm3.src.dir} to ${tm3.src.classes.dir}." />
+	<mkdir dir="${tm3.src.classes.dir}" />
+	<javac destdir="${tm3.src.classes.dir}" debug="on" optimize="on" deprecation="on" fork="yes" memoryMaximumSize="256m" encoding="UTF-8" source="1.6" target="1.6">
+		<src path="${tm3.src.dir}" />
+		<src path="${tm3.tools.src.dir}" />
+		<classpath refid="tm3.standalone.classpath" />
+		<compilerarg value="-Xswitchcheck" compiler="modern" />
+		<compilerarg value="-nowarn" compiler="modern" />
+	</javac>
 
-    <!-- Compile tests -->
-    <echo message="Compiling source from ${tm3.test.dir} to ${tm3.test.classes.dir}."/>
-    <mkdir dir="${tm3.test.classes.dir}" />
-    <javac 
-           destdir="${tm3.test.classes.dir}"
-           debug="on"
-           optimize="on"
-           deprecation="on"
-           fork="yes"
-           memoryMaximumSize="256m"
-           encoding="UTF-8"
-           source="1.6"
-           target="1.6" >
-      <src path="${tm3.test.dir}" />
-      <classpath refid="tm3.test.classpath"/>
-      <compilerarg value="-Xswitchcheck" compiler="modern"/>
-      <compilerarg value="-nowarn" compiler="modern"/>
-    </javac>
+	<!-- Compile tests -->
+	<echo message="Compiling source from ${tm3.test.dir} to ${tm3.test.classes.dir}." />
+	<mkdir dir="${tm3.test.classes.dir}" />
+	<javac destdir="${tm3.test.classes.dir}" debug="on" optimize="on" deprecation="on" fork="yes" memoryMaximumSize="256m" encoding="UTF-8" source="1.6" target="1.6">
+		<src path="${tm3.test.dir}" />
+		<classpath refid="tm3.test.classpath" />
+		<compilerarg value="-Xswitchcheck" compiler="modern" />
+		<compilerarg value="-nowarn" compiler="modern" />
+	</javac>
 
-    <!-- Copy HBM files over - ugly -->
-    <copy todir="${tm3.src.classes.dir}/com/globalsight/ling/tm3/core">
-      <fileset dir="${tm3.src.dir}">
-        <include name="**/*.hbm.xml" />
-      </fileset>
-    </copy>
-    <copy todir="${tm3.test.classes.dir}/com/globalsight/ling/tm3/core">
-      <fileset dir="${tm3.test.dir}/com/globalsight/ling/tm3/core">
-        <include name="**/*.hbm.xml" />
-      </fileset>
-    </copy>
+	<!-- Copy HBM files over - ugly -->
+	<copy todir="${tm3.src.classes.dir}/com/globalsight/ling/tm3/core">
+		<fileset dir="${tm3.src.dir}">
+			<include name="**/*.hbm.xml" />
+		</fileset>
+	</copy>
+	<copy todir="${tm3.test.classes.dir}/com/globalsight/ling/tm3/core">
+		<fileset dir="${tm3.test.dir}/com/globalsight/ling/tm3/core">
+			<include name="**/*.hbm.xml" />
+		</fileset>
+	</copy>
 
-    <!-- Make the JAR -->
-    <jar compress="false" jarfile="${tm3.jar}">
-        <fileset dir="${tm3.src.classes.dir}"/>
-    </jar>
-  </target>
+	<!-- Make the JAR -->
+	<jar compress="false" jarfile="${tm3.jar}">
+		<fileset dir="${tm3.src.classes.dir}" />
+	</jar>
+</target>
 
-  <target name="tm3.test" depends="tm3.standalone"> 
-    <junit fork="yes" haltonfailure="yes" maxmemory="128m">
-      <test name="com.globalsight.ling.tm3.core.TestBilingualTm" />
-      <test name="com.globalsight.ling.tm3.core.TestMultilingualTm" />
-      <test name="com.globalsight.ling.tm3.core.TestMultilingualSharedTm" />
-      <test name="com.globalsight.ling.tm3.core.TestEditDistanceScorer" />
-      <formatter type="plain" usefile="false" />
-      <classpath refid="tm3.test.classpath" />
-    </junit>
-  </target>
+<target name="tm3.test" depends="tm3.standalone">
+	<junit fork="yes" haltonfailure="yes" maxmemory="128m">
+		<test name="com.globalsight.ling.tm3.core.TestBilingualTm" />
+		<test name="com.globalsight.ling.tm3.core.TestMultilingualTm" />
+		<test name="com.globalsight.ling.tm3.core.TestMultilingualSharedTm" />
+		<test name="com.globalsight.ling.tm3.core.TestEditDistanceScorer" />
+		<formatter type="plain" usefile="false" />
+		<classpath refid="tm3.test.classpath" />
+	</junit>
+</target>
 
 </project>

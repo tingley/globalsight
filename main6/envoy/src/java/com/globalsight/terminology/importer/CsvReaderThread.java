@@ -26,8 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-
-import org.apache.regexp.RE;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
@@ -41,17 +39,16 @@ import com.globalsight.terminology.importer.ImportOptions.ColumnDescriptor;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 import com.globalsight.util.StringUtil;
+import com.sun.org.apache.regexp.internal.RE;
 
 /**
- * Reads CSV files and produces Entry objects by putting ReaderResult
- * objects into a ReaderResultQueue.
+ * Reads CSV files and produces Entry objects by putting ReaderResult objects
+ * into a ReaderResultQueue.
  */
-public class CsvReaderThread
-    extends Thread
+public class CsvReaderThread extends Thread
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            CsvReaderThread.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(CsvReaderThread.class);
 
     private ReaderResultQueue m_results;
     private ReaderResult m_result = null;
@@ -63,8 +60,8 @@ public class CsvReaderThread
     //
     // Constructor
     //
-    public CsvReaderThread (ReaderResultQueue p_q, ImportOptions p_options,
-        Termbase p_termbase)
+    public CsvReaderThread(ReaderResultQueue p_q, ImportOptions p_options,
+            Termbase p_termbase)
     {
         m_results = p_q;
         m_options = p_options;
@@ -98,18 +95,17 @@ public class CsvReaderThread
                 do
                 {
                     line = reader.readLine();
-                }
-                while (line != null && ImportUtil.isEmptyLine(line));
+                } while (line != null && ImportUtil.isEmptyLine(line));
             }
-            
+
             boolean isFirstLine = true;
-            
-            //Added for encoding comma within quoted string
+
+            // Added for encoding comma within quoted string
             CsvReaderUtil csvRUtil = new CsvReaderUtil();
             csvRUtil.setColumnChooseList(m_options);
             boolean _IfEncode = false;
             List columnChooseList = csvRUtil.getColumnChooseList();
-            
+
             // then read and process all other lines
             while ((line = reader.readLine()) != null)
             {
@@ -122,10 +118,10 @@ public class CsvReaderThread
                         encoding = CodesetMapper.getJavaEncoding(encoding);
                         line = StringUtil.removeBom(line, encoding);
                     }
-                    
+
                     isFirstLine = false;
                 }
-                
+
                 m_result = m_results.hireResult();
 
                 try
@@ -136,36 +132,39 @@ public class CsvReaderThread
                     }
 
                     _IfEncode = csvRUtil.ifEncodeForCSV(line);
-                    if(_IfEncode)
+                    if (_IfEncode)
                     {
-                    	line = csvRUtil.encodeForCSV(line);
+                        line = csvRUtil.encodeForCSV(line);
                     }
-                    
+
                     String[] columns = regexp.split(line + " ");
 
                     for (int i = 0, max = columns.length; i < max; ++i)
                     {
-                        //columns[i] = columns[i].trim();
-                    	columns[i] = csvRUtil.csvDelQuotation(columns[i]);
+                        // columns[i] = columns[i].trim();
+                        columns[i] = csvRUtil.csvDelQuotation(columns[i]);
                     }
 
                     if (CATEGORY.isDebugEnabled())
                     {
-                        CATEGORY.debug("line " + reader.getLineNumber() +
-                            " (" + columns.length + " columns) `" + line + "'");
+                        CATEGORY.debug("line " + reader.getLineNumber() + " ("
+                                + columns.length + " columns) `" + line + "'");
                     }
 
                     // Sanity check of column count
                     // if (columns.length != expectedColumns)
-                    if(checkColumns(columnChooseList,columns))
+                    if (checkColumns(columnChooseList, columns))
                     {
-                        /*m_result.setError("line " + reader.getLineNumber() +
-                            ": expected " + expectedColumns + " columns, " +
-                            "found " + columns.length + "; ignoring line"); */
+                        /*
+                         * m_result.setError("line " + reader.getLineNumber() +
+                         * ": expected " + expectedColumns + " columns, " +
+                         * "found " + columns.length + "; ignoring line");
+                         */
 
-                    	m_result.setError("line " + reader.getLineNumber() +
-                                ": Found Invalid Data Issue"+"; ignoring line");
-                    	
+                        m_result.setError("line " + reader.getLineNumber()
+                                + ": Found Invalid Data Issue"
+                                + "; ignoring line");
+
                         CATEGORY.warn(m_result.getMessage());
 
                         boolean done = m_results.put(m_result);
@@ -180,11 +179,11 @@ public class CsvReaderThread
                         continue;
                     }
 
-                    if(_IfEncode)
+                    if (_IfEncode)
                     {
-                    	columns = csvRUtil.decodeForCSV(columns);
+                        columns = csvRUtil.decodeForCSV(columns);
                     }
-                    
+
                     Document dom = buildEntry(columns);
                     Entry entry = new Entry(dom);
 
@@ -197,8 +196,8 @@ public class CsvReaderThread
                 }
                 catch (Exception ex)
                 {
-                    m_result.setError("line " + reader.getLineNumber() +
-                        ": " + ex.getMessage());
+                    m_result.setError("line " + reader.getLineNumber() + ": "
+                            + ex.getMessage());
                 }
 
                 boolean done = m_results.put(m_result);
@@ -238,20 +237,21 @@ public class CsvReaderThread
     }
 
     /**
-     * <p>Converts a list of column values into an Entry.</p>
+     * <p>
+     * Converts a list of column values into an Entry.
+     * </p>
      *
-     * <p>Algorithmic note: columns are managed in a priority queue.
-     * We retrieve the first column and try to map it to the entry.
-     * If we can't because the column depends on a later column
-     * (associatedColumn field), we add it to the end of the queue.
-     * Rinse and repeat until the queue is empty.</p>
+     * <p>
+     * Algorithmic note: columns are managed in a priority queue. We retrieve
+     * the first column and try to map it to the entry. If we can't because the
+     * column depends on a later column (associatedColumn field), we add it to
+     * the end of the queue. Rinse and repeat until the queue is empty.
+     * </p>
      */
-    private Document buildEntry(String[] p_columns)
-        throws TermbaseException,
-               Exception
+    private Document buildEntry(String[] p_columns) throws TermbaseException,
+            Exception
     {
-        com.globalsight.terminology.importer.ImportOptions options =
-            (com.globalsight.terminology.importer.ImportOptions)m_options;
+        com.globalsight.terminology.importer.ImportOptions options = (com.globalsight.terminology.importer.ImportOptions) m_options;
 
         Document result = m_factory.createDocument();
         Element root = result.addElement("conceptGrp");
@@ -271,15 +271,15 @@ public class CsvReaderThread
 
         while (!queue.isEmpty())
         {
-            ColumnDescriptor col = (ColumnDescriptor)queue.remove(0);
+            ColumnDescriptor col = (ColumnDescriptor) queue.remove(0);
 
             index = col.m_position;
-            
-            //added for ArrayIndexOutOfBoundsException
-            if(index>=p_columns.length||index<0)
-            	value = "";
-            else 
-            	value = p_columns[index];
+
+            // added for ArrayIndexOutOfBoundsException
+            if (index >= p_columns.length || index < 0)
+                value = "";
+            else
+                value = p_columns[index];
 
             if (col.m_type.equals("term"))
             {
@@ -315,7 +315,7 @@ public class CsvReaderThread
                     {
                         // The column to which this column belongs has
                         // not been processed yet, but it will be
-                        // processed eventually.  Put this column at
+                        // processed eventually. Put this column at
                         // the end of the queue to be processed later.
                         queue.add(col);
                     }
@@ -385,18 +385,18 @@ public class CsvReaderThread
 
     private boolean isSkippedColumn(int index)
     {
-        ColumnDescriptor col = (ColumnDescriptor)
-            ((com.globalsight.terminology.importer.ImportOptions)m_options).
-            getColumns().get(index);
+        ColumnDescriptor col = (ColumnDescriptor) ((com.globalsight.terminology.importer.ImportOptions) m_options)
+                .getColumns().get(index);
 
         return col.m_type.equals("skip");
     }
 
     private void addTermGrp(Element p_root, Element p_term, String p_language)
-        throws TermbaseException
+            throws TermbaseException
     {
-        Element langGrp = (Element)p_root.selectSingleNode(
-            "//languageGrp[language/@name='" + p_language + "']");
+        Element langGrp = (Element) p_root
+                .selectSingleNode("//languageGrp[language/@name='" + p_language
+                        + "']");
 
         if (langGrp == null)
         {
@@ -424,14 +424,14 @@ public class CsvReaderThread
 
     private Element buildTermGrp(String p_value)
     {
-        Element grp  = m_factory.createElement("termGrp");
+        Element grp = m_factory.createElement("termGrp");
         Element node = grp.addElement("term").addText(p_value);
         return grp;
     }
 
     private Element buildDescripGrp(String p_value, String p_type)
     {
-        Element grp  = m_factory.createElement("descripGrp");
+        Element grp = m_factory.createElement("descripGrp");
         Element node = grp.addElement("descrip").addText(p_value);
         node.addAttribute("type", p_type);
         return grp;
@@ -439,25 +439,24 @@ public class CsvReaderThread
 
     private Element buildSourceGrp(String p_value)
     {
-        Element grp  = m_factory.createElement("sourceGrp");
+        Element grp = m_factory.createElement("sourceGrp");
         Element node = grp.addElement("source").addText(p_value);
         return grp;
     }
 
     private Element buildLanguageGrp(String p_language)
-        throws TermbaseException
+            throws TermbaseException
     {
         String locale = m_termbase.getLocaleByLanguage(p_language);
 
-        Element grp  = m_factory.createElement("languageGrp");
+        Element grp = m_factory.createElement("languageGrp");
         Element node = grp.addElement("language");
         node.addAttribute("name", p_language);
         node.addAttribute("locale", locale);
         return grp;
     }
 
-    private LineNumberReader getReader(String p_url)
-        throws IOException
+    private LineNumberReader getReader(String p_url) throws IOException
     {
         String encoding = m_options.getEncoding();
 
@@ -467,34 +466,33 @@ public class CsvReaderThread
         }
         encoding = CodesetMapper.getJavaEncoding(encoding);
 
-        return new LineNumberReader(new InputStreamReader(
-            new FileInputStream(p_url), encoding));
+        return new LineNumberReader(new InputStreamReader(new FileInputStream(
+                p_url), encoding));
     }
 
     /** Returns the number of columns defined for the import file. */
     private int getColumnCount(ImportOptions p_options)
     {
-        com.globalsight.terminology.importer.ImportOptions options =
-            (com.globalsight.terminology.importer.ImportOptions)p_options;
+        com.globalsight.terminology.importer.ImportOptions options = (com.globalsight.terminology.importer.ImportOptions) p_options;
 
         return options.getColumns().size();
     }
 
-    public boolean checkColumns(List columnChooseList,String[] columns)
+    public boolean checkColumns(List columnChooseList, String[] columns)
     {
-    	if(columnChooseList!=null&&columnChooseList.size()>0)
-    	{
-    		Iterator it = columnChooseList.iterator();
-    		int col,length=columns.length;
-    		while(it.hasNext())
-    		{
-    			col = (Integer)it.next();
-    			if(col>=length)//||"".equals(columns[col])
-    			{
-    				return true;
-    			}
-    		}
-    	}
-    	return false;
+        if (columnChooseList != null && columnChooseList.size() > 0)
+        {
+            Iterator it = columnChooseList.iterator();
+            int col, length = columns.length;
+            while (it.hasNext())
+            {
+                col = (Integer) it.next();
+                if (col >= length)// ||"".equals(columns[col])
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

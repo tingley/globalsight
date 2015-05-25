@@ -33,7 +33,7 @@
 			<property name="classpath" value="${classpath}" />
 		</ant>
 		<echo message="***** compile : javac task *****" />
-		<javac nowarn="${nowarn}" encoding="ISO-8859-1" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="../../${envoySrcJava}:../../${diplomatDevSrcJava}:../../${lingSrcJava}" destdir="${serverclassesDest}" includes="**/*.java" excludes="test/**/*.java, tools/**/*.java" fork="true" memoryMaximumSize="512m">
+		<javac nowarn="${nowarn}" includeantruntime="${includeantruntime}" encoding="ISO-8859-1" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="../../${envoySrcJava}:../../${diplomatDevSrcJava}:../../${lingSrcJava}" destdir="${serverclassesDest}" includes="**/*.java" excludes="test/**/*.java, tools/**/*.java" fork="true" memoryMaximumSize="512m">
 		</javac>
 	</target>
 
@@ -169,7 +169,7 @@
 	<target name="netegrity" depends="distdir">
 		<ant antfile="zip.xml" target="netegrity" />
 	</target>
-	
+
 	<!-- Target to package the GS services -->
 	<target name="globalsightServices">
 		<ant dir="${globalsightServices}/" antfile="build.xml" target="build" inheritAll="false" />

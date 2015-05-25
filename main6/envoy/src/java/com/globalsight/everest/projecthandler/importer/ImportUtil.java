@@ -19,17 +19,14 @@ package com.globalsight.everest.projecthandler.importer;
 
 import org.apache.log4j.Logger;
 
-import org.apache.regexp.RE;
-
+import com.sun.org.apache.regexp.internal.RE;
 
 /**
  * Reads CSV files and produces Entry objects.
  */
 public class ImportUtil
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            ImportUtil.class);
+    private static final Logger CATEGORY = Logger.getLogger(ImportUtil.class);
 
     //
     // Private Member Variables
@@ -40,12 +37,11 @@ public class ImportUtil
     //
 
     /** Static class, private constructor */
-    private ImportUtil ()
+    private ImportUtil()
     {
     }
 
-    public static RE getDelimiterRegexp(String p_delimiter)
-        throws Exception
+    public static RE getDelimiterRegexp(String p_delimiter) throws Exception
     {
         // Build a regexp from the separator char and be careful
         // to protect special chars like '|' (make them "\|").

@@ -17,22 +17,19 @@
 
 package com.globalsight.everest.tm.util;
 
-import com.globalsight.everest.tm.util.DtdResolver;
-import com.globalsight.everest.tm.util.Tmx;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
-import org.dom4j.*;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.ElementHandler;
+import org.dom4j.ElementPath;
 import org.dom4j.io.SAXReader;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import java.io.*;
-import java.util.*;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * Reads Trados TMX files and counts how many TUs they contain.
@@ -50,8 +47,7 @@ public class TmxAnalyzer
     private Tmx m_tmx;
     private String m_tmxVersion = "";
 
-    private static final REProgram DTD_SEARCH_PATTERN =
-        createSearchPattern("tmx\\d+\\.dtd");
+    private static final REProgram DTD_SEARCH_PATTERN = createSearchPattern("tmx\\d+\\.dtd");
 
     private static REProgram createSearchPattern(String p_pattern)
     {
@@ -74,7 +70,7 @@ public class TmxAnalyzer
     // Constructors
     //
 
-    public TmxAnalyzer ()
+    public TmxAnalyzer()
     {
     }
 
@@ -83,8 +79,7 @@ public class TmxAnalyzer
         System.out.println(p_message);
     }
 
-    public void analyze(String p_url)
-        throws Exception
+    public void analyze(String p_url) throws Exception
     {
         m_tuCount = 0;
         m_tuvCount = 0;
@@ -101,78 +96,72 @@ public class TmxAnalyzer
 
         log("Analyzing document: " + p_url);
 
-        reader.addHandler("/tmx",
-            new ElementHandler ()
-                {
-                    public void onStart(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
+        reader.addHandler("/tmx", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                Element element = path.getCurrent();
 
-                        m_tmxVersion = element.attributeValue("version");
-                    }
+                m_tmxVersion = element.attributeValue("version");
+            }
 
-                    public void onEnd(ElementPath path)
-                    {
-                    }
-                }
-            );
+            public void onEnd(ElementPath path)
+            {
+            }
+        });
 
-            reader.addHandler("/tmx/header",
-                new ElementHandler()
-                    {
-                        public void onStart(ElementPath path)
-                        {
-                        }
+        reader.addHandler("/tmx/header", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+            }
 
-                        public void onEnd(ElementPath path)
-                        {
-                            Element element = path.getCurrent();
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
 
-                            element.detach();
+                element.detach();
 
-                            m_tmx = new Tmx(element);
-                            m_tmx.setTmxVersion(m_tmxVersion);
-                        }
-                    }
-                );
+                m_tmx = new Tmx(element);
+                m_tmx.setTmxVersion(m_tmxVersion);
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/body/tu",
-            new ElementHandler ()
+        reader.addHandler("/tmx/body/tu", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                ++m_tuCount;
+
+                if (m_tuCount % 1000 == 0)
                 {
-                    public void onStart(ElementPath path)
-                    {
-                        ++m_tuCount;
-
-                        if (m_tuCount % 1000 == 0)
-                        {
-                            log("TU " + m_tuCount);
-                        }
-                    }
-
-                    public void onEnd(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
-
-                        List tuvs = element.selectNodes("//tuv");
-
-                        m_tuvCount += tuvs.size();
-
-                        for (int i = 0, max = tuvs.size(); i < max; i++)
-                        {
-                            Element tuv = (Element)tuvs.get(i);
-
-                            String locale = tuv.attributeValue("lang");
-                            m_locales.add(locale);
-                        }
-
-                        // prune the current element to reduce memory
-                        element.detach();
-
-                        element = null;
-                    }
+                    log("TU " + m_tuCount);
                 }
-            );
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+
+                List tuvs = element.selectNodes("//tuv");
+
+                m_tuvCount += tuvs.size();
+
+                for (int i = 0, max = tuvs.size(); i < max; i++)
+                {
+                    Element tuv = (Element) tuvs.get(i);
+
+                    String locale = tuv.attributeValue("lang");
+                    m_locales.add(locale);
+                }
+
+                // prune the current element to reduce memory
+                element.detach();
+
+                element = null;
+            }
+        });
 
         Document document = reader.read(p_url);
 
@@ -184,9 +173,9 @@ public class TmxAnalyzer
         log("Total TUVs: " + m_tuvCount);
         log("Total Locales: " + m_localeCount);
 
-        for (Iterator it = m_locales.iterator(); it.hasNext(); )
+        for (Iterator it = m_locales.iterator(); it.hasNext();)
         {
-            String locale = (String)it.next();
+            String locale = (String) it.next();
 
             log(locale);
         }
@@ -194,17 +183,15 @@ public class TmxAnalyzer
         // all done
     }
 
-    static public void main(String[] argv)
-        throws Exception
+    static public void main(String[] argv) throws Exception
     {
         TmxAnalyzer a = new TmxAnalyzer();
 
         if (argv.length != 1)
         {
-            System.err.println(
-                "Usage: TmxAnalyzer FILE\n" +
-                "\tAnalyzes a TMX file for syntactical correctness.\n" +
-                "\tPrints out the number of TUs and TUVs at the end.");
+            System.err.println("Usage: TmxAnalyzer FILE\n"
+                    + "\tAnalyzes a TMX file for syntactical correctness.\n"
+                    + "\tPrints out the number of TUs and TUVs at the end.");
             System.exit(1);
         }
 

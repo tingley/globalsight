@@ -26,8 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.everest.segmentationhelper.Segmentation;
 import com.globalsight.everest.segmentationhelper.SegmentationRule;
@@ -40,6 +38,8 @@ import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper
 import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * Takes unsegmented GXML input and produces a segmented version based on the
@@ -196,7 +196,8 @@ public class DiplomatSegmenter
      * <p>
      * The result can be retrieved as the Output object itself (
      * <code>getOutput()</code>), or as string (<code>getDiplomatXml()</code>).
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
     public void segment(Output p_diplomat) throws Exception
     {
@@ -309,7 +310,8 @@ public class DiplomatSegmenter
 
     /**
      * Walks an internal Output object and segments translatable nodes.
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
     private void doSegmentation() throws Exception
     {
@@ -375,7 +377,8 @@ public class DiplomatSegmenter
                 .parseSegmentationRule(p_segmentationRuleText);
 
         HashMap<String, String> trgTrunks = null;
-        if (isXliff) {
+        if (isXliff)
+        {
             trgTrunks = getTargetChuncks();
         }
         HashMap<String, List<String>> srcSegmentedResult = new HashMap<String, List<String>>();
@@ -499,13 +502,12 @@ public class DiplomatSegmenter
             BreakPosition pos = new BreakPosition(iEnd);
             breakPositions.add(pos);
         }
-        
+
         // remove these index for GBS-3794
         /*
          * <rule break="no"> <beforebreak>\w\n</beforebreak>
          * <afterbreak>[\s]+</afterbreak> </rule>
          */
-        
 
         // Now go back and split the string with tags into segments.
         List<String> segments = splitOriSegment(breakPositions);
@@ -703,8 +705,9 @@ public class DiplomatSegmenter
      * Then converts all <bpt>, <ept> tags to <it> tags if they were split by
      * segment boundaries.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-	private List<String> fixTmxTags(List<String> p_segments)
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
+    private List<String> fixTmxTags(List<String> p_segments)
     {
         String segment;
         int offset;
@@ -755,9 +758,9 @@ public class DiplomatSegmenter
 
                 if (tag_index.get(key) == null)
                 {
-					tag_index
-							.put(key, m_matchAllBptEpt.getParen(1)
-									.equals("bpt") ? "begin" : "end");
+                    tag_index
+                            .put(key, m_matchAllBptEpt.getParen(1)
+                                    .equals("bpt") ? "begin" : "end");
                 }
                 else
                 {
@@ -794,24 +797,27 @@ public class DiplomatSegmenter
                 xKey = "x=\"" + key + "\"";
                 while (matchAllBptEpt.match(replaced, start))
                 {
-                	paren2 = matchAllBptEpt.getParen(2);
-                	paren3 = matchAllBptEpt.getParen(3);
-                	paren4 = matchAllBptEpt.getParen(4);
-                	// if x="key" has already existed (XLF case), not add duplicate one.
-					if (paren2.indexOf(xKey) > -1 || paren3.indexOf(xKey) > -1
-							|| paren4.indexOf(xKey) > -1) {
+                    paren2 = matchAllBptEpt.getParen(2);
+                    paren3 = matchAllBptEpt.getParen(3);
+                    paren4 = matchAllBptEpt.getParen(4);
+                    // if x="key" has already existed (XLF case), not add
+                    // duplicate one.
+                    if (paren2.indexOf(xKey) > -1 || paren3.indexOf(xKey) > -1
+                            || paren4.indexOf(xKey) > -1)
+                    {
                         substitute = "<it " + matchAllBptEpt.getParen(2)
-                                + "pos=\"" + value + "\" "
-                        		+ "i=\"" + key + "\""
-                                + matchAllBptEpt.getParen(3) + ">"
+                                + "pos=\"" + value + "\" " + "i=\"" + key
+                                + "\"" + matchAllBptEpt.getParen(3) + ">"
                                 + matchAllBptEpt.getParen(4) + "</it>";
-                	} else {
+                    }
+                    else
+                    {
                         substitute = "<it " + matchAllBptEpt.getParen(2)
                                 + "pos=\"" + value + "\" " + "x=\"" + key
                                 + "\" i=\"" + key + "\""
                                 + matchAllBptEpt.getParen(3) + ">"
                                 + matchAllBptEpt.getParen(4) + "</it>";
-                	}
+                    }
 
                     replaced = matchAllBptEpt.subst(replaced, substitute,
                             RE.REPLACE_FIRSTONLY);
@@ -989,7 +995,7 @@ public class DiplomatSegmenter
         }
     }
 
-    // Put target chunks into map for later using, only for xliff/PO file. 
+    // Put target chunks into map for later using, only for xliff/PO file.
     private HashMap<String, String> getTargetChuncks()
     {
         HashMap<String, String> chunks = new HashMap<String, String>();
@@ -1030,7 +1036,7 @@ public class DiplomatSegmenter
             }
             if (xlfAtts.get("xliffSegSourceMrkId") != null)
             {
-                mid = (String) xlfAtts.get("xliffSegSourceMrkId");                        
+                mid = (String) xlfAtts.get("xliffSegSourceMrkId");
             }
 
             if (tuID != null)
@@ -1057,7 +1063,7 @@ public class DiplomatSegmenter
      *            -- cache segmented source, if one source becomes to pieces
      *            after segmentation, need add same size targets nodes.
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     private List<String> segmentXliff(TranslatableElement elem,
             HashMap<String, String> trgTrunks,
@@ -1070,15 +1076,17 @@ public class DiplomatSegmenter
         String xliffChunk = elem.getChunk();
         String key = getKeyFromElement(elem);
         // If segment has tag, do not do segmentation anyway.
-		boolean hasTag = (xliffChunk.indexOf("<") > -1 || xliffChunk
-				.indexOf(">") > -1);
-		// if target is empty or same with source or composed of pure tags,
-		// source need segmentation.
-        if (!hasTag && "source".equals(elem.getXliffPartByName()) && key != null)
+        boolean hasTag = (xliffChunk.indexOf("<") > -1 || xliffChunk
+                .indexOf(">") > -1);
+        // if target is empty or same with source or composed of pure tags,
+        // source need segmentation.
+        if (!hasTag && "source".equals(elem.getXliffPartByName())
+                && key != null)
         {
             String trgTrunk = trgTrunks.get(key);
             if (StringUtil.isEmpty(trgTrunk)
-                    || (trgTrunk.equals(xliffChunk) && elem.getTmScoreFromXlfPart() != 100f))
+                    || (trgTrunk.equals(xliffChunk) && elem
+                            .getTmScoreFromXlfPart() != 100f))
             {
                 needDoSegmentation = true;
             }

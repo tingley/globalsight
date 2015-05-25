@@ -17,46 +17,48 @@
 
 package com.globalsight.everest.tm.util.trados;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
 import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.ElementHandler;
+import org.dom4j.ElementPath;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 
 import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Tmx;
-
+import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
+import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
-import com.globalsight.ling.docproc.LocalizableElement;
-
-import com.globalsight.ling.common.HtmlEntities;
-import com.globalsight.ling.common.RegEx;
-import com.globalsight.ling.common.Text;
-
-
-import org.dom4j.*;
-import org.dom4j.io.SAXReader;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import java.util.regex.Pattern;
-
-import java.util.*;
-import java.io.*;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * <p>Trados-TMX Converter for S-Tagger for FrameMaker.</p>
+ * <p>
+ * Trados-TMX Converter for S-Tagger for FrameMaker.
+ * </p>
  *
- * <p>This tool reads a Trados TMX file containing segments created
- * with Trados' S-Tagger for FrameMaker filter, and writes it out as
- * GXML.</p>
+ * <p>
+ * This tool reads a Trados TMX file containing segments created with Trados'
+ * S-Tagger for FrameMaker filter, and writes it out as GXML.
+ * </p>
  */
 public class TradosFmTmxToGxml
 {
@@ -85,26 +87,16 @@ public class TradosFmTmxToGxml
 
     private Pattern m_pattern = Pattern.compile("<ut>|</ut>");
 
-    private static final REProgram CS_START_PATTERN =
-        createSearchPattern("&lt;:cs.*?&gt;");
-    private static final REProgram CS_END_PATTERN =
-        createSearchPattern("&lt;:/cs&gt;");
-    private static final REProgram HS_PATTERN =
-        createSearchPattern("&lt;:hs&gt;");
-    private static final REProgram HH_PATTERN =
-        createSearchPattern("&lt;:hh&gt;");
-    private static final REProgram EMS_PATTERN =
-        createSearchPattern("&lt;:ems&gt;");
-    private static final REProgram ENS_PATTERN =
-        createSearchPattern("&lt;:ens&gt;");
-    private static final REProgram TAB_PATTERN =
-        createSearchPattern("&lt;:t&gt;");
-    private static final REProgram GT_PATTERN =
-        createSearchPattern("&lt;:gt&gt;");
-    private static final REProgram LT_PATTERN =
-        createSearchPattern("&lt;:lt&gt;");
-    private static final REProgram ANY_STAG_PATTERN =
-        createSearchPattern("&lt;.*?&gt;");
+    private static final REProgram CS_START_PATTERN = createSearchPattern("&lt;:cs.*?&gt;");
+    private static final REProgram CS_END_PATTERN = createSearchPattern("&lt;:/cs&gt;");
+    private static final REProgram HS_PATTERN = createSearchPattern("&lt;:hs&gt;");
+    private static final REProgram HH_PATTERN = createSearchPattern("&lt;:hh&gt;");
+    private static final REProgram EMS_PATTERN = createSearchPattern("&lt;:ems&gt;");
+    private static final REProgram ENS_PATTERN = createSearchPattern("&lt;:ens&gt;");
+    private static final REProgram TAB_PATTERN = createSearchPattern("&lt;:t&gt;");
+    private static final REProgram GT_PATTERN = createSearchPattern("&lt;:gt&gt;");
+    private static final REProgram LT_PATTERN = createSearchPattern("&lt;:lt&gt;");
+    private static final REProgram ANY_STAG_PATTERN = createSearchPattern("&lt;.*?&gt;");
 
     private static REProgram createSearchPattern(String p_pattern)
     {
@@ -127,11 +119,11 @@ public class TradosFmTmxToGxml
     // Constructors
     //
 
-    public TradosFmTmxToGxml ()
+    public TradosFmTmxToGxml()
     {
     }
 
-    public TradosFmTmxToGxml (Logger p_logger)
+    public TradosFmTmxToGxml(Logger p_logger)
     {
         m_logger = p_logger;
     }
@@ -190,8 +182,7 @@ public class TradosFmTmxToGxml
         return p_name.substring(p_name.lastIndexOf(".") + 1);
     }
 
-    public void startOutputFile(String p_base)
-        throws Exception
+    public void startOutputFile(String p_base) throws Exception
     {
         m_fileCount++;
 
@@ -200,14 +191,13 @@ public class TradosFmTmxToGxml
         debug("Writing to file " + m_filename);
 
         m_writer = new PrintWriter(new OutputStreamWriter(
-            new BufferedOutputStream(new FileOutputStream(m_filename)),
-            "UTF8"));
+                new BufferedOutputStream(new FileOutputStream(m_filename)),
+                "UTF8"));
 
         m_writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
     }
 
-    public void closeOutputFile()
-        throws Exception
+    public void closeOutputFile() throws Exception
     {
         m_writer.println("</body>");
         m_writer.println("</tmx>");
@@ -221,8 +211,7 @@ public class TradosFmTmxToGxml
 
     // ******************************************
 
-    public String handleTuv(Element p_element)
-        throws Throwable
+    public String handleTuv(Element p_element) throws Throwable
     {
         try
         {
@@ -245,8 +234,7 @@ public class TradosFmTmxToGxml
         }
     }
 
-    public Output extractSegment(String p_segment)
-        throws Exception
+    public Output extractSegment(String p_segment) throws Exception
     {
         m_diplomat.reset();
         m_diplomat.setSourceString(p_segment);
@@ -261,40 +249,41 @@ public class TradosFmTmxToGxml
     }
 
     /**
-     * After System4 paragraph segmentation, return the first
-     * translatable segment.
+     * After System4 paragraph segmentation, return the first translatable
+     * segment.
      */
     public String getFirstSegment(Output p_output)
     {
-        for (Iterator it = p_output.documentElementIterator(); it.hasNext(); )
+        for (Iterator it = p_output.documentElementIterator(); it.hasNext();)
         {
-            DocumentElement de = (DocumentElement)it.next();
+            DocumentElement de = (DocumentElement) it.next();
 
             switch (de.type())
             {
-            case DocumentElement.TRANSLATABLE:
-            {
-                TranslatableElement elem = (TranslatableElement)de;
-
-                if (elem.hasSegments())
+                case DocumentElement.TRANSLATABLE:
                 {
-                    SegmentNode node = (SegmentNode)elem.getSegments().get(0);
+                    TranslatableElement elem = (TranslatableElement) de;
 
-                    return node.getSegment();
+                    if (elem.hasSegments())
+                    {
+                        SegmentNode node = (SegmentNode) elem.getSegments()
+                                .get(0);
+
+                        return node.getSegment();
+                    }
+
+                    break;
                 }
+                case DocumentElement.LOCALIZABLE:
+                {
+                    // LocalizableElement elem = (LocalizableElement)de;
+                    // return elem.getChunk();
 
-                break;
-            }
-            case DocumentElement.LOCALIZABLE:
-            {
-                // LocalizableElement elem = (LocalizableElement)de;
-                // return elem.getChunk();
-
-                break;
-            }
-            default:
-                // skip all others
-                break;
+                    break;
+                }
+                default:
+                    // skip all others
+                    break;
             }
         }
 
@@ -302,19 +291,18 @@ public class TradosFmTmxToGxml
     }
 
     /**
-     * Removes all TMX 1.4 &lt;ut&gt; elements from a segment and
-     * converts the tag content to Unicode characters or HTML markup,
-     * if possible.
+     * Removes all TMX 1.4 &lt;ut&gt; elements from a segment and converts the
+     * tag content to Unicode characters or HTML markup, if possible.
      */
     private String removeUtElements(Element p_seg)
     {
         StringBuffer result = new StringBuffer();
         String xml = p_seg.asXML();
 
-        /* Old way using jakarta-regexp
-        RE re = new RE(UT_SEARCH_PATTERN);
-        String[] parts = re.split(xml);
-        */
+        /*
+         * Old way using jakarta-regexp RE re = new RE(UT_SEARCH_PATTERN);
+         * String[] parts = re.split(xml);
+         */
 
         // Split string at <ut> boundaries
         String[] parts = m_pattern.split(xml);
@@ -371,7 +359,7 @@ public class TradosFmTmxToGxml
         StringBuffer result = new StringBuffer();
 
         // BPT/EPTs. We only handle the erasable formatting tags.
-        if      (p_tag.startsWith("&lt;:bi&gt;"))
+        if (p_tag.startsWith("&lt;:bi&gt;"))
         {
             result.append("<B><I>");
         }
@@ -416,7 +404,7 @@ public class TradosFmTmxToGxml
         //
         else if (p_tag.startsWith("&lt;:hr&gt;"))
         {
-            result.append("<BR>");        // hard line break
+            result.append("<BR>"); // hard line break
         }
         else if (p_tag.startsWith("&lt;:v "))
         {
@@ -433,7 +421,7 @@ public class TradosFmTmxToGxml
             var = re.subst(var, "", RE.REPLACE_ALL);
 
             int i_start = var.indexOf('"') + 1;
-            int i_end   = var.indexOf('"', i_start);
+            int i_end = var.indexOf('"', i_start);
 
             var = var.substring(i_start, i_end);
             // debug("VALUE=" + var);
@@ -477,31 +465,31 @@ public class TradosFmTmxToGxml
         //
         else if (p_tag.startsWith("&lt;:hs&gt;"))
         {
-            result.append("\u00a0");      // nbsp
+            result.append("\u00a0"); // nbsp
         }
         else if (p_tag.startsWith("&lt;:hh&gt;"))
         {
-            result.append("-");           // discretionary hyphen
+            result.append("-"); // discretionary hyphen
         }
         else if (p_tag.startsWith("&lt;:ems&gt;"))
         {
-            result.append("\u2003");      // em space
+            result.append("\u2003"); // em space
         }
         else if (p_tag.startsWith("&lt;:ens&gt;"))
         {
-            result.append("\u2002");      // en space
+            result.append("\u2002"); // en space
         }
         else if (p_tag.startsWith("&lt;:lt&gt;"))
         {
-            result.append("&lt;");        // less than
+            result.append("&lt;"); // less than
         }
         else if (p_tag.startsWith("&lt;:gt&gt;"))
         {
-            result.append("&gt;");        // greater than
+            result.append("&gt;"); // greater than
         }
         else if (p_tag.startsWith("&lt;:t&gt;"))
         {
-            result.append("\t");          // tab
+            result.append("\t"); // tab
         }
         else
         {
@@ -520,45 +508,45 @@ public class TradosFmTmxToGxml
     {
         StringBuffer result = new StringBuffer();
 
-        if      (rtfStart.startsWith("\\emdash"))
+        if (rtfStart.startsWith("\\emdash"))
         {
-            result.append('\u2014');  // EM DASH
+            result.append('\u2014'); // EM DASH
         }
         else if (rtfStart.startsWith("\\endash"))
         {
-            result.append('\u2013');  // EN DASH
+            result.append('\u2013'); // EN DASH
         }
         else if (rtfStart.startsWith("\\lquote"))
         {
-            result.append('\u2018');  // LEFT SINGLE QUOTATION MARK
+            result.append('\u2018'); // LEFT SINGLE QUOTATION MARK
         }
         else if (rtfStart.startsWith("\\rquote"))
         {
-            result.append('\u2019');  // RIGHT SINGLE QUOTATION MARK
+            result.append('\u2019'); // RIGHT SINGLE QUOTATION MARK
         }
         else if (rtfStart.startsWith("\\ldblquote"))
         {
-            result.append('\u201C');  // LEFT DOUBLE QUOTATION MARK
+            result.append('\u201C'); // LEFT DOUBLE QUOTATION MARK
         }
         else if (rtfStart.startsWith("\\rdblquote"))
         {
-            result.append('\u201D');  // RIGHT DOUBLE QUOTATION MARK
+            result.append('\u201D'); // RIGHT DOUBLE QUOTATION MARK
         }
         else if (rtfStart.startsWith("\\bullet"))
         {
-            result.append('\u2022');  // BULLET
+            result.append('\u2022'); // BULLET
         }
         else if (rtfStart.startsWith("\\~"))
         {
-            result.append('\u00A0');  // NO-BREAK SPACE
+            result.append('\u00A0'); // NO-BREAK SPACE
         }
         else if (rtfStart.startsWith("\\-"))
         {
-            result.append('\u00AD');  // SOFT HYPHEN
+            result.append('\u00AD'); // SOFT HYPHEN
         }
         else if (rtfStart.startsWith("\\_"))
         {
-            result.append('\u2011');  // NON-BREAKING HYPHEN
+            result.append('\u2011'); // NON-BREAKING HYPHEN
         }
         else if (rtfStart.startsWith("\\\\"))
         {
@@ -574,15 +562,15 @@ public class TradosFmTmxToGxml
         }
         else if (rtfStart.startsWith("\\emspace"))
         {
-            result.append('\u2003');  // EM SPACE
+            result.append('\u2003'); // EM SPACE
         }
         else if (rtfStart.startsWith("\\enspace"))
         {
-            result.append('\u2002');  // EN SPACE
+            result.append('\u2002'); // EN SPACE
         }
         else if (rtfStart.startsWith("\\tab"))
         {
-            result.append('\t');      // TAB
+            result.append('\t'); // TAB
         }
 
         // Discard any other tags.
@@ -605,7 +593,7 @@ public class TradosFmTmxToGxml
         m_newHeader.setOriginalFormat(m_header.getOriginalFormat());
         m_newHeader.setAdminLang(Tmx.DEFAULT_ADMINLANG);
         m_newHeader.setSourceLang(m_header.getSourceLang());
-        // TODO: Datatype should be a constant in Tmx.java.  The data
+        // TODO: Datatype should be a constant in Tmx.java. The data
         // type should probably be a native identifier ("g-tmx"?)
         // because now we have native data and don't care about where
         // it came from.
@@ -628,8 +616,8 @@ public class TradosFmTmxToGxml
             if (m_segmentReader == null)
             {
                 m_segmentReader = new SAXReader();
-                m_segmentReader.setXMLReaderClassName(
-                    "org.dom4j.io.aelfred.SAXDriver");
+                m_segmentReader
+                        .setXMLReaderClassName("org.dom4j.io.aelfred.SAXDriver");
                 m_segmentReader.setValidation(false);
             }
 
@@ -645,8 +633,7 @@ public class TradosFmTmxToGxml
     /**
      * Main method to call, returns the new filename of the result.
      */
-    public String convertToGxml(String p_url)
-        throws Exception
+    public String convertToGxml(String p_url) throws Exception
     {
         final String baseName = getBaseName(p_url);
         final String extension = getExtension(p_url);
@@ -663,146 +650,136 @@ public class TradosFmTmxToGxml
         reader.setValidation(true);
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx",
-            new ElementHandler ()
-                {
-                    public void onStart(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
+        reader.addHandler("/tmx", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                Element element = path.getCurrent();
 
-                        m_version = element.attributeValue("version");
-                    }
+                m_version = element.attributeValue("version");
+            }
 
-                    public void onEnd(ElementPath path)
-                    {
-                    }
-                }
-            );
+            public void onEnd(ElementPath path)
+            {
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/header",
-            new ElementHandler ()
-                {
-                    public void onStart(ElementPath path)
-                    {
-                    }
+        reader.addHandler("/tmx/header", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+            }
 
-                    public void onEnd(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
 
-                        setOldHeader(element);
-                        createNewHeader();
+                setOldHeader(element);
+                createNewHeader();
 
-                        // prune the current element to reduce memory
-                        element.detach();
+                // prune the current element to reduce memory
+                element.detach();
 
-                        element = null;
-                    }
-                }
-            );
+                element = null;
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/body/tu",
-            new ElementHandler ()
+        reader.addHandler("/tmx/body/tu", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                ++m_entryCount;
+                m_tuError = false;
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+
+                if (m_tuError)
                 {
-                    public void onStart(ElementPath path)
-                    {
-                        ++m_entryCount;
-                        m_tuError = false;
-                    }
-
-                    public void onEnd(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
-
-                        if (m_tuError)
-                        {
-                            m_errorCount++;
-                        }
-                        else
-                        {
-                            writeEntry(element.asXML());
-                        }
-
-                        // prune the current element to reduce memory
-                        element.detach();
-
-                        element = null;
-
-                        if (m_entryCount % 1000 == 0)
-                        {
-                            debug("Entry " + m_entryCount);
-                        }
-                    }
+                    m_errorCount++;
                 }
-            );
+                else
+                {
+                    writeEntry(element.asXML());
+                }
+
+                // prune the current element to reduce memory
+                element.detach();
+
+                element = null;
+
+                if (m_entryCount % 1000 == 0)
+                {
+                    debug("Entry " + m_entryCount);
+                }
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/body/tu/tuv/seg",
-            new ElementHandler ()
+        reader.addHandler("/tmx/body/tu/tuv/seg", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+
+                try
                 {
-                    public void onStart(ElementPath path)
+                    String gxml = handleTuv(element);
+                    Document doc = parse("<root>" + gxml + "</root>");
+
+                    // Remove old content of seg
+                    List content = element.content();
+                    for (int i = content.size() - 1; i >= 0; --i)
                     {
+                        ((Node) content.get(i)).detach();
                     }
 
-                    public void onEnd(ElementPath path)
+                    // Add new GXML content (backwards)
+                    content = doc.getRootElement().content();
+                    Collections.reverse(content);
+                    for (int i = content.size() - 1; i >= 0; --i)
                     {
-                        Element element = path.getCurrent();
-
-                        try
-                        {
-                            String gxml = handleTuv(element);
-                            Document doc = parse("<root>" + gxml + "</root>");
-
-                            // Remove old content of seg
-                            List content = element.content();
-                            for (int i = content.size() - 1; i >= 0; --i)
-                            {
-                                ((Node)content.get(i)).detach();
-                            }
-
-                            // Add new GXML content (backwards)
-                            content = doc.getRootElement().content();
-                            Collections.reverse(content);
-                            for (int i = content.size() - 1; i >= 0; --i)
-                            {
-                                Node node = (Node)content.get(i);
-                                element.add(node.detach());
-                            }
-                        }
-                        catch (Throwable ex)
-                        {
-                            m_tuError = true;
-                        }
+                        Node node = (Node) content.get(i);
+                        element.add(node.detach());
                     }
                 }
-            );
+                catch (Throwable ex)
+                {
+                    m_tuError = true;
+                }
+            }
+        });
 
         Document document = reader.read(p_url);
 
         closeOutputFile();
 
-        info("Processed " + m_entryCount + " TUs " + "into file `" +
-            m_filename + "', " + m_errorCount + " errors.");
+        info("Processed " + m_entryCount + " TUs " + "into file `" + m_filename
+                + "', " + m_errorCount + " errors.");
 
         return m_filename;
     }
 
-    static public void main(String[] argv)
-        throws Exception
+    static public void main(String[] argv) throws Exception
     {
         TradosFmTmxToGxml a = new TradosFmTmxToGxml();
 
         if (argv.length != 1)
         {
             System.err.println("Usage: TradosFmTmxToGxml FILE\n");
-            System.err.println("Converts Trados TMX containing " +
-                "FrameMaker data to GXML.\n");
+            System.err.println("Converts Trados TMX containing "
+                    + "FrameMaker data to GXML.\n");
             System.exit(1);
         }
 
         a.convertToGxml(argv[0]);
     }
 }
-

@@ -16,16 +16,13 @@
  */
 package com.globalsight.ling.docproc;
 
-import com.globalsight.ling.docproc.SegmenterRegexps;
-
+import java.text.CharacterIterator;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-
-import java.text.CharacterIterator;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 // JDK iterators
 //import java.text.BreakIterator;
@@ -33,7 +30,6 @@ import java.text.CharacterIterator;
 // ICU iterators
 //import com.ibm.text.BreakIterator;
 //import com.ibm.text.RuleBasedBreakIterator;
-
 
 //
 // Let's see how others do segmentation:
@@ -159,32 +155,36 @@ import java.text.CharacterIterator;
 //
 
 /**
- * <p>Segmenter is a wrapper around the Java BreakIterator that
- * extends the sentence iterator with heuristics and rules to correct
- * common segmenting mistakes.</p>
+ * <p>
+ * Segmenter is a wrapper around the Java BreakIterator that extends the
+ * sentence iterator with heuristics and rules to correct common segmenting
+ * mistakes.
+ * </p>
  *
- * <p>Heuristics:</p>
+ * <p>
+ * Heuristics:
+ * </p>
  * <ul>
- * <li>A dot is not interpreted as a segment boundary marker if it
- *     is preceded by an abbreviation.</li>
- * <li>A dot is not interpreted as a segment boundary marker if it
- *     is preceded by only a single letter.</li>
- * <li>A dot is not interpreted as a segment boundary marker if it
- *     is followed by a word which is included in a list of ordinal
- *     followers (nouns that typically follow numbers).
- *     <I>(Not implemented yet)</I></li>
- * <li>A question or exclamation mark that is <b>not</b> followed
- *     by whitespace does not end the segment.  Most likely it is
- *     followed by punctuation (as in "He said 'Yow!'") or text
- *     ("'!important' is a CSS keyword.")</li>
+ * <li>A dot is not interpreted as a segment boundary marker if it is preceded
+ * by an abbreviation.</li>
+ * <li>A dot is not interpreted as a segment boundary marker if it is preceded
+ * by only a single letter.</li>
+ * <li>A dot is not interpreted as a segment boundary marker if it is followed
+ * by a word which is included in a list of ordinal followers (nouns that
+ * typically follow numbers). <I>(Not implemented yet)</I></li>
+ * <li>A question or exclamation mark that is <b>not</b> followed by whitespace
+ * does not end the segment. Most likely it is followed by punctuation (as in
+ * "He said 'Yow!'") or text ("'!important' is a CSS keyword.")</li>
  * </ul>
  *
- * <p><b>Limitiations:</b> this class only implements forward-scanning
- * using <code>next()</code>.  The other methods are implemented but
- * do <B>not</B> work as intended.</p>
+ * <p>
+ * <b>Limitiations:</b> this class only implements forward-scanning using
+ * <code>next()</code>. The other methods are implemented but do <B>not</B> work
+ * as intended.
+ * </p>
  */
 public class Segmenter
-//    extends BreakIterator
+// extends BreakIterator
 {
     //
     // Public Constants
@@ -200,78 +200,88 @@ public class Segmenter
     private int m_textLength;
 
     /**
-     * A builtin list of language-dependent abbreviations which are
-     * loaded from abbreviations.properties.
+     * A builtin list of language-dependent abbreviations which are loaded from
+     * abbreviations.properties.
      */
     private RE re_builtinAbbrevs = null;
 
     /**
-     * A user-definable list of language-dependent abbreviations which
-     * are loaded from abbreviations.properties.
+     * A user-definable list of language-dependent abbreviations which are
+     * loaded from abbreviations.properties.
      */
     private RE re_abbreviations = null;
 
     /**
-     * A user-definable list of language-dependent ordinal followers
-     * which are loaded from abbreviations.properties.  Ordinal
-     * followers turn numbers followed by periods into ordinals, as in
-     * DE "Am 24. Dezember ist Weihnachten."
+     * A user-definable list of language-dependent ordinal followers which are
+     * loaded from abbreviations.properties. Ordinal followers turn numbers
+     * followed by periods into ordinals, as in DE
+     * "Am 24. Dezember ist Weihnachten."
      *
      */
     private RE re_ordinalFollowers = null;
 
     /**
-     * <p>A builtin regexp matching a single uppercase character
-     * followed by a period.  This is most likely <em>not</em> a word
-     * that can end a sentence.</p>
+     * <p>
+     * A builtin regexp matching a single uppercase character followed by a
+     * period. This is most likely <em>not</em> a word that can end a sentence.
+     * </p>
      */
     // static private final String SINGLECHAR =
-    //   "(^|[:space:])[:alpha:]\\.[:space:]*$";
+    // "(^|[:space:])[:alpha:]\\.[:space:]*$";
     private RE re_singleChar = null;
 
     /**
-     * <p>A builtin regexp matching an exclamation or question mark at
-     * the end of a segment if it's <b>not</b> followed by
-     * whitespace.</p>
+     * <p>
+     * A builtin regexp matching an exclamation or question mark at the end of a
+     * segment if it's <b>not</b> followed by whitespace.
+     * </p>
      *
-     * <p>Example: <em>"What's up?", he asked.</em> is segmented like
-     * this: <em>"What's up?</em> and <em>", he asked.</em></p>
+     * <p>
+     * Example: <em>"What's up?", he asked.</em> is segmented like this:
+     * <em>"What's up?</em> and <em>", he asked.</em>
+     * </p>
      */
     // static private final String ENDINGPUNCT = "(!|\\?)$";
     private RE re_endingPunct = null;
 
     /**
-     * <p>A builtin regexp matching an exclamation or question mark at
-     * the end of a segment that is followed by closing quotes and
-     * optional whitespace.</p>
+     * <p>
+     * A builtin regexp matching an exclamation or question mark at the end of a
+     * segment that is followed by closing quotes and optional whitespace.
+     * </p>
      *
-     * <p>Example: <em>"What's up?", he asked.</em> is segmented like
-     * this: <em>"What's up?</em> and <em>", he asked.</em></p>
+     * <p>
+     * Example: <em>"What's up?", he asked.</em> is segmented like this:
+     * <em>"What's up?</em> and <em>", he asked.</em>
+     * </p>
      */
     // static private final String ENDINGPUNCT2 =
-    //  "(!|\\?)['|\"][:space:]*$";
+    // "(!|\\?)['|\"][:space:]*$";
     private RE re_endingPunct2 = null;
 
     // static private final String STARTINGPUNCT2 =
-    //  "^(,|;|[:space:]*\\(?[:lower:])";
+    // "^(,|;|[:space:]*\\(?[:lower:])";
     private RE re_startingPunct2 = null;
 
     /**
-     * <p>A builtin regexp matching a comma, semicolon, period,
-     * exclamation mark or question mark at the
-     * <strong>beginning</strong> of a sentence.  These characters do
-     * not start a sentence in any language.</p>
+     * <p>
+     * A builtin regexp matching a comma, semicolon, period, exclamation mark or
+     * question mark at the <strong>beginning</strong> of a sentence. These
+     * characters do not start a sentence in any language.
+     * </p>
      */
     // static private final String STARTINGPUNCT3 =
-    //  "^(,|;|!|\\.|\\?)";
+    // "^(,|;|!|\\.|\\?)";
     private RE re_startingPunct3 = null;
 
     /**
-     * <p>A regexp matching digits followed by a period and space.
-     * Used for ordinal followers detection (in e.g. German).</p>
+     * <p>
+     * A regexp matching digits followed by a period and space. Used for ordinal
+     * followers detection (in e.g. German).
+     * </p>
      */
     // static private final String ENDINGDIGITS =
-    //  "(^|[:space:])[:digit:]+\\.[:space:]*$";
+    // "(^|[:space:])[:digit:]+\\.[:space:]*$";
     private RE re_endingDigits = null;
 
     private int i_current = 0;
@@ -283,12 +293,12 @@ public class Segmenter
     // Constructors
     //
 
-    public Segmenter (Locale locale)
+    public Segmenter(Locale locale)
     {
-        this ("", locale);
+        this("", locale);
     }
 
-    public Segmenter (String text, Locale locale)
+    public Segmenter(String text, Locale locale)
     {
         m_bi = GlobalsightRuleBasedBreakIterator.getSentenceInstance(locale);
         m_bi.setText(text);
@@ -296,63 +306,62 @@ public class Segmenter
         m_textLength = m_text.length();
 
         // initialize precompiled expressions
-        re_singleChar =
-          new RE (SegmenterRegexps.SINGLECHAR_Pattern.getProgram(),
-            RE.MATCH_NORMAL);
+        re_singleChar = new RE(
+                SegmenterRegexps.SINGLECHAR_Pattern.getProgram(),
+                RE.MATCH_NORMAL);
 
-        re_endingPunct =
-          new RE (SegmenterRegexps.ENDINGPUNCT_Pattern.getProgram(),
-            RE.MATCH_NORMAL);
+        re_endingPunct = new RE(
+                SegmenterRegexps.ENDINGPUNCT_Pattern.getProgram(),
+                RE.MATCH_NORMAL);
 
-        re_endingPunct2 =
-          new RE (SegmenterRegexps.ENDINGPUNCT2_Pattern.getProgram(),
-            RE.MATCH_NORMAL);
+        re_endingPunct2 = new RE(
+                SegmenterRegexps.ENDINGPUNCT2_Pattern.getProgram(),
+                RE.MATCH_NORMAL);
 
-        re_startingPunct2 =
-          new RE (SegmenterRegexps.STARTINGPUNCT2_Pattern.getProgram(),
-            RE.MATCH_NORMAL);
+        re_startingPunct2 = new RE(
+                SegmenterRegexps.STARTINGPUNCT2_Pattern.getProgram(),
+                RE.MATCH_NORMAL);
 
-        re_startingPunct3 =
-          new RE (SegmenterRegexps.STARTINGPUNCT3_Pattern.getProgram(),
-            RE.MATCH_NORMAL);
+        re_startingPunct3 = new RE(
+                SegmenterRegexps.STARTINGPUNCT3_Pattern.getProgram(),
+                RE.MATCH_NORMAL);
 
-        re_endingDigits =
-          new RE (SegmenterRegexps.ENDINGDIGITS_Pattern.getProgram(),
-            RE.MATCH_NORMAL);
+        re_endingDigits = new RE(
+                SegmenterRegexps.ENDINGDIGITS_Pattern.getProgram(),
+                RE.MATCH_NORMAL);
 
         // load language-dependent builtin abbreviations
         // eventually this if-else can be sorted common languages first
         if (locale.getLanguage().equals("de"))
         {
-            re_builtinAbbrevs =
-              new RE (SegmenterRegexps.ABBR_DE_Pattern.getProgram(),
-                RE.MATCH_NORMAL);
+            re_builtinAbbrevs = new RE(
+                    SegmenterRegexps.ABBR_DE_Pattern.getProgram(),
+                    RE.MATCH_NORMAL);
         }
         else if (locale.getLanguage().equals("en"))
         {
-            re_builtinAbbrevs =
-              new RE (SegmenterRegexps.ABBR_EN_Pattern.getProgram(),
-                RE.MATCH_NORMAL);
+            re_builtinAbbrevs = new RE(
+                    SegmenterRegexps.ABBR_EN_Pattern.getProgram(),
+                    RE.MATCH_NORMAL);
         }
         else if (locale.getLanguage().equals("es"))
         {
-            re_builtinAbbrevs =
-              new RE (SegmenterRegexps.ABBR_ES_Pattern.getProgram(),
-                RE.MATCH_NORMAL);
+            re_builtinAbbrevs = new RE(
+                    SegmenterRegexps.ABBR_ES_Pattern.getProgram(),
+                    RE.MATCH_NORMAL);
         }
         else if (locale.getLanguage().equals("fr"))
         {
-            re_builtinAbbrevs =
-              new RE (SegmenterRegexps.ABBR_FR_Pattern.getProgram(),
-                RE.MATCH_NORMAL);
+            re_builtinAbbrevs = new RE(
+                    SegmenterRegexps.ABBR_FR_Pattern.getProgram(),
+                    RE.MATCH_NORMAL);
         }
         else if (locale.getLanguage().equals("nl"))
         {
-            re_builtinAbbrevs =
-              new RE (SegmenterRegexps.ABBR_NL_Pattern.getProgram(),
-                RE.MATCH_NORMAL);
+            re_builtinAbbrevs = new RE(
+                    SegmenterRegexps.ABBR_NL_Pattern.getProgram(),
+                    RE.MATCH_NORMAL);
         }
-
 
         // load a user-defined abbreviation list and ordinal followers
         ResourceBundle res;
@@ -368,15 +377,17 @@ public class Segmenter
 
                 if (regex != null && regex.length() > 0)
                 {
-                    //System.err.println("abbreviation regex: " + regex);
-                    re_abbreviations = new RE (regex, RE.MATCH_NORMAL);
+                    // System.err.println("abbreviation regex: " + regex);
+                    re_abbreviations = new RE(regex, RE.MATCH_NORMAL);
                 }
             }
             catch (RESyntaxException e)
             {
                 re_abbreviations = null;
-                System.err.println("Segmenter: abbreviation regex for language " +
-                  locale.toString() + " contains errors:\n" + e.toString());
+                System.err
+                        .println("Segmenter: abbreviation regex for language "
+                                + locale.toString() + " contains errors:\n"
+                                + e.toString());
             }
             catch (MissingResourceException e)
             {
@@ -389,15 +400,18 @@ public class Segmenter
 
                 if (regex != null && regex.length() > 0)
                 {
-                    //System.err.println("followers regex: " + regex);
-                    re_ordinalFollowers = new RE (regex, RE.MATCH_NORMAL);
+                    // System.err.println("followers regex: " + regex);
+                    re_ordinalFollowers = new RE(regex, RE.MATCH_NORMAL);
                 }
             }
             catch (RESyntaxException e)
             {
                 re_ordinalFollowers = null;
-                System.err.println("Segmenter: ordinal followers regex for language " +
-                  locale.toString() + " contains errors:\n" + e.toString());
+                System.err
+                        .println("Segmenter: ordinal followers regex for language "
+                                + locale.toString()
+                                + " contains errors:\n"
+                                + e.toString());
             }
             catch (MissingResourceException e)
             {
@@ -409,7 +423,6 @@ public class Segmenter
             // fine, no properties file at all
         }
     }
-
 
     //
     // Class Overrides (Interface Implementation) -- BreakIterator
@@ -452,28 +465,30 @@ public class Segmenter
             String str_segment;
             String str_nextSegment;
 
-            while (i_current < m_textLength && i_current != GlobalsightBreakIterator.DONE)
+            while (i_current < m_textLength
+                    && i_current != GlobalsightBreakIterator.DONE)
             {
                 str_segment = m_text.substring(i_start, i_current);
 
-                //System.err.println(i_start + ":" + i_current +
-                //  " `" + str_segment + "'");
+                // System.err.println(i_start + ":" + i_current +
+                // " `" + str_segment + "'");
 
                 // 1. if the segment ends with a single character,
                 // scan again.
                 if (re_singleChar.match(str_segment, 0))
                 {
-                    //System.err.println("** single char match");
+                    // System.err.println("** single char match");
                     i_current = m_bi.next();
                     continue;
                 }
 
                 // 2. if the segment ends with a non-terminating
                 // builtin abbreviation, scan again.
-                else if (re_builtinAbbrevs != null &&
-                  re_builtinAbbrevs.match(str_segment, 0))
+                else if (re_builtinAbbrevs != null
+                        && re_builtinAbbrevs.match(str_segment, 0))
                 {
-                    //System.err.println("** builtin abbrev match: " + str_segment);
+                    // System.err.println("** builtin abbrev match: " +
+                    // str_segment);
                     i_current = m_bi.next();
                     continue;
                 }
@@ -481,12 +496,12 @@ public class Segmenter
                 // 3. correct an error in the JDK BreakIterator: a
                 // break is always inserted after ? and ! regardless
                 // of following puntucation or letters ("!important"
-                // is '"!' plus 'important"').  It seems safe to
+                // is '"!' plus 'important"'). It seems safe to
                 // append the next segment without looking at what it
                 // starts with.
                 else if (re_endingPunct.match(str_segment, 0))
                 {
-                    //System.err.println("** ending !? match");
+                    // System.err.println("** ending !? match");
                     i_current = m_bi.next();
                     continue;
                 }
@@ -502,7 +517,8 @@ public class Segmenter
                 else if (re_endingPunct2.match(str_segment, 0))
                 {
                     str_nextSegment = m_text.substring(i_current);
-                    //System.err.println("** ending !?\"' --> " + str_nextSegment);
+                    // System.err.println("** ending !?\"' --> " +
+                    // str_nextSegment);
 
                     if (re_startingPunct2.match(str_nextSegment, 0))
                     {
@@ -512,11 +528,11 @@ public class Segmenter
                 }
 
                 // 5. check ordinal followers in languages that have them (DE)
-                else if (re_ordinalFollowers != null &&
-                  re_endingDigits.match(str_segment, 0))
+                else if (re_ordinalFollowers != null
+                        && re_endingDigits.match(str_segment, 0))
                 {
                     str_nextSegment = m_text.substring(i_current);
-                    //System.err.println("** digits -> " + str_nextSegment);
+                    // System.err.println("** digits -> " + str_nextSegment);
 
                     if (re_ordinalFollowers.match(str_nextSegment, 0))
                     {
@@ -527,10 +543,11 @@ public class Segmenter
 
                 // 6. if the segment ends with a user-defined
                 // abbreviation, scan again.
-                else if (re_abbreviations != null &&
-                  re_abbreviations.match(str_segment, 0))
+                else if (re_abbreviations != null
+                        && re_abbreviations.match(str_segment, 0))
                 {
-                    //System.err.println("** user abbrev match --> " + str_segment);
+                    // System.err.println("** user abbrev match --> " +
+                    // str_segment);
                     i_current = m_bi.next();
                     continue;
                 }
@@ -564,8 +581,7 @@ public class Segmenter
     }
 
     /**
-     * @deprecated This function is not correctly implemented by this
-     * wrapper.
+     * @deprecated This function is not correctly implemented by this wrapper.
      */
     public int next(int i)
     {
@@ -584,8 +600,7 @@ public class Segmenter
     }
 
     /**
-     * @deprecated This function is not correctly implemented by this
-     * wrapper.
+     * @deprecated This function is not correctly implemented by this wrapper.
      */
     public int previous()
     {
@@ -607,9 +622,9 @@ public class Segmenter
     }
 
     /**
-     * Required by the BreakIterator Interface but not useful for this
-     * class because we need to know the original String and
-     * CharacterIterator won't give it to us.
+     * Required by the BreakIterator Interface but not useful for this class
+     * because we need to know the original String and CharacterIterator won't
+     * give it to us.
      *
      * @deprecated use setText(String)
      */

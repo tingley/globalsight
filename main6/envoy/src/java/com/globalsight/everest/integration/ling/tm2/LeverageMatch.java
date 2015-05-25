@@ -22,10 +22,6 @@ import java.util.List;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
@@ -36,6 +32,10 @@ import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.leverage.SidComparable;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 @SuppressWarnings("rawtypes")
 public class LeverageMatch extends PersistentObject implements Comparable,
@@ -299,7 +299,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     {
         m_subid = subId;
     }
-    
+
     public String getCreationUser()
     {
         return creationUser;
@@ -496,7 +496,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     {
         return sid;
     }
-    
+
     public void setSid(String s)
     {
         sid = s;

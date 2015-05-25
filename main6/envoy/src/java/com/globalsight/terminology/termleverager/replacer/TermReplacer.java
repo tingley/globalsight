@@ -27,7 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
 
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
@@ -39,6 +38,7 @@ import com.globalsight.util.SortUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.gxml.TextNode;
+import com.sun.org.apache.regexp.internal.RE;
 
 /**
  * <p>

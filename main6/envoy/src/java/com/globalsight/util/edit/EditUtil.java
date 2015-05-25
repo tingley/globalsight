@@ -22,10 +22,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.cxe.adapter.adobe.AdobeHelper;
 import com.globalsight.cxe.adapter.idml.IdmlConverter;
@@ -35,6 +31,10 @@ import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * This class collects some of the standard utility functions a HTML-based UI

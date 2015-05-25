@@ -25,8 +25,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import org.apache.regexp.RE;
-
+import com.sun.org.apache.regexp.internal.RE;
 
 /**
  * SegmentationRule is datastructure of a segmentation rule file, it holds all
@@ -71,7 +70,8 @@ public class SegmentationRule implements Serializable
         m_header = null;
     }
 
-    public SegmentationRule(String p_rootName, HashMap<String, ArrayList<Rule>> p_rules,
+    public SegmentationRule(String p_rootName,
+            HashMap<String, ArrayList<Rule>> p_rules,
             ArrayList<LanguageMap> p_languageMaps, SrxHeader p_header)
     {
         m_rootName = p_rootName;
@@ -136,7 +136,8 @@ public class SegmentationRule implements Serializable
         return rules;
     }
 
-    public ArrayList<Rule> getRulesBylanguageCode(String p_languageCode) throws Exception
+    public ArrayList<Rule> getRulesBylanguageCode(String p_languageCode)
+            throws Exception
     {
         ArrayList<Rule> rules = new ArrayList<Rule>();
         try
@@ -172,7 +173,8 @@ public class SegmentationRule implements Serializable
         }
         catch (Exception e)
         {
-            CATEGORY.error("Exception in getRulesBylanguageCode(String p_languageCode)",
+            CATEGORY.error(
+                    "Exception in getRulesBylanguageCode(String p_languageCode)",
                     e);
             throw new Exception(e.getMessage());
         }
@@ -208,7 +210,8 @@ public class SegmentationRule implements Serializable
                     // languagepattern is not language code regular expression,
                     // just locale string as "en_US"(SRX2.0 is not supported).
                     CATEGORY.info("locale equals language pattern ignorecasely ");
-                    CATEGORY.info("Locale is :" + p_locale + "language pattern is: " + pattern);
+                    CATEGORY.info("Locale is :" + p_locale
+                            + "language pattern is: " + pattern);
                     String languageName = langMap.getLanguageruleName();
                     rules = this.getRulesBylanguageName(languageName);
                     break;
@@ -227,7 +230,8 @@ public class SegmentationRule implements Serializable
                             // Cascade is allowed, get rules from all associated
                             // languagerulenames corresponding to matched
                             // languagepattern.
-                            rules.addAll(this.getRulesBylanguageName(languageName));
+                            rules.addAll(this
+                                    .getRulesBylanguageName(languageName));
                             continue;
                         }
                         else

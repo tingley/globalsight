@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
@@ -136,6 +137,10 @@ public class JobDataMigration
             + "WHERE part.TEMPLATE_ID = tem.ID "
             + "AND tem.SOURCE_PAGE_ID = req.PAGE_ID "
             + "AND req.JOB_ID = ? ";
+
+	private static HashSet<Long> archivingJobs = new HashSet<Long>();
+	private static Object LOCK = new Object();
+
     /**
      * Move data of specified job in TU/TUV/LM/TEMPLATE_PART tables to their
      * cloned tables for performance purpose.
@@ -145,12 +150,20 @@ public class JobDataMigration
      */
     public static void migrateJobData(Job p_job) throws SQLException
     {
+        long jobId = p_job.getId();
         // Re-export "archived" job can turn back to "exported" state, but
         // migrated data will not be back.
-        if (p_job.isMigrated())
-        {
-            return;
-        }
+    	synchronized(LOCK)
+    	{
+            if (p_job.isMigrated() || archivingJobs.contains(jobId))
+            {
+                return;
+            }
+            else
+            {
+                archivingJobs.add(jobId);
+            }
+    	}
 
         Connection connection = null;
         boolean autoCommit = false;
@@ -159,9 +172,7 @@ public class JobDataMigration
         {
             connection = DbUtil.getConnection();
             autoCommit = connection.getAutoCommit();
-            connection.setAutoCommit(false);
-
-            long jobId = p_job.getId();
+            connection.setAutoCommit(true);
 
             // check archive tables. Archive jobs do not support job level.
             BigTableUtil.checkTuTuvLmArchiveTablesForJob(jobId);
@@ -175,15 +186,12 @@ public class JobDataMigration
             migrateTuData(connection, jobId);
             migrateTemplatePartData(connection, jobId);
 
-            // commit all
-            connection.commit();
-
             // update job migrated flag
             p_job.setIsMigrated(true);
             HibernateUtil.update(p_job);
 
             dropJobLevelTables(connection, p_job);
-            connection.commit();
+            logger.info("Job " + p_job.getJobId() + " is archived successfully.");
         }
         catch (Exception e)
         {
@@ -192,6 +200,11 @@ public class JobDataMigration
         }
         finally
         {
+        	synchronized(LOCK)
+        	{
+                archivingJobs.remove(jobId);
+        	}
+
             connection.setAutoCommit(autoCommit);
             DbUtil.silentReturnConnection(connection);
         }

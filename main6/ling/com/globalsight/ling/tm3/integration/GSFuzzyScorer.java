@@ -24,32 +24,45 @@ public class GSFuzzyScorer implements TM3FuzzyMatchScorer<GSTuvData> {
         long start = System.currentTimeMillis();
         // This can ignore the locale because it should already be embedded 
         // in the keys
+        // Get score that care stop word file.
         List<Token> matchTokens = 
                     LuceneUtil.buildTokenList(matchKey.getTokens());
         List<Token> candidateTokens = 
                     LuceneUtil.buildTokenList(candidate.getTokens());
-
         // XXX: further filter by min/max tokens?
-        
-        float f = getScore(matchTokens, candidateTokens);
+        float f1 = getScore(matchTokens, candidateTokens);
+
+        // Get score that does not care stop word file.
+		matchTokens = LuceneUtil.buildTokenList(matchKey.getTokensNoStopWord());
+		candidateTokens = LuceneUtil.buildTokenList(candidate
+				.getTokensNoStopWord());
+        float f2 = getScore(matchTokens, candidateTokens);
+
+        // For score = 100 case, refer to "LeverageMatches.applySegmentTmOptions()".
+        float f = Math.max(f1, f2);
+        if (f >= 1) return f;
+
+        f = Math.min(f1, f2);
         if (LOGGER.isDebugEnabled())
         {
             LOGGER.debug("Score(" + matchKey + ", " + candidate + ") = " + 
                     (int)(f * 100) +
-                    " in " + (System.currentTimeMillis() - start) + "ms");            
+                    " in " + (System.currentTimeMillis() - start) + "ms");
         }
         return f;
     }
 
-    protected float getScore(List<Token> keyTokens, List<Token> candidateTokens) {
-        int orgSegTokenCount = keyTokens.size();
-        int candidateTokenCount = candidateTokens.size();
+    protected float getScore(List<Token> keyTokens, List<Token> candidateTokens)
+    {
+//        int orgSegTokenCount = keyTokens.size();
+//        int candidateTokenCount = candidateTokens.size();
+        int orgSegTotalTokenCount = keyTokens.get(0).getTotalTokenCount();
+		int candidateTotalTokenCount = candidateTokens.get(0)
+				.getTotalTokenCount();
 
         // XXX This could be cached
         Map<String, Integer> keyTokenMap = getTokenMap(keyTokens);
-
         int count = 0;
-        
         for (Token t : candidateTokens) {
             Integer keyReps = keyTokenMap.get(t.getTokenString());
             if (keyReps != null) { // Token in common
@@ -57,10 +70,11 @@ public class GSFuzzyScorer implements TM3FuzzyMatchScorer<GSTuvData> {
                 count += minR;
             }
         }
-        
+
         // Apply Dice's coefficient
         float numer = 2f * count;
-        float denom = orgSegTokenCount + candidateTokenCount;
+//        float denom = orgSegTokenCount + candidateTokenCount;
+        float denom = orgSegTotalTokenCount + candidateTotalTokenCount;
         return numer / denom;
     }
     

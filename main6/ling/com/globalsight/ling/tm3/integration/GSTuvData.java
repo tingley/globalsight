@@ -10,7 +10,6 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.FuzzyIndexFormatHandler;
-import com.globalsight.ling.tm2.indexer.Token;
 import com.globalsight.ling.tm2.lucene.LuceneUtil;
 import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.tm3.core.TM3Data;
@@ -119,6 +118,7 @@ public class GSTuvData implements TM3Data {
     // Cache the tokens, but use a soft reference so they'll
     // get GC'd if we need to
     private SoftReference<List<String>> tokenCache;
+    private SoftReference<List<String>> tokenCacheNoStopWord;
     
     /**
      * Perform locale-sensitive tokenization on the tuv data.
@@ -142,7 +142,30 @@ public class GSTuvData implements TM3Data {
             throw new TM3Exception(e);
         }
     }
-    
+
+    /**
+	 * Get tokens without regard to stop word file.
+	 * 
+	 * @return List<String>
+	 */
+    public List<String> getTokensNoStopWord() {
+        try {
+            if (tokenCacheNoStopWord != null) {
+                List<String> l = tokenCacheNoStopWord.get();
+                if (l != null) {
+                    return l;
+                }
+            }
+			List<String> l = LuceneUtil.createTm3TokensNoStopWord(
+					normalizeTuvData(), locale);
+            tokenCacheNoStopWord = new SoftReference<List<String>>(l);
+            return l;
+        }
+        catch (Exception e) {
+            throw new TM3Exception(e);
+        }
+    }
+
     // Normalize the content -- this comes from AbstractTmTuv.getFuzzyIndexFormat()
     public String normalizeTuvData() throws DiplomatBasicParserException {
         FuzzyIndexFormatHandler handler = new FuzzyIndexFormatHandler();

@@ -22,7 +22,6 @@ import com.globalsight.ling.tm2.indexer.StopWord;
 
 import java.io.IOException;
 
-import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Token;
 
@@ -43,7 +42,20 @@ class GsStopFilter
         super(p_tokenStream);
         m_stopWord = StopWord.getStopWord(p_locale);
     }
-    
+
+	public GsStopFilter(TokenStream p_tokenStream, GlobalSightLocale p_locale,
+			boolean p_careStopWordFile) throws Exception
+	{
+		super(p_tokenStream);
+		if (p_careStopWordFile)
+		{
+			m_stopWord = StopWord.getStopWord(p_locale);
+		}
+		else
+		{
+			m_stopWord = StopWord.getBaseStopWord(p_locale);
+		}
+	}
 
     /**
      * Returns the next input Token whose termText() is not a stop word.

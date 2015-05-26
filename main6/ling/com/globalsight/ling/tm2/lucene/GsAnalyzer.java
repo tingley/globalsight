@@ -35,12 +35,20 @@ public class GsAnalyzer extends Analyzer
     private static final Logger c_logger = Logger.getLogger(GsAnalyzer.class);
 
     private GlobalSightLocale m_locale;
+    private boolean m_careStopWordFile = true;// default true
 
     // / Constructor
     public GsAnalyzer(GlobalSightLocale p_locale)
     {
         super(new ReuseStrategyNo());
         m_locale = p_locale;
+    }
+
+    public GsAnalyzer(GlobalSightLocale p_locale, boolean careStopWordFile)
+    {
+        super(new ReuseStrategyNo());
+        m_locale = p_locale;
+        m_careStopWordFile = careStopWordFile;
     }
 
     public GlobalSightLocale getLocale()
@@ -56,7 +64,15 @@ public class GsAnalyzer extends Analyzer
         try
         {
             Tokenizer t = new GsTokenizer(reader, m_locale);
-            TokenStream tok = new GsStopFilter(t, m_locale);
+            TokenStream tok = null;
+            if (m_careStopWordFile)
+            {
+            	tok = new GsStopFilter(t, m_locale);
+            }
+            else
+            {
+            	tok = new GsStopFilter(t, m_locale, false);
+            }
             tok = new GsStemFilter(tok, m_locale);
 
             result = new TokenStreamComponents(t, tok);

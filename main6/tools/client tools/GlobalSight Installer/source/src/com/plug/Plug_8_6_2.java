@@ -29,17 +29,17 @@ public class Plug_8_6_2 implements Plug
     @Override
     public void run()
     {
-    	File folder = new File(ServerUtil.getPath() + "/jboss/server/standalone/deployments/globalsight.ear/lib/classes/properties/tm");
-    	if (folder.exists() && folder.isDirectory())
-    	{
-    		File[] files = folder.listFiles();
-    		for (File f : files)
-    		{
-    			if (f.isFile() && f.getName().startsWith("StopWordList_"))
-    			{
-    				f.delete();
-    			}
-    		}
-    	}
+//    	File folder = new File(ServerUtil.getPath() + "/jboss/server/standalone/deployments/globalsight.ear/lib/classes/properties/tm");
+//    	if (folder.exists() && folder.isDirectory())
+//    	{
+//    		File[] files = folder.listFiles();
+//    		for (File f : files)
+//    		{
+//    			if (f.isFile() && f.getName().startsWith("StopWordList_"))
+//    			{
+//    				f.delete();
+//    			}
+//    		}
+//    	}
     }
 }

@@ -58,8 +58,7 @@
                includes="com/globalsight/resources/messages/*" />
     </copy>
     <copy todir="${serverclassesDest}/properties/tm">
-      <fileset dir="${lingSrc}/com/globalsight/ling/tm2/tm_properties"
-        		excludes="**/StopWordList_*" />
+        <fileset dir="${lingSrc}/com/globalsight/ling/tm2/tm_properties" />
     </copy>
     <copy todir="${serverclassesDest}/properties/aligner">
       <fileset dir="${lingSrc}/com/globalsight/ling/aligner/aligner_properties" />

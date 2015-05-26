@@ -345,7 +345,8 @@ public class EloquaCreateJobHandler extends PageActionHandler
         HttpSession session = request.getSession(false);
         SessionManager sessionManager = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        int page = (Integer) sessionManager.getAttribute("email_page");
+        Integer pageInteger = (Integer) sessionManager.getAttribute("email_page");
+        int page = pageInteger == null ? 0 : pageInteger;
 
         List<Email> es = (List<Email>) sessionManager
                 .getAttribute("eloquaEmails");
@@ -798,11 +799,16 @@ public class EloquaCreateJobHandler extends PageActionHandler
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         
         List<Email> es;
+        List<LandingPage> ps;
         
         // is after create job.
         if (request.getAttribute("isCreate") != null || request.getParameter("isCancel") != null)
         {
             es = loadEmailFromSession(sessionManager);
+            ps = loadLandingPageFromSession(sessionManager);
+            
+            if (ps == null)
+                ps = new ArrayList();
         }
         else
         {
@@ -811,16 +817,17 @@ public class EloquaCreateJobHandler extends PageActionHandler
             
             int n = alls.getTotal() / 1000 + 1;
             sessionManager.setAttribute(EMAIL_SET_TOTAL, n);
-            
             sessionManager.setAttribute(EMAIL_SET, 1);
+            
+            Alls pageAlls = new Alls();
+            ps = new ArrayList();
+            int n2 = pageAlls.getTotal() / 1000 + 1;
+            sessionManager.setAttribute(LANDING_PAGE_SET_TOTAL, n2);
             sessionManager.setAttribute(LANDING_PAGE_SET, 1);
         }
         
         sessionManager.setAttribute("eloquaLandingPageFilter", null);
         sessionManager.setAttribute("eloquaEmailFilter", null);
-
-        Alls pageAlls = new Alls();
-        List<LandingPage> ps = new ArrayList();
 
         sessionManager.setAttribute("eloquaEmails", es);
         sessionManager.setAttribute("eloquaLandingPages", ps);
@@ -833,9 +840,6 @@ public class EloquaCreateJobHandler extends PageActionHandler
         List<Email> e1 = es.size() > perPage ? es.subList(0, perPage) : es;
         List<LandingPage> p1 = ps.size() > perPage ? ps.subList(0, perPage)
                 : ps;
-
-        int n = pageAlls.getTotal() / 1000 + 1;
-        sessionManager.setAttribute(LANDING_PAGE_SET_TOTAL, n);
 
         String pageSet = getPageSetNavString("Email",
                 getEloquaPageSet(request, EMAIL_SET),

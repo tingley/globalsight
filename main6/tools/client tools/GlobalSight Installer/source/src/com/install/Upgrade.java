@@ -18,7 +18,6 @@ package com.install;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.config.properties.Resource;
-import com.plug.Version_8_3_1.UpdateRegistryHelp;
 import com.ui.UI;
 import com.ui.UIFactory;
 import com.util.FileUtil;
@@ -80,6 +78,7 @@ public class Upgrade
     {
         updaters.add(new JBossUpdater4());
         updaters.add(new JBossUpdater71());
+        updaters.add(new JBossUpdater72());
     }
 
     public static Map<String, Integer> RATES = new HashMap<String, Integer>();
@@ -93,7 +92,7 @@ public class Upgrade
         RATES.put(SIGN, 200000);
     }
     
-    private static List<String> COPY_UNCOVER = new ArrayList<String>();
+    public static List<String> COPY_UNCOVER = new ArrayList<String>();
     static
     {
         COPY_UNCOVER.add("createJob.properties");

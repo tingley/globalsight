@@ -239,23 +239,28 @@ public class XLIFFStandardUtil
                         newSeg = newSeg.replace(xliffAtt, tmxAtt);
                     }
 
-                    if (att_ctype.equals(xliffAtt))
-                    {
-                        String attStart = tmxAtt;
-                        if (toXliff)
-                        {
-                            attStart = xliffAtt;
-                        }
+					// We do not adjust any attribute values to avoid issues
+					// like GBS-3950, even though XLF specification asks
+					// "A user-defined value must start with an "x-" prefix".
+                    /** 
+					if (att_ctype.equals(xliffAtt))
+					{
+						String attStart = tmxAtt;
+						if (toXliff)
+						{
+							attStart = xliffAtt;
+						}
 
-                        StringIndex siAtt = StringIndex.getValueBetween(newSeg,
-                                0, attStart, att_end);
-                        if (siAtt != null)
-                        {
-                            String newValue = processCType(siAtt.value, toXliff);
-                            newSeg = newSeg.replace(siAtt.allValue, attStart
-                                    + newValue + att_end);
-                        }
-                    }
+						StringIndex siAtt = StringIndex.getValueBetween(newSeg,
+								0, attStart, att_end);
+						if (siAtt != null)
+						{
+							String newValue = processCType(siAtt.value, toXliff);
+							newSeg = newSeg.replace(siAtt.allValue, attStart
+									+ newValue + att_end);
+						}
+					}
+					*/
                 }
             }
             segment = segment.replace(oriSeg, newSeg);

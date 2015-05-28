@@ -541,7 +541,6 @@ public class TaskDetailHandler extends PageHandler
 			TaskHelper.removeMRUtask(p_request, p_session, menuName, p_response);
 
 			// forward to the jsp page.
-			TaskSearchHandler.setup(p_request);
 			SessionManager sessionMgr = (SessionManager) p_session
             		.getAttribute(PageHandler.SESSION_MANAGER);
 			sessionMgr.setMyactivitiesAttribute("badresults", MessageFormat.format(

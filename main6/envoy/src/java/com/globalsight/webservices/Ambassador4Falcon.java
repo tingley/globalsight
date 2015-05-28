@@ -3181,10 +3181,10 @@ public class Ambassador4Falcon extends JsonTypeWebService
     }
     
     /**
-     * Returns an json description containing project information according by
+     * Returns an json description containing projects information according by
      * current user
      * 
-     * This method will return projects information which are in charged by
+     * This method will return projects information which are in charge by
      * current user.
      * 
      * @param p_accessToken
@@ -3247,16 +3247,21 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		return array.toString();
 	}
     
-    /**
-     * Get all activities.
-     * @param p_accessToken
-     * 			-- login user's token
-     * @param p_projectIds
-     * 			-- project id can be null.
-     * @param p_taskState
-     * 			-- taskState can be null."8" is "in progress","3" is "available".
-     * @return string
-     */
+	/**
+	 * Get activities current logged user is in charge of.
+	 * 
+	 * @param p_accessToken
+	 *            -- login user's token
+	 * @param p_projectIds
+	 *            -- project IDs, comma separated. A sample is "12,13". Can be
+	 *            null.
+	 * @param p_taskState
+	 *            -- taskState, can be null. Available values are "8" or "3"("8"
+	 *            means "in progress","3" means "available").
+	 *
+	 * @return string in JSON
+	 * @throws WebServiceException
+	 */
 	public String getActivityList(String p_accessToken, String p_projectIds,
 			String p_taskState) throws WebServiceException
 	{
@@ -3295,14 +3300,14 @@ public class Ambassador4Falcon extends JsonTypeWebService
 					&& Integer.parseInt(p_taskState) != 8)
 			{
 				return makeErrorJson(GET_ACTIVITY_LIST,
-						"Task state  if not empty,then the value is only 3 or 8 .");
+						"Task state can only be 3 (available) and 8 (in progress). The input state is "
+								+ p_taskState);
 			}
 		}
 		
-		List tasks = null;
-		String json = null;
 		try
 		{
+			List tasks = null;
 			String username = getUsernameFromSession(p_accessToken);
 			User user = ServerProxy.getUserManager().getUserByName(username);
 			if (StringUtils.isBlank(p_taskState))
@@ -3315,32 +3320,26 @@ public class Ambassador4Falcon extends JsonTypeWebService
 				tasks = ServerProxy.getTaskManager().getTasks(user.getUserId(),
 						Integer.parseInt(p_taskState));
 			}
-			
-			List<String> projectNameList = new ArrayList<String>();
+
+			List<Long> projectIdList = new ArrayList<Long>();
 			if (StringUtils.isNotBlank(p_projectIds))
 			{
 				String[] projectIds = p_projectIds.split(",");
 				for (String projectId : projectIds)
 				{
-					Project project = ServerProxy.getProjectHandler()
-							.getProjectById(Long.parseLong(projectId));
-					if (project == null)
-					{
-						return makeErrorJson(GET_ACTIVITY_LIST,
-								"Invalid project id: " + projectId);
-					}
-					projectNameList.add(project.getName());
+					projectIdList.add(Long.parseLong(projectId));
 				}
 			}
-		
+
 			JSONArray arrayOut = new JSONArray();
-			Map<String,List<Task>> map = new HashMap<String,List<Task>>();
+			Map<String, List<Task>> map = new HashMap<String, List<Task>>();
 			List<Task> list = null;
 			for (int i = 0; i < tasks.size(); i++)
 			{
 				Task task = (Task) tasks.get(i);
-				if (projectNameList.size() > 0
-						&& !projectNameList.contains(task.getProjectName()))
+				if (projectIdList.size() > 0
+						&& !projectIdList.contains(task.getWorkflow()
+								.getJob().getProjectId()))
 				{
 					continue;
 				}
@@ -3361,14 +3360,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
 					list = new ArrayList<Task>();
 					list.add(task);
 				}
-				map.put(task.getJobId()+","+task.getJobName(), list);
+				map.put(task.getJobId() + "," + task.getJobName(), list);
 			}
-			
-			Iterator it = map.keySet().iterator();
-			while (it.hasNext())
+
+			for (Entry<String, List<Task>> entry : map.entrySet())
 			{
-				String key = (String) it.next();
-				List<Task> taskList = map.get(key);
+				String key = entry.getKey();
+				List<Task> taskList = entry.getValue();
 				JSONObject jsonOut = new JSONObject();
 				String[] keyArr = key.split(",");
 				jsonOut.put("jobID", keyArr[0]);
@@ -3379,14 +3377,14 @@ public class Ambassador4Falcon extends JsonTypeWebService
 					JSONObject jsonIn = new JSONObject();
 					jsonIn.put("targetLanguage", tk.getTargetLocale());
 					jsonIn.put("taskID", tk.getId());
-					jsonIn.put("taskState", tk.getStateAsString());
+					jsonIn.put("taskState", (tk.getState() == 3 ? "AVAILABLE" : "IN PROGRESS"));
 					arrayIn.put(jsonIn);
 				}
 				jsonOut.put("workflow", arrayIn);
 				arrayOut.put(jsonOut);
 			}
-			
-			json = arrayOut.toString();
+
+			return arrayOut.toString();
 		}
 		catch (Exception e)
 		{
@@ -3395,7 +3393,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			message = makeErrorJson(GET_ACTIVITY_LIST, message);
 			throw new WebServiceException(message);
 		}
-		return json;
 	}
     
     ///////////////////////////////////////////////////////////////////////////

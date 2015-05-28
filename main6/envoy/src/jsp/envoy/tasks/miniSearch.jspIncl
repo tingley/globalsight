@@ -177,34 +177,6 @@ function getOption(field)
 </table>
 <!-- fill in default values -->
 <script>
-<%
-    Cookie cookie = TaskSearchHandlerHelper.getTaskSearchCookie(session, request);
-    String listType = (String)request.getAttribute("listType");
-    String searchType = (String)session.getAttribute(
-                        JobSearchConstants.LAST_TASK_SEARCH_TYPE);
-    if ((listType != null &&
-        (listType.equals("miniSearch") || listType.equals("lastSearch"))) &&
-         JobSearchConstants.MINI_TASK_SEARCH_COOKIE.equals(searchType))
-    {
-%>
-var searchCriteria = "<%=cookie.getValue()%>";
-if (searchCriteria.length > 0)
-{
-    // job name option
-    setField("<%=nameOptions%>", searchForm.<%=nameOptions%>, searchCriteria, true);
-
-    // job name field
-    //setField("<%=nameField%>", searchForm.<%=nameField%>, searchCriteria, false);
-
-    // status option
-    setField("<%=statusOptions%>", searchForm.<%=statusOptions%>, searchCriteria, true);
-    
-    // company option
-    setField("<%=companyOptions%>", searchForm.<%=companyOptions%>, searchCriteria, true);
-}
-<%
-    }
-%>
     // Always set the status no matter what
     setOption(searchForm.<%=statusOptions%>, "<%=taskState%>");
 </script>

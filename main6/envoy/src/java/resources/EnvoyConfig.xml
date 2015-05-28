@@ -1181,20 +1181,6 @@
   	</WebActivity>
   </WebModule>
   <WebModule webModuleName="jobs">
-    <WebActivity webActivityName="searchJob">
-      <WebPage pageName="SJ" isDefault="true" jspName="/envoy/projects/workflows/jobSearch.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandler">
-        <PageLink linkName="jobSearch" destinationPageName="SJ"></PageLink> 
-        <PageLink linkName="pending" destinationPageName="WF1"></PageLink>
-        <PageLink linkName="ready" destinationPageName="WF2"></PageLink>
-        <PageLink linkName="progress" destinationPageName="WF3"></PageLink>
-        <PageLink linkName="complete" destinationPageName="WF4"></PageLink>
-        <PageLink linkName="dtpprogress" destinationPageName="WF6"></PageLink>
-        <PageLink linkName="archived" destinationPageName="ARCH"></PageLink>
-        <PageLink linkName="exported" destinationPageName="WF5"></PageLink>
-        <PageLink linkName="complete" destinationPageName="WF4"></PageLink>
-        <PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
-      </WebPage>
-    </WebActivity>
     <WebActivity webActivityName="jobsAll">
       <WebPage pageName="ALLS" isDefault="true" jspName="/envoy/projects/workflows/jobControl.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobControlAllStatusHandler">
         <PageLink linkName="archived" destinationPageName="ARCH"></PageLink>
@@ -1981,12 +1967,6 @@
     </WebActivity>
   </WebModule>
   <WebModule webModuleName="tasks">
-    <WebActivity webActivityName="searchTask">
-      <WebPage pageName="ST" isDefault="true" jspName="/envoy/tasks/taskSearch.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandler">
-        <PageLink linkName="taskSearch" destinationPageName="ST"></PageLink> 
-        <PageLink linkName="list" destinationPageName="TK1A"></PageLink> 
-      </WebPage>
-    </WebActivity>
     <WebActivity webActivityName="myactivities">
       <WebPage pageName="TK1" isDefault="true" jspName="/envoy/tasks/taskListorSearch.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.TaskListHandler">
         <PageLink linkName="detail" destinationPageName="TK2"></PageLink>

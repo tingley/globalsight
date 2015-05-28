@@ -3151,7 +3151,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
         p_request.setAttribute("badresults",
                 bundle.getString("msg_job_no_file"));
-        JobSearchHandlerHelper.setupForSearch(p_request);
+        //JobSearchHandlerHelper.setupForSearch(p_request);
         // forward to the jsp page.
         RequestDispatcher dispatcher = p_context
                 .getRequestDispatcher("/envoy/projects/workflows/jobSearch.jsp");
@@ -3182,7 +3182,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         }
         p_request.setAttribute("badresults", bundle.getString("lb_job") + " "
                 + jobname + " " + bundle.getString("msg_cannot_be_found"));
-        JobSearchHandlerHelper.setupForSearch(p_request);
+        //JobSearchHandlerHelper.setupForSearch(p_request);
         // forward to the jsp page.
         RequestDispatcher dispatcher = p_context
                 .getRequestDispatcher("/envoy/projects/workflows/jobSearch.jsp");

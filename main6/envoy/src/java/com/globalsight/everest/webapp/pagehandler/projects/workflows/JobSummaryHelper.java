@@ -435,7 +435,6 @@ public class JobSummaryHelper
         }
         p_request.setAttribute("badresults", bundle.getString("lb_job") + " "
                 + jobname + " " + bundle.getString("msg_cannot_be_found"));
-        JobSearchHandlerHelper.setupForSearch(p_request);
         // forward to the jsp page.
         sessionMgr.setMyjobsAttribute("badresults", bundle.getString("lb_job") + " "
                 + jobname + " " + bundle.getString("msg_cannot_be_found"));

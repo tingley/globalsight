@@ -102,6 +102,10 @@ public class WorkflowCancelMDB extends GenericQueueMDB
             tx = HibernateUtil.getTransaction();
 
             wf = HibernateUtil.get(WorkflowImpl.class, workflowId);
+			// Maybe this workflow has been discarded (JMS can not ensure it is
+			// done in real time).
+            if (wf == null)
+            	return;
             long companyId = wf.getCompanyId();
             CompanyThreadLocal.getInstance().setIdValue(companyId);
 

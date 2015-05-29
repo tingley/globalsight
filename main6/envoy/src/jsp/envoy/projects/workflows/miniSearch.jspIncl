@@ -1,8 +1,7 @@
 <%@ page import='com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
           com.globalsight.everest.servlet.util.SessionManager,
           com.globalsight.everest.jobhandler.Job,
-          com.globalsight.util.StringUtil,
-          com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper' %>
+          com.globalsight.util.StringUtil' %>
 
 <jsp:useBean id="miniSearch" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />

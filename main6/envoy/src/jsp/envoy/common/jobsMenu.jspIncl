@@ -1,7 +1,6 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page import="java.util.*,
         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
-        com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper,
         com.globalsight.everest.servlet.util.SessionManager,
         com.globalsight.everest.jobhandler.Job,
         com.globalsight.everest.servlet.util.ServerProxy,

@@ -2,7 +2,6 @@
                  com.globalsight.everest.util.comparator.StringComparator,
                  com.globalsight.everest.taskmanager.Task,
                  com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
-                 com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandlerHelper,
                  com.globalsight.everest.webapp.WebAppConstants,
                  com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
                  com.globalsight.everest.projecthandler.Project,

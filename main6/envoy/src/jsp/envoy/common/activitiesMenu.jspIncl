@@ -1,6 +1,5 @@
 <%@ page import="java.util.*,
         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
-        com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandlerHelper,
         com.globalsight.everest.servlet.util.SessionManager,
         com.globalsight.everest.workflow.WorkflowConstants,
         com.globalsight.everest.taskmanager.Task,

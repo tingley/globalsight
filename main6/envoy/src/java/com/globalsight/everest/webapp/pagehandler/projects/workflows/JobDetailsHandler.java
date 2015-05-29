@@ -3130,35 +3130,6 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         }
     }
 
-    private void noFiles(HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context, Job job)
-            throws ServletException, IOException, EnvoyServletException
-    {
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
-        ResourceBundle bundle = getBundle(session);
-
-        String jobname = null;
-        if (job == null)
-        {
-            jobname = Long.toString(getJobId(p_request, sessionMgr));
-        }
-        else
-        {
-            jobname = job.getJobName();
-        }
-
-        p_request.setAttribute("badresults",
-                bundle.getString("msg_job_no_file"));
-        //JobSearchHandlerHelper.setupForSearch(p_request);
-        // forward to the jsp page.
-        RequestDispatcher dispatcher = p_context
-                .getRequestDispatcher("/envoy/projects/workflows/jobSearch.jsp");
-
-        dispatcher.forward(p_request, p_response);
-    }
-
     private void jobNotFound(HttpServletRequest p_request,
             HttpServletResponse p_response, ServletContext p_context, Job job)
             throws ServletException, IOException, EnvoyServletException
@@ -3182,7 +3153,6 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         }
         p_request.setAttribute("badresults", bundle.getString("lb_job") + " "
                 + jobname + " " + bundle.getString("msg_cannot_be_found"));
-        //JobSearchHandlerHelper.setupForSearch(p_request);
         // forward to the jsp page.
         RequestDispatcher dispatcher = p_context
                 .getRequestDispatcher("/envoy/projects/workflows/jobSearch.jsp");

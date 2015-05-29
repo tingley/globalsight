@@ -18,9 +18,12 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -33,6 +36,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 public class JobDataMigration
 {
     private static final Logger logger = Logger.getLogger(JobDataMigration.class);
+
+    private static final int BATCH_CAPACITY = 1000;
 
     private static final String SQL_DROP = "drop table if exists ";
 
@@ -62,12 +67,6 @@ public class JobDataMigration
             + "WHERE lm.source_page_id = req.PAGE_ID "
             + "AND req.JOB_ID = ?";
 
-    // Delete data from original leverage match table
-    private static final String LM_DELETE =
-            "DELETE lm FROM " + FROM_LM_TABLE + " lm, request req "
-            + "WHERE lm.source_page_id = req.page_id "
-            + "AND req.job_id = ?";
-
     // Move TUV data to TUV archived table.
     private static final String TUV_ARCHIVED_INSERT =
             "REPLACE INTO " + TO_TUV_TABLE + " ("
@@ -82,16 +81,6 @@ public class JobDataMigration
             + "tuv.CREATION_USER, tuv.UPDATED_BY_PROJECT, tuv.SID, tuv.SRC_COMMENT, tuv.REPETITION_OF_ID, "
             + "tuv.IS_REPEATED "
             + "FROM " + FROM_TUV_TABLE + " tuv, " + FROM_TU_TABLE + " tu, source_page_leverage_group splg, request req "
-            + "WHERE tuv.TU_ID = tu.ID "
-            + "AND tu.leverage_group_id = splg.lg_id "
-            + "AND splg.sp_id = req.page_id "
-            + "AND req.job_id = ? ";
-
-    // Delete data from original TUV table
-    private static final String TUV_DELETE =
-            "DELETE tuv FROM " + FROM_TUV_TABLE + " tuv, "
-            + FROM_TU_TABLE + " tu, "
-            + "source_page_leverage_group splg, request req "
             + "WHERE tuv.TU_ID = tu.ID "
             + "AND tu.leverage_group_id = splg.lg_id "
             + "AND splg.sp_id = req.page_id "
@@ -113,27 +102,12 @@ public class JobDataMigration
             + "AND splg.sp_id = req.page_id "
             + "AND req.job_id = ? ";
 
-    // Delete data from original TU table
-    private static final String TU_DELETE =
-            "DELETE tu FROM " + FROM_TU_TABLE + " tu, "
-            + "source_page_leverage_group splg, request req "
-            + "WHERE tu.leverage_group_id = splg.lg_id "
-            + "AND splg.sp_id = req.page_id "
-            + "AND req.job_id = ? ";
-
     // Move TUV data to "template_part_archived" table.
     private static final String TEMPLATE_PART_ARCHIVED_INSERT =
             "REPLACE INTO TEMPLATE_PART_ARCHIVED ( "
             + "ID, TEMPLATE_ID, ORDER_NUM, SKELETON_CLOB, SKELETON_STRING, TU_ID) "
             + "SELECT part.ID, part.TEMPLATE_ID, part.ORDER_NUM, part.SKELETON_CLOB, part.SKELETON_STRING, part.TU_ID "
             + "FROM template_part part, template tem, request req "
-            + "WHERE part.TEMPLATE_ID = tem.ID "
-            + "AND tem.SOURCE_PAGE_ID = req.PAGE_ID "
-            + "AND req.JOB_ID = ? ";
-
-    // Delete data from original table "template_part"
-    private static final String TEMPLATE_PART_DELETE =
-            "DELETE part FROM template_part part, template tem, request req "
             + "WHERE part.TEMPLATE_ID = tem.ID "
             + "AND tem.SOURCE_PAGE_ID = req.PAGE_ID "
             + "AND req.JOB_ID = ? ";
@@ -166,12 +140,9 @@ public class JobDataMigration
     	}
 
         Connection connection = null;
-        boolean autoCommit = false;
-
         try
         {
             connection = DbUtil.getConnection();
-            autoCommit = connection.getAutoCommit();
             connection.setAutoCommit(true);
 
             // check archive tables. Archive jobs do not support job level.
@@ -204,8 +175,6 @@ public class JobDataMigration
         	{
                 archivingJobs.remove(jobId);
         	}
-
-            connection.setAutoCommit(autoCommit);
             DbUtil.silentReturnConnection(connection);
         }
     }
@@ -221,9 +190,6 @@ public class JobDataMigration
     private static void migrateLeverageMatchData(Connection connection,
             long jobId) throws Exception
     {
-        PreparedStatement ps1 = null;
-        PreparedStatement ps2 = null;
-
         try
         {
             Job job = BigTableUtil.getJobById(jobId);
@@ -233,27 +199,19 @@ public class JobDataMigration
 
             String lmInsertSql = LM_ARCHIVED_INSERT.replace(FROM_LM_TABLE,
                     fromLmTable).replace(TO_LM_TABLE, toLmTable);
-            String lmDeleteSql = LM_DELETE.replace(FROM_LM_TABLE, fromLmTable);
+            execOnce(connection, lmInsertSql, jobId);
 
-            ps1 = connection.prepareStatement(lmInsertSql);
-            ps2 = connection.prepareStatement(lmDeleteSql);
-
-            ps1.setLong(1, jobId);
-            ps2.setLong(1, jobId);
-
-            ps1.execute();
-            ps2.execute();
+			List<List<Object>> spIdList = queryBatchList(connection,
+					"SELECT page_id FROM request req WHERE job_id = ? ", jobId,
+					10);
+			exec(connection, "DELETE FROM " + fromLmTable
+					+ " WHERE source_page_id IN ", spIdList);
         }
         catch (SQLException sqlEx)
         {
             logger.error("Failed to migrate leverage match data for job "
                     + jobId);
             throw sqlEx;
-        }
-        finally
-        {
-            DbUtil.silentClose(ps1);
-            DbUtil.silentClose(ps2);
         }
     }
 
@@ -265,15 +223,12 @@ public class JobDataMigration
      * @param jobId
      * @throws SQLException
      */
-    private static void migrateTuvData(Connection connection, long p_jobId)
+    private static void migrateTuvData(Connection connection, long jobId)
             throws Exception
     {
-        PreparedStatement ps1 = null;
-        PreparedStatement ps2 = null;
-
         try
         {
-            Job job = BigTableUtil.getJobById(p_jobId);
+            Job job = BigTableUtil.getJobById(jobId);
             String fromTuTable = job.getTuTable();
             String fromTuvTable = job.getTuvTable();
             String toTuvTable = job.getTuvArchiveTable();
@@ -282,28 +237,28 @@ public class JobDataMigration
                     .replace(TO_TUV_TABLE, toTuvTable)
                     .replace(FROM_TU_TABLE, fromTuTable)
                     .replace(FROM_TUV_TABLE, fromTuvTable);
+            execOnce(connection, tuvInsertSql, jobId);
 
-            String tuvDeleteSql = TUV_DELETE.replace(FROM_TUV_TABLE,
-                    fromTuvTable).replace(FROM_TU_TABLE, fromTuTable);
+            StringBuilder sql = new StringBuilder();
+			sql.append("SELECT tuv.ID FROM ")
+					.append(fromTuvTable)
+					.append(" tuv, ")
+					.append(fromTuTable)
+					.append(" tu, source_page_leverage_group splg, request req ")
+					.append(" WHERE tuv.TU_ID = tu.ID ")
+					.append(" AND tu.leverage_group_id = splg.lg_id ")
+					.append(" AND splg.sp_id = req.page_id ")
+					.append(" AND req.job_id = ? ");
+			List<List<Object>> tuvIdList = queryBatchList(connection,
+					sql.toString(), jobId, BATCH_CAPACITY);
 
-            ps1 = connection.prepareStatement(tuvInsertSql);
-            ps2 = connection.prepareStatement(tuvDeleteSql);
-
-            ps1.setLong(1, p_jobId);
-            ps2.setLong(1, p_jobId);
-
-            ps1.execute();
-            ps2.execute();
+			exec(connection, "DELETE FROM " + fromTuvTable + " WHERE ID IN ",
+					tuvIdList);
         }
         catch (Exception ex)
         {
-            logger.error("Failed to migrate TUV data for job " + p_jobId);
+            logger.error("Failed to migrate TUV data for job " + jobId);
             throw ex;
-        }
-        finally
-        {
-            DbUtil.silentClose(ps1);
-            DbUtil.silentClose(ps2);
         }
     }
 
@@ -318,9 +273,6 @@ public class JobDataMigration
     private static void migrateTuData(Connection connection, long jobId)
             throws Exception
     {
-        PreparedStatement ps1 = null;
-        PreparedStatement ps2 = null;
-
         try
         {
             Job job = BigTableUtil.getJobById(jobId);
@@ -329,26 +281,24 @@ public class JobDataMigration
 
             String tuInsertSql = TU_ARCHIVED_INSERT.replace(TO_TU_TABLE, to)
                     .replace(FROM_TU_TABLE, from);
-            String tuDeleteSql = TU_DELETE.replace(FROM_TU_TABLE, from);
+            execOnce(connection, tuInsertSql, jobId);
 
-            ps1 = connection.prepareStatement(tuInsertSql);
-            ps2 = connection.prepareStatement(tuDeleteSql);
-
-            ps1.setLong(1, jobId);
-            ps2.setLong(1, jobId);
-
-            ps1.execute();
-            ps2.execute();
+            StringBuilder sql = new StringBuilder();
+			sql.append("SELECT tu.ID FROM ")
+					.append(from)
+					.append(" tu, source_page_leverage_group splg, request req ")
+					.append(" WHERE tu.leverage_group_id = splg.lg_id ")
+					.append(" AND splg.sp_id = req.page_id ")
+					.append(" AND req.job_id = ? ");
+			List<List<Object>> tuIdList = queryBatchList(connection,
+					sql.toString(), jobId, BATCH_CAPACITY);
+			exec(connection, "DELETE FROM " + from + " WHERE ID IN ",
+					tuIdList);
         }
         catch (Exception sqlEx)
         {
             logger.error("Failed to migrate TU data for job " + jobId);
             throw sqlEx;
-        }
-        finally
-        {
-            DbUtil.silentClose(ps1);
-            DbUtil.silentClose(ps2);
         }
     }
 
@@ -364,30 +314,26 @@ public class JobDataMigration
     private static void migrateTemplatePartData(Connection connection,
             long jobId) throws SQLException
     {
-        PreparedStatement ps1 = null;
-        PreparedStatement ps2 = null;
-
         try
         {
-            ps1 = connection.prepareStatement(TEMPLATE_PART_ARCHIVED_INSERT);
-            ps2 = connection.prepareStatement(TEMPLATE_PART_DELETE);
+            execOnce(connection, TEMPLATE_PART_ARCHIVED_INSERT, jobId);
 
-            ps1.setLong(1, jobId);
-            ps2.setLong(1, jobId);
-
-            ps1.execute();
-            ps2.execute();
+            StringBuilder sql = new StringBuilder();
+			sql.append("SELECT part.ID ")
+					.append(" FROM template_part part, template tem, request req ")
+					.append(" WHERE part.TEMPLATE_ID = tem.ID ")
+					.append(" AND tem.SOURCE_PAGE_ID = req.PAGE_ID ")
+					.append(" AND req.JOB_ID = ? ");
+			List<List<Object>> partIdList = queryBatchList(connection,
+					sql.toString(), jobId, BATCH_CAPACITY);
+			exec(connection, "DELETE FROM template_part WHERE ID IN ",
+					partIdList);
         }
         catch (SQLException sqlEx)
         {
             logger.error("Failed to migrate 'TEMPLATE_PART' data for job "
                     + jobId);
             throw sqlEx;
-        }
-        finally
-        {
-            DbUtil.silentClose(ps1);
-            DbUtil.silentClose(ps2);
         }
     }
 
@@ -426,6 +372,69 @@ public class JobDataMigration
         }
     }
 
+	private static void exec(Connection conn, String sql,
+			List<List<Object>> batchList) throws SQLException
+    {
+        int batchCount = batchList.size();
+        if (batchCount > 1)
+        {
+			logger.info(batchCount + " batches of records found to be deleted.");
+        }
+        int deletedBatchCount = 0;
+        for (List<Object> list : batchList)
+        {
+            execOnce(conn, sql + toInClause(list));
+            if (batchCount > 1)
+            {
+                deletedBatchCount++;
+                int leftBatchCount = batchCount - deletedBatchCount;
+                String message = "";
+                if (deletedBatchCount == 1)
+                {
+                    if (leftBatchCount == 1)
+                    {
+                        message = "1 batch deleted, left 1";
+                    }
+                    else
+                    {
+                        message = "1 batch deleted, left " + leftBatchCount;
+                    }
+                }
+                else
+                {
+                    if (leftBatchCount == 1)
+                    {
+                        message = deletedBatchCount
+                                + " batches deleted, left 1";
+                    }
+                    else if (leftBatchCount > 1)
+                    {
+                        message = deletedBatchCount + " batches deleted, left "
+                                + leftBatchCount;
+                    }
+                }
+                if (leftBatchCount > 0)
+                {
+                    logger.info(message);
+                }
+            }
+        }
+    }
+
+    private static void execOnce(Connection conn, String sql, Object param)
+            throws SQLException
+    {
+        try
+        {
+            execOnce(toPreparedStatement(conn, sql, param));
+        }
+        catch (Exception e)
+        {
+            logger.info("Current SQL :: " + sql);
+            throw new SQLException(e.getMessage());
+        }
+    }
+
     private static void execOnce(Connection conn, String sql)
             throws SQLException
     {
@@ -444,5 +453,159 @@ public class JobDataMigration
         {
             ConnectionPool.silentClose(stmt);
         }
+    }
+
+    private static void execOnce(PreparedStatement ps) throws SQLException
+    {
+        try
+        {
+            ps.execute();
+        }
+        catch (Exception e)
+        {
+            logger.error("Current SQL :: " + ps.toString());
+            throw new SQLException(e.getMessage());
+        }
+        finally
+        {
+            ConnectionPool.silentClose(ps);
+        }
+    }
+
+    private static List<List<Object>> queryBatchList(Connection conn,
+			String sql, Object param, int batchSize) throws SQLException
+    {
+        Statement stmt = null;
+        PreparedStatement ps = null;
+        try
+        {
+            ResultSet rs = null;
+            if (param instanceof List)
+            {
+                StringBuilder sb = new StringBuilder(sql);
+                sb.append(toInClause((List<?>) param));
+
+                stmt = toStatement(conn);
+
+                rs = stmt.executeQuery(sb.toString());
+            }
+            else
+            {
+                ps = toPreparedStatement(conn, sql, param);
+                rs = ps.executeQuery();
+            }
+            return toBatchList(rs, batchSize);
+        }
+        finally
+        {
+            ConnectionPool.silentClose(stmt);
+            ConnectionPool.silentClose(ps);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static String toInClause(List<?> list)
+    {
+        StringBuilder in = new StringBuilder();
+        if (list.size() == 0)
+            return "(0)";
+        
+        in.append("(");
+        for (Object o : list)
+        {
+            if (o instanceof List)
+            {
+                if (((List) o).size() == 0)
+                    continue;
+                
+                for (Object id : (List<?>) o)
+                {
+                    if (id instanceof String)
+                    {
+                        in.append("'");
+                        in.append(((String) id).replace("\'", "\\\'"));
+                        in.append("'");
+                    }
+                    else
+                    {
+                        in.append(id);
+                    }
+                    in.append(",");
+                }
+            }
+            else if (o instanceof String)
+            {
+                in.append("'");
+                in.append(((String) o).replace("\'", "\\\'"));
+                in.append("'");
+                in.append(",");
+            }
+            else
+            {
+                in.append(o);
+                in.append(",");
+            }
+        }
+        in.deleteCharAt(in.length() - 1);
+        in.append(")");
+
+        return in.toString();
+    }
+
+    private static Statement toStatement(Connection conn) throws SQLException
+    {
+        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY);
+        // will have oom error when querying great number of records without
+        // this setting
+        stmt.setFetchSize(Integer.MIN_VALUE);
+        return stmt;
+    }
+
+    private static PreparedStatement toPreparedStatement(Connection conn,
+            String sql, Object param) throws SQLException
+    {
+        PreparedStatement ps = conn.prepareStatement(sql,
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        // will have oom error when querying great number of records without
+        // this setting
+        ps.setFetchSize(Integer.MIN_VALUE);
+        ps.setObject(1, param);
+        return ps;
+    }
+
+    private static List<List<Object>> toBatchList(ResultSet rs, int batchSize)
+			throws SQLException
+    {
+        List<List<Object>> batchList = new ArrayList<List<Object>>();
+        if (rs == null)
+        {
+            return batchList;
+        }
+        List<Object> subList = new ArrayList<Object>();
+        int count = 0;
+        try
+        {
+            while (rs.next())
+            {
+                subList.add(rs.getObject(1));
+                count++;
+                if (count == batchSize)
+                {
+                    batchList.add(subList);
+                    subList = new ArrayList<Object>();
+                    count = 0;
+                }
+            }
+            if (subList.size() > 0)
+            {
+                batchList.add(subList);
+            }
+        }
+        finally
+        {
+            ConnectionPool.silentClose(rs);
+        }
+        return batchList;
     }
 }

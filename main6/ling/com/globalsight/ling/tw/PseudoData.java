@@ -569,6 +569,21 @@ public class PseudoData
         sup_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</sup>");
         sup_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
         sup_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
+        
+        // highlight
+        String strHighlight = TmxTagGenerator
+                .getInlineTypeName(TmxTagGenerator.OFFICE_HIGHLIGHT);
+        Hashtable highlight_Data = new Hashtable();
+        highlight_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
+        highlight_Data.put(PseudoConstants.ADDABLE_TMX_TYPE, strHighlight);
+        highlight_Data.put(PseudoConstants.ADDABLE_TMX_ENDPAIRTAG, "ept");
+        highlight_Data.put(PseudoConstants.ADDABLE_ATTR_ERASABLE, erasableVal);
+        // B_Data.put(PseudoConstants.ADDABLE_ATTR_MOVABLE, movableVal);
+        // Note: enter raw native content - caller must encode as needed
+        highlight_Data.put(PseudoConstants.ADDABLE_HTML_CONTENT, "<highlight>");
+        highlight_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</highlight>");
+        highlight_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
+        highlight_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
 
         // BOLD
         String cStrB = TmxTagGenerator
@@ -926,6 +941,9 @@ public class PseudoData
                 "sub", false, sub_Data));
         p.put(strSup, new PseudoOverrideMapItem(strSup, true, "superscript",
                 "sup", false, sup_Data));
+        
+        p.put(strHighlight, new PseudoOverrideMapItem(strSup, true, "highlight",
+                "hl", true, null));
 
         return p;
     }

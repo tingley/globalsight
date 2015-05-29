@@ -153,6 +153,7 @@ public class WordExtractor extends AbstractExtractor
         MOVABLE_NODES.add("u");
         MOVABLE_NODES.add("sub");
         MOVABLE_NODES.add("sup");
+        MOVABLE_NODES.add("highlight");
     }
 
     public static boolean useNewExtractor(String fileProfileId)
@@ -211,7 +212,7 @@ public class WordExtractor extends AbstractExtractor
             DocumentUtil dUtil = new DocumentUtil();
             dUtil.setWordExtractor(this);
             dUtil.handle(document);
-            // util.saveToFile(document, "c://a.xml");
+            // util.saveToFile(document, "e://a.xml");
         }
         else if ("c:chartSpace".equals(rootName)
                 || "dgm:dataModel".equals(rootName))

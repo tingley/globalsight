@@ -167,9 +167,9 @@ public class WorkflowCancelHelper
     private static void deleteScore(Connection conn, long wfId)
     		throws SQLException
 	{
-		logStart("SCORE");
+		logStart("SCORECARD_SCORE");
 		execOnce(conn, SQL_DELETE_SCORE, wfId);
-		logEnd("SCORE");
+		logEnd("SCORECARD_SCORE");
 	}
     
     private static void deleteTargetPageleverageGroup(Connection conn, long wfId)

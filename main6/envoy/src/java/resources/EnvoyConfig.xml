@@ -1968,6 +1968,19 @@
   </WebModule>
   <WebModule webModuleName="tasks">
     <WebActivity webActivityName="myactivities">
+      <WebPage pageName="TK1" isDefault="true" jspName="/envoy/tasks/taskListorSearch.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.TaskListHandler">
+        <PageLink linkName="detail" destinationPageName="TK2"></PageLink>
+        <PageLink linkName="self" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="invokedownload" destinationPageName="TK7"></PageLink>
+        <PageLink linkName="previousPage" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="nextPage" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="export" destinationPageName="EJ"></PageLink>
+        <PageLink linkName="search" destinationPageName="TASKSEARCH"></PageLink>
+        <PageLink linkName="taskSearch" destinationPageName="ST"></PageLink>
+        <PageLink linkName="miniSearch" destinationPageName="ST"></PageLink>
+        <PageLink linkName="list" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="wordcountlist" destinationPageName="TWCL"></PageLink>
+      </WebPage>
       <WebPage pageName="TK1A" isDefault="true" jspName="/envoy/tasks/taskList.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.TaskListHandler">
         <PageLink linkName="detail" destinationPageName="TK2"></PageLink>
         <PageLink linkName="self" destinationPageName="TK1A"></PageLink>

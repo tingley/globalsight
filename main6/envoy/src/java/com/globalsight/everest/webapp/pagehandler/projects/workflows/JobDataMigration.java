@@ -63,9 +63,8 @@ public class JobDataMigration
             + "lm.MATCHED_TABLE_TYPE, lm.PROJECT_TM_INDEX, lm.TM_ID, lm.TM_PROFILE_ID, lm.MT_NAME, "
             + "lm.MATCHED_ORIGINAL_SOURCE, lm.JOB_DATA_TU_ID, lm.SID, lm.CREATION_USER, lm.CREATION_DATE, "
             + "lm.MODIFY_USER, lm.MODIFY_DATE "
-            + "FROM " + FROM_LM_TABLE + " lm, request req "
-            + "WHERE lm.source_page_id = req.PAGE_ID "
-            + "AND req.JOB_ID = ?";
+            + "FROM " + FROM_LM_TABLE + " lm "
+            + "WHERE lm.source_page_id IN ";
 
     // Move TUV data to TUV archived table.
     private static final String TUV_ARCHIVED_INSERT =
@@ -80,11 +79,8 @@ public class JobDataMigration
             + "tuv.MERGE_STATE, tuv.TIMESTAMP, tuv.LAST_MODIFIED, tuv.MODIFY_USER, tuv.CREATION_DATE, "
             + "tuv.CREATION_USER, tuv.UPDATED_BY_PROJECT, tuv.SID, tuv.SRC_COMMENT, tuv.REPETITION_OF_ID, "
             + "tuv.IS_REPEATED "
-            + "FROM " + FROM_TUV_TABLE + " tuv, " + FROM_TU_TABLE + " tu, source_page_leverage_group splg, request req "
-            + "WHERE tuv.TU_ID = tu.ID "
-            + "AND tu.leverage_group_id = splg.lg_id "
-            + "AND splg.sp_id = req.page_id "
-            + "AND req.job_id = ? ";
+            + "FROM " + FROM_TUV_TABLE + " tuv "
+            + "WHERE tuv.ID IN ";
 
     // Move TUV data to "translation_unit_archived" table.
     private static final String TU_ARCHIVED_INSERT =
@@ -97,20 +93,16 @@ public class JobDataMigration
             + "tu.LOCALIZE_TYPE, tu.LEVERAGE_GROUP_ID, tu.PID, tu.SOURCE_TM_NAME, tu.XLIFF_TRANSLATION_TYPE, "
             + "tu.XLIFF_LOCKED, tu.IWS_SCORE, tu.XLIFF_TARGET_SEGMENT, tu.XLIFF_TARGET_LANGUAGE, tu.GENERATE_FROM, "
             + "tu.SOURCE_CONTENT, tu.PASSOLO_STATE, tu.TRANSLATE "
-            + "FROM " + FROM_TU_TABLE + " tu, source_page_leverage_group splg, request req "
-            + "WHERE tu.leverage_group_id = splg.lg_id "
-            + "AND splg.sp_id = req.page_id "
-            + "AND req.job_id = ? ";
+            + "FROM " + FROM_TU_TABLE + " tu "
+            + "WHERE tu.id IN ";
 
     // Move TUV data to "template_part_archived" table.
     private static final String TEMPLATE_PART_ARCHIVED_INSERT =
             "REPLACE INTO TEMPLATE_PART_ARCHIVED ( "
             + "ID, TEMPLATE_ID, ORDER_NUM, SKELETON_CLOB, SKELETON_STRING, TU_ID) "
             + "SELECT part.ID, part.TEMPLATE_ID, part.ORDER_NUM, part.SKELETON_CLOB, part.SKELETON_STRING, part.TU_ID "
-            + "FROM template_part part, template tem, request req "
-            + "WHERE part.TEMPLATE_ID = tem.ID "
-            + "AND tem.SOURCE_PAGE_ID = req.PAGE_ID "
-            + "AND req.JOB_ID = ? ";
+            + "FROM template_part part "
+            + "WHERE part.ID IN ";
 
 	private static HashSet<Long> archivingJobs = new HashSet<Long>();
 	private static Object LOCK = new Object();
@@ -193,17 +185,17 @@ public class JobDataMigration
         try
         {
             Job job = BigTableUtil.getJobById(jobId);
-
             String fromLmTable = job.getLmTable();
             String toLmTable = job.getLmArchiveTable();
 
-            String lmInsertSql = LM_ARCHIVED_INSERT.replace(FROM_LM_TABLE,
-                    fromLmTable).replace(TO_LM_TABLE, toLmTable);
-            execOnce(connection, lmInsertSql, jobId);
-
-			List<List<Object>> spIdList = queryBatchList(connection,
+            List<List<Object>> spIdList = queryBatchList(connection,
 					"SELECT page_id FROM request req WHERE job_id = ? ", jobId,
-					10);
+					5);
+
+			String lmInsertSql = LM_ARCHIVED_INSERT.replace(FROM_LM_TABLE,
+                    fromLmTable).replace(TO_LM_TABLE, toLmTable);
+            exec(connection, lmInsertSql, spIdList);
+
 			exec(connection, "DELETE FROM " + fromLmTable
 					+ " WHERE source_page_id IN ", spIdList);
         }
@@ -233,12 +225,6 @@ public class JobDataMigration
             String fromTuvTable = job.getTuvTable();
             String toTuvTable = job.getTuvArchiveTable();
 
-            String tuvInsertSql = TUV_ARCHIVED_INSERT
-                    .replace(TO_TUV_TABLE, toTuvTable)
-                    .replace(FROM_TU_TABLE, fromTuTable)
-                    .replace(FROM_TUV_TABLE, fromTuvTable);
-            execOnce(connection, tuvInsertSql, jobId);
-
             StringBuilder sql = new StringBuilder();
 			sql.append("SELECT tuv.ID FROM ")
 					.append(fromTuvTable)
@@ -251,6 +237,10 @@ public class JobDataMigration
 					.append(" AND req.job_id = ? ");
 			List<List<Object>> tuvIdList = queryBatchList(connection,
 					sql.toString(), jobId, BATCH_CAPACITY);
+
+			String tuvInsertSql = TUV_ARCHIVED_INSERT.replace(TO_TUV_TABLE,
+					toTuvTable).replace(FROM_TUV_TABLE, fromTuvTable);
+            exec(connection, tuvInsertSql, tuvIdList);
 
 			exec(connection, "DELETE FROM " + fromTuvTable + " WHERE ID IN ",
 					tuvIdList);
@@ -279,10 +269,6 @@ public class JobDataMigration
             String from = job.getTuTable();
             String to = job.getTuArchiveTable();
 
-            String tuInsertSql = TU_ARCHIVED_INSERT.replace(TO_TU_TABLE, to)
-                    .replace(FROM_TU_TABLE, from);
-            execOnce(connection, tuInsertSql, jobId);
-
             StringBuilder sql = new StringBuilder();
 			sql.append("SELECT tu.ID FROM ")
 					.append(from)
@@ -292,8 +278,12 @@ public class JobDataMigration
 					.append(" AND req.job_id = ? ");
 			List<List<Object>> tuIdList = queryBatchList(connection,
 					sql.toString(), jobId, BATCH_CAPACITY);
-			exec(connection, "DELETE FROM " + from + " WHERE ID IN ",
-					tuIdList);
+
+			String tuInsertSql = TU_ARCHIVED_INSERT.replace(TO_TU_TABLE, to)
+					.replace(FROM_TU_TABLE, from);
+			exec(connection, tuInsertSql, tuIdList);
+
+			exec(connection, "DELETE FROM " + from + " WHERE ID IN ", tuIdList);
         }
         catch (Exception sqlEx)
         {
@@ -316,8 +306,6 @@ public class JobDataMigration
     {
         try
         {
-            execOnce(connection, TEMPLATE_PART_ARCHIVED_INSERT, jobId);
-
             StringBuilder sql = new StringBuilder();
 			sql.append("SELECT part.ID ")
 					.append(" FROM template_part part, template tem, request req ")
@@ -326,6 +314,9 @@ public class JobDataMigration
 					.append(" AND req.JOB_ID = ? ");
 			List<List<Object>> partIdList = queryBatchList(connection,
 					sql.toString(), jobId, BATCH_CAPACITY);
+
+			exec(connection, TEMPLATE_PART_ARCHIVED_INSERT, partIdList);
+
 			exec(connection, "DELETE FROM template_part WHERE ID IN ",
 					partIdList);
         }

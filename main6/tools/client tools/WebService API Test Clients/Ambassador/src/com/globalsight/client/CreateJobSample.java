@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Vector;
+
 import com.globalsight.www.webservices.Ambassador;
+
 import org.apache.poi.POITextExtractor;  
 import org.apache.poi.extractor.ExtractorFactory;  
 
@@ -30,38 +32,38 @@ public class CreateJobSample
 		try
 		{
 			Ambassador ambassador = getAmbassador();
+			// login to get token which is required in any later invoking.
 			String fullAccessToken = ambassador.login(userName, password);
 			System.out.println("fullAccessToken : " + fullAccessToken);
 
-			// First step : getUniqueJobName, get a unique job name.(If you can
-			// make sure that the job name of the sole, then the method can not
-			// be executed)
+			// First step : getUniqueJobName
+			// GlobalSight requires job name unique
 			testGetUniqueJobName(ambassador, fullAccessToken);
 
 			// Second step : getFileProfileInfoEx, get all file profile.(If you
 			// know the file profile, then the method can not be executed)
 			testGetFileProfileInfoEx(ambassador, fullAccessToken);
 
-			// Third step : uploadFile,upload files to the server.
-			// If you need to upload multiple files, then call this method
-			// multiple times
+			// Third step : uploadFile, upload files to the server.
+			// For non-java client language.
+			// Same as "uploadFileForInitial".
 			testUploadFile(ambassador, fullAccessToken);
 
-			// Third step : uploadFileForInitial,upload files to the
-			// server.(uploadFileForInitial and uploadFile same function)
-			// If you need to upload multiple files, then call this method
-			// multiple times
+			// Third step : uploadFileForInitial,upload files to the server.
+			// For Java
 			testUploadFileForInitial(ambassador, fullAccessToken);
 
-			// Fourth step : addJobComment,add comment for job.(If you do not
-			// add a comment,then the method can not be executed)
+			// Fourth step : addJobComment,add comment for job.
+			// Optional API
 			testAddJobComment(ambassador, fullAccessToken);
 
 			// Fifth step : createJob
+			// For non-java client language.
+			// Same as "createJobOnInitial"
 			testCreateJob(ambassador, fullAccessToken);
 
-			// Fifth step : createJobOnInitial (createJob and createJobOnInitial
-			// same function)
+			// Fifth step : createJobOnInitial
+			// For java
 			testCreateJobOnInitial(ambassador, fullAccessToken);
 		}
 		catch (Exception e)
@@ -86,13 +88,22 @@ public class CreateJobSample
 		System.out.println(xml);
 	}
 	
+	/**
+	 * Use this method to upload file contents to GlobalSight server. Generally,
+	 * one call is for one file. For large file, it allows to be called multiple
+	 * times to same file.
+	 * 
+	 * @param ambassador
+	 * @param accessToken
+	 * @throws Exception
+	 */
 	private static void testUploadFile(Ambassador ambassador, String accessToken)
 			throws Exception
 	{
 		String uniqueJobName = "jobName_890581768";
-		// If you want to keep a local path, file path for this form
-		// String filePath =
-		// "Users/a/Desktop/down/test/html/accuracy_test_results.htm";
+
+		// If local path is wanted
+		// String filePath = "Users/a/Desktop/down/test/html/accuracy_test_results.htm";
 		// String filePath = "accuracy_test_results.htm";
 		// String filePath = "01 - Overview_Microsoft.docx";
 		String filePath = "Welocalize_company.pptx";
@@ -102,43 +113,54 @@ public class CreateJobSample
 		String fileProfileId = "42";// office
 		// String fileProfileId = "48";//xml
 
-		// String fileStr =
-		// "C:/Users/a/Desktop/down/test/html/accuracy_test_results.htm";
+		// String fileStr = "C:/Users/a/Desktop/down/test/html/accuracy_test_results.htm";
 		String fileStr = "C:/Users/a/Desktop/down/test/pptx/Welocalize_Company.pptx";
-		// String fileStr
-		// ="C:/Users/a/Desktop/down/test/xml/tm_100_InContext_Fuzzy_NoMatch.xml";
+		// String fileStr ="C:/Users/a/Desktop/down/test/xml/tm_100_InContext_Fuzzy_NoMatch.xml";
 
-		// If you upload office documents, with this analytical methods:
-		// ------start----
-		File uploadFile = new File(fileStr);
-		POITextExtractor extractor = ExtractorFactory
-				.createExtractor(uploadFile);
-		String content = extractor.getText();
-		// ------end----
-
-		// If you upload html, xml and other documents, use this analytical
-		// methods:
-		// File uploadFile = new File(fileStr);
-		// byte[] bytes = new byte[(int) uploadFile.length()];
-		// FileInputStream fin = new FileInputStream(uploadFile);
-		// fin.read(bytes, 0, (int) uploadFile.length());
-		// fin.close();
-		// String content = new String(bytes);
+		String content = null;
+		// If upload DOCX, XLSX, PPTX documents:
+		if (filePath.toLowerCase().endsWith(".docx")
+				|| filePath.toLowerCase().endsWith(".pptx")
+				|| filePath.toLowerCase().endsWith(".xlsx"))
+		{
+			File uploadFile = new File(fileStr);
+			POITextExtractor extractor = ExtractorFactory
+					.createExtractor(uploadFile);
+			content = extractor.getText();
+		}
+		else
+		{
+			 File uploadFile = new File(fileStr);
+			 byte[] bytes = new byte[(int) uploadFile.length()];
+			 FileInputStream fin = new FileInputStream(uploadFile);
+			 fin.read(bytes, 0, (int) uploadFile.length());
+			 fin.close();
+			 content = new String(bytes);
+		}
 
 		ambassador.uploadFile(accessToken, uniqueJobName, filePath,
 				fileProfileId, content);
 	}
-	
-	//If you need to upload multiple files, then call this method multiple times
+
+	/**
+	 * Use this method to upload file contents to GlobalSight server. Generally,
+	 * one call is for one file. For large file, it allows to be called multiple
+	 * times to same file.
+	 * 
+	 * @param ambassador
+	 * @param accessToken
+	 * @throws Exception
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void testUploadFileForInitial(Ambassador ambassador,
 			String accessToken) throws Exception
 	{
 		HashMap map = new HashMap();
 		String uniqueJobName = "jobName_890581768";
-		// If you want to keep a local path, file path for this form
-		// String filePath =
-		// "Users/a/Desktop/down/test/html/accuracy_test_results.htm";
+
 		// String filePath = "accuracy_test_results.htm";
+		// If local path is wanted
+		// String filePath = "Users/a/Desktop/down/test/html/accuracy_test_results.htm";
 		String filePath = "9 - Safety and Security - Copy.docx";
 		// String filePath = "tm_100_InContext_Fuzzy_NoMatch.xml";
 
@@ -146,34 +168,36 @@ public class CreateJobSample
 		String fileProfileId = "42";// office
 		// String fileProfileId = "48";//xml
 
-		// String fileStr =
-		// "C:/Users/a/Desktop/down/test/html/accuracy_test_results.htm";
+		// String fileStr = "C:/Users/a/Desktop/down/test/html/accuracy_test_results.htm";
 		String fileStr = "C:/Users/a/Desktop/down/test/docx/19 - Safety and Security - Copy.docx";
-		// String fileStr
-		// ="C:/Users/a/Desktop/down/test/xml/tm_100_InContext_Fuzzy_NoMatch.xml";
+		// String fileStr ="C:/Users/a/Desktop/down/test/xml/tm_100_InContext_Fuzzy_NoMatch.xml";
 
-		// If you upload office documents, with this analytical methods:
-		// ------start----
-		File uploadFile = new File(fileStr);
-		POITextExtractor extractor = ExtractorFactory
-				.createExtractor(uploadFile);
-		String content = extractor.getText();
-		byte[] bytes = content.getBytes();
-		// ------end----
-
-		// If you upload html, xml and other documents, use this analytical
-		// methods:
-		// File file = new File(fileStr);
-		// InputStream is = new FileInputStream(file);
-		// byte[] bytes = new byte[(int) file.length()];
-		// int offset = 0;
-		// int numRead = 0;
-		// while (offset < bytes.length
-		// && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0)
-		// {
-		// offset += numRead;
-		// }
-		// is.close();
+		byte[] bytes = null;
+		// If upload DOCX, XLSX, PPTX documents:
+		if (filePath.toLowerCase().endsWith(".docx")
+				|| filePath.toLowerCase().endsWith(".pptx")
+				|| filePath.toLowerCase().endsWith(".xlsx"))
+		{
+			File uploadFile = new File(fileStr);
+			POITextExtractor extractor = ExtractorFactory
+					.createExtractor(uploadFile);
+			String content = extractor.getText();
+			bytes = content.getBytes();
+		}
+		else
+		{
+			File file = new File(fileStr);
+			InputStream is = new FileInputStream(file);
+			bytes = new byte[(int) file.length()];
+			int offset = 0;
+			int numRead = 0;
+			while (offset < bytes.length
+					&& (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0)
+			{
+				offset += numRead;
+			}
+			is.close();
+		}
 
 		map.put("accessToken", accessToken);
 		map.put("jobName", uniqueJobName);
@@ -184,6 +208,13 @@ public class CreateJobSample
 		ambassador.uploadFileForInitial(map);
 	}
 	
+	/**
+	 * Add job comment and job reference file.
+	 * 
+	 * @param ambassador
+	 * @param accessToken
+	 * @throws Exception
+	 */
 	private static void testAddJobComment(Ambassador ambassador,
 			String accessToken) throws Exception
 	{
@@ -193,16 +224,6 @@ public class CreateJobSample
 		String access = "General";
 		String comment = "test add job comment";
 		String fileStr = "C:/Users/a/Desktop/down/test/xml/books.xml";
-		// String fileStr =
-		// "C:/Users/a/Desktop/down/test/docx/19 - Safety and Security - Copy.docx";
-		// If you upload office documents, with this analytical methods:
-		// ------start----
-		// File uploadFile = new File(fileStr);
-		// POITextExtractor extractor = ExtractorFactory
-		// .createExtractor(uploadFile);
-		// String content = extractor.getText();
-		// byte[] bytes = content.getBytes();
-		// ------end----
 
 		File file = new File(fileStr);
 		InputStream is = new FileInputStream(file);
@@ -226,16 +247,23 @@ public class CreateJobSample
 	{
 		String uniqueJobName = "jobName_890581768";
 		String comment = "Test create job step.";
-		String filePaths = "accuracy_test_results.htm,19 - Safety and Security - Copy.docx,tm_100_InContext_Fuzzy_NoMatch.xml";
-		// If you want to keep a local path, file path for this form
-		// String filePaths =
-		// "Users/a/Desktop/down/test/html/accuracy_test_results.htm,Users/a/Desktop/down/test/docx/01 - Overview_Microsoft.docx,Users/a/Desktop/down/test/xml/tm_100_InContext_Fuzzy_NoMatch.xml";
-		String fileProfileIds = "44,42,48";
-		String targetLocales = "fr_FR,de_DE,es_ES";
+
+		// file pathnames are separated by "|"
+		String filePaths = "accuracy_test_results.htm|19 - Safety and Security - Copy.docx|tm_100_InContext_Fuzzy_NoMatch.xml";
+		// If local path is wanted:
+//		String filePaths = "Users/a/Desktop/down/test/html/accuracy_test_results.htm|Users/a/Desktop/down/test/docx/01 - Overview_Microsoft.docx|Users/a/Desktop/down/test/xml/tm_100_InContext_Fuzzy_NoMatch.xml";
+
+		// Separated by "|" with same sequence with files pathnames
+		String fileProfileIds = "44|42|48";
+
+		// this job has 3 target locales, every "fr_FR,de_DE,es_ES" is for one file 
+		String targetLocales = "fr_FR,de_DE,es_ES|fr_FR,de_DE,es_ES|fr_FR,de_DE,es_ES";
+
 		ambassador.createJob(accessToken, uniqueJobName, comment, filePaths,
 				fileProfileIds, targetLocales);
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static void testCreateJobOnInitial(Ambassador ambassador,
 			String accessToken) throws Exception
 	{
@@ -248,16 +276,19 @@ public class CreateJobSample
 		filePaths.add("accuracy_test_results.htm");
 		filePaths.add("19 - Safety and Security - Copy.docx");
 		filePaths.add("tm_100_InContext_Fuzzy_NoMatch.xml");
-		// If you want to keep a local path, file path for this form
+
+		// If local path is wanted:
 		// filePaths.add("Users/a/Desktop/down/test/html/accuracy_test_results.htm");
 		// filePaths.add("Users/a/Desktop/down/test/docx/01 - Overview_Microsoft.docx");
 		// filePaths.add("Users/a/Desktop/down/test/xml/tm_100_InContext_Fuzzy_NoMatch.xml");
+
 		fileProfileIds.add("44");
 		fileProfileIds.add("42");
 		fileProfileIds.add("48");
-		targetLocales.add("fr_FR");
-		targetLocales.add("de_DE");
-		targetLocales.add("es_ES");
+
+		targetLocales.add("fr_FR,de_DE,es_ES");// for first file
+		targetLocales.add("fr_FR,de_DE,es_ES");// for second file
+		targetLocales.add("fr_FR,de_DE,es_ES");// for third file
 
 		map.put("accessToken", accessToken);
 		map.put("jobId", jobId);

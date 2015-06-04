@@ -156,7 +156,7 @@ var w_viewer;
 				cache_option = "Plugin"
                 NAME = "GPUI" WIDTH = 100% HEIGHT = 100% 
 				scriptable=true
-                pluginspage="<%=httpProtocolToUse%>://www.java.com/en/download">
+                pluginspage="<%=httpProtocolToUse%>://www.java.com/en/download/manual.jsp">
                 <NOEMBED></COMMENT>
                 </NOEMBED></EMBED>
 				<% if(isIE){%>

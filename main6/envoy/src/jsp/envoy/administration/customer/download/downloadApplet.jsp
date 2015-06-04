@@ -129,21 +129,20 @@ function submitPage()
             //boolean isFirefox = request.getHeader("User-Agent").indexOf("Firefox")!=-1;
             %>
             <%if(isIE){%>
-            <OBJECT classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
+            <OBJECT classid="clsid:CAFEEFAC-0018-0000-0045-ABCDEFFEDCBA"
             WIDTH = 80% HEIGHT = 100% NAME = "FSV"  
-            codebase="<%=httpProtocolToUse%>://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6">
+            codebase="<%=httpProtocolToUse%>://javadl.sun.com/webapps/download/AutoDL?BundleId=107109">
             <PARAM NAME = CODE VALUE = "com.globalsight.everest.webapp.applet.admin.customer.download.DownloadApplet.class" >
             <%} else {%>                                    
             <%=bundle.getString("applet_need_java_support")%>
             <BR>
-            <APPLET type="application/x-java-applet;jpi-version=1.6"
-              height=100% width=80% pluginspage="http://java.sun.com/products/plugin/index.html#download" code="com.globalsight.everest.webapp.applet.admin.customer.download.DownloadApplet.class">
+            <APPLET type="application/x-java-applet;jpi-version=1.8.0_45"
+              height=100% width=80% pluginspage="<%=httpProtocolToUse%>://www.java.com/en/download/manual.jsp" code="com.globalsight.everest.webapp.applet.admin.customer.download.DownloadApplet.class">
             <%}%>
             <!-- PARAM NAME = CODEBASE VALUE = "classes/"-->            
             <PARAM NAME = "cache_option" VALUE = "Plugin" >
             <PARAM NAME = "cache_archive" VALUE = "applet/lib/customer.jar, applet/lib/ant.jar">
             <PARAM NAME = NAME VALUE = "FSV" >
-            <PARAM NAME = "type" VALUE="application/x-java-applet;jpi-version=1.6">
             <PARAM NAME = "scriptable" VALUE="true">
             <PARAM NAME =  "rand" value=<%=session.getAttribute("UID_" + session.getId())%>>
             <PARAM NAME = "servletUrl" value="/globalsight/ControlServlet?activityName=customerView&applet=true&rand=">

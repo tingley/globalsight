@@ -125,9 +125,7 @@ public final class UCode_CharStream
                 tokenBegin = bufpos;
             }
 
-            // Can be sun.io.MalformedInputException for erronous
-            // UTF-8 input or other double-byte codesets (s-jis).
-            if (e instanceof sun.io.MalformedInputException)
+            if (e instanceof java.nio.charset.MalformedInputException)
             {
                 throw new TokenMgrError("Malformed encoding in input file",
                   TokenMgrError.LEXICAL_ERROR);

@@ -41,7 +41,7 @@
 
 		<!--  Compile our ant tasks  -->
 		<mkdir dir="${lingToolsBinDir}" />
-		<javac verbose="${javacverbose}" debug="on" target="${javactarget}" srcdir="${lingToolsDir}" destdir="${lingToolsBinDir}" includes="com/**/*.java" />
+		<javac verbose="${javacverbose}" debug="on" srcdir="${lingToolsDir}" destdir="${lingToolsBinDir}" includes="com/**/*.java" />
 
 		<!--  Define new tasks  -->
 		<property name="antTasksPackage" value="com.globalsight.tools.ant" />

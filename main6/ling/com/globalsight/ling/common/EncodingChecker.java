@@ -16,30 +16,31 @@
  */
 package com.globalsight.ling.common;
 
-import java.io.UnsupportedEncodingException;
-
-import sun.io.CharToByteConverter;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.UnsupportedCharsetException;
 
 public class EncodingChecker
 {
     private String m_encoding = null;
-    private CharToByteConverter m_converter = null;
+    private CharsetEncoder m_encoder = null;
 
     public EncodingChecker(String p_encoding)
-        throws UnsupportedEncodingException
+            throws UnsupportedCharsetException
     {
         m_encoding = p_encoding;
-        m_converter = CharToByteConverter.getConverter(p_encoding);
+        Charset charset = Charset.forName(p_encoding);
+        m_encoder = charset.newEncoder();
     }
 
     public boolean canConvert(char c)
     {
-        return m_converter.canConvert(c);
+        return m_encoder.canEncode(c);
     }
 
     public String getEncoding()
     {
         return m_encoding;
     }
-    
+
 }

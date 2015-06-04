@@ -62,8 +62,8 @@ $(document).ready(function() {
     }).css("width","90px");
     
     if ($.browser.msie) {
-        $("#appl").html("<OBJECT name='CJ' classid='clsid:8AD9C840-044E-11D1-B3E9-00805F499D93'  " +
-                        "codebase='<c:out value='${httpProtocolToUse}'/>://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6' " + 
+        $("#appl").html("<OBJECT name='CJ' classid='clsid:CAFEEFAC-0018-0000-0045-ABCDEFFEDCBA'  " +
+                        "codebase='<c:out value='${httpProtocolToUse}'/>://javadl.sun.com/webapps/download/AutoDL?BundleId=107109' " + 
                         "width='0' height='0' MAYSCRIPT>" +
                         "<PARAM NAME = 'servletUrl' value='/globalsight/ControlServlet?linkName=next&pageName=CUSTOMERUP&applet=true&doPost=true&createJob=true&rand='>" +
                         "<PARAM NAME = 'rand' VALUE = <c:out value='${rand}'/>>" +
@@ -72,16 +72,13 @@ $(document).ready(function() {
                         "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar,"+
                         "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar,applet/lib/zip4j_1.3.2.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
-                        "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'CODE' VALUE = 'com.globalsight.everest.webapp.applet.createjob.SelectFilesApplet.class' >" +
                         "<PARAM NAME = 'folderName' VALUE = <c:out value='${tmpFolderName}'/>>" +
                         "<PARAM NAME = 'lastSelectedFolder' VALUE = '<c:out value="${lastSelectedFolder}" escapeXml='true'/>'>" +
                         "</OBJECT>"
         );
         
-        $("#attachment").html("<OBJECT name='ATTC' classid='clsid:8AD9C840-044E-11D1-B3E9-00805F499D93'  " +
-                        "codebase='<c:out value='${httpProtocolToUse}'/>://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6' " + 
-                        "width='0' height='0' MAYSCRIPT>" +
+        $("#attachment").html("<OBJECT name='ATTC' width='0' height='0' MAYSCRIPT>" +
                         "<PARAM NAME = 'servletUrl' value='/globalsight/ControlServlet?linkName=next&pageName=CUSTOMERUP&applet=true&doPost=true&createJob=attachment&rand='>" +
                         "<PARAM NAME = 'rand' VALUE = <c:out value='${rand}'/>>" +
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
@@ -89,14 +86,13 @@ $(document).ready(function() {
                         "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar,"+
                         "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar,applet/lib/zip4j_1.3.2.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
-                        "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'CODE' VALUE = 'com.globalsight.everest.webapp.applet.createjob.UploadAttachment.class' >" +
                         "<PARAM NAME = 'folderName' VALUE = <c:out value='${tmpFolderName}'/>>" +
                         "</OBJECT>"
         );
     } else {
-        $("#appl").html("<APPLET name='CJ' type='application/x-java-applet;jpi-version=1.6' width='0' height='0' code='com.globalsight.everest.webapp.applet.createjob.SelectFilesApplet.class' " + 
-                        "pluginspage='<c:out value='${httpProtocolToUse}'/>://java.sun.com/products/plugin/index.html#download' MAYSCRIPT>" +
+        $("#appl").html("<APPLET name='CJ' type='application/x-java-applet;jpi-version=1.8.0_45' width='0' height='0' code='com.globalsight.everest.webapp.applet.createjob.SelectFilesApplet.class' " + 
+                        "pluginspage='<c:out value='${httpProtocolToUse}'/>://www.java.com/en/download/manual.jsp' MAYSCRIPT>" +
                         "<PARAM NAME = 'servletUrl' value='/globalsight/ControlServlet?linkName=next&pageName=CUSTOMERUP&applet=true&doPost=true&&createJob=true&rand='>" +
                         "<PARAM NAME = 'rand' VALUE = <c:out value='${rand}'/>>" +
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
@@ -104,14 +100,12 @@ $(document).ready(function() {
                         "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar,"+
                         "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar,applet/lib/zip4j_1.3.2.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
-                        "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'folderName' VALUE = <c:out value='${tmpFolderName}'/>>" +
                         "<PARAM NAME = 'lastSelectedFolder' VALUE = '<c:out value="${lastSelectedFolder}" escapeXml='true'/>'>" +
                         "</APPLET>"
         );
         
-        $("#attachment").html("<APPLET name='ATTC' type='application/x-java-applet;jpi-version=1.6' width='0' height='0' code='com.globalsight.everest.webapp.applet.createjob.UploadAttachment.class' " + 
-                        "pluginspage='<c:out value='${httpProtocolToUse}'/>://java.sun.com/products/plugin/index.html#download' MAYSCRIPT>" +
+        $("#attachment").html("<APPLET name='ATTC' width='0' height='0' code='com.globalsight.everest.webapp.applet.createjob.UploadAttachment.class' " + 
                         "<PARAM NAME = 'servletUrl' value='/globalsight/ControlServlet?linkName=next&pageName=CUSTOMERUP&applet=true&doPost=true&&createJob=attachment&rand='>" +
                         "<PARAM NAME = 'rand' VALUE = <c:out value='${rand}'/>>" +
                         "<PARAM NAME = 'cache_archive' VALUE = 'applet/lib/createJob.jar,applet/lib/commons-logging.jar," + 
@@ -119,7 +113,6 @@ $(document).ready(function() {
                         "applet/lib/mail-1.4.5.jar,applet/lib/activation-1.1.1.jar,"+
                         "applet/lib/java-unrar-0.5.jar,applet/lib/commons-compress-1.9.jar,applet/lib/xz.jar,applet/lib/zip4j_1.3.2.jar'>" +
                         "<PARAM NAME = 'cache_option' VALUE = 'Plugin' >" +
-                        "<PARAM NAME = 'type' VALUE='application/x-java-applet;version=1.6'>" +
                         "<PARAM NAME = 'folderName' VALUE = <c:out value='${tmpFolderName}'/>>" +
                         "</APPLET>"
         );

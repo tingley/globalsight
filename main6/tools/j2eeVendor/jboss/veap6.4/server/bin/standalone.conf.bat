@@ -46,7 +46,7 @@ rem # options that are always passed by run.bat.
 rem #
 
 rem # JVM memory allocation pool parameters - modify as appropriate.
-set "JAVA_OPTS=-Xms1G -Xmx1G -XX:MaxPermSize=256M -Xss512k"
+set "JAVA_OPTS=-Xms1G -Xmx1G -Xss512k"
 rem # Options for performance tuning
 set "JAVA_OPTS=%JAVA_OPTS% -XX:-UseParallelOldGC -XX:+AggressiveOpts -XX:+UseFastAccessorMethods"
 

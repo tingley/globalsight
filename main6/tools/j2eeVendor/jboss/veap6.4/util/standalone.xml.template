@@ -160,6 +160,9 @@
             <logger category="org.quartz">
                 <level name="ERROR"/>
             </logger>
+            <logger category="org.hornetq">
+                <level name="ERROR"/>
+            </logger>
             <logger category="org.jbpm">
                 <level name="ERROR"/>
             </logger>

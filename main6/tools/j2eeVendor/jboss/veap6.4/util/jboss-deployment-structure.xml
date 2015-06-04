@@ -34,7 +34,6 @@
 				<paths>
 					<path name="com/sun/org/apache/regexp/internal" />
 					<path name="com/sun/jndi/toolkit/url" />
-					<path name="sun/beans/editors" />
 				</paths>
 			</system>
 		</dependencies>

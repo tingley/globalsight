@@ -116,28 +116,29 @@
 	if (isIE)
 	{
 		appletcontent
-				.append("<OBJECT classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\" width=\"920\" height=\"500\" ");
+				.append("<OBJECT classid=\"clsid:CAFEEFAC-0018-0000-0045-ABCDEFFEDCBA\" width=\"920\" height=\"500\" ");
 		appletcontent.append("NAME = \"FSV\" codebase=\"");
 		appletcontent.append(httpProtocolToUse);
 		appletcontent
-				.append("://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6\"> ");
+				.append("://javadl.sun.com/webapps/download/AutoDL?BundleId=107109\"> ");
 		appletcontent
 				.append("<PARAM NAME = \"code\" VALUE = \"com.globalsight.EditSourceApplet\" > ");
 	}
 	else
 	{
 		appletcontent
-				.append("<APPLET style=\"display:inline\" type=\"application/x-java-applet;jpi-version=1.6\" width=\"920\" height=\"500\" code=\"com.globalsight.EditSourceApplet\" ");
+				.append("<APPLET style=\"display:inline\" type=\"application/x-java-applet;jpi-version=1.8.0_45\" width=\"920\" height=\"500\" code=\"com.globalsight.EditSourceApplet\" ");
 		appletcontent
-				.append("pluginspage=\"http://java.sun.com/products/plugin/index.html#download\"> ");
+				.append("pluginspage=\"");
+		appletcontent.append(httpProtocolToUse);
+		appletcontent
+				.append("://www.java.com/en/download\"> ");
 	}
 	appletcontent
 			.append("<PARAM NAME = \"cache_option\" VALUE = \"Plugin\" > ");
 	appletcontent
 			.append("<PARAM NAME = \"cache_archive\" VALUE = \"applet/lib/SelectFilesApplet.jar, applet/lib/commons-codec-1.3.jar, applet/lib/commons-httpclient-3.0-rc2.jar, applet/lib/commons-logging.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar\">");
 	appletcontent.append("<PARAM NAME = NAME VALUE = \"FSV\"> ");
-	appletcontent
-			.append("<PARAM NAME = \"type\" VALUE=\"application/x-java-applet;version=1.6\"> ");
 	appletcontent
 			.append("<PARAM NAME = \"scriptable\" VALUE=\"true\"> ");
 	appletcontent.append("<PARAM NAME = \"jobId\" value=\""

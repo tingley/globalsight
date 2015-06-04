@@ -21,11 +21,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.nio.charset.MalformedInputException;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
-
-import sun.io.MalformedInputException;
 
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;

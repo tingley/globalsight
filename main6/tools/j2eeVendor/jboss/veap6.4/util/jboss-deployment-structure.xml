@@ -33,6 +33,7 @@
 			<system export="true">
 				<paths>
 					<path name="com/sun/org/apache/regexp/internal" />
+					<path name="com/sun/org/apache/xerces/internal/dom" />
 					<path name="com/sun/jndi/toolkit/url" />
 				</paths>
 			</system>

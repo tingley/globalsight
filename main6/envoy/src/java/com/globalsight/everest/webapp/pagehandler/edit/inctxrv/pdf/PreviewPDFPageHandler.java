@@ -242,7 +242,7 @@ public class PreviewPDFPageHandler extends PageHandler implements
         else
         {
             String msg = "Can not generate PDF file for review: "
-                    + pdfFile.getPath();
+                    + pdfFile;
             LOGGER.error(msg);
             p_request.setAttribute("errorMsg", "Can't generate PDF for review, please contact Admin for advice.");
             super.invokePageHandler(p_pageDescriptor, p_request, p_response,

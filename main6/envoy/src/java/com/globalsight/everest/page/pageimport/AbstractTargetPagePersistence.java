@@ -319,6 +319,14 @@ public abstract class AbstractTargetPagePersistence implements
                         isXlf ? "true" : "false");
                 paramMap.put(MachineTranslator.DATA_TYPE,
                         MTHelper2.getDataType(p_sourcePage.getId()));
+				if (MachineTranslator.ENGINE_MSTRANSLATOR
+						.equalsIgnoreCase(machineTranslator.getEngineName())
+						&& p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
+                {
+					String srLang = mtProfile
+							.getPreferedLangForSr(p_targetLocale.toString());
+					paramMap.put(MachineTranslator.SR_LANGUAGE, srLang);
+                }
                 machineTranslator.setMtParameterMap(paramMap);
                 boolean isLocalePairSupportedByMT = isLocalePairSupportedByMT(
                         sourceLocale, p_targetLocale);

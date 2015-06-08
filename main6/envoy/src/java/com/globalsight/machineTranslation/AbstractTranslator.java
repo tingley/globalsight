@@ -125,7 +125,15 @@ public abstract class AbstractTranslator implements MachineTranslator
                 translatedSegs = trSafaba(sourceLocale, targetLocale, segments);
                 break;
             case MS_Translator:
-                translatedSegs = trMs(sourceLocale, targetLocale, segments, containTags);
+        		// Seems MS Translator cannot return valid GXML for certain languages
+        		// such as "sr_Cyrl", we have to try pure text way.
+    			String trgSrLang = (String) getMtParameterMap().get(
+    					MachineTranslator.SR_LANGUAGE);
+        		if ("sr-Cyrl".equalsIgnoreCase(trgSrLang)) {
+        			translatedSegs = trMs2(sourceLocale, targetLocale, segments, containTags);
+        		} else {
+                    translatedSegs = trMs(sourceLocale, targetLocale, segments);
+        		}
                 break;
             case IPTranslator:
                 translatedSegs = trIPTranslator(sourceLocale, targetLocale, segments);
@@ -340,8 +348,7 @@ public abstract class AbstractTranslator implements MachineTranslator
 
     // The whole segment GXML is sent for translation.
 	private String[] trMs(Locale sourceLocale, Locale targetLocale,
-			String[] segments, boolean containTags)
-			throws MachineTranslationException
+			String[] segments) throws MachineTranslationException
 	{
 		String seg = null;
 
@@ -411,12 +418,12 @@ public abstract class AbstractTranslator implements MachineTranslator
 			}
 			catch (Exception e)
 			{
-				results[i] = segments[i];
+				results[i] = null;
 				CATEGORY.error(e);
 			}
         }
 
-    	return results;
+		return results;
 	}
 
 	// Text nodes are sent to MS separately, return bad translation.

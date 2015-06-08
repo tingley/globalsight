@@ -80,6 +80,12 @@ public interface MachineTranslator
      */
     public static final String DATA_TYPE = "dataType";
 
+    /**
+	 * For MS_Translator and "SR_xx" workflows, we can configure to translate to
+	 * "sr_Latn" or "sr_Cyrl" dynamically.
+	 */
+    public static final String SR_LANGUAGE = "rsLanguage";
+
     public static final String[] gsSupportedMTEngines =
     { ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE, ENGINE_SAFABA,
             ENGINE_IPTRANSLATOR, ENGINE_DOMT, ENGINE_GOOGLE};

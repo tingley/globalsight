@@ -48,6 +48,13 @@
 
     String current_engine = mtProfile.getMtEngine();
     String jsonInfo = mtProfile.getJsonInfo();
+    String srRSValue = null;
+    String srYUValue = null;
+    if ("MS_Translator".equalsIgnoreCase(current_engine))
+    {
+    	srRSValue = mtProfile.getPreferedLangForSr("sr_RS");
+    	srYUValue = mtProfile.getPreferedLangForSr("sr_YU");
+    }
     String exInfoVal = mtProfile.getExInfoVal();
     // For "MS_Translator" and "Asia_Online",need check if connection is available.
     String action = (String) request.getAttribute("action");
@@ -603,7 +610,7 @@
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
 	<DIV ID="contentLayer"
-		STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute; WIDTH: 800px; TOP: 108px">
+		STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute; WIDTH: 850px; TOP: 108px">
 
 		<DIV CLASS="mainHeading" id="idHeading"><%=title%></DIV>
 
@@ -780,7 +787,7 @@
 								<tr>
 									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_url")%><font
 										color="red">*</font>:</td>
-									<td><INPUT CLASS="standardText" ID="idMsMtUrl"
+									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtUrl"
 										NAME="<%=MTProfileConstants.MT_MS_URL%>"
 										value="<%=mtProfile4val.getUrl()%>" TYPE="text"
 										MAXLENGTH="99" SIZE="90" /></td>
@@ -788,7 +795,7 @@
 								<tr>
 									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_id")%><font
 										color="red">*</font>:</td>
-									<td><INPUT CLASS="standardText" ID="idMsMtClientid"
+									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtClientid"
 										NAME="<%=MTProfileConstants.MT_MS_CLIENT_ID%>"
 										value="<%=mtProfile4val.getUsername()%>" TYPE="text"
 										MAXLENGTH="100" SIZE="90" /> <a
@@ -798,7 +805,7 @@
 								<tr>
 									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_secret")%><font
 										color="red">*</font>:</td>
-									<td><INPUT CLASS="standardText" ID="idMsMtClientSecret"
+									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtClientSecret"
 										NAME="<%=MTProfileConstants.MT_MS_CLIENT_SECRET%>"
 										value="<%=mtProfile4val.getPassword()%>" TYPE="password"
 										MAXLENGTH="100" SIZE="90" /></td>
@@ -810,8 +817,32 @@
 										ID="idMsMtCategory"
 										NAME="<%=MTProfileConstants.MT_MS_CATEGORY%>"
 										value="<%=(mtProfile4val.getCategory()==null||"".equals(mtProfile4val.getCategory())) ? "general": mtProfile4val.getCategory() %>"
-										TYPE="text"	MAXLENGTH="128" SIZE="90" /> 
+										TYPE="text"	MAXLENGTH="128" SIZE="90" />
 									</td>
+								</tr>
+								<tr>
+								    <td align="left">Serbian (Serbia) [sr_RS]:</td>
+								    <td colspan="2">
+									    <SELECT CLASS="standardText" ID="sr_RS" NAME="sr_RS">
+									    <%
+									    	String isCyrlSelected = "sr-Cyrl".equals(srRSValue) ? "selected" : "";
+									    %>
+											<OPTION VALUE="sr-Cyrl" <%=isCyrlSelected%> >sr-Cyrl</OPTION>
+											<OPTION VALUE="sr-Latn" <%="".equals(isCyrlSelected) ? "selected" : "" %> >sr-Latn</OPTION>
+										</SELECT>
+								    </td>
+								</tr>
+								<tr>
+								    <td align="left">Serbian (YU) [sr_YU]:</td>
+								    <td colspan="2">
+									    <SELECT CLASS="standardText" ID="sr_YU" NAME="sr_YU">
+									    <%
+									    	isCyrlSelected = "sr-Cyrl".equals(srYUValue) ? "selected" : "";
+									    %>
+											<OPTION VALUE="sr-Cyrl" <%=isCyrlSelected%> >sr-Cyrl</OPTION>
+											<OPTION VALUE="sr-Latn" <%="".equals(isCyrlSelected) ? "selected" : "" %> >sr-Latn</OPTION>
+										</SELECT>
+								    </td>
 								</tr>
 								<%if (action != null && "testMSHost".equals(action)) {
 								    if (exceptionInfo != null && !"".equals(exceptionInfo.trim())) {%>

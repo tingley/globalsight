@@ -132,8 +132,10 @@ var jsStartOccAlert = "<%= bundle.getString("lb_filter_plaintextfilter_StartOccA
 var jsFinishOccAlert = "<%= bundle.getString("lb_filter_plaintextfilter_FinishOccAlert") %>";
 var jsStartStringEmpty = "<%= bundle.getString("lb_filter_plaintextfilter_StartStrAlert") %>";
 var jsCustomTextRule = "<%= bundle.getString("lb_filter_plaintextfilter_custom") %>";
+var jsCustomSidRule = "<%= bundle.getString("lb_filter_plaintextfilter_sidRule") %>";
 var jsCustomTextTest = "<%= bundle.getString("lb_filter_plaintextfilter_testDesc") %>";
 var jsTest = "<%= bundle.getString("lb_test") %>";
+var jsMultiline = "<%= bundle.getString("lb_Multiline") %>";
 var jsCustomTextRuleExist = "<%= bundle.getString("lb_filter_plaintextfilter_StartStrExist") %>";
 
 var jsXmlRule = "<%= bundle.getString("lb_xml_rule") %>";

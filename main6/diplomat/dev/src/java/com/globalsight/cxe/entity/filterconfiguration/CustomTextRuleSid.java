@@ -23,7 +23,7 @@ import org.w3c.dom.NodeList;
 
 import com.globalsight.everest.util.comparator.Priorityable;
 
-public class CustomTextRule implements Priorityable, CustomTextRuleBase
+public class CustomTextRuleSid implements CustomTextRuleBase
 {
     private String startString = null;
     private boolean startIsRegEx = false;
@@ -31,16 +31,14 @@ public class CustomTextRule implements Priorityable, CustomTextRuleBase
     private String finishString = null;
     private boolean finishIsRegEx = false;
     private String finishOccurrence = null;
-    private boolean isMultiline = false;
-    private int priority = 9;
 
-    public CustomTextRule()
+    public CustomTextRuleSid()
     {
     }
 
-    public CustomTextRule(String startString, boolean startIsRegEx,
+    public CustomTextRuleSid(String startString, boolean startIsRegEx,
             String startOccurrence, String finishString, boolean finishIsRegEx,
-            String finishOccurrence, boolean isMultiline)
+            String finishOccurrence)
     {
         this.startString = startString;
         this.startIsRegEx = startIsRegEx;
@@ -49,8 +47,6 @@ public class CustomTextRule implements Priorityable, CustomTextRuleBase
         this.finishString = finishString;
         this.finishIsRegEx = finishIsRegEx;
         this.finishOccurrence = finishOccurrence;
-        
-        this.isMultiline = isMultiline;
     }
 
     public String getStartString()
@@ -113,26 +109,11 @@ public class CustomTextRule implements Priorityable, CustomTextRuleBase
         this.finishOccurrence = finishOccurrence;
     }
 
-    public void setPriority(int priority)
-    {
-        this.priority = priority;
-    }
-
-    public boolean getIsMultiline()
-    {
-        return isMultiline;
-    }
-
-    public void setIsMultiline(boolean isMultiline)
-    {
-        this.isMultiline = isMultiline;
-    }
-    
     /*
      * String startString , boolean startIsRegEx , String startOccurrence ,
      * String finishString , boolean finishIsRegEx , String finishOccurrence ,
      */
-    public static CustomTextRule initFromElement(Element tagElement)
+    public static CustomTextRuleSid initFromElement(Element tagElement)
     {
         Node tagNameElement = tagElement.getElementsByTagName("startString")
                 .item(0);
@@ -173,48 +154,20 @@ public class CustomTextRule implements Priorityable, CustomTextRuleBase
                     .getFirstChild().getNodeValue());
         }
 
-        NodeList priorityElements = tagElement.getElementsByTagName("priority");
-        int priority = 9;
-        if (priorityElements != null && priorityElements.getLength() > 0)
-        {
-            String pp = priorityElements.item(0).getFirstChild().getNodeValue();
-            try
-            {
-                priority = Integer.parseInt(pp);
-            }
-            catch (Exception ex)
-            {
-                priority = 9;
-            }
-        }
-        
-        NodeList isMultilineElements = tagElement
-                .getElementsByTagName("isMultiline");
-        boolean isMultiline = false;
-        if (isMultilineElements != null
-                && isMultilineElements.getLength() > 0)
-        {
-            isMultiline = "true".equals(isMultilineElements.item(0)
-                    .getFirstChild().getNodeValue());
-        }
-
-        CustomTextRule ee = new CustomTextRule(startString, startIsRegEx,
-                startOccurrence, finishString, finishIsRegEx, finishOccurrence,
-                isMultiline);
-        ee.setPriority(priority);
+        CustomTextRuleSid ee = new CustomTextRuleSid(startString, startIsRegEx,
+                startOccurrence, finishString, finishIsRegEx, finishOccurrence);
 
         return ee;
     }
 
-    @Override
-    public int getPriority()
-    {
-        return priority;
-    }
-
-    @Override
     public String getName()
     {
         return startString;
+    }
+
+    @Override
+    public boolean getIsMultiline()
+    {
+        return false;
     }
 }

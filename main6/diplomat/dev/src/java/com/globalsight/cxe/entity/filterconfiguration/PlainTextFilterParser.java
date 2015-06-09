@@ -51,6 +51,7 @@ public class PlainTextFilterParser
 {
     public static final String NODE_ROOT = "PlainTextFilterConfig";
     public static final String NODE_CUSTOM = "customTextRules";
+    public static final String NODE_SID = "customTextRuleSids";
     public static final String NODE_ELEMENT_POST_FILTER = "elementPostFilter";
     public static final String NODE_ELEMENT_POST_FILTER_ID = "elementPostFilterId";
 
@@ -84,7 +85,7 @@ public class PlainTextFilterParser
 
     // {tagName : "name1", itemid : 1, attributes : [{itemid : 0, aName :
     // "name1", aOp : "equal", aValue : "vvv1"}]}
-    public static String toXml(JSONArray customTextRules,
+    public static String toXml(JSONArray customTextRules, JSONArray customTextRuleSids, 
             String elementPostFilter, String elementPostFilterId)
             throws Exception
     {
@@ -94,6 +95,12 @@ public class PlainTextFilterParser
         sb.append(customTextRules == null ? ""
                 : jsonArrayToXml(customTextRules));
         sb.append("</").append(NODE_CUSTOM).append(">");
+        
+        sb.append("<").append(NODE_SID).append(">");
+        sb.append(customTextRuleSids == null ? ""
+                : jsonArrayToXml(customTextRuleSids));
+        sb.append("</").append(NODE_SID).append(">");
+        
         sb.append("<").append(NODE_ELEMENT_POST_FILTER).append(">");
         sb.append(elementPostFilter);
         sb.append("</").append(NODE_ELEMENT_POST_FILTER).append(">");
@@ -116,12 +123,30 @@ public class PlainTextFilterParser
         m_rootElement = m_document.getDocumentElement();
     }
 
-    public List<CustomTextRule> getCustomTextRules()
+    public List<CustomTextRuleBase> getCustomTextRules()
     {
-        List<CustomTextRule> result = new ArrayList<CustomTextRule>();
+        List<CustomTextRuleBase> result = new ArrayList<CustomTextRuleBase>();
 
-        result = getBaseFilterTagsFromXml(NODE_CUSTOM, new CustomTextRule());
+        List<CustomTextRule> rrr = getBaseFilterTagsFromXml(NODE_CUSTOM, new CustomTextRule());
+        
+        for (CustomTextRule customTextRule : rrr)
+        {
+            result.add(customTextRule);
+        }
 
+        return result;
+    }
+    
+    public List<CustomTextRuleBase> getCustomTextRuleSids()
+    {
+        List<CustomTextRuleBase> result = new ArrayList<CustomTextRuleBase>();
+        List<CustomTextRuleSid> rrr = getBaseFilterTagsFromXml(NODE_SID, new CustomTextRuleSid());
+
+        for (CustomTextRuleSid customTextRule : rrr)
+        {
+            result.add(customTextRule);
+        }
+        
         return result;
     }
 
@@ -218,6 +243,21 @@ public class PlainTextFilterParser
         try
         {
             Element element = getSingleElement(NODE_CUSTOM);
+            String[] toArray = null;
+            return tagsXmlToJsonArray(element, toArray);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error occur when xml to json", e);
+            return "[]";
+        }
+    }
+    
+    public String getCustomTextRuleSidsJson()
+    {
+        try
+        {
+            Element element = getSingleElement(NODE_SID);
             String[] toArray = null;
             return tagsXmlToJsonArray(element, toArray);
         }

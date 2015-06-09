@@ -52,6 +52,7 @@ import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleBase;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
 import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
@@ -538,14 +539,17 @@ public class AjaxService extends HttpServlet
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         String customTextRules = request.getParameter("customTextRules");
+        String customTextRuleSids = request.getParameter("customTextRuleSids");
         String elementPostFilter = request.getParameter("elementPostFilter");
         String elementPostFilterId = request
                 .getParameter("elementPostFilterId");
 
         JSONArray jsonArrayCustomTextRules = new JSONArray();
+        JSONArray jsonArrayCustomTextRuleSids = new JSONArray();
         try
         {
             jsonArrayCustomTextRules = new JSONArray(customTextRules);
+            jsonArrayCustomTextRuleSids = new JSONArray(customTextRuleSids);
         }
         catch (Exception e)
         {
@@ -556,7 +560,7 @@ public class AjaxService extends HttpServlet
         try
         {
             configXml = PlainTextFilterParser.toXml(jsonArrayCustomTextRules,
-                    elementPostFilter, elementPostFilterId);
+                    jsonArrayCustomTextRuleSids, elementPostFilter, elementPostFilterId);
         }
         catch (Exception e)
         {
@@ -586,21 +590,32 @@ public class AjaxService extends HttpServlet
         String result = "";
         String source = request.getParameter("source");
         String customTextRules = request.getParameter("customTextRules");
+        String customTextRuleSids = request.getParameter("customTextRuleSids");
         String elementPostFilter = request.getParameter("elementPostFilter");
         String elementPostFilterId = request
                 .getParameter("elementPostFilterId");
+        boolean isSid = "true".equalsIgnoreCase(request.getParameter("isSid"));
         try
         {
+            JSONArray jsonArrayCustomTextRules = new JSONArray(
+                    isSid ? customTextRuleSids : customTextRules);
 
-            JSONArray jsonArrayCustomTextRules = new JSONArray(customTextRules);
             String configXml = PlainTextFilterParser.toXml(
-                    jsonArrayCustomTextRules, elementPostFilter,
+                    jsonArrayCustomTextRules, null, elementPostFilter,
                     elementPostFilterId);
             PlainTextFilterParser p = new PlainTextFilterParser(configXml);
             p.parserXml();
 
-            List<CustomTextRule> rules = p.getCustomTextRules();
-            result = CustomTextRuleHelper.extractLines(source, rules, "\n");
+            List<CustomTextRuleBase> rules = p.getCustomTextRules();
+
+            if (isSid && (rules == null || rules.size() == 0))
+            {
+                result = "";
+            }
+            else
+            {
+                result = CustomTextRuleHelper.extractLines(source, rules, "\n");
+            }
         }
         catch (Exception e)
         {

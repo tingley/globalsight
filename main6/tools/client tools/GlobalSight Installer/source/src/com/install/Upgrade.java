@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.config.properties.InstallValues;
 import com.config.properties.Resource;
 import com.ui.UI;
 import com.ui.UIFactory;
@@ -352,6 +353,16 @@ public class Upgrade
 //        log.info("Removing class files finished");
 //    }
 
+    private void validateJDK()
+    {
+    	 ui.addProgress(0, Resource.get("process.validateJDK"));
+    	String jdk = InstallValues.get("java_home");
+    	if (jdk.contains("1.6") || jdk.contains("1.7"))
+    	{
+    		ui.upgradeJdk();
+    	}
+    }
+    
     /**
      * Upgrades a server to a new server.
      */
@@ -602,5 +613,6 @@ public class Upgrade
         validatePath();
         validateVersion();
         validateDatabase();
+        validateJDK();
     }
 }

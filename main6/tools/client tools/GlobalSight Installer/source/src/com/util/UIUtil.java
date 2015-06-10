@@ -33,7 +33,8 @@ public class UIUtil
 
     public static Font getFrameFont()
     {
-        return (new JPanel()).getFont().deriveFont(Font.PLAIN, FONT_SIZE);
+    	Font f = (new JPanel()).getFont().deriveFont(Font.PLAIN, FONT_SIZE);
+        return f;
     }
 
     public static void setLookAndFeel()

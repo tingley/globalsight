@@ -65,7 +65,6 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryH
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
-import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -244,7 +243,6 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 TaskHelper.removeMRUtask(p_request, session, menuName,
                         p_response);
                 // forward to the jsp page.
-                TaskSearchHandler.setup(p_request);
                 RequestDispatcher dispatcher = p_context
                         .getRequestDispatcher("/envoy/tasks/taskSearch.jsp");
 

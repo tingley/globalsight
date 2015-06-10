@@ -223,6 +223,26 @@ public class LuceneUtil
         return tokens;
     }
 
+	@SuppressWarnings("resource")
+	public static List<String> createTm3TokensNoStopWord(String p_text,
+			GlobalSightLocale p_locale) throws Exception
+	{
+		GsAnalyzer analyzer = new GsAnalyzer(p_locale, false);
+		TokenStream tokenStream = analyzer.tokenStream("blah",
+				new StringReader(p_text));
+		tokenStream.reset();
+
+		List<String> tokens = new ArrayList<String>();
+		while (tokenStream.incrementToken()) {
+			CharTermAttribute termAtt = tokenStream
+					.getAttribute(CharTermAttribute.class);
+			tokens.add(termAtt.toString());
+		}
+		tokenStream.close();
+
+		return tokens;
+	}
+
     /**
      * Given a list of Strings representing token text, collapse
      * into a list of tokens by removing duplicates and calculating

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -29,6 +30,8 @@ import com.globalsight.everest.projecthandler.EngineEnum;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.SegmentNode;
+import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.machineTranslation.google.GoogleProxy;
 import com.globalsight.machineTranslation.safaba.SafabaProxy;
 import com.globalsight.util.StringUtil;
@@ -122,7 +125,15 @@ public abstract class AbstractTranslator implements MachineTranslator
                 translatedSegs = trSafaba(sourceLocale, targetLocale, segments);
                 break;
             case MS_Translator:
-                translatedSegs = trMs(sourceLocale, targetLocale, segments, containTags);
+        		// Seems MS Translator cannot return valid GXML for certain languages
+        		// such as "sr_Cyrl", we have to try pure text way.
+    			String trgSrLang = (String) getMtParameterMap().get(
+    					MachineTranslator.SR_LANGUAGE);
+        		if ("sr-Cyrl".equalsIgnoreCase(trgSrLang)) {
+        			translatedSegs = trMs2(sourceLocale, targetLocale, segments, containTags);
+        		} else {
+                    translatedSegs = trMs(sourceLocale, targetLocale, segments);
+        		}
                 break;
             case IPTranslator:
                 translatedSegs = trIPTranslator(sourceLocale, targetLocale, segments);
@@ -335,7 +346,88 @@ public abstract class AbstractTranslator implements MachineTranslator
     	
     }
 
-    private String[] trMs(Locale sourceLocale, Locale targetLocale,
+    // The whole segment GXML is sent for translation.
+	private String[] trMs(Locale sourceLocale, Locale targetLocale,
+			String[] segments) throws MachineTranslationException
+	{
+		String seg = null;
+
+		List<String> heads = new ArrayList<String>();
+		String[] segmentsNoStyleInfo = new String[segments.length];
+		for (int i = 0; i < segments.length; i++)
+		{
+			seg = segments[i];
+            String head = seg.substring(0, seg.indexOf(">") + 1);
+            heads.add(head);
+
+			BaseTmTuv srcTuv = TmUtil.createTmSegment(seg, 0, null, "unknown",
+					true);
+			segmentsNoStyleInfo[i] = GxmlUtil.stripRootTag(srcTuv.getSegment());
+		}
+
+        List<String> translatedList = new ArrayList<String>();
+        List<String> subList = new ArrayList<String>();
+        int charCount = 0;
+		for (int i = 0; i < segmentsNoStyleInfo.length; i++)
+		{
+			subList.add(segmentsNoStyleInfo[i]);
+			if (i == segmentsNoStyleInfo.length - 1
+					|| charCount + segmentsNoStyleInfo[i].length() > TMProfileConstants.MT_MS_MAX_CHARACTER_NUM)
+			{
+                Object[] segmentObjArray = subList.toArray();
+                String[] segmentsArray = new String[segmentObjArray.length];
+                for (int j = 0; j < segmentObjArray.length; j++)
+                {
+                    segmentsArray[j] = (String) segmentObjArray[j];
+                }
+
+				String[] subResults = doBatchTranslation(sourceLocale,
+						targetLocale, segmentsArray);
+
+                if (subResults != null)
+                {
+                    translatedList.addAll(Arrays.asList(subResults));
+                }
+                subList.clear();
+                charCount = 0;
+			}
+			else
+			{
+				charCount += segmentsNoStyleInfo[i].length();
+			}
+ 		}
+
+		if (translatedList == null
+				|| translatedList.size() != segments.length)
+			return null;
+
+		String[] results = new String[segments.length];
+		Map<String, String> separatedSegmentMap = new HashMap<String, String>();
+    	String injected = null;
+		for (int i = 0; i < translatedList.size(); i++)
+        {
+        	separatedSegmentMap.clear();
+        	separatedSegmentMap.put("0", translatedList.get(i));
+			try
+			{
+				injected = TmUtil.composeCompleteText(segments[i],
+						separatedSegmentMap);
+				// MS Translator will add extra space like "> <".
+	        	injected = StringUtil.replace(injected, "> <", "><");
+	        	results[i] = heads.get(i) + injected + "</segment>";
+			}
+			catch (Exception e)
+			{
+				results[i] = null;
+				CATEGORY.error(e);
+			}
+        }
+
+		return results;
+	}
+
+	// Text nodes are sent to MS separately, return bad translation.
+    private String[] trMs2(Locale sourceLocale, Locale targetLocale,
             String[] segments, boolean containTags)
             throws MachineTranslationException
     {

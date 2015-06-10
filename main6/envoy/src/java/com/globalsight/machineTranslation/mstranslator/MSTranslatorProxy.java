@@ -348,6 +348,15 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 		    lang = "id";
 		}
 
+		// GBS-3985: "sr_RS" and "sr_YU" are translated to "sr-Latn" default.
+		if (lang.equalsIgnoreCase("sr"))
+		{
+			lang = (String) getMtParameterMap().get(
+					MachineTranslator.SR_LANGUAGE);
+			if (lang == null)
+				lang = "sr-Latn";
+		}
+
 		return lang;
     }
 }

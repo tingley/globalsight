@@ -80,6 +80,12 @@ public class Ambassador4FalconProxy implements com.globalsight.www.webservices.A
     return ambassador4Falcon.completeTask(p_accessToken, p_taskId, p_destinationArrow);
   }
   
+  public java.lang.String getAllProjectsByUser(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.getAllProjectsByUser(p_accessToken);
+  }
+  
   public java.lang.String exportWorkflow(java.lang.String p_accessToken, java.lang.String p_jobName, java.lang.String p_workflowLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador4Falcon == null)
       _initAmbassador4FalconProxy();
@@ -110,6 +116,12 @@ public class Ambassador4FalconProxy implements com.globalsight.www.webservices.A
     return ambassador4Falcon.taskReassign(p_accessToken, p_taskId, p_users);
   }
   
+  public java.lang.String getWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType, java.lang.String p_workofflineFileTypeOption) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.getWorkOfflineFiles(p_accessToken, p_taskId, p_workOfflineFileType, p_workofflineFileTypeOption);
+  }
+  
   public java.lang.String getWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador4Falcon == null)
       _initAmbassador4FalconProxy();
@@ -128,10 +140,10 @@ public class Ambassador4FalconProxy implements com.globalsight.www.webservices.A
     return ambassador4Falcon.importWorkOfflineFiles(p_accessToken, p_taskId, p_identifyKey, p_workOfflineFileType);
   }
   
-  public java.lang.String getTranslationPercentage(java.lang.String p_accessToken, java.lang.String p_taskId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String getInContextReviewLink(java.lang.String p_accessToken, java.lang.String p_taskId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador4Falcon == null)
       _initAmbassador4FalconProxy();
-    return ambassador4Falcon.getTranslationPercentage(p_accessToken, p_taskId);
+    return ambassador4Falcon.getInContextReviewLink(p_accessToken, p_taskId);
   }
   
   public java.lang.String getJobIDsWithStatusChanged(java.lang.String p_accessToken, int p_intervalInMinute, java.lang.String p_companyName) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -140,10 +152,22 @@ public class Ambassador4FalconProxy implements com.globalsight.www.webservices.A
     return ambassador4Falcon.getJobIDsWithStatusChanged(p_accessToken, p_intervalInMinute, p_companyName);
   }
   
+  public java.lang.String getTranslationPercentage(java.lang.String p_accessToken, java.lang.String p_taskId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.getTranslationPercentage(p_accessToken, p_taskId);
+  }
+  
   public java.lang.String getDetailedWordcounts(java.lang.String p_accessToken, java.lang.String[] p_jobIds, java.lang.Boolean p_includeMTData) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador4Falcon == null)
       _initAmbassador4FalconProxy();
     return ambassador4Falcon.getDetailedWordcounts(p_accessToken, p_jobIds, p_includeMTData);
+  }
+  
+  public java.lang.String getAllProjectProfiles(java.lang.String p_accessToken, java.lang.String p_companyName) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.getAllProjectProfiles(p_accessToken, p_companyName);
   }
   
   public java.lang.String getWorkflowTemplateNames(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -158,10 +182,10 @@ public class Ambassador4FalconProxy implements com.globalsight.www.webservices.A
     return ambassador4Falcon.modifyWorkflowTemplateAssignees(p_accessToken, p_workflowTemplateName, p_companyName, p_activityAssigneesInJson);
   }
   
-  public java.lang.String getInContextReviewLink(java.lang.String p_accessToken, java.lang.String p_taskId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String getActivityList(java.lang.String p_accessToken, java.lang.String p_projectIds, java.lang.String p_taskState) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador4Falcon == null)
       _initAmbassador4FalconProxy();
-    return ambassador4Falcon.getInContextReviewLink(p_accessToken, p_taskId);
+    return ambassador4Falcon.getActivityList(p_accessToken, p_projectIds, p_taskState);
   }
   
   public boolean isInstalled() throws java.rmi.RemoteException{

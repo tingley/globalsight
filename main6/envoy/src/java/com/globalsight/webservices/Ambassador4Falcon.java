@@ -66,6 +66,7 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectImpl;
+import com.globalsight.everest.projecthandler.ProjectInfo;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WfTemplateSearchParameters;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
@@ -129,6 +130,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
     public static final String GET_JOB_EXPORT_WORKFLOW_FILES = "getJobExportWorkflowFiles";
     public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
     public static final String GET_ALL_PROJECT_PROFILES="getAllProjectProfiles";
+    public static final String GET_ALL_PROJECTS_BY_USER = "getAllProjectsByUser";
+    public static final String GET_ACTIVITY_LIST = "getActivityList";
 
     private static String NOT_IN_DB = "This job is not ready for query: ";
     private static SimpleDateFormat dateFormat = new SimpleDateFormat(
@@ -3176,6 +3179,221 @@ public class Ambassador4Falcon extends JsonTypeWebService
             }
         }
     }
+    
+    /**
+     * Returns an json description containing projects information according by
+     * current user
+     * 
+     * This method will return projects information which are in charge by
+     * current user.
+     * 
+     * @param p_accessToken
+     * 
+     * @return java.lang.String 
+     * @throws WebServiceException
+     */
+    public String getAllProjectsByUser(String p_accessToken)
+            throws WebServiceException
+	{
+		checkAccess(p_accessToken, GET_ALL_PROJECTS_BY_USER);
+		// checkPermission(p_accessToken, Permission.GET_ALL_PROJECTS);
+
+		List projects = null;
+		try
+		{
+			String username = getUsernameFromSession(p_accessToken);
+			User user = ServerProxy.getUserManager().getUserByName(username);
+			projects = ServerProxy.getProjectHandler()
+					.getProjectInfosManagedByUser(user,
+							Permission.GROUP_MODULE_GLOBALSIGHT);
+		}
+		catch (Exception e)
+		{
+			String message = "Unable to get all projects infos managed by user";
+			logger.error(message, e);
+			message = makeErrorJson("getAllProjectsByUser", message);
+			throw new WebServiceException(message);
+		}
+
+		JSONArray array = new JSONArray();
+		Iterator it = projects.iterator();
+		try
+		{
+			while (it.hasNext())
+			{
+				JSONObject json = new JSONObject();
+				ProjectInfo pi = (ProjectInfo) it.next();
+				json.put("projectId", pi.getProjectId());
+				json.put("projectName", pi.getName());
+				json.put("companyId", pi.getCompanyId());
+				json.put("companyName",
+						CompanyWrapper.getCompanyNameById(pi.getCompanyId()));
+				if (pi.getDescription() == null
+						|| pi.getDescription().length() < 1)
+				{
+					json.put("description", "N/A");
+				}
+				else
+				{
+					json.put("description", pi.getDescription());
+				}
+				array.put(json);
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		return array.toString();
+	}
+    
+	/**
+	 * Get activities current logged user is in charge of.
+	 * 
+	 * @param p_accessToken
+	 *            -- login user's token
+	 * @param p_projectIds
+	 *            -- project IDs, comma separated. A sample is "12,13". Can be
+	 *            null.
+	 * @param p_taskState
+	 *            -- taskState, can be null. Available values are "8" or "3"("8"
+	 *            means "in progress","3" means "available").
+	 *
+	 * @return string in JSON
+	 * @throws WebServiceException
+	 */
+	public String getActivityList(String p_accessToken, String p_projectIds,
+			String p_taskState) throws WebServiceException
+	{
+		checkAccess(p_accessToken, GET_ACTIVITY_LIST);
+		try
+		{
+			if (StringUtils.isNotBlank(p_taskState))
+			{
+				Assert.assertIsInteger(p_taskState);
+			}
+			if (StringUtils.isNotBlank(p_projectIds))
+			{
+				if (p_projectIds.contains(","))
+				{
+					String[] projectIds = p_projectIds.split(",");
+					for (String projectId : projectIds)
+					{
+						Assert.assertIsInteger(projectId);
+					}
+				}
+				else
+				{
+					Assert.assertIsInteger(p_projectIds);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorJson(GET_ACTIVITY_LIST, e.getMessage());
+		}
+		
+		if (StringUtils.isNotBlank(p_taskState))
+		{
+			if (Integer.parseInt(p_taskState) != 3
+					&& Integer.parseInt(p_taskState) != 8)
+			{
+				return makeErrorJson(GET_ACTIVITY_LIST,
+						"Task state can only be 3 (available) and 8 (in progress). The input state is "
+								+ p_taskState);
+			}
+		}
+		
+		try
+		{
+			List tasks = null;
+			String username = getUsernameFromSession(p_accessToken);
+			User user = ServerProxy.getUserManager().getUserByName(username);
+			if (StringUtils.isBlank(p_taskState))
+			{
+				tasks = ServerProxy.getTaskManager().getTasks(user.getUserId(),
+						-10);
+			}
+			else
+			{
+				tasks = ServerProxy.getTaskManager().getTasks(user.getUserId(),
+						Integer.parseInt(p_taskState));
+			}
+
+			List<Long> projectIdList = new ArrayList<Long>();
+			if (StringUtils.isNotBlank(p_projectIds))
+			{
+				String[] projectIds = p_projectIds.split(",");
+				for (String projectId : projectIds)
+				{
+					projectIdList.add(Long.parseLong(projectId));
+				}
+			}
+
+			JSONArray arrayOut = new JSONArray();
+			Map<String, List<Task>> map = new HashMap<String, List<Task>>();
+			List<Task> list = null;
+			for (int i = 0; i < tasks.size(); i++)
+			{
+				Task task = (Task) tasks.get(i);
+				if (projectIdList.size() > 0
+						&& !projectIdList.contains(task.getWorkflow()
+								.getJob().getProjectId()))
+				{
+					continue;
+				}
+				if (StringUtils.isBlank(p_taskState))
+				{
+					if (task.getState() != 3 && task.getState() != 8)
+					{
+						continue;
+					}
+				}
+				if (map.containsKey(task.getJobId() + "," + task.getJobName()))
+				{
+					list = map.get(task.getJobId() + "," + task.getJobName());
+					list.add(task);
+				}
+				else
+				{
+					list = new ArrayList<Task>();
+					list.add(task);
+				}
+				map.put(task.getJobId() + "," + task.getJobName(), list);
+			}
+
+			for (Entry<String, List<Task>> entry : map.entrySet())
+			{
+				String key = entry.getKey();
+				List<Task> taskList = entry.getValue();
+				JSONObject jsonOut = new JSONObject();
+				String[] keyArr = key.split(",");
+				jsonOut.put("jobID", keyArr[0]);
+				jsonOut.put("jobName", keyArr[1]);
+				JSONArray arrayIn = new JSONArray();
+				for (Task tk : taskList)
+				{
+					JSONObject jsonIn = new JSONObject();
+					jsonIn.put("targetLanguage", tk.getTargetLocale());
+					jsonIn.put("taskID", tk.getId());
+					jsonIn.put("taskState", (tk.getState() == 3 ? "AVAILABLE" : "IN PROGRESS"));
+					arrayIn.put(jsonIn);
+				}
+				jsonOut.put("workflow", arrayIn);
+				arrayOut.put(jsonOut);
+			}
+
+			return arrayOut.toString();
+		}
+		catch (Exception e)
+		{
+			String message = "Unable to get all projects infos managed by user";
+			logger.error(message, e);
+			message = makeErrorJson(GET_ACTIVITY_LIST, message);
+			throw new WebServiceException(message);
+		}
+	}
     
     ///////////////////////////////////////////////////////////////////////////
     //// COMMON PRIVATE METHODS

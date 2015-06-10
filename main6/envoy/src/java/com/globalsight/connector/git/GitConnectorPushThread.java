@@ -25,7 +25,6 @@ public class GitConnectorPushThread implements Runnable
     {
 			while (true) 
 			{
-				Transaction tx = HibernateUtil.getTransaction();
 				String hql = " from GitConnectorCacheFile";
 				List<GitConnectorCacheFile> cacheFiles = (List<GitConnectorCacheFile>)
 						HibernateUtil.search(hql);
@@ -50,7 +49,7 @@ public class GitConnectorPushThread implements Runnable
 						HibernateUtil.delete(cacheFile);
 					}
 				}
-				HibernateUtil.commit(tx);
+				HibernateUtil.closeSession();
 				
 				Thread.sleep(60 * 1000);
 			}

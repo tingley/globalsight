@@ -42,6 +42,11 @@ public class SidRuleItem extends XmlRuleItem
         {
             rule = new Rule();
             ruleMap.put(node, rule);
+            
+            if (Node.ATTRIBUTE_NODE == node.getNodeType())
+            {
+                rule.setTranslate(false);
+            }
         }
         rule.setSid(sid);
 

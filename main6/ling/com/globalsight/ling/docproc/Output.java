@@ -384,6 +384,11 @@ public class Output
     {
         addTrans(p_strChunk, false);
     }
+    
+    public void addTranslatable(String p_strChunk, String sid)
+    {
+        addTrans(p_strChunk, false, sid);
+    }
 
     public void addTranslatableTmx(String p_Tmx)
     {

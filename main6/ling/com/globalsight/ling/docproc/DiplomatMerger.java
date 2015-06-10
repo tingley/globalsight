@@ -715,13 +715,16 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
             {
                 tmp = encoding(tmp, false);
+                // we do not expect double encoded < and >.
+                tmp = StringUtil.replace(tmp, "&amp;lt;", "&lt;");
+                tmp = StringUtil.replace(tmp, "&amp;gt;", "&gt;");
                 // GBS-3805: revert ", ' and & back.
                 if (!m_convertHtmlEntityForHtml)
                 {
-                    tmp = StringUtil.replace(tmp, "&quot;", "\"");
+                    tmp = StringUtil.replace(tmp, "&amp;", "&");
+                	tmp = StringUtil.replace(tmp, "&quot;", "\"");
                     tmp = StringUtil.replace(tmp, "&apos;", "'");
                     tmp = StringUtil.replace(tmp, "&#39;", "'");
-                    tmp = StringUtil.replace(tmp, "&amp;", "&");
                 }
             }
 

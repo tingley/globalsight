@@ -4236,8 +4236,13 @@ public class WorkflowManagerLocal implements WorkflowManager
                 && p_job.getWorkflows().iterator().hasNext())
         {
             Workflow wf = p_job.getWorkflows().iterator().next();
-            String dataSourceType = (wf.getTargetPages().iterator().next())
-                    .getDataSourceType();
+            String dataSourceType = DataSourceType.FILE_SYSTEM_AUTO_IMPORT;
+            try {
+                dataSourceType = (wf.getTargetPages().iterator().next())
+                        .getDataSourceType();
+            } catch (Exception ignore) {
+            	
+            }
             boolean isAutoImport = dataSourceType
                     .equals(DataSourceType.FILE_SYSTEM_AUTO_IMPORT);
             if (isAutoImport)

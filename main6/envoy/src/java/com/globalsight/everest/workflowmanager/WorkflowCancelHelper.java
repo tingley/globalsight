@@ -21,9 +21,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -32,7 +34,6 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
-import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyFileRemoval;
@@ -45,15 +46,11 @@ public class WorkflowCancelHelper
     private static final Logger logger = Logger
             .getLogger(WorkflowCancelHelper.class.getName());
 
+    private static final int BATCH_CAPACITY = 1000;
+
     private static long runtime = -1l;
     private static String runningMessage = "";
     private static String doneMessage = "";
-
-    private static final String SOURCE_PAGE_IDS_PLACEHOLDER = "\uE000"
-            + "_SOURCE_PAGE_IDS_" + "\uE000";
-    
-    private static final String TARGET_PAGE_IDS_PLACEHOLDER = "\uE000"
-            + "_TARGET_PAGE_IDS_" + "\uE000";
 
     private static final String SQL_DELETE_SCORE = "DELETE FROM SCORECARD_SCORE WHERE WORKFLOW_ID = ?";
     
@@ -104,41 +101,10 @@ public class WorkflowCancelHelper
     private static final String SQL_DELETE_ISSUE_HISTORY = "DELETE history "
             + "FROM issue_history history, issue iss "
             + "WHERE history.issue_id = iss.id "
-            + "AND iss.target_page_id IN (" + TARGET_PAGE_IDS_PLACEHOLDER + ")";
+            + "AND iss.target_page_id IN ";
 
     private static final String SQL_DELETE_ISSUE = "DELETE FROM issue "
-            + "WHERE target_page_id IN (" + TARGET_PAGE_IDS_PLACEHOLDER + ")";
-
-    private static final String SQL_DELETE_LEVERAGE_MATCH = "DELETE FROM "
-            + TuvQueryConstants.LM_TABLE_PLACEHOLDER + " "
-            + "WHERE target_locale_id = ? "
-            + "AND source_page_id IN (" + SOURCE_PAGE_IDS_PLACEHOLDER + ")";
-
-    private static final String SQL_DELETE_LM_ATTR = "DELETE FROM "
-    		+ TuvQueryConstants.LM_ATTR_TABLE_PLACEHOLDER + " "
-    		+ "WHERE target_locale_id = ? "
-    		+ "AND source_page_id IN (" + SOURCE_PAGE_IDS_PLACEHOLDER + ")";
-
-    private static final String SQL_DELETE_TUV = "DELETE tuv.* FROM "
-            + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " tuv, "
-            + TuvQueryConstants.TU_TABLE_PLACEHOLDER + " tu, "
-            + "source_page_leverage_group splg "
-            + "WHERE tuv.TU_ID = tu.ID "
-            + "AND tu.LEVERAGE_GROUP_ID = splg.LG_ID "
-            + "AND tuv.LOCALE_ID = ? "
-            + "AND splg.SP_ID IN (" + SOURCE_PAGE_IDS_PLACEHOLDER + ")";
-
-    private static final String SQL_DELETE_TU_TUV_ATTR = "DELETE attr.* FROM "
-    		+ TuvQueryConstants.TU_TUV_ATTR_TABLE_PLACEHOLDER + " attr, "
-    		+ TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " tuv, "
-    		+ TuvQueryConstants.TU_TABLE_PLACEHOLDER + " tu, "
-    		+ "source_page_leverage_group splg "
-    		+ "WHERE attr.OBJECT_TYPE = '" + TuTuvAttributeImpl.OBJECT_TYPE_TUV + "'"
-    		+ " AND attr.OBJECT_ID = tuv.ID "
-    		+ " AND tuv.TU_ID = tu.ID "
-    	    + " AND tuv.LOCALE_ID = ? "
-    		+ " AND tu.LEVERAGE_GROUP_ID = splg.LG_ID "
-    	    + " AND splg.SP_ID IN (" + SOURCE_PAGE_IDS_PLACEHOLDER + ")";
+            + "WHERE target_page_id IN ";
 
     public static void cancelWorkflow(Workflow workflow) throws Exception
     {
@@ -149,7 +115,7 @@ public class WorkflowCancelHelper
         try
         {
             conn = DbUtil.getConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(true);
             long wfId = workflow.getId();
             long companyId = workflow.getCompanyId();
             long jobId = workflow.getJob().getId();
@@ -177,13 +143,11 @@ public class WorkflowCancelHelper
 
             deleteSegmentComment(conn, workflow);
 
-            String srcPageIds = getSourcePageIdsInStr(workflow);
-            deleteLMAttributes(conn, trgLocaleId, srcPageIds, jobId);
-            deleteLeverageMatch(conn, trgLocaleId, srcPageIds, jobId);
-            deleteTuTuvAttributeByTuvIds(conn, trgLocaleId, srcPageIds, jobId);
-            deleteTuv(conn, trgLocaleId, srcPageIds, jobId);
-
-            conn.commit();
+            List<List<Object>> spIdBatchList = getSourcePageIds(workflow);
+            deleteLMAttributes(conn, trgLocaleId, spIdBatchList, jobId);
+            deleteLeverageMatch(conn, trgLocaleId, spIdBatchList, jobId);
+            deleteTuTuvAttributeByTuvIds(conn, trgLocaleId, spIdBatchList, jobId);
+            deleteTuv(conn, trgLocaleId, spIdBatchList, jobId);
 
             deleteSecondaryTargetFileOnHD(companyId, jobId, wfId);
             deleteExportedTargetFilesOnHD(companyId, jobId, targetLocale);
@@ -191,7 +155,6 @@ public class WorkflowCancelHelper
         }
         catch (Exception e)
         {
-            conn.rollback();
             logger.error("Error when cancel workflow " + workflow.getId(), e);
             throw e;
         }
@@ -204,9 +167,9 @@ public class WorkflowCancelHelper
     private static void deleteScore(Connection conn, long wfId)
     		throws SQLException
 	{
-		logStart("SCORE");
+		logStart("SCORECARD_SCORE");
 		execOnce(conn, SQL_DELETE_SCORE, wfId);
-		logEnd("SCORE");
+		logEnd("SCORECARD_SCORE");
 	}
     
     private static void deleteTargetPageleverageGroup(Connection conn, long wfId)
@@ -369,109 +332,276 @@ public class WorkflowCancelHelper
     private static void deleteSegmentComment(Connection conn, Workflow workflow)
             throws SQLException
     {
-        String tpIdsStr = getTargetPageIdsInStr(workflow);
+        List<List<Object>> tpIdsInbatch = getTargetPageIds(workflow);
 
         logStart("ISSUE_HISTORY");
-        String sql = SQL_DELETE_ISSUE_HISTORY.replace(
-                TARGET_PAGE_IDS_PLACEHOLDER, tpIdsStr);
-        execOnce(conn.prepareStatement(sql));
+        exec(conn, SQL_DELETE_ISSUE_HISTORY, tpIdsInbatch);
         logEnd("ISSUE_HISTORY");
 
         logStart("ISSUE");
-        sql = SQL_DELETE_ISSUE.replace(TARGET_PAGE_IDS_PLACEHOLDER, tpIdsStr);
-        execOnce(conn.prepareStatement(sql));
+        exec(conn, SQL_DELETE_ISSUE, tpIdsInbatch);
         logEnd("ISSUE");
     }
 
     private static void deleteLeverageMatch(Connection conn, long trgLocaleId,
-            String srcPageIds, long p_jobId) throws Exception
+    		List<List<Object>> spIdBatchList, long p_jobId) throws Exception
     {
         String lmTableName = BigTableUtil.getLMTableJobDataInByJobId(p_jobId);
-        String sql = SQL_DELETE_LEVERAGE_MATCH.replace(
-                TuvQueryConstants.LM_TABLE_PLACEHOLDER, lmTableName).replace(
-                SOURCE_PAGE_IDS_PLACEHOLDER, srcPageIds);
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM ").append(lmTableName)
+				.append(" WHERE target_locale_id = ").append(trgLocaleId)
+				.append(" AND source_page_id IN ");
 
         logStart(lmTableName.toUpperCase());
-        execOnce(conn, sql, trgLocaleId);
+        exec(conn, sql.toString(), spIdBatchList);
         logEnd(lmTableName.toUpperCase());
     }
 
 	private static void deleteLMAttributes(Connection conn, long trgLocaleId,
-			String srcPageIds, long p_jobId) throws Exception
+			List<List<Object>> spIdBatchList, long p_jobId) throws Exception
 	{
 		String lmAttrTable = BigTableUtil.getLMAttributeTableByJobId(p_jobId);
-		String sql = SQL_DELETE_LM_ATTR.replace(
-				TuvQueryConstants.LM_ATTR_TABLE_PLACEHOLDER, lmAttrTable)
-				.replace(SOURCE_PAGE_IDS_PLACEHOLDER, srcPageIds);
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM ").append(lmAttrTable)
+				.append(" WHERE target_locale_id = ").append(trgLocaleId)
+				.append(" AND source_page_id IN ");
 
 		logStart(lmAttrTable.toUpperCase());
-		execOnce(conn, sql, trgLocaleId);
+		exec(conn, sql.toString(), spIdBatchList);
 		logEnd(lmAttrTable.toUpperCase());
 	}
 
-    private static void deleteTuTuvAttributeByTuvIds(Connection conn,
-			long trgLocaleId, String srcPageIds, long p_jobId) throws Exception
+	private static void deleteTuTuvAttributeByTuvIds(Connection conn,
+			long trgLocaleId, List<List<Object>> spIdBatchList, long p_jobId)
+			throws Exception
     {
         String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(p_jobId);
         String tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(p_jobId);
         String tuTuvAttrTableName = BigTableUtil.getTuTuvAttributeTableByJobId(p_jobId);
-		String sql = SQL_DELETE_TU_TUV_ATTR
-				.replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName)
-				.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTableName)
-				.replace(TuvQueryConstants.TU_TUV_ATTR_TABLE_PLACEHOLDER,
-						tuTuvAttrTableName)
-				.replace(SOURCE_PAGE_IDS_PLACEHOLDER, srcPageIds);
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT attr.ID FROM ").append(tuTuvAttrTableName)
+				.append(" attr, ").append(tuvTableName).append(" tuv, ")
+				.append(tuTableName)
+				.append(" tu, source_page_leverage_group splg ")
+				.append(" WHERE attr.OBJECT_TYPE = '")
+				.append(TuTuvAttributeImpl.OBJECT_TYPE_TUV).append("'")
+				.append(" AND attr.OBJECT_ID = tuv.ID ")
+				.append(" AND tuv.TU_ID = tu.ID ")
+				.append(" AND tu.LEVERAGE_GROUP_ID = splg.LG_ID ")
+				.append(" AND tuv.LOCALE_ID = ").append(trgLocaleId)
+				.append(" AND splg.SP_ID IN ");
+        List<List<Object>> attIds = queryBatchList(conn, sql.toString(),
+        		spIdBatchList);
 
         logStart(tuTuvAttrTableName.toUpperCase());
-        execOnce(conn, sql, trgLocaleId);
+        exec(conn, "DELETE FROM " + tuTuvAttrTableName + " WHERE ID IN ", attIds);
         logEnd(tuTuvAttrTableName.toUpperCase());
     }
 
     private static void deleteTuv(Connection conn, long trgLocaleId,
-            String srcPageIds, long p_jobId) throws Exception
+    		List<List<Object>> spIdBatchList, long p_jobId) throws Exception
     {
         String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(p_jobId);
         String tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(p_jobId);
-        String sql = SQL_DELETE_TUV
-                .replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName)
-                .replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTableName)
-                .replace(SOURCE_PAGE_IDS_PLACEHOLDER, srcPageIds);
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT tuv.ID FROM ").append(tuvTableName).append(" tuv, ")
+				.append(tuTableName)
+				.append(" tu, source_page_leverage_group splg ")
+				.append(" WHERE tuv.TU_ID = tu.ID ")
+				.append(" AND tu.LEVERAGE_GROUP_ID = splg.LG_ID ")
+				.append(" AND tuv.LOCALE_ID = ").append(trgLocaleId)
+				.append(" AND splg.SP_ID IN ");
+		List<List<Object>> tuvIdList = queryBatchList(conn, sql.toString(),
+				spIdBatchList);
 
         logStart(tuvTableName.toUpperCase());
-        execOnce(conn, sql, trgLocaleId);
+        exec(conn, "DELETE FROM " + tuvTableName + " WHERE ID IN ", tuvIdList);
         logEnd(tuvTableName.toUpperCase());
     }
 
     @SuppressWarnings("rawtypes")
-    private static String getSourcePageIdsInStr(Workflow workflow)
+	private static List<List<Object>> getSourcePageIds(Workflow workflow)
     {
-        StringBuilder spIds = new StringBuilder();
+    	List<Object> spIdList = new ArrayList<Object>();
         Collection sps = workflow.getJob().getSourcePages();
         for (Iterator it = sps.iterator(); it.hasNext();)
         {
             SourcePage sp = (SourcePage) it.next();
-            spIds.append(sp.getId()).append(",");
+            spIdList.add(sp.getIdAsLong());
         }
-
-        return spIds.substring(0, spIds.length() - 1);
+        
+        return toBatchList(spIdList, 10);
     }
 
-    private static String getTargetPageIdsInStr(Workflow workflow)
+    private static List<List<Object>> getTargetPageIds(Workflow workflow)
     {
-        StringBuilder tpIds = new StringBuilder();
+    	List<Object> tpIdList = new ArrayList<Object>();
         Vector<TargetPage> tps = workflow.getAllTargetPages();
-        for (int i = 0; i< tps.size(); i++)
+        for (TargetPage tp : tps)
         {
-            TargetPage tp = tps.get(i);
-            if (i > 0)
-            {
-                tpIds.append(",");
-            }
-            tpIds.append(tp.getId());
+        	tpIdList.add(tp.getIdAsLong());
         }
-        return tpIds.toString();
+
+        return toBatchList(tpIdList, 10);
     }
-    
+
+    private static List<List<Object>> queryBatchList(Connection conn, String sql,
+            Object param) throws SQLException
+    {
+        Statement stmt = null;
+        PreparedStatement ps = null;
+        try
+        {
+            ResultSet rs = null;
+            if (param instanceof List)
+            {
+                StringBuilder sb = new StringBuilder(sql);
+                sb.append(toInClause((List<?>) param));
+
+                stmt = toStatement(conn);
+
+                rs = stmt.executeQuery(sb.toString());
+            }
+            else
+            {
+                ps = toPreparedStatement(conn, sql, param);
+                rs = ps.executeQuery();
+            }
+            return toBatchList(rs);
+        }
+        finally
+        {
+            ConnectionPool.silentClose(stmt);
+            ConnectionPool.silentClose(ps);
+        }
+    }
+
+	private static List<List<Object>> toBatchList(ResultSet rs)
+			throws SQLException
+    {
+        List<List<Object>> batchList = new ArrayList<List<Object>>();
+        if (rs == null)
+        {
+            return batchList;
+        }
+        List<Object> subList = new ArrayList<Object>();
+        int count = 0;
+        try
+        {
+            while (rs.next())
+            {
+                subList.add(rs.getObject(1));
+                count++;
+                if (count == BATCH_CAPACITY)
+                {
+                    batchList.add(subList);
+                    subList = new ArrayList<Object>();
+                    count = 0;
+                }
+            }
+            if (subList.size() > 0)
+            {
+                batchList.add(subList);
+            }
+        }
+        finally
+        {
+            ConnectionPool.silentClose(rs);
+        }
+        return batchList;
+    }
+
+    private static List<List<Object>> toBatchList(List<Object> list, int batchSize)
+    {
+        List<List<Object>> batchList = new ArrayList<List<Object>>();
+        if (list == null)
+        {
+            return batchList;
+        }
+
+        List<Object> subList = new ArrayList<Object>();
+        int count = 0;
+        for (Object obj : list)
+        {
+        	subList.add(obj);
+        	count++;
+        	if (count == batchSize)
+        	{
+        		batchList.add(subList);
+        		subList = new ArrayList<Object>();
+        		count = 0;
+        	}
+        }
+
+        if (subList.size() > 0)
+        {
+        	batchList.add(subList);
+        }
+
+        return batchList;
+    }
+
+    private static Statement toStatement(Connection conn) throws SQLException
+    {
+        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY);
+        // will have oom error when querying great number of records without
+        // this setting
+        stmt.setFetchSize(Integer.MIN_VALUE);
+        return stmt;
+    }
+
+    private static void exec(Connection conn, String sql, List<List<Object>> batchList)
+            throws SQLException
+    {
+        int batchCount = batchList.size();
+        if (batchCount > 1)
+        {
+			logger.info(batchCount + " batches of records found to be deleted.");
+        }
+        int deletedBatchCount = 0;
+        for (List<Object> list : batchList)
+        {
+            execOnce(conn, sql + toInClause(list));
+            if (batchCount > 1)
+            {
+                deletedBatchCount++;
+                int leftBatchCount = batchCount - deletedBatchCount;
+                String message = "";
+                if (deletedBatchCount == 1)
+                {
+                    if (leftBatchCount == 1)
+                    {
+                        message = "1 batch deleted, left 1";
+                    }
+                    else
+                    {
+                        message = "1 batch deleted, left " + leftBatchCount;
+                    }
+                }
+                else
+                {
+                    if (leftBatchCount == 1)
+                    {
+                        message = deletedBatchCount
+                                + " batches deleted, left 1";
+                    }
+                    else if (leftBatchCount > 1)
+                    {
+                        message = deletedBatchCount + " batches deleted, left "
+                                + leftBatchCount;
+                    }
+                }
+                if (leftBatchCount > 0)
+                {
+                    logger.info(message);
+                }
+            }
+        }
+    }
+
     private static void execOnce(Connection conn, String sql, Object param)
             throws SQLException
     {
@@ -486,16 +616,25 @@ public class WorkflowCancelHelper
         }
     }
 
-    private static PreparedStatement toPreparedStatement(Connection conn,
-            String sql, Object param) throws SQLException
+    private static void execOnce(Connection conn, String sql)
+            throws SQLException
     {
-        PreparedStatement ps = conn.prepareStatement(sql,
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        // will have oom error when querying great number of records without
-        // this setting
-        ps.setFetchSize(Integer.MIN_VALUE);
-        ps.setObject(1, param);
-        return ps;
+        Statement stmt = null;
+        try
+        {
+            stmt = conn.createStatement();
+            stmt.execute(sql);
+        }
+        catch (Exception e)
+        {
+            logger.info("Current SQL :: " + sql);
+            logger.error(e);
+            throw new SQLException(e.getMessage());
+        }
+        finally
+        {
+            ConnectionPool.silentClose(stmt);
+        }
     }
 
     private static void execOnce(PreparedStatement ps) throws SQLException
@@ -515,6 +654,18 @@ public class WorkflowCancelHelper
         }
     }
 
+    private static PreparedStatement toPreparedStatement(Connection conn,
+            String sql, Object param) throws SQLException
+    {
+        PreparedStatement ps = conn.prepareStatement(sql,
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        // will have oom error when querying great number of records without
+        // this setting
+        ps.setFetchSize(Integer.MIN_VALUE);
+        ps.setObject(1, param);
+        return ps;
+    }
+
     private static void logStart(String table)
     {
         runtime = System.currentTimeMillis();
@@ -527,5 +678,54 @@ public class WorkflowCancelHelper
         long runningTime = System.currentTimeMillis() - runtime;
         
         logger.info(doneMessage + table + " [" + runningTime + " msc]");
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static String toInClause(List<?> list)
+    {
+        StringBuilder in = new StringBuilder();
+        if (list.size() == 0)
+            return "(0)";
+        
+        in.append("(");
+        for (Object o : list)
+        {
+            if (o instanceof List)
+            {
+                if (((List) o).size() == 0)
+                    continue;
+                
+                for (Object id : (List<?>) o)
+                {
+                    if (id instanceof String)
+                    {
+                        in.append("'");
+                        in.append(((String) id).replace("\'", "\\\'"));
+                        in.append("'");
+                    }
+                    else
+                    {
+                        in.append(id);
+                    }
+                    in.append(",");
+                }
+            }
+            else if (o instanceof String)
+            {
+                in.append("'");
+                in.append(((String) o).replace("\'", "\\\'"));
+                in.append("'");
+                in.append(",");
+            }
+            else
+            {
+                in.append(o);
+                in.append(",");
+            }
+        }
+        in.deleteCharAt(in.length() - 1);
+        in.append(")");
+
+        return in.toString();
     }
 }

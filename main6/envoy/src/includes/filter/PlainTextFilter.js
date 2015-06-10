@@ -12,8 +12,10 @@ function PlainTextFilter()
 	this.dialogId = "plaintextFilterDialog";
 	
 	this.optionCustomTextRules = "0";
+	this.optionCustomTextRuleSids = "1";
 	this.optionNameMap = new Object();
 	this.optionNameMap[this.optionCustomTextRules] = jsCustomTextRule;
+	this.optionNameMap[this.optionCustomTextRuleSids] = jsCustomSidRule;
 	
 	this.operatorEqual = "equal";
 	this.operatorNotEqual = "not equal";
@@ -24,7 +26,7 @@ function PlainTextFilter()
 	this.operatorNameMap[this.operatorMatch] = jsOperatorMatch;
 	
 	this.optionObjsMap = new Object();
-	this.availableOptions = [this.optionCustomTextRules];
+	this.availableOptions = [this.optionCustomTextRules, this.optionCustomTextRuleSids];
 	this.checkedItemIds = new Array();
 	
 	this.tagsEveryPage = 10;
@@ -58,10 +60,14 @@ PlainTextFilter.prototype.initOptionMap = function (filter)
 	{
 		var customTextRules = this.filter.customTextRules;
 		plaintextFilter.optionObjsMap[this.optionCustomTextRules] = JSON.parse(customTextRules);
+		
+		var customTextRuleSids = this.filter.customTextRuleSids;
+		plaintextFilter.optionObjsMap[this.optionCustomTextRuleSids] = JSON.parse(customTextRuleSids);
 	}
 	else
 	{
 		plaintextFilter.optionObjsMap[this.optionCustomTextRules] = new Array();
+		plaintextFilter.optionObjsMap[this.optionCustomTextRuleSids] = new Array();
 	}
 	
 	plaintextFilter.refreshCheckedIds();
@@ -92,7 +98,7 @@ PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFi
 {
 	this.initOptionMap(this.filter);
 	
-	var str = new StringBuffer("<div style='float:left;width:450px'><table border=0 width='450px'>");
+	var str = new StringBuffer("<div style='float:left;width:500px'><table border=0 width='500px'>");
 	str.append("<tr>");
 	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
 	str.append("<td><input type='text' style='width:100%' id='plaintextFilterName' maxlength='"+maxFilterNameLength+"' value='" + this.filter.filterName + "'></input>");
@@ -106,7 +112,7 @@ PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFi
 	str.append("</tr>");
 	str.append("</table>");
 	
-	str.append("<table border=0 width='450px'>");	
+	str.append("<table border=0 width='500px'>");	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsInternalTextPostFilter + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
@@ -123,13 +129,13 @@ PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFi
 	
 	str.append("</table>");
 	
-	str.append("<div class='specialFilter_dialog_label' style='width:450px'>");
+	str.append("<div class='specialFilter_dialog_label' style='width:500px'>");
 	str.append(this.generateTagsTable(this.filter));
 	str.append("</div></div><div style='float:right;width:350px'>");
 	
 	str.append("<table border=0 width='350px'>");	
 	str.append("<tr>");
-	str.append("<td class='specialFilter_dialog_label'>" + jsCustomTextTest + "</td>");
+	str.append("<td class='specialFilter_dialog_label' id='td_testDesc'>" + jsCustomTextTest + "</td>");
 	str.append("</tr>");
 	str.append("<tr>");
 	str.append("<td><textarea style='width:100%' rows='5' id='plaintextFilterTestSource' name='testSource'></textarea></td>");
@@ -144,6 +150,7 @@ PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFi
 	
 	var dialogObj = document.getElementById('plaintextFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
+	plaintextFilter.switchStatus();
 	this.showDialog();
 	
 	savePlainTextFilter.edit = true;
@@ -158,7 +165,7 @@ PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 {
 	this.initOptionMap();
 	var defaultName = getFilterNameByTableName(this.filterTableName);
-	var str = new StringBuffer("<div style='float:left;width:450px'><table border=0 width='450px'>");
+	var str = new StringBuffer("<div style='float:left;width:500px'><table border=0 width='500px'>");
 	str.append("<tr>");
 	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
 	str.append("<td><input type='text' style='width:100%' id='plaintextFilterName' maxlength='"+maxFilterNameLength+"' value='" + defaultName + "'></input>");
@@ -172,7 +179,7 @@ PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("</tr>");
 	str.append("</table>");
 	
-	str.append("<table border=0 width='450px'>");	
+	str.append("<table border=0 width='500px'>");	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsInternalTextPostFilter + "" + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
@@ -189,13 +196,13 @@ PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 	
 	str.append("</table>");
 	
-	str.append("<div class='specialFilter_dialog_label' style='width:450px'>");
+	str.append("<div class='specialFilter_dialog_label' style='width:500px'>");
 	str.append(this.generateTagsTable());
 	str.append("</div></div><div style='float:right;width:350px'>");
 	
 	str.append("<table border=0 width='350px'>");	
 	str.append("<tr>");
-	str.append("<td class='specialFilter_dialog_label'>" + jsCustomTextTest + "</td>");
+	str.append("<td class='specialFilter_dialog_label' id='td_testDesc'>" + jsCustomTextTest + "</td>");
 	str.append("</tr>");
 	str.append("<tr>");
 	str.append("<td><textarea style='width:100%' rows='5' id='plaintextFilterTestSource' name='testSource'></textarea></td>");
@@ -210,6 +217,7 @@ PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 	
 	var dialogObj = document.getElementById('plaintextFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
+	plaintextFilter.switchStatus();
 	this.showDialog();
 	savePlainTextFilter.edit = false;
 	savePlainTextFilter.topFilterId = topFilterId;
@@ -218,10 +226,10 @@ PlainTextFilter.prototype.generateDiv = function(topFilterId, color)
 
 function doTest()
 {
-	var ruleObjects = plaintextFilter.optionObjsMap[plaintextFilter.optionCustomTextRules];
-	var rules = new Array();
 	document.getElementById("plaintextFilterTestResult").value = "Generate testing result...";
 	
+	var ruleObjects = plaintextFilter.optionObjsMap[plaintextFilter.optionCustomTextRules];
+	var rules = new Array();
 	if (ruleObjects && ruleObjects.length > 0)
 	{
 		for(var i=0; i < ruleObjects.length; i++)
@@ -234,8 +242,26 @@ function doTest()
 		}
 	}
 	
+	var sidruleObjects = plaintextFilter.optionObjsMap[plaintextFilter.optionCustomTextRuleSids];
+	var sidrules = new Array();
+	if (sidruleObjects && sidruleObjects.length > 0)
+	{
+		for(var i=0; i < sidruleObjects.length; i++)
+		{
+			var ruleObj = sidruleObjects[i];
+			if (ruleObj.enable)
+			{
+				sidrules[sidrules.length] = ruleObj;
+			}
+		}
+	}
+	
+	var isSid = (plaintextFilter.currentOption == plaintextFilter.optionCustomTextRuleSids);
+	
 	var source = document.getElementById("plaintextFilterTestSource").value;
-	var obj = {customTextRules : JSON.stringify(rules), source : source};
+	var obj = {customTextRules : JSON.stringify(rules), 
+			customTextRuleSids : JSON.stringify(sidrules), 
+			source : source, isSid : isSid};
 	
 	sendAjax(obj, "doTestCustomTextRule", "doTestCustomTextRuleCallback");
 }
@@ -273,6 +299,7 @@ function savePlainTextFilter()
 	var filterDesc = document.getElementById("plaintextFilterDesc").value;
 	var baseFilterId = document.getElementById("plain_text_filter_baseFilterSelect").value;
 	var customTextRules = JSON.stringify(plaintextFilter.optionObjsMap[plaintextFilter.optionCustomTextRules]);
+	var customTextRuleSids = JSON.stringify(plaintextFilter.optionObjsMap[plaintextFilter.optionCustomTextRuleSids]);
 	var elementPostFilterIdTable = document.getElementById("elementPostFilter").value;
 	var splitedElementPostIdTable = splitByFirstIndex(elementPostFilterIdTable, "-");
 	var elementPostFilterId = (splitedElementPostIdTable) ? splitedElementPostIdTable[0] : "-1";
@@ -290,6 +317,7 @@ function savePlainTextFilter()
 		companyId : companyId,
 		baseFilterId : baseFilterId,
 		customTextRules : customTextRules,
+		customTextRuleSids : customTextRuleSids,
 		elementPostFilter : elementPostFilter,
 		elementPostFilterId : elementPostFilterId
 	};
@@ -344,6 +372,7 @@ function updatePlainTextFilterCallback(data)
 		xrFilter.filterDescription = isFilterValidCallback.obj.filterDesc;
 		xrFilter.baseFilterId = isFilterValidCallback.obj.baseFilterId;
 		xrFilter.customTextRules = isFilterValidCallback.obj.customTextRules;
+		xrFilter.customTextRuleSids = isFilterValidCallback.obj.customTextRuleSids;
 		xrFilter.elementPostFilter = isFilterValidCallback.obj.elementPostFilter;
 		xrFilter.elementPostFilterId = isFilterValidCallback.obj.elementPostFilterId;
 		xrFilter.companyId = companyId;
@@ -367,6 +396,7 @@ function savePlainTextFilterCallback(data)
 		xrFilter.filterDescription = isFilterValidCallback.obj.filterDesc;
 		xrFilter.baseFilterId = isFilterValidCallback.obj.baseFilterId;
 		xrFilter.customTextRules = isFilterValidCallback.obj.customTextRules;
+		xrFilter.customTextRuleSids = isFilterValidCallback.obj.customTextRuleSids;
 		xrFilter.elementPostFilter = isFilterValidCallback.obj.elementPostFilter;
 		xrFilter.elementPostFilterId = isFilterValidCallback.obj.elementPostFilterId;
 		xrFilter.companyId = companyId;
@@ -488,6 +518,7 @@ PlainTextFilter.prototype.closeAllTagPopup = function()
 	closePopupDialog("plainTextFilter_CustomTextRule_Dialog");
 	closePopupDialog("editPriorityPlainTextDialog");
 	closePopupDialog("deletePlainTextTagDialog");
+	closePopupDialog("plainTextFilter_CustomSidRule_Dialog");
 }
 
 PlainTextFilter.prototype.addTag = function(radioId)
@@ -495,12 +526,18 @@ PlainTextFilter.prototype.addTag = function(radioId)
 	var dialogId = "plainTextFilter_CustomTextRule_Dialog";
 	var isEdit = (radioId) ? true : false;
 	var useCustomTextDiv = (plaintextFilter.currentOption == plaintextFilter.optionCustomTextRules);
+	var useCustomSidDiv = (plaintextFilter.currentOption == plaintextFilter.optionCustomTextRuleSids);
 	
 	plaintextFilter.closeAllTagPopup();
 	
 	if (useCustomTextDiv)
 	{
 		dialogId = "plainTextFilter_CustomTextRule_Dialog";
+	}
+	
+	if (useCustomSidDiv)
+	{
+		dialogId = "plainTextFilter_CustomSidRule_Dialog";
 	}
 	
 	showPopupDialog(dialogId);
@@ -518,6 +555,7 @@ PlainTextFilter.prototype.addTag = function(radioId)
 		var finishString = isEdit ? editItem.finishString : "";
 		var finishIsRegEx = isEdit ? editItem.finishIsRegEx : false;
 		var finishOccurrence = isEdit ? editItem.finishOccurrence : "FIRST";
+		var isMultiline = isEdit ? editItem.isMultiline : false;
 		
 		var occid = "1";
 		var occtimes = "";
@@ -558,6 +596,55 @@ PlainTextFilter.prototype.addTag = function(radioId)
 		document.getElementById("plainTextFilter_customTextRule_startOccTimes").value = occtimes;
 		
 		document.getElementById("plainTextFilter_customTextRule_priority").value = isEdit ? editItem.priority : "";
+		document.getElementById("plainTextFilter_customTextRule_isMultiline").checked = isMultiline;
+	}
+	
+	if (useCustomSidDiv)
+	{
+		var startString = isEdit ? editItem.startString : "";
+		var startIsRegEx = isEdit ? editItem.startIsRegEx : false;
+		var startOccurrence = isEdit ? editItem.startOccurrence : "FIRST";
+		var finishString = isEdit ? editItem.finishString : "";
+		var finishIsRegEx = isEdit ? editItem.finishIsRegEx : false;
+		var finishOccurrence = isEdit ? editItem.finishOccurrence : "FIRST";
+		
+		var occid = "1";
+		var occtimes = "";
+		if ("FIRST" == finishOccurrence)
+		{
+			occid = "1";
+		} else if ("LAST" == finishOccurrence)
+		{
+			occid = "2";
+		}
+		else
+		{
+			occid = "3";
+			occtimes = finishOccurrence;
+		}
+		document.getElementById("plainTextFilter_customSidRule_finishStr").value = finishString;
+		document.getElementById("plainTextFilter_customSidRule_finishIs").checked = finishIsRegEx;
+		document.getElementById("plainTextFilter_customSidRule_finishOcc" + occid).checked = true;
+		document.getElementById("plainTextFilter_customSidRule_finishOccTimes").value = occtimes;
+		
+		occid = "1";
+		occtimes = "";
+		if ("FIRST" == startOccurrence)
+		{
+			occid = "1";
+		} else if ("LAST" == startOccurrence)
+		{
+			occid = "2";
+		}
+		else
+		{
+			occid = "3";
+			occtimes = startOccurrence;
+		}
+		document.getElementById("plainTextFilter_customSidRule_startStr").value = startString;
+		document.getElementById("plainTextFilter_customSidRule_startIs").checked = startIsRegEx;
+		document.getElementById("plainTextFilter_customSidRule_startOcc" + occid).checked = true;
+		document.getElementById("plainTextFilter_customSidRule_startOccTimes").value = occtimes;
 	}
 }
 
@@ -592,6 +679,73 @@ PlainTextFilter.prototype.getItemById = function(itemId, optionValue)
 	return item;
 }
 
+PlainTextFilter.prototype.saveCustomSidRule = function()
+{
+	var itemId = plaintextFilter.editItemId;
+	var validate = new Validate();
+	var startString = new StringBuffer(document.getElementById("plainTextFilter_customSidRule_startStr").value);
+	var startIsRegEx = document.getElementById("plainTextFilter_customSidRule_startIs").checked;
+	var startOccurrence = document.getElementById("plainTextFilter_customSidRule_startOcc1").checked ? 
+			"FIRST" : (document.getElementById("plainTextFilter_customSidRule_startOcc2").checked ? 
+					"LAST" : document.getElementById("plainTextFilter_customSidRule_startOccTimes").value);
+	
+	var finishString = new StringBuffer(document.getElementById("plainTextFilter_customSidRule_finishStr").value);
+	var finishIsRegEx = document.getElementById("plainTextFilter_customSidRule_finishIs").checked;
+	var finishOccurrence = document.getElementById("plainTextFilter_customSidRule_finishOcc1").checked ? 
+			"FIRST" : (document.getElementById("plainTextFilter_customSidRule_finishOcc2").checked ? 
+					"LAST" : document.getElementById("plainTextFilter_customSidRule_finishOccTimes").value);
+
+	if(validate.isEmptyStr(startString))
+	{
+		document.getElementById("plainTextFilter_customSidRule_startStr").value = "";
+		alert(jsStartStringEmpty);
+		return;
+	}
+	
+	if("FIRST" != startOccurrence && "LAST" != startOccurrence && (!validate.isPositiveInteger(startOccurrence) || startOccurrence < 1))
+	{
+		alert(jsStartOccAlert);
+		return;
+	}
+	
+	if("FIRST" != finishOccurrence && "LAST" != finishOccurrence && (!validate.isPositiveInteger(finishOccurrence) || finishOccurrence < 1))
+	{
+		alert(jsFinishOccAlert);
+		return;
+	}
+	
+	if(this.isCustomSidRuleExists(itemId, startString, finishString))
+	{
+		alert(jsCustomTextRuleExist);
+		return;
+	}
+	
+	var isFinishEmpty = validate.isEmptyStr(finishString);
+	var dialogId = "plainTextFilter_CustomSidRule_Dialog";
+	
+	var enable = plaintextFilter.editItemEnable;
+	var item = {itemid : itemId, enable : enable, startString : startString.toString(), startIsRegEx : startIsRegEx, startOccurrence : startOccurrence.toString(),
+			finishString : (isFinishEmpty ? "" : finishString.toString()), finishIsRegEx : finishIsRegEx, finishOccurrence : finishOccurrence.toString()};
+	
+	plaintextFilter.addOneItemInCurrentOptions(item);
+	plaintextFilter.closeTagDialog(dialogId);
+}
+
+PlainTextFilter.prototype.isCustomSidRuleExists = function(id, startStr, finishStr)
+{
+	var items = this.optionObjsMap[this.optionCustomTextRuleSids];
+	for (var i = 0; i < items.length; i++)
+	{
+		var item = items[i];
+		if (item.itemid != id && item.startString == startStr && item.finishString == finishStr)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 PlainTextFilter.prototype.saveCustomTextRule = function()
 {
 	var itemId = plaintextFilter.editItemId;
@@ -607,6 +761,8 @@ PlainTextFilter.prototype.saveCustomTextRule = function()
 	var finishOccurrence = document.getElementById("plainTextFilter_customTextRule_finishOcc1").checked ? 
 			"FIRST" : (document.getElementById("plainTextFilter_customTextRule_finishOcc2").checked ? 
 					"LAST" : document.getElementById("plainTextFilter_customTextRule_finishOccTimes").value);
+	
+	var isMultiline = document.getElementById("plainTextFilter_customTextRule_isMultiline").checked;
 	
 	var priority = document.getElementById("plainTextFilter_customTextRule_priority").value;
 
@@ -645,7 +801,8 @@ PlainTextFilter.prototype.saveCustomTextRule = function()
 	
 	var enable = plaintextFilter.editItemEnable;
 	var item = {itemid : itemId, enable : enable, startString : startString.toString(), startIsRegEx : startIsRegEx, startOccurrence : startOccurrence.toString(),
-			finishString : (isFinishEmpty ? "" : finishString.toString()), finishIsRegEx : finishIsRegEx, finishOccurrence : finishOccurrence.toString()};
+			finishString : (isFinishEmpty ? "" : finishString.toString()), finishIsRegEx : finishIsRegEx, finishOccurrence : finishOccurrence.toString(), 
+			priority : priority, isMultiline : isMultiline};
 	
 	plaintextFilter.addOneItemInCurrentOptions(item);
 	plaintextFilter.closeTagDialog(dialogId);
@@ -1127,8 +1284,28 @@ PlainTextFilter.prototype.switchRules = function(plaintextFilterRulesSection)
 	plaintextFilter.refreshCheckedIds();
 	var content = plaintextFilter.generateTagsContent(plaintextFilter.currentOption, plaintextFilter.currentPage);
 	plaintextFilter.refreshTagsContent(content);
-	document.getElementById("checkAllPlainTextFilter").checked = false;
+	var checkAllEle = document.getElementById("checkAllPlainTextFilter");
+	checkAllEle.checked = false;
 	plaintextFilter.setPageValue();
+	
+	plaintextFilter.switchStatus();
+}
+
+PlainTextFilter.prototype.switchStatus = function()
+{
+	if (plaintextFilter.currentOption == plaintextFilter.optionCustomTextRuleSids)
+	{
+		//checkAllEle.disabled = "disabled";
+		document.getElementById("plaintextFilter_editPriority").disabled = "disabled";
+		document.getElementById("td_testDesc").innerText = "Input some Text to test Custom SID Rule";
+	}
+	else
+	{
+		//checkAllEle.disabled = "";
+		document.getElementById("plaintextFilter_editPriority").disabled = "";
+		document.getElementById("td_testDesc").innerText = jsCustomTextTest;
+	}
+	
 }
 
 PlainTextFilter.prototype.refreshTagsContent = function(content)
@@ -1149,16 +1326,20 @@ PlainTextFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 	
 	if (objArray && objArray.length > 0)
 	{
-		for(var i = 0; i < objArray.length; i++)
+		if (optionValue != plaintextFilter.optionCustomTextRuleSids)
 		{
-			var ruleone = objArray[i];
-			if (typeof(ruleone.priority) == "undefined")
+			for(var i = 0; i < objArray.length; i++)
 			{
-				ruleone.priority = i + 1;
+				var ruleone = objArray[i];
+				if (typeof(ruleone.priority) == "undefined")
+				{
+					ruleone.priority = i + 1;
+				}
 			}
+			
+
+			objArray.sort(sortPriority);
 		}
-		
-		objArray.sort(sortPriority);
 		
 		var sortImgSrc = "/globalsight/images/sort-up.gif";
 		if(plaintextFilter.sortOrder == 'asc')
@@ -1171,18 +1352,28 @@ PlainTextFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 		}
 		
 		//var checkAllStr = (plaintextFilter.checkedItemIds.length == plaintextFilter.getCurrentObjectsSize()) ? " checked " : "";
-		var checkAllStr = "";
+		var checkAllStr = (optionValue == plaintextFilter.optionCustomTextRuleSids) ? "disabled='disabled'" : "";
 		str.append("<td width='5%'><input type='checkbox' onclick='plaintextFilter.checkAll()' id='checkAllPlainTextFilter'" + checkAllStr + "/></td>");
 
 		if (optionValue == plaintextFilter.optionCustomTextRules)
 		{
-			str.append("<td width='15%' class='tagName_td'>" + jsStartString + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsStartString + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsStartIs + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsStartOcc + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsFinishString + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsFinishIs + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsFinishOcc + "</td>");
+			str.append("<td width='12%' class='tagName_td'>" + jsMultiline + "</td>");
+			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
+		}
+		if (optionValue == plaintextFilter.optionCustomTextRuleSids)
+		{
+			str.append("<td width='20%' class='tagName_td'>" + jsStartString + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsStartIs + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsStartOcc + "</td>");
-			str.append("<td width='15%' class='tagName_td'>" + jsFinishString + "</td>");
+			str.append("<td width='20%' class='tagName_td'>" + jsFinishString + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsFinishIs + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsFinishOcc + "</td>");
-			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
 		}
 		str.append("</tr>");
 		var startIndex = 0;
@@ -1220,7 +1411,18 @@ PlainTextFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 					str.append("<td class='tagValue_td'>" + ruleObj.finishString.replace(/\</g,"&lt;").replace(/\>/g, "&gt;"));
 					str.append("<td class='tagValue_td'>" + (ruleObj.finishIsRegEx?imgYes:"") + "</td>");
 					str.append("<td class='tagValue_td'>" + ruleObj.finishOccurrence + "</td>");
+					str.append("<td class='tagValue_td'>" + (ruleObj.isMultiline?imgYes:"") + "</td>");
 					str.append("<td class='tagValue_td'>" + (ruleObj.priority ? ruleObj.priority : 9) + "</td>");
+				}
+				if (optionValue == plaintextFilter.optionCustomTextRuleSids)
+				{
+					var encodedName = ruleObj.startString.replace(/\</g,"&lt;").replace(/\>/g, "&gt;");
+					str.append("<td class='tagValue_td'><a href='#' onclick=\"plaintextFilter.addTag('" + radioId + "')\">"+encodedName+"</a></td>");
+					str.append("<td class='tagValue_td'>" + (ruleObj.startIsRegEx?imgYes:"") + "</td>");
+					str.append("<td class='tagValue_td'>" + ruleObj.startOccurrence + "</td>");
+					str.append("<td class='tagValue_td'>" + ruleObj.finishString.replace(/\</g,"&lt;").replace(/\>/g, "&gt;"));
+					str.append("<td class='tagValue_td'>" + (ruleObj.finishIsRegEx?imgYes:"") + "</td>");
+					str.append("<td class='tagValue_td'>" + ruleObj.finishOccurrence + "</td>");
 				}
 				str.append("</tr>");
 			}
@@ -1232,13 +1434,23 @@ PlainTextFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 		
 		if (optionValue == plaintextFilter.optionCustomTextRules)
 		{
-			str.append("<td width='15%' class='tagName_td'>" + jsStartString + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsStartString + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsStartIs + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsStartOcc + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsFinishString + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsFinishIs + "</td>");
+			str.append("<td width='13%' class='tagName_td'>" + jsFinishOcc + "</td>");
+			str.append("<td width='12%' class='tagName_td'>" + jsMultiline + "</td>");
+			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
+		}
+		if (optionValue == plaintextFilter.optionCustomTextRuleSids)
+		{
+			str.append("<td width='20%' class='tagName_td'>" + jsStartString + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsStartIs + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsStartOcc + "</td>");
-			str.append("<td width='15%' class='tagName_td'>" + jsFinishString + "</td>");
+			str.append("<td width='20%' class='tagName_td'>" + jsFinishString + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsFinishIs + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsFinishOcc + "</td>");
-			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
 		}
 		str.append("</tr>");
 		str.append("<tr><td colspan='2'><p><br /></p></td></tr>");
@@ -1263,6 +1475,27 @@ PlainTextFilter.prototype.checkthis = function(cobj)
 	var checkAllObj = document.getElementById("checkAllPlainTextFilter");
 	var itemId = plaintextFilter.getItemId(oid);
 	var ruleObj = plaintextFilter.getItemById(itemId, plaintextFilter.currentOption);
+	
+	// only one rule can be enabled for custom sid rule
+	if (plaintextFilter.currentOption == plaintextFilter.optionCustomTextRuleSids && cobj.checked)
+	{
+		var objArray = plaintextFilter.optionObjsMap[plaintextFilter.optionCustomTextRuleSids];
+		if (objArray && objArray.length > 0)
+		{
+			for(var i = 0; i < objArray.length; i++)
+			{
+				var ruleone = objArray[i];
+				
+				if (ruleone.enable)
+				{
+					alert("Only one custom SID rule can be enabled!");
+					cobj.checked = false;
+					return;
+				}
+			}
+		}
+	}
+	
 	ruleObj.enable = cobj.checked;
 
 	if (!cobj.checked)

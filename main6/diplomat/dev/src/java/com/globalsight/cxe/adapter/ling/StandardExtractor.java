@@ -1744,9 +1744,32 @@ public class StandardExtractor
                 {
                     try
                     {
-                        m_ruleFile = FileUtils
-                                .read(StandardExtractor.class
-                                        .getResourceAsStream("/properties/AuthorITXmlRule.properties"));
+                        if (m_ruleFile != null)
+                        {
+                            StringBuilder rule = new StringBuilder(m_ruleFile);
+                            String rulesetStr = "</ruleset>";
+                            int index = m_ruleFile.indexOf(rulesetStr);
+                            if ("".equals(m_ruleFile) || index < 0)
+                            {
+                                m_ruleFile = FileUtils
+                                        .read(StandardExtractor.class
+                                                .getResourceAsStream("/properties/AuthorITXmlRule.properties"));
+                            }
+                            else
+                            {
+                                String sidRile = "<sid path=\"//*[local-name()='Object']/*[local-name()='ID']\" root=\"Object\"/>";
+                                rule.insert(index, sidRile);
+                                
+                                m_ruleFile = rule.toString();
+                            }
+                        }
+                        else
+                        {
+                            m_ruleFile = FileUtils
+                                    .read(StandardExtractor.class
+                                            .getResourceAsStream("/properties/AuthorITXmlRule.properties"));
+                        }
+                        
                     }
                     catch (Exception e)
                     {

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleBase;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
@@ -43,6 +45,8 @@ import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
+import com.globalsight.ling.docproc.LineIndex;
+import com.globalsight.ling.docproc.LineString;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.Segmentable;
 import com.globalsight.ling.docproc.SkeletonElement;
@@ -70,7 +74,8 @@ public class Extractor extends AbstractExtractor implements
     static public boolean s_breakOnSingleCR = false;
     static public boolean s_keepEmbeddedCR = true;
 
-    private List<CustomTextRule> m_customTextRules = null;
+    private List<CustomTextRuleBase> m_customTextRules = null;
+    private List<CustomTextRuleBase> m_customSidRules = null;
     // GBS-3881
     private Filter m_elementPostFilter = null;
     private String m_postFormat = null;
@@ -247,6 +252,7 @@ public class Extractor extends AbstractExtractor implements
                 PlainTextFilterParser parser = new PlainTextFilterParser(pf);
                 parser.parserXml();
                 m_customTextRules = parser.getCustomTextRules();
+                m_customSidRules = parser.getCustomTextRuleSids();
                 m_elementPostFilter = parser.getElementPostFilter();
                 if (m_elementPostFilter != null)
                 {
@@ -257,55 +263,166 @@ public class Extractor extends AbstractExtractor implements
 
             if (m_customTextRules != null && m_customTextRules.size() > 0)
             {
-                // The Custom Text File filter should process files
-                // line-by-line.
-                LineNumberReader lr = new LineNumberReader(readInput());
-
-                String lineterminator = "\n";
-                String line = lr.readLine();
-
-                while (line != null)
+                boolean isMultiline = false;
+                for (int i = 0; i < m_customTextRules.size(); i++)
                 {
-                    int[] index = CustomTextRuleHelper.extractOneLine(line,
-                            m_customTextRules);
-                    if (index == null)
+                    CustomTextRule rrr = (CustomTextRule) m_customTextRules.get(i);
+                    
+                    if (rrr.getIsMultiline())
                     {
-                        getOutput().addSkeleton(line);
+                        isMultiline = true;
+                        break;
                     }
-                    else if (index.length == 2 && index[0] < index[1])
+                }
+                
+                String lineterminator = "\n";
+                LineNumberReader lr = null;
+                if (isMultiline)
+                {
+                    lr = new LineNumberReader(readInput());
+                    StringBuffer allStr = new StringBuffer();
+                    List<LineString> lines = new ArrayList<LineString>();
+                    String line = lr.readLine();
+                    int lineNumber = 1;
+
+                    while (line != null)
                     {
-                        String s0 = line.substring(0, index[0]);
-                        String s1 = line.substring(index[0], index[1]);
-                        String s2 = line.substring(index[1]);
-                        if (s0 != null && s0.length() > 0)
+                        lines.add(new LineString(line, lineNumber));
+                        allStr.append(line);
+
+                        line = lr.readLine();
+                        ++lineNumber;
+                        
+                        if (line != null)
                         {
-                            getOutput().addSkeleton(s0);
+                            allStr.append(lineterminator);
                         }
-                        if (s1 != null && s1.length() > 0)
+                    }
+                    
+                    List<LineIndex> indexes = CustomTextRuleHelper
+                            .extractLines(lines, allStr.length(),
+                                    m_customTextRules, m_customSidRules);
+                    
+                    if (indexes == null || indexes.size() == 0)
+                    {
+                        for (int i = 0; i < lines.size(); i++)
                         {
-                            if (m_elementPostFilter != null)
+                            LineString lineStr = lines.get(i);
+                            
+                            getOutput().addSkeleton(lineStr.getLine());
+                            if (i != (lines.size() - 1))
                             {
-                                gotoPostFilter(s1);
+                                getOutput().addSkeleton(lineterminator);
                             }
-                            else
-                            {
-                                getOutput().addTranslatable(s1);
-                            }
-                        }
-                        if (s2 != null && s2.length() > 0)
-                        {
-                            getOutput().addSkeleton(s2);
                         }
                     }
                     else
                     {
-                        getOutput().addSkeleton(line);
+                        int start = 0;
+                        for (int i = 0; i < indexes.size(); i++)
+                        {
+                            LineIndex lineIndex = indexes.get(i);
+                            
+                            String s0 = allStr.substring(start, lineIndex.getContentStart());
+                            String s1 = allStr.substring(lineIndex.getContentStart(), lineIndex.getContentEnd());
+                            String sid = ((lineIndex.getSidStart() == -1) ? null : allStr.substring(lineIndex.getSidStart(), lineIndex.getSidEnd()));
+                            
+                            if (s0 != null && s0.length() > 0)
+                            {
+                                getOutput().addSkeleton(s0);
+                            }
+                            if (s1 != null && s1.length() > 0)
+                            {
+                                if (m_elementPostFilter != null)
+                                {
+                                    gotoPostFilter(s1);
+                                }
+                                else
+                                {
+                                    getOutput().addTranslatable(s1, sid);
+                                }
+                            }
+                            
+                            start = lineIndex.getContentEnd();
+                        }
+                        
+                        if (start < allStr.length())
+                        {
+                            String endStr = allStr.substring(start, allStr.length());
+                            getOutput().addSkeleton(endStr);
+                        }
                     }
+                }
+                else
+                {
+                    // The Custom Text File filter should process files
+                    // line-by-line.
+                    lr = new LineNumberReader(readInput());
+                    String line = lr.readLine();
 
-                    line = lr.readLine();
-                    if (line != null)
+                    while (line != null)
                     {
-                        getOutput().addSkeleton(lineterminator);
+                        int[] index = CustomTextRuleHelper.extractOneLine(line,
+                                m_customTextRules);
+                        if (index == null)
+                        {
+                            getOutput().addSkeleton(line);
+                        }
+                        else if (index.length == 2 && index[0] < index[1])
+                        {
+                            String sid = null;
+                            int[] sidIndex = CustomTextRuleHelper.extractOneLine(line,
+                                    m_customSidRules);
+                            if (sidIndex != null && sidIndex.length == 2 && sidIndex[0] < sidIndex[1])
+                            {
+                                sid = line.substring(sidIndex[0], sidIndex[1]);
+                            }
+                            
+                            String s0 = line.substring(0, index[0]);
+                            String s1 = line.substring(index[0], index[1]);
+                            String s2 = line.substring(index[1]);
+                            if (s0 != null && s0.length() > 0)
+                            {
+                                getOutput().addSkeleton(s0);
+                            }
+                            if (s1 != null && s1.length() > 0)
+                            {
+                                if (m_elementPostFilter != null)
+                                {
+                                    gotoPostFilter(s1);
+                                }
+                                else
+                                {
+                                    getOutput().addTranslatable(s1, sid);
+                                }
+                            }
+                            if (s2 != null && s2.length() > 0)
+                            {
+                                getOutput().addSkeleton(s2);
+                            }
+                        }
+                        else
+                        {
+                            getOutput().addSkeleton(line);
+                        }
+
+                        line = lr.readLine();
+                        if (line != null)
+                        {
+                            getOutput().addSkeleton(lineterminator);
+                        }
+                    }
+                }
+                
+                if (lr != null)
+                {
+                    try
+                    {
+                        lr.close();
+                    }
+                    catch (Exception exxx)
+                    {
+                        // ignore
                     }
                 }
             }

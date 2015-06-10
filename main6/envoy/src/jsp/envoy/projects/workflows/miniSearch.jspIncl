@@ -1,8 +1,7 @@
 <%@ page import='com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
           com.globalsight.everest.servlet.util.SessionManager,
           com.globalsight.everest.jobhandler.Job,
-          com.globalsight.util.StringUtil,
-          com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper' %>
+          com.globalsight.util.StringUtil' %>
 
 <jsp:useBean id="miniSearch" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -423,7 +422,7 @@ function checkFilters()
 	var tmp = ATrim($("#jobIdFilter").val());
 	var isEffective = /^([0-9]+[-]?[0-9]*[,]?)+/;
 	var isLetter = /^[a-zA-Z]/;
-	var isInteger = /^[0-9]/;
+	var isInt = /^[0-9]/;
 	var containLetterSpace = "no";
 	tmp = tmp.replace(/\s+/g," ");
 	var t= tmp.replace(/\-/g,"");
@@ -442,7 +441,7 @@ function checkFilters()
 		{
 			for(var i=0;i<tmp.length;i++)
 			{
-				if(isLetter.test(tmp.charAt(i))||isInteger.test(tmp.charAt(i))&&i<tmp.length-2 && tmp.charAt(i+1)==" "&&isInteger.test(tmp.charAt(i+2)))
+				if(isLetter.test(tmp.charAt(i)) || isInt.test(tmp.charAt(i)) && i<tmp.length-2 && tmp.charAt(i+1)==" "&& isInt.test(tmp.charAt(i+2)))
 				{
 					containLetterSpace = "yes";
 					break;

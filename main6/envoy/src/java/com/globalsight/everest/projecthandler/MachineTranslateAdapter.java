@@ -39,6 +39,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.google.translate.api.v2.core.Translator;
 import org.google.translate.api.v2.core.model.Translation;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.tempuri.SoapService;
@@ -353,6 +354,30 @@ public class MachineTranslateAdapter
         {
             mtProfile.setCategory("general");
         }
+
+        String srRS = p_request.getParameter("sr_RS");
+        if (StringUtils.isEmpty(srRS)) {
+        	srRS = "sr-Latn";
+        }
+        String srYU = p_request.getParameter("sr_YU");
+        if (StringUtils.isEmpty(srYU)) {
+        	srYU = "sr-Latn";
+        }
+        JSONArray arr = new JSONArray();
+        JSONObject srRSObj = new JSONObject();
+        JSONObject srYUObj = new JSONObject();
+        try {
+			srRSObj.put("sr_RS", srRS);
+			srYUObj.put("sr_YU", srYU);
+			arr.put(srRSObj);
+			arr.put(srYUObj);
+			mtProfile.setJsonInfo(arr.toString());
+		} catch (JSONException e) {
+			// default.
+			mtProfile.setJsonInfo("[{\"sr_RS\":\"sr-Latn\"},{\"sr_YU\":\"sr-Latn\"}]");
+			logger.warn("Fail to save MT setting for MS Translator Serbian: "
+					+ e.getMessage());
+		}
     }
 
     /**

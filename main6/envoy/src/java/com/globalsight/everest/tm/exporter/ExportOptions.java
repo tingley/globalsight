@@ -253,7 +253,12 @@ public class ExportOptions
             result.append(EditUtil.encodeXmlEntities(m_tuId));
             result.append("</tuId>");
             result.append("<stringId>");
-            result.append(EditUtil.encodeXmlEntities(m_sid));
+			String sid = EditUtil.encodeXmlEntities(m_sid);
+			if (sid.indexOf("\\") != -1)
+			{
+				sid = sid.replace("\\", "\\\\");
+			}
+            result.append(sid);
             result.append("</stringId>");
             result.append("<regex>");
             result.append(EditUtil.encodeXmlEntities(m_regex));

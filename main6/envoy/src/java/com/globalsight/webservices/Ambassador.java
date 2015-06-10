@@ -557,6 +557,8 @@ public class Ambassador extends AbstractWebService
 
     /**
      * Returns an XML description of the current set of file profiles.
+     *
+     * @deprecated -- this method is not well designed, not suggest to use it.
      * 
      * @param p_accessToken
      *            String Access Token for invoking method

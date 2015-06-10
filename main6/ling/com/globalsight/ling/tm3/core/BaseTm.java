@@ -312,7 +312,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             sourceLocale, targetLocales, inlineAttributes,
                             customAttributes, maxResults, lookupTarget,
                             tm3TmIds);
-                    int max = maxResults * (tm3TmIds.size() <= 3 ? 3 : tm3TmIds.size());
+            		int max = determineMaxResults(maxResults, tm3TmIds.size(),
+            				targetLocales.size());
                     if (count < max)
                     {
                         getFuzzyMatches(conn, results, matchKey, sourceLocale,
@@ -435,10 +436,12 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         {
             exactTuvIds.add(match.getTuv().getId());
         }
-        maxResults *= (tm3TmIds.size() <= 3 ? 3 : tm3TmIds.size());
-        int max = maxResults - results.getMatches().size();
+
+		int max = determineMaxResults(maxResults, tm3TmIds.size(),
+				targetLocales.size());
+		int fuzzyMax = max - results.getMatches().size();
         Iterator<FuzzyCandidate<T>> it = sorted.iterator();
-        while (candidates.size() < max && it.hasNext())
+        while (candidates.size() < fuzzyMax && it.hasNext())
         {
             FuzzyCandidate<T> c = it.next();
             if (!exactTuvIds.contains(c.getId()))
@@ -461,7 +464,24 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         }
     }
 
-    @Override
+	private int determineMaxResults(int maxResults, int tmSize,
+			int targetLocaleSize)
+    {
+        if (maxResults < Integer.MAX_VALUE)
+        {
+        	int maxHits = maxResults;
+            int max1 = maxHits * (tmSize <= 3 ? 3 : tmSize);
+            int max2 = maxHits * targetLocaleSize;
+            return Math.max(max1, max2);
+        }
+        else
+        {
+        	// maxResults = Integer.MAX_VALUE, want all
+            return maxResults;        	
+        }
+    }
+
+	@Override
     public TM3Saver<T> createSaver()
     {
         return new BaseSaver<T>(this);

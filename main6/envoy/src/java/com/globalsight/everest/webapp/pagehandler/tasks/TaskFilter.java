@@ -189,7 +189,6 @@ public class TaskFilter
         }
 
         // forward to the jsp page.
-        TaskSearchHandler.setup(p_request);
         RequestDispatcher dispatcher = p_context
                 .getRequestDispatcher("/envoy/tasks/taskSearch.jsp");
 

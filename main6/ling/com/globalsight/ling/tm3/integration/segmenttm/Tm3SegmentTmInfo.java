@@ -306,10 +306,10 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 }
                 // SID changed from TM Search Edit Entry page
                 TM3Attribute sidAttr = TM3Util.getAttr(tm, SID);
-                if (StringUtil.isNotEmpty(stu.getSID()))
-                {
+//                if (StringUtil.isNotEmpty(stu.getSID()))
+//                {
                     tu.setAttribute(sidAttr, stu.getSID());
-                }
+//                }
                 // Now find the relevant TUV
                 for (TM3Tuv<GSTuvData> tm3tuv : tu.getAllTuv())
                 {

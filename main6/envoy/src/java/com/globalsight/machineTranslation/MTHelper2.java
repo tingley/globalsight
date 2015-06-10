@@ -137,6 +137,14 @@ public class MTHelper2
                 mt = MTHelper.initMachineTranslator(mtEngine);
                 HashMap hashMap = mtProfile.getParamHM();
 //                hashMap.put(MachineTranslator.SOURCE_PAGE_ID, sourcePageId);
+				if (MachineTranslator.ENGINE_MSTRANSLATOR
+						.equalsIgnoreCase(mt.getEngineName())
+						&& p_state.getTargetLocale().getLanguage().equalsIgnoreCase("sr"))
+                {
+					String srLang = mtProfile.getPreferedLangForSr(p_state
+							.getTargetLocale().toString());
+					hashMap.put(MachineTranslator.SR_LANGUAGE, srLang);
+                }
                 mt.setMtParameterMap(hashMap);
             }
         }

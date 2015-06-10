@@ -1,7 +1,6 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page import="java.util.*,
         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
-        com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper,
         com.globalsight.everest.servlet.util.SessionManager,
         com.globalsight.everest.jobhandler.Job,
         com.globalsight.everest.servlet.util.ServerProxy,
@@ -49,59 +48,6 @@ var myJobsMenu = new WebFXMenu;
 // search job
 
 // last job
-<%
-ResourceBundle jbundle = PageHandler.getBundle(session);
-Cookie jobSearchCookie = JobSearchHandlerHelper.getJobSearchCookie(session, request);
-if (jobSearchCookie != null)
-{
-    String jcookie = URLDecoder.decode(jobSearchCookie.getValue());
-    int begin = jcookie.indexOf(":"+JobSearchConstants.STATUS_OPTIONS+"=");
-    int end = jcookie.indexOf(":", begin+1);
-    String jobstate = jcookie.substring(begin+5, end);
-    String lastJobUrl = null;
-    String menuLabel = mainMenuBundle.getString("lb_last_search");
-    if (jobstate.equals(Job.PENDING))
-    {
-        menuLabel += " (" + jbundle.getString("lb_pending") + ")";
-        lastJobUrl = LinkHelper.getWebActivityURL(request, "jobsPending");
-    }
-    else if (jobstate.equals(Job.READY_TO_BE_DISPATCHED))
-    {
-        menuLabel += " (" + jbundle.getString("lb_ready") + ")";
-        lastJobUrl = LinkHelper.getWebActivityURL(request, "jobsReady");
-    }
-    else if (jobstate.equals(Job.DISPATCHED))
-    {
-        menuLabel += " (" + jbundle.getString("lb_inprogress") + ")";
-        lastJobUrl = LinkHelper.getWebActivityURL(request, "jobsInProgress");
-    }
-    else if (jobstate.equals(Job.LOCALIZED))
-    {
-        menuLabel += " (" + jbundle.getString("lb_localized") + ")";
-        lastJobUrl = LinkHelper.getWebActivityURL(request, "jobsLocalized");
-    }
-    else if (jobstate.equals(Job.ARCHIVED))//Need to be modified when the state come out.
-    {
-        menuLabel += " (" + jbundle.getString("lb_archived") + ")";
-        lastJobUrl = LinkHelper.getWebActivityURL(request, "jobsArchived");
-    }
-    else if (jobstate.equals(Job.EXPORTED))
-    {
-        menuLabel += " (" + jbundle.getString("lb_exported") + ")";
-        lastJobUrl = LinkHelper.getWebActivityURL(request, "jobsExported");
-    }
-    else
-    {
-        menuLabel += " (" + jbundle.getString("lb_all_jobs") + ")";//modify for GBS-2875
-        lastJobUrl = LinkHelper.getWebActivityURL(request, "jobsAll");
-    }
-    lastJobUrl += "&searchType=lastSearch";
-
-%>
-myJobsMenu.add(new WebFXMenuItem("<%=menuLabel%>", "javascript:goToUrl('<%=lastJobUrl%>');", ""));
-<%
-}
-%>
 
 <amb:permission name="<%=Permission.JOBS_VIEW%>" >
     myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_pending")%>", "javascript:goToUrl('<%=jobsPendingUrl%>');", ""));

@@ -48,28 +48,61 @@ public class StopWord
     // Key: language code (en, fr, etc)
     // Value: StopWord object
     private static Map c_stopWordCache  = new Hashtable();
-    
+    private static Map c_emptyStopWordCache  = new Hashtable();
+
     private Set m_stopWords = new HashSet();
-    
 
     // factory method
-    static public StopWord getStopWord(GlobalSightLocale p_locale)
+    @SuppressWarnings("unchecked")
+	static public StopWord getStopWord(GlobalSightLocale p_locale)
         throws Exception
     {
-        StopWord sw = (StopWord)c_stopWordCache.get(p_locale);
+		StopWord sw = (StopWord) c_stopWordCache.get(p_locale);
         if(sw == null)
         {
-            sw = new StopWord(p_locale);
+            sw = new StopWord(p_locale, true);
             c_stopWordCache.put(p_locale, sw);
         }
-        
+
         return sw;
     }
-    
+
+    /**
+     * In case we don't care stop-word file.
+     * 
+     * @param p_locale
+     * @return
+     * @throws Exception
+     */
+	@SuppressWarnings("unchecked")
+	static public StopWord getBaseStopWord(GlobalSightLocale p_locale)
+			throws Exception
+	{
+		StopWord sw = (StopWord) c_emptyStopWordCache.get(p_locale);
+        if(sw == null)
+        {
+            sw = new StopWord(p_locale, false);
+            c_emptyStopWordCache.put(p_locale, sw);
+        }
+
+        return sw;
+	}
 
     //constructor
-    private StopWord(GlobalSightLocale p_locale)
+    private StopWord(GlobalSightLocale p_locale, boolean p_careStopWordFile)
         throws Exception
+    {
+    	loadCommonStopWords();
+
+    	if (p_careStopWordFile)
+    	{
+            // get stop word list for a specified language
+            readStopWordFromFile(p_locale);
+    	}
+    }
+    
+    @SuppressWarnings("unchecked")
+	private void loadCommonStopWords()
     {
         // common stop words (symbols)
 
@@ -101,12 +134,7 @@ public class StopWord
         {
             m_stopWords.add("x" + i);
         }
-
-        // get stop word list for a specified language
-        readStopWordFromFile(p_locale);
-        
     }
-    
 
     public boolean isStopWord(String p_word)
     {
@@ -160,10 +188,8 @@ public class StopWord
         }
         else
         {
-        	if (c_logger.isDebugEnabled()) {
-                c_logger.warn("Couldn't find a stop word file for "
-                        + p_locale.toString());        		
-        	}
+            c_logger.warn("Couldn't find a stop word file for "
+                    + p_locale.toString());
         }
     }
 

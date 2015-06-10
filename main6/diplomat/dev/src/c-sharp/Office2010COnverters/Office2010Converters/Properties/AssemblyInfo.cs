@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Office 2010 converters")]
+[assembly: AssemblyTitle("MS Office 2010 In Context Review Converter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Office 2010 converters")]
+[assembly: AssemblyProduct("MS Office 2010 In Context Review Converter")]
 [assembly: AssemblyCopyright("©1998-2011, Welocalize Inc.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -316,7 +316,7 @@ abstract class FuzzyIndex<T extends TM3Data>
         int max2 = 0;
         if (targetLocales != null)
         {
-            max2 = 5 * targetLocales.size();
+            max2 = 10 * targetLocales.size();
         }
 
         inner.append(" LIMIT " + Math.max(max1, max2));

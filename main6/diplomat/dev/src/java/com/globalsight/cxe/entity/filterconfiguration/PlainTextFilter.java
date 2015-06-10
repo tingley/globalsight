@@ -111,6 +111,10 @@ public class PlainTextFilter implements Filter
                 .append("\"")
                 .append(isParsed ? FilterHelper.escape(parser
                         .getCustomTextRulesJson()) : "[]").append("\",");
+        sb.append("\"customTextRuleSids\":")
+                .append("\"")
+                .append(isParsed ? FilterHelper.escape(parser
+                        .getCustomTextRuleSidsJson()) : "[]").append("\",");
         sb.append("\"elementPostFilter\":").append("\"")
                 .append(isParsed ? parser.getElementPostFilterTableName() : "")
                 .append("\",");

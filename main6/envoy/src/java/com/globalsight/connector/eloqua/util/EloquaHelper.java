@@ -397,6 +397,7 @@ public class EloquaHelper
                 LandingPage e = new LandingPage();
                 e.setJson((JSONObject) es.get(i), true);
                 setCreateBy(e);
+                setCreateAt(e);
                 all.addElements(e);
             }
         }

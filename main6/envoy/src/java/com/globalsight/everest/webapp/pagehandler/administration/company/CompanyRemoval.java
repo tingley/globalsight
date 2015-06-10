@@ -69,7 +69,7 @@ public class CompanyRemoval
     private String runningMessage = "";
     private String doneMessage = "";
 
-    private static final int BATCH_CAPACITY = 10000;
+    private static final int BATCH_CAPACITY = 1000;
 
     private static final String TABLE_BACKUP_COMPANY = "COMPANY_BACKUP";
     private static final String TABLE_BACKUP_JOB = "JOB_BACKUP";
@@ -204,7 +204,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_SSO_USER_MAPPING = "delete from SSO_USER_MAPPING where COMPANY_ID=?";
     private static final String SQL_DELETE_SURCHARGE = "delete from SURCHARGE where COST_ID in ";
     private static final String SQL_DELETE_SYSTEM_PARAMETER = "delete from SYSTEM_PARAMETER where COMPANY_ID=?";
-    private static final String SQL_DELETE_TARGET_PAGE = "delete from TARGET_PAGE where SOURCE_PAGE_ID in ";
+    private static final String SQL_DELETE_TARGET_PAGE = "delete from TARGET_PAGE where ID in ";
     private static final String SQL_DELETE_TARGET_PAGE_LEVERAGE_GROUP = "delete from TARGET_PAGE_LEVERAGE_GROUP where TP_ID in ";
     private static final String SQL_DELETE_TASK_INFO_BY_COMPANY_ID = "delete from TASK_INFO where COMPANY_ID=?";
     private static final String SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID = "delete from SCORECARD_CATEGORY WHERE COMPANY_ID = ?";
@@ -226,9 +226,9 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TEAMSITE_BRANCH_LANGUAGE = "delete from TEAMSITE_BRANCH_LANGUAGE where TEAMSITE_SERVER_ID in ";
     private static final String SQL_DELETE_TEAMSITE_SERVER = "delete from TEAMSITE_SERVER where COMPANY_ID=?";
     private static final String SQL_DELETE_TEAMSITE_SERVER_BACKING_STORE = "delete from TEAMSITE_SERVER_BACKING_STORE where TEAMSITE_SERVER_ID in ";
-    private static final String SQL_DELETE_TEMPLATE = "delete from TEMPLATE where SOURCE_PAGE_ID in ";
-    private static final String SQL_DELETE_TEMPLATE_PART = "delete from TEMPLATE_PART where TEMPLATE_ID in ";
-    private static final String SQL_DELETE_TEMPLATE_PART_ARCHIVED = "delete from TEMPLATE_PART_ARCHIVED where TEMPLATE_ID in ";
+    private static final String SQL_DELETE_TEMPLATE = "delete from TEMPLATE where ID in ";
+    private static final String SQL_DELETE_TEMPLATE_PART = "delete from TEMPLATE_PART where ID in ";
+    private static final String SQL_DELETE_TEMPLATE_PART_ARCHIVED = "delete from TEMPLATE_PART_ARCHIVED where ID in ";
     private static final String SQL_DELETE_TM_ATTRIBUTE = "delete from TM_ATTRIBUTE where TM_ID in ";
     private static final String SQL_DELETE_TM_PROFILE_PROJECT_TM_INFO = "delete from TM_PROFILE_PROJECT_TM_INFO where PROJECT_TM_ID in ";
     private static final String SQL_DELETE_TM_PROFILE = "delete from TM_PROFILE where PROJECT_TM_ID_FOR_SAVE in ";
@@ -3259,7 +3259,7 @@ public class CompanyRemoval
             removeImageReplaceFileMap(conn, targetPageIds);
         }
         logStart("TARGET_PAGE");
-        exec(conn, SQL_DELETE_TARGET_PAGE, sourcePageIds);
+        exec(conn, SQL_DELETE_TARGET_PAGE, targetPageIds);
         logEnd("TARGET_PAGE");
     }
 
@@ -3448,24 +3448,32 @@ public class CompanyRemoval
         {
             removeTemplatePart(conn, templateIds);
         }
+
         logStart("TEMPLATE");
-        exec(conn, SQL_DELETE_TEMPLATE, sourcePageIds);
+        exec(conn, SQL_DELETE_TEMPLATE, templateIds);
         logEnd("TEMPLATE");
     }
 
     private void removeTemplatePart(Connection conn,
             List<List<Object>> templateIds) throws SQLException
     {
-        logStart("TEMPLATE_PART");
-        exec(conn, SQL_DELETE_TEMPLATE_PART, templateIds);
+		List<List<Object>> templatePartIds = queryBatchList(conn,
+				"SELECT ID FROM TEMPLATE_PART WHERE TEMPLATE_ID IN ",
+				templateIds);
+		logStart("TEMPLATE_PART");
+        exec(conn, SQL_DELETE_TEMPLATE_PART, templatePartIds);
         logEnd("TEMPLATE_PART");
 
         // "TEMPLATE_PART_ARCHIVED"
         if (DbUtil.isTableExisted(conn, "TEMPLATE_PART_ARCHIVED"))
         {
+			templatePartIds = queryBatchList(
+					conn,
+					"SELECT ID FROM TEMPLATE_PART_ARCHIVED WHERE TEMPLATE_ID IN ",
+					templateIds);
             logStart("TEMPLATE_PART_ARCHIVED");
-            exec(conn, SQL_DELETE_TEMPLATE_PART_ARCHIVED, templateIds);
-            logEnd("TEMPLATE_PART_ARCHIVED");            
+			exec(conn, SQL_DELETE_TEMPLATE_PART_ARCHIVED, templatePartIds);
+            logEnd("TEMPLATE_PART_ARCHIVED");
         }
     }
 

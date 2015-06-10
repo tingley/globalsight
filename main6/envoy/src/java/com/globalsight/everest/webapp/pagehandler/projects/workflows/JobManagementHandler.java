@@ -35,7 +35,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -79,7 +78,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.workflow.Workfl
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -2846,162 +2844,6 @@ public abstract class JobManagementHandler extends PageHandler
     {
         try
         {
-            Cookie cookie = JobSearchHandlerHelper.getJobSearchCookie(session,
-                    request, searchType);
-            if (cookie == null)
-                return sp;
-
-            String cookieValue = URLDecoder.decode(cookie.getValue());
-            StringTokenizer strtok = new StringTokenizer(cookieValue, ":");
-            while (strtok.hasMoreTokens())
-            {
-                String key = "";
-                String value = "";
-                try
-                {
-                    String tok = strtok.nextToken();
-                    int idx = tok.indexOf("=");
-                    key = tok.substring(0, idx);
-                    value = tok.substring(idx + 1);
-                }
-                catch (Exception e)
-                {
-                    continue;
-                }
-                if (key.equals(JobSearchConstants.NAME_FIELD))
-                {
-                    if (!value.equals(""))
-                        sp.setJobName(value);
-                }
-                else if (key.equals(JobSearchConstants.NAME_OPTIONS))
-                {
-                    sp.setJobNameCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.ID_FIELD))
-                {
-                    if (!value.equals(""))
-                        sp.setJobId(value);
-				}
-				else if (key.equals(JobSearchConstants.ID_GROUP))
-				{
-					 if (!value.equals(""))
-	                        sp.setJobGroupId(value);
-				}
-				else if (key.equals(JobSearchConstants.ID_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setJobIdCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.STATUS_OPTIONS))
-                {
-                    List<String> list = new ArrayList<String>();
-                    if (value.equals(Job.ALLSTATUS))
-                    {
-                        list.addAll(Job.ALLSTATUSLIST);
-                    }
-                    else
-                    {
-                        if (value.equals(Job.PENDING))
-                        {
-                            list.addAll(Job.PENDING_STATUS_LIST);
-                        }
-                        else if (value.equals(Job.EXPORTED))
-                        {
-                            list.add(Job.EXPORT_FAIL);
-                        }
-                        else
-                        {
-                            list.add(value);
-                        }
-                    }
-                    sp.setJobState(list);
-                }
-                else if (key.equals(JobSearchConstants.PROJECT_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setProjectId(value);
-                }
-                else if (key.equals(JobSearchConstants.SRC_LOCALE))
-                {
-                    if (!value.equals("-1"))
-                        sp.setSourceLocale(ServerProxy.getLocaleManager()
-                                .getLocaleById(Long.parseLong(value)));
-                }
-                else if (key.equals(JobSearchConstants.TARG_LOCALE))
-                {
-                    if (!value.equals("-1"))
-                        sp.setTargetLocale(ServerProxy.getLocaleManager()
-                                .getLocaleById(Long.parseLong(value)));
-                }
-                else if (key.equals(JobSearchConstants.PRIORITY_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setPriority(value);
-                }
-                else if (key.equals(JobSearchConstants.CREATION_START))
-                {
-                    if (!value.equals(""))
-                        sp.setCreationStart(new Integer(value));
-                }
-                else if (key.equals(JobSearchConstants.CREATION_START_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setCreationStartCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.CREATION_END))
-                {
-                    if (!value.equals(""))
-                        sp.setCreationEnd(new Integer(value));
-                }
-                else if (key.equals(JobSearchConstants.CREATION_END_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setCreationEndCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.EST_COMPLETION_START))
-                {
-                    if (!value.equals(""))
-                        sp.setEstCompletionStart(new Integer(value));
-                }
-                else if (key
-                        .equals(JobSearchConstants.EST_COMPLETION_START_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setEstCompletionStartCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.EST_COMPLETION_END))
-                {
-                    if (!value.equals(""))
-                        sp.setEstCompletionEnd(new Integer(value));
-                }
-                else if (key
-                        .equals(JobSearchConstants.EST_COMPLETION_END_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setEstCompletionEndCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.EXPORT_DATE_START))
-                {
-                    if (!value.equals(""))
-                        sp.setExportDateStart(new Integer(value));
-                }
-                else if (key
-                        .equals(JobSearchConstants.EXPORT_DATE_START_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setExportDateStartOptions(value);
-                }
-                else if (key.equals(JobSearchConstants.EXPORT_DATE_END))
-                {
-                    if (!value.equals(""))
-                        sp.setExportDateEnd(new Integer(value));
-                }
-                else if (key.equals(JobSearchConstants.EXPORT_DATE_END_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setExportDateEndOptions(value);
-                }
-            }
             return sp;
         }
         catch (Exception e)

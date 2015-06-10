@@ -914,7 +914,7 @@ session="true" %>
                         </div>
                     </span>
                     <span id="plaintextFilter_content">
-                        <div id='plaintextFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:880px;position:absolute;top:100px;z-index:21'>
+                        <div id='plaintextFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:930px;position:absolute;top:100px;z-index:21'>
                             <div id='plaintextFilterDialogT' onmousedown="DragAndDrop(document.getElementById('plaintextFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold'>
                                     <%=bundle.getString("lb_filter_plaintextfilter")%>
@@ -928,7 +928,7 @@ session="true" %>
                             <tr><td>
                             <div id="div_button_plaintext_filter" style="margin-left:50px;margin-right:50px;margin-top:10px;margin-bottom:10px;width: 100%; text-align: center;">
                              <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='savePlainTextFilter()'/>
-                             <input type='button' value='<%=bundle.getString("lb_priority_edit")%>' onclick='plaintextFilter.generatePriorityTagTableContent()'/>
+                             <input type='button' id="plaintextFilter_editPriority" value='<%=bundle.getString("lb_priority_edit")%>' onclick='plaintextFilter.generatePriorityTagTableContent()'/>
                              <input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('plaintextFilterDialog')"/>
                             </div>
                             </td></tr>
@@ -983,6 +983,10 @@ session="true" %>
                                         </td>
                                     </tr>
                                     <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_Multiline")%>:</td>
+                                        <td class='htmlFilter_right_td'><input type='checkbox' id='plainTextFilter_customTextRule_isMultiline' checked></td>
+                                    </tr>
+                                    <tr>
                                         <td class='htmlFilter_left_td'><%=bundle.getString("lb_priority")%>:</td>
                                         <td class='htmlFilter_right_td'><input type='text' id='plainTextFilter_customTextRule_priority'></input></td>
                                     </tr>                        
@@ -991,6 +995,62 @@ session="true" %>
                             <div id="div_button_baseFilter_escapings" style="float:left;margin-left:100px;margin-top:10px;margin-bottom:10px;">
                                 <center>
                                     <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='plaintextFilter.saveCustomTextRule()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('plainTextFilter_CustomTextRule_Dialog')"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="plaintextFilter_customSidRule">
+                        <div id='plainTextFilter_CustomSidRule_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:400px;position:absolute;top:120px;z-index:22'>
+                            <div id='baseFilter_Escaping_DialogT' onmousedown="DragAndDrop(document.getElementById('baseFilter_Escaping_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                     <%=bundle.getString("lb_filter_plaintextfilter_sidRule")%>
+                                </label>
+                            </div>
+                            <div style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                                <table width="360px" cellpadding="3" border="0" cellspacing="1">
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_StartStr")%>:</td>
+                                        <td class='htmlFilter_right_td'><input type='text' id='plainTextFilter_customSidRule_startStr'></td>
+                                    </tr>
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_StartIs")%>:</td>
+                                        <td class='htmlFilter_right_td'><input type='checkbox' id='plainTextFilter_customSidRule_startIs' checked></td>
+                                    </tr>
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_StartOcc")%>:</td>
+                                        <td class='htmlFilter_right_td'>
+                                        <input type='radio' name='plainTextFilter_customTextRule_startOcc' id='plainTextFilter_customSidRule_startOcc1' value='1' checked />
+                                        <%=bundle.getString("lb_filter_plaintextfilter_first")%>
+                                        <input type='radio' name='plainTextFilter_customTextRule_startOcc' id='plainTextFilter_customSidRule_startOcc2' value='2' />
+                                        <%=bundle.getString("lb_filter_plaintextfilter_last")%>
+                                        <input type='radio' name='plainTextFilter_customTextRule_startOcc' id='plainTextFilter_customSidRule_startOcc3' value='3' />
+                                        #<input type='text' id='plainTextFilter_customSidRule_startOccTimes' maxlength="3" size="3" style="width:28px">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_FinishStr")%>:</td>
+                                        <td class='htmlFilter_right_td'><input type='text' id='plainTextFilter_customSidRule_finishStr'></td>
+                                    </tr>
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_FinishIs")%>:</td>
+                                        <td class='htmlFilter_right_td'><input type='checkbox' id='plainTextFilter_customSidRule_finishIs' checked></td>
+                                    </tr>
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_plaintextfilter_FinishOcc")%>:</td>
+                                        <td class='htmlFilter_right_td'>
+                                        <input type='radio' name='plainTextFilter_customTextRule_finishOcc' id='plainTextFilter_customSidRule_finishOcc1' value='1' checked />
+                                        <%=bundle.getString("lb_filter_plaintextfilter_first")%>
+                                        <input type='radio' name='plainTextFilter_customTextRule_finishOcc' id='plainTextFilter_customSidRule_finishOcc2' value='2' />
+                                        <%=bundle.getString("lb_filter_plaintextfilter_last")%>
+                                        <input type='radio' name='plainTextFilter_customTextRule_finishOcc' id='plainTextFilter_customSidRule_finishOcc3' value='3' />
+                                        #<input type='text' id='plainTextFilter_customSidRule_finishOccTimes' maxlength="3" size="3" style="width:28px">
+                                        </td>
+                                    </tr>                    
+                                </table>
+                            </div>
+                            <div id="div_button_baseFilter_escapings" style="float:left;margin-left:100px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='plaintextFilter.saveCustomSidRule()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('plainTextFilter_CustomSidRule_Dialog')"/>
                                 </center>
                             </div>
                         </div>

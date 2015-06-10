@@ -141,9 +141,10 @@ function highlightObjects(o)
 //2
 var pageContent = buildPageContent(loPn, window.parent.parent.parent.localData, true);
 
+var loPn1 = loPn;
 while (pageContent.segments.length == 0 && pageContent.content.length == 0)
 {
-	var loPn1 = loPn - 1;
+	loPn1 = loPn1 - 1;
 	
 	if (loPn1 > 0)
 	{
@@ -170,7 +171,7 @@ if (divArr && divArr.length > 0)
 			{
 				if (typeof(parent.parent.target.content.findSegment) != "undefined")
 			    {
-					parent.parent.target.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
+					parent.parent.target.content.findSegment(pageContent.format, 1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
 			    }
 				return;
 			}
@@ -181,18 +182,18 @@ if (divArr && divArr.length > 0)
 			{
 				currentSegment = segment;
 				
-				findSegment(segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag, true, loPn, repIndex);
+				findSegment(pageContent.format, segment.tuId, segment.srcSegmentNoTag, segment.tgtSegmentNoTag, true, loPn, repIndex);
 				
 				if (typeof(parent.parent.target.content.findSegment) != "undefined")
 			    {
-					parent.parent.target.content.findSegment(segment.tuId, segment.tgtSegmentNoTag, "", true, loPn, repIndex);
+					parent.parent.target.content.findSegment(pageContent.format, segment.tuId, segment.tgtSegmentNoTag, "", true, loPn, repIndex);
 			    }
 			}
 			else
 			{
 				if (typeof(parent.parent.target.content.findSegment) != "undefined")
 			    {
-					parent.parent.target.content.findSegment(1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
+					parent.parent.target.content.findSegment(pageContent.format, 1234, "thisisnotbefoundanymore141516", "thisisnotbefoundanymore141516", true, loPn, 1);
 			    }
 			}
 			

@@ -1313,64 +1313,19 @@ public class Ambassador extends AbstractWebService
      *            String Attributes used to create job
      * @throws WebServiceException
      */
-    public void createJob(String accessToken, String jobName, String comment,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public void createJob(String accessToken, String jobName, String comment,
             String filePaths, String fileProfileIds, String targetLocales,
             String attributeXml) throws WebServiceException
     {
-        Vector fPaths = new Vector();
-        for (String path : filePaths.split("\\|"))
-        {
-            fPaths.add(path);
-        }
-
-        Vector fIds = new Vector();
-        for (String fId : fileProfileIds.split("\\|"))
-        {
-            fIds.add(fId);
-        }
-
-        Vector tLocales = new Vector();
-        String targetLocales2 = targetLocales.replace("|", "");
-		if (StringUtil.isEmpty(targetLocales)
-				|| StringUtil.isEmpty(targetLocales2))
-		{
-			for (int i = 0; i < fIds.size(); i++)
-			{
-				tLocales.add(" ");
-			}
-		}
-		else
-		{
-			for (String tLocale : targetLocales.split("\\|"))
-			{
-				if (tLocale.contains(","))
-				{
-					String locales = "";
-					for (String locale : tLocale.split(","))
-					{
-						locales += locale.trim() + ",";
-					}
-					if (locales != "" && locales.endsWith(","))
-					{
-						tLocales.add(locales.substring(0,
-								locales.lastIndexOf(",")));
-					}
-				}
-				else
-				{
-					tLocales.add(tLocale.trim());
-				}
-			}
-		}
-
-        HashMap args = new HashMap();
-        args.put("accessToken", accessToken);
-        args.put("jobName", jobName);
-        args.put("comment", comment);
-        args.put("filePaths", fPaths);
-        args.put("fileProfileIds", fIds);
-        args.put("targetLocales", tLocales);
-        args.put("attributes", attributeXml);
+		HashMap args = new HashMap();
+		args.put("accessToken", accessToken);
+		args.put("jobName", jobName);
+		args.put("comment", comment);
+		args.put("filePaths", filePaths);
+		args.put("fileProfileIds", fileProfileIds);
+		args.put("targetLocales", targetLocales);
+		args.put("attributes", attributeXml);
 
         createJob(args);
     }
@@ -1397,7 +1352,8 @@ public class Ambassador extends AbstractWebService
      * @param args
      * @throws WebServiceException
      */
-    public void createJob(HashMap args) throws WebServiceException
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public void createJob(HashMap args) throws WebServiceException
     {
         // Checks authority.
         String accessToken = (String) args.get("accessToken");
@@ -1428,7 +1384,20 @@ public class Ambassador extends AbstractWebService
             {
                 String userId = UserUtil.getUserIdByName(userName);
                 String priority = (String) args.get("priority");
-                Vector fileProfileIds = (Vector) args.get("fileProfileIds");
+    			Vector<String> fileProfileIds = new Vector<String>();
+    			Object fpIdsObj = args.get("fileProfileIds");
+    			if (fpIdsObj instanceof String)
+    			{ 
+    		        for (String fId : ((String) fpIdsObj).split("\\|"))
+    		        {
+    		        	fileProfileIds.add(fId);
+    		        }
+    			}
+    			else
+    			{
+    				fileProfileIds = (Vector<String>) fpIdsObj;
+    			}
+
                 if (fileProfileIds != null && fileProfileIds.size() > 0)
                 {
                     String fpId = (String) fileProfileIds.get(0);
@@ -1436,7 +1405,6 @@ public class Ambassador extends AbstractWebService
                     FileProfile fp = ServerProxy
                             .getFileProfilePersistenceManager()
                             .readFileProfile(iFpId);
-                    long l10nProfileId = fp.getL10nProfileId();
 
                     job = JobCreationMonitor.initializeJob(jobName, userId,
                             fp.getL10nProfileId(), priority, Job.PROCESSING);
@@ -1492,7 +1460,8 @@ public class Ambassador extends AbstractWebService
      * @throws RemoteException 
      * @throws NumberFormatException 
      */
-    public void createJobOnInitial(HashMap args) throws WebServiceException,
+    @SuppressWarnings("unchecked")
+	public void createJobOnInitial(HashMap args) throws WebServiceException,
     	NumberFormatException, RemoteException, GeneralException, NamingException
 	{
 		Job job = null;
@@ -1522,9 +1491,51 @@ public class Ambassador extends AbstractWebService
 
 			String uuId = ((JobImpl) job).getUuid();
 			String comment = (String) args.get("comment");
-			Vector filePaths = (Vector) args.get("filePaths");
-			Vector fileProfileIds = (Vector) args.get("fileProfileIds");
-			Vector targetLocales = (Vector) args.get("targetLocales");
+			// filePaths
+			Vector<String> filePaths = new Vector<String>();
+			Object filePathsObj = args.get("filePaths");
+			if (filePathsObj instanceof String)
+			{
+				for (String path : ((String) filePathsObj).split("\\|"))
+				{
+					filePaths.add(path);
+				}
+			}
+			else
+			{
+				filePaths = (Vector<String>) filePathsObj;
+			}
+			// fileProfileIds
+			Vector<String> fileProfileIds = new Vector<String>();
+			Object fpIdsObj = args.get("fileProfileIds");
+			if (fpIdsObj instanceof String)
+			{
+		        for (String fId : ((String) fpIdsObj).split("\\|"))
+		        {
+		        	fileProfileIds.add(fId);
+		        }
+			}
+			else
+			{
+				fileProfileIds = (Vector<String>) fpIdsObj;
+			}
+			// targetLocales
+			Vector<String> targetLocales = new Vector<String>();
+			Object trgLocalesObj = args.get("targetLocales");
+			if (trgLocalesObj instanceof String)
+			{
+				targetLocales = handleTargetLocales((String) trgLocalesObj,
+						fileProfileIds.size());
+			}
+			else if (trgLocalesObj == null)
+			{
+				targetLocales = handleTargetLocales("", fileProfileIds.size());
+			}
+			else
+			{
+				targetLocales = (Vector<String>) trgLocalesObj;
+			}
+
 			String priority = (String) args.get("priority");
 			String attributesXml = (String) args.get("attributes");
 
@@ -1757,6 +1768,46 @@ public class Ambassador extends AbstractWebService
 			}
 		}
 	}
+
+	private Vector<String> handleTargetLocales(String p_targetLocales,
+			int fileSize)
+    {
+        Vector<String> tLocales = new Vector<String>();
+
+        if (StringUtil.isEmpty(p_targetLocales)
+				|| StringUtil.isEmpty(p_targetLocales.replace("|", "")))
+		{
+			for (int i = 0; i < fileSize; i++)
+			{
+				tLocales.add(" ");
+			}
+		}
+		else
+		{
+			for (String tLocale : p_targetLocales.split("\\|"))
+			{
+				if (tLocale.contains(","))
+				{
+					String locales = "";
+					for (String locale : tLocale.split(","))
+					{
+						locales += locale.trim() + ",";
+					}
+					if (locales != "" && locales.endsWith(","))
+					{
+						tLocales.add(locales.substring(0,
+								locales.lastIndexOf(",")));
+					}
+				}
+				else
+				{
+					tLocales.add(tLocale.trim());
+				}
+			}
+		}
+
+        return tLocales;
+    }
 
     private String checkIfCreateJobCalled(String methodName, long jobId,
             String jobName) throws WebServiceException

@@ -1671,11 +1671,8 @@ public class Ambassador extends AbstractWebService
 				{
 					JobCreationMonitor.updateJobState(job, Job.IMPORTFAILED);
 				}
-				logger.error("Get file profile failed with exception "
-						+ e.getMessage());
-				throw new WebServiceException(
-						"Get file profile failed with exception "
-								+ e.getMessage());
+				logger.error(e);
+				throw new WebServiceException(e.getMessage());
 			}
 
 			// Calls script if has.

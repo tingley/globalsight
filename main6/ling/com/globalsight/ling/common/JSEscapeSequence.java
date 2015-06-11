@@ -18,9 +18,10 @@ package com.globalsight.ling.common;
 
 import java.util.Hashtable;
 
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
+
 //jakarta regexp package
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
 
 /**
  * <P>

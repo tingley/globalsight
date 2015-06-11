@@ -16,10 +16,9 @@
  */
 package com.globalsight.ling.common;
 
-import org.apache.regexp.RE;
+import com.sun.org.apache.regexp.internal.RE;
 
-public class RegExMatch
-implements RegExMatchInterface
+public class RegExMatch implements RegExMatchInterface
 {
     private RE m_match = null;
 
@@ -42,7 +41,8 @@ implements RegExMatchInterface
      * 
      * 
      * @return int
-     * @param p_group int
+     * @param p_group
+     *            int
      */
     public int beginOffset(int p_group)
     {
@@ -61,7 +61,8 @@ implements RegExMatchInterface
      * 
      * 
      * @return int
-     * @param p_group int
+     * @param p_group
+     *            int
      */
     public int endOffset(int p_group)
     {
@@ -72,7 +73,8 @@ implements RegExMatchInterface
      * 
      * 
      * @return java.lang.String
-     * @param p_group int
+     * @param p_group
+     *            int
      */
     public String group(int p_group)
     {
@@ -100,10 +102,11 @@ implements RegExMatchInterface
     }
 
     /**
-    * RegExMatch constructor comment.
-    */
+     * RegExMatch constructor comment.
+     */
     public RegExMatch(RE p_match)
     {
         super();
         m_match = p_match;
-    }}
+    }
+}

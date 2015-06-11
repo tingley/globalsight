@@ -17,72 +17,89 @@
 
 package com.globalsight.everest.edit.offline.rtf;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
-import com.globalsight.everest.edit.offline.page.UploadIssue;
-import com.globalsight.everest.edit.offline.rtf.IssueLoader;
 import com.globalsight.everest.edit.offline.upload.UploadPageSaverException;
+import com.globalsight.ling.rtf.RtfAnnotation;
+import com.globalsight.ling.rtf.RtfAnnotationBookmark;
+import com.globalsight.ling.rtf.RtfBookmark;
+import com.globalsight.ling.rtf.RtfCell;
+import com.globalsight.ling.rtf.RtfCompoundObject;
+import com.globalsight.ling.rtf.RtfControl;
+import com.globalsight.ling.rtf.RtfData;
+import com.globalsight.ling.rtf.RtfDocument;
+import com.globalsight.ling.rtf.RtfFieldInstance;
+import com.globalsight.ling.rtf.RtfFootnote;
+import com.globalsight.ling.rtf.RtfHyperLink;
+import com.globalsight.ling.rtf.RtfLineBreak;
+import com.globalsight.ling.rtf.RtfMarker;
+import com.globalsight.ling.rtf.RtfObject;
+import com.globalsight.ling.rtf.RtfPageBreak;
+import com.globalsight.ling.rtf.RtfParagraph;
+import com.globalsight.ling.rtf.RtfPicture;
+import com.globalsight.ling.rtf.RtfRow;
+import com.globalsight.ling.rtf.RtfShape;
+import com.globalsight.ling.rtf.RtfShapePicture;
+import com.globalsight.ling.rtf.RtfShapeText;
+import com.globalsight.ling.rtf.RtfSymbol;
+import com.globalsight.ling.rtf.RtfTab;
+import com.globalsight.ling.rtf.RtfText;
+import com.globalsight.ling.rtf.RtfTextProperties;
+import com.globalsight.ling.rtf.RtfVariable;
+import com.globalsight.ling.rtf.RtfVariables;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoOverrideMapItem;
-
-import com.globalsight.ling.rtf.*;
-
-import org.apache.regexp.*;
-
-import java.io.Reader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.StringTokenizer;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * This class is responsible for reading an Offline file of type
- * Paragragh-View-1 (which is RTF) and loading it into an
- * OfflinePageData p_object.
+ * Paragragh-View-1 (which is RTF) and loading it into an OfflinePageData
+ * p_object.
  *
- * This class is similar (in purpose) to the loadOfflineTextFile()
- * method of the OfflinePageData class itself - only this method
- * populates the specified OfflinePageData p_object from an
- * RTF-paragraph-view file instead.
+ * This class is similar (in purpose) to the loadOfflineTextFile() method of the
+ * OfflinePageData class itself - only this method populates the specified
+ * OfflinePageData p_object from an RTF-paragraph-view file instead.
  */
-public class ParaViewOneWorkDocLoader
-    implements ParaViewWorkDocConstants, AmbassadorDwUpConstants, PseudoConstants
+public class ParaViewOneWorkDocLoader implements ParaViewWorkDocConstants,
+        AmbassadorDwUpConstants, PseudoConstants
 {
-    static private final Logger c_logger =
-        Logger.getLogger(
-            ParaViewOneWorkDocLoader.class);
+    static private final Logger c_logger = Logger
+            .getLogger(ParaViewOneWorkDocLoader.class);
 
     //
     // Private & Protected Constants
     //
 
-    static private final String regx_baseId =
-        "(([:digit:]+)(" + BOOKMARK_SEG_ID_DELIM + "([:digit:]+))?)";
+    static private final String regx_baseId = "(([:digit:]+)("
+            + BOOKMARK_SEG_ID_DELIM + "([:digit:]+))?)";
 
     /**
      * Identifies segment ids contained in the target documents merge record.
      */
-    static private final REProgram m_gsMergeRecSegIdSignature =
-        createProgram(regx_baseId);
+    static private final REProgram m_gsMergeRecSegIdSignature = createProgram(regx_baseId);
 
     /**
      * Identifies our bookmark signature in the body of the target document.
      *
-     * Note: we allow user modified endings to be added.  This allows
-     * uses to tag segments with their own macros without interfering
-     * with Ambassador.
+     * Note: we allow user modified endings to be added. This allows uses to tag
+     * segments with their own macros without interfering with Ambassador.
      */
-    static private final REProgram m_gsBookmarkSignature =
-        createProgram("^(gs)" + regx_baseId + "[.]*");
+    static private final REProgram m_gsBookmarkSignature = createProgram("^(gs)"
+            + regx_baseId + "[.]*");
 
     // bookmark signature
     static private final int PAREN_FULLMATCH = 0;
@@ -93,8 +110,7 @@ public class ParaViewOneWorkDocLoader
     static private final int PAREN_SUBID = 5;
 
     /** Identifies our ptag fields. */
-    static private final REProgram m_gsPtagSignature =
-        createProgram("ptag[:space:]+(\\[.*\\])");
+    static private final REProgram m_gsPtagSignature = createProgram("ptag[:space:]+(\\[.*\\])");
 
     // ptag signature
     static private final int PAREN_PTAG_NAME = 1;
@@ -129,14 +145,14 @@ public class ParaViewOneWorkDocLoader
     /** The RTF segment name of the current segment being read (gs1234). */
     private String m_curSegName = null;
     /**
-     * The Ambassador segment ID of the current segment being read
-     * (123_45) (TU_SUB).
+     * The Ambassador segment ID of the current segment being read (123_45)
+     * (TU_SUB).
      */
     private String m_curSegId = null;
 
     /**
-     * Flag - true when we encountered an embedded segment bookmark
-     * while still reading the previous segment.
+     * Flag - true when we encountered an embedded segment bookmark while still
+     * reading the previous segment.
      */
     private boolean m_inEmbeddedSegment = false;
     /**
@@ -158,7 +174,6 @@ public class ParaViewOneWorkDocLoader
     private String m_gsUnderlinedOn = null;
     private String m_gsUnderlinedOff = null;
     private String m_gsNbsp = null;
-
 
     //
     // Constructors
@@ -218,27 +233,21 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-
     //
     // Public Methods
     //
 
-
-    public void parse()
-        throws Exception
+    public void parse() throws Exception
     {
         loadVariables(m_rtfDoc);
         loadSegments(m_rtfDoc);
     }
 
-
     //
     // Private Methods
     //
 
-
-    private void loadVariables(RtfDocument p_doc)
-        throws Exception
+    private void loadVariables(RtfDocument p_doc) throws Exception
     {
         boolean encFound = false;
         boolean mrgFound = false;
@@ -300,34 +309,37 @@ public class ParaViewOneWorkDocLoader
         }
 
         // error check
-        if (!srcLocaleFound || !trgLocaleFound ||!encFound || !mrgFound ||
-            !pageIdFound || !ptagFormatFound || !taskIdFound || !wkfIdFound)
+        if (!srcLocaleFound || !trgLocaleFound || !encFound || !mrgFound
+                || !pageIdFound || !ptagFormatFound || !taskIdFound
+                || !wkfIdFound)
         {
-            String args[] = {
-            DOCVAR_NAME_SRCLOCALE,
-            srcLocaleFound ? m_opd.getSourceLocaleName() : "missing!",
-            DOCVAR_NAME_TRGLOCALE,
-            trgLocaleFound ? m_opd.getTargetLocaleName() : "missing!",
-            DOCVAR_NAME_ENCODING,
-            encFound ? m_opd.getEncoding() : "missing!",
-            DOCVAR_NAME_MERGEDATA,
-            mrgFound ? m_opd.getSegmentMergeMap().toString(): "missing!",
-            DOCVAR_NAME_PAGEID,
-            pageIdFound ? m_opd.getPageId() : "missing!",
-            DOCVAR_NAME_PTAGFMT,
-            ptagFormatFound ? m_opd.getPlaceholderFormat() : "missing!",
-            DOCVAR_NAME_TASKID,
-            taskIdFound ? m_opd.getTaskId() : "missing!",
-            DOCVAR_NAME_WORKFLOWID,
-            wkfIdFound ? m_opd.getWorkflowId() : "missing!" };
+            String args[] =
+            {
+                    DOCVAR_NAME_SRCLOCALE,
+                    srcLocaleFound ? m_opd.getSourceLocaleName() : "missing!",
+                    DOCVAR_NAME_TRGLOCALE,
+                    trgLocaleFound ? m_opd.getTargetLocaleName() : "missing!",
+                    DOCVAR_NAME_ENCODING,
+                    encFound ? m_opd.getEncoding() : "missing!",
+                    DOCVAR_NAME_MERGEDATA,
+                    mrgFound ? m_opd.getSegmentMergeMap().toString()
+                            : "missing!",
+                    DOCVAR_NAME_PAGEID,
+                    pageIdFound ? m_opd.getPageId() : "missing!",
+                    DOCVAR_NAME_PTAGFMT,
+                    ptagFormatFound ? m_opd.getPlaceholderFormat() : "missing!",
+                    DOCVAR_NAME_TASKID,
+                    taskIdFound ? m_opd.getTaskId() : "missing!",
+                    DOCVAR_NAME_WORKFLOWID,
+                    wkfIdFound ? m_opd.getWorkflowId() : "missing!" };
 
             throw new UploadPageSaverException(
-                UploadPageSaverException.MSG_FAILED_TO_GET_PV1_DOC_VARS, args, null);
+                    UploadPageSaverException.MSG_FAILED_TO_GET_PV1_DOC_VARS,
+                    args, null);
         }
     }
 
-    private void loadSegments(RtfDocument p_doc)
-        throws Exception
+    private void loadSegments(RtfDocument p_doc) throws Exception
     {
         for (int i = 0, max = p_doc.size(); i < max; i++)
         {
@@ -335,96 +347,95 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfObject p_object)
-        throws Exception
+    private void load(RtfObject p_object) throws Exception
     {
         if (p_object instanceof RtfAnnotation)
         {
-            load((RtfAnnotation)p_object);
+            load((RtfAnnotation) p_object);
         }
         else if (p_object instanceof RtfAnnotationBookmark)
         {
-            load((RtfAnnotationBookmark)p_object);
+            load((RtfAnnotationBookmark) p_object);
         }
         else if (p_object instanceof RtfFootnote)
         {
-            load((RtfFootnote)p_object);
+            load((RtfFootnote) p_object);
         }
         else if (p_object instanceof RtfMarker)
         {
-            load((RtfMarker)p_object);
+            load((RtfMarker) p_object);
         }
         else if (p_object instanceof RtfControl)
         {
-            load((RtfControl)p_object);
+            load((RtfControl) p_object);
         }
         else if (p_object instanceof RtfText)
         {
-            load((RtfText)p_object);
+            load((RtfText) p_object);
         }
         else if (p_object instanceof RtfParagraph)
         {
-            load((RtfParagraph)p_object);
+            load((RtfParagraph) p_object);
         }
         else if (p_object instanceof RtfData)
         {
-            load((RtfData)p_object);
+            load((RtfData) p_object);
         }
         else if (p_object instanceof RtfLineBreak)
         {
-            load((RtfLineBreak)p_object);
+            load((RtfLineBreak) p_object);
         }
         else if (p_object instanceof RtfPageBreak)
         {
-            load((RtfPageBreak)p_object);
+            load((RtfPageBreak) p_object);
         }
         else if (p_object instanceof RtfFieldInstance)
         {
-            load((RtfFieldInstance)p_object);
+            load((RtfFieldInstance) p_object);
         }
         else if (p_object instanceof RtfSymbol)
         {
-            load((RtfSymbol)p_object);
+            load((RtfSymbol) p_object);
         }
         else if (p_object instanceof RtfTab)
         {
-            load((RtfTab)p_object);
+            load((RtfTab) p_object);
         }
         else if (p_object instanceof RtfHyperLink)
         {
-            load((RtfHyperLink)p_object);
+            load((RtfHyperLink) p_object);
         }
         else if (p_object instanceof RtfShape)
         {
-            load((RtfShape)p_object);
+            load((RtfShape) p_object);
         }
         else if (p_object instanceof RtfShapeText)
         {
-            load((RtfShapeText)p_object);
+            load((RtfShapeText) p_object);
         }
         else if (p_object instanceof RtfShapePicture)
         {
-            load((RtfShapePicture)p_object);
+            load((RtfShapePicture) p_object);
         }
         else if (p_object instanceof RtfPicture)
         {
-            load((RtfPicture)p_object);
+            load((RtfPicture) p_object);
         }
         else if (p_object instanceof RtfBookmark)
         {
-            load((RtfBookmark)p_object);
+            load((RtfBookmark) p_object);
         }
         else if (p_object instanceof RtfRow)
         {
-            load((RtfRow)p_object);
+            load((RtfRow) p_object);
         }
         else if (p_object instanceof RtfCell)
         {
-            load((RtfCell)p_object);
+            load((RtfCell) p_object);
         }
         else if (p_object instanceof RtfCompoundObject)
         {
-            load((RtfCompoundObject)p_object);
+            load((RtfCompoundObject) p_object);
         }
         else
         {
@@ -432,8 +443,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfCompoundObject p_object)
-        throws Exception
+    private void load(RtfCompoundObject p_object) throws Exception
     {
         for (int i = 0, max = p_object.size(); i < max; i++)
         {
@@ -443,8 +453,7 @@ public class ParaViewOneWorkDocLoader
 
     // Currently we load row properties before *and* after the
     // cells as simple controls. We write them out as they come.
-    private void load(RtfRow p_object)
-        throws Exception
+    private void load(RtfRow p_object) throws Exception
     {
         for (int i = 0, max = p_object.size(); i < max; i++)
         {
@@ -452,8 +461,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfCell p_object)
-        throws Exception
+    private void load(RtfCell p_object) throws Exception
     {
         for (int i = 0, max = p_object.size(); i < max; i++)
         {
@@ -461,8 +469,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfAnnotation p_object)
-        throws Exception
+    private void load(RtfAnnotation p_object) throws Exception
     {
         StringWriter writer = new StringWriter();
         PrintWriter pw = new PrintWriter(writer);
@@ -471,8 +478,8 @@ public class ParaViewOneWorkDocLoader
 
         if (c_logger.isDebugEnabled())
         {
-            System.out.println("RtfAnnotation for " + m_curSegId +
-                " (in " + m_curSegName + ")");
+            System.out.println("RtfAnnotation for " + m_curSegId + " (in "
+                    + m_curSegName + ")");
             System.out.println("  getId=" + p_object.getId());
             System.out.println("  getRef=" + p_object.getRef());
             System.out.println("  toText=" + annotation);
@@ -487,12 +494,11 @@ public class ParaViewOneWorkDocLoader
             String segName = m_curSegName.substring(2);
 
             IssueLoader.handleUploadIssue(m_opd, m_curSegId, segName,
-                annotation);
+                    annotation);
         }
     }
 
-    private void load(RtfAnnotationBookmark p_object)
-        throws Exception
+    private void load(RtfAnnotationBookmark p_object) throws Exception
     {
         if (c_logger.isDebugEnabled())
         {
@@ -504,8 +510,7 @@ public class ParaViewOneWorkDocLoader
     }
 
     // Footnotes always appear inside paragraphs.
-    private void load(RtfFootnote p_object)
-        throws Exception
+    private void load(RtfFootnote p_object) throws Exception
     {
         if (false && c_logger.isDebugEnabled())
         {
@@ -515,8 +520,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfControl p_object)
-        throws Exception
+    private void load(RtfControl p_object) throws Exception
     {
         if (false && c_logger.isDebugEnabled())
         {
@@ -528,8 +532,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfLineBreak p_object)
-        throws Exception
+    private void load(RtfLineBreak p_object) throws Exception
     {
         if (false && c_logger.isDebugEnabled())
         {
@@ -539,8 +542,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfPageBreak p_object)
-        throws Exception
+    private void load(RtfPageBreak p_object) throws Exception
     {
         if (false && c_logger.isDebugEnabled())
         {
@@ -548,8 +550,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfFieldInstance p_object)
-        throws Exception
+    private void load(RtfFieldInstance p_object) throws Exception
     {
         // process ptag fields found within a segment - ignore all other fields
         RE matcher = new RE(m_gsPtagSignature);
@@ -561,8 +562,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfSymbol p_object)
-        throws Exception
+    private void load(RtfSymbol p_object) throws Exception
     {
         if (false && c_logger.isDebugEnabled())
         {
@@ -573,8 +573,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfParagraph p_object)
-        throws Exception
+    private void load(RtfParagraph p_object) throws Exception
     {
         if (false && c_logger.isDebugEnabled())
         {
@@ -586,12 +585,12 @@ public class ParaViewOneWorkDocLoader
 
         for (int i = 0, max = p_object.size(); i < max; i++)
         {
-            RtfObject o = (RtfObject)p_object.getObject(i);
+            RtfObject o = (RtfObject) p_object.getObject(i);
 
             if (o instanceof RtfAnnotation)
             {
                 // Load annotations out of the normal document flow.
-                load((RtfAnnotation)o);
+                load((RtfAnnotation) o);
             }
             else
             {
@@ -600,20 +599,21 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfText p_object)
-        throws Exception
+    private void load(RtfText p_object) throws Exception
     {
         if (m_inEmbeddedSegment)
         {
-            String [] args = { m_embeddedSegmentName, m_curSegName };
+            String[] args =
+            { m_embeddedSegmentName, m_curSegName };
 
             throw new UploadPageSaverException(
-                UploadPageSaverException.MSG_EMBEDDED_BOOKMARKS, args, null);
+                    UploadPageSaverException.MSG_EMBEDDED_BOOKMARKS, args, null);
         }
 
         if (false && c_logger.isDebugEnabled())
         {
-            System.out.println("RtfText - properties follow=" + p_object.getData());
+            System.out.println("RtfText - properties follow="
+                    + p_object.getData());
         }
 
         RtfTextProperties props = p_object.getProperties();
@@ -625,8 +625,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfMarker p_object)
-        throws Exception
+    private void load(RtfMarker p_object) throws Exception
     {
         if (false && c_logger.isDebugEnabled())
         {
@@ -646,7 +645,8 @@ public class ParaViewOneWorkDocLoader
             System.out.println("  isBold=" + p_props.isBold());
             System.out.println("  isBoldSet=" + p_props.isBoldSet());
             System.out.println("  isUnderlined=" + p_props.isUnderlined());
-            System.out.println("  isUnderlinedSet=" + p_props.isUnderlinedSet());
+            System.out
+                    .println("  isUnderlinedSet=" + p_props.isUnderlinedSet());
             System.out.println("  isItalic=" + p_props.isItalic());
             System.out.println("  isItalicSet=" + p_props.isItalicSet());
             System.out.println("  m_segmentRun=" + m_segmentRun);
@@ -663,8 +663,7 @@ public class ParaViewOneWorkDocLoader
     /**
      * Hyperlinks, which are really fields in RTF.
      */
-    private void load(RtfHyperLink p_object)
-        throws Exception
+    private void load(RtfHyperLink p_object) throws Exception
     {
         if (c_logger.isDebugEnabled())
         {
@@ -681,34 +680,29 @@ public class ParaViewOneWorkDocLoader
     /**
      * Shapes.
      */
-    private void load(RtfShape p_object)
-        throws Exception
+    private void load(RtfShape p_object) throws Exception
     {
     }
 
     /**
      * Shape paragraphs embedded in shapes.
      */
-    private void load(RtfShapeText p_object)
-        throws Exception
+    private void load(RtfShapeText p_object) throws Exception
     {
     }
 
     /**
      * Embedded Pictures.
      */
-    private void load(RtfShapePicture p_object)
-        throws Exception
+    private void load(RtfShapePicture p_object) throws Exception
     {
     }
 
-    private void load(RtfPicture p_object)
-        throws Exception
+    private void load(RtfPicture p_object) throws Exception
     {
     }
 
-    private void load(RtfBookmark p_object)
-        throws Exception
+    private void load(RtfBookmark p_object) throws Exception
     {
         RE matcher = new RE(m_gsBookmarkSignature);
 
@@ -717,7 +711,8 @@ public class ParaViewOneWorkDocLoader
             m_curSegId = cvtBmkSegIdToInternalId(matcher);
 
             // Detect embedded segment bookmarks.
-            if (m_inSegment && !m_curSegName.equalsIgnoreCase(p_object.getName()))
+            if (m_inSegment
+                    && !m_curSegName.equalsIgnoreCase(p_object.getName()))
             {
                 // We have detected a posssible error:
                 // We are in error if text within this next segment
@@ -725,7 +720,7 @@ public class ParaViewOneWorkDocLoader
                 // bookmark is encountered. It must immediately follow
                 // this bookmark.
                 // See the load method for the RtfText object where
-                // these flags are checked.  These flags are cleared
+                // these flags are checked. These flags are cleared
                 // below if the next item is the closing bookmark.
                 if (p_object.isStart())
                 {
@@ -757,8 +752,10 @@ public class ParaViewOneWorkDocLoader
 
                 // Detect and replace the empty segment placeholder.
                 String trgText = m_segmentRun.toString();
-                if (trgText.trim().toLowerCase().equals(
-                    AmbassadorDwUpConstants.WC_EMPTY_SEG_PLACEHOLDER_TEXT_LC))
+                if (trgText
+                        .trim()
+                        .toLowerCase()
+                        .equals(AmbassadorDwUpConstants.WC_EMPTY_SEG_PLACEHOLDER_TEXT_LC))
                 {
                     trgText = "";
                 }
@@ -768,7 +765,8 @@ public class ParaViewOneWorkDocLoader
                 // Note: if parent, must also check for and copy merge data.
                 if (!OfflineEditHelper.isSubflowSegmentId(m_curSegId))
                 {
-                    md = (ArrayList)m_documentMergeData.get(new Long(m_curSegId));
+                    md = (ArrayList) m_documentMergeData.get(new Long(
+                            m_curSegId));
                     osd.setMergedIds(md);
                 }
                 m_opd.addSegment(osd); // standard upload add.
@@ -794,8 +792,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfData p_object)
-        throws Exception
+    private void load(RtfData p_object) throws Exception
     {
         if (c_logger.isDebugEnabled())
         {
@@ -805,8 +802,7 @@ public class ParaViewOneWorkDocLoader
         }
     }
 
-    private void load(RtfTab p_object)
-        throws Exception
+    private void load(RtfTab p_object) throws Exception
     {
         if (m_inSegment)
         {
@@ -849,7 +845,8 @@ public class ParaViewOneWorkDocLoader
             m_segmentRun.append(m_gsUnderlinedOn);
             m_inUnderlinedRun = true;
         }
-        else if (!p_isUnderlinedSet && m_inUnderlinedRun && m_gsUnderlinedOff != null)
+        else if (!p_isUnderlinedSet && m_inUnderlinedRun
+                && m_gsUnderlinedOff != null)
         {
             m_segmentRun.append(m_gsUnderlinedOff);
             m_inUnderlinedRun = false;
@@ -885,29 +882,29 @@ public class ParaViewOneWorkDocLoader
     /**
      * Converts the document merge record into a hashmap.
      *
-     * The map is keyed by the parent Id under which the merge
-     * occured.
+     * The map is keyed by the parent Id under which the merge occured.
      *
-     * The value of each map entry is a list of ids in the same order
-     * as read from the document merge record. The first id of each
-     * record is also always the parent Id under which the merge
-     * occured.
+     * The value of each map entry is a list of ids in the same order as read
+     * from the document merge record. The first id of each record is also
+     * always the parent Id under which the merge occured.
      *
-     * @param p_docVarMergeValue the document merge record (as read
-     * from the document variable).
-     * @return HashMap of merge records - keyed by the parent Id under
-     * which the merge occured.
+     * @param p_docVarMergeValue
+     *            the document merge record (as read from the document
+     *            variable).
+     * @return HashMap of merge records - keyed by the parent Id under which the
+     *         merge occured.
      */
-    private HashMap parseMergeData(String p_docVarMergeValue)
-        throws Exception
+    private HashMap parseMergeData(String p_docVarMergeValue) throws Exception
     {
         HashMap result = new HashMap();
 
-        if (p_docVarMergeValue != null && p_docVarMergeValue.length() > 0 &&
-            !p_docVarMergeValue.trim().toLowerCase().equals(NO_MERGE_RECORDS))
+        if (p_docVarMergeValue != null
+                && p_docVarMergeValue.length() > 0
+                && !p_docVarMergeValue.trim().toLowerCase()
+                        .equals(NO_MERGE_RECORDS))
         {
             StringTokenizer t1 = new StringTokenizer(p_docVarMergeValue,
-                String.valueOf(AmbassadorDwUpConstants.MERGE_RECORD_DELIM));
+                    String.valueOf(AmbassadorDwUpConstants.MERGE_RECORD_DELIM));
 
             while (t1.hasMoreElements())
             {
@@ -925,20 +922,23 @@ public class ParaViewOneWorkDocLoader
                     if (matcher.match(token))
                     {
                         // note: complex seg Ids (subflows) can never be merged
-                        Long idAsLong = new Long(matcher.getParen(PAREN_FULLMATCH));
+                        Long idAsLong = new Long(
+                                matcher.getParen(PAREN_FULLMATCH));
                         record.add(idAsLong);
 
                         if (firstRecId)
                         {
                             parentID = idAsLong;
-                            firstRecId=false;
+                            firstRecId = false;
                         }
                     }
                     else
                     {
-                        String args[] = { token };
+                        String args[] =
+                        { token };
                         throw new UploadPageSaverException(
-                            UploadPageSaverException.MSG_INVALID_MERGE_ID, args, null);
+                                UploadPageSaverException.MSG_INVALID_MERGE_ID,
+                                args, null);
                     }
                 }
 
@@ -957,7 +957,7 @@ public class ParaViewOneWorkDocLoader
         StringBuffer sb = new StringBuffer();
 
         sb.append(p_gsBookmarkSignature.getParen(PAREN_PARENTID));
-        //String tmp = p_gsBookmarkSignature.getParen(PAREN_FULLMATCH);
+        // String tmp = p_gsBookmarkSignature.getParen(PAREN_FULLMATCH);
         String subid = p_gsBookmarkSignature.getParen(PAREN_SUBID);
 
         if (subid != null)

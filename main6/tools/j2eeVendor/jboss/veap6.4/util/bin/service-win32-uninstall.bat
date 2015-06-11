@@ -1,0 +1,13 @@
+@echo off
+
+rem echo Copy win32 service required files...
+xcopy /E /C /I /F /H /R /K /Y "%~dp0..\service\win32\bin\*" "%~dp0..\..\server\bin"
+
+rem echo.
+cd %~dp0..\..\server\bin
+rem echo Remove old GlobalSight service using windows command...
+sc delete "GlobalSight Service"
+rem echo Stop GlobalSight service if it is running...
+net stop "GlobalSight Service"
+rem echo Uninstall win32 GlobalSight service using JBoss command...
+service.bat uninstall

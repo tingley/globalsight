@@ -18,7 +18,6 @@ package com.install;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +26,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.config.properties.InstallValues;
 import com.config.properties.Resource;
-import com.plug.Version_8_3_1.UpdateRegistryHelp;
 import com.ui.UI;
 import com.ui.UIFactory;
 import com.util.FileUtil;
@@ -80,6 +79,7 @@ public class Upgrade
     {
         updaters.add(new JBossUpdater4());
         updaters.add(new JBossUpdater71());
+        updaters.add(new JBossUpdater72());
     }
 
     public static Map<String, Integer> RATES = new HashMap<String, Integer>();
@@ -93,7 +93,7 @@ public class Upgrade
         RATES.put(SIGN, 200000);
     }
     
-    private static List<String> COPY_UNCOVER = new ArrayList<String>();
+    public static List<String> COPY_UNCOVER = new ArrayList<String>();
     static
     {
         COPY_UNCOVER.add("createJob.properties");
@@ -353,6 +353,16 @@ public class Upgrade
 //        log.info("Removing class files finished");
 //    }
 
+    private void validateJDK()
+    {
+    	 ui.addProgress(0, Resource.get("process.validateJDK"));
+    	String jdk = InstallValues.get("java_home");
+    	if (jdk.contains("1.6") || jdk.contains("1.7"))
+    	{
+    		ui.upgradeJdk();
+    	}
+    }
+    
     /**
      * Upgrades a server to a new server.
      */
@@ -603,5 +613,6 @@ public class Upgrade
         validatePath();
         validateVersion();
         validateDatabase();
+        validateJDK();
     }
 }

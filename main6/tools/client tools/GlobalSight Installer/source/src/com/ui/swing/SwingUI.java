@@ -252,4 +252,9 @@ public class SwingUI extends JFrame implements UI
     {
         new TryAgainDialog(msg);
     }
+
+	@Override
+	public void upgradeJdk() {
+		new JdkDialog();
+	}
 }

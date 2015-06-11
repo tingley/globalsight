@@ -42,8 +42,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.cxe.entity.cms.teamsite.server.TeamSiteServer;
 import com.globalsight.cxe.entity.fileextension.FileExtension;
@@ -63,6 +61,8 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 public class TranslateServlet extends HttpServlet implements SingleThreadModel
 {

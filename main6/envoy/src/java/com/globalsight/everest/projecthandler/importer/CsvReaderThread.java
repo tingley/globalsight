@@ -17,34 +17,32 @@
 
 package com.globalsight.everest.projecthandler.importer;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
+import org.dom4j.DocumentFactory;
 
 import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.projecthandler.importer.ImportUtil;
 import com.globalsight.importer.ImportOptions;
-import com.globalsight.importer.IReader;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
-
-import org.apache.regexp.RE;
-
-import org.dom4j.*;
-import org.dom4j.io.SAXReader;
-
-import java.util.*;
-import java.io.*;
+import com.sun.org.apache.regexp.internal.RE;
 
 /**
- * Reads CSV files and produces Entry objects by putting ReaderResult
- * objects into a ReaderResultQueue.
+ * Reads CSV files and produces Entry objects by putting ReaderResult objects
+ * into a ReaderResultQueue.
  */
-public class CsvReaderThread
-    extends Thread
+public class CsvReaderThread extends Thread
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            CsvReaderThread.class.getName());
+    private static final Logger CATEGORY = Logger
+            .getLogger(CsvReaderThread.class.getName());
 
     private ReaderResultQueue m_results;
     private ReaderResult m_result;
@@ -56,8 +54,8 @@ public class CsvReaderThread
     //
     // Constructor
     //
-    public CsvReaderThread (ReaderResultQueue p_queue,
-        ImportOptions p_options, Project p_project)
+    public CsvReaderThread(ReaderResultQueue p_queue, ImportOptions p_options,
+            Project p_project)
     {
         m_results = p_queue;
         m_options = p_options;
@@ -93,8 +91,7 @@ public class CsvReaderThread
                 do
                 {
                     line = reader.readLine();
-                }
-                while (line != null && ImportUtil.isEmptyLine(line));
+                } while (line != null && ImportUtil.isEmptyLine(line));
             }
 
             HashMap map = new HashMap();
@@ -102,7 +99,6 @@ public class CsvReaderThread
             while ((line = reader.readLine()) != null)
             {
                 m_result = m_results.hireResult();
-
 
                 try
                 {
@@ -120,16 +116,17 @@ public class CsvReaderThread
 
                     if (CATEGORY.isDebugEnabled())
                     {
-                        CATEGORY.debug("line " + reader.getLineNumber() +
-                            " (" + columns.length + " columns) `" + line + "'");
+                        CATEGORY.debug("line " + reader.getLineNumber() + " ("
+                                + columns.length + " columns) `" + line + "'");
                     }
 
                     // Sanity check of column count
                     if (columns.length != expectedColumns)
                     {
-                        m_result.setError("line " + reader.getLineNumber() +
-                            ": expected " + expectedColumns + " columns, " +
-                            "found only " + columns.length + "; ignoring line");
+                        m_result.setError("line " + reader.getLineNumber()
+                                + ": expected " + expectedColumns
+                                + " columns, " + "found only " + columns.length
+                                + "; ignoring line");
 
                         CATEGORY.error(m_result.getMessage());
                     }
@@ -147,8 +144,8 @@ public class CsvReaderThread
                 }
                 catch (Exception ex)
                 {
-                    m_result.setError("line " + reader.getLineNumber() +
-                        ": " + ex.getMessage());
+                    m_result.setError("line " + reader.getLineNumber() + ": "
+                            + ex.getMessage());
                 }
 
                 boolean done = m_results.put(m_result);
@@ -187,14 +184,13 @@ public class CsvReaderThread
     }
 
     /**
-     * <p>Converts a list of column values into an Entry.</p>
+     * <p>
+     * Converts a list of column values into an Entry.
+     * </p>
      */
-    private Entry buildEntry(String[] p_columns)
-        throws Exception
+    private Entry buildEntry(String[] p_columns) throws Exception
     {
-        com.globalsight.everest.projecthandler.importer.ImportOptions options =
-            (com.globalsight.everest.projecthandler.importer.ImportOptions)
-            m_options;
+        com.globalsight.everest.projecthandler.importer.ImportOptions options = (com.globalsight.everest.projecthandler.importer.ImportOptions) m_options;
 
         Set userIds = m_project.getUserIds();
         ArrayList descriptors = options.getColumns();
@@ -205,10 +201,8 @@ public class CsvReaderThread
         {
             String col = p_columns[i];
 
-            com.globalsight.everest.projecthandler.importer.
-                ImportOptions.ColumnDescriptor desc =
-                (com.globalsight.everest.projecthandler.importer.
-                    ImportOptions.ColumnDescriptor)descriptors.get(i);
+            com.globalsight.everest.projecthandler.importer.ImportOptions.ColumnDescriptor desc = (com.globalsight.everest.projecthandler.importer.ImportOptions.ColumnDescriptor) descriptors
+                    .get(i);
 
             if (desc.m_type.equals("skip"))
             {
@@ -221,7 +215,7 @@ public class CsvReaderThread
                 if (userIds.contains(col))
                 {
                     entry.setUsername(col);
-                }                
+                }
                 else
                 {
                     isInvalid = true;
@@ -248,7 +242,7 @@ public class CsvReaderThread
             else
             {
                 throw new Exception("invalid column descriptor " + desc.m_type);
-            }            
+            }
         }
 
         return entry;
@@ -258,8 +252,7 @@ public class CsvReaderThread
     // Helper Methods
     //
 
-    private LineNumberReader getReader(String p_url)
-        throws IOException
+    private LineNumberReader getReader(String p_url) throws IOException
     {
         String encoding = m_options.getEncoding();
 
@@ -269,14 +262,14 @@ public class CsvReaderThread
         }
         encoding = CodesetMapper.getJavaEncoding(encoding);
 
-        return new LineNumberReader(new InputStreamReader(
-            new FileInputStream(p_url), encoding));
+        return new LineNumberReader(new InputStreamReader(new FileInputStream(
+                p_url), encoding));
     }
 
     /** Returns the number of columns defined for the import file. */
     private int getColumnCount(ImportOptions p_options)
     {
-        return ((com.globalsight.everest.projecthandler.importer.ImportOptions)
-            p_options).getColumns().size();
+        return ((com.globalsight.everest.projecthandler.importer.ImportOptions) p_options)
+                .getColumns().size();
     }
 }

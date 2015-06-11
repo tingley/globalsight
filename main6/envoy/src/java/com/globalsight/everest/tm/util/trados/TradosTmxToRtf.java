@@ -17,34 +17,40 @@
 
 package com.globalsight.everest.tm.util.trados;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.ElementHandler;
+import org.dom4j.ElementPath;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 
 import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Tmx;
-
-
-import org.dom4j.*;
-import org.dom4j.io.SAXReader;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import java.util.*;
-import java.io.*;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * <p>Trados-TMX Converter for RTF.</p>
+ * <p>
+ * Trados-TMX Converter for RTF.
+ * </p>
  *
- * <p>This tool reads a Trados TMX file and writes it out as RTF that
- * Word can read. When the file is saved from within Word as HTML, use
- * StylesheetRemover to remove the possibly very large stylesheet, and
- * then WordHtmlToTmx to parse the HTML, extract segments, and write
- * the result as GXML TMX.</p>
+ * <p>
+ * This tool reads a Trados TMX file and writes it out as RTF that Word can
+ * read. When the file is saved from within Word as HTML, use StylesheetRemover
+ * to remove the possibly very large stylesheet, and then WordHtmlToTmx to parse
+ * the HTML, extract segments, and write the result as GXML TMX.
+ * </p>
  */
 public class TradosTmxToRtf
 {
@@ -59,8 +65,7 @@ public class TradosTmxToRtf
     private String m_version = "";
     private Tmx m_header = null;
 
-    private static final REProgram PARAGRAPH_SEARCH_PATTERN =
-        createSearchPattern("\\\\pard?");
+    private static final REProgram PARAGRAPH_SEARCH_PATTERN = createSearchPattern("\\\\pard?");
 
     private static REProgram createSearchPattern(String p_pattern)
     {
@@ -83,11 +88,11 @@ public class TradosTmxToRtf
     // Constructors
     //
 
-    public TradosTmxToRtf ()
+    public TradosTmxToRtf()
     {
     }
 
-    public TradosTmxToRtf (Logger p_logger)
+    public TradosTmxToRtf(Logger p_logger)
     {
         m_logger = p_logger;
     }
@@ -133,8 +138,7 @@ public class TradosTmxToRtf
         return p_name.substring(p_name.lastIndexOf(".") + 1);
     }
 
-    public void startOutputFile(String p_base)
-        throws Exception
+    public void startOutputFile(String p_base) throws Exception
     {
         m_fileCount++;
 
@@ -143,15 +147,13 @@ public class TradosTmxToRtf
         debug("Writing to file " + m_filename);
 
         m_writer = new PrintWriter(new OutputStreamWriter(
-            new BufferedOutputStream(new FileOutputStream(m_filename)),
-            "UTF8"));
+                new BufferedOutputStream(new FileOutputStream(m_filename)),
+                "UTF8"));
 
-        m_writer.println(
-            "{\\rtf1\\ansi\\ansicpg1252\\uc0\\deff0\\deflang1033\\deflangfe1033");
+        m_writer.println("{\\rtf1\\ansi\\ansicpg1252\\uc0\\deff0\\deflang1033\\deflangfe1033");
     }
 
-    public void closeOutputFile()
-        throws Exception
+    public void closeOutputFile() throws Exception
     {
         m_writer.println("}");
         m_writer.close();
@@ -164,70 +166,57 @@ public class TradosTmxToRtf
 
     public void writeOtherRtfHeader()
     {
-        m_writer.println(
-            "{\\colortbl;\n" +
-            "\\red0\\green0\\blue0;\n" +
-            "\\red0\\green0\\blue255;\n" +
-            "\\red0\\green255\\blue255;\n" +
-            "\\red0\\green255\\blue0;\n" +
-            "\\red255\\green0\\blue255;\n" +
-            "\\red255\\green0\\blue0;\n" +
-            "\\red255\\green255\\blue0;\n" +
-            "\\red255\\green255\\blue255;\n" +
-            "\\red0\\green0\\blue128;\n" +
-            "\\red0\\green128\\blue128;\n" +
-            "\\red0\\green128\\blue0;\n" +
-            "\\red128\\green0\\blue128;\n" +
-            "\\red128\\green0\\blue0;\n" +
-            "\\red128\\green128\\blue0;\n" +
-            "\\red128\\green128\\blue128;\n" +
-            "\\red192\\green192\\blue192;\n" +
-            "}");
+        m_writer.println("{\\colortbl;\n" + "\\red0\\green0\\blue0;\n"
+                + "\\red0\\green0\\blue255;\n" + "\\red0\\green255\\blue255;\n"
+                + "\\red0\\green255\\blue0;\n" + "\\red255\\green0\\blue255;\n"
+                + "\\red255\\green0\\blue0;\n" + "\\red255\\green255\\blue0;\n"
+                + "\\red255\\green255\\blue255;\n"
+                + "\\red0\\green0\\blue128;\n" + "\\red0\\green128\\blue128;\n"
+                + "\\red0\\green128\\blue0;\n" + "\\red128\\green0\\blue128;\n"
+                + "\\red128\\green0\\blue0;\n" + "\\red128\\green128\\blue0;\n"
+                + "\\red128\\green128\\blue128;\n"
+                + "\\red192\\green192\\blue192;\n" + "}");
 
-        m_writer.println(
-            "{\\info{\\title TMX CONVERSION}" +
-            "{\\author CvdL}{\\operator CvdL}" +
-            "{\\creatim\\yr2003\\mo7\\dy8\\hr21\\min46}" +
-            "{\\revtim\\yr2003\\mo7\\dy8\\hr21\\min47}" +
-            "{\\version1}{\\edmins1}{\\nofpages1}" +
-            "{\\nofwords0}{\\nofchars0}" +
-            "{\\*\\company GlobalSight}{\\nofcharsws0}{\\vern8269}" +
-            "}");
+        m_writer.println("{\\info{\\title TMX CONVERSION}"
+                + "{\\author CvdL}{\\operator CvdL}"
+                + "{\\creatim\\yr2003\\mo7\\dy8\\hr21\\min46}"
+                + "{\\revtim\\yr2003\\mo7\\dy8\\hr21\\min47}"
+                + "{\\version1}{\\edmins1}{\\nofpages1}"
+                + "{\\nofwords0}{\\nofchars0}"
+                + "{\\*\\company GlobalSight}{\\nofcharsws0}{\\vern8269}" + "}");
 
-        m_writer.println(
-            "\\widowctrl\\ftnbj\\aenddoc\\noxlattoyen\\expshrtn\\noultrlspc\\dntblnsbdb\\nospaceforul\\formshade\\horzdoc\\dgmargin\\dghspace180\\dgvspace180\\dghorigin1800\\dgvorigin1440\\dghshow1\\dgvshow1\n" +
-            "\\jexpand\\viewkind1\\viewscale129\\viewzk2\\pgbrdrhead\\pgbrdrfoot\\splytwnine\\ftnlytwnine\\htmautsp\\nolnhtadjtbl\\useltbaln\\alntblind\\lytcalctblwd\\lyttblrtgr\\lnbrkrule \\fet0\\sectd \\linex0\\endnhere\\sectlinegrid360\\sectdefaultcl \n" +
-            "{\\*\\pnseclvl1 \\pnucrm\\pnstart1\\pnindent720\\pnhang{\\pntxta .}}\n" +
-            "{\\*\\pnseclvl2\\pnucltr\\pnstart1\\pnindent720\\pnhang{\\pntxta .}}\n" +
-            "{\\*\\pnseclvl3\\pndec\\pnstart1\\pnindent720\\pnhang{\\pntxta .}}\n" +
-            "{\\*\\pnseclvl4\\pnlcltr\\pnstart1\\pnindent720\\pnhang{\\pntxta )}}\n" +
-            "{\\*\\pnseclvl5\\pndec\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n" +
-            "{\\*\\pnseclvl6\\pnlcltr\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n" +
-            "{\\*\\pnseclvl7\\pnlcrm\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n" +
-            "{\\*\\pnseclvl8\\pnlcltr\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n" +
-            "{\\*\\pnseclvl9\\pnlcrm\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n" +
-            "\\pard\\plain \\ql \\li0\\ri0\\widctlpar\\aspalpha\\aspnum\\faauto\\adjustright\\rin0\\lin0\\itap0 \n" +
-            "\\fs24\\lang1033\\langfe1033\\cgrid\\langnp1033\\langfenp1033 ");
+        m_writer.println("\\widowctrl\\ftnbj\\aenddoc\\noxlattoyen\\expshrtn\\noultrlspc\\dntblnsbdb\\nospaceforul\\formshade\\horzdoc\\dgmargin\\dghspace180\\dgvspace180\\dghorigin1800\\dgvorigin1440\\dghshow1\\dgvshow1\n"
+                + "\\jexpand\\viewkind1\\viewscale129\\viewzk2\\pgbrdrhead\\pgbrdrfoot\\splytwnine\\ftnlytwnine\\htmautsp\\nolnhtadjtbl\\useltbaln\\alntblind\\lytcalctblwd\\lyttblrtgr\\lnbrkrule \\fet0\\sectd \\linex0\\endnhere\\sectlinegrid360\\sectdefaultcl \n"
+                + "{\\*\\pnseclvl1 \\pnucrm\\pnstart1\\pnindent720\\pnhang{\\pntxta .}}\n"
+                + "{\\*\\pnseclvl2\\pnucltr\\pnstart1\\pnindent720\\pnhang{\\pntxta .}}\n"
+                + "{\\*\\pnseclvl3\\pndec\\pnstart1\\pnindent720\\pnhang{\\pntxta .}}\n"
+                + "{\\*\\pnseclvl4\\pnlcltr\\pnstart1\\pnindent720\\pnhang{\\pntxta )}}\n"
+                + "{\\*\\pnseclvl5\\pndec\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n"
+                + "{\\*\\pnseclvl6\\pnlcltr\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n"
+                + "{\\*\\pnseclvl7\\pnlcrm\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n"
+                + "{\\*\\pnseclvl8\\pnlcltr\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n"
+                + "{\\*\\pnseclvl9\\pnlcrm\\pnstart1\\pnindent720\\pnhang{\\pntxtb (}{\\pntxta )}}\n"
+                + "\\pard\\plain \\ql \\li0\\ri0\\widctlpar\\aspalpha\\aspnum\\faauto\\adjustright\\rin0\\lin0\\itap0 \n"
+                + "\\fs24\\lang1033\\langfe1033\\cgrid\\langnp1033\\langfenp1033 ");
     }
 
     /**
-     * Encodes a Unicode char to a series of RTF escaped chars in
-     * unicode (\uDDDDD) where DDDDD is the decimal code of the char.
+     * Encodes a Unicode char to a series of RTF escaped chars in unicode
+     * (\uDDDDD) where DDDDD is the decimal code of the char.
      */
     private String encodeChar(char ch)
     {
-        short code = (short)ch;
+        short code = (short) ch;
 
         /*
-        if (code == 0x5c || code == 0x7b || code == 0x7d) // {,\,}
-        {
-            return "\\" + ch;
-        }
-        else */ if (0x20 <= code && code < 0x80)
+         * if (code == 0x5c || code == 0x7b || code == 0x7d) // {,\,} { return
+         * "\\" + ch; } else
+         */if (0x20 <= code && code < 0x80)
         {
             return String.valueOf(ch);
         }
-        else // if (code > 0xff || code < 0)
+        else
+        // if (code > 0xff || code < 0)
         {
             StringBuffer sb = new StringBuffer(8);
 
@@ -253,10 +242,9 @@ public class TradosTmxToRtf
     }
 
     /**
-     * Removes all TMX 1.4 <ut> elements from the segment. <ut> is
-     * special since it does not surround embedded tags but text,
-     * witch must be pulled out of the <ut> and added to the
-     * parent segment.
+     * Removes all TMX 1.4 <ut> elements from the segment. <ut> is special since
+     * it does not surround embedded tags but text, witch must be pulled out of
+     * the <ut> and added to the parent segment.
      */
     private Element removeUtElements(Element p_seg)
     {
@@ -266,7 +254,7 @@ public class TradosTmxToRtf
 
         for (int i = 0; i < elems.size(); i++)
         {
-            Element ut = (Element)elems.get(i);
+            Element ut = (Element) elems.get(i);
 
             removeUtElement(ut);
         }
@@ -275,10 +263,9 @@ public class TradosTmxToRtf
     }
 
     /**
-     * Removes the given TMX 1.4 <ut> element from the segment. <ut>
-     * is special since it does not surround embedded tags but text,
-     * witch must be pulled out of the <ut> and added to the
-     * parent segment.
+     * Removes the given TMX 1.4 <ut> element from the segment. <ut> is special
+     * since it does not surround embedded tags but text, witch must be pulled
+     * out of the <ut> and added to the parent segment.
      */
     private void removeUtElement(Element p_element)
     {
@@ -294,7 +281,7 @@ public class TradosTmxToRtf
 
         for (int i = content.size() - 1; i >= 0; --i)
         {
-            Node node = (Node)content.get(i);
+            Node node = (Node) content.get(i);
 
             newContent.add(node.detach());
         }
@@ -304,7 +291,7 @@ public class TradosTmxToRtf
 
         for (int i = 0, max = newContent.size(); i < max; ++i)
         {
-            Node node = (Node)newContent.get(i);
+            Node node = (Node) newContent.get(i);
 
             if (i == index)
             {
@@ -322,11 +309,11 @@ public class TradosTmxToRtf
         // Depth-first traversal: add embedded <ut> to the list first.
         for (int i = 0, max = p_element.nodeCount(); i < max; i++)
         {
-            Node child = (Node)p_element.node(i);
+            Node child = (Node) p_element.node(i);
 
             if (child instanceof Element)
             {
-                findUtElements(p_result, (Element)child);
+                findUtElements(p_result, (Element) child);
             }
         }
 
@@ -359,18 +346,16 @@ public class TradosTmxToRtf
 
         writeEntry("SOURCELANG='" + sourceLang + "' \\par");
 
-        /* To write the entire header, use this:
-        String xml = m_header.getHeaderXml();
-        writeEntry(xml);
-        writeEntry("\\par\n");
-        */
+        /*
+         * To write the entire header, use this: String xml =
+         * m_header.getHeaderXml(); writeEntry(xml); writeEntry("\\par\n");
+         */
     }
 
     /**
      * Main method to call, returns the new filename of the result.
      */
-    public String convertToRtf(String p_url)
-        throws Exception
+    public String convertToRtf(String p_url) throws Exception
     {
         final String baseName = getBaseName(p_url);
         final String extension = getExtension(p_url);
@@ -388,102 +373,96 @@ public class TradosTmxToRtf
         reader.setValidation(true);
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx",
-            new ElementHandler ()
-                {
-                    public void onStart(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
+        reader.addHandler("/tmx", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                Element element = path.getCurrent();
 
-                        m_version = element.attributeValue("version");
-                    }
+                m_version = element.attributeValue("version");
+            }
 
-                    public void onEnd(ElementPath path)
-                    {
-                    }
-                }
-            );
+            public void onEnd(ElementPath path)
+            {
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/header",
-            new ElementHandler ()
-                {
-                    public void onStart(ElementPath path)
-                    {
-                    }
+        reader.addHandler("/tmx/header", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+            }
 
-                    public void onEnd(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
-                        setOldHeader(element);
-                        
-                        Element prop = (Element)element.selectSingleNode(
-                            "/prop[@type='RTFFontTable']");
-                        
-                        if(prop != null)
-                            writeEntry(prop.getText());
-                        
-                        prop = (Element)element.selectSingleNode(
-                            "/prop[@type='RTFStyleSheet']");
-                        
-                        if(prop != null)
-                            writeEntry(prop.getText());
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+                setOldHeader(element);
 
-                        writeOtherRtfHeader();
+                Element prop = (Element) element
+                        .selectSingleNode("/prop[@type='RTFFontTable']");
 
-                        writeDummyParagraph();
+                if (prop != null)
+                    writeEntry(prop.getText());
 
-                        // prune the current element to reduce memory
-                        element.detach();
+                prop = (Element) element
+                        .selectSingleNode("/prop[@type='RTFStyleSheet']");
 
-                        element = null;
-                    }
-                }
-            );
+                if (prop != null)
+                    writeEntry(prop.getText());
+
+                writeOtherRtfHeader();
+
+                writeDummyParagraph();
+
+                // prune the current element to reduce memory
+                element.detach();
+
+                element = null;
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/body/tu",
-            new ElementHandler ()
+        reader.addHandler("/tmx/body/tu", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                ++m_entryCount;
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+
+                element = removeUtElements(element);
+
+                writeEntry(replaceUnicodeChars(removeRtfParagraphs(element
+                        .asXML())));
+                writeEntry("\\par");
+
+                // prune the current element to reduce memory
+                element.detach();
+
+                element = null;
+
+                if (m_entryCount % 1000 == 0)
                 {
-                    public void onStart(ElementPath path)
-                    {
-                        ++m_entryCount;
-                    }
-
-                    public void onEnd(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
-
-                        element = removeUtElements(element);
-
-                        writeEntry(replaceUnicodeChars(
-                            removeRtfParagraphs(element.asXML())));
-                        writeEntry("\\par");
-
-                        // prune the current element to reduce memory
-                        element.detach();
-
-                        element = null;
-
-                        if (m_entryCount % 1000 == 0)
-                        {
-                            debug("Entry " + m_entryCount);
-                        }
-                    }
+                    debug("Entry " + m_entryCount);
                 }
-            );
+            }
+        });
 
         Document document = reader.read(p_url);
 
         closeOutputFile();
 
-        info("Processed " + m_entryCount + " TUs into file `" + m_filename + "'");
+        info("Processed " + m_entryCount + " TUs into file `" + m_filename
+                + "'");
 
         return m_filename;
     }
 
-    static public void main(String[] argv)
-        throws Exception
+    static public void main(String[] argv) throws Exception
     {
         TradosTmxToRtf a = new TradosTmxToRtf();
 
@@ -496,4 +475,3 @@ public class TradosTmxToRtf
         a.convertToRtf(argv[0]);
     }
 }
-

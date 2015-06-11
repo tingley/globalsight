@@ -17,37 +17,38 @@
 
 package com.globalsight.everest.tm.util.trados;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Tmx;
-
-
-import com.globalsight.ling.docproc.extractor.html.IHtmlHandler;
-import com.globalsight.ling.docproc.extractor.html.HtmlObjects;
-import com.globalsight.ling.docproc.extractor.html.Parser;
-import com.globalsight.ling.docproc.extractor.html.ParseException;
-
-import com.globalsight.ling.docproc.DiplomatAPI;
-import com.globalsight.ling.docproc.IFormatNames;
-import com.globalsight.ling.docproc.Output;
-import com.globalsight.ling.docproc.DocumentElement;
-import com.globalsight.ling.docproc.SegmentNode;
-import com.globalsight.ling.docproc.TranslatableElement;
-import com.globalsight.ling.docproc.LocalizableElement;
-
 import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.RegEx;
-import com.globalsight.ling.common.Text;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import com.globalsight.ling.docproc.DiplomatAPI;
+import com.globalsight.ling.docproc.DocumentElement;
+import com.globalsight.ling.docproc.IFormatNames;
+import com.globalsight.ling.docproc.LocalizableElement;
+import com.globalsight.ling.docproc.Output;
+import com.globalsight.ling.docproc.SegmentNode;
+import com.globalsight.ling.docproc.TranslatableElement;
+import com.globalsight.ling.docproc.extractor.html.HtmlObjects;
+import com.globalsight.ling.docproc.extractor.html.IHtmlHandler;
+import com.globalsight.ling.docproc.extractor.html.ParseException;
+import com.globalsight.ling.docproc.extractor.html.Parser;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * OBSOLETE: USE TradosHtmlTmxToGxml.
@@ -56,24 +57,24 @@ import java.net.*;
  *
  * Tool to convert Trados TMX files to GXML TMX files.
  *
- * Use TradosTmxToRtf to read a Trados TMX file and write it out as an
- * RTF file that Word can read. When the file is saved from within
- * Word as HTML, use this class to parse the HTML, extract segments,
- * and write the result as GXML TMX.
+ * Use TradosTmxToRtf to read a Trados TMX file and write it out as an RTF file
+ * that Word can read. When the file is saved from within Word as HTML, use this
+ * class to parse the HTML, extract segments, and write the result as GXML TMX.
  *
- * Notes: for RTF-type segments:
- * - skip leading <p><span>
- * - skip trailing </span></p>
+ * Notes: for RTF-type segments: - skip leading
+ * <p>
+ * <span> - skip trailing </span>
+ * </p>
  * - skip trailing <o:p></o:p>
  *
- * for HTML-type segments:
- * - skip leading <p>
- * - skip trailing </p>
- * - decode internal <span mso-spacerun>...</span> tags
- * - decode HTML entities in string and extract
+ * for HTML-type segments: - skip leading
+ * <p>
+ * - skip trailing
+ * </p>
+ * - decode internal <span mso-spacerun>...</span> tags - decode HTML entities
+ * in string and extract
  */
-public class WordHtmlToTmx2
-    implements IHtmlHandler
+public class WordHtmlToTmx2 implements IHtmlHandler
 {
     private Logger m_logger = null;
 
@@ -97,11 +98,9 @@ public class WordHtmlToTmx2
     // two <span mso-tab-counts> which we have to get rid of.
     private boolean m_firstTuv = true;
 
-    private static final REProgram SEG_SEARCH_PATTERN =
-        createSearchPattern("<seg>(.*?)</seg>");
+    private static final REProgram SEG_SEARCH_PATTERN = createSearchPattern("<seg>(.*?)</seg>");
 
-    private static final REProgram SPACERUN_SEARCH_PATTERN =
-        createSearchPattern("<span(.|[:space:])+?style=\"mso-spacerun[^>]*>(.*?)</span>");
+    private static final REProgram SPACERUN_SEARCH_PATTERN = createSearchPattern("<span(.|[:space:])+?style=\"mso-spacerun[^>]*>(.*?)</span>");
 
     private static REProgram createSearchPattern(String p_pattern)
     {
@@ -124,11 +123,11 @@ public class WordHtmlToTmx2
     // Constructors
     //
 
-    public WordHtmlToTmx2 ()
+    public WordHtmlToTmx2()
     {
     }
 
-    public WordHtmlToTmx2 (Logger p_logger)
+    public WordHtmlToTmx2(Logger p_logger)
     {
         m_logger = p_logger;
     }
@@ -295,49 +294,48 @@ public class WordHtmlToTmx2
     }
 
     /**
-     * Handle a ASP/JSP tag; the script text is included in the
-     * argument <code>t</code>.
+     * Handle a ASP/JSP tag; the script text is included in the argument
+     * <code>t</code>.
      */
     public void handleXsp(HtmlObjects.Xsp t)
     {
     }
 
     /**
-     * Handle the <code>&lt;script&gt;</code> tag; the script text is
-     * included in the argument <code>t</code>.
+     * Handle the <code>&lt;script&gt;</code> tag; the script text is included
+     * in the argument <code>t</code>.
      */
     public void handleScript(HtmlObjects.Script t)
     {
     }
 
     /**
-     * Handle the <code>&lt;java&gt;</code> tag; the java text is
-     * included in the argument <code>t</code>.
+     * Handle the <code>&lt;java&gt;</code> tag; the java text is included in
+     * the argument <code>t</code>.
      */
     public void handleJava(HtmlObjects.Java t)
     {
     }
 
     /**
-     * Handle the <code>&lt;style&gt;</code> tag; the style text is
-     * included in the argument <code>t</code>.
+     * Handle the <code>&lt;style&gt;</code> tag; the style text is included in
+     * the argument <code>t</code>.
      */
     public void handleStyle(HtmlObjects.Style t)
     {
     }
 
     /**
-     * Handle the <code>&lt;CFSCRIPT&gt;</code> tag; the ColdFusion
-     * script text is included in the argument <code>t</code>.
+     * Handle the <code>&lt;CFSCRIPT&gt;</code> tag; the ColdFusion script text
+     * is included in the argument <code>t</code>.
      */
     public void handleCFScript(HtmlObjects.CFScript t)
     {
     }
 
     /**
-     * Handle the <code>&lt;CFSCRIPT&gt;</code> tag with SQL
-     * statements inside; the SQL text is included in the argument
-     * <code>t</code>.
+     * Handle the <code>&lt;CFSCRIPT&gt;</code> tag with SQL statements inside;
+     * the SQL text is included in the argument <code>t</code>.
      */
     public void handleCFQuery(HtmlObjects.CFQuery t)
     {
@@ -360,7 +358,7 @@ public class WordHtmlToTmx2
             tu.append(o.toString());
         }
 
-        //System.err.println("TU = " + tu + "\n");
+        // System.err.println("TU = " + tu + "\n");
 
         String temp = tu.toString();
 
@@ -378,7 +376,7 @@ public class WordHtmlToTmx2
             debug(ex.toString());
         }
 
-        //System.err.println("TU = " + temp + "\n");
+        // System.err.println("TU = " + temp + "\n");
 
         // Gather data for TUVs that consist of multiple segments
         // (according to System4 tag definition and paragraph
@@ -390,8 +388,8 @@ public class WordHtmlToTmx2
         String pre = "";
         String post = "";
         String segment = "";
-        RE re = new RE(SEG_SEARCH_PATTERN,
-            RE.MATCH_CASEINDEPENDENT | RE.MATCH_SINGLELINE);
+        RE re = new RE(SEG_SEARCH_PATTERN, RE.MATCH_CASEINDEPENDENT
+                | RE.MATCH_SINGLELINE);
         while (re.match(temp))
         {
             pre = temp.substring(0, re.getParenStart(0));
@@ -415,7 +413,7 @@ public class WordHtmlToTmx2
             {
                 System.err.println("\tPRE=" + pre);
                 System.err.println("\tSEG=" + segment);
-                //System.err.println("\tXML=" + gxml);
+                // System.err.println("\tXML=" + gxml);
                 System.err.println("\tPOS=" + post);
             }
         }
@@ -426,7 +424,7 @@ public class WordHtmlToTmx2
         // the original Trados TMX paragraph.
         StringBuffer toWrite = new StringBuffer();
 
-        int max = ((ArrayList)segments.get(0)).size();
+        int max = ((ArrayList) segments.get(0)).size();
 
         // Loop over the System4 segments and collect output
         try
@@ -436,8 +434,9 @@ public class WordHtmlToTmx2
                 // Loop over TUVs in TU
                 for (int j = 0; j < preambles.size(); j++)
                 {
-                    String preamble = (String)preambles.get(j);
-                    String gxml = (String)(((ArrayList)segments.get(j)).get(i));
+                    String preamble = (String) preambles.get(j);
+                    String gxml = (String) (((ArrayList) segments.get(j))
+                            .get(i));
 
                     toWrite.append(preamble);
                     toWrite.append("<seg>");
@@ -459,11 +458,11 @@ public class WordHtmlToTmx2
 
             for (int i = 0; i < segments.size(); i++)
             {
-                ArrayList segs = (ArrayList)segments.get(i);
+                ArrayList segs = (ArrayList) segments.get(i);
 
                 for (int j = 0; j < segs.size(); j++)
                 {
-                    String gxml = (String)segs.get(j);
+                    String gxml = (String) segs.get(j);
                     debug("Segment: " + gxml);
                 }
 
@@ -472,8 +471,7 @@ public class WordHtmlToTmx2
         }
     }
 
-    public String normalizeEOL(String p_string)
-        throws Exception
+    public String normalizeEOL(String p_string) throws Exception
     {
         String result = p_string;
 
@@ -487,8 +485,8 @@ public class WordHtmlToTmx2
     {
         StringBuffer result = new StringBuffer();
 
-        RE re = new RE(SPACERUN_SEARCH_PATTERN,
-            RE.MATCH_CASEINDEPENDENT | RE.MATCH_SINGLELINE);
+        RE re = new RE(SPACERUN_SEARCH_PATTERN, RE.MATCH_CASEINDEPENDENT
+                | RE.MATCH_SINGLELINE);
 
         String temp = p_string;
         while (re.match(temp))
@@ -536,39 +534,39 @@ public class WordHtmlToTmx2
     {
         ArrayList result = new ArrayList();
 
-        for (Iterator it = p_output.documentElementIterator(); it.hasNext(); )
+        for (Iterator it = p_output.documentElementIterator(); it.hasNext();)
         {
-            DocumentElement de = (DocumentElement)it.next();
+            DocumentElement de = (DocumentElement) it.next();
 
             switch (de.type())
             {
-            case DocumentElement.TRANSLATABLE:
-            {
-                TranslatableElement elem = (TranslatableElement)de;
-
-                if (elem.hasSegments())
+                case DocumentElement.TRANSLATABLE:
                 {
-                    ArrayList segments = elem.getSegments();
+                    TranslatableElement elem = (TranslatableElement) de;
 
-                    for (int i = 0, max = segments.size(); i < max; i++)
+                    if (elem.hasSegments())
                     {
-                        SegmentNode node = (SegmentNode)segments.get(i);
-                        result.add(node.getSegment());
+                        ArrayList segments = elem.getSegments();
+
+                        for (int i = 0, max = segments.size(); i < max; i++)
+                        {
+                            SegmentNode node = (SegmentNode) segments.get(i);
+                            result.add(node.getSegment());
+                        }
                     }
+
+                    break;
                 }
+                case DocumentElement.LOCALIZABLE:
+                {
+                    LocalizableElement elem = (LocalizableElement) de;
+                    result.add(elem.getChunk());
 
-                break;
-            }
-            case DocumentElement.LOCALIZABLE:
-            {
-                LocalizableElement elem = (LocalizableElement)de;
-                result.add(elem.getChunk());
-
-                break;
-            }
-            default:
-                // skip all others
-                break;
+                    break;
+                }
+                default:
+                    // skip all others
+                    break;
             }
         }
 
@@ -576,8 +574,15 @@ public class WordHtmlToTmx2
     }
 
     /**
-     * Remove tags inserted by Word: either <p>...</p>, or
-     * <p><span>...<o:p></o:p></span></p>.
+     * Remove tags inserted by Word: either
+     * <p>
+     * ...
+     * </p>
+     * , or
+     * <p>
+     * <span>...<o:p></o:p></span>
+     * </p>
+     * .
      */
     private void cleanupRawTags(ArrayList p_tags)
     {
@@ -588,8 +593,8 @@ public class WordHtmlToTmx2
         {
             try
             {
-                HtmlObjects.Tag tag =
-                    (HtmlObjects.Tag)p_tags.get(p_tags.size() - 4);
+                HtmlObjects.Tag tag = (HtmlObjects.Tag) p_tags.get(p_tags
+                        .size() - 4);
 
                 if (tag.tag.equals("o:p"))
                 {
@@ -597,7 +602,8 @@ public class WordHtmlToTmx2
                 }
             }
             catch (Throwable ignore)
-            {}
+            {
+            }
         }
 
         if (b_removeOP)
@@ -634,27 +640,28 @@ public class WordHtmlToTmx2
             {
                 try
                 {
-                    HtmlObjects.Tag tag1 = (HtmlObjects.Tag)p_tags.get(0);
-                    HtmlObjects.Tag tag2 = (HtmlObjects.Tag)p_tags.get(3);
+                    HtmlObjects.Tag tag1 = (HtmlObjects.Tag) p_tags.get(0);
+                    HtmlObjects.Tag tag2 = (HtmlObjects.Tag) p_tags.get(3);
 
                     String original1 = tag1.original;
                     String original2 = tag2.original;
 
-                    if (original1.indexOf("span") >= 0 &&
-                        original2.indexOf("span") >= 0 &&
-                        original1.indexOf("mso-tab-count") >= 0 &&
-                        original2.indexOf("mso-tab-count") >= 0)
+                    if (original1.indexOf("span") >= 0
+                            && original2.indexOf("span") >= 0
+                            && original1.indexOf("mso-tab-count") >= 0
+                            && original2.indexOf("mso-tab-count") >= 0)
                     {
-                        p_tags.remove(0);         // <span>
-                        p_tags.remove(0);         // nbsps
-                        p_tags.remove(0);         // </span>
-                        p_tags.remove(0);         // <span>
-                        p_tags.remove(0);         // nbsps
-                        p_tags.remove(0);         // </span>
+                        p_tags.remove(0); // <span>
+                        p_tags.remove(0); // nbsps
+                        p_tags.remove(0); // </span>
+                        p_tags.remove(0); // <span>
+                        p_tags.remove(0); // nbsps
+                        p_tags.remove(0); // </span>
                     }
                 }
                 catch (Throwable ignore)
-                {}
+                {
+                }
             }
         }
     }
@@ -669,16 +676,15 @@ public class WordHtmlToTmx2
         return p_name.substring(p_name.lastIndexOf(".") + 1);
     }
 
-    public void startOutputFile(String p_base)
-        throws Exception
+    public void startOutputFile(String p_base) throws Exception
     {
         m_filename = p_base + "-gxml.tmx";
 
         debug("Writing to file " + m_filename);
 
         m_writer = new PrintWriter(new OutputStreamWriter(
-            new BufferedOutputStream(new FileOutputStream(m_filename)),
-            "UTF8"));
+                new BufferedOutputStream(new FileOutputStream(m_filename)),
+                "UTF8"));
 
         m_writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
         m_writer.println(m_header.getTmxDeclaration());
@@ -687,8 +693,7 @@ public class WordHtmlToTmx2
         m_writer.println("<body>");
     }
 
-    public void closeOutputFile()
-        throws Exception
+    public void closeOutputFile() throws Exception
     {
         m_writer.println("</body>");
         m_writer.println("</tmx>");
@@ -709,20 +714,18 @@ public class WordHtmlToTmx2
         m_header.setSegmentationType("sentence");
         m_header.setOriginalFormat("html");
         m_header.setAdminLang("en_US");
-        m_header.setSourceLang("en_US");          // TODO
-        m_header.setDatatype("text");             // TODO
+        m_header.setSourceLang("en_US"); // TODO
+        m_header.setDatatype("text"); // TODO
         // TODO
     }
 
-    public Reader createInputReader(String p_url)
-        throws Exception
+    public Reader createInputReader(String p_url) throws Exception
     {
-        return new BufferedReader(new InputStreamReader(
-            new FileInputStream(p_url), "UTF8"));
+        return new BufferedReader(new InputStreamReader(new FileInputStream(
+                p_url), "UTF8"));
     }
 
-    public void createParser(String p_url)
-        throws Exception
+    public void createParser(String p_url) throws Exception
     {
         Reader inputReader = createInputReader(p_url);
 
@@ -743,8 +746,7 @@ public class WordHtmlToTmx2
         }
     }
 
-    public String convertHtmlToTmx(String p_url)
-        throws Exception
+    public String convertHtmlToTmx(String p_url) throws Exception
     {
         final String baseName = getBaseName(p_url);
         final String extension = getExtension(p_url);
@@ -758,13 +760,13 @@ public class WordHtmlToTmx2
 
         closeOutputFile();
 
-        info("Processed " + m_entryCount + " TUs into file `" + m_filename + "'");
+        info("Processed " + m_entryCount + " TUs into file `" + m_filename
+                + "'");
 
         return m_filename;
     }
 
-    static public void main(String[] argv)
-        throws Exception
+    static public void main(String[] argv) throws Exception
     {
         WordHtmlToTmx2 a = new WordHtmlToTmx2();
 
@@ -782,6 +784,6 @@ public class WordHtmlToTmx2
             com.globalsight.ling.docproc.extractor.html.HtmlObjects.Text t)
     {
         // TODO Auto-generated method stub
-        
+
     }
 }

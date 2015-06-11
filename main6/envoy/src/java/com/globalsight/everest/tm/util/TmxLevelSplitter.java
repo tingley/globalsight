@@ -17,26 +17,26 @@
 
 package com.globalsight.everest.tm.util;
 
-import com.globalsight.everest.tm.util.DtdResolver;
-import com.globalsight.everest.tm.util.Tmx;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.List;
 
-import org.dom4j.*;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.ElementHandler;
+import org.dom4j.ElementPath;
+import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import java.util.*;
-import java.io.*;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * Reads a TMX file and splits it into two files: one that contains
- * level 1 segments (text only), and level 2 segments (with tags).
+ * Reads a TMX file and splits it into two files: one that contains level 1
+ * segments (text only), and level 2 segments (with tags).
  */
 public class TmxLevelSplitter
 {
@@ -50,8 +50,7 @@ public class TmxLevelSplitter
     private String m_version = "";
     private Element m_header = null;
 
-    private static final REProgram DTD_SEARCH_PATTERN =
-        createSearchPattern("tmx\\d+\\.dtd");
+    private static final REProgram DTD_SEARCH_PATTERN = createSearchPattern("tmx\\d+\\.dtd");
 
     private static REProgram createSearchPattern(String p_pattern)
     {
@@ -75,7 +74,7 @@ public class TmxLevelSplitter
     // Constructors
     //
 
-    public TmxLevelSplitter ()
+    public TmxLevelSplitter()
     {
     }
 
@@ -94,8 +93,7 @@ public class TmxLevelSplitter
         System.err.println(p_message);
     }
 
-    public void startFiles(String p_base, String p_extension)
-        throws Exception
+    public void startFiles(String p_base, String p_extension) throws Exception
     {
         String textfile = p_base + "-text." + p_extension;
         String tagsfile = p_base + "-tags." + p_extension;
@@ -104,14 +102,13 @@ public class TmxLevelSplitter
         m_writer2 = startFile(tagsfile);
     }
 
-    public PrintWriter startFile(String p_filename)
-        throws Exception
+    public PrintWriter startFile(String p_filename) throws Exception
     {
         log("Starting file " + p_filename);
 
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(
-            new BufferedOutputStream(new FileOutputStream(p_filename)),
-            "UTF8"));
+                new BufferedOutputStream(new FileOutputStream(p_filename)),
+                "UTF8"));
 
         writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 
@@ -128,8 +125,7 @@ public class TmxLevelSplitter
         return writer;
     }
 
-    public void closeFiles()
-        throws Exception
+    public void closeFiles() throws Exception
     {
         m_writer1.println("</body>");
         m_writer1.println("</tmx>");
@@ -158,7 +154,7 @@ public class TmxLevelSplitter
 
         for (int i = 0, max = segs.size(); i < max; i++)
         {
-            Element seg = (Element)segs.get(i);
+            Element seg = (Element) segs.get(i);
 
             if (containsTags2(seg))
             {
@@ -173,7 +169,7 @@ public class TmxLevelSplitter
     {
         for (int i = 0, max = p_seg.nodeCount(); i < max; i++)
         {
-            Node child = (Node)p_seg.node(i);
+            Node child = (Node) p_seg.node(i);
 
             if (child instanceof Element)
             {
@@ -184,8 +180,7 @@ public class TmxLevelSplitter
         return false;
     }
 
-    public void split(String p_url)
-        throws Exception
+    public void split(String p_url) throws Exception
     {
         final String baseName = getBaseName(p_url);
         final String extension = getExtension(p_url);
@@ -201,111 +196,104 @@ public class TmxLevelSplitter
         log("Splitting document `" + p_url + "'");
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx",
-            new ElementHandler ()
-                {
-                    public void onStart(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
+        reader.addHandler("/tmx", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                Element element = path.getCurrent();
 
-                        m_version = element.attributeValue("version");
-                    }
+                m_version = element.attributeValue("version");
+            }
 
-                    public void onEnd(ElementPath path)
-                    {
-                    }
-                }
-            );
+            public void onEnd(ElementPath path)
+            {
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/header",
-            new ElementHandler ()
+        reader.addHandler("/tmx/header", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+
+                m_header = element;
+
+                try
                 {
-                    public void onStart(ElementPath path)
-                    {
-                    }
-
-                    public void onEnd(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
-
-                        m_header = element;
-
-                        try
-                        {
-                            startFiles(baseName, extension);
-                        }
-                        catch (Exception ex)
-                        {
-                            log(ex.toString());
-                            System.exit(1);
-                        }
-
-                        // prune the current element to reduce memory
-                        element.detach();
-
-                        element = null;
-                    }
+                    startFiles(baseName, extension);
                 }
-            );
+                catch (Exception ex)
+                {
+                    log(ex.toString());
+                    System.exit(1);
+                }
+
+                // prune the current element to reduce memory
+                element.detach();
+
+                element = null;
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/body/tu",
-            new ElementHandler ()
+        reader.addHandler("/tmx/body/tu", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                ++m_entryCount;
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+
+                if (containsTags(element))
                 {
-                    public void onStart(ElementPath path)
-                    {
-                        ++m_entryCount;
-                    }
+                    writeTagsEntry(element.asXML());
 
-                    public void onEnd(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
-
-                        if (containsTags(element))
-                        {
-                            writeTagsEntry(element.asXML());
-
-                            m_tagsCount++;
-                        }
-                        else
-                        {
-                            writeTextEntry(element.asXML());
-
-                            m_textCount++;
-                        }
-
-                        // prune the current element to reduce memory
-                        element.detach();
-
-                        element = null;
-                    }
+                    m_tagsCount++;
                 }
-            );
+                else
+                {
+                    writeTextEntry(element.asXML());
+
+                    m_textCount++;
+                }
+
+                // prune the current element to reduce memory
+                element.detach();
+
+                element = null;
+            }
+        });
 
         Document document = reader.read(p_url);
 
         closeFiles();
 
-        log("Processed " + m_entryCount + " TUs, " + m_textCount +
-            " level 1 (text), " + m_tagsCount + " level 2 (tags)");
+        log("Processed " + m_entryCount + " TUs, " + m_textCount
+                + " level 1 (text), " + m_tagsCount + " level 2 (tags)");
 
         // all done
     }
 
-    static public void main(String[] argv)
-        throws Exception
+    static public void main(String[] argv) throws Exception
     {
         TmxLevelSplitter a = new TmxLevelSplitter();
 
         if (argv.length != 1)
         {
-            System.err.println(
-                "Usage: TmxLevelSplitter FILE\n" +
-                "\tSplits a FILE into two files, one that contains\n" +
-                "\tthe level 1 segments (text only) and another that\n" +
-                "\tcontains the level 2 segments (with tags).\n" +
-                "\tOutput files are named FILE-text.EXT and FILE-tags.EXT.");
+            System.err
+                    .println("Usage: TmxLevelSplitter FILE\n"
+                            + "\tSplits a FILE into two files, one that contains\n"
+                            + "\tthe level 1 segments (text only) and another that\n"
+                            + "\tcontains the level 2 segments (with tags).\n"
+                            + "\tOutput files are named FILE-text.EXT and FILE-tags.EXT.");
             System.exit(1);
         }
 

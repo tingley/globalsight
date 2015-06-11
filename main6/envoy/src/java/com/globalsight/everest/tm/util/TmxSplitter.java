@@ -17,22 +17,20 @@
 
 package com.globalsight.everest.tm.util;
 
-import com.globalsight.everest.tm.util.DtdResolver;
-import com.globalsight.everest.tm.util.Tmx;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
-import org.dom4j.*;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.ElementHandler;
+import org.dom4j.ElementPath;
 import org.dom4j.io.SAXReader;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import java.util.*;
-import java.io.*;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * Reads a TMX file and splits it into smaller chunks.
@@ -47,8 +45,7 @@ public class TmxSplitter
     private String m_version = "";
     private Element m_header = null;
 
-    private static final REProgram DTD_SEARCH_PATTERN =
-        createSearchPattern("tmx\\d+\\.dtd");
+    private static final REProgram DTD_SEARCH_PATTERN = createSearchPattern("tmx\\d+\\.dtd");
 
     private static REProgram createSearchPattern(String p_pattern)
     {
@@ -71,7 +68,7 @@ public class TmxSplitter
     // Constructors
     //
 
-    public TmxSplitter ()
+    public TmxSplitter()
     {
     }
 
@@ -90,23 +87,25 @@ public class TmxSplitter
         System.err.println(p_message);
     }
 
-    public void startFile(String p_base, String p_extension)
-        throws Exception
+    public void startFile(String p_base, String p_extension) throws Exception
     {
         m_fileCount++;
 
         String filename = p_base + "-";
-        if      (m_fileCount <   10) filename += "00" + m_fileCount;
-        else if (m_fileCount <  100) filename += "0"  + m_fileCount;
-        else /*if (m_fileCount >= 100)*/ filename += "" + m_fileCount;
+        if (m_fileCount < 10)
+            filename += "00" + m_fileCount;
+        else if (m_fileCount < 100)
+            filename += "0" + m_fileCount;
+        else
+            /* if (m_fileCount >= 100) */filename += "" + m_fileCount;
 
         filename += "." + p_extension;
 
         log("Starting file " + filename);
 
         m_writer = new PrintWriter(new OutputStreamWriter(
-            new BufferedOutputStream(new FileOutputStream(filename)),
-            "UTF8"));
+                new BufferedOutputStream(new FileOutputStream(filename)),
+                "UTF8"));
 
         m_writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 
@@ -121,8 +120,7 @@ public class TmxSplitter
         m_writer.println("<body>");
     }
 
-    public void closeFile()
-        throws Exception
+    public void closeFile() throws Exception
     {
         m_writer.println("</body>");
         m_writer.println("</tmx>");
@@ -134,8 +132,7 @@ public class TmxSplitter
         m_writer.println(p_message);
     }
 
-    public void split(String p_url, String p_numEntries)
-        throws Exception
+    public void split(String p_url, String p_numEntries) throws Exception
     {
         final int maxEntries = Integer.parseInt(p_numEntries);
         final String baseName = getBaseName(p_url);
@@ -152,90 +149,84 @@ public class TmxSplitter
         log("Splitting document `" + p_url + "'");
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx",
-            new ElementHandler ()
-                {
-                    public void onStart(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
+        reader.addHandler("/tmx", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                Element element = path.getCurrent();
 
-                        m_version = element.attributeValue("version");
-                    }
+                m_version = element.attributeValue("version");
+            }
 
-                    public void onEnd(ElementPath path)
-                    {
-                    }
-                }
-            );
+            public void onEnd(ElementPath path)
+            {
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/header",
-            new ElementHandler ()
+        reader.addHandler("/tmx/header", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+
+                m_header = element;
+
+                try
                 {
-                    public void onStart(ElementPath path)
-                    {
-                    }
-
-                    public void onEnd(ElementPath path)
-                    {
-                        Element element = path.getCurrent();
-
-                        m_header = element;
-
-                        try
-                        {
-                            startFile(baseName, extension);
-                        }
-                        catch (Exception ex)
-                        {
-                            log(ex.toString());
-                            System.exit(1);
-                        }
-
-                        // prune the current element to reduce memory
-                        element.detach();
-
-                        element = null;
-                    }
+                    startFile(baseName, extension);
                 }
-            );
+                catch (Exception ex)
+                {
+                    log(ex.toString());
+                    System.exit(1);
+                }
+
+                // prune the current element to reduce memory
+                element.detach();
+
+                element = null;
+            }
+        });
 
         // enable element complete notifications to conserve memory
-        reader.addHandler("/tmx/body/tu",
-            new ElementHandler ()
+        reader.addHandler("/tmx/body/tu", new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+                ++m_entryCount;
+
+                if (m_entryCount % maxEntries == 0)
                 {
-                    public void onStart(ElementPath path)
+                    try
                     {
-                        ++m_entryCount;
-
-                        if (m_entryCount % maxEntries == 0)
-                        {
-                            try
-                            {
-                                closeFile();
-                                startFile(baseName, extension);
-                            }
-                            catch (Exception ex)
-                            {
-                                log(ex.toString());
-                                System.exit(1);
-                            }
-                        }
+                        closeFile();
+                        startFile(baseName, extension);
                     }
-
-                    public void onEnd(ElementPath path)
+                    catch (Exception ex)
                     {
-                        Element element = path.getCurrent();
-
-                        writeEntry(element.asXML());
-
-                        // prune the current element to reduce memory
-                        element.detach();
-
-                        element = null;
+                        log(ex.toString());
+                        System.exit(1);
                     }
                 }
-            );
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+
+                writeEntry(element.asXML());
+
+                // prune the current element to reduce memory
+                element.detach();
+
+                element = null;
+            }
+        });
 
         Document document = reader.read(p_url);
 
@@ -244,22 +235,20 @@ public class TmxSplitter
         // all done
     }
 
-    static public void main(String[] argv)
-        throws Exception
+    static public void main(String[] argv) throws Exception
     {
         TmxSplitter a = new TmxSplitter();
 
         if (argv.length != 2)
         {
-            System.err.println(
-                "Usage: TmxSplitter FILE NUMENTRIES\n" +
-                "\tSplits a FILE after NUMENTRIES entries.\n" +
-                "\tOutput files are named FILE-001.ext, FILE-002.EXT etc." +
-                "\tTo determine the number of entries, use TmxAnalyzer.\n");
+            System.err
+                    .println("Usage: TmxSplitter FILE NUMENTRIES\n"
+                            + "\tSplits a FILE after NUMENTRIES entries.\n"
+                            + "\tOutput files are named FILE-001.ext, FILE-002.EXT etc."
+                            + "\tTo determine the number of entries, use TmxAnalyzer.\n");
             System.exit(1);
         }
 
         a.split(argv[0], argv[1]);
     }
 }
-

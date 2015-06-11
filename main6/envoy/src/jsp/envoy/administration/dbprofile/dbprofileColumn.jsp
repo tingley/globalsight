@@ -83,17 +83,17 @@ function cancelForm()
 								%> <%
  	if (isIE) {
  %> <OBJECT
-									classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" WIDTH="538"
+									classid="clsid:CAFEEFAC-0018-0000-0045-ABCDEFFEDCBA" WIDTH="538"
 									HEIGHT="385" NAME="GPUI" id="GPUI"
-									codebase="<%=httpProtocolToUse%>://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6">
+									codebase="<%=httpProtocolToUse%>://javadl.sun.com/webapps/download/AutoDL?BundleId=107109">
 									<%
 										} else {
 									%>
 									<%=bundle.getString("applet_need_java_support")%>
 									<BR>
-									<APPLET type="application/x-java-applet;jpi-version=1.6"
+									<APPLET type="application/x-java-applet;jpi-version=1.8.0_45"
 										id="GPUI" height="385" width="538"
-										pluginspage="http://java.sun.com/products/plugin/index.html#download">
+										pluginspage="<%=httpProtocolToUse%>://www.java.com/en/download/manual.jsp">
 										<%
 											}
 										%>

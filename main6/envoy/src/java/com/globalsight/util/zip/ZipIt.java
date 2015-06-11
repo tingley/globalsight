@@ -90,19 +90,22 @@ public class ZipIt implements Serializable
             for (int i = 0; i < entryFiles.length; i++)
             {
                 File oriFile = entryFiles[i];
-                String encodedName = URLEncoder.encode(oriFile.getName(), "UTF-8");
+                String encodedName = URLEncoder.encode(oriFile.getName(),
+                        "UTF-8");
                 String path = oriFile.getParentFile().getAbsolutePath();
                 path = path.replace("\\", File.separator);
                 path = path.replace(File.separator, FILE_SEPARATOR);
                 String encodedPath = URLEncoder.encode(path, "UTF-8");
-                encodedPath = encodedPath.replace(FILE_SEPARATOR, File.separator);
+                encodedPath = encodedPath.replace(FILE_SEPARATOR,
+                        File.separator);
                 File destFile = new File(encodedPath, encodedName);
                 FileUtil.copyFile(oriFile, destFile);
                 newEntryFiles[i] = destFile;
             }
 
             // Add name encoded files into p_zipFile.
-            addEntriesToZipFile(p_zipFile, newEntryFiles, donotIncludePath, comment);
+            addEntriesToZipFile(p_zipFile, newEntryFiles, donotIncludePath,
+                    comment);
 
             // Delete the TEMP files.
             for (File destFile : newEntryFiles)
@@ -143,19 +146,19 @@ public class ZipIt implements Serializable
             throws FileNotFoundException, IOException
     {
         Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
-        if(entryFiles != null)
+        if (entryFiles != null)
         {
-        	for (File file : entryFiles)
-        	{
-        		entryFileToFileNameMap.put(file,
-        				getEntryFileName(file, donotIncludePath));
-        	}
+            for (File file : entryFiles)
+            {
+                entryFileToFileNameMap.put(file,
+                        getEntryFileName(file, donotIncludePath));
+            }
         }
         addEntriesToZipFile(p_zipFile, entryFileToFileNameMap, comment);
     }
 
-    public static void addEntriesToZipFile(File p_zipFile, Set<File> entryFiles,
-            boolean donotIncludePath, String comment)
+    public static void addEntriesToZipFile(File p_zipFile,
+            Set<File> entryFiles, boolean donotIncludePath, String comment)
             throws FileNotFoundException, IOException
     {
         Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
@@ -169,7 +172,7 @@ public class ZipIt implements Serializable
     }
 
     /**
-     * This process will add a number of files to a zip file. 
+     * This process will add a number of files to a zip file.
      * 
      * @param p_zipFile
      *            The zip file to be created.
@@ -191,16 +194,16 @@ public class ZipIt implements Serializable
             throws FileNotFoundException, IOException
     {
         String fileName = null;
-        if(excludedPath != null && !excludedPath.endsWith(File.separator))
+        if (excludedPath != null && !excludedPath.endsWith(File.separator))
         {
             excludedPath += File.separator;
         }
 
         Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
-        for(File file : entryFiles)
+        for (File file : entryFiles)
         {
             fileName = file.getPath();
-            if(excludedPath != null && fileName.startsWith(excludedPath))
+            if (excludedPath != null && fileName.startsWith(excludedPath))
             {
                 fileName = fileName.substring(fileName.indexOf(excludedPath)
                         + excludedPath.length());
@@ -218,9 +221,10 @@ public class ZipIt implements Serializable
 
         addEntriesToZipFile(p_zipFile, entryFileToFileNameMap, comment);
     }
-    
+
     /**
      * This process will add a number of files to a zip file with root dir name
+     * 
      * @param p_zipFile
      * @param entryFiles
      * @param rootDir
@@ -230,8 +234,8 @@ public class ZipIt implements Serializable
      * @throws IOException
      */
     public static void addEntriesToZipFile(File p_zipFile,
-            Set<File> entryFiles, String rootDir, String excludedPath, String comment)
-            throws FileNotFoundException, IOException
+            Set<File> entryFiles, String rootDir, String excludedPath,
+            String comment) throws FileNotFoundException, IOException
     {
         String fileName = null;
         if (excludedPath != null && !excludedPath.endsWith(File.separator))
@@ -284,6 +288,7 @@ public class ZipIt implements Serializable
                 new CRC32());
         ZipOutputStream zos = new ZipOutputStream(cos);
         zos.setComment(comment);
+        zos.setEncoding("UTF-8");
 
         for (Map.Entry<File, String> entry : entryFileToFileNameMap.entrySet())
         {
@@ -294,7 +299,8 @@ public class ZipIt implements Serializable
             zos.putNextEntry(new ZipEntry(entryFileName));
 
             //
-            DataInputStream dis = new DataInputStream(new FileInputStream(entryFile));
+            DataInputStream dis = new DataInputStream(new FileInputStream(
+                    entryFile));
             long length = entryFile.length();
             int chunks = (int) length / SPLIT_SIZE;
             for (int m = 0; m < chunks; m++)
@@ -332,7 +338,6 @@ public class ZipIt implements Serializable
 
         return fileName;
     }
-
 
     /**
      * Unpack the zip file and extract the files to a path relative to the zip
@@ -394,8 +399,8 @@ public class ZipIt implements Serializable
                     new FileOutputStream(outfile));
 
             byte[] buf = new byte[BUFSIZE];
-            BufferedInputStream in = new BufferedInputStream(zipfile
-                    .getInputStream(entry));
+            BufferedInputStream in = new BufferedInputStream(
+                    zipfile.getInputStream(entry));
             int readLen = 0;
             while ((readLen = in.read(buf, 0, BUFSIZE)) != -1)
             {
@@ -481,8 +486,8 @@ public class ZipIt implements Serializable
                     new FileOutputStream(outfile));
 
             byte[] buf = new byte[BUFSIZE];
-            BufferedInputStream in = new BufferedInputStream(zipfile
-                    .getInputStream(entry));
+            BufferedInputStream in = new BufferedInputStream(
+                    zipfile.getInputStream(entry));
             int readLen = 0;
             while ((readLen = in.read(buf, 0, BUFSIZE)) != -1)
             {
@@ -531,92 +536,97 @@ public class ZipIt implements Serializable
         ZipFile zipfile = new ZipFile(p_zipFileName);
         ArrayList<String> files = new ArrayList<String>();
         Map<String, String> changedEntryName = new HashMap<String, String>();
-        for(String jobName:jobNames)
-        {       	
-        	try {				
-        		changedEntryName.putAll(changeEntryName(zipfile, jobName));
-			} catch (Exception e) {}
-        	Enumeration temp = zipfile.getEntries();
-        	int jobIdIndex = -1;
-        	while (temp.hasMoreElements())
-        	{
-        		ZipEntry entry = (ZipEntry) temp.nextElement();  		
-        		String entryName = getEntryName(entry);
-        		int index = entryName.indexOf("/" + jobName + "/");
-        		if(index != -1)
-        		{
-        			if(jobIdIndex == -1)
-        			{
-        				jobIdIndex = index;
-        			}
-    				if(index < jobIdIndex)
-    				{
-    					jobIdIndex = index;
-    				}
-        		}
-        	}
-        	Enumeration entries = zipfile.getEntries();
-        	while (entries.hasMoreElements())
-        	{
-        		// read zip entry
-        		ZipEntry entry = (ZipEntry) entries.nextElement();
-        		
-        		String entryName = getEntryName(entry);
-        		if(entryName.indexOf("/" + jobName + "/") == -1 ||
-        				entryName.indexOf("/" + jobName + "/") != jobIdIndex)
-        			continue;
-        		String tailer = changedEntryName.get(entryName);
-        		files.add(tailer);
-        		File outfile = new File(zipdir + File.separator + tailer);
-        		
-        		if (entry.isDirectory())
-        		{
-        			outfile.mkdirs();
-        			continue;
-        		}
-        		else
-        		{
-        			if (!outfile.getParentFile().exists())
-        				outfile.getParentFile().mkdirs();
-        		}
-        		
-        		BufferedOutputStream out = new BufferedOutputStream(
-        				new FileOutputStream(outfile));
-        		
-        		byte[] buf = new byte[BUFSIZE];
-        		BufferedInputStream in = new BufferedInputStream(zipfile
-        				.getInputStream(entry));
-        		int readLen = 0;
-        		while ((readLen = in.read(buf, 0, BUFSIZE)) != -1)
-        		{
-        			// write file
-        			try
-        			{
-        				out.write(buf, 0, readLen);
-        			}
-        			catch (FileNotFoundException e)
-        			{
-        				out.close();
-        				cleanUp(zipfile, zipDirFile, zipdir);
-        				throw e;
-        			}
-        			catch (IOException ioe)
-        			{
-        				out.close();
-        				cleanUp(zipfile, zipDirFile, zipdir);
-        				throw ioe;
-        			}
-        		}
-        		out.close();
-        		in.close();
-        		
-        		String lastModifiedTime = lastModifiedTimes.get(outfile.getName());
-        		if (lastModifiedTime != null && !lastModifiedTime.equals(""))
-        		{
-        			outfile.setLastModified(Long.parseLong(lastModifiedTime));
-        		}
-        		
-        	}
+        for (String jobName : jobNames)
+        {
+            try
+            {
+                changedEntryName.putAll(changeEntryName(zipfile, jobName));
+            }
+            catch (Exception e)
+            {
+            }
+            Enumeration temp = zipfile.getEntries();
+            int jobIdIndex = -1;
+            while (temp.hasMoreElements())
+            {
+                ZipEntry entry = (ZipEntry) temp.nextElement();
+                String entryName = getEntryName(entry);
+                int index = entryName.indexOf("/" + jobName + "/");
+                if (index != -1)
+                {
+                    if (jobIdIndex == -1)
+                    {
+                        jobIdIndex = index;
+                    }
+                    if (index < jobIdIndex)
+                    {
+                        jobIdIndex = index;
+                    }
+                }
+            }
+            Enumeration entries = zipfile.getEntries();
+            while (entries.hasMoreElements())
+            {
+                // read zip entry
+                ZipEntry entry = (ZipEntry) entries.nextElement();
+
+                String entryName = getEntryName(entry);
+                if (entryName.indexOf("/" + jobName + "/") == -1
+                        || entryName.indexOf("/" + jobName + "/") != jobIdIndex)
+                    continue;
+                String tailer = changedEntryName.get(entryName);
+                files.add(tailer);
+                File outfile = new File(zipdir + File.separator + tailer);
+
+                if (entry.isDirectory())
+                {
+                    outfile.mkdirs();
+                    continue;
+                }
+                else
+                {
+                    if (!outfile.getParentFile().exists())
+                        outfile.getParentFile().mkdirs();
+                }
+
+                BufferedOutputStream out = new BufferedOutputStream(
+                        new FileOutputStream(outfile));
+
+                byte[] buf = new byte[BUFSIZE];
+                BufferedInputStream in = new BufferedInputStream(
+                        zipfile.getInputStream(entry));
+                int readLen = 0;
+                while ((readLen = in.read(buf, 0, BUFSIZE)) != -1)
+                {
+                    // write file
+                    try
+                    {
+                        out.write(buf, 0, readLen);
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        out.close();
+                        cleanUp(zipfile, zipDirFile, zipdir);
+                        throw e;
+                    }
+                    catch (IOException ioe)
+                    {
+                        out.close();
+                        cleanUp(zipfile, zipDirFile, zipdir);
+                        throw ioe;
+                    }
+                }
+                out.close();
+                in.close();
+
+                String lastModifiedTime = lastModifiedTimes.get(outfile
+                        .getName());
+                if (lastModifiedTime != null && !lastModifiedTime.equals(""))
+                {
+                    outfile.setLastModified(Long.parseLong(lastModifiedTime));
+                }
+
+            }
         }
         try
         {
@@ -669,59 +679,61 @@ public class ZipIt implements Serializable
     {
         Map<String, String> entryNamesMap = new HashMap<String, String>();
         ArrayList<String> entryNames = getEntryNames(zipfile);
-        
+
         ArrayList<String> endParts = new ArrayList<String>();
         int jobIdIndex = -1;
-    	for(String entryName:entryNames)
-    	{
-    		int index = entryName.indexOf("/" + jobName + "/");
-    		if(index != -1)
-    		{
-    			if(jobIdIndex == -1)
-    			{
-    				jobIdIndex = index;
-    			}
-				if(index < jobIdIndex)
-				{
-					jobIdIndex = index;
-				}
-    		}
-    	}
-        
         for (String entryName : entryNames)
         {
-        	if(entryName.indexOf("/" + jobName + "/") == -1 ||
-        			entryName.indexOf("/" + jobName + "/") != jobIdIndex)
-        		continue;
+            int index = entryName.indexOf("/" + jobName + "/");
+            if (index != -1)
+            {
+                if (jobIdIndex == -1)
+                {
+                    jobIdIndex = index;
+                }
+                if (index < jobIdIndex)
+                {
+                    jobIdIndex = index;
+                }
+            }
+        }
+
+        for (String entryName : entryNames)
+        {
+            if (entryName.indexOf("/" + jobName + "/") == -1
+                    || entryName.indexOf("/" + jobName + "/") != jobIdIndex)
+                continue;
             String[] result = splitEntryName(entryName, jobName);
             endParts.add(result[1]);
         }
         String commonPath = getCommonPath(endParts);
         int index = commonPath.length();
-        
-        for(String entryName:entryNames)
+
+        for (String entryName : entryNames)
         {
-        	if(entryName.indexOf("/" + jobName + "/") == -1 ||
-        			entryName.indexOf("/" + jobName + "/") != jobIdIndex)
-        		continue;
-        	entryNamesMap.put(entryName, changeEntryName(entryName, index, jobName));
+            if (entryName.indexOf("/" + jobName + "/") == -1
+                    || entryName.indexOf("/" + jobName + "/") != jobIdIndex)
+                continue;
+            entryNamesMap.put(entryName,
+                    changeEntryName(entryName, index, jobName));
         }
 
         return entryNamesMap;
     }
 
-    private static String changeEntryName(
-            String entryName, int commonPathIndex, String jobName)
+    private static String changeEntryName(String entryName,
+            int commonPathIndex, String jobName)
     {
         String changedEntryName = new String();
 
-		String[] result = splitEntryName(entryName, jobName);
-		String locale = result[0];
-		String endPart = result[1];
+        String[] result = splitEntryName(entryName, jobName);
+        String locale = result[0];
+        String endPart = result[1];
 
-        String str = jobName + "/" + locale + "/" + endPart.substring(commonPathIndex);
+        String str = jobName + "/" + locale + "/"
+                + endPart.substring(commonPathIndex);
         str = str.replace("//", "/");
-    	changedEntryName = str;
+        changedEntryName = str;
 
         return changedEntryName;
     }
@@ -796,23 +808,23 @@ public class ZipIt implements Serializable
                     break;
                 }
             }
-            //Added for GBS-1023 
-            boolean _addCommonPath = true;  
+            // Added for GBS-1023
+            boolean _addCommonPath = true;
             String temp = tokens.get(0)[i];
-            for(int j=1;j<tokens.size();j++)
+            for (int j = 1; j < tokens.size(); j++)
             {
-            	if(!temp.equals(tokens.get(j)[i]))
-            	{
-            		_addCommonPath = false;
-            		isDifferent = true;
-            		break;
-            	}
+                if (!temp.equals(tokens.get(j)[i]))
+                {
+                    _addCommonPath = false;
+                    isDifferent = true;
+                    break;
+                }
             }
-            
-            if(_addCommonPath)
+
+            if (_addCommonPath)
             {
-            	commonPath.append(tokens.get(0)[i]);
-            	commonPath.append("/");
+                commonPath.append(tokens.get(0)[i]);
+                commonPath.append("/");
             }
         }
 
@@ -865,9 +877,10 @@ public class ZipIt implements Serializable
         }
         zipDirFile.delete();
     }
-    
+
     /**
      * Zip a directory, currently for OpenOffice converter
+     * 
      * @param srcPathName
      * @param zipFile
      */
@@ -879,7 +892,8 @@ public class ZipIt implements Serializable
         try
         {
             FileOutputStream fileOutputStream = new FileOutputStream(zipFile);
-            CheckedOutputStream cos = new CheckedOutputStream(fileOutputStream, new CRC32());
+            CheckedOutputStream cos = new CheckedOutputStream(fileOutputStream,
+                    new CRC32());
             ZipOutputStream out = new ZipOutputStream(cos);
             String basedir = "";
             compress(file, out, basedir, false);
@@ -891,7 +905,8 @@ public class ZipIt implements Serializable
         }
     }
 
-    private static void compress(File file, ZipOutputStream out, String basedir, boolean includeName)
+    private static void compress(File file, ZipOutputStream out,
+            String basedir, boolean includeName)
     {
         if (file.isDirectory())
         {
@@ -903,7 +918,8 @@ public class ZipIt implements Serializable
         }
     }
 
-    private static void compressDirectory(File dir, ZipOutputStream out, String basedir, boolean includeName)
+    private static void compressDirectory(File dir, ZipOutputStream out,
+            String basedir, boolean includeName)
     {
         if (!dir.exists())
             return;
@@ -911,11 +927,13 @@ public class ZipIt implements Serializable
         File[] files = dir.listFiles();
         for (int i = 0; i < files.length; i++)
         {
-            compress(files[i], out, includeName ? basedir + dir.getName() + "/" : basedir, true);
+            compress(files[i], out, includeName ? basedir + dir.getName() + "/"
+                    : basedir, true);
         }
     }
 
-    private static void compressFile(File file, ZipOutputStream out, String basedir)
+    private static void compressFile(File file, ZipOutputStream out,
+            String basedir)
     {
         if (!file.exists())
         {
@@ -923,7 +941,8 @@ public class ZipIt implements Serializable
         }
         try
         {
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            BufferedInputStream bis = new BufferedInputStream(
+                    new FileInputStream(file));
             ZipEntry entry = new ZipEntry(basedir + file.getName());
             out.putNextEntry(entry);
             int count;

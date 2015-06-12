@@ -47,4 +47,5 @@ public interface UI
     public void confirmUpgradeAgain();
     public void confirmContinue(String msg);
     public void tryAgain(String msg);
+    public void upgradeJdk();
 }

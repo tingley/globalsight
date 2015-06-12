@@ -21,13 +21,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.nio.charset.MalformedInputException;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
-
-import org.apache.regexp.RE;
-
-import sun.io.MalformedInputException;
 
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
@@ -37,16 +34,14 @@ import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
+import com.sun.org.apache.regexp.internal.RE;
 
 /**
  * Reads CSV files and produces Entry objects.
  */
-public class CsvReader
-    implements IReader, TermbaseExceptionMessages, L18nable
+public class CsvReader implements IReader, TermbaseExceptionMessages, L18nable
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            CsvReader.class);
+    private static final Logger CATEGORY = Logger.getLogger(CsvReader.class);
 
     //
     // Private Member Variables
@@ -64,7 +59,7 @@ public class CsvReader
     // Constructors
     //
 
-    public CsvReader (ImportOptions p_options, Termbase p_termbase)
+    public CsvReader(ImportOptions p_options, Termbase p_termbase)
     {
         m_termbase = p_termbase;
         setImportOptions(p_options);
@@ -78,7 +73,6 @@ public class CsvReader
     {
         m_options = p_options;
     }
-
 
     public boolean hasNext()
     {
@@ -103,10 +97,9 @@ public class CsvReader
     }
 
     /**
-     * Analyzes the import file and returns an updated ImportOptions
-     * object with a status whether the file is syntactically correct,
-     * the number of expected entries, and column descriptors in case
-     * of CSV files.
+     * Analyzes the import file and returns an updated ImportOptions object with
+     * a status whether the file is syntactically correct, the number of
+     * expected entries, and column descriptors in case of CSV files.
      */
     public ImportOptions analyze()
     {
@@ -134,7 +127,7 @@ public class CsvReader
     {
         if (m_thread == null)
         {
-            m_results = new ReaderResultQueue (100);
+            m_results = new ReaderResultQueue(100);
             m_thread = new CsvReaderThread(m_results, m_options, m_termbase);
             m_thread.start();
         }
@@ -150,13 +143,11 @@ public class CsvReader
         }
     }
 
-
     /**
-     * Reads a CSV file and checks the columns. If there's any error
-     * in the file, an exception with a descriptive message is thrown.
+     * Reads a CSV file and checks the columns. If there's any error in the
+     * file, an exception with a descriptive message is thrown.
      */
-    private void analyzeFile(String p_url)
-        throws Exception
+    private void analyzeFile(String p_url) throws Exception
     {
         // sets expected number of entries as side-effect
         checkFileEncoding(p_url);
@@ -164,15 +155,14 @@ public class CsvReader
     }
 
     /**
-     * Reads an input file once, checking the encoding. If an encoding
-     * error occurs, an exception is thrown. As a side effect, the
-     * lines are counted and the expected number of entries is set to
-     * that count.
+     * Reads an input file once, checking the encoding. If an encoding error
+     * occurs, an exception is thrown. As a side effect, the lines are counted
+     * and the expected number of entries is set to that count.
      *
-     * @exception MalformedInputException file had an invlid encoding
+     * @exception MalformedInputException
+     *                file had an invlid encoding
      */
-    private void checkFileEncoding(String p_url)
-        throws Exception
+    private void checkFileEncoding(String p_url) throws Exception
     {
         LineNumberReader reader = null;
         int skippedLines = 0;
@@ -207,20 +197,24 @@ public class CsvReader
         }
         catch (IOException ex)
         {
-            throw new Exception("Error reading file (" +
-                ex.getMessage() + ")");
+            throw new Exception("Error reading file (" + ex.getMessage() + ")");
         }
         finally
         {
             if (reader != null)
             {
-                try { reader.close(); } catch (Exception ignore) {}
+                try
+                {
+                    reader.close();
+                }
+                catch (Exception ignore)
+                {
+                }
             }
         }
     }
 
-    private void analyzeColumns(String p_url)
-        throws Exception
+    private void analyzeColumns(String p_url) throws Exception
     {
         LineNumberReader reader = null;
         String defaultName = "Column";
@@ -228,9 +222,9 @@ public class CsvReader
         {
             defaultName = bundle.getString("lb_column");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            //ignore it.
+            // ignore it.
         }
 
         try
@@ -242,20 +236,19 @@ public class CsvReader
             do
             {
                 line = reader.readLine();
-            }
-            while (line != null && ImportUtil.isEmptyLine(line));
+            } while (line != null && ImportUtil.isEmptyLine(line));
 
             String separator = m_options.getSeparator();
-            
+
             boolean isFirstLine = true;
-            
-            //Added for encoding comma within quoted string
+
+            // Added for encoding comma within quoted string
             CsvReaderUtil csvRUtil = new CsvReaderUtil();
             boolean _IfEncode = false;
             _IfEncode = csvRUtil.ifEncodeForCSV(line);
-            if(_IfEncode)
+            if (_IfEncode)
             {
-            	line = csvRUtil.encodeForCSV(line);
+                line = csvRUtil.encodeForCSV(line);
             }
 
             // Build a regexp from the separator char and be careful
@@ -264,24 +257,24 @@ public class CsvReader
 
             String[] columns = regexp.split(line + " ");
             int numColumns = columns.length;
-            
-            //Added for decoding comma within columns
-            if(_IfEncode)
+
+            // Added for decoding comma within columns
+            if (_IfEncode)
             {
-            	columns = csvRUtil.decodeForCSV(columns);
+                columns = csvRUtil.decodeForCSV(columns);
             }
 
             // Remove excessive whitespace.
             for (int i = 0; i < columns.length; ++i)
             {
-                //columns[i] = columns[i].trim();
-            	columns[i] = csvRUtil.csvDelQuotation(columns[i]);
+                // columns[i] = columns[i].trim();
+                columns[i] = csvRUtil.csvDelQuotation(columns[i]);
             }
 
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("line " + reader.getLineNumber() +
-                    " (" + columns.length + " columns) `" + line + "'");
+                CATEGORY.debug("line " + reader.getLineNumber() + " ("
+                        + columns.length + " columns) `" + line + "'");
             }
 
             String[] columnNames;
@@ -304,8 +297,7 @@ public class CsvReader
                 {
                     // read a second, non-empty line
                     line = reader.readLine();
-                }
-                while (line != null && ImportUtil.isEmptyLine(line));
+                } while (line != null && ImportUtil.isEmptyLine(line));
             }
             else
             {
@@ -321,29 +313,29 @@ public class CsvReader
             if (line != null)
             {
                 _IfEncode = csvRUtil.ifEncodeForCSV(line);
-                if(_IfEncode)
+                if (_IfEncode)
                 {
-                	line  = csvRUtil.encodeForCSV(line);
+                    line = csvRUtil.encodeForCSV(line);
                 }
-            	columns   = regexp.split(line + " ");
-            	if(_IfEncode)
+                columns = regexp.split(line + " ");
+                if (_IfEncode)
                 {
-                	columns = csvRUtil.decodeForCSV(columns);
+                    columns = csvRUtil.decodeForCSV(columns);
                 }
-            	
+
                 // Remove excessive whitespace.
                 for (int i = 0; i < columns.length; ++i)
                 {
-                    //columns[i] = columns[i].trim();
-                	columns[i] = csvRUtil.csvDelQuotation(columns[i]);
+                    // columns[i] = columns[i].trim();
+                    columns[i] = csvRUtil.csvDelQuotation(columns[i]);
                 }
 
                 columnExamples = columns;
 
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("line " + reader.getLineNumber() +
-                        " (" + columns.length + " columns) `" + line + "'");
+                    CATEGORY.debug("line " + reader.getLineNumber() + " ("
+                            + columns.length + " columns) `" + line + "'");
                 }
             }
             else
@@ -355,8 +347,8 @@ public class CsvReader
 
             if (columnNames.length != columnExamples.length)
             {
-                throw new Exception("line " + reader.getLineNumber() +
-                    ": inconsistent column count");
+                throw new Exception("line " + reader.getLineNumber()
+                        + ": inconsistent column count");
             }
 
             buildColumnOptions(columnNames, columnExamples);
@@ -364,29 +356,33 @@ public class CsvReader
         catch (Exception ex)
         {
             CATEGORY.error("Error analyzing import file", ex);
-            throw new Exception("Error reading file (" +
-                ex.getMessage() + ")");
+            throw new Exception("Error reading file (" + ex.getMessage() + ")");
         }
         finally
         {
             if (reader != null)
             {
-                try { reader.close(); } catch (Exception ignore) {}
+                try
+                {
+                    reader.close();
+                }
+                catch (Exception ignore)
+                {
+                }
             }
         }
     }
 
     private void buildColumnOptions(String[] p_names, String[] p_examples)
     {
-        com.globalsight.terminology.importer.ImportOptions options =
-            (com.globalsight.terminology.importer.ImportOptions)m_options;
+        com.globalsight.terminology.importer.ImportOptions options = (com.globalsight.terminology.importer.ImportOptions) m_options;
 
         options.clearColumns();
 
         for (int i = 0; i < p_names.length; ++i)
         {
-            com.globalsight.terminology.importer.ImportOptions.ColumnDescriptor col =
-                options.createColumnDescriptor();
+            com.globalsight.terminology.importer.ImportOptions.ColumnDescriptor col = options
+                    .createColumnDescriptor();
 
             col.m_position = i;
             col.m_name = p_names[i].trim();
@@ -400,8 +396,7 @@ public class CsvReader
         }
     }
 
-    private LineNumberReader getReader(String p_url)
-        throws IOException
+    private LineNumberReader getReader(String p_url) throws IOException
     {
         String encoding = m_options.getEncoding();
 
@@ -411,8 +406,8 @@ public class CsvReader
         }
         encoding = CodesetMapper.getJavaEncoding(encoding);
 
-        return new LineNumberReader(new InputStreamReader(
-            new FileInputStream(p_url), encoding));
+        return new LineNumberReader(new InputStreamReader(new FileInputStream(
+                p_url), encoding));
     }
 
     @Override

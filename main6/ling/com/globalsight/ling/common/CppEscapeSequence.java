@@ -16,24 +16,19 @@
  */
 package com.globalsight.ling.common;
 
-import com.globalsight.ling.common.NativeEnDecoder;
-import com.globalsight.ling.common.NativeEnDecoderException;
-
-//jakarta regexp package
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-
 import java.util.Hashtable;
 
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * <P>Implementation of encoding and decoding escape sequences for
- * C++.</P>
+ * <P>
+ * Implementation of encoding and decoding escape sequences for C++.
+ * </P>
  *
  * @see NativeEnDecoder
  */
-public class CppEscapeSequence
-    extends NativeEnDecoder
+public class CppEscapeSequence extends NativeEnDecoder
 {
     //
     // Private Transient Member Variables
@@ -43,16 +38,18 @@ public class CppEscapeSequence
     private static final Hashtable mEscapeToChar = mapEscapeToChar();
 
     private static final String NCR_BEGIN = "\\x";
-    private static final char[] ZERO_ARRAY = {'0', '0', '0', '0'};
+    private static final char[] ZERO_ARRAY =
+    { '0', '0', '0', '0' };
     private static final int HEX_DIGIT = 4;
 
     private static RE m_pattern = null;
-    static {
+    static
+    {
         try
         {
-            m_pattern = new RE (
-                "\\\\(\\\\|t|n|r|[uU][0-9a-fA-F]{4}|[xX][0-9a-fA-F]{2,4}|0[0-7]{0,3}|.)",
-              RE.MATCH_NORMAL);
+            m_pattern = new RE(
+                    "\\\\(\\\\|t|n|r|[uU][0-9a-fA-F]{4}|[xX][0-9a-fA-F]{2,4}|0[0-7]{0,3}|.)",
+                    RE.MATCH_NORMAL);
         }
         catch (RESyntaxException e)
         {
@@ -66,32 +63,30 @@ public class CppEscapeSequence
 
     // other way round... later...
 
-    public String decode (String p_str)
-        throws NativeEnDecoderException
+    public String decode(String p_str) throws NativeEnDecoderException
     {
         return decodeString(p_str);
     }
 
     public String decode(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
 
-    public String encode(String p_str)
-        throws NativeEnDecoderException
+    public String encode(String p_str) throws NativeEnDecoderException
     {
         return encodeString(p_str);
     }
 
     public String encode(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
 
     public String encodeWithEncodingCheck(String p_str)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         String s = encodeString(p_str);
         StringBuffer sbuf = new StringBuffer();
@@ -123,7 +118,7 @@ public class CppEscapeSequence
     }
 
     public String encodeWithEncodingCheck(String p_str, String p_outerQuote)
-        throws NativeEnDecoderException
+            throws NativeEnDecoderException
     {
         throw notApplicable();
     }
@@ -133,22 +128,30 @@ public class CppEscapeSequence
     //
 
     /**
-     * <P>Decodes escape sequences in a string and converts them to
-     * unicode characters.  Escape sequences that will be decoded are
-     * hexadecimal sequences and octal sequences.</P>
+     * <P>
+     * Decodes escape sequences in a string and converts them to unicode
+     * characters. Escape sequences that will be decoded are hexadecimal
+     * sequences and octal sequences.
+     * </P>
      *
-     * <P>The exception to this is that protected quotes inside the
-     * same type of quotes are <STRONG>not</STRONG> decoded.</P>
+     * <P>
+     * The exception to this is that protected quotes inside the same type of
+     * quotes are <STRONG>not</STRONG> decoded.
+     * </P>
      *
-     * <P>Example: <CODE>s = "eval('return \'1\' == \'2\'');"</CODE>.
-     * will remain the same after being subjected to this function.</P>
+     * <P>
+     * Example: <CODE>s = "eval('return \'1\' == \'2\'');"</CODE>. will remain
+     * the same after being subjected to this function.
+     * </P>
      *
-     * <P>We also ignore \b\f\v since they won't make it through the
-     * XML parsers.  If a Unicode sequence maps to these or any other
-     * control characters, tough luck, the DiplomatAPI will catch the
-     * error.</P>
+     * <P>
+     * We also ignore \b\f\v since they won't make it through the XML parsers.
+     * If a Unicode sequence maps to these or any other control characters,
+     * tough luck, the DiplomatAPI will catch the error.
+     * </P>
      *
-     * @param s string to be decoded
+     * @param s
+     *            string to be decoded
      * @return decoded string
      */
     public static String decodeString(String s)
@@ -166,7 +169,7 @@ public class CppEscapeSequence
         StringBuffer ret = new StringBuffer();
 
         // copy RE to make it thread-safe
-        RE pattern = new RE (m_pattern.getProgram());
+        RE pattern = new RE(m_pattern.getProgram());
 
         while (pattern.match(s, last_index))
         {
@@ -174,8 +177,8 @@ public class CppEscapeSequence
             last_index = pattern.getParenEnd(0);
 
             String es = pattern.getParen(1);
-            Character c =
-              (Character)mEscapeToChar.get(new Character(es.charAt(0)));
+            Character c = (Character) mEscapeToChar.get(new Character(es
+                    .charAt(0)));
 
             if (c == null)
             {
@@ -183,7 +186,7 @@ public class CppEscapeSequence
 
                 // See http://www.csci.csusb.edu/dick/c++std/cd2/lex.html.
                 // Unicode sequences are allowed.
-                if (tmp == 'u' || tmp == 'U')     // UnicodeEscapeSequence
+                if (tmp == 'u' || tmp == 'U') // UnicodeEscapeSequence
                 {
                     System.err.println(es);
                     c = decodeUnicodeSequence(es);
@@ -193,7 +196,7 @@ public class CppEscapeSequence
                     System.err.println(es);
                     c = decodeHexSequence(es);
                 }
-                else if (tmp == '0')              // OctalEscapeSequence
+                else if (tmp == '0') // OctalEscapeSequence
                 {
                     c = decodeOctalSequence(es);
                 }
@@ -212,7 +215,7 @@ public class CppEscapeSequence
             char ch = c.charValue();
             if (ch == '\\' || ch == '\'' || ch == '\"') // don't decode \,',"
             {
-                ret.append('\\');                 // so: output backslash again
+                ret.append('\\'); // so: output backslash again
             }
 
             ret.append(c);
@@ -237,11 +240,12 @@ public class CppEscapeSequence
                 if (!b_escaped)
                 {
                     b_escaped = true;
-                    continue;                     // output later
+                    continue; // output later
                 }
                 else
                 {
-                    ret.append('\\'); b_escaped = false;
+                    ret.append('\\');
+                    b_escaped = false;
                 }
             }
             else if (ch == '\'' || ch == '\"')
@@ -252,7 +256,8 @@ public class CppEscapeSequence
                 }
                 else if (ch == theQuote && b_escaped)
                 {
-                    ret.append('\\'); b_escaped = false;
+                    ret.append('\\');
+                    b_escaped = false;
                 }
                 else if (ch == theQuote && !b_escaped)
                 {
@@ -260,7 +265,8 @@ public class CppEscapeSequence
                 }
                 else if (b_escaped)
                 {
-                    ret.append('\\'); b_escaped = false;
+                    ret.append('\\');
+                    b_escaped = false;
                 }
                 else
                 {
@@ -269,7 +275,8 @@ public class CppEscapeSequence
             }
             else if (b_escaped)
             {
-                ret.append('\\'); b_escaped = false;
+                ret.append('\\');
+                b_escaped = false;
             }
 
             ret.append(ch);
@@ -280,17 +287,20 @@ public class CppEscapeSequence
         return ret.toString();
     }
 
-
     /**
-     * <P>Encodes characters in strings to C++ escape sequences.
-     * Characters that will always be encoded are
-     * \b,\f,\t,\n,\r,\v.</P>
+     * <P>
+     * Encodes characters in strings to C++ escape sequences. Characters that
+     * will always be encoded are \b,\f,\t,\n,\r,\v.
+     * </P>
      *
-     * <P>The characters \,'," (backslash, apostrophe, quote) will
-     * only be encoded if they produce a valid output string, one that
-     * is parseable without errors.</P>
+     * <P>
+     * The characters \,'," (backslash, apostrophe, quote) will only be encoded
+     * if they produce a valid output string, one that is parseable without
+     * errors.
+     * </P>
      *
-     * @param s string to be encoded
+     * @param s
+     *            string to be encoded
      * @return encoded string
      */
     public static String encodeString(String s)
@@ -310,39 +320,41 @@ public class CppEscapeSequence
                 if (!b_escaped)
                 {
                     b_escaped = true;
-                    continue;                     // output later
+                    continue; // output later
                 }
                 else
                 {
-                    ret.append('\\'); b_escaped = false;
+                    ret.append('\\');
+                    b_escaped = false;
                 }
             }
             else if (ch == '\'' || ch == '\"')
             {
-                ret.append('\\'); b_escaped = false;
+                ret.append('\\');
+                b_escaped = false;
 
-//              else if (ch == '\'' || ch == '\"')
-//              {
-//                  if (theQuote == '\0' && !b_escaped)
-//                  {
-//                      theQuote = ch;
-//                  }
-//                  else if (ch == theQuote && b_escaped)
-//                  {
-//                      ret.append('\\'); b_escaped = false;
-//                  }
-//                  else if (ch == theQuote && !b_escaped)
-//                  {
-//                      theQuote = '\0';
-//                  }
-//                  else if (b_escaped)
-//                  {
-//                      ret.append('\\'); b_escaped = false;
-//                  }
-//                  else
-//                  {
-//                      // System.err.println("OUCH: " + ch);
-//                  }
+                // else if (ch == '\'' || ch == '\"')
+                // {
+                // if (theQuote == '\0' && !b_escaped)
+                // {
+                // theQuote = ch;
+                // }
+                // else if (ch == theQuote && b_escaped)
+                // {
+                // ret.append('\\'); b_escaped = false;
+                // }
+                // else if (ch == theQuote && !b_escaped)
+                // {
+                // theQuote = '\0';
+                // }
+                // else if (b_escaped)
+                // {
+                // ret.append('\\'); b_escaped = false;
+                // }
+                // else
+                // {
+                // // System.err.println("OUCH: " + ch);
+                // }
             }
             else if (b_escaped)
             {
@@ -361,7 +373,7 @@ public class CppEscapeSequence
         for (int i = 0; i < s.length(); ++i)
         {
             Character c = new Character(s.charAt(i));
-            String es = (String)mCharToEscape.get(c);
+            String es = (String) mCharToEscape.get(c);
 
             if (es != null)
             {
@@ -392,7 +404,6 @@ public class CppEscapeSequence
         return ret.toString();
     }
 
-
     //
     // Private Methods
     //
@@ -404,7 +415,7 @@ public class CppEscapeSequence
 
         try
         {
-            c = new Character((char)Integer.parseInt(s.substring(i), 16));
+            c = new Character((char) Integer.parseInt(s.substring(i), 16));
         }
         catch (NumberFormatException e)
         {
@@ -420,7 +431,7 @@ public class CppEscapeSequence
 
         try
         {
-            c = new Character((char)Integer.parseInt(s, 8));
+            c = new Character((char) Integer.parseInt(s, 8));
         }
         catch (NumberFormatException e)
         {
@@ -437,7 +448,7 @@ public class CppEscapeSequence
 
         try
         {
-            c = new Character((char)Integer.parseInt(s.substring(i), 16));
+            c = new Character((char) Integer.parseInt(s.substring(i), 16));
         }
         catch (NumberFormatException e)
         {
@@ -462,7 +473,6 @@ public class CppEscapeSequence
         return h;
     }
 
-
     private static Hashtable mapEscapeToChar()
     {
         Hashtable h = new Hashtable();
@@ -470,115 +480,69 @@ public class CppEscapeSequence
         // Don't map chars that are illegal in XML
 
         h.put(new Character('\\'), new Character('\\'));
-        // h.put(new Character('b'),  new Character('\b'));
-        // h.put(new Character('f'),  new Character('\u000c'));
-        h.put(new Character('n'),  new Character('\n'));
-        h.put(new Character('r'),  new Character('\r'));
-        h.put(new Character('t'),  new Character('\t'));
-        // h.put(new Character('v'),  new Character('\u000b'));
+        // h.put(new Character('b'), new Character('\b'));
+        // h.put(new Character('f'), new Character('\u000c'));
+        h.put(new Character('n'), new Character('\n'));
+        h.put(new Character('r'), new Character('\r'));
+        h.put(new Character('t'), new Character('\t'));
+        // h.put(new Character('v'), new Character('\u000b'));
 
         return h;
     }
-
 
     //
     // Test code
     //
 
-/********************************************************
-    public static void main(String[] args)
-    {
-        String s;
-
-        System.out.println(CppEscapeSequence.decodeString(
-          "\\u00c0\\x21\\1000abcd\\\\\\'\\\"\\b\\f\\n\\r\\tefg\\h"));
-        System.out.println(CppEscapeSequence.encodeString(
-          "abcd\\'\"\b\f\n\r\tefgh"));
-
-        s = "abcd\\'\"\b\f\n\r\tefgh";
-        if (CppEscapeSequence.decodeString(CppEscapeSequence.encodeString(s))
-          .compareTo(s) == 0)
-        {
-            System.out.println("roundtrip 1 ok");
-        }
-        else
-        {
-            System.out.println("roundtrip 1 failed");
-        }
-
-        s = "\\u00c0\\x21\\1000abcd\\\\\\'\\\"\\b\\f\\n\\r\\tefg\\h";
-        if (CppEscapeSequence.decodeString(CppEscapeSequence.encodeString(s))
-          .compareTo(s) == 0)
-        {
-            System.out.println("roundtrip 2 ok");
-        }
-        else
-        {
-            System.out.println("roundtrip 2 failed");
-        }
-    }
-
-    public static void main(String[] args)
-        throws NativeEnDecoderException, java.io.UnsupportedEncodingException
-    {
-        String s = "test \" ' \u00a0 \u00a9 \u2122 \u00ae \u0367 test";
-        EncodingChecker checker = new EncodingChecker(args[0]);
-        CppEscapeSequence encoder = new CppEscapeSequence();
-        encoder.setEncodingChecker(checker);
-
-        System.out.println(encoder.encode(s));
-    }
-
-********************************************************
-
-    public static void main(String[] args)
-    {
-        String s, s1, s2;
-
-        s = "doit('if (\\'1\\'==\\'1\\') {1;} else {2;}')";
-        System.err.println("S " + s);
-        s1 = CppEscapeSequence.decodeString(s);
-        System.err.println("D " + s1);
-        s2 = CppEscapeSequence.encodeString(s1);
-        System.err.println("E " + s2);
-        if (s2.compareTo(s) == 0)
-        {
-            System.err.println("roundtrip 3 ok");
-        }
-        else
-        {
-            System.err.println("roundtrip 3 failed");
-        }
-
-        s = "doit('if (\\'1\\'==\\'1\\') {1;} else {2;}'); return \"1\"";
-        System.err.println("S " + s);
-        s1 = CppEscapeSequence.decodeString(s);
-        System.err.println("D " + s1);
-        s2 = CppEscapeSequence.encodeString(s1);
-        System.err.println("E " + s2);
-        if (s2.compareTo(s) == 0)
-        {
-            System.err.println("roundtrip 4 ok");
-        }
-        else
-        {
-            System.err.println("roundtrip 4 failed");
-        }
-
-        s = "\\u00c0\\x21\\1000abcd\\\\\\'\\\"\\b\\f\\n\\r\\tefg\\h\\y";
-        System.err.println("S " + s);
-        s1 = CppEscapeSequence.decodeString(s);
-        System.err.println("D " + s1);
-        s2 = CppEscapeSequence.encodeString(s1);
-        System.err.println("E " + s2);
-        if (s2.compareTo(s) == 0)
-        {
-            System.err.println("roundtrip 5 ok");
-        }
-        else
-        {
-            System.err.println("roundtrip 5 failed");
-        }
-    }
-*******************************************************/
+    /********************************************************
+     * public static void main(String[] args) { String s;
+     * 
+     * System.out.println(CppEscapeSequence.decodeString(
+     * "\\u00c0\\x21\\1000abcd\\\\\\'\\\"\\b\\f\\n\\r\\tefg\\h"));
+     * System.out.println(CppEscapeSequence.encodeString(
+     * "abcd\\'\"\b\f\n\r\tefgh"));
+     * 
+     * s = "abcd\\'\"\b\f\n\r\tefgh"; if
+     * (CppEscapeSequence.decodeString(CppEscapeSequence.encodeString(s))
+     * .compareTo(s) == 0) { System.out.println("roundtrip 1 ok"); } else {
+     * System.out.println("roundtrip 1 failed"); }
+     * 
+     * s = "\\u00c0\\x21\\1000abcd\\\\\\'\\\"\\b\\f\\n\\r\\tefg\\h"; if
+     * (CppEscapeSequence.decodeString(CppEscapeSequence.encodeString(s))
+     * .compareTo(s) == 0) { System.out.println("roundtrip 2 ok"); } else {
+     * System.out.println("roundtrip 2 failed"); } }
+     * 
+     * public static void main(String[] args) throws NativeEnDecoderException,
+     * java.io.UnsupportedEncodingException { String s =
+     * "test \" ' \u00a0 \u00a9 \u2122 \u00ae \u0367 test"; EncodingChecker
+     * checker = new EncodingChecker(args[0]); CppEscapeSequence encoder = new
+     * CppEscapeSequence(); encoder.setEncodingChecker(checker);
+     * 
+     * System.out.println(encoder.encode(s)); }
+     * 
+     ********************************************************
+     * 
+     * public static void main(String[] args) { String s, s1, s2;
+     * 
+     * s = "doit('if (\\'1\\'==\\'1\\') {1;} else {2;}')";
+     * System.err.println("S " + s); s1 = CppEscapeSequence.decodeString(s);
+     * System.err.println("D " + s1); s2 = CppEscapeSequence.encodeString(s1);
+     * System.err.println("E " + s2); if (s2.compareTo(s) == 0) {
+     * System.err.println("roundtrip 3 ok"); } else {
+     * System.err.println("roundtrip 3 failed"); }
+     * 
+     * s = "doit('if (\\'1\\'==\\'1\\') {1;} else {2;}'); return \"1\"";
+     * System.err.println("S " + s); s1 = CppEscapeSequence.decodeString(s);
+     * System.err.println("D " + s1); s2 = CppEscapeSequence.encodeString(s1);
+     * System.err.println("E " + s2); if (s2.compareTo(s) == 0) {
+     * System.err.println("roundtrip 4 ok"); } else {
+     * System.err.println("roundtrip 4 failed"); }
+     * 
+     * s = "\\u00c0\\x21\\1000abcd\\\\\\'\\\"\\b\\f\\n\\r\\tefg\\h\\y";
+     * System.err.println("S " + s); s1 = CppEscapeSequence.decodeString(s);
+     * System.err.println("D " + s1); s2 = CppEscapeSequence.encodeString(s1);
+     * System.err.println("E " + s2); if (s2.compareTo(s) == 0) {
+     * System.err.println("roundtrip 5 ok"); } else {
+     * System.err.println("roundtrip 5 failed"); } }
+     *******************************************************/
 }

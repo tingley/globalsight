@@ -16,17 +16,15 @@
  */
 package com.globalsight.ling.docproc.extractor.xml;
 
-// jakarta regexp package
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.DiplomatSegmenter;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * Utility class used in the XML Extractor.
@@ -57,7 +55,7 @@ public abstract class OutputWriter
     {
         this.sid = sid;
     }
-    
+
     public XmlFilterHelper getXmlFilterHelper()
     {
         return m_xmlFilterHelper;
@@ -67,12 +65,12 @@ public abstract class OutputWriter
     {
         this.m_xmlFilterHelper = xmlFilterHelper;
     }
-    
+
     public boolean isPreserveWhiteSpace()
     {
         return m_isPreserveWS;
     }
-    
+
     public void setPreserveWhiteSpace(boolean isPreserveWS)
     {
         m_isPreserveWS = isPreserveWS;
@@ -105,7 +103,7 @@ public abstract class OutputWriter
         RE matcher = new RE(COMMENTS_SEARCH_PATTERN, RE.MATCH_SINGLELINE);
         return matcher.match(p_content);
     }
-    
+
     protected boolean isTmxTagsOnly(String p_content)
     {
         Pattern p = Pattern.compile("<sub[^>]*>([^<]*?)</sub>");
@@ -116,10 +114,10 @@ public abstract class OutputWriter
             if (!Text.isBlank(s))
                 return false;
         }
-        
+
         DiplomatSegmenter seg = new DiplomatSegmenter();
         String noTags = seg.removeTags(p_content);
-        
+
         if (noTags == null)
         {
             return true;

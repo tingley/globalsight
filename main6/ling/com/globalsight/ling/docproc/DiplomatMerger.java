@@ -16,7 +16,7 @@
  */
 package com.globalsight.ling.docproc;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
@@ -159,7 +159,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             m_encodingChecker = new EncodingChecker("UTF-8");
         }
-        catch (UnsupportedEncodingException e)
+        catch (UnsupportedCharsetException e)
         {
             // Shouldn't reach here. UTF-8 is predefined in Java.
         }
@@ -201,7 +201,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
             m_encodingChecker = new EncodingChecker(targetEncoding);
         }
-        catch (UnsupportedEncodingException e)
+        catch (UnsupportedCharsetException e)
         {
             throw new DiplomatMergerException(
                     ExtractorExceptionConstants.INVALID_ENCODING, e.toString());
@@ -722,7 +722,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 if (!m_convertHtmlEntityForHtml)
                 {
                     tmp = StringUtil.replace(tmp, "&amp;", "&");
-                	tmp = StringUtil.replace(tmp, "&quot;", "\"");
+                    tmp = StringUtil.replace(tmp, "&quot;", "\"");
                     tmp = StringUtil.replace(tmp, "&apos;", "'");
                     tmp = StringUtil.replace(tmp, "&#39;", "'");
                 }

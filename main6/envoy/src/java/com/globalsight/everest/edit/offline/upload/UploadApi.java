@@ -47,10 +47,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.regexp.RE;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-import org.apache.regexp.RESyntaxException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -111,6 +107,10 @@ import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * Contains methods responsible for error-checking and saving uploaded content.
@@ -629,7 +629,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (WebAppConstants.POST_REVIEW_QA.equals(p_reportName))
             {
                 // update task comment
-                if(taskComment != null && !"".equals(taskComment)){
+                if (taskComment != null && !"".equals(taskComment))
+                {
                     TaskHelper.saveComment(task, task.getId(),
                             p_user.getUserId(), taskComment);
                 }
@@ -1709,19 +1710,19 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         }
         return localeId;
     }
-    
+
     public String processXliff20(Reader p_reader, String p_fileName,
             User p_user, long p_ownerTaskId, Collection p_excludedItemTypes,
             String p_jmsQueueDestination)
     {
         loadListViewTextFile(p_reader, p_fileName, true);
-        
+
         m_uploadPageData.setIsXliff20(true);
-        
+
         List<Task> isUploadingTasks = new ArrayList<Task>();
         String errPage = null;
         String checkErrMsg = null;
-        
+
         // for GBS-1939, for GBS-2829
         List<Long> taskIdsList = null;
         String taskId = m_uploadPageData.getTaskId();

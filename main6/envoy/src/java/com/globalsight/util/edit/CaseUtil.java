@@ -17,15 +17,12 @@
 
 package com.globalsight.util.edit;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.util.GlobalSightLocale;
-
-import org.apache.regexp.RE;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.io.UnsupportedEncodingException;
+import org.apache.log4j.Logger;
+
+import com.sun.org.apache.regexp.internal.RE;
 
 // TODO: this class need to be instantiable so search-replace code can
 // use one instance for 1000s of strings.
@@ -35,9 +32,7 @@ import java.io.UnsupportedEncodingException;
  */
 public final class CaseUtil
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            CaseUtil.class);
+    private static final Logger CATEGORY = Logger.getLogger(CaseUtil.class);
 
     private String m_search;
     private String m_replace;
@@ -47,7 +42,7 @@ public final class CaseUtil
     private Pattern m_pattern;
 
     public CaseUtil(String p_search, String p_replace,
-        boolean p_caseInsensitive, boolean p_smartReplace)
+            boolean p_caseInsensitive, boolean p_smartReplace)
     {
         m_search = p_search;
         m_replace = p_replace;
@@ -57,45 +52,42 @@ public final class CaseUtil
         // May have to remove asterisk, it gets mapped "*" -> ".*"
         if (p_caseInsensitive)
         {
-            m_pattern = Pattern.compile (
-                RE.simplePatternToFullRegularExpression(p_search),
-                Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
+            m_pattern = Pattern.compile(
+                    RE.simplePatternToFullRegularExpression(p_search),
+                    Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
         }
         else
         {
-            m_pattern = Pattern.compile (
-                RE.simplePatternToFullRegularExpression(p_search));
+            m_pattern = Pattern.compile(RE
+                    .simplePatternToFullRegularExpression(p_search));
         }
     }
 
     /**
-     * Replaces a search string in text with a replace string, thereby
-     * matching the replaced text's case with the matched text's case.
+     * Replaces a search string in text with a replace string, thereby matching
+     * the replaced text's case with the matched text's case.
      *
-     * smartReplace() ignores case while searching for occurrences to
-     * replace -- provided `case-insensitive-search' is true.
+     * smartReplace() ignores case while searching for occurrences to replace --
+     * provided `case-insensitive-search' is true.
      *
-     * If the SMARTREPLACE argument is false, the replace text is
-     * inserted as is.
+     * If the SMARTREPLACE argument is false, the replace text is inserted as
+     * is.
      *
-     * If the SMARTREPLACE argument is true and, in addition, when the
-     * REPLACE argument is all or partly lower case, replacement
-     * commands try to preserve the case pattern of each occurrence.
-     * Thus,
+     * If the SMARTREPLACE argument is true and, in addition, when the REPLACE
+     * argument is all or partly lower case, replacement commands try to
+     * preserve the case pattern of each occurrence. Thus,
      *
-     *     smartReplace("foo", "bar")
+     * smartReplace("foo", "bar")
      *
-     * replaces a lower case `foo' with a lower case `bar', an
-     * all-caps `FOO' with `BAR', and a capitalized `Foo' with `Bar'.
-     * (These three alternatives -- lower case, all caps, and
-     * capitalized, are the only ones that smartReplace() can
-     * distinguish.)
+     * replaces a lower case `foo' with a lower case `bar', an all-caps `FOO'
+     * with `BAR', and a capitalized `Foo' with `Bar'. (These three alternatives
+     * -- lower case, all caps, and capitalized, are the only ones that
+     * smartReplace() can distinguish.)
      *
-     * If upper-case letters are used in the replacement string, they
-     * remain upper case every time that text is inserted.  If
-     * upper-case letters are used in the search string, the
-     * replacement text is always substituted exactly as given, with
-     * no case conversion.
+     * If upper-case letters are used in the replacement string, they remain
+     * upper case every time that text is inserted. If upper-case letters are
+     * used in the search string, the replacement text is always substituted
+     * exactly as given, with no case conversion.
      */
     public String smartReplace(String p_text)
     {
@@ -114,8 +106,7 @@ public final class CaseUtil
             {
                 result.append(p_text.substring(pos, matcher.start()));
 
-                String match = p_text.substring(
-                    matcher.start(), matcher.end());
+                String match = p_text.substring(matcher.start(), matcher.end());
 
                 result.append(getSmartCasedText(m_search, m_replace, match));
 
@@ -130,21 +121,21 @@ public final class CaseUtil
 
     /** @see #smartReplace(String) */
     static public String smartReplace(String p_text, String p_search,
-        String p_replace, boolean p_caseInsensitive, boolean p_smartReplace)
+            String p_replace, boolean p_caseInsensitive, boolean p_smartReplace)
     {
         Pattern pattern;
 
         // May have to remove asterisk, it gets mapped "*" -> ".*"
         if (p_caseInsensitive)
         {
-            pattern = Pattern.compile (
-                RE.simplePatternToFullRegularExpression(p_search),
-                Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
+            pattern = Pattern.compile(
+                    RE.simplePatternToFullRegularExpression(p_search),
+                    Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
         }
         else
         {
-            pattern = Pattern.compile (
-                RE.simplePatternToFullRegularExpression(p_search));
+            pattern = Pattern.compile(RE
+                    .simplePatternToFullRegularExpression(p_search));
         }
 
         Matcher matcher = pattern.matcher(p_text);
@@ -162,8 +153,7 @@ public final class CaseUtil
             {
                 result.append(p_text.substring(pos, matcher.start()));
 
-                String match = p_text.substring(
-                    matcher.start(), matcher.end());
+                String match = p_text.substring(matcher.start(), matcher.end());
 
                 result.append(getSmartCasedText(p_search, p_replace, match));
 
@@ -178,7 +168,7 @@ public final class CaseUtil
 
     /** @see #smartReplace(String) */
     static public String getSmartCasedText(String p_search, String p_replace,
-        String p_match)
+            String p_match)
     {
         // assert(p_search.length() > 1);
         // assert(p_match.length() > 1);
@@ -282,43 +272,29 @@ public final class CaseUtil
     }
 
     /*
-      Emacs test here.
-
-      lower case test f-o-o -> b-a-r
-      f-o-o     foo    b-a-r
-      F-O-O     FOO    B-A-R
-      F-o-o     Foo    B-a-r
-      F-o-O     FoO    B-a-r
-
-      mixed case test f-o-o -> b-A-r
-      f-o-o     foo    b-A-r
-      F-O-O     FOO    B-A-R
-      F-o-o     Foo    B-A-r
-      F-o-O     FoO    B-A-r
-
-      mixed case test f-o-o -> B-a-r
-      f-o-o     foo    B-a-r
-      F-O-O     FOO    B-A-R
-      F-o-o     Foo    B-a-r
-      F-o-O     FoO    B-a-r
-
-      mixed case test f-O-o -> b-A-r
-      f-o-o     foo   <no match>
-      F-O-O     FOO
-      F-o-o     Foo
-      F-o-O     FoO
-      f-O-o     fOo   <replace text as is, b-A-r>
+     * Emacs test here.
+     * 
+     * lower case test f-o-o -> b-a-r f-o-o foo b-a-r F-O-O FOO B-A-R F-o-o Foo
+     * B-a-r F-o-O FoO B-a-r
+     * 
+     * mixed case test f-o-o -> b-A-r f-o-o foo b-A-r F-O-O FOO B-A-R F-o-o Foo
+     * B-A-r F-o-O FoO B-A-r
+     * 
+     * mixed case test f-o-o -> B-a-r f-o-o foo B-a-r F-O-O FOO B-A-R F-o-o Foo
+     * B-a-r F-o-O FoO B-a-r
+     * 
+     * mixed case test f-O-o -> b-A-r f-o-o foo <no match> F-O-O FOO F-o-o Foo
+     * F-o-O FoO f-O-o fOo <replace text as is, b-A-r>
      */
 
     static public void test(String s, String r, String m, String e)
     {
         System.err.println("search=" + s + " replace=" + r + " match=" + m);
-        System.err.println("-->" + getSmartCasedText(s, r, m) +
-            " --- expected " + e);
+        System.err.println("-->" + getSmartCasedText(s, r, m)
+                + " --- expected " + e);
     }
 
-    static public void main (String[] argv)
-        throws Exception
+    static public void main(String[] argv) throws Exception
     {
         test("foo", "bar", "foo", "bar");
         test("foo", "bar", "FOO", "BAR");

@@ -30,15 +30,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-import sun.beans.editors.IntEditor;
-import sun.beans.editors.LongEditor;
-import sun.beans.editors.StringEditor;
-
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
+import com.sun.beans.editors.IntegerEditor;
+import com.sun.beans.editors.LongEditor;
+import com.sun.beans.editors.StringEditor;
 
 public abstract class PageActionHandler extends PageHandler
 {
@@ -267,7 +266,7 @@ public abstract class PageActionHandler extends PageHandler
         {
             EDITS = new HashMap<Class, Class>();
             EDITS.put(String.class, StringEditor.class);
-            EDITS.put(int.class, IntEditor.class);
+            EDITS.put(int.class, IntegerEditor.class);
             EDITS.put(long.class, LongEditor.class);
         }
 

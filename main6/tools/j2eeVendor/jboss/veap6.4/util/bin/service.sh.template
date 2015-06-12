@@ -1,0 +1,39 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          jboss
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+### END INIT INFO
+
+JAVA_HOME=${JAVA_HOME:-"%%java_home%%"}
+export PATH=$JAVA_HOME/bin:$PATH
+JBOSS_HOME=${JBOSS_HOME:-"%%JBOSS_HOME%%"}
+export PATH=$JBOSS_HOME/bin:$PATH
+SERVICE_NAME=${SERVICE_NAME:-"%%SERVICE_NAME%%"}
+
+JBOSS_USER=jboss  
+export JBOSS_USER
+
+case "$1" in
+    start)
+        echo "Starting GlobalSight"
+        start-stop-daemon --start --quiet --background --user ${JBOSS_USER} --exec ${JBOSS_HOME}/bin/standalone.sh
+    ;;
+    stop)
+        echo "Stopping GlobalSight"
+        start-stop-daemon --start --quiet --background --user ${JBOSS_USER} --exec ${JBOSS_HOME}/bin/jboss-cli.sh -- --connect command=:shutdown
+    ;;
+    restart)
+      $0 stop
+      $0 start
+      ;;
+    *)
+        echo "Usage: /etc/init.d/${SERVICE_NAME} {start|stop|restart}"
+        exit 1
+    ;;
+esac
+
+exit 0
+

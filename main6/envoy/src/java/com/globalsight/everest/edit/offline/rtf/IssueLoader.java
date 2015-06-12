@@ -31,36 +31,29 @@
 package com.globalsight.everest.edit.offline.rtf;
 
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.UploadIssue;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 public class IssueLoader
 {
-    static private final Logger c_logger =
-        Logger.getLogger(
-            IssueLoader.class);
+    static private final Logger c_logger = Logger.getLogger(IssueLoader.class);
 
     // Comment regexp for MyTitle
-    static private final REProgram m_commentTitle =
-        createProgram("\\{MyTitle=([^\\}]*)\\}");
+    static private final REProgram m_commentTitle = createProgram("\\{MyTitle=([^\\}]*)\\}");
     // Comment regexp for Status
-    static private final REProgram m_commentStatus =
-        createProgram("\\{Status=([^\\}]*)\\}");
+    static private final REProgram m_commentStatus = createProgram("\\{Status=([^\\}]*)\\}");
     // Comment regexp for Category
-    static private final REProgram m_commentCategory = 
-    	createProgram("\\{Category=([^\\}]*)\\}");
+    static private final REProgram m_commentCategory = createProgram("\\{Category=([^\\}]*)\\}");
     // Comment regexp for Priority
-    static private final REProgram m_commentPriority =
-        createProgram("\\{Priority=([^\\}]*)\\}");
+    static private final REProgram m_commentPriority = createProgram("\\{Priority=([^\\}]*)\\}");
     // Comment regexp for MyReply
-    static private final REProgram m_commentReply =
-        createProgram("\\{MyReply=([^\\}]*)\\}");
+    static private final REProgram m_commentReply = createProgram("\\{MyReply=([^\\}]*)\\}");
 
     static private REProgram createProgram(String p_pattern)
     {
@@ -81,15 +74,17 @@ public class IssueLoader
     }
 
     /**
-     * Parses a raw annotation text into title, comment, status and
-     * priority and category and populates the UploadPageData object.
+     * Parses a raw annotation text into title, comment, status and priority and
+     * category and populates the UploadPageData object.
      *
-     * @param p_segId normalized segment ID (TUID_SUBID)
-     * @param p_segName display string for the segment ID, either
-     * TUID_SUBID (RTF para view), or TUID:[XX]:SUBID (RTF list view)
+     * @param p_segId
+     *            normalized segment ID (TUID_SUBID)
+     * @param p_segName
+     *            display string for the segment ID, either TUID_SUBID (RTF para
+     *            view), or TUID:[XX]:SUBID (RTF list view)
      */
-    static /**/ void handleUploadIssue(OfflinePageData p_opd,
-        String p_segId, String p_segName, String p_text)
+    static/**/void handleUploadIssue(OfflinePageData p_opd, String p_segId,
+            String p_segName, String p_text)
     {
         String title = null;
         String status = null;
@@ -115,7 +110,7 @@ public class IssueLoader
         {
             category = matcher.getParen(1).trim();
         }
-        
+
         matcher = new RE(m_commentPriority);
         if (matcher.match(p_text))
         {
@@ -130,8 +125,8 @@ public class IssueLoader
 
         if (c_logger.isDebugEnabled())
         {
-            System.out.println("Segment Comment " + priority + " " + status +
-                category + " '" + title + "' = '" + reply + "'.");
+            System.out.println("Segment Comment " + priority + " " + status
+                    + category + " '" + title + "' = '" + reply + "'.");
         }
 
         // Must have at least a valid reply
@@ -163,10 +158,10 @@ public class IssueLoader
             priority = Issue.PRI_LOW;
         }
 
-        if (!Issue.PRI_URGENT.equals(priority) &&
-            !Issue.PRI_HIGH  .equals(priority) &&
-            !Issue.PRI_MEDIUM.equals(priority) &&
-            !Issue.PRI_LOW   .equals(priority))
+        if (!Issue.PRI_URGENT.equals(priority)
+                && !Issue.PRI_HIGH.equals(priority)
+                && !Issue.PRI_MEDIUM.equals(priority)
+                && !Issue.PRI_LOW.equals(priority))
         {
             priority = Issue.PRI_MEDIUM;
         }
@@ -203,59 +198,58 @@ public class IssueLoader
                 status = Issue.STATUS_OPEN;
             }
         }
-//        if (Issue.CATEGORY_TYPE01.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE01;
-//        }
-//        else if (Issue.CATEGORY_TYPE02.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE02;
-//        }
-//        else if (Issue.CATEGORY_TYPE03.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE03;
-//        }
-//        else if (Issue.CATEGORY_TYPE04.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE04;
-//        }
-//        else if (Issue.CATEGORY_TYPE05.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE05;
-//        }
-//        else if (Issue.CATEGORY_TYPE06.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE06;
-//        }
-//        else if (Issue.CATEGORY_TYPE07.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE07;
-//        }
-//        else if (Issue.CATEGORY_TYPE08.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE08;
-//        }
-//        else if (Issue.CATEGORY_TYPE09.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE09;
-//        }
-//        else if (Issue.CATEGORY_TYPE10.equalsIgnoreCase(category))
-//        {
-//            category = Issue.CATEGORY_TYPE10;
-//        }
-//        else
-//        {
-//        	category = Issue.CATEGORY_TYPE01;
-//        }
+        // if (Issue.CATEGORY_TYPE01.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE01;
+        // }
+        // else if (Issue.CATEGORY_TYPE02.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE02;
+        // }
+        // else if (Issue.CATEGORY_TYPE03.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE03;
+        // }
+        // else if (Issue.CATEGORY_TYPE04.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE04;
+        // }
+        // else if (Issue.CATEGORY_TYPE05.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE05;
+        // }
+        // else if (Issue.CATEGORY_TYPE06.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE06;
+        // }
+        // else if (Issue.CATEGORY_TYPE07.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE07;
+        // }
+        // else if (Issue.CATEGORY_TYPE08.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE08;
+        // }
+        // else if (Issue.CATEGORY_TYPE09.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE09;
+        // }
+        // else if (Issue.CATEGORY_TYPE10.equalsIgnoreCase(category))
+        // {
+        // category = Issue.CATEGORY_TYPE10;
+        // }
+        // else
+        // {
+        // category = Issue.CATEGORY_TYPE01;
+        // }
 
         // TODO:
         String[] tmp = p_segId.split("[_:]");
         String tuvId = tmp[0];
         String subId = tmp.length == 2 ? tmp[1] : "0";
 
-        UploadIssue issue = new UploadIssue(p_segName,
-            Long.parseLong(tuvId), Long.parseLong(subId),
-            title, status, category, priority, reply);
+        UploadIssue issue = new UploadIssue(p_segName, Long.parseLong(tuvId),
+                Long.parseLong(subId), title, status, category, priority, reply);
 
         if (c_logger.isDebugEnabled())
         {

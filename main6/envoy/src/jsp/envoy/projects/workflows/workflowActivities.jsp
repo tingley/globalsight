@@ -130,35 +130,33 @@ var w_viewer;
                 boolean isIE = request.getHeader("User-Agent").indexOf("MSIE")!=-1;
                 %>
                 <%if(isIE){%>
-				<OBJECT classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
+				<OBJECT classid="clsid:CAFEEFAC-0018-0000-0045-ABCDEFFEDCBA"
 				WIDTH = "90%" HEIGHT = "95%" NAME = "GPUI"  
-                codebase="<%=httpProtocolToUse%>://java.sun.com/products/plugin/autodl/jinstall-1_4_2-windows-i586.cab#Version=1,4">
+                codebase="<%=httpProtocolToUse%>://javadl.sun.com/webapps/download/AutoDL?BundleId=107109">
 				<PARAM NAME = CODE VALUE = "com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class" >
 				<%} else {%>           
                 <SPAN CLASS="standardText"><%=bundle.getString("applet_need_java_support")%></SPAN>
                 <BR>
-                <APPLET type="application/x-java-applet;jpi-version=1.6"
-                height="95%" width="90%" pluginspage="http://java.sun.com/products/plugin/index.html#download" code="com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class">
+                <APPLET type="application/x-java-applet;jpi-version=1.8.0_45"
+                height="95%" width="90%" pluginspage="<%=httpProtocolToUse%>://www.java.com/en/download/manual.jsp" code="com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class">
                 <%}%>
 				<!-- PARAM NAME = CODEBASE VALUE = "/classes/" -->
 				
 				<PARAM NAME = "cache_option" VALUE = "Plugin" >
                 <PARAM NAME = "cache_archive" VALUE = "/globalsight/applet/lib/graphicalWf.jar">
 				<PARAM NAME = NAME VALUE = "GPUI" >
-
-				<PARAM NAME = "type" VALUE="application/x-java-applet;version=1.4">
 				<PARAM NAME = "scriptable" VALUE="true">
 				<PARAM NAME =  "rand" value=<%=session.getAttribute("UID_" + session.getId())%>>
                 <PARAM NAME = "servletUrl" value="/globalsight/ControlServlet?linkName=workflowActivities&pageName=DTLS&applet=true&rand=">
                 <PARAM NAME = "grid" value="com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVPane">				
 	            <COMMENT>
-				<EMBED type="application/x-java-applet;version=1.4"  
+				<EMBED type="application/x-java-applet;jpi-version=1.8.0_45"  
 				CODE = "com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class" 
 				CODEBASE = "/classes/"
 				cache_option = "Plugin"
                 NAME = "GPUI" WIDTH = 100% HEIGHT = 100% 
 				scriptable=true
-                pluginspage="<%=httpProtocolToUse%>://java.sun.com/j2se/1.4/download.html">
+                pluginspage="<%=httpProtocolToUse%>://www.java.com/en/download/manual.jsp">
                 <NOEMBED></COMMENT>
                 </NOEMBED></EMBED>
 				<% if(isIE){%>

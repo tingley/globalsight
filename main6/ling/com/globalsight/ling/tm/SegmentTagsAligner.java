@@ -16,41 +16,38 @@
  */
 package com.globalsight.ling.tm;
 
-import java.util.Properties;
-import java.util.LinkedList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
 
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * Align the tags of two GXML encoded segments. Compare each tag and
- * if they are equivalent set their x attributes to the same id.
+ * Align the tags of two GXML encoded segments. Compare each tag and if they are
+ * equivalent set their x attributes to the same id.
  */
 public class SegmentTagsAligner
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            SegmentTagsAligner.class.getName());
+    private static final Logger CATEGORY = Logger
+            .getLogger(SegmentTagsAligner.class.getName());
 
     private static final REProgram c_removeTagsResult = precompileRegexp();
 
     private LinkedList m_SourceTagList = null;
-    private LinkedList m_TargetTagList = null;     
-    private LinkedList m_addableBptList = null;     
-    private boolean m_differingX = false;   
+    private LinkedList m_TargetTagList = null;
+    private LinkedList m_addableBptList = null;
+    private boolean m_differingX = false;
 
     /**
      * SegmentTagsAligner constructor comment.
      */
     public SegmentTagsAligner()
     {
-        super();        
+        super();
         m_addableBptList = new LinkedList();
     }
 
@@ -61,7 +58,8 @@ public class SegmentTagsAligner
         try
         {
             RECompiler compiler = new RECompiler();
-            reProgram = compiler.compile("<(bpt|ept|it|ph|ut)[^>]*>(.|[:space:])*?</(\\1)[:space:]*>");
+            reProgram = compiler
+                    .compile("<(bpt|ept|it|ph|ut)[^>]*>(.|[:space:])*?</(\\1)[:space:]*>");
         }
         catch (RESyntaxException e)
         {
@@ -74,16 +72,15 @@ public class SegmentTagsAligner
     }
 
     public String alignTags(String p_source, String p_target)
-        throws LingManagerException
+            throws LingManagerException
     {
-        m_differingX = false; 
+        m_differingX = false;
 
         m_SourceTagList = extractTmxTagPairs(p_source);
         m_TargetTagList = extractTmxTagPairs(p_target);
 
         // no tags to align
-        if (m_SourceTagList.size() == 0 &&
-            m_TargetTagList.size() == 0)
+        if (m_SourceTagList.size() == 0 && m_TargetTagList.size() == 0)
         {
             return p_target;
         }
@@ -99,48 +96,48 @@ public class SegmentTagsAligner
             return null;
         }
     }
-    
+
     public String removeUnmatchedTargetTags(String p_source, String p_target)
-        throws LingManagerException
+            throws LingManagerException
     {
-        m_differingX = false;      
-        
+        m_differingX = false;
+
         m_SourceTagList = extractTmxTagPairs(p_source);
-        m_TargetTagList = extractTmxTagPairs(p_target);  
+        m_TargetTagList = extractTmxTagPairs(p_target);
         m_addableBptList.clear();
-        
+
         // no tags in the target, just return it.
         if (m_TargetTagList.size() == 0)
         {
             return p_target;
         }
-        
+
         compareTags();
-        
+
         findAndMarkAmbiguousTags();
-             
+
         return removeUnmatched(p_target);
     }
-    
+
     private void findAndMarkAmbiguousTags()
-    {        
+    {
         int startIndex = 1;
         int index;
         Iterator targetIterator = m_TargetTagList.iterator();
-        while(targetIterator.hasNext())
-        {            
-            TmxTag currentTag = (TmxTag)targetIterator.next();                                               
+        while (targetIterator.hasNext())
+        {
+            TmxTag currentTag = (TmxTag) targetIterator.next();
             index = startIndex;
-            startIndex++;        
-            
-            // All addables are keepers 
+            startIndex++;
+
+            // All addables are keepers
             if (currentTag.isAddable())
             {
-                m_addableBptList.add(currentTag);   
+                m_addableBptList.add(currentTag);
                 currentTag.setMatched();
                 continue;
             }
-            
+
             // find the ept's mate if it's a keeper then we
             // keep the ept too
             if (currentTag.isEpt())
@@ -148,45 +145,45 @@ public class SegmentTagsAligner
                 if (!keepEpt(currentTag))
                 {
                     currentTag.setUnMatched();
-                }                
+                }
                 continue;
             }
-            
+
             // already found a match - skip
             if (currentTag.isDuplicate())
             {
                 continue;
-            }                     
-            
+            }
+
             // add all bpt's to this list to search later.
             if (currentTag.isBpt())
             {
-                m_addableBptList.add(currentTag);                            
+                m_addableBptList.add(currentTag);
             }
-            
+
             // find all matching tags for currentTag
             while (index < m_TargetTagList.size())
             {
-                TmxTag compareTag = (TmxTag)m_TargetTagList.get(index);
+                TmxTag compareTag = (TmxTag) m_TargetTagList.get(index);
                 if (currentTag.equals(compareTag))
                 {
                     currentTag.setDuplicate();
-                    compareTag.setDuplicate();                  
+                    compareTag.setDuplicate();
                 }
-                index++;                
+                index++;
             }
         }
     }
-    
+
     private boolean keepEpt(TmxTag p_tag)
-    {        
+    {
         Iterator bptIterator = m_addableBptList.iterator();
-        while(bptIterator.hasNext())
-        {            
-            TmxTag bptTag = (TmxTag)bptIterator.next(); 
+        while (bptIterator.hasNext())
+        {
+            TmxTag bptTag = (TmxTag) bptIterator.next();
             if (bptTag.getIValue().equals(p_tag.getIValue()))
-            {                                
-                bptIterator.remove();                
+            {
+                bptIterator.remove();
                 if (!bptTag.isDuplicate() && bptTag.isMatched())
                 {
                     return true;
@@ -197,22 +194,21 @@ public class SegmentTagsAligner
                 }
             }
         }
-        
+
         return false;
     }
-    
-    private String removeUnmatched(String p_target)
-        throws LingManagerException
+
+    private String removeUnmatched(String p_target) throws LingManagerException
     {
         StringBuffer tempTarget = new StringBuffer(p_target);
 
         // go backwards through tag list
         while (!m_TargetTagList.isEmpty())
         {
-            TmxTag tag = (TmxTag)m_TargetTagList.removeLast();
+            TmxTag tag = (TmxTag) m_TargetTagList.removeLast();
 
-            tempTarget.delete(tag.getInsertionPoint(),
-                tag.getInsertionPoint() + tag.getLength());
+            tempTarget.delete(tag.getInsertionPoint(), tag.getInsertionPoint()
+                    + tag.getLength());
 
             if ((tag.isMatched() && !tag.isDuplicate()))
             {
@@ -220,11 +216,11 @@ public class SegmentTagsAligner
             }
         }
 
-        return tempTarget.toString();    
+        return tempTarget.toString();
     }
-    
+
     private LinkedList extractTmxTagPairs(String p_GxmlSegment)
-        throws LingManagerException
+            throws LingManagerException
     {
         int start = 0;
         String tagMatch = null;
@@ -247,7 +243,7 @@ public class SegmentTagsAligner
             {
                 tag.setMatched();
             }
-            
+
             tagList.add(tag);
         }
 
@@ -262,7 +258,7 @@ public class SegmentTagsAligner
         // compare each target tag to all source tags until we get a match
         while (targetIterator.hasNext())
         {
-            tag = (TmxTag)targetIterator.next();
+            tag = (TmxTag) targetIterator.next();
             findMatchAndMark(tag);
         }
     }
@@ -275,7 +271,7 @@ public class SegmentTagsAligner
         // compare each target tag to source tags until we get a match
         while (sourceIterator.hasNext())
         {
-            tag = (TmxTag)sourceIterator.next();
+            tag = (TmxTag) sourceIterator.next();
 
             // skip if already matched
             if (!tag.isMatched())
@@ -314,7 +310,7 @@ public class SegmentTagsAligner
         Iterator sourceIterator = m_SourceTagList.iterator();
         while (sourceIterator.hasNext())
         {
-            TmxTag tag = (TmxTag)sourceIterator.next();
+            TmxTag tag = (TmxTag) sourceIterator.next();
             if (!tag.isMatched() && !tag.isAddable())
             {
                 return true;
@@ -323,31 +319,30 @@ public class SegmentTagsAligner
         }
 
         Iterator targetIterator = m_TargetTagList.iterator();
-        while(targetIterator.hasNext())
+        while (targetIterator.hasNext())
         {
-            TmxTag tag = (TmxTag)targetIterator.next();
+            TmxTag tag = (TmxTag) targetIterator.next();
             if (!tag.isMatched() && !tag.isAddable())
             {
                 return true;
             }
         }
 
-
         return false;
     }
 
     private String insertNewTargetTags(String p_target)
-        throws LingManagerException
+            throws LingManagerException
     {
         StringBuffer tempTarget = new StringBuffer(p_target);
 
         // go backwards through tag list
         while (!m_TargetTagList.isEmpty())
         {
-            TmxTag tag = (TmxTag)m_TargetTagList.removeLast();
+            TmxTag tag = (TmxTag) m_TargetTagList.removeLast();
 
-            tempTarget.delete(tag.getInsertionPoint(),
-                tag.getInsertionPoint() + tag.getLength());
+            tempTarget.delete(tag.getInsertionPoint(), tag.getInsertionPoint()
+                    + tag.getLength());
 
             tempTarget.insert(tag.getInsertionPoint(), tag.getString());
         }

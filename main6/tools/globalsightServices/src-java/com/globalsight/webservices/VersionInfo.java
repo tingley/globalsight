@@ -15,9 +15,9 @@
  *  
  */
 
-package com.globalsight.webservices.coti;
+package com.globalsight.webservices;
 
-public class VersionInfo
+public class VersionInfo implements java.io.Serializable
 {
     private String version;
     private String cotiVersion;

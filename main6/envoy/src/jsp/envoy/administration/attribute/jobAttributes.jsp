@@ -89,9 +89,7 @@
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%=title%></TITLE>
 <style type="text/css">
-@import url(/globalsight/dijit/themes/tundra/attribute.css);
 @import url(/globalsight/dojox/form/resources/FileUploader.css);
-@import url(/globalsight/dojo/resources/dojo.css);
 
 .tundra .dijitButtonText {
     width:100%;
@@ -99,11 +97,37 @@
 	text-align: center;
 	padding: 0 0.3em;
 }
+
+#uploadFormDiv{
+	color:#00CC99;
+	width:700px;
+	background-color:#FDFFFF;
+	border: 1px solid #ccc;
+	font-size:small;
+	}
+
+.fileDiv,.listDiv,.intDiv,.floatDiv,.textDiv,.dateDiv{
+ 	min-height:20px;
+	width:50px;
+	cursor:pointer;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #C0C0C0 #C0C0C0 #9B9B9B;
+	-moz-border-top-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-bottom-colors: none;
+	-moz-border-left-colors: none;
+	border-image: none;
+	border-radius: 2px;
+	padding: 0.1em 0.2em 0.2em;
+	background: #FFF url("dijit/themes/tundra/images/buttonEnabled.png") repeat-x scroll left bottom;
+ }
 </style>
 <script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <script language="JavaScript" src="/globalsight/includes/report/calendar.js"></script>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/dojo/dojo.js" djConfig="parseOnLoad: true"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -112,224 +136,65 @@
     var guideNode = "myJobs";
     var objectName = "";
     var helpFile = "<%=bundle.getString("help_job_attribute_screen")%>";
-    dojo.require("dijit.Dialog");
-    dojo.require("dijit.form.Button");
-    dojo.require("dijit.form.MultiSelect");
-    dojo.require("dijit.form.FilteringSelect");
-    dojo.require("dijit.form.TextBox");
-    dojo.require("dojo.io.iframe");
 
-    function editListValue(obj)
-    {
-    	var jsonOjb = eval("(" + obj + ")");
-
-        dojo.xhrPost(
-        {
-           url:"<%=editListUrl%>",
-           handleAs: "text", 
-           content:jsonOjb,
-           load:function(data)
-           {
-               var returnData = eval(data);
-               if (returnData.error)
-               {
-            	   alert(returnData.error);
-               }
-               else
-               {
-            	   dijit.byId("selected" + jsonOjb.attributeId).setLabel(returnData.label.replace(new RegExp("<br>","gm"),","));
-            	   dijit.byId("jobAtt" + jsonOjb.attributeId).setValue(returnData.jobAttributeId);
-               }
-           },
-           error:function(error)
-           {
-               alert(error.message);
-           }
-       });
-    }
-
-    function editIntValue(obj)
-    {
-       	var jsonOjb = eval("(" + obj + ")");
-
-        dojo.xhrPost(
-        {
-           url:"<%=editIntUrl%>",
-           handleAs: "text", 
-           content:jsonOjb,
-           load:function(data)
-           {
-               var returnData = eval(data);
-               if (returnData.error)
-               {
-            	   alert(returnData.error);
-               }
-               else
-               {
-            	   dijit.byId("int" + jsonOjb.attributeId).setLabel(returnData.value);
-            	   dijit.byId("jobAtt" + jsonOjb.attributeId).setValue(returnData.jobAttributeId);
-               }
-           },
-           error:function(error)
-           {
-               alert("error4:" + error.message);
-           }
-       });
-    }
-
-    function editFloatValue(obj)
-    {
-       	var jsonOjb = eval("(" + obj + ")");
-
-        dojo.xhrPost(
-        {
-           url:"<%=editFloatUrl%>",
-           handleAs: "text", 
-           content:jsonOjb,
-           load:function(data)
-           {
-               var returnData = eval(data);
-               if (returnData.error)
-               {
-            	   alert(returnData.error);
-               }
-               else
-               {
-            	   dijit.byId("float" + jsonOjb.attributeId).setLabel(returnData.value);
-            	   dijit.byId("jobAtt" + jsonOjb.attributeId).setValue(returnData.jobAttributeId);
-               }
-           },
-           error:function(error)
-           {
-               alert(error.message);
-           }
-       });
-    }
-
-    function editDateValue(obj)
-    {
-       	var jsonOjb = eval("(" + obj + ")");
-       	jsonOjb.dateValue = dojo.byId("dateValue"+jsonOjb.attributeId).value;
-
-        dojo.xhrPost(
-        {
-           url:"<%=editDateUrl%>",
-           handleAs: "text", 
-           content:jsonOjb,
-           load:function(data)
-           {
-               var returnData = eval(data);
-               if (returnData.error)
-               {
-            	   alert(returnData.error);
-               }
-               else
-               {
-            	   dijit.byId("date" + jsonOjb.attributeId).setLabel(returnData.value);
-            	   dijit.byId("jobAtt" + jsonOjb.attributeId).setValue(returnData.jobAttributeId);
-               }
-           },
-           error:function(error)
-           {
-               alert(error.message);
-           }
-       });
-    }
-
-    function editTextValue(obj)
-    {
-       	var jsonOjb = eval("(" + obj + ")");
-
-        dojo.xhrPost(
-        {
-           url:"<%=editTextUrl%>",
-           handleAs: "text", 
-           content:jsonOjb,
-           load:function(data)
-           {
-               var returnData = eval(data);
-               if (returnData.error)
-               {
-            	   alert(returnData.error);
-               }
-               else
-               {
-            	   dijit.byId("text" + jsonOjb.attributeId).setLabel(returnData.value);
-            	   dijit.byId("jobAtt" + jsonOjb.attributeId).setValue(returnData.jobAttributeId);
-               }
-           },
-           error:function(error)
-           {
-               alert(error.message);
-           }
-       });
-    }
-    
-    function uploadFile() 
-    {
-        dojo.io.iframe.send({
-   		form: dojo.byId("uploadForm"),
-   		url:  "<%=uploadFileUrl%>", 
-           method: 'POST', 
-           contentType: "multipart/form-data",
-   		handleAs: "text",
-   		handle: function(response, ioArgs){
-   			if(response instanceof Error){
-   				alert("Failed to upload file, please try later.");
-   			}else{
-   				var id = dojo.byId("attributeId").value;
-   				var returnData = eval(response);
-                if (returnData.error)
-                {
-             	   alert(returnData.error);
-                }
-                else
-                {
-                	dojo.byId("jobAttributeId").value = returnData.jobAttributeId;
-                    dojo.byId("jobAtt" + id).value = returnData.jobAttributeId;
-             	    dojo.byId("file" + id).innerHTML = returnData.label;
-             	    
-             	    updateFiles(returnData.files);
-                }
-   			}
-   		}
-   	});
-   }
-
-   function showUploadfileDialog(attributeId)
+    function showUploadfileDialog(attributeId)
    {
-	   var jobAttributeId = dojo.byId("jobAtt" + attributeId).value
+	   var jobAttributeId = document.getElementById("jobAtt" + attributeId).value
 	   var jsonOjb = {
 		  attributeId : attributeId,
 		  jobAttributeId : jobAttributeId
 	   }
-
-	   dojo.xhrPost(
-       {
-          url:"<%=getFilesUrl%>",
-          handleAs: "text", 
-          content:jsonOjb,
-          load:function(data)
-          {
-              var returnData = eval(data);
-              if (returnData.error)
-              {
-           	      alert(returnData.error);
-              }
-              else
-              {
-            	  initFileDialog(attributeId, jobAttributeId, returnData);
-	        	  dijit.byId('uploadFormDiv').show();
-              }
-          },
-          error:function(error)
-          {
-              alert(error.message);
-          }
-      });
+	   
+	   $.ajax({
+   		   type: "POST",
+   		   dataType : "text",
+   		   url: "<%=getFilesUrl%>",
+   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId,
+   		   success: function(data){
+   		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	        	  initFileDialog(attributeId, jobAttributeId, returnData);
+	        	  $("#uploadFormDiv").dialog({width: 700, height: 460, resizable:false});
+	          }
+   		   },
+	   	   error:function(error)
+	       {
+             alert(error.message);
+           }
+   		});
+	   
    }
-
+   
+   function initFileDialog(attributeId, jobAttributeId, data)
+   {
+	   document.getElementById("attributeId").value = attributeId;
+	   document.getElementById("jobAttributeId").value = jobAttributeId;
+       updateFiles(data.files);
+   }
+   
    function updateFiles(files)
+   {
+	   var selectBox = document.getElementById("allFiles");
+	   var options =  selectBox.options;
+	   for (var i = options.length-1; i>=0; i--)
+	   {
+	       selectBox.remove(i);
+	   }
+
+	   for (var i = 0; i < files.length; i++)
+	   {
+		   addFile(files[i]);
+	   }
+
+	   setOptionColor();
+	}
+
+   function update(files)
    {
 	   var selectBox = dojo.byId("allFiles");
 	   var options =  selectBox.options;
@@ -345,39 +210,80 @@
 
 	   setOptionColor();
 	}
-
-	function updateFilesLabel(files)
-	{
-		var label = "";
-	    for (var i = 0; i < files.length; i++)
-	    {
-		    if (label.lenght > 0)
-		    {
-		    	label.concat("<br>");
-			}
-		    label.concat(files[i]);
-	    }
-	}
    
-   function initFileDialog(attributeId, jobAttributeId, data)
-   {
-       dojo.byId("attributeId").value = attributeId;
-       dojo.byId("jobAttributeId").value = jobAttributeId;
-       updateFiles(data.files);
-   }
-
    function addFile(file)
    {
        var option = document.createElement("option");
        option.appendChild(document.createTextNode(file));
        option.setAttribute("value", file);
-       dojo.byId("allFiles").appendChild(option);
+       document.getElementById("allFiles").appendChild(option);
    }
-
+   
+   function setOptionColor()
+   {
+   	   var options = document.getElementById("allFiles").options;
+       var flag = true;
+       for (var i = 0; i<options.length; i++)
+       {
+   		if (flag)
+   		{
+   		    options[i].className="row1";
+   			flag = false;
+   		}
+           else
+   		{
+   			options[i].className="row2";
+   			flag = true;
+   		}
+       }
+   }
+   
+   
+   function uploadFileMethod() 
+   {
+		$("#uploadForm").submit();
+		setTimeout("getAllFiles()", 500);
+  }
+   
+   function getAllFiles()
+   {
+	   var attributeId = document.getElementById("attributeId").value;
+	   var jobAttributeId = document.getElementById("jobAttributeId").value;
+	   var jsonOjb = {
+				  attributeId : attributeId,
+				  jobAttributeId : jobAttributeId
+			   }
+	   $.ajax({
+   		   type: "POST",
+   		   dataType : "text",
+   		   url: "<%=getFilesUrl%>",
+   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId,
+   		   success: function(data){
+   			  var id = document.getElementById("attributeId").value;
+   		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	        	  document.getElementById("jobAttributeId").value = returnData.jobAttributeId;
+   	        	  document.getElementById("jobAtt" + id).value = returnData.jobAttributeId;
+   	        	  document.getElementById("file" + id).innerHTML = returnData.label;
+               	  updateFiles(returnData.files);
+	          }
+   		   },
+	   	   error:function(error)
+	       {
+             alert(error.message);
+           }
+   		});
+   }
+   
    function deleteSelectFiles()
    {
 	   var selectFiles = new Array();
-	   var selectBox = dojo.byId("allFiles");
+	   var selectBox = document.getElementById("allFiles");
 	   var options = selectBox.options;
 	   for (var i = options.length-1; i>=0; i--)
 	   {
@@ -391,49 +297,49 @@
 	   {
 		   return;
 	   }
-
-	   var attId = dojo.byId("attributeId").value;
+	   var attId = document.getElementById("attributeId").value;
+	   var jobAttributeId = document.getElementById("jobAttributeId").value;
 	   
 	   var jsonOjb = {
 		  attributeId : attId,
-		  jobAttributeId : dojo.byId("jobAttributeId").value,
+		  jobAttributeId : jobAttributeId,
 		  deleteFiles : selectFiles
 	   }
-
+	   
 	   if (selectFiles.length == 0)
 	   {
 		   return;
 	   }
-
-       dojo.xhrPost(
-       {
-          url:"<%=deleteFilesUrl%>",
-          handleAs: "text", 
-          content:jsonOjb,
-          load:function(data)
-          {
-              var returnData = eval(data);
-              if (returnData.error)
-              {
-           	      alert(returnData.error);
-              }
-              else
-              {
-            	  updateFiles(returnData.files);
-            	  dojo.byId("file" + attId).innerHTML = returnData.label;
-              }
-          },
-          error:function(error)
-          {
-              alert(error.message);
-          }
-      });
+	
+	   $.ajax({
+   		   type: "POST",
+   		   dataType : "text",
+   		   url: "<%=deleteFilesUrl%>",
+   		   traditional: true,
+   		   data: jsonOjb,
+   		   success: function(data){
+   		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	        	  updateFiles(returnData.files);
+	        	  document.getElementById("file" + attId).innerHTML = returnData.label;
+	          }
+   		   },
+	   	   error:function(error)
+	       {
+             alert(error.message);
+           }
+   		});
    }
 
    function downloadSelectFiles()
    {
 	   var selectFiles = new Array();
-	   var selectBox = dojo.byId("allFiles");
+	   var selectBox = document.getElementById("allFiles");
 	   var options = selectBox.options;
 	   for (var i = options.length-1; i>=0; i--)
 	   {
@@ -448,8 +354,8 @@
 		   return;
 	   }
 
-	   var downloadFiles = dojo.byId("downloadFiles");
-	   dojo.byId("jobAttributeId2").value = dojo.byId("jobAttributeId").value;
+	   var downloadFiles = document.getElementById("downloadFiles");
+	   document.getElementById("jobAttributeId2").value = document.getElementById("jobAttributeId").value;
 
 	   downloadFiles.innerHTML = "";
 	   
@@ -469,32 +375,177 @@
 	   downLoadForm.submit();
    }
 
-   function setOptionColor()
-   {
-   	   var options = dojo.byId("allFiles").options;
-       var flag = true;
-       for (var i = 0; i<options.length; i++)
-       {
-   		if (flag)
-   		{
-   		    options[i].className="row1";
-   			flag = false;
-   		}
-           else
-   		{
-   			options[i].className="row2";
-   			flag = true;
-   		}
-       }
-   }
-
-   function showCalendar1(attId) {
-       var cal1 = new calendar2(dojo.byId("dateValue" + attId), dijit.byId("date" + attId), "openDropDown()");
+   function showCalendar1(inputId) {
+       var cal1 = new calendar2(document.getElementById(inputId), "openDropDown()");
        cal1.year_scroll = true;
        cal1.time_comp = true;
        cal1.popup();
    }
    
+   function editTextValue(textAttributeId)
+   {
+	  var attributeId = document.getElementById("attributeId"+textAttributeId).value;
+   	  var jobAttributeId = document.getElementById("jobAtt"+textAttributeId).value;
+   	  var textValue = document.getElementById("updateTextValue").value;
+   	   
+   	  $.ajax({
+   		   type: "POST",
+   		   dataType : "text",
+   		   url: "<%=editTextUrl%>",
+   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&textValue="+textValue,
+   		   success: function(data){
+   		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("textValue"+textAttributeId).innerHTML = returnData.value;
+	   		     document.getElementById("jobAtt"+textAttributeId).value = returnData.jobAttributeId;
+	          }
+   		   },
+	   	   error:function(error)
+	       {
+             alert(error.message);
+           }
+   		});
+   	 $('#uptadeTextDiv').dialog('close');
+   }
+   
+   function editFloatValue(floatAttributeId)
+   {
+	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
+   	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
+   	  var floatValue = document.getElementById("updateFloatValue").value;
+   	   
+   	  $.ajax({
+   		   type: "POST",
+   		   dataType : "text",
+   		   url: "<%=editFloatUrl%>",
+   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&floatValue="+floatValue,
+   		   success: function(data){
+   		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("floatValue"+floatAttributeId).innerHTML = returnData.value;
+	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
+	          }
+   		   },
+	   	   error:function(error)
+	       {
+             alert(error.message);
+           }
+   		});
+   	$('#uptadeFloatDiv').dialog('close');
+   }
+   
+   function editIntValue(floatAttributeId)
+   {
+	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
+   	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
+   	  var intValue = document.getElementById("updateIntValue").value;
+
+   	  $.ajax({
+   		   type: "POST",
+   		   dataType : "text",
+   		   url: "<%=editIntUrl%>",
+   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&intValue="+intValue,
+   		   success: function(data){
+   		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("intValue"+floatAttributeId).innerHTML = returnData.value;
+	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
+	          }
+   		   },
+	   	   error:function(error)
+	       {
+             alert(error.message);
+           }
+   		});
+  	 $('#uptadeIntDiv').dialog('close');
+   }
+   
+   
+   function editDateValue(floatAttributeId)
+   {
+	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
+   	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
+   	  var dateValue = document.getElementById("updateDateValue").value;
+   	   
+   	  $.ajax({
+   		   type: "POST",
+   		   dataType : "text",
+   		   url: "<%=editDateUrl%>",
+   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&dateValue="+dateValue,
+   		   success: function(data){
+   		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("dateValue"+floatAttributeId).innerHTML = returnData.value;
+	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
+	          }
+   		   },
+	   	   error:function(error)
+	       {
+             alert(error.message);
+           }
+   		});
+   	  $('#uptadeDateDiv').dialog('close');
+   }
+   
+   function editListValue(floatAttributeId)
+   {
+	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
+   	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
+   	  var selectOption = $("#selectOption").val();
+
+   	  $.ajax({
+   		   type: "POST",
+   		   dataType : "text",
+   		   url: "<%=editListUrl%>",
+   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&selectOption="+selectOption,
+   		   success: function(data){
+   		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("selected"+floatAttributeId).innerHTML = returnData.label;
+	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
+	          }
+   		   },
+	   	   error:function(error)
+	       {
+             alert(error.message);
+           }
+   		});
+   	$('#uptadeSelectedDiv').dialog('close');
+   }
+   
+   function disPlayInput(inputId)
+   {
+	   $("#"+inputId).dialog({width: 350, height: 100, resizable:false});
+   }
+   function closeInput(inputId)
+   {
+	   document.getElementById(inputId).style.display= "none";
+   }
 //jobSummary child page needed started
 <amb:permission  name="<%=Permission.JOB_ATTRIBUTE_VIEW%>" >
 $(document).ready(function(){
@@ -519,7 +570,7 @@ $(document).ready(function(){
 </div>
 <form name="CommentForm" method="post">
 <!-- Comments data table -->
-    <table cellpadding=2 cellspacing=2 border=0 id="contentTable" class="standardText" width="650px;">
+    <table cellpadding=2 cellspacing=2 border=0 id="contentTable" class="standardText" width="750px;">
         <tr><td>&nbsp;</td></tr>
         <tr>
             <td><b><%=bundle.getString("lb_job_attributes") %>
@@ -590,7 +641,6 @@ $(document).ready(function(){
                     {
                         jobAtt = new JobAttribute();
                     }
-
                     Condition condition = attribute.getCondition();
                     if (condition instanceof ListCondition)
                     {
@@ -601,33 +651,32 @@ $(document).ready(function(){
     					{
     					    ListCondition listCondition = (ListCondition)condition;
 						    List<SelectOption> allOptions = listCondition.getSortedAllOptions();
-						    String mult = listCondition.isMultiple()? "dijit.form.MultiSelect MULTIPLE size=\"5\"" : "dijit.form.FilteringSelect";
                         %>
-	    					<div dojoType="dijit.form.DropDownButton" id="selected<%=attribute.getId()%>" style="width:180px;text-align:left;" label="<%=listLabel2%>">
-	    					    <div dojoType="dijit.TooltipDialog" title="Select Values" id="tooltipDlg<%=attribute.getId()%>"
-	    					    execute="editListValue(dojo.toJson(arguments[0], true));">					         
-	    					      	 <table>
-	    					      	 <tr>
-	    					      	 <td>
-	    					      	   <input dojoType=dijit.form.TextBox type="hidden" name="attributeId" value="<%=attribute.getId()%>">
-	    					      	   <input dojoType=dijit.form.TextBox type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId" value="<%=jobAtt.getId()%>">
-	    					      	   <select dojoType=<%=mult%> name="selectOption" hasDownArrow="true" style="width:180px;">
-		    							  <%
-		    			                    for (SelectOption option : allOptions){
-		    			                        String selected = selectOptions.contains(option) ? "selected" : "";%>
-		    			                        <option value="<%=option.getId()%>" <%=selected%>><%=EditUtil.encodeTohtml(option.getValue())%></option>
-		    							  <%}%>
-		    						   </select>
-	    					      	 </td>
-	    					      	 </tr>
-	    					      	 <tr style="padding-top: 10px;">
-	    					      	 <td align="center">
-	    					      	     <button dojoType=dijit.form.Button type="button" name="close" onclick="dijit.byId('selected<%=attribute.getId()%>').closeDropDown();"><%=bundle.getString("lb_close") %></button>
-	    					      	     <button dojoType=dijit.form.Button type="submit" name="submit"><%=bundle.getString("lb_save") %></button>
-	    					      	 </td>
-	    					      	 </tr>
-	    					      	 </table>
-	    					   </div>
+              				<div class="listDiv" id="selected<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeSelectedDiv');">
+              				<%=listLabel2%>
+	              				<div title="Select Values" id="uptadeSelectedDiv" style="display:none;">
+		                        	<table>
+		                        		<tr valign="middle">
+		                        			<td>
+		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
+		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
+			                        			<select  name="selectOption" id = "selectOption" hasDownArrow="true" style="width:120px;">
+					    						  <%
+					    			                 for (SelectOption option : allOptions){
+					    			                     String selected = selectOptions.contains(option) ? "selected" : "";%>
+					    			                    <option value="<%=option.getId()%>" <%=selected%>><%=EditUtil.encodeTohtml(option.getValue())%></option>
+					    						  <%}%>
+					    						</select>
+		                        			</td>
+		                        			<td>
+		                        				<input type="button" name = "selectedButtonClose" id = "selectedButtonClose" onclick = "$('#uptadeSelectedDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "selectedButtonSave" id = "selectedButtonSave"  onclick = "editListValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
+		                        			</td>
+		                        		</tr>
+		                        	</table>
+	              				</div>
+	                        </div>
+	                        
                        <%}
     					else
     					{
@@ -640,24 +689,23 @@ $(document).ready(function(){
                         if (editable)
     					{
                         %>
-    					<div dojoType="dijit.form.DropDownButton" id="int<%=attribute.getId()%>" style="width:120px; text-align:left;" label="<%=label%>">
-    					    <div dojoType="dijit.TooltipDialog" title="<%=bundle.getString("lb_update_job_attributes") %>"
-    					    execute="editIntValue(dojo.toJson(arguments[0], true));">					         
-    					         <table>
-    					         <tr valign="middle">
-    					         <td valign="middle">
-    					             <input dojoType=dijit.form.TextBox type="hidden" name="attributeId" value="<%=attribute.getId()%>">
-    					      	     <input dojoType=dijit.form.TextBox type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId" value="<%=jobAtt.getId()%>">
-    					             <input dojoType=dijit.form.TextBox name="intValue" style="width:120px; height:25px;">
-    					         </td>
-    					         <td>    
-    					             <button dojoType=dijit.form.Button trim="true" type="button" name="button" onclick="dijit.byId('int<%=attribute.getId()%>').closeDropDown()"><%=bundle.getString("lb_close") %></button>
-    					             <button dojoType=dijit.form.Button type="submit" name="submit" ><%=bundle.getString("lb_save") %></button>
-    					         </td>
-    					         </tr>
-    					         </table>
-    					  </div>
-    					</div>
+                        <div class="intDiv" id="intValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeIntDiv');"><%=label%>
+	              				<div title="Input Value" id="uptadeIntDiv" style="display:none;">
+		                        	<table>
+		                        		<tr valign="middle">
+		                        			<td>
+		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
+		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
+			                        			<input style="width:100px; height:25px;" name ="updateIntValue" id ="updateIntValue">
+		                        			</td>
+		                        			<td>
+		                        				<input type="button" name = "intButtonClose" id = "intButtonClose" onclick = "$('#uptadeIntDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "intButtonSave" id = "intButtonSave"  onclick = "editIntValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
+		                        			</td>
+		                        		</tr>
+		                        	</table>
+	              				</div>
+	                        </div>
                        <%}
     					else
     					{
@@ -670,24 +718,23 @@ $(document).ready(function(){
                         if (editable)
     					{
                         %>
-    					<div dojoType="dijit.form.DropDownButton" id="float<%=attribute.getId()%>" style="width:120px; text-align:left;" label="<%=label%>">
-    					    <div dojoType="dijit.TooltipDialog" title="<%=bundle.getString("lb_update_job_attributes") %>"
-    					    execute="editFloatValue(dojo.toJson(arguments[0], true));">					         
-    					         <table>
-    					         <tr valign="middle">
-    					         <td valign="middle">
-    					             <input dojoType=dijit.form.TextBox type="hidden" name="attributeId" value="<%=attribute.getId()%>">
-    					      	     <input dojoType=dijit.form.TextBox type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId" value="<%=jobAtt.getId()%>">
-    					             <input dojoType=dijit.form.TextBox trim="true" name="floatValue" style="width:120px; height:25px;">
-    					         </td>
-    					         <td>   
-    					             <button dojoType=dijit.form.Button trim="true" type="button" name="button" onclick="dijit.byId('float<%=attribute.getId()%>').closeDropDown()"><%=bundle.getString("lb_close") %></button>
-    					             <button dojoType=dijit.form.Button trim="true" type="submit" name="submit" ><%=bundle.getString("lb_save") %></button>
-    					         </td>
-    					         </tr>
-    					         </table>
-    					  </div>
-    					</div>
+                        <div class="floatDiv" id="floatValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeFloatDiv');"><%=label%>
+	              				<div title="Input Value" id="uptadeFloatDiv" style="display:none;">
+		                        	<table>
+		                        		<tr valign="middle">
+		                        			<td>
+		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
+		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
+			                        			<input style="width:100px; height:25px;" name ="updateFloatValue" id ="updateFloatValue">
+		                        			</td>
+		                        			<td>
+		                        				<input type="button" name = "floatButtonClose" id = "floatButtonClose" onclick = "$('#uptadeFloatDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "floatButtonSave" id = "floatButtonSave"  onclick = "editFloatValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
+		                        			</td>
+		                        		</tr>
+		                        	</table>
+	              				</div>
+	                        </div>
                        <%}
     					else
     					{
@@ -700,17 +747,10 @@ $(document).ready(function(){
                         if (editable)
     					{
                         %>
-  					      <input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId" value="<%=jobAtt.getId()%>">
-                          <div class="dijitReset dijitInline dijitButtonNode" 
-                               onclick="showUploadfileDialog('<%=attribute.getId()%>')"
-                               style="margin:3px; text-align:left;">
-                              <div id="file<%=attribute.getId()%>">
-                          		<%=filesLabel%>
-                              </div>
-                              <div style="width:30px;">&nbsp;</div>
-                          </div>
-                          
-                          
+                        	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId" value="<%=jobAtt.getId()%>">
+                        	<div class="fileDiv"  style="width:200px;" id="file<%=attribute.getId()%>" onclick="showUploadfileDialog('<%=attribute.getId()%>')" >
+                         		<%=filesLabel%>
+                             </div>
                        <%}
     					else
     					{
@@ -719,61 +759,62 @@ $(document).ready(function(){
                     }
                     else if (condition instanceof TextCondition)
                     {
-                        String lable = EditUtil.encodeHtmlEntities(jobAtt.getTextLabel());
+                        String label = EditUtil.encodeHtmlEntities(jobAtt.getTextLabel());
                         if (editable)
     					{
                         %>
-    					<div dojoType="dijit.form.DropDownButton" id="text<%=attribute.getId()%>" style="min-width:120px; text-align:left;" label="<%=lable%>">
-    					    <div dojoType="dijit.TooltipDialog" title="<%=bundle.getString("lb_update_job_attributes") %>"
-    					    execute="editTextValue(dojo.toJson(arguments[0], true));">					         
-    					         <table>
-    					         <tr valign="middle">
-    					         <td valign="middle">
-    					            <input dojoType=dijit.form.TextBox type="hidden" name="attributeId" value="<%=attribute.getId()%>">
-    					      	    <input dojoType=dijit.form.TextBox type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId" value="<%=jobAtt.getId()%>">
-    					            <input dojoType=dijit.form.TextBox trim="true" name="textValue" style="width:120px; height:25px; ma">
-    					         </td>
-    					         <td>
-    					            <button dojoType=dijit.form.Button trim="true" type="button" name="button" onclick="dijit.byId('text<%=attribute.getId()%>').closeDropDown()"><%=bundle.getString("lb_close") %></button>
-    					      	    <button dojoType=dijit.form.Button trim="true" type="submit" name="submit" ><%=bundle.getString("lb_save") %></button>
-    					         </td>
-    					         </tr>
-    					         </table>
-    					  </div>
-    					</div>
+                        <div class="textDiv" id="textValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeTextDiv');"><%=label%>
+	              				<div title="Input Value" id="uptadeTextDiv" style="display:none;">
+		                        	<table>
+		                        		<tr valign="middle">
+		                        			<td>
+		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
+		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
+			                        			<input style="width:100px; height:25px;" name ="updateTextValue" id ="updateTextValue">
+		                        			</td>
+		                        			<td>
+		                        				<input type="button" name = "textButtonClose" id = "textButtonClose" onclick = "$('#uptadeTextDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "textButtonSave" id = "textButtonSave"  onclick = "editTextValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
+		                        			</td>
+		                        		</tr>
+		                        	</table>
+	              				</div>
+	                        </div>
                        <%}
     					else
     					{
-    					    out.println(lable);
+    						 out.println(label);
     					}   					
                     }
                     else if (condition instanceof DateCondition)
                     {
-                        String lable = jobAtt.getDateLabel();
+                        String label = jobAtt.getDateLabel();
                         if (editable)
     					{
                         %>
-    					<div dojoType="dijit.form.DropDownButton" id="date<%=attribute.getId()%>" style="width:120px; text-align:left;" label="<%=lable%>">
-    					    <div dojoType="dijit.TooltipDialog" title="<%=bundle.getString("lb_update_job_attributes") %>"
-    					    execute="editDateValue(dojo.toJson(arguments[0], true));">					         
-     					      	 <table>
-    					         <tr valign="middle">
-    					         <td >
-    					            <input dojoType=dijit.form.TextBox type="hidden" name="attributeId" value="<%=attribute.getId()%>">
-    					      	    <input dojoType=dijit.form.TextBox type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId" value="<%=jobAtt.getId()%>">
-    					      	    <input id="dateValue<%=attribute.getId()%>" name="dateValue" style="width:150px; height:25px;" >
-    					         </td>
-    					         <td valign="middle"><IMG style='cursor:hand' align=top border=0 src="/globalsight/includes/Calendar.gif"  onclick="showCalendar1('<%=attribute.getId()%>')"></td>
-    					         <td align="right"><button dojoType=dijit.form.Button trim="true" type="button" name="button" onclick="dijit.byId('date<%=attribute.getId()%>').closeDropDown()"><%=bundle.getString("lb_close") %></button></td>
-    					         <td align="left"><button dojoType=dijit.form.Button trim="true" type="submit" name="submit" ><%=bundle.getString("lb_save") %></button></td>
-    					         </tr>
-    					         </table>
-    					  </div>
-    					</div>
+                        <div class="dateDiv" id="dateValue<%=attribute.getId()%>"  style="text-align:left;width:100px;"  onclick = "disPlayInput('uptadeDateDiv');"><%=label%>
+	              				<div title="Input Value" id="uptadeDateDiv" style="display:none;">
+		                        	<table>
+		                        		<tr valign="middle">
+		                        			<td>
+		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
+		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
+			                        			<input style="width:150px; height:25px;" name ="updateDateValue" id ="updateDateValue">
+			                        			<IMG style='cursor:hand' align=top border=0 src="/globalsight/includes/Calendar.gif"  onclick="showCalendar1('updateDateValue')">
+		                        			</td>
+		                        			<td>
+		                        				<input type="button" name = "dateButtonClose" id = "dateButtonClose" onclick = "$('#uptadeDateDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "dateButtonSave" id = "dateButtonSave"  onclick = "editDateValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
+		                        			</td>
+		                        		</tr>
+		                        	</table>
+	              				</div>
+	                        </div>
+    					
                        <%}
     					else
     					{
-    					    out.println(lable);
+    					    out.println(label);
     					}   					
                     }
                 }
@@ -790,39 +831,38 @@ $(document).ready(function(){
     </table>
 </form>
 
-<div dojoType="dijit.Dialog" id="uploadFormDiv" title="<%=bundle.getString("lb_update_job_attributes") %>"
-    execute="" style="display:none">
-  
-  <FORM NAME="uploadForm" METHOD="POST" ACTION="<%=uploadFileUrl%>"
-        ENCTYPE="multipart/form-data" id="uploadForm">
-  <input type="hidden" id="attributeId" name="attributeId" value="-1">
-  <input type="hidden" id="jobAttributeId" name="jobAttributeId" value="-1">
-  <table style="width: 650px; ">
-    <tr>
-      <td colspan="2">
-          <%=bundle.getString("lb_all_files") %>:
-          <select name="allFiles" multiple="multiple" id="allFiles" size="15" style="width: 100%;">
-		  </select>
-		  <div align="right">
-		  <button type="button" dojoType="dijit.form.Button" name="downloadFiles" id="downloadFiles" onclick="downloadSelectFiles()"><%=bundle.getString("lb_download")%></button>
-		  <button type="button" dojoType="dijit.form.Button" name="deleteFiles" id="deleteFiles" onclick="deleteSelectFiles()"><%=bundle.getString("lb_delete")%></button>
-		  </div>
-	  </td>
-    </tr>
-    <tr>
-      <td colspan="2">&nbsp;</td>     
-    </tr>
-    <tr>
-      <td colspan="2"  align="right" valign="middle">
-          <%=bundle.getString("lb_file")%>:
-          <input type="file" name="uploadFile" size="55" id="fileUploadDialog" style="height:24px;">
-          <button dojoType="dijit.form.Button" type="button" onclick="uploadFile()"><%=bundle.getString("lb_upload")%></button>
-          <button dojoType="dijit.form.Button" type="button" onclick="dijit.byId('uploadFormDiv').hide();"><%=bundle.getString("lb_close")%></button>
-      </td>
-    </tr>
-  </table>
-  </FORM>
+<div id="uploadFormDiv" title="<%=bundle.getString("lb_update_job_attributes") %>"  execute="" style="display:none;">
+  <form name="uploadForm" method="post" action="<%=uploadFileUrl%>" enctype="multipart/form-data" id="uploadForm"  target="ajaxUpload">
+	  <input type="hidden" id="attributeId" name="attributeId" value="-1">
+	  <input type="hidden" id="jobAttributeId" name="jobAttributeId" value="-1">
+	  <table style="width: 650px; ">
+	    <tr>
+	      <td colspan="2">
+	          <%=bundle.getString("lb_all_files") %>:
+	          <select name="allFiles" multiple="multiple" id="allFiles" size="15" style="width: 100%;">
+			  </select>
+			  <div align="right">
+			  <input type="button" name="downloadFiles" id="downloadFiles" onclick="downloadSelectFiles()" value="<%=bundle.getString("lb_download")%>">
+			  <input type="button" name="deleteFiles" id="deleteFiles" onclick="deleteSelectFiles()" value = "<%=bundle.getString("lb_delete")%>">
+			  </div>
+		  </td>
+	    </tr>
+	    <tr>
+	      <td colspan="2">&nbsp;</td>     
+	    </tr>
+	    <tr>
+	      <td colspan="2"  align="right" valign="middle">
+	          <%=bundle.getString("lb_file")%>:
+	          <input type="file" name="uploadFile" size="55" id="fileUploadDialog" style="height:24px;">
+	          <input type="button" onclick="uploadFileMethod()" value="<%=bundle.getString("lb_upload")%>">
+	          <input type="button" onclick="$('#uploadFormDiv').dialog('close')" value="<%=bundle.getString("lb_close")%>">
+	      </td>
+	    </tr>
+	  </table>
+  </form>
 </div>
+<!-- for uploading file asynchronous -->
+<iframe id="ajaxUpload" name="ajaxUpload" style="display:none"></iframe>
 
 <Form name="downLoadForm" method="post" action="<%=downloadFilesUrl%>">
   <input type="hidden" id="jobAttributeId2" name="jobAttributeId" value="-1">

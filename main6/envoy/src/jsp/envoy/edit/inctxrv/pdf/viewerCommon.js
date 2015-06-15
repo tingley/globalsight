@@ -25,6 +25,7 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
 		}
 		
 		// navigate to dest
+		/*
 		var matchedDiv;
 	    var dest = getGlobalSightDest(tuId);
 	    if (dest == "")
@@ -41,6 +42,7 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
 	    }
 	    
 	    PDFViewerApplication.navigateTo(dest);
+	    */
     }
     
     // clean other color

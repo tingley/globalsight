@@ -472,7 +472,6 @@ public class TextUI implements UI
         while (true)
         {
             System.out.println(Resource.get("input.exit"));
-            System.out.println();
 
             String inputValue = get(Resource.get("lb.jdk.home") + ": ", ".*");
             

@@ -24,18 +24,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.text.MessageFormat;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 
 import com.config.properties.InstallValues;
 import com.config.properties.Resource;
@@ -79,33 +76,15 @@ public class JdkDialog extends JDialog {
 	 */
 	private void initUI() {
 		getContentPane().setLayout(null);
-
-		JEditorPane jEditorPane = new JEditorPane();
-		jEditorPane.setSize(DIALOG_WIDTH - 30, 82);
-		jEditorPane.setLocation(20, 22);
-		jEditorPane.setBackground(this.getBackground());
-		jEditorPane.setEditable(false);
-		jEditorPane.setFont(UIUtil.getFrameFont());
-		jEditorPane.setContentType("text/html");
-		jEditorPane.setText(MessageFormat.format(Resource
-                .get("msg.jdk"), UIUtil.getFrameFont().getFamily()));
-		jEditorPane.addHyperlinkListener(new HyperlinkListener() {
-			public void hyperlinkUpdate(HyperlinkEvent e) {
-				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-					try {
-						String command = "explorer.exe "
-								+ e.getURL().toString();
-						Runtime.getRuntime().exec(command);
-					} catch (Exception ex) {
-						ex.printStackTrace();
-						System.err.println("connection error");
-					}
-				}
-			}
-		});
-
 		
-		this.getContentPane().add(jEditorPane);
+		JTextArea test = new JTextArea(Resource.get("msg.jdk"));
+        test.setSize(DIALOG_WIDTH - 50, 70);
+        test.setLocation(20, 20);
+        test.setBackground(this.getBackground());
+        test.setEditable(false);
+        test.setLineWrap(true);
+        test.setFont(UIUtil.getFrameFont());
+        this.add(test);
 
 		cancelButton.setSize(UIUtil.DEFAULT_WIDTH, UIUtil.DEFAULT_HEIGHT);
 		cancelButton.setLocation(270,
@@ -117,12 +96,12 @@ public class JdkDialog extends JDialog {
 				178);
 		getContentPane().add(tryButton);
 
-		JLabel lblNewLabel = new JLabel(Resource.get("lb.jdk.home"));
-		lblNewLabel.setBounds(20, 124, 54, 15);
+		JLabel lblNewLabel = new JLabel(Resource.get("lb.jdk.home") + ":");
+		lblNewLabel.setBounds(20, 94, 280, 15);
 		getContentPane().add(lblNewLabel);
 
 		textField = new JTextField();
-		textField.setBounds(95, 121, 253, 21);
+		textField.setBounds(20, 121, 320, 21);
 		getContentPane().add(textField);
 		textField.setColumns(10);
 

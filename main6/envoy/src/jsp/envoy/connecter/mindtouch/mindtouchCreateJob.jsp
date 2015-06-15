@@ -118,6 +118,12 @@ var attributeRequired = false;
 var isUploading = false;
 var uploadedFiles = new Array();
 var defaultFileProfile = "-1";
+var autoSelectSubPages = true;
+
+function changeSelectMode()
+{
+	autoSelectSubPages = !autoSelectSubPages;
+}
 
 function confirmJump() {
     return true;
@@ -154,6 +160,18 @@ $(document).ready(function ()
             initPageDivInfo(pageIdAndUrl, pageTitle);
         },
         onSelect: function(select, node) {
+        	var nodeList = node.getChildren();
+        	if(autoSelectSubPages && nodeList != null)
+        	{
+        		for(var i =0; i< nodeList.length; i++)
+        		{
+        			nodeList[i].select(false);
+		        	if(node.isSelected())
+		        	{
+        				nodeList[i].select(true);
+       				}
+        		}
+        	}
             // Get a list of all selected nodes, and convert to a key array:
             var selKeys = $.map(node.tree.getSelectedNodes(), function(node){
               return node.data.key;
@@ -755,6 +773,9 @@ function removeSelectedFile(id) {
             <td style="width:1px"></td>
             <td style="border:1px solid black;background-color:#738eb5;">
                 <input type="button" id="refreshFile" class="button_out" style="background-image:url('/globalsight/includes/dtree_checkbox/img/refresh.png')" title="Reload" onClick="fnReload();">
+            </td>
+            <td style="width:300px;height:20px;" align="left">
+                <input type="checkbox" id="changeSelectMode" title="Auto Select Sub-Pages" checked onChange="changeSelectMode()"> <span class="standardText" style="vertical-align:middle;">Auto Select/Deselect Sub-Pages</span>
             </td>
         </tr>
         <tr><td style="height:3px" colspan="7"></td></tr>

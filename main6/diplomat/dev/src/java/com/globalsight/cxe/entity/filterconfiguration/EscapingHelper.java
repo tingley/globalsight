@@ -61,39 +61,85 @@ public class EscapingHelper
         {
             tags = TagIndex.getContentIndexes(oriStr, false);
         }
-        
-        
-        int count = tags.size();
 
+        int count = tags.size();
         for (int i = 0; i < count; i++)
         {
             TagIndex ti = tags.get(i);
-
             if (ti.isTag)
             {
-                sb.append(ti.content);
+           		sb.append(handleTagContent4Export(ti.content, es, doDecode));
             }
             else
             {
-                StringBuffer sub = new StringBuffer();
-                String ccc = ti.content;
-                ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
-                int length = ccc.length();
-                for (int j = 0; j < length; j++)
-                {
-                    char char1 = ccc.charAt(j);
-
-                    String processed = handleChar4Export(es, char1);
-                    sub.append(processed);
-                }
-
-                String subStr = doDecode ? m_xmlEncoder.encodeStringBasic(sub
-                        .toString()) : sub.toString();
-                sb.append(subStr);
+				sb.append(handleString4Export(ti.content, es, doDecode));
             }
         }
 
         return sb.toString();
+    }
+
+	/**
+	 * The text node value in tag is also need escape handling. i.e. <bpt i="2"
+	 * type="font" x="2">&lt;font color=\&apos;#0063AD\&apos;&gt;</bpt>
+	 */
+	private static String handleTagContent4Export(String content,
+			List<Escaping> es, boolean doDecode)
+    {
+    	StringBuffer sb = new StringBuffer();
+    	int index = content.indexOf(">");
+    	if (index > -1)
+    	{
+    		sb.append(content.substring(0, index + 1));
+    		String rest = content.substring(index + 1);
+    		index = rest.indexOf("<");
+    		if (index > -1)
+    		{
+        		String textNodeStr = rest.substring(0, index);
+				sb.append(handleString4Export(textNodeStr, es, doDecode));
+				sb.append(rest.substring(index));
+    		}
+    		else
+    		{
+    			sb.append(rest);
+    		}
+    	}
+    	else
+    	{
+    		sb.append(content);
+    	}
+    	return sb.toString();
+    }
+
+    private static String handleString4Export(String ccc, List<Escaping> es,
+			boolean doDecode)
+    {
+        StringBuffer sub = new StringBuffer();
+        String preProcessed = null;
+        String processed = null;
+        ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
+        int length = ccc.length();
+        for (int j = 0; j < length; j++)
+        {
+            char char1 = ccc.charAt(j);
+
+            processed = handleChar4Export(es, char1);
+            // avoid double escape like "\\'".
+			if ("\\".equals(preProcessed) && !"\\".equals(processed)
+					&& processed.startsWith("\\"))
+            {
+            	sub.append(char1);
+            }
+            else
+            {
+                sub.append(processed);
+            }
+            preProcessed = processed;
+        }
+
+        String subStr = doDecode ? m_xmlEncoder.encodeStringBasic(sub
+                .toString()) : sub.toString();
+        return subStr;
     }
 
     public static void handleOutput4Import(Output p_output, Filter mFilter)

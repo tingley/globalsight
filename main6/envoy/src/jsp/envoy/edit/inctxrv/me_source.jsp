@@ -223,29 +223,54 @@ function SE(tuId, tuvId, subId, p_forceComment)
   
   if (typeof(parent.parent.target.content.findSegment) != "undefined")
   {
-	  var xmlHttp=null;
-	    try
-	    {// Firefox, Opera 8.0+, Safari, IE7
-	    xmlHttp=new XMLHttpRequest();
-	    }
-	  catch(e)
-	    {// Old IE
-	    try
-	      {
-	      xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-	      }
-	    catch(e)
-	      {
-	      alert ("Your browser does not support XMLHTTP!");
-	      return;  
-	      }
-	    }
-	  var url=this.location + "&action=getTargetSegment&tuid=" + tuId + "&tuvid=" + tuvId + "&subid=" + subId;
-	  xmlHttp.open("GET",url,false);
-	  xmlHttp.send(null);
-	  var _segment = xmlHttp.responseText;
+	  var format;
+	  var donotMove = false;
+	  var pageNum = false;
+	  var repIndex = 1;
+	  var tgtSegmentNoTag;
 	  
-      parent.parent.target.content.findSegment(tuId, _segment);
+	  if (typeof(window.parent.parent.parent.localData) != "undefined"
+			  && typeof(window.parent.parent.parent.localData.source) != "undefined"
+			  && typeof(window.parent.parent.parent.localData.target) != "undefined")
+	  {
+		  format = window.parent.parent.parent.localData.source[0].format;
+		  
+		  for(var i0 = 0; i0 < window.parent.parent.parent.localData.target.length; i0++)
+		  {
+			  var seg0 = window.parent.parent.parent.localData.target[i0];
+			  if (seg0.tuId == tuId)
+		      {
+				  tgtSegmentNoTag = seg0.segmentNoTag;
+				  break;
+		      }
+		  }
+	  }
+	  else
+	 {
+		  var xmlHttp=null;
+		    try
+		    {// Firefox, Opera 8.0+, Safari, IE7
+		    xmlHttp=new XMLHttpRequest();
+		    }
+		  catch(e)
+		    {// Old IE
+		    try
+		      {
+		      xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+		      }
+		    catch(e)
+		      {
+		      alert ("Your browser does not support XMLHTTP!");
+		      return;  
+		      }
+		    }
+		  var url=this.location + "&action=getTargetSegment&tuid=" + tuId + "&tuvid=" + tuvId + "&subid=" + subId;
+		  xmlHttp.open("GET",url,false);
+		  xmlHttp.send(null);
+		  tgtSegmentNoTag = xmlHttp.responseText;
+	 }
+	  
+      parent.parent.target.content.findSegment(format, tuId, tgtSegmentNoTag, "", donotMove, pageNum, repIndex);
   }
 }
 

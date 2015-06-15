@@ -15,35 +15,24 @@
  *  
  */
 
-package com.globalsight.webservices.coti;
+package com.globalsight.webservices;
 
-public class MetadataInfo
+public class StatusInfo implements java.io.Serializable
 {
-    private String[] sourceLanguages = null;
-    private String[] targetLanguages = null;
+    private String statusValue;
 
-    public MetadataInfo()
+    public String getStatusValue()
     {
+        return statusValue;
     }
 
-    public String[] getSourceLanguages()
+    public void setStatusValue(String statusValue)
     {
-        return sourceLanguages;
+        this.statusValue = statusValue;
     }
 
-    public void setSourceLanguages(String[] sourceLanguages)
+    public StatusInfo()
     {
-        this.sourceLanguages = sourceLanguages;
-    }
-
-    public String[] getTargetLanguages()
-    {
-        return targetLanguages;
-    }
-
-    public void setTargetLanguages(String[] targetLanguages)
-    {
-        this.targetLanguages = targetLanguages;
     }
 
 }

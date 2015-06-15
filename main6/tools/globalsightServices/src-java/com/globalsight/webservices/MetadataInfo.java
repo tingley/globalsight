@@ -15,24 +15,19 @@
  *  
  */
 
-package com.globalsight.webservices.coti;
+package com.globalsight.webservices;
 
-public class StatusInfo
+public class MetadataInfo implements java.io.Serializable
 {
-    private String statusValue;
+    private MetaProperty[] metaProperties = null;
 
-    public String getStatusValue()
+    public MetaProperty[] getMetaProperties()
     {
-        return statusValue;
+        return metaProperties;
     }
 
-    public void setStatusValue(String statusValue)
+    public void setMetaProperties(MetaProperty[] metaProperties)
     {
-        this.statusValue = statusValue;
+        this.metaProperties = metaProperties;
     }
-
-    public StatusInfo()
-    {
-    }
-
 }

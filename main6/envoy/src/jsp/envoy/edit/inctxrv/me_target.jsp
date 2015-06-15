@@ -529,7 +529,42 @@ function SE(tuId, tuvId, subId, p_forceComment)
   
     if (typeof(parent.parent.source.content.findSegment) != "undefined")
     {
-    	var xmlHttp=null;
+    	var format;
+  	  var donotMove = false;
+  	  var pageNum = false;
+  	  var repIndex = 1;
+  	  var tgtSegmentNoTag;
+  	  var srcSegmentNoTag;
+  	  
+  	  if (typeof(window.parent.parent.parent.localData) != "undefined"
+  			  && typeof(window.parent.parent.parent.localData.source) != "undefined"
+  			  && typeof(window.parent.parent.parent.localData.target) != "undefined")
+  	  {
+  		  format = window.parent.parent.parent.localData.source[0].format;
+  		  
+  		  for(var i0 = 0; i0 < window.parent.parent.parent.localData.target.length; i0++)
+  		  {
+  			  var seg0 = window.parent.parent.parent.localData.target[i0];
+  			  if (seg0.tuId == tuId)
+  		      {
+  				  tgtSegmentNoTag = seg0.segmentNoTag;
+  				  break;
+  		      }
+  		  }
+  		  
+  		  for(var i0 = 0; i0 < window.parent.parent.parent.localData.source.length; i0++)
+		  {
+			  var seg0 = window.parent.parent.parent.localData.source[i0];
+			  if (seg0.tuId == tuId)
+		      {
+				  srcSegmentNoTag = seg0.segmentNoTag;
+				  break;
+		      }
+		  }
+  	  }
+  	  else
+  	  {
+  		var xmlHttp=null;
         try
         {// Firefox, Opera 8.0+, Safari, IE7
         xmlHttp=new XMLHttpRequest();
@@ -551,10 +586,11 @@ function SE(tuId, tuvId, subId, p_forceComment)
       xmlHttp.send(null);
       var _data = xmlHttp.responseText;
       var _dataArray = _data.split("_globalsight_sep_");
-      var _segment = _dataArray[0];
-      var _targetSegment = _dataArray[1];
+      srcSegmentNoTag = _dataArray[0];
+      tgtSegmentNoTag = _dataArray[1];
+  	  }
     	
-      parent.parent.source.content.findSegment(tuId, _segment, _targetSegment);
+      parent.parent.source.content.findSegment(format, tuId, srcSegmentNoTag, tgtSegmentNoTag, donotMove, pageNum, repIndex);
     }
 
     if (g_reviewMode || p_forceComment)

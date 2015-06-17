@@ -683,8 +683,12 @@ public class StandardExtractor
 						// protect "<" and ">" to ensure html filter will work
                         temp = temp.replace("&amp;lt;", "_leftAmpLt_");
                         temp = temp.replace("&amp;gt;", "_rightAmpGt_");
+                        temp = temp.replace("&amp;quot;", "_ampQuot_");
+                        temp = temp.replace("&amp;apos;", "_ampApos_");
                         // GBS-3906
                         temp = temp.replace("&amp;", m_tag_amp);
+                        temp = temp.replace("_ampApos_", "&amp;apos;");
+                        temp = temp.replace("_ampQuot_", "&amp;quot;");
                         temp = temp.replace("_rightAmpGt_", "&amp;gt;");
                         temp = temp.replace("_leftAmpLt_", "&amp;lt;");
                         List<String> internalTexts = new ArrayList<String>();

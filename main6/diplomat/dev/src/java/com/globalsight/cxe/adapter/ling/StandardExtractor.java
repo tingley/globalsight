@@ -680,20 +680,20 @@ public class StandardExtractor
                         String temp = node.getSegment();
                         boolean hasLtGt = temp.contains("&lt;")
                                 || temp.contains("&gt;");
+						// protect "<" and ">" to ensure html filter will work
+                        temp = temp.replace("&amp;lt;", "_leftAmpLt_");
+                        temp = temp.replace("&amp;gt;", "_rightAmpGt_");
                         // GBS-3906
                         temp = temp.replace("&amp;", m_tag_amp);
+                        temp = temp.replace("_rightAmpGt_", "&amp;gt;");
+                        temp = temp.replace("_leftAmpLt_", "&amp;lt;");
                         List<String> internalTexts = new ArrayList<String>();
                         temp = InternalTextHelper.protectInternalTexts(temp,
                                 internalTexts);
                         String segmentValue = xe.decodeStringBasic(temp);
-                        // decode TWICE to make sure secondary parser can work
-                        // as expected,
-                        // but it will result in an entity issue,seems it can't
-                        // be resolved
-                        // in current framework of GS.
+                        // decode TWICE to make sure secondary parser can work as expected
                         if (segmentValue.indexOf("&") > -1)
                         {
-                            // needDecodeTwice = true;
                             segmentValue = xe.decodeStringBasic(segmentValue);
                         }
 

@@ -82,36 +82,57 @@ public class EscapingHelper
 	/**
 	 * The text node value in tag is also need escape handling. i.e. <bpt i="2"
 	 * type="font" x="2">&lt;font color=\&apos;#0063AD\&apos;&gt;</bpt>
+	 * 
+	 * Also supports sub segments.
 	 */
 	private static String handleTagContent4Export(String content,
 			List<Escaping> es, boolean doDecode)
     {
-    	StringBuffer sb = new StringBuffer();
+    	StringBuffer sub = new StringBuffer();
+    	List<String> splits = new ArrayList<String>();
+    	splitContent(content, splits);
+    	while (splits.size() == 3)
+    	{
+    		sub.append(splits.get(0));
+    		sub.append(handleString4Export(splits.get(1), es, doDecode));
+    		splitContent(splits.get(2), splits);
+    	}
+    	// splits.size == 1 or 2
+    	for (String str : splits)
+    	{
+    		sub.append(str);
+    	}
+
+    	return sub.toString();
+    }
+
+	private static void splitContent(String content, List<String> splits)
+	{
+		splits.clear();
     	int index = content.indexOf(">");
     	if (index > -1)
     	{
-    		sb.append(content.substring(0, index + 1));
+    		splits.add(content.substring(0, index + 1));
     		String rest = content.substring(index + 1);
     		index = rest.indexOf("<");
     		if (index > -1)
     		{
         		String textNodeStr = rest.substring(0, index);
-				sb.append(handleString4Export(textNodeStr, es, doDecode));
-				sb.append(rest.substring(index));
+        		splits.add(textNodeStr);
+        		splits.add(rest.substring(index));
     		}
     		else
     		{
-    			sb.append(rest);
+    			splits.add(rest);
     		}
     	}
     	else
     	{
-    		sb.append(content);
+    		splits.add(content);
     	}
-    	return sb.toString();
-    }
+	}
 
-    private static String handleString4Export(String ccc, List<Escaping> es,
+	private static String handleString4Export(String ccc, List<Escaping> es,
 			boolean doDecode)
     {
         StringBuffer sub = new StringBuffer();

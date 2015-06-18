@@ -152,7 +152,7 @@ public class JPEscapeSequence extends NativeEnDecoder
                             thisIsEscapeChar = true;
                         }
                     }
-                    if (thisIsEscapeChar)
+                    if (thisIsEscapeChar && !isJavaProperty)
                     {
                         result.append('\\');
                     }

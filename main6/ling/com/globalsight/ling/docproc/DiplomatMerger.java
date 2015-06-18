@@ -46,6 +46,7 @@ import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.EncodingChecker;
 import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.HtmlEscapeSequence;
+import com.globalsight.ling.common.JPEscapeSequence;
 import com.globalsight.ling.common.NativeEnDecoder;
 import com.globalsight.ling.common.NativeEnDecoderException;
 import com.globalsight.ling.common.Text;
@@ -455,6 +456,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
             else
             {
+                if (IFormatNames.FORMAT_JAVAPROP.equalsIgnoreCase(p_mainFormat)
+                        && encoder instanceof JPEscapeSequence)
+                {
+                    ((JPEscapeSequence)encoder).setIsJavaProperty(true);
+                }
+                
                 newText = encoder.encodeWithEncodingCheck(newText);
             }
         }

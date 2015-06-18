@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.datacontract.schemas._2004._07.Microsoft_MT_Web_Service_V2.TranslateArrayResponse;
@@ -90,8 +91,13 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             String[] languageArray = service
                     .getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
 
-            List<String> tmp = Arrays.asList(languageArray);
-            return tmp.contains(sourceLang) && tmp.contains(targetLang);
+            Vector<String> langs = new Vector<String>();
+            for (String lang : languageArray)
+            {
+            	langs.add(lang);
+            }
+            langs.add("pt-PT");//GBS-4000
+            return langs.contains(sourceLang) && langs.contains(targetLang);
         }
         catch (Exception ex)
         {
@@ -357,6 +363,17 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 				lang = "sr-Latn";
 		}
 
+		if (lang.equalsIgnoreCase("pt"))
+		{
+			if (country.equalsIgnoreCase("pt"))
+			{
+				lang = "pt-PT";
+			}
+			else
+			{
+				lang = "pt";
+			}
+		}
 		return lang;
     }
 }

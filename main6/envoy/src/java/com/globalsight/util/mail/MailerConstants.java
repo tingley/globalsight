@@ -94,6 +94,9 @@ public class MailerConstants
     public static final String LOGIN_RETRIEVE_UESRNAME_MESSAGE 		= "message_login_retrieveUsernames";
     public static final String JOB_IMPORT_SUCC_MESSAGE              = "message_job_import_succ"; 
     
+    public static final String WORKFLOW_STATE_POST_FAILURE_SUBJECT = "subject_wfStatePostFailure";
+    public static final String WORKFLOW_STATE_POST_FAILURE_MESSAGE = "message_wfStatePostFailure";
+    
     // Auto-accept email
     public static final String AUTO_ACCEPT_SUBJECT = "subject_autoaccept_task";
     public static final String AUTO_ACCEPT_MESSAGE = "message_autoaccept_task";

@@ -23,11 +23,16 @@
      com.globalsight.util.GeneralException,
 	 java.util.ResourceBundle,
      java.util.Collections,
-     com.globalsight.util.collections.HashtableValueOrderWalker"
+     com.globalsight.util.collections.HashtableValueOrderWalker,
+     com.globalsight.everest.company.CompanyWrapper,
+     com.globalsight.everest.company.Company"
 	 session="true" %>
 <jsp:useBean id="save" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="cancel" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <%
+	boolean isEnableWorkflowStatePosts = false;
+	Company company = CompanyWrapper.getCurrentCompany();
+	isEnableWorkflowStatePosts = company.getEnableWorkflowStatePosts();
 	ResourceBundle bundle = PageHandler.getBundle(session); 
     String title,helperText;
     if (request.getAttribute("edit") != null)
@@ -373,7 +378,18 @@ $(document).ready(function editPage(){
 					<option value="false" <c:if test="${AutomaticDispatch==false}">selected="selected"</c:if>><%=bundle.getString("lb_manual")%></option>
 				</select>
 			</div>
-		</div>
+			<%if (isEnableWorkflowStatePosts){%>
+				<div>
+					<label for="wfStatePostProfileId"><%= bundle.getString("lb_workflow_state_post_profile") %></label>
+					<select id="wfStatePostProfileId" name="wfStatePostProfileId" >
+					<option value="-1"><%=bundle.getString("lb_choose")%></option>
+					<c:forEach items="${wfStatePost}" var="item">
+						<option value="${item.id}" <c:if test="${wfStatePostProfileId==item.id}">selected="selected"</c:if>>${item.name}</option>
+					</c:forEach>
+				</select>
+				</div>
+			<%}%>
+			</div>
 		
 		<div id="TargetLocals">
 			<div id="TargetLocalsTitle" class="mainHeading" style="width:1000px">

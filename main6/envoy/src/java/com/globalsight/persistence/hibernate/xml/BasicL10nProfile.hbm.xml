@@ -30,6 +30,7 @@
             column="IS_EXACT_MATCH_EDIT" type="yes_no" not-null="false" />
         <property name="TMEditType" column="TM_EDIT_TYPE" type="int"
             length="1" not-null="true" />
+        <property name="wfStatePostId" column="WF_STATE_POST_ID" type="long" not-null="false"/>
         <property name="isActive" column="IS_ACTIVE" type="yes_no"
             not-null="true" />
         <property name="companyId" length="20" column="COMPANYID"

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.workflowmanager.WorkflowStatePosts"
+		table="WORKFLOW_STATE_POSTS">
+		<id name="id" column="ID" type="long" length="20">
+			<generator class="native" />
+		</id>
+		
+		<property name="name" length="40" column="NAME"
+			type="string" not-null="true" unique="false" />
+		<property name="description" length="4000" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
+		<property name="listenerURL" length="100" column="LISTENER_URL"
+			type="string" not-null="true" unique="false" />
+		<property name="secretKey" length="100" column="SECRET_KEY"
+			type="string" not-null="false" unique="false" />
+		<property name="timeoutPeriod" length="3" column="TIMEOUT_PERIOD"
+			type="string" not-null="false" unique="false" />
+		<property name="retryNumber" length="3" column="RETRY_NUMBER"
+			type="string" not-null="false" unique="false" />
+		<property name="notifyEmail" length="100" column="NOTIFY_EMAIL"
+			type="string" not-null="true" unique="false" />
+		<property name="companyId"  length="20" column="COMPANY_ID"
+			type="long" not-null="true" />
+	</class>
+</hibernate-mapping>

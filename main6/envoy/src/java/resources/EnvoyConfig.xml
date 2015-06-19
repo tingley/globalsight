@@ -277,6 +277,20 @@
       </WebPage>
     </WebActivity>
   </WebModule>
+    <WebModule webModuleName="workflowStatePost">
+  	<WebActivity webActivityName="workflowStatePost">
+	  	<WebPage pageName="WSP" isDefault="true" jspName="/envoy/administration/workflow/workflowStatePost.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowStatePostHandler">
+	  		<PageLink linkName="self" destinationPageName="WSP"></PageLink>
+	  		<PageLink linkName="new1" destinationPageName="CWSP"></PageLink>
+	  		<PageLink linkName="modify" destinationPageName="CWSP"></PageLink>
+	  		<PageLink linkName="remove" destinationPageName="WSP"></PageLink>
+  		</WebPage>
+  		<WebPage pageName="CWSP" isDefault="false" jspName="/envoy/administration/workflow/newWorkflowStatePost.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.workflow.BasicWorkflowStatePostHandler">
+  			<PageLink linkName="save" destinationPageName="WSP"></PageLink>
+			<PageLink linkName="cancel" destinationPageName="WSP"></PageLink>
+  		</WebPage>
+  	</WebActivity>
+  </WebModule>
   <WebModule webModuleName="tmProfiles">
     <WebActivity webActivityName="tmProfiles">
       <WebPage pageName="TMP" isDefault="true" jspName="/envoy/administration/tmprofile/tmProfiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandler">

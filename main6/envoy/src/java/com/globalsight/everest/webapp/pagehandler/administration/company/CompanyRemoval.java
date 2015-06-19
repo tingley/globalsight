@@ -1113,6 +1113,7 @@ public class CompanyRemoval
         columns.append(" BIG_DATA_STORE_LEVEL,");
         columns.append(" MIGRATE_PROCESSING,");
         columns.append(" ENABLE_DITA_CHECKS,");
+        columns.append(" ENABLE_WORKFLOW_STATE_POSTS,");
         columns.append(" ENABLE_QA_CHECKS");
 
         StringBuilder sql = new StringBuilder();
@@ -1285,6 +1286,7 @@ public class CompanyRemoval
         sql.append(" BIG_DATA_STORE_LEVEL SMALLINT(1) DEFAULT 1,");
         sql.append(" MIGRATE_PROCESSING INT DEFAULT 0,");
         sql.append(" ENABLE_DITA_CHECKS CHAR(1) DEFAULT 'N',");
+        sql.append(" ENABLE_WORKFLOW_STATE_POSTS CHAR(1) DEFAULT 'N',");
         sql.append(" ENABLE_QA_CHECKS char(1) DEFAULT 'N'");
         sql.append(");");
 

@@ -61,6 +61,7 @@ public class Company extends PersistentObject
     private int m_migrateProcessing = 0;
 
     private boolean m_enableDitaChecks = false;
+    private boolean m_enableWorkflowStatePosts = false;
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -349,5 +350,15 @@ public class Company extends PersistentObject
     public void setEnableDitaChecks(boolean p_enableDitaChecks)
     {
         this.m_enableDitaChecks = p_enableDitaChecks;
+    }
+    
+    public boolean getEnableWorkflowStatePosts()
+    {
+        return m_enableWorkflowStatePosts;
+    }
+    
+    public void setEnableWorkflowStatePosts(boolean p_enableWorkflowStatePosts)
+    {
+        this.m_enableWorkflowStatePosts = p_enableWorkflowStatePosts;
     }
 }

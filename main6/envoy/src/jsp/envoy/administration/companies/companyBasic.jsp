@@ -67,6 +67,7 @@
     String useSeparateTablesPerJobChecked = "";
     String qaChecks = "";
     String enableDitaChecksChecked = "";
+    String enableWorkflowStatePosts = "";
     
     if (company != null)
     {
@@ -117,6 +118,10 @@
 
         if (company.getEnableDitaChecks()) {
             enableDitaChecksChecked = "checked";
+        }
+        
+        if(company.getEnableWorkflowStatePosts()){
+            enableWorkflowStatePosts = "checked";
         }
     }
 %>
@@ -789,6 +794,13 @@ function addQualityTo()
             <td colspan="2">
                 <input class="standardText" type="checkbox" name="<%=CompanyConstants.ENABLE_DITA_CHECKS%>" <%=enableDitaChecksChecked%>/>
             </td>
+        </tr>
+        
+        <tr>
+        <td valign="top"><%=bundle.getString("lb_enable_workflow_state_posts") %>:</td>
+        <td>
+        	<input class="standardText" type="checkbox" name="<%=CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS%>" <%=enableWorkflowStatePosts%>/>
+        </td>
         </tr>
 
         <tr valign="top">

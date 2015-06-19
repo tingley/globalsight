@@ -53,6 +53,7 @@ public interface CompanyConstants
     public static final String TM3_VERSION = "tm3version";
     public static final String BIG_DATA_STORE_LEVEL = "bigDataStoreLevel";
     public static final String ENABLE_DITA_CHECKS = "enableDitaChecks";
+    public static final String ENABLE_WORKFLOW_STATE_POSTS = "enableWorkflowStatePosts";
 
     public static final String FILTER_NAME = "companyNameFilter";
     public static final String FILTER_DESCRIPTION = "companyDescriptionFilter";

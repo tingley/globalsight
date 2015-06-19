@@ -11,6 +11,8 @@
             com.globalsight.everest.webapp.pagehandler.administration.shutdown.ShutdownMainHandler,
             com.globalsight.vignette.VignetteProperties,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+            com.globalsight.everest.company.CompanyWrapper,
+     		com.globalsight.everest.company.Company,
             java.util.ResourceBundle"
 %>
 
@@ -18,6 +20,9 @@
 
 <%@ include file="/envoy/common/installedModules.jspIncl" %>
 <%
+	boolean isEnablewfStatePosts = false;
+	Company curCompany = CompanyWrapper.getCurrentCompany();
+	isEnablewfStatePosts = curCompany.getEnableWorkflowStatePosts();
     String gridAlignment = "LEFT";
 
     ResourceBundle mainMenuBundle = PageHandler.getBundle(session);
@@ -185,6 +190,7 @@
    String teamsiteConfigUrl = LinkHelper.getWebActivityURL(request, "tsservers");
    String teamsiteBranchesUrl = LinkHelper.getWebActivityURL(request, "teamsite");
    String templatesUrl = LinkHelper.getWebActivityURL(request, "templates");
+   String workflowStatePostUrl = LinkHelper.getWebActivityURL(request, "workflowStatePost");
    String terminologyUrl = LinkHelper.getWebActivityURL(request, "termbases");
    String tmUrl = LinkHelper.getWebActivityURL(request, "tm");
    String usersUrl = LinkHelper.getWebActivityURL(request, "users");
@@ -384,7 +390,9 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_projects")%>", 
 <% if (userPerms.getPermissionFor(Permission.WORKFLOWS_VIEW)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_workflows")%>", "javascript:goToUrl('<%=templatesUrl%>');", ""));
 <% } %>
-
+<%if(isEnablewfStatePosts){%>
+setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_workflow_state_post_profiles")%>", "javascript:goToUrl('<%=workflowStatePostUrl%>');", ""));
+<%}%>
 <% if (userPerms.getPermissionFor(Permission.LOCPROFILES_VIEW)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_loc_profiles")%>", "javascript:goToUrl('<%=locProfilesUrl%>');", ""));
 <% } %>

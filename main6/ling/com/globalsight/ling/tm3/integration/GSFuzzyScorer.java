@@ -56,9 +56,16 @@ public class GSFuzzyScorer implements TM3FuzzyMatchScorer<GSTuvData> {
     {
 //        int orgSegTokenCount = keyTokens.size();
 //        int candidateTokenCount = candidateTokens.size();
-        int orgSegTotalTokenCount = keyTokens.get(0).getTotalTokenCount();
-		int candidateTotalTokenCount = candidateTokens.get(0)
-				.getTotalTokenCount();
+        int orgSegTotalTokenCount = keyTokens.size();
+		if (keyTokens.size() > 0) {
+			orgSegTotalTokenCount = keyTokens.get(0).getTotalTokenCount();
+		}
+		int candidateTotalTokenCount = candidateTokens.size();
+		if (candidateTokens.size() > 0)
+		{
+			candidateTotalTokenCount = candidateTokens.get(0)
+					.getTotalTokenCount();
+		}
 
         // XXX This could be cached
         Map<String, Integer> keyTokenMap = getTokenMap(keyTokens);

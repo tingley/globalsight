@@ -97,6 +97,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             	langs.add(lang);
             }
             langs.add("pt-PT");//GBS-4000
+            langs.add("es-419");
             return langs.contains(sourceLang) && langs.contains(targetLang);
         }
         catch (Exception ex)
@@ -374,6 +375,18 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 				lang = "pt";
 			}
 		}
+
+		if (lang.equalsIgnoreCase("es"))
+		{
+			lang = "es";
+			// es-419: Spanish appropriate for the Latin America and Caribbean
+			// region
+			if (!country.equalsIgnoreCase("es"))
+			{
+				lang = "es-419";
+			}
+		}
+
 		return lang;
     }
 }

@@ -1,4 +1,4 @@
-<%@page import="com.globalsight.everest.util.comparator.RequestFileComparator"%>
+<%@page import="com.globalsight.everest.util.comparator.ExportRequestComparator"%>
 <%@page import="com.globalsight.everest.foundation.SearchCriteriaParameters"%>
 <%@page import="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -32,7 +32,7 @@
 <HTML>
     <HEAD>
         <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
-        <TITLE><%=bundle.getString("lb_job_creation_status")%></TITLE>
+        <TITLE><%=bundle.getString("lb_job_export_status")%></TITLE>
         <script SRC="/globalsight/includes/utilityScripts.js"></script>
         <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
         <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/formvalidation.js"></SCRIPT>
@@ -100,18 +100,18 @@
             <div style="width: 860px; border-bottom: 1px groove #0C1476; padding-top: 10px">
                 <table cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                        <td class="tableHeadingListOn">
-                            <img src="/globalsight/images/tab_left_blue.gif" border="0" /> 
-                            <a class="sortHREFWhite"
-                               href="<%=selfUrl%>"> <%=bundle.getString("lb_job_creation_status")%></a> <img
-                               src="/globalsight/images/tab_right_blue.gif" border="0" />
-                        </td>
-                        <td width="2"></td>
                         <td class="tableHeadingListOff">
                             <img src="/globalsight/images/tab_left_gray.gif" border="0" /> 
                             <a class="sortHREFWhite"
-                               href="<%=exportingUrl%>"> <%=bundle.getString("lb_job_export_status")%></a> <img
+                               href="<%=importingUrl%>"> <%=bundle.getString("lb_job_creation_status")%></a> <img
                                src="/globalsight/images/tab_right_gray.gif" border="0" />
+                        </td>
+                        <td width="2"></td>
+                        <td class="tableHeadingListOn">
+                            <img src="/globalsight/images/tab_left_blue.gif" border="0" /> 
+                            <a class="sortHREFWhite"
+                               href="<%=selfUrl%>"> <%=bundle.getString("lb_job_export_status")%></a> <img
+                               src="/globalsight/images/tab_right_blue.gif" border="0" />
                         </td>
                     </tr>
                 </table>
@@ -129,49 +129,43 @@
                         <td id="jobWorkflowsTab" class="tableHeadingListOff">
                             <img src="/globalsight/images/tab_left_gray.gif" border="0" /> 
                             <a class="sortHREFWhite"
-                               href="<%=importingUrl%>"> <%=bundle.getString("lb_job_create_import")%></a> <img
+                               href="<%=exportingUrl%>"> <%=bundle.getString("lb_job_create_export")%></a> <img
                                src="/globalsight/images/tab_right_gray.gif" border="0" />
                         </td>
                     </tr>
                 </table>
             </div>
             <div class="standardText">
-                <amb:tableNav bean="waitingRequestDefine" key="waitingRequestDefineKey" pageUrl="self" />
+                <amb:tableNav bean="requestDefine" key="requestDefineKey" pageUrl="self" />
                 <div align='right'>
                     <c:out value="${tableNav}" escapeXml="false"></c:out>
                     </div>
                     <FORM NAME="MyForm" METHOD="POST">
-                        <amb:table bean="waitingRequestDefine" id="requestVo" key="waitingRequestDefineKey"
-                                   dataClass="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobCreationState.RequestFile"
+                        <amb:table bean="requestDefine" id="requestVo" key="requestDefineKey"
+                                   dataClass="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.RequestFile"
                                    pageUrl="self" emptyTableMsg="msg_waiting_request_none">
                             <amb:column label="checkbox">
                                 <INPUT TYPE=checkbox NAME=key VALUE="${requestVo.key}">
                         </amb:column>
-                        <amb:column label="lb_company" sortBy="<%=RequestFileComparator.Company%>">
+                         <amb:column label="lb_company" sortBy="<%=ExportRequestComparator.Company%>">
                             ${requestVo.company}
                         </amb:column>
-                        <amb:column label="lb_job_id" sortBy="<%=RequestFileComparator.JOB_ID%>">
+                        <amb:column label="lb_job_id" sortBy="<%=ExportRequestComparator.JOB_ID%>">
                             ${requestVo.jobId}
                         </amb:column>
-                        <amb:column label="lb_job_name" sortBy="<%=RequestFileComparator.JOB_NAME%>">
+                        <amb:column label="lb_job_name" sortBy="<%=ExportRequestComparator.JOB_NAME%>">
                             ${requestVo.jobName}
                         </amb:column>
-                        <amb:column label="lb_file" sortBy="<%=RequestFileComparator.FILE_NAME%>" width="40%" style="text-align: left; word-break: break-all; word-wrap: break-word;">
+                        <amb:column label="lb_file" sortBy="<%=ExportRequestComparator.FILE_NAME%>" width="40%" style="text-align: left; word-break: break-all; word-wrap: break-word;">
                             ${requestVo.file}
                         </amb:column>
-                        <amb:column label="lb_size" sortBy="<%=RequestFileComparator.FILE_SIZE%>">
-                            ${requestVo.size}
-                        </amb:column>
-                        <amb:column label="lb_project" sortBy="<%=RequestFileComparator.FILE_PROFILE%>">
+                        <amb:column label="lb_project" sortBy="<%=ExportRequestComparator.FILE_PROFILE%>">
                             ${requestVo.project}
                         </amb:column>
-                        <amb:column label="lb_file_profile" sortBy="<%=RequestFileComparator.FILE_PROFILE%>">
-                            ${requestVo.fileProfile}
+                        <amb:column label="lb_targetLange" sortBy="<%=ExportRequestComparator.LOCALE%>">
+                            ${requestVo.workflowLocale}
                         </amb:column>
-                        <amb:column label="lb_priority" sortBy="<%=RequestFileComparator.PRIORITY%>">
-                            ${requestVo.priority}
-                        </amb:column>
-                        <amb:column label="lb_date_request" sortBy="<%=RequestFileComparator.REQUEST_TIME%>">
+                        <amb:column label="lb_date_request" sortBy="<%=ExportRequestComparator.REQUEST_TIME%>">
                             ${requestVo.requestTime}
                         </amb:column>
                     </amb:table>
@@ -179,7 +173,7 @@
                    <div align='right' style="padding-top: 5px;">
                     <c:out value="${tableNav2}" escapeXml="false" ></c:out>
                     <c:out value="${tableNav}" escapeXml="false" ></c:out>
-                     <amb:tableNav bean="waitingRequestDefine" key="waitingRequestDefineKey" pageUrl="self" scope="10,20,50" />
+                     <amb:tableNav bean="requestDefine" key="requestDefineKey" pageUrl="self" scope="10,20,50" />
                   </div>
                 </FORM>
                 <DIV ID="ButtonLayer" ALIGN="LEFT">

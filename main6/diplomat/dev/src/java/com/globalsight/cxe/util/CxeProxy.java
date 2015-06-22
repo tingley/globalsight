@@ -16,10 +16,10 @@
  */
 package com.globalsight.cxe.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 import javax.jms.DeliveryMode;
@@ -41,33 +41,29 @@ import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
 import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
-import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
 import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
 import com.globalsight.cxe.adapter.teamsite.TeamSiteAdapter;
 import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
+import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
 import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.MessageData;
+import com.globalsight.cxe.util.fileExport.FileExportUtil;
 import com.globalsight.cxe.util.fileImport.FileImportUtil;
 import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.FileUtil;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
@@ -1182,11 +1178,52 @@ public class CxeProxy
         exportMsg.setEventFlowXml(p_eventFlowXml);
         exportMsg.setMessageData(p_gxml);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX
-                + EventTopicMap.FOR_CAP_SOURCE_ADAPTER;
-        sendCxeMessage(exportMsg, jmsTopic);
+        if (FileExportUtil.USE_JMS)
+        {
+            String jmsTopic = EventTopicMap.JMS_PREFIX
+                    + EventTopicMap.FOR_CAP_SOURCE_ADAPTER;
+            sendCxeMessage(exportMsg, jmsTopic);
+        }
+        else
+        {
+            try
+            {
+                handleCxeMessage(exportMsg);
+            }
+            catch (Exception e)
+            {
+                s_logger.error(e);
+            }
+        }
     }
 
+    /**
+     * Handles the CxeMessage.
+     * 
+     * @param cxeMessage
+     * @throws Exception
+     */
+    static private void handleCxeMessage(CxeMessage cxeMessage)
+            throws Exception
+    {
+        if (cxeMessage == null)
+        {
+            return;
+        }
+
+        CxeMessageType eventName = cxeMessage.getMessageType();
+        
+        BaseAdapterMDB adapter = EventTopicMap.getBaseAdapterMDB(eventName);
+
+        List<CxeMessage> cms = adapter.handlerAdapterResults(cxeMessage);
+
+        for (CxeMessage c : cms)
+        {
+            handleCxeMessage(c);
+        }
+
+        return;
+    }
 	
     /**
      * Initiates an export within CXE using JMS(Override method for documentum

@@ -98,6 +98,7 @@ public class Upgrade
     {
         COPY_UNCOVER.add("createJob.properties");
         COPY_UNCOVER.add("offlineUpload.properties");
+        COPY_UNCOVER.add("exportJob.properties");
     }
 
     private static List<String> IGNORE_PROPERTIES = new ArrayList<String>();

@@ -332,6 +332,7 @@ public class TmUtil
         public void handleStartTag(String p_name, Properties p_attributes,
                 String p_originalString) throws DiplomatBasicParserException
         {
+        	p_name = p_name.toLowerCase();
             if (p_name.equals(GxmlNames.SEGMENT)
                     || p_name.equals(GxmlNames.LOCALIZABLE))
             {

@@ -9,6 +9,8 @@
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.webnavigation.LinkHelper,
             com.globalsight.everest.taskmanager.Task,
+            com.globalsight.everest.company.CompanyWrapper,
+            com.globalsight.everest.company.Company,
             java.util.ResourceBundle"
     session="true"%>
 <%
@@ -39,6 +41,10 @@
             + Task.STATE_ACTIVE + "&listType=stateOnly";
     String inprogressUrl = "&" + WebAppConstants.TASK_STATE + "="
             + Task.STATE_ACCEPTED + "&listType=stateOnly";
+    
+    boolean isEnableWorkflowStatePosts = false;
+    Company company = CompanyWrapper.getCurrentCompany();
+    isEnableWorkflowStatePosts = company.getEnableWorkflowStatePosts();
 %>
 <HTML>
 <!-- This JSP is envoy/login/welcome.jsp -->
@@ -311,6 +317,11 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.WORKFLOWS_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=templatesUrl%>"><%=bundle.getString("lb_workflows")%></A><BR>
         </amb:permission>
+        <%
+        if(isEnableWorkflowStatePosts){
+        %>
+        <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=workflowStatePostUrl%>"><%=bundle.getString("lb_workflow_state_post_profiles")%></A><BR>
+        <%} %>
         <amb:permission name="<%=Permission.LOCPROFILES_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=locProfilesUrl%>"><%=bundle.getString("lb_loc_profiles")%></A><BR>
         </amb:permission>

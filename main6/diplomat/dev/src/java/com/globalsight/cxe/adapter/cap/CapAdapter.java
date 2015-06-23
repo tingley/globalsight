@@ -16,31 +16,19 @@
  */
 package com.globalsight.cxe.adapter.cap;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.BaseAdapter;
-import com.globalsight.cxe.adapter.CxeProcessor;
-import com.globalsight.cxe.adapter.cap.CapAdapterException;
-import com.globalsight.cxe.adapter.cap.CapImporter;
-import com.globalsight.cxe.adapter.cap.Mapper;
-import com.globalsight.cxe.adapter.cap.Uploader;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
-import com.globalsight.cxe.message.FileMessageData;
-import com.globalsight.cxe.message.MessageData;
-import com.globalsight.cxe.message.MessageDataFactory;
-import com.globalsight.cxe.util.EventFlowXmlParser;
-import com.globalsight.diplomat.util.Logger;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.util.GeneralException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 /**
  * The CapAdapter provides functionality for receiving messages
  * from CAP and processing them, as well as preparing messages
@@ -48,9 +36,6 @@ import java.util.List;
  */
 public class CapAdapter extends BaseAdapter
 {
-    //////////////////////////////////////
-    // Constructor                      //
-    //////////////////////////////////////
     /**
      * Creates a CapAdapter
      * 

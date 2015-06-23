@@ -39,6 +39,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.WorkflowInfos;
 import com.globalsight.everest.workflow.WorkflowTemplate;
+import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
 import com.globalsight.exporter.ExporterException;
 import com.globalsight.exporter.IExportManager;
 import com.globalsight.importer.IImportManager;
@@ -931,4 +932,17 @@ public interface ProjectHandler
             throws RemoteException, ProjectHandlerException;
 
     public List<ProjectImpl> getProjectsByTermbaseDepended(String termbaseName, long companyId);
+    
+    public List<WorkflowStatePosts> getAllWorkflowStatePostProfie(String[] filterParams);
+    
+    public List<WorkflowStatePosts> getAllWorkflowStatePostInfos();
+   
+    public void createWfStatePostProfile(WorkflowStatePosts wfStatePost);
+    
+    public WorkflowStatePosts getWfStatePostProfile(long wfStatePostId);
+    
+    public void modifyWfStatePostProfile(WorkflowStatePosts wfstaPosts);
+    
+    public void removeWorkflowStatePost(WorkflowStatePosts wfstaPosts);
+    
 }

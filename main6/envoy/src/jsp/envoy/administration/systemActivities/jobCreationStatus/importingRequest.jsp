@@ -16,12 +16,15 @@
          %>
 <jsp:useBean id="self" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="waiting" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
+<jsp:useBean id="exporting" class="com.globalsight.everest.webapp.javabean.NavigationBean"
+             scope="request" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionManager = (SessionManager) session
             .getAttribute(WebAppConstants.SESSION_MANAGER);
     String selfUrl = self.getPageURL();
     String waitingUrl = waiting.getPageURL();
+    String exportingUrl = exporting.getPageURL();
     String jobCreationStatus = bundle.getString("lb_job_creation_status");
 %>
 
@@ -92,8 +95,16 @@
                     <tr>
                         <td class="tableHeadingListOn">
                             <img src="/globalsight/images/tab_left_blue.gif" border="0" /> 
-                            <a class="sortHREFWhite" href="<%=selfUrl%>"> <%=bundle.getString("lb_job_creation_status")%></a> 
-                            <img src="/globalsight/images/tab_right_blue.gif" border="0" />
+                            <a class="sortHREFWhite"
+                               href="<%=selfUrl%>"> <%=bundle.getString("lb_job_creation_status")%></a> <img
+                               src="/globalsight/images/tab_right_blue.gif" border="0" />
+                        </td>
+                        <td width="2"></td>
+                        <td class="tableHeadingListOff">
+                            <img src="/globalsight/images/tab_left_gray.gif" border="0" /> 
+                            <a class="sortHREFWhite"
+                               href="<%=exportingUrl%>"> <%=bundle.getString("lb_job_export_status")%></a> <img
+                               src="/globalsight/images/tab_right_gray.gif" border="0" />
                         </td>
                     </tr>
                 </table>

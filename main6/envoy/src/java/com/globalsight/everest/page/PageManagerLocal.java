@@ -35,6 +35,7 @@ import org.dom4j.Node;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.cxe.util.fileExport.FileExportUtil;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.online.OnlineEditorConstants;
 import com.globalsight.everest.page.pageexport.ExportConstants;
@@ -1107,7 +1108,7 @@ public final class PageManagerLocal implements PageManager
 					ExtractedSourceFile sfile = (ExtractedSourceFile) page
 							.getExtractedFile();
 					String path = page.getExternalPageId().toLowerCase();
-					if (path.endsWith(".pptx") && sfile != null
+					if (FileExportUtil.USE_JMS && path.endsWith(".pptx") && sfile != null
 							&& "office-xml".equals(sfile.getDataType()))
 					{
 						if (path.startsWith("(slide"))
@@ -1125,10 +1126,24 @@ public final class PageManagerLocal implements PageManager
 
 						continue;
 					}
+					
+					if (!FileExportUtil.USE_JMS)
+					{
+					    map.put("filePath", path);
+					    String key = p_exportBatchId + path + map.get(new Integer(PAGE_NUM));
+					    map.put("key", key);
+					}
 
 				}
-                JmsHelper
-                        .sendMessageToQueue(map, JmsHelper.JMS_EXPORTING_QUEUE);
+				
+				if (FileExportUtil.USE_JMS)
+				{
+				    JmsHelper.sendMessageToQueue(map, JmsHelper.JMS_EXPORTING_QUEUE);
+				}
+				else
+				{
+				    FileExportUtil.exportFileWithThread(map);
+				}
             }
 
             if (slidesPages.size() > 0)

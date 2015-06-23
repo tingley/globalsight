@@ -67,6 +67,7 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     protected Project m_project = null;
     protected String m_name = null;
     protected String m_description = null;
+    public long m_wfStatePostId = -1;
     protected long m_companyId = -1;
     protected int m_priority = -1;
     protected GlobalSightLocale m_sourceLocale = null;
@@ -1105,4 +1106,16 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     {
         this.TMEditType = allowEditType;
     }
+    
+
+    public long getWfStatePostId()
+    {
+        return m_wfStatePostId;
+    }
+
+    public void setWfStatePostId(long p_wfStatePostId)
+    {
+        this.m_wfStatePostId = p_wfStatePostId;
+    }
+    
 }

@@ -412,8 +412,11 @@ public abstract class AbstractTranslator implements MachineTranslator
 			{
 				injected = TmUtil.composeCompleteText(segments[i],
 						separatedSegmentMap);
-				// MS Translator will add extra space like "> <".
+				// MS Translator will add extra space before < and after > like
+				// "> <", " <" and "> ".
 	        	injected = StringUtil.replace(injected, "> <", "><");
+	        	injected = StringUtil.replace(injected, "> ", ">");
+	        	injected = StringUtil.replace(injected, " <", "<");
 	        	results[i] = heads.get(i) + injected + "</segment>";
 			}
 			catch (Exception e)

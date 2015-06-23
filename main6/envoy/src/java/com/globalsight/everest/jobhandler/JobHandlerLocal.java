@@ -614,6 +614,8 @@ public class JobHandlerLocal implements JobHandler
                 c.setTmVersion(p_company.getTmVersion());
                 c.setBigDataStoreLevel(p_company.getBigDataStoreLevel());
                 c.setEnableDitaChecks(p_company.getEnableDitaChecks());
+                c.setEnableWorkflowStatePosts(p_company
+                        .getEnableWorkflowStatePosts());
                 HibernateUtil.update(c);
 
                 if (p_company.getTmVersion().getValue() == 3)

@@ -145,6 +145,8 @@ public class ProjectHandlerException extends GeneralException
     public final static String MSG__CREATE_JMS_POOL_FAILED = "FailedToCreateJmsPool";
     // Args: 0
     public final static String MSG_FAILED_TO_GET_FPIS = "FailedToGetFpis";
+    
+    public final static String MSG_FAILED_TO_REMOVE_WF_STATE_POST_PROFILE = "FailedToRemoveWfStatePostProfile";
 
     /**
      * Create a ProjectHandlerException with the specified message.

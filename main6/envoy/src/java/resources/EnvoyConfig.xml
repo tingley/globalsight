@@ -98,10 +98,40 @@
       <WebPage pageName="WR1" isDefault="true" jspName="/envoy/administration/systemActivities/jobCreationStatus/waitingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobCreationState.WaitingRequestHandler">
          <PageLink linkName="self" destinationPageName="WR1"></PageLink>
          <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+         <PageLink linkName="exporting" destinationPageName="WER1"></PageLink>
       </WebPage>
       <WebPage pageName="IR1" isDefault="false" jspName="/envoy/administration/systemActivities/jobCreationStatus/importingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobCreationState.ImportingRequestHandler">
          <PageLink linkName="waiting" destinationPageName="WR1"></PageLink>
          <PageLink linkName="self" destinationPageName="IR1"></PageLink>
+         <PageLink linkName="exporting" destinationPageName="WER1"></PageLink>
+      </WebPage>
+    </WebActivity>
+  </WebModule>
+  <WebModule webModuleName="jobExportStatus">
+    <WebActivity webActivityName="jobExportStatus">
+      <WebPage pageName="WER1" isDefault="true" jspName="/envoy/administration/systemActivities/jobExportStatus/waitingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.WaitingRequestHandler">
+         <PageLink linkName="self" destinationPageName="WER1"></PageLink>
+         <PageLink linkName="exporting" destinationPageName="IER1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+      </WebPage>
+      <WebPage pageName="IER1" isDefault="false" jspName="/envoy/administration/systemActivities/jobExportStatus/runningRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.runningRequestHandler">
+         <PageLink linkName="waiting" destinationPageName="WER1"></PageLink>
+         <PageLink linkName="self" destinationPageName="IER1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+      </WebPage>
+    </WebActivity>
+  </WebModule>
+  <WebModule webModuleName="offlineUploadStatus">
+    <WebActivity webActivityName="offlineUploadStatus">
+      <WebPage pageName="WER1" isDefault="true" jspName="/envoy/administration/systemActivities/jobExportStatus/waitingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.WaitingRequestHandler">
+         <PageLink linkName="self" destinationPageName="WER1"></PageLink>
+         <PageLink linkName="exporting" destinationPageName="IER1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+      </WebPage>
+      <WebPage pageName="IER1" isDefault="false" jspName="/envoy/administration/systemActivities/jobExportStatus/exportingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.ExportingRequestHandler">
+         <PageLink linkName="waiting" destinationPageName="WER1"></PageLink>
+         <PageLink linkName="self" destinationPageName="IER1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>
@@ -276,6 +306,20 @@
         <PageLink linkName="previous" destinationPageName="WFT"></PageLink>
       </WebPage>
     </WebActivity>
+  </WebModule>
+    <WebModule webModuleName="workflowStatePost">
+  	<WebActivity webActivityName="workflowStatePost">
+	  	<WebPage pageName="WSP" isDefault="true" jspName="/envoy/administration/workflow/workflowStatePost.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowStatePostHandler">
+	  		<PageLink linkName="self" destinationPageName="WSP"></PageLink>
+	  		<PageLink linkName="new1" destinationPageName="CWSP"></PageLink>
+	  		<PageLink linkName="modify" destinationPageName="CWSP"></PageLink>
+	  		<PageLink linkName="remove" destinationPageName="WSP"></PageLink>
+  		</WebPage>
+  		<WebPage pageName="CWSP" isDefault="false" jspName="/envoy/administration/workflow/newWorkflowStatePost.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.workflow.BasicWorkflowStatePostHandler">
+  			<PageLink linkName="save" destinationPageName="WSP"></PageLink>
+			<PageLink linkName="cancel" destinationPageName="WSP"></PageLink>
+  		</WebPage>
+  	</WebActivity>
   </WebModule>
   <WebModule webModuleName="tmProfiles">
     <WebActivity webActivityName="tmProfiles">

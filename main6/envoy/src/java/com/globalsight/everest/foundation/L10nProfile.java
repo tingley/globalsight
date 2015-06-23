@@ -342,4 +342,7 @@ public interface L10nProfile
     
     public int getTMEditType();
     public void setTMEditType(int TMEditType);
+    
+    public long getWfStatePostId();
+    public void setWfStatePostId(long p_wfStatePostId);
 }

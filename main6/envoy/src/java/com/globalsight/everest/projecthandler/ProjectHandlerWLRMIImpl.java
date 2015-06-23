@@ -41,6 +41,7 @@ import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.WorkflowInfos;
 import com.globalsight.everest.workflow.WorkflowTemplate;
+import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
 import com.globalsight.exporter.ExporterException;
 import com.globalsight.exporter.IExportManager;
 import com.globalsight.importer.IImportManager;
@@ -737,4 +738,40 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
 	{
 		return m_localReference.getL10ProfilesByProjectId(projectId);
 	}
+
+    @Override
+    public List<WorkflowStatePosts> getAllWorkflowStatePostProfie(String[] filterParams)
+    {
+        return m_localReference.getAllWorkflowStatePostProfie(filterParams);
+    }
+
+    @Override
+    public List<WorkflowStatePosts> getAllWorkflowStatePostInfos()
+    {
+        return m_localReference.getAllWorkflowStatePostInfos();
+    }
+
+    @Override
+    public void createWfStatePostProfile(WorkflowStatePosts wfStatePost)
+    {
+        m_localReference.createWfStatePostProfile(wfStatePost);
+    }
+
+    @Override
+    public WorkflowStatePosts getWfStatePostProfile(long wfStatePostId)
+    {
+        return m_localReference.getWfStatePostProfile(wfStatePostId);
+    }
+
+    @Override
+    public void modifyWfStatePostProfile(WorkflowStatePosts wfstaPosts)
+    {
+        m_localReference.modifyWfStatePostProfile(wfstaPosts);
+    }
+
+    @Override
+    public void removeWorkflowStatePost(WorkflowStatePosts wfstaPosts)
+    {
+        m_localReference.removeWorkflowStatePost(wfstaPosts);
+    }
 }

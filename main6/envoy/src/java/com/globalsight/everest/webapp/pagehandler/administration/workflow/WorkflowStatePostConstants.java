@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
 public interface WorkflowStatePostConstants
 {
-
     public static final String NAME = "nameFiled";
 
     public static final String DESC = "descField";
@@ -51,5 +50,4 @@ public interface WorkflowStatePostConstants
     public static final String WFSTATEPOSTTIMEOUTPERIOD = "wfStatePostTimeoutPeriod";
     public static final String WFSTATEPOSTRETRYTIME = "wfStatePostRetryTime";
     public static final String WFSTATEPOSTNOTIFYEMAIL = "wfStatePostNotifyEmail";
-
 }

@@ -17,14 +17,9 @@
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Vector;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -42,11 +37,9 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.WorkflowStatePostComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 
 public class WorkflowStatePostHandler extends PageHandler implements
@@ -156,9 +149,7 @@ public class WorkflowStatePostHandler extends PageHandler implements
      */
     private void createWfStatePostProfile(WorkflowStatePosts wfStatePost)
     {
-
         WorkflowStatePostHandlerHelper.createWfStatePostProfile(wfStatePost);
-
     }
 
     private String[] getFilterParameters(HttpServletRequest p_request)

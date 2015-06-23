@@ -43,11 +43,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
@@ -55,12 +52,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -69,8 +60,6 @@ import org.jbpm.JbpmContext;
 import org.jbpm.graph.def.Node;
 import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.taskmgmt.exe.TaskInstance;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.w3c.dom.NodeList;
 
 import com.globalsight.calendar.BaseFluxCalendar;
@@ -177,7 +166,6 @@ import com.globalsight.everest.workflow.SystemAction;
 import com.globalsight.everest.workflow.SystemActionPerformer;
 import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.everest.workflow.WfTaskInfo;
-import com.globalsight.everest.workflow.WorkflowArrowInstance;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowHelper;
@@ -2037,13 +2025,9 @@ public class WorkflowManagerLocal implements WorkflowManager
                 pool.shutdown();
             }
         }
-        catch (GeneralException e)
-        {
-            e.printStackTrace();
-        }
         catch (Exception e)
         {
-            e.printStackTrace();
+            s_logger.error("Error trying to finish COTI job.", e);
         }
     }
 

@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -27,14 +26,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.globalsight.everest.foundation.BasicL10nProfile;
-import com.globalsight.everest.gsedition.GSEdition;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
 import com.globalsight.util.GeneralException;
@@ -51,9 +46,6 @@ public class BasicWorkflowStatePostHandler extends PageHandler implements
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
         String action = (String) p_request
                 .getParameter(WorkflowStatePostConstants.ACTION);
         p_request.setAttribute(WorkflowTemplateConstants.ACTION, action);
@@ -64,9 +56,9 @@ public class BasicWorkflowStatePostHandler extends PageHandler implements
         }
         try
         {
-            ArrayList<WorkflowStatePosts> wfStatePostList = (ArrayList<WorkflowStatePosts>) ServerProxy
-                    .getProjectHandler().getAllWorkflowStatePostInfos();
-            ArrayList allNames = new ArrayList();
+			ArrayList<WorkflowStatePosts> wfStatePostList = (ArrayList<WorkflowStatePosts>) ServerProxy
+					.getProjectHandler().getAllWorkflowStatePostInfos();
+            ArrayList<String> allNames = new ArrayList<String>();
 
             if (wfStatePostList != null)
             {

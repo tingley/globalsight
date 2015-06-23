@@ -19,12 +19,13 @@ package com.globalsight.everest.util.comparator;
 import java.util.Locale;
 
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
 
 public class WorkflowStatePostComparator extends StringComparator
 {
-    // types of WorkflowStatePost comparison
+	private static final long serialVersionUID = 1483159845942252846L;
+
+	// types of WorkflowStatePost comparison
     public static final int NAME = 0;
     public static final int DESCRIPTION = 1;
     public static final int LISTENER_URL = 2;

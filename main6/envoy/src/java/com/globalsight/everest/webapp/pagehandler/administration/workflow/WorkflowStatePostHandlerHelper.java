@@ -16,14 +16,10 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
-
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflowmanager.WorkflowStatePosts;

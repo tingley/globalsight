@@ -57,7 +57,8 @@ public class WfStatePostThread implements Runnable
         wfStatePost(task, destinationArrow);
     }
 
-    private void wfStatePost(Task p_task, String p_destinationArrow)
+    @SuppressWarnings("unchecked")
+	private void wfStatePost(Task p_task, String p_destinationArrow)
     {
         String toArrowName = p_destinationArrow;
         JSONObject jsonObj = new JSONObject();
@@ -124,13 +125,14 @@ public class WfStatePostThread implements Runnable
             long wfStatePostId = l10nProfile.getWfStatePostId();
             WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()
                     .getWfStatePostProfile(wfStatePostId);
+            s_logger.info("workflow transition post info: " + jsonObj);
+            
             doPost(wfStatePost, jsonObj);
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-        s_logger.info("arrow name =============" + toArrowName);
     }
 
     @SuppressWarnings("unchecked")
@@ -164,7 +166,8 @@ public class WfStatePostThread implements Runnable
         return toArrowName;
     }
 
-    private String determineOutgoingArrow(WorkflowArrowInstance arrow)
+    @SuppressWarnings("unchecked")
+	private String determineOutgoingArrow(WorkflowArrowInstance arrow)
     {
         String toArrowName = null;
         WorkflowTaskInstance trgNode = (WorkflowTaskInstance) arrow
@@ -191,7 +194,8 @@ public class WfStatePostThread implements Runnable
         return toArrowName;
     }
 
-    private static void doPost(WorkflowStatePosts wfStatePost,
+    @SuppressWarnings({ "resource", "deprecation" })
+	private static void doPost(WorkflowStatePosts wfStatePost,
             JSONObject message)
     {
         DefaultHttpClient client = new DefaultHttpClient();
@@ -217,7 +221,7 @@ public class WfStatePostThread implements Runnable
                         doPost(wfStatePost, message);
                     }
                 }
-                if (StringUtils.isNotEmpty(wfStatePost.getName()))
+                if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail()))
                 {
                     String recipient = wfStatePost.getNotifyEmail();
                     long companyId = wfStatePost.getCompanyId();
@@ -231,7 +235,8 @@ public class WfStatePostThread implements Runnable
                                     MailerConstants.WORKFLOW_STATE_POST_FAILURE_MESSAGE,
                                     String.valueOf(companyId));
                 }
-                loggerTDAInfo(res);
+
+                logPostFailureInfo(res);
                 return;
             }
         }
@@ -242,7 +247,7 @@ public class WfStatePostThread implements Runnable
 
     }
 
-    private static void loggerTDAInfo(HttpResponse res)
+    private static void logPostFailureInfo(HttpResponse res)
     {
         if (res.getStatusLine().getStatusCode() == 400)
         {

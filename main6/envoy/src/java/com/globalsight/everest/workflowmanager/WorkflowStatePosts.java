@@ -18,7 +18,6 @@ package com.globalsight.everest.workflowmanager;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.persistence.PersistentObject;
 
 public class WorkflowStatePosts extends PersistentObject

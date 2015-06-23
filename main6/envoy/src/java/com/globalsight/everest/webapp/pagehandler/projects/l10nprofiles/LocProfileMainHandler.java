@@ -63,6 +63,7 @@ public class LocProfileMainHandler extends PageHandler implements
 {
 
     private static int numPerPage = 20;
+    long wfStatePostProfileId = -1;
     // Category for log4j logging.
     private static final Logger CATEGORY = Logger
             .getLogger(LocProfileMainHandler.class.getName());
@@ -231,7 +232,10 @@ public class LocProfileMainHandler extends PageHandler implements
         long sourceLocaleId = Long.parseLong(value);
         
          value = p_request.getParameter("wfStatePostProfileId");
-         long wfStatePostProfileId = Long.parseLong(value);
+        if (StringUtil.isNotEmpty(value))
+        {
+            wfStatePostProfileId = Long.parseLong(value);
+        }
 
         int TMChoice = -1;
         value = (String) p_request.getParameter("LocProfileTMUsageId");

@@ -19,7 +19,9 @@ package com.globalsight.webservices;
 
 import java.security.Key;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -33,6 +35,8 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.pagehandler.login.LoginAttemptController;
+import com.globalsight.log.ActivityLog;
 
 /**
  * Abstract base class for web service classes to extend.
@@ -66,35 +70,66 @@ public abstract class AbstractWebService
             throws WebServiceException
     {
         checkIfInstalled();
-        s_logger.debug("Logging in user " + p_username);
-        boolean isValidLogin = allowAccess(p_username, p_password);
+
+        Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+        activityArgs.put("userIP", LoginAttemptController.getIpAddressAxis());
+        activityArgs.put("user", p_username);
+        ActivityLog.Start activityStart = ActivityLog.start(
+                AbstractWebService.class, "doLogin", activityArgs);
+
         String accessToken = null;
-        if (isValidLogin)
+        try
         {
-            try
+
+            boolean isValidLogin = allowAccess(p_username, p_password);
+            // GBS-3991, invalid login if the IP is blocked
+            if (LoginAttemptController.isIpBlocked())
             {
-                accessToken = generateAccessToken(p_username);
+                isValidLogin = false;
             }
-            catch (Exception e)
+            if (isValidLogin)
             {
-                s_logger.error("Unable to create an Access Token due to the following exception"
-                        + e);
-                String message = "Unable to create an encryption key for login";
+                try
+                {
+                    accessToken = generateAccessToken(p_username);
+                }
+                catch (Exception e)
+                {
+                    s_logger.error("Unable to create an Access Token due to the following exception"
+                            + e);
+                    String message = "Unable to create an encryption key for login";
+                    message = makeErrorXml("login", message);
+                    throw new WebServiceException(message);
+                }
+            }
+            else
+            {
+                // GBS-3991, record failed login attempt
+                LoginAttemptController.recordFailedLoginAttempt();
+                String message = "Unable to login user "
+                        + p_username
+                        + " to GlobalSight.  The username or password may be incorrect.";
                 message = makeErrorXml("login", message);
                 throw new WebServiceException(message);
             }
-        }
-        else
-        {
-            String message = "Unable to login user "
-                    + p_username
-                    + " to GlobalSight.  The username or password may be incorrect.";
-            message = makeErrorXml("login", message);
-            throw new WebServiceException(message);
-        }
 
-        // set the username in the session
-        setUsernameInSession(accessToken, p_username);
+            // set the username in the session
+            setUsernameInSession(accessToken, p_username);
+            // GBS-3991 clean up the failed login attempt associated with the IP
+            // address while login successfully
+            LoginAttemptController.cleanFailedLoginAttempt();
+        }
+        catch (Exception e)
+        {
+            throw new WebServiceException(e.getMessage());
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
         return accessToken;
     }
 
@@ -362,7 +397,7 @@ public abstract class AbstractWebService
             throw new WebServiceException(e.getMessage());
         }
     }
-    
+
     /**
      * Check if current user has the specified permission
      * 
@@ -371,28 +406,28 @@ public abstract class AbstractWebService
      *            Permission information
      * @throws WebServiceException
      */
-	protected String checkPermissionReturnStr(String accessToken,
-			String permission) throws WebServiceException
-	{
-		try
-		{
-			User user = ServerProxy.getUserManager().getUserByName(
-					getUsernameFromSession(accessToken));
-			PermissionSet ps = Permission.getPermissionManager()
-					.getPermissionSetForUser(user.getUserId());
+    protected String checkPermissionReturnStr(String accessToken,
+            String permission) throws WebServiceException
+    {
+        try
+        {
+            User user = ServerProxy.getUserManager().getUserByName(
+                    getUsernameFromSession(accessToken));
+            PermissionSet ps = Permission.getPermissionManager()
+                    .getPermissionSetForUser(user.getUserId());
 
-			if (!ps.getPermissionFor(permission))
-			{
-				String msg = "User " + user.getUserName()
-						+ " does not have enough permission";
-				return msg;
-			}
-		}
-		catch (Exception e)
-		{
-			s_logger.error(e.getMessage(), e);
-			throw new WebServiceException(e.getMessage());
-		}
-		return null;
-	}
+            if (!ps.getPermissionFor(permission))
+            {
+                String msg = "User " + user.getUserName()
+                        + " does not have enough permission";
+                return msg;
+            }
+        }
+        catch (Exception e)
+        {
+            s_logger.error(e.getMessage(), e);
+            throw new WebServiceException(e.getMessage());
+        }
+        return null;
+    }
 }

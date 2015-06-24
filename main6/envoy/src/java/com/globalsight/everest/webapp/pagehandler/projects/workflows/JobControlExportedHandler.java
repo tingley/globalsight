@@ -16,8 +16,12 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.pageexport.ExportBatchEvent;
@@ -34,17 +38,22 @@ import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoExportSear
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
 import java.rmi.RemoteException;
 
 public class JobControlExportedHandler
@@ -76,6 +85,9 @@ public class JobControlExportedHandler
         //After re-export,UI will turn back to "Exported" search results list.
         try
         {
+        	Company company = ServerProxy.getJobHandler().getCompanyById(
+					CompanyWrapper.getCurrentCompanyIdAsLong());
+			p_request.setAttribute("company", company);
             String isFromExportErrorPage = p_request.getParameter("fromExportErrorPage");
             if (isFromExportErrorPage != null && "true".equals(isFromExportErrorPage))
             {
@@ -135,6 +147,12 @@ public class JobControlExportedHandler
         p_request.setAttribute("action", p_request.getParameter("action"));
 
         performAppropriateOperation(p_request);
+		if (p_request.getParameter("downloadQAReport") != null)
+		{
+			String jobIds = p_request.getParameter("downloadQAReport");
+			exportQAChecksReport(p_request, p_response, jobIds);
+			return;
+		}
         Vector jobStates = new Vector();
         jobStates.add(Job.EXPORTED);
         jobStates.add(Job.EXPORT_FAIL);
@@ -172,6 +190,53 @@ public class JobControlExportedHandler
         dispatcher.forward(p_request, p_response);
     }
 
+	public void exportQAChecksReport(HttpServletRequest p_request,
+			HttpServletResponse p_response, String jobIds)
+	{
+		Set<File> exportListFiles = new HashSet<File>();
+		Set<String> locales = new HashSet<String>();
+		Set<Long> jobIdSet = new HashSet<Long>();
+		if (StringUtils.isNotBlank(jobIds))
+		{
+			String[] jobIdArr = jobIds.split(" ");
+			for (String id : jobIdArr)
+			{
+				jobIdSet.add(Long.parseLong(id));
+			}
+		}
+		Set<Workflow> workflowSet = new HashSet<Workflow>();
+		String companyId = CompanyThreadLocal.getInstance().getValue();
+		try
+		{
+			Company company = CompanyWrapper.getCompanyById(companyId);
+			if (company.getEnableQAChecks())
+			{
+				for (Long jobId : jobIdSet)
+				{
+					Job job = ServerProxy.getJobHandler().getJobById(jobId);
+					workflowSet.addAll(job.getWorkflows());
+				}
+				for (Workflow workflow : workflowSet)
+				{
+					locales.add(workflow.getTargetLocale().getLocaleCode());
+					String filePath = WorkflowHandlerHelper
+							.getExportFilePath(workflow);
+					if (filePath != null)
+					{
+						exportListFiles.add(new File(filePath));
+					}
+				}
+			}
+			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
+					Long.parseLong(companyId), jobIdSet, exportListFiles,
+					locales);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
     /**
      * Overide getControlFlowHelper so we can do processing
      * and redirect the user correctly.

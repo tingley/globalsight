@@ -16,14 +16,19 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -31,9 +36,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.JobException;
+import com.globalsight.everest.qachecks.QAChecker;
+import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tm.searchreplace.TuvInfo;
@@ -41,9 +55,13 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoInProgressSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 
 public class JobControlInProgressHandler extends JobManagementHandler
@@ -127,14 +145,19 @@ public class JobControlInProgressHandler extends JobManagementHandler
             out.write(result);
             out.close();
             return;
-        }
+		}
+		else if (p_request.getParameter("downloadQAReport") != null)
+		{
+			String jobIds = p_request.getParameter("downloadQAReport");
+			exportQAChecksReport(p_request, p_response, jobIds);
+			return;
+		}
 
         performAppropriateOperation(p_request);
         
         sessionMgr.setMyjobsAttribute("lastState", Job.DISPATCHED);
         JobVoInProgressSearcher searcher = new JobVoInProgressSearcher();
         searcher.setJobVos(p_request, true);
-        
         p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
         p_request.setAttribute(JOB_ID, JOB_ID);
         p_request.setAttribute(JOB_LIST_START_PARAM,
@@ -144,6 +167,16 @@ public class JobControlInProgressHandler extends JobManagementHandler
                 getPagingText(p_request,
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
                         Job.DISPATCHED));
+    	try
+		{
+			Company company = ServerProxy.getJobHandler().getCompanyById(
+					CompanyWrapper.getCurrentCompanyIdAsLong());
+			p_request.setAttribute("company", company);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
@@ -167,6 +200,53 @@ public class JobControlInProgressHandler extends JobManagementHandler
         dispatcher.forward(p_request, p_response);
     }
     
+	public void exportQAChecksReport(HttpServletRequest p_request,
+			HttpServletResponse p_response, String jobIds)
+	{
+		Set<File> exportListFiles = new HashSet<File>();
+		Set<String> locales = new HashSet<String>();
+		Set<Long> jobIdSet = new HashSet<Long>();
+		if (StringUtils.isNotBlank(jobIds))
+		{
+			String[] jobIdArr = jobIds.split(" ");
+			for (String id : jobIdArr)
+			{
+				jobIdSet.add(Long.parseLong(id));
+			}
+		}
+		Set<Workflow> workflowSet = new HashSet<Workflow>();
+		String companyId = CompanyThreadLocal.getInstance().getValue();
+		try
+		{
+			Company company = CompanyWrapper.getCompanyById(companyId);
+			if (company.getEnableQAChecks())
+			{
+				for (Long jobId : jobIdSet)
+				{
+					Job job = ServerProxy.getJobHandler().getJobById(jobId);
+					workflowSet.addAll(job.getWorkflows());
+				}
+				for (Workflow workflow : workflowSet)
+				{
+					locales.add(workflow.getTargetLocale().getLocaleCode());
+					String filePath = WorkflowHandlerHelper
+							.getExportFilePath(workflow);
+					if (filePath != null)
+					{
+						exportListFiles.add(new File(filePath));
+					}
+				}
+			}
+			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
+					Long.parseLong(companyId), jobIdSet, exportListFiles,
+					locales);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
     /**
      * Overide getControlFlowHelper so we can do processing and redirect the
      * user correctly.

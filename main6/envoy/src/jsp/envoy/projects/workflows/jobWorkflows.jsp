@@ -10,6 +10,7 @@
             com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
             com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
+            com.globalsight.everest.company.Company,
             java.text.MessageFormat,
             java.util.*"
     session="true"
@@ -69,6 +70,8 @@
 //jobSummary child page needed started.
    ResourceBundle bundle = PageHandler.getBundle(session);
    String jobCommentsURL = jobComments.getPageURL() + "&jobId=" + request.getAttribute("jobId");
+   Company company = (Company)request.getAttribute("company");
+   boolean enableQAChecks = company.getEnableQAChecks();
 //jobSummary child page needed end.
 %>
 <html>
@@ -293,6 +296,9 @@
            <c:if test="${sending_back_edition}">
            	   <input class="standardText" type="button" name="ReSendingBack" value="<%=bundle.getString("lb_resendingback_edition_job")%>" onclick="submitForm('sendingbackEditionJob');"/>
            </c:if>
+            <%if(enableQAChecks){ %>
+  			<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport')">
+    		<% } %>
 	</div>
 	</c:if>
 </div>
@@ -879,6 +885,11 @@ function realSubmitForm(specificButton){
    else if (specificButton == "sendingbackEditionJob")
    {
 	   var url = "${self.pageURL}&action=sendingbackEditionJob&wfId=" + wfId + "&jobId=${jobId}";
+	   $("#workflowForm").attr("action", url);
+	   $("#workflowForm").submit();
+   }else if(specificButton == "downloadQAReport")
+   {
+	   var url = "${self.pageURL}&action=downloadQAReport&wfId=" + wfId + "&jobId=${jobId}";
 	   $("#workflowForm").attr("action", url);
 	   $("#workflowForm").submit();
    }

@@ -16,6 +16,7 @@
             com.globalsight.everest.costing.Currency,
             com.globalsight.everest.jobhandler.Job,
             java.util.Vector,
+            com.globalsight.everest.company.Company,
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
             com.globalsight.everest.servlet.util.SessionManager,
@@ -100,6 +101,8 @@
     if(badresults == null)
     	badresults = "";
     sessMr.setMyjobsAttribute("badresults","");
+    Company company = (Company)request.getAttribute("company");
+    boolean enableQAChecks = company.getEnableQAChecks();
 %>                       
 <HTML>
 <HEAD>
@@ -404,6 +407,11 @@ function submitForm(buttonClicked)
       JobForm.action = "<%=discardURL%>";
       jobActionParam = "<%=JobManagementHandler.DISCARD_JOB_PARAM%>";
 	}
+   else if(buttonClicked == "downloadQAReport")
+   {
+	   JobForm.action = "<%=discardURL%>";
+	   jobActionParam = "downloadQAReport";
+   }
 
    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
    if (buttonClicked == "ExportForUpdate")
@@ -699,6 +707,9 @@ is defined in header.jspIncl which must be included in the body.
 	    <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
 	        <INPUT TYPE="BUTTON" NAME=Download VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');">
 	    </amb:permission>
+	    <%if(enableQAChecks){ %>
+  		<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport');">
+    <% } %>
 </DIV>
 </TD></TR>
 </TABLE>

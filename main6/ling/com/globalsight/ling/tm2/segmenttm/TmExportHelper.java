@@ -33,7 +33,7 @@ import com.globalsight.util.StringUtil;
 public class TmExportHelper {
     static private final Logger CATEGORY = Logger
                 .getLogger(TmExportHelper.class);
-    static private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
     /**
      * Get the count of all TUs in the TM.
      */
@@ -1056,7 +1056,7 @@ public class TmExportHelper {
             String createdBefore)
     {
         StringBuffer result = new StringBuffer();
-
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         if (StringUtils.isNotBlank(createdAfter))
         {
             createdAfter = format.format(new Date(createdAfter));
@@ -1089,6 +1089,7 @@ public class TmExportHelper {
 		String tuIds = (String) paramMap.get("tuIds");
 		String stringId = (String) paramMap.get("stringId");
 
+		DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		if (StringUtils.isNotBlank(createdAfter))
 		{
 			createdAfter = format.format(new Date(createdAfter));

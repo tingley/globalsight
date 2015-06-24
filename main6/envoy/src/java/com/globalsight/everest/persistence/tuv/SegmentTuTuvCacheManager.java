@@ -19,7 +19,6 @@ package com.globalsight.everest.persistence.tuv;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -35,9 +34,6 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
 {
     static private final Logger logger = Logger
             .getLogger(SegmentTuTuvCacheManager.class);
-
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss");
 
     // TU constants
     public static final String REMOVED_TAG = "removed_tag";

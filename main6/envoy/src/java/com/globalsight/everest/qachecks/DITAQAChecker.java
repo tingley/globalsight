@@ -82,8 +82,6 @@ public class DITAQAChecker
     private static final Logger logger = Logger.getLogger(DITAQAChecker.class);
 
     private Locale m_uiLocale = Locale.US;
-    private static final SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd HHmmss");
-
     private ResourceBundle m_bundle = null;
 
     private CellStyle headerStyle = null;
@@ -181,7 +179,8 @@ public class DITAQAChecker
      */
     private static String getReportFileName(Task p_task)
     {
-        String dateSuffix = format.format(new Date());
+		String dateSuffix = new SimpleDateFormat("yyyyMMdd HHmmss")
+				.format(new Date());
         try
         {
             String trgLang = p_task.getTargetLocale().toString();

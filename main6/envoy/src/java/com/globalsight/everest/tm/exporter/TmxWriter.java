@@ -96,10 +96,10 @@ public class TmxWriter implements IWriter
     // Helper for printing XML strings with empty elements expanded (for Trados)
     private OutputFormat m_outputFormat;
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd");
-    private static final SimpleDateFormat format = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss");
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat(
+			"yyyy-MM-dd");
+	private final SimpleDateFormat format = new SimpleDateFormat(
+			"yyyy-MM-dd HH:mm:ss");
     //
     // Constructors
     //
@@ -423,7 +423,7 @@ public class TmxWriter implements IWriter
      * 
      * - Not in use, but not delete for now.
      */
-    public static String convertToTmx(SegmentTmTu p_tu, Tmx tmx,
+    public String convertToTmx(SegmentTmTu p_tu, Tmx tmx,
             com.globalsight.everest.tm.exporter.ExportOptions options,
             OutputFormat outputFormat) throws Exception
     {
@@ -621,7 +621,7 @@ public class TmxWriter implements IWriter
         return result.toString();
     }
     
-	public static String convertToTmx(SegmentTmTu p_tu, Tmx tmx,
+	public String convertToTmx(SegmentTmTu p_tu, Tmx tmx,
 			com.globalsight.everest.tm.exporter.ExportOptions options,
 			OutputFormat outputFormat, boolean singleExport) throws Exception
 	{
@@ -1428,7 +1428,7 @@ public class TmxWriter implements IWriter
         return StringUtil.isEmpty(s) ? null : new Date(s);
     }
     
-    private static Date parseStartDate(String startStr)
+    private Date parseStartDate(String startStr)
 	{
 		Date start = parseDate(startStr);
 		if (start != null)
@@ -1454,7 +1454,7 @@ public class TmxWriter implements IWriter
 		return null;
 	}
 
-    private static Date parseEndDate(String endStr)
+    private Date parseEndDate(String endStr)
 	{
 		Date end = parseDate(endStr);
 		if (end != null)

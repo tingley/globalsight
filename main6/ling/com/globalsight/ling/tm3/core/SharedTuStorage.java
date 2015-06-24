@@ -41,8 +41,8 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 {
     private long tmId;
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd");
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat(
+			"yyyy-MM-dd");
 
     SharedTuStorage(StorageInfo<T> storage)
     {

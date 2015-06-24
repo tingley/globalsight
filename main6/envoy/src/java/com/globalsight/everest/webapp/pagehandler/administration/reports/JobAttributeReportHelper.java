@@ -61,9 +61,9 @@ import com.globalsight.util.SortUtil;
 public class JobAttributeReportHelper
 {
     private static Logger s_logger = Logger.getLogger("Reports");
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
             DateCondition.FORMAT);
-    private static SimpleDateFormat simpleDate = new SimpleDateFormat("MM/dd/yyyy");
+    private SimpleDateFormat simpleDate = new SimpleDateFormat("MM/dd/yyyy");
     private HttpServletRequest request = null;
     private HttpServletResponse response = null;
     private Workbook workbook = null;

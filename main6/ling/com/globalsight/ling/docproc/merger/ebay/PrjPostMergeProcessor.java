@@ -16,37 +16,25 @@
  */
 package com.globalsight.ling.docproc.merger.ebay;
 
-import com.globalsight.ling.docproc.merger.PostMergeProcessor;
 import com.globalsight.ling.docproc.DiplomatMergerException;
-import com.globalsight.ling.common.RegEx;
-import com.globalsight.ling.common.RegExException;
-import com.globalsight.ling.common.RegExMatchInterface;
-
-import com.globalsight.ling.docproc.extractor.ebay.PrjExtractor;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import com.globalsight.diplomat.util.Logger;
+import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * This class post processes a merged eBay PRJ document.
- * Inserts the previous XML declaration:
- * <?xml version=\${XMLVERSION} encoding="\${\${COUNTRYPATH}CHARENCODING}" ?>
+ * This class post processes a merged eBay PRJ document. Inserts the previous
+ * XML declaration: <?xml version=\${XMLVERSION}
+ * encoding="\${\${COUNTRYPATH}CHARENCODING}" ?>
  */
-public class PrjPostMergeProcessor
-    implements PostMergeProcessor
+public class PrjPostMergeProcessor implements PostMergeProcessor
 {
-    private static final String PROCESS_ERROR =
-        "eBay PRJ post merge process error";
+    private static final String PROCESS_ERROR = "eBay PRJ post merge process error";
 
-    private static final REProgram PATTERN =
-        compilePattern("<\\?xml version=\"1.0\" \\?>");
+    private static final REProgram PATTERN = compilePattern("<\\?xml version=\"1.0\" \\?>");
 
-    public static final String EBAY_XMLDECLARATION =
-        "<?xml version=\\${XMLVERSION} encoding=\"\\${\\${COUNTRYPATH}CHARENCODING}\" ?>";
+    public static final String EBAY_XMLDECLARATION = "<?xml version=\\${XMLVERSION} encoding=\"\\${\\${COUNTRYPATH}CHARENCODING}\" ?>";
 
     private static REProgram compilePattern(String p_pattern)
     {
@@ -67,14 +55,14 @@ public class PrjPostMergeProcessor
     }
 
     /**
-     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String, java.lang.String)
+     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String,
+     *      java.lang.String)
      */
     public String process(String p_content, String p_IanaEncoding)
-        throws DiplomatMergerException
+            throws DiplomatMergerException
     {
         return rewriteXmlDecl(p_content, p_IanaEncoding);
     }
-
 
     private String rewriteXmlDecl(String p_content, String p_encoding)
     {

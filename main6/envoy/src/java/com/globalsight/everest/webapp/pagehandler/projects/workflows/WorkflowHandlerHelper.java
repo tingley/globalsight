@@ -17,7 +17,9 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import java.util.Vector;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -55,12 +58,16 @@ import com.globalsight.everest.page.PageStateValidator;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.qachecks.QAChecker;
+import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -73,6 +80,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.file.XliffFileUtil;
+import com.globalsight.util.zip.ZipIt;
 import com.globalsight.webservices.client2.Ambassador2;
 import com.globalsight.webservices.client2.WebService2ClientHelper;
 
@@ -1159,6 +1167,185 @@ public class WorkflowHandlerHelper
         }
     }
 
+	public static String getExportFilePath(Workflow workflow)
+	{
+		String filePath = null;
+		try
+		{
+			Map activeTasks = ServerProxy.getWorkflowServer()
+					.getActiveTasksForWorkflow(workflow.getId());
+
+			WorkflowTaskInstance activeTask = null;
+			Object[] tasks = (activeTasks == null) ? null : activeTasks
+					.values().toArray();
+			if (tasks != null && tasks.length > 0)
+			{
+				activeTask = (WorkflowTaskInstance) tasks[0];
+			}
+			if (activeTask != null)
+			{
+				Task task = ServerProxy.getTaskManager().getTask(
+						activeTask.getTaskId());
+
+				boolean qaCheck = QACheckerHelper.isShowQAChecksTab(task);
+				if (qaCheck)
+				{
+					QAChecker qaChecker = new QAChecker();
+					filePath = qaChecker.runQAChecksAndGenerateReport(task
+							.getId());
+				}
+			}
+			else
+			{
+
+				if (workflow.getState().equalsIgnoreCase("EXPORTED"))
+				{
+					StringBuilder sb = new StringBuilder();
+					sb.append(AmbFileStoragePathUtils.getReportsDir(workflow
+							.getCompanyId()));
+					sb.append(File.separator);
+					sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
+					sb.append(File.separator);
+					sb.append(workflow.getJob().getId());
+					sb.append(File.separator);
+					sb.append(workflow.getTargetLocale().toString());
+					File file = new File(sb.toString());
+					long maxTime = 0;
+					File emptyFile = null;
+					if (file.exists())
+					{
+						File[] files = file.listFiles();
+						for (File fe : files)
+						{
+							long time = fe.lastModified();
+							if (time > maxTime)
+							{
+								maxTime = time;
+								emptyFile = fe;
+							}
+						}
+						filePath = emptyFile.listFiles()[0].getPath();
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return filePath;
+	}
+    
+	public static void zippedFolder(HttpServletRequest p_request,
+			HttpServletResponse p_response, long companyId, Set<Long> jobIdSet,
+			Set<File> exportListFiles, Set<String> locales)
+	{
+		String zipFileName = AmbFileStoragePathUtils.getReportsDir(companyId)
+				+ File.separator + ReportConstants.REPORT_QA_CHECKS_REPORT
+				+ ".zip";
+		File zipFile = new File(zipFileName);
+		Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
+				exportListFiles, jobIdSet, locales, AmbFileStoragePathUtils
+						.getReportsDir(companyId).getPath()
+						+ File.separator
+						+ ReportConstants.REPORT_QA_CHECKS_REPORT);
+		try
+		{
+			ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
+			String downloadFileName = zipFile.getName();
+			if (jobIdSet != null && jobIdSet.size() == 1)
+			{
+				Long jobId = jobIdSet.iterator().next();
+				downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT
+						+ "_(" + jobId + ").zip";
+			}
+			else if (jobIdSet != null && jobIdSet.size() > 1)
+			{
+				String tempS = jobIdSet.toString();
+				String jobNamesstr = tempS.substring(1, tempS.length() - 1);
+				downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT
+						+ "_(" + jobNamesstr + ").zip";
+			}
+
+			// write zip file to client
+			p_response.setContentType("application/zip");
+			p_response.setHeader("Content-Disposition",
+					"attachment; filename=\"" + downloadFileName + "\";");
+			if (p_request.isSecure())
+			{
+				PageHandler.setHeaderForHTTPSDownload(p_response);
+			}
+			p_response.setContentLength((int) zipFile.length());
+
+			// Send the data to the client
+			byte[] inBuff = new byte[4096];
+			FileInputStream fis = new FileInputStream(zipFile);
+			int bytesRead = 0;
+			while ((bytesRead = fis.read(inBuff)) != -1)
+			{
+				p_response.getOutputStream().write(inBuff, 0, bytesRead);
+			}
+
+			if (bytesRead > 0)
+			{
+				p_response.getOutputStream().write(inBuff, 0, bytesRead);
+			}
+
+			fis.close();
+			FileUtil.deleteFile(zipFile);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+		}
+		finally
+		{
+			if (zipFile.exists())
+				zipFile.deleteOnExit();
+		}
+	}
+    
+	public static Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles,
+			Set<Long> jobIdSet, Set<String> locales, String cxeDocsDirPath)
+	{
+		Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
+		File tempFile;
+
+		for (Long jobId : jobIdSet)
+		{
+			ArrayList<String> entryNames = new ArrayList<String>();
+
+			for (String locale : locales)
+			{
+				entryNames.clear();
+				String prefixStr1 = cxeDocsDirPath + File.separator + jobId
+						+ File.separator + locale;
+				for (File entryFile : entryFiles)
+				{
+					String entryFilePath = entryFile.getPath();
+					if (entryFilePath.startsWith(prefixStr1))
+					{
+						entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+					}
+				}
+				if (entryNames.size() > 0)
+				{
+					Map<String, String> tempMap = ZipIt
+							.getEntryNamesMap(entryNames);
+					for (String key : tempMap.keySet())
+					{
+						tempFile = new File(key);
+						entryFileToFileNameMap.put(tempFile, locale
+								+ File.separator + jobId + File.separator
+								+ tempMap.get(key));
+					}
+				}
+			}
+		}
+		return entryFileToFileNameMap;
+	}
+    
+    
     /**
      * Get the local file pathname of source file.
      * @param displayName

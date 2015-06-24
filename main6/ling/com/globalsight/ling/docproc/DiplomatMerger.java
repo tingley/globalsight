@@ -16,7 +16,7 @@
  */
 package com.globalsight.ling.docproc;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
@@ -46,6 +46,7 @@ import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.EncodingChecker;
 import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.HtmlEscapeSequence;
+import com.globalsight.ling.common.JPEscapeSequence;
 import com.globalsight.ling.common.NativeEnDecoder;
 import com.globalsight.ling.common.NativeEnDecoderException;
 import com.globalsight.ling.common.Text;
@@ -159,7 +160,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             m_encodingChecker = new EncodingChecker("UTF-8");
         }
-        catch (UnsupportedEncodingException e)
+        catch (UnsupportedCharsetException e)
         {
             // Shouldn't reach here. UTF-8 is predefined in Java.
         }
@@ -201,7 +202,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
             m_encodingChecker = new EncodingChecker(targetEncoding);
         }
-        catch (UnsupportedEncodingException e)
+        catch (UnsupportedCharsetException e)
         {
             throw new DiplomatMergerException(
                     ExtractorExceptionConstants.INVALID_ENCODING, e.toString());
@@ -455,6 +456,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
             else
             {
+                if (IFormatNames.FORMAT_JAVAPROP.equalsIgnoreCase(p_mainFormat)
+                        && encoder instanceof JPEscapeSequence)
+                {
+                    ((JPEscapeSequence)encoder).setIsJavaProperty(true);
+                }
+                
                 newText = encoder.encodeWithEncodingCheck(newText);
             }
         }
@@ -722,7 +729,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 if (!m_convertHtmlEntityForHtml)
                 {
                     tmp = StringUtil.replace(tmp, "&amp;", "&");
-                	tmp = StringUtil.replace(tmp, "&quot;", "\"");
+                    tmp = StringUtil.replace(tmp, "&quot;", "\"");
                     tmp = StringUtil.replace(tmp, "&apos;", "'");
                     tmp = StringUtil.replace(tmp, "&#39;", "'");
                 }
@@ -775,11 +782,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     && this.isUseSecondaryFilter)
             {
                 // GBS-3906
-                tmp = tmp.replace("&amp;", "&");
+                tmp = StringUtil.replace(tmp, "&amp;", "&");
+                tmp = StringUtil.replace(tmp, "&quot;", "\"");
                 if (this.convertHtmlEntityFromSecondFilter)
                 {
                     char[] specXmlEncodeChar =
-                    { '<', '>', '&', '"' };
+                    { '<', '>', '&', '"', '\'' };
                     tmp = XmlFilterHelper.encodeSpecifiedEntities(tmp,
                             specXmlEncodeChar);
                 }

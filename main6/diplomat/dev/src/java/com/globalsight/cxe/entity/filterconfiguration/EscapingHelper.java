@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.util.comparator.PriorityComparator;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DocumentElement;
+import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
@@ -48,12 +49,13 @@ public class EscapingHelper
             return oriStr;
 
         StringBuffer sb = new StringBuffer();
-        
+
         List<TagIndex> tags = null;
-        
+
         if (noTag)
         {
-            TagIndex ti = TagIndex.createTagIndex(oriStr, false, 0, oriStr.length());
+            TagIndex ti = TagIndex.createTagIndex(oriStr, false, 0,
+                    oriStr.length());
             tags = new ArrayList<TagIndex>();
             tags.add(ti);
         }
@@ -61,39 +63,107 @@ public class EscapingHelper
         {
             tags = TagIndex.getContentIndexes(oriStr, false);
         }
-        
-        
-        int count = tags.size();
 
+        int count = tags.size();
         for (int i = 0; i < count; i++)
         {
             TagIndex ti = tags.get(i);
-
             if (ti.isTag)
             {
-                sb.append(ti.content);
+                sb.append(handleTagContent4Export(ti.content, es, doDecode, format));
             }
             else
             {
-                StringBuffer sub = new StringBuffer();
-                String ccc = ti.content;
-                ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
-                int length = ccc.length();
-                for (int j = 0; j < length; j++)
-                {
-                    char char1 = ccc.charAt(j);
-
-                    String processed = handleChar4Export(es, char1);
-                    sub.append(processed);
-                }
-
-                String subStr = doDecode ? m_xmlEncoder.encodeStringBasic(sub
-                        .toString()) : sub.toString();
-                sb.append(subStr);
+                sb.append(handleString4Export(ti.content, es, doDecode, format));
             }
         }
 
         return sb.toString();
+    }
+
+    /**
+     * The text node value in tag is also need escape handling. i.e. <bpt i="2"
+     * type="font" x="2">&lt;font color=\&apos;#0063AD\&apos;&gt;</bpt>
+     * 
+     * Also supports sub segments.
+     */
+    private static String handleTagContent4Export(String content,
+            List<Escaping> es, boolean doDecode, String format)
+    {
+        StringBuffer sub = new StringBuffer();
+        List<String> splits = new ArrayList<String>();
+        splitContent(content, splits);
+        while (splits.size() == 3)
+        {
+            sub.append(splits.get(0));
+            sub.append(handleString4Export(splits.get(1), es, doDecode, format));
+            splitContent(splits.get(2), splits);
+        }
+        // splits.size == 1 or 2
+        for (String str : splits)
+        {
+            sub.append(str);
+        }
+
+        return sub.toString();
+    }
+
+    private static void splitContent(String content, List<String> splits)
+    {
+        splits.clear();
+        int index = content.indexOf(">");
+        if (index > -1)
+        {
+            splits.add(content.substring(0, index + 1));
+            String rest = content.substring(index + 1);
+            index = rest.indexOf("<");
+            if (index > -1)
+            {
+                String textNodeStr = rest.substring(0, index);
+                splits.add(textNodeStr);
+                splits.add(rest.substring(index));
+            }
+            else
+            {
+                splits.add(rest);
+            }
+        }
+        else
+        {
+            splits.add(content);
+        }
+    }
+
+    private static String handleString4Export(String ccc, List<Escaping> es,
+            boolean doDecode, String format)
+    {
+        StringBuffer sub = new StringBuffer();
+        String preProcessed = null;
+        String processed = null;
+        ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
+        int length = ccc.length();
+        for (int j = 0; j < length; j++)
+        {
+            char char1 = ccc.charAt(j);
+            char char2 = (j + 1 < length) ? ccc.charAt(j + 1) : 'X';
+
+            processed = handleChar4Export(es, char1, char2, format);
+            // avoid double escape like "\\'".
+            if ("\\".equals(preProcessed) && !"\\".equals(processed)
+                    && processed.startsWith("\\"))
+            {
+                sub.append(char1);
+            }
+            else
+            {
+                sub.append(processed);
+            }
+            preProcessed = processed;
+        }
+
+        String subStr = doDecode ? m_xmlEncoder.encodeStringBasic(sub
+                .toString()) : sub.toString();
+        return subStr;
     }
 
     public static void handleOutput4Import(Output p_output, Filter mFilter)
@@ -159,11 +229,13 @@ public class EscapingHelper
                             String segment = snode.getSegment();
                             // protect internal text to avoid escape
                             List<String> internalTexts = new ArrayList<String>();
-                            segment = InternalTextHelper.protectInternalTexts(segment, internalTexts);
+                            segment = InternalTextHelper.protectInternalTexts(
+                                    segment, internalTexts);
 
                             String result = handleString4Import(segment, es,
                                     format, false);
-                            result = InternalTextHelper.restoreInternalTexts(result, internalTexts);
+                            result = InternalTextHelper.restoreInternalTexts(
+                                    result, internalTexts);
                             snode.setSegment(result);
                         }
                     }
@@ -201,7 +273,8 @@ public class EscapingHelper
                 if (isPureText)
                 {
                     String ccc = ti.content;
-                    String subStr = handleString4Import(ccc, es, doDecode);
+                    String subStr = handleString4Import(ccc, es, doDecode,
+                            format);
                     sb.append(subStr);
                 }
                 else
@@ -218,7 +291,7 @@ public class EscapingHelper
                 else
                 {
                     String ccc = ti.content;
-                    String subStr = handleString4Import(ccc, es, doDecode);
+                    String subStr = handleString4Import(ccc, es, doDecode, format);
                     sb.append(subStr);
                 }
             }
@@ -228,7 +301,7 @@ public class EscapingHelper
     }
 
     private static String handleString4Import(String ccc, List<Escaping> es,
-            boolean doDecode)
+            boolean doDecode, String format)
     {
         StringBuffer sub = new StringBuffer();
         ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
@@ -252,6 +325,15 @@ public class EscapingHelper
                 if (!processed)
                 {
                     sub.append(char1);
+                }
+                else
+                {
+                    if (IFormatNames.FORMAT_JAVAPROP.equals(format)
+                            && char1 == '\\' && char2 == '\\')
+                    {
+                        sub.append(char1);
+                        j = j + 1;
+                    }
                 }
 
                 if (j == length - 1)
@@ -289,7 +371,7 @@ public class EscapingHelper
         return false;
     }
 
-    private static String handleChar4Export(List<Escaping> es, char char1)
+    private static String handleChar4Export(List<Escaping> es, char char1, char char2, String format)
     {
         for (Escaping escaping : es)
         {
@@ -300,6 +382,12 @@ public class EscapingHelper
 
             if ((char1 + "").equals(escaping.getCharacter()))
             {
+                if (IFormatNames.FORMAT_JAVAPROP.equals(format)
+                        && char1 == '\\' && "nrt".contains("" + char2))
+                {
+                    return "" + char1;
+                }
+                
                 return "\\" + char1;
             }
         }

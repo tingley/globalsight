@@ -122,13 +122,13 @@ public class QAChecker
         }
     }
 
-    public void runQAChecksAndGenerateReport(long taskId) throws Exception
+    public String runQAChecksAndGenerateReport(long taskId) throws Exception
     {
         Task task = ServerProxy.getTaskManager().getTask(taskId);
         Company company = CompanyWrapper.getCompanyById(task.getCompanyId());
         if (!company.getEnableQAChecks())
         {
-            return;
+            return null;
         }
         Workflow workflow = task.getWorkflow();
         GlobalSightLocale targetLocale = workflow.getTargetLocale();
@@ -167,6 +167,7 @@ public class QAChecker
             logger.info("Done QA Checks, no issues reported. Report "
                     + reportPath + " is saved.");
         }
+        return reportPath;
     }
 
     private boolean writeSegmentInfo(Workbook p_workbook, Sheet p_sheet,

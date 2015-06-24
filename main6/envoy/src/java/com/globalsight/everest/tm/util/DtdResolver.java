@@ -17,34 +17,26 @@
 
 package com.globalsight.everest.tm.util;
 
-import com.globalsight.everest.tm.util.Tmx;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
-import org.dom4j.*;
-import org.dom4j.io.SAXReader;
-
-import org.xml.sax.InputSource;
 import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import java.io.*;
-import java.util.*;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * An implementation of EntityResolver that finds the various TMX DTDs.
  */
-public class DtdResolver
-    implements EntityResolver
+public class DtdResolver implements EntityResolver
 {
-    static private final REProgram DTD_SEARCH_PROGRAM =
-        createSearchProgram("tmx\\d+\\.dtd");
+    static private final REProgram DTD_SEARCH_PROGRAM = createSearchProgram("tmx\\d+\\.dtd");
 
-    static private final REProgram GS_DTD_SEARCH_PROGRAM =
-        createSearchProgram(Tmx.TMX_DTD_GS);
+    static private final REProgram GS_DTD_SEARCH_PROGRAM = createSearchProgram(Tmx.TMX_DTD_GS);
 
     private static REProgram createSearchProgram(String p_pattern)
     {
@@ -74,7 +66,9 @@ public class DtdResolver
     //
 
     // Singleton class, private constructor.
-    private DtdResolver () {}
+    private DtdResolver()
+    {
+    }
 
     //
     // Public Methods
@@ -86,7 +80,7 @@ public class DtdResolver
     }
 
     public InputSource resolveEntity(String publicId, String systemId)
-        throws SAXException
+            throws SAXException
     {
         InputSource result = null;
 
@@ -94,8 +88,8 @@ public class DtdResolver
 
         if (matcher.match(systemId))
         {
-            InputStream stream = DtdResolver.class.getResourceAsStream(
-                "/resources/" + matcher.getParen(0));
+            InputStream stream = DtdResolver.class
+                    .getResourceAsStream("/resources/" + matcher.getParen(0));
 
             if (stream != null)
             {
@@ -109,8 +103,9 @@ public class DtdResolver
 
             if (matcher.match(systemId))
             {
-                InputStream stream = DtdResolver.class.getResourceAsStream(
-                    "/resources/" + matcher.getParen(0));
+                InputStream stream = DtdResolver.class
+                        .getResourceAsStream("/resources/"
+                                + matcher.getParen(0));
 
                 if (stream != null)
                 {

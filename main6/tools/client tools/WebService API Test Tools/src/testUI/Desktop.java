@@ -335,9 +335,6 @@ public class Desktop extends javax.swing.JFrame
 						while (st.hasMoreTokens()) {
 							parametersList.add(st.nextToken().trim());
 						}
-						if (parameterList.contains("Vector")) {
-							functionNoteLabel.setText("<html>"+resourceMap.getString("functionNoteLabel.text")+".<br/><font color =#FF0000>"+resourceMap.getString("functionVectorNoteLabel.text")+"</html>");
-						} else {
 							for (int i = 0; i < parametersList.size(); i = i + 2) {
 								Label_TextField_Panel pair = new Label_TextField_Panel();
 								pair.setLabel(parametersList.get(i + 1) + "("
@@ -354,7 +351,6 @@ public class Desktop extends javax.swing.JFrame
 								oMCenterPanel.add(pair);
 								labelTextFieldPairs.add(pair);
 							}
-						}
 					} else {
                         Label_TextField_Panel pair = new Label_TextField_Panel();
                         pair.setLabel(para.getName() + "(" + para.getType() + ")");

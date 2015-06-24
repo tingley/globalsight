@@ -1,5 +1,5 @@
 <serviceGroup>
-	<service name="COTILogin">
+	<service name="COTILogin" targetNamespace="http://www.dercom.de/COTI/2013/1.0/namespace">
 		<description>
 			GlobalSight COTI Login Service
 		</description>
@@ -23,7 +23,7 @@
 			</action>
 		</parameter>
 	</service>
-	<service name="COTIApi">
+	<service name="COTIApi" targetNamespace="http://www.dercom.de/COTI/2013/1.0/namespace">
 		<description>
 			GlobalSight COTI Service
 		</description>

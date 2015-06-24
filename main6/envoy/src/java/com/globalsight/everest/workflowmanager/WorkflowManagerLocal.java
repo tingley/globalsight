@@ -43,6 +43,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
@@ -247,6 +249,8 @@ public class WorkflowManagerLocal implements WorkflowManager
     public static final int LOCALIZED_STATE = 3;
 
     public static final int EXPORTING_STATE = 4;
+    
+    public static final int MAX_THREAD = 5;
 
     public static final String[] ORDERED_STATES =
     { WF_IMPORT_FAILED, WF_READY, WF_DISPATCHED, WF_LOCALIZED, WF_EXPORTING,
@@ -2005,8 +2009,30 @@ public class WorkflowManagerLocal implements WorkflowManager
             // log the error but don't let it affect job completion
             s_logger.error("Error trying to finish COTI job.", t);
         }
+        
+        try
+        {
+            long jobId = p_task.getJobId();
+            L10nProfile l10nProfile = ServerProxy.getJobHandler()
+                    .getL10nProfileByJobId(jobId);
+            long wfStatePostId = l10nProfile.getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
+                WfStatePostThread myTask = new WfStatePostThread(p_task,
+                        p_destinationArrow);
+                pool.execute(myTask);
+                pool.shutdown();
+            }
+        }
+        catch (Exception e)
+        {
+            s_logger.error("Error trying to finish COTI job.", e);
+        }
     }
 
+
+    
     /**
      * @see WorkflowManager.getTaskInfoByTaskId(Workflow, List, long)
      */

@@ -93,6 +93,7 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowOwner.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowRequestImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowTemplateInfo.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowStatePosts.hbm.xml"/>
 		<mapping resource="com/globalsight/persistence/hibernate/xml/XmlRuleFileImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ProjectTmTuT.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ProjectTmTuvT.hbm.xml" />

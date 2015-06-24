@@ -75,9 +75,6 @@ public class StatisticsService
 {
     private static Logger c_logger = Logger.getLogger(StatisticsService.class);
 
-    // private static SimpleDateFormat format = new
-    // SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     /**
      * Calculate word counts for all target pages in a workflow, and calculate
      * the repetitions in the scope of workflow.

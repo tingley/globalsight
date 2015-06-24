@@ -18,7 +18,10 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
@@ -29,15 +32,19 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -62,6 +69,7 @@ import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceM
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.comment.CommentManagerLocal;
 import com.globalsight.everest.comment.IssueEditionRelation;
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.edit.EditHelper;
@@ -78,6 +86,8 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.qachecks.QAChecker;
+import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -91,6 +101,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -98,6 +109,7 @@ import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.ScorecardData;
 import com.globalsight.everest.workflow.ScorecardScore;
 import com.globalsight.everest.workflow.ScorecardScoreHelper;
+import com.globalsight.everest.workflow.WorkflowException;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.JobWorkflowDisplay;
@@ -107,11 +119,14 @@ import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Entry;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.modules.Modules;
+import com.globalsight.util.zip.ZipIt;
 import com.globalsight.webservices.client.Ambassador;
 import com.globalsight.webservices.client.WebServiceClientHelper;
 
@@ -399,7 +414,15 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         	sessionMgr.setAttribute("categoryList", categoryList);
         	sessionMgr.setAttribute("scorecardDataList", scorecardDataList);
         	sessionMgr.setAttribute("tmpScoreMap", tmpScoreMap);
-        }
+		}
+		else if ("downloadQAReport".equals(p_request.getParameter("action")))
+		{
+			String[] wfIds = p_request.getParameter("wfId").split(" ");
+			String jobId = p_request.getParameter("jobId");
+			long companyId = job.getCompanyId();
+			exportQAChecksReport(p_request, p_response, companyId, jobId, wfIds);
+			return;
+		}
         // deal with ajax request.End.
 
         boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
@@ -424,6 +447,46 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 p_context);
     }
 
+	public void exportQAChecksReport(HttpServletRequest p_request,
+			HttpServletResponse p_response, long companyId, String jobId,
+			String[] wfIds)
+	{
+		Company company = CompanyWrapper.getCompanyById(companyId);
+		Set<File> exportListFiles = new HashSet<File>();
+		Set<String> locales = new HashSet<String>();
+		Set<Long> jobIdSet = new HashSet<Long>();
+		jobIdSet.add(Long.parseLong(jobId));
+		try
+		{
+			if (company.getEnableQAChecks())
+			{
+				for (String wfIdStr : wfIds)
+				{
+					long wfId = Long.parseLong(wfIdStr);
+					Workflow workflow = WorkflowHandlerHelper
+							.getWorkflowById(wfId);
+					locales.add(workflow.getTargetLocale().getLocaleCode());
+					String filePath = WorkflowHandlerHelper
+							.getExportFilePath(workflow);
+					if (filePath != null)
+					{
+						exportListFiles.add(new File(filePath));
+					}
+				}
+			}
+
+			// zipped Folder
+			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
+					companyId, jobIdSet, exportListFiles, locales);
+		}
+		catch (Exception e)
+		{
+			CATEGORY.error(e.getMessage(), e);
+		}
+	}
+	
+	
+	
     private void getUpdateWordCountsPercentage(HttpServletResponse p_response,
             long p_jobId) throws IOException
     {
@@ -783,7 +846,16 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         // tell UI if current job has been archived.
         p_request.setAttribute("isJobMigrated", job.isMigrated() ? "true"
                 : "false");
-
+		try
+		{
+			Company company = ServerProxy.getJobHandler().getCompanyById(
+					job.getCompanyId());
+			p_request.setAttribute("company", company);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
     }
 
     private void dealWithGSEditionJob(HttpServletRequest p_request, Job job)

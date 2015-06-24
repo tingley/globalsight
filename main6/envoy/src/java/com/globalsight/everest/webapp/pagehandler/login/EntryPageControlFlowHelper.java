@@ -72,7 +72,8 @@ import com.globalsight.util.modules.Modules;
  * authentication' and some system initialization and return the real link for
  * next page based on the operation result.
  */
-public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
+public class EntryPageControlFlowHelper implements ControlFlowHelper,
+        WebAppConstants
 {
     private static final Logger CATEGORY = Logger
             .getLogger(EntryPageControlFlowHelper.class);
@@ -92,6 +93,12 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppCons
     // returns the name of the link to follow
     public String determineLinkToFollow() throws EnvoyServletException
     {
+        // GBS-3991, return as a failure if the IP is blocked
+        if (LoginAttemptController.isIpBlocked(m_request))
+        {
+            return loginFailed(null);
+        }
+
         if (Netegrity.isNetegrityEnabled())
         {
             // check the HTTP referer host, and if the machine is Netegrity,
@@ -357,7 +364,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppCons
             if (CATEGORY.isDebugEnabled())
             {
                 CATEGORY.debug("Total user permissions are: "
-                        + perms.toString());                
+                        + perms.toString());
             }
         }
         catch (Exception e)
@@ -421,7 +428,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppCons
 
         // Adds auto login cookie.
         addAutoLoginCookie(p_userId, p_password);
-        
+
         // store current logged user info
         try
         {
@@ -433,10 +440,14 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppCons
         {
             throw new EnvoyServletException(e);
         }
-        
+
+        // GBS-3991 clean up the failed login attempt associated with the IP
+        // address while login successfully
+        LoginAttemptController.cleanFailedLoginAttempt(m_request);
+
         return WebAppConstants.LOGIN_PASS;
     }
-    
+
     // Adds auto login cookie.
     private void addAutoLoginCookie(String p_userId, String p_pass)
     {
@@ -449,25 +460,6 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppCons
         cookie.setMaxAge(expires);
         cookie.setHttpOnly(true);
         m_response.addCookie(cookie);
-    }
-
-    // well,if the system need it will move to an class
-    private String getIpAddr(HttpServletRequest request)
-    {
-        String ip = request.getHeader("x-forwarded-for");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
-        {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
-        {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
-        {
-            ip = request.getRemoteAddr();
-        }
-        return ip;
     }
 
     /**
@@ -503,10 +495,11 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppCons
             throw new EnvoyServletException(GeneralException.EX_REMOTE, e);
         }
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-        activityArgs.put("userIP", getIpAddr(m_request));
+        activityArgs.put("userIP",
+                LoginAttemptController.getIpAddress(m_request));
         activityArgs.put("user", user.getUserName());
         ActivityLog.Start activityStart = ActivityLog.start(
-                EntryPageControlFlowHelper.class, "_doPost", activityArgs);
+                EntryPageControlFlowHelper.class, "performLogin", activityArgs);
         try
         {
             // calculate the users that logged in the system.
@@ -558,6 +551,9 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppCons
      */
     private String loginFailed(EnvoyServletException ese)
     {
+        // GBS-3991, record failed login attempt
+        LoginAttemptController.recordFailedLoginAttempt(m_request);
+
         String failureString = m_request.getMethod().equals("POST") ? "generalFail"
                 : "notALogin";
 

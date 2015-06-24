@@ -43,5 +43,8 @@
 			type="int" not-null="false" />
 		<property name="enableDitaChecks" column="ENABLE_DITA_CHECKS"
 			type="yes_no" not-null="false" unique="false" />
+		<property name="enableWorkflowStatePosts" column="ENABLE_WORKFLOW_STATE_POSTS"
+			type="yes_no" not-null="false" unique="false" />
+			
 	</class>
 </hibernate-mapping>

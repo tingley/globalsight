@@ -28,7 +28,7 @@
 			<fileset dir="${src}" />
 		</copy>
 
-		<javac nowarn="${nowarn}" classpath="${classpath}" target="${javactarget}" destdir="${dist}/WEB-INF/classes">
+		<javac nowarn="${nowarn}" classpath="${classpath}" destdir="${dist}/WEB-INF/classes">
 			<src path="${src-java}" />
 			<include name="**/*.java" />
 		</javac>

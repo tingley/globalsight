@@ -14,6 +14,7 @@
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.servlet.util.ServerProxy,
+            com.globalsight.everest.company.Company,
             com.globalsight.everest.jobhandler.Job,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
             com.globalsight.everest.servlet.util.SessionManager,
@@ -93,7 +94,9 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
     String lbLocalized= bundle.getString("lb_localized");
     String lbExported= bundle.getString("lb_exported");
     String lbArchived= bundle.getString("lb_archived");
-
+    Company company = (Company)request.getAttribute("company");
+    boolean enableQAChecks = company.getEnableQAChecks();
+    
     String refreshUrl = progressURL;
     boolean b_addDelete = false;
     boolean b_searchEnabled = false;
@@ -631,6 +634,11 @@ function submitForm(buttonClicked, curJobId)
 	   JobForm.submit();
 	   return;
    }
+   else(buttonClicked == "downloadQAReport")
+   {
+	   JobForm.action = "<%=refreshUrl%>";
+	   jobActionParam = "downloadQAReport";
+   }
 
 
    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
@@ -1084,6 +1092,9 @@ is defined in header.jspIncl which must be included in the body.
 	<amb:permission name="<%=Permission.JOBS_REMOVEJOBFROMGROUP%>" >
   		<INPUT TYPE="BUTTON" NAME=search VALUE="<%=bundle.getString("lb_remove_job_from_group")%>" onClick="removeJobFromGroup();">
 	</amb:permission>
+	<%if(enableQAChecks){ %>
+  		<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport')">
+    <% } %>
 </DIV>
 <P id="statusMessage" CLASS="standardText" >&nbsp;</P>
 <span id="exportdownload_progress_content">

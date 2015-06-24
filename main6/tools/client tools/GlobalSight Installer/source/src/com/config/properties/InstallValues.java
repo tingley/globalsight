@@ -91,6 +91,14 @@ public class InstallValues
 
         return PROPERTIES;
     }
+    
+    public static void setJavaHome(String home)
+    {
+    	PROPERTIES.put("java_home", home);
+    	saveTo(new File(ServerUtil.getPath() + File.separator
+                        + RESOURCE_FILE));
+    	saveTo(getTempFile());
+    }
 
     private static void decode()
     {

@@ -425,7 +425,6 @@ public class JobAttributeMainHandler extends PageActionHandler
     {
         logger.debug("Update float value...");
 
-        ServletOutputStream out = response.getOutputStream();
         try
         {
             String jobId = request.getParameter("jobId");
@@ -471,36 +470,21 @@ public class JobAttributeMainHandler extends PageActionHandler
                     FileUtils.copyFile(file, targetFile);
                 }
             }
-
-            StringBuffer result = new StringBuffer();
-            result.append("<html><body><textarea>");
-
-            Map<String, Object> returnValue = new HashMap();
-            returnValue.put("label", jobAtt.getFilesLabel());
-            returnValue.put("jobAttributeId", jobAtt.getIdAsLong());
-            returnValue.put("files", jobAtt.getDisplayFiles());
-            result.append(JsonUtil.toObjectJson(returnValue));
-            result.append("</textarea></body></html>");
-            out.write(result.toString().getBytes("UTF-8"));
         }
         catch (ValidateException ve)
         {
             ResourceBundle bundle = PageHandler.getBundle(request.getSession());
             String s = "({\"error\" : "
                     + JsonUtil.toJson(ve.getMessage(bundle)) + "})";
-            out.write(s.getBytes("UTF-8"));
         }
         catch (Exception e)
         {
             String s = "({\"error\" : " + JsonUtil.toObjectJson(e.getMessage())
                     + "})";
-            out.write(s.getBytes("UTF-8"));
             logger.error(e.getMessage(), e);
         }
         finally
         {
-            out.close();
-            out.flush();
             pageReturn();
         }
 
@@ -644,17 +628,19 @@ public class JobAttributeMainHandler extends PageActionHandler
         {
             List<String> files = new ArrayList<String>();
             String jobAttributeId = request.getParameter("jobAttributeId");
+            JobAttribute jobAtt = null;
             long jobAttId = Long.parseLong(jobAttributeId);
             if (jobAttId > 0)
-            {
-                JobAttribute jobAtt = HibernateUtil.get(JobAttribute.class,
-                        jobAttId);
-                files.addAll(jobAtt.getFileValuesAsStrings());
-            }
+			{
+				jobAtt = HibernateUtil.get(JobAttribute.class, jobAttId);
+				files.addAll(jobAtt.getFileValuesAsStrings());
+			}
 
             StringBuffer s = new StringBuffer();
             Map<String, Object> returnValue = new HashMap();
             returnValue.put("files", files);
+            returnValue.put("label", jobAtt.getFilesLabel());
+            returnValue.put("jobAttributeId", jobAtt.getIdAsLong());
             out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
         }
         catch (ValidateException ve)

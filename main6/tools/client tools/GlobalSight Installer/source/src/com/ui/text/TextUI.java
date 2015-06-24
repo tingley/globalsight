@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.Main;
+import com.config.properties.InstallValues;
 import com.config.properties.Resource;
 import com.ui.UI;
 import com.util.Assert;
@@ -188,6 +189,31 @@ public class TextUI implements UI
         {
             log.error(e.getMessage(), e);
         }
+    }
+    
+    public String readLine()
+    {
+    	BufferedReader input = new BufferedReader(new InputStreamReader(
+                System.in));
+        String inputValue = null;
+        try
+        {
+            inputValue = input.readLine();
+        }
+        catch (IOException e)
+        {
+            log.error(e.getMessage(), e);
+            StackTraceElement[] trace = e.getStackTrace();
+            for (StackTraceElement msg : trace)
+            {
+                log.error("\tat " + msg);
+            }
+
+            pressEntryKey();
+            System.exit(0);
+        }
+        
+        return inputValue;
     }
 
     public String get(String label, String regex, String accept)
@@ -430,4 +456,43 @@ public class TextUI implements UI
         }
         
     }
+
+	@Override
+	public void upgradeJdk() {
+		
+		clear();
+        System.out.println();
+        System.out.println(CONFIRM_TITLE);
+        System.out.println();
+        System.out.println(Resource.get("msg.jdk.text"));
+        System.out.println();
+        System.out.println(ROOT);
+        System.out.println();
+        
+        while (true)
+        {
+            System.out.println(Resource.get("input.exit"));
+
+            String inputValue = get(Resource.get("lb.jdk.home") + ": ", ".*");
+            
+            if (EXIT.equalsIgnoreCase(inputValue))
+            {
+                System.exit(0);
+            }
+            
+            if (new File(inputValue + "/bin").exists())
+            {
+            	InstallValues.setJavaHome(inputValue);
+            	break;
+            }
+            else
+            {
+            	System.out.println(Resource
+                        .get("msg.jdk.home.wrong"));
+            }
+        }
+        
+        
+//        return input.equalsIgnoreCase("y");
+	}
 }

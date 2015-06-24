@@ -1,18 +1,19 @@
-/*
- * Copyright (c) 2000 GlobalSight Corporation. All rights reserved.
- *
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
  */
-
 package com.globalsight.tools.tmximport;
 
 import java.io.IOException;
@@ -28,11 +29,10 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.InputSource;
 import org.apache.xerces.parsers.SAXParser;
 
-//jakarta regexp package
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
@@ -42,14 +42,12 @@ import com.globalsight.everest.tm.Tm;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * Parse a TMX file and save segments to database. Validates TMX files
- * while parsing.
+ * Parse a TMX file and save segments to database. Validates TMX files while
+ * parsing.
  */
-public class TmxParser
-    extends DefaultHandler
+public class TmxParser extends DefaultHandler
 {
-    private static final REProgram DTD_SEARCH_PATTERN
-        = createSearchPattern("tmx\\d+\\.dtd");
+    private static final REProgram DTD_SEARCH_PATTERN = createSearchPattern("tmx\\d+\\.dtd");
 
     private static REProgram createSearchPattern(String p_pattern)
     {
@@ -66,7 +64,6 @@ public class TmxParser
         }
         return pattern;
     }
-
 
     // TMX element names
     private static final String TMX_HEADER = "header";
@@ -85,7 +82,7 @@ public class TmxParser
     private static final String TMX_DATATYPE = "datatype";
     private static final String TMX_XMLLANG = "xml:lang";
     private static final String TMX_LANG = "lang";
-    
+
     private Connection m_connection;
     private XMLReader m_parser = new SAXParser();
     private String m_datatype = "unknown";
@@ -100,12 +97,10 @@ public class TmxParser
     private Tuv m_tuv;
     private StringBuffer m_segment;
     private boolean m_inSegment = false;
-    
-    
+
     // default constructor
-    public TmxParser(Connection p_connection, Tm p_tm,
-        LeverageGroup p_levGrp)
-        throws Exception
+    public TmxParser(Connection p_connection, Tm p_tm, LeverageGroup p_levGrp)
+            throws Exception
     {
         m_connection = p_connection;
         m_tuTmx = new TuTmx(p_connection);
@@ -114,7 +109,7 @@ public class TmxParser
         m_levGrp = p_levGrp;
         m_localeTmx = new LocaleTmx(p_connection, new Lang2Locale());
         m_sourceLocale = null;
-        
+
         m_parser.setContentHandler(this);
         m_parser.setErrorHandler(this);
 
@@ -124,40 +119,35 @@ public class TmxParser
         // validate documents
         m_parser.setFeature("http://xml.org/sax/features/validation", true);
     }
-    
 
-    public void parse(String p_uri)
-        throws Exception
+    public void parse(String p_uri) throws Exception
     {
         m_parser.parse(p_uri);
     }
-    
-    
+
     //
     // DocumentHandler methods
     //
 
-
     /** Start element. */
     public void startElement(String p_namespaceURI, String p_localName,
-        String p_qName, Attributes p_attrs)
-        throws SAXException
+            String p_qName, Attributes p_attrs) throws SAXException
     {
         try
         {
             // store datatype
-            if(p_localName.equals(TMX_HEADER))
+            if (p_localName.equals(TMX_HEADER))
             {
                 // determine datatype
                 String datatype = p_attrs.getValue(TMX_DATATYPE);
-                if(datatype != null)
+                if (datatype != null)
                 {
                     m_datatype = datatype;
                 }
 
                 // determine source locale
                 String srcLocale = p_attrs.getValue(TMX_SRCLANG);
-                if(srcLocale.equals("*all*"))
+                if (srcLocale.equals("*all*"))
                 {
                     m_sourceLocale = null;
                 }
@@ -168,39 +158,39 @@ public class TmxParser
 
             }
             // create TU object
-            else if(p_localName.equals(TMX_TU))
+            else if (p_localName.equals(TMX_TU))
             {
                 String datatype = p_attrs.getValue(TMX_DATATYPE);
-                m_tu = m_tuTmx.create(
-                    datatype == null ? m_datatype : datatype, m_tm, m_levGrp);
+                m_tu = m_tuTmx.create(datatype == null ? m_datatype : datatype,
+                        m_tm, m_levGrp);
                 m_tuTmx.save(m_tu);
             }
             // create TUV object
-            else if(p_localName.equals(TMX_TUV))
+            else if (p_localName.equals(TMX_TUV))
             {
                 String locale = p_attrs.getValue(TMX_XMLLANG);
-                if(locale == null)
+                if (locale == null)
                 {
                     locale = p_attrs.getValue(TMX_LANG);
                 }
                 m_tuv = m_tuvTmx.create(m_localeTmx.get(locale), m_tu);
             }
             // start collecting segment text data
-            else if(p_localName.equals(TMX_SEG))
+            else if (p_localName.equals(TMX_SEG))
             {
                 m_segment = new StringBuffer(SEGMENT_START);
                 m_inSegment = true;
             }
             else
             {
-                if(m_inSegment)
+                if (m_inSegment)
                 {
                     String elementName = p_localName;
-                    if(elementName.equals(TMX_UT))
+                    if (elementName.equals(TMX_UT))
                     {
                         elementName = TMX_PH;
                     }
-                    
+
                     // add it to segment
                     m_segment.append('<');
                     m_segment.append(elementName);
@@ -218,17 +208,17 @@ public class TmxParser
                     }
 
                     // add locType attribute to <sub> element
-                    if(p_localName.equals(TMX_SUB))
+                    if (p_localName.equals(TMX_SUB))
                     {
                         m_segment.append(SUB_LOCTYPE);
                     }
-                
+
                     m_segment.append('>');
                 }
             }
-            
+
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             throw new SAXException(e);
         }
@@ -237,7 +227,7 @@ public class TmxParser
     /** Characters. */
     public void characters(char ch[], int start, int length)
     {
-        if(m_inSegment)
+        if (m_inSegment)
         {
             m_segment.append(normalize(new String(ch, start, length)));
         }
@@ -246,7 +236,7 @@ public class TmxParser
     /** Ignorable whitespace. */
     public void ignorableWhitespace(char ch[], int start, int length)
     {
-        if(m_inSegment)
+        if (m_inSegment)
         {
             characters(ch, start, length);
         }
@@ -254,40 +244,39 @@ public class TmxParser
 
     /** End element. */
     public void endElement(String p_namespaceURI, String p_localName,
-        String p_qName)
-        throws SAXException
+            String p_qName) throws SAXException
     {
         try
         {
             // save TUV
-            if(p_localName.equals(TMX_TUV))
+            if (p_localName.equals(TMX_TUV))
             {
-                m_tuvTmx.setSegment((TuvImpl)m_tuv, m_segment.toString());
-                m_tuvTmx.save((TuvImpl)m_tuv);
+                m_tuvTmx.setSegment((TuvImpl) m_tuv, m_segment.toString());
+                m_tuvTmx.save((TuvImpl) m_tuv);
 
                 // commit the change so that indexer doesn't complain
                 // abount not finding TUV id
                 m_connection.commit();
-                
+
                 // index source locale segment
-                if(m_sourceLocale == null
-                    || m_sourceLocale.equals(m_tuv.getGlobalSightLocale()))
+                if (m_sourceLocale == null
+                        || m_sourceLocale.equals(m_tuv.getGlobalSightLocale()))
                 {
                     IndexerTmx.index(m_tuv);
                 }
             }
             // stop collecting segment text data
-            else if(p_localName.equals(TMX_SEG))
+            else if (p_localName.equals(TMX_SEG))
             {
                 m_segment.append(SEGMENT_END);
                 m_inSegment = false;
             }
             else
             {
-                if(m_inSegment)
+                if (m_inSegment)
                 {
                     String elementName = p_localName;
-                    if(elementName.equals(TMX_UT))
+                    if (elementName.equals(TMX_UT))
                     {
                         elementName = TMX_PH;
                     }
@@ -299,11 +288,11 @@ public class TmxParser
                 }
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             throw new SAXException(e);
         }
-        
+
     }
 
     //
@@ -313,25 +302,23 @@ public class TmxParser
     /** Warning. */
     public void warning(SAXParseException ex)
     {
-        System.err.println("[Warning] "+ getLocationString(ex)+": "+
-            ex.getMessage());
+        System.err.println("[Warning] " + getLocationString(ex) + ": "
+                + ex.getMessage());
     }
 
     /** Error. */
-    public void error(SAXParseException ex)
-        throws SAXException
+    public void error(SAXParseException ex) throws SAXException
     {
-        System.err.println("[Error] "+ getLocationString(ex)+": "+
-            ex.getMessage());
+        System.err.println("[Error] " + getLocationString(ex) + ": "
+                + ex.getMessage());
         throw ex;
     }
 
     /** Fatal error. */
-    public void fatalError(SAXParseException ex)
-        throws SAXException
+    public void fatalError(SAXParseException ex) throws SAXException
     {
-        System.err.println("[Fatal Error] "+ getLocationString(ex)+": "+
-            ex.getMessage());
+        System.err.println("[Fatal Error] " + getLocationString(ex) + ": "
+                + ex.getMessage());
         throw ex;
     }
 
@@ -373,20 +360,20 @@ public class TmxParser
             char ch = s.charAt(i);
             switch (ch)
             {
-            case '<':
-                str.append("&lt;");
-                break;
-            case '>':
-                str.append("&gt;");
-                break;
-            case '&':
-                str.append("&amp;");
-                break;
-            case '"':
-                str.append("&quot;");
-                break;
-            default:
-                str.append(ch);
+                case '<':
+                    str.append("&lt;");
+                    break;
+                case '>':
+                    str.append("&gt;");
+                    break;
+                case '&':
+                    str.append("&amp;");
+                    break;
+                case '"':
+                    str.append("&quot;");
+                    break;
+                default:
+                    str.append(ch);
             }
         }
 
@@ -394,31 +381,29 @@ public class TmxParser
 
     }
 
-
     /**
      * Overrides EntityResolver#resolveEntity.
      *
-     * Provide a right DTD to read. If unrecognizable DTD is
-     * specified, this method returns a null stream.
+     * Provide a right DTD to read. If unrecognizable DTD is specified, this
+     * method returns a null stream.
      */
     public InputSource resolveEntity(String publicId, String systemId)
-        throws SAXException
+            throws SAXException
     {
         InputSource in = null;
 
         RE matcher = new RE(DTD_SEARCH_PATTERN, RE.MATCH_SINGLELINE);
-        if(matcher.match(systemId))
+        if (matcher.match(systemId))
         {
-            InputStream ist
-                = TmxParser.class.getResourceAsStream(
-                    "/resources/" + matcher.getParen(0));
+            InputStream ist = TmxParser.class.getResourceAsStream("/resources/"
+                    + matcher.getParen(0));
 
-            if(ist != null)
+            if (ist != null)
             {
                 in = new InputSource(ist);
             }
         }
-        
+
         if (in == null)
         {
             in = new InputSource(new ByteArrayInputStream(new byte[0]));

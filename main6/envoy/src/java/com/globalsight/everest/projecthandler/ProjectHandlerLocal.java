@@ -95,6 +95,7 @@ import com.globalsight.everest.workflow.WorkflowOwners;
 import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
 import com.globalsight.exporter.ExporterException;
 import com.globalsight.exporter.IExportManager;
 import com.globalsight.importer.IImportManager;
@@ -4206,4 +4207,169 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         return list;
     }
+    
+    public List<WorkflowStatePosts> getAllWorkflowStatePostProfie(
+            String[] filterParams)
+    {
+        Connection conn = null;
+        Statement st = null;
+        ResultSet rs = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            st = conn.createStatement();
+            rs = st.executeQuery(getQueryWorkflowStatePostProfileInfoSql(filterParams));
+            List<WorkflowStatePosts> queryResult = new ArrayList<WorkflowStatePosts>();
+            while (rs.next())
+            {
+                long id = Long.valueOf(rs.getString("id"));
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                String listenerURL = rs.getString("listener_URL");
+                String secretKey = rs.getString("secret_key");
+                String timeoutPeriod = rs.getString("timeout_Period");
+                String retryNumber = rs.getString("retry_Number");
+                String notifyEmail = rs.getString("notify_Email");
+                Long companyId = Long.valueOf(rs.getString("company_Id"));
+
+                WorkflowStatePosts workflowStatePosts = new WorkflowStatePosts(
+                        id, name, description, listenerURL, secretKey,
+                        timeoutPeriod, retryNumber, notifyEmail, companyId);
+                queryResult.add(workflowStatePosts);
+            }
+            return queryResult;
+        }
+        catch (Exception e)
+        {
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(st);
+            DbUtil.silentReturnConnection(conn);
+        }
+
+    }
+
+    private String getQueryWorkflowStatePostProfileInfoSql(String[] filterParams)
+    {
+        Vector args = CompanyWrapper.addCompanyIdBoundArgs(new Vector());
+        StringBuffer sql = new StringBuffer(
+                "select wsp.ID, wsp.NAME, wsp.DESCRIPTION, wsp.LISTENER_URL, wsp.SECRET_KEY, wsp.TIMEOUT_PERIOD, wsp.RETRY_NUMBER, wsp.NOTIFY_EMAIL, wsp.COMPANY_ID");
+        sql.append(" from workflow_state_posts wsp,company c");
+        sql.append(" where 1 = 1");
+        sql.append(" and wsp.COMPANY_ID >= " + args.get(0));
+        sql.append(" and wsp.COMPANY_ID <= " + args.get(1));
+        if (filterParams[0] != null && filterParams[0].trim().length() > 0)
+        {
+            sql.append(" and wsp.NAME LIKE '%" + filterParams[0] + "%'");
+        }
+
+        if (filterParams[1] != null && filterParams[1].trim().length() > 0)
+        {
+            sql.append(" and wsp.LISTENER_URL LIKE '%" + filterParams[1] + "%'");
+        }
+        if (filterParams[2] != null && filterParams[2].trim().length() > 0)
+        {
+            sql.append(" and wsp.SECRET_KEY LIKE '%" + filterParams[2] + "%'");
+        }
+        sql.append(" and wsp.COMPANY_ID = c.ID");
+        if (filterParams[3] != null && filterParams[3].trim().length() > 0)
+        {
+            sql.append(" and c.NAME LIKE '%" + filterParams[3] + "%'");
+        }
+        sql.append(" group by wsp.ID, wsp.NAME, wsp.DESCRIPTION, wsp.COMPANY_ID");
+        sql.append(" order by wsp.NAME ");
+        return sql.toString();
+    }
+
+    @Override
+    public List<WorkflowStatePosts> getAllWorkflowStatePostInfos()
+    {
+        try
+        {
+            String hql = "from WorkflowStatePosts wfs where 1 = 1";
+            HashMap map = new HashMap();
+            String currentCompanyId = CompanyThreadLocal.getInstance()
+                    .getValue();
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
+            {
+                hql = hql + " and wfs.companyId=:companyId";
+                map.put("companyId", Long.parseLong(currentCompanyId));
+            }
+            List queryResult = HibernateUtil.search(hql, map);
+            return queryResult;
+        }
+        catch (Exception e)
+        {
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+        }
+    }
+
+    @Override
+    public void createWfStatePostProfile(WorkflowStatePosts wfStatePost)
+    {
+        try
+        {
+            HibernateUtil.save(wfStatePost);
+        }
+        catch (Exception e)
+        {
+            String[] args = new String[1];
+            args[0] = wfStatePost.getName();
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_CREATE_WFI, args, e);
+        }
+    }
+
+    @Override
+    public WorkflowStatePosts getWfStatePostProfile(long wfStatePostId)
+    {
+        try
+        {
+            return getWfStatePostProfile(new Long(wfStatePostId), true);
+        }
+        catch (Exception e)
+        {
+            String[] args = new String[1];
+            args[0] = Long.toString(wfStatePostId);
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_WFI, args, e);
+        }
+    }
+
+    private WorkflowStatePosts getWfStatePostProfile(Long wfStatePostId,
+            boolean editable)
+    {
+        return (WorkflowStatePosts) HibernateUtil.get(WorkflowStatePosts.class,
+                wfStatePostId);
+    }
+
+    @Override
+    public void modifyWfStatePostProfile(WorkflowStatePosts wfstaPosts)
+    {
+        HibernateUtil.update(wfstaPosts);
+    }
+
+    @Override
+    public void removeWorkflowStatePost(WorkflowStatePosts wfstaPosts)
+    {
+        try
+        {
+            HibernateUtil.delete(wfstaPosts);
+        }
+        catch (Exception pe)
+        {
+            c_category.error("Couldn't remove the WorkflowStatePosts", pe);
+            String args[] =
+            { Long.toString(wfstaPosts.getId()) };
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_WF_STATE_POST_PROFILE,
+                    args, pe);
+        }
+    }
+    
 }

@@ -169,7 +169,7 @@ $(document).ready(function()
       	if(jobGroupList != null && jobGroupList.size() > 0){
       		%>
       		<tr id="jobGroupMessage" class="standardText" style="width:240px;">
-      			<td class="standardText" vAlign="top" style="padding-right: 25px;width:65px;"><b>Job Group :</b></td>
+      			<td class="standardText" vAlign="top" style="padding-right: 25px;width:70px;"><b>Job Group :</b></td>
 	       		<td class="standardText" vAlign="bottom" style="padding-right: 25px;">
 	       		<select name="jobGroupSelect" id="jobGroupSelect" size="6" style="width:140px;">
       	<%

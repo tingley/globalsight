@@ -23,9 +23,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
 
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
@@ -45,6 +42,9 @@ import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 import com.globalsight.util.gxml.GxmlNames;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
 
 /**
  * Collection of utility methods.
@@ -332,6 +332,7 @@ public class TmUtil
         public void handleStartTag(String p_name, Properties p_attributes,
                 String p_originalString) throws DiplomatBasicParserException
         {
+        	p_name = p_name.toLowerCase();
             if (p_name.equals(GxmlNames.SEGMENT)
                     || p_name.equals(GxmlNames.LOCALIZABLE))
             {
@@ -694,11 +695,11 @@ public class TmUtil
         {
             GlobalSightLocale locale = p_tuv.getGlobalSightLocale();
             Tu originalTu = p_tuv.getTu(p_jobId);
-			PageTmTu tu = new PageTmTu(originalTu.getId(), 0,
-					originalTu.getDataType(), originalTu.getTuType(),
-					!originalTu.isLocalizable());
-			PageTmTuv tuv = new PageTmTuv(p_tuv.getId(), p_tuv.getGxml(),
-					locale);
+            PageTmTu tu = new PageTmTu(originalTu.getId(), 0,
+                    originalTu.getDataType(), originalTu.getTuType(),
+                    !originalTu.isLocalizable());
+            PageTmTuv tuv = new PageTmTuv(p_tuv.getId(), p_tuv.getGxml(),
+                    locale);
             tuv.setSid(p_tuv.getSid());
             tu.addTuv(tuv);
 

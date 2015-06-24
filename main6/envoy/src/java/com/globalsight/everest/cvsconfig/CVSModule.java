@@ -1,7 +1,6 @@
 package com.globalsight.everest.cvsconfig;
 
 import com.globalsight.everest.persistence.PersistentObject;
-import com.ibm.text.SimpleDateFormat;
 
 public class CVSModule extends PersistentObject {
     private static final long serialVersionUID = -8905970137576301722L;

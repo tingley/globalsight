@@ -37,10 +37,6 @@ import java.util.ResourceBundle;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-import org.apache.regexp.RESyntaxException;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -124,6 +120,10 @@ import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 import com.globalsight.util.zip.ZipIt;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
  * Interface Implementation
@@ -1549,9 +1549,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
     }
 
     /**
-	 * Only when the source file is XLF, need re-wrap the off-line down-loaded
-	 * XLIFF file.
-	 */
+     * Only when the source file is XLF, need re-wrap the off-line down-loaded
+     * XLIFF file.
+     */
     private void reWrapXliff(Document doc, HashSet<Long> jobIds)
     {
         Element root = doc.getRootElement();
@@ -1560,20 +1560,20 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
         // Find TU elements that are from XLF source file.
         List<Element> xlfTuElements = new ArrayList<Element>();
-		for (Iterator i = bodyElement
-				.elementIterator(XliffConstants.TRANS_UNIT); i.hasNext();)
+        for (Iterator i = bodyElement
+                .elementIterator(XliffConstants.TRANS_UNIT); i.hasNext();)
         {
             Element foo = (org.dom4j.Element) i.next();
-			if (isSrcFileXlf(foo, jobIds))
+            if (isSrcFileXlf(foo, jobIds))
             {
-				xlfTuElements.add(foo);
+                xlfTuElements.add(foo);
             }
         }
 
-		if (xlfTuElements.size() == 0)
-			return;
+        if (xlfTuElements.size() == 0)
+            return;
 
-		//
+        //
         StringBuffer xliffString = new StringBuffer();
         xliffString.append("<?xml version=\"1.0\"?>");
         xliffString.append("<xliff version=\"1.2\">");
@@ -1599,19 +1599,21 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     + ">", "");
 
             xliffString.append("<trans-unit>");
-            xliffString.append("<source>").append(sourceContent).append("</source>");
-            xliffString.append("<target>").append(targetContent).append("</target>");
+            xliffString.append("<source>").append(sourceContent)
+                    .append("</source>");
+            xliffString.append("<target>").append(targetContent)
+                    .append("</target>");
             xliffString.append("</trans-unit>");
 
             // Store the state attributes in sequence
             stateAttr = targetElement.attribute(XliffConstants.STATE);
             if (stateAttr == null)
             {
-            	trgStates.add("");
+                trgStates.add("");
             }
             else
             {
-            	trgStates.add(stateAttr.getValue());
+                trgStates.add(stateAttr.getValue());
             }
         }
         xliffString.append("</body>");
@@ -1646,17 +1648,17 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     SegmentNode src = (SegmentNode) (trans.getSegments().get(0));
                     if (trans.getXliffPartByName().equals("source"))
                     {
-						sourceArray
-								.add("<source>"
-										+ replaceEntity(src.getSegment())
-										+ "</source>");
+                        sourceArray
+                                .add("<source>"
+                                        + replaceEntity(src.getSegment())
+                                        + "</source>");
                     }
                     else if (trans.getXliffPartByName().equals("target"))
                     {
-						targetArray
-								.add("<target>"
-										+ replaceEntity(src.getSegment())
-										+ "</target>");
+                        targetArray
+                                .add("<target>"
+                                        + replaceEntity(src.getSegment())
+                                        + "</target>");
                     }
                 }
             }
@@ -1682,42 +1684,51 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 }
 
                 Element foo = (org.dom4j.Element) i.next();
-				if (!isSrcFileXlf(foo, jobIds))
-            	{
-            		continue;
-            	}
+                if (!isSrcFileXlf(foo, jobIds))
+                {
+                    continue;
+                }
 
-				TuImpl tu = getTu(foo, jobIds);
-				GxmlElement srcGxmlElement = tu.getSourceTuv().getGxmlElement();
-				String newSrc = "<segment>"
-						+ GxmlUtil.stripRootTag(sourceArray.get(index))
-						+ "</segment>";
-				GxmlElement trgGxmlElement = SegmentUtil2.getGxmlElement(newSrc);
-				newSrc = SegmentUtil2.adjustSegmentAttributeValues(
-						srcGxmlElement, trgGxmlElement, "xlf");
-				newSrc = "<source>" + GxmlUtil.stripRootTag(newSrc) + "</source>";
-		        Element sourceElement = foo.element(XliffConstants.SOURCE);
+                TuImpl tu = getTu(foo, jobIds);
+                GxmlElement srcGxmlElement = tu.getSourceTuv().getGxmlElement();
+                String newSrc = "<segment>"
+                        + GxmlUtil.stripRootTag(sourceArray.get(index))
+                        + "</segment>";
+                GxmlElement trgGxmlElement = SegmentUtil2
+                        .getGxmlElement(newSrc);
+                newSrc = SegmentUtil2.adjustSegmentAttributeValues(
+                        srcGxmlElement, trgGxmlElement, "xlf");
+                newSrc = "<source>" + GxmlUtil.stripRootTag(newSrc)
+                        + "</source>";
+                Element sourceElement = foo.element(XliffConstants.SOURCE);
                 Element newSourceElement = getDom(newSrc).getRootElement();
                 foo.remove(sourceElement);
                 foo.add(newSourceElement);
 
-				String newTrg = "<segment>" + GxmlUtil.stripRootTag(targetArray.get(index)) + "</segment>";
-				trgGxmlElement = SegmentUtil2.getGxmlElement(newTrg);
-				newTrg = SegmentUtil2.adjustSegmentAttributeValues(
-						srcGxmlElement, trgGxmlElement, "xlf");
-				newTrg = "<target>" + GxmlUtil.stripRootTag(newTrg) + "</target>";
+                String newTrg = "<segment>"
+                        + GxmlUtil.stripRootTag(targetArray.get(index))
+                        + "</segment>";
+                trgGxmlElement = SegmentUtil2.getGxmlElement(newTrg);
+                newTrg = SegmentUtil2.adjustSegmentAttributeValues(
+                        srcGxmlElement, trgGxmlElement, "xlf");
+                newTrg = "<target>" + GxmlUtil.stripRootTag(newTrg)
+                        + "</target>";
                 Element newTargetElement = getDom(newTrg).getRootElement();
                 Element targetElement = foo.element(XliffConstants.TARGET);
                 foo.remove(targetElement);
-				// If target has "state" attribute, it should be preserved.
-				try {
-					if (!"".equals(trgStates.get(index))) {
-						newTargetElement.add(new DefaultAttribute(
-								XliffConstants.STATE, trgStates.get(index)));
-					}
-				} catch (Exception ignore) {
+                // If target has "state" attribute, it should be preserved.
+                try
+                {
+                    if (!"".equals(trgStates.get(index)))
+                    {
+                        newTargetElement.add(new DefaultAttribute(
+                                XliffConstants.STATE, trgStates.get(index)));
+                    }
+                }
+                catch (Exception ignore)
+                {
 
-				}
+                }
 
                 foo.add(newTargetElement);
                 index++;
@@ -1727,27 +1738,28 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
     /**
      * If the TU element is from XLF source file, return true;
+     * 
      * @param tuElement
      * @param jobIds
      * @return
      */
-	private boolean isSrcFileXlf(Element tuElement, HashSet<Long> jobIds)
+    private boolean isSrcFileXlf(Element tuElement, HashSet<Long> jobIds)
     {
         TuImpl tu = getTu(tuElement, jobIds);
         if (tu != null)
         {
             if ("xlf".equals(tu.getDataType()))
             {
-            	return true;
+                return true;
             }
         }
 
         return false;
     }
 
-	private TuImpl getTu(Element tuElement, HashSet<Long> jobIds)
-	{
-		TuImpl tu = null;
+    private TuImpl getTu(Element tuElement, HashSet<Long> jobIds)
+    {
+        TuImpl tu = null;
         try
         {
             String tuId = getTuId(tuElement);
@@ -1755,12 +1767,12 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             {
                 if (tuId.indexOf(":") > 0)
                 {
-                	tuId = tuId.substring(0, tuId.indexOf(":"));
+                    tuId = tuId.substring(0, tuId.indexOf(":"));
                 }
 
                 for (long id : jobIds)
                 {
-					tu = SegmentTuUtil.getTuById(Long.parseLong(tuId), id);
+                    tu = SegmentTuUtil.getTuById(Long.parseLong(tuId), id);
                     if (tu != null)
                     {
                         break;
@@ -1770,30 +1782,32 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         }
         catch (Exception e)
         {
-        	if (s_category.isDebugEnabled()) {
-            	s_category.error("isSrcFileXlf(..) error:", e);        		
-        	}
+            if (s_category.isDebugEnabled())
+            {
+                s_category.error("isSrcFileXlf(..) error:", e);
+            }
         }
 
         return tu;
-	}
+    }
 
-	/**
-	 * Get "id" attribute from a "<trans-unit id="2328958" ...>".
-	 * @param tuElement
-	 * @return 
-	 */
-	private String getTuId(Element tuElement)
-	{
-		Attribute tuIdAtt = tuElement.attribute("id");
-		if (tuIdAtt != null)
-		{
-			return tuIdAtt.getValue();
-		}
-		return null;
-	}
+    /**
+     * Get "id" attribute from a "<trans-unit id="2328958" ...>".
+     * 
+     * @param tuElement
+     * @return
+     */
+    private String getTuId(Element tuElement)
+    {
+        Attribute tuIdAtt = tuElement.attribute("id");
+        if (tuIdAtt != null)
+        {
+            return tuIdAtt.getValue();
+        }
+        return null;
+    }
 
-	/*
+    /*
      * Because the getDom will deEntity the code when parse, so before parse,
      * first entity the code.
      */
@@ -1853,8 +1867,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 textContent = textContent.replaceFirst(
                         "<" + tagName + "[^>]*>", "");
                 textContent = textContent.replace("</" + tagName + ">", "");
-				textContent = convertSegment2Pseudo(textContent,
-						isSrcFileXlf(foo, jobIds));
+                textContent = convertSegment2Pseudo(textContent,
+                        isSrcFileXlf(foo, jobIds));
                 sourceElement.setText(textContent);
             }
             catch (Exception e)

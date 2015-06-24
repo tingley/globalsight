@@ -57,6 +57,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowStatePostHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -158,6 +159,11 @@ public class LocProfileNewAndEditHandler extends PageHandler implements
         }
         p_request.setAttribute("maxPriority", new Integer(maxPriority));
         p_request.setAttribute("defaultPriority", new Integer(defaultPriority));
+        
+        //workflow state post profile
+        
+        List wfStatePost = WorkflowStatePostHandlerHelper.getAllWfStatePost();
+        p_request.setAttribute("wfStatePost", wfStatePost);
     }
 
     private String getJSONWorkflows(HttpServletRequest p_request)
@@ -363,6 +369,10 @@ public class LocProfileNewAndEditHandler extends PageHandler implements
             p_request.setAttribute("locTMProfileId", tmProfile.getId() + "");
         }
 
+        //workflow state post profile
+        p_request.setAttribute("wfStatePostProfileId",
+                editLocprofile.getWfStatePostId() + "");
+        
         p_request.setAttribute("LocProfileProjectId",
                 editLocprofile.getProjectId() + "");
         p_request

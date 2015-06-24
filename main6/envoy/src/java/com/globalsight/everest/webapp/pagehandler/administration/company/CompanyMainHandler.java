@@ -840,6 +840,8 @@ public class CompanyMainHandler extends PageActionHandler implements
                 .getParameter(CompanyConstants.BIG_DATA_STORE_LEVEL);
         String enableDitaChecks = p_request
                 .getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
+        String enableWorkflowStatePosts = p_request
+                .getParameter(CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS);
 
         if ("on".equalsIgnoreCase(enableIPFilter))
         {
@@ -905,6 +907,12 @@ public class CompanyMainHandler extends PageActionHandler implements
         if ("on".equalsIgnoreCase(enableDitaChecks))
         {
             company.setEnableDitaChecks(true);
+        }
+        
+        company.setEnableWorkflowStatePosts(false);
+        if ("on".equalsIgnoreCase(enableWorkflowStatePosts))
+        {
+            company.setEnableWorkflowStatePosts(true);
         }
     }
 
@@ -934,6 +942,8 @@ public class CompanyMainHandler extends PageActionHandler implements
                 .getParameter(CompanyConstants.BIG_DATA_STORE_LEVEL);
         String enableDitaChecks = p_request
                 .getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
+        String enableWorkflowStatePosts = p_request
+                .getParameter(CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS);
 
         if ("on".equalsIgnoreCase(enableIPFilter))
         {
@@ -999,6 +1009,12 @@ public class CompanyMainHandler extends PageActionHandler implements
         if ("on".equalsIgnoreCase(enableDitaChecks))
         {
             company.setEnableDitaChecks(true);
+        }
+        
+        company.setEnableWorkflowStatePosts(false);
+        if ("on".equalsIgnoreCase(enableWorkflowStatePosts))
+        {
+            company.setEnableWorkflowStatePosts(true);
         }
 
         return company;

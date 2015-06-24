@@ -49,9 +49,6 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.ServerUtil;
-import com.globalsight.webservices.coti.MetadataInfo;
-import com.globalsight.webservices.coti.StatusInfo;
-import com.globalsight.webservices.coti.VersionInfo;
 import com.globalsight.webservices.coti.util.COTISession;
 import com.globalsight.webservices.coti.util.COTIUtil;
 
@@ -130,9 +127,114 @@ public class COTIApi
 
         // TODO add details after discussion
         MetadataInfo mi = new MetadataInfo();
-        mi.setSourceLanguages(new String[] { "en_US", "de_DE" });
-        mi.setTargetLanguages(new String[] { "en_US", "de_DE" });
+        
+        //Name http://meta.DERCOM.de/COTI/name 
+        //Subject http://meta.DERCOM.de/COTI/subject 
+        //Source language http://meta.DERCOM.de/COTI/source_language 
+        //Target language http://meta.DERCOM.de/COTI/target_language 
+        //Workflow http://meta.DERCOM.de/COTI/workflow 
+        //Report type http://meta.DERCOM.de/COTI/report_type
+        //Translator http://meta.DERCOM.de/COTI/translator 
+        //Project manager http://meta.DERCOM.de/COTI/manager
+        MetaProperty[] metaProperties = new MetaProperty[5];
+        MetaProperty mp;
+        Entry entry;
+        Entry[] entries;
+        
+        mp = new MetaProperty();
+        mp.setUri("http://meta.DERCOM.de/COTI/source_language");
+        mp.setType("string");
+        mp.setLabel("source language");
+        mp.setMandatory(true);
+        entries = new Entry[3];
+        entry = new Entry();
+        entry.setKey("de-DE");
+        entry.setLabel("German (Germany)");
+        entries[0] = entry;
+        entry = new Entry();
+        entry.setKey("en-US");
+        entry.setLabel("English (United States)");
+        entries[1] = entry;
+        entry = new Entry();
+        entry.setKey("it-IT");
+        entry.setLabel(" Italian (Italy)");
+        entries[2] = entry;
+        mp.setDomain(entries);
+        metaProperties[0] = mp;
+        
+        mp = new MetaProperty();
+        mp.setUri("http://meta.DERCOM.de/COTI/target_language");
+        mp.setType("string");
+        mp.setLabel("target language");
+        mp.setMandatory(true);
+        entries = new Entry[3];
+        entry = new Entry();
+        entry.setKey("ru-RU");
+        entry.setLabel("Russian (Russia)");
+        entries[0] = entry;
+        entry = new Entry();
+        entry.setKey("en-US");
+        entry.setLabel("English (United States)");
+        entries[1] = entry;
+        entry = new Entry();
+        entry.setKey("it-IT");
+        entry.setLabel(" Italian (Italy)");
+        entries[2] = entry;
+        mp.setDomain(entries);
+        metaProperties[1] = mp;
+        
+        mp = new MetaProperty();
+        mp.setUri("http://meta.DERCOM.de/COTI/workflow");
+        mp.setType("string");
+        mp.setLabel("workflow");
+        mp.setMandatory(false);
+        entries = new Entry[2];
+        entry = new Entry();
+        entry.setKey("translation");
+        entry.setLabel("translation");
+        entries[0] = entry;
+        entry = new Entry();
+        entry.setKey("pretranslation");
+        entry.setLabel("pretranslation");
+        entries[1] = entry;
+        mp.setDomain(entries);
+        metaProperties[2] = mp;
+        
+        mp = new MetaProperty();
+        mp.setUri("http://meta.DERCOM.de/COTI/report_type");
+        mp.setType("string");
+        mp.setLabel("Report-Typ");
+        mp.setMandatory(false);
+        entries = new Entry[2];
+        entry = new Entry();
+        entry.setKey("translationStatus");
+        entry.setLabel("translationStatus");
+        entries[0] = entry;
+        entry = new Entry();
+        entry.setKey("costEstimation");
+        entry.setLabel("costEstimation");
+        entries[1] = entry;
+        mp.setDomain(entries);
+        metaProperties[3] = mp;
+        
+        mp = new MetaProperty();
+        mp.setUri("http://meta.DERCOM.de/COTI/translator");
+        mp.setType("string");
+        mp.setLabel("translator");
+        mp.setMandatory(false);
+        entries = new Entry[2];
+        entry = new Entry();
+        entry.setKey("kim");
+        entry.setLabel("Kim");
+        entries[0] = entry;
+        entry = new Entry();
+        entry.setKey("peter");
+        entry.setLabel("Peter");
+        entries[1] = entry;
+        mp.setDomain(entries);
+        metaProperties[4] = mp;
 
+        mi.setMetaProperties(metaProperties);
         return mi;
     }
 

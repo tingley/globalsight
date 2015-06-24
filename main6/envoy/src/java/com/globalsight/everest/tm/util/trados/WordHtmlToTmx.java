@@ -17,48 +17,51 @@
 
 package com.globalsight.everest.tm.util.trados;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Tmx;
-
-
-import com.globalsight.ling.docproc.extractor.html.IHtmlHandler;
-import com.globalsight.ling.docproc.extractor.html.HtmlObjects;
-import com.globalsight.ling.docproc.extractor.html.Parser;
-import com.globalsight.ling.docproc.extractor.html.ParseException;
-
+import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
+import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
-import com.globalsight.ling.docproc.LocalizableElement;
-
-import com.globalsight.ling.common.HtmlEntities;
-import com.globalsight.ling.common.Text;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import com.globalsight.ling.docproc.extractor.html.HtmlObjects;
+import com.globalsight.ling.docproc.extractor.html.IHtmlHandler;
+import com.globalsight.ling.docproc.extractor.html.ParseException;
+import com.globalsight.ling.docproc.extractor.html.Parser;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * <p>Trados-TMX Converter for RTF.</p>
+ * <p>
+ * Trados-TMX Converter for RTF.
+ * </p>
  *
- * <p>Use TradosTmxToRtf to read a Trados TMX file and write it out as
- * RTF that Word can read. When the file is saved from within Word as
- * HTML, use StylesheetRemover to remove the possibly very large
- * stylesheet, and then use this class to parse the HTML, extract
- * segments, and write the result as GXML TMX.</p>
+ * <p>
+ * Use TradosTmxToRtf to read a Trados TMX file and write it out as RTF that
+ * Word can read. When the file is saved from within Word as HTML, use
+ * StylesheetRemover to remove the possibly very large stylesheet, and then use
+ * this class to parse the HTML, extract segments, and write the result as GXML
+ * TMX.
+ * </p>
  */
-public class WordHtmlToTmx
-    implements IHtmlHandler
+public class WordHtmlToTmx implements IHtmlHandler
 {
     private Logger m_logger = null;
 
@@ -86,13 +89,10 @@ public class WordHtmlToTmx
 
     static private ArrayList s_EMPTYSEGMENTS = new ArrayList();
 
-    private static final REProgram SEG_SEARCH_PATTERN =
-        createSearchPattern("<seg>(.*?)</seg>");
+    private static final REProgram SEG_SEARCH_PATTERN = createSearchPattern("<seg>(.*?)</seg>");
 
-    private static final REProgram B_BIDI_BOLD_SEARCH_PATTERN =
-        createSearchPattern("<b([:space:])+?style=\'mso-bidi-font-weight:[^>]*?>");
-    private static final REProgram B_BIDI_ITALIC_SEARCH_PATTERN =
-        createSearchPattern("<i([:space:])+?style=\'mso-bidi-font-style:[^>]*?>");
+    private static final REProgram B_BIDI_BOLD_SEARCH_PATTERN = createSearchPattern("<b([:space:])+?style=\'mso-bidi-font-weight:[^>]*?>");
+    private static final REProgram B_BIDI_ITALIC_SEARCH_PATTERN = createSearchPattern("<i([:space:])+?style=\'mso-bidi-font-style:[^>]*?>");
 
     private static REProgram createSearchPattern(String p_pattern)
     {
@@ -116,11 +116,11 @@ public class WordHtmlToTmx
     // Constructors
     //
 
-    public WordHtmlToTmx ()
+    public WordHtmlToTmx()
     {
     }
 
-    public WordHtmlToTmx (Logger p_logger)
+    public WordHtmlToTmx(Logger p_logger)
     {
         m_logger = p_logger;
     }
@@ -299,49 +299,48 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Handle a ASP/JSP tag; the script text is included in the
-     * argument <code>t</code>.
+     * Handle a ASP/JSP tag; the script text is included in the argument
+     * <code>t</code>.
      */
     public void handleXsp(HtmlObjects.Xsp t)
     {
     }
 
     /**
-     * Handle the <code>&lt;script&gt;</code> tag; the script text is
-     * included in the argument <code>t</code>.
+     * Handle the <code>&lt;script&gt;</code> tag; the script text is included
+     * in the argument <code>t</code>.
      */
     public void handleScript(HtmlObjects.Script t)
     {
     }
 
     /**
-     * Handle the <code>&lt;java&gt;</code> tag; the java text is
-     * included in the argument <code>t</code>.
+     * Handle the <code>&lt;java&gt;</code> tag; the java text is included in
+     * the argument <code>t</code>.
      */
     public void handleJava(HtmlObjects.Java t)
     {
     }
 
     /**
-     * Handle the <code>&lt;style&gt;</code> tag; the style text is
-     * included in the argument <code>t</code>.
+     * Handle the <code>&lt;style&gt;</code> tag; the style text is included in
+     * the argument <code>t</code>.
      */
     public void handleStyle(HtmlObjects.Style t)
     {
     }
 
     /**
-     * Handle the <code>&lt;CFSCRIPT&gt;</code> tag; the ColdFusion
-     * script text is included in the argument <code>t</code>.
+     * Handle the <code>&lt;CFSCRIPT&gt;</code> tag; the ColdFusion script text
+     * is included in the argument <code>t</code>.
      */
     public void handleCFScript(HtmlObjects.CFScript t)
     {
     }
 
     /**
-     * Handle the <code>&lt;CFSCRIPT&gt;</code> tag with SQL
-     * statements inside; the SQL text is included in the argument
-     * <code>t</code>.
+     * Handle the <code>&lt;CFSCRIPT&gt;</code> tag with SQL statements inside;
+     * the SQL text is included in the argument <code>t</code>.
      */
     public void handleCFQuery(HtmlObjects.CFQuery t)
     {
@@ -405,8 +404,8 @@ public class WordHtmlToTmx
             String post = "";
             String segment = "";
 
-            RE re = new RE(SEG_SEARCH_PATTERN,
-                RE.MATCH_CASEINDEPENDENT | RE.MATCH_SINGLELINE);
+            RE re = new RE(SEG_SEARCH_PATTERN, RE.MATCH_CASEINDEPENDENT
+                    | RE.MATCH_SINGLELINE);
 
             while (re.match(temp))
             {
@@ -416,21 +415,19 @@ public class WordHtmlToTmx
                 temp = post;
 
                 /*
-                // Fix up peculiarities of the extraction here. Example:
-                // <b> comes back as <b style='mso-bidi-font-weight:normal'>,
-                // <i> comes back as <i style='mso-bidi-font-style:normal'>.
-                // Note: The Word-HTML Extractor does this too.
-
-                //debug(segment);
-                RE re2 = new RE(B_BIDI_BOLD_SEARCH_PATTERN,
-                    RE.MATCH_CASEINDEPENDENT | RE.MATCH_SINGLELINE);
-                segment = re2.subst(segment, "<b>");
-
-                re2 = new RE(B_BIDI_ITALIC_SEARCH_PATTERN,
-                    RE.MATCH_CASEINDEPENDENT | RE.MATCH_SINGLELINE);
-                segment = re2.subst(segment, "<i>");
-                //debug(segment);
-                */
+                 * // Fix up peculiarities of the extraction here. Example: //
+                 * <b> comes back as <b style='mso-bidi-font-weight:normal'>, //
+                 * <i> comes back as <i style='mso-bidi-font-style:normal'>. //
+                 * Note: The Word-HTML Extractor does this too.
+                 * 
+                 * //debug(segment); RE re2 = new RE(B_BIDI_BOLD_SEARCH_PATTERN,
+                 * RE.MATCH_CASEINDEPENDENT | RE.MATCH_SINGLELINE); segment =
+                 * re2.subst(segment, "<b>");
+                 * 
+                 * re2 = new RE(B_BIDI_ITALIC_SEARCH_PATTERN,
+                 * RE.MATCH_CASEINDEPENDENT | RE.MATCH_SINGLELINE); segment =
+                 * re2.subst(segment, "<i>"); //debug(segment);
+                 */
 
                 preambles.add(pre);
 
@@ -463,14 +460,14 @@ public class WordHtmlToTmx
                 return;
             }
 
-            int maxSegs = ((ArrayList)segments.get(0)).size();
+            int maxSegs = ((ArrayList) segments.get(0)).size();
 
             // Sanity check 2: Loop over the System4 segments and find
             // the minimum number of segments in each <seg> that can
             // be created in this TU.
             for (int i = 0, max = preambles.size(); i < max; i++)
             {
-                int numSegs = ((ArrayList)segments.get(i)).size();
+                int numSegs = ((ArrayList) segments.get(i)).size();
 
                 maxSegs = Math.min(maxSegs, numSegs);
             }
@@ -491,8 +488,9 @@ public class WordHtmlToTmx
                 // Loop over TUVs in TU
                 for (int j = 0, max = preambles.size(); j < max; j++)
                 {
-                    String preamble = (String)preambles.get(j);
-                    String gxml = (String)(((ArrayList)segments.get(j)).get(i));
+                    String preamble = (String) preambles.get(j);
+                    String gxml = (String) (((ArrayList) segments.get(j))
+                            .get(i));
 
                     toWrite.append(preamble);
                     toWrite.append("<seg>");
@@ -526,11 +524,11 @@ public class WordHtmlToTmx
 
                 for (int i = 0; i < segments.size(); i++)
                 {
-                    ArrayList segs = (ArrayList)segments.get(i);
+                    ArrayList segs = (ArrayList) segments.get(i);
 
                     for (int j = 0; j < segs.size(); j++)
                     {
-                        String gxml = (String)segs.get(j);
+                        String gxml = (String) segs.get(j);
                         debug("Segment " + i + ":" + j + "= " + gxml);
                     }
                 }
@@ -565,49 +563,49 @@ public class WordHtmlToTmx
     }
 
     /**
-     * After System4 paragraph segmentation, return all translatable
-     * segments (the real segments) in a list.
+     * After System4 paragraph segmentation, return all translatable segments
+     * (the real segments) in a list.
      */
     public ArrayList getSegments(Output p_output)
     {
         ArrayList result = new ArrayList();
 
-        for (Iterator it = p_output.documentElementIterator(); it.hasNext(); )
+        for (Iterator it = p_output.documentElementIterator(); it.hasNext();)
         {
-            DocumentElement de = (DocumentElement)it.next();
+            DocumentElement de = (DocumentElement) it.next();
 
             switch (de.type())
             {
-            case DocumentElement.TRANSLATABLE:
-            {
-                TranslatableElement elem = (TranslatableElement)de;
-
-                if (elem.hasSegments())
+                case DocumentElement.TRANSLATABLE:
                 {
-                    ArrayList segments = elem.getSegments();
+                    TranslatableElement elem = (TranslatableElement) de;
 
-                    for (int i = 0, max = segments.size(); i < max; i++)
+                    if (elem.hasSegments())
                     {
-                        SegmentNode node = (SegmentNode)segments.get(i);
-                        result.add(node.getSegment());
+                        ArrayList segments = elem.getSegments();
+
+                        for (int i = 0, max = segments.size(); i < max; i++)
+                        {
+                            SegmentNode node = (SegmentNode) segments.get(i);
+                            result.add(node.getSegment());
+                        }
                     }
+
+                    break;
                 }
+                case DocumentElement.LOCALIZABLE:
+                {
+                    // Thu Dec 04 01:53:59 2003 CvdL: ignore localizables.
+                    /*
+                     * LocalizableElement elem = (LocalizableElement)de;
+                     * result.add(elem.getChunk());
+                     */
 
-                break;
-            }
-            case DocumentElement.LOCALIZABLE:
-            {
-                // Thu Dec 04 01:53:59 2003 CvdL: ignore localizables.
-                /*
-                LocalizableElement elem = (LocalizableElement)de;
-                result.add(elem.getChunk());
-                */
-
-                break;
-            }
-            default:
-                // skip all others
-                break;
+                    break;
+                }
+                default:
+                    // skip all others
+                    break;
             }
         }
 
@@ -615,13 +613,19 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Removes tags inserted by Word: either <p>...</p>, or
-     * <p><span>...<o:p></o:p></span></p>.
+     * Removes tags inserted by Word: either
+     * <p>
+     * ...
+     * </p>
+     * , or
+     * <p>
+     * <span>...<o:p></o:p></span>
+     * </p>
+     * .
      *
-     * The Word-HTML extractor performs the same simplifications but
-     * WE DO HAVE TO MAKE THEM HERE because of Word conversion
-     * particuliarities that generate "improperly" balanced tags (for
-     * our purposes, at least).
+     * The Word-HTML extractor performs the same simplifications but WE DO HAVE
+     * TO MAKE THEM HERE because of Word conversion particuliarities that
+     * generate "improperly" balanced tags (for our purposes, at least).
      */
     private void cleanupRawTags(ArrayList p_tags)
     {
@@ -654,7 +658,9 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Removes paragraph tags: <p> and <o:p>.
+     * Removes paragraph tags:
+     * <p>
+     * and <o:p>.
      */
     private void removeParagraphTags(ArrayList p_tags)
     {
@@ -670,7 +676,7 @@ public class WordHtmlToTmx
 
             if (o instanceof HtmlObjects.Tag)
             {
-                HtmlObjects.Tag tag = (HtmlObjects.Tag)o;
+                HtmlObjects.Tag tag = (HtmlObjects.Tag) o;
 
                 if (tag.tag.equalsIgnoreCase("o:p"))
                 {
@@ -691,15 +697,14 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Removes property revisions: <span class=msoProChange> and the
-     * closing tag.
+     * Removes property revisions: <span class=msoProChange> and the closing
+     * tag.
      */
     private void removePropRevisionMarkers(ArrayList p_tags)
     {
         boolean b_changed = true;
 
-  propchange:
-        while (b_changed)
+        propchange: while (b_changed)
         {
             for (int i = 0, max = p_tags.size(); i < max; i++)
             {
@@ -707,11 +712,11 @@ public class WordHtmlToTmx
 
                 if (o instanceof HtmlObjects.Tag)
                 {
-                    HtmlObjects.Tag tag = (HtmlObjects.Tag)o;
+                    HtmlObjects.Tag tag = (HtmlObjects.Tag) o;
                     String original = tag.original;
 
-                    if (tag.tag.equalsIgnoreCase("span") &&
-                        original.indexOf("class=msoChangeProp") >= 0)
+                    if (tag.tag.equalsIgnoreCase("span")
+                            && original.indexOf("class=msoChangeProp") >= 0)
                     {
                         p_tags.remove(i);
 
@@ -729,15 +734,14 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Removes DEL revisions: <span class=msoDel> and text up to and
-     * including the closing tag.
+     * Removes DEL revisions: <span class=msoDel> and text up to and including
+     * the closing tag.
      */
     private void removeDelRevisions(ArrayList p_tags)
     {
         boolean b_changed = true;
 
-  deltags:
-        while (b_changed)
+        deltags: while (b_changed)
         {
             for (int i = 0, max = p_tags.size(); i < max; i++)
             {
@@ -745,11 +749,11 @@ public class WordHtmlToTmx
 
                 if (o instanceof HtmlObjects.Tag)
                 {
-                    HtmlObjects.Tag tag = (HtmlObjects.Tag)o;
+                    HtmlObjects.Tag tag = (HtmlObjects.Tag) o;
                     String original = tag.original;
 
-                    if (tag.tag.equalsIgnoreCase("span") &&
-                        original.indexOf("class=msoDel") >= 0)
+                    if (tag.tag.equalsIgnoreCase("span")
+                            && original.indexOf("class=msoDel") >= 0)
                     {
                         removeTagAndContent(p_tags, tag);
 
@@ -763,15 +767,14 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Removes INS revisions: <span class=msoIns> followed by <INS>,
-     * </INS> and the closing </span>.
+     * Removes INS revisions: <span class=msoIns> followed by <INS>, </INS> and
+     * the closing </span>.
      */
     private void applyInsRevisions(ArrayList p_tags)
     {
         boolean b_changed = true;
 
-  instags:
-        while (b_changed)
+        instags: while (b_changed)
         {
             for (int i = 0, max = p_tags.size(); i < max; i++)
             {
@@ -779,11 +782,11 @@ public class WordHtmlToTmx
 
                 if (o instanceof HtmlObjects.Tag)
                 {
-                    HtmlObjects.Tag tag = (HtmlObjects.Tag)o;
+                    HtmlObjects.Tag tag = (HtmlObjects.Tag) o;
                     String original = tag.original;
 
-                    if (tag.tag.equalsIgnoreCase("span") &&
-                        original.indexOf("class=msoIns") >= 0)
+                    if (tag.tag.equalsIgnoreCase("span")
+                            && original.indexOf("class=msoIns") >= 0)
                     {
                         removeInsTag(p_tags, tag);
 
@@ -803,8 +806,7 @@ public class WordHtmlToTmx
     {
         boolean b_changed = true;
 
-  endnotes:
-        while (b_changed)
+        endnotes: while (b_changed)
         {
             for (int i = 0, max = p_tags.size() - 1; i < max; i++)
             {
@@ -812,11 +814,11 @@ public class WordHtmlToTmx
 
                 if (o instanceof HtmlObjects.Tag)
                 {
-                    HtmlObjects.Tag tag = (HtmlObjects.Tag)o;
+                    HtmlObjects.Tag tag = (HtmlObjects.Tag) o;
                     String original = tag.original;
 
-                    if (tag.tag.equalsIgnoreCase("A") &&
-                        original.indexOf("style='mso-endnote-id:") > 0)
+                    if (tag.tag.equalsIgnoreCase("A")
+                            && original.indexOf("style='mso-endnote-id:") > 0)
                     {
                         removeTagAndContent(p_tags, tag);
                         continue endnotes;
@@ -829,29 +831,28 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Removes INS revisions: <span class=msoIns> followed by <INS>,
-     * </INS> and the closing </span>.
+     * Removes INS revisions: <span class=msoIns> followed by <INS>, </INS> and
+     * the closing </span>.
      */
     private void removeEmptyFormatting(ArrayList p_tags)
     {
         boolean b_changed = true;
 
-  emptytag:
-        while (b_changed)
+        emptytag: while (b_changed)
         {
             for (int i = 0, max = p_tags.size() - 1; i < max; i++)
             {
                 Object o1 = p_tags.get(i);
                 Object o2 = p_tags.get(i + 1);
 
-                if (o1 instanceof HtmlObjects.Tag &&
-                    o2 instanceof HtmlObjects.EndTag)
+                if (o1 instanceof HtmlObjects.Tag
+                        && o2 instanceof HtmlObjects.EndTag)
                 {
-                    HtmlObjects.Tag tag = (HtmlObjects.Tag)o1;
-                    HtmlObjects.EndTag etag = (HtmlObjects.EndTag)o2;
+                    HtmlObjects.Tag tag = (HtmlObjects.Tag) o1;
+                    HtmlObjects.EndTag etag = (HtmlObjects.EndTag) o2;
 
-                    if (tag.tag.equalsIgnoreCase(etag.tag) &&
-                        tag.partnerId == etag.partnerId)
+                    if (tag.tag.equalsIgnoreCase(etag.tag)
+                            && tag.partnerId == etag.partnerId)
                     {
                         p_tags.remove(i + 1);
                         p_tags.remove(i);
@@ -866,8 +867,8 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Removes the closing tag for the given HtmlObjects.Tag as
-     * determined by the tag's partner id.
+     * Removes the closing tag for the given HtmlObjects.Tag as determined by
+     * the tag's partner id.
      */
     private void removeClosingTag(ArrayList p_tags, HtmlObjects.Tag p_tag)
     {
@@ -877,10 +878,10 @@ public class WordHtmlToTmx
 
             if (o instanceof HtmlObjects.EndTag)
             {
-                HtmlObjects.EndTag etag = (HtmlObjects.EndTag)o;
+                HtmlObjects.EndTag etag = (HtmlObjects.EndTag) o;
 
-                if (p_tag.tag.equalsIgnoreCase(etag.tag) &&
-                    p_tag.partnerId == etag.partnerId)
+                if (p_tag.tag.equalsIgnoreCase(etag.tag)
+                        && p_tag.partnerId == etag.partnerId)
                 {
                     p_tags.remove(i);
                     return;
@@ -891,16 +892,14 @@ public class WordHtmlToTmx
 
     /**
      * Removes a Word insert revision by removing a starting <span
-     * class=msoIns><ins> tag + counterparts, and leaving the
-     * contents in place.
+     * class=msoIns><ins> tag + counterparts, and leaving the contents in place.
      */
     private void removeInsTag(ArrayList p_tags, HtmlObjects.Tag p_tag)
     {
         int i_start = 0;
         int i_end = 0;
 
-  loop:
-        for (int i = 0, max = p_tags.size(); i < max; i++)
+        loop: for (int i = 0, max = p_tags.size(); i < max; i++)
         {
             Object o = p_tags.get(i);
 
@@ -914,10 +913,10 @@ public class WordHtmlToTmx
 
                     if (o1 instanceof HtmlObjects.EndTag)
                     {
-                        HtmlObjects.EndTag etag = (HtmlObjects.EndTag)o1;
+                        HtmlObjects.EndTag etag = (HtmlObjects.EndTag) o1;
 
-                        if (p_tag.tag.equalsIgnoreCase(etag.tag) &&
-                            p_tag.partnerId == etag.partnerId)
+                        if (p_tag.tag.equalsIgnoreCase(etag.tag)
+                                && p_tag.partnerId == etag.partnerId)
                         {
                             i_end = j;
                             break loop;
@@ -935,16 +934,15 @@ public class WordHtmlToTmx
     }
 
     /**
-     * Removes a tag and its content between the endtag (which must
-     * exist and be paired with the start).
+     * Removes a tag and its content between the endtag (which must exist and be
+     * paired with the start).
      */
     private void removeTagAndContent(ArrayList p_tags, HtmlObjects.Tag p_tag)
     {
         int i_start = 0;
         int i_end = 0;
 
-  loop:
-        for (int i = 0, max = p_tags.size(); i < max; i++)
+        loop: for (int i = 0, max = p_tags.size(); i < max; i++)
         {
             Object o = p_tags.get(i);
 
@@ -958,10 +956,10 @@ public class WordHtmlToTmx
 
                     if (o1 instanceof HtmlObjects.EndTag)
                     {
-                        HtmlObjects.EndTag etag = (HtmlObjects.EndTag)o1;
+                        HtmlObjects.EndTag etag = (HtmlObjects.EndTag) o1;
 
-                        if (p_tag.tag.equalsIgnoreCase(etag.tag) &&
-                            p_tag.partnerId == etag.partnerId)
+                        if (p_tag.tag.equalsIgnoreCase(etag.tag)
+                                && p_tag.partnerId == etag.partnerId)
                         {
                             i_end = j;
                             break loop;
@@ -978,11 +976,13 @@ public class WordHtmlToTmx
     }
 
     /**
-     * <p>Walk through a segment and mark each pairable tag without
-     * buddy as isolated.  The tags' boolean members m_bPaired and
-     * m_bIsolated are false by default.
+     * <p>
+     * Walk through a segment and mark each pairable tag without buddy as
+     * isolated. The tags' boolean members m_bPaired and m_bIsolated are false
+     * by default.
      *
-     * <p>Copied from ling/docproc/extractor/html/ExtractionHandler.
+     * <p>
+     * Copied from ling/docproc/extractor/html/ExtractionHandler.
      */
     private void assignPairingStatus(ArrayList p_segment)
     {
@@ -996,14 +996,13 @@ public class WordHtmlToTmx
 
         i_start = 0;
         i_max = tags.size();
-  outer:
-        while (i_start < i_max)
+        outer: while (i_start < i_max)
         {
             o1 = tags.get(i_start);
 
             if (o1 instanceof HtmlObjects.Tag)
             {
-                t_start = (HtmlObjects.Tag)o1;
+                t_start = (HtmlObjects.Tag) o1;
 
                 // don't consider tags that are already closed (<BR/>)
                 if (t_start.isClosed)
@@ -1023,7 +1022,7 @@ public class WordHtmlToTmx
 
                     if (o2 instanceof HtmlObjects.Tag)
                     {
-                        t_tag = (HtmlObjects.Tag)o2;
+                        t_tag = (HtmlObjects.Tag) o2;
 
                         if (t_start.tag.equalsIgnoreCase(t_tag.tag))
                         {
@@ -1033,7 +1032,7 @@ public class WordHtmlToTmx
                     }
                     else if (o2 instanceof HtmlObjects.EndTag)
                     {
-                        t_end = (HtmlObjects.EndTag)o2;
+                        t_end = (HtmlObjects.EndTag) o2;
 
                         if (t_start.tag.equalsIgnoreCase(t_end.tag))
                         {
@@ -1062,7 +1061,7 @@ public class WordHtmlToTmx
             }
             else if (o1 instanceof HtmlObjects.CFTag)
             {
-                t_CFstart = (HtmlObjects.CFTag)o1;
+                t_CFstart = (HtmlObjects.CFTag) o1;
 
                 // don't consider tags that are already closed (<BR/>)
                 if (t_CFstart.isClosed)
@@ -1082,7 +1081,7 @@ public class WordHtmlToTmx
 
                     if (o2 instanceof HtmlObjects.CFTag)
                     {
-                        t_CFtag = (HtmlObjects.CFTag)o2;
+                        t_CFtag = (HtmlObjects.CFTag) o2;
 
                         if (t_CFstart.tag.equalsIgnoreCase(t_CFtag.tag))
                         {
@@ -1092,7 +1091,7 @@ public class WordHtmlToTmx
                     }
                     else if (o2 instanceof HtmlObjects.EndTag)
                     {
-                        t_end = (HtmlObjects.EndTag)o2;
+                        t_end = (HtmlObjects.EndTag) o2;
 
                         if (t_CFstart.tag.equalsIgnoreCase(t_end.tag))
                         {
@@ -1119,7 +1118,7 @@ public class WordHtmlToTmx
                 --i_max;
                 continue outer;
             }
-            else if (! (o1 instanceof HtmlObjects.EndTag))
+            else if (!(o1 instanceof HtmlObjects.EndTag))
             {
                 // don't consider non-tag tags in the list
                 tags.remove(i_start);
@@ -1132,8 +1131,11 @@ public class WordHtmlToTmx
     }
 
     /**
-     * The first paragraph contains TMX header info as in
-     * "<p>SOURCELANG='EN-US'</p>".
+     * The first paragraph contains TMX header info as in "
+     * <p>
+     * SOURCELANG='EN-US'
+     * </p>
+     * ".
      */
     public String getSourceLang(String p_text)
     {
@@ -1159,24 +1161,22 @@ public class WordHtmlToTmx
         return p_name.substring(p_name.lastIndexOf(".") + 1);
     }
 
-    public void startOutputFile(String p_base)
-        throws Exception
+    public void startOutputFile(String p_base) throws Exception
     {
         m_filename = p_base + "-gxml.tmx";
 
         debug("Writing to file " + m_filename);
 
         m_writer = new PrintWriter(new OutputStreamWriter(
-            new BufferedOutputStream(new FileOutputStream(m_filename)),
-            "UTF8"));
+                new BufferedOutputStream(new FileOutputStream(m_filename)),
+                "UTF8"));
 
         m_writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
         m_writer.println(m_header.getTmxDeclaration());
         m_writer.println(m_header.getTmxXml());
     }
 
-    public void closeOutputFile()
-        throws Exception
+    public void closeOutputFile() throws Exception
     {
         m_writer.println("</body>");
         m_writer.println("</tmx>");
@@ -1200,22 +1200,20 @@ public class WordHtmlToTmx
         // Done in handleFirstParagraph()
         // m_header.setSourceLang("en_US");
 
-        // TODO: Datatype should be a constant in Tmx.java.  The data
+        // TODO: Datatype should be a constant in Tmx.java. The data
         // type should probably be a native identifier ("g-tmx"?)
         // because now we have native data and don't care about where
         // it came from.
         m_header.setDatatype("rtf");
     }
 
-    public Reader createInputReader(String p_url)
-        throws Exception
+    public Reader createInputReader(String p_url) throws Exception
     {
-        return new BufferedReader(new InputStreamReader(
-            new FileInputStream(p_url), "UTF8"));
+        return new BufferedReader(new InputStreamReader(new FileInputStream(
+                p_url), "UTF8"));
     }
 
-    public void parseFile(String p_url)
-        throws Exception
+    public void parseFile(String p_url) throws Exception
     {
         Reader inputReader = createInputReader(p_url);
 
@@ -1239,8 +1237,7 @@ public class WordHtmlToTmx
     /**
      * Main method to call, returns the new filename of the result.
      */
-    public String convertHtmlToTmx(String p_url)
-        throws Exception
+    public String convertHtmlToTmx(String p_url) throws Exception
     {
         final String baseName = getBaseName(p_url);
         final String extension = getExtension(p_url);
@@ -1254,15 +1251,14 @@ public class WordHtmlToTmx
 
         closeOutputFile();
 
-        info("Processed " + m_entryCount + " TUs into file `" +
-            m_filename + "', " + m_errorCount + " errors, " +
-            m_ignoreCount + " ignored TUs.");
+        info("Processed " + m_entryCount + " TUs into file `" + m_filename
+                + "', " + m_errorCount + " errors, " + m_ignoreCount
+                + " ignored TUs.");
 
         return m_filename;
     }
 
-    static public void main(String[] argv)
-        throws Exception
+    static public void main(String[] argv) throws Exception
     {
         WordHtmlToTmx a = new WordHtmlToTmx();
 
@@ -1280,6 +1276,6 @@ public class WordHtmlToTmx
             com.globalsight.ling.docproc.extractor.html.HtmlObjects.Text t)
     {
         // TODO Auto-generated method stub
-        
+
     }
 }

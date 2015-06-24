@@ -105,10 +105,6 @@ public class SecurityManagerLocal implements SecurityManager
             { "Invalid login info received: " + userName + ", password="
                     + p_password };
 
-            CATEGORY.info("SecurityManagerException is thrown from: "
-                    + "SecurityManagerLocal::authenticateUser(): "
-                    + messageArgument[0]);
-
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
                     messageArgument, null);
@@ -155,10 +151,6 @@ public class SecurityManagerLocal implements SecurityManager
                 { "Invalid login info received: " + userName + ", password="
                         + p_password };
 
-                CATEGORY.info("SecurityManagerException is thrown from: "
-                        + "SecurityManagerLocal::authenticateUser(): "
-                        + messageArgument[0]);
-
                 throw new SecurityManagerException(
                         SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
                         messageArgument, null);
@@ -171,10 +163,6 @@ public class SecurityManagerLocal implements SecurityManager
             String[] messageArgument =
             { "Error for authenticating user " + userName };
 
-            CATEGORY.info("SecurityManagerException is thrown from: "
-                    + "SecurityManagerLocal::authenticateUser(): "
-                    + messageArgument[0]);
-
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
                     messageArgument, ex);
@@ -183,10 +171,6 @@ public class SecurityManagerLocal implements SecurityManager
         {
             String[] messageArgument =
             { "UserManager failed to get info for user " + userName };
-
-            CATEGORY.info("SecurityManagerException is thrown from: "
-                    + "SecurityManagerLocal::authenticateUser(): "
-                    + messageArgument[0]);
 
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
@@ -201,10 +185,6 @@ public class SecurityManagerLocal implements SecurityManager
             String[] messageArgument =
             { "Case of user name " + userName + " is not correct" };
 
-            CATEGORY.info("SecurityManagerException is thrown from: "
-                    + "SecurityManagerLocal::authenticateUser(): "
-                    + messageArgument[0], null);
-
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
                     messageArgument, null);
@@ -215,10 +195,6 @@ public class SecurityManagerLocal implements SecurityManager
         {
             String[] messageArgument =
             { "User " + userName + " is not an active user" };
-
-            CATEGORY.warn("SecurityManagerException is thrown from: "
-                    + "SecurityManagerLocal::authenticateUser(): "
-                    + messageArgument[0], null);
 
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,

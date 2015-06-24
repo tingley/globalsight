@@ -16,38 +16,35 @@
  */
 package com.globalsight.ling.docproc.extractor.ebay;
 
-import com.globalsight.ling.docproc.extractor.xml.Extractor;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringWriter;
 
-import com.globalsight.ling.docproc.AbstractExtractor;
+import com.globalsight.ling.docproc.EFInputData;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 import com.globalsight.ling.docproc.ExtractorRegistry;
-import com.globalsight.ling.docproc.EFInputData;
-
-import java.io.*;
-
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
+import com.globalsight.ling.docproc.extractor.xml.Extractor;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.RECompiler;
+import com.sun.org.apache.regexp.internal.REProgram;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 /**
- * Special extractor for EBay's .prj files, which are XSL files with
- * an invalid XML declaration.
+ * Special extractor for EBay's .prj files, which are XSL files with an invalid
+ * XML declaration.
  *
  * <?xml version=\${XMLVERSION} encoding="\${\${COUNTRYPATH}CHARENCODING}" ?>
  */
-public class PrjExtractor
-    extends Extractor
+public class PrjExtractor extends Extractor
 {
     // WARNING - keep in sync with merger/ebay/PrjPostMergeProcessor
     public static final String XMLDECLARATION = "<?xml version=\"1.0\" ?>";
 
-    private static final REProgram COMMENT_PATTERN =
-        compilePattern("<comment (.*?)/>");
+    private static final REProgram COMMENT_PATTERN = compilePattern("<comment (.*?)/>");
 
     private static final String COMMENT_SUBST_START = "<comment>";
-    private static final String COMMENT_SUBST_END   = "</comment>";
+    private static final String COMMENT_SUBST_END = "</comment>";
 
     private static REProgram compilePattern(String p_pattern)
     {
@@ -87,19 +84,17 @@ public class PrjExtractor
     /**
      * Preprocess the input:
      */
-    public void extract()
-        throws ExtractorException
+    public void extract() throws ExtractorException
     {
         preprocessInput();
 
         super.extract();
     }
 
-    private void preprocessInput()
-        throws ExtractorException
+    private void preprocessInput() throws ExtractorException
     {
         BufferedReader reader = new BufferedReader(readInput());
-        StringWriter   writer = new StringWriter(4096);
+        StringWriter writer = new StringWriter(4096);
 
         String line = null;
 
@@ -137,7 +132,7 @@ public class PrjExtractor
             System.err.println("can't preprocess input: " + ex);
 
             throw new ExtractorException(
-                ExtractorExceptionConstants.INVALID_SOURCE, ex);
+                    ExtractorExceptionConstants.INVALID_SOURCE, ex);
         }
     }
 
@@ -150,8 +145,8 @@ public class PrjExtractor
         int start = 0;
         while (re.match(p_line, start))
         {
-            String subst = COMMENT_SUBST_START + re.getParen(1) +
-                COMMENT_SUBST_END;
+            String subst = COMMENT_SUBST_START + re.getParen(1)
+                    + COMMENT_SUBST_END;
 
             result = re.subst(result, subst, RE.REPLACE_FIRSTONLY);
 

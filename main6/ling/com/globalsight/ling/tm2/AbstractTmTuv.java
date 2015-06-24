@@ -572,6 +572,7 @@ public abstract class AbstractTmTuv
             String p_originalString)
             throws DiplomatBasicParserException
         {
+        	p_name = p_name.toLowerCase();
             if (p_name.equals(GxmlNames.SEGMENT) ||
                 p_name.equals(GxmlNames.LOCALIZABLE))
             {

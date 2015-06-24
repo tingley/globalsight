@@ -17,6 +17,7 @@
 package com.globalsight.connector.mindtouch.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URL;
@@ -30,13 +31,26 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.cookie.CookieSpec;
+import org.apache.http.cookie.CookieSpecProvider;
+import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BestMatchSpecFactory;
+import org.apache.http.impl.cookie.BrowserCompatSpec;
+import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -73,7 +87,7 @@ public class MindTouchHelper
      */
     public String doTest()
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        CloseableHttpClient httpClient = getHttpClient();
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/home/info";
@@ -104,7 +118,7 @@ public class MindTouchHelper
 
     public void deletePage(long pageId) throws Exception
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        CloseableHttpClient httpClient = getHttpClient();
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/" + pageId;
@@ -136,7 +150,7 @@ public class MindTouchHelper
      */
     public String getTreeXml(String pageId)
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        CloseableHttpClient httpClient = getHttpClient();
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/tree";
@@ -265,7 +279,7 @@ public class MindTouchHelper
      */
     public String getPageContents(String pageId)
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        CloseableHttpClient httpClient = getHttpClient();
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/" + pageId
@@ -305,7 +319,7 @@ public class MindTouchHelper
      */
     public String getPageTags(long pageId)
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        CloseableHttpClient httpClient = getHttpClient();
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/tags";
@@ -362,7 +376,7 @@ public class MindTouchHelper
 
     private String getPageInfo2(String url)
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        CloseableHttpClient httpClient = getHttpClient();
         try
         {
             HttpGet httpget = getHttpGet(url);
@@ -458,7 +472,7 @@ public class MindTouchHelper
             MindTouchPageInfo pageInfo, String sourceLocale, String targetLocale)
             throws Exception
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        CloseableHttpClient httpClient = getHttpClient();
         String path = null;
         try
         {
@@ -525,7 +539,7 @@ public class MindTouchHelper
     public void putPageTags(File tagsTrgFile, MindTouchPageInfo pageInfo,
             String sourceLocale, String targetLocale)
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        CloseableHttpClient httpClient = getHttpClient();
         String path = null;
         try
         {
@@ -579,14 +593,19 @@ public class MindTouchHelper
      * suffix.
      * 
      * @param pageInfo
-     * @param sourceLocale
-     * @param targetLocale
+     * @param sourceLocale -- sample "en_US"
+     * @param targetLocale -- sample "zh_CN"
      * @return String
      */
     private String getNewPath(MindTouchPageInfo pageInfo, String sourceLocale,
             String targetLocale)
     {
         sourceLocale = sourceLocale.replace("_", "-").toLowerCase();
+        String sourceLang = null;
+        if (sourceLocale.indexOf("-") > 0)
+        {
+        	sourceLang = sourceLocale.substring(0, sourceLocale.indexOf("-"));
+        }
         targetLocale = targetLocale.replace("_", "-").toLowerCase();
 
         String path = pageInfo.getPath();
@@ -608,12 +627,47 @@ public class MindTouchHelper
             }
             else
             {
-                path += "(" + targetLocale + ")";
+            	path = getNewPathByLangOnly(path, sourceLang, targetLocale);
             }
         }
         path = URLEncoder.encode(path);
         path = URLEncoder.encode(path);
         return path;
+    }
+
+	private String getNewPathByLangOnly(String sourcePath, String sourceLang,
+			String targetLocale)
+    {
+		if (sourceLang == null)
+			return sourcePath + "(" + targetLocale + ")";
+
+    	boolean isSrcFound = false;
+    	StringBuilder newPath = new StringBuilder();
+    	for (String path : sourcePath.split("/"))
+    	{
+    		if (path.startsWith(sourceLang + "-") && !isSrcFound)
+    		{
+    			isSrcFound = true;
+    			newPath.append("/").append(targetLocale);
+    		}
+    		else
+    		{
+    			newPath.append("/").append(path);
+    		}
+    	}
+
+    	if (!isSrcFound)
+    	{
+    		newPath.append("(").append(targetLocale).append(")");
+    	}
+
+    	String result = newPath.toString();
+    	if (result.startsWith("/"))
+    	{
+    		result = result.substring(1);
+    	}
+
+    	return result;
     }
 
     /**
@@ -752,12 +806,53 @@ public class MindTouchHelper
         return httpdelete;
     }
 
-    private void shutdownHttpClient(HttpClient httpClient)
+    CookieSpecProvider easySpecProvider = new CookieSpecProvider()
+    {
+        public CookieSpec create(HttpContext context)
+        {
+        	return new BrowserCompatSpec()
+        	{
+        		@Override
+				public void validate(Cookie cookie, CookieOrigin origin)
+						throws MalformedCookieException {
+					// Oh, I am easy
+				}
+            };
+        }
+    };
+
+	Registry<CookieSpecProvider> reg = RegistryBuilder
+			.<CookieSpecProvider> create()
+			.register(CookieSpecs.BEST_MATCH, new BestMatchSpecFactory())
+			.register(CookieSpecs.BROWSER_COMPATIBILITY, new BrowserCompatSpecFactory())
+			.register("mySpec", easySpecProvider)
+			.build();
+
+	RequestConfig requestConfig = RequestConfig.custom()
+			.setCookieSpec("mySpec").build();
+
+	private CloseableHttpClient getHttpClient()
+    {
+        CloseableHttpClient httpClient = HttpClients.custom()  
+                .setDefaultCookieSpecRegistry(reg)  
+                .setDefaultRequestConfig(requestConfig)  
+                .build();
+        return httpClient;
+    }
+
+    private void shutdownHttpClient(CloseableHttpClient httpClient)
     {
         if (httpClient == null)
             return;
 
-        httpClient.getConnectionManager().shutdown();
+        try
+        {
+			httpClient.close();
+		}
+        catch (IOException e)
+        {
+        	logger.error("Fail to close httpclient", e);
+		}
     }
 
     private final String authorizationHeader(String username, String password)

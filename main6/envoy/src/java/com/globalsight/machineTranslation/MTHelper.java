@@ -119,9 +119,11 @@ public class MTHelper
      */
     public static boolean needCheckMTTranslationTag(String engineName)
     {
-        if (MachineTranslator.ENGINE_IPTRANSLATOR.equalsIgnoreCase(engineName)
-                || MachineTranslator.ENGINE_DOMT.equalsIgnoreCase(engineName)
-                || MachineTranslator.ENGINE_SAFABA.equalsIgnoreCase(engineName))
+		if (MachineTranslator.ENGINE_IPTRANSLATOR.equalsIgnoreCase(engineName)
+				|| MachineTranslator.ENGINE_DOMT.equalsIgnoreCase(engineName)
+				|| MachineTranslator.ENGINE_SAFABA.equalsIgnoreCase(engineName)
+				|| MachineTranslator.ENGINE_MSTRANSLATOR
+						.equalsIgnoreCase(engineName))
         {
             return true;
         }

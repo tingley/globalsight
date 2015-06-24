@@ -465,7 +465,8 @@ function showNoResults()
 	  buf.push('<th width="12%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
 	}
 	buf.push('</table>');
-	buf.push("${msg_search_results_nothing_found}"+"<p>");
+	buf.push("${msg_search_results_nothing_found}");
+	buf.push(' If "Search in Target", please ensure target has been indexed ("Translation Memory" >> "ReIndex...").<p>');
 	$("#searchResult").html(buf.join(""));
 	$("#loading").html("");
 }

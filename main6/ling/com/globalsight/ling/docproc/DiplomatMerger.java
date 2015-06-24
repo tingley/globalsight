@@ -782,11 +782,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     && this.isUseSecondaryFilter)
             {
                 // GBS-3906
-                tmp = tmp.replace("&amp;", "&");
+                tmp = StringUtil.replace(tmp, "&amp;", "&");
+                tmp = StringUtil.replace(tmp, "&quot;", "\"");
                 if (this.convertHtmlEntityFromSecondFilter)
                 {
                     char[] specXmlEncodeChar =
-                    { '<', '>', '&', '"' };
+                    { '<', '>', '&', '"', '\'' };
                     tmp = XmlFilterHelper.encodeSpecifiedEntities(tmp,
                             specXmlEncodeChar);
                 }

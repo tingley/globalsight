@@ -128,7 +128,7 @@
          <PageLink linkName="exporting" destinationPageName="IER1"></PageLink>
          <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
       </WebPage>
-      <WebPage pageName="IER1" isDefault="false" jspName="/envoy/administration/systemActivities/jobExportStatus/exportingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.ExportingRequestHandler">
+      <WebPage pageName="IER1" isDefault="false" jspName="/envoy/administration/systemActivities/jobExportStatus/exportingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.RunningRequestHandler">
          <PageLink linkName="waiting" destinationPageName="WER1"></PageLink>
          <PageLink linkName="self" destinationPageName="IER1"></PageLink>
          <PageLink linkName="importing" destinationPageName="IR1"></PageLink>

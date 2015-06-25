@@ -71,7 +71,6 @@ public class WfStatePostThread implements Runnable
         wfStatePost(task, destinationArrow);
     }
 
-    @SuppressWarnings("unchecked")
     private void wfStatePost(Task p_task, String p_destinationArrow)
     {
         try
@@ -83,80 +82,77 @@ public class WfStatePostThread implements Runnable
             WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()
                     .getWfStatePostProfile(wfStatePostId);
             s_logger.info("workflow transition post info: " + jsonObj);
+
             doPost(wfStatePost, jsonObj);
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+        	s_logger.error(e);
         }
     }
 
-    private JSONObject getNotifyMessage(Task p_task, String p_destinationArrow)
+	@SuppressWarnings("unchecked")
+	private JSONObject getNotifyMessage(Task p_task, String p_destinationArrow)
+			throws Exception
     {
         String toArrowName = p_destinationArrow;
         JSONObject jsonObj = new JSONObject();
         long jobId = p_task.getJobId();
-        try
+        WorkflowTaskInstance nextTask = ServerProxy.getWorkflowServer()
+                .nextNodeInstances(p_task, p_destinationArrow, null);
+        if (nextTask != null)
         {
-            WorkflowTaskInstance nextTask = ServerProxy.getWorkflowServer()
-                    .nextNodeInstances(p_task, p_destinationArrow, null);
+            jsonObj.put("currActivity", nextTask.getActivityDisplayName());
+        }
+        else
+        {
+            jsonObj.put("currActivity", "exit");
+        }
+        if (StringUtils.isEmpty(p_destinationArrow))
+        {
             if (nextTask != null)
             {
-                jsonObj.put("currActivity", nextTask.getActivityDisplayName());
-            }
-            else
-            {
-                jsonObj.put("currActivity", "exit");
-            }
-            if (StringUtils.isEmpty(p_destinationArrow))
-            {
-                if (nextTask != null)
+                Vector<WorkflowArrowInstance> arrows = nextTask
+                        .getIncomingArrows();
+                if (arrows != null && arrows.size() == 1)
                 {
-                    Vector<WorkflowArrowInstance> arrows = nextTask
-                            .getIncomingArrows();
-                    if (arrows != null && arrows.size() == 1)
-                    {
-                        toArrowName = arrows.get(0).getName();
-                    }
-                    else
-                    {
-                        for (WorkflowArrowInstance arrow : arrows)
-                        {
-                            toArrowName = determineIncomingArrow(arrow,
-                                    p_task.getId());
-                            if (toArrowName != null)
-                                break;
-                        }
-                    }
+                    toArrowName = arrows.get(0).getName();
                 }
                 else
                 {
-                    WorkflowTaskInstance currentTask = ServerProxy
-                            .getWorkflowServer().getWorkflowTaskInstance(
-                                    p_task.getWorkflow().getId(),
-                                    p_task.getId());
-                    Vector<WorkflowArrowInstance> arrows2 = currentTask
-                            .getOutgoingArrows();
-                    for (WorkflowArrowInstance arrow2 : arrows2)
+                    for (WorkflowArrowInstance arrow : arrows)
                     {
-                        toArrowName = determineOutgoingArrow(arrow2);
+                        toArrowName = determineIncomingArrow(arrow,
+                                p_task.getId());
                         if (toArrowName != null)
                             break;
                     }
                 }
             }
-            jsonObj.put("arrowText", toArrowName);
-            jsonObj.put("jobId", jobId);
-            jsonObj.put("jobName", p_task.getJobName());
-            jsonObj.put("workflowId", p_task.getWorkflow().getIdAsLong());
-            jsonObj.put("sourceLocale", p_task.getSourceLocale().toString());
-            jsonObj.put("targetLocale", p_task.getTargetLocale().toString());
-            jsonObj.put("prevaAtivity", p_task.getTaskDisplayName());
+            else
+            {
+                WorkflowTaskInstance currentTask = ServerProxy
+                        .getWorkflowServer().getWorkflowTaskInstance(
+                                p_task.getWorkflow().getId(),
+                                p_task.getId());
+                Vector<WorkflowArrowInstance> arrows2 = currentTask
+                        .getOutgoingArrows();
+                for (WorkflowArrowInstance arrow2 : arrows2)
+                {
+                    toArrowName = determineOutgoingArrow(arrow2);
+                    if (toArrowName != null)
+                        break;
+                }
+            }
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        jsonObj.put("arrowText", toArrowName);
+        jsonObj.put("jobId", jobId);
+        jsonObj.put("jobName", p_task.getJobName());
+        jsonObj.put("workflowId", p_task.getWorkflow().getIdAsLong());
+        jsonObj.put("sourceLocale", p_task.getSourceLocale().toString());
+        jsonObj.put("targetLocale", p_task.getTargetLocale().toString());
+        jsonObj.put("prevaAtivity", p_task.getTaskDisplayName());
+
         return jsonObj;
     }
 
@@ -240,42 +236,35 @@ public class WfStatePostThread implements Runnable
                 reqEntity.setContentType("application/json");
                 httpPost.setEntity(reqEntity);
                 HttpResponse response = httpClient.execute(httpPost);
-                if (response.getStatusLine().getStatusCode() != 204)
+                if (response.getStatusLine().getStatusCode() == 204)
                 {
-                    if ((i == num - 1))
-                    {
-                        if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail()))
-                        {
-                            String recipient = wfStatePost.getNotifyEmail();
-                            long companyId = wfStatePost.getCompanyId();
-                            String[] messageArguments =
-                            { message.toString() };
-                            ServerProxy
-                                    .getMailer()
-                                    .sendMailFromAdmin(
-                                            recipient,
-                                            messageArguments,
-                                            MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,
-                                            MailerConstants.WORKFLOW_STATE_POST_FAILURE_MESSAGE,
-                                            String.valueOf(companyId));
-                        }
-                        logPostFailureInfo(response);
-                    }
-                    continue;
-
+                	break;                	
                 }
                 else
                 {
-                    return;
+                    logPostFailureInfo(response);
+
+                    if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail())
+							&& (i == num - 1))
+                    {
+                        String recipient = wfStatePost.getNotifyEmail();
+                        long companyId = wfStatePost.getCompanyId();
+						String[] messageArguments = { message.toString() };
+						ServerProxy.getMailer().sendMailFromAdmin(
+								recipient,	messageArguments,
+								MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,
+								MailerConstants.WORKFLOW_STATE_POST_FAILURE_MESSAGE,
+								String.valueOf(companyId));
+                    }
                 }
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+            	s_logger.error(e);
             }
         }
     }
-    
+
     CookieSpecProvider easySpecProvider = new CookieSpecProvider()
     {
         public CookieSpec create(HttpContext context)
@@ -313,19 +302,19 @@ public class WfStatePostThread implements Runnable
     {
         if (res.getStatusLine().getStatusCode() == 400)
         {
-            s_logger.info("The request payload data failed validation!");
+			s_logger.warn("Workflow state post failure: The request payload data failed validation!");
         }
         else if (res.getStatusLine().getStatusCode() == 401)
         {
-            s_logger.info("Not authorized. The secret value is incorrect!");
+			s_logger.warn("Workflow state post failure: Not authorized. The secret value is incorrect!");
         }
         else if (res.getStatusLine().getStatusCode() == 405)
         {
-            s_logger.info("The request did not use the POST method!");
+			s_logger.warn("Workflow state post failure: The request did not use the POST method!");
         }
         else if (res.getStatusLine().getStatusCode() == 500)
         {
-            s_logger.info("Database error!");
+            s_logger.warn("Workflow state post failure: Database error!");
         }
     }
 }

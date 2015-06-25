@@ -1054,8 +1054,6 @@ public class CompanyRemoval
                 + (end - start) + " ms");
     }
 
-
-
     private void backupCompany(Connection conn) throws SQLException
     {
         CATEGORY.info("Backing up company " + company.getCompanyName()
@@ -3951,10 +3949,10 @@ public class CompanyRemoval
 
     private void removeWfStatePostProfile(Connection conn) throws SQLException
     {
-        logStart("WORKFLOW_STATE_POST_PROFILE");
+        logStart("WORKFLOW_STATE_POSTS");
         long companyId = company.getId();
         execOnce(conn, SQL_DELETE_WORKFLOW_STATE_POST_BY_COMPANY_ID, companyId);
-        logEnd("WORKFLOW_STATE_POST_PROFILE");
+        logEnd("WORKFLOW_STATE_POSTS");
     }
     
     private void removeWorkflowTemplate(Connection conn) throws SQLException

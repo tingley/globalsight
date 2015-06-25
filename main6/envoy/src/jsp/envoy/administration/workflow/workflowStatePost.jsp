@@ -83,17 +83,22 @@ var helpFile = "<%=bundle.getString("help_workflow_state_post_profiles_main_scre
 		        if (!confirm("<%=bundle.getString("msg_confirm_workflow_state_post_profile_removal")%>"))
 		            return false;
 		        var url = "<%=selfURL%>&action=check&wfStatePostId="+value;
-		 	   $.getJSON(url, function(data) {
-		 		   var wrong = data.wrong;
-		 		   if(wrong != "needRemove"){
-		 			   alert("The job groups are in use,(workflow state post id : "+wrong+") can not be deleted.");
-		 			  workflowStatePostForm.action = "<%=selfURL %>"
-		 				 workflowStatePostForm.submit();
-		 		   }else{
-		 			  workflowStatePostForm.action = "<%=removeURL%>";
-		 			 workflowStatePostForm.submit();
-		 		   }
-		 	   });
+		        $.ajax({
+		        	   type: "POST",
+		        	   url: url,
+		        	   dataType:"json",
+		        	   success: function(data){
+		        		   var wrong = data.wrong;
+				 		   if(wrong != "needRemove"){
+				 			   alert("The Workflow State Post Profile is in use,(workflow state post id : "+wrong+") can not be deleted.");
+				 			  workflowStatePostForm.action = "<%=selfURL %>"
+				 				 workflowStatePostForm.submit();
+				 		   }else{
+				 			  workflowStatePostForm.action = "<%=removeURL%>";
+				 			 workflowStatePostForm.submit();
+				 		   }
+		        	   }
+		        	});
 		    }
 		}
 

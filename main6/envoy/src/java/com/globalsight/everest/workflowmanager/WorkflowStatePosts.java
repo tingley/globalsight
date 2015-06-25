@@ -31,8 +31,8 @@ public class WorkflowStatePosts extends PersistentObject
 
     private String m_listenerURL;
     private String m_secretKey;
-    private String m_timeoutPeriod;
-    private String m_retryNumber;
+    private int m_timeoutPeriod;
+    private int m_retryNumber;
     private String m_notifyEmail;
     private long m_companyId;
 
@@ -42,8 +42,8 @@ public class WorkflowStatePosts extends PersistentObject
     }
 
     public WorkflowStatePosts(long id, String name, String description,
-            String listenerURL, String secretKey, String timeoutPeriod,
-            String retryNumber, String notifyEmail, long companyId)
+            String listenerURL, String secretKey, int timeoutPeriod,
+            int retryNumber, String notifyEmail, long companyId)
     {
         m_wfStatePostId = id;
         m_name = name;
@@ -86,22 +86,22 @@ public class WorkflowStatePosts extends PersistentObject
         this.m_secretKey = m_secretKey;
     }
 
-    public String getTimeoutPeriod()
+    public int getTimeoutPeriod()
     {
         return m_timeoutPeriod;
     }
 
-    public void setTimeoutPeriod(String m_timeoutPeriod)
+    public void setTimeoutPeriod(int m_timeoutPeriod)
     {
         this.m_timeoutPeriod = m_timeoutPeriod;
     }
 
-    public String getRetryNumber()
+    public int getRetryNumber()
     {
         return m_retryNumber;
     }
 
-    public void setRetryNumber(String m_retryNumber)
+    public void setRetryNumber(int m_retryNumber)
     {
         this.m_retryNumber = m_retryNumber;
     }

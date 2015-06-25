@@ -73,8 +73,8 @@
    String wfStatePostDescription = "";
    String wfStatePostlistenerURL = "";
    String wfStatePostSecretKey = "";
-   String wfStatePostTimeoutPeriod = "";
-   String wfStatePostRetryTime = "";
+   String wfStatePostTimeoutPeriod = String.valueOf(10);
+   String wfStatePostRetryTime = String.valueOf(3);
    String wfStatePostNotifyEmail = "";
    if(wfsp != null)
    {
@@ -169,9 +169,8 @@ function confirmForm()
 	    {
 	    	alert("<%=bundle.getString("jsmsg_email_invalid")%>");
 	        return false;
-	    }else{
-	    	return true;
 	    }
+	    return true;
 }
 
 function confirmTime()
@@ -182,20 +181,17 @@ function confirmTime()
 		{
 			alert("<%=bundle.getString("msg_listenertime_retrynumber_time")%>");
 			return false;
-		}else {
-			return true;
 		}
 	}
 	var retryNumber = wfStatePostForm.<%=retryTimeField%>.value;
 	{
-		if(retryNumber != '' && isNumeric(retryNumber))
+		if(retryNumber != '' && !isNumeric(retryNumber))
 		{
 			alert("<%=bundle.getString("msg_listenertime_retrynumber_time")%>");
 			return false;
-		}else{
-			return true;
 		}
 	}
+	return true;
 }
 
 function isNumeric(str){

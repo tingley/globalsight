@@ -108,14 +108,17 @@ public class WorkflowStatePostHandler extends PageHandler implements
     private WorkflowStatePosts getBasicWfStatePostProfile(
             HttpServletRequest p_request)
     {
+        String value;
         WorkflowStatePosts wfStatePost = new WorkflowStatePosts();
         HttpSession session = p_request.getSession(false);
         String name = (String) p_request.getParameter(NAME_FIELD);
         String description = (String) p_request.getParameter(DESCRIPTION_FIELD);
         String listenerURL = (String) p_request.getParameter(LISTENERURL_FIELD);
         String secretKey = (String) p_request.getParameter(SECRETKEY_FIELD);
-        String timeoutPeriod = (String) p_request.getParameter(TIMEOUT_FIELD);
-        String retryNumber = (String) p_request.getParameter(RETRY_TIME_FIELD);
+        value = (String) p_request.getParameter(TIMEOUT_FIELD);
+        int timeoutPeriod = Integer.parseInt(value);
+        value = (String) p_request.getParameter(RETRY_TIME_FIELD);
+        int retryNumber = Integer.parseInt(value);
         String notifyEmail = (String) p_request
                 .getParameter(NOTIFY_EMAIL_FIELD);
 

@@ -16,9 +16,9 @@
 		<property name="secretKey" length="100" column="SECRET_KEY"
 			type="string" not-null="false" unique="false" />
 		<property name="timeoutPeriod" length="3" column="TIMEOUT_PERIOD"
-			type="string" not-null="false" unique="false" />
+			type="int" not-null="false" unique="false" />
 		<property name="retryNumber" length="3" column="RETRY_NUMBER"
-			type="string" not-null="false" unique="false" />
+			type="int" not-null="false" unique="false" />
 		<property name="notifyEmail" length="100" column="NOTIFY_EMAIL"
 			type="string" not-null="true" unique="false" />
 		<property name="companyId"  length="20" column="COMPANY_ID"

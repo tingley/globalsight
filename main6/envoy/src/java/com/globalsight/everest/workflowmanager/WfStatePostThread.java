@@ -16,23 +16,47 @@
  */
 package com.globalsight.everest.workflowmanager;
 
+import java.io.UnsupportedEncodingException;
+import java.rmi.RemoteException;
 import java.util.Vector;
+
+import javax.naming.NamingException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.cookie.CookieSpec;
+import org.apache.http.cookie.CookieSpecProvider;
+import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BestMatchSpecFactory;
+import org.apache.http.impl.cookie.BrowserCompatSpec;
+import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.workflow.WorkflowArrowInstance;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
+import com.globalsight.util.GeneralException;
 import com.globalsight.util.mail.MailerConstants;
 
 public class WfStatePostThread implements Runnable
@@ -58,7 +82,26 @@ public class WfStatePostThread implements Runnable
     }
 
     @SuppressWarnings("unchecked")
-	private void wfStatePost(Task p_task, String p_destinationArrow)
+    private void wfStatePost(Task p_task, String p_destinationArrow)
+    {
+        try
+        {
+            JSONObject jsonObj = getNotifyMessage(p_task, destinationArrow);
+            L10nProfile l10nProfile = ServerProxy.getJobHandler()
+                    .getL10nProfileByJobId(p_task.getJobId());
+            long wfStatePostId = l10nProfile.getWfStatePostId();
+            WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()
+                    .getWfStatePostProfile(wfStatePostId);
+            s_logger.info("workflow transition post info: " + jsonObj);
+            doPost(wfStatePost, jsonObj);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private JSONObject getNotifyMessage(Task p_task, String p_destinationArrow)
     {
         String toArrowName = p_destinationArrow;
         JSONObject jsonObj = new JSONObject();
@@ -119,20 +162,12 @@ public class WfStatePostThread implements Runnable
             jsonObj.put("sourceLocale", p_task.getSourceLocale().toString());
             jsonObj.put("targetLocale", p_task.getTargetLocale().toString());
             jsonObj.put("prevaAtivity", p_task.getTaskDisplayName());
-
-            L10nProfile l10nProfile = ServerProxy.getJobHandler()
-                    .getL10nProfileByJobId(jobId);
-            long wfStatePostId = l10nProfile.getWfStatePostId();
-            WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()
-                    .getWfStatePostProfile(wfStatePostId);
-            s_logger.info("workflow transition post info: " + jsonObj);
-            
-            doPost(wfStatePost, jsonObj);
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+        return jsonObj;
     }
 
     @SuppressWarnings("unchecked")
@@ -194,57 +229,94 @@ public class WfStatePostThread implements Runnable
         return toArrowName;
     }
 
-    @SuppressWarnings({ "resource", "deprecation" })
-	private static void doPost(WorkflowStatePosts wfStatePost,
-            JSONObject message)
+    private void doPost(WorkflowStatePosts wfStatePost, JSONObject message)
     {
-        DefaultHttpClient client = new DefaultHttpClient();
-        String listenerUrl = wfStatePost.getListenerURL();
-        String secretKey = wfStatePost.getSecretKey();
-        HttpPost post = new HttpPost(listenerUrl);
-        post.setHeader(HttpHeaders.AUTHORIZATION, secretKey);
-        StringEntity s;
-        try
+        int num = wfStatePost.getRetryNumber();
+        for (int i = 0; i < num; i++)
         {
-            s = new StringEntity(message.toString());
-            s.setContentEncoding("UTF-8");
-            s.setContentType("application/json");
-            post.setEntity(s);
-            HttpResponse res = client.execute(post);
-            if (res.getStatusLine().getStatusCode() != 204)
+            try
             {
-                if (StringUtils.isNotEmpty(wfStatePost.getRetryNumber()))
+                CloseableHttpClient httpClient = getHttpClient();
+                String listenerUrl = wfStatePost.getListenerURL();
+                String secretKey = wfStatePost.getSecretKey();
+                HttpPost httpPost = new HttpPost(listenerUrl);
+                httpPost.setHeader(HttpHeaders.AUTHORIZATION, secretKey);
+                RequestConfig config = RequestConfig.custom()
+                        .setConnectTimeout(wfStatePost.getTimeoutPeriod())
+                        .build();
+                httpPost.setConfig(config);
+                StringEntity reqEntity = new StringEntity(message.toString());
+                reqEntity.setContentEncoding("UTF-8");
+                reqEntity.setContentType("application/json");
+                httpPost.setEntity(reqEntity);
+                HttpResponse response = httpClient.execute(httpPost);
+                if (response.getStatusLine().getStatusCode() != 204)
                 {
-                    int num = Integer.valueOf(wfStatePost.getRetryNumber());
-                    for (int i = 0; i < num; i++)
+                    if ((i == num - 1))
                     {
-                        doPost(wfStatePost, message);
+                        if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail()))
+                        {
+                            String recipient = wfStatePost.getNotifyEmail();
+                            long companyId = wfStatePost.getCompanyId();
+                            String[] messageArguments =
+                            { message.toString() };
+                            ServerProxy
+                                    .getMailer()
+                                    .sendMailFromAdmin(
+                                            recipient,
+                                            messageArguments,
+                                            MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,
+                                            MailerConstants.WORKFLOW_STATE_POST_FAILURE_MESSAGE,
+                                            String.valueOf(companyId));
+                        }
+                        logPostFailureInfo(response);
                     }
-                }
-                if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail()))
-                {
-                    String recipient = wfStatePost.getNotifyEmail();
-                    long companyId = wfStatePost.getCompanyId();
-                    String[] messageArguments ={ message.toString() };
-                    ServerProxy
-                            .getMailer()
-                            .sendMailFromAdmin(
-                                    recipient,
-                                    messageArguments,
-                                    MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,
-                                    MailerConstants.WORKFLOW_STATE_POST_FAILURE_MESSAGE,
-                                    String.valueOf(companyId));
-                }
+                    continue;
 
-                logPostFailureInfo(res);
-                return;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
             }
         }
-        catch (Exception e)
+    }
+    
+    CookieSpecProvider easySpecProvider = new CookieSpecProvider()
+    {
+        public CookieSpec create(HttpContext context)
         {
-            e.printStackTrace();
+            return new BrowserCompatSpec()
+            {
+                @Override
+                public void validate(Cookie cookie, CookieOrigin origin)
+                        throws MalformedCookieException {
+                    // Oh, I am easy
+                }
+            };
         }
+    };
 
+    Registry<CookieSpecProvider> reg = RegistryBuilder
+            .<CookieSpecProvider> create()
+            .register(CookieSpecs.BEST_MATCH, new BestMatchSpecFactory())
+            .register(CookieSpecs.BROWSER_COMPATIBILITY, new BrowserCompatSpecFactory())
+            .register("mySpec", easySpecProvider)
+            .build();
+
+    RequestConfig requestConfig = RequestConfig.custom()
+            .setCookieSpec("mySpec").build();
+    private CloseableHttpClient getHttpClient()
+    {
+        CloseableHttpClient httpClient = HttpClients.custom()  
+                .setDefaultCookieSpecRegistry(reg)  
+                .setDefaultRequestConfig(requestConfig)  
+                .build();
+        return httpClient;
     }
 
     private static void logPostFailureInfo(HttpResponse res)

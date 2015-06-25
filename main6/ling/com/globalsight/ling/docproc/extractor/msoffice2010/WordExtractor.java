@@ -371,7 +371,9 @@ public class WordExtractor extends AbstractExtractor
 
         String type = TYPE.get(nodeName);
         if (type == null)
+        {
             type = nodeName;
+        }
 
         return type;
     }
@@ -653,9 +655,11 @@ public class WordExtractor extends AbstractExtractor
     private void outBpt(List<Node> nodes, int n)
     {
         StringBuilder sb = new StringBuilder();
+        String nodeType = getType(nodes);
+        boolean isCommonStleTag = false;
 
         sb.append("<bpt i=\"").append(n).append("\" type=\"")
-                .append(getType(nodes)).append("\" ");
+                .append(nodeType).append("\" ");
 
         if (nodes.size() == 1)
         {
@@ -702,12 +706,22 @@ public class WordExtractor extends AbstractExtractor
             }
             sb.append("&gt;");
 
+            if (TYPE.containsValue(nodeType) && nodes.size() == 1)
+            {
+            	isCommonStleTag = true;
+            	sb.append("</bpt>");
+            	outputTranslatableTmx(sb.toString());
+            	sb = null;
+            }
+            
             addFldStart(node, sb);
         }
 
-        sb.append("</bpt>");
-
-        outputTranslatableTmx(sb.toString());
+        if (!isCommonStleTag)
+        {
+	        sb.append("</bpt>");
+	        outputTranslatableTmx(sb.toString());
+        }
     }
 
     private boolean includeFld(Node node)
@@ -882,14 +896,23 @@ public class WordExtractor extends AbstractExtractor
         }
         else if ("fldChar".equals(node.getNodeName()))
         {
-            if (includeFld(node.getParentNode()))
+        	Element e = (Element) node;
+        	Node parent = node.getParentNode();
+        	
+            if (includeFld(parent))
             {
-                if (node.getPreviousSibling() == null
-                        || node.getNextSibling() == null)
-                    return;
-            }
+				if (node.getPreviousSibling() == null
+						|| node.getNextSibling() == null) {
+					String pName = parent.getNodeName();
+					if (TYPE.containsKey(pName)
+							&& "end".equals(e.getAttribute("type"))) {
+						handleFldCharEnd(node, null);
+					}
 
-            Element e = (Element) node;
+					return;
+				}
+			}
+            
             if ("begin".equals(e.getAttribute("type")))
             {
                 handleFldCharStart(node, null);

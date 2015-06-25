@@ -16,16 +16,11 @@
  */
 package com.globalsight.everest.workflowmanager;
 
-import java.io.UnsupportedEncodingException;
-import java.rmi.RemoteException;
 import java.util.Vector;
-
-import javax.naming.NamingException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
@@ -38,25 +33,20 @@ import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BestMatchSpecFactory;
 import org.apache.http.impl.cookie.BrowserCompatSpec;
 import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
-import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.workflow.WorkflowArrowInstance;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.mail.MailerConstants;
 
 public class WfStatePostThread implements Runnable

@@ -81,6 +81,8 @@ public class WorkflowCancelHelper
 
     private static final String SQL_DELETE_SECONDARY_TARGET_FILE = "DELETE FROM secondary_target_file WHERE workflow_id = ?";
 
+    private static final String SQL_DELETE_EXPORT_BATCH = "DELETE FROM exportbatch_workflow WHERE workflow_id = ?";
+
     private static final String SQL_DELETE_WORKFLOW = "DELETE FROM workflow WHERE IFLOW_INSTANCE_ID = ?";
 
     private static final String SQL_DELETE_JBPM_TASKACTORPOOL = "DELETE jt.* "
@@ -134,6 +136,7 @@ public class WorkflowCancelHelper
 
             deleteWorkflowOwner(conn, wfId);
             deleteSecondaryTargetFile(conn, wfId);
+            deleteExportBatch(conn, wfId);
             deleteWorkflow(conn, wfId);
 
             deleteJbpmTaskActorPool(conn, wfId);
@@ -288,6 +291,13 @@ public class WorkflowCancelHelper
                 fileRemoval.removeConverterFile(targetLocale);
             }
         }
+    }
+
+    private static void deleteExportBatch(Connection conn, long wfId) throws SQLException
+    {
+        logStart("EXPORTBATCH_WORKFLOW");
+        execOnce(conn, SQL_DELETE_EXPORT_BATCH, wfId);
+        logEnd("EXPORTBATCH_WORKFLOW");
     }
 
     private static void deleteWorkflow(Connection conn, long wfId) throws SQLException

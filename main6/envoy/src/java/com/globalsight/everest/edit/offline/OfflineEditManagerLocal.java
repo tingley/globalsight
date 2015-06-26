@@ -1868,7 +1868,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                         "<" + tagName + "[^>]*>", "");
                 textContent = textContent.replace("</" + tagName + ">", "");
                 textContent = convertSegment2Pseudo(textContent,
-                        isSrcFileXlf(foo, jobIds));
+                        isSrcFileXlf(foo, jobIds), getTu(foo, jobIds));
                 sourceElement.setText(textContent);
             }
             catch (Exception e)
@@ -1885,7 +1885,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
     }
 
     @SuppressWarnings("static-access")
-    private String convertSegment2Pseudo(String textContent, boolean isXliffXlf)
+	private String convertSegment2Pseudo(String textContent,
+			boolean isXliffXlf, TuImpl currentTu)
     {
         textContent = XLIFFStandardUtil.convertToTmx(textContent);
 
@@ -1898,7 +1899,17 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         convertor = new TmxPseudo();
 
         // configure addable ptags for this format
-        PTagData.setAddables("html");
+        if (currentTu != null)
+        {
+    		String tuDataType = currentTu.getDataType();
+    		String tuType = currentTu.getTuType();
+			PTagData.setAddables(tuDataType);
+			// special treatment for html
+			if ("html".equalsIgnoreCase(tuDataType) && !"text".equals(tuType))
+			{
+				PTagData.setAddables(tuType);
+			}
+        }
         PTagData.setIsXliffXlfFile(isXliffXlf);
 
         // convert the current source text and

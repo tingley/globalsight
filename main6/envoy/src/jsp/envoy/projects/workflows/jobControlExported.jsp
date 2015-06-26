@@ -103,6 +103,11 @@
     sessMr.setMyjobsAttribute("badresults","");
     Company company = (Company)request.getAttribute("company");
     boolean enableQAChecks = company.getEnableQAChecks();
+    boolean showButton = true;
+    if(company.getId() == 1)
+    {
+    	showButton = false;
+    }
 %>                       
 <HTML>
 <HEAD>
@@ -707,7 +712,7 @@ is defined in header.jspIncl which must be included in the body.
 	    <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
 	        <INPUT TYPE="BUTTON" NAME=Download VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');">
 	    </amb:permission>
-	    <%if(enableQAChecks){ %>
+	    <%if(enableQAChecks && showButton){ %>
   		<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport');">
     <% } %>
 </DIV>

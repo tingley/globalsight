@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -73,7 +74,8 @@ public class JobControlInProgressHandler extends JobManagementHandler
      * instance variable.
      */
     private String m_exportUrl = null;
-
+    private static final Logger logger = Logger
+    		.getLogger(JobControlInProgressHandler.class);
     /**
      * Invokes this EntryPageHandler object
      * <p>
@@ -215,17 +217,21 @@ public class JobControlInProgressHandler extends JobManagementHandler
 			}
 		}
 		Set<Workflow> workflowSet = new HashSet<Workflow>();
-		String companyId = CompanyThreadLocal.getInstance().getValue();
 		try
 		{
+			long companyId = -1;
+			for (Long jobId : jobIdSet)
+			{
+				Job job = ServerProxy.getJobHandler().getJobById(jobId);
+				if (companyId == -1)
+				{
+					companyId = job.getCompanyId();
+				}
+				workflowSet.addAll(job.getWorkflows());
+			}
 			Company company = CompanyWrapper.getCompanyById(companyId);
 			if (company.getEnableQAChecks())
 			{
-				for (Long jobId : jobIdSet)
-				{
-					Job job = ServerProxy.getJobHandler().getJobById(jobId);
-					workflowSet.addAll(job.getWorkflows());
-				}
 				for (Workflow workflow : workflowSet)
 				{
 					locales.add(workflow.getTargetLocale().getLocaleCode());
@@ -237,13 +243,13 @@ public class JobControlInProgressHandler extends JobManagementHandler
 					}
 				}
 			}
+
 			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
-					Long.parseLong(companyId), jobIdSet, exportListFiles,
-					locales);
+					companyId, jobIdSet, exportListFiles, locales);
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 	

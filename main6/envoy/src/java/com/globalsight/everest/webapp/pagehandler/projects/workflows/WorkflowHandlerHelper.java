@@ -1186,56 +1186,67 @@ public class WorkflowHandlerHelper
 			{
 				Task task = ServerProxy.getTaskManager().getTask(
 						activeTask.getTaskId());
-
-				boolean qaCheck = QACheckerHelper.isShowQAChecksTab(task);
-				if (qaCheck)
+				Project project = task.getWorkflow().getJob().getProject();
+				if (project.getAllowManualQAChecks())
 				{
-					QAChecker qaChecker = new QAChecker();
-					filePath = qaChecker.runQAChecksAndGenerateReport(task
-							.getId());
+					if (QACheckerHelper.isQAActivity(task))
+					{
+						QAChecker qaChecker = new QAChecker();
+						filePath = qaChecker.runQAChecksAndGenerateReport(task
+								.getId());
+					}
+					else
+					{
+						filePath = getPreviousQAReportFilePath(workflow);
+					}
 				}
 			}
 			else
 			{
-
 				if (workflow.getState().equalsIgnoreCase("EXPORTED"))
 				{
-					StringBuilder sb = new StringBuilder();
-					sb.append(AmbFileStoragePathUtils.getReportsDir(workflow
-							.getCompanyId()));
-					sb.append(File.separator);
-					sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
-					sb.append(File.separator);
-					sb.append(workflow.getJob().getId());
-					sb.append(File.separator);
-					sb.append(workflow.getTargetLocale().toString());
-					File file = new File(sb.toString());
-					long maxTime = 0;
-					File emptyFile = null;
-					if (file.exists())
-					{
-						File[] files = file.listFiles();
-						for (File fe : files)
-						{
-							long time = fe.lastModified();
-							if (time > maxTime)
-							{
-								maxTime = time;
-								emptyFile = fe;
-							}
-						}
-						filePath = emptyFile.listFiles()[0].getPath();
-					}
+					filePath = getPreviousQAReportFilePath(workflow);
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return filePath;
 	}
     
+	private static String getPreviousQAReportFilePath(Workflow workflow)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(AmbFileStoragePathUtils.getReportsDir(workflow.getCompanyId()));
+		sb.append(File.separator);
+		sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
+		sb.append(File.separator);
+		sb.append(workflow.getJob().getId());
+		sb.append(File.separator);
+		sb.append(workflow.getTargetLocale().toString());
+		File file = new File(sb.toString());
+		long maxTime = 0;
+		File emptyFile = null;
+		String filePath = null;
+		if (file.exists())
+		{
+			File[] files = file.listFiles();
+			for (File fe : files)
+			{
+				long time = fe.lastModified();
+				if (time > maxTime)
+				{
+					maxTime = time;
+					emptyFile = fe;
+				}
+			}
+			filePath = emptyFile.listFiles()[0].getPath();
+		}
+		return filePath;
+	}
+	
 	public static void zippedFolder(HttpServletRequest p_request,
 			HttpServletResponse p_response, long companyId, Set<Long> jobIdSet,
 			Set<File> exportListFiles, Set<String> locales)
@@ -1296,7 +1307,7 @@ public class WorkflowHandlerHelper
 		}
 		catch (Exception e)
 		{
-			logger.error(e.getMessage(), e);
+			logger.error(e);
 		}
 		finally
 		{

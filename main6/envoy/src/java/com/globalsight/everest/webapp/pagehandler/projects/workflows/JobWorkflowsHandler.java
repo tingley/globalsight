@@ -435,7 +435,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         packJobWorkflowInfoView(p_request, job);
         dealWithGSEditionJob(p_request, job);
         packSessionMgrAttr(p_request);
-
+        
         if (Job.CANCELLED.equals(job.getState()))
         {
             jobSummaryHelper.jobNotFound(p_request, p_response, p_context, job);
@@ -481,7 +481,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 		}
 		catch (Exception e)
 		{
-			CATEGORY.error(e.getMessage(), e);
+			CATEGORY.error(e);
 		}
 	}
 	
@@ -846,6 +846,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         // tell UI if current job has been archived.
         p_request.setAttribute("isJobMigrated", job.isMigrated() ? "true"
                 : "false");
+        p_request.setAttribute("project", job.getProject());
 		try
 		{
 			Company company = ServerProxy.getJobHandler().getCompanyById(

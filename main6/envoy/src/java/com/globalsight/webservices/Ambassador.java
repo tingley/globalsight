@@ -17817,6 +17817,30 @@ public class Ambassador extends AbstractWebService
 				}
 			}
 
+			Company logUserCompany = getCompanyInfo(getUsernameFromSession(p_accessToken));
+			if (logUserCompany.getId() != 1)
+			{
+				for (String id : jobIdArr)
+				{
+					Job job = ServerProxy.getJobHandler().getJobById(
+							Long.parseLong(id));
+					if (job != null)
+					{
+						if (job.getCompanyId() != logUserCompany.getId())
+						{
+							return makeErrorXml(DOWNLOAD_QA_CHECKS_REPORTS,
+									"Current user not super user or does not belong to company of this job id: "
+											+ id);
+						}
+					}
+					else
+					{
+						return makeErrorXml(DOWNLOAD_QA_CHECKS_REPORTS,
+								"Invalid job id: " + id);
+					}
+				}
+			}
+
 			Set<Long> workflowIdSet = new HashSet<Long>();
 			if (workflowIdArr != null)
 			{
@@ -17828,63 +17852,72 @@ public class Ambassador extends AbstractWebService
 
 			Set<Long> jobIdSet = new HashSet<Long>();
 			Set<Workflow> workflowSet = new HashSet<Workflow>();
-			long companyId = -1;
+			Set<Long> companyIdSet = new HashSet<Long>();
 			for (String jobId : jobIdArr)
 			{
 				Job job = ServerProxy.getJobHandler().getJobById(
 						Long.parseLong(jobId));
-				if (companyId == -1)
-				{
-					companyId = job.getCompanyId();
-				}
+				companyIdSet.add(job.getCompanyId());
 				workflowSet.addAll(job.getWorkflows());
 				jobIdSet.add(Long.parseLong(jobId));
 			}
 
-			Company company = CompanyWrapper.getCompanyById(companyId);
-			CompanyThreadLocal.getInstance().setValue(company.getCompanyName());
-			if (company.getEnableQAChecks())
+			Map<Long, Set<File>> exportFilesMap = new HashMap<Long, Set<File>>();
+			Set<String> locales = new HashSet<String>();
+			for (Long companyId : companyIdSet)
 			{
-				Set<File> exportListFiles = new HashSet<File>();
-				Set<String> locales = new HashSet<String>();
-				for (Workflow workflow : workflowSet)
+				Set<File> exportFilesList = new HashSet<File>();
+				Company company = CompanyWrapper.getCompanyById(companyId);
+				CompanyThreadLocal.getInstance().setValue(
+						company.getCompanyName());
+				if (company.getEnableQAChecks())
 				{
-					String filePath = null;
-					if (workflowIdSet != null && workflowIdSet.size() > 0)
+					for (Workflow workflow : workflowSet)
 					{
-						if (workflowIdSet.contains(workflow.getId()))
+						if (workflow.getCompanyId() == companyId)
 						{
-							locales.add(workflow.getTargetLocale()
-									.getLocaleCode());
-							filePath = WorkflowHandlerHelper
-									.getExportFilePath(workflow);
-							if (filePath != null)
+							String filePath = null;
+							if (workflowIdSet != null
+									&& workflowIdSet.size() > 0)
 							{
-								exportListFiles.add(new File(filePath));
+								if (workflowIdSet.contains(workflow.getId()))
+								{
+									locales.add(workflow.getTargetLocale()
+											.getLocaleCode());
+									filePath = WorkflowHandlerHelper
+											.getExportFilePath(workflow);
+									if (filePath != null)
+									{
+										exportFilesList.add(new File(filePath));
+									}
+									continue;
+								}
 							}
-							continue;
+							else
+							{
+								locales.add(workflow.getTargetLocale()
+										.getLocaleCode());
+								filePath = WorkflowHandlerHelper
+										.getExportFilePath(workflow);
+								if (filePath != null)
+								{
+									exportFilesList.add(new File(filePath));
+								}
+							}
 						}
+
 					}
-					else
-					{
-						locales.add(workflow.getTargetLocale().getLocaleCode());
-						filePath = WorkflowHandlerHelper
-								.getExportFilePath(workflow);
-						if (filePath != null)
-						{
-							exportListFiles.add(new File(filePath));
-						}
-					}
+					exportFilesMap.put(companyId, exportFilesList);
 				}
-				// zipped Folder
-				returnFilePath = zippedFolder(companyId, jobIdSet,
-						exportListFiles, locales);
+				else
+				{
+					return makeErrorXml(DOWNLOAD_QA_CHECKS_REPORTS,
+							"Current log user no download QA report permissions");
+				}
 			}
-			else
-			{
-				return makeErrorXml(DOWNLOAD_QA_CHECKS_REPORTS,
-						"Current log user no download QA report permissions");
-			}
+
+			// zipped Folder
+			returnFilePath = zippedFolder(jobIdSet, exportFilesMap, locales);
 		}
 		catch (Exception e)
 		{
@@ -17894,13 +17927,15 @@ public class Ambassador extends AbstractWebService
 		return returnFilePath;
 	}
 
-	private String zippedFolder(long companyId, Set<Long> jobIdSet,
-			Set<File> exportListFiles, Set<String> locales)
+	private String zippedFolder(Set<Long> jobIdSet,
+			Map<Long, Set<File>> exportFilesMap, Set<String> locales)
 	{
 		String fileUrl = null;
-		String directory = AmbFileStoragePathUtils.getReportsDir(companyId)
-				+ File.separator + ReportConstants.REPORT_QA_CHECKS_REPORT
-				+ File.separator + "apiDownload";
+		String directory = AmbFileStoragePathUtils.getFileStorageDirPath(1)
+				.replace("\\", "/")
+				+ File.separator
+				+ "Reports"
+				+ File.separator + "apiQACheckDownload";
 		new File(directory).mkdirs();
 
 		String downloadFileName = null;
@@ -17913,6 +17948,7 @@ public class Ambassador extends AbstractWebService
 		else if (jobIdSet != null && jobIdSet.size() > 1)
 		{
 			String tempS = jobIdSet.toString();
+			tempS = tempS.replace(" ", "");
 			String jobNamesstr = tempS.substring(1, tempS.length() - 1);
 			downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT + "_("
 					+ jobNamesstr + ").zip";
@@ -17920,22 +17956,31 @@ public class Ambassador extends AbstractWebService
 		String zipFileName = directory + File.separator + downloadFileName;
 		File zipFile = new File(zipFileName);
 
-		Map<File, String> entryFileToFileNameMap = WorkflowHandlerHelper
-				.getEntryFileToFileNameMap(exportListFiles, jobIdSet, locales,
-						AmbFileStoragePathUtils.getReportsDir(companyId)
-								.getPath()
-								+ File.separator
-								+ ReportConstants.REPORT_QA_CHECKS_REPORT);
+		Map<File, String> allEntryFileToFileNameMap = new HashMap<File, String>();
+		Set<Long> keySet = exportFilesMap.keySet();
+		for (Long companyId : keySet)
+		{
+			Set<File> exportListFiles = exportFilesMap.get(companyId);
+			Map<File, String> entryFileToFileNameMap = WorkflowHandlerHelper
+					.getEntryFileToFileNameMap(exportListFiles, jobIdSet,
+							locales,
+							AmbFileStoragePathUtils.getReportsDir(companyId)
+									.getPath()
+									+ File.separator
+									+ ReportConstants.REPORT_QA_CHECKS_REPORT);
+			allEntryFileToFileNameMap.putAll(entryFileToFileNameMap);
+		}
+
 		try
 		{
-			ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
+			ZipIt.addEntriesToZipFile(zipFile, allEntryFileToFileNameMap, "");
 			String filestore = AmbFileStoragePathUtils.getFileStorageDirPath(1)
 					.replace("\\", "/");
 			String fullPathName = zipFile.getAbsolutePath().replace("\\", "/");
 			String path = fullPathName.substring(fullPathName
 					.indexOf(filestore) + filestore.length());
 			String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-					+ "/DownloadTM";
+					+ "/DownloadReports";
 			fileUrl = root + path;
 		}
 		catch (Exception e)

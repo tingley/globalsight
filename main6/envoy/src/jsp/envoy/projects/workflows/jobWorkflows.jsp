@@ -11,6 +11,7 @@
             com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
             com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
             com.globalsight.everest.company.Company,
+            com.globalsight.everest.projecthandler.Project,
             java.text.MessageFormat,
             java.util.*"
     session="true"
@@ -72,6 +73,13 @@
    String jobCommentsURL = jobComments.getPageURL() + "&jobId=" + request.getAttribute("jobId");
    Company company = (Company)request.getAttribute("company");
    boolean enableQAChecks = company.getEnableQAChecks();
+   Project project = (Project)request.getAttribute("project");
+   boolean allowManualRunningQAChecks = project.getAllowManualQAChecks();
+   boolean showButton = true;
+   if(company.getId() == 1)
+   {
+   	showButton = false;
+   }
 //jobSummary child page needed end.
 %>
 <html>
@@ -296,7 +304,7 @@
            <c:if test="${sending_back_edition}">
            	   <input class="standardText" type="button" name="ReSendingBack" value="<%=bundle.getString("lb_resendingback_edition_job")%>" onclick="submitForm('sendingbackEditionJob');"/>
            </c:if>
-            <%if(enableQAChecks){ %>
+            <%if(showButton && enableQAChecks && allowManualRunningQAChecks){ %>
   			<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport')">
     		<% } %>
 	</div>

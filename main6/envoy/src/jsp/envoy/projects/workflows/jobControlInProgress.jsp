@@ -96,29 +96,37 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
     String lbArchived= bundle.getString("lb_archived");
     Company company = (Company)request.getAttribute("company");
     boolean enableQAChecks = company.getEnableQAChecks();
-    
-    String refreshUrl = progressURL;
-    boolean b_addDelete = false;
-    boolean b_searchEnabled = false;
-    try
-    {
-        SystemConfiguration sc = SystemConfiguration.getInstance();
-        b_addDelete = sc.getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
-        b_searchEnabled =
-               sc.getBooleanParameter(SystemConfigParamNames.JOB_SEARCH_REPLACE_ALLOWED);
+	boolean showButton = true;
+	if (company.getId() == 1)
+	{
+		showButton = false;
+	}
 
-    }
-    catch (Exception ge)
-    {
-        // assume false
-    }
-    
-    String helperText = bundle.getString("helper_text_job_inprogress");
-    SessionManager sessMr= (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-    String badresults = (String)sessMr.getMyjobsAttribute("badresults");
-    if(badresults == null)
-    	badresults = "";
-    sessMr.setMyjobsAttribute("badresults","");
+	String refreshUrl = progressURL;
+	boolean b_addDelete = false;
+	boolean b_searchEnabled = false;
+	try
+	{
+		SystemConfiguration sc = SystemConfiguration.getInstance();
+		b_addDelete = sc
+				.getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
+		b_searchEnabled = sc
+				.getBooleanParameter(SystemConfigParamNames.JOB_SEARCH_REPLACE_ALLOWED);
+
+	}
+	catch (Exception ge)
+	{
+		// assume false
+	}
+
+	String helperText = bundle.getString("helper_text_job_inprogress");
+	SessionManager sessMr = (SessionManager) session
+			.getAttribute(WebAppConstants.SESSION_MANAGER);
+	String badresults = (String) sessMr
+			.getMyjobsAttribute("badresults");
+	if (badresults == null)
+		badresults = "";
+	sessMr.setMyjobsAttribute("badresults", "");
 %>
 <HTML>
 <HEAD>
@@ -634,7 +642,7 @@ function submitForm(buttonClicked, curJobId)
 	   JobForm.submit();
 	   return;
    }
-   else(buttonClicked == "downloadQAReport")
+   else if(buttonClicked == "downloadQAReport")
    {
 	   JobForm.action = "<%=refreshUrl%>";
 	   jobActionParam = "downloadQAReport";
@@ -1092,7 +1100,7 @@ is defined in header.jspIncl which must be included in the body.
 	<amb:permission name="<%=Permission.JOBS_REMOVEJOBFROMGROUP%>" >
   		<INPUT TYPE="BUTTON" NAME=search VALUE="<%=bundle.getString("lb_remove_job_from_group")%>" onClick="removeJobFromGroup();">
 	</amb:permission>
-	<%if(enableQAChecks){ %>
+	<%if(enableQAChecks && showButton){ %>
   		<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport')">
     <% } %>
 </DIV>

@@ -205,17 +205,21 @@ public class JobControlExportedHandler
 			}
 		}
 		Set<Workflow> workflowSet = new HashSet<Workflow>();
-		String companyId = CompanyThreadLocal.getInstance().getValue();
 		try
 		{
+			long companyId = -1;
+			for (Long jobId : jobIdSet)
+			{
+				Job job = ServerProxy.getJobHandler().getJobById(jobId);
+				if (companyId == -1)
+				{
+					companyId = job.getCompanyId();
+				}
+				workflowSet.addAll(job.getWorkflows());
+			}
 			Company company = CompanyWrapper.getCompanyById(companyId);
 			if (company.getEnableQAChecks())
 			{
-				for (Long jobId : jobIdSet)
-				{
-					Job job = ServerProxy.getJobHandler().getJobById(jobId);
-					workflowSet.addAll(job.getWorkflows());
-				}
 				for (Workflow workflow : workflowSet)
 				{
 					locales.add(workflow.getTargetLocale().getLocaleCode());
@@ -228,12 +232,11 @@ public class JobControlExportedHandler
 				}
 			}
 			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
-					Long.parseLong(companyId), jobIdSet, exportListFiles,
-					locales);
+					companyId, jobIdSet, exportListFiles, locales);
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			s_logger.error(e);
 		}
 	}
 	

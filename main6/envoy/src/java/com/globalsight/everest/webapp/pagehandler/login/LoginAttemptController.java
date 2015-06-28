@@ -28,6 +28,8 @@ import org.apache.axis.MessageContext;
 import org.apache.axis.transport.http.HTTPConstants;
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.systemActivity.LoginAttemptConfig;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -93,6 +95,9 @@ public class LoginAttemptController
      */
     public static void recordFailedLoginAttempt(String ip)
     {
+        if (!isIpBlockingEnabled())
+            return;
+        
         if (ip == null || isExemptedIp(ip))
         {
             return;
@@ -113,8 +118,11 @@ public class LoginAttemptController
             logger.info("IP "
                     + ip
                     + " has reached failed login attempts allowed consecutively("
-                    + loginAttempts + "). Will be blocked for " + blockTime
-                    + " minutes.");
+                    + loginAttempts
+                    + "). Will be blocked for "
+                    + (blockTime == 0 ? "an indefinite period." : blockTime
+                            + " minutes."));
+
         }
     }
 
@@ -192,12 +200,44 @@ public class LoginAttemptController
     {
         return isIpBlocked(getIpAddress(p_request));
     }
+    
+    /**
+     * Gets all blocked IP.
+     * @return
+     */
+    public static List<String> getBlockedIpList()
+    {
+        List<String> blockedIps = new ArrayList<String>();
+        List<String> ips = new ArrayList<String>();
+        ips.addAll(LOGIN_ATTEMPTS.keySet());
+        for (String ip : ips)
+        {
+            if (isIpBlocked(ip))
+            {
+                blockedIps.add(ip);
+            }
+        }
+        
+        return blockedIps;
+    }
+    
+    /**
+     * Gets all exampt IP.
+     * @return
+     */
+    public static List<String> getExamptIpList()
+    {
+        return getConfigFromDb().getExamptIpAsList();
+    }
 
     /**
      * Checks if the IP address is being blocked or not.
      */
     public static boolean isIpBlocked(String ip)
     {
+        if (!isIpBlockingEnabled())
+            return false;
+        
         if (ip == null || isExemptedIp(ip))
         {
             return false;
@@ -229,7 +269,7 @@ public class LoginAttemptController
      */
     private static int getFailedLoginAttemptAllowed()
     {
-        return 10;
+        return getConfigFromDb().getMaxTime();
     }
 
     /**
@@ -237,7 +277,7 @@ public class LoginAttemptController
      */
     private static long getBlockTime()
     {
-        return 60;
+        return getConfigFromDb().getBlockTime();
     }
 
     /**
@@ -245,7 +285,7 @@ public class LoginAttemptController
      */
     private static List<String> getExemptedIpList()
     {
-        return new ArrayList<String>();
+        return getConfigFromDb().getExamptIpAsList();
     }
 
     /**
@@ -262,7 +302,38 @@ public class LoginAttemptController
      */
     private static boolean isInBlockTime(LoginAttempt attempt)
     {
-        return LocalDateTime.now().minusMinutes(getBlockTime())
-                .isBefore(attempt.getBlockTime());
+        long blockTime = getBlockTime();
+        return blockTime == 0 ? true : LocalDateTime.now()
+                .minusMinutes(blockTime).isBefore(attempt.getBlockTime());
+    }
+    
+    /**
+     * Checks if Fail Login Attempts IP Blocking is enabled or not.
+     */
+    private static boolean isIpBlockingEnabled()
+    {
+        return getConfigFromDb().isEnable();
+    }
+    
+    /**
+     * Gets LoginAttemptConfig from database.
+     */
+    public static LoginAttemptConfig getConfigFromDb()
+    {
+        LoginAttemptConfig config = (LoginAttemptConfig) HibernateUtil.getFirst("from LoginAttemptConfig");
+        if (config == null)
+        {
+            config = new LoginAttemptConfig();
+            try
+            {
+                HibernateUtil.save(config);
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+        }
+        
+        return config;
     }
 }

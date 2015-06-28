@@ -35,6 +35,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
+import com.sun.beans.editors.BooleanEditor;
 import com.sun.beans.editors.IntegerEditor;
 import com.sun.beans.editors.LongEditor;
 import com.sun.beans.editors.StringEditor;
@@ -268,6 +269,7 @@ public abstract class PageActionHandler extends PageHandler
             EDITS.put(String.class, StringEditor.class);
             EDITS.put(int.class, IntegerEditor.class);
             EDITS.put(long.class, LongEditor.class);
+            EDITS.put(boolean.class, BooleanEditor.class);
         }
 
         return EDITS;

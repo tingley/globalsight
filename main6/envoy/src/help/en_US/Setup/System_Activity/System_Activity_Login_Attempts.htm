@@ -8,7 +8,7 @@
 
 <head>
 
-<title>Login Attempt Requests</title>
+<title>Login Attempts</title>
 
 <!--(Meta)==========================================================-->
 
@@ -128,7 +128,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 <!--(==============================================================)-->
 
 
-<h1>Login Attempt Requests</h1>
+<h1>Login Attempts</h1>
 
 <!--(Table)=========================================================-->
 <table x-use-null-cells cellspacing="10" width="100%" class="whs1">
@@ -139,7 +139,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 <td width="15.993%" class="whs5">
 <p class="whs6">Summary:</td>
 <td width="84.007%" class="whs7">
-<p class="whs6">The page lists all exporting requests.</td></tr>
+<p class="whs6">The page allows superadmin to configure number of failed attempts allowed consecutively, block time and also allows user to add IP exception list (not to block).</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="2" rowspan="1" width="100%" class="whs8">
@@ -153,10 +153,60 @@ else
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="15.993%" class="whs10">
-<p class="whs14">Table</td>
+<p class="whs6">Enable Fail Login Attempts IP Blocking</td>
 <td colspan="1" rowspan="1" width="84.007%" class="whs11">
-<p>Displays all waiting requests. Click a column header to sort the table based on data in that column; click a second time to reverse the sort order.
+<p>Checks this option to enable fail login attempts IP blocking.
 </td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs6">Maximum Failed Login Attempt Allowed</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>Configures the number of failed attempts allowed consecutively.
+</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs6">Block Time</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>Configures the block time.</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs6">Blocked IP</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>Lists the IP addresses that are being blocked.</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs6">Exempted IP</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>Configures the IP exception list (not to block).</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs14">Buttons</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>&nbsp;</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs6">Save</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>Saves the configuration.</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs6">Cancel</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>Cancels the configuration.</td></tr>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
 </body>
 
 </html>

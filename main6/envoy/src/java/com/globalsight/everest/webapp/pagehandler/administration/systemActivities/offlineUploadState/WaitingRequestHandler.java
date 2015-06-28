@@ -25,7 +25,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.OfflineEditManagerLocal;
 import com.globalsight.everest.edit.offline.OfflineUploadForm;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.util.comparator.ExportRequestComparator;
+import com.globalsight.everest.util.comparator.OfflineUploadRequestComparator;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.systemActivities.RequestAbstractHandler;
 
@@ -63,6 +63,10 @@ public class WaitingRequestHandler extends RequestAbstractHandler
             
             v.setFileName(f.getFileName());
             v.setFileSize("" + f.getTmpFile().length());
+            if (f.getUser() != null)
+            {
+                v.setUser(f.getUser().toString());
+            }
             
             forms.add(v);
         }
@@ -73,7 +77,7 @@ public class WaitingRequestHandler extends RequestAbstractHandler
     @Override
     protected StringComparator getComparator(Locale uiLocale)
     {
-        return new ExportRequestComparator(uiLocale);
+        return new OfflineUploadRequestComparator(uiLocale);
     }
 
 }

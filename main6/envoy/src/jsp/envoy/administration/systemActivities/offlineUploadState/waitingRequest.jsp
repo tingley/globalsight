@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.everest.util.comparator.OfflineUploadRequestComparator"%>
 <%@page import="com.globalsight.everest.util.comparator.ExportRequestComparator"%>
 <%@page import="com.globalsight.everest.foundation.SearchCriteriaParameters"%>
 <%@page import="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler"%>
@@ -163,18 +164,18 @@
                                key="requestDefineKey"
                                dataClass="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.offlineUploadState.Vo"
                                pageUrl="self"
-                               emptyTableMsg="msg_exporting_request_none" >
+                               emptyTableMsg="msg_waiting_request_none" >
 
-                        <amb:column label="lb_company" sortBy="<%=ExportRequestComparator.Company%>"  >
+                        <amb:column label="lb_company" sortBy="<%=OfflineUploadRequestComparator.COMPANY%>" >
                             ${requestVo.company}
                         </amb:column>
-                        <amb:column label="lb_file" sortBy="<%=ExportRequestComparator.JOB_ID%>"style="text-align: left; word-break: break-all; word-wrap: break-word;">
+                        <amb:column label="lb_file" sortBy="<%=OfflineUploadRequestComparator.FILE_NAME%>" style="text-align: left; word-break: break-all; word-wrap: break-word;">
                             ${requestVo.fileName}
                         </amb:column>
-                         <amb:column label="lb_size" sortBy="<%=ExportRequestComparator.FILE_NAME%>" >
+                         <amb:column label="lb_size" sortBy="<%=OfflineUploadRequestComparator.FILE_SIZE%>" >
                             ${requestVo.fileSize}
                         </amb:column>
-                        <amb:column label="lb_username" sortBy="<%=ExportRequestComparator.JOB_NAME%>" >
+                        <amb:column label="lb_username" sortBy="<%=OfflineUploadRequestComparator.USER%>" >
                             ${requestVo.user}
                         </amb:column>
                        
@@ -186,10 +187,6 @@
                      <amb:tableNav bean="requestDefine" key="requestDefineKey" pageUrl="self" scope="10,20,50" />
                   </div>
                 </FORM>
-                <DIV ID="ButtonLayer" ALIGN="LEFT">
-                     <INPUT TYPE="BUTTON" NAME="Error" VALUE="<%=bundle.getString("lb_remove")%>"
-                                onClick="cancelFiles();">
-                </DIV>
             </DIV>
     </BODY>
 </HTML>

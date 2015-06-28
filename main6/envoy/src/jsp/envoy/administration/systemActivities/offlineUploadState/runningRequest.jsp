@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.everest.util.comparator.OfflineUploadRequestComparator"%>
 <%@page import="com.globalsight.everest.util.comparator.ExportRequestComparator"%>
 <%@page import="com.globalsight.everest.util.comparator.RequestFileComparator"%>
 <%@page import="com.globalsight.everest.foundation.SearchCriteriaParameters"%>
@@ -160,17 +161,17 @@
                                key="requestDefineKey"
                                dataClass="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.offlineUploadState.Vo"
                                pageUrl="self"
-                               emptyTableMsg="msg_exporting_request_none" >
-                        <amb:column label="lb_company" sortBy="<%=ExportRequestComparator.Company%>" >
+                               emptyTableMsg="msg_uploading_request_none" >
+                        <amb:column label="lb_company" sortBy="<%=OfflineUploadRequestComparator.COMPANY%>" >
                             ${requestVo.company}
                         </amb:column>
-                        <amb:column label="lb_file" sortBy="<%=ExportRequestComparator.JOB_ID%>" style="text-align: left; word-break: break-all; word-wrap: break-word;">
+                        <amb:column label="lb_file" sortBy="<%=OfflineUploadRequestComparator.FILE_NAME%>" style="text-align: left; word-break: break-all; word-wrap: break-word;">
                             ${requestVo.fileName}
                         </amb:column>
-                         <amb:column label="lb_size" sortBy="<%=ExportRequestComparator.FILE_NAME%>" >
+                         <amb:column label="lb_size" sortBy="<%=OfflineUploadRequestComparator.FILE_SIZE%>" >
                             ${requestVo.fileSize}
                         </amb:column>
-                        <amb:column label="lb_username" sortBy="<%=ExportRequestComparator.JOB_NAME%>" >
+                        <amb:column label="lb_username" sortBy="<%=OfflineUploadRequestComparator.USER%>" >
                             ${requestVo.user}
                         </amb:column>
                        

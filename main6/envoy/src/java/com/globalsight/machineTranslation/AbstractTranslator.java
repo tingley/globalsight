@@ -386,7 +386,11 @@ public abstract class AbstractTranslator implements MachineTranslator
 
                 if (subResults != null)
                 {
-                    translatedList.addAll(Arrays.asList(subResults));
+					for (int j = 0; j < subResults.length; j++)
+                	{
+						translatedList.add(StringUtil.replace(subResults[j],
+								"_", " "));
+                	}
                 }
                 subList.clear();
                 charCount = 0;

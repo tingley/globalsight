@@ -2331,7 +2331,7 @@ public class Ambassador extends AbstractWebService
                 JobCreationMonitor.updateJobState(Long.parseLong(jobId),
                         Job.IMPORTFAILED);
             }
-            logger.error(e.getMessage());
+            logger.error(e);
             throw new WebServiceException(e.getMessage());
         }
         finally

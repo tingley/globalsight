@@ -1435,13 +1435,16 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         this.uuid = uuid;
     }
 
+    /**
+     * Not only cost center but also the required attribute will be checked.
+     */
     @SuppressWarnings(
     { "unchecked", "rawtypes", "unused" })
     public boolean hasSetCostCenter()
     {
         synchronized (AddJobAttributeThread.getLock(uuid))
         {
-            // do nothing, wait util attribute are set.
+            // do nothing, wait until attribute are set.
             int i = 0;
         }
 
@@ -1458,6 +1461,12 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         for (JobAttribute att : atts)
         {
             action.run(att);
+            
+            if (att != null && att.getAttribute().isRequired() && !att.isSet())
+            {
+                c_logger.info("The job can not be dispatched until required attribute is set.");
+                return false;
+            }
         }
 
         if (!action.isSeted())

@@ -199,7 +199,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMPro
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobWorkflowsHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.tm.corpus.OverridableLeverageOptions;
@@ -1689,7 +1688,7 @@ public class Ambassador extends AbstractWebService
 
 			// cache job attributes
 			List<JobAttributeVo> atts = null;
-			String companyId = null;
+			 String companyId = CompanyThreadLocal.getInstance().getValue();
 
 			try
 			{
@@ -1698,7 +1697,6 @@ public class Ambassador extends AbstractWebService
 					Attributes attributes = com.globalsight.cxe.util.XmlUtil
 							.string2Object(Attributes.class, attributesXml);
 					atts = (List<JobAttributeVo>) attributes.getAttributes();
-					companyId = CompanyThreadLocal.getInstance().getValue();
 
 					List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
 					for (JobAttributeVo jobAttributeVo : atts)
@@ -1709,6 +1707,24 @@ public class Ambassador extends AbstractWebService
 
 					RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
 				}
+				else
+                {
+                    AttributeSet as = ((JobImpl)job).getAttributeSet();
+                    List<Attribute> jas = as.getAttributeAsList();
+                    List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
+                    atts = new ArrayList<JobAttributeVo>();
+                  
+                    for (Attribute ja : jas)
+                    {
+                        JobAttributeVo vo = AttributeUtil.getAttributeVo(ja
+                                .getCloneAttribute());
+                        atts.add(vo);
+                        jobatts.add(AttributeUtil
+                                .createJobAttribute(vo));
+                    }
+
+                    RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
+                }
 			}
 			catch (Exception e)
 			{

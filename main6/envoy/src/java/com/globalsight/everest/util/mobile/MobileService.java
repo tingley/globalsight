@@ -808,7 +808,7 @@ public class MobileService extends HttpServlet
             String jobName = validateBeforeDispatch(jobIds);
             if (jobName.length() > 0)
             {
-                msg = "The following job(s) can not be dispatched until cost center attribute is set '"
+                msg = "The following job(s) can not be dispatched until cost center attribute and required attributes are set '"
                         + jobName + "'.";
             }
             else

@@ -219,6 +219,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
+import com.globalsight.everest.workflowmanager.WorkflowManager;
 import com.globalsight.everest.workflowmanager.WorkflowManagerException;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
@@ -4130,7 +4131,7 @@ public class Ambassador extends AbstractWebService
         String[] jobIds = p_jobIds.split(",");
         StringBuffer xml = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
-        WorkflowManagerLocal workflowManagerLocal  = new WorkflowManagerLocal();
+        WorkflowManager wfManager = null;
         HashMap<String, String> errorJobs = new HashMap<String, String>();
         boolean isArchived;
         for(String jobId: jobIds)
@@ -4154,7 +4155,11 @@ public class Ambassador extends AbstractWebService
                     continue;
                 }
 
-                isArchived = workflowManagerLocal.archive(job);
+                if (wfManager == null)
+                {
+        			wfManager = ServerProxy.getWorkflowManager();
+        		}
+                isArchived = wfManager.archive(job);
         		if(!isArchived)
         		{
         			errorJobs.put(jobId, "the job is not in \"Exported\" state and can't be archived.");

@@ -3023,7 +3023,7 @@ namespace GlobalSight.InDesignConverter
             while (!isDocumentOpened && !isExceptionOccur)
             {
 
-                string[] titles = { INDD_POPUP_DIALOG_TITLE, "Missing Plug-ins", "Cannot Open File", "Missing Fonts", "Embedded Profile Mismatch", "È±Ê§×ÖÌå" };
+                string[] titles = { INDD_POPUP_DIALOG_TITLE, "Missing Plug-ins", "Cannot Open File", "Missing Fonts", "Embedded Profile Mismatch", "Find Font" };
 
                 foreach (string ttt in titles)
                 {
@@ -3035,7 +3035,7 @@ namespace GlobalSight.InDesignConverter
 
                         if (hhh == IntPtr.Zero)
                         {
-                            hhh = Win32Pinvoker.FindWindowEx(hwnd, IntPtr.Zero, null, "È·¶¨");
+                            hhh = Win32Pinvoker.FindWindowEx(hwnd, IntPtr.Zero, null, "Done");
                         }
 
                         if (hhh != IntPtr.Zero)

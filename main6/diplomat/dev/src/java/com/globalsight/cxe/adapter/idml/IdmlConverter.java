@@ -168,6 +168,12 @@ public class IdmlConverter
             tFile = new File(getConvertDir() + "/" + folder + "/" + testFile);
             FileUtil.writeFile(tFile, "test converter is start or not");
         }
+        else
+        {
+            String testFile = type + (int) (Math.random() * 1000000) + ".test";
+            tFile = new File(getConvertDir() + "/" + folder + "/" + locale + "/" + testFile);
+            FileUtil.writeFile(tFile, "test converter is start or not");
+        }
 
         name = (int) (Math.random() * 1000000) + name;
         String prefixName = name.substring(0, name.lastIndexOf("."));
@@ -203,12 +209,16 @@ public class IdmlConverter
 
         if (!found)
         {
-            if (!isIncontextReview)
+            if (tFile.exists())
             {
-                if (tFile.exists())
+                tFile.delete();
+                if (!isIncontextReview)
                 {
-                    tFile.delete();
                     throw new Exception("idml converter is not started");
+                }
+                else
+                {
+                    throw new Exception("In Context Review converter is not started");
                 }
             }
         }

@@ -63,6 +63,8 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
 
     private Hashtable<Object, String> m_hEpt2BptSrcIndexMap = new Hashtable<Object, String>();
     private HashMap<String, String> ept2bpt = new HashMap();
+    // this is for tag that not has id. just like [b]
+    private HashMap<String, String> ept2bpt2 = new HashMap();
     
     private int m_nextUniqIndex = 0;
     private Hashtable m_hTagMap = new Hashtable();
@@ -290,7 +292,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
         
         if (m_PseudoData.isXliff20File())
         {
-            String PTag = Tmx2Xliff20.getTag(p_strTmxTagName, p_hAttributes, p_strOriginalString, ept2bpt);
+            String PTag = Tmx2Xliff20.getTag(p_strTmxTagName, p_hAttributes, p_strOriginalString, ept2bpt, ept2bpt2);
             
             try
             {

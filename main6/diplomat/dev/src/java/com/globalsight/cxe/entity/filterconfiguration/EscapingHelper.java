@@ -70,7 +70,12 @@ public class EscapingHelper
             TagIndex ti = tags.get(i);
             if (ti.isTag)
             {
-                sb.append(handleTagContent4Export(ti.content, es, doDecode, format));
+            	if (IFormatNames.FORMAT_OFFICE_XML.equals(format)) {
+            		sb.append(ti.content);
+            	} else {
+            		// Escape tag content is dangerous...
+                    sb.append(handleTagContent4Export(ti.content, es, doDecode, format));
+            	}
             }
             else
             {

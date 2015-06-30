@@ -27,6 +27,8 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.document.Pc;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Ph;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Sc;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.YesNo;
+import com.globalsight.ling.tw.PseudoData;
+import com.globalsight.ling.tw.PseudoOverrideMapItem;
 
 /**
  * <p>
@@ -55,6 +57,8 @@ public class Tmx2Xliff20Handler
     private String id;
 
     private boolean isSource = true;
+    
+    private PseudoData pseudoData = new PseudoData();
 
     /**
      * Returns the input string with PTags inserted in place of TMX.
@@ -115,6 +119,16 @@ public class Tmx2Xliff20Handler
         Pc pc = new Pc();
         id = getId(hAttributes);
         pc.setId(id);
+        
+        String type = hAttributes.getProperty("type");
+        if (type != null)
+        {
+            PseudoOverrideMapItem item = pseudoData.getOverrideMapItem(type);
+            if (item != null && !item.m_bNumbered)
+            {
+                pc.setSubType(type);
+            }
+        }
 
         String internal = hAttributes.getProperty("internal");
         if ("yes".equals(internal))

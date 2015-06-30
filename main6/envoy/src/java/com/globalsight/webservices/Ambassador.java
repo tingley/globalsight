@@ -391,7 +391,7 @@ public class Ambassador extends AbstractWebService
 
     public static final String GENERATE_DITA_QA_REPORT = "generateDITAQAReport";
     public static final String GENERATE_QA_CHECKS_REPORT = "generateQAChecksReport";
-    public static final String DOWNLOAD_QA_CHECKS_REPORTS = "downloadQAChecksReports";
+    public static final String GENERATE_QA_CHECKS_REPORTS = "generateQAChecksReports";
     
     public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
 
@@ -17809,9 +17809,9 @@ public class Ambassador extends AbstractWebService
 	 * @return XML string.
 	 *            -- If fail, it will return null; 
 	 * 			   -- If succeed, report returning is like
-	 *         "http://10.10.215.110:8080/globalsight/DownloadTM/test/GlobalSight/Reports/QAChecksReport/apiDownload/QAChecksReport_(196).zip"
+	 *         "http://10.10.213.117:8080/globalsight/DownloadReports/Reports/apiQACheckDownload/QAChecksReport_(206).zip"
 	 */
-	public String downloadQAChecksReports(String p_accessToken, String jobIds,
+	public String generateQAChecksReports(String p_accessToken, String jobIds,
 			String workflowIds) throws WebServiceException
 	{
 		String returnFilePath = null;
@@ -17849,14 +17849,14 @@ public class Ambassador extends AbstractWebService
 					{
 						if (job.getCompanyId() != logUserCompany.getId())
 						{
-							return makeErrorXml(DOWNLOAD_QA_CHECKS_REPORTS,
+							return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
 									"Current user not super user or does not belong to company of this job id: "
 											+ id);
 						}
 					}
 					else
 					{
-						return makeErrorXml(DOWNLOAD_QA_CHECKS_REPORTS,
+						return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
 								"Invalid job id: " + id);
 					}
 				}
@@ -17932,7 +17932,7 @@ public class Ambassador extends AbstractWebService
 				}
 				else
 				{
-					return makeErrorXml(DOWNLOAD_QA_CHECKS_REPORTS,
+					return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
 							"Current log user no download QA report permissions");
 				}
 			}

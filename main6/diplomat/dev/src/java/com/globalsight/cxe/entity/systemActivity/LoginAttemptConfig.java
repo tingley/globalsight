@@ -32,7 +32,7 @@ public class LoginAttemptConfig extends PersistentObject
     // minutes
     private long blockTime = 60;
 
-    private String examptIps = "";
+    private String exemptIps = "";
 
     public boolean isEnable()
     {
@@ -64,17 +64,17 @@ public class LoginAttemptConfig extends PersistentObject
         this.blockTime = blockTime;
     }
 
-    public String getExamptIps()
+    public String getExemptIps()
     {
-        return examptIps;
+        return exemptIps;
     }
     
-    public List<String> getExamptIpAsList()
+    public List<String> getExemptIpAsList()
     {
         List<String> ips = new ArrayList<String>();
-        if (examptIps != null && examptIps.length() > 0)
+        if (exemptIps != null && exemptIps.length() > 0)
         {
-            String[] splitIps = examptIps.split(",");
+            String[] splitIps = exemptIps.split(",");
             for (String ip :splitIps)
             {
                 ips.add(ip.trim());
@@ -84,20 +84,20 @@ public class LoginAttemptConfig extends PersistentObject
         return ips;
     }
     
-    public void SetExamptIpsAsList(List<String> ips)
+    public void setExemptIpsAsList(List<String> ips)
     {
         if (ips == null || ips.size() == 0)
         {
-            examptIps = "";
+            exemptIps = "";
             return;
         }
             
-        examptIps = ips.toString();
-        examptIps = examptIps.substring(1, examptIps.length() - 1);
+        exemptIps = ips.toString();
+        exemptIps = exemptIps.substring(1, exemptIps.length() - 1);
     }
 
-    public void setExamptIps(String examptIps)
+    public void setExemptIps(String exemptIps)
     {
-        this.examptIps = examptIps;
+        this.exemptIps = exemptIps;
     }
 }

@@ -47,7 +47,7 @@
     
     LoginAttemptConfig loginConfig = (LoginAttemptConfig)request.getAttribute("config");
     List<String> blockedIps = (List<String>) request.getAttribute("blockedIps");
-    List<String> examptIps = (List<String>) request.getAttribute("examptIps");
+    List<String> exemptIps = (List<String>) request.getAttribute("exemptIps");
 %>
 <HTML>
 <HEAD>
@@ -99,15 +99,17 @@
             	var tmp = $('#blockTime').val();
 	       		tmp = $.trim(tmp);
 	       		
+	       		if (tmp == "0")
+	       			return true;
+	       		
 	       		var re = /^[1-9]+[0-9]*]*$/;
 	            if (!re.test(tmp))
 	            	return false;
 	       		
-	       		if (tmp != "0") {
-	       			tmp=Number(tmp);
-	       			if(!tmp || tmp<30 || tmp>999999){	       			
-	            		return false;
-		       		}
+	       		
+	       		tmp=Number(tmp);
+       			if(!tmp || tmp<30 || tmp>999999){	       			
+            		return false;
 	       		}
             
                 return true;
@@ -128,48 +130,50 @@
 	       		}
             		
             	loginConfigForm.action = "<%=saveURL%>";
-            	$("#examptIps").find("option").attr("selected", true);
+            	$("#exemptIps").find("option").attr("selected", true);
+            	$("#blockIps").find("option").attr("selected", true);
+            	
             	loginConfigForm.submit();
             }
             
-            function deleteExamptIp() {
-            	if ($("#examptIps").find("option:selected").length == 0) {
+            function deleteExemptIp() {
+            	if ($("#exemptIps").find("option:selected").length == 0) {
             		alert("<%=EditUtil.toJavascript(bundle.getString("msg_select_exempt_delete"))%>");
             		return;
             	}
             	
             	if (confirm("<%=EditUtil.toJavascript(bundle.getString("msg_remove_exempt_ip"))%>")){
-            		$("#examptIps").find("option:selected").remove();  
+            		$("#exemptIps").find("option:selected").remove();  
             	}
             }
 
-            function addExamptIp() {
-            	var content = $("#examptIp").val();
+            function addExemptIp() {
+            	var content = $("#exemptIp").val();
             	content = $.trim(content);
             	if(content == '') {
             		alert("<%=EditUtil.toJavascript(bundle.getString("msg_exempt_ip_null"))%>");
-            		loginConfigForm.examptIp.focus();
+            		loginConfigForm.exemptIp.focus();
                     return;
             	}
             	
             	if (!validateIP(content)) {
             		alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_invalid_ip"))%>");
-            		loginConfigForm.examptIp.focus();
+            		loginConfigForm.exemptIp.focus();
                     return;
             	}
             	
-            	var ips =$("#examptIps").find("option");
+            	var ips =$("#exemptIps").find("option");
             	for (var i = 0; i < ips.length; i++) {
             		if (content == ips.get(i).text) {
             			alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_exist_ip"))%>");
-            			loginConfigForm.examptIp.focus();
+            			loginConfigForm.exemptIp.focus();
             			return;
             		}
             	}
             	
-            	$("#examptIps").append("<option value='" + content + "'>" + content + "</option>");
-            	$("#examptIp").val("");
-            	loginConfigForm.examptIp.focus();
+            	$("#exemptIps").append("<option value='" + content + "'>" + content + "</option>");
+            	$("#exemptIp").val("");
+            	loginConfigForm.exemptIp.focus();
             }
             
             function updateEnable() {
@@ -177,18 +181,18 @@
             	    $("#blockTime").removeAttr("disabled");
             	    $("#maxTime").removeAttr("disabled");
              	    $("#blockIps").removeAttr("disabled");
-            	    $("#examptIp").removeAttr("disabled");
-            	    $("#addExampt").removeAttr("disabled");
-            	    $("#examptIps").removeAttr("disabled");
-            	    $("#deleteExampt").removeAttr("disabled");
+            	    $("#exemptIp").removeAttr("disabled");
+            	    $("#addExempt").removeAttr("disabled");
+            	    $("#exemptIps").removeAttr("disabled");
+            	    $("#deleteExempt").removeAttr("disabled");
            		} else {
            			$("#blockTime").attr("disabled", "disabled");
             	    $("#maxTime").attr("disabled", "disabled");
             	    $("#blockIps").attr("disabled", "disabled");
-            	    $("#examptIp").attr("disabled", "disabled");
-            	    $("#addExampt").attr("disabled", "disabled");
-            	    $("#examptIps").attr("disabled", "disabled");
-            	    $("#deleteExampt").attr("disabled", "disabled");
+            	    $("#exemptIp").attr("disabled", "disabled");
+            	    $("#addExempt").attr("disabled", "disabled");
+            	    $("#exemptIps").attr("disabled", "disabled");
+            	    $("#deleteExempt").attr("disabled", "disabled");
                }
             }
             
@@ -268,7 +272,8 @@
 				</div>
 
 				<div style="padding: 20px; width: 400px; float: left">
-					<%=bundle.getString("lb_block_ip")%><br> <select
+					<%=bundle.getString("lb_block_ip")%><br> 
+					<select
 						name="blockIps" multiple="multiple" id="blockIps" size="15"
 						style="width: 100%; height: 300px; margin-top: 42px;">
 						<%
@@ -284,23 +289,24 @@
 				<div style="padding: 20px; width: 400px; float: left">
 					<%=bundle.getString("lb_exempt_ip")%>
 					<span class="errorMsg" id="ipMsg">&nbsp;</span><br> <input
-						type="text" id="examptIp" name="examptIp"
+						type="text" id="exemptIp" name="exemptIp"
 						style="margin-top: 10px; width: 330px;"> <input
 						type="button" style="margin-left: 10px;"
-						value=" <%=bundle.getString("lb_add")%>" id="addExampt"
-						onclick="addExamptIp()"> <select name="examptIps"
-						multiple="multiple" id="examptIps" size="15"
+						value=" <%=bundle.getString("lb_add")%>" id="addExempt"
+						onclick="addExemptIp()"> 
+					<select name="exemptIps"
+						multiple="multiple" id="exemptIps" size="15"
 						style="width: 100%; height: 300px; margin-top: 10px; margin-bottom: 10px;">
 						<%
-							for (String ip : examptIps) {
+							for (String ip : exemptIps) {
 						%>
 						<option value='<%=ip%>'><%=ip%></option>
 						<%
 							}
 						%>
-					</select> <input type="button" id="deleteExampt"
+					</select> <input type="button" id="deleteExempt"
 						value=" <%=bundle.getString("lb_delete")%>"
-						onclick="deleteExamptIp()">
+						onclick="deleteExemptIp()">
 				</div>
 
 				<div style="clear: both;">

@@ -16,11 +16,10 @@
  */
 package com.globalsight.everest.webapp.pagehandler.login;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -40,8 +39,6 @@ public class LoginAttemptController
 {
     private static final Logger logger = Logger
             .getLogger(LoginAttemptController.class);
-
-    public static Map<String, LoginAttempt> LOGIN_ATTEMPTS = new HashMap<String, LoginAttempt>();
 
     /**
      * Cleans up failed login attempt associated with the IP address while login
@@ -71,7 +68,39 @@ public class LoginAttemptController
         {
             return;
         }
-        LOGIN_ATTEMPTS.remove(ip);
+        
+        for (LoginAttempt attempt : getAllAttempts())
+        {
+            if (ip.equals(attempt.getIp()))
+            {
+                try
+                {
+                    HibernateUtil.delete(attempt);
+                }
+                catch (Exception e)
+                {
+                    logger.error(e);
+                }
+                return;
+            }
+        }
+    }
+    
+    /**
+     * Gets all attempts saved in database.
+     */
+    @SuppressWarnings("unchecked")
+    private static List<LoginAttempt> getAllAttempts()
+    {
+        return (List<LoginAttempt>) HibernateUtil.search("from LoginAttempt");
+    }
+    
+    /**
+     * Gets login attempt with ip.
+     */
+    private static LoginAttempt getLoginAttempt(String ip)
+    {
+        return (LoginAttempt) HibernateUtil.getFirst("from LoginAttempt where ip = ?", ip);
     }
 
     /**
@@ -102,19 +131,19 @@ public class LoginAttemptController
         {
             return;
         }
-        LoginAttempt attempt = new LoginAttempt(ip);
-        if (LOGIN_ATTEMPTS.get(ip) != null)
+        LoginAttempt attempt = getLoginAttempt(ip);
+        if (attempt == null)
         {
-            attempt = LOGIN_ATTEMPTS.get(ip);
+            attempt = new LoginAttempt(ip);
         }
+
         attempt.setCount(attempt.getCount() + 1);
-        LOGIN_ATTEMPTS.put(ip, attempt);
 
         int loginAttempts = getFailedLoginAttemptAllowed();
         long blockTime = getBlockTime();
         if (attempt.getCount() == loginAttempts)
         {
-            attempt.setBlockTime(LocalDateTime.now());
+            attempt.setBlockTime(new Date());
             logger.info("IP "
                     + ip
                     + " has reached failed login attempts allowed consecutively("
@@ -124,6 +153,8 @@ public class LoginAttemptController
                             + " minutes."));
 
         }
+        
+        HibernateUtil.saveOrUpdate(attempt);
     }
 
     /**
@@ -209,12 +240,11 @@ public class LoginAttemptController
     {
         List<String> blockedIps = new ArrayList<String>();
         List<String> ips = new ArrayList<String>();
-        ips.addAll(LOGIN_ATTEMPTS.keySet());
-        for (String ip : ips)
+        for (LoginAttempt ip : getAllAttempts())
         {
-            if (isIpBlocked(ip))
+            if (isIpBlocked(ip.getIp()))
             {
-                blockedIps.add(ip);
+                blockedIps.add(ip.getIp());
             }
         }
         
@@ -222,12 +252,12 @@ public class LoginAttemptController
     }
     
     /**
-     * Gets all exampt IP.
+     * Gets all exempt IP.
      * @return
      */
-    public static List<String> getExamptIpList()
+    public static List<String> getExemptIpList()
     {
-        return getConfigFromDb().getExamptIpAsList();
+        return getConfigFromDb().getExemptIpAsList();
     }
 
     /**
@@ -242,9 +272,10 @@ public class LoginAttemptController
         {
             return false;
         }
-        if (LOGIN_ATTEMPTS.get(ip) != null)
+        
+        LoginAttempt attempt = getLoginAttempt(ip);
+        if (attempt != null)
         {
-            LoginAttempt attempt = LOGIN_ATTEMPTS.get(ip);
             int loginAttempts = getFailedLoginAttemptAllowed();
             if (attempt.getCount() >= loginAttempts)
             {
@@ -257,7 +288,14 @@ public class LoginAttemptController
                 {
                     // time exceeds the block time, then remove this IP from
                     // blocked list
-                    LOGIN_ATTEMPTS.remove(ip);
+                    try
+                    {
+                        HibernateUtil.delete(attempt);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.error(e);
+                    }
                 }
             }
         }
@@ -285,7 +323,7 @@ public class LoginAttemptController
      */
     private static List<String> getExemptedIpList()
     {
-        return getConfigFromDb().getExamptIpAsList();
+        return getConfigFromDb().getExemptIpAsList();
     }
 
     /**
@@ -303,8 +341,14 @@ public class LoginAttemptController
     private static boolean isInBlockTime(LoginAttempt attempt)
     {
         long blockTime = getBlockTime();
-        return blockTime == 0 ? true : LocalDateTime.now()
-                .minusMinutes(blockTime).isBefore(attempt.getBlockTime());
+        if (blockTime == 0)
+            return true;
+        
+        Date date = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(attempt.getBlockTime());
+        c.add(Calendar.MINUTE, (int) blockTime);
+        return date.before(c.getTime());
     }
     
     /**

@@ -307,6 +307,7 @@ DROP TABLE IF EXISTS SSO_USER_MAPPING CASCADE;
 
 DROP TABLE IF EXISTS SYSTEM_LOG CASCADE;
 DROP TABLE IF EXISTS LOGIN_ATTEMPT_CONFIG CASCADE;
+DROP TABLE IF EXISTS LOGIN_ATTEMPT CASCADE; 
 
 -- TM3 tables: dynamic tables first, then static ones
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'tm3_attr_val_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;

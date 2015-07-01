@@ -16,19 +16,28 @@
  */
 package com.globalsight.everest.webapp.pagehandler.login;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+
+import com.globalsight.everest.persistence.PersistentObject;
 
 /**
  * Login Attempt object.
  */
-public class LoginAttempt
+public class LoginAttempt extends PersistentObject
 {
-    private String ip;
-    private int count;
-    private LocalDateTime blockTime;
+    private static final long serialVersionUID = 8591662988007152637L;
+    private String ip = "";
+    private int count = 0;
+    private Date blockTime;
+    
+    public LoginAttempt()
+    {
+        super();
+    }
 
     public LoginAttempt(String ip)
     {
+        super();
         this.ip = ip;
     }
 
@@ -42,12 +51,12 @@ public class LoginAttempt
         this.count = count;
     }
 
-    public LocalDateTime getBlockTime()
+    public Date getBlockTime()
     {
         return blockTime;
     }
 
-    public void setBlockTime(LocalDateTime blockTime)
+    public void setBlockTime(Date blockTime)
     {
         this.blockTime = blockTime;
     }

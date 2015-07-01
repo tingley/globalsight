@@ -643,9 +643,18 @@ public class MindTouchHelper
 
     	boolean isSrcFound = false;
     	StringBuilder newPath = new StringBuilder();
-    	for (String path : sourcePath.split("/"))
+    	String[] paths = sourcePath.split("/");
+    	String path = null;
+		for (int i = 0; i < paths.length; i++)
     	{
+    		path = paths[i];
     		if (path.startsWith(sourceLang + "-") && !isSrcFound)
+    		{
+    			isSrcFound = true;
+    			newPath.append("/").append(targetLocale);
+    		}
+    		// replace first section in path into target locale, the first section must be like "xx-xx" style.
+    		else if (i == 0 && path.split("-").length == 2 && path.indexOf("-") > 0)
     		{
     			isSrcFound = true;
     			newPath.append("/").append(targetLocale);

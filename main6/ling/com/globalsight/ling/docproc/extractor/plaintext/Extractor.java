@@ -371,11 +371,14 @@ public class Extractor extends AbstractExtractor implements
                         else if (index.length == 2 && index[0] < index[1])
                         {
                             String sid = null;
-                            int[] sidIndex = CustomTextRuleHelper.extractOneLine(line,
-                                    m_customSidRules);
-                            if (sidIndex != null && sidIndex.length == 2 && sidIndex[0] < sidIndex[1])
+                            if (m_customSidRules != null && m_customSidRules.size() > 0)
                             {
-                                sid = line.substring(sidIndex[0], sidIndex[1]);
+                                int[] sidIndex = CustomTextRuleHelper.extractOneLine(line,
+                                        m_customSidRules);
+                                if (sidIndex != null && sidIndex.length == 2 && sidIndex[0] < sidIndex[1])
+                                {
+                                    sid = line.substring(sidIndex[0], sidIndex[1]);
+                                }
                             }
                             
                             String s0 = line.substring(0, index[0]);

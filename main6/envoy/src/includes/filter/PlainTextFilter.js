@@ -1404,11 +1404,11 @@ PlainTextFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 				
 				if (optionValue == plaintextFilter.optionCustomTextRules)
 				{
-					var encodedName = ruleObj.startString.replace(/\</g,"&lt;").replace(/\>/g, "&gt;");
+					var encodedName = ruleObj.startString.toString().replace(/\</g,"&lt;").replace(/\>/g, "&gt;");
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"plaintextFilter.addTag('" + radioId + "')\">"+encodedName+"</a></td>");
 					str.append("<td class='tagValue_td'>" + (ruleObj.startIsRegEx?imgYes:"") + "</td>");
 					str.append("<td class='tagValue_td'>" + ruleObj.startOccurrence + "</td>");
-					str.append("<td class='tagValue_td'>" + ruleObj.finishString.replace(/\</g,"&lt;").replace(/\>/g, "&gt;"));
+					str.append("<td class='tagValue_td'>" + ruleObj.finishString.toString().replace(/\</g,"&lt;").replace(/\>/g, "&gt;"));
 					str.append("<td class='tagValue_td'>" + (ruleObj.finishIsRegEx?imgYes:"") + "</td>");
 					str.append("<td class='tagValue_td'>" + ruleObj.finishOccurrence + "</td>");
 					str.append("<td class='tagValue_td'>" + (ruleObj.isMultiline?imgYes:"") + "</td>");
@@ -1416,11 +1416,11 @@ PlainTextFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 				}
 				if (optionValue == plaintextFilter.optionCustomTextRuleSids)
 				{
-					var encodedName = ruleObj.startString.replace(/\</g,"&lt;").replace(/\>/g, "&gt;");
+					var encodedName = ruleObj.startString.toString().replace(/\</g,"&lt;").replace(/\>/g, "&gt;");
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"plaintextFilter.addTag('" + radioId + "')\">"+encodedName+"</a></td>");
 					str.append("<td class='tagValue_td'>" + (ruleObj.startIsRegEx?imgYes:"") + "</td>");
 					str.append("<td class='tagValue_td'>" + ruleObj.startOccurrence + "</td>");
-					str.append("<td class='tagValue_td'>" + ruleObj.finishString.replace(/\</g,"&lt;").replace(/\>/g, "&gt;"));
+					str.append("<td class='tagValue_td'>" + ruleObj.finishString.toString().replace(/\</g,"&lt;").replace(/\>/g, "&gt;"));
 					str.append("<td class='tagValue_td'>" + (ruleObj.finishIsRegEx?imgYes:"") + "</td>");
 					str.append("<td class='tagValue_td'>" + ruleObj.finishOccurrence + "</td>");
 				}

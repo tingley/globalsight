@@ -183,6 +183,11 @@ public class PlainTextFilterParser
             {
                 t2 = (T) CustomTextRule.initFromElement(tagElement);
             }
+            
+            if (t instanceof CustomTextRuleSid)
+            {
+                t2 = (T) CustomTextRuleSid.initFromElement(tagElement);
+            }
 
             if (t2 != null)
             {

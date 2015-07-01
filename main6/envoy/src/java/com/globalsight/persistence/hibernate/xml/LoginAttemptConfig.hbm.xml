@@ -13,7 +13,7 @@
       not-null="false" unique="false" />
     <property name="maxTime" column="MAX_TIME" type="int"
       not-null="false" unique="false" />
-    <property name="examptIps" column="EXAMPT_IPS" type="string"
+    <property name="exemptIps" column="EXEMPT_IPS" type="string"
       not-null="false" unique="false" />
   </class>
 </hibernate-mapping>

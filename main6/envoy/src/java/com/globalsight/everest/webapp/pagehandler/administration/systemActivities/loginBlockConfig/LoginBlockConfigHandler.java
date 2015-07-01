@@ -43,11 +43,11 @@ public class LoginBlockConfigHandler extends PageActionHandler
             Object form) throws Exception
     {
         logger.debug("Saving LoginAttemptConfig...");
-        String[] examptIps = request.getParameterValues("examptIps");
+        String[] exemptIps = request.getParameterValues("exemptIps");
         List<String> ips = new ArrayList<String>();
-        if (examptIps != null)
+        if (exemptIps != null)
         {
-            for (String ip : examptIps)
+            for (String ip : exemptIps)
             {
                 ips.add(ip);
             }
@@ -58,7 +58,7 @@ public class LoginBlockConfigHandler extends PageActionHandler
         old.setBlockTime(config.getBlockTime());
         old.setEnable(config.isEnable());
         old.setMaxTime(config.getMaxTime());
-        old.SetExamptIpsAsList(ips);
+        old.setExemptIpsAsList(ips);
 
         HibernateUtil.saveOrUpdate(old);
 
@@ -82,7 +82,7 @@ public class LoginBlockConfigHandler extends PageActionHandler
     {
         request.setAttribute("config", LoginAttemptController.getConfigFromDb());
         request.setAttribute("blockedIps", LoginAttemptController.getBlockedIpList());
-        request.setAttribute("examptIps", LoginAttemptController.getExamptIpList());
+        request.setAttribute("exemptIps", LoginAttemptController.getExemptIpList());
     }
 
 }

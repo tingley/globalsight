@@ -50,6 +50,8 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.RequestImpl;
+import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.LeverageGroupImpl;
@@ -306,7 +308,7 @@ public final class PageManagerLocal implements PageManager
         return PagePersistenceAccessor
                 .getTargetPage(p_sourcePageId, p_localeId);
     }
-    
+
     /**
      * Filter target page list by Target Page Filter type
      * 
@@ -317,15 +319,16 @@ public final class PageManagerLocal implements PageManager
      */
     public List<TargetPage> filterTargetPages(Task p_task, String p_filertType)
     {
-        List<TargetPage> tps = p_task.getTargetPages();        
-        if(OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED.equalsIgnoreCase(p_filertType))
+        List<TargetPage> tps = p_task.getTargetPages();
+        if (OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED
+                .equalsIgnoreCase(p_filertType))
         {
             return SegmentTuvUtil.filterUnTranslatedTargetPages(tps);
         }
-        
+
         return tps;
     }
-    
+
     /**
      * @see PageManager.getPageWithExtractedFileForImport(Request,
      *      GlobalSightLocale, String, int, boolean, String)
@@ -499,11 +502,10 @@ public final class PageManagerLocal implements PageManager
     {
         Collection pages = null;
 
-
         TargetPagePersistence tpPersistence = new TargetPageImportPersistence();
 
-            pages = tpPersistence.persistFailedObjectsWithExtractedFile(
-                    p_sourcePage, p_targetLocaleInfo);
+        pages = tpPersistence.persistFailedObjectsWithExtractedFile(
+                p_sourcePage, p_targetLocaleInfo);
 
         return pages;
     }
@@ -1044,7 +1046,7 @@ public final class PageManagerLocal implements PageManager
             ArrayList<Hashtable> otherPages = new ArrayList<Hashtable>();
 
             // loop through all pages....
-			String exportCode = p_exportParameters.getExportCodeset();
+            String exportCode = p_exportParameters.getExportCodeset();
             for (int i = 0; i < pageCount; i++)
             {
                 // set the values in a hashtable
@@ -1069,6 +1071,7 @@ public final class PageManagerLocal implements PageManager
                         pageDocMap.getPageCountForDoc(pageId));
 
                 SourcePage page = null;
+                SecondaryTargetFile secondaryTargetFile = null;
                 if (p_genericPageType == SOURCE_PAGE)
                 {
                     page = HibernateUtil.get(SourcePage.class, pageId);
@@ -1083,67 +1086,81 @@ public final class PageManagerLocal implements PageManager
                             || !exportSubDir.equals(p_exportParameters
                                     .getLocaleSubDir()))
                     {
-                        tpage.setExportSubDir(p_exportParameters.getLocaleSubDir());
+                        tpage.setExportSubDir(p_exportParameters
+                                .getLocaleSubDir());
                         PagePersistenceAccessor.updateTargetPage(tpage);
                     }
                     page = tpage.getSourcePage();
                 }
+                else if (SECONDARY_TARGET_FILE == p_genericPageType)
+                {
+                    secondaryTargetFile = ServerProxy
+                            .getSecondaryTargetFileManager()
+                            .getSecondaryTargetFile(pageId);
+                }
 
-				if (page != null)
-				{
-					// GBS-3731
-					if (exportCode
-							.startsWith(JobManagementHandler.SAME_AS_SOURCE))
-					{
-						long fileProfileId = page.getRequest()
-								.getFileProfileId();
-						FileProfile fileProfile = (FileProfile) HibernateUtil
-								.get(FileProfileImpl.class, fileProfileId,
-										false);
-						p_exportParameters.setExportCodeset(exportCode.replace(
-								JobManagementHandler.SAME_AS_SOURCE,
-								fileProfile.getCodeSet()));
-					}
+                String path = null;
+                if (page != null)
+                {
+                    // GBS-3731
+                    if (exportCode
+                            .startsWith(JobManagementHandler.SAME_AS_SOURCE))
+                    {
+                        long fileProfileId = page.getRequest()
+                                .getFileProfileId();
+                        FileProfile fileProfile = (FileProfile) HibernateUtil
+                                .get(FileProfileImpl.class, fileProfileId,
+                                        false);
+                        p_exportParameters.setExportCodeset(exportCode.replace(
+                                JobManagementHandler.SAME_AS_SOURCE,
+                                fileProfile.getCodeSet()));
+                    }
 
-					ExtractedSourceFile sfile = (ExtractedSourceFile) page
-							.getExtractedFile();
-					String path = page.getExternalPageId().toLowerCase();
-					if (FileExportUtil.USE_JMS && path.endsWith(".pptx") && sfile != null
-							&& "office-xml".equals(sfile.getDataType()))
-					{
-						if (path.startsWith("(slide"))
-						{
-							slidesPages.add(map);
-						}
-						else if (path.startsWith("(notes"))
-						{
-							notesPages.add(map);
-						}
-						else
-						{
-							otherPages.add(map);
-						}
+                    ExtractedSourceFile sfile = (ExtractedSourceFile) page
+                            .getExtractedFile();
+                    path = page.getExternalPageId().toLowerCase();
+                    if (FileExportUtil.USE_JMS && path.endsWith(".pptx")
+                            && sfile != null
+                            && "office-xml".equals(sfile.getDataType()))
+                    {
+                        if (path.startsWith("(slide"))
+                        {
+                            slidesPages.add(map);
+                        }
+                        else if (path.startsWith("(notes"))
+                        {
+                            notesPages.add(map);
+                        }
+                        else
+                        {
+                            otherPages.add(map);
+                        }
 
-						continue;
-					}
-					
-					if (!FileExportUtil.USE_JMS)
-					{
-					    map.put("filePath", path);
-					    String key = p_exportBatchId + path + map.get(new Integer(PAGE_NUM));
-					    map.put("key", key);
-					}
+                        continue;
+                    }
+                }
+                else if (secondaryTargetFile != null)
+                {
+                    path = secondaryTargetFile.getStoragePath();
+                }
 
-				}
-				
-				if (FileExportUtil.USE_JMS)
-				{
-				    JmsHelper.sendMessageToQueue(map, JmsHelper.JMS_EXPORTING_QUEUE);
-				}
-				else
-				{
-				    FileExportUtil.exportFileWithThread(map);
-				}
+                if (FileExportUtil.USE_JMS)
+                {
+                    JmsHelper.sendMessageToQueue(map,
+                            JmsHelper.JMS_EXPORTING_QUEUE);
+                }
+                else
+                {
+                    if (path != null)
+                    {
+                        map.put("filePath", path);
+                        String key = p_exportBatchId + path
+                                + map.get(new Integer(PAGE_NUM));
+                        map.put("key", key);
+                    }
+
+                    FileExportUtil.exportFileWithThread(map);
+                }
             }
 
             if (slidesPages.size() > 0)
@@ -1170,8 +1187,6 @@ public final class PageManagerLocal implements PageManager
             throw new PageException(ex);
         }
     }
-
-
 
     /**
      * Returns a TargetLocaleLgIdsMapper object, which maps leverage group ids

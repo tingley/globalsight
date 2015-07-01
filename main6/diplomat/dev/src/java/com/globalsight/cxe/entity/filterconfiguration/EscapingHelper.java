@@ -48,6 +48,11 @@ public class EscapingHelper
         if (es == null || es.size() == 0)
             return oriStr;
 
+        // To be safe, do not escape anything for office 2010.
+        if (IFormatNames.FORMAT_OFFICE_XML.equals(format)) {
+        	return oriStr;
+        }
+
         StringBuffer sb = new StringBuffer();
 
         List<TagIndex> tags = null;

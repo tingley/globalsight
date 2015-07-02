@@ -17994,15 +17994,23 @@ public class Ambassador extends AbstractWebService
 
 		try
 		{
-			ZipIt.addEntriesToZipFile(zipFile, allEntryFileToFileNameMap, "");
-			String filestore = AmbFileStoragePathUtils.getFileStorageDirPath(1)
-					.replace("\\", "/");
-			String fullPathName = zipFile.getAbsolutePath().replace("\\", "/");
-			String path = fullPathName.substring(fullPathName
-					.indexOf(filestore) + filestore.length());
-			String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-					+ "/DownloadReports";
-			fileUrl = root + path;
+			if (allEntryFileToFileNameMap.entrySet().size() > 0)
+			{
+
+				ZipIt.addEntriesToZipFile(zipFile, allEntryFileToFileNameMap, "");
+				String filestore = AmbFileStoragePathUtils.getFileStorageDirPath(1)
+						.replace("\\", "/");
+				String fullPathName = zipFile.getAbsolutePath().replace("\\", "/");
+				String path = fullPathName.substring(fullPathName
+						.indexOf(filestore) + filestore.length());
+				String root = AmbassadorUtil.getCapLoginOrPublicUrl()
+						+ "/DownloadReports";
+				fileUrl = root + path;
+			}
+			else
+			{
+				fileUrl = "No QA Report downloaded !";
+			}
 		}
 		catch (Exception e)
 		{

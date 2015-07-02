@@ -78,7 +78,6 @@ public class WfStatePostThread implements Runnable
         try
         {
             JSONObject jsonObj = getNotifyMessage(p_task, destinationArrow,isDispatch);
-            String[] aa = jsonObj.toString().split(",");
             L10nProfile l10nProfile = ServerProxy.getJobHandler()
                     .getL10nProfileByJobId(p_task.getJobId());
             long wfStatePostId = l10nProfile.getWfStatePostId();
@@ -107,6 +106,7 @@ public class WfStatePostThread implements Runnable
             WorkflowTaskInstance firstTask = ServerProxy.getWorkflowServer()
                     .getWorkflowTaskInstance(p_task.getWorkflow().getId(),
                             p_task.getId());
+            jsonObj.put("currActivity", firstTask.getActivityDisplayName());
             Vector<WorkflowArrowInstance> arrows3 = firstTask
                     .getIncomingArrows();
             for (WorkflowArrowInstance arrow3 : arrows3)
@@ -273,7 +273,11 @@ public class WfStatePostThread implements Runnable
                     {
                         String recipient = wfStatePost.getNotifyEmail();
                         long companyId = wfStatePost.getCompanyId();
-						String[] messageArguments = message.toString().split(",");
+                        String[] messageArguments =
+                        { wfStatePost.getName(), wfStatePost.getListenerURL(),
+                                wfStatePost.getSecretKey(),
+                                String.valueOf(wfStatePost.getRetryNumber()),
+                                message.toString() };
 						ServerProxy.getMailer().sendMailFromAdmin(
 								recipient,	messageArguments,
 								MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,

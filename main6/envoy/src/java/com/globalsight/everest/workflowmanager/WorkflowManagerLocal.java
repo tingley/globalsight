@@ -841,6 +841,18 @@ public class WorkflowManagerLocal implements WorkflowManager
                 }
 
                 Task task = (Task) wfClone.getTasks().get(taskId);
+                long jobId = task.getJobId();
+                L10nProfile l10nProfile = ServerProxy.getJobHandler()
+                        .getL10nProfileByJobId(jobId);
+                long wfStatePostId = l10nProfile.getWfStatePostId();
+                if (wfStatePostId != -1)
+                {
+                    ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
+                    WfStatePostThread myTask = new WfStatePostThread(task,
+                            null, true);
+                    pool.execute(myTask);
+                    pool.shutdown();
+                }
 
                 if (task != null)
                 {
@@ -1783,6 +1795,18 @@ public class WorkflowManagerLocal implements WorkflowManager
                     }
 
                     Task task = (Task) wfClone.getTasks().get(taskId);
+                    long jobId = task.getJobId();
+                    L10nProfile l10nProfile = ServerProxy.getJobHandler()
+                            .getL10nProfileByJobId(jobId);
+                    long wfStatePostId = l10nProfile.getWfStatePostId();
+                    if (wfStatePostId != -1)
+                    {
+                        ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
+                        WfStatePostThread myTask = new WfStatePostThread(task,
+                                null, true);
+                        pool.execute(myTask);
+                        pool.shutdown();
+                    }
 
                     // For sla issue
                     if (wfClone.isEstimatedTranslateCompletionDateOverrided())
@@ -2020,7 +2044,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             {
                 ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
                 WfStatePostThread myTask = new WfStatePostThread(p_task,
-                        p_destinationArrow);
+                        p_destinationArrow, false);
                 pool.execute(myTask);
                 pool.shutdown();
             }

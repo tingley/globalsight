@@ -16,10 +16,15 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
+import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflowmanager.WorkflowStatePosts;
@@ -107,6 +112,41 @@ public class WorkflowStatePostHandlerHelper
     public static Map<String, Object> checkWfStatePostProfile(
             HttpServletRequest p_request)
     {
+        Connection connection = null;
+        PreparedStatement query = null;
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            String sql1 = "UPDATE l10n_profile SET WF_STATE_POST_ID = -1 WHERE IS_ACTIVE = \"N\"";
+            connection.setAutoCommit(false);
+            query = connection.prepareStatement(sql1);
+            query.execute();
+            connection.commit();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (query != null)
+            {
+                try
+                {
+                    query.close();
+                }
+                catch (Exception e)
+                {
+                }
+            }
+            try
+            {
+                ConnectionPool.returnConnection(connection);
+            }
+            catch (Exception cpe)
+            {
+            }
+        }
         String errorId = "";
         Map<String, String> param = null;
         String sql = "SELECT DISTINCT L.* FROM L10N_PROFILE L"

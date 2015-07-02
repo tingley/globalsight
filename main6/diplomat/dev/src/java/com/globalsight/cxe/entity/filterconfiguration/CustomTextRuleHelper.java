@@ -507,10 +507,10 @@ public class CustomTextRuleHelper
 
                 if (startMatch)
                 {
-                    int startIndex = extractIndexStart;
+                    int startIndex = extractIndexStart - processedChars;
 
                     // there is no more string after start string
-                    if (startIndex >= (processedChars + line.length()))
+                    if (startIndex >= line.length())
                     {
                         break;
                     }

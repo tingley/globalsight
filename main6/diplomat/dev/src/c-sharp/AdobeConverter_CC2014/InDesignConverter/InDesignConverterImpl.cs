@@ -109,18 +109,18 @@ namespace GlobalSight.InDesignConverter
         /// the file was written in</param>
         public void Convert(string p_fileName, string p_language)
         {
-            lock (locker)
+            try
             {
-                try
+                if (m_conversionType == ConversionType.TEST)
                 {
-                    ResetState();
+                    // do nothing, just delete the *.test file
+                }
+                else
+                {
+                    lock (locker)
+                    {
+                        ResetState();
 
-                    if (m_conversionType == ConversionType.TEST)
-                    {
-                        // do nothing, just delete the *.test file
-                    }
-                    else
-                    {
                         m_statusFileName = p_fileName.Substring(
                             0, p_fileName.Length - FILE_EXT_LEN) + "status";
                         DetermineConversionValues(p_fileName);
@@ -177,15 +177,15 @@ namespace GlobalSight.InDesignConverter
                         m_log.Log("[Indesign]: Converted successfully to: " + m_newFileName);
                     }
                 }
-                catch (Exception e)
-                {
-                    Logger.LogError("[Indesign]: InDesign Conversion Failed", e);
-                    StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
-                }
-                finally
-                {
-                    DeleteInputFile(p_fileName);
-                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("[Indesign]: InDesign Conversion Failed", e);
+                StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
+            }
+            finally
+            {
+                DeleteInputFile(p_fileName);
             }
         }
 

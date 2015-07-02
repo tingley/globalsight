@@ -79,7 +79,7 @@ var helpFile = "<%=bundle.getString("help_workflow_state_post_profiles_main_scre
 		    }
 		    else if(button == "Remove")
 		    {
-		        value = getRadioValue(workflowStatePostForm.radioBtn);
+		        var value = getRadioValue(workflowStatePostForm.radioBtn);
 		        if (!confirm("<%=bundle.getString("msg_confirm_workflow_state_post_profile_removal")%>"))
 		            return false;
 		        var url = "<%=selfURL%>&action=check&wfStatePostId="+value;
@@ -90,7 +90,7 @@ var helpFile = "<%=bundle.getString("help_workflow_state_post_profiles_main_scre
 		        	   success: function(data){
 		        		   var wrong = data.wrong;
 				 		   if(wrong != "needRemove"){
-				 			   alert("The Workflow State Post Profile is in use,(workflow state post id : "+wrong+") can not be deleted.");
+				 			   alert("The selected workflow state post profile is in use, cannot be removed.");
 				 			  workflowStatePostForm.action = "<%=selfURL %>"
 				 				 workflowStatePostForm.submit();
 				 		   }else{
@@ -163,12 +163,12 @@ var helpFile = "<%=bundle.getString("help_workflow_state_post_profiles_main_scre
                      pageUrl="self"
                      emptyTableMsg="msg_no_workflow_state_post_profile" hasFilter="true">
                 <amb:column label="checkbox" width="2%">
-                    <input type="checkbox" name="radioBtn" value="<%=wfStatePostProfile.getWfStatePostId()%>"
+                    <input type="checkbox" name="radioBtn" value="<%=wfStatePostProfile.getId()%>"
                         onclick="enableButtons()">
                 </amb:column>
                 <amb:column label="lb_name" sortBy="<%=WorkflowStatePostComparator.NAME%>" filter="nameFilter" filterValue="<%=nameFilter%>" width="10%">
                	<%
-					    out.print("<a href='javascript:void(0)' title='Edit Workflow State Post Profiles' onclick='editwfStatePostProfile(" + wfStatePostProfile.getWfStatePostId() + ")'>" + wfStatePostProfile.getName() + "</a>");
+					    out.print("<a href='javascript:void(0)' title='Edit Workflow State Post Profiles' onclick='editwfStatePostProfile(" + wfStatePostProfile.getId() + ")'>" + wfStatePostProfile.getName() + "</a>");
 				%>
                 </amb:column>
                 <amb:column label="lb_description" sortBy="<%=WorkflowStatePostComparator.DESCRIPTION%>" width="20%">

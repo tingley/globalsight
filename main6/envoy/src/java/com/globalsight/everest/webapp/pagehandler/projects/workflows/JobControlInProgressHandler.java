@@ -24,11 +24,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -40,13 +38,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobException;
-import com.globalsight.everest.qachecks.QAChecker;
-import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -56,13 +50,9 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoInProgressSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 
 public class JobControlInProgressHandler extends JobManagementHandler

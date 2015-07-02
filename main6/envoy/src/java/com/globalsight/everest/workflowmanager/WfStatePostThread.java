@@ -57,25 +57,28 @@ public class WfStatePostThread implements Runnable
 
     private Task task;
     private String destinationArrow;
+    private boolean isDispatch;
 
-    public WfStatePostThread(Task task, String destinationArrow)
+    public WfStatePostThread(Task task, String destinationArrow, boolean isDispatch)
     {
         super();
         this.task = task;
         this.destinationArrow = destinationArrow;
+        this.isDispatch = isDispatch;
     }
 
     @Override
     public void run()
     {
-        wfStatePost(task, destinationArrow);
+        wfStatePost(task, destinationArrow, isDispatch);
     }
 
-    private void wfStatePost(Task p_task, String p_destinationArrow)
+    private void wfStatePost(Task p_task, String p_destinationArrow, boolean isDispatch)
     {
         try
         {
-            JSONObject jsonObj = getNotifyMessage(p_task, destinationArrow);
+            JSONObject jsonObj = getNotifyMessage(p_task, destinationArrow,isDispatch);
+            String[] aa = jsonObj.toString().split(",");
             L10nProfile l10nProfile = ServerProxy.getJobHandler()
                     .getL10nProfileByJobId(p_task.getJobId());
             long wfStatePostId = l10nProfile.getWfStatePostId();
@@ -92,58 +95,80 @@ public class WfStatePostThread implements Runnable
     }
 
 	@SuppressWarnings("unchecked")
-	private JSONObject getNotifyMessage(Task p_task, String p_destinationArrow)
-			throws Exception
+    private JSONObject getNotifyMessage(Task p_task, String p_destinationArrow,
+            boolean isDispatch) throws Exception
     {
         String toArrowName = p_destinationArrow;
         JSONObject jsonObj = new JSONObject();
         long jobId = p_task.getJobId();
-        WorkflowTaskInstance nextTask = ServerProxy.getWorkflowServer()
-                .nextNodeInstances(p_task, p_destinationArrow, null);
-        if (nextTask != null)
+        if (isDispatch)
         {
-            jsonObj.put("currActivity", nextTask.getActivityDisplayName());
+            jsonObj.put("prevActivity", "start");
+            WorkflowTaskInstance firstTask = ServerProxy.getWorkflowServer()
+                    .getWorkflowTaskInstance(p_task.getWorkflow().getId(),
+                            p_task.getId());
+            Vector<WorkflowArrowInstance> arrows3 = firstTask
+                    .getIncomingArrows();
+            for (WorkflowArrowInstance arrow3 : arrows3)
+            {
+                WorkflowTaskInstance srcNode = (WorkflowTaskInstance) arrow3
+                        .getSourceNode();
+                if (srcNode.getType() == WorkflowConstants.START)
+                {
+                    toArrowName = arrow3.getName();
+                }
+            }
         }
         else
         {
-            jsonObj.put("currActivity", "exit");
-        }
-        if (StringUtils.isEmpty(p_destinationArrow))
-        {
+            WorkflowTaskInstance nextTask = ServerProxy.getWorkflowServer()
+                    .nextNodeInstances(p_task, p_destinationArrow, null);
             if (nextTask != null)
             {
-                Vector<WorkflowArrowInstance> arrows = nextTask
-                        .getIncomingArrows();
-                if (arrows != null && arrows.size() == 1)
+                jsonObj.put("currActivity", nextTask.getActivityDisplayName());
+            }
+            else
+            {
+                jsonObj.put("currActivity", "exit");
+            }
+            if (StringUtils.isEmpty(p_destinationArrow))
+            {
+                if (nextTask != null)
                 {
-                    toArrowName = arrows.get(0).getName();
+                    Vector<WorkflowArrowInstance> arrows = nextTask
+                            .getIncomingArrows();
+                    if (arrows != null && arrows.size() == 1)
+                    {
+                        toArrowName = arrows.get(0).getName();
+                    }
+                    else
+                    {
+                        for (WorkflowArrowInstance arrow : arrows)
+                        {
+                            toArrowName = determineIncomingArrow(arrow,
+                                    p_task.getId());
+                            if (toArrowName != null)
+                                break;
+                        }
+                    }
                 }
                 else
                 {
-                    for (WorkflowArrowInstance arrow : arrows)
+                    WorkflowTaskInstance currentTask = ServerProxy
+                            .getWorkflowServer().getWorkflowTaskInstance(
+                                    p_task.getWorkflow().getId(),
+                                    p_task.getId());
+                    Vector<WorkflowArrowInstance> arrows2 = currentTask
+                            .getOutgoingArrows();
+                    for (WorkflowArrowInstance arrow2 : arrows2)
                     {
-                        toArrowName = determineIncomingArrow(arrow,
-                                p_task.getId());
+                        toArrowName = determineOutgoingArrow(arrow2);
                         if (toArrowName != null)
                             break;
                     }
                 }
             }
-            else
-            {
-                WorkflowTaskInstance currentTask = ServerProxy
-                        .getWorkflowServer().getWorkflowTaskInstance(
-                                p_task.getWorkflow().getId(),
-                                p_task.getId());
-                Vector<WorkflowArrowInstance> arrows2 = currentTask
-                        .getOutgoingArrows();
-                for (WorkflowArrowInstance arrow2 : arrows2)
-                {
-                    toArrowName = determineOutgoingArrow(arrow2);
-                    if (toArrowName != null)
-                        break;
-                }
-            }
+            jsonObj.put("prevActivity", p_task.getTaskDisplayName());
         }
         jsonObj.put("arrowText", toArrowName);
         jsonObj.put("jobId", jobId);
@@ -151,7 +176,6 @@ public class WfStatePostThread implements Runnable
         jsonObj.put("workflowId", p_task.getWorkflow().getIdAsLong());
         jsonObj.put("sourceLocale", p_task.getSourceLocale().toString());
         jsonObj.put("targetLocale", p_task.getTargetLocale().toString());
-        jsonObj.put("prevaAtivity", p_task.getTaskDisplayName());
 
         return jsonObj;
     }
@@ -249,7 +273,7 @@ public class WfStatePostThread implements Runnable
                     {
                         String recipient = wfStatePost.getNotifyEmail();
                         long companyId = wfStatePost.getCompanyId();
-						String[] messageArguments = { message.toString() };
+						String[] messageArguments = message.toString().split(",");
 						ServerProxy.getMailer().sendMailFromAdmin(
 								recipient,	messageArguments,
 								MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,

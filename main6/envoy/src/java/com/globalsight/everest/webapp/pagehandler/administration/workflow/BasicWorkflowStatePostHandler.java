@@ -52,7 +52,6 @@ public class BasicWorkflowStatePostHandler extends PageHandler implements
         if (action != null && "edit".equals(action))
         {
             modifyWfStatePostProfile(p_request, p_response);
-
         }
         try
         {

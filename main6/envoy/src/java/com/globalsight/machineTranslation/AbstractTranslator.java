@@ -125,15 +125,24 @@ public abstract class AbstractTranslator implements MachineTranslator
                 translatedSegs = trSafaba(sourceLocale, targetLocale, segments);
                 break;
             case MS_Translator:
-        		// Seems MS Translator cannot return valid GXML for certain languages
-        		// such as "sr_Cyrl", we have to try pure text way.
-    			String trgSrLang = (String) getMtParameterMap().get(
-    					MachineTranslator.SR_LANGUAGE);
-        		if ("sr-Cyrl".equalsIgnoreCase(trgSrLang)) {
-        			translatedSegs = trMs2(sourceLocale, targetLocale, segments, containTags);
-        		} else {
-                    translatedSegs = trMs(sourceLocale, targetLocale, segments);
-        		}
+            	String type = MTHelper.getMTConfig("ms_translator.translate.type");
+            	// old version
+            	if ("1".equals(type))
+            	{
+            		translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
+            	}
+            	else
+            	{
+            		// Seems MS Translator cannot return valid GXML for certain languages
+            		// such as "sr_Cyrl", we have to try pure text way.
+        			String trgSrLang = (String) getMtParameterMap().get(
+        					MachineTranslator.SR_LANGUAGE);
+            		if ("sr-Cyrl".equalsIgnoreCase(trgSrLang)) {
+            			translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
+            		} else {
+                        translatedSegs = trMs2(sourceLocale, targetLocale, segments);
+            		}
+            	}
                 break;
             case IPTranslator:
                 translatedSegs = trIPTranslator(sourceLocale, targetLocale, segments);
@@ -347,7 +356,7 @@ public abstract class AbstractTranslator implements MachineTranslator
     }
 
     // The whole segment GXML is sent for translation.
-	private String[] trMs(Locale sourceLocale, Locale targetLocale,
+	private String[] trMs2(Locale sourceLocale, Locale targetLocale,
 			String[] segments) throws MachineTranslationException
 	{
 		String seg = null;
@@ -437,7 +446,7 @@ public abstract class AbstractTranslator implements MachineTranslator
 	}
 
 	// Text nodes are sent to MS separately, return bad translation.
-    private String[] trMs2(Locale sourceLocale, Locale targetLocale,
+    private String[] trMs1(Locale sourceLocale, Locale targetLocale,
             String[] segments, boolean containTags)
             throws MachineTranslationException
     {

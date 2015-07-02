@@ -81,7 +81,7 @@ public class OfflineUploadRequestComparator extends StringComparator
             break;
         case USER:
             aValue = a.getUser();
-            bValue = a.getUser();
+            bValue = b.getUser();
             rv = this.compareStrings(aValue, bValue);
             break;        
         }

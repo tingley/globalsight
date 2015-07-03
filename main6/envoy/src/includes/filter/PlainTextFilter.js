@@ -1,6 +1,6 @@
 var plaintextFilter = new PlainTextFilter();
 var checkAllTagsInPlainTextFilter = false;
-var baseTagsContentTable = "<table id='plainTextFilterTagsContentTable' border=0 width='400px' class='standardText'>"; 
+var plaintextTagsContentTable = "<table id='plainTextFilterTagsContentTable' border=0 width='400px' class='standardText'>"; 
 var fontTagS = "<font class='specialFilter_dialog_label'>";
 var fontTagE = "</font>"
 var imgYes = "<IMG SRC='/globalsight/images/checkmark.gif' HEIGHT=9 WIDTH=13 HSPACE=10 VSPACE=3></IMG>";
@@ -485,8 +485,8 @@ PlainTextFilter.prototype.generateTagsTable = function (filter)
 	str.append("</div>");
 	str.append("</td></tr></table>");
 	
-	str.append("<div id='baseTagsContent'>");
-	str.append(baseTagsContentTable);
+	str.append("<div id='plaintextTagsContent'>");
+	str.append(plaintextTagsContentTable);
 	
 	if (filter)
 	{
@@ -1310,11 +1310,11 @@ PlainTextFilter.prototype.switchStatus = function()
 
 PlainTextFilter.prototype.refreshTagsContent = function(content)
 {
-	var ccc = new StringBuffer(baseTagsContentTable);
+	var ccc = new StringBuffer(plaintextTagsContentTable);
 	ccc.append(content);
 	ccc.append("</table>");
 	
-	document.getElementById("baseTagsContent").innerHTML = ccc.toString();
+	document.getElementById("plaintextTagsContent").innerHTML = ccc.toString();
 }
 
 PlainTextFilter.prototype.generateTagsContent = function(optionValue, pageIndex)

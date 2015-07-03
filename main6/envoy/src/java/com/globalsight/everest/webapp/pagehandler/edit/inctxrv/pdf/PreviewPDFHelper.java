@@ -114,6 +114,9 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     private static final Map<String, Future<File>> createPDFMap = new ConcurrentHashMap<String, Future<File>>();
     private static final ExecutorService serviceForINDD = Executors.newSingleThreadExecutor();
     private static final ExecutorService serviceForIDML = Executors.newSingleThreadExecutor();
+    private static final ExecutorService serviceForDOCX = Executors.newSingleThreadExecutor();
+    private static final ExecutorService serviceForPPTX = Executors.newSingleThreadExecutor();
+    private static final ExecutorService serviceForXLSX = Executors.newSingleThreadExecutor();
 
     private static final int BUFFERSIZE = 4096;
 
@@ -216,19 +219,19 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         else if (externalPageId.endsWith(DOCX_SUFFIX))
         {
             task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_DOCX, isTarget);
-            future = serviceForIDML.submit(task);
+            future = serviceForDOCX.submit(task);
             createPDFMap.put(key, future);
         }
         else if (externalPageId.endsWith(PPTX_SUFFIX))
         {
             task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_PPTX, isTarget);
-            future = serviceForIDML.submit(task);
+            future = serviceForPPTX.submit(task);
             createPDFMap.put(key, future);
         }
         else if (externalPageId.endsWith(XLSX_SUFFIX))
         {
             task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_XLSX, isTarget);
-            future = serviceForIDML.submit(task);
+            future = serviceForXLSX.submit(task);
             createPDFMap.put(key, future);
         }
     }
@@ -1145,7 +1148,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         int i = 0;
         File f = new File(statusFileName);
         boolean found = false;
-        while (i++ < 5)
+        while (i++ < 10)
         {
             Thread.sleep(2000);
             if (f.exists())
@@ -1159,6 +1162,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             if (testFile.exists())
             {
+                testFile.delete();
+                
                 throw new Exception(
                         "In Context Review converter is not started");
             }

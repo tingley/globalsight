@@ -16370,7 +16370,14 @@ public class Ambassador extends AbstractWebService
 					if (wf != null)
 					{
 						projectId = String.valueOf(wf.getJob().getProjectId());
-						if (UserUtil.isInProject(userName, projectId))
+						
+						if (!wf.getJob().hasSetCostCenter())
+                        {
+                            return makeErrorXml("dispatchWorkflow",
+                                    "Invaild workflow id: " + wfId
+                                            + ", cost center attribute or required attributes are not set.");
+                        }
+						else if (UserUtil.isInProject(userName, projectId))
 						{
 							wfm.dispatch(wf);
 						}

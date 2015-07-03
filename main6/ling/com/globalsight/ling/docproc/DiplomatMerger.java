@@ -54,6 +54,7 @@ import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.XmlWriter;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.ling.docproc.extractor.xliff.WSConstants;
+import com.globalsight.ling.docproc.extractor.xml.XmlExtractor;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.worldserver.WsSkeletonDispose;
 import com.globalsight.machineTranslation.MTHelper;
@@ -459,9 +460,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 if (IFormatNames.FORMAT_JAVAPROP.equalsIgnoreCase(p_mainFormat)
                         && encoder instanceof JPEscapeSequence)
                 {
-                    ((JPEscapeSequence)encoder).setIsJavaProperty(true);
+                    ((JPEscapeSequence) encoder).setIsJavaProperty(true);
                 }
-                
+
                 newText = encoder.encodeWithEncodingCheck(newText);
             }
         }
@@ -1021,6 +1022,13 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             tmp = StringUtil.replace(tmp,
                                     IdmlHelper.MARK_LineBreak_IDML,
                                     IdmlHelper.LINE_BREAK);
+                        }
+                        // GBS-3955
+                        if (tmp.contains(XmlExtractor.DOCTYPE_HTML))
+                        {
+                            // remove DOCTYPE_HTML during export
+                            tmp = StringUtil.replace(tmp,
+                                    XmlExtractor.DOCTYPE_HTML, "");
                         }
                     }
 

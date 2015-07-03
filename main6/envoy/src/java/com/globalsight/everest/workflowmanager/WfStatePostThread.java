@@ -273,11 +273,8 @@ public class WfStatePostThread implements Runnable
                     {
                         String recipient = wfStatePost.getNotifyEmail();
                         long companyId = wfStatePost.getCompanyId();
-                        String[] messageArguments =
-                        { wfStatePost.getName(), wfStatePost.getListenerURL(),
-                                wfStatePost.getSecretKey(),
-                                String.valueOf(wfStatePost.getRetryNumber()),
-                                message.toString() };
+                        String[] messageArguments = { wfStatePost.getName(), 
+                              wfStatePost.getListenerURL(), message.toString()};
 						ServerProxy.getMailer().sendMailFromAdmin(
 								recipient,	messageArguments,
 								MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,

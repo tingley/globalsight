@@ -395,14 +395,15 @@ public abstract class AbstractTranslator implements MachineTranslator
 
                 if (subResults != null)
                 {
-					for (int j = 0; j < subResults.length; j++)
-                	{
+					translatedList.addAll(Arrays.asList(subResults));
+//					for (int j = 0; j < subResults.length; j++)
+//                	{
 						// We have to do so as MS Translator returns
 						// unreasonable translations with bad tags. We know this
 						// is not 100% reliable.
-						translatedList.add(StringUtil.replace(subResults[j],
-								"_", " "));
-                	}
+//						translatedList.add(StringUtil.replace(subResults[j],
+//								"_", " "));
+//                	}
                 }
                 subList.clear();
                 charCount = 0;

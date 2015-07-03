@@ -178,8 +178,9 @@ public class WelcomeHandler extends PageHandler
         		isSuperAdmin);
         p_request.setAttribute(WebAppConstants.IS_ADMIN, 
         		isAdmin);
+        p_request.setAttribute(WebAppConstants.SUPER_PM_NAME, isSuperPm);
         p_request.setAttribute(WebAppConstants.IS_PROJECT_MANAGER, 
-        		isProjectManager);		
+        		isProjectManager);
     	p_request.setAttribute(WebAppConstants.EXPORTING_WORKFLOW_NUMBER, 
     			WorkflowExportingHelper.getExportingWorkflowNumber(isSuperAdmin, companyId));
     	

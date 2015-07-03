@@ -36,7 +36,7 @@
    ResourceBundle bundle = PageHandler.getBundle(session);
    SessionManager sessionMgr = 
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-   ArrayList names = (ArrayList)request.getAttribute("allWfStatePostNames");
+   List wfStatePostProfile = (List)request.getAttribute("allWfStatePost");
    String actionType = (String) request.getAttribute(WorkflowStatePostConstants.ACTION);
    Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
    //names
@@ -59,7 +59,7 @@
 
    // get the newly created or existing workflow state post info
    WorkflowStatePosts wfsp = (WorkflowStatePosts)
-      sessionMgr.getAttribute(WorkflowStatePostConstants.WF_STATE_POST_INFO);
+      request.getAttribute(WorkflowStatePostConstants.WF_STATE_POST_INFO);
    
    String jsmsg = "";
    long wfStatePostInfoId = -1;
@@ -146,6 +146,23 @@ function confirmForm()
 	        wfStatePostForm.<%=nameField%>.focus();
 	        return false;
 	    }
+	   var lowerName = wfStatePostForm.<%=nameField%>.value.toLowerCase();
+	   <%
+	   if (wfStatePostProfile != null)
+	   {
+	       for (int i = 0; i < wfStatePostProfile.size(); i ++)
+	       {
+	           WorkflowStatePosts wfStatePost = (WorkflowStatePosts)wfStatePostProfile.get(i);
+	  %>
+	           if ("<%=wfStatePost.getName().toLowerCase()%>" == lowerName )
+	           {
+	               alert(wfStatePostForm.<%=nameField%>.value + " is already existed. Please input another one.");
+	               return false;
+	           }
+	  <%
+	       }
+	   }
+	  %>
 	   if (!isNotLongerThan(wfStatePostForm.<%=descriptionField%>.value, 256)) {
 			alert("<%= bundle.getString("jsmsg_description") %>");
 			wfStatePostForm.<%=descriptionField%>.focus();

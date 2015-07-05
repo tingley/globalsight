@@ -197,7 +197,7 @@ public class IdmlConverter
         int i = 0;
         File f = new File(expectedStatus);
         boolean found = false;
-        while (i++ < 5)
+        while (i++ < 10)
         {
             Thread.sleep(2000);
             if (f.exists())

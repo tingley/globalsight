@@ -20,6 +20,7 @@ namespace GlobalSight.Common
 		private bool m_keepWatching = true;
 		private Converter m_converter = null;
         private ArrayList m_watchDirInfo = new ArrayList();
+        private int sleepSeconds = 20;
 
 
 		/// <summary>
@@ -41,6 +42,18 @@ namespace GlobalSight.Common
 			m_watchThread = new Thread(new ThreadStart(Watch));
 			m_log = Logger.GetLogger();
 		}
+
+        public int SleepSeconds
+        {
+            get
+            {
+                return sleepSeconds;
+            }
+            set
+            {
+                sleepSeconds = value;
+            }
+        }
 
 		/// <summary>
 		/// Starts the ConverterRunner up to watch the watch directory.
@@ -75,7 +88,7 @@ namespace GlobalSight.Common
 				{
 					Logger.LogError("Failed to scan directory",e);
 				}
-				Thread.Sleep(20 * 1000);
+                Thread.Sleep(sleepSeconds * 1000);
 			}
 		}
 	

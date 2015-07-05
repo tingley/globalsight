@@ -219,6 +219,14 @@
    //It's a very ugly implementation for multicompany prototype. Modify it in real version.
    boolean isSuperAdmin3 = UserUtil.isSuperAdmin(
         (String) request.getSession().getAttribute(WebAppConstants.USER_NAME));
+        
+   boolean isAdmin3 = UserUtil.isInPermissionGroup(
+   (String) request.getSession().getAttribute(WebAppConstants.USER_NAME), "Administrator");
+   
+    boolean isSuperProjectManager3 = UserUtil.isSuperPM(
+        (String) request.getSession().getAttribute(WebAppConstants.USER_NAME));
+        
+     boolean isProjectManager3 = userPerms.getPermissionFor(Permission.PROJECTS_MANAGE);
 %>
 
 
@@ -390,7 +398,7 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_projects")%>", 
 <% if (userPerms.getPermissionFor(Permission.WORKFLOWS_VIEW)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_workflows")%>", "javascript:goToUrl('<%=templatesUrl%>');", ""));
 <% } %>
-<%if(isEnablewfStatePosts){%>
+<%if(isEnablewfStatePosts && (isSuperAdmin3 || isAdmin3  || isSuperProjectManager3 || isProjectManager3)){%>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_workflow_state_post_profiles")%>", "javascript:goToUrl('<%=workflowStatePostUrl%>');", ""));
 <%}%>
 <% if (userPerms.getPermissionFor(Permission.LOCPROFILES_VIEW)) { %>

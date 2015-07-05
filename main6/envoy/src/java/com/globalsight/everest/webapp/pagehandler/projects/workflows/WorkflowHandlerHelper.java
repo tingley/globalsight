@@ -1170,23 +1170,23 @@ public class WorkflowHandlerHelper
 		String filePath = null;
 		try
 		{
-			if (workflow.getJob().getProject().getAllowManualQAChecks())
+			Map activeTasks = ServerProxy.getWorkflowServer()
+					.getActiveTasksForWorkflow(workflow.getId());
+
+			WorkflowTaskInstance activeTask = null;
+			Object[] tasks = (activeTasks == null) ? null : activeTasks
+					.values().toArray();
+			if (tasks != null && tasks.length > 0)
 			{
-				Map activeTasks = ServerProxy.getWorkflowServer()
-						.getActiveTasksForWorkflow(workflow.getId());
+				activeTask = (WorkflowTaskInstance) tasks[0];
+			}
 
-				WorkflowTaskInstance activeTask = null;
-				Object[] tasks = (activeTasks == null) ? null : activeTasks
-						.values().toArray();
-				if (tasks != null && tasks.length > 0)
+			if (activeTask != null)
+			{
+				Task task = ServerProxy.getTaskManager().getTask(
+						activeTask.getTaskId());
+				if (QACheckerHelper.isShowQAChecksTab(task))
 				{
-					activeTask = (WorkflowTaskInstance) tasks[0];
-				}
-
-				if (activeTask != null)
-				{
-					Task task = ServerProxy.getTaskManager().getTask(
-							activeTask.getTaskId());
 					if (QACheckerHelper.isQAActivity(task))
 					{
 						QAChecker qaChecker = new QAChecker();
@@ -1198,7 +1198,10 @@ public class WorkflowHandlerHelper
 						filePath = getPreviousQAReportFilePath(workflow);
 					}
 				}
-				else
+			}
+			else
+			{
+				if (workflow.getJob().getProject().getAllowManualQAChecks())
 				{
 					if (workflow.getState().equalsIgnoreCase("EXPORTED"))
 					{

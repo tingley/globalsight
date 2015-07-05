@@ -17757,7 +17757,7 @@ public class Ambassador extends AbstractWebService
                             + p_taskId);
         }
 
-        String returning = "";
+        String returning = "No QA report available for download.";
         ActivityLog.Start activityStart = null;
         try
         {
@@ -17769,23 +17769,32 @@ public class Ambassador extends AbstractWebService
                     activityArgs);
 
             String fileUrl = null;
+            
+			if (logUserCompany.getEnableQAChecks())
+			{
+				if (QACheckerHelper.isShowQAChecksTab(task))
+				{
+					QAChecker checker = new QAChecker();
+					checker.runQAChecksAndGenerateReport(Long
+							.parseLong(p_taskId));
+					File qaReport = QACheckerHelper.getQAReportFile(task);
 
-            QAChecker checker = new QAChecker();
-            checker.runQAChecksAndGenerateReport(Long.parseLong(p_taskId));
-            File qaReport = QACheckerHelper.getQAReportFile(task);
+					String filestore = AmbFileStoragePathUtils
+							.getFileStorageDirPath(task.getCompanyId())
+							.replace("\\", "/");
+					String fullPathName = qaReport.getAbsolutePath().replace(
+							"\\", "/");
+					String path = fullPathName.substring(fullPathName
+							.indexOf(filestore) + filestore.length());
+					path = path.substring(path.indexOf("/Reports/")
+							+ "/Reports/".length());
+					String root = AmbassadorUtil.getCapLoginOrPublicUrl()
+							+ "/DownloadReports";
+					fileUrl = root + "/" + path;
 
-            String filestore = AmbFileStoragePathUtils.getFileStorageDirPath(
-                    task.getCompanyId()).replace("\\", "/");
-            String fullPathName = qaReport.getAbsolutePath().replace("\\", "/");
-            String path = fullPathName.substring(fullPathName
-                    .indexOf(filestore) + filestore.length());
-            path = path.substring(path.indexOf("/Reports/")
-                    + "/Reports/".length());
-            String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-                    + "/DownloadReports";
-            fileUrl = root + "/" + path;
-
-            returning = fileUrl;
+					returning = fileUrl;
+				}
+			}
         }
         catch (Exception e)
         {
@@ -17821,7 +17830,7 @@ public class Ambassador extends AbstractWebService
 	public String generateQAChecksReports(String p_accessToken, String jobIds,
 			String workflowIds) throws WebServiceException
 	{
-		String returnFilePath = null;
+		String returnFilePath = "No QA report available for download.";
 		try
 		{
 			String[] jobIdArr = null;
@@ -17857,14 +17866,27 @@ public class Ambassador extends AbstractWebService
 						if (job.getCompanyId() != logUserCompany.getId())
 						{
 							return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
-									"Current user not super user or does not belong to company of this job id: "
+									"Current user is not super user or current company has no job with id : "
 											+ id);
 						}
 					}
 					else
 					{
 						return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
-								"Invalid job id: " + id);
+								"Invalid job id(s): " + id + " does not exist.");
+					}
+				}
+			}
+			else
+			{
+				for (String id : jobIdArr)
+				{
+					Job job = ServerProxy.getJobHandler().getJobById(
+							Long.parseLong(id));
+					if (job == null)
+					{
+						return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
+								"Invalid job id(s): " + id + " does not exist.");
 					}
 				}
 			}
@@ -17935,6 +17957,17 @@ public class Ambassador extends AbstractWebService
 						}
 
 					}
+
+					if (workflowIdSet != null && workflowIdSet.size() > 0)
+					{
+						if (exportFilesList != null
+								&& exportFilesList.size() == 0)
+						{
+							return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
+									"Invalid workflow id(s): " + workflowIds);
+						}
+					}
+
 					exportFilesMap.put(companyId, exportFilesList);
 				}
 				else

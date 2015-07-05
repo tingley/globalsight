@@ -61,6 +61,8 @@ namespace InDesignConverter
                     new InDesignConverterImpl(InDesignConverterImpl.ConversionType.TEST),
                     m_watchDirNames);
 
+                m_testRunner.SleepSeconds = 5;
+
                 m_importConverterRunner.Start();
                 m_exportConverterRunner.Start();
                 m_previewConverterRunner.Start();

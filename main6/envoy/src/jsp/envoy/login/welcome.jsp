@@ -33,6 +33,8 @@
             .getAttribute(WebAppConstants.IS_SUPER_ADMIN);
     Boolean isAdmin = (Boolean) request
             .getAttribute(WebAppConstants.IS_ADMIN);
+    Boolean isSuperProjectManager = (Boolean) request
+            .getAttribute(WebAppConstants.SUPER_PM_NAME);
     Boolean isProjectManager = (Boolean) request
             .getAttribute(WebAppConstants.IS_PROJECT_MANAGER);
     Integer creatingJobsNum = (Integer) request
@@ -318,7 +320,7 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=templatesUrl%>"><%=bundle.getString("lb_workflows")%></A><BR>
         </amb:permission>
         <%
-        if(isEnableWorkflowStatePosts){
+        if(isEnableWorkflowStatePosts && (isSuperAdmin || isAdmin || isSuperProjectManager || isProjectManager)){
         %>
         <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=workflowStatePostUrl%>"><%=bundle.getString("lb_workflow_state_post_profiles")%></A><BR>
         <%} %>

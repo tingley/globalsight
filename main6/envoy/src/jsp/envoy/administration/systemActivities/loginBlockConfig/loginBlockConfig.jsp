@@ -275,7 +275,7 @@
 					<%=bundle.getString("lb_block_ip")%><br> 
 					<select
 						name="blockIps" multiple="multiple" id="blockIps" size="15"
-						style="width: 100%; height: 300px; margin-top: 42px;">
+						style="width: 100%; height: 332px; margin-top: 10px;">
 						<%
 							for (String ip : blockedIps) {
 						%>

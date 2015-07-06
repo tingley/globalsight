@@ -58,7 +58,7 @@ public abstract class Segmentable
 
     public void setEscapingChars(String escapingChars)
     {
-        this.escapingChars = escapingChars;
+        this.escapingChars = EditUtil.encodeXmlEntities(escapingChars);
     }
 
     public boolean isPreserveWhiteSpace()

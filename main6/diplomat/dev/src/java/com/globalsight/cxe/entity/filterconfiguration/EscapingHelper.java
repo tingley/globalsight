@@ -40,7 +40,8 @@ public class EscapingHelper
     private static XmlEntities m_xmlEncoder = new XmlEntities();
 
     public static String handleString4Export(String oriStr, List<Escaping> es,
-            String format, boolean noTag, boolean doDecode)
+            String format, boolean noTag, boolean doDecode,
+            String escapingChars)
     {
         if (oriStr == null || oriStr.length() == 0)
             return oriStr;
@@ -84,13 +85,13 @@ public class EscapingHelper
                 {
                     // Escape tag content is dangerous...
                     sb.append(handleTagContent4Export(ti.content, es, doDecode,
-                            format));
+                            format, escapingChars));
                 }
             }
             else
             {
-                sb.append(
-                        handleString4Export(ti.content, es, doDecode, format));
+                sb.append(handleString4Export(ti.content, es, doDecode, format,
+                        escapingChars));
             }
         }
 
@@ -105,7 +106,8 @@ public class EscapingHelper
      * Also supports sub segments.
      */
     private static String handleTagContent4Export(String content,
-            List<Escaping> es, boolean doDecode, String format)
+            List<Escaping> es, boolean doDecode, String format,
+            String escapingChars)
     {
         StringBuffer sub = new StringBuffer();
         List<String> splits = new ArrayList<String>();
@@ -113,8 +115,8 @@ public class EscapingHelper
         while (splits.size() == 3)
         {
             sub.append(splits.get(0));
-            sub.append(
-                    handleString4Export(splits.get(1), es, doDecode, format));
+            sub.append(handleString4Export(splits.get(1), es, doDecode, format,
+                    escapingChars));
             splitContent(splits.get(2), splits);
         }
         // splits.size == 1 or 2
@@ -153,7 +155,7 @@ public class EscapingHelper
     }
 
     private static String handleString4Export(String ccc, List<Escaping> es,
-            boolean doDecode, String format)
+            boolean doDecode, String format, String escapingChars)
     {
         StringBuffer sub = new StringBuffer();
         String preProcessed = null;
@@ -167,7 +169,7 @@ public class EscapingHelper
             char char3 = (j + 2 < length) ? ccc.charAt(j + 2) : ' ';
 
             processed = handleChar4Export(es, sub.toString(), char1, char2,
-                    char3, format);
+                    char3, format, escapingChars);
             // avoid double escape like "\\'".
             if ("\\".equals(preProcessed) && !"\\".equals(processed)
                     && processed.startsWith("\\"))
@@ -261,7 +263,7 @@ public class EscapingHelper
                             snode.setSegment(result);
                         }
                     }
-                    
+
                     if (processedChars != null && processedChars.size() > 0)
                     {
                         StringBuffer sb = new StringBuffer();
@@ -269,7 +271,7 @@ public class EscapingHelper
                         {
                             sb.append(ccc);
                         }
-                        
+
                         elem.setEscapingChars(sb.toString());
                     }
 
@@ -413,7 +415,8 @@ public class EscapingHelper
     }
 
     private static String handleChar4Export(List<Escaping> es, String before,
-            char char1, char char2, char char3, String format)
+            char char1, char char2, char char3, String format,
+            String escapingChars)
     {
         for (Escaping escaping : es)
         {
@@ -427,6 +430,11 @@ public class EscapingHelper
                 // process special chars in special format
                 if (isSpecialFormat(format) && char1 == '\\')
                 {
+                    if (escapingChars.contains("" + char2))
+                    {
+                        return "\\" + char1;
+                    }
+                    
                     if ("/:?*<>|\"".contains("" + char2))
                     {
                         return "" + char1;

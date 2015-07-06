@@ -59,6 +59,7 @@ import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.worldserver.WsSkeletonDispose;
 import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * <p>
@@ -774,7 +775,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 else
                 {
                     tmp = EscapingHelper.handleString4Export(tmp, m_escapings,
-                            ExtractorRegistry.FORMAT_PO, false, false);
+                            ExtractorRegistry.FORMAT_PO, false, false, null);
                 }
             }
 
@@ -950,9 +951,16 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
                     // GBS-3722
                     chunk = MTHelper.cleanMTTagsForExport(chunk);
+                    String escapingChars = null;
+
+                    if (((TranslatableElement) de).getEscapingChars() != null)
+                    {
+                        escapingChars = EditUtil.decodeXmlEntities(
+                                ((TranslatableElement) de).getEscapingChars());
+                    }
 
                     String newchunk = EscapingHelper.handleString4Export(chunk,
-                            m_escapings, srcDataType, false, true);
+                            m_escapings, srcDataType, false, true, escapingChars);
 
                     parseDiplomatSnippet(addSpanRtl(newchunk));
                     m_stateStack.pop();

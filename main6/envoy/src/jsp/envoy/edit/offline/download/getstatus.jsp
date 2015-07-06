@@ -91,7 +91,7 @@ function doLoad()
   <% } %>
 
   // refresh frame
-  if ("<%=done%>" == "false")
+  if ("<%=done%>" == "false" || "<%=canDownload%>" == "false")
   {
     window.setTimeout("doRefresh()", 5000, "JavaScript");
   }

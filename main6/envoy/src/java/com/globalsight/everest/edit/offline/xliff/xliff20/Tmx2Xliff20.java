@@ -600,7 +600,7 @@ public class Tmx2Xliff20
         String i = Tmx2Xliff20Handler.getId(p_hAttributes);
         
         String type = p_hAttributes.getProperty("type");
-        if (type != null && "yes".equalsIgnoreCase(p_hAttributes.getProperty("erasable")))
+        if (type != null)
         {
             PseudoOverrideMapItem item = data.getOverrideMapItem(type);
             if (item != null && !item.m_bNumbered)

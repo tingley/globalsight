@@ -735,7 +735,8 @@ public class ExtractedFileImporter extends FileImporter
                     if (isCreateTu)
                     {
                         int inddPageNumInt = 0;
-                        String inddPageNum = elem.getAttribute("inddPageNum");
+                        String inddPageNum = elem.getAttribute(
+                                DiplomatNames.Attribute.INDDPAGENUM);
                         if (inddPageNum != null)
                         {
                             inddPageNumInt = Integer.parseInt(inddPageNum);

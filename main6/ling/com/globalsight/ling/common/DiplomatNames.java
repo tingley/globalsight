@@ -59,5 +59,7 @@ public interface DiplomatNames
         String TARGETLANGUAGE = "targetLanguage";
         String ISLOCALIZED = "isLocalized";
         String ISAUTOCOMMITETM = "isAutoCommitTM";
+        String INDDPAGENUM ="inddPageNum";
+        String ESCAPINGCHARS = "escapingChars";
     }
 }

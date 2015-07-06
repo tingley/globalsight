@@ -843,7 +843,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
                                 .handleString4Import(tempString, es,
                                         m_ExtractorRegistry
                                                 .getFormatName(m_input
-                                                        .getType()), true);
+                                                        .getType()), true, null);
                         // keep empty cdata section
                         tempString = tempString
                                 .replace("<![CDATA[]]>",

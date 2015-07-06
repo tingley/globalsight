@@ -241,6 +241,7 @@ public class EscapingHelper
                 {
                     TranslatableElement elem = (TranslatableElement) de;
                     ArrayList segments = elem.getSegments();
+                    List<Character> processedChars = new ArrayList<Character>();
 
                     if (segments != null && !segments.isEmpty())
                     {
@@ -254,11 +255,22 @@ public class EscapingHelper
                                     segment, internalTexts);
 
                             String result = handleString4Import(segment, es,
-                                    format, false);
+                                    format, false, processedChars);
                             result = InternalTextHelper.restoreInternalTexts(
                                     result, internalTexts);
                             snode.setSegment(result);
                         }
+                    }
+                    
+                    if (processedChars != null && processedChars.size() > 0)
+                    {
+                        StringBuffer sb = new StringBuffer();
+                        for (Character ccc : processedChars)
+                        {
+                            sb.append(ccc);
+                        }
+                        
+                        elem.setEscapingChars(sb.toString());
                     }
 
                     break;
@@ -272,7 +284,7 @@ public class EscapingHelper
     }
 
     public static String handleString4Import(String oriStr, List<Escaping> es,
-            String format, boolean isPureText)
+            String format, boolean isPureText, List<Character> processedChars)
     {
         if (oriStr == null || oriStr.length() <= 1)
             return oriStr;
@@ -295,7 +307,7 @@ public class EscapingHelper
                 {
                     String ccc = ti.content;
                     String subStr = handleString4Import(ccc, es, doDecode,
-                            format);
+                            format, processedChars);
                     sb.append(subStr);
                 }
                 else
@@ -313,7 +325,7 @@ public class EscapingHelper
                 {
                     String ccc = ti.content;
                     String subStr = handleString4Import(ccc, es, doDecode,
-                            format);
+                            format, processedChars);
                     sb.append(subStr);
                 }
             }
@@ -323,7 +335,7 @@ public class EscapingHelper
     }
 
     private static String handleString4Import(String ccc, List<Escaping> es,
-            boolean doDecode, String format)
+            boolean doDecode, String format, List<Character> processedChars)
     {
         StringBuffer sub = new StringBuffer();
         ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
@@ -341,6 +353,7 @@ public class EscapingHelper
             {
                 char char1 = ccc.charAt(j);
                 char char2 = ccc.charAt(j + 1);
+                char char3 = (j + 2 <= length) ? ccc.charAt(j + 2) : ' ';
 
                 boolean processed = handleChar4Import(es, char1, char2);
 
@@ -355,6 +368,12 @@ public class EscapingHelper
                     {
                         sub.append(char1);
                         j = j + 1;
+
+                        if (char3 != ' ' && processedChars != null
+                                && !processedChars.contains(char3))
+                        {
+                            processedChars.add(char3);
+                        }
                     }
                 }
 

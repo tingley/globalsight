@@ -624,17 +624,46 @@ public class CustomTextRuleHelper
                 LineIndex lineIndex = null;
                 
                 // extract sid from first line
+                int pcharCount = processedChars;
                 int sidStart = -1;
                 int sidEnd = -1;
+                int jj = j + 1;
                 if (p_customSidRules != null && p_customSidRules.size() > 0)
                 {
-                    int[] sidIndex = extractOneLine(lineString.getLine(),
+                    // find the first line, which is not empty
+                    String l0 = lineString.getLine();
+                    if (l0.trim().length() == 0 && isMultiline)
+                    {
+                        if (jj < lines.size())
+                        {
+                            LineString temp = lines.get(jj);
+                            l0 = temp.getLine();
+
+                            while (temp.getLine().trim().length() == 0 && jj < lines.size())
+                            {
+                                jj = jj + 1;
+                                temp = lines.get(jj);
+                                l0 = temp.getLine();
+                            }
+                        }
+                    }
+                    
+                    int[] sidIndex = extractOneLine(l0,
                             p_customSidRules);
 
                     if (sidIndex != null && sidIndex.length == 2)
                     {
-                        sidStart = processedChars + sidIndex[0];
-                        sidEnd = processedChars + sidIndex[1];
+                        for(int jjj = j; jjj < jj; jjj++)
+                        {
+                            LineString temp = lines.get(jjj);
+                            pcharCount = temp.getLine().length() + pcharCount;
+                            
+                            //\n
+                            pcharCount = pcharCount + 1;
+                        }
+                        
+                        sidStart = pcharCount + sidIndex[0];
+                        sidEnd = pcharCount + sidIndex[1];
                     }
                 }
                 

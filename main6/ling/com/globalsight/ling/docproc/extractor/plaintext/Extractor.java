@@ -335,7 +335,7 @@ public class Extractor extends AbstractExtractor implements
                             {
                                 if (m_elementPostFilter != null)
                                 {
-                                    gotoPostFilter(s1);
+                                    gotoPostFilter(s1, sid);
                                 }
                                 else
                                 {
@@ -392,7 +392,7 @@ public class Extractor extends AbstractExtractor implements
                             {
                                 if (m_elementPostFilter != null)
                                 {
-                                    gotoPostFilter(s1);
+                                    gotoPostFilter(s1, sid);
                                 }
                                 else
                                 {
@@ -545,7 +545,7 @@ public class Extractor extends AbstractExtractor implements
      * 
      * @since GBS-3881
      */
-    private void gotoPostFilter(String str)
+    private void gotoPostFilter(String str, String sid)
     {
         str = protectInvalidTags(str);
         Output output = switchExtractor(str, m_postFormat, m_elementPostFilter);
@@ -564,6 +564,10 @@ public class Extractor extends AbstractExtractor implements
                     chunk = StringUtil.replace(chunk, PLACEHOLDER_RIGHT_NATIVE,
                             "&gt;");
                     segmentableElement.setChunk(chunk);
+                    if (sid != null && sid.length() > 0)
+                    {
+                        segmentableElement.setSid(sid);
+                    }
                     getOutput().addDocumentElement(element, true);
                     break;
 

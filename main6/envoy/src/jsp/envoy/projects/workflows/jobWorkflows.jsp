@@ -895,13 +895,32 @@ function realSubmitForm(specificButton){
 	   var url = "${self.pageURL}&action=sendingbackEditionJob&wfId=" + wfId + "&jobId=${jobId}";
 	   $("#workflowForm").attr("action", url);
 	   $("#workflowForm").submit();
-   }else if(specificButton == "downloadQAReport")
-   {
-	   var url = "${self.pageURL}&action=downloadQAReport&wfId=" + wfId + "&jobId=${jobId}";
-	   $("#workflowForm").attr("action", url);
-	   $("#workflowForm").submit();
    }
-   //choose 1 or more checkbox, above buttons are available.End.
+   else if(specificButton == "downloadQAReport")
+   {
+	   $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "${self.pageURL}&action=checkDownloadQAReport",
+		   data: "wfId=" + wfId + "&jobId=${jobId}",
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.download == "fail")
+	          {
+	   			alert("<%=bundle.getString("lb_download_qa_reports_message")%>");
+	          }
+	          else if(returnData.download == "success")
+	          {
+	        	  $("#workflowForm").attr("action", "${self.pageURL}&action=downloadQAReport");
+	       	   	  $("#workflowForm").submit();
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          		alert(error.message);
+           }
+		});
+   }
 }
 
 function checkDelayTime(wfId){

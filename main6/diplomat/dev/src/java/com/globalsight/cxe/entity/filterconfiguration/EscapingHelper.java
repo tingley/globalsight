@@ -49,8 +49,9 @@ public class EscapingHelper
         if (es == null || es.size() == 0)
             return oriStr;
 
-        // To be safe, do not escape anything for office 2010.
-        if (IFormatNames.FORMAT_OFFICE_XML.equals(format))
+        // To be safe, do not escape anything for office 2010 and HTML.
+		if (IFormatNames.FORMAT_OFFICE_XML.equalsIgnoreCase(format)
+				|| IFormatNames.FORMAT_HTML.equalsIgnoreCase(format))
         {
             return oriStr;
         }

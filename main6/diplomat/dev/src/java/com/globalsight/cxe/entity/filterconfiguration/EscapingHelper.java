@@ -430,7 +430,7 @@ public class EscapingHelper
                 // process special chars in special format
                 if (isSpecialFormat(format) && char1 == '\\')
                 {
-                    if (escapingChars.contains("" + char2))
+                    if (escapingChars != null && escapingChars.contains("" + char2))
                     {
                         return "\\" + char1;
                     }

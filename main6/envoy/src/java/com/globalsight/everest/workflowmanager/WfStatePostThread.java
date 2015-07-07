@@ -331,7 +331,7 @@ public class WfStatePostThread implements Runnable
     {
         if (res.getStatusLine().getStatusCode() == 400)
         {
-			s_logger.error("Workflow state post failure: The request payload data failed validation!");
+			s_logger.warn("Workflow state post failure: The request payload data failed validation!");
         }
         else if (res.getStatusLine().getStatusCode() == 401)
         {

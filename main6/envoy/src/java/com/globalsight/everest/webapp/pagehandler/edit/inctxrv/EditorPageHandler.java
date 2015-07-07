@@ -517,6 +517,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         if (isGetJsonData)
         {
+            jsonStr = state.getEditorManager().getTargetJsonData(state, isAssignee,
+                    getSearchParamsInMap(p_request), true);
+            /*
             long _trgPageId = state.getTargetPageId().longValue();
             TargetPage _targetPage = ServerProxy.getPageManager().getTargetPage(_trgPageId);
             SourcePage _sourcePage = _targetPage.getSourcePage();
@@ -573,7 +576,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         ArrayList<PagePair> pagePairs = state.getPages();
                         for (PagePair pagePair : pagePairs)
                         {
-                            if (pagePair.getSourcePageId() == sourcePage.getIdAsLong())
+                            if (pagePair.getSourcePageId().longValue() == sourcePage.getIdAsLong().longValue())
                             {
                                 state.setCurrentPage(pagePair);
                                 break;
@@ -616,7 +619,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
                 }
                 jsonStr = mainJson.toString();
-            }
+            } */
         }
         p_response.getWriter().write(jsonStr);
     }

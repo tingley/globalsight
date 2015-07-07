@@ -24,12 +24,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -37,6 +39,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
@@ -138,10 +141,42 @@ public class JobControlInProgressHandler extends JobManagementHandler
             out.close();
             return;
 		}
-		else if (p_request.getParameter("downloadQAReport") != null)
+		else if (p_request.getParameter("action") != null
+				&& "checkDownloadQAReport".equals(p_request
+						.getParameter("action")))
 		{
-			String jobIds = p_request.getParameter("downloadQAReport");
-			exportQAChecksReport(p_request, p_response, jobIds);
+			ServletOutputStream out = p_response.getOutputStream();
+			String jobIds = p_request.getParameter("jobIds");
+			boolean checkQA = checkQAReport(sessionMgr, jobIds);
+			String download = "";
+			if (checkQA)
+			{
+				download = "success";
+			}
+			else
+			{
+				download = "fail";
+			}
+			Map<String, Object> returnValue = new HashMap();
+			returnValue.put("download", download);
+			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+			return;
+		}
+		else if (p_request.getParameter("action") != null
+				&& "downloadQAReport".equals(p_request.getParameter("action")))
+		{
+			Set<Long> jobIdSet = (Set<Long>) sessionMgr
+					.getAttribute("jobIdSet");
+			Set<File> exportFilesSet = (Set<File>) sessionMgr
+					.getAttribute("exportFilesSet");
+			Set<String> localesSet = (Set<String>) sessionMgr
+					.getAttribute("localesSet");
+			long companyId = (Long) sessionMgr.getAttribute("companyId");
+			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
+					companyId, jobIdSet, exportFilesSet, localesSet);
+			sessionMgr.removeElement("jobIdSet");
+			sessionMgr.removeElement("exportFilesSet");
+			sessionMgr.removeElement("localesSet");
 			return;
 		}
 
@@ -192,11 +227,10 @@ public class JobControlInProgressHandler extends JobManagementHandler
         dispatcher.forward(p_request, p_response);
     }
     
-	public void exportQAChecksReport(HttpServletRequest p_request,
-			HttpServletResponse p_response, String jobIds)
+	public boolean checkQAReport(SessionManager sessionMgr, String jobIds)
 	{
-		Set<File> exportListFiles = new HashSet<File>();
-		Set<String> locales = new HashSet<String>();
+		Set<File> exportFilesSet = new HashSet<File>();
+		Set<String> localesSet = new HashSet<String>();
 		Set<Long> jobIdSet = new HashSet<Long>();
 		if (StringUtils.isNotBlank(jobIds))
 		{
@@ -224,25 +258,31 @@ public class JobControlInProgressHandler extends JobManagementHandler
 			{
 				for (Workflow workflow : workflowSet)
 				{
-					locales.add(workflow.getTargetLocale().getLocaleCode());
+					localesSet.add(workflow.getTargetLocale().getLocaleCode());
 					String filePath = WorkflowHandlerHelper
 							.getExportFilePath(workflow);
 					if (filePath != null)
 					{
-						exportListFiles.add(new File(filePath));
+						exportFilesSet.add(new File(filePath));
 					}
 				}
 			}
-
-			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
-					companyId, jobIdSet, exportListFiles, locales);
+			if (exportFilesSet != null && exportFilesSet.size() > 0)
+			{
+				sessionMgr.setAttribute("jobIdSet", jobIdSet);
+				sessionMgr.setAttribute("exportFilesSet", exportFilesSet);
+				sessionMgr.setAttribute("localesSet", localesSet);
+				sessionMgr.setAttribute("companyId", companyId);
+				return true;
+			}
 		}
 		catch (Exception e)
 		{
 			logger.error(e);
 		}
+		return false;
 	}
-	
+    
     /**
      * Overide getControlFlowHelper so we can do processing and redirect the
      * user correctly.

@@ -39,9 +39,17 @@ public class EscapingHelper
             .getLogger(EscapingHelper.class);
     private static XmlEntities m_xmlEncoder = new XmlEntities();
 
+	public static String handleString4Export(String oriStr, List<Escaping> es,
+			String format, boolean noTag, boolean doDecode,
+			String escapingChars)
+	{
+		return handleString4Export(oriStr, es, format, noTag, doDecode,
+				escapingChars, false);
+	}
+
     public static String handleString4Export(String oriStr, List<Escaping> es,
             String format, boolean noTag, boolean doDecode,
-            String escapingChars)
+            String escapingChars, boolean isInCDATA)
     {
         if (oriStr == null || oriStr.length() == 0)
             return oriStr;
@@ -77,7 +85,7 @@ public class EscapingHelper
             TagIndex ti = tags.get(i);
             if (ti.isTag)
             {
-            	if (IFormatNames.FORMAT_XML.equals(format))
+            	if (IFormatNames.FORMAT_XML.equals(format) && isInCDATA)
             	{
                     // Escape tag content is dangerous...
                     sb.append(handleTagContent4Export(ti.content, es, doDecode,

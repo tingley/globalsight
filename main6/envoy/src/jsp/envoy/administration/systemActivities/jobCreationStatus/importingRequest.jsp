@@ -18,6 +18,10 @@
 <jsp:useBean id="waiting" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="exporting" class="com.globalsight.everest.webapp.javabean.NavigationBean"
              scope="request" />
+<jsp:useBean id="loginBlock" class="com.globalsight.everest.webapp.javabean.NavigationBean"
+             scope="request" />
+<jsp:useBean id="offline" class="com.globalsight.everest.webapp.javabean.NavigationBean"
+             scope="request" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionManager = (SessionManager) session
@@ -26,6 +30,8 @@
     String waitingUrl = waiting.getPageURL();
     String exportingUrl = exporting.getPageURL();
     String jobCreationStatus = bundle.getString("lb_job_creation_status");
+    String loginBlockConfigUrl = loginBlock.getPageURL();
+    String offlineUrl = offline.getPageURL();
 %>
 
 
@@ -106,6 +112,20 @@
                                href="<%=exportingUrl%>"> <%=bundle.getString("lb_job_export_status")%></a> <img
                                src="/globalsight/images/tab_right_gray.gif" border="0" />
                         </td>
+                        <td width="2"></td>
+                        <td class="tableHeadingListOff">
+                            <img src="/globalsight/images/tab_left_gray.gif" border="0" /> 
+                            <a class="sortHREFWhite"
+                               href="<%=offlineUrl%>"> <%=bundle.getString("lb_offline_upload_status")%></a> <img
+                               src="/globalsight/images/tab_right_gray.gif" border="0" />
+                        </td>
+                        <td width="2"></td>
+                        <td class="tableHeadingListOff">
+                            <img src="/globalsight/images/tab_left_gray.gif" border="0" /> 
+                            <a class="sortHREFWhite"
+                               href="<%=loginBlockConfigUrl%>"> <%=bundle.getString("lb_login_block_status")%></a> <img
+                               src="/globalsight/images/tab_right_gray.gif" border="0" />
+                        </td>    
                     </tr>
                 </table>
             </div>

@@ -28,24 +28,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobException;
-import com.globalsight.everest.qachecks.QAChecker;
-import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -55,13 +53,9 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoInProgressSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 
 public class JobControlInProgressHandler extends JobManagementHandler
@@ -73,7 +67,8 @@ public class JobControlInProgressHandler extends JobManagementHandler
      * instance variable.
      */
     private String m_exportUrl = null;
-
+    private static final Logger logger = Logger
+    		.getLogger(JobControlInProgressHandler.class);
     /**
      * Invokes this EntryPageHandler object
      * <p>
@@ -146,10 +141,42 @@ public class JobControlInProgressHandler extends JobManagementHandler
             out.close();
             return;
 		}
-		else if (p_request.getParameter("downloadQAReport") != null)
+		else if (p_request.getParameter("action") != null
+				&& "checkDownloadQAReport".equals(p_request
+						.getParameter("action")))
 		{
-			String jobIds = p_request.getParameter("downloadQAReport");
-			exportQAChecksReport(p_request, p_response, jobIds);
+			ServletOutputStream out = p_response.getOutputStream();
+			String jobIds = p_request.getParameter("jobIds");
+			boolean checkQA = checkQAReport(sessionMgr, jobIds);
+			String download = "";
+			if (checkQA)
+			{
+				download = "success";
+			}
+			else
+			{
+				download = "fail";
+			}
+			Map<String, Object> returnValue = new HashMap();
+			returnValue.put("download", download);
+			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+			return;
+		}
+		else if (p_request.getParameter("action") != null
+				&& "downloadQAReport".equals(p_request.getParameter("action")))
+		{
+			Set<Long> jobIdSet = (Set<Long>) sessionMgr
+					.getAttribute("jobIdSet");
+			Set<File> exportFilesSet = (Set<File>) sessionMgr
+					.getAttribute("exportFilesSet");
+			Set<String> localesSet = (Set<String>) sessionMgr
+					.getAttribute("localesSet");
+			long companyId = (Long) sessionMgr.getAttribute("companyId");
+			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
+					companyId, jobIdSet, exportFilesSet, localesSet);
+			sessionMgr.removeElement("jobIdSet");
+			sessionMgr.removeElement("exportFilesSet");
+			sessionMgr.removeElement("localesSet");
 			return;
 		}
 
@@ -200,11 +227,10 @@ public class JobControlInProgressHandler extends JobManagementHandler
         dispatcher.forward(p_request, p_response);
     }
     
-	public void exportQAChecksReport(HttpServletRequest p_request,
-			HttpServletResponse p_response, String jobIds)
+	public boolean checkQAReport(SessionManager sessionMgr, String jobIds)
 	{
-		Set<File> exportListFiles = new HashSet<File>();
-		Set<String> locales = new HashSet<String>();
+		Set<File> exportFilesSet = new HashSet<File>();
+		Set<String> localesSet = new HashSet<String>();
 		Set<Long> jobIdSet = new HashSet<Long>();
 		if (StringUtils.isNotBlank(jobIds))
 		{
@@ -215,38 +241,48 @@ public class JobControlInProgressHandler extends JobManagementHandler
 			}
 		}
 		Set<Workflow> workflowSet = new HashSet<Workflow>();
-		String companyId = CompanyThreadLocal.getInstance().getValue();
 		try
 		{
+			long companyId = -1;
+			for (Long jobId : jobIdSet)
+			{
+				Job job = ServerProxy.getJobHandler().getJobById(jobId);
+				if (companyId == -1)
+				{
+					companyId = job.getCompanyId();
+				}
+				workflowSet.addAll(job.getWorkflows());
+			}
 			Company company = CompanyWrapper.getCompanyById(companyId);
 			if (company.getEnableQAChecks())
 			{
-				for (Long jobId : jobIdSet)
-				{
-					Job job = ServerProxy.getJobHandler().getJobById(jobId);
-					workflowSet.addAll(job.getWorkflows());
-				}
 				for (Workflow workflow : workflowSet)
 				{
-					locales.add(workflow.getTargetLocale().getLocaleCode());
+					localesSet.add(workflow.getTargetLocale().getLocaleCode());
 					String filePath = WorkflowHandlerHelper
 							.getExportFilePath(workflow);
 					if (filePath != null)
 					{
-						exportListFiles.add(new File(filePath));
+						exportFilesSet.add(new File(filePath));
 					}
 				}
 			}
-			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
-					Long.parseLong(companyId), jobIdSet, exportListFiles,
-					locales);
+			if (exportFilesSet != null && exportFilesSet.size() > 0)
+			{
+				sessionMgr.setAttribute("jobIdSet", jobIdSet);
+				sessionMgr.setAttribute("exportFilesSet", exportFilesSet);
+				sessionMgr.setAttribute("localesSet", localesSet);
+				sessionMgr.setAttribute("companyId", companyId);
+				return true;
+			}
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			logger.error(e);
 		}
+		return false;
 	}
-	
+    
     /**
      * Overide getControlFlowHelper so we can do processing and redirect the
      * user correctly.

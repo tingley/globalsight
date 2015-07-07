@@ -4211,31 +4211,22 @@ public class ProjectHandlerLocal implements ProjectHandler
     public List<WorkflowStatePosts> getAllWorkflowStatePostProfie(
             String[] filterParams)
     {
-        Connection conn = null;
-        Statement st = null;
-        ResultSet rs = null;
         try
         {
-            conn = DbUtil.getConnection();
-            st = conn.createStatement();
-            rs = st.executeQuery(getQueryWorkflowStatePostProfileInfoSql(filterParams));
             List<WorkflowStatePosts> queryResult = new ArrayList<WorkflowStatePosts>();
-            while (rs.next())
+            List<WorkflowStatePosts> qureyList = getAllWorkflowStatePostInfos();
+            for (WorkflowStatePosts wfStatePost : qureyList)
             {
-                long id = Long.valueOf(rs.getString("id"));
-                String name = rs.getString("name");
-                String description = rs.getString("description");
-                String listenerURL = rs.getString("listener_URL");
-                String secretKey = rs.getString("secret_key");
-                String timeoutPeriod = rs.getString("timeout_Period");
-                String retryNumber = rs.getString("retry_Number");
-                String notifyEmail = rs.getString("notify_Email");
-                Long companyId = Long.valueOf(rs.getString("company_Id"));
+                if (wfStatePost.getName().indexOf(filterParams[0]) != -1
+                        && wfStatePost.getListenerURL()
+                                .indexOf(filterParams[1]) != -1
+                       && CompanyWrapper.getCompanyNameById(
+                                wfStatePost.getCompanyId()).indexOf(
+                                filterParams[2]) != -1)
+                {
+                    queryResult.add(wfStatePost);
+                }
 
-                WorkflowStatePosts workflowStatePosts = new WorkflowStatePosts(
-                        id, name, description, listenerURL, secretKey,
-                        timeoutPeriod, retryNumber, notifyEmail, companyId);
-                queryResult.add(workflowStatePosts);
             }
             return queryResult;
         }
@@ -4244,45 +4235,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             throw new ProjectHandlerException(
                     ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
         }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(st);
-            DbUtil.silentReturnConnection(conn);
-        }
-
-    }
-
-    private String getQueryWorkflowStatePostProfileInfoSql(String[] filterParams)
-    {
-        Vector args = CompanyWrapper.addCompanyIdBoundArgs(new Vector());
-        StringBuffer sql = new StringBuffer(
-                "select wsp.ID, wsp.NAME, wsp.DESCRIPTION, wsp.LISTENER_URL, wsp.SECRET_KEY, wsp.TIMEOUT_PERIOD, wsp.RETRY_NUMBER, wsp.NOTIFY_EMAIL, wsp.COMPANY_ID");
-        sql.append(" from workflow_state_posts wsp,company c");
-        sql.append(" where 1 = 1");
-        sql.append(" and wsp.COMPANY_ID >= " + args.get(0));
-        sql.append(" and wsp.COMPANY_ID <= " + args.get(1));
-        if (filterParams[0] != null && filterParams[0].trim().length() > 0)
-        {
-            sql.append(" and wsp.NAME LIKE '%" + filterParams[0] + "%'");
-        }
-
-        if (filterParams[1] != null && filterParams[1].trim().length() > 0)
-        {
-            sql.append(" and wsp.LISTENER_URL LIKE '%" + filterParams[1] + "%'");
-        }
-        if (filterParams[2] != null && filterParams[2].trim().length() > 0)
-        {
-            sql.append(" and wsp.SECRET_KEY LIKE '%" + filterParams[2] + "%'");
-        }
-        sql.append(" and wsp.COMPANY_ID = c.ID");
-        if (filterParams[3] != null && filterParams[3].trim().length() > 0)
-        {
-            sql.append(" and c.NAME LIKE '%" + filterParams[3] + "%'");
-        }
-        sql.append(" group by wsp.ID, wsp.NAME, wsp.DESCRIPTION, wsp.COMPANY_ID");
-        sql.append(" order by wsp.NAME ");
-        return sql.toString();
     }
 
     @Override

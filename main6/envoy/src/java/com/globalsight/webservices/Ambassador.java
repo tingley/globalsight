@@ -199,7 +199,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMPro
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobWorkflowsHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.tm.corpus.OverridableLeverageOptions;
@@ -220,6 +219,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
+import com.globalsight.everest.workflowmanager.WorkflowManager;
 import com.globalsight.everest.workflowmanager.WorkflowManagerException;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
@@ -391,7 +391,7 @@ public class Ambassador extends AbstractWebService
 
     public static final String GENERATE_DITA_QA_REPORT = "generateDITAQAReport";
     public static final String GENERATE_QA_CHECKS_REPORT = "generateQAChecksReport";
-    public static final String DOWNLOAD_QA_CHECKS_REPORTS = "downloadQAChecksReports";
+    public static final String GENERATE_QA_CHECKS_REPORTS = "generateQAChecksReports";
     
     public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
 
@@ -1689,7 +1689,7 @@ public class Ambassador extends AbstractWebService
 
 			// cache job attributes
 			List<JobAttributeVo> atts = null;
-			String companyId = null;
+			 String companyId = CompanyThreadLocal.getInstance().getValue();
 
 			try
 			{
@@ -1698,7 +1698,6 @@ public class Ambassador extends AbstractWebService
 					Attributes attributes = com.globalsight.cxe.util.XmlUtil
 							.string2Object(Attributes.class, attributesXml);
 					atts = (List<JobAttributeVo>) attributes.getAttributes();
-					companyId = CompanyThreadLocal.getInstance().getValue();
 
 					List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
 					for (JobAttributeVo jobAttributeVo : atts)
@@ -1709,6 +1708,24 @@ public class Ambassador extends AbstractWebService
 
 					RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
 				}
+				else
+                {
+                    AttributeSet as = ((JobImpl)job).getAttributeSet();
+                    List<Attribute> jas = as.getAttributeAsList();
+                    List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
+                    atts = new ArrayList<JobAttributeVo>();
+                  
+                    for (Attribute ja : jas)
+                    {
+                        JobAttributeVo vo = AttributeUtil.getAttributeVo(ja
+                                .getCloneAttribute());
+                        atts.add(vo);
+                        jobatts.add(AttributeUtil
+                                .createJobAttribute(vo));
+                    }
+
+                    RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
+                }
 			}
 			catch (Exception e)
 			{
@@ -2315,7 +2332,7 @@ public class Ambassador extends AbstractWebService
                 JobCreationMonitor.updateJobState(Long.parseLong(jobId),
                         Job.IMPORTFAILED);
             }
-            logger.error(e.getMessage());
+            logger.error(e);
             throw new WebServiceException(e.getMessage());
         }
         finally
@@ -4114,7 +4131,7 @@ public class Ambassador extends AbstractWebService
         String[] jobIds = p_jobIds.split(",");
         StringBuffer xml = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
-        WorkflowManagerLocal workflowManagerLocal  = new WorkflowManagerLocal();
+        WorkflowManager wfManager = null;
         HashMap<String, String> errorJobs = new HashMap<String, String>();
         boolean isArchived;
         for(String jobId: jobIds)
@@ -4138,7 +4155,11 @@ public class Ambassador extends AbstractWebService
                     continue;
                 }
 
-                isArchived = workflowManagerLocal.archive(job);
+                if (wfManager == null)
+                {
+        			wfManager = ServerProxy.getWorkflowManager();
+        		}
+                isArchived = wfManager.archive(job);
         		if(!isArchived)
         		{
         			errorJobs.put(jobId, "the job is not in \"Exported\" state and can't be archived.");
@@ -16349,7 +16370,14 @@ public class Ambassador extends AbstractWebService
 					if (wf != null)
 					{
 						projectId = String.valueOf(wf.getJob().getProjectId());
-						if (UserUtil.isInProject(userName, projectId))
+						
+						if (!wf.getJob().hasSetCostCenter())
+                        {
+                            return makeErrorXml("dispatchWorkflow",
+                                    "Invaild workflow id: " + wfId
+                                            + ", cost center attribute or required attributes are not set.");
+                        }
+						else if (UserUtil.isInProject(userName, projectId))
 						{
 							wfm.dispatch(wf);
 						}
@@ -17729,7 +17757,7 @@ public class Ambassador extends AbstractWebService
                             + p_taskId);
         }
 
-        String returning = "";
+        String returning = "No QA report available for download.";
         ActivityLog.Start activityStart = null;
         try
         {
@@ -17741,23 +17769,32 @@ public class Ambassador extends AbstractWebService
                     activityArgs);
 
             String fileUrl = null;
+            
+			if (logUserCompany.getEnableQAChecks())
+			{
+				if (QACheckerHelper.isShowQAChecksTab(task))
+				{
+					QAChecker checker = new QAChecker();
+					checker.runQAChecksAndGenerateReport(Long
+							.parseLong(p_taskId));
+					File qaReport = QACheckerHelper.getQAReportFile(task);
 
-            QAChecker checker = new QAChecker();
-            checker.runQAChecksAndGenerateReport(Long.parseLong(p_taskId));
-            File qaReport = QACheckerHelper.getQAReportFile(task);
+					String filestore = AmbFileStoragePathUtils
+							.getFileStorageDirPath(task.getCompanyId())
+							.replace("\\", "/");
+					String fullPathName = qaReport.getAbsolutePath().replace(
+							"\\", "/");
+					String path = fullPathName.substring(fullPathName
+							.indexOf(filestore) + filestore.length());
+					path = path.substring(path.indexOf("/Reports/")
+							+ "/Reports/".length());
+					String root = AmbassadorUtil.getCapLoginOrPublicUrl()
+							+ "/DownloadReports";
+					fileUrl = root + "/" + path;
 
-            String filestore = AmbFileStoragePathUtils.getFileStorageDirPath(
-                    task.getCompanyId()).replace("\\", "/");
-            String fullPathName = qaReport.getAbsolutePath().replace("\\", "/");
-            String path = fullPathName.substring(fullPathName
-                    .indexOf(filestore) + filestore.length());
-            path = path.substring(path.indexOf("/Reports/")
-                    + "/Reports/".length());
-            String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-                    + "/DownloadReports";
-            fileUrl = root + "/" + path;
-
-            returning = fileUrl;
+					returning = fileUrl;
+				}
+			}
         }
         catch (Exception e)
         {
@@ -17788,12 +17825,12 @@ public class Ambassador extends AbstractWebService
 	 * @return XML string.
 	 *            -- If fail, it will return null; 
 	 * 			   -- If succeed, report returning is like
-	 *         "http://10.10.215.110:8080/globalsight/DownloadTM/test/GlobalSight/Reports/QAChecksReport/apiDownload/QAChecksReport_(196).zip"
+	 *         "http://10.10.213.117:8080/globalsight/DownloadReports/Reports/apiQACheckDownload/QAChecksReport_(206).zip"
 	 */
-	public String downloadQAChecksReports(String p_accessToken, String jobIds,
+	public String generateQAChecksReports(String p_accessToken, String jobIds,
 			String workflowIds) throws WebServiceException
 	{
-		String returnFilePath = null;
+		String returnFilePath = "No QA report available for download.";
 		try
 		{
 			String[] jobIdArr = null;
@@ -17817,6 +17854,43 @@ public class Ambassador extends AbstractWebService
 				}
 			}
 
+			Company logUserCompany = getCompanyInfo(getUsernameFromSession(p_accessToken));
+			if (logUserCompany.getId() != 1)
+			{
+				for (String id : jobIdArr)
+				{
+					Job job = ServerProxy.getJobHandler().getJobById(
+							Long.parseLong(id));
+					if (job != null)
+					{
+						if (job.getCompanyId() != logUserCompany.getId())
+						{
+							return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
+									"Current user is not super user or current company has no job with id : "
+											+ id);
+						}
+					}
+					else
+					{
+						return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
+								"Invalid job id(s): " + id + " does not exist.");
+					}
+				}
+			}
+			else
+			{
+				for (String id : jobIdArr)
+				{
+					Job job = ServerProxy.getJobHandler().getJobById(
+							Long.parseLong(id));
+					if (job == null)
+					{
+						return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
+								"Invalid job id(s): " + id + " does not exist.");
+					}
+				}
+			}
+
 			Set<Long> workflowIdSet = new HashSet<Long>();
 			if (workflowIdArr != null)
 			{
@@ -17828,63 +17902,83 @@ public class Ambassador extends AbstractWebService
 
 			Set<Long> jobIdSet = new HashSet<Long>();
 			Set<Workflow> workflowSet = new HashSet<Workflow>();
-			long companyId = -1;
+			Set<Long> companyIdSet = new HashSet<Long>();
 			for (String jobId : jobIdArr)
 			{
 				Job job = ServerProxy.getJobHandler().getJobById(
 						Long.parseLong(jobId));
-				if (companyId == -1)
-				{
-					companyId = job.getCompanyId();
-				}
+				companyIdSet.add(job.getCompanyId());
 				workflowSet.addAll(job.getWorkflows());
 				jobIdSet.add(Long.parseLong(jobId));
 			}
 
-			Company company = CompanyWrapper.getCompanyById(companyId);
-			CompanyThreadLocal.getInstance().setValue(company.getCompanyName());
-			if (company.getEnableQAChecks())
+			Map<Long, Set<File>> exportFilesMap = new HashMap<Long, Set<File>>();
+			Set<String> locales = new HashSet<String>();
+			for (Long companyId : companyIdSet)
 			{
-				Set<File> exportListFiles = new HashSet<File>();
-				Set<String> locales = new HashSet<String>();
-				for (Workflow workflow : workflowSet)
+				Set<File> exportFilesList = new HashSet<File>();
+				Company company = CompanyWrapper.getCompanyById(companyId);
+				CompanyThreadLocal.getInstance().setValue(
+						company.getCompanyName());
+				if (company.getEnableQAChecks())
 				{
-					String filePath = null;
+					for (Workflow workflow : workflowSet)
+					{
+						if (workflow.getCompanyId() == companyId)
+						{
+							String filePath = null;
+							if (workflowIdSet != null
+									&& workflowIdSet.size() > 0)
+							{
+								if (workflowIdSet.contains(workflow.getId()))
+								{
+									locales.add(workflow.getTargetLocale()
+											.getLocaleCode());
+									filePath = WorkflowHandlerHelper
+											.getExportFilePath(workflow);
+									if (filePath != null)
+									{
+										exportFilesList.add(new File(filePath));
+									}
+									continue;
+								}
+							}
+							else
+							{
+								locales.add(workflow.getTargetLocale()
+										.getLocaleCode());
+								filePath = WorkflowHandlerHelper
+										.getExportFilePath(workflow);
+								if (filePath != null)
+								{
+									exportFilesList.add(new File(filePath));
+								}
+							}
+						}
+
+					}
+
 					if (workflowIdSet != null && workflowIdSet.size() > 0)
 					{
-						if (workflowIdSet.contains(workflow.getId()))
+						if (exportFilesList != null
+								&& exportFilesList.size() == 0)
 						{
-							locales.add(workflow.getTargetLocale()
-									.getLocaleCode());
-							filePath = WorkflowHandlerHelper
-									.getExportFilePath(workflow);
-							if (filePath != null)
-							{
-								exportListFiles.add(new File(filePath));
-							}
-							continue;
+							return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
+									"Invalid workflow id(s): " + workflowIds);
 						}
 					}
-					else
-					{
-						locales.add(workflow.getTargetLocale().getLocaleCode());
-						filePath = WorkflowHandlerHelper
-								.getExportFilePath(workflow);
-						if (filePath != null)
-						{
-							exportListFiles.add(new File(filePath));
-						}
-					}
+
+					exportFilesMap.put(companyId, exportFilesList);
 				}
-				// zipped Folder
-				returnFilePath = zippedFolder(companyId, jobIdSet,
-						exportListFiles, locales);
+				else
+				{
+					return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
+							"Current log user no download QA report permissions");
+				}
 			}
-			else
-			{
-				return makeErrorXml(DOWNLOAD_QA_CHECKS_REPORTS,
-						"Current log user no download QA report permissions");
-			}
+
+			// zipped Folder
+			returnFilePath = zippedFolder(jobIdSet, exportFilesMap, locales);
 		}
 		catch (Exception e)
 		{
@@ -17894,13 +17988,15 @@ public class Ambassador extends AbstractWebService
 		return returnFilePath;
 	}
 
-	private String zippedFolder(long companyId, Set<Long> jobIdSet,
-			Set<File> exportListFiles, Set<String> locales)
+	private String zippedFolder(Set<Long> jobIdSet,
+			Map<Long, Set<File>> exportFilesMap, Set<String> locales)
 	{
 		String fileUrl = null;
-		String directory = AmbFileStoragePathUtils.getReportsDir(companyId)
-				+ File.separator + ReportConstants.REPORT_QA_CHECKS_REPORT
-				+ File.separator + "apiDownload";
+		String directory = AmbFileStoragePathUtils.getFileStorageDirPath(1)
+				.replace("\\", "/")
+				+ File.separator
+				+ "Reports"
+				+ File.separator + "apiQACheckDownload";
 		new File(directory).mkdirs();
 
 		String downloadFileName = null;
@@ -17913,6 +18009,7 @@ public class Ambassador extends AbstractWebService
 		else if (jobIdSet != null && jobIdSet.size() > 1)
 		{
 			String tempS = jobIdSet.toString();
+			tempS = tempS.replace(" ", "");
 			String jobNamesstr = tempS.substring(1, tempS.length() - 1);
 			downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT + "_("
 					+ jobNamesstr + ").zip";
@@ -17920,23 +18017,40 @@ public class Ambassador extends AbstractWebService
 		String zipFileName = directory + File.separator + downloadFileName;
 		File zipFile = new File(zipFileName);
 
-		Map<File, String> entryFileToFileNameMap = WorkflowHandlerHelper
-				.getEntryFileToFileNameMap(exportListFiles, jobIdSet, locales,
-						AmbFileStoragePathUtils.getReportsDir(companyId)
-								.getPath()
-								+ File.separator
-								+ ReportConstants.REPORT_QA_CHECKS_REPORT);
+		Map<File, String> allEntryFileToFileNameMap = new HashMap<File, String>();
+		Set<Long> keySet = exportFilesMap.keySet();
+		for (Long companyId : keySet)
+		{
+			Set<File> exportListFiles = exportFilesMap.get(companyId);
+			Map<File, String> entryFileToFileNameMap = WorkflowHandlerHelper
+					.getEntryFileToFileNameMap(exportListFiles, jobIdSet,
+							locales,
+							AmbFileStoragePathUtils.getReportsDir(companyId)
+									.getPath()
+									+ File.separator
+									+ ReportConstants.REPORT_QA_CHECKS_REPORT);
+			allEntryFileToFileNameMap.putAll(entryFileToFileNameMap);
+		}
+
 		try
 		{
-			ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
-			String filestore = AmbFileStoragePathUtils.getFileStorageDirPath(1)
-					.replace("\\", "/");
-			String fullPathName = zipFile.getAbsolutePath().replace("\\", "/");
-			String path = fullPathName.substring(fullPathName
-					.indexOf(filestore) + filestore.length());
-			String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-					+ "/DownloadTM";
-			fileUrl = root + path;
+			if (allEntryFileToFileNameMap.entrySet().size() > 0)
+			{
+
+				ZipIt.addEntriesToZipFile(zipFile, allEntryFileToFileNameMap, "");
+				String filestore = AmbFileStoragePathUtils.getFileStorageDirPath(1)
+						.replace("\\", "/");
+				String fullPathName = zipFile.getAbsolutePath().replace("\\", "/");
+				String path = fullPathName.substring(fullPathName
+						.indexOf(filestore) + filestore.length());
+				String root = AmbassadorUtil.getCapLoginOrPublicUrl()
+						+ "/DownloadReports";
+				fileUrl = root + path;
+			}
+			else
+			{
+				fileUrl = "No QA Report downloaded !";
+			}
 		}
 		catch (Exception e)
 		{

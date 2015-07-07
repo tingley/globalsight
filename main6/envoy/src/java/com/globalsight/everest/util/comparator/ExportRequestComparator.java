@@ -83,12 +83,12 @@ public class ExportRequestComparator extends StringComparator
             break;
         case FILE_NAME:
             aValue = a.getFile();
-            bValue = a.getFile();
+            bValue = b.getFile();
             rv = this.compareStrings(aValue, bValue);
             break;
         case LOCALE:
             aValue = a.getWorkflowLocale();
-            bValue = a.getWorkflowLocale();
+            bValue = b.getWorkflowLocale();
             rv = this.compareStrings(aValue, bValue);
             break;
         case FILE_PROFILE:

@@ -168,6 +168,12 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
                             .append(p_request.getPathInfo()).toString()
                             .replace("\\", "/").replace("/", File.separator);
                 }
+				else if (pathInfo.indexOf("/Reports/apiQACheckDownload") > -1)
+				{
+					 fileFullPath = new StringBuffer().append(docHome)
+	                            .append(p_request.getPathInfo()).toString()
+	                            .replace("\\", "/").replace("/", File.separator);
+				}
                 else
                 {
                     fileFullPath = new StringBuffer().append(docHome)

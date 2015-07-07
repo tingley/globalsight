@@ -25,25 +25,42 @@
      java.util.Collections,
      com.globalsight.util.collections.HashtableValueOrderWalker,
      com.globalsight.everest.company.CompanyWrapper,
-     com.globalsight.everest.company.Company"
+     com.globalsight.everest.company.Company,
+     com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+     com.globalsight.everest.permission.Permission,
+     com.globalsight.everest.permission.PermissionSet"
 	 session="true" %>
 <jsp:useBean id="save" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="cancel" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <%
-	boolean isEnableWorkflowStatePosts = false;
-	Company company = CompanyWrapper.getCurrentCompany();
-	isEnableWorkflowStatePosts = company.getEnableWorkflowStatePosts();
-	ResourceBundle bundle = PageHandler.getBundle(session); 
-    String title,helperText;
+	ResourceBundle bundle = PageHandler.getBundle(session);
+	PermissionSet userPerms1 = (PermissionSet) session.getAttribute( 
+        WebAppConstants.PERMISSIONS);
+    boolean isSuperAdmin = UserUtil.isSuperAdmin(
+        (String) request.getSession().getAttribute(WebAppConstants.USER_NAME));
+	boolean isAdmin = UserUtil.isInPermissionGroup((String) request.getSession().getAttribute(WebAppConstants.USER_NAME), "Administrator");
+    boolean isSuperProjectManager = UserUtil
+            .isSuperPM((String) request.getSession().getAttribute(
+                    WebAppConstants.USER_NAME));
+    boolean isProjectManager = userPerms1.getPermissionFor(Permission.PROJECTS_MANAGE);
+    boolean isEnableWorkflowStatePosts = false;
+    Company company = CompanyWrapper.getCurrentCompany();
+    isEnableWorkflowStatePosts = company.getEnableWorkflowStatePosts();
+   
+    String title, helperText;
     if (request.getAttribute("edit") != null)
     {
-        title = bundle.getString("lb_edit") + " " + bundle.getString("lb_loc_profile");
-        helperText = bundle.getString("helper_text_loc_profile_edit") + " " + bundle.getString("helper_text_refer_to_help");
+        title = bundle.getString("lb_edit") + " "
+                + bundle.getString("lb_loc_profile");
+        helperText = bundle.getString("helper_text_loc_profile_edit")
+                + " " + bundle.getString("helper_text_refer_to_help");
     }
     else
     {
-        title = bundle.getString("lb_new") + " " + bundle.getString("lb_loc_profile");
-        helperText = bundle.getString("helper_text_loc_profile_enter") + " " + bundle.getString("helper_text_refer_to_help");
+        title = bundle.getString("lb_new") + " "
+                + bundle.getString("lb_loc_profile");
+        helperText = bundle.getString("helper_text_loc_profile_enter")
+                + " " + bundle.getString("helper_text_refer_to_help");
     }
 %>
 <html>
@@ -378,7 +395,7 @@ $(document).ready(function editPage(){
 					<option value="false" <c:if test="${AutomaticDispatch==false}">selected="selected"</c:if>><%=bundle.getString("lb_manual")%></option>
 				</select>
 			</div>
-			<%if (isEnableWorkflowStatePosts){%>
+			<%if (isEnableWorkflowStatePosts && (isSuperAdmin || isAdmin  || isSuperProjectManager || isProjectManager)){%>
 				<div>
 					<label for="wfStatePostProfileId"><%= bundle.getString("lb_workflow_state_post_profile") %></label>
 					<select id="wfStatePostProfileId" name="wfStatePostProfileId" >

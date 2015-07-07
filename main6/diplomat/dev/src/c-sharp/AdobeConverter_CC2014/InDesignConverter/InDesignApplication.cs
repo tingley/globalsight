@@ -3022,36 +3022,96 @@ namespace GlobalSight.InDesignConverter
         {
             while (!isDocumentOpened && !isExceptionOccur)
             {
+                IntPtr hwnd1 = Win32Pinvoker.FindWindow(null,
+                   "Missing Plug-ins");
+                IntPtr hwnd2 = Win32Pinvoker.FindWindow(null,
+                    "Cannot Open File");
+                IntPtr hwnd3 = Win32Pinvoker.FindWindow(null,
+                    "Missing Fonts");
+                IntPtr hwnd4 = Win32Pinvoker.FindWindow(null,
+                    "Embedded Profile Mismatch");
+                IntPtr hwnd5 = Win32Pinvoker.FindWindow(null,
+                    "Find Font");
+                IntPtr hwnd = Win32Pinvoker.FindWindow(null, INDD_POPUP_DIALOG_TITLE);
 
-                string[] titles = { INDD_POPUP_DIALOG_TITLE, "Missing Plug-ins", "Cannot Open File", "Missing Fonts", "Embedded Profile Mismatch", "È±Ê§×ÖÌå" };
-
-                foreach (string ttt in titles)
+                if (hwnd1 == IntPtr.Zero && hwnd2 == IntPtr.Zero
+                    && hwnd3 == IntPtr.Zero && hwnd4 == IntPtr.Zero
+                    && hwnd5 == IntPtr.Zero && hwnd == IntPtr.Zero)
                 {
-                    IntPtr hwnd = Win32Pinvoker.FindWindow(null, ttt);
-
-                    if (hwnd != IntPtr.Zero)
+                    Thread.Sleep(100);
+                }
+                else
+                {
+                    // Missing Plug-ins
+                    if (hwnd1 != IntPtr.Zero)
                     {
-                        IntPtr hhh = Win32Pinvoker.FindWindowEx(hwnd, IntPtr.Zero, null, "OK");
-
-                        if (hhh == IntPtr.Zero)
+                        IntPtr h1 = Win32Pinvoker.FindWindowEx(hwnd1, IntPtr.Zero, null, "OK");
+                        if (h1 != IntPtr.Zero)
                         {
-                            hhh = Win32Pinvoker.FindWindowEx(hwnd, IntPtr.Zero, null, "È·¶¨");
-                        }
-
-                        if (hhh != IntPtr.Zero)
-                        {
-                            Win32Pinvoker.ClickButtonAndClose(hhh);
+                            Win32Pinvoker.ClickButtonAndClose(h1);
                         }
                         else
                         {
-
-                            Win32Pinvoker.ClosePopupDialog(hwnd);
+                            Win32Pinvoker.ClosePopupDialog(hwnd1);
                         }
                     }
+                    //Cannot Open File
+                    if (hwnd2 != IntPtr.Zero)
+                    {
+                        IntPtr h2 = Win32Pinvoker.FindWindowEx(hwnd2, IntPtr.Zero, null, "OK");
+                        if (h2 != IntPtr.Zero)
+                        {
+                            Win32Pinvoker.ClickButtonAndClose(h2);
+                        }
+                        else
+                        {
+                            Win32Pinvoker.ClosePopupDialog(hwnd2);
+                        }
+                    }
+                    //Missing Fonts
+                    if (hwnd3 != IntPtr.Zero)
+                    {
+                        IntPtr h3 = Win32Pinvoker.FindWindowEx(hwnd3, IntPtr.Zero, null, "OK");
+                        if (h3 != IntPtr.Zero)
+                        {
+                            Win32Pinvoker.ClickButtonAndClose(h3);
+                        }
+                        else
+                        {
+                            Win32Pinvoker.ClosePopupDialog(hwnd3);
+                        }
+                    }
+                    //Embedded Profile Mismatch
+                    if (hwnd4 != IntPtr.Zero)
+                    {
+                        IntPtr h4 = Win32Pinvoker.FindWindowEx(hwnd4, IntPtr.Zero, null, "OK");
+                        if (h4 != IntPtr.Zero)
+                        {
+                            Win32Pinvoker.ClickButtonAndClose(h4);
+                        }
+                        else
+                        {
+                            Win32Pinvoker.ClosePopupDialog(hwnd4);
+                        }
+                    }
+                    //Find Font
+                    if (hwnd5 != IntPtr.Zero)
+                    {
+                        IntPtr h5 = Win32Pinvoker.FindWindowEx(hwnd5, IntPtr.Zero, null, "OK");
+                        if (h5 != IntPtr.Zero)
+                        {
+                            Win32Pinvoker.ClickButtonAndClose(h5);
+                        }
+                        else
+                        {
+                            Win32Pinvoker.ClosePopupDialog(hwnd5);
+                        }
+                    }
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        Win32Pinvoker.ClosePopupDialog(hwnd);
+                    }
                 }
-
-
-                Thread.Sleep(100);
             }
         }
 

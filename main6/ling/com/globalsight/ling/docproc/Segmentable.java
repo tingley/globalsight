@@ -39,6 +39,7 @@ public abstract class Segmentable
     private boolean m_isPreserveWS = false;
     private String isLocalized = null;
     private int inddPageNum = 0;
+    private String escapingChars;
     
     public int getInddPageNum()
     {
@@ -48,6 +49,16 @@ public abstract class Segmentable
     public void setInddPageNum(int inddPageNum)
     {
         this.inddPageNum = inddPageNum;
+    }
+    
+    public String getEscapingChars()
+    {
+        return escapingChars;
+    }
+
+    public void setEscapingChars(String escapingChars)
+    {
+        this.escapingChars = EditUtil.encodeXmlEntities(escapingChars);
     }
 
     public boolean isPreserveWhiteSpace()
@@ -224,7 +235,14 @@ public abstract class Segmentable
         
         if (inddPageNum != 0)
         {
-            attribs.setProperty("inddPageNum", "" + inddPageNum);
+            attribs.setProperty(DiplomatNames.Attribute.INDDPAGENUM,
+                    "" + inddPageNum);
+        }
+        
+        if (escapingChars != null && escapingChars.length() > 0)
+        {
+            attribs.setProperty(DiplomatNames.Attribute.ESCAPINGCHARS,
+                    escapingChars);
         }
         
         if(xliffAttributes != null && xliffAttributes.size() > 0) {

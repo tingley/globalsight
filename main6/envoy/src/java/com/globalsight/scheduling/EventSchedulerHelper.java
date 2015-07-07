@@ -268,14 +268,10 @@ public class EventSchedulerHelper
         }
 
         Long wfId = (Long) p_emailInfo.get(SchedulerConstants.WF_ID);
-
-        // a light workflow object without iFlow related attributes
-        WorkflowManagerLocal manager = new WorkflowManagerLocal();
-        Workflow wf = manager.getWorkflowById(wfId.longValue());
-
+		Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
+				wfId.longValue());
         WorkflowTemplateInfo wfti = wf.getJob().getL10nProfile()
                 .getWorkflowTemplateInfo(wf.getTargetLocale());
-
         List wfManagerIds = wf
                 .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER);
         int size = wfManagerIds.size();
@@ -370,22 +366,21 @@ public class EventSchedulerHelper
             throws PersistenceException
     {
         Long wfId = (Long) p_emailInfo.get(SchedulerConstants.WF_ID);
-        // a light workflow object without iFlow related attributes
-        WorkflowManagerLocal manager = new WorkflowManagerLocal();
         Workflow wf = null;
         try
         {
-            wf = manager.getWorkflowById(wfId.longValue());
+			wf = ServerProxy.getWorkflowManager().getWorkflowById(
+					wfId.longValue());
+	        if (wf == null)
+	        {
+				throw new PersistenceException("Can't get workflow by id:"
+						+ wfId);
+	        }
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	s_category.error(e);
             throw new PersistenceException(e);
-        }
-        if (wf == null)
-        {
-            throw new PersistenceException("Can't get workflow by id:" + wfId);
         }
 
         WorkflowTemplateInfo wfti = wf.getJob().getL10nProfile()
@@ -435,10 +430,8 @@ public class EventSchedulerHelper
             ProjectHandlerException, GeneralException, NamingException
     {
         Long wfId = (Long) p_emailInfo.get(SchedulerConstants.WF_ID);
-
-        // a light workflow object without iFlow related attributes
-        WorkflowManagerLocal manager = new WorkflowManagerLocal();
-        Workflow wf = manager.getWorkflowById(wfId.longValue());
+		Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
+				wfId.longValue());
         if (wf == null)
         {
             throw new PersistenceException("Can't get workflow by Id: " + wfId);

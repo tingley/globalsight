@@ -44,10 +44,8 @@ import org.hibernate.Session;
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
-import com.globalsight.connector.git.GitConnectorManagerLocal;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.entity.gitconnector.GitConnectorJob;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.foundation.Timestamp;
@@ -1182,60 +1180,93 @@ public class WorkflowHandlerHelper
 			{
 				activeTask = (WorkflowTaskInstance) tasks[0];
 			}
+
 			if (activeTask != null)
 			{
 				Task task = ServerProxy.getTaskManager().getTask(
 						activeTask.getTaskId());
-
-				boolean qaCheck = QACheckerHelper.isShowQAChecksTab(task);
-				if (qaCheck)
+				if (QACheckerHelper.isShowQAChecksTab(task))
 				{
-					QAChecker qaChecker = new QAChecker();
-					filePath = qaChecker.runQAChecksAndGenerateReport(task
-							.getId());
+					if (QACheckerHelper.isQAActivity(task))
+					{
+						QAChecker qaChecker = new QAChecker();
+						filePath = qaChecker.runQAChecksAndGenerateReport(task
+								.getId());
+					}
+					else
+					{
+						filePath = getPreviousQAReportFilePath(workflow);
+					}
 				}
 			}
 			else
 			{
-
-				if (workflow.getState().equalsIgnoreCase("EXPORTED"))
+				if (workflow.getJob().getProject().getAllowManualQAChecks())
 				{
-					StringBuilder sb = new StringBuilder();
-					sb.append(AmbFileStoragePathUtils.getReportsDir(workflow
-							.getCompanyId()));
-					sb.append(File.separator);
-					sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
-					sb.append(File.separator);
-					sb.append(workflow.getJob().getId());
-					sb.append(File.separator);
-					sb.append(workflow.getTargetLocale().toString());
-					File file = new File(sb.toString());
-					long maxTime = 0;
-					File emptyFile = null;
-					if (file.exists())
+					if (workflow.getState().equalsIgnoreCase("EXPORTED"))
 					{
-						File[] files = file.listFiles();
-						for (File fe : files)
-						{
-							long time = fe.lastModified();
-							if (time > maxTime)
-							{
-								maxTime = time;
-								emptyFile = fe;
-							}
-						}
-						filePath = emptyFile.listFiles()[0].getPath();
+						filePath = getPreviousQAReportFilePath(workflow);
 					}
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return filePath;
 	}
     
+	private static String getPreviousQAReportFilePath(Workflow workflow)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(AmbFileStoragePathUtils.getReportsDir(workflow.getCompanyId()));
+		sb.append(File.separator);
+		sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
+		sb.append(File.separator);
+		sb.append(workflow.getJob().getId());
+		sb.append(File.separator);
+		sb.append(workflow.getTargetLocale().toString());
+		File file = new File(sb.toString());
+		long maxTime = 0;
+		File emptyFile = null;
+		String filePath = null;
+		if (file.exists())
+		{
+			File[] files = file.listFiles();
+			for (File fe : files)
+			{
+				long time = fe.lastModified();
+				if (time > maxTime)
+				{
+					maxTime = time;
+					emptyFile = fe;
+				}
+			}
+
+			long maxDate = 0;
+			File emptyDownFile = null;
+			if (emptyFile != null)
+			{
+				File[] downFiles = emptyFile.listFiles();
+				for (File f : downFiles)
+				{
+					long time = f.lastModified();
+					if (time > maxDate)
+					{
+						maxDate = time;
+						emptyDownFile = f;
+					}
+				}
+				if (emptyDownFile != null)
+				{
+					filePath = emptyDownFile.getPath();
+				}
+			}
+		}
+		return filePath;
+	}
+	
 	public static void zippedFolder(HttpServletRequest p_request,
 			HttpServletResponse p_response, long companyId, Set<Long> jobIdSet,
 			Set<File> exportListFiles, Set<String> locales)
@@ -1253,18 +1284,25 @@ public class WorkflowHandlerHelper
 		{
 			ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
 			String downloadFileName = zipFile.getName();
-			if (jobIdSet != null && jobIdSet.size() == 1)
+			if (entryFileToFileNameMap.entrySet().size() > 0)
 			{
-				Long jobId = jobIdSet.iterator().next();
-				downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT
-						+ "_(" + jobId + ").zip";
+				if (jobIdSet != null && jobIdSet.size() == 1)
+				{
+					Long jobId = jobIdSet.iterator().next();
+					downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT
+							+ "_(" + jobId + ").zip";
+				}
+				else if (jobIdSet != null && jobIdSet.size() > 1)
+				{
+					String tempS = jobIdSet.toString();
+					String jobNamesstr = tempS.substring(1, tempS.length() - 1);
+					downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT
+							+ "_(" + jobNamesstr + ").zip";
+				}
 			}
-			else if (jobIdSet != null && jobIdSet.size() > 1)
+			else
 			{
-				String tempS = jobIdSet.toString();
-				String jobNamesstr = tempS.substring(1, tempS.length() - 1);
-				downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT
-						+ "_(" + jobNamesstr + ").zip";
+				downloadFileName = "No Report Download.zip";
 			}
 
 			// write zip file to client
@@ -1296,7 +1334,7 @@ public class WorkflowHandlerHelper
 		}
 		catch (Exception e)
 		{
-			logger.error(e.getMessage(), e);
+			logger.error(e);
 		}
 		finally
 		{

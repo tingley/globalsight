@@ -46,29 +46,19 @@ public class BasicWorkflowStatePostHandler extends PageHandler implements
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
-        String action = (String) p_request
-                .getParameter(WorkflowStatePostConstants.ACTION);
-        p_request.setAttribute(WorkflowTemplateConstants.ACTION, action);
-        if (action != null && "edit".equals(action))
-        {
-            modifyWfStatePostProfile(p_request, p_response);
-
-        }
         try
         {
-			ArrayList<WorkflowStatePosts> wfStatePostList = (ArrayList<WorkflowStatePosts>) ServerProxy
-					.getProjectHandler().getAllWorkflowStatePostInfos();
-            ArrayList<String> allNames = new ArrayList<String>();
-
-            if (wfStatePostList != null)
+            String action = (String) p_request
+                    .getParameter(WorkflowStatePostConstants.ACTION);
+            p_request.setAttribute(WorkflowTemplateConstants.ACTION, action);
+            ArrayList<WorkflowStatePosts> wfStatePostList = (ArrayList<WorkflowStatePosts>) ServerProxy
+                    .getProjectHandler().getAllWorkflowStatePostInfos();
+            if (action != null && "edit".equals(action))
             {
-                for (int i = 0; i < wfStatePostList.size(); i++)
-                {
-                    allNames.add(((WorkflowStatePosts) wfStatePostList.get(i))
-                            .getName());
-                }
+                modifyWfStatePostProfile(p_request, p_response, wfStatePostList);
             }
-            p_request.setAttribute("allWfStatePostNames", allNames);
+
+            p_request.setAttribute("allWfStatePost", wfStatePostList);
         }
         catch (GeneralException e)
         {
@@ -85,7 +75,7 @@ public class BasicWorkflowStatePostHandler extends PageHandler implements
     }
 
     private void modifyWfStatePostProfile(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws IOException
+            HttpServletResponse p_response, ArrayList<WorkflowStatePosts> wfStatePostList) throws IOException
     {
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
@@ -100,10 +90,17 @@ public class BasicWorkflowStatePostHandler extends PageHandler implements
         }
         WorkflowStatePosts wfStatePostProfile = (WorkflowStatePosts) WorkflowStatePostHandlerHelper
                 .getWfStatePostProfile(Long.parseLong(id));
-
+        for (WorkflowStatePosts wfStatePost : wfStatePostList)
+        {
+            if (wfStatePost.getName().equals(wfStatePostProfile.getName()))
+            {
+                wfStatePostList.remove(wfStatePostProfile);
+                break;
+            }
+        }
         p_request.setAttribute(WORKFLOW_STATE_POST_ID, new Long(
                 wfStatePostProfile.getId()));
-        sessionMgr.setAttribute(WF_STATE_POST_INFO, wfStatePostProfile);
+        p_request.setAttribute(WF_STATE_POST_INFO, wfStatePostProfile);
 
         String actionType = (String) p_request.getParameter(ACTION);
         sessionMgr.setAttribute(ACTION, actionType);

@@ -108,14 +108,17 @@ public class WorkflowStatePostHandler extends PageHandler implements
     private WorkflowStatePosts getBasicWfStatePostProfile(
             HttpServletRequest p_request)
     {
+        String value;
         WorkflowStatePosts wfStatePost = new WorkflowStatePosts();
         HttpSession session = p_request.getSession(false);
         String name = (String) p_request.getParameter(NAME_FIELD);
         String description = (String) p_request.getParameter(DESCRIPTION_FIELD);
         String listenerURL = (String) p_request.getParameter(LISTENERURL_FIELD);
         String secretKey = (String) p_request.getParameter(SECRETKEY_FIELD);
-        String timeoutPeriod = (String) p_request.getParameter(TIMEOUT_FIELD);
-        String retryNumber = (String) p_request.getParameter(RETRY_TIME_FIELD);
+        value = (String) p_request.getParameter(TIMEOUT_FIELD);
+        int timeoutPeriod = Integer.parseInt(value);
+        value = (String) p_request.getParameter(RETRY_TIME_FIELD);
+        int retryNumber = Integer.parseInt(value);
         String notifyEmail = (String) p_request
                 .getParameter(NOTIFY_EMAIL_FIELD);
 
@@ -160,7 +163,6 @@ public class WorkflowStatePostHandler extends PageHandler implements
                 .getAttribute(SESSION_MANAGER);
         String name = p_request.getParameter("nameFilter");
         String listenerURL = p_request.getParameter("listenerURLFilter");
-        String secretKey = p_request.getParameter("secretkeyFilter");
         String company = p_request.getParameter("wfStatePostCompanyNameFilter");
         if (!FILTER_SEARCH.equals(action)
                 || p_request.getMethod().equalsIgnoreCase(
@@ -168,7 +170,6 @@ public class WorkflowStatePostHandler extends PageHandler implements
         {
             name = (String) sessionMgr.getAttribute("nameFilter");
             listenerURL = (String) sessionMgr.getAttribute("listenerURLFilter");
-            secretKey = (String) sessionMgr.getAttribute("secretkeyFilter");
             company = (String) sessionMgr
                     .getAttribute("wfStatePostCompanyNameFilter");
         }
@@ -180,21 +181,17 @@ public class WorkflowStatePostHandler extends PageHandler implements
         }
         name = name == null ? "" : name;
         listenerURL = listenerURL == null ? "" : listenerURL;
-        secretKey = secretKey == null ? "" : secretKey;
         company = company == null ? "" : company;
         sessionMgr.setAttribute("nameFilter", name);
         sessionMgr.setAttribute("listenerURLFilter", listenerURL);
-        sessionMgr.setAttribute("secretKeyFilter", secretKey);
         sessionMgr.setAttribute("wfStatePostCompanyNameFilter", company);
-        String[] filterParam =
-        { name, listenerURL, secretKey, company };
+        String[] filterParam = { name, listenerURL, company };
         return filterParam;
     }
 
     private void dataForTable(HttpServletRequest p_request,
             HttpSession p_session, String[] filterParams)
     {
-
         Locale uiLocale = (Locale) p_session
                 .getAttribute(WebAppConstants.UILOCALE);
         List<WorkflowStatePosts> wfStatePosts = null;

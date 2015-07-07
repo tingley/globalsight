@@ -35,6 +35,8 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.document.Unit;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Xliff;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.YesNo;
 import com.globalsight.ling.common.DiplomatBasicHandler;
+import com.globalsight.ling.tw.PseudoData;
+import com.globalsight.ling.tw.PseudoOverrideMapItem;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -52,6 +54,7 @@ public class Tmx2Xliff20
     private StringBuffer attrValue;
     private Properties attributes;
     private Tmx2Xliff20Handler handler;
+    private static PseudoData data = new PseudoData();
 
     /**
      * Returns the input string with PTags inserted in place of TMX.
@@ -532,6 +535,12 @@ public class Tmx2Xliff20
                     getContentAsString(pc.getContent(), sb);
                     sb.append("]");
                 }
+                else if (pc.getSubType() != null && pc.getSubType().length() > 0)
+                {
+                    sb.append("[").append(pc.getSubType()).append("]");
+                    getContentAsString(pc.getContent(), sb);
+                    sb.append("[/").append(pc.getSubType()).append("]");
+                }
                 else
                 {
                     sb.append("[g").append(pc.getId()).append("]");
@@ -586,10 +595,22 @@ public class Tmx2Xliff20
      * @return
      */
     public static String getTag(String p_strTmxTagName,
-            Properties p_hAttributes, String p_strOriginalString, Map<String, String> ept2bpt)
+            Properties p_hAttributes, String p_strOriginalString, Map<String, String> ept2bpt, Map<String, String> ept2bpt2)
     {
         String i = Tmx2Xliff20Handler.getId(p_hAttributes);
-
+        
+        String type = p_hAttributes.getProperty("type");
+        if (type != null)
+        {
+            PseudoOverrideMapItem item = data.getOverrideMapItem(type);
+            if (item != null && !item.m_bNumbered)
+            {
+                String bId = getBptId(p_hAttributes);
+                ept2bpt2.put(bId, type);
+                return type;
+            }
+        }
+        
         if (p_strTmxTagName.equals("bpt"))
         {
             String bId = getBptId(p_hAttributes);
@@ -604,6 +625,11 @@ public class Tmx2Xliff20
                 String bId = ept2bpt.get(i);
                 ept2bpt.remove(i);
                 return "/g" + bId;
+            }
+            
+            if (ept2bpt2.containsKey(i))
+            {
+                return "/" + ept2bpt2.remove(i);
             }
             
             return "/g" + i;

@@ -19,8 +19,8 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -50,6 +51,7 @@ import java.util.Vector;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -146,13 +148,46 @@ public class JobControlExportedHandler
         m_exportErrorBean = new NavigationBean(ERROR_BEAN, p_thePageDescriptor.getPageName());
         p_request.setAttribute("action", p_request.getParameter("action"));
 
-        performAppropriateOperation(p_request);
-		if (p_request.getParameter("downloadQAReport") != null)
+        if (p_request.getParameter("action") != null
+				&& "checkDownloadQAReport".equals(p_request
+						.getParameter("action")))
 		{
-			String jobIds = p_request.getParameter("downloadQAReport");
-			exportQAChecksReport(p_request, p_response, jobIds);
+			ServletOutputStream out = p_response.getOutputStream();
+			String jobIds = p_request.getParameter("jobIds");
+			boolean checkQA = checkQAReport(sessionMgr, jobIds);
+			String download = "";
+			if (checkQA)
+			{
+				download = "success";
+			}
+			else
+			{
+				download = "fail";
+			}
+			Map<String, Object> returnValue = new HashMap();
+			returnValue.put("download", download);
+			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
 			return;
 		}
+		else if (p_request.getParameter("action") != null
+				&& "downloadQAReport".equals(p_request.getParameter("action")))
+		{
+			Set<Long> jobIdSet = (Set<Long>) sessionMgr
+					.getAttribute("jobIdSet");
+			Set<File> exportFilesSet = (Set<File>) sessionMgr
+					.getAttribute("exportFilesSet");
+			Set<String> localesSet = (Set<String>) sessionMgr
+					.getAttribute("localesSet");
+			long companyId = (Long) sessionMgr.getAttribute("companyId");
+			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
+					companyId, jobIdSet, exportFilesSet, localesSet);
+			sessionMgr.removeElement("jobIdSet");
+			sessionMgr.removeElement("exportFilesSet");
+			sessionMgr.removeElement("localesSet");
+			return;
+		}
+        
+        performAppropriateOperation(p_request);
         Vector jobStates = new Vector();
         jobStates.add(Job.EXPORTED);
         jobStates.add(Job.EXPORT_FAIL);
@@ -190,11 +225,10 @@ public class JobControlExportedHandler
         dispatcher.forward(p_request, p_response);
     }
 
-	public void exportQAChecksReport(HttpServletRequest p_request,
-			HttpServletResponse p_response, String jobIds)
+	public boolean checkQAReport(SessionManager sessionMgr, String jobIds)
 	{
-		Set<File> exportListFiles = new HashSet<File>();
-		Set<String> locales = new HashSet<String>();
+		Set<File> exportFilesSet = new HashSet<File>();
+		Set<String> localesSet = new HashSet<String>();
 		Set<Long> jobIdSet = new HashSet<Long>();
 		if (StringUtils.isNotBlank(jobIds))
 		{
@@ -205,36 +239,46 @@ public class JobControlExportedHandler
 			}
 		}
 		Set<Workflow> workflowSet = new HashSet<Workflow>();
-		String companyId = CompanyThreadLocal.getInstance().getValue();
 		try
 		{
+			long companyId = -1;
+			for (Long jobId : jobIdSet)
+			{
+				Job job = ServerProxy.getJobHandler().getJobById(jobId);
+				if (companyId == -1)
+				{
+					companyId = job.getCompanyId();
+				}
+				workflowSet.addAll(job.getWorkflows());
+			}
 			Company company = CompanyWrapper.getCompanyById(companyId);
 			if (company.getEnableQAChecks())
 			{
-				for (Long jobId : jobIdSet)
-				{
-					Job job = ServerProxy.getJobHandler().getJobById(jobId);
-					workflowSet.addAll(job.getWorkflows());
-				}
 				for (Workflow workflow : workflowSet)
 				{
-					locales.add(workflow.getTargetLocale().getLocaleCode());
+					localesSet.add(workflow.getTargetLocale().getLocaleCode());
 					String filePath = WorkflowHandlerHelper
 							.getExportFilePath(workflow);
 					if (filePath != null)
 					{
-						exportListFiles.add(new File(filePath));
+						exportFilesSet.add(new File(filePath));
 					}
 				}
 			}
-			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
-					Long.parseLong(companyId), jobIdSet, exportListFiles,
-					locales);
+			if (exportFilesSet != null && exportFilesSet.size() > 0)
+			{
+				sessionMgr.setAttribute("jobIdSet", jobIdSet);
+				sessionMgr.setAttribute("exportFilesSet", exportFilesSet);
+				sessionMgr.setAttribute("localesSet", localesSet);
+				sessionMgr.setAttribute("companyId", companyId);
+				return true;
+			}
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			s_logger.error(e);
 		}
+		return false;
 	}
 	
     /**

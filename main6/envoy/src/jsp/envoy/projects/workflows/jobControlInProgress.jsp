@@ -96,29 +96,37 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
     String lbArchived= bundle.getString("lb_archived");
     Company company = (Company)request.getAttribute("company");
     boolean enableQAChecks = company.getEnableQAChecks();
-    
-    String refreshUrl = progressURL;
-    boolean b_addDelete = false;
-    boolean b_searchEnabled = false;
-    try
-    {
-        SystemConfiguration sc = SystemConfiguration.getInstance();
-        b_addDelete = sc.getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
-        b_searchEnabled =
-               sc.getBooleanParameter(SystemConfigParamNames.JOB_SEARCH_REPLACE_ALLOWED);
+	boolean showButton = true;
+	if (company.getId() == 1)
+	{
+		showButton = false;
+	}
 
-    }
-    catch (Exception ge)
-    {
-        // assume false
-    }
-    
-    String helperText = bundle.getString("helper_text_job_inprogress");
-    SessionManager sessMr= (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-    String badresults = (String)sessMr.getMyjobsAttribute("badresults");
-    if(badresults == null)
-    	badresults = "";
-    sessMr.setMyjobsAttribute("badresults","");
+	String refreshUrl = progressURL;
+	boolean b_addDelete = false;
+	boolean b_searchEnabled = false;
+	try
+	{
+		SystemConfiguration sc = SystemConfiguration.getInstance();
+		b_addDelete = sc
+				.getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
+		b_searchEnabled = sc
+				.getBooleanParameter(SystemConfigParamNames.JOB_SEARCH_REPLACE_ALLOWED);
+
+	}
+	catch (Exception ge)
+	{
+		// assume false
+	}
+
+	String helperText = bundle.getString("helper_text_job_inprogress");
+	SessionManager sessMr = (SessionManager) session
+			.getAttribute(WebAppConstants.SESSION_MANAGER);
+	String badresults = (String) sessMr
+			.getMyjobsAttribute("badresults");
+	if (badresults == null)
+		badresults = "";
+	sessMr.setMyjobsAttribute("badresults", "");
 %>
 <HTML>
 <HEAD>
@@ -556,31 +564,37 @@ function submitForm(buttonClicked, curJobId)
 
    if (buttonClicked == "Export")
    {
-	  
-	var checkUrl = "${self.pageURL}&checkIsUploadingForExport=true&jobId=" + jobId + "&t=" + new Date().getTime();
-	var isContinue = true;
-	$.ajaxSetup({async: false}); 
-	$.get(checkUrl,function(data){
-		if(data == "uploading")
-		{
-			alert("The job is uploading. Please wait.");
-			isContinue =  false;
-		}
-	});
-	$.ajaxSetup({ async: true}); 
-
-	if(!isContinue)
-		return false;
-	  
-	ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
-    JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
-    jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
+	 	var checkUrl = "${self.pageURL}&checkIsUploadingForExport=true&jobId=" + jobId + "&t=" + new Date().getTime();
+		var isContinue = true;
+		$.ajaxSetup({async: false}); 
+		$.get(checkUrl,function(data){
+			if(data == "uploading")
+			{
+				alert("The job is uploading. Please wait.");
+				isContinue =  false;
+			}
+		});
+		$.ajaxSetup({ async: true}); 
+	
+		if(!isContinue)
+			return false;
+		  
+		ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
+	    JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
+	    jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
+	    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
+	    JobForm.submit();
+	    return;
    }
    else if(buttonClicked == "ExportForUpdate")
    {
 	   	ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
 	    JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
 	    jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
+	    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
+	    JobForm.action += "&" + "<%=JobManagementHandler.EXPORT_FOR_UPDATE_PARAM%>" + "=true";
+	    JobForm.submit();
+	    return;
    }
    else if (buttonClicked == "Discard")
    {
@@ -593,16 +607,25 @@ function submitForm(buttonClicked, curJobId)
       ShowStatusMessage("<%=bundle.getString("jsmsg_discarding_selected_jobs")%>")
       JobForm.action = "<%=refreshUrl%>";
       jobActionParam = "<%=JobManagementHandler.DISCARD_JOB_PARAM%>";
+      JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
+      JobForm.submit();
+      return;
    }
    else if (buttonClicked == "changeWFMgr")
    {
       JobForm.action = "<%=changeWfMgrURL%>";
       jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
+      JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
+      JobForm.submit();
+      return;
    }
    else if (buttonClicked == "search")
    {
       JobForm.action = "<%=searchURL%>";
       jobActionParam = "search";
+      JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
+      JobForm.submit();
+      return;
    }
    else if (buttonClicked == "Download")
    {
@@ -634,19 +657,31 @@ function submitForm(buttonClicked, curJobId)
 	   JobForm.submit();
 	   return;
    }
-   else(buttonClicked == "downloadQAReport")
+   else if(buttonClicked == "downloadQAReport")
    {
-	   JobForm.action = "<%=refreshUrl%>";
-	   jobActionParam = "downloadQAReport";
+	   $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=refreshUrl%>&action=checkDownloadQAReport",
+		   data: "jobIds="+jobId,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.download == "fail")
+	          {
+	   			alert("<%=bundle.getString("lb_download_qa_reports_message")%>");
+	          }
+	          else if(returnData.download == "success")
+	          {
+		       	  JobForm.action = "<%=refreshUrl%>"+"&action=downloadQAReport";
+		    	  JobForm.submit();
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          		alert(error.message);
+           }
+		});
    }
-
-
-   JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
-   if (buttonClicked == "ExportForUpdate")
-   {
-      JobForm.action += "&" + "<%=JobManagementHandler.EXPORT_FOR_UPDATE_PARAM%>" + "=true";
-   }
-   JobForm.submit();
 }
 
 //for GBS-2599
@@ -1092,7 +1127,7 @@ is defined in header.jspIncl which must be included in the body.
 	<amb:permission name="<%=Permission.JOBS_REMOVEJOBFROMGROUP%>" >
   		<INPUT TYPE="BUTTON" NAME=search VALUE="<%=bundle.getString("lb_remove_job_from_group")%>" onClick="removeJobFromGroup();">
 	</amb:permission>
-	<%if(enableQAChecks){ %>
+	<%if(enableQAChecks && showButton){ %>
   		<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport')">
     <% } %>
 </DIV>

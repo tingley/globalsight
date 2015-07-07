@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+  <class name="com.globalsight.cxe.entity.systemActivity.LoginAttemptConfig"
+    table="LOGIN_ATTEMPT_CONFIG">
+    <id name="id" column="ID" type="long">
+      <generator class="native" />
+    </id>
+
+    <property name="enable" column="ENABLE" type="yes_no"
+      not-null="true" unique="false" />
+    <property name="blockTime" column="BLOCK_TIME" type="long"
+      not-null="false" unique="false" />
+    <property name="maxTime" column="MAX_TIME" type="int"
+      not-null="false" unique="false" />
+    <property name="exemptIps" column="EXEMPT_IPS" type="string"
+      not-null="false" unique="false" />
+  </class>
+</hibernate-mapping>

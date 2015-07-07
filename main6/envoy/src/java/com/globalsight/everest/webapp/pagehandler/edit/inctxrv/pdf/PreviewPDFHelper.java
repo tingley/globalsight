@@ -109,51 +109,19 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 {
     private static final Logger LOGGER = Logger.getLogger(PreviewPDFHelper.class);
     private static SystemConfiguration m_sc = SystemConfiguration.getInstance();
-    public static final Set<String> extensionSet = new HashSet<String>();
     // The Map for storing PDF future, the key is TargetPageID, the value is PDF
     // Future.
     private static final Map<String, Future<File>> createPDFMap = new ConcurrentHashMap<String, Future<File>>();
     private static final ExecutorService serviceForINDD = Executors.newSingleThreadExecutor();
     private static final ExecutorService serviceForIDML = Executors.newSingleThreadExecutor();
+    private static final ExecutorService serviceForDOCX = Executors.newSingleThreadExecutor();
+    private static final ExecutorService serviceForPPTX = Executors.newSingleThreadExecutor();
+    private static final ExecutorService serviceForXLSX = Executors.newSingleThreadExecutor();
 
     private static final int BUFFERSIZE = 4096;
 
     private static final String[] PROPERTY_FILES = { "/properties/Logger.properties",
             "/properties/AdobeAdapter.properties" };
-
-    static
-    {
-        // Initial File Extension Set, which could be previewed by PDF.
-        extensionSet.add(INDD_SUFFIX);
-        extensionSet.add(IDML_SUFFIX);
-    }
-
-    // Justify whether the job contained the file, which could been previewed by
-    // PDF.
-    public static boolean isEnablePreviewPDF(Job p_job)
-    {
-        for (SourcePage sp : (Collection<SourcePage>) p_job.getSourcePages())
-        {
-            String spPath = sp.getExternalPageId();
-            int index = spPath.lastIndexOf(".");
-            if (index > -1)
-            {
-                String extension = spPath.substring(index);
-                if (extensionSet.contains(extension.toLowerCase()))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    public static boolean isEnablePreviewPDF(Task p_task)
-    {
-        Job job = p_task.getWorkflow().getJob();
-        return isEnablePreviewPDF(job);
-    }
 
     // Cancel Creating PDF Threads.
     public void cancelPDF(Set<Long> p_workflowIdSet, String p_userId)
@@ -251,19 +219,19 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         else if (externalPageId.endsWith(DOCX_SUFFIX))
         {
             task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_DOCX, isTarget);
-            future = serviceForIDML.submit(task);
+            future = serviceForDOCX.submit(task);
             createPDFMap.put(key, future);
         }
         else if (externalPageId.endsWith(PPTX_SUFFIX))
         {
             task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_PPTX, isTarget);
-            future = serviceForIDML.submit(task);
+            future = serviceForPPTX.submit(task);
             createPDFMap.put(key, future);
         }
         else if (externalPageId.endsWith(XLSX_SUFFIX))
         {
             task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_XLSX, isTarget);
-            future = serviceForIDML.submit(task);
+            future = serviceForXLSX.submit(task);
             createPDFMap.put(key, future);
         }
     }
@@ -298,13 +266,11 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             // Get existPDFFileNumber & totalPDFFileNumber
             String tpPath = getPagePath(tp, true);
             String extension = tpPath.substring(tpPath.lastIndexOf("."));
-            if (extensionSet.contains(extension.toLowerCase()))
-            {
-                totalPDFFileNumber++;
-                File pdfFile = getPreviewPdf(tpPath, companyId, p_userId);
-                if (pdfFile.exists())
-                    existPDFFileNumber++;
-            }
+
+            totalPDFFileNumber++;
+            File pdfFile = getPreviewPdf(tpPath, companyId, p_userId);
+            if (pdfFile.exists())
+                existPDFFileNumber++;
         }
 
         p_pdfBO.setTotalPDFFileNumber(totalPDFFileNumber);
@@ -378,23 +344,6 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         return new File(outPutFile);
     }
 
-    public static long getExistPDFFileNumber(Workflow p_wf)
-    {
-        int result = 0;
-        Iterator<TargetPage> it = p_wf.getTargetPages().iterator();
-        while (it.hasNext())
-        {
-            String spPath = it.next().getExternalPageId();
-            String extension = spPath.substring(spPath.lastIndexOf("."));
-            if (extensionSet.contains(extension.toLowerCase()))
-            {
-                result++;
-            }
-        }
-
-        return result;
-    }
-
     public static boolean isINDDAndInx(PreviewPDFBO p_params)
     {
         int fileVersionType = p_params.getVersionType();
@@ -462,6 +411,11 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     .getGlobalSightLocale().toString();
             converterDir = getConvertDir(p_params, true) + trgLocale;
             new File(converterDir).mkdirs();
+            
+            // test converter is started or not
+            String testFile = "indd" + (int) (Math.random() * 1000000) + ".test";
+            File tFile = new File(converterDir + "/" + testFile);
+            FileUtil.writeFile(tFile, "test converter is start or not");
 
             String targetPageFolder = p_pdfFile.getParent();
             String statusPageFolder = p_oldPdfFile.getParent();
@@ -489,7 +443,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
             // Wait for Adobe Converter to convert
             return readTargetPdfFile(xmlFilePath, p_pageName, trgLocale, p_userId, p_companyId,
-                    isTarget);
+                    isTarget, tFile);
         }
         catch (InterruptedException e)
         {
@@ -1183,12 +1137,38 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_targetPageName
      * @return
      */
-    private File readTargetPdfFile(String p_xmlFileName, String p_targetPageName,
-            String p_trgLocale, String p_userId, long p_companyId, boolean isTarget)
+    private File readTargetPdfFile(String p_xmlFileName,
+            String p_targetPageName, String p_trgLocale, String p_userId,
+            long p_companyId, boolean isTarget, File testFile) throws Exception
     {
         String statusFileName = FileUtils.getPrefix(p_xmlFileName) + COMMAND_STATUS_SUFFIX;
         File statusFile = new File(statusFileName);
         String[] status = null;
+        
+        int i = 0;
+        File f = new File(statusFileName);
+        boolean found = false;
+        while (i++ < 10)
+        {
+            Thread.sleep(2000);
+            if (f.exists())
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            if (testFile.exists())
+            {
+                testFile.delete();
+                
+                throw new Exception(
+                        "In Context Review converter is not started");
+            }
+        }
+        
         FileWaiter fileWaiter = new FileWaiter(AdobeConfiguration.SLEEP_TIME, getMaxWaitTime(),
                 statusFileName);
         StringBuffer tarDir = new StringBuffer(AmbFileStoragePathUtils

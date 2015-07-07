@@ -67,7 +67,6 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.diplomat.util.Logger;
-import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.cvsconfig.CVSUtil;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
@@ -81,7 +80,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.D
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.ling.common.MapOfHtmlEntity;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -218,14 +216,12 @@ public class Exporter
                 fileTargetEncoding = (String) messageTargetCharset;
             }
 
-            // added by Walter, In GSEdition, the ServerB's exported xliff file
-            // needed
-            // to be uploaded in serverA, if the xliff file have no bom format,
-            // it will throw exception when check.
-            WorkflowManagerLocal wmanager = new WorkflowManagerLocal();
-            Workflow wf = wmanager.getWorkflowById((Long.parseLong(m_cxeMessage
-                    .getParameters().get("WorkflowId").toString())));
-
+			// added by Walter, In GSEdition, the ServerB's exported xliff file
+			// needed to be uploaded in serverA, if the xliff file have no bom
+			// format, it will throw exception when check.
+			Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
+					(Long.parseLong(m_cxeMessage.getParameters()
+							.get("WorkflowId").toString())));
             if ("xlz".equals(m_formatType) || "xlf".equals(m_formatType))
             {
                 String fileEncoding = FileUtil.guessEncoding(finalFile);

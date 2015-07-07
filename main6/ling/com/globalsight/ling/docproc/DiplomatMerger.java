@@ -54,10 +54,12 @@ import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.XmlWriter;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.ling.docproc.extractor.xliff.WSConstants;
+import com.globalsight.ling.docproc.extractor.xml.XmlExtractor;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.worldserver.WsSkeletonDispose;
 import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * <p>
@@ -459,9 +461,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 if (IFormatNames.FORMAT_JAVAPROP.equalsIgnoreCase(p_mainFormat)
                         && encoder instanceof JPEscapeSequence)
                 {
-                    ((JPEscapeSequence)encoder).setIsJavaProperty(true);
+                    ((JPEscapeSequence) encoder).setIsJavaProperty(true);
                 }
-                
+
                 newText = encoder.encodeWithEncodingCheck(newText);
             }
         }
@@ -773,7 +775,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 else
                 {
                     tmp = EscapingHelper.handleString4Export(tmp, m_escapings,
-                            ExtractorRegistry.FORMAT_PO, false, false);
+                            ExtractorRegistry.FORMAT_PO, false, false, null);
                 }
             }
 
@@ -865,7 +867,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         String srcDataType = m_output.getDiplomatAttribute().getDataType();
         boolean isTuvLocalized = false;
         String localizedBy = new String();
-
+        boolean isInCDATA = false;
         for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
             de = (DocumentElement) it.next();
@@ -949,9 +951,17 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
                     // GBS-3722
                     chunk = MTHelper.cleanMTTagsForExport(chunk);
+                    String escapingChars = null;
 
-                    String newchunk = EscapingHelper.handleString4Export(chunk,
-                            m_escapings, srcDataType, false, true);
+                    if (((TranslatableElement) de).getEscapingChars() != null)
+                    {
+                        escapingChars = EditUtil.decodeXmlEntities(
+                                ((TranslatableElement) de).getEscapingChars());
+                    }
+
+				String newchunk = EscapingHelper.handleString4Export(chunk,
+						m_escapings, srcDataType, false, true, escapingChars,
+						isInCDATA);
 
                     parseDiplomatSnippet(addSpanRtl(newchunk));
                     m_stateStack.pop();
@@ -970,6 +980,14 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             null));
 
                     String tmp = decode(((SkeletonElement) de).getSkeleton());
+                    if (tmp.indexOf("<![CDATA[") > -1 && tmp.indexOf("]]") == -1)
+                    {
+                    	isInCDATA = true;
+                    }
+                    if (isInCDATA && tmp.indexOf("]]") > -1)
+                    {
+                    	isInCDATA = false;
+                    }
                     if (OfficeContentPostFilterHelper
                             .isOfficeFormat(srcDataType))
                     {
@@ -1021,6 +1039,13 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             tmp = StringUtil.replace(tmp,
                                     IdmlHelper.MARK_LineBreak_IDML,
                                     IdmlHelper.LINE_BREAK);
+                        }
+                        // GBS-3955
+                        if (tmp.contains(XmlExtractor.DOCTYPE_HTML))
+                        {
+                            // remove DOCTYPE_HTML during export
+                            tmp = StringUtil.replace(tmp,
+                                    XmlExtractor.DOCTYPE_HTML, "");
                         }
                     }
 

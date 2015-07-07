@@ -25,14 +25,12 @@ public class WorkflowStatePosts extends PersistentObject
     private static Logger c_logger = Logger.getLogger(WorkflowStatePosts.class);
     private static final long serialVersionUID = 8507246584782247051L;
 
-    private long m_wfStatePostId = -1;
-    private String m_name;
     private String m_description;
 
     private String m_listenerURL;
     private String m_secretKey;
-    private String m_timeoutPeriod;
-    private String m_retryNumber;
+    private int m_timeoutPeriod;
+    private int m_retryNumber;
     private String m_notifyEmail;
     private long m_companyId;
 
@@ -41,12 +39,10 @@ public class WorkflowStatePosts extends PersistentObject
 
     }
 
-    public WorkflowStatePosts(long id, String name, String description,
-            String listenerURL, String secretKey, String timeoutPeriod,
-            String retryNumber, String notifyEmail, long companyId)
+    public WorkflowStatePosts(String description,
+            String listenerURL, String secretKey, int timeoutPeriod,
+            int retryNumber, String notifyEmail, long companyId)
     {
-        m_wfStatePostId = id;
-        m_name = name;
         m_description = description;
         m_listenerURL = listenerURL;
         m_secretKey = secretKey;
@@ -86,22 +82,22 @@ public class WorkflowStatePosts extends PersistentObject
         this.m_secretKey = m_secretKey;
     }
 
-    public String getTimeoutPeriod()
+    public int getTimeoutPeriod()
     {
         return m_timeoutPeriod;
     }
 
-    public void setTimeoutPeriod(String m_timeoutPeriod)
+    public void setTimeoutPeriod(int m_timeoutPeriod)
     {
         this.m_timeoutPeriod = m_timeoutPeriod;
     }
 
-    public String getRetryNumber()
+    public int getRetryNumber()
     {
         return m_retryNumber;
     }
 
-    public void setRetryNumber(String m_retryNumber)
+    public void setRetryNumber(int m_retryNumber)
     {
         this.m_retryNumber = m_retryNumber;
     }
@@ -125,20 +121,4 @@ public class WorkflowStatePosts extends PersistentObject
     {
         this.m_companyId = m_companyId;
     }
-
-    public long getWfStatePostId()
-    {
-        return m_wfStatePostId;
-    }
-
-    public String getName()
-    {
-        return m_name;
-    }
-
-    public void setName(String name)
-    {
-        this.m_name = name;
-    }
-
 }

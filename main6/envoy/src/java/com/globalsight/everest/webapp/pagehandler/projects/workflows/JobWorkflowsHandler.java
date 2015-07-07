@@ -18,10 +18,7 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
@@ -43,8 +40,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -65,6 +60,7 @@ import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
 import com.globalsight.cxe.engine.util.XmlUtils;
 import com.globalsight.cxe.entity.exportlocation.ExportLocation;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.comment.CommentManagerLocal;
@@ -86,8 +82,6 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.everest.qachecks.QAChecker;
-import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -101,7 +95,6 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -109,7 +102,6 @@ import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.ScorecardData;
 import com.globalsight.everest.workflow.ScorecardScore;
 import com.globalsight.everest.workflow.ScorecardScoreHelper;
-import com.globalsight.everest.workflow.WorkflowException;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.JobWorkflowDisplay;
@@ -119,14 +111,11 @@ import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Entry;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.modules.Modules;
-import com.globalsight.util.zip.ZipIt;
 import com.globalsight.webservices.client.Ambassador;
 import com.globalsight.webservices.client.WebServiceClientHelper;
 
@@ -164,6 +153,9 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
+		HttpSession httpSession = p_request.getSession(false);
+		SessionManager sessionMgr = (SessionManager) httpSession
+				.getAttribute(SESSION_MANAGER);
         JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
         Job job = jobSummaryHelper.getJobByRequest(p_request);
         String scorecardFlag = "";
@@ -305,10 +297,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         if("scorecard".equals(p_request.getParameter("action")) || 
         		"scorecard".equals(scorecardFlag))
         {
-        	HttpSession httpSession = p_request.getSession();
-        	SessionManager sessionMgr = (SessionManager) httpSession
-            	.getAttribute(SESSION_MANAGER);
-        	
         	List<Select> categoryList = ScorecardScoreHelper.initSelectList(job.getCompanyId(),
         			PageHandler.getBundle(p_request.getSession()));
         	
@@ -415,12 +403,42 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         	sessionMgr.setAttribute("scorecardDataList", scorecardDataList);
         	sessionMgr.setAttribute("tmpScoreMap", tmpScoreMap);
 		}
-		else if ("downloadQAReport".equals(p_request.getParameter("action")))
+		else if ("checkDownloadQAReport".equals(p_request
+				.getParameter("action")))
 		{
+			ServletOutputStream out = p_response.getOutputStream();
 			String[] wfIds = p_request.getParameter("wfId").split(" ");
 			String jobId = p_request.getParameter("jobId");
 			long companyId = job.getCompanyId();
-			exportQAChecksReport(p_request, p_response, companyId, jobId, wfIds);
+			boolean checkQA = checkQAReport(sessionMgr, companyId, jobId, wfIds);
+			String download = "";
+			if (checkQA)
+			{
+				download = "success";
+			}
+			else
+			{
+				download = "fail";
+			}
+			Map<String, Object> returnValue = new HashMap();
+			returnValue.put("download", download);
+			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+			return;
+		}
+		else if ("downloadQAReport".equals(p_request.getParameter("action")))
+		{
+			Set<Long> jobIdSet = (Set<Long>) sessionMgr
+					.getAttribute("jobIdSet");
+			Set<File> exportFilesSet = (Set<File>) sessionMgr
+					.getAttribute("exportFilesSet");
+			Set<String> localesSet = (Set<String>) sessionMgr
+					.getAttribute("localesSet");
+			long companyId = (Long) sessionMgr.getAttribute("companyId");
+			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
+					companyId, jobIdSet, exportFilesSet, localesSet);
+			sessionMgr.removeElement("jobIdSet");
+			sessionMgr.removeElement("exportFilesSet");
+			sessionMgr.removeElement("localesSet");
 			return;
 		}
         // deal with ajax request.End.
@@ -435,7 +453,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         packJobWorkflowInfoView(p_request, job);
         dealWithGSEditionJob(p_request, job);
         packSessionMgrAttr(p_request);
-
+        
         if (Job.CANCELLED.equals(job.getState()))
         {
             jobSummaryHelper.jobNotFound(p_request, p_response, p_context, job);
@@ -447,13 +465,12 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 p_context);
     }
 
-	public void exportQAChecksReport(HttpServletRequest p_request,
-			HttpServletResponse p_response, long companyId, String jobId,
-			String[] wfIds)
+	public boolean checkQAReport(SessionManager sessionMgr, long companyId,
+			String jobId, String[] wfIds)
 	{
 		Company company = CompanyWrapper.getCompanyById(companyId);
-		Set<File> exportListFiles = new HashSet<File>();
-		Set<String> locales = new HashSet<String>();
+		Set<File> exportFilesSet = new HashSet<File>();
+		Set<String> localesSet = new HashSet<String>();
 		Set<Long> jobIdSet = new HashSet<Long>();
 		jobIdSet.add(Long.parseLong(jobId));
 		try
@@ -465,24 +482,30 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 					long wfId = Long.parseLong(wfIdStr);
 					Workflow workflow = WorkflowHandlerHelper
 							.getWorkflowById(wfId);
-					locales.add(workflow.getTargetLocale().getLocaleCode());
+					localesSet.add(workflow.getTargetLocale().getLocaleCode());
 					String filePath = WorkflowHandlerHelper
 							.getExportFilePath(workflow);
 					if (filePath != null)
 					{
-						exportListFiles.add(new File(filePath));
+						exportFilesSet.add(new File(filePath));
 					}
 				}
 			}
 
-			// zipped Folder
-			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
-					companyId, jobIdSet, exportListFiles, locales);
+			if (exportFilesSet != null && exportFilesSet.size() > 0)
+			{
+				sessionMgr.setAttribute("jobIdSet", jobIdSet);
+				sessionMgr.setAttribute("exportFilesSet", exportFilesSet);
+				sessionMgr.setAttribute("localesSet", localesSet);
+				sessionMgr.setAttribute("companyId", companyId);
+				return true;
+			}
 		}
 		catch (Exception e)
 		{
-			CATEGORY.error(e.getMessage(), e);
+			CATEGORY.error(e);
 		}
+		return false;
 	}
 	
 	
@@ -846,6 +869,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         // tell UI if current job has been archived.
         p_request.setAttribute("isJobMigrated", job.isMigrated() ? "true"
                 : "false");
+        p_request.setAttribute("project", job.getProject());
 		try
 		{
 			Company company = ServerProxy.getJobHandler().getCompanyById(

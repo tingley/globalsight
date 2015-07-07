@@ -99,11 +99,15 @@
          <PageLink linkName="self" destinationPageName="WR1"></PageLink>
          <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
          <PageLink linkName="exporting" destinationPageName="WER1"></PageLink>
+         <PageLink linkName="loginBlock" destinationPageName="LB1"></PageLink>
+         <PageLink linkName="offline" destinationPageName="WOUR1"></PageLink>
       </WebPage>
       <WebPage pageName="IR1" isDefault="false" jspName="/envoy/administration/systemActivities/jobCreationStatus/importingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobCreationState.ImportingRequestHandler">
          <PageLink linkName="waiting" destinationPageName="WR1"></PageLink>
          <PageLink linkName="self" destinationPageName="IR1"></PageLink>
          <PageLink linkName="exporting" destinationPageName="WER1"></PageLink>
+         <PageLink linkName="loginBlock" destinationPageName="LB1"></PageLink>
+          <PageLink linkName="offline" destinationPageName="WOUR1"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>
@@ -112,26 +116,44 @@
       <WebPage pageName="WER1" isDefault="true" jspName="/envoy/administration/systemActivities/jobExportStatus/waitingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.WaitingRequestHandler">
          <PageLink linkName="self" destinationPageName="WER1"></PageLink>
          <PageLink linkName="exporting" destinationPageName="IER1"></PageLink>
-         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="WR1"></PageLink>
+         <PageLink linkName="loginBlock" destinationPageName="LB1"></PageLink>
+         <PageLink linkName="offline" destinationPageName="WOUR1"></PageLink>
       </WebPage>
-      <WebPage pageName="IER1" isDefault="false" jspName="/envoy/administration/systemActivities/jobExportStatus/runningRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.runningRequestHandler">
+      <WebPage pageName="IER1" isDefault="false" jspName="/envoy/administration/systemActivities/jobExportStatus/runningRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.RunningRequestHandler">
          <PageLink linkName="waiting" destinationPageName="WER1"></PageLink>
          <PageLink linkName="self" destinationPageName="IER1"></PageLink>
-         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="WR1"></PageLink>
+         <PageLink linkName="loginBlock" destinationPageName="LB1"></PageLink>
+          <PageLink linkName="offline" destinationPageName="WOUR1"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>
   <WebModule webModuleName="offlineUploadStatus">
     <WebActivity webActivityName="offlineUploadStatus">
-      <WebPage pageName="WER1" isDefault="true" jspName="/envoy/administration/systemActivities/jobExportStatus/waitingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.WaitingRequestHandler">
-         <PageLink linkName="self" destinationPageName="WER1"></PageLink>
-         <PageLink linkName="exporting" destinationPageName="IER1"></PageLink>
-         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+      <WebPage pageName="WOUR1" isDefault="true" jspName="/envoy/administration/systemActivities/offlineUploadState/waitingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.offlineUploadState.WaitingRequestHandler">
+         <PageLink linkName="self" destinationPageName="WOUR1"></PageLink>
+         <PageLink linkName="exporting" destinationPageName="WER1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="WR1"></PageLink>
+         <PageLink linkName="loginBlock" destinationPageName="LB1"></PageLink>
+         <PageLink linkName="running" destinationPageName="IOU1"></PageLink>
       </WebPage>
-      <WebPage pageName="IER1" isDefault="false" jspName="/envoy/administration/systemActivities/jobExportStatus/exportingRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.RunningRequestHandler">
-         <PageLink linkName="waiting" destinationPageName="WER1"></PageLink>
-         <PageLink linkName="self" destinationPageName="IER1"></PageLink>
-         <PageLink linkName="importing" destinationPageName="IR1"></PageLink>
+      <WebPage pageName="IOU1" isDefault="false" jspName="/envoy/administration/systemActivities/offlineUploadState/runningRequest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.offlineUploadState.RunningRequestHandler">
+         <PageLink linkName="waiting" destinationPageName="WOUR1"></PageLink>
+         <PageLink linkName="self" destinationPageName="IOU1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="WR1"></PageLink>
+         <PageLink linkName="loginBlock" destinationPageName="LB1"></PageLink>
+         <PageLink linkName="exporting" destinationPageName="WER1"></PageLink>
+      </WebPage>
+    </WebActivity>
+  </WebModule>
+    <WebModule webModuleName="loginBlockConfig">
+    <WebActivity webActivityName="loginBlockConfig">
+      <WebPage pageName="LB1" isDefault="true" jspName="/envoy/administration/systemActivities/loginBlockConfig/loginBlockConfig.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.loginBlockConfig.LoginBlockConfigHandler">
+         <PageLink linkName="self" destinationPageName="LB1"></PageLink>
+         <PageLink linkName="exporting" destinationPageName="WER1"></PageLink>
+         <PageLink linkName="importing" destinationPageName="WR1"></PageLink>
+          <PageLink linkName="offline" destinationPageName="WOUR1"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>

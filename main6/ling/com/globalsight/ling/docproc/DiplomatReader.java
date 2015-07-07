@@ -654,6 +654,7 @@ public class DiplomatReader
         String type = null;
         int wordcount = 0;
         String isLocalized = null;
+        String escapintChars = null;
 
         for (int i = 0, max = p_attributes.getLength(); i < max; i++)
         {
@@ -679,6 +680,10 @@ public class DiplomatReader
             {
                 isLocalized = p_attributes.getValue(i);
             }
+            else if (name.equalsIgnoreCase(DiplomatNames.Attribute.ESCAPINGCHARS))
+            {
+                escapintChars = p_attributes.getValue(i);
+            }
         }
 
         try
@@ -692,6 +697,13 @@ public class DiplomatReader
                     (TranslatableElement)m_output.getCurrentElement();
 
                 elem.setWordcount(wordcount);
+            }
+            
+            if (escapintChars != null)
+            {
+                TranslatableElement elem =
+                        (TranslatableElement)m_output.getCurrentElement();
+                elem.setEscapingChars(escapintChars);
             }
         }
         catch (DocumentElementException e)

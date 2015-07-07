@@ -1286,11 +1286,9 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 targetEvents = new MultiUserEventProducer(tm, sourceTuvEvent);
             }
 
-            // pTargetLocales is just the set of all locales for which there is
-            // a
-            // target segment. We can pull that directly from the segments
-            // themselves, so it's ignored.
-
+			// pTargetLocales is just the set of all locales for which there is
+			// a target segment. We can pull that directly from the segments
+			// themselves, so it's ignored.
             TM3Attribute translatableAttr = TM3Util.getAttr(tm, TRANSLATABLE);
             TM3Attribute typeAttr = TM3Util.getAttr(tm, TYPE);
             TM3Attribute formatAttr = TM3Util.getAttr(tm, FORMAT);
@@ -1304,137 +1302,147 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             Map<String, String> attValues = TMAttributeManager
                     .getTUAttributesForPopulator(projectTM, m_job);
 
-            TM3Saver<GSTuvData> saver = tm.createSaver();
+            List<ArrayList<BaseTmTu>> batches = new ArrayList<ArrayList<BaseTmTu>>();
+            ArrayList<BaseTmTu> batch = new ArrayList<BaseTmTu>();
             for (BaseTmTu base : usr.getAllTus())
             {
-                SegmentTmTu srcTu = (SegmentTmTu) base;
-
-                // NB SegmentTmTu's idea of source tuv is the first tuv with
-                // the source locale
-                BaseTmTuv srcTuv = srcTu.getSourceTuv();
-                TM3Saver<GSTuvData>.Tu tuToSave = saver.tu(
-                        new GSTuvData(srcTuv), pSourceLocale,
-                        sourceEvents.getEventForTuv(srcTuv),
-                        srcTuv.getCreationUser(), srcTuv.getCreationDate(),
-                        srcTuv.getModifyUser(), srcTuv.getModifyDate());
-                for (BaseTmTuv tuv : srcTu.getTuvs())
-                {
-                    if (tuv.equals(srcTuv))
-                    {
-                        continue;
-                    }
-                    tuToSave.target(new GSTuvData(tuv), tuv.getLocale(),
-                            targetEvents.getEventForTuv(tuv),
-                            decideTargetTuvCreationUser(srcTuv, tuv, pFromTmImport),
-                            tuv.getCreationDate(), tuv.getModifyUser(),
-                            tuv.getModifyDate());
-                }
-
-                // handle TU properties
-                Collection<ProjectTmTuTProp> props = srcTu.getProps();
-                if (props != null)
-                {
-                    for (ProjectTmTuTProp prop : props)
-                    {
-                        String vv = prop.getPropValue();
-
-                        if (vv == null)
-                        {
-                            continue;
-                        }
-
-                        String name = TM3Util.getNameForTM3(prop);
-                        TM3Attribute tm3a = null;
-
-                        if (tm.doesAttributeExist(name))
-                        {
-                            tm3a = tm.getAttributeByName(name);
-                        }
-                        else
-                        {
-                            tm3a = TM3Util.toTM3Attribute(prop);
-                            tm3a = TM3Util.saveTM3Attribute(tm3a, (BaseTm) tm);
-                        }
-
-                        tuToSave.attr(tm3a, vv);
-                    }
-                }
-
-                if (attValues != null)
-                {
-                    for (Map.Entry<String, String> attV : attValues.entrySet())
-                    {
-                        String vv = attV.getValue();
-
-                        if (vv == null)
-                        {
-                            continue;
-                        }
-
-                        String name = attV.getKey();
-                        TM3Attribute tm3a = null;
-
-                        if (tm.doesAttributeExist(name))
-                        {
-                            tm3a = tm.getAttributeByName(name);
-                        }
-                        else
-                        {
-                            tm3a = new TM3Attribute(name,
-                                    new TM3AttributeValueType.CustomType(),
-                                    null, false);
-                            tm3a = TM3Util.saveTM3Attribute(tm3a, (BaseTm) tm);
-                        }
-
-                        tuToSave.attr(tm3a, vv);
-                    }
-                }
-
-                tuToSave.attr(translatableAttr, srcTu.isTranslatable());
-                tuToSave.attr(fromWsAttr, srcTu.isFromWorldServer());
-                if (srcTu.getType() != null)
-                {
-                    tuToSave.attr(typeAttr, srcTu.getType());
-                }
-                if (srcTu.getFormat() != null)
-                {
-                    tuToSave.attr(formatAttr, srcTu.getFormat());
-                }
-                if (srcTuv.getSid() != null)
-                {
-                    tuToSave.attr(sidAttr, srcTuv.getSid());
-                }
-                else if (srcTu.getSID() != null)
-                {
-                    tuToSave.attr(sidAttr, srcTu.getSID());
-                }
-
-                if (srcTuv.getUpdatedProject() != null)
-                {
-                    tuToSave.attr(projectAttr, srcTuv.getUpdatedProject());
-                }
-                // if (savedTus.size() > 0)
-                // {
-                // TM3Tu<GSTuvData> saved = savedTus.get(0);
-                // for (BaseTmTuv stuv : usr.getIdenticalSegment(srcTuv))
-                // {
-                // // Note that this uses the PROJECT TM ID, not the tm3 tm
-                // // id.
-                // holder.addMapping(pSourceLocale, stuv.getId(), stuv
-                // .getTu().getId(), pTm.getId(), saved.getId(),
-                // saved.getSourceTuv().getId());
-                // }
-                // newTus.add(saved);
-                // }
+            	batch.add(base);
+            	if (batch.size() == 500)
+            	{
+            		batches.add(batch);
+            		batch = new ArrayList<BaseTmTu>();
+            	}
+            }
+            if (batch.size() > 0)
+            {
+            	batches.add(batch);
             }
 
-            boolean indexTarget = (projectTM == null ? false : projectTM
-                    .isIndexTarget());
-            List<TM3Tu<GSTuvData>> savedTus = saver
-                    .save(convertSaveMode(pMode), indexTarget);
+            List<TM3Tu<GSTuvData>> savedTus = new ArrayList<TM3Tu<GSTuvData>>();
+			boolean indexTarget = (projectTM == null ? false : projectTM
+					.isIndexTarget());
+            for (ArrayList<BaseTmTu> bat : batches)
+            {
+                TM3Saver<GSTuvData> saver = tm.createSaver();
+                for (BaseTmTu base : bat)
+                {
+                    SegmentTmTu srcTu = (SegmentTmTu) base;
+
+                    // NB SegmentTmTu's idea of source tuv is the first tuv with
+                    // the source locale
+                    BaseTmTuv srcTuv = srcTu.getSourceTuv();
+                    TM3Saver<GSTuvData>.Tu tuToSave = saver.tu(
+                            new GSTuvData(srcTuv), pSourceLocale,
+                            sourceEvents.getEventForTuv(srcTuv),
+                            srcTuv.getCreationUser(), srcTuv.getCreationDate(),
+                            srcTuv.getModifyUser(), srcTuv.getModifyDate());
+                    for (BaseTmTuv tuv : srcTu.getTuvs())
+                    {
+                        if (tuv.equals(srcTuv))
+                        {
+                            continue;
+                        }
+                        tuToSave.target(new GSTuvData(tuv), tuv.getLocale(),
+                                targetEvents.getEventForTuv(tuv),
+                                decideTargetTuvCreationUser(srcTuv, tuv, pFromTmImport),
+                                tuv.getCreationDate(), tuv.getModifyUser(),
+                                tuv.getModifyDate());
+                    }
+
+                    // handle TU properties
+                    Collection<ProjectTmTuTProp> props = srcTu.getProps();
+                    if (props != null)
+                    {
+                        for (ProjectTmTuTProp prop : props)
+                        {
+                            String vv = prop.getPropValue();
+
+                            if (vv == null)
+                            {
+                                continue;
+                            }
+
+                            String name = TM3Util.getNameForTM3(prop);
+                            TM3Attribute tm3a = null;
+
+                            if (tm.doesAttributeExist(name))
+                            {
+                                tm3a = tm.getAttributeByName(name);
+                            }
+                            else
+                            {
+                                tm3a = TM3Util.toTM3Attribute(prop);
+                                tm3a = TM3Util.saveTM3Attribute(tm3a, (BaseTm) tm);
+                            }
+
+                            tuToSave.attr(tm3a, vv);
+                        }
+                    }
+
+                    if (attValues != null)
+                    {
+                        for (Map.Entry<String, String> attV : attValues.entrySet())
+                        {
+                            String vv = attV.getValue();
+
+                            if (vv == null)
+                            {
+                                continue;
+                            }
+
+                            String name = attV.getKey();
+                            TM3Attribute tm3a = null;
+
+                            if (tm.doesAttributeExist(name))
+                            {
+                                tm3a = tm.getAttributeByName(name);
+                            }
+                            else
+                            {
+                                tm3a = new TM3Attribute(name,
+                                        new TM3AttributeValueType.CustomType(),
+                                        null, false);
+                                tm3a = TM3Util.saveTM3Attribute(tm3a, (BaseTm) tm);
+                            }
+
+                            tuToSave.attr(tm3a, vv);
+                        }
+                    }
+
+                    tuToSave.attr(translatableAttr, srcTu.isTranslatable());
+                    tuToSave.attr(fromWsAttr, srcTu.isFromWorldServer());
+                    if (srcTu.getType() != null)
+                    {
+                        tuToSave.attr(typeAttr, srcTu.getType());
+                    }
+                    if (srcTu.getFormat() != null)
+                    {
+                        tuToSave.attr(formatAttr, srcTu.getFormat());
+                    }
+                    if (srcTuv.getSid() != null)
+                    {
+                        tuToSave.attr(sidAttr, srcTuv.getSid());
+                    }
+                    else if (srcTu.getSID() != null)
+                    {
+                        tuToSave.attr(sidAttr, srcTu.getSID());
+                    }
+
+                    if (srcTuv.getUpdatedProject() != null)
+                    {
+                        tuToSave.attr(projectAttr, srcTuv.getUpdatedProject());
+                    }
+                }
+
+				savedTus.addAll(saver.save(convertSaveMode(pMode), indexTarget));
+                synchronized (this)
+                {
+                    connection.commit();
+                }
+            }
 
             // build the Lucene index.
-            // XXX if tm.save overwrote some old data, we should re-index it
+            // XXX if tm.save overwrite some old data, we should re-index it
             luceneIndexTus(pTm.getId(), savedTus, indexTarget);
             if (tusRemove.size() != 0)
             {
@@ -1442,11 +1450,8 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 tusRemove.clear();
             }
 
-            synchronized (this)
-            {
-                connection.commit();
-            }
-
+            batches = null;
+            savedTus = null;
             return holder;
         }
         catch (Exception e)

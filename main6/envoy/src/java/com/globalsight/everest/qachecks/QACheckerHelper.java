@@ -17,6 +17,8 @@
 package com.globalsight.everest.qachecks;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,7 +119,9 @@ public class QACheckerHelper
     public static String getQAReportName(Task p_task)
     {
         StringBuilder sb = new StringBuilder();
-
+        String dateSuffix = new SimpleDateFormat("yyyyMMdd HHmmss")
+		.format(new Date());
+        
         sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
         sb.append("_");
         sb.append(p_task.getJobName());
@@ -125,7 +129,7 @@ public class QACheckerHelper
         sb.append(p_task.getTaskDisplayName());
         sb.append("-");
         sb.append(p_task.getTargetLocale().toString());
-
+        sb.append("-").append(dateSuffix);
         sb.append(ReportConstants.EXTENSION_XLSX);
 
         return sb.toString();

@@ -98,7 +98,7 @@ public class JobAttributeMainHandler extends PageActionHandler
                 jobAtt = HibernateUtil.get(JobAttribute.class, jobAttId);
             }
 
-            String[] selectOptions = request.getParameterValues("selectOption");
+            String[] selectOptions = request.getParameter("selectOption").split(",");
             List<String> optionIds = new ArrayList<String>();
 
             for (String option : selectOptions)

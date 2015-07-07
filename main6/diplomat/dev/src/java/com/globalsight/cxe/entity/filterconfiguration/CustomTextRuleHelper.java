@@ -325,7 +325,7 @@ public class CustomTextRuleHelper
                                 if (find == number)
                                 {
                                     extractIndexFinish = m.start();
-                                    finishMatch = true;
+                                    finishMatch =  (extractIndexFinish > extractIndexStart);
                                     break;
                                 }
                             }
@@ -364,7 +364,7 @@ public class CustomTextRuleHelper
                                 if (find == number)
                                 {
                                     extractIndexFinish = i0;
-                                    finishMatch = true;
+                                    finishMatch =  (extractIndexFinish > extractIndexStart);
                                     break;
                                 }
 
@@ -507,7 +507,7 @@ public class CustomTextRuleHelper
 
                 if (startMatch)
                 {
-                    int startIndex = extractIndexStart;
+                    int startIndex = extractIndexStart - processedChars;
 
                     // there is no more string after start string
                     if (startIndex >= line.length())
@@ -562,7 +562,7 @@ public class CustomTextRuleHelper
                                     if (find == number)
                                     {
                                         extractIndexFinish = processedChars + m.start();
-                                        finishMatch = true;
+                                        finishMatch =  (extractIndexFinish > extractIndexStart);
                                         break;
                                     }
                                 }
@@ -601,7 +601,7 @@ public class CustomTextRuleHelper
                                     if (find == number)
                                     {
                                         extractIndexFinish = processedChars + i0;
-                                        finishMatch = true;
+                                        finishMatch =  (extractIndexFinish > extractIndexStart);
                                         break;
                                     }
 
@@ -622,6 +622,52 @@ public class CustomTextRuleHelper
             if (startMatch && finishMatch)
             {
                 LineIndex lineIndex = null;
+                
+                // extract sid from first line
+                int pcharCount = processedChars;
+                int sidStart = -1;
+                int sidEnd = -1;
+                int jj = j;
+                if (p_customSidRules != null && p_customSidRules.size() > 0)
+                {
+                    // find the first line, which is not empty
+                    String l0 = lineString.getLine();
+                    if (l0.trim().length() == 0 && isMultiline)
+                    {
+                        if (jj < lines.size())
+                        {
+                            jj = jj + 1;
+                            LineString temp = lines.get(jj);
+                            l0 = temp.getLine();
+
+                            while (l0.trim().length() == 0 && jj < lines.size())
+                            {
+                                jj = jj + 1;
+                                temp = lines.get(jj);
+                                l0 = temp.getLine();
+                            }
+                        }
+                    }
+                    
+                    int[] sidIndex = extractOneLine(l0,
+                            p_customSidRules);
+
+                    if (sidIndex != null && sidIndex.length == 2)
+                    {
+                        for(int jjj = j; jjj < jj; jjj++)
+                        {
+                            LineString temp = lines.get(jjj);
+                            pcharCount = temp.getLine().length() + pcharCount;
+                            
+                            //\n
+                            pcharCount = pcharCount + 1;
+                        }
+                        
+                        sidStart = pcharCount + sidIndex[0];
+                        sidEnd = pcharCount + sidIndex[1];
+                    }
+                }
+                
                 if (isMultiline)
                 {
                     lineIndex = new LineIndex(extractIndexStart,
@@ -666,15 +712,9 @@ public class CustomTextRuleHelper
                             + lineString.getLine().length() + 1;
                     j = j + 1;
                 }
-
-                // extract sid from first line
-                int[] sidIndex = extractOneLine(lineString.getLine(),
-                        p_customSidRules);
-                if (sidIndex != null && sidIndex.length == 2)
-                {
-                    lineIndex.setSidStart(processedChars + sidIndex[0]);
-                    lineIndex.setSidEnd(processedChars + sidIndex[1]);
-                }
+                
+                lineIndex.setSidStart(sidStart);
+                lineIndex.setSidEnd(sidEnd);
                 
                 result.add(lineIndex);
             }

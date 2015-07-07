@@ -82,12 +82,12 @@ public class RequestFileComparator extends StringComparator
             break;
         case FILE_NAME:
             aValue = a.getFile();
-            bValue = a.getFile();
+            bValue = b.getFile();
             rv = this.compareStrings(aValue, bValue);
             break;
         case FILE_SIZE:
             aValue = a.getSize();
-            bValue = a.getSize();
+            bValue = b.getSize();
             rv = this.compareStrings(aValue, bValue);
             break;
         case FILE_PROFILE:

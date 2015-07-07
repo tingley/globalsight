@@ -261,6 +261,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_XML_DTD = "delete from XML_DTD where COMPANY_ID=?";
     private static final String SQL_DELETE_XML_RULE = "delete from XML_RULE where COMPANY_ID=?";
     private static final String SQL_DELETE_XML_RULE_FILTER = "delete from XML_RULE_FILTER where COMPANY_ID=?";
+    private static final String SQL_DELETE_WORKFLOW_STATE_POST_BY_COMPANY_ID = "delete from WORKFLOW_STATE_POSTS where COMPANY_ID=?";
     // sql for query
     private static final String SQL_QUERY_ID = "select ID from ";
 //    private static final String SQL_QUERY_TABLE = "show tables like ?";
@@ -941,6 +942,8 @@ public class CompanyRemoval
             romovePostReviewCategory(conn);
             // remove workflows
             removeWorkflow(conn, null);
+            //remove workflow state post profile
+            removeWfStatePostProfile(conn);
             // remove jobs
             removeJob(conn, null);
             // remove activities
@@ -3944,6 +3947,14 @@ public class CompanyRemoval
         logEnd("WORKFLOW");
     }
 
+    private void removeWfStatePostProfile(Connection conn) throws SQLException
+    {
+        logStart("WORKFLOW_STATE_POSTS");
+        long companyId = company.getId();
+        execOnce(conn, SQL_DELETE_WORKFLOW_STATE_POST_BY_COMPANY_ID, companyId);
+        logEnd("WORKFLOW_STATE_POSTS");
+    }
+    
     private void removeWorkflowTemplate(Connection conn) throws SQLException
     {
         long companyId = company.getId();

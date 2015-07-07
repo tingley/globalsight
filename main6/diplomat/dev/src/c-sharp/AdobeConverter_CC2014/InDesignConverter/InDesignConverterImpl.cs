@@ -39,6 +39,7 @@ namespace GlobalSight.InDesignConverter
         public const string PEVIEW_FILE_EXT = "*.pv_command";
         public const string IDML_PEVIEW_FILE_EXT = "*.ip_command";
         public const string INCTXRV_FILE_EXT = "*.ir_command";
+        public const string TEST_FILE_EXT = "*.test";
 
         //10 chars after . for both 
         //import(*.im_command), 
@@ -46,7 +47,7 @@ namespace GlobalSight.InDesignConverter
         //preview(*.pv_command)
         //in context review(*.ir_command)
         private const int FILE_EXT_LEN = 10;
-        public enum ConversionType { IMPORT, EXPORT, PREVIEW, IDML_PREVIEW, INCTXRV };
+        public enum ConversionType { IMPORT, EXPORT, PREVIEW, IDML_PREVIEW, INCTXRV, TEST };
 
 
         private string m_originalFileName = null;
@@ -89,6 +90,10 @@ namespace GlobalSight.InDesignConverter
             {
                 m_fileExtensionSearchPattern = INCTXRV_FILE_EXT;
             }
+            else if (m_conversionType == ConversionType.TEST)
+            {
+                m_fileExtensionSearchPattern = TEST_FILE_EXT;
+            }
 			else
             {
 				m_fileExtensionSearchPattern = IMPORT_FILE_EXT;
@@ -104,75 +109,83 @@ namespace GlobalSight.InDesignConverter
         /// the file was written in</param>
         public void Convert(string p_fileName, string p_language)
         {
-            lock (locker)
+            try
             {
-                try
+                if (m_conversionType == ConversionType.TEST)
                 {
-                    ResetState();
-                    m_statusFileName = p_fileName.Substring(
-                        0, p_fileName.Length - FILE_EXT_LEN) + "status";
-                    DetermineConversionValues(p_fileName);
+                    // do nothing, just delete the *.test file
+                }
+                else
+                {
+                    lock (locker)
+                    {
+                        ResetState();
 
-                    m_log.Log("[Indesign]: The converter will process file: " + m_originalFileName);
-                    m_log.Log("m_masterTranslated: " + m_masterTranslated);
-                    m_log.Log("m_translateHiddenLayer: " + m_translateHiddenLayer);
+                        m_statusFileName = p_fileName.Substring(
+                            0, p_fileName.Length - FILE_EXT_LEN) + "status";
+                        DetermineConversionValues(p_fileName);
 
-                    InDesignApplication indesignApp = InDesignApplication.getInstance();
-                    if (m_conversionType == ConversionType.EXPORT)
-                    {
-                        indesignApp.ConvertXmlToIndd(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
-                    }
-                    else if (m_conversionType == ConversionType.PREVIEW)
-                    {
-                        //The status name will be changed to *.pv_status from *.status
-                        //when execute the preview command(*.pv_command) file
-                        m_statusFileName = m_statusFileName.Substring(0,
-                                    m_statusFileName.LastIndexOf(".")) + ".pv_status";
-                        indesignApp.ConvertInddToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
-                    }
-                    else if (m_conversionType == ConversionType.IDML_PREVIEW)
-                    {
-                        //The status name will be changed to *.pv_status from *.status
-                        //when execute the preview command(*.pv_command) file
-                        m_statusFileName = m_statusFileName.Substring(0,
-                                    m_statusFileName.LastIndexOf(".")) + ".ip_status";
-                        indesignApp.ConvertIdmlToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
-                    }
-                    else if (m_conversionType == ConversionType.INCTXRV)
-                    {
-                        //The status name will be changed to *.pv_status from *.status
-                        //when execute the preview command(*.pv_command) file
-                        m_statusFileName = m_statusFileName.Substring(0,
-                                    m_statusFileName.LastIndexOf(".")) + ".ir_status";
-                        indesignApp.ConvertXmlToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
-                    }
-                    else
-                    {
-                        try
+                        m_log.Log("[Indesign]: The converter will process file: " + m_originalFileName);
+                        m_log.Log("m_masterTranslated: " + m_masterTranslated);
+                        m_log.Log("m_translateHiddenLayer: " + m_translateHiddenLayer);
+
+                        InDesignApplication indesignApp = InDesignApplication.getInstance();
+                        if (m_conversionType == ConversionType.EXPORT)
                         {
-                            indesignApp.ConvertInddToXml(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                            indesignApp.ConvertXmlToIndd(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
                         }
-                        catch (Exception iee)
+                        else if (m_conversionType == ConversionType.PREVIEW)
                         {
-                            m_log.Log("Exception occurred, retry conversion for file : " + m_originalFileName);
-                            indesignApp.ConvertInddToXml(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                            //The status name will be changed to *.pv_status from *.status
+                            //when execute the preview command(*.pv_command) file
+                            m_statusFileName = m_statusFileName.Substring(0,
+                                        m_statusFileName.LastIndexOf(".")) + ".pv_status";
+                            indesignApp.ConvertInddToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
                         }
+                        else if (m_conversionType == ConversionType.IDML_PREVIEW)
+                        {
+                            //The status name will be changed to *.pv_status from *.status
+                            //when execute the preview command(*.pv_command) file
+                            m_statusFileName = m_statusFileName.Substring(0,
+                                        m_statusFileName.LastIndexOf(".")) + ".ip_status";
+                            indesignApp.ConvertIdmlToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                        }
+                        else if (m_conversionType == ConversionType.INCTXRV)
+                        {
+                            //The status name will be changed to *.pv_status from *.status
+                            //when execute the preview command(*.pv_command) file
+                            m_statusFileName = m_statusFileName.Substring(0,
+                                        m_statusFileName.LastIndexOf(".")) + ".ir_status";
+                            indesignApp.ConvertXmlToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                indesignApp.ConvertInddToXml(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                            }
+                            catch (Exception iee)
+                            {
+                                m_log.Log("Exception occurred, retry conversion for file : " + m_originalFileName);
+                                indesignApp.ConvertInddToXml(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                            }
+                        }
+
+                        StatusFile.WriteSuccessStatus(m_statusFileName,
+                            m_originalFileName + " was converted successfully.");
+
+                        m_log.Log("[Indesign]: Converted successfully to: " + m_newFileName);
                     }
-
-                    StatusFile.WriteSuccessStatus(m_statusFileName,
-                        m_originalFileName + " was converted successfully.");
-
-                    m_log.Log("[Indesign]: Converted successfully to: " + m_newFileName);
                 }
-                catch (Exception e)
-                {
-                    Logger.LogError("[Indesign]: InDesign Conversion Failed", e);
-                    StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
-                }
-                finally
-                {
-                    DeleteInputFile(p_fileName);
-                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("[Indesign]: InDesign Conversion Failed", e);
+                StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
+            }
+            finally
+            {
+                DeleteInputFile(p_fileName);
             }
         }
 

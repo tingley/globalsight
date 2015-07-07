@@ -136,416 +136,6 @@
     var guideNode = "myJobs";
     var objectName = "";
     var helpFile = "<%=bundle.getString("help_job_attribute_screen")%>";
-
-    function showUploadfileDialog(attributeId)
-   {
-	   var jobAttributeId = document.getElementById("jobAtt" + attributeId).value
-	   var jsonOjb = {
-		  attributeId : attributeId,
-		  jobAttributeId : jobAttributeId
-	   }
-	   
-	   $.ajax({
-   		   type: "POST",
-   		   dataType : "text",
-   		   url: "<%=getFilesUrl%>",
-   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId,
-   		   success: function(data){
-   		      var returnData = eval(data);
-	   		  if (returnData.error)
-	          {
-	      	    alert(returnData.error);
-	          }
-	          else
-	          {
-	        	  initFileDialog(attributeId, jobAttributeId, returnData);
-	        	  $("#uploadFormDiv").dialog({width: 700, height: 460, resizable:false});
-	          }
-   		   },
-	   	   error:function(error)
-	       {
-             alert(error.message);
-           }
-   		});
-	   
-   }
-   
-   function initFileDialog(attributeId, jobAttributeId, data)
-   {
-	   document.getElementById("attributeId").value = attributeId;
-	   document.getElementById("jobAttributeId").value = jobAttributeId;
-       updateFiles(data.files);
-   }
-   
-   function updateFiles(files)
-   {
-	   var selectBox = document.getElementById("allFiles");
-	   var options =  selectBox.options;
-	   for (var i = options.length-1; i>=0; i--)
-	   {
-	       selectBox.remove(i);
-	   }
-
-	   for (var i = 0; i < files.length; i++)
-	   {
-		   addFile(files[i]);
-	   }
-
-	   setOptionColor();
-	}
-
-   function update(files)
-   {
-	   var selectBox = dojo.byId("allFiles");
-	   var options =  selectBox.options;
-	   for (var i = options.length-1; i>=0; i--)
-	   {
-	       selectBox.remove(i);
-	   }
-
-	   for (var i = 0; i < files.length; i++)
-	   {
-		   addFile(files[i]);
-	   }
-
-	   setOptionColor();
-	}
-   
-   function addFile(file)
-   {
-       var option = document.createElement("option");
-       option.appendChild(document.createTextNode(file));
-       option.setAttribute("value", file);
-       document.getElementById("allFiles").appendChild(option);
-   }
-   
-   function setOptionColor()
-   {
-   	   var options = document.getElementById("allFiles").options;
-       var flag = true;
-       for (var i = 0; i<options.length; i++)
-       {
-   		if (flag)
-   		{
-   		    options[i].className="row1";
-   			flag = false;
-   		}
-           else
-   		{
-   			options[i].className="row2";
-   			flag = true;
-   		}
-       }
-   }
-   
-   
-   function uploadFileMethod() 
-   {
-		$("#uploadForm").submit();
-		setTimeout("getAllFiles()", 500);
-  }
-   
-   function getAllFiles()
-   {
-	   var attributeId = document.getElementById("attributeId").value;
-	   var jobAttributeId = document.getElementById("jobAttributeId").value;
-	   var jsonOjb = {
-				  attributeId : attributeId,
-				  jobAttributeId : jobAttributeId
-			   }
-	   $.ajax({
-   		   type: "POST",
-   		   dataType : "text",
-   		   url: "<%=getFilesUrl%>",
-   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId,
-   		   success: function(data){
-   			  var id = document.getElementById("attributeId").value;
-   		      var returnData = eval(data);
-	   		  if (returnData.error)
-	          {
-	      	    alert(returnData.error);
-	          }
-	          else
-	          {
-	        	  document.getElementById("jobAttributeId").value = returnData.jobAttributeId;
-   	        	  document.getElementById("jobAtt" + id).value = returnData.jobAttributeId;
-   	        	  document.getElementById("file" + id).innerHTML = returnData.label;
-               	  updateFiles(returnData.files);
-	          }
-   		   },
-	   	   error:function(error)
-	       {
-             alert(error.message);
-           }
-   		});
-   }
-   
-   function deleteSelectFiles()
-   {
-	   var selectFiles = new Array();
-	   var selectBox = document.getElementById("allFiles");
-	   var options = selectBox.options;
-	   for (var i = options.length-1; i>=0; i--)
-	   {
-		   if (options[i].selected)
-		   {
-			   selectFiles.push(options[i].value);
-		   }
-	   }
-
-	   if (selectFiles.length < 1)
-	   {
-		   return;
-	   }
-	   var attId = document.getElementById("attributeId").value;
-	   var jobAttributeId = document.getElementById("jobAttributeId").value;
-	   
-	   var jsonOjb = {
-		  attributeId : attId,
-		  jobAttributeId : jobAttributeId,
-		  deleteFiles : selectFiles
-	   }
-	   
-	   if (selectFiles.length == 0)
-	   {
-		   return;
-	   }
-	
-	   $.ajax({
-   		   type: "POST",
-   		   dataType : "text",
-   		   url: "<%=deleteFilesUrl%>",
-   		   traditional: true,
-   		   data: jsonOjb,
-   		   success: function(data){
-   		      var returnData = eval(data);
-	   		  if (returnData.error)
-	          {
-	      	    alert(returnData.error);
-	          }
-	          else
-	          {
-	        	  updateFiles(returnData.files);
-	        	  document.getElementById("file" + attId).innerHTML = returnData.label;
-	          }
-   		   },
-	   	   error:function(error)
-	       {
-             alert(error.message);
-           }
-   		});
-   }
-
-   function downloadSelectFiles()
-   {
-	   var selectFiles = new Array();
-	   var selectBox = document.getElementById("allFiles");
-	   var options = selectBox.options;
-	   for (var i = options.length-1; i>=0; i--)
-	   {
-		   if (options[i].selected)
-		   {
-			   selectFiles.push(options[i].value);
-		   }
-	   }
-
-	   if (selectFiles.length == 0)
-	   {
-		   return;
-	   }
-
-	   var downloadFiles = document.getElementById("downloadFiles");
-	   document.getElementById("jobAttributeId2").value = document.getElementById("jobAttributeId").value;
-
-	   downloadFiles.innerHTML = "";
-	   
-	   for (var i = options.length-1; i>=0; i--)
-	   {
-		   if (options[i].selected)
-		   {
-			   var fileBox = document.createElement("input");
-			   fileBox.type = "checkbox";
-			   fileBox.name = "selectFiles";
-			   fileBox.value = options[i].value;
-			   downloadFiles.appendChild(fileBox);
-			   fileBox.checked = true;
-		   }
-	   }
-
-	   downLoadForm.submit();
-   }
-
-   function showCalendar1(inputId) {
-       var cal1 = new calendar2(document.getElementById(inputId), "openDropDown()");
-       cal1.year_scroll = true;
-       cal1.time_comp = true;
-       cal1.popup();
-   }
-   
-   function editTextValue(textAttributeId)
-   {
-	  var attributeId = document.getElementById("attributeId"+textAttributeId).value;
-   	  var jobAttributeId = document.getElementById("jobAtt"+textAttributeId).value;
-   	  var textValue = document.getElementById("updateTextValue").value;
-   	   
-   	  $.ajax({
-   		   type: "POST",
-   		   dataType : "text",
-   		   url: "<%=editTextUrl%>",
-   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&textValue="+textValue,
-   		   success: function(data){
-   		      var returnData = eval(data);
-	   		  if (returnData.error)
-	          {
-	      	    alert(returnData.error);
-	          }
-	          else
-	          {
-	   		  	 document.getElementById("textValue"+textAttributeId).innerHTML = returnData.value;
-	   		     document.getElementById("jobAtt"+textAttributeId).value = returnData.jobAttributeId;
-	          }
-   		   },
-	   	   error:function(error)
-	       {
-             alert(error.message);
-           }
-   		});
-   	 $('#uptadeTextDiv').dialog('close');
-   }
-   
-   function editFloatValue(floatAttributeId)
-   {
-	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
-   	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
-   	  var floatValue = document.getElementById("updateFloatValue").value;
-   	   
-   	  $.ajax({
-   		   type: "POST",
-   		   dataType : "text",
-   		   url: "<%=editFloatUrl%>",
-   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&floatValue="+floatValue,
-   		   success: function(data){
-   		      var returnData = eval(data);
-	   		  if (returnData.error)
-	          {
-	      	    alert(returnData.error);
-	          }
-	          else
-	          {
-	   		  	 document.getElementById("floatValue"+floatAttributeId).innerHTML = returnData.value;
-	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
-	          }
-   		   },
-	   	   error:function(error)
-	       {
-             alert(error.message);
-           }
-   		});
-   	$('#uptadeFloatDiv').dialog('close');
-   }
-   
-   function editIntValue(floatAttributeId)
-   {
-	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
-   	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
-   	  var intValue = document.getElementById("updateIntValue").value;
-
-   	  $.ajax({
-   		   type: "POST",
-   		   dataType : "text",
-   		   url: "<%=editIntUrl%>",
-   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&intValue="+intValue,
-   		   success: function(data){
-   		      var returnData = eval(data);
-	   		  if (returnData.error)
-	          {
-	      	    alert(returnData.error);
-	          }
-	          else
-	          {
-	   		  	 document.getElementById("intValue"+floatAttributeId).innerHTML = returnData.value;
-	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
-	          }
-   		   },
-	   	   error:function(error)
-	       {
-             alert(error.message);
-           }
-   		});
-  	 $('#uptadeIntDiv').dialog('close');
-   }
-   
-   
-   function editDateValue(floatAttributeId)
-   {
-	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
-   	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
-   	  var dateValue = document.getElementById("updateDateValue").value;
-   	   
-   	  $.ajax({
-   		   type: "POST",
-   		   dataType : "text",
-   		   url: "<%=editDateUrl%>",
-   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&dateValue="+dateValue,
-   		   success: function(data){
-   		      var returnData = eval(data);
-	   		  if (returnData.error)
-	          {
-	      	    alert(returnData.error);
-	          }
-	          else
-	          {
-	   		  	 document.getElementById("dateValue"+floatAttributeId).innerHTML = returnData.value;
-	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
-	          }
-   		   },
-	   	   error:function(error)
-	       {
-             alert(error.message);
-           }
-   		});
-   	  $('#uptadeDateDiv').dialog('close');
-   }
-   
-   function editListValue(floatAttributeId)
-   {
-	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
-   	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
-   	  var selectOption = $("#selectOption").val();
-
-   	  $.ajax({
-   		   type: "POST",
-   		   dataType : "text",
-   		   url: "<%=editListUrl%>",
-   		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&selectOption="+selectOption,
-   		   success: function(data){
-   		      var returnData = eval(data);
-	   		  if (returnData.error)
-	          {
-	      	    alert(returnData.error);
-	          }
-	          else
-	          {
-	   		  	 document.getElementById("selected"+floatAttributeId).innerHTML = returnData.label;
-	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
-	          }
-   		   },
-	   	   error:function(error)
-	       {
-             alert(error.message);
-           }
-   		});
-   	$('#uptadeSelectedDiv').dialog('close');
-   }
-   
-   function disPlayInput(inputId)
-   {
-	   $("#"+inputId).dialog({width: 350, height: 100, resizable:false});
-   }
-   function closeInput(inputId)
-   {
-	   document.getElementById(inputId).style.display= "none";
-   }
 //jobSummary child page needed started
 <amb:permission  name="<%=Permission.JOB_ATTRIBUTE_VIEW%>" >
 $(document).ready(function(){
@@ -647,20 +237,27 @@ $(document).ready(function(){
                         Set<SelectOption> selectOptions = jobAtt.getOptionValues();
                         String listLabel = EditUtil.encodeHtmlEntities(jobAtt.getListLabel());
                         String listLabel2=listLabel.replaceAll("&lt;br&gt;",",");
+                        System.out.println(listLabel2);
     					if (editable)
     					{
     					    ListCondition listCondition = (ListCondition)condition;
 						    List<SelectOption> allOptions = listCondition.getSortedAllOptions();
+						    String isMultiple = listCondition.isMultiple() ? "multiple='true' size='5' " : "size='5'";
                         %>
-              				<div class="listDiv" id="selected<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeSelectedDiv');">
-              				<%=listLabel2%>
-	              				<div title="Select Values" id="uptadeSelectedDiv" style="display:none;">
+              				<div class="listDiv" id="selected<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayListInput('uptadeSelectedDiv<%=attribute.getId()%>');">
+              					<% for(String label : listLabel2.split(",")){
+              					%>
+              							<%= label%> <br>
+              				    <%	
+              					   }
+              					 %>
+	              				<div title="Select Values" id="uptadeSelectedDiv<%=attribute.getId()%>" style="display:none;">
 		                        	<table>
 		                        		<tr valign="middle">
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<select  name="selectOption" id = "selectOption" hasDownArrow="true" style="width:120px;">
+			                        			<select  name="selectOption<%=attribute.getId()%>" id = "selectOption<%=attribute.getId()%>" hasDownArrow="true" style="width:120px;" <%= isMultiple%>>
 					    						  <%
 					    			                 for (SelectOption option : allOptions){
 					    			                     String selected = selectOptions.contains(option) ? "selected" : "";%>
@@ -668,11 +265,13 @@ $(document).ready(function(){
 					    						  <%}%>
 					    						</select>
 		                        			</td>
+		                        		</tr>
+	                        			<tr>
 		                        			<td>
-		                        				<input type="button" name = "selectedButtonClose" id = "selectedButtonClose" onclick = "$('#uptadeSelectedDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "selectedButtonClose" id = "selectedButtonClose" onclick = "$('#uptadeSelectedDiv<%=attribute.getId()%>').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
 		                        				<input type="button" name = "selectedButtonSave" id = "selectedButtonSave"  onclick = "editListValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
 		                        			</td>
-		                        		</tr>
+	                        			</tr>
 		                        	</table>
 	              				</div>
 	                        </div>
@@ -689,17 +288,17 @@ $(document).ready(function(){
                         if (editable)
     					{
                         %>
-                        <div class="intDiv" id="intValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeIntDiv');"><%=label%>
-	              				<div title="Input Value" id="uptadeIntDiv" style="display:none;">
+                        <div class="intDiv" id="intValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeIntDiv<%=attribute.getId()%>');"><%=label%>
+	              				<div title="Input Integer Value" id="uptadeIntDiv<%=attribute.getId()%>" style="display:none;">
 		                        	<table>
 		                        		<tr valign="middle">
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<input style="width:100px; height:25px;" name ="updateIntValue" id ="updateIntValue">
+			                        			<input style="width:100px; height:25px;" name ="updateIntValue<%=attribute.getId()%>" id ="updateIntValue<%=attribute.getId()%>" value="<%=label%>">
 		                        			</td>
 		                        			<td>
-		                        				<input type="button" name = "intButtonClose" id = "intButtonClose" onclick = "$('#uptadeIntDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "intButtonClose" id = "intButtonClose" onclick = "$('#uptadeIntDiv<%=attribute.getId()%>').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
 		                        				<input type="button" name = "intButtonSave" id = "intButtonSave"  onclick = "editIntValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
 		                        			</td>
 		                        		</tr>
@@ -718,17 +317,17 @@ $(document).ready(function(){
                         if (editable)
     					{
                         %>
-                        <div class="floatDiv" id="floatValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeFloatDiv');"><%=label%>
-	              				<div title="Input Value" id="uptadeFloatDiv" style="display:none;">
+                        <div class="floatDiv" id="floatValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeFloatDiv<%=attribute.getId()%>');"><%=label%>
+	              				<div title="Input Float Value" id="uptadeFloatDiv<%=attribute.getId()%>" style="display:none;">
 		                        	<table>
 		                        		<tr valign="middle">
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<input style="width:100px; height:25px;" name ="updateFloatValue" id ="updateFloatValue">
+			                        			<input style="width:100px; height:25px;" name ="updateFloatValue<%=attribute.getId()%>" id ="updateFloatValue<%=attribute.getId()%>" value="<%=label%>">
 		                        			</td>
 		                        			<td>
-		                        				<input type="button" name = "floatButtonClose" id = "floatButtonClose" onclick = "$('#uptadeFloatDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "floatButtonClose" id = "floatButtonClose" onclick = "$('#uptadeFloatDiv<%=attribute.getId()%>').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
 		                        				<input type="button" name = "floatButtonSave" id = "floatButtonSave"  onclick = "editFloatValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
 		                        			</td>
 		                        		</tr>
@@ -763,17 +362,17 @@ $(document).ready(function(){
                         if (editable)
     					{
                         %>
-                        <div class="textDiv" id="textValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeTextDiv');"><%=label%>
-	              				<div title="Input Value" id="uptadeTextDiv" style="display:none;">
+                        <div class="textDiv" id="textValue<%=attribute.getId()%>"  style="text-align:left;"  onclick = "disPlayInput('uptadeTextDiv<%=attribute.getId()%>');"><%=label%>
+	              				<div title="Input Text Value" id="uptadeTextDiv<%=attribute.getId()%>" style="display:none;">
 		                        	<table>
 		                        		<tr valign="middle">
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<input style="width:100px; height:25px;" name ="updateTextValue" id ="updateTextValue">
+			                        			<input style="width:100px; height:25px;" name ="updateTextValue" id ="updateTextValue<%=attribute.getId()%>" value="<%=label%>">
 		                        			</td>
 		                        			<td>
-		                        				<input type="button" name = "textButtonClose" id = "textButtonClose" onclick = "$('#uptadeTextDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "textButtonClose" id = "textButtonClose" onclick = "$('#uptadeTextDiv<%=attribute.getId()%>').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
 		                        				<input type="button" name = "textButtonSave" id = "textButtonSave"  onclick = "editTextValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
 		                        			</td>
 		                        		</tr>
@@ -792,18 +391,18 @@ $(document).ready(function(){
                         if (editable)
     					{
                         %>
-                        <div class="dateDiv" id="dateValue<%=attribute.getId()%>"  style="text-align:left;width:100px;"  onclick = "disPlayInput('uptadeDateDiv');"><%=label%>
-	              				<div title="Input Value" id="uptadeDateDiv" style="display:none;">
+                        <div class="dateDiv" id="dateValue<%=attribute.getId()%>"  style="text-align:left;width:100px;"  onclick = "disPlayInput('uptadeDateDiv<%=attribute.getId()%>');"><%=label%>
+	              				<div title="Input Date Value" id="uptadeDateDiv<%=attribute.getId()%>" style="display:none;">
 		                        	<table>
 		                        		<tr valign="middle">
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<input style="width:150px; height:25px;" name ="updateDateValue" id ="updateDateValue">
-			                        			<IMG style='cursor:hand' align=top border=0 src="/globalsight/includes/Calendar.gif"  onclick="showCalendar1('updateDateValue')">
+			                        			<input style="width:150px; height:25px;" name ="updateDateValue<%=attribute.getId()%>" id ="updateDateValue<%=attribute.getId()%>" value = "<%=label%>">
+			                        			<IMG style='cursor:hand' align=top border=0 src="/globalsight/includes/Calendar.gif"  onclick="showCalendar1('updateDateValue<%=attribute.getId()%>')">
 		                        			</td>
 		                        			<td>
-		                        				<input type="button" name = "dateButtonClose" id = "dateButtonClose" onclick = "$('#uptadeDateDiv').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
+		                        				<input type="button" name = "dateButtonClose" id = "dateButtonClose" onclick = "$('#uptadeDateDiv<%=attribute.getId()%>').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
 		                        				<input type="button" name = "dateButtonSave" id = "dateButtonSave"  onclick = "editDateValue(<%=attribute.getId()%>);" value = "<%=bundle.getString("lb_save") %>">
 		                        			</td>
 		                        		</tr>
@@ -871,3 +470,411 @@ $(document).ready(function(){
   </div>
 </Form>
 </body>
+<SCRIPT LANGUAGE="JavaScript">
+function showUploadfileDialog(attributeId)
+{
+	   var jobAttributeId = document.getElementById("jobAtt" + attributeId).value
+	   
+	   $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=getFilesUrl%>",
+		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	        	  initFileDialog(attributeId, jobAttributeId, returnData);
+	        	  $("#uploadFormDiv").dialog({width: 700, height: 460, resizable:false});
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+	   
+}
+
+function initFileDialog(attributeId, jobAttributeId, data)
+{
+	   document.getElementById("attributeId").value = attributeId;
+	   document.getElementById("jobAttributeId").value = jobAttributeId;
+    updateFiles(data.files);
+}
+
+function updateFiles(files)
+{
+	   var selectBox = document.getElementById("allFiles");
+	   var options =  selectBox.options;
+	   for (var i = options.length-1; i>=0; i--)
+	   {
+	       selectBox.remove(i);
+	   }
+
+	   for (var i = 0; i < files.length; i++)
+	   {
+		   addFile(files[i]);
+	   }
+
+	   setOptionColor();
+	}
+
+function update(files)
+{
+	   var selectBox = dojo.byId("allFiles");
+	   var options =  selectBox.options;
+	   for (var i = options.length-1; i>=0; i--)
+	   {
+	       selectBox.remove(i);
+	   }
+
+	   for (var i = 0; i < files.length; i++)
+	   {
+		   addFile(files[i]);
+	   }
+
+	   setOptionColor();
+	}
+
+function addFile(file)
+{
+    var option = document.createElement("option");
+    option.appendChild(document.createTextNode(file));
+    option.setAttribute("value", file);
+    document.getElementById("allFiles").appendChild(option);
+}
+
+function setOptionColor()
+{
+	   var options = document.getElementById("allFiles").options;
+    var flag = true;
+    for (var i = 0; i<options.length; i++)
+    {
+		if (flag)
+		{
+		    options[i].className="row1";
+			flag = false;
+		}
+        else
+		{
+			options[i].className="row2";
+			flag = true;
+		}
+    }
+}
+
+
+function uploadFileMethod() 
+{
+		$("#uploadForm").submit();
+		setTimeout("getAllFiles()", 500);
+}
+
+function getAllFiles()
+{
+	   var attributeId = document.getElementById("attributeId").value;
+	   var jobAttributeId = document.getElementById("jobAttributeId").value;
+	   var jsonOjb = {
+				  attributeId : attributeId,
+				  jobAttributeId : jobAttributeId
+			   }
+	   $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=getFilesUrl%>",
+		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId,
+		   success: function(data){
+			  var id = document.getElementById("attributeId").value;
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	        	  document.getElementById("jobAttributeId").value = returnData.jobAttributeId;
+	        	  document.getElementById("jobAtt" + id).value = returnData.jobAttributeId;
+	        	  document.getElementById("file" + id).innerHTML = returnData.label;
+            	  updateFiles(returnData.files);
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+}
+
+function deleteSelectFiles()
+{
+	   var selectFiles = new Array();
+	   var selectBox = document.getElementById("allFiles");
+	   var options = selectBox.options;
+	   for (var i = options.length-1; i>=0; i--)
+	   {
+		   if (options[i].selected)
+		   {
+			   selectFiles.push(options[i].value);
+		   }
+	   }
+
+	   if (selectFiles.length < 1)
+	   {
+		   return;
+	   }
+	   var attId = document.getElementById("attributeId").value;
+	   var jobAttributeId = document.getElementById("jobAttributeId").value;
+	   
+	   var jsonOjb = {
+		  attributeId : attId,
+		  jobAttributeId : jobAttributeId,
+		  deleteFiles : selectFiles
+	   }
+	   
+	   if (selectFiles.length == 0)
+	   {
+		   return;
+	   }
+	
+	   $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=deleteFilesUrl%>",
+		   traditional: true,
+		   data: jsonOjb,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	        	  updateFiles(returnData.files);
+	        	  document.getElementById("file" + attId).innerHTML = returnData.label;
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+}
+
+function downloadSelectFiles()
+{
+	   var selectFiles = new Array();
+	   var selectBox = document.getElementById("allFiles");
+	   var options = selectBox.options;
+	   for (var i = options.length-1; i>=0; i--)
+	   {
+		   if (options[i].selected)
+		   {
+			   selectFiles.push(options[i].value);
+		   }
+	   }
+
+	   if (selectFiles.length == 0)
+	   {
+		   return;
+	   }
+
+	   var downloadFiles = document.getElementById("downloadFiles");
+	   document.getElementById("jobAttributeId2").value = document.getElementById("jobAttributeId").value;
+
+	   downloadFiles.innerHTML = "";
+	   
+	   for (var i = options.length-1; i>=0; i--)
+	   {
+		   if (options[i].selected)
+		   {
+			   var fileBox = document.createElement("input");
+			   fileBox.type = "checkbox";
+			   fileBox.name = "selectFiles";
+			   fileBox.value = options[i].value;
+			   downloadFiles.appendChild(fileBox);
+			   fileBox.checked = true;
+		   }
+	   }
+
+	   downLoadForm.submit();
+}
+
+function showCalendar1(inputId) {
+    var cal1 = new calendar2(document.getElementById(inputId), "openDropDown()");
+    cal1.year_scroll = true;
+    cal1.time_comp = true;
+    cal1.popup();
+}
+
+function editTextValue(textAttributeId)
+{
+	  var attributeId = document.getElementById("attributeId"+textAttributeId).value;
+	  var jobAttributeId = document.getElementById("jobAtt"+textAttributeId).value;
+	  var textValue = document.getElementById("updateTextValue"+textAttributeId).value;
+	  
+	  $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=editTextUrl%>",
+		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&textValue="+textValue,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("textValue"+textAttributeId).innerHTML = returnData.value;
+	   		     document.getElementById("jobAtt"+textAttributeId).value = returnData.jobAttributeId;
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+	 $('#uptadeTextDiv'+textAttributeId).dialog('close');
+}
+
+function editFloatValue(floatAttributeId)
+{
+	  var attributeId = document.getElementById("attributeId"+floatAttributeId).value;
+	  var jobAttributeId = document.getElementById("jobAtt"+floatAttributeId).value;
+	  var floatValue = document.getElementById("updateFloatValue"+floatAttributeId).value;
+	  
+	  $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=editFloatUrl%>",
+		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&floatValue="+floatValue,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("floatValue"+floatAttributeId).innerHTML = returnData.value;
+	   		     document.getElementById("jobAtt"+floatAttributeId).value = returnData.jobAttributeId;
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+	$('#uptadeFloatDiv'+floatAttributeId).dialog('close');
+}
+
+function editIntValue(intAttributeId)
+{
+	  var attributeId = document.getElementById("attributeId"+intAttributeId).value;
+	  var jobAttributeId = document.getElementById("jobAtt"+intAttributeId).value;
+	  var intValue = document.getElementById("updateIntValue"+intAttributeId).value;
+	  
+	  $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=editIntUrl%>",
+		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&intValue="+intValue,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("intValue"+intAttributeId).innerHTML = returnData.value;
+	   		     document.getElementById("jobAtt"+intAttributeId).value = returnData.jobAttributeId;
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+	 $('#uptadeIntDiv'+intAttributeId).dialog('close');
+}
+
+
+function editDateValue(dateAttributeId)
+{
+	  var attributeId = document.getElementById("attributeId"+dateAttributeId).value;
+	  var jobAttributeId = document.getElementById("jobAtt"+dateAttributeId).value;
+	  var dateValue = document.getElementById("updateDateValue"+dateAttributeId).value;
+	  
+	  $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=editDateUrl%>",
+		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&dateValue="+dateValue,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("dateValue"+dateAttributeId).innerHTML = returnData.value;
+	   		     document.getElementById("jobAtt"+dateAttributeId).value = returnData.jobAttributeId;
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+	  $('#uptadeDateDiv'+dateAttributeId).dialog('close');
+}
+
+function editListValue(listAttributeId)
+{
+	  var attributeId = document.getElementById("attributeId"+listAttributeId).value;
+	  var jobAttributeId = document.getElementById("jobAtt"+listAttributeId).value;
+	  var selectOption = $("#selectOption"+listAttributeId).val();
+ 
+	  $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=editListUrl%>",
+		   data: "attributeId="+attributeId+"&jobAttributeId="+jobAttributeId+"&selectOption="+selectOption,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	   		  	 document.getElementById("selected"+listAttributeId).innerHTML = returnData.label;
+	   		     document.getElementById("jobAtt"+listAttributeId).value = returnData.jobAttributeId;
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+	$('#uptadeSelectedDiv'+listAttributeId).dialog('close');
+}
+
+function disPlayInput(inputId)
+{
+	   $("#"+inputId).dialog({width: 350, height: 100, resizable:false});
+}
+
+function disPlayListInput(inputId)
+{
+	   $("#"+inputId).dialog({width: 200, height: 200, resizable:false});
+}
+</SCRIPT>

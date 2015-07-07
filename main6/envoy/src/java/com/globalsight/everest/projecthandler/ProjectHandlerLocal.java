@@ -4220,10 +4220,9 @@ public class ProjectHandlerLocal implements ProjectHandler
                 if (wfStatePost.getName().indexOf(filterParams[0]) != -1
                         && wfStatePost.getListenerURL()
                                 .indexOf(filterParams[1]) != -1
-                        && wfStatePost.getSecretKey().indexOf(filterParams[2]) != -1
-                        && CompanyWrapper.getCompanyNameById(
+                       && CompanyWrapper.getCompanyNameById(
                                 wfStatePost.getCompanyId()).indexOf(
-                                filterParams[3]) != -1)
+                                filterParams[2]) != -1)
                 {
                     queryResult.add(wfStatePost);
                 }

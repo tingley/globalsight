@@ -42,7 +42,6 @@
     String nameFilter = (String) sessionMgr.getAttribute("nameFilter");
     String wfStatePostCompanyNameFilter = (String) sessionMgr.getAttribute("wfStatePostCompanyNameFilter");
     String listenerURLFilter = (String) sessionMgr.getAttribute("listenerURLFilter");
-    String secretKeyFilter = (String) sessionMgr.getAttribute("secretKeyFilter");
     PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
 %>
@@ -178,7 +177,7 @@ var helpFile = "<%=bundle.getString("help_workflow_state_post_profiles_main_scre
                  <amb:column label="lb_listener_url" sortBy="<%=WorkflowStatePostComparator.LISTENER_URL%>" filter="listenerURLFilter" filterValue="<%=listenerURLFilter%>" width="20%">
                      <%= wfStatePostProfile.getListenerURL()%>
                 </amb:column>
-                 <amb:column label="lb_secret_key" sortBy="<%=WorkflowStatePostComparator.SECRET_KEY%>" filter="secretKeyFilter" filterValue="<%=secretKeyFilter%>" width="10%">
+                 <amb:column label="lb_secret_key" sortBy="<%=WorkflowStatePostComparator.SECRET_KEY%>"  width="10%">
                      <%= wfStatePostProfile.getSecretKey()%>
                 </amb:column>
                 <% if (isSuperAdmin) { %>

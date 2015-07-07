@@ -52,13 +52,12 @@ public class WaitingRequestHandler extends RequestAbstractHandler
         fs.addAll(OfflineEditManagerLocal.WAITING_FORMS);
         for (OfflineUploadForm f : fs)
         {
-            
+            String companyName = null;
             Vo v = new Vo();
             Task t = f.getTask();
             if (t != null)
             {
-                String companyName = CompanyWrapper.getCompanyNameById(t.getCompanyId());
-                v.setCompany(companyName);
+                companyName = CompanyWrapper.getCompanyNameById(t.getCompanyId());
             }
             
             v.setFileName(f.getFileName());
@@ -66,7 +65,14 @@ public class WaitingRequestHandler extends RequestAbstractHandler
             if (f.getUser() != null)
             {
                 v.setUser(f.getUser().toString());
+                
+                if (companyName == null || companyName.trim().length() == 0)
+                {
+                    companyName = f.getUser().getCompanyName();
+                }
             }
+            
+            v.setCompany(companyName);
             
             forms.add(v);
         }

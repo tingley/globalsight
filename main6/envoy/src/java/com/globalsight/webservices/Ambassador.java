@@ -17837,21 +17837,33 @@ public class Ambassador extends AbstractWebService
 			String[] workflowIdArr = null;
 			Assert.assertNotEmpty(p_accessToken, "Access token");
 			Assert.assertNotEmpty(jobIds, "Job id");
-			if (StringUtils.isNotBlank(jobIds))
+			String tempId = null;
+			try
 			{
-				jobIdArr = jobIds.split(",");
-				for (String id : jobIdArr)
+				if (StringUtils.isNotBlank(jobIds))
 				{
-					Assert.assertIsInteger(id);
+					jobIdArr = jobIds.split(",");
+					for (String id : jobIdArr)
+					{
+						tempId = id;
+						Assert.assertIsInteger(id);
+					}
+				}
+
+				if (StringUtils.isNotBlank(workflowIds))
+				{
+					workflowIdArr = workflowIds.split(",");
+					for (String id : workflowIdArr)
+					{
+						tempId = id;
+						Assert.assertIsInteger(id);
+					}
 				}
 			}
-			if (StringUtils.isNotBlank(workflowIds))
+			catch (Exception e)
 			{
-				workflowIdArr = workflowIds.split(",");
-				for (String id : workflowIdArr)
-				{
-					Assert.assertIsInteger(id);
-				}
+				return makeErrorXml(GENERATE_QA_CHECKS_REPORTS, tempId
+						+ " can not be converted into an integer.");
 			}
 
 			Company logUserCompany = getCompanyInfo(getUsernameFromSession(p_accessToken));

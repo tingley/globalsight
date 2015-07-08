@@ -660,6 +660,7 @@ public class StandardExtractor
                 {
                     for (int i = 0, max = segments.size(); i < max; i++)
                     {
+                        diplomat.setIsSecondFilter(true);
                         // boolean needDecodeTwice = false;
                         diplomat.resetForChainFilter();
 
@@ -778,6 +779,8 @@ public class StandardExtractor
                             }
                             extractedOutPut.addDocumentElement(element2);
                         }
+                        
+                        diplomat.setIsSecondFilter(false);
                     }
                 }
             }

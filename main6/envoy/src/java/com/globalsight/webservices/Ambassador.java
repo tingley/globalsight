@@ -17830,28 +17830,40 @@ public class Ambassador extends AbstractWebService
 	public String generateQAChecksReports(String p_accessToken, String jobIds,
 			String workflowIds) throws WebServiceException
 	{
-		String returnFilePath = "No QA report available for download.";
+		String returnFilePath = null;
 		try
 		{
 			String[] jobIdArr = null;
 			String[] workflowIdArr = null;
 			Assert.assertNotEmpty(p_accessToken, "Access token");
 			Assert.assertNotEmpty(jobIds, "Job id");
-			if (StringUtils.isNotBlank(jobIds))
+			String tempId = null;
+			try
 			{
-				jobIdArr = jobIds.split(",");
-				for (String id : jobIdArr)
+				if (StringUtils.isNotBlank(jobIds))
 				{
-					Assert.assertIsInteger(id);
+					jobIdArr = jobIds.split(",");
+					for (String id : jobIdArr)
+					{
+						tempId = id;
+						Assert.assertIsInteger(id);
+					}
+				}
+
+				if (StringUtils.isNotBlank(workflowIds))
+				{
+					workflowIdArr = workflowIds.split(",");
+					for (String id : workflowIdArr)
+					{
+						tempId = id;
+						Assert.assertIsInteger(id);
+					}
 				}
 			}
-			if (StringUtils.isNotBlank(workflowIds))
+			catch (Exception e)
 			{
-				workflowIdArr = workflowIds.split(",");
-				for (String id : workflowIdArr)
-				{
-					Assert.assertIsInteger(id);
-				}
+				return makeErrorXml(GENERATE_QA_CHECKS_REPORTS, tempId
+						+ " can not be converted into an integer.");
 			}
 
 			Company logUserCompany = getCompanyInfo(getUsernameFromSession(p_accessToken));
@@ -17866,7 +17878,7 @@ public class Ambassador extends AbstractWebService
 						if (job.getCompanyId() != logUserCompany.getId())
 						{
 							return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
-									"Current user is not super user or current company has no job with id : "
+									"Current user is not super user or current company has no job with id: "
 											+ id);
 						}
 					}
@@ -17973,7 +17985,7 @@ public class Ambassador extends AbstractWebService
 				else
 				{
 					return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
-							"Current log user no download QA report permissions");
+							"Current user has no download QA reports permission.");
 				}
 			}
 
@@ -18049,7 +18061,7 @@ public class Ambassador extends AbstractWebService
 			}
 			else
 			{
-				fileUrl = "No QA Report downloaded !";
+				fileUrl = "No QA report available for download.";
 			}
 		}
 		catch (Exception e)

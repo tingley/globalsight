@@ -1239,7 +1239,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             Set<GlobalSightLocale> pTargetLocales, int pMode,
             boolean pFromTmImport)
     {
-
+    	int BATCH_SIZE = 1000;
         LOGGER.info("saveToSegmentTm: " + pSegmentsToSave.size()
                 + " segs, srcLocale=" + pSourceLocale + ", pMode=" + pMode
                 + ", fromTmImport=" + pFromTmImport);
@@ -1307,7 +1307,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             for (BaseTmTu base : usr.getAllTus())
             {
             	batch.add(base);
-            	if (batch.size() == 500)
+            	if (batch.size() == BATCH_SIZE)
             	{
             		batches.add(batch);
             		batch = new ArrayList<BaseTmTu>();

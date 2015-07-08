@@ -2991,6 +2991,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
 	 *			   -- 10 : XLiff 1.2
 	 *			   -- 11 : Xliff 2.0
 	 *			   -- 12 : RTF List view
+	 *			   -- 14 : Reviewer Comments Report with Compact Tags
+	 *			   -- 15 : Reviewer Comments Report (Simplified) with Compact Tags
      *@param p_workofflineFileTypeOption
      *			   --1  : consolidate/split = split per file, include repeated segments = no (Default)
      *			   --2  : consolidate/split = consolidate (overrides preserve folder structure setting),include repeated segments = no

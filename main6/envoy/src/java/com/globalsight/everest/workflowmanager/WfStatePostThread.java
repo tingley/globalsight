@@ -242,7 +242,7 @@ public class WfStatePostThread implements Runnable
     private void doPost(WorkflowStatePosts wfStatePost, JSONObject message)
     {
         int num = wfStatePost.getRetryNumber();
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < num + 1; i++)
         {
             try
             {
@@ -251,8 +251,13 @@ public class WfStatePostThread implements Runnable
                 String secretKey = wfStatePost.getSecretKey();
                 HttpPost httpPost = new HttpPost(listenerUrl);
                 httpPost.setHeader(HttpHeaders.AUTHORIZATION, secretKey);
-                RequestConfig config = RequestConfig.custom()
-                        .setConnectTimeout(wfStatePost.getTimeoutPeriod())
+                RequestConfig config = RequestConfig
+                        .custom()
+                        .setConnectionRequestTimeout(
+                                wfStatePost.getTimeoutPeriod() * 1000)
+                        .setConnectTimeout(
+                                wfStatePost.getTimeoutPeriod() * 1000)
+                        .setSocketTimeout(wfStatePost.getTimeoutPeriod() * 1000)
                         .build();
                 httpPost.setConfig(config);
                 StringEntity reqEntity = new StringEntity(message.toString());
@@ -267,9 +272,8 @@ public class WfStatePostThread implements Runnable
                 else
                 {
                     logPostFailureInfo(response);
-
                     if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail())
-							&& (i == num - 1))
+							&& (i == num))
                     {
                         String recipient = wfStatePost.getNotifyEmail();
                         long companyId = wfStatePost.getCompanyId();

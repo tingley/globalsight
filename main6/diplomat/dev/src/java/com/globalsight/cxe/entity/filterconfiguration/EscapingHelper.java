@@ -373,6 +373,7 @@ public class EscapingHelper
                         j = j + 1;
 
                         if (char3 != ' ' && processedChars != null
+                                && !sub.toString().endsWith("\\\\")
                                 && !processedChars.contains(char3))
                         {
                             processedChars.add(char3);

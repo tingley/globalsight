@@ -17830,7 +17830,7 @@ public class Ambassador extends AbstractWebService
 	public String generateQAChecksReports(String p_accessToken, String jobIds,
 			String workflowIds) throws WebServiceException
 	{
-		String returnFilePath = "No QA report available for download.";
+		String returnFilePath = null;
 		try
 		{
 			String[] jobIdArr = null;
@@ -17866,7 +17866,7 @@ public class Ambassador extends AbstractWebService
 						if (job.getCompanyId() != logUserCompany.getId())
 						{
 							return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
-									"Current user is not super user or current company has no job with id : "
+									"Current user is not super user or current company has no job with id: "
 											+ id);
 						}
 					}
@@ -17973,7 +17973,7 @@ public class Ambassador extends AbstractWebService
 				else
 				{
 					return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
-							"Current log user no download QA report permissions");
+							"Current user has no download QA reports permission.");
 				}
 			}
 
@@ -18049,7 +18049,7 @@ public class Ambassador extends AbstractWebService
 			}
 			else
 			{
-				fileUrl = "No QA Report downloaded !";
+				fileUrl = "No QA report available for download.";
 			}
 		}
 		catch (Exception e)

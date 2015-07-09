@@ -18084,8 +18084,8 @@ public class Ambassador extends AbstractWebService
      *            -- 1 : Reviewer Comments Report or Translations Edit Report (this follows UI settings)
      *            -- 2 : Offline Translation Kit
      *            -- 3 : Translation Edit Report
-     *            -- 4 : Reviewer Comments Report with Compact Tags
-     *			   -- 5 : Reviewer Comments Report (Simplified) with Compact Tags
+     *            -- 4 : Reviewer Comments Report
+     *            -- 5 : Reviewer Comments Report (Simplified)
      *            -- 6 : Post Review QA Report
      *
      * @return -- XML string. -- If fail, it will return an xml string to tell

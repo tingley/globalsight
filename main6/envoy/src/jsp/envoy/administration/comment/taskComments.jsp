@@ -869,9 +869,9 @@ function handleMultiSelectAll_2() {
                         <%= com %>
                         <div onclick="javascript:showComment('j<%= jobComment.getId()%>');" style="cursor:hand">[more...]</div>
                         <div id=j<%=jobComment.getId()%> class="comment"><%= jobComment.getComment()%><div onclick="closeComment('j<%= jobComment.getId()%>');"><span style="cursor: hand; color:blue">[Close]</span></div></div>
-                    <%}else%>
-                    <%= jobComment.getComment()%>
-                <%;%>
+                    <%} else {
+	                    out.println(jobComment.getComment());
+                    } %>
             </div>
             </amb:column>
 			<amb:column label="multiCheckbox_1" align="right" width="5px"></amb:column>

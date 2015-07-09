@@ -104,6 +104,7 @@ public class BasicWorkflowStatePostHandler extends PageHandler implements
 
         String actionType = (String) p_request.getParameter(ACTION);
         sessionMgr.setAttribute(ACTION, actionType);
+        sessionMgr.setAttribute(WF_STATE_POST_INFO, wfStatePostProfile);
     }
 
 }

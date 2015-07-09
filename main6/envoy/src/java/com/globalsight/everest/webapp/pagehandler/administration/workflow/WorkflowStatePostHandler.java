@@ -55,10 +55,15 @@ public class WorkflowStatePostHandler extends PageHandler implements
             ServletException, IOException
     {
         HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
         String action = p_request.getParameter("action");
         if (SAVE_ACTION.equals(action))
         {
-            createWfStatePostProfile(getBasicWfStatePostProfile(p_request));
+            WorkflowStatePosts wfStatePost = getBasicWfStatePostProfile(p_request);
+            String companyId = CompanyThreadLocal.getInstance().getValue();
+            wfStatePost.setCompanyId(Long.parseLong(companyId));
+            createWfStatePostProfile(wfStatePost);
             p_response
                     .sendRedirect("/globalsight/ControlServlet?activityName=workflowStatePost");
             return;
@@ -82,8 +87,11 @@ public class WorkflowStatePostHandler extends PageHandler implements
         }
         else if (MODIFY_ACTION.equals(action))
         {
-            editWfStatePostProfile(p_request,
-                    getBasicWfStatePostProfile(p_request));
+            WorkflowStatePosts wfStatePosts = getBasicWfStatePostProfile(p_request);
+            WorkflowStatePosts wfStatePost = (WorkflowStatePosts) sessionMgr
+                    .getAttribute(WF_STATE_POST_INFO);
+            wfStatePosts.setCompanyId(wfStatePost.getCompanyId());
+            editWfStatePostProfile(p_request, wfStatePosts);
             p_response
                     .sendRedirect("/globalsight/ControlServlet?activityName=workflowStatePost");
             return;
@@ -129,15 +137,12 @@ public class WorkflowStatePostHandler extends PageHandler implements
         wfStatePost.setTimeoutPeriod(timeoutPeriod);
         wfStatePost.setRetryNumber(retryNumber);
         wfStatePost.setNotifyEmail(notifyEmail);
-        String companyId = CompanyThreadLocal.getInstance().getValue();
-        wfStatePost.setCompanyId(Long.parseLong(companyId));
         return wfStatePost;
     }
 
     private void editWfStatePostProfile(HttpServletRequest p_request,
             WorkflowStatePosts wfstaPosts)
     {
-
         if (p_request.getParameter("wfStatePostId") != null)
         {
             long wfStatePostInfoId = Long.parseLong(p_request

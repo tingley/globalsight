@@ -4217,12 +4217,12 @@ public class ProjectHandlerLocal implements ProjectHandler
             List<WorkflowStatePosts> qureyList = getAllWorkflowStatePostInfos();
             for (WorkflowStatePosts wfStatePost : qureyList)
             {
-                if (wfStatePost.getName().indexOf(filterParams[0]) != -1
-                        && wfStatePost.getListenerURL()
-                                .indexOf(filterParams[1]) != -1
+                if (wfStatePost.getName().toLowerCase().indexOf(filterParams[0].toLowerCase()) != -1
+                        && wfStatePost.getListenerURL().toLowerCase()
+                                .indexOf(filterParams[1].toLowerCase()) != -1
                        && CompanyWrapper.getCompanyNameById(
-                                wfStatePost.getCompanyId()).indexOf(
-                                filterParams[2]) != -1)
+                                wfStatePost.getCompanyId()).toLowerCase().indexOf(
+                                filterParams[2].toLowerCase()) != -1)
                 {
                     queryResult.add(wfStatePost);
                 }

@@ -2948,50 +2948,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            -- 4 : Reviewer Comments Report
      *            -- 5 : Reviewer Comments Report (Simplified)
      *            -- 6 : Post Review QA Report
-     *
-     * @return -- JSON string. -- If fail, it is like
-     *         '{"getWorkOfflineFiles":"Corresponding message is here."}'; -- If
-     *         succeed, report returning is like
-     *         '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/ReviewersCommentsReport-(jobname_492637643)(337)-en_US_zh_CN-20140218
-     *         162543.xlsx"}'. -- offline translation kit returning is like
-     *         '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadOfflineKit/[CompanyName]/GlobalSight/CustomerDownload/[jobName_zh_CN.zip]"}'
-     *         .
-     * @throws WebServiceException
-     */
-    public String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
-            int p_workOfflineFileType) throws WebServiceException
-	{
-		checkAccess(p_accessToken, GET_WORK_OFFLINE_FILES);
-		if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2
-				&& p_workOfflineFileType != 3 && p_workOfflineFileType != 4
-				&& p_workOfflineFileType != 5 && p_workOfflineFileType != 6)
-		{
-			return makeErrorJson(GET_WORK_OFFLINE_FILES,
-					"Invalid workOfflineFileType " + p_workOfflineFileType
-							+ ", it should be limited in 1, 2, 3, 4, 5 or 6.");
-		}
-		AmbassadorHelper helper = new AmbassadorHelper();
-		return helper.getWorkOfflineFiles(p_accessToken, p_taskId,
-				p_workOfflineFileType, true);
-	}
-    
-    
-    /**
-     * Offline download to get reviewers comments report, translations edit
-     * report or offline translation kit. For offline translation kit
-     * downloading, it will follow logged user's "Download Options" as default.
-     * 
-     * @param p_accessToken
-     *            -- login user's token
-     * @param p_taskId
-     *            -- task ID to offline download file for.
-     * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report (this follows UI settings)
-     *            -- 2 : Offline Translation Kit
-     *            -- 3 : Translation Edit Report
-     *            -- 4 : Reviewer Comments Report
-     *            -- 5 : Reviewer Comments Report (Simplified)
-     *            -- 6 : Post Review QA Report
      *            -- 7  : Biligual Trados RTF
 	 *			   -- 8  : Trados 7 TTX
 	 *			   -- 9  : OmegaT

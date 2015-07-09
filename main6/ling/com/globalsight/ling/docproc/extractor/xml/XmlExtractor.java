@@ -2684,6 +2684,11 @@ public class XmlExtractor extends AbstractExtractor implements
                 encoding = getInput().getCodeset();
             }
             String content = FileUtil.readFile(f, encoding);
+            if (content.indexOf("<") == 1)
+            {
+                // a BOM in the first index
+                content = content.substring(1);
+            }
             if (content.contains("<!DOCTYPE"))
             {
                 return;

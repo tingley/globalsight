@@ -2982,8 +2982,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            -- 1 : Reviewer Comments Report or Translations Edit Report (this follows UI settings)
      *            -- 2 : Offline Translation Kit
      *            -- 3 : Translation Edit Report
-     *            -- 4 : Reviewer Comments Report
-     *            -- 5 : Reviewer Comments Report (Simplified)
+     *			   -- 4 : Reviewer Comments Report with Compact Tags
+     *			   -- 5 : Reviewer Comments Report (Simplified) with Compact Tags
      *            -- 6 : Post Review QA Report
      *            -- 7  : Biligual Trados RTF
 	 *			   -- 8  : Trados 7 TTX
@@ -2991,8 +2991,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
 	 *			   -- 10 : XLiff 1.2
 	 *			   -- 11 : Xliff 2.0
 	 *			   -- 12 : RTF List view
-	 *			   -- 14 : Reviewer Comments Report with Compact Tags
-	 *			   -- 15 : Reviewer Comments Report (Simplified) with Compact Tags
+	 *            -- 14 : Reviewer Comments Report
+	 *            -- 15 : Reviewer Comments Report (Simplified)
      *@param p_workofflineFileTypeOption
      *			   --1  : consolidate/split = split per file, include repeated segments = no (Default)
      *			   --2  : consolidate/split = consolidate (overrides preserve folder structure setting),include repeated segments = no

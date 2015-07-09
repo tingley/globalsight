@@ -89,26 +89,12 @@
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%=title%></TITLE>
 <style type="text/css">
-@import url(/globalsight/dojox/form/resources/FileUploader.css);
-
-.tundra .dijitButtonText {
-    width:100%;
-    height:20px;
-	text-align: center;
-	padding: 0 0.3em;
-}
-
-#uploadFormDiv{
-	color:#00CC99;
-	width:700px;
-	background-color:#FDFFFF;
-	border: 1px solid #ccc;
-	font-size:small;
-	}
 
 .fileDiv,.listDiv,.intDiv,.floatDiv,.textDiv,.dateDiv{
+    width:auto !important;
+	min-width:50px;
+	display:inline-block;
  	min-height:20px;
-	width:50px;
 	cursor:pointer;
 	border-width: 1px;
 	border-style: solid;
@@ -123,7 +109,6 @@
 	background: #FFF url("dijit/themes/tundra/images/buttonEnabled.png") repeat-x scroll left bottom;
  }
 </style>
-<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <script language="JavaScript" src="/globalsight/includes/report/calendar.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
@@ -237,7 +222,6 @@ $(document).ready(function(){
                         Set<SelectOption> selectOptions = jobAtt.getOptionValues();
                         String listLabel = EditUtil.encodeHtmlEntities(jobAtt.getListLabel());
                         String listLabel2=listLabel.replaceAll("&lt;br&gt;",",");
-                        System.out.println(listLabel2);
     					if (editable)
     					{
     					    ListCondition listCondition = (ListCondition)condition;
@@ -347,7 +331,7 @@ $(document).ready(function(){
     					{
                         %>
                         	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId" value="<%=jobAtt.getId()%>">
-                        	<div class="fileDiv"  style="width:200px;" id="file<%=attribute.getId()%>" onclick="showUploadfileDialog('<%=attribute.getId()%>')" >
+                        	<div class="fileDiv"  id="file<%=attribute.getId()%>" onclick="showUploadfileDialog('<%=attribute.getId()%>')" >
                          		<%=filesLabel%>
                              </div>
                        <%}
@@ -571,18 +555,14 @@ function setOptionColor()
 
 function uploadFileMethod() 
 {
-		$("#uploadForm").submit();
-		setTimeout("getAllFiles()", 500);
+	$("#uploadForm").submit();
+	setTimeout("getAllFiles()", 500);
 }
 
 function getAllFiles()
 {
 	   var attributeId = document.getElementById("attributeId").value;
 	   var jobAttributeId = document.getElementById("jobAttributeId").value;
-	   var jsonOjb = {
-				  attributeId : attributeId,
-				  jobAttributeId : jobAttributeId
-			   }
 	   $.ajax({
 		   type: "POST",
 		   dataType : "text",

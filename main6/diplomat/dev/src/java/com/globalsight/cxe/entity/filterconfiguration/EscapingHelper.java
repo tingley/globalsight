@@ -39,9 +39,17 @@ public class EscapingHelper
             .getLogger(EscapingHelper.class);
     private static XmlEntities m_xmlEncoder = new XmlEntities();
 
+	public static String handleString4Export(String oriStr, List<Escaping> es,
+			String format, boolean noTag, boolean doDecode,
+			String escapingChars)
+	{
+		return handleString4Export(oriStr, es, format, noTag, doDecode,
+				escapingChars, false);
+	}
+
     public static String handleString4Export(String oriStr, List<Escaping> es,
             String format, boolean noTag, boolean doDecode,
-            String escapingChars)
+            String escapingChars, boolean isInCDATA)
     {
         if (oriStr == null || oriStr.length() == 0)
             return oriStr;
@@ -50,7 +58,7 @@ public class EscapingHelper
             return oriStr;
 
         // To be safe, do not escape anything for office 2010.
-        if (IFormatNames.FORMAT_OFFICE_XML.equals(format))
+		if (IFormatNames.FORMAT_OFFICE_XML.equalsIgnoreCase(format))
         {
             return oriStr;
         }
@@ -77,16 +85,16 @@ public class EscapingHelper
             TagIndex ti = tags.get(i);
             if (ti.isTag)
             {
-                if (IFormatNames.FORMAT_OFFICE_XML.equals(format))
-                {
-                    sb.append(ti.content);
-                }
-                else
-                {
+            	if (IFormatNames.FORMAT_XML.equals(format) && isInCDATA)
+            	{
                     // Escape tag content is dangerous...
                     sb.append(handleTagContent4Export(ti.content, es, doDecode,
                             format, escapingChars));
-                }
+            	}
+            	else
+            	{
+                    sb.append(ti.content);
+            	}
             }
             else
             {
@@ -372,6 +380,7 @@ public class EscapingHelper
                         j = j + 1;
 
                         if (char3 != ' ' && processedChars != null
+                                && !sub.toString().endsWith("\\\\")
                                 && !processedChars.contains(char3))
                         {
                             processedChars.add(char3);
@@ -430,7 +439,7 @@ public class EscapingHelper
                 // process special chars in special format
                 if (isSpecialFormat(format) && char1 == '\\')
                 {
-                    if (escapingChars.contains("" + char2))
+                    if (escapingChars != null && escapingChars.contains("" + char2))
                     {
                         return "\\" + char1;
                     }

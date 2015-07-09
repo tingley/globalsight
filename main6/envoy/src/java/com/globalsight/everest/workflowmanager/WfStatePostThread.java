@@ -242,7 +242,7 @@ public class WfStatePostThread implements Runnable
     private void doPost(WorkflowStatePosts wfStatePost, JSONObject message)
     {
         int num = wfStatePost.getRetryNumber();
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < num + 1; i++)
         {
             try
             {
@@ -251,25 +251,38 @@ public class WfStatePostThread implements Runnable
                 String secretKey = wfStatePost.getSecretKey();
                 HttpPost httpPost = new HttpPost(listenerUrl);
                 httpPost.setHeader(HttpHeaders.AUTHORIZATION, secretKey);
-                RequestConfig config = RequestConfig.custom()
-                        .setConnectTimeout(wfStatePost.getTimeoutPeriod())
+                RequestConfig config = RequestConfig
+                        .custom()
+                        .setConnectionRequestTimeout(
+                                wfStatePost.getTimeoutPeriod() * 1000)
+                        .setConnectTimeout(
+                                wfStatePost.getTimeoutPeriod() * 1000)
+                        .setSocketTimeout(wfStatePost.getTimeoutPeriod() * 1000)
                         .build();
                 httpPost.setConfig(config);
                 StringEntity reqEntity = new StringEntity(message.toString());
                 reqEntity.setContentEncoding("UTF-8");
                 reqEntity.setContentType("application/json");
                 httpPost.setEntity(reqEntity);
-                HttpResponse response = httpClient.execute(httpPost);
-                if (response.getStatusLine().getStatusCode() == 204)
+                HttpResponse response =null;
+                try
                 {
-                	break;                	
+                    response = httpClient.execute(httpPost);
+                }
+                catch (Exception e)
+                {
+                    s_logger.error(e);
+                }
+                if (response != null
+                        && response.getStatusLine().getStatusCode() == 204)
+                {
+                    break;
                 }
                 else
                 {
                     logPostFailureInfo(response);
-
                     if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail())
-							&& (i == num - 1))
+							&& (i == num))
                     {
                         String recipient = wfStatePost.getNotifyEmail();
                         long companyId = wfStatePost.getCompanyId();
@@ -325,21 +338,24 @@ public class WfStatePostThread implements Runnable
 
     private static void logPostFailureInfo(HttpResponse res)
     {
-        if (res.getStatusLine().getStatusCode() == 400)
+        if (res != null)
         {
-			s_logger.warn("Workflow state post failure: The request payload data failed validation!");
-        }
-        else if (res.getStatusLine().getStatusCode() == 401)
-        {
-			s_logger.warn("Workflow state post failure: Not authorized. The secret value is incorrect!");
-        }
-        else if (res.getStatusLine().getStatusCode() == 405)
-        {
-			s_logger.warn("Workflow state post failure: The request did not use the POST method!");
-        }
-        else if (res.getStatusLine().getStatusCode() == 500)
-        {
-            s_logger.warn("Workflow state post failure: Database error!");
+            if (res.getStatusLine().getStatusCode() == 400)
+            {
+                s_logger.warn("Workflow state post failure: The request payload data failed validation!");
+            }
+            else if (res.getStatusLine().getStatusCode() == 401)
+            {
+                s_logger.warn("Workflow state post failure: Not authorized. The secret value is incorrect!");
+            }
+            else if (res.getStatusLine().getStatusCode() == 405)
+            {
+                s_logger.warn("Workflow state post failure: The request did not use the POST method!");
+            }
+            else if (res.getStatusLine().getStatusCode() == 500)
+            {
+                s_logger.warn("Workflow state post failure: Database error!");
+            }
         }
     }
 }

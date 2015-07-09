@@ -43,6 +43,7 @@ import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.TuvComparator;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.util.GlobalSightCrc;
@@ -480,6 +481,13 @@ public class AutoPropagateThread implements Runnable
                             changedTargetTuv.setState(TuvState.APPROVED);
                         }
                         tuvs.add(changedTargetTuv);
+                        
+                        // delete old preview PDF for TUV changing
+                        long targetPageId = changedTargetTuv.getTargetPage(p_jobId)
+                                .getIdAsLong();
+                        PreviewPDFHelper.deleteOldPdf(targetPageId, p_targetLocale.getId());
+                        PreviewPageHandler.deleteOldPreviewFile(targetPageId, p_targetLocale.getId());
+                    
                     }
                     catch (Exception ignore)
                     {

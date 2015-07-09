@@ -867,7 +867,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         String srcDataType = m_output.getDiplomatAttribute().getDataType();
         boolean isTuvLocalized = false;
         String localizedBy = new String();
-
+        boolean isInCDATA = false;
         for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
             de = (DocumentElement) it.next();
@@ -959,8 +959,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                                 ((TranslatableElement) de).getEscapingChars());
                     }
 
-                    String newchunk = EscapingHelper.handleString4Export(chunk,
-                            m_escapings, srcDataType, false, true, escapingChars);
+				String newchunk = EscapingHelper.handleString4Export(chunk,
+						m_escapings, srcDataType, false, true, escapingChars,
+						isInCDATA);
 
                     parseDiplomatSnippet(addSpanRtl(newchunk));
                     m_stateStack.pop();
@@ -979,6 +980,14 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             null));
 
                     String tmp = decode(((SkeletonElement) de).getSkeleton());
+                    if (tmp.indexOf("<![CDATA[") > -1 && tmp.indexOf("]]") == -1)
+                    {
+                    	isInCDATA = true;
+                    }
+                    if (isInCDATA && tmp.indexOf("]]") > -1)
+                    {
+                    	isInCDATA = false;
+                    }
                     if (OfficeContentPostFilterHelper
                             .isOfficeFormat(srcDataType))
                     {

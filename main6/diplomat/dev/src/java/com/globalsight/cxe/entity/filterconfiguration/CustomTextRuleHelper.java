@@ -627,7 +627,7 @@ public class CustomTextRuleHelper
                 int pcharCount = processedChars;
                 int sidStart = -1;
                 int sidEnd = -1;
-                int jj = j + 1;
+                int jj = j;
                 if (p_customSidRules != null && p_customSidRules.size() > 0)
                 {
                     // find the first line, which is not empty
@@ -636,10 +636,11 @@ public class CustomTextRuleHelper
                     {
                         if (jj < lines.size())
                         {
+                            jj = jj + 1;
                             LineString temp = lines.get(jj);
                             l0 = temp.getLine();
 
-                            while (temp.getLine().trim().length() == 0 && jj < lines.size())
+                            while (l0.trim().length() == 0 && jj < lines.size())
                             {
                                 jj = jj + 1;
                                 temp = lines.get(jj);

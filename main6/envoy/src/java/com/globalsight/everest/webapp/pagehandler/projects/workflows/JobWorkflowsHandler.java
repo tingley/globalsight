@@ -60,6 +60,7 @@ import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
 import com.globalsight.cxe.engine.util.XmlUtils;
 import com.globalsight.cxe.entity.exportlocation.ExportLocation;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.comment.CommentManagerLocal;
@@ -152,6 +153,9 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
+		HttpSession httpSession = p_request.getSession(false);
+		SessionManager sessionMgr = (SessionManager) httpSession
+				.getAttribute(SESSION_MANAGER);
         JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
         Job job = jobSummaryHelper.getJobByRequest(p_request);
         String scorecardFlag = "";
@@ -293,10 +297,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         if("scorecard".equals(p_request.getParameter("action")) || 
         		"scorecard".equals(scorecardFlag))
         {
-        	HttpSession httpSession = p_request.getSession();
-        	SessionManager sessionMgr = (SessionManager) httpSession
-            	.getAttribute(SESSION_MANAGER);
-        	
         	List<Select> categoryList = ScorecardScoreHelper.initSelectList(job.getCompanyId(),
         			PageHandler.getBundle(p_request.getSession()));
         	
@@ -403,12 +403,42 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         	sessionMgr.setAttribute("scorecardDataList", scorecardDataList);
         	sessionMgr.setAttribute("tmpScoreMap", tmpScoreMap);
 		}
-		else if ("downloadQAReport".equals(p_request.getParameter("action")))
+		else if ("checkDownloadQAReport".equals(p_request
+				.getParameter("action")))
 		{
+			ServletOutputStream out = p_response.getOutputStream();
 			String[] wfIds = p_request.getParameter("wfId").split(" ");
 			String jobId = p_request.getParameter("jobId");
 			long companyId = job.getCompanyId();
-			exportQAChecksReport(p_request, p_response, companyId, jobId, wfIds);
+			boolean checkQA = checkQAReport(sessionMgr, companyId, jobId, wfIds);
+			String download = "";
+			if (checkQA)
+			{
+				download = "success";
+			}
+			else
+			{
+				download = "fail";
+			}
+			Map<String, Object> returnValue = new HashMap();
+			returnValue.put("download", download);
+			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+			return;
+		}
+		else if ("downloadQAReport".equals(p_request.getParameter("action")))
+		{
+			Set<Long> jobIdSet = (Set<Long>) sessionMgr
+					.getAttribute("jobIdSet");
+			Set<File> exportFilesSet = (Set<File>) sessionMgr
+					.getAttribute("exportFilesSet");
+			Set<String> localesSet = (Set<String>) sessionMgr
+					.getAttribute("localesSet");
+			long companyId = (Long) sessionMgr.getAttribute("companyId");
+			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
+					companyId, jobIdSet, exportFilesSet, localesSet);
+			sessionMgr.removeElement("jobIdSet");
+			sessionMgr.removeElement("exportFilesSet");
+			sessionMgr.removeElement("localesSet");
 			return;
 		}
         // deal with ajax request.End.
@@ -435,13 +465,12 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 p_context);
     }
 
-	public void exportQAChecksReport(HttpServletRequest p_request,
-			HttpServletResponse p_response, long companyId, String jobId,
-			String[] wfIds)
+	public boolean checkQAReport(SessionManager sessionMgr, long companyId,
+			String jobId, String[] wfIds)
 	{
 		Company company = CompanyWrapper.getCompanyById(companyId);
-		Set<File> exportListFiles = new HashSet<File>();
-		Set<String> locales = new HashSet<String>();
+		Set<File> exportFilesSet = new HashSet<File>();
+		Set<String> localesSet = new HashSet<String>();
 		Set<Long> jobIdSet = new HashSet<Long>();
 		jobIdSet.add(Long.parseLong(jobId));
 		try
@@ -453,24 +482,30 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 					long wfId = Long.parseLong(wfIdStr);
 					Workflow workflow = WorkflowHandlerHelper
 							.getWorkflowById(wfId);
-					locales.add(workflow.getTargetLocale().getLocaleCode());
+					localesSet.add(workflow.getTargetLocale().getLocaleCode());
 					String filePath = WorkflowHandlerHelper
 							.getExportFilePath(workflow);
 					if (filePath != null)
 					{
-						exportListFiles.add(new File(filePath));
+						exportFilesSet.add(new File(filePath));
 					}
 				}
 			}
 
-			// zipped Folder
-			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
-					companyId, jobIdSet, exportListFiles, locales);
+			if (exportFilesSet != null && exportFilesSet.size() > 0)
+			{
+				sessionMgr.setAttribute("jobIdSet", jobIdSet);
+				sessionMgr.setAttribute("exportFilesSet", exportFilesSet);
+				sessionMgr.setAttribute("localesSet", localesSet);
+				sessionMgr.setAttribute("companyId", companyId);
+				return true;
+			}
 		}
 		catch (Exception e)
 		{
 			CATEGORY.error(e);
 		}
+		return false;
 	}
 	
 	

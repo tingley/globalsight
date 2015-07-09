@@ -190,6 +190,7 @@ public class XmlExtractor extends AbstractExtractor implements
     private boolean m_preserveEmptyTag = true;
     private final String ATTRIBUTE_PRESERVE_CLOSED_TAG = "GS_XML_ATTRIBUTE_PRESERVE_CLOSED_TAG";
     public static String DOCTYPE_HTML = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
+    public static String DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
     private List<ExtractRule> rules = new ArrayList<ExtractRule>();
 
@@ -2698,7 +2699,7 @@ public class XmlExtractor extends AbstractExtractor implements
             }
             else
             {
-                content = DOCTYPE_HTML + content;
+                content = DECLARATION + DOCTYPE_HTML + content;
             }
             FileUtil.writeFile(f, content, encoding);
         }

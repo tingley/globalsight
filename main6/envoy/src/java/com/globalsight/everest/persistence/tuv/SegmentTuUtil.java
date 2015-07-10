@@ -70,7 +70,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             + "source_page_leverage_group splg "
             + "WHERE tu.leverage_group_id = splg.lg_id "
             + "AND tu.generate_from = '"
-            + TuImpl.FROM_WORLDSERVER
+            + TuImpl.FROM_WORLDSERVER 
             + "' "
             + "AND splg.sp_id = ? ";
 
@@ -84,6 +84,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             // Update the TU sequence first despite below succeeding or failure.
             SegmentTuTuvIndexUtil.updateTuSequence(conn);
 
+            conn.setAutoCommit(false);
             String tuTable = BigTableUtil.getTuTableJobDataInByJobId(p_jobId);
             StringBuilder strBuilder = new StringBuilder();
             strBuilder = strBuilder
@@ -103,6 +104,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             {
                 ifCacheTus = true;
             }
+            int batchUpdate = 0;
             for (Iterator<Tu> it = p_tus.iterator(); it.hasNext();)
             {
                 TuImpl tu = (TuImpl) it.next();
@@ -135,9 +137,22 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
                 ps.setString(18, tu.getTranslate());
 
                 ps.addBatch();
+
+                batchUpdate++;
+                if (batchUpdate > DbUtil.BATCH_INSERT_UNIT)
+                {
+                    ps.executeBatch();
+                    batchUpdate = 0;
+                }
             }
 
-            ps.executeBatch();
+            // execute the rest of the added batch
+            if (batchUpdate > 0)
+            {
+                ps.executeBatch();
+            }
+
+            conn.commit();
         }
         catch (Exception e)
         {

@@ -233,43 +233,6 @@ public class ClientTester
         System.out.println(result);
     }
 
-    // GBS-3421 (8.5.3) && GBS-3536 (8.5.8)
-    private static File testGetWorkOfflineFiles(Ambassador4Falcon ambassador,
-            String p_accessToken) throws Exception
-    {
-        long taskId = 4985;
-        int workOfflineFileType = 1;
-        String result = ambassador.getWorkOfflineFiles(p_accessToken, taskId,
-                workOfflineFileType);
-        System.out.println(result);
-
-        // Get the file back via the url in "path" key.
-        try
-        {
-            JSONObject object = new JSONObject(result);
-            String path = (String) object.get("path");
-            path = path.replace("\\\\", "/");
-            String fileName = path.substring(path.lastIndexOf("/") + 1);
-            String urlDecode = URLDecoder.decode(path, "UTF-8").replace(" ", "%20");
-
-            URL url = new URL(urlDecode);
-            HttpURLConnection hurl = (HttpURLConnection) url.openConnection();
-            hurl.connect();
-            InputStream is = hurl.getInputStream();
-            File localFile = new File("C:\\local", fileName);
-            saveFile(is, localFile);
-            System.out.println("Report is save to local :: "
-                    + localFile.getAbsolutePath());
-            return localFile;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     private static void saveFile(InputStream is, File file) throws IOException,
             FileNotFoundException
     {

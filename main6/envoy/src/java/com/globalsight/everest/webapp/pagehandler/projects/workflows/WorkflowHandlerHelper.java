@@ -1203,7 +1203,9 @@ public class WorkflowHandlerHelper
 			{
 				if (workflow.getJob().getProject().getAllowManualQAChecks())
 				{
-					if (workflow.getState().equalsIgnoreCase("EXPORTED"))
+					if (workflow.getState().equalsIgnoreCase("EXPORTED")
+							|| workflow.getState()
+									.equalsIgnoreCase("LOCALIZED"))
 					{
 						filePath = getPreviousQAReportFilePath(workflow);
 					}

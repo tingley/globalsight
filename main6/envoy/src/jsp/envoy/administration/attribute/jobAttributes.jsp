@@ -89,7 +89,7 @@
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%=title%></TITLE>
 <style type="text/css">
-
+@import url(/globalsight/dijit/themes/tundra/attribute.css);
 .fileDiv,.listDiv,.intDiv,.floatDiv,.textDiv,.dateDiv{
     width:auto !important;
 	min-width:50px;
@@ -418,7 +418,7 @@ $(document).ready(function(){
   <form name="uploadForm" method="post" action="<%=uploadFileUrl%>" enctype="multipart/form-data" id="uploadForm"  target="ajaxUpload">
 	  <input type="hidden" id="attributeId" name="attributeId" value="-1">
 	  <input type="hidden" id="jobAttributeId" name="jobAttributeId" value="-1">
-	  <table style="width: 650px; ">
+	  <table id = "uploadFormTable" style="width:97%;" class="standardText">
 	    <tr>
 	      <td colspan="2">
 	          <%=bundle.getString("lb_all_files") %>:
@@ -434,9 +434,11 @@ $(document).ready(function(){
 	      <td colspan="2">&nbsp;</td>     
 	    </tr>
 	    <tr>
-	      <td colspan="2"  align="right" valign="middle">
-	          <%=bundle.getString("lb_file")%>:
-	          <input type="file" name="uploadFile" size="55" id="fileUploadDialog" style="height:24px;">
+	    	<td align="left" valign="middle">
+	    		<%=bundle.getString("lb_file")%>:
+	          <input type="file" name="uploadFile" size="60" id="fileUploadDialog" style="height:24px;width:300px">
+	    	</td>
+	      <td align="right" valign="middle">
 	          <input type="button" onclick="uploadFileMethod()" value="<%=bundle.getString("lb_upload")%>">
 	          <input type="button" onclick="$('#uploadFormDiv').dialog('close')" value="<%=bundle.getString("lb_close")%>">
 	      </td>
@@ -473,21 +475,21 @@ function showUploadfileDialog(attributeId)
 	          else
 	          {
 	        	  initFileDialog(attributeId, jobAttributeId, returnData);
-	        	  $("#uploadFormDiv").dialog({width: 700, height: 460, resizable:false});
+	        	  $("#uploadFormDiv").dialog({width:600, height:400,resizable:true});
 	          }
 		   },
 	   	   error:function(error)
 	       {
-          alert(error.message);
-        }
+          	alert(error.message);
+           }
 		});
 	   
 }
 
 function initFileDialog(attributeId, jobAttributeId, data)
 {
-	   document.getElementById("attributeId").value = attributeId;
-	   document.getElementById("jobAttributeId").value = jobAttributeId;
+   document.getElementById("attributeId").value = attributeId;
+   document.getElementById("jobAttributeId").value = jobAttributeId;
     updateFiles(data.files);
 }
 

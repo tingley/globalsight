@@ -531,6 +531,7 @@
     <permission id="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE%>"/>
     <permission id="<%=Permission.REPORTS_POST_REVIEW_QA%>"/>
     <permission id="<%=Permission.REPORTS_TRANSLATIONS_EDIT%>"/>
+    <permission id="<%=Permission.REPORTS_TRANSLATIONS_VERIFICATION%>"/>
     <permission id="<%=Permission.REPORTS_SCORECARD%>"/>
     <permission id="<%=Permission.REPORTS_CHARACTER_COUNT%>"/>
     <permission id="<%=Permission.REPORTS_CUSTOMIZE%>"/>

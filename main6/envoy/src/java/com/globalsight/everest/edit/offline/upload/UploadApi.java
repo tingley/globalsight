@@ -608,7 +608,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 return null;
 
             if (p_reportName.equals(WebAppConstants.TRANSLATION_EDIT)
-                    || WebAppConstants.POST_REVIEW_QA.equals(p_reportName))
+                    || WebAppConstants.POST_REVIEW_QA.equals(p_reportName)
+                    || WebAppConstants.TRANSLATION_VERIFICATION.equals(p_reportName))
             {
                 if ((errPage = createErrorChecker()) != null)
                 {
@@ -828,6 +829,21 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 if (isPRRReport(sheet, segmentHeaderRow + 4))
                 {
                     return loadPRRReportData(sheet, task, tLocale);
+                }
+                else
+                {
+                    m_errWriter
+                            .addFileErrorMsg("The report type is not correct."
+                                    + "\r\nPlease make sure the report type is correct and upload again.");
+                    return m_errWriter.buildReportErroPage().toString();
+                }
+            }
+            else if (WebAppConstants.TRANSLATION_VERIFICATION
+                    .equals(p_reportName))
+            {
+                if (isTVRReport(sheet, segmentHeaderRow))
+                {
+                    return loadTVRReportData(sheet, task, tLocale);
                 }
                 else
                 {
@@ -1437,7 +1453,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         List<IssueImpl> existIssues = null;
 
         int n, m;
-        if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName))
+        if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName)
+                || WebAppConstants.TRANSLATION_VERIFICATION
+                        .equals(p_reportName))
         {
             n = LOAD_DATA + CHECK_SAVE;
             m = COMMENT;
@@ -3499,6 +3517,146 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         if (task.isType(Task.TYPE_REVIEW))
         {
             segId2RequiredTranslation.clear();
+        }
+
+        if (hasSegmentIdErro)
+        {
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        if (jobIds.size() > 1)
+        {
+            m_errWriter
+                    .addFileErrorMsg("The job id is not consistent, you may hava changed some of them."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if ((jobIds.size() == 1)
+                && !jobIds.contains(String.valueOf(task.getJobId())))
+        {
+            m_errWriter
+                    .addFileErrorMsg("The file you are uploading does not belong to this job."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        else if (jobIds.size() == 0)
+        {
+            m_errWriter
+                    .addFileErrorMsg("No job id detected."
+                            + "\r\nPlease make sure they are correct and upload again.");
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        return null;
+    }
+    
+    private boolean isTVRReport(Sheet sheet, int segmentHeaderRow)
+    {
+        // Cell "L7"
+        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
+        // Cell "M7"
+        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 12);
+        // Cell "N7"
+        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 13);
+        // Cell "D7"
+        String modifyTranslation = ExcelUtil.getCellValue(sheet,
+                segmentHeaderRow, 3);
+
+        if ("Job id".equalsIgnoreCase(jobId)
+                && "Segment id".equalsIgnoreCase(segmentId)
+                && "Page name".equalsIgnoreCase(pageName)
+                && modifyTranslation.startsWith("Modify the translation here"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    private String loadTVRReportData(Sheet sheet, Task task,
+            GlobalSightLocale tLocale)
+    {
+        int segmentStartRow = ImplementedCommentsCheckReportGenerator.SEGMENT_START_ROW;
+        Set<String> jobIds = new HashSet<String>();
+
+        segId2RequiredTranslation = new HashMap<Long, String>();
+        segId2PageId = new HashMap<Long, Long>();
+        segId2FailureType = new HashMap<Long, String>();
+        segId2Comment = new HashMap<Long, String>();
+        segId2CommentStatus = new HashMap<Long, String>();
+
+        String segmentId = null;
+        long segIdLong;
+        String updatedText = null;
+        String jobIdText = null;
+        String comment = null;
+        String requiredComment = null;
+        String commentStatus = null;
+        boolean hasSegmentIdErro = false;
+
+        int n = 5;
+        int m = LOAD_DATA - n;
+
+        for (int j = segmentStartRow, row = sheet.getLastRowNum(); j <= row; j++)
+        {
+            if (cancel)
+                return null;
+
+            int x = j * m / row;
+            updateProcess(n + x);
+
+            segmentId = ExcelUtil.getCellValue(sheet, j, 12);
+            if (StringUtil.isEmpty(segmentId))
+            {
+                break;
+            }
+            segIdLong = new Long(Long.parseLong(segmentId));
+
+            updatedText = ExcelUtil.getCellValue(sheet, j, 3);
+            comment = ExcelUtil.getCellValue(sheet, j, 4);
+            requiredComment = ExcelUtil.getCellValue(sheet, j, 5);
+            commentStatus = ExcelUtil.getCellValue(sheet, j, 7);
+
+            if (EditUtil.isRTLLocale(tLocale))
+                updatedText = EditUtil.removeU200F(updatedText);
+
+            jobIdText = ExcelUtil.getCellValue(sheet, j, 11);
+            jobIds.add(jobIdText);
+            if (segmentId != null && !segmentId.equals(""))
+            {
+                if (updatedText != null && !updatedText.equals(""))
+                {
+                    segId2RequiredTranslation.put(segIdLong, updatedText);
+                }
+                if (comment != null && !comment.equals(""))
+                {
+                    if (requiredComment != null
+                            && !requiredComment.equals("")
+                            && !StringUtil.equalsIgnoreSpace(requiredComment,
+                                    ""))
+                    {
+                        segId2Comment.put(segIdLong, requiredComment);
+                    }
+                    segId2CommentStatus.put(segIdLong, commentStatus);
+                }
+                else
+                {
+                    if (requiredComment != null
+                            && !requiredComment.equals("")
+                            && !StringUtil.equalsIgnoreSpace(requiredComment,
+                                    ""))
+                    {
+                        segId2Comment.put(segIdLong, requiredComment);
+                        segId2CommentStatus.put(segIdLong, "query");
+                    }
+                }
+            }
+            else
+            {
+                m_errWriter.addFileErrorMsg("Segment id is lost in row "
+                        + (j + 1) + "\r\n");
+                hasSegmentIdErro = true;
+            }
         }
 
         if (hasSegmentIdErro)

@@ -194,6 +194,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.generat
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.PostReviewQAReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationVerificationReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
@@ -388,6 +389,7 @@ public class Ambassador extends AbstractWebService
     public static final String GENERATE_REVIEWERS_COMMENT_REPORT = "generateReviewersCommentReport";
     public static final String GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT = "generateReviewersCommentSimplifiedReport";
     public static final String GENERATE_POST_REVIEW_QA_REPORT = "generatePostReviewQAReport";
+    public static final String GENERATE_TRANSLATION_VERIFICATION_REPORT = "generateTranslationVerificationReport";
 
     public static final String GENERATE_DITA_QA_REPORT = "generateDITAQAReport";
     public static final String GENERATE_QA_CHECKS_REPORT = "generateQAChecksReport";
@@ -17404,6 +17406,56 @@ public class Ambassador extends AbstractWebService
 		}
 
 		return returnString;
+    }
+    /**
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_jobId
+     *            -- job ID to get report.
+     * @param p_targetLocale
+     *            -- target locale. eg "zh_CN"(case insensitive).
+     * @return -- XML string. -- If fail, it will return an xml string to tell
+     *         error message; -- If succeed, report returning is like
+     *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/TranslationsEditReport-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
+     * @throws WebServiceException
+     */
+    public String generateTranslationVerificationReport(String p_accessToken, 
+            String p_jobId, String p_targetLocale) throws WebServiceException
+    {
+        checkAccess(p_accessToken, GENERATE_TRANSLATION_VERIFICATION_REPORT);
+        String returnString = "";
+        try 
+        {
+            //get and check job ids
+            Long jobId = Long.valueOf(p_jobId);
+            List<Long> jobIdList = new ArrayList<Long>();
+            jobIdList.add(jobId);
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
+            String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
+            if(illegalJobIds.length() > 0)
+            {
+                return makeErrorXml(GENERATE_TRANSLATION_VERIFICATION_REPORT,
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
+            }
+            //get target locales
+            List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
+            targetLocalList.add(getLocaleByName(p_targetLocale));
+            //get report
+            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            TranslationVerificationReportGenerator generator = new TranslationVerificationReportGenerator(
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), userId);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
+            returnString = getReportsUrl(files);
+        } 
+        catch (Exception e) 
+        {
+            logger.error("Error found in generateTranslationVerificationReport.", e);
+            return makeErrorXml(GENERATE_TRANSLATION_VERIFICATION_REPORT,
+                    "Error info: " + e.toString());
+        }
+        
+        return returnString;
     }
     
     /**

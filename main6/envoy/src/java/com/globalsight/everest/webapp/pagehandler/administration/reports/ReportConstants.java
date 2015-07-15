@@ -71,10 +71,12 @@ public interface ReportConstants
     public static final String CHARACTER_COUNT_REPORT = "CharacterCountReport";
     public static final String TRANSLATIONS_EDIT_REPORT = "TranslationsEditReport";
     public static final String POST_REVIEW_QA_REPORT = "PostReviewQAReport";
+    public static final String TRANSLATION_VERIFICATION_REPORT = "TransltionVerificationReport";
 
     public static final String TRANSLATIONS_EDIT_REPORT_ABBREVIATION = "TER";
     public static final String SUMMARY_REPORT = "SummaryReport";
     public static final String POST_REVIEW_REPORT_ABBREVIATION = "PRR";
+    public static final String TRANSLATIONS_VERIFICATION_REPORT_ABBREVIATION = "TVR";
 
     public static final String COMMENTS_REPORT = "CommentsReport";
     public static final String JOB_STATUS_REPORT = "JobStatusReport";
@@ -119,6 +121,8 @@ public interface ReportConstants
             put(ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR,
                     ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR_ABBREVIATION);
             put(POST_REVIEW_QA_REPORT, POST_REVIEW_REPORT_ABBREVIATION);
+            put(TRANSLATION_VERIFICATION_REPORT,
+                    TRANSLATIONS_VERIFICATION_REPORT_ABBREVIATION);
         }
     };
 

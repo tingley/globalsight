@@ -1264,12 +1264,13 @@ function doSegmentFilter(p_segmentFilter)
 <TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"
  style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;
  		font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
-  <COL WIDTH="1%" VALIGN="TOP" CLASS="editorId" ID="editorId" NOWRAP>
-  <COL WIDTH="99%" VALIGN="TOP" CLASS="editorText">
-
+ 		
+  <COL WIDTH="0%" VALIGN="TOP" CLASS="editorId" ID="editorId" NOWRAP>		
+  <COL WIDTH="100%" VALIGN="TOP" CLASS="editorText">
+  
   <THEAD>
     <TR CLASS="tableHeadingGray">
-      <TD ALIGN="CENTER" class="lbid"><%=lb_id%></TD>
+      <TD ALIGN="CENTER" class="lbid"></TD>
       <TD ALIGN="LEFT" class="lcid"><%=tHead.toString()%></TD>
     </TR>
   </THEAD>

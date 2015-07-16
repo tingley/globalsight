@@ -209,7 +209,11 @@ abstract class FuzzyIndex<T extends TM3Data>
         }
         sb.append(" WHERE ");
         sb.append("(idx.fingerprint = ?").addValue(fingerprints.get(0));
-        for (int i = 1; i < fingerprints.size(); i++)
+		// For GBS-3934: Query at most 300 finger-prints to avoid performance
+		// problem for large segment. Most TM data finger-prints number is less
+		// than 300.
+		int maxfpNum = fingerprints.size() <= 300 ? fingerprints.size() : 300;
+        for (int i = 1; i < maxfpNum; i++)
         {
             sb.append(" OR idx.fingerprint = ?").addValue(fingerprints.get(i));
         }

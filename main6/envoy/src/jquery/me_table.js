@@ -134,6 +134,7 @@ var inner_reviewMode=false;
 var searchBySid;
 var searchByUser;
 var setToNormal;
+var isIncontextReview = false;
 $(
 	function(){
 		lbid=$(".lbid");
@@ -148,7 +149,15 @@ $(
 		searchBySid=args.searchBySid;
 		searchByUser = args.searchByUser;
 		setToNormal = args.setToNormal;
-		var pageName=args.pageName=="ED4"?"source":"target";
+		
+		var isNull = false;
+		if (typeof(args.pageName) == "undefined")
+		{
+			isNull = true;
+		}
+		
+		isIncontextReview = isNull ? false : (args.pageName.indexOf("inctxrv") == 0);
+		var pageName=isNull ? "target"  : ((args.pageName.indexOf("ED4") >= 0)?"source":"target");
 
 		// Click "List" on "me_source.jsp" or "me_target.jsp".
 		if(main.localData && reuseData)
@@ -212,16 +221,22 @@ function recursion(data,beginIndex, se_able){
 function renderHtml(item, se_able){
 	var idPageHtml=$("#idPageHtml");
 	var temp=trnode.clone(true);
+	var displayId = true;
 	if(modeFrom == "target")
 	{
 		temp.attr("id","tr_target_"+item.tuId);
+		
+		if (isIncontextReview)
+		{
+			displayId = false;
+		}
 	}
 	else if(modeFrom == "source")
 	{
 		temp.attr("id","tr_source_"+item.tuId);
 	}
 	temp.children('td').eq(0).attr("id","seg"+item.tuId);
-	temp.children('td').eq(0).text(item.tuId);
+	temp.children('td').eq(0).text(displayId? item.tuId : "");
 
 	temp.children('td').eq(1).attr("id","seg"+item.tuId+"_"+item.tuvId+"_"+item.subId);
 

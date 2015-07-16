@@ -449,6 +449,17 @@ TR.standardText
         </TR>
         </amb:permission>
         
+        	<amb:permission name="<%=Permission.REPORTS_TRANSLATIONS_VERIFICATION%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+           	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportTranslationVerification","TranslationVerificationReport")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportNew'; return true"><%=bundle.getString("translation_verification_report")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("review_translation_verification_report_desc")%></TD>
+        </TR>
+        </amb:permission>
+        
         <amb:permission name="<%=Permission.REPORTS_TRANSLATION_PROGRESS%>">
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
             <TD>

@@ -465,6 +465,11 @@ public class UploadPageHandlerHelper implements WebAppConstants
                 {
                     reportType = WebAppConstants.POST_REVIEW_QA;
                 }
+                else if (reportInfo
+                        .equals(ReportConstants.TRANSLATIONS_VERIFICATION_REPORT_ABBREVIATION))
+                {
+                    reportType = WebAppConstants.TRANSLATION_VERIFICATION;
+                }
 
                 if (reportType != null && !"".equals(reportType))
                 {
@@ -503,9 +508,15 @@ public class UploadPageHandlerHelper implements WebAppConstants
                 {
                     reportType = WebAppConstants.TRANSLATION_EDIT;
                 }
-                else
+                else if (res.getString("lb_post_review_qa_report").equals(
+                        titleInfo))
                 {
                     reportType = WebAppConstants.POST_REVIEW_QA;
+                }
+                else if (res.getString("lb_translation_verification_report")
+                        .equals(titleInfo))
+                {
+                    reportType = WebAppConstants.TRANSLATION_VERIFICATION;
                 }
             }
             result[0] = isReport;

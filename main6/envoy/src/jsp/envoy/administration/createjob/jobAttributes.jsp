@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/error.jsp"
          session="true"
@@ -7,28 +8,34 @@
 <head>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><c:out value="${lb_job_attributes}"/></TITLE>
-<link rel="stylesheet" type="text/css" href="/globalsight/dijit/themes/tundra/attribute.css"/>
-<link rel="stylesheet" type="text/css" href="/globalsight/dojox/form/resources/FileUploader.css"/>
-<link rel="stylesheet" type="text/css" href="/globalsight/includes/css/createJob.css"/>
 <style type="text/css">
-.tundra .dijitButtonText {
-    width:100%;
-    height:20px;
-	text-align: center;
-	padding: 0 0.3em;
-}
+@import url(/globalsight/dijit/themes/tundra/attribute.css);
+.fileDiv{
+	width:auto !important;
+	min-width:50px;
+	display:inline-block;
+ 	min-height:20px;
+	cursor:pointer;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #C0C0C0 #C0C0C0 #9B9B9B;
+	-moz-border-top-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-bottom-colors: none;
+	-moz-border-left-colors: none;
+	border-image: none;
+	border-radius: 2px;
+	padding: 0.1em 0.2em 0.2em;
+	background: #FFF url("dijit/themes/tundra/images/buttonEnabled.png") repeat-x scroll left bottom;
+ }
+
 </style>
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/jQueryUI.redmond.css"/>
 <SCRIPT type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<SCRIPT type="text/javascript" src="/globalsight/dojo/dojo.js" djConfig="parseOnLoad: true"></SCRIPT>
 <script type="text/javascript" src="/globalsight/includes/report/calendar.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <SCRIPT type="text/javascript">
-dojo.require("dijit.Dialog");
-dojo.require("dijit.form.Button");
-dojo.require("dijit.form.MultiSelect");
-dojo.require("dijit.form.FilteringSelect");
-dojo.require("dijit.form.TextBox");
-dojo.require("dojo.io.iframe");
 
 $(document).ready(function() {
 	$(".standardBtn_mouseout").mouseover(function(){
@@ -205,58 +212,68 @@ function editTextValue(obj, attributeId)
    	}
 }
 
-function uploadFile() {
-	dojo.io.iframe.send({
-		form : dojo.byId("uploadForm"),
-		url : "/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=editFile",
-		method : 'POST',
-		contentType : "multipart/form-data",
-		handleAs : "text",
-		handle : function(response, ioArgs) {
-			if (response instanceof Error) {
-				alert("Failed to upload file, please try later.");
-			} else {
-				var id = dojo.byId("attributeName").value;
-				var returnData = eval(response);
-				if (returnData.error) {
-					alert(returnData.error);
-				} else {
-					dojo.byId("file" + id).innerHTML = returnData.label;
-					updateFiles(returnData.files);
-				}
-			}
-		}
-	});
+function uploadFileMethod() 
+{
+	$("#uploadForm").submit();
+	setTimeout("getAllFiles()", 1000);
 }
 
+function getAllFiles()
+{
+	   var attributeName = document.getElementById("attributeName").value;
+	   $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=getFiles",
+		   data: "attributeName="+attributeName,
+		   success: function(data){
+			  var id = document.getElementById("attributeName").value;
+		      var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	        	  document.getElementById("file" + id).innerHTML = returnData.label;
+            	  updateFiles(returnData.files);
+	          }
+		   },
+	   	   error:function(error)
+	       {
+               alert(error.message);
+           }
+		});
+}
 
-function showUploadfileDialog(attributeName) {
-
-	var jsonOjb = {
-		attributeName : attributeName
-	}
-
-	dojo.xhrPost({
-		url : "/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=getFiles",
-		handleAs : "text",
-		content : jsonOjb,
-		load : function(data) {
-			var returnData = eval(data);
-			if (returnData.error) {
-				alert(returnData.error);
-			} else {
-				initFileDialog(attributeName, returnData);
-				dijit.byId('uploadFormDiv').show();
-			}
-		},
-		error : function(error) {
-			alert(error.message);
-		}
+function showUploadfileDialog(attributeName)
+{
+   $.ajax({
+	   type: "POST",
+	   dataType : "text",
+	   url: "/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=getFiles",
+	   data: "attributeName="+attributeName,
+	   success: function(data){
+	      var returnData = eval(data);
+   		  if (returnData.error)
+          {
+      	    alert(returnData.error);
+          }
+          else
+          {
+        	  initFileDialog(attributeName, returnData);
+        	  $("#uploadFormDiv").dialog({width: 600, height: 400, resizable:false});
+          }
+	   },
+   	   error:function(error)
+       {
+         alert(error.message);
+       }
 	});
 }
 
 function updateFiles(files) {
-	var selectBox = dojo.byId("allFiles");
+	var selectBox = document.getElementById("allFiles");
 	var options = selectBox.options;
 	for ( var i = options.length - 1; i >= 0; i--) {
 		selectBox.remove(i);
@@ -268,31 +285,22 @@ function updateFiles(files) {
 	setOptionColor();
 }
 
-function updateFilesLabel(files) {
-	var label = "";
-	for ( var i = 0; i < files.length; i++) {
-		if (label.lenght > 0) {
-			label.concat("<br>");
-		}
-		label.concat(files[i]);
-	}
-}
-
-function initFileDialog(attributeName, data) {
-	dojo.byId("attributeName").value = attributeName;
-	updateFiles(data.files);
+function initFileDialog(attributeName, data)
+{
+   document.getElementById("attributeName").value = attributeName;
+   updateFiles(data.files);
 }
 
 function addFile(file) {
 	var option = document.createElement("option");
 	option.appendChild(document.createTextNode(file));
 	option.setAttribute("value", file);
-	dojo.byId("allFiles").appendChild(option);
+	document.getElementById("allFiles").appendChild(option);
 }
 
 function deleteSelectFiles() {
 	var selectFiles = new Array();
-	var selectBox = dojo.byId("allFiles");
+	var selectBox = document.getElementById("allFiles");
 	var options = selectBox.options;
 
 	for ( var i = options.length - 1; i >= 0; i--) {
@@ -305,35 +313,35 @@ function deleteSelectFiles() {
 		return;
 	}
 
-	var attributeName = dojo.byId("attributeName").value;
+	var attributeName = document.getElementById("attributeName").value;
 
-	var jsonOjb = {
-		attributeName : attributeName,
-		deleteFiles : selectFiles
-	}
-
-	dojo.xhrPost({
-		url : "/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=deleteFiles",
-		handleAs : "text",
-		content : jsonOjb,
-		load : function(data) {
-			var returnData = eval(data);
-			if (returnData.error) {
-				alert(returnData.error);
-			} else {
-				updateFiles(returnData.files);
-				dojo.byId("file" + attributeName).innerHTML = returnData.label;
-				dojo.byId("input" + attributeName).value = returnData.label;
-			}
-		},
-		error : function(error) {
-			alert(error.message);
-		}
+   $.ajax({
+	   type: "POST",
+	   dataType : "text",
+	   url: "/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=deleteFiles",
+	   data: "attributeName="+attributeName+"&deleteFiles="+selectFiles,
+	   success: function(data){
+	      var returnData = eval(data);
+   		  if (returnData.error)
+          {
+      	    alert(returnData.error);
+          }
+          else
+          {
+        	  updateFiles(returnData.files);
+        	  document.getElementById("file" + attributeName).innerHTML = returnData.label;
+        	  document.getElementById("input" + attributeName).value = returnData.label;
+          }
+	   },
+   	   error:function(error)
+       {
+         alert(error.message);
+       }
 	});
 }
 
 function setOptionColor() {
-	var options = dojo.byId("allFiles").options;
+	var options = document.getElementById("allFiles").options;
 	var flag = true;
 	for ( var i = 0; i < options.length; i++) {
 		if (flag) {
@@ -467,14 +475,10 @@ function showCalendar(attributeId) {
 						<input type="hidden" id="jobAtt${ja.attribute.id}" name="attributeName" value="${ja.attribute.name}">
 						<input type="hidden" id="input${ja.attribute.id}_req" value="${ja.attribute.required}">
 						<input type="hidden" id="input${ja.attribute.name}" name="inputValue" value="">
-						<div class="dijitReset dijitInline dijitButtonNode" 
-	                           onclick="showUploadfileDialog('${ja.attribute.name}')"
-	                           style="margin:3px; text-align:left;">
-							<div id="file${ja.attribute.name}">
-		                     	${ja.fileLabel}
-							</div>
+                       	<div class="fileDiv"  onclick="showUploadfileDialog('${ja.attribute.name}')" style="margin:3px; text-align:left;">
+                            <div id="file${ja.attribute.name}">${ja.fileLabel}</div>
 							<div style="width:35px;">&nbsp;</div>
-						</div>	    		
+                        </div>	    		
 		    		</td>
 		    	</c:when>
     		</c:choose>
@@ -492,37 +496,38 @@ function showCalendar(attributeId) {
 </table>
 </form>
 
-<div dojoType="dijit.Dialog" id="uploadFormDiv" title="<c:out value='${lb_update_job_attributes}'/>"
-    execute="" style="display:none">
-  
-  <FORM NAME="uploadForm" METHOD="POST" ACTION="/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=editFile"
-        ENCTYPE="multipart/form-data" id="uploadForm">
-  <input type="hidden" id="attributeName" name="attributeName" value="-1">
-  <table style="width: 400px;">
-    <tr>
-      <td colspan="2">
-          <c:out value="${lb_all_files}"/>:
-          <select name="allFiles" multiple="multiple" id="allFiles" size="10" style="width:100%;">
-		  </select>
-		  <div align="right">
-		  <button type="button" dojoType="dijit.form.Button" name="deleteFiles" id="deleteFiles" onclick="deleteSelectFiles()"><c:out value="${lb_delete}"/></button>
-		  </div>
-	  </td>
-    </tr>
-    <tr>
-      <td colspan="2">&nbsp;</td>
-    </tr>
-    <tr>
-      <td colspan="2"  align="right">
-          <c:out value="${lb_file}"/>:
-          <input type="file" name="uploadFile" id="fileUploadDialog" size="35" style="height:24px;">
-          <button dojoType="dijit.form.Button" type="button" onclick="uploadFile()"><c:out value="${lb_upload}"/></button>
-          <button dojoType="dijit.form.Button" type="button" onclick="dijit.byId('uploadFormDiv').hide();"><c:out value="${lb_close}"/></button>
-      </td>
-    </tr>
-  </table>
-  </FORM>
+<div id="uploadFormDiv" title="<c:out value='${lb_update_job_attributes}'/>"  execute="" style="display:none;">
+  <form name="uploadForm" method="post" action="/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=editFile" enctype="multipart/form-data" id="uploadForm"  target="ajaxUpload">
+	  <input type="hidden" id="attributeName" name="attributeName" value="-1">
+	  <table style="width:97%;" class="standardText">
+	    <tr>
+	      <td colspan="2">
+	          <c:out value="${lb_all_files}"/>:
+	          <select name="allFiles" multiple="multiple" id="allFiles" size="15" style="width: 100%;">
+			  </select>
+			  <div align="right">
+			  <input type="button" name="deleteFiles" id="deleteFiles" onclick="deleteSelectFiles()" value="<c:out value="${lb_delete}"/>">
+			  </div>
+		  </td>
+	    </tr>
+	    <tr>
+	      <td colspan="2">&nbsp;</td>     
+	    </tr>
+	    <tr>
+	    <td align="left" valign="middle">
+	    		<c:out value="${lb_file}"/>:
+	          <input type="file" name="uploadFile" size="60" id="fileUploadDialog" style="height:24px;width:300px">
+	    	</td>
+	      <td align="right" valign="middle">
+	          <input type="button" onclick="uploadFileMethod()" value="<c:out value="${lb_upload}"/>">
+	          <input type="button" onclick="$('#uploadFormDiv').dialog('close')" value="<c:out value="${lb_close}"/>">
+	      </td>
+	    </tr>
+	  </table>
+  </form>
 </div>
+<!-- for uploading file asynchronous -->
+<iframe id="ajaxUpload" name="ajaxUpload" style="display:none"></iframe>
 
 </body>
 </html>

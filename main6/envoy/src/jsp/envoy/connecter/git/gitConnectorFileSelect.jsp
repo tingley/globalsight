@@ -50,7 +50,7 @@ String gitConnectorId = request.getParameter("gitConnectorId");
 GitConnector gc = GitConnectorManagerLocal.getGitConnectorById(Long.parseLong(gitConnectorId));
 GitConnectorHelper gcHelper = new GitConnectorHelper(gc);
 String gitFolderPath = gcHelper.getGitFolder().getPath();
-int length = gitFolderPath.lastIndexOf(File.separator) + 1 + gc.getName().length() + 3;
+int length = gitFolderPath.length() + 1;
 session.setAttribute("gitConnectorId", gitConnectorId);
 %>
 <body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0">

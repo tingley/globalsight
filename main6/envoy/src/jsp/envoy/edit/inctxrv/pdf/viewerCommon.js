@@ -185,6 +185,10 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
   	  if (isOfficeXml)
   	  {
   	      textLayerContent = textLayerDiv.innerText;
+  	      if (typeof(textLayerContent) == "undefined")
+  	      {
+  	          textLayerContent = $(textLayerDiv).text();
+  	      }
   	      textLayerContent = handleStringForOffice(textLayerContent, rnIndex);
   	  }
   	  

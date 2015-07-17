@@ -71,7 +71,7 @@ public interface ReportConstants
     public static final String CHARACTER_COUNT_REPORT = "CharacterCountReport";
     public static final String TRANSLATIONS_EDIT_REPORT = "TranslationsEditReport";
     public static final String POST_REVIEW_QA_REPORT = "PostReviewQAReport";
-    public static final String TRANSLATION_VERIFICATION_REPORT = "TransltionVerificationReport";
+    public static final String TRANSLATION_VERIFICATION_REPORT = "TranslationVerificationReport";
 
     public static final String TRANSLATIONS_EDIT_REPORT_ABBREVIATION = "TER";
     public static final String SUMMARY_REPORT = "SummaryReport";

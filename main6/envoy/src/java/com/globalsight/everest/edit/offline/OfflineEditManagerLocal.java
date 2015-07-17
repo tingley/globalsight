@@ -1127,7 +1127,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
             if (p_reportName.equals(WebAppConstants.TRANSLATION_EDIT)
                     || WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName)
-                    || WebAppConstants.POST_REVIEW_QA.equals(p_reportName))
+                    || WebAppConstants.POST_REVIEW_QA.equals(p_reportName)
+                    ||WebAppConstants.TRANSLATION_VERIFICATION.equals(p_reportName))
             {
                 m_status.setUseProcess(true);
             }
@@ -1148,7 +1149,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             m_status.setCounter(1);
             m_status.setPercentage(100);
 
-            if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName))
+            if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName)
+                    || WebAppConstants.TRANSLATION_VERIFICATION
+                            .equals(p_reportName))
             {
                 logUploadResultForReport(p_user, p_task, p_fileName);
             }

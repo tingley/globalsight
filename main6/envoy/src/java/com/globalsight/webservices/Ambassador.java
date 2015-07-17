@@ -17433,7 +17433,7 @@ public class Ambassador extends AbstractWebService
      *            -- target locale. eg "zh_CN"(case insensitive).
      * @return -- XML string. -- If fail, it will return an xml string to tell
      *         error message; -- If succeed, report returning is like
-     *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/TranslationsEditReport-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
+     *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsVerificationReport/20140219/TVR-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
      * @throws WebServiceException
      */
     public String generateTranslationVerificationReport(String p_accessToken, 
@@ -18155,6 +18155,7 @@ public class Ambassador extends AbstractWebService
      *            -- 4 : Reviewer Comments Report
      *            -- 5 : Reviewer Comments Report (Simplified)
      *            -- 6 : Post Review QA Report
+     *            -- 7 : Translation Verification Report
      *
      * @return -- XML string. -- If fail, it will return an xml string to tell
      *         error message; -- If succeed, report returning is like
@@ -18181,7 +18182,8 @@ public class Ambassador extends AbstractWebService
      * @param p_taskId
      *            -- task ID to upload file to.
      * @param p_workOfflineFileType
-     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report",
+     *               "Translations Edit Report", "Post Review QA Report" or "Translation Verification Report".
      *            -- 2 : Offline Translation Kit
      * @param p_fileName
      *            -- the upload file name
@@ -18218,7 +18220,8 @@ public class Ambassador extends AbstractWebService
      * @param p_identifyKey
      *            -- identifyKey to help locate where the uploaded file is.
      * @param p_workOfflineFileType
-     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report",
+     *              "Translations Edit Report", "Post Review QA Report" or "Translation Verification Report".
      *            -- 2 : Offline Translation Kit
      * @return -- Empty if succeed; if fail, return corresponding message.
      * 

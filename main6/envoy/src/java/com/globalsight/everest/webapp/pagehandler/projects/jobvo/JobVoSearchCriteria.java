@@ -813,7 +813,7 @@ public class JobVoSearchCriteria
         }
     }
 
-    private List getMyProjects(String userid)
+    public List getMyProjects(String userid)
     {
         List<Long> condition = new ArrayList<Long>();
         List allProjects = (List) ProjectHandlerHelper.getProjectByUser(userid);

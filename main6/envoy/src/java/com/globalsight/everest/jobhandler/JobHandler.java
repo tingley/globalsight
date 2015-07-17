@@ -545,9 +545,9 @@ public interface JobHandler
      * @throws JobException
      * @author Vincent Yan, 2011/01/12
      */
-    public String[] getJobIdsByCompany(String p_companyId, int p_offset,
-            int p_count, boolean p_isDescOrder) throws RemoteException,
-            JobException;
+	public String[] getJobIdsByCompany(String p_companyId, int p_offset,
+			int p_count, boolean p_isDescOrder, String currentUserId)
+			throws RemoteException, JobException;
 
     /**
      * Get job IDs with special job state and range of fetching records
@@ -565,9 +565,9 @@ public interface JobHandler
      * @throws JobException
      * @author Vincent Yan, 2011/01/12
      */
-    public String[] getJobIdsByState(String p_companyId, String p_state,
-            int p_offset, int p_count, boolean p_isDescOrder)
-            throws RemoteException, JobException;
+	public String[] getJobIdsByState(String p_companyId, String p_state,
+			int p_offset, int p_count, boolean p_isDescOrder,
+			String currentUserId) throws RemoteException, JobException;
     
     /**
      * Get job IDs with special creator userName and range of fetching records
@@ -584,9 +584,10 @@ public interface JobHandler
      * @throws RemoteException
      * @throws JobException
      */
-    public String[] getJobIdsByCreator(long p_companyId, String p_creatorUserId,
-            int p_offset, int p_count, boolean p_isDescOrder)
-            throws RemoteException, JobException;
+	public String[] getJobIdsByCreator(long p_companyId,
+			String p_creatorUserId, int p_offset, int p_count,
+			boolean p_isDescOrder, String currentUserId)
+			throws RemoteException, JobException;
 
     /**
      * Get counts of every job state with speical company id

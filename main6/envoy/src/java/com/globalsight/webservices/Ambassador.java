@@ -199,6 +199,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.generat
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoSearchCriteria;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
@@ -13596,42 +13597,20 @@ public class Ambassador extends AbstractWebService
         String loggedComName = loggedUserObj.getCompanyName();
 
         ActivityLog.Start activityStart = null;
-        StringBuffer jobIdList = new StringBuffer();
+        String jobIds = new String();
         try
-        {
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", loggedUserName);
-            activityStart = ActivityLog.start(Ambassador.class,
-                    "fetchJobIdsPerCompany(p_accessToken)", activityArgs);
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", loggedUserName);
+			activityStart = ActivityLog.start(Ambassador.class,
+					"fetchJobIdsPerCompany(p_accessToken)", activityArgs);
 
-            JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
-            JobSearchParameters jsParm = new JobSearchParameters();
-            // all jobs for all companies to be filtered
-            Collection allJobs = jobHandler.getJobs(jsParm);
-            if (allJobs != null && allJobs.size() > 0)
-            {
-                Iterator allJobsIter = allJobs.iterator();
-                while (allJobsIter.hasNext())
-                {
-                    Job job = (Job) allJobsIter.next();
-                    long comId = job.getCompanyId();
-                    String jobComName = ServerProxy.getJobHandler()
-                            .getCompanyById(comId).getCompanyName();
-                    if (loggedComName != null && jobComName != null
-                            && loggedComName.equals(jobComName))
-                    {
-                        if (jobIdList.length() == 0)
-                        {
-                            jobIdList.append("" + job.getId());
-                        }
-                        else
-                        {
-                            jobIdList.append("," + job.getId());
-                        }
-                    }
-                }
-            }
-        }
+			JobSearchParameters sp = new JobSearchParameters();
+			sp.setUser(loggedUserObj);
+			JobVoSearchCriteria searcher = new JobVoSearchCriteria();
+			List result = searcher.search(sp);
+			jobIds = getJobIds(result);
+		}
         catch (Exception e)
         {
             String message = "Failed to retrive all job IDs for current company";
@@ -13647,9 +13626,28 @@ public class Ambassador extends AbstractWebService
             }
         }
 
-        return jobIdList.toString();
+        return jobIds;
     }
 
+    private String getJobIds(List result)
+	{
+		StringBuffer jobIdList = new StringBuffer();
+		for (int i = 0; i < result.size(); i++)
+		{
+			Object[] obs = (Object[]) result.get(i);
+			if (jobIdList.length() == 0)
+			{
+				jobIdList.append("" + obs[0].toString());
+			}
+			else
+			{
+				jobIdList.append("," + obs[0].toString());
+			}
+		}
+		return jobIdList.toString();
+	}
+
+    
     /**
      * Get jobs according with special offset and count of fetching records in
      * current company
@@ -13685,6 +13683,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
+            User user = this.getUser(userName);
+            CompanyThreadLocal.getInstance().setValue(user.getCompanyName());
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("offset", p_offset);
@@ -13699,16 +13699,16 @@ public class Ambassador extends AbstractWebService
 
             Company company = getCompanyInfo(userName);
             if (company != null)
-            {
-                String[] ids = jobHandler.getJobIdsByCompany(
-                        String.valueOf(company.getId()), p_offset, p_count,
-                        p_isDescOrder);
-                if (ids != null && ids.length > 0)
-                {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
-                }
-            }
+			{
+				String[] ids = jobHandler.getJobIdsByCompany(
+						String.valueOf(company.getId()), p_offset, p_count,
+						p_isDescOrder, user.getUserId());
+				if (ids != null && ids.length > 0)
+				{
+					result = fetchJobsPerCompany(p_accessToken, ids, true,
+							true, false);
+				}
+			}
             return result;
         }
         catch (Exception e)
@@ -13767,6 +13767,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
+            User user = this.getUser(userName);
+            CompanyThreadLocal.getInstance().setValue(user.getCompanyName());
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("state", p_state);
@@ -13781,16 +13783,16 @@ public class Ambassador extends AbstractWebService
 
             Company company = getCompanyInfo(userName);
             if (company != null)
-            {
-                String[] ids = jobHandler.getJobIdsByState(
-                        String.valueOf(company.getId()), p_state, p_offset,
-                        p_count, p_isDescOrder);
-                if (ids != null && ids.length > 0)
-                {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
-                }
-            }
+			{
+				String[] ids = jobHandler.getJobIdsByState(
+						String.valueOf(company.getId()), p_state, p_offset,
+						p_count, p_isDescOrder, user.getUserId());
+				if (ids != null && ids.length > 0)
+				{
+					result = fetchJobsPerCompany(p_accessToken, ids, true,
+							true, false);
+				}
+			}
 
             return result;
         }
@@ -13848,6 +13850,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
+            User user = this.getUser(userName);
+            CompanyThreadLocal.getInstance().setValue(user.getCompanyName());
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("creatorUserName", p_creatorUserName);
@@ -13883,15 +13887,16 @@ public class Ambassador extends AbstractWebService
                 }
             }
             if (company != null)
-            {
-                String[] ids = jobHandler.getJobIdsByCreator(
-                        company.getId(), creatorUserId,p_offset, p_count, p_isDescOrder);
-                if (ids != null && ids.length > 0)
-                {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
-                }
-            }
+			{
+				String[] ids = jobHandler.getJobIdsByCreator(company.getId(),
+						creatorUserId, p_offset, p_count, p_isDescOrder,
+						user.getUserId());
+				if (ids != null && ids.length > 0)
+				{
+					result = fetchJobsPerCompany(p_accessToken, ids, true,
+							true, false);
+				}
+			}
 
             return result;
         }
@@ -14150,33 +14155,44 @@ public class Ambassador extends AbstractWebService
                             "fetchJobsPerCompany(p_accessToken, p_jobIds, p_returnSourcePageInfo, p_returnWorkflowInfo, p_returnJobAttributeInfo",
                             activityArgs);
 
+            String jobIds = fetchJobIdsPerCompany(p_accessToken);
+            String[] ids = null;
+            List<String> idList = new ArrayList();
+            if (jobIds != null && jobIds.trim().length() > 0)
+            {
+                ids = jobIds.split(",");
+                idList = Arrays.asList(ids);
+            }
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
             // handle job one by one;if jobId is invalid or does not belong to
             // current company,ignore it.
             for (int i = 0; i < p_jobIds.length; i++)
             {
                 try
-                {
-                    long jobID = Long.parseLong(p_jobIds[i]);
-                    Job job = jobHandler.getJobById(jobID);
-                    if (job == null)
-                        continue;
+				{
+					if (idList.contains(p_jobIds[i]))
+					{
+						long jobID = Long.parseLong(p_jobIds[i]);
+						Job job = jobHandler.getJobById(jobID);
+						if (job == null)
+							continue;
 
-                    if (!isInSameCompany(loggedUserName,
-                            String.valueOf(job.getCompanyId())))
-                    {
-                        if (!UserUtil.isSuperAdmin(loggedUserName)
-                                && !UserUtil.isSuperPM(loggedUserName))
-                        {
-                            continue;
-                        }
-                    }
+						if (!isInSameCompany(loggedUserName,
+								String.valueOf(job.getCompanyId())))
+						{
+							if (!UserUtil.isSuperAdmin(loggedUserName)
+									&& !UserUtil.isSuperPM(loggedUserName))
+							{
+								continue;
+							}
+						}
 
-                    String singleJobXml = handleSingleJob(job, tz,
-                            p_returnSourcePageInfo, p_returnWorkflowInfo,
-                            p_returnJobAttributeInfo);
-                    xml.append(singleJobXml);
-                }
+						String singleJobXml = handleSingleJob(job, tz,
+								p_returnSourcePageInfo, p_returnWorkflowInfo,
+								p_returnJobAttributeInfo);
+						xml.append(singleJobXml);
+					}
+				}
                 catch (Exception e)
                 {
 

@@ -366,6 +366,11 @@ public class XmlExtractor extends AbstractExtractor implements
         {
             return;
         }
+        
+        if (s.matches(".*The entity \"[^\"]*?\" was referenced, but not declared."))
+        {
+            return;
+        }
 
         throw new SAXException("XML parse error at\n  line "
                 + e.getLineNumber() + "\n  column " + e.getColumnNumber()

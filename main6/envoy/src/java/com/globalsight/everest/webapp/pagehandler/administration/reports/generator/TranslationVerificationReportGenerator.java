@@ -102,8 +102,8 @@ import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
 /**
- * This Generator is used for creating Translations Verification Report (Include
- * Translations Verification Report in offline download report page)
+ * This Generator is used for creating Translation Verification Report (Include
+ * Translation Verification Report in offline download report page)
  */
 public class TranslationVerificationReportGenerator implements ReportGenerator,
         Cancelable
@@ -693,7 +693,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                             m_rtlTargetLocale, p_job.getId());
                     Cell cell_B = getCell(currentRow, col);
                     cell_B.setCellValue(previousSegments);
-                    if (!previousSegments.endsWith(currentSegments))
+                    if (StringUtil.isNotEmpty(previousSegments)
+                            && !previousSegments.endsWith(currentSegments))
                     {
                         trgStyle = m_rtlTargetLocale ? getRtlContentStyle1(p_workBook)
                                 : getContentStyle1(p_workBook);

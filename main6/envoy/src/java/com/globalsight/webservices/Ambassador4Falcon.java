@@ -2948,12 +2948,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            -- 4 : Reviewer Comments Report
      *            -- 5 : Reviewer Comments Report (Simplified)
      *            -- 6 : Post Review QA Report
-     *            -- 7  : Biligual Trados RTF
-	 *			   -- 8  : Trados 7 TTX
-	 *			   -- 9  : OmegaT
-	 *			   -- 10 : XLiff 1.2
-	 *			   -- 11 : Xliff 2.0
-	 *			   -- 12 : RTF List view
+     *            -- 7 : Translation Verification Report
+     *            -- 8  : Biligual Trados RTF
+	 *			   -- 9  : Trados 7 TTX
+	 *			   -- 10  : OmegaT
+	 *			   -- 11 : XLiff 1.2
+	 *			   -- 12 : Xliff 2.0
+	 *			   -- 13 : RTF List view
 	 *			   -- 14 : Reviewer Comments Report with Compact Tags
 	 *			   -- 15 : Reviewer Comments Report (Simplified) with Compact Tags
      *@param p_workofflineFileTypeOption
@@ -2991,7 +2992,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * @param p_taskId
      *            -- task ID to upload file to.
      * @param p_workOfflineFileType
-     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report",
+     *             "Translations Edit Report", "Post Review QA Report" or "Translation Verification Report".
      *            -- 2 : Offline Translation Kit
      * @param p_fileName
      *            -- the upload file name
@@ -3024,7 +3026,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * @param p_identifyKey
      *            -- identifyKey to help locate where the uploaded file is.
      * @param p_workOfflineFileType
-     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report",
+     *             "Translations Edit Report", "Post Review QA Report" or "Translation Verification Report".
      *            -- 2 : Offline Translation Kit
      * @return -- Empty if succeed; if fail, return corresponding message.
      * 

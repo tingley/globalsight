@@ -42,6 +42,7 @@ import com.globalsight.util.JsonUtil;
 import com.globalsight.util.UTC;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.edit.SegmentUtil;
 
 public class TMSearchEditEntryHandlerHelper
 {
@@ -71,6 +72,7 @@ public class TMSearchEditEntryHandlerHelper
         setLableToJsp(request, bundle, "msg_tm_search_add_source_null");
         setLableToJsp(request, bundle, "msg_tm_search_add_target_null");
         setLableToJsp(request, bundle, "msg_tm_search_no_changed");
+        setLableToJsp(request, bundle, "msg_internal_moved_continue");
     }
 
     /**
@@ -142,6 +144,30 @@ public class TMSearchEditEntryHandlerHelper
         SegmentManager segmentManagerTarget = new SegmentManager();
         segmentManagerTarget.setInputSegment(trgSegment, "", "html");
         segmentManagerTarget.getCompact();
+        HashMap<String, String> sourceInternals = segmentManagerSource.getPseudoData().getInternalTexts();
+        HashMap<String, String> targetInternals = segmentManagerTarget.getPseudoData().getInternalTexts();
+        
+        if (sourceInternals != null)
+        {
+            List<String> addedKeys = new ArrayList<String>();
+            for (String sourceKey : sourceInternals.keySet())
+            {
+                if (!targetInternals.containsKey(sourceKey))
+                {
+                    addedKeys.add(sourceKey);
+                }
+            }
+
+            if (addedKeys.size() > 0)
+            {
+                for (String sourceKey : addedKeys)
+                {
+                    segmentManagerTarget.getPseudoData().addInternalTags(
+                            sourceKey, sourceInternals.get(sourceKey));
+                }
+            }
+        }
+        
         String targetErrorCheck = segmentManagerTarget.errorCheck(newTarget,
                 trgSegment, 0, "UTF8", 0, "UTF8");
         if (targetErrorCheck != null)
@@ -278,6 +304,30 @@ public class TMSearchEditEntryHandlerHelper
         source = source.replace("\n", "\\n");
         source = source.replace("\t", "\\t");
         String ptagsSource = segmentManagerSource.getPtagString();
+        SegmentUtil sutil = new SegmentUtil(null);
+        List<String> sourceInternals = sutil.getInternalWords(srcSegment);
+        
+        if (sourceInternals != null && sourceInternals.size() > 0)
+        {
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < sourceInternals.size(); i++)
+            {
+                String internal = sourceInternals.get(i);
+
+                sb.append("[").append(internal).append("]");
+
+                if ((i + 1) < sourceInternals.size())
+                {
+                    sb.append("_g_s_");
+                }
+            }
+            
+            entryInfo.put("sourceInternals", sb.toString());
+        }
+        else
+        {
+            entryInfo.put("sourceInternals", "");
+        }
         entryInfo.put("source", source);
         entryInfo.put("ptagsSource", ptagsSource); 
 
@@ -296,6 +346,29 @@ public class TMSearchEditEntryHandlerHelper
         String ptagsTarget = segmentManagerTarget.getPtagString();
         entryInfo.put("target", target);
         entryInfo.put("ptagsTarget", ptagsTarget);
+        List<String> targetInternals = sutil.getInternalWords(trgSegment);
+        
+        if (targetInternals != null && targetInternals.size() > 0)
+        {
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < targetInternals.size(); i++)
+            {
+                String internal = targetInternals.get(i);
+
+                sb.append("[").append(internal).append("]");
+
+                if ((i + 1) < targetInternals.size())
+                {
+                    sb.append("_g_s_");
+                }
+            }
+            
+            entryInfo.put("targetInternals", sb.toString());
+        }
+        else
+        {
+            entryInfo.put("targetInternals", "");
+        }
 
         request.setAttribute("entryInfo", JsonUtil.toJson(entryInfo));
     }

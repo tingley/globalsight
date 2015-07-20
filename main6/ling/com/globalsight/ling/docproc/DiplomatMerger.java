@@ -989,6 +989,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     {
                         isInCDATA = false;
                     }
+                    if (tmp.indexOf("<![CDATA[") > -1
+                            && tmp.indexOf("]]") > -1)
+                    {
+                        isInCDATA = tmp.indexOf("<![CDATA[") > tmp.indexOf("]]");
+                    }
+                    
                     if (OfficeContentPostFilterHelper
                             .isOfficeFormat(srcDataType))
                     {

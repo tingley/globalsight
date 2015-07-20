@@ -46,6 +46,11 @@ public class SegmentManager implements PseudoBaseHandler
         coloredPtags = new StringBuffer();
         ptagParser = new PseudoParser(this);
     }
+    
+    public PseudoData getPseudoData()
+    {
+        return withPtags;
+    }
 
     /**
      * Get the current source string with maximally compressed p-tags. This

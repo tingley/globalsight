@@ -84,6 +84,10 @@ var userId;
 var uiLocale;
 var ptagsSource;
 var ptagsTarget;
+var sourceInternals = new Array();
+var targetInternals = new Array();
+var controlChars = "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000A\u000B\u000C\u000D\u000E\u000F\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001A\u001B\u001C\u001D\u001E\u001F";
+var hexChars = "0123456789ABCDEF";
 
 function spellCheck(tLocale, edit)
 {
@@ -230,6 +234,18 @@ function init()
 	ptagsSource = entryInfo.ptagsSource;
 	ptagsTarget = entryInfo.ptagsTarget;
 	
+	var sourceInternalsTemp = entryInfo.sourceInternals;
+	if (sourceInternalsTemp.length > 0)
+	{
+		sourceInternals = sourceInternalsTemp.split("_g_s_");
+	}
+	
+	var targetInternalsTemp = entryInfo.targetInternals;
+	if (targetInternalsTemp.length > 0)
+	{
+		targetInternals = targetInternalsTemp.split("_g_s_");
+	}
+	
 	$("#tmName").html(entryInfo.tmName);
 	$("#createdBy").html(entryInfo.createdBy);	
 	$("#createdOn").html(entryInfo.createdOn);	
@@ -320,6 +336,104 @@ function saveEntry()
 	}
 	else
 	{
+		// check control chars
+		for(var chari = 0; chari < controlChars.length; chari ++)
+		{
+			var charHere = controlChars.charAt(chari);
+			var charCode = controlChars.charCodeAt(chari);
+			
+			var index = newSourceText.indexOf(charHere);
+			var msg;
+			
+			var charCodeStr;
+			if(charCode < 16)
+			{
+				charCodeStr = "000" + hexChars.charAt(charCode);
+			}
+			else if (charCode >= 16)
+			{
+				charCodeStr = "001" + hexChars.charAt(charCode - 16);
+			}
+			
+			if (index != -1)
+			{
+				msg = "You are saving a string with a non-visible character in source segment. Character is u+" 
+				+ charCodeStr + ", and is at column " + (index + 1) + " in the string.";
+			}
+			else
+			{
+			index = newTargetText.indexOf(charHere);
+			if (index != -1)
+			{
+				msg = "You are saving a string with a non-visible character in target segment. Character is u+" 
+				+ charCodeStr + ", and is at column " + (index + 1) + " in the string.";
+			}
+			}
+			
+			if (index != -1)
+			{
+				var isOkControlChar = confirm(msg);
+				
+				if (!isOkControlChar)
+				{
+					return;
+				}
+			}
+		}
+		
+		// check internal tag
+		if (sourceInternals.length > 0)
+		{
+			var missedInternals = new Array();
+			for(var i = 0; i < sourceInternals.length; i++)
+			{
+				var internal = sourceInternals[i];
+				
+				if (newSourceText.indexOf(internal) == -1)
+				{
+					missedInternals[missedInternals.length] = internal;
+				}
+				
+			}
+			
+			if (missedInternals.length > 0)
+			{
+				var confirmmsg = "${msg_internal_moved_continue}".replace(/target segment/g, "source segment") + "\r\n\r\n" + missedInternals.toString();
+				var isOkInternal = confirm(confirmmsg);
+				
+				if (!isOkInternal)
+				{
+					return;
+				}
+			}
+		}
+		
+		if (targetInternals.length > 0)
+		{
+			var missedInternals = new Array();
+			for(var i = 0; i < targetInternals.length; i++)
+			{
+				var internal = targetInternals[i];
+				
+				if (newTargetText.indexOf(internal) == -1)
+				{
+					missedInternals[missedInternals.length] = internal;
+				}
+				
+			}
+			
+			if (missedInternals.length > 0)
+			{
+				var confirmmsg = "${msg_internal_moved_continue}" + "\r\n\r\n" + missedInternals.toString();
+				var isOkInternal = confirm(confirmmsg);
+				
+				if (!isOkInternal)
+				{
+					return;
+				}
+			}
+		}
+		
 		var searchParams
 		if(sid=="")
 		{

@@ -1556,7 +1556,7 @@ public class PseudoData
         return m_mtIdentifierTrailing;
     }
 
-    private void addInternalTags(String tag, String segment)
+    public void addInternalTags(String tag, String segment)
             throws TagNodeException
     {
         m_internalTexts.put(tag, segment);

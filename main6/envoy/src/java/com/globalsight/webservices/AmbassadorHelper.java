@@ -2143,7 +2143,7 @@ public class AmbassadorHelper extends JsonTypeWebService
 						GET_WORK_OFFLINE_FILES,
 						"Invalid workOfflineFileType "
 								+ p_workOfflineFileType
-								+ ", it should be limited in 1, 2, 3, 4, 5,6,14 or 15.");
+								+ ", it should be limited in 1, 2, 3, 4, 5, 6, 7, 14 or 15.");
 			}
 			
 			if (!p_isJson)
@@ -2451,7 +2451,7 @@ public class AmbassadorHelper extends JsonTypeWebService
 						GET_WORK_OFFLINE_FILES,
 						"Invalid workofflineFileTypeOption format : "
 								+ p_workofflineFileTypeOption
-								+ ",it should be limited in 1, 2, 3, 4, 5, 6, 7 or empty");
+								+ ", it should be limited in 1, 2, 3, 4, 5, 6 or empty");
 			}
 
 			workofflineFileTypeOption = Integer
@@ -2461,15 +2461,14 @@ public class AmbassadorHelper extends JsonTypeWebService
 					&& workofflineFileTypeOption != 3
 					&& workofflineFileTypeOption != 4
 					&& workofflineFileTypeOption != 5
-					&& workofflineFileTypeOption != 6
-					&& workofflineFileTypeOption != 7)
+					&& workofflineFileTypeOption != 6)
 			{
 				return makeErrorMessage(
 						p_isJson,
 						GET_WORK_OFFLINE_FILES,
 						"Invalid workofflineFileTypeOption : "
 								+ p_workofflineFileTypeOption
-								+ ", it should be limited in 1, 2, 3, 4, 5, 6, 7 or empty.");
+								+ ", it should be limited in 1, 2, 3, 4, 5, 6 or empty.");
 			}
 		}
 
@@ -3074,13 +3073,13 @@ public class AmbassadorHelper extends JsonTypeWebService
                         && !"Translation Verification Report".equalsIgnoreCase(repName))
                 {
                     return makeErrorMessage(p_isJson, UPLOAD_WORK_OFFLINE_FILES,
-                            "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report, Translation Verification Report file.");
+                            "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report or Translation Verification Report file.");
                 }
             }
             catch (Exception e)
             {
                 return makeErrorMessage(p_isJson, UPLOAD_WORK_OFFLINE_FILES,
-                        "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report, Translation Verification Report file.");
+                        "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report or Translation Verification Report file.");
             }
         }
 

@@ -139,7 +139,7 @@ public class ReportGeneratorHandler extends PageHandler implements
                         .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
                         null);
         String reportType = p_request.getParameter(ReportConstants.REPORT_TYPE);
-        
+//        String includeCompactTags = p_request.getParameter("includeCompactTags");
         String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
         ReportInfo info = new ReportInfo();
     	m_reportResultMap.put(key, info);

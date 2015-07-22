@@ -95,10 +95,30 @@ function fnCheckAll()
 	if($("#checkAll").attr("checked")){
 		$("input[name='checkReport']").each(function(){
 			$(this).attr("checked", true);
+			if(this.value == "ReviewersCommentsReport")
+			{
+				$("#ReviewersIncludeTagsTR").show();
+				$("#ReviewersIncludeTags").attr("checked", true);
+			}
+			else if(this.value == "ReviewersCommentsSimpleReport")
+			{
+				$("#ReviewersSimpleIncludeTagsTR").show();
+				$("#ReviewersSimpleIncludeTags").attr("checked", true);
+			}
 		})
 	}else{
 		$("input[name='checkReport']").each(function(){
 			$(this).attr("checked", false);
+			if(this.value == "ReviewersCommentsReport")
+			{
+				$("#ReviewersIncludeTagsTR").hide();
+				$("#ReviewersIncludeTags").attr("checked", false);
+			}
+			else if(this.value == "ReviewersCommentsSimpleReport")
+			{
+				$("#ReviewersSimpleIncludeTagsTR").hide();
+				$("#ReviewersSimpleIncludeTags").attr("checked", false);
+			}
 		})
 	}
 }
@@ -145,14 +165,43 @@ function fnGenerateReport(obj)
 	ReportsForm.submit();
 }
 
+function checkSaveUnlSeg(obj)
+{
+	if(obj.value == "ReviewersCommentsReport")
+	{
+		if(obj.checked)
+		{
+			 $("#ReviewersIncludeTagsTR").show();
+		}
+		else
+		{
+			$("#ReviewersIncludeTagsTR").hide();
+			$("#ReviewersIncludeTags").attr("checked", false);
+		}
+	}
+	else if(obj.value == "ReviewersCommentsSimpleReport")
+	{
+		if(obj.checked)
+		{
+			$("#ReviewersSimpleIncludeTagsTR").show();
+		}
+		else
+		{
+			$("#ReviewersSimpleIncludeTagsTR").hide();
+			$("#ReviewersSimpleIncludeTags").attr("checked", false);
+		}
+	}
+}
+
 $(document).ready(function(){
 	// Modify the css of Reports tab.
 	$("#jobReportsTab").removeClass("tableHeadingListOff");
 	$("#jobReportsTab").addClass("tableHeadingListOn");
 	$("#jobReportsTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
 	$("#jobReportsTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
-	
 	$('#checkAll').click(fnCheckAll);
+	$("#ReviewersIncludeTagsTR").hide();
+	$("#ReviewersSimpleIncludeTagsTR").hide();
 });
 </script>
 </HEAD>
@@ -210,7 +259,7 @@ $(document).ready(function(){
     
     	<amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>">
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-        	<TD><input type="checkbox" name="checkReport" value="<%=ReportConstants.REVIEWERS_COMMENTS_REPORT%>"></TD>
+        	<TD><input type="checkbox" name="checkReport" onclick="checkSaveUnlSeg(this)" value="<%=ReportConstants.REVIEWERS_COMMENTS_REPORT%>"></TD>
             <TD>
           		<A CLASS=standardHREF href="javascript:;" onclick="javascript:fnGenerateReport(this.parentNode.parentNode);">
              		<%=bundle.getString("review_reviewers_comments")%>
@@ -219,11 +268,19 @@ $(document).ready(function(){
             <TD>XLSX</TD>
             <TD><%=bundle.getString("review_reviewers_comments_desc")%></TD>
         </TR>
+        <TR id="ReviewersIncludeTagsTR" CLASS="standardText">
+        	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        	<TD>
+        		<INPUT TYPE="checkbox" ID="ReviewersIncludeTags" NAME="withCompactTags"><%=bundle.getString("with_compact_tags")%>
+        	</TD>
+        	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        </TR>
         </amb:permission>
         
         <amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE%>">
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-        	<TD><input type="checkbox" name="checkReport" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT%>"></TD>
+        	<TD><input type="checkbox" name="checkReport" onclick="checkSaveUnlSeg(this)" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT%>"></TD>
             <TD>
           		<A CLASS=standardHREF href="javascript:;" onclick="javascript:fnGenerateReport(this.parentNode.parentNode);">
              		<%=bundle.getString("review_reviewers_comments_simple")%>
@@ -231,6 +288,14 @@ $(document).ready(function(){
             </TD>
             <TD>XLSX</TD>
             <TD><%=bundle.getString("review_reviewers_comments_simple_desc")%></TD>
+        </TR>
+         <TR id="ReviewersSimpleIncludeTagsTR" CLASS="standardText">
+         	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        	<TD>
+        		<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="withCompactTags"><%=bundle.getString("with_compact_tags")%>
+        	</TD>
+        	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
         </TR>
         </amb:permission>
 

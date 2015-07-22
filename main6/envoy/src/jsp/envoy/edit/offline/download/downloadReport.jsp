@@ -630,13 +630,29 @@ function download()
 	{
 		reportType = $("input[name='reviewCommentsReportType']:checked").val();
 	}
-
+	
 	$("#reportType").val(reportType);
+	
+	var withCompactTags;
+	if(reportType == "ReviewersCommentsReport")
+	{
+		withCompactTags = document.getElementById("ReviewersIncludeTags").checked;
+	}
+	else if(reportType == "ReviewersCommentsSimpleReport")
+	{
+		withCompactTags = document.getElementById("ReviewersSimpleIncludeTags").checked;
+	}
+	
+	if(withCompactTags)
+	{
+		withCompactTags = "on";
+	}
 	
 	var obj = {
 			inputJobIDS : "<%=task.getJobId()%>",
 			targetLocalesList: "<%=task.getTargetLocale().getId()%>",
 			reportType:reportType,
+			withCompactTags:withCompactTags,
 			random:Math.random()
 	}	
 	
@@ -729,11 +745,36 @@ function cancelReport()
    });
 }
 
+function checkSaveUnlSeg(obj)
+{
+	if(obj.value == "ReviewersCommentsReport")
+	{
+		$("#ReviewersIncludeTagsTR").show();
+		$("#ReviewersSimpleIncludeTagsTR").hide();
+		$("#ReviewersSimpleIncludeTags").attr("checked", false);
+	}
+	else if(obj.value == "ReviewersCommentsSimpleReport")
+	{
+		$("#ReviewersIncludeTagsTR").hide();
+		$("#ReviewersSimpleIncludeTagsTR").show();
+		$("#ReviewersIncludeTags").attr("checked", false);
+	}
+	else
+	{
+		$("#ReviewersIncludeTagsTR").hide();
+		$("#ReviewersSimpleIncludeTagsTR").hide();
+		$("#ReviewersIncludeTags").attr("checked", false);
+		$("#ReviewersSimpleIncludeTags").attr("checked", false);
+	}
+}
+
 $(document).ready(function(){
 	$("#taskWorkOfflineTab").removeClass("tableHeadingListOff");
 	$("#taskWorkOfflineTab").addClass("tableHeadingListOn");
 	$("#taskWorkOfflineTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
 	$("#taskWorkOfflineTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
+	$("#ReviewersIncludeTagsTR").show();
+	$("#ReviewersSimpleIncludeTagsTR").hide();
 })
 </SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -822,10 +863,22 @@ if (!review_only)
         	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_REPORT %>" checked><%=bundle.getString("review_reviewers_comments")%>
      	</TD>
      </TR>
+     <TR id="ReviewersIncludeTagsTR">
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT TYPE="checkbox" ID="ReviewersIncludeTags" NAME="ReviewersIncludeTags"><%=bundle.getString("with_compact_tags")%>
+     	</TD>
+     </TR>
 	 <TR>
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT %>"><%=bundle.getString("review_reviewers_comments_simple")%>
+     	</TD>
+     </TR>
+     <TR id="ReviewersSimpleIncludeTagsTR">
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="ReviewersSimpleIncludeTags"><%=bundle.getString("with_compact_tags")%>
      	</TD>
      </TR>
 	 <TR>
@@ -841,6 +894,12 @@ if (!review_only)
         	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT %>" checked><%=bundle.getString("review_reviewers_comments_simple")%>
      	</TD>
      </TR>
+	 <TR id="ReviewersSimpleIncludeTagsTR">
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="ReviewersSimpleIncludeTags"><%=bundle.getString("with_compact_tags")%>
+     	</TD>
+     </TR>
 	 <TR>
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -852,6 +911,12 @@ if (!review_only)
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_REPORT %>" checked><%=bundle.getString("review_reviewers_comments")%>
+     	</TD>
+     </TR>
+     <TR id="ReviewersIncludeTagsTR">
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT TYPE="checkbox" ID="ReviewersIncludeTags" NAME="ReviewersIncludeTags"><%=bundle.getString("with_compact_tags")%>
      	</TD>
      </TR>
 	 <TR>
@@ -867,10 +932,22 @@ if (!review_only)
         	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_REPORT %>" checked><%=bundle.getString("review_reviewers_comments")%>
      	</TD>
      </TR>
+	 <TR id="ReviewersIncludeTagsTR">
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT TYPE="checkbox" ID="ReviewersIncludeTags" NAME="ReviewersIncludeTags"><%=bundle.getString("with_compact_tags")%>
+     	</TD>
+     </TR>
 	 <TR>
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT %>"><%=bundle.getString("review_reviewers_comments_simple")%>
+     	</TD>
+     </TR>
+     <TR id="ReviewersSimpleIncludeTagsTR">
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="ReviewersSimpleIncludeTags"><%=bundle.getString("with_compact_tags")%>
      	</TD>
      </TR>
     <%} else if(!review_only && postReviewQAReport && transEditReport && transVeriReport){%>

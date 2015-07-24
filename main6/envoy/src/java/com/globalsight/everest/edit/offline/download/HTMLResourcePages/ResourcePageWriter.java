@@ -364,9 +364,12 @@ public class ResourcePageWriter extends DownloadWriter implements
         {
             LeverageMatch lm = (LeverageMatch) l1.get(i);
 
-            args[0] = (lm == null) ? "??" : ""
-                    + StringUtil.formatPercent(lm.getScoreNum(), 2) + "%";
-
+			args[0] = (lm == null) ? "??" : ""
+					+ String.valueOf(Math.floor(lm.getScoreNum())).substring(
+							0,
+							String.valueOf(Math.floor(lm.getScoreNum()))
+									.indexOf(".")) + "%";
+           
             try
             {
                 if (m_rtlTargetLocale)

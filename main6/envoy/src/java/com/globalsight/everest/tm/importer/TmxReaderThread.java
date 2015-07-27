@@ -503,13 +503,11 @@ public class TmxReaderThread
             result.addTuv(tuv);
         }
 
-        if (m_options
-                .getFileType()
-                .equals(
-                        com.globalsight.everest.tm.importer.ImportOptions.TYPE_TMX_WORLD_SERVER))
-        {
-            result.setFromWorldServer(true);
-        }
+		if (com.globalsight.everest.tm.importer.ImportOptions.TYPE_TMX_WORLD_SERVER
+				.equals(m_options.getFileType()))
+		{
+			result.setFromWorldServer(true);
+		}
         
         return result;
     }
@@ -589,7 +587,6 @@ public class TmxReaderThread
             {
                 date = UTC.parse(ts);
             }
-
             result.setCreationDate(new Timestamp(date.getTime()));
         }
         else
@@ -612,7 +609,6 @@ public class TmxReaderThread
             {
                 date = UTC.parse(ts);
             }
-
             result.setModifyDate(new Timestamp(date.getTime()));
         }
         else
@@ -620,6 +616,21 @@ public class TmxReaderThread
             // If no "changedate", set it same as "creationdate".
             result.setModifyDate(result.getCreationDate());
         }
+
+		ts = p_root.attributeValue(Tmx.LASTUSAGEDATE);
+		if (ts == null)
+		{
+			ts = p_root.getParent().attributeValue(Tmx.LASTUSAGEDATE);
+		}
+		if (ts != null)
+		{
+			date = UTC.parseNoSeparators(ts);
+			if (date == null)
+			{
+				date = UTC.parse(ts);
+			}
+			result.setLastUsageDate(new Timestamp(date.getTime()));
+		}
 
         // Segment text: need to produce root elements <translatable>
         // and <localizable> depending on TU type.
@@ -645,14 +656,13 @@ public class TmxReaderThread
             segment.append("</localizable>");
         }
 
-        //Added by Vincent Yan 09/04/24
         result.setSid(p_tu.getSID());
         //End of Added
         result.setSegment(segment.toString());
 
         return result;
     }
-    
+
     private ProjectTmTuTProp createProp(SegmentTmTu p_tu, Element p_root) throws Exception
     {
         ProjectTmTuTProp result = null;

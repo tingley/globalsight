@@ -262,14 +262,21 @@ public class TMAttributeManager
         if (jobAtt != null && jobAtt.getValue() != null)
         {
             Object obj = jobAtt.getValue();
-
+            // "choiceList" and "file" type
             if (obj instanceof List<?>)
             {
                 List<?> l = (List<?>) obj;
                 if (l.size() != 0)
                 {
-                    Object l1 = l.get(0);
-                    result = l1.toString();
+                    for (int i = 0; i < l.size(); i++)
+                    {
+                        Object l1 = l.get(i);
+                        result += l1.toString();
+                        if (i != l.size() - 1)
+                        {
+                            result += ",";
+                        }
+                    }
                 }
             }
             else
@@ -291,15 +298,9 @@ public class TMAttributeManager
         {
             if (aValue != null && aValue instanceof List)
             {
-                List l = (List) aValue;
-                for (Object object : l)
+                if (isAttributeExactEquals(aValue, tuAttValue))
                 {
-                    strValue = object == null ? "" : object.toString();
-                    if (tuAttValue != null && tuAttValue.equals(strValue))
-                    {
-                        matched = true;
-                        break;
-                    }
+                    matched = true;
                 }
             }
             else
@@ -315,21 +316,10 @@ public class TMAttributeManager
         {
             if (aValue != null && aValue instanceof List)
             {
-                List l = (List) aValue;
-                for (Object object : l)
+                boolean isEquals = isAttributeExactEquals(aValue, tuAttValue);
+                if (!isEquals)
                 {
-                    strValue = object == null ? "" : object.toString();
-                    if (tuAttValue != null && !tuAttValue.equals(strValue))
-                    {
-                        matched = true;
-                        break;
-                    }
-
-                    if (tuAttValue == null && strValue != null)
-                    {
-                        matched = true;
-                        break;
-                    }
+                    matched = true;
                 }
             }
             else
@@ -416,5 +406,65 @@ public class TMAttributeManager
         }
 
         return attValue;
+    }
+
+    /**
+     * Return true only when both have exact same sub items.
+     * 
+     * @param jobAttValue
+     *            Object
+     * @param tuAttValue
+     *            String comma separated
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    private static boolean isAttributeExactEquals(Object jobAttValue,
+            String tuAttValue)
+    {
+        HashSet<String> tuAttValueItems = split(tuAttValue);
+        HashSet<String> jobAttValueItems = new HashSet<String>();
+        if (jobAttValue != null && jobAttValue instanceof List)
+        {
+            List l = (List) jobAttValue;
+            for (Object object : l)
+            {
+                String strValue = object == null ? "" : object.toString();
+                jobAttValueItems.add(strValue);
+            }
+        }
+
+        if (tuAttValueItems.size() != jobAttValueItems.size()
+                || tuAttValueItems.size() == 0)
+        {
+            return false;
+        }
+
+        // assume true first
+        boolean isEquals = true;
+        // Return true only when both have exact same sub items.
+        for (String jobAtt : jobAttValueItems)
+        {
+            if (!tuAttValueItems.contains(jobAtt))
+            {
+                isEquals = false;
+                break;
+            }
+        }
+
+        return isEquals;
+    }
+
+    private static HashSet<String> split(String attValues)
+    {
+        HashSet<String> set = new HashSet<String>();
+        if (attValues != null && attValues.trim().length() > 0)
+        {
+            String[] strs = attValues.split(",");
+            for (String str : strs)
+            {
+                set.add(str);
+            }
+        }
+        return set;
     }
 }

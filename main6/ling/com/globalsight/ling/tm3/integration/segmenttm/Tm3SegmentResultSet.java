@@ -23,23 +23,15 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
 
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
 
-import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.SegmentTmTuv;
-import com.globalsight.ling.tm2.leverage.LeveragedSegmentTuv;
 import com.globalsight.ling.tm3.core.TM3Attribute;
 import com.globalsight.ling.tm3.core.TM3Tm;
 import com.globalsight.ling.tm3.core.TM3Tu;
-import com.globalsight.ling.tm3.core.TM3Tuv;
 import com.globalsight.ling.tm3.integration.GSTuvData;
-import com.globalsight.util.GlobalSightLocale;
 
 public class Tm3SegmentResultSet implements SegmentResultSet
 {

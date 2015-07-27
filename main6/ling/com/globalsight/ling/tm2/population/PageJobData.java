@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.tm2.population;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,13 +59,15 @@ public class PageJobData
     private static final boolean INCLUDE_STATE = false;
 
     // a list of merged PageTmTu
-    private List m_mergedTus;
+    private List<PageTmTu> m_mergedTus = null;
 
     // tentative list of PageTmTu (unmerged yet)
-    private List m_tentativeTus;
+    private List<PageTmTu> m_tentativeTus = null;
 
     private GlobalSightLocale m_sourceLocale;
     private long m_jobId;
+    private String m_jobName = null;
+    private Timestamp now = null;
 
     /**
      * Constructor.
@@ -72,18 +75,30 @@ public class PageJobData
      * @param p_sourceLocale
      *            Source locale (GlobalSightLocale)
      */
-    public PageJobData(GlobalSightLocale p_sourceLocale, long p_jobId)
+	public PageJobData(GlobalSightLocale p_sourceLocale, long p_jobId,
+			String p_jobName)
     {
         m_mergedTus = null; // initially null
 
-        m_tentativeTus = new ArrayList();
+        m_tentativeTus = new ArrayList<PageTmTu>();
         m_sourceLocale = p_sourceLocale;
         m_jobId = p_jobId;
+        m_jobName = p_jobName;
+        now = new Timestamp(System.currentTimeMillis());
     }
 
     public void addTu(PageTmTu p_tu)
     {
         m_tentativeTus.add(p_tu);
+        // Use current date as "creationDate", "modifyDate" and "lastUsageDate".
+    	for (BaseTmTuv tuv : p_tu.getTuvs())
+        {
+        	tuv.setJobId(m_jobId);
+        	tuv.setJobName(m_jobName);
+        	tuv.setLastUsageDate(now);
+        	tuv.setCreationDate(now);
+        	tuv.setModifyDate(now);
+        }
     }
 
     /**
@@ -92,7 +107,7 @@ public class PageJobData
      * @param p_options
      *            LeverageOptions object
      */
-    public Collection getTusToSaveToPageTm(LeverageOptions p_options)
+    public Collection<PageTmTu> getTusToSaveToPageTm(LeverageOptions p_options)
             throws Exception
     {
         boolean saveUntranslated = p_options.savesUntranslatedInPageTm();
@@ -105,9 +120,9 @@ public class PageJobData
      * @param p_options
      *            LeverageOptions object
      */
-    public Collection getTusToSaveToSegmentTm(LeverageOptions p_options)
-            throws Exception
-    {
+	public Collection<PageTmTu> getTusToSaveToSegmentTm(
+			LeverageOptions p_options) throws Exception
+	{
         boolean saveUntranslated = p_options.savesUntranslatedInSegmentTm();
         boolean saveApproved = p_options.savesApprovedInSegmentTm();
         boolean saveExactMatch = p_options.savesExactMatchInSegmentTm();
@@ -117,7 +132,7 @@ public class PageJobData
     /**
      * Get a Collection of Tus of which all Tuvs' state is COMPLETE
      */
-    public Collection getCompleteTus() throws Exception
+    public Collection<PageTmTu> getCompleteTus() throws Exception
     {
         Set<String> states = new HashSet<String>();
         states.add(TuvState.COMPLETE.getName());
@@ -129,12 +144,12 @@ public class PageJobData
     // Tuvs are returned. If not, only Tuvs that are not NOT_LOCALIZED
     // are returned.
     //To Page TM
-    private Collection getTusToSave(boolean p_saveUntranslated)
+    private Collection<PageTmTu> getTusToSave(boolean p_saveUntranslated)
             throws Exception
     {
         populateMergedTus();
 
-        Collection tuList = null;
+        Collection<PageTmTu> tuList = null;
         if (p_saveUntranslated)
         {
             tuList = m_mergedTus;
@@ -152,12 +167,12 @@ public class PageJobData
     }
     
     //To Project TM
-	private Collection getTusToSave(boolean p_saveUntranslated,
+	private Collection<PageTmTu> getTusToSave(boolean p_saveUntranslated,
 			boolean p_saveApproved, boolean p_saveExactMatch) throws Exception
 	{
 		populateMergedTus();
 		
-		Collection tuList = null;
+		Collection<PageTmTu> tuList = null;
 		Set<String> excludeStates = new HashSet<String>();
 		excludeStates.add(TuvState.COMPLETE.getName());
 		if (p_saveUntranslated)
@@ -207,22 +222,16 @@ public class PageJobData
      *            indicates whether Tuvs returned have p_state or not have
      *            p_state
      */
-    private Collection getTusByState(Set<String> p_states,
+    @SuppressWarnings("rawtypes")
+	private Collection<PageTmTu> getTusByState(Set<String> p_states,
             boolean p_excludeState) throws Exception
     {
         populateMergedTus();
 
-        ArrayList tuList = new ArrayList();
-        Iterator itTu = m_mergedTus.iterator();
-        while (itTu.hasNext())
+        ArrayList<PageTmTu> tuList = new ArrayList<PageTmTu>();
+        for (PageTmTu tu : m_mergedTus)
         {
-            PageTmTu tu = (PageTmTu) itTu.next();
             PageTmTu clonedTu = (PageTmTu) tu.clone();
-
-            if (c_logger.isDebugEnabled())
-            {
-                c_logger.debug(tu.toDebugString(true));                
-            }
 
             Iterator itLocale = tu.getAllTuvLocales().iterator();
             while (itLocale.hasNext())
@@ -252,19 +261,17 @@ public class PageJobData
     }
 
     // populate m_mergedTus if it's null
-    private void populateMergedTus() throws Exception
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	private void populateMergedTus() throws Exception
     {
         if (m_mergedTus == null)
         {
-            m_mergedTus = new ArrayList();
+            m_mergedTus = new ArrayList<PageTmTu>();
 
-            Map trgTuvMap = new HashMap();
+            Map<GlobalSightLocale, List<TuvPair>> trgTuvMap = new HashMap<GlobalSightLocale, List<TuvPair>>();
 
-            Iterator it = m_tentativeTus.iterator();
-            while (it.hasNext())
+            for (PageTmTu tu : m_tentativeTus)
             {
-                PageTmTu tu = (PageTmTu) it.next();
-
                 // make a new HashSet to avoid concurrent modification
                 // exception. And also remove source locale.
                 HashSet trgLocales = new HashSet(tu.getAllTuvLocales());
@@ -281,10 +288,10 @@ public class PageJobData
 
                     if (!mergeState.equals(Tuv.NOT_MERGED))
                     {
-                        List mergeTuvs = (List) trgTuvMap.get(locale);
+                        List<TuvPair> mergeTuvs = trgTuvMap.get(locale);
                         if (mergeTuvs == null)
                         {
-                            mergeTuvs = new ArrayList();
+                            mergeTuvs = new ArrayList<TuvPair>();
                             trgTuvMap.put(locale, mergeTuvs);
                         }
 
@@ -312,10 +319,8 @@ public class PageJobData
 
             // fix missing x attribute
             List<Long> tuvIds = new ArrayList<Long>();
-            it = m_mergedTus.iterator();
-            while (it.hasNext())
+            for (PageTmTu tu : m_mergedTus)
             {
-                PageTmTu tu = (PageTmTu) it.next();
                 TmxTagRepairer.fixMissingX(tu, m_sourceLocale);
                 for (BaseTmTuv tuv :tu.getTuvs())
                 {
@@ -331,10 +336,9 @@ public class PageJobData
     		{
     			sidAttrMap.put(sidAttr.getObjectId(), sidAttr.getTextValue());
     		}
-    		it = m_mergedTus.iterator();
-    		while (it.hasNext())
+
+            for (PageTmTu tu : m_mergedTus)
     		{
-                PageTmTu tu = (PageTmTu) it.next();
                 for (BaseTmTuv tuv :tu.getTuvs())
                 {
         			if (StringUtil.isNotEmpty(sidAttrMap.get(tuv.getId())))
@@ -361,7 +365,7 @@ public class PageJobData
         PageTmTuv targetTuv = firstTuvPair.getTargetTuv();
 
         // get source segment
-        List sourceTextList = new ArrayList();
+        List<String> sourceTextList = new ArrayList<String>();
 
         Iterator it = p_tuvs.iterator();
         while (it.hasNext())
@@ -394,8 +398,6 @@ public class PageJobData
     private void renumberSubIds() throws Exception
     {
         GxmlFragmentReader reader = null;
-        String result = null;
-
         try
         {
             reader = GxmlFragmentReaderPool.instance().getGxmlFragmentReader();

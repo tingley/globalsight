@@ -307,9 +307,6 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance.getSegmentsById(tuIds);
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn) throws RemoteException,
@@ -319,46 +316,12 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
                 conn);
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter, Connection conn,Set<String> jobAttributeSet) 
-    		throws RemoteException,LingManagerException
-    {
-        return m_localInstance.getAllSegments(tm, createdBefore, createdAfter,
-                conn, jobAttributeSet);
-    }
-    
     public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
 			Map<String, Object> paramMap, Connection conn)
 			throws RemoteException, LingManagerException
 	{
 		return m_localInstance.getAllSegmentsByParamMap(tm, paramMap, conn);
 	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-	@Override
-	public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
-			String createdBefore, String createdAfter, Connection conn)
-			throws RemoteException, LingManagerException
-	{
-		return m_localInstance.getSegmentsByLocales(tm, localeList, createdBefore,
-				createdAfter, conn);
-	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
-            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
-            throws RemoteException, LingManagerException
-    {
-        return m_localInstance.getSegmentsByLocales(tm, localeList, createdBefore,
-                createdAfter, conn, jobAttributeSet);
-    }
 
 	@Override
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
@@ -369,29 +332,6 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
 				paramMap, conn);
 	}
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Connection conn)
-            throws RemoteException, LingManagerException
-    {
-        return m_localInstance.getSegmentsByProjectName(tm, projectName,
-                createdBefore, createdAfter, conn);
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
-            throws RemoteException, LingManagerException
-    {
-        return m_localInstance.getSegmentsByProjectName(tm, projectName,
-                createdBefore, createdAfter, conn, jobAttributeSet);
-    }
-
 	@Override
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap, Connection conn)
@@ -401,9 +341,6 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
 				projectName, paramMap, conn);
 	}
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException
@@ -412,45 +349,11 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
                 createdAfter);
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getAllSegmentsCount(Tm tm, String createdBefore,
-            String createdAfter, Set<String> jobAttributeSet) 
-    		throws RemoteException, LingManagerException
-    {
-        return m_localInstance.getAllSegmentsCount(tm, createdBefore,
-                createdAfter, jobAttributeSet);
-    }
-
 	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException
 	{
 		return m_localInstance.getAllSegmentsCountByParamMap(tm, paramMap);
 	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException
-    {
-        return m_localInstance.getSegmentsCountByLocales(tm, localeList,
-                createdBefore, createdAfter);
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getSegmentsCountByLocales(Tm tm, List<String> locales,
-            String createdBefore, String createdAfter, Set<String> jobAttributeSet) 
-    		throws RemoteException, LingManagerException
-    {
-        return m_localInstance.getSegmentsCountByLocales(tm, locales,
-                createdBefore, createdAfter, jobAttributeSet);
-    }
 
 	@Override
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
@@ -460,29 +363,6 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
 		return m_localInstance.getSegmentsCountByLocalesAndParamMap(tm,
 				localeList, paramMap);
 	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public int getSegmentsCountByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException
-    {
-        return m_localInstance.getSegmentsCountByProjectName(tm, projectName,
-                createdBefore, createdAfter);
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getSegmentsCountByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Set<String> jobAttributeSet) 
-    		throws RemoteException, LingManagerException
-    {
-        return m_localInstance.getSegmentsCountByProjectName(tm, projectName,
-                createdBefore, createdAfter, jobAttributeSet);
-    }
 
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap)

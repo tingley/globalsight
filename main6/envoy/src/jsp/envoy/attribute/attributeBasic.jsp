@@ -422,6 +422,10 @@ function onAdd()
 
     if (value.length > 0)
     {
+    	if (value.indexOf(",") > -1)
+   		{
+    		alert("Cannot input comma: " + value);
+   		}
         if (isExist(value))
         {
             alert(value + " " + '<%=bundle.getString("msg_has_exist")%>');

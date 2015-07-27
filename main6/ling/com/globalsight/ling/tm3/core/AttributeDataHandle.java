@@ -1,17 +1,15 @@
 package com.globalsight.ling.tm3.core;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Date;
-import java.util.Set;
 
 class AttributeDataHandle<T extends TM3Data> extends
         AbstractDataHandle<T> {
     private Map<TM3Attribute, Object> inlineAttrs;
     private Map<TM3Attribute, String> customAttrs;
-    private Set<String> m_jobAttributeSet;
     private Map<String,Object> m_paramMap;
     
     AttributeDataHandle(BaseTm<T> tm,
@@ -23,16 +21,6 @@ class AttributeDataHandle<T extends TM3Data> extends
         this.customAttrs = customAttrs;
     }
     
-    AttributeDataHandle(BaseTm<T> tm,
-		            Map<TM3Attribute, Object> inlineAttrs,
-		            Map<TM3Attribute, String> customAttrs,
-		            Date start, Date end, Set<String> jobAttributeSet) {
-		super(tm, start, end);
-		this.inlineAttrs = inlineAttrs;
-		this.customAttrs = customAttrs;
-		m_jobAttributeSet = jobAttributeSet;
-	}
-
 	AttributeDataHandle(BaseTm<T> tm, Map<TM3Attribute, Object> inlineAttrs,
 			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
 	{

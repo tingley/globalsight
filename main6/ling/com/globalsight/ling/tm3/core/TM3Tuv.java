@@ -24,6 +24,12 @@ public class TM3Tuv<T extends TM3Data> {
     private Date creationDate;
     private String modifyUser;
     private Date modifyDate;
+    private Date lastUsageDate = null;
+    private long jobId = -1;
+    private String jobName = null;
+    private long previousHash = -1;
+    private long nextHash= -1;
+    private String sid = null;
     
     private T data; // Transient
     private TM3EventLog eventLog;
@@ -33,7 +39,8 @@ public class TM3Tuv<T extends TM3Data> {
 
     TM3Tuv(TM3Locale locale, T data, TM3Event creationEvent,
             String creationUser, Date creationDate, String modifyUser,
-            Date modifyDate)
+			Date modifyDate, Date lastUsageDate, long jobId, String jobName,
+			long previousHash, long nextHash, String sid)
     {
         this.locale = locale;
         setContent(data);
@@ -43,6 +50,12 @@ public class TM3Tuv<T extends TM3Data> {
         this.creationDate = creationDate;
         this.modifyUser = modifyUser;
         this.modifyDate = modifyDate;
+        this.lastUsageDate = lastUsageDate;
+        this.jobId = jobId;
+        this.jobName = jobName;
+        this.previousHash = previousHash;
+        this.nextHash = nextHash;
+        this.sid = sid;
     }
 
     public Long getId() {
@@ -205,4 +218,52 @@ public class TM3Tuv<T extends TM3Data> {
     {
         this.modifyDate = modifyDate;
     }
+
+	public Date getLastUsageDate() {
+		return lastUsageDate;
+	}
+
+	public void setLastUsageDate(Date lastUsageDate) {
+		this.lastUsageDate = lastUsageDate;
+	}
+
+	public long getJobId() {
+		return jobId;
+	}
+
+	public void setJobId(long jobId) {
+		this.jobId = jobId;
+	}
+
+	public String getJobName() {
+		return jobName;
+	}
+
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
+	}
+
+	public long getPreviousHash() {
+		return previousHash;
+	}
+
+	public void setPreviousHash(long previousHash) {
+		this.previousHash = previousHash;
+	}
+
+	public long getNextHash() {
+		return nextHash;
+	}
+
+	public void setNextHash(long nextHash) {
+		this.nextHash = nextHash;
+	}
+
+	public String getSid() {
+		return sid;
+	}
+
+	public void setSid(String sid) {
+		this.sid = sid;
+	}
 }

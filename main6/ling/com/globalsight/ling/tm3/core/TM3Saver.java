@@ -43,12 +43,14 @@ public abstract class TM3Saver<T extends TM3Data>
      * @param event source tuv event
      * @return
      */
-    public Tu tu(T content, TM3Locale locale, TM3Event event,
-            String creationUser, Date creationDate, String modifyUser,
-            Date modifyDate)
+	public Tu tu(T content, TM3Locale locale, TM3Event event,
+			String creationUser, Date creationDate, String modifyUser,
+			Date modifyDate, Date lastUsageDate, long jobId, String jobName,
+			long previousHash, long nextHash, String sid)
     {
-        Tu tu = new Tu(content, locale, event, creationUser, creationDate,
-                modifyUser, modifyDate);
+		Tu tu = new Tu(content, locale, event, creationUser, creationDate,
+				modifyUser, modifyDate, lastUsageDate, jobId, jobName,
+				previousHash, nextHash, sid);
         tus.add(tu);
         return tu;
     }
@@ -74,11 +76,14 @@ public abstract class TM3Saver<T extends TM3Data>
         List<Tuv> targets = new ArrayList<Tuv>();
         Map<TM3Attribute, Object> attrs = new HashMap<TM3Attribute, Object>();
 
-        Tu(T content, TM3Locale locale, TM3Event event, String creationUser,
-                Date creationDate, String modifyUser, Date modifyDate)
+		Tu(T content, TM3Locale locale, TM3Event event, String creationUser,
+                Date creationDate, String modifyUser, Date modifyDate,
+				Date lastUsageDate, long jobId, String jobName,
+				long previousHash, long nextHash, String sid)
         {
-            srcTuv = new Tuv(content, locale, event, creationUser,
-                    creationDate, modifyUser, modifyDate);
+			srcTuv = new Tuv(content, locale, event, creationUser,
+					creationDate, modifyUser, modifyDate, lastUsageDate, jobId,
+					jobName, previousHash, nextHash, sid);
         }
 
         /**
@@ -111,27 +116,16 @@ public abstract class TM3Saver<T extends TM3Data>
          * @param event target TUV event
          * @return this
          */
-        public Tu target(T content, TM3Locale locale, TM3Event event,
-                String creationUser, Date creationDate, String modifyUser,
-                Date modifyDate)
+		public Tu target(T content, TM3Locale locale, TM3Event event,
+				String creationUser, Date creationDate, String modifyUser,
+				Date modifyDate, Date lastUsageDate, long jobId,
+				String jobName, long previousHash, long nextHash, String sid)
         {
-            targets.add(new Tuv(content, locale, event, creationUser,
-                    creationDate, modifyUser, modifyDate));
+			targets.add(new Tuv(content, locale, event, creationUser,
+					creationDate, modifyUser, modifyDate, lastUsageDate, jobId,
+					jobName, previousHash, nextHash, sid));
             return this;
         }
-        
-        /**
-         * Add multiple target TUVs to this TU.
-         * @param t Map of locales to target data
-         * @param event target TUV event
-         * @return this
-         */
-//        public Tu targets(Map<TM3Locale, T> t, TM3Event event) {
-//            for (Map.Entry<TM3Locale, T> e : t.entrySet()) {
-//                targets.add(new Tuv(e.getValue(), e.getKey(), event));
-//            }
-//            return this;
-//        }
         
         /**
          * Update the TM based on the contents of this saver.  This will
@@ -157,9 +151,17 @@ public abstract class TM3Saver<T extends TM3Data>
         Date creationDate = null;
         String modifyUser = null;
         Date modifyDate = null;
+        Date lastUsageDate = null;
+        long jobId = -1;
+        String jobName = null;
+        long previousHash = -1;
+        long nextHash = -1;
+        String sid = null;
 
-        Tuv(T content, TM3Locale locale, TM3Event event, String creationUser,
-                Date creationDate, String modifyUser, Date modifyDate)
+		Tuv(T content, TM3Locale locale, TM3Event event, String creationUser,
+				Date creationDate, String modifyUser, Date modifyDate,
+				Date lastUsageDate, long jobId, String jobName,
+				long previousHash, long nextHash, String sid)
         {
             this.content = content;
             this.locale = locale;
@@ -168,6 +170,12 @@ public abstract class TM3Saver<T extends TM3Data>
             this.creationDate = creationDate;
             this.modifyUser = modifyUser;
             this.modifyDate = modifyDate;
+            this.lastUsageDate = lastUsageDate;
+            this.jobId = jobId;
+            this.jobName = jobName;
+            this.previousHash = previousHash;
+            this.nextHash = nextHash;
+            this.sid = sid;
         }
 
         public T getContent()
@@ -203,6 +211,36 @@ public abstract class TM3Saver<T extends TM3Data>
         public Date getModifyDate()
         {
             return modifyDate;
+        }
+
+        public Date getLastUsageDate()
+        {
+        	return lastUsageDate;
+        }
+
+        public long getJobId()
+        {
+        	return jobId;
+        }
+
+        public String getJobName()
+        {
+        	return jobName;
+        }
+
+        public long getPreviousHash()
+        {
+        	return previousHash;
+        }
+
+        public long getNextHash()
+        {
+        	return nextHash;
+        }
+
+        public String getSid()
+        {
+        	return sid;
         }
     }
 }

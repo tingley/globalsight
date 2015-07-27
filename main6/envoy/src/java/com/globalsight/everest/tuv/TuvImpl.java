@@ -168,6 +168,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         this.srcComment = p_other.srcComment;
         this.m_repeated = p_other.m_repeated;
         this.m_repetitionOfId = p_other.m_repetitionOfId;
+        this.sid = p_other.sid;
     }
 
     //

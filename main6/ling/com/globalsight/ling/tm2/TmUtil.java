@@ -188,6 +188,11 @@ public class TmUtil
                     segmentTmTuv.setWordCount(segAtt.getWordCount());
                     segmentTmTuv.setUpdatedProject(tuv.getUpdatedProject());
                     segmentTmTuv.setSid(tuv.getSid());
+                    segmentTmTuv.setLastUsageDate(tuv.getLastUsageDate());
+                    segmentTmTuv.setJobId(tuv.getJobId());
+                    segmentTmTuv.setJobName(tuv.getJobName());
+                    segmentTmTuv.setPreviousHash(tuv.getPreviousHash());
+                    segmentTmTuv.setNextHash(tuv.getNextHash());
 
                     segmentTmTu.addTuv(segmentTmTuv);
                 }

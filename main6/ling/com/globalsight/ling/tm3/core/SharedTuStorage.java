@@ -76,6 +76,19 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                             .getModifyDate());
         }
         SQLUtil.execBatch(conn, sb);
+
+        // Store TUV extension attributes
+		BatchStatementBuilder sb2 = new BatchStatementBuilder("INSERT INTO ")
+				.append(getStorage().getTuvExtTableName())
+				.append(" (tuvId, tuId, tmId, lastUsageDate, jobId, jobName, previousHash, nextHash, sid) ")
+				.append("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        for (TM3Tuv<T> tuv : tuvs)
+        {
+			sb2.addBatch(tuv.getId(), tu.getId(), tmId, tuv.getLastUsageDate(),
+					tuv.getJobId(), tuv.getJobName(), tuv.getPreviousHash(),
+					tuv.getNextHash(), tuv.getSid());
+        }
+        SQLUtil.execBatch(conn, sb2);
     }
 
     @Override
@@ -191,7 +204,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 .getInlineAttributes(tu.getAttributes());
         Map<TM3Attribute, String> customAttributes = BaseTm
                 .getCustomAttributes(tu.getAttributes());
-        List<TM3TuTuvAttribute> sidAttrs = new ArrayList<TM3TuTuvAttribute>();
         StatementBuilder sb = new StatementBuilder("INSERT INTO ").append(
                 getStorage().getTuTableName())
                 .append(" (id, tmId, srcLocaleId");
@@ -203,29 +215,22 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 tu.getSourceTuv().getLocale().getId());
         for (Map.Entry<TM3Attribute, Object> e : inlineAttributes.entrySet())
         {
-        	// SID attribute is always stored into another table
+			// SID attribute is stored into tm3_tuv_ext_shared_xx table since 8.6.4.
 			if (".sid".equalsIgnoreCase(e.getKey().getName()))
-        	{
-                sb.append(", ?").addValue(null);
-
-                TM3TuTuvAttribute attr = new TM3TuTuvAttribute(tu.getId(),
-						TM3TuTuvAttribute.OBJECT_TYPE_TU,
-						TM3TuTuvAttribute.NAME_SID);
-				attr.setTextValue((String) e.getValue());
-				attr.setTmId(getStorage().getId());
-				sidAttrs.add(attr);
-        	}
-        	else
-        	{
-                sb.append(", ?").addValue(e.getValue());
-        	}
+			{
+				sb.append(", ?").addValue(null);
+			}
+			else
+			{
+				sb.append(", ?").addValue(e.getValue());
+			}
         }
         sb.append(")");
         SQLUtil.exec(conn, sb);
 
         addTuvs(conn, tu, tu.getAllTuv());
+
         saveCustomAttributes(conn, tu.getId(), customAttributes);
-        saveTuTuvAttributes(conn, sidAttrs);
     }
 
     @Override
@@ -247,96 +252,38 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                     tuv.getId());
         }
         SQLUtil.execBatch(conn, sb);
-    }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public long getTuCount(Date start, Date end) throws SQLException
-    {
-        Connection conn = null;
-        try
+        // Store TUV extension attributes
+        StatementBuilder sb2 = new StatementBuilder();
+        for (TM3Tuv<T> tuv : tuvs)
         {
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
+			sb2 = new StatementBuilder("SELECT tuvId FROM ")
+					.append(getStorage().getTuvExtTableName())
+					.append(" WHERE tuvId = ?").addValues(tuv.getId());
+        	long tuvExtCount = SQLUtil.execCountQuery(conn, sb2);
+            if (tuvExtCount == 0)
             {
-                sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ").append("TM3_EVENTS as event ")
-                        .append("WHERE tuv.lastEventId = event.id ")
-                        .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ?")
-                        .addValues(parseStartDate(start), parseEndDate(end));
+				sb2 = new StatementBuilder("INSERT INTO ")
+						.append(getStorage().getTuvExtTableName())
+						.append(" (tuvId, tuId, tmId, lastUsageDate, jobId, jobName, previousHash, nextHash, sid) ")
+						.append("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+						.addValues(tuv.getId(), tu.getId(), tmId,
+								tuv.getLastUsageDate(), tuv.getJobId(),
+								tuv.getJobName(), tuv.getPreviousHash(),
+								tuv.getNextHash(), tuv.getSid());
+				SQLUtil.exec(conn, sb2);
             }
             else
             {
-                sb.append("SELECT COUNT(id) FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" WHERE tmId = ?").addValue(tmId);
+				sb2 = new StatementBuilder("UPDATE ")
+						.append(getStorage().getTuvExtTableName())
+						.append(" SET sid = ? ").addValue(tuv.getSid())
+						.append(" WHERE tuvId = ?").addValue(tuv.getId());
+                SQLUtil.exec(conn, sb2);
             }
-            return SQLUtil.execCountQuery(conn, sb);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
         }
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public long getTuCount(Date start, Date end, Set<String> jobAttributeSet) throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-            {
-                sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ").append("TM3_EVENTS as event ")
-                        .append("WHERE tuv.lastEventId = event.id ")
-                        .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ?")
-                        .addValues(parseStartDate(start), parseEndDate(end));
-                
-                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, true);
-                }
-            }
-            else
-            {
-                sb.append("SELECT COUNT(tu.id) FROM ")
-                        .append(getStorage().getTuTableName()).append(" as tu ")
-                        .append(" WHERE tu.tmId = ?").addValue(tmId);
-                
-                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, false);
-                }
-            }
-            
-            return SQLUtil.execCountQuery(conn, sb);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-    
 	@Override
 	public long getTuCountByParamMap(Map<String, Object> paramMap)
 			throws SQLException
@@ -359,7 +306,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
-				count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				count = filterTuBySid(conn, sb, stringId, isRegex).size();
 			}
 			else
 			{
@@ -477,105 +424,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public long getTuCountByLocales(List<TM3Locale> localeList, Date start, Date end)
-            throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-        	String localeIds = getLocaleIds(localeList);
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-			{
-				sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
-						.append(getStorage().getTuvTableName())
-						.append(" as tuv ")
-						.append("WHERE tuv.tmId = ? ")
-						.addValue(tmId)
-						.append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
-						.addValues(parseStartDate(start), parseEndDate(end))
-						.append(" AND tuv.localeId in (").append(localeIds)
-						.append(")");
-			}
-            else
-			{
-				sb.append("SELECT COUNT(DISTINCT tuId) FROM ")
-						.append(getStorage().getTuvTableName())
-						.append(" WHERE tmId = ? ").addValues(tmId)
-						.append(" AND localeId in (").append(localeIds)
-						.append(")");
-			}
-            return SQLUtil.execCountQuery(conn, sb);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-	public long getTuCountByLocales(List<TM3Locale> localeList, Date start,
-			Date end, Set<String> jobAttributeSet) throws SQLException
-	{
-		Connection conn = null;
-		try
-		{
-			String localeIds = getLocaleIds(localeList);
-		    conn = DbUtil.getConnection();
-		    StatementBuilder sb = new StatementBuilder();
-		    if (start != null && end != null)
-		    {
-				sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
-						.append(getStorage().getTuvTableName())
-						.append(" as tuv ")
-						.append("WHERE tuv.tmId = ? ")
-						.addValue(tmId)
-						.append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
-						.addValues(parseStartDate(start), parseEndDate(end))
-						.append(" AND tuv.localeId in (").append(localeIds)
-						.append(")");
-		        
-		        if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, true);
-                }
-		    }
-		    else
-		    {
-				sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
-						.append(getStorage().getTuvTableName())
-						.append(" as tuv ").append(" WHERE tuv.tmId = ?")
-						.addValue(tmId).append(" AND tuv.localeId in (")
-						.append(localeIds).append(")");
-		        
-		        if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, true);
-                }
-		    }
-		    return SQLUtil.execCountQuery(conn, sb);
-		}
-		catch (Exception e)
-		{
-		    throw new SQLException(e);
-		}
-		finally
-		{
-		    DbUtil.silentReturnConnection(conn);
-		}
-	}
-
 	@Override
 	public long getTuCountByLocalesAndParamMap(List<TM3Locale> localeList,
 			Map<String, Object> paramMap) throws SQLException
@@ -599,7 +447,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
-				count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				count = filterTuBySid(conn, sb, stringId, isRegex).size();
 			}
 			else
 			{
@@ -667,16 +515,29 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         try
         {
             conn = DbUtil.getConnection();
-            conn.setAutoCommit(false);
-            StatementBuilder sb = new StatementBuilder().append("DELETE FROM ")
-                    .append(getStorage().getTuvTableName())
-                    .append(" WHERE tmId = ?").addValue(tmId)
-                    .append(" AND localeId = ?").addValue(locale.getId())
-                    .append(" AND (select srcLocaleId from ")
-                    .append(getStorage().getTuTableName())
-                    .append(" WHERE id = tuId) != localeId");
-            SQLUtil.exec(conn, sb);
-            conn.commit();
+            conn.setAutoCommit(true);
+
+            StatementBuilder sb = new StatementBuilder();
+			sb.append("SELECT tuv.id FROM ")
+					.append(getStorage().getTuvTableName())
+					.append(" tuv, (SELECT id FROM ")
+					.append(getStorage().getTuTableName())
+					.append(" WHERE tmid = ?").addValue(tmId)
+					.append(" AND srcLocaleId != ?").addValue(locale.getId())
+					.append(") AS tu").append(" WHERE tu.id = tuv.tuId")
+					.append(" AND tuv.tmid = ?").addValue(tmId)
+					.append(" AND tuv.localeId = ?").addValue(locale.getId());
+            List<Long> tuvIds = SQLUtil.execIdsQuery(conn, sb);
+
+            List<List<Long>> tuvIdsInbatch = SQLUtil.toBatchList(tuvIds, 1000);
+
+			SQLUtil.execBatchDelete(conn, "DELETE FROM "
+					+ getStorage().getTuvExtTableName() + " WHERE tuvId IN ",
+					tuvIdsInbatch);
+
+			SQLUtil.execBatchDelete(conn, "DELETE FROM "
+					+ getStorage().getTuvTableName() + " WHERE ID IN ",
+					tuvIdsInbatch);
         }
         catch (Exception e)
         {
@@ -691,115 +552,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
     //
     // AttributeDataHandle
     //
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public long getTuCountByAttributes(Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end)
-            throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-			{
-				sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
-						.append(getStorage().getTuTableName())
-						.append(" as tu ,")
-						.append(getStorage().getTuvTableName())
-						.append(" as tuv, ").append("TM3_EVENTS as event ");
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-				sb.append(
-						"WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
-						.append("AND tu.tmId = ? ").addValue(tmId)
-						.append(" AND event.time >= ? AND event.time <= ? ")
-						.addValues(parseStartDate(start), parseEndDate(end));
-			}
-            else
-            {
-                sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu ");
-                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-                sb.append(" WHERE tu.tmId = ?").addValue(tmId);
-            }
-            
-            getInlineAttrsSql(sb,inlineAttrs);
-            
-            return SQLUtil.execCountQuery(conn, sb);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public long getTuCountByAttributes(Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end, Set<String> jobAttributeSet)
-            throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-            {
-                sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu ,")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ").append("TM3_EVENTS as event ");
-                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-                sb.append(
-                        "WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
-                        .append("AND tu.tmId = ? ").addValue(tmId)
-                        .append(" AND event.time >= ? AND event.time <= ? ")
-                        .addValues(parseStartDate(start), parseEndDate(end));
-                        
-                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, true);
-                }
-            }
-            else
-            {
-                sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu ");
-                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-                sb.append(" WHERE tu.tmId = ?").addValue(tmId);
-                
-                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, false);
-                }
-            }
-            
-            getInlineAttrsSql(sb,inlineAttrs);
-            
-            return SQLUtil.execCountQuery(conn, sb);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
 
     @Override
 	public long getTuCountByAttributesAndParamMap(
@@ -826,7 +578,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
-				count = getMapWithSID(conn, sb, stringId, isRegex).size();
+				count = filterTuBySid(conn, sb, stringId, isRegex).size();
 			}
 			else
 			{
@@ -895,107 +647,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public List<TM3Tu<T>> getTuPage(long startId, int count, Date start,
-            Date end) throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-            {
-                sb.append("SELECT DISTINCT tuId FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ").append("TM3_EVENTS as event ")
-                        .append("WHERE tuv.lastEventId = event.id ")
-                        .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
-                        .addValues(parseStartDate(start), parseEndDate(end))
-                        .append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
-                        .addValues(startId, count);
-            }
-            else
-            {
-                sb.append("SELECT id FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" WHERE tmId = ? AND id > ? ORDER BY id ASC LIMIT ?")
-                        .addValues(tmId, startId, count);
-            }
-            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public List<TM3Tu<T>> getTuPage(long startId, int count, Date start,
-            Date end, Set<String> jobAttributeSet) throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-            {
-                sb.append("SELECT DISTINCT tuv.tuId FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ").append("TM3_EVENTS as event ")
-                        .append("WHERE tuv.lastEventId = event.id ")
-                        .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
-                        .addValues(parseStartDate(start), parseEndDate(end));
-                
-                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, true);
-                }
-                
-                sb.append("AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
-                        .addValues(startId, count);
-                
-            }
-            else
-            {
-                sb.append("SELECT DISTINCT tu.id FROM ")
-                        .append(getStorage().getTuTableName()).append(" as tu ")
-                        .append(" WHERE tu.tmId = ? AND tu.id > ? ");
-                
-                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, false);
-                }
-                
-                sb.append(" ORDER BY tu.id ASC LIMIT ?")
-                        .addValues(tmId, startId, count);
-                
-            }
-            
-            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
 	@Override
 	public List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
 			Map<String, Object> paramMap) throws SQLException
@@ -1016,7 +667,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			getSqlByParamMap(sb, paramMap, null, null, null, startId, count);
 			if (StringUtil.isNotEmpty(stringId))
 			{
-				ids = getMapWithSID(conn, sb, stringId, isRegex);
+				ids = filterTuBySid(conn, sb, stringId, isRegex);
 			}
 			else
 			{
@@ -1034,118 +685,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			DbUtil.silentReturnConnection(conn);
 		}
 	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
-            List<TM3Locale> localeList, Date start, Date end) throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-        	String localeIds = getLocaleIds(localeList);
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-			{
-				sb.append("SELECT DISTINCT tuId FROM ")
-						.append(getStorage().getTuvTableName())
-						.append(" as tuv ")
-						.append("WHERE tuv.tmId = ? ")
-						.addValue(tmId)
-						.append(" AND tuv.localeId in ( ")
-						.append(localeIds)
-						.append(")")
-						.append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
-						.addValues(parseStartDate(start), parseEndDate(end))
-						.append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
-						.addValues(startId, count);
-			}
-            else
-			{
-				sb.append("SELECT DISTINCT tuId FROM ")
-						.append(getStorage().getTuvTableName())
-						.append(" WHERE tmId = ? ").addValue(tmId)
-						.append(" AND localeId in (").append(localeIds).append(")")
-						.append(" AND tuId > ? ORDER BY tuId ASC LIMIT ?")
-						.addValues(startId, count);
-			}
-            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-	public List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
-			List<TM3Locale> localeList, Date start, Date end,
-			Set<String> jobAttributeSet) throws SQLException
-	{
-        Connection conn = null;
-        try
-		{
-        	String localeIds = getLocaleIds(localeList);
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-			{
-				sb.append("SELECT DISTINCT tuv.tuId FROM ")
-						.append(getStorage().getTuvTableName())
-						.append(" as tuv ")
-						.append("WHERE  tuv.tmId = ? ")
-						.addValue(tmId)
-						.append(" AND tuv.localeId in (")
-						.append(localeIds)
-						.append(")")
-						.append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
-						.addValues(parseStartDate(start), parseEndDate(end));
-
-				if (jobAttributeSet != null && jobAttributeSet.size() > 0)
-				{
-					appendAttributeSql(jobAttributeSet, sb, true);
-				}
-
-				sb.append("AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
-						.addValues(startId, count);
-			}
-            else
-			{
-				sb.append("SELECT DISTINCT tuv.tuId FROM ")
-						.append(getStorage().getTuvTableName())
-						.append(" as tuv ").append(" WHERE tuv.tmId = ? ")
-						.addValue(tmId);
-
-				if (jobAttributeSet != null && jobAttributeSet.size() > 0)
-				{
-					appendAttributeSql(jobAttributeSet, sb, true);
-				}
-				sb.append(" AND tuv.localeId in (")
-						.append(localeIds)
-						.append(")")
-						.append("  AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
-						.addValues(startId, count);
-			}
-            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
 
 	@Override
 	public List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
@@ -1171,7 +710,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
-				ids = getMapWithSID(conn, sb, stringId, isRegex);
+				ids = filterTuBySid(conn, sb, stringId, isRegex);
 			}
 			else
 			{
@@ -1189,137 +728,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			DbUtil.silentReturnConnection(conn);
 		}
 	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public List<TM3Tu<T>> getTuPageByAttributes(long startId, int count,
-            Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end)
-            throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-            {
-                sb.append("SELECT DISTINCT tuv.tuId FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu, ").append("TM3_EVENTS as event ");
-                getStorage().attributeJoinFilter(sb, "tuv.tuId", customAttrs);
-                sb.append(
-                        " WHERE tuv.tuid=tu.id AND tuv.lastEventId = event.id ")
-                        .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND event.time >= ? AND event.time <= ? ")
-                        .addValues(parseStartDate(start), parseEndDate(end))
-                        .append("AND tuv.tuId > ?").addValues(startId);
-            }
-            else
-            {
-                sb.append("SELECT DISTINCT tu.id FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu ");
-                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-                sb.append(" WHERE tu.tmId = ? ").addValue(tmId)
-                        .append(" AND tu.id > ?").addValues(startId);
-            }
-            
-            getInlineAttrsSql(sb,inlineAttrs);
-            
-            if (start != null && end != null)
-            {
-                sb.append(" ORDER BY tuv.tuId ASC LIMIT ?").addValues(count);
-            }
-            else
-            {
-                sb.append(" ORDER BY tu.id ASC LIMIT ?").addValues(count);
-            }
-            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public List<TM3Tu<T>> getTuPageByAttributes(long startId, int count,
-            Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end,Set<String> jobAttributeSet)
-            throws SQLException
-    {
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            StatementBuilder sb = new StatementBuilder();
-            if (start != null && end != null)
-            {
-                sb.append("SELECT DISTINCT tuv.tuId FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu, ").append("TM3_EVENTS as event ");
-                getStorage().attributeJoinFilter(sb, "tuv.tuId", customAttrs);
-                sb.append(
-                        " WHERE tuv.tuid=tu.id AND tuv.lastEventId = event.id ")
-                        .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND event.time >= ? AND event.time <= ? ")
-                        .addValues(parseStartDate(start), parseEndDate(end))
-                        .append("AND tuv.tuId > ?").addValues(startId);
-                
-                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, true);
-                }
-            }
-            else
-            {
-                sb.append("SELECT DISTINCT tu.id FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu ");
-                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-                sb.append(" WHERE tu.tmId = ? ").addValue(tmId)
-                        .append(" AND tu.id > ?").addValues(startId);
-                
-                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
-                {
-                	appendAttributeSql(jobAttributeSet, sb, false);
-                }
-            }
-            
-            getInlineAttrsSql(sb,inlineAttrs);
-            
-            if (start != null && end != null)
-            {
-                sb.append(" ORDER BY tuv.tuId ASC LIMIT ?").addValues(count);
-            }
-            else
-            {
-                sb.append(" ORDER BY tu.id ASC LIMIT ?").addValues(count);
-            }
-            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
 
 	@Override
 	public List<TM3Tu<T>> getTuPageByAttributesAndParamMap(long startId,
@@ -1345,7 +753,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
-				ids = getMapWithSID(conn, sb, stringId, isRegex);
+				ids = filterTuBySid(conn, sb, stringId, isRegex);
 			}
 			else
 			{
@@ -1524,18 +932,15 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		{
 			stringId = (String) paramMap.get("stringId");
 		}
-
+		// TODO: How about the performance ???
 		if (StringUtil.isNotEmpty(stringId))
 		{
-			if (startId != -1 && count != -1)
-			{
-				sb.append("SELECT tuId,sid FROM (");
-			}
-			sb.append(
-					"SELECT DISTINCT tuv.tuId AS tuId, attr.TEXT_VALUE AS sid FROM ")
+			// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...
+			sb.append("SELECT tuId,sid FROM (")
+					.append("SELECT DISTINCT tuv.tuId AS tuId, ext.sid AS sid FROM ")
 					.append(getStorage().getTuvTableName()).append(" as tuv, ")
-					.append(getStorage().getTuTuvAttrTableName())
-					.append(" as attr ");
+					.append(getStorage().getTuvExtTableName())
+					.append(" AS ext");
 			if (inlineAttrs != null && !inlineAttrs.isEmpty())
 			{
 				sb.append(",").append(getStorage().getTuTableName())
@@ -1543,22 +948,21 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
 			}
 			getParameterSql(sb, paramMap, localeIds, inlineAttrs);
-			sb.append(" AND attr.OBJECT_TYPE = 'TU' ")
-					.append(" AND attr.NAME = 'SID' ")
-					.append(" AND attr.OBJECT_ID = tuv.tuId")
-					.append(" AND attr.TEXT_VALUE IS NOT NULL ");
+			sb.append(" AND tuv.id = ext.tuvId ").append(
+					"AND ext.sid IS NOT NULL ");
 			if (startId != -1 && count != -1)
 			{
 				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
 						.addValues(startId, count);
-				sb.append(") attrAndTuvAndTu");
 			}
+			sb.append(") attrAndTuvAndTu");
+
 			sb.append(" UNION ");
-			if (startId != -1 && count != -1)
-			{
-				sb.append("SELECT tuId,sid FROM (");
-			}
-			sb.append("SELECT DISTINCT tuv.tuId AS tuId, tu.sid AS sid  FROM ")
+
+			// If SID is not empty, query "tm3_tu_shared_xx" table as "old" SID
+			// are stored in TU table. Can be removed in future.
+			sb.append("SELECT tuId,sid FROM (")
+					.append("SELECT DISTINCT tuv.tuId AS tuId, tu.sid AS sid  FROM ")
 					.append(getStorage().getTuvTableName()).append(" as tuv, ")
 					.append(getStorage().getTuTableName()).append(" as tu ");
 			if (customAttrs != null && !customAttrs.isEmpty())
@@ -1573,8 +977,8 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			{
 				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
 						.addValues(startId, count);
-				sb.append(") tuvAndTu");
 			}
+			sb.append(") tuvAndTu");
 		}
 		else
 		{
@@ -1707,7 +1111,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		sb.append(") ");
 	}
 
-	private List<Long> getMapWithSID(Connection conn, StatementBuilder sb,
+	private List<Long> filterTuBySid(Connection conn, StatementBuilder sb,
 			String stringId, String isRegex) throws SQLException
 	{
 		List<Long> tuIdList = new ArrayList<Long>();
@@ -1718,8 +1122,8 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		{
 			map.put(rs.getLong(1), rs.getString(2));
 		}
-		ps.close();
 		rs.close();
+		ps.close();
 
 		boolean regex = Boolean.parseBoolean(isRegex);
 		Pattern pattern = Pattern.compile(stringId);

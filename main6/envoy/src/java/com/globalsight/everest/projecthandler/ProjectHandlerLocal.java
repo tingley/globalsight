@@ -3928,7 +3928,9 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         try
         {
+        	Set<TMAttribute> attrs = tm.getAttributes();
             HibernateUtil.delete(tm);
+        	HibernateUtil.delete(tm.getAttributes());
             OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_TM,
                     tm.getName());
         }

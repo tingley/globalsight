@@ -255,9 +255,14 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
 	        {
 	            origin = TTXConstants.TTX_TU_ORIGIN_UNTRANSLATED;
 	        }
-	        m_outputStream.write("<Tu Origin=" + str2DoubleQuotation(origin)
-	                + " MatchPercent="
-	                + str2DoubleQuotation(StringUtil.formatPercent(matchPercent, 2)) + ">");
+			m_outputStream.write("<Tu Origin="
+					+ str2DoubleQuotation(origin)
+					+ " MatchPercent="
+					+ str2DoubleQuotation(String.valueOf(
+							Math.floor(matchPercent)).substring(
+							0,
+							String.valueOf(Math.floor(matchPercent)).indexOf(
+									"."))) + ">");
 	
 	        // write Source
 	        String srcLang = null;

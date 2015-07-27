@@ -17433,7 +17433,7 @@ public class Ambassador extends AbstractWebService
      *            -- target locale. eg "zh_CN"(case insensitive).
      * @return -- XML string. -- If fail, it will return an xml string to tell
      *         error message; -- If succeed, report returning is like
-     *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsVerificationReport/20140219/TVR-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
+     *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationVerificationReport/20140219/TVR-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
      * @throws WebServiceException
      */
     public String generateTranslationVerificationReport(String p_accessToken, 

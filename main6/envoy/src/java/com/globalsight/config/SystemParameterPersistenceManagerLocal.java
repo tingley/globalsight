@@ -138,6 +138,8 @@ public class SystemParameterPersistenceManagerLocal implements
 
     public SystemParameter getSystemParameter(String p_name, String p_companyId)
     {
+        // check if reloading from database is needed
+        initSystemParamters();
         HashMap companyParams = (HashMap) systemParamMap.get(p_companyId);
         SystemParameter result = null;
         if (companyParams != null)
@@ -355,7 +357,6 @@ public class SystemParameterPersistenceManagerLocal implements
 
     private void resetSystemParamMap(Collection systemParams)
     {
-
         systemParamMap.clear();
         Iterator it = systemParams.iterator();
         while (it.hasNext())

@@ -698,7 +698,9 @@
     try
     {
         SystemConfiguration sc = SystemConfiguration.getInstance();
-        enabledInContextReview = sc.getBooleanParameter("incontext.review.enable");
+        enabledInContextReview = "true".equals(sc.getStringParameter(
+                SystemConfigParamNames.INCTXRV_ENABLE,
+                "" + theTask.getCompanyId()));
     }
     catch (Exception ex)
     {

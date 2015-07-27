@@ -54,6 +54,9 @@ public interface CompanyConstants
     public static final String BIG_DATA_STORE_LEVEL = "bigDataStoreLevel";
     public static final String ENABLE_DITA_CHECKS = "enableDitaChecks";
     public static final String ENABLE_WORKFLOW_STATE_POSTS = "enableWorkflowStatePosts";
+    public static final String ENABLE_INCTXRV_TOOL = "enableInCtxRvToolField";
+    public static final String INCTXRV_DIR_INDD = "InCtxRvToolDirIndd";
+    public static final String INCTXRV_DIR_OFFICE = "InCtxRvToolDirOffice";
 
     public static final String FILTER_NAME = "companyNameFilter";
     public static final String FILTER_DESCRIPTION = "companyDescriptionFilter";

@@ -433,7 +433,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
             String trgLocale = isTarget ? tp.getGlobalSightLocale().toString()
                     : sp.getGlobalSightLocale().toString();
-            converterDir = getConvertDir(p_params, true) + trgLocale;
+            converterDir = getConvertDir(p_params, true, p_companyId) + trgLocale;
             new File(converterDir).mkdirs();
 
             // test converter is started or not
@@ -458,8 +458,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     trgLocale, p_job.getL10nProfile().getTargetLocales());
 
             // Upload indd and xmp file to converter.
-            backupInddFile(newFileNameMap, getConvertDir(p_params, false),
-                    getConvertDir(p_params, true), trgLocale, oriXmlFileName,
+            backupInddFile(newFileNameMap, getConvertDir(p_params, false, p_companyId),
+                    getConvertDir(p_params, true, p_companyId), trgLocale, oriXmlFileName,
                     p_fileSuffix, p_job);
             // Upload XML file to converter
             String xmlFilePath = converterDir + File.separator
@@ -517,13 +517,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         String trgPagePath = getPagePath(p_page, isTarget);
         long pageid = p_page.getId();
         long companyId = isTarget ? tp.getCompanyId() : sp.getCompanyId();
+        converter.setCompanyId(companyId);
         String locale = p_page.getGlobalSightLocale().toString();
         File pdfFile = getPreviewPdf(trgPagePath, companyId, null);
         PreviewPDFBO params = determineConversionParameters(spId);
 
         try
         {
-            String converterDir = getConvertDir(params, true) + File.separator
+            String converterDir = getConvertDir(params, true, companyId) + File.separator
                     + locale;
             new File(converterDir).mkdirs();
 
@@ -581,6 +582,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         long pageid = p_page.getId();
         long companyId = isTarget ? tp.getCompanyId() : sp.getCompanyId();
+        oxc.setCompanyId(companyId);
         String locale = p_page.getGlobalSightLocale().toString();
         String srcLocale = isTarget
                 ? tp.getSourcePage().getGlobalSightLocale().toString()
@@ -592,7 +594,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         try
         {
-            String converterDir = getConvertDir(params, true) + File.separator
+            String converterDir = getConvertDir(params, true, companyId) + File.separator
                     + locale;
             new File(converterDir).mkdirs();
             String xmlFilePath = converterDir + File.separator
@@ -688,7 +690,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @throws Exception
      */
     public String getConvertDir(PreviewPDFBO p_params,
-            boolean isIncontextReview) throws Exception
+            boolean isIncontextReview, long companyId) throws Exception
     {
         int fileVersionType = p_params.getVersionType();
         if (fileVersionType == ADOBE_TYPE_IDML)
@@ -701,7 +703,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             StringBuffer convDir = null;
             convDir = new StringBuffer(m_sc.getStringParameter(
-                    SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE));
+                    SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
+                    "" + companyId));
 
             convDir.append(File.separator);
 
@@ -722,7 +725,6 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             convDir.append(File.separator);
 
             return convDir.toString();
-
         }
         else if (isIncontextReview)
         {
@@ -733,7 +735,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     || fileVersionType == ADOBE_CS6)
             {
                 convDir = new StringBuffer(m_sc.getStringParameter(
-                        SystemConfigParamNames.INCTXRV_CONV_DIR));
+                        SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
+                        "" + companyId));
             }
             else
             {
@@ -741,7 +744,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 // InDesign cs3 files,
                 // we will use cs3 converter to process them.
                 convDir = new StringBuffer(m_sc.getStringParameter(
-                        SystemConfigParamNames.INCTXRV_CONV_DIR));
+                        SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
+                        "" + companyId));
             }
 
             convDir.append(File.separator);
@@ -866,7 +870,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
 
         copyAdobeFiles(srcLocale, p_trgLocale, getConvertedFileName(previewDir,
-                p_trgPageName, p_trgLocale, allTrgLocales), p_params);
+                p_trgPageName, p_trgLocale, allTrgLocales), p_params, p_companyId);
     }
 
     /**
@@ -942,10 +946,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     }
 
     private void copyAdobeFiles(String p_existedLocale, String p_trgLocale,
-            String p_convertedFileName, PreviewPDFBO p_params) throws Exception
+            String p_convertedFileName, PreviewPDFBO p_params, long companyId) throws Exception
     {
-        String conDir = getConvertDir(p_params, false);
-        String conDir_inctxrv = getConvertDir(p_params, true);
+        String conDir = getConvertDir(p_params, false, companyId);
+        String conDir_inctxrv = getConvertDir(p_params, true, companyId);
         String fileName = FileUtils.getPrefix(p_convertedFileName);
 
         StringBuffer inddFile = new StringBuffer(conDir);

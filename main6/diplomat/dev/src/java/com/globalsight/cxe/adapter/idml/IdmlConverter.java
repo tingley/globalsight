@@ -42,9 +42,10 @@ public class IdmlConverter
     private static boolean isInstalled = false;
 
     private static String convertDir = null;
-    private static String convertDir_incontextReview = null;
+    private String convertDir_incontextReview = null;
     
     private boolean isIncontextReview = false;
+    private long companyId = 1;
 
     public String convertIdmlToXml(String p_odFile, String p_dir)
             throws Exception
@@ -124,8 +125,7 @@ public class IdmlConverter
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
             convertDir_incontextReview = sc.getStringParameter(
-                    SystemConfigParamNames.INCTXRV_CONV_DIR,
-                    CompanyWrapper.SUPER_COMPANY_ID);
+                    SystemConfigParamNames.INCTXRV_CONV_DIR_INDD, companyId + "");
         }
 
         return isIncontextReview ? convertDir_incontextReview : convertDir;
@@ -241,5 +241,15 @@ public class IdmlConverter
         }
 
         FileUtil.copyFile(expectedPdfFile, p_pdfFile);
+    }
+
+    public long getCompanyId()
+    {
+        return companyId;
+    }
+
+    public void setCompanyId(long companyId)
+    {
+        this.companyId = companyId;
     }
 }

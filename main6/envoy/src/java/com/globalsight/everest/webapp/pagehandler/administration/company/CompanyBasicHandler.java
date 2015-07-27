@@ -125,6 +125,10 @@ public class CompanyBasicHandler extends PageHandler implements
                 p_request.setAttribute("scorecardToList", scorecardToList);
                 p_request.setAttribute("qualityToList", qualityToList);
                 p_request.setAttribute("marketToList", marketToList);
+                
+                p_request.setAttribute("incontext_review_key", "false");
+                p_request.setAttribute("incontext_review_dir_indd", "");
+                p_request.setAttribute("incontext_review_dir_office", "");
             }
             else if (action.equals(CompanyConstants.EDIT))
             {
@@ -181,6 +185,10 @@ public class CompanyBasicHandler extends PageHandler implements
                     p_request.setAttribute("scorecardFromList", scorecardFromList);
                     p_request.setAttribute("qualityFromList", qualityFromList);
                     p_request.setAttribute("marketFromList", marketFromList);
+                    
+                    p_request.setAttribute("incontext_review_key", getInCtxRvEnable(companyID));
+                    p_request.setAttribute("incontext_review_dir_indd", getInCtxRvInddDir(companyID));
+                    p_request.setAttribute("incontext_review_dir_office", getInCtxRvOfficeDir(companyID));
                 }
                 p_request.setAttribute("edit", "true");
             }
@@ -245,6 +253,58 @@ public class CompanyBasicHandler extends PageHandler implements
         catch (Exception e)
         {
             s_logger.error("There is an error when getting ENABLE_SSO from System Parameter");
+        }
+        return temp;
+    }
+    
+    private String getInCtxRvEnable(String companyId)
+    {
+        String temp = "false";
+        try
+        {
+            temp = ServerProxy.getSystemParameterPersistenceManager()
+                    .getSystemParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            companyId)
+                    .getValue();
+        }
+        catch (Exception e)
+        {
+            // ignore
+        }
+        return temp;
+    }
+
+    private String getInCtxRvInddDir(String companyId)
+    {
+        String temp = "";
+        try
+        {
+            temp = ServerProxy.getSystemParameterPersistenceManager()
+                    .getSystemParameter(SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
+                            companyId)
+                    .getValue();
+        }
+        catch (Exception e)
+        {
+            // ignore
+        }
+        return temp;
+    }
+
+    private String getInCtxRvOfficeDir(String companyId)
+    {
+        String temp = "";
+        try
+        {
+            temp = ServerProxy.getSystemParameterPersistenceManager()
+                    .getSystemParameter(
+                            SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
+                            companyId)
+                    .getValue();
+        }
+        catch (Exception e)
+        {
+            // ignore
         }
         return temp;
     }

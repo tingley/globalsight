@@ -1,13 +1,7 @@
 package com.globalsight.ling.tm3.core.persistence;
 
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
-
-import com.globalsight.ling.tm3.core.TM3Exception;
-import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 
 /**
  * This class should not be public; I need to fix the test setup.

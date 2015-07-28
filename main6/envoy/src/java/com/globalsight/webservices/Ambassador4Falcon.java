@@ -2948,49 +2948,15 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            -- 4 : Reviewer Comments Report
      *            -- 5 : Reviewer Comments Report (Simplified)
      *            -- 6 : Post Review QA Report
-     *
-     * @return -- JSON string. -- If fail, it is like
-     *         '{"getWorkOfflineFiles":"Corresponding message is here."}'; -- If
-     *         succeed, report returning is like
-     *         '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/ReviewersCommentsReport-(jobname_492637643)(337)-en_US_zh_CN-20140218
-     *         162543.xlsx"}'. -- offline translation kit returning is like
-     *         '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadOfflineKit/[CompanyName]/GlobalSight/CustomerDownload/[jobName_zh_CN.zip]"}'
-     *         .
-     * @throws WebServiceException
-     */
-    public String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
-            int p_workOfflineFileType) throws WebServiceException
-    {
-        checkAccess(p_accessToken, GET_WORK_OFFLINE_FILES);
-
-        AmbassadorHelper helper = new AmbassadorHelper();
-        return helper.getWorkOfflineFiles(p_accessToken, p_taskId,
-                p_workOfflineFileType, true);
-    }
-    
-    
-    /**
-     * Offline download to get reviewers comments report, translations edit
-     * report or offline translation kit. For offline translation kit
-     * downloading, it will follow logged user's "Download Options" as default.
-     * 
-     * @param p_accessToken
-     *            -- login user's token
-     * @param p_taskId
-     *            -- task ID to offline download file for.
-     * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report (this follows UI settings)
-     *            -- 2 : Offline Translation Kit
-     *            -- 3 : Translation Edit Report
-     *            -- 4 : Reviewer Comments Report
-     *            -- 5 : Reviewer Comments Report (Simplified)
-     *            -- 6 : Post Review QA Report
-     *            -- 7  : Biligual Trados RTF
-	 *			   -- 8  : Trados 7 TTX
-	 *			   -- 9  : OmegaT
-	 *			   -- 10 : XLiff 1.2
-	 *			   -- 11 : Xliff 2.0
-	 *			   -- 12 : RTF List view
+     *            -- 7 : Translation Verification Report
+     *            -- 8  : Biligual Trados RTF
+	 *			   -- 9  : Trados 7 TTX
+	 *			   -- 10  : OmegaT
+	 *			   -- 11 : XLiff 1.2
+	 *			   -- 12 : Xliff 2.0
+	 *			   -- 13 : RTF List view
+	 *			   -- 14 : Reviewer Comments Report with Compact Tags
+	 *			   -- 15 : Reviewer Comments Report (Simplified) with Compact Tags
      *@param p_workofflineFileTypeOption
      *			   --1  : consolidate/split = split per file, include repeated segments = no (Default)
      *			   --2  : consolidate/split = consolidate (overrides preserve folder structure setting),include repeated segments = no
@@ -3026,7 +2992,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * @param p_taskId
      *            -- task ID to upload file to.
      * @param p_workOfflineFileType
-     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report",
+     *             "Translations Edit Report", "Post Review QA Report" or "Translation Verification Report".
      *            -- 2 : Offline Translation Kit
      * @param p_fileName
      *            -- the upload file name
@@ -3059,7 +3026,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * @param p_identifyKey
      *            -- identifyKey to help locate where the uploaded file is.
      * @param p_workOfflineFileType
-     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report",
+     *             "Translations Edit Report", "Post Review QA Report" or "Translation Verification Report".
      *            -- 2 : Offline Translation Kit
      * @return -- Empty if succeed; if fail, return corresponding message.
      * 

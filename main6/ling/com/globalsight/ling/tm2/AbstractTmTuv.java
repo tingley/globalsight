@@ -19,19 +19,16 @@ package com.globalsight.ling.tm2;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Stack;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.ExactMatchFormatHandler;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.TuvSegmentBaseHandler;
-import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.util.GlobalSightLocale;
@@ -48,9 +45,8 @@ import com.globalsight.util.gxml.GxmlNames;
 public abstract class AbstractTmTuv
     implements BaseTmTuv, Cloneable
 {
-    static private final Logger c_logger =
-        Logger.getLogger(
-            AbstractTmTuv.class);
+	static private final Logger c_logger = Logger
+			.getLogger(AbstractTmTuv.class);
 
     private long m_id;  // Tuv id
     private BaseTmTu m_tu; // reference to Tu
@@ -71,6 +67,12 @@ public abstract class AbstractTmTuv
     
     private String m_updatedByProject = null;
     private String sid = null;
+
+    private Timestamp lastUsageDate = null;
+    private long jobId = -1;
+    private String jobName = null;
+    private long previousHash = -1;
+    private long nextHash = -1;
 
     /**
      * Default constructor. It can be called only from a subclass.
@@ -876,4 +878,44 @@ public abstract class AbstractTmTuv
     {
         this.sid = sid;
     }
+
+	public Timestamp getLastUsageDate() {
+		return lastUsageDate;
+	}
+
+	public void setLastUsageDate(Timestamp p_lastUsageDate) {
+		this.lastUsageDate = p_lastUsageDate;
+	}
+
+	public long getJobId() {
+		return jobId;
+	}
+
+	public void setJobId(long p_jobId) {
+		this.jobId = p_jobId;
+	}
+
+	public String getJobName() {
+		return jobName;
+	}
+
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
+	}
+
+	public long getPreviousHash() {
+		return previousHash;
+	}
+
+	public void setPreviousHash(long previousHash) {
+		this.previousHash = previousHash;
+	}
+
+	public long getNextHash() {
+		return nextHash;
+	}
+
+	public void setNextHash(long nextHash) {
+		this.nextHash = nextHash;
+	}
 }

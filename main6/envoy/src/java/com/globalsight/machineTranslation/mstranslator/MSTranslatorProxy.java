@@ -98,6 +98,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             }
             langs.add("pt-PT");//GBS-4000
             langs.add("es-419");
+            langs.add("en-gb");//GBS-4007
             return langs.contains(sourceLang) && langs.contains(targetLang);
         }
         catch (Exception ex)
@@ -350,7 +351,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 		}
 		
 		// Indonesian
-		if ("in".equals(lang) && "ID".equals(country))
+		if ("in".equals(lang) && "ID".equalsIgnoreCase(country))
 		{
 		    lang = "id";
 		}
@@ -387,6 +388,13 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 			}
 		}
 
+		if (lang.equalsIgnoreCase("en"))
+		{
+			if (country.equalsIgnoreCase("gb"))
+			{
+				lang = "en-gb";
+			}
+		}
 		return lang;
     }
 }

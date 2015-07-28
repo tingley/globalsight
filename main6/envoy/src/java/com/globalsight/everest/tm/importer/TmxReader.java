@@ -17,39 +17,32 @@
 
 package com.globalsight.everest.tm.importer;
 
+import java.io.File;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.log4j.Logger;
-
-import com.globalsight.everest.tm.importer.ImportUtil;
-import com.globalsight.everest.tm.importer.TmxReaderThread;
-import com.globalsight.everest.tm.util.Tmx;
-import com.globalsight.everest.tm.util.DtdResolver;
-
-import com.globalsight.everest.tm.util.trados.StylesheetRemover;
-import com.globalsight.everest.tm.util.trados.TradosFmTmxToGxml;
-import com.globalsight.everest.tm.util.trados.TradosFmSgmlTmxToGxml;
-import com.globalsight.everest.tm.util.trados.TradosQxTmxToGxml;
-import com.globalsight.everest.tm.util.trados.TradosHtmlTmxToGxml;
-import com.globalsight.everest.tm.util.trados.TradosTmxToRtf;
-import com.globalsight.everest.tm.util.trados.WordHtmlToTmx;
-import com.globalsight.cxe.adapter.msoffice.MicrosoftWordHelperForTmx;
-
-import com.globalsight.everest.tm.Tm;
-
-import com.globalsight.importer.IReader;
-import com.globalsight.importer.ImportOptions;
-import com.globalsight.importer.ImporterException;
-import com.globalsight.util.ReaderResult;
-import com.globalsight.util.ReaderResultQueue;
-
-
-import org.dom4j.*;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.ElementHandler;
+import org.dom4j.ElementPath;
 import org.dom4j.io.SAXReader;
 
-import org.xml.sax.InputSource;
-
-import java.io.*;
-import java.util.*;
-import com.globalsight.everest.tm.importer.ImportManager;
+import com.globalsight.cxe.adapter.msoffice.MicrosoftWordHelperForTmx;
+import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.util.DtdResolver;
+import com.globalsight.everest.tm.util.Tmx;
+import com.globalsight.everest.tm.util.trados.StylesheetRemover;
+import com.globalsight.everest.tm.util.trados.TradosFmSgmlTmxToGxml;
+import com.globalsight.everest.tm.util.trados.TradosFmTmxToGxml;
+import com.globalsight.everest.tm.util.trados.TradosHtmlTmxToGxml;
+import com.globalsight.everest.tm.util.trados.TradosQxTmxToGxml;
+import com.globalsight.everest.tm.util.trados.TradosTmxToRtf;
+import com.globalsight.everest.tm.util.trados.WordHtmlToTmx;
+import com.globalsight.importer.IReader;
+import com.globalsight.importer.ImportOptions;
+import com.globalsight.util.ReaderResult;
+import com.globalsight.util.ReaderResultQueue;
 
 /**
  * Reads TMX files and produces TU objects.

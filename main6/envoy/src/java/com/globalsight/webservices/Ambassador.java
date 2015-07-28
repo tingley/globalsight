@@ -194,10 +194,12 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.generat
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.PostReviewQAReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationVerificationReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoSearchCriteria;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
@@ -388,6 +390,7 @@ public class Ambassador extends AbstractWebService
     public static final String GENERATE_REVIEWERS_COMMENT_REPORT = "generateReviewersCommentReport";
     public static final String GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT = "generateReviewersCommentSimplifiedReport";
     public static final String GENERATE_POST_REVIEW_QA_REPORT = "generatePostReviewQAReport";
+    public static final String GENERATE_TRANSLATION_VERIFICATION_REPORT = "generateTranslationVerificationReport";
 
     public static final String GENERATE_DITA_QA_REPORT = "generateDITAQAReport";
     public static final String GENERATE_QA_CHECKS_REPORT = "generateQAChecksReport";
@@ -13594,42 +13597,20 @@ public class Ambassador extends AbstractWebService
         String loggedComName = loggedUserObj.getCompanyName();
 
         ActivityLog.Start activityStart = null;
-        StringBuffer jobIdList = new StringBuffer();
+        String jobIds = new String();
         try
-        {
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", loggedUserName);
-            activityStart = ActivityLog.start(Ambassador.class,
-                    "fetchJobIdsPerCompany(p_accessToken)", activityArgs);
+		{
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", loggedUserName);
+			activityStart = ActivityLog.start(Ambassador.class,
+					"fetchJobIdsPerCompany(p_accessToken)", activityArgs);
 
-            JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
-            JobSearchParameters jsParm = new JobSearchParameters();
-            // all jobs for all companies to be filtered
-            Collection allJobs = jobHandler.getJobs(jsParm);
-            if (allJobs != null && allJobs.size() > 0)
-            {
-                Iterator allJobsIter = allJobs.iterator();
-                while (allJobsIter.hasNext())
-                {
-                    Job job = (Job) allJobsIter.next();
-                    long comId = job.getCompanyId();
-                    String jobComName = ServerProxy.getJobHandler()
-                            .getCompanyById(comId).getCompanyName();
-                    if (loggedComName != null && jobComName != null
-                            && loggedComName.equals(jobComName))
-                    {
-                        if (jobIdList.length() == 0)
-                        {
-                            jobIdList.append("" + job.getId());
-                        }
-                        else
-                        {
-                            jobIdList.append("," + job.getId());
-                        }
-                    }
-                }
-            }
-        }
+			JobSearchParameters sp = new JobSearchParameters();
+			sp.setUser(loggedUserObj);
+			JobVoSearchCriteria searcher = new JobVoSearchCriteria();
+			List result = searcher.search(sp);
+			jobIds = getJobIds(result);
+		}
         catch (Exception e)
         {
             String message = "Failed to retrive all job IDs for current company";
@@ -13645,9 +13626,28 @@ public class Ambassador extends AbstractWebService
             }
         }
 
-        return jobIdList.toString();
+        return jobIds;
     }
 
+    private String getJobIds(List result)
+	{
+		StringBuffer jobIdList = new StringBuffer();
+		for (int i = 0; i < result.size(); i++)
+		{
+			Object[] obs = (Object[]) result.get(i);
+			if (jobIdList.length() == 0)
+			{
+				jobIdList.append("" + obs[0].toString());
+			}
+			else
+			{
+				jobIdList.append("," + obs[0].toString());
+			}
+		}
+		return jobIdList.toString();
+	}
+
+    
     /**
      * Get jobs according with special offset and count of fetching records in
      * current company
@@ -13683,6 +13683,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
+            User user = this.getUser(userName);
+            CompanyThreadLocal.getInstance().setValue(user.getCompanyName());
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("offset", p_offset);
@@ -13697,16 +13699,16 @@ public class Ambassador extends AbstractWebService
 
             Company company = getCompanyInfo(userName);
             if (company != null)
-            {
-                String[] ids = jobHandler.getJobIdsByCompany(
-                        String.valueOf(company.getId()), p_offset, p_count,
-                        p_isDescOrder);
-                if (ids != null && ids.length > 0)
-                {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
-                }
-            }
+			{
+				String[] ids = jobHandler.getJobIdsByCompany(
+						String.valueOf(company.getId()), p_offset, p_count,
+						p_isDescOrder, user.getUserId());
+				if (ids != null && ids.length > 0)
+				{
+					result = fetchJobsPerCompany(p_accessToken, ids, true,
+							true, false);
+				}
+			}
             return result;
         }
         catch (Exception e)
@@ -13765,6 +13767,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
+            User user = this.getUser(userName);
+            CompanyThreadLocal.getInstance().setValue(user.getCompanyName());
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("state", p_state);
@@ -13779,16 +13783,16 @@ public class Ambassador extends AbstractWebService
 
             Company company = getCompanyInfo(userName);
             if (company != null)
-            {
-                String[] ids = jobHandler.getJobIdsByState(
-                        String.valueOf(company.getId()), p_state, p_offset,
-                        p_count, p_isDescOrder);
-                if (ids != null && ids.length > 0)
-                {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
-                }
-            }
+			{
+				String[] ids = jobHandler.getJobIdsByState(
+						String.valueOf(company.getId()), p_state, p_offset,
+						p_count, p_isDescOrder, user.getUserId());
+				if (ids != null && ids.length > 0)
+				{
+					result = fetchJobsPerCompany(p_accessToken, ids, true,
+							true, false);
+				}
+			}
 
             return result;
         }
@@ -13846,6 +13850,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
+            User user = this.getUser(userName);
+            CompanyThreadLocal.getInstance().setValue(user.getCompanyName());
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("creatorUserName", p_creatorUserName);
@@ -13881,15 +13887,16 @@ public class Ambassador extends AbstractWebService
                 }
             }
             if (company != null)
-            {
-                String[] ids = jobHandler.getJobIdsByCreator(
-                        company.getId(), creatorUserId,p_offset, p_count, p_isDescOrder);
-                if (ids != null && ids.length > 0)
-                {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
-                }
-            }
+			{
+				String[] ids = jobHandler.getJobIdsByCreator(company.getId(),
+						creatorUserId, p_offset, p_count, p_isDescOrder,
+						user.getUserId());
+				if (ids != null && ids.length > 0)
+				{
+					result = fetchJobsPerCompany(p_accessToken, ids, true,
+							true, false);
+				}
+			}
 
             return result;
         }
@@ -14148,33 +14155,44 @@ public class Ambassador extends AbstractWebService
                             "fetchJobsPerCompany(p_accessToken, p_jobIds, p_returnSourcePageInfo, p_returnWorkflowInfo, p_returnJobAttributeInfo",
                             activityArgs);
 
+            String jobIds = fetchJobIdsPerCompany(p_accessToken);
+            String[] ids = null;
+            List<String> idList = new ArrayList();
+            if (jobIds != null && jobIds.trim().length() > 0)
+            {
+                ids = jobIds.split(",");
+                idList = Arrays.asList(ids);
+            }
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
             // handle job one by one;if jobId is invalid or does not belong to
             // current company,ignore it.
             for (int i = 0; i < p_jobIds.length; i++)
             {
                 try
-                {
-                    long jobID = Long.parseLong(p_jobIds[i]);
-                    Job job = jobHandler.getJobById(jobID);
-                    if (job == null)
-                        continue;
+				{
+					if (idList.contains(p_jobIds[i]))
+					{
+						long jobID = Long.parseLong(p_jobIds[i]);
+						Job job = jobHandler.getJobById(jobID);
+						if (job == null)
+							continue;
 
-                    if (!isInSameCompany(loggedUserName,
-                            String.valueOf(job.getCompanyId())))
-                    {
-                        if (!UserUtil.isSuperAdmin(loggedUserName)
-                                && !UserUtil.isSuperPM(loggedUserName))
-                        {
-                            continue;
-                        }
-                    }
+						if (!isInSameCompany(loggedUserName,
+								String.valueOf(job.getCompanyId())))
+						{
+							if (!UserUtil.isSuperAdmin(loggedUserName)
+									&& !UserUtil.isSuperPM(loggedUserName))
+							{
+								continue;
+							}
+						}
 
-                    String singleJobXml = handleSingleJob(job, tz,
-                            p_returnSourcePageInfo, p_returnWorkflowInfo,
-                            p_returnJobAttributeInfo);
-                    xml.append(singleJobXml);
-                }
+						String singleJobXml = handleSingleJob(job, tz,
+								p_returnSourcePageInfo, p_returnWorkflowInfo,
+								p_returnJobAttributeInfo);
+						xml.append(singleJobXml);
+					}
+				}
                 catch (Exception e)
                 {
 
@@ -17405,6 +17423,56 @@ public class Ambassador extends AbstractWebService
 
 		return returnString;
     }
+    /**
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_jobId
+     *            -- job ID to get report.
+     * @param p_targetLocale
+     *            -- target locale. eg "zh_CN"(case insensitive).
+     * @return -- XML string. -- If fail, it will return an xml string to tell
+     *         error message; -- If succeed, report returning is like
+     *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationVerificationReport/20140219/TVR-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
+     * @throws WebServiceException
+     */
+    public String generateTranslationVerificationReport(String p_accessToken, 
+            String p_jobId, String p_targetLocale) throws WebServiceException
+    {
+        checkAccess(p_accessToken, GENERATE_TRANSLATION_VERIFICATION_REPORT);
+        String returnString = "";
+        try 
+        {
+            //get and check job ids
+            Long jobId = Long.valueOf(p_jobId);
+            List<Long> jobIdList = new ArrayList<Long>();
+            jobIdList.add(jobId);
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
+            String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
+            if(illegalJobIds.length() > 0)
+            {
+                return makeErrorXml(GENERATE_TRANSLATION_VERIFICATION_REPORT,
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
+            }
+            //get target locales
+            List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
+            targetLocalList.add(getLocaleByName(p_targetLocale));
+            //get report
+            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            TranslationVerificationReportGenerator generator = new TranslationVerificationReportGenerator(
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), userId);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
+            returnString = getReportsUrl(files);
+        } 
+        catch (Exception e) 
+        {
+            logger.error("Error found in generateTranslationVerificationReport.", e);
+            return makeErrorXml(GENERATE_TRANSLATION_VERIFICATION_REPORT,
+                    "Error info: " + e.toString());
+        }
+        
+        return returnString;
+    }
     
     /**
      * 
@@ -17830,28 +17898,40 @@ public class Ambassador extends AbstractWebService
 	public String generateQAChecksReports(String p_accessToken, String jobIds,
 			String workflowIds) throws WebServiceException
 	{
-		String returnFilePath = "No QA report available for download.";
+		String returnFilePath = null;
 		try
 		{
 			String[] jobIdArr = null;
 			String[] workflowIdArr = null;
 			Assert.assertNotEmpty(p_accessToken, "Access token");
 			Assert.assertNotEmpty(jobIds, "Job id");
-			if (StringUtils.isNotBlank(jobIds))
+			String tempId = null;
+			try
 			{
-				jobIdArr = jobIds.split(",");
-				for (String id : jobIdArr)
+				if (StringUtils.isNotBlank(jobIds))
 				{
-					Assert.assertIsInteger(id);
+					jobIdArr = jobIds.split(",");
+					for (String id : jobIdArr)
+					{
+						tempId = id;
+						Assert.assertIsInteger(id);
+					}
+				}
+
+				if (StringUtils.isNotBlank(workflowIds))
+				{
+					workflowIdArr = workflowIds.split(",");
+					for (String id : workflowIdArr)
+					{
+						tempId = id;
+						Assert.assertIsInteger(id);
+					}
 				}
 			}
-			if (StringUtils.isNotBlank(workflowIds))
+			catch (Exception e)
 			{
-				workflowIdArr = workflowIds.split(",");
-				for (String id : workflowIdArr)
-				{
-					Assert.assertIsInteger(id);
-				}
+				return makeErrorXml(GENERATE_QA_CHECKS_REPORTS, tempId
+						+ " can not be converted into an integer.");
 			}
 
 			Company logUserCompany = getCompanyInfo(getUsernameFromSession(p_accessToken));
@@ -17866,7 +17946,7 @@ public class Ambassador extends AbstractWebService
 						if (job.getCompanyId() != logUserCompany.getId())
 						{
 							return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
-									"Current user is not super user or current company has no job with id : "
+									"Current user is not super user or current company has no job with id: "
 											+ id);
 						}
 					}
@@ -17973,7 +18053,7 @@ public class Ambassador extends AbstractWebService
 				else
 				{
 					return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
-							"Current log user no download QA report permissions");
+							"Current user has no download QA reports permission.");
 				}
 			}
 
@@ -18049,7 +18129,7 @@ public class Ambassador extends AbstractWebService
 			}
 			else
 			{
-				fileUrl = "No QA Report downloaded !";
+				fileUrl = "No QA report available for download.";
 			}
 		}
 		catch (Exception e)
@@ -18075,6 +18155,7 @@ public class Ambassador extends AbstractWebService
      *            -- 4 : Reviewer Comments Report
      *            -- 5 : Reviewer Comments Report (Simplified)
      *            -- 6 : Post Review QA Report
+     *            -- 7 : Translation Verification Report
      *
      * @return -- XML string. -- If fail, it will return an xml string to tell
      *         error message; -- If succeed, report returning is like
@@ -18101,7 +18182,8 @@ public class Ambassador extends AbstractWebService
      * @param p_taskId
      *            -- task ID to upload file to.
      * @param p_workOfflineFileType
-     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report",
+     *               "Translations Edit Report", "Post Review QA Report" or "Translation Verification Report".
      *            -- 2 : Offline Translation Kit
      * @param p_fileName
      *            -- the upload file name
@@ -18138,7 +18220,8 @@ public class Ambassador extends AbstractWebService
      * @param p_identifyKey
      *            -- identifyKey to help locate where the uploaded file is.
      * @param p_workOfflineFileType
-     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report", "Translations Edit Report" or "Post Review QA Report".
+     *            -- 1 : For reports like "Reviewer Comments Report", "Simplified Reviewer Comments Report",
+     *              "Translations Edit Report", "Post Review QA Report" or "Translation Verification Report".
      *            -- 2 : Offline Translation Kit
      * @return -- Empty if succeed; if fail, return corresponding message.
      * 

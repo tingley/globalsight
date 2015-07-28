@@ -277,19 +277,17 @@ function confirmTime()
 							<INPUT TYPE="HIDDEN" NAME="formAction" VALUE="wfStatePostForm">
 							<TR>
 								<TD><%=labelName%><SPAN CLASS="asterisk">*</SPAN>:</TD>
-								<TD><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="50"
+								<TD><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="40"
 									NAME="<%=nameField%>" CLASS="standardText"
 									<%if (wfStatePostName != null)
-            {%>
+            						{%>
 									VALUE="<%=wfStatePostName%>" <%}%>></INPUT></TD>
 							</TR>
 							<TR>
 								<TD><%=labelDescription%>:</TD>
-								<TD><TEXTAREA NAME="<%=descriptionField%>" COLS="50"
-										ROWS="6" CLASS="standardText">
-										<%
-										    if (wfStatePostDescription != null)
-										%><%=wfStatePostDescription%></TEXTAREA>
+								<TD>
+								<TEXTAREA rows="6" cols="50" name="<%=descriptionField%>" 
+								class="standardText"><%=wfStatePostDescription%></TEXTAREA>
 								</TD>
 							</TR>
 							<TR>

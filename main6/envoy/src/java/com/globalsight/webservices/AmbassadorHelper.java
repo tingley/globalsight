@@ -77,6 +77,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.generat
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationVerificationReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
@@ -2119,21 +2120,42 @@ public class AmbassadorHelper extends JsonTypeWebService
      *            -- 4 : Reviewer Comments Report
      *            -- 5 : Reviewer Comments Report (Simplified)
      *            -- 6 : Post Review QA Report
+     *            -- 7 : Translation Verification Report
+     *            -- 14 : Reviewer Comments Report with Compact Tags
+	 *			   -- 15 : Reviewer Comments Report (Simplified) with Compact Tags
      * @throws WebServiceException
      */
     protected String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
             int p_workOfflineFileType, boolean p_isJson)
             throws WebServiceException
     {
-        // Check work offline file type
-        if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2
-                && p_workOfflineFileType != 3 && p_workOfflineFileType != 4
-                && p_workOfflineFileType != 5 && p_workOfflineFileType !=6)
-        {
-            return makeErrorMessage(p_isJson, GET_WORK_OFFLINE_FILES,
-                    "Invalid workOfflineFileType " + p_workOfflineFileType
-                            + ", it should be limited in 1, 2, 3, 4, 5 or 6.");
-        }
+		// Check work offline file type
+		if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2
+				&& p_workOfflineFileType != 3 && p_workOfflineFileType != 4
+				&& p_workOfflineFileType != 5 && p_workOfflineFileType != 6
+				&& p_workOfflineFileType != 7)
+		{
+			if (p_isJson && p_workOfflineFileType != 14
+					&& p_workOfflineFileType != 15)
+			{
+				return makeErrorMessage(
+						p_isJson,
+						GET_WORK_OFFLINE_FILES,
+						"Invalid workOfflineFileType "
+								+ p_workOfflineFileType
+								+ ", it should be limited in 1, 2, 3, 4, 5, 6, 7, 14 or 15.");
+			}
+			
+			if (!p_isJson)
+			{
+				return makeErrorMessage(
+						p_isJson,
+						GET_WORK_OFFLINE_FILES,
+						"Invalid workOfflineFileType "
+								+ p_workOfflineFileType
+								+ ", it should be limited in 1, 2, 3, 4, 5, 6 or 7.");
+			}
+		}
 
         Task task = null;
         try
@@ -2264,12 +2286,39 @@ public class AmbassadorHelper extends JsonTypeWebService
             {
                 generator = new PostReviewQAReportGenerator(companyName);
                 ((PostReviewQAReportGenerator) generator).setUserId(userId);
-            }
-
-            if (p_workOfflineFileType == 1 || p_workOfflineFileType == 3
-                    || p_workOfflineFileType == 4 || p_workOfflineFileType == 5
-                    || p_workOfflineFileType == 6)
+			}
+            //TVR (does not care current task type)
+            else if (p_workOfflineFileType == 7)
             {
+                generator = new TranslationVerificationReportGenerator(companyName);
+                ((TranslationVerificationReportGenerator)generator).setUserId(userId);
+            }
+			// Reviewer Comments Report with Compact Tags
+			else if (p_workOfflineFileType == 14)
+			{
+				generator = new ReviewersCommentsReportGenerator(companyName);
+				((ReviewersCommentsReportGenerator) generator)
+						.setIncludeCompactTags(true);
+				((ReviewersCommentsReportGenerator) generator)
+						.setUserId(userId);
+			}
+			// Reviewer Comments Report (Simplified) with Compact Tags
+			else if (p_workOfflineFileType == 15)
+			{
+				generator = new ReviewersCommentsSimpleReportGenerator(
+						companyName);
+				((ReviewersCommentsSimpleReportGenerator) generator)
+						.setIncludeCompactTags(true);
+				((ReviewersCommentsSimpleReportGenerator) generator)
+						.setUserId(userId);
+			}
+
+			if (p_workOfflineFileType == 1 || p_workOfflineFileType == 3
+					|| p_workOfflineFileType == 4 || p_workOfflineFileType == 5
+					|| p_workOfflineFileType == 6 || p_workOfflineFileType == 7
+					|| p_workOfflineFileType == 14
+					|| p_workOfflineFileType == 15)
+			{
                 List<Long> jobIds = new ArrayList<Long>();
                 jobIds.add(task.getJobId());
                 List<GlobalSightLocale> trgLocales = new ArrayList<GlobalSightLocale>();
@@ -2336,12 +2385,15 @@ public class AmbassadorHelper extends JsonTypeWebService
      *            -- 4 : Reviewer Comments Report
      *            -- 5 : Reviewer Comments Report (Simplified)
      *            -- 6 : Post Review QA Report
-     *            -- 7  : Biligual Trados RTF
-	 *			   -- 8  : Trados 7 TTX
-	 *			   -- 9  : OmegaT
-	 *			   -- 10 : XLiff 1.2
-	 *			   -- 11 : Xliff 2.0
-	 *			   -- 12 : RTF List view
+     *            -- 7 : Translation Verification Report
+     *            -- 8  : Biligual Trados RTF
+	 *			   -- 9  : Trados 7 TTX
+	 *			   -- 10  : OmegaT
+	 *			   -- 11 : XLiff 1.2
+	 *			   -- 12 : Xliff 2.0
+	 *			   -- 13 : RTF List view
+	 *			   -- 14 : Reviewer Comments Report with Compact Tags
+	 *			   -- 15 : Reviewer Comments Report (Simplified) with Compact Tags
      *@param p_workofflineFileTypeOption
      *			   --1  : consolidate/split = split per file, include repeated segments = no (Default)
      *			   --2  : consolidate/split = consolidate (overrides preserve folder structure setting),include repeated segments = no
@@ -2368,14 +2420,16 @@ public class AmbassadorHelper extends JsonTypeWebService
 				&& p_workOfflineFileType != 5 && p_workOfflineFileType != 6
 				&& p_workOfflineFileType != 7 && p_workOfflineFileType != 8
 				&& p_workOfflineFileType != 9 && p_workOfflineFileType != 10
-				&& p_workOfflineFileType != 11 && p_workOfflineFileType != 12)
+				&& p_workOfflineFileType != 11 && p_workOfflineFileType != 12
+				&& p_workOfflineFileType != 13 && p_workOfflineFileType != 14 
+				&& p_workOfflineFileType != 15)
 		{
 			return makeErrorMessage(
 					p_isJson,
 					GET_WORK_OFFLINE_FILES,
 					"Invalid workOfflineFileType "
 							+ p_workOfflineFileType
-							+ ", it should be limited in 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, or 12.");
+							+ ", it should be limited in 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,12,13,14 or 15.");
 		}
 
 		int workofflineFileTypeOption = -1;
@@ -2397,7 +2451,7 @@ public class AmbassadorHelper extends JsonTypeWebService
 						GET_WORK_OFFLINE_FILES,
 						"Invalid workofflineFileTypeOption format : "
 								+ p_workofflineFileTypeOption
-								+ ",it should be limited in 1, 2, 3, 4, 5, 6 or empty");
+								+ ", it should be limited in 1, 2, 3, 4, 5, 6 or empty");
 			}
 
 			workofflineFileTypeOption = Integer
@@ -2420,7 +2474,9 @@ public class AmbassadorHelper extends JsonTypeWebService
 
 		if (p_workOfflineFileType == 1 || p_workOfflineFileType == 2
 				|| p_workOfflineFileType == 3 || p_workOfflineFileType == 4
-				|| p_workOfflineFileType == 5 || p_workOfflineFileType == 6)
+				|| p_workOfflineFileType == 5 || p_workOfflineFileType == 6
+				|| p_workOfflineFileType == 7
+				|| p_workOfflineFileType == 14 || p_workOfflineFileType == 15)
 		{
 			return getWorkOfflineFiles(p_accessToken, p_taskId,
 					p_workOfflineFileType, p_isJson);
@@ -2454,16 +2510,16 @@ public class AmbassadorHelper extends JsonTypeWebService
 					task.getTaskName());
 			if (act != null && act.getType() == Activity.TYPE_REVIEW)
 			{
-				if (p_workOfflineFileType == 7 || p_workOfflineFileType == 8
-						|| p_workOfflineFileType == 9
+				if (p_workOfflineFileType == 8 || p_workOfflineFileType == 9
 						|| p_workOfflineFileType == 10
 						|| p_workOfflineFileType == 11
-						|| p_workOfflineFileType == 12)
+						|| p_workOfflineFileType == 12
+						|| p_workOfflineFileType == 13)
 				{
 					return makeErrorMessage(
 							p_isJson,
 							GET_WORK_OFFLINE_FILES,
-							"The task type is review status,can't download when workOfflineFileType are 7,8,9,10,11,12.");
+							"The task type is review status,can't download when workOfflineFileType are 8,9,10,11,12,13.");
 				}
 			}
 		}
@@ -2500,33 +2556,33 @@ public class AmbassadorHelper extends JsonTypeWebService
 
 			OfflineEditManager oem = ServerProxy.getOfflineEditManager();
 			String fileType = null;
-			// 7:Biligual Trados RTF.
-			if (p_workOfflineFileType == 7)
+			// 8:Biligual Trados RTF.
+			if (p_workOfflineFileType == 8)
 			{
 				fileType = OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED;
 			}
-			// 8:Trados 7 TTX
-			else if (p_workOfflineFileType == 8)
+			// 9:Trados 7 TTX
+			else if (p_workOfflineFileType == 9)
 			{
 				fileType = OfflineConstants.FORMAT_TTX_VALUE;
 			}
-			// 9:OmegaT
-			else if (p_workOfflineFileType == 9)
+			// 10:OmegaT
+			else if (p_workOfflineFileType == 10)
 			{
 				fileType = OfflineConstants.FORMAT_OMEGAT_VALUE;
 			}
-			// 10:XLiff 1.2
-			else if (p_workOfflineFileType == 10)
+			// 11:XLiff 1.2
+			else if (p_workOfflineFileType == 11)
 			{
 				fileType = OfflineConstants.FORMAT_XLF_NAME_12;
 			}
-			// 11:Xliff 2.0
-			else if (p_workOfflineFileType == 11)
+			// 12:Xliff 2.0
+			else if (p_workOfflineFileType == 12)
 			{
 				fileType = OfflineConstants.FORMAT_XLF_VALUE_20;
 			}
-			// 12:RTF List view
-			else if (p_workOfflineFileType == 12)
+			// 13:RTF List view
+			else if (p_workOfflineFileType == 13)
 			{
 				fileType = OfflineConstants.FORMAT_RTF;
 			}
@@ -2806,10 +2862,13 @@ public class AmbassadorHelper extends JsonTypeWebService
         // Check work offline file type
         if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2)
         {
-            return makeErrorMessage(p_isJson, UPLOAD_WORK_OFFLINE_FILES,
+            return makeErrorMessage(
+                    p_isJson,
+                    UPLOAD_WORK_OFFLINE_FILES,
                     "Invalid workOfflineFileType "
                             + p_workOfflineFileType
-                            + ", it should be limited in 1(for Reviewer Comments Report or Translations Edit Report) or 2(for Offline Translation Kit).");
+                            + ", it should be limited in 1(for Reviewer Comments Report, Translations Edit Report, Post-Review QA Report or Translation Verification Report) "
+                            + "or 2(for Offline Translation Kit).");
         }
 
         Task task = null;
@@ -2932,7 +2991,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             return makeErrorMessage(p_isJson, IMPORT_WORK_OFFLINE_FILES,
                     "Invalid workOfflineFileType "
                             + p_workOfflineFileType
-                            + ", it should be limited in 1(for Reviewer Comments Report or Translations Edit Report) or 2(for Offline Translation Kit).");
+                            + ", it should be limited in 1(for Reviewer Comments Report, Translations Edit Report, Post-Review QA Report or Translation Verification Report) or 2(for Offline Translation Kit).");
         }
 
         Task task = null;
@@ -3010,16 +3069,17 @@ public class AmbassadorHelper extends JsonTypeWebService
                                 .equalsIgnoreCase(repName)
                         && !"Reviewers Comments Report (Simplified)"
                                 .equalsIgnoreCase(repName)
-                        && !"Post-Review QA Report".equalsIgnoreCase(repName))
+                        && !"Post-Review QA Report".equalsIgnoreCase(repName)
+                        && !"Translation Verification Report".equalsIgnoreCase(repName))
                 {
                     return makeErrorMessage(p_isJson, UPLOAD_WORK_OFFLINE_FILES,
-                            "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report file.");
+                            "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report or Translation Verification Report file.");
                 }
             }
             catch (Exception e)
             {
                 return makeErrorMessage(p_isJson, UPLOAD_WORK_OFFLINE_FILES,
-                        "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report file.");
+                        "The file is none of Translation Edit Report, Reviewers Comments Report, Post-Review QA Report or Translation Verification Report file.");
             }
         }
 
@@ -3048,6 +3108,11 @@ public class AmbassadorHelper extends JsonTypeWebService
                 else if ("Post-Review QA Report".equalsIgnoreCase(repName))
                 {
                     reportName = WebAppConstants.POST_REVIEW_QA;
+                }
+                else if ("Translation Verification Report"
+                        .equalsIgnoreCase(repName))
+                {
+                    reportName = WebAppConstants.TRANSLATION_VERIFICATION;
                 }
                 // Process uploading in same thread, not use separate thread so
                 // that error message can be returned to invoker.

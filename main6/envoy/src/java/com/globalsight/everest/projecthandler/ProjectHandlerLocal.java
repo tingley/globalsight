@@ -109,7 +109,6 @@ import com.globalsight.ling.tm3.core.TM3Tm;
 import com.globalsight.ling.tm3.integration.GSDataFactory;
 import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute;
-import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.ArrayConverter;
 import com.globalsight.util.CacheData;
@@ -199,9 +198,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
 
             transaction.commit();
-            
-            OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_L10N_PROFILE,
-                    p_l10nProfile.getName());
             
             return basicProfile.getId();
         }
@@ -296,8 +292,6 @@ public class ProjectHandlerLocal implements ProjectHandler
                 lnWfInfo.setKey(key);
                 lnWfInfo.setIsActive(wftInfo.isActive());
                 saveL10nProfileWfTemplateInfo(session, lnWfInfo);
-                OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_L10N_PROFILE,
-                        duplicatedProfile.getName());
             }
 
             transaction.commit();
@@ -478,9 +472,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
 
             transaction.commit();
-            
-            OperationLog.log(OperationLog.EVENT_EDIT, OperationLog.COMPONET_L10N_PROFILE,
-                    modifiedProfile.getName());
         }
         catch (Exception pe)
         {
@@ -519,8 +510,6 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
             HibernateUtil.delete(p_l10nProfile);
-            OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_L10N_PROFILE,
-                    p_l10nProfile.getName());
         }
         catch (Exception pe)
         {
@@ -840,8 +829,6 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
             HibernateUtil.save(p_project);
-            OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_PROJECT,
-                    p_project.getName());
 
             SetDefaultRoleUtil.setUserDefaultRoleToProject(p_project);
         }
@@ -993,8 +980,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             session.update(clone);
             transaction.commit();
-            OperationLog.log(OperationLog.EVENT_EDIT, OperationLog.COMPONET_PROJECT,
-                    clone.getName());
 
             SetDefaultRoleUtil.setUserDefaultRoleToProject(originalProject);
 
@@ -2613,9 +2598,6 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
             HibernateUtil.save(p_workflowTemplateInfo);
-            
-            OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_WORKFLOW,
-                    p_workflowTemplateInfo.getName());
         }
         catch (Exception e)
         {
@@ -2681,8 +2663,6 @@ public class ProjectHandlerLocal implements ProjectHandler
                         p_displayRoleName, false);
                 dupWorkflowTemplateInfo.setWorkflowTemplate(iflowTempDup);
                 session.save(dupWorkflowTemplateInfo);
-                OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_WORKFLOW,
-                        dupWorkflowTemplateInfo.getName());
             }
             tx.commit();
         }
@@ -2776,9 +2756,6 @@ public class ProjectHandlerLocal implements ProjectHandler
                 workflowTemplateInfo.setWorkflowTemplate(jbpmTemp);
                 // uow.registerObject(dupWorkflowTemplateInfo);
                 session.save(workflowTemplateInfo);
-
-                OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_WORKFLOW,
-                        workflowTemplateInfo.getName());
             }
             // uow.commit();
             tx.commit();
@@ -2875,8 +2852,6 @@ public class ProjectHandlerLocal implements ProjectHandler
                     p_displayRoleName, false);
             dupWorkflowTemplateInfo.setWorkflowTemplate(iflowDuplicate);
             HibernateUtil.save(dupWorkflowTemplateInfo);
-            OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_WORKFLOW,
-                    dupWorkflowTemplateInfo.getName());
         }
         catch (Exception e)
         {
@@ -2918,8 +2893,6 @@ public class ProjectHandlerLocal implements ProjectHandler
                     origWorkflowTemplateInfo.getWorkflowManagerIds(), "", true);
             dupWorkflowTemplateInfo.setWorkflowTemplate(iflowDuplicate);
             HibernateUtil.save(dupWorkflowTemplateInfo);
-            OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_WORKFLOW,
-                    dupWorkflowTemplateInfo.getName());
         }
         catch (Exception e)
         {
@@ -3052,8 +3025,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             leverageLocales.setBackPointer(p_workflowTemplateInfo);
         }
         HibernateUtil.update(p_workflowTemplateInfo);
-        OperationLog.log(OperationLog.EVENT_EDIT, OperationLog.COMPONET_WORKFLOW,
-                p_workflowTemplateInfo.getName());
     }
 
     /**
@@ -3078,8 +3049,6 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             wfti.deactivate();
             HibernateUtil.saveOrUpdate(wfti);
-            OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_WORKFLOW,
-                    wfti.getName());
         }
         catch (Exception pe)
         {
@@ -3540,9 +3509,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             p_tmProfile
                     .setAllLeverageProjectTMs(p_tmProfile.getNewProjectTMs());
             HibernateUtil.save(p_tmProfile);
-
-            OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_TM_PROFILE,
-                    p_tmProfile.getName());
         }
         catch (Exception e)
         {
@@ -3628,9 +3594,6 @@ public class ProjectHandlerLocal implements ProjectHandler
                 tmProfile.setAllLeverageProjectTMs(v);
 
                 session.saveOrUpdate(tmProfile);
-
-                OperationLog.log(OperationLog.EVENT_EDIT, OperationLog.COMPONET_TM_PROFILE,
-                        tmProfile.getName());
             }
 
             tx.commit();
@@ -3757,9 +3720,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
 
             HibernateUtil.save(p_projectTM);
-
-            OperationLog.log(OperationLog.EVENT_ADD, OperationLog.COMPONET_TM,
-                    p_projectTM.getName());
         }
         catch (Exception e)
         {
@@ -3907,8 +3867,6 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             clone.setAttributes(p_projectTM.getAttributes());
             HibernateUtil.update(clone);
-            OperationLog.log(OperationLog.EVENT_EDIT, OperationLog.COMPONET_TM,
-                    p_projectTM.getName());
         }
         catch (Exception e)
         {
@@ -3928,9 +3886,9 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         try
         {
+        	Set<TMAttribute> attrs = tm.getAttributes();
             HibernateUtil.delete(tm);
-            OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_TM,
-                    tm.getName());
+        	HibernateUtil.delete(tm.getAttributes());
         }
         catch (Exception e)
         {
@@ -4088,9 +4046,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             connection.commit();
 
             HibernateUtil.delete(tmprofile);
-
-            OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_TM_PROFILE,
-                    tmprofile.getName());
             
             LogManager.log(LogType.TMProfile, LogManager.EVENT_TYPE_REMOVE,
                     tmprofile.getId(), "Delete Translation Memory Profile ["
@@ -4217,12 +4172,12 @@ public class ProjectHandlerLocal implements ProjectHandler
             List<WorkflowStatePosts> qureyList = getAllWorkflowStatePostInfos();
             for (WorkflowStatePosts wfStatePost : qureyList)
             {
-                if (wfStatePost.getName().indexOf(filterParams[0]) != -1
-                        && wfStatePost.getListenerURL()
-                                .indexOf(filterParams[1]) != -1
+                if (wfStatePost.getName().toLowerCase().indexOf(filterParams[0].toLowerCase()) != -1
+                        && wfStatePost.getListenerURL().toLowerCase()
+                                .indexOf(filterParams[1].toLowerCase()) != -1
                        && CompanyWrapper.getCompanyNameById(
-                                wfStatePost.getCompanyId()).indexOf(
-                                filterParams[2]) != -1)
+                                wfStatePost.getCompanyId()).toLowerCase().indexOf(
+                                filterParams[2].toLowerCase()) != -1)
                 {
                     queryResult.add(wfStatePost);
                 }

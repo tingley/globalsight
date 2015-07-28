@@ -335,4 +335,132 @@ public class SQLUtil
         }
     }
 
+	public static List<List<Long>> toBatchList(List<Long> ids,
+			int batchSize)
+    {
+        List<List<Long>> batchList = new ArrayList<List<Long>>();
+        if (ids == null)
+        {
+            return batchList;
+        }
+
+        List<Long> subList = new ArrayList<Long>();
+        int count = 0;
+        for (Long obj : ids)
+        {
+        	subList.add(obj);
+        	count++;
+        	if (count == batchSize)
+        	{
+        		batchList.add(subList);
+        		subList = new ArrayList<Long>();
+        		count = 0;
+        	}
+        }
+
+        if (subList.size() > 0)
+        {
+        	batchList.add(subList);
+        }
+
+        return batchList;
+    }
+
+	public static void execBatchDelete(Connection conn, String sql,
+			List<List<Long>> batchList) throws SQLException
+    {
+        int batchCount = batchList.size();
+        if (batchCount > 1)
+        {
+        	SQL_LOGGER.info(batchCount + " batches of records found to be deleted.");
+        }
+        int deletedBatchCount = 0;
+        for (List<Long> list : batchList)
+        {
+            exec(conn, sql + toInClause(list));
+            if (batchCount > 1)
+            {
+                deletedBatchCount++;
+                int leftBatchCount = batchCount - deletedBatchCount;
+                String message = "";
+                if (deletedBatchCount == 1)
+                {
+                    if (leftBatchCount == 1)
+                    {
+                        message = "1 batch deleted, left 1";
+                    }
+                    else
+                    {
+                        message = "1 batch deleted, left " + leftBatchCount;
+                    }
+                }
+                else
+                {
+                    if (leftBatchCount == 1)
+                    {
+                        message = deletedBatchCount
+                                + " batches deleted, left 1";
+                    }
+                    else if (leftBatchCount > 1)
+                    {
+                        message = deletedBatchCount + " batches deleted, left "
+                                + leftBatchCount;
+                    }
+                }
+                if (leftBatchCount > 0)
+                {
+                	SQL_LOGGER.info(message);
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static String toInClause(List<?> list)
+    {
+        StringBuilder in = new StringBuilder();
+        if (list.size() == 0)
+            return "(0)";
+        
+        in.append("(");
+        for (Object o : list)
+        {
+            if (o instanceof List)
+            {
+                if (((List) o).size() == 0)
+                    continue;
+                
+                for (Object id : (List<?>) o)
+                {
+                    if (id instanceof String)
+                    {
+                        in.append("'");
+                        in.append(((String) id).replace("\'", "\\\'"));
+                        in.append("'");
+                    }
+                    else
+                    {
+                        in.append(id);
+                    }
+                    in.append(",");
+                }
+            }
+            else if (o instanceof String)
+            {
+                in.append("'");
+                in.append(((String) o).replace("\'", "\\\'"));
+                in.append("'");
+                in.append(",");
+            }
+            else
+            {
+                in.append(o);
+                in.append(",");
+            }
+        }
+        in.deleteCharAt(in.length() - 1);
+        in.append(")");
+
+        return in.toString();
+    }
 }

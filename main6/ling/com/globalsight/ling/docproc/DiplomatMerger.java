@@ -54,7 +54,6 @@ import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.XmlWriter;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.ling.docproc.extractor.xliff.WSConstants;
-import com.globalsight.ling.docproc.extractor.xml.XmlExtractor;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.worldserver.WsSkeletonDispose;
 import com.globalsight.machineTranslation.MTHelper;
@@ -955,13 +954,14 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
                     if (((TranslatableElement) de).getEscapingChars() != null)
                     {
-                        escapingChars = EditUtil.decodeXmlEntities(
-                                ((TranslatableElement) de).getEscapingChars());
+                        escapingChars = EditUtil
+                                .decodeXmlEntities(((TranslatableElement) de)
+                                        .getEscapingChars());
                     }
 
-				String newchunk = EscapingHelper.handleString4Export(chunk,
-						m_escapings, srcDataType, false, true, escapingChars,
-						isInCDATA);
+                    String newchunk = EscapingHelper.handleString4Export(chunk,
+                            m_escapings, srcDataType, false, true,
+                            escapingChars, isInCDATA);
 
                     parseDiplomatSnippet(addSpanRtl(newchunk));
                     m_stateStack.pop();
@@ -980,14 +980,21 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             null));
 
                     String tmp = decode(((SkeletonElement) de).getSkeleton());
-                    if (tmp.indexOf("<![CDATA[") > -1 && tmp.indexOf("]]") == -1)
+                    if (tmp.indexOf("<![CDATA[") > -1
+                            && tmp.indexOf("]]") == -1)
                     {
-                    	isInCDATA = true;
+                        isInCDATA = true;
                     }
                     if (isInCDATA && tmp.indexOf("]]") > -1)
                     {
-                    	isInCDATA = false;
+                        isInCDATA = false;
                     }
+                    if (tmp.indexOf("<![CDATA[") > -1
+                            && tmp.indexOf("]]") > -1)
+                    {
+                        isInCDATA = tmp.indexOf("<![CDATA[") > tmp.indexOf("]]");
+                    }
+                    
                     if (OfficeContentPostFilterHelper
                             .isOfficeFormat(srcDataType))
                     {
@@ -1039,13 +1046,6 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             tmp = StringUtil.replace(tmp,
                                     IdmlHelper.MARK_LineBreak_IDML,
                                     IdmlHelper.LINE_BREAK);
-                        }
-                        // GBS-3955
-                        if (tmp.contains(XmlExtractor.DOCTYPE_HTML))
-                        {
-                            // remove DOCTYPE_HTML during export
-                            tmp = StringUtil.replace(tmp,
-                                    XmlExtractor.DOCTYPE_HTML, "");
                         }
                     }
 

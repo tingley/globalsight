@@ -2947,6 +2947,9 @@
     <WebActivity webActivityName="xlsReportTranslationsEdit">
       <WebPage pageName="TRANSLATIONSEDIT" isDefault="true" jspName="/envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
+    <WebActivity webActivityName="xlsReportTranslationVerification">
+    	<WebPage pageName="TRANSLATIONVERIFICATION" isDefault="true" jspName="/envoy/administration/reports/translationVerificationReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+    </WebActivity>
     <WebActivity webActivityName="xlsReportTranslationProgress">
       <WebPage pageName="TRANSLATIONPROGRESS" isDefault="true" jspName="/envoy/administration/reports/translationProgressXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>

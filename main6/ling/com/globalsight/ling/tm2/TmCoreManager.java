@@ -334,7 +334,7 @@ public interface TmCoreManager
      * WARNING: The caller MUST clean up the SegmentResultSet object by calling
      * its finish() method to avoid leaking a Hibernate session (and its
      * underlying DB connection).
-     * @deprecated Not in use since 8.6.2
+	 *
      * @param tm
      *            TM to export from
      * @param createdBefore
@@ -347,13 +347,6 @@ public interface TmCoreManager
 			String createdAfter, Connection conn) throws RemoteException,
 			LingManagerException;
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter, Connection conn, Set<String> jobAttributeSet)
-    		throws RemoteException, LingManagerException;
-    
 	public SegmentResultSet getAllSegmentsByParamMap(Tm tm,
 			Map<String, Object> paramMap, Connection conn)
 			throws RemoteException, LingManagerException;
@@ -365,7 +358,7 @@ public interface TmCoreManager
      * NOTE: The date parameters are passed as Strings in DD/MM/YYYY form. This
      * is due to legacy code in com.globalsight.tm.export.ExportOptions It would
      * be nice to fix it.
-     * @deprecated Not in use since 8.6.2
+     * 
      * @param tm
      *            TM to export from
      * @param createdBefore
@@ -377,160 +370,20 @@ public interface TmCoreManager
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException;
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getAllSegmentsCount(Tm tm, String createdBefore,
-            String createdAfter, Set<String> jobAttributeSet) throws RemoteException, LingManagerException;
-
 	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;
-
-    /**
-     * Return an Iterator that will return all the segments in a TM that have a
-     * TUV in the specified locale, constrained by date ranges.
-     * 
-     * NOTE: The locale parameter is also a String (ie "en_US").
-     * 
-     * NOTE: The date parameters are passed as Strings in DD/MM/YYYY form. This
-     * is due to legacy code in com.globalsight.tm.export.ExportOptions It would
-     * be nice to fix it.
-     * 
-     * WARNING: The caller MUST clean up the SegmentResultSet object by calling
-     * its finish() method to avoid leaking a Hibernate session (and its
-     * underlying DB connection).
-     * @deprecated Not in use since 8.6.2
-     * @param tm
-     *            TM to export from
-     * @param locale
-     *            locale name (ie, "en_US")
-     * @param createdBefore
-     *            date lower bound (inclusive), in DD/MM/YYYY form
-     * @param createdAfter
-     *            date upper bounad (inclusive), in DD/MM/YYYY form
-     * @return Iterator of segments
-     */
-	public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
-			String createdBefore, String createdAfter, Connection conn)
-			throws RemoteException, LingManagerException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
-            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
-            throws RemoteException, LingManagerException;
 
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap,
 			Connection conn) throws RemoteException, LingManagerException;
 
-    /**
-     * Return the count of the number of segments that would be returned to a
-     * corresponding call to getSegmentsByLocale.
-     * 
-     * NOTE: The locale parameter is also a String (ie "en_US").
-     * 
-     * NOTE: The date parameters are passed as Strings in DD/MM/YYYY form. This
-     * is due to legacy code in com.globalsight.tm.export.ExportOptions It would
-     * be nice to fix it.
-     * @deprecated Not in use since 8.6.2
-     * @param tm
-     *            TM to export from
-     * @param locale
-     *            locale name (ie, "en_US")
-     * @param createdBefore
-     *            date lower bound (inclusive), in DD/MM/YYYY form
-     * @param createdAfter
-     *            date upper bounad (inclusive), in DD/MM/YYYY form
-     * @return Iterable that will produce an iterator over the result set
-     */
-	public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
-			String createdBefore, String createdAfter) throws RemoteException,
-			LingManagerException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
-            String createdBefore, String createdAfter,Set<String> jobAttributeSet)
-    		throws RemoteException, LingManagerException;
-    
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;
 
-    /**
-     * Return an Iterator that returns all the segments in a TM that were added
-     * or modified by the specified project, constrained by date ranges.
-     * 
-     * NOTE: The project is also specified by name, again due to legacy behavior
-     * in the ExportOptions code.
-     * 
-     * NOTE: The date parameters are passed as Strings in DD/MM/YYYY form. This
-     * is due to legacy code in com.globalsight.tm.export.ExportOptions It would
-     * be nice to fix it.
-     * 
-     * WARNING: The caller MUST clean up the SegmentResultSet object by calling
-     * its finish() method to avoid leaking a Hibernate session (and its
-     * underlying DB connection).
-     * @deprecated Not in use since 8.6.2
-     * @param tm
-     *            TM to export from
-     * @param projectName
-     *            project name
-     * @param createdBefore
-     *            date lower bound (inclusive), in DD/MM/YYYY form
-     * @param createdAfter
-     *            date upper bounad (inclusive), in DD/MM/YYYY form
-     * @return Iterator of segments
-     */
-    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Connection conn)
-            throws RemoteException, LingManagerException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
-            throws RemoteException, LingManagerException;
-
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws RemoteException, LingManagerException;
-
-    /**
-     * Return the count of the number of segments that would be returned to a
-     * corresponding call to getSegmentsByProjectName.
-     * 
-     * NOTE: The project is also specified by name, again due to legacy behavior
-     * in the ExportOptions code.
-     * 
-     * NOTE: The date parameters are passed as Strings in DD/MM/YYYY form. This
-     * is due to legacy code in com.globalsight.tm.export.ExportOptions It would
-     * be nice to fix it.
-     * @deprecated Not in use since 8.6.2
-     * @param tm
-     *            TM to export from
-     * @param projectName
-     *            project name
-     * @param createdBefore
-     *            date lower bound (inclusive), in DD/MM/YYYY form
-     * @param createdAfter
-     *            date upper bounad (inclusive), in DD/MM/YYYY form
-     * @return Iterable that will produce an iterator over the result set
-     */
-    public int getSegmentsCountByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getSegmentsCountByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter,Set<String> jobAttributeSet) 
-    		throws RemoteException, LingManagerException;
 
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap)

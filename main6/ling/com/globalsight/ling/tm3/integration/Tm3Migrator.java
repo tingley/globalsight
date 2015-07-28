@@ -193,7 +193,13 @@ public class Tm3Migrator
                                     oldSrcTuv.getCreationUser(),
                                     oldSrcTuv.getCreationDate(),
                                     oldSrcTuv.getModifyUser(),
-                                    oldSrcTuv.getModifyDate());
+                                    oldSrcTuv.getModifyDate(),
+                                    oldSrcTuv.getLastUsageDate(),
+                                    oldSrcTuv.getJobId(),
+                                    oldSrcTuv.getJobName(),
+                                    oldSrcTuv.getPreviousHash(),
+                                    oldSrcTuv.getNextHash(),
+                                    oldSrcTuv.getSid());
                     tu.attr(fromWsAttr, oldTu.isFromWorldServer());
                     tu.attr(translatableAttr, oldTu.isTranslatable());
                     if (oldTu.getType() != null)
@@ -214,10 +220,13 @@ public class Tm3Migrator
                         {
                             continue;
                         }
-                        tu.target(new GSTuvData(tuv), tuv.getLocale(),
-                                events.get(tuv), tuv.getCreationUser(),
-                                tuv.getCreationDate(), tuv.getModifyUser(),
-                                tuv.getModifyDate());
+						tu.target(new GSTuvData(tuv), tuv.getLocale(),
+								events.get(tuv), tuv.getCreationUser(),
+								tuv.getCreationDate(), tuv.getModifyUser(),
+								tuv.getModifyDate(), tuv.getLastUsageDate(),
+								tuv.getJobId(), tuv.getJobName(),
+								tuv.getPreviousHash(), tuv.getNextHash(),
+								tuv.getSid());
                     }
 
                     // handle TU properties
@@ -497,7 +506,13 @@ public class Tm3Migrator
                                     oldSrcTuv.getCreationUser(),
                                     oldSrcTuv.getCreationDate(),
                                     oldSrcTuv.getModifyUser(),
-                                    oldSrcTuv.getModifyDate());
+                                    oldSrcTuv.getModifyDate(),
+                                    oldSrcTuv.getLastUsageDate(),
+                                    oldSrcTuv.getJobId(),
+                                    oldSrcTuv.getJobName(),
+                                    oldSrcTuv.getPreviousHash(),
+                                    oldSrcTuv.getNextHash(),
+                                    oldSrcTuv.getSid());
                     tu.attr(fromWsAttr, oldTu.isFromWorldServer());
                     tu.attr(translatableAttr, oldTu.isTranslatable());
                     if (oldTu.getType() != null)
@@ -518,10 +533,13 @@ public class Tm3Migrator
                         {
                             continue;
                         }
-                        tu.target(new GSTuvData(tuv), tuv.getLocale(),
-                                events.get(tuv), tuv.getCreationUser(),
-                                tuv.getCreationDate(), tuv.getModifyUser(),
-                                tuv.getModifyDate());
+						tu.target(new GSTuvData(tuv), tuv.getLocale(),
+								events.get(tuv), tuv.getCreationUser(),
+								tuv.getCreationDate(), tuv.getModifyUser(),
+								tuv.getModifyDate(), tuv.getLastUsageDate(),
+								tuv.getJobId(), tuv.getJobName(),
+								tuv.getPreviousHash(), tuv.getNextHash(),
+								tuv.getSid());
                     }
                     // handle TU properties
                     Collection<ProjectTmTuTProp> props = oldTu.getProps();

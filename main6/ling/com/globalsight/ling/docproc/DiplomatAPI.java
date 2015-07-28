@@ -454,12 +454,23 @@ public class DiplomatAPI implements IFormatNames
     private boolean isPreview = false;
 
     private String filterTableName;
-
+    private boolean isSecondFilter = false;
    
+    public boolean getisSecondFilter()
+    {
+        return isSecondFilter;
+    }
+    
+    public void setIsSecondFilter(boolean isSecondFilter)
+    {
+        this.isSecondFilter = isSecondFilter;
+    }
+    
     public FileProfileImpl getFileProfile()
 	{
 		return fileProfile;
 	}
+    
 	public void setFileProfile(FileProfileImpl fileProfile)
 	{
 		this.fileProfile = fileProfile;
@@ -1239,7 +1250,10 @@ public class DiplomatAPI implements IFormatNames
 			}
 		}
 		
-		EscapingHelper.handleOutput4Import(m_output, mainFilter);
+		if (!isSecondFilter)
+		{
+		    EscapingHelper.handleOutput4Import(m_output, mainFilter);
+		}
 
         if (m_debug)
         {

@@ -264,10 +264,19 @@ public class WfStatePostThread implements Runnable
                 reqEntity.setContentEncoding("UTF-8");
                 reqEntity.setContentType("application/json");
                 httpPost.setEntity(reqEntity);
-                HttpResponse response = httpClient.execute(httpPost);
-                if (response.getStatusLine().getStatusCode() == 204)
+                HttpResponse response =null;
+                try
                 {
-                	break;                	
+                    response = httpClient.execute(httpPost);
+                }
+                catch (Exception e)
+                {
+                    s_logger.error(e);
+                }
+                if (response != null
+                        && response.getStatusLine().getStatusCode() == 204)
+                {
+                    break;
                 }
                 else
                 {
@@ -329,21 +338,24 @@ public class WfStatePostThread implements Runnable
 
     private static void logPostFailureInfo(HttpResponse res)
     {
-        if (res.getStatusLine().getStatusCode() == 400)
+        if (res != null)
         {
-			s_logger.warn("Workflow state post failure: The request payload data failed validation!");
-        }
-        else if (res.getStatusLine().getStatusCode() == 401)
-        {
-			s_logger.warn("Workflow state post failure: Not authorized. The secret value is incorrect!");
-        }
-        else if (res.getStatusLine().getStatusCode() == 405)
-        {
-			s_logger.warn("Workflow state post failure: The request did not use the POST method!");
-        }
-        else if (res.getStatusLine().getStatusCode() == 500)
-        {
-            s_logger.warn("Workflow state post failure: Database error!");
+            if (res.getStatusLine().getStatusCode() == 400)
+            {
+                s_logger.warn("Workflow state post failure: The request payload data failed validation!");
+            }
+            else if (res.getStatusLine().getStatusCode() == 401)
+            {
+                s_logger.warn("Workflow state post failure: Not authorized. The secret value is incorrect!");
+            }
+            else if (res.getStatusLine().getStatusCode() == 405)
+            {
+                s_logger.warn("Workflow state post failure: The request did not use the POST method!");
+            }
+            else if (res.getStatusLine().getStatusCode() == 500)
+            {
+                s_logger.warn("Workflow state post failure: Database error!");
+            }
         }
     }
 }

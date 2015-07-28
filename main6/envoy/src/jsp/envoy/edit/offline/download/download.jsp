@@ -1091,7 +1091,7 @@ $(document).ready(function(){
         <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=downloadUrl%>"><%=lbDownload%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
         <TD WIDTH="2"></TD>
         <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=uploadUrl%>"><%=lbUpload%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <%if(isReportUploadCheck == 1 || perms.getPermissionFor(Permission.REPORTS_TRANSLATIONS_EDIT) || perms.getPermissionFor(Permission.REPORTS_POST_REVIEW_QA)) {%>
+        <%if(isReportUploadCheck == 1 || perms.getPermissionFor(Permission.REPORTS_TRANSLATIONS_EDIT) || perms.getPermissionFor(Permission.REPORTS_POST_REVIEW_QA) || perms.getPermissionFor(Permission.REPORTS_TRANSLATIONS_VERIFICATION)) {%>
         <TD WIDTH="2"></TD>
         <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=downloadReportUrl%>"><%=lbDownloadReport%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
         <TD WIDTH="2"></TD>

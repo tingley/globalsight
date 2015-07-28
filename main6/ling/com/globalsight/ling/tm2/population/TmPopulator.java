@@ -17,10 +17,8 @@
 package com.globalsight.ling.tm2.population;
 
 import java.sql.Connection;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,7 +28,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -140,9 +137,11 @@ public class TmPopulator
         try
         {
             conn = DbUtil.getConnection();
+            Job job = p_page.getRequest().getJob();
             GlobalSightLocale sourceLocale = p_page.getGlobalSightLocale();
             // prepare a repository of job data for the page
-            PageJobData pageJobData = new PageJobData(sourceLocale, p_jobId);
+			PageJobData pageJobData = new PageJobData(sourceLocale, p_jobId,
+					job.getJobName());
 
             // Get page data from TU and TUV table
             PageJobDataRetriever pageJobDataRetriever = new PageJobDataRetriever(
@@ -160,44 +159,9 @@ public class TmPopulator
             LOGGER.debug("Populating Page TM");
             populatePageTm(pageJobData.getTusToSaveToPageTm(p_options), p_page,
                     p_targetLocales);
-            Job job = null;
 
-            try
-            {
-                job = p_page.getRequest().getJob();
-                FileProfile fileProfile = job.getFileProfile();
-                if (fileProfile.getTerminologyApproval() == 1)
-                {
-                    String termbaseName = p_page.getRequest().getL10nProfile()
-                            .getProject().getTermbaseName();
-                    Termbase tb = TermbaseList
-                            .get(String.valueOf(p_page.getCompanyId()),
-                                    termbaseName);
-                    if (tb != null)
-                    {
-                        TermbaseManager tbm = new TermbaseManager();
-                        Collection p_segmentsToSave = pageJobData
-                                .getTusToSaveToSegmentTm(p_options);
-                        Iterator it = p_segmentsToSave.iterator();
-                        while (it.hasNext())
-                        {
-                            // separate subflows out of the main text and save
-                            // them as
-                            // independent segments
-                            BaseTmTu baseTu = (BaseTmTu) it.next();
-                            List baseTuvs = baseTu.getTuvs();
-                            tbm.batchAddTuvsAsNew(tb.getId(), baseTuvs, p_page
-                                    .getRequest().getL10nProfile().getProject()
-                                    .getProjectManager().getUserId());
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                LOGGER.error("Terminology populating error: "
-                        + e.getMessage());
-            }
+            // populate into term-base if "Terminology Approval" is yes.
+			populateIntoTermbase(pageJobData, job, p_page, p_options);
 
             // populate Segment TM
             LOGGER.debug("Populating Segment TM");
@@ -205,12 +169,10 @@ public class TmPopulator
                     p_options.getSaveTmId(), true);
             SegmentTmInfo segtmInfo = tm.getSegmentTmInfo();
             segtmInfo.setJob(job);
-            Timestamp newCreationDate = new Timestamp(new Date().getTime());
-            mappingHolder = segtmInfo.saveToSegmentTm(
-            		reSetTuvDate(newCreationDate, 
-            				pageJobData.getTusToSaveToSegmentTm(p_options)),
-                    sourceLocale, tm, p_targetLocales,
-                    TmCoreManager.SYNC_MERGE, false);
+			mappingHolder = segtmInfo.saveToSegmentTm(
+					pageJobData.getTusToSaveToSegmentTm(p_options),
+					sourceLocale, tm, p_targetLocales,
+					TmCoreManager.SYNC_MERGE, false);
         }
         catch (LingManagerException le)
         {
@@ -227,21 +189,44 @@ public class TmPopulator
 
         return mappingHolder;
     }
-    
-    //Set exportDate as tuv's creationDate and modifyDate for populate TM
-    private Collection reSetTuvDate(Timestamp p_creationDate,
-    					Collection<? extends BaseTmTu> p_segments)
-    {
-    	for(BaseTmTu baseTu: p_segments)
-    	{
-    		for(BaseTmTuv baseTuv : baseTu.getTuvs())
-    		{
-    			baseTuv.setCreationDate(p_creationDate);
-    			baseTuv.setModifyDate(p_creationDate);
-    		}
-    	}
 
-    	return p_segments;
+	private void populateIntoTermbase(PageJobData pageJobData, Job job,
+			SourcePage p_page, LeverageOptions p_options)
+    {
+        try
+        {
+            if (job.getFileProfile().getTerminologyApproval() == 1)
+            {
+                String termbaseName = p_page.getRequest().getL10nProfile()
+                        .getProject().getTermbaseName();
+                Termbase tb = TermbaseList
+                        .get(String.valueOf(p_page.getCompanyId()),
+                                termbaseName);
+                if (tb != null)
+                {
+                    TermbaseManager tbm = new TermbaseManager();
+                    Collection p_segmentsToSave = pageJobData
+                            .getTusToSaveToSegmentTm(p_options);
+                    Iterator it = p_segmentsToSave.iterator();
+                    while (it.hasNext())
+                    {
+                        // separate subflows out of the main text and save
+                        // them as
+                        // independent segments
+                        BaseTmTu baseTu = (BaseTmTu) it.next();
+                        List baseTuvs = baseTu.getTuvs();
+                        tbm.batchAddTuvsAsNew(tb.getId(), baseTuvs, p_page
+                                .getRequest().getL10nProfile().getProject()
+                                .getProjectManager().getUserId());
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Terminology populating error: "
+                    + e.getMessage());
+        }
     }
 
     /**

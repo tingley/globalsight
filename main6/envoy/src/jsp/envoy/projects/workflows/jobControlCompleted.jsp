@@ -13,6 +13,7 @@
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.jobhandler.Job,
+            com.globalsight.everest.company.Company,
             com.globalsight.everest.permission.Permission,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
             com.globalsight.everest.servlet.util.SessionManager,
@@ -91,6 +92,14 @@
     if(badresults == null)
     	badresults = "";
     sessMr.setMyjobsAttribute("badresults","");
+    
+    Company company = (Company)request.getAttribute("company");
+    boolean enableQAChecks = company.getEnableQAChecks();
+	boolean showButton = true;
+	if (company.getId() == 1)
+	{
+		showButton = false;
+	}
 %>
 <HTML>
 <HEAD>
@@ -438,9 +447,15 @@ function submitForm(buttonClicked)
 
    if(buttonClicked == 'Export' || buttonClicked == 'ExportForUpdate'){
    		ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
+	   JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
+	   jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
+	   JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
+	   if (buttonClicked == "ExportForUpdate")
+	   {
+	      JobForm.action += "&" + "<%=JobManagementHandler.EXPORT_FOR_UPDATE_PARAM%>" + "=true";
+	   }
+	   JobForm.submit();
    }
-   JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
-   jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
 
    var valuesArray;
    var jobId = "";
@@ -511,7 +526,8 @@ function submitForm(buttonClicked)
                         + "&<%=DownloadFileHandler.DOWNLOAD_FROM_JOB%>=true";
       JobForm.submit();
       return;
-   }else if(buttonClicked == "Discard")
+   }
+   else if(buttonClicked == "Discard")
    {
 	   if ( !confirm("<%=bundle.getString("jsmsg_warning")%>\n\n" +
                "<%=bundle.getString("jsmsg_discard_job")%>"))
@@ -523,13 +539,31 @@ function submitForm(buttonClicked)
 	  JobForm.action = "<%=refreshUrl%>";
 	  jobActionParam = "<%=JobManagementHandler.DISCARD_JOB_PARAM%>";
    }
-
-   JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
-   if (buttonClicked == "ExportForUpdate")
+   else if(buttonClicked == 'downloadQAReport')
    {
-      JobForm.action += "&" + "<%=JobManagementHandler.EXPORT_FOR_UPDATE_PARAM%>" + "=true";
+	   $.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=refreshUrl%>&action=checkDownloadQAReport",
+		   data: "jobIds="+jobId,
+		   success: function(data){
+		      var returnData = eval(data);
+	   		  if (returnData.download == "fail")
+	          {
+	   			alert("<%=bundle.getString("lb_download_qa_reports_message")%>");
+	          }
+	          else if(returnData.download == "success")
+	          {
+		       	  JobForm.action = "<%=refreshUrl%>"+"&action=downloadQAReport";
+		    	  JobForm.submit();
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          		alert(error.message);
+           }
+		});   
    }
-   JobForm.submit();
 }
 
 //for GBS-2599
@@ -818,6 +852,9 @@ is defined in header.jspIncl which must be included in the body.
     <amb:permission name="<%=Permission.JOBS_EXPORT_DOWNLOAD%>" >
         <INPUT TYPE="BUTTON" NAME=ExportDownload VALUE="<%=bundle.getString("lb_export_download")%>..." onClick="startExport()">
     </amb:permission>
+    	<%if(enableQAChecks && showButton){ %>
+  		<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport')">
+    <% } %>
 </DIV>
 </TD></TR>
 </TABLE>

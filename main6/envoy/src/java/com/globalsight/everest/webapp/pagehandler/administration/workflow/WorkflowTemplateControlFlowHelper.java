@@ -27,6 +27,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.dependencychecking.WorkflowTemplateDependencyChecker;
 import com.globalsight.util.GeneralException;
 
@@ -60,6 +61,7 @@ class WorkflowTemplateControlFlowHelper
     // local variables
     private HttpServletRequest m_request = null;
     private HttpServletResponse m_response = null;
+    String m_userId;
 
     public WorkflowTemplateControlFlowHelper(HttpServletRequest p_request,
         HttpServletResponse p_response)
@@ -79,6 +81,7 @@ class WorkflowTemplateControlFlowHelper
         throws EnvoyServletException
     {
         HttpSession p_session = m_request.getSession(false);
+        m_userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
         String destinationPage = null;
 
         // action should only be null for paging purposes
@@ -270,7 +273,10 @@ class WorkflowTemplateControlFlowHelper
     {        
         try
         {
+            WorkflowTemplateInfo wfti = getWorkflowTemplateInfo(wftiId);
             ServerProxy.getProjectHandler().removeWorkflowTemplate(Long.parseLong(wftiId));
+            OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                    OperationLog.COMPONET_WORKFLOW, wfti.getName());
         }
 	catch (GeneralException ge)
 	{

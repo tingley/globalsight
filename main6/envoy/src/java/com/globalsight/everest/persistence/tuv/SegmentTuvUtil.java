@@ -1201,7 +1201,6 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
             // addBatch counters
             int batchUpdate = 0;
-            String sid = null;
 			List<TuTuvAttributeImpl> sidAttibutes = new ArrayList<TuTuvAttributeImpl>();
             for (TuvImpl tuv : p_tuvs)
             {
@@ -1236,7 +1235,12 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 tuvUpdateStmt.setString(17, null);
                 if (StringUtil.isNotEmpty(tuv.getSid()))
                 {
-					TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
+                	// Also save it in original table if not too long.
+                	if (tuv.getSid().length() < 254) {
+                		tuvUpdateStmt.setString(17, tuv.getSid());
+                    }
+
+                	TuTuvAttributeImpl sidAttr = new TuTuvAttributeImpl(
 							tuv.getId(), TuTuvAttributeImpl.OBJECT_TYPE_TUV,
 							TuTuvAttributeImpl.SID);
                     sidAttr.setTextValue(tuv.getSid());

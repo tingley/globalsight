@@ -409,8 +409,6 @@ public class SetAttributeHandler extends PageActionHandler
             HttpServletResponse response, Object form) throws Exception
     {
         logger.debug("Update float value...");
-
-        ServletOutputStream out = response.getOutputStream();
         try
         {
             FileUploader uploader = new FileUploader();
@@ -427,35 +425,13 @@ public class SetAttributeHandler extends PageActionHandler
                     FileUtils.copyFile(file, targetFile);
                 }
             }
-
-            StringBuffer result = new StringBuffer();
-            result.append("<html><body><textarea>");
-
-            Map<String, Object> returnValue = new HashMap();
-            returnValue.put("label", getFileLabel(root));
-            returnValue.put("files", getFiles(root));
-            result.append(JsonUtil.toObjectJson(returnValue));
-            result.append("</textarea></body></html>");
-            out.write(result.toString().getBytes("UTF-8"));
-        }
-        catch (ValidateException ve)
-        {
-            ResourceBundle bundle = PageHandler.getBundle(request.getSession());
-            String s = "({\"error\" : "
-                    + JsonUtil.toJson(ve.getMessage(bundle)) + "})";
-            out.write(s.getBytes("UTF-8"));
         }
         catch (Exception e)
         {
-            String s = "({\"error\" : " + JsonUtil.toObjectJson(e.getMessage())
-                    + "})";
-            out.write(s.getBytes("UTF-8"));
             logger.error(e.getMessage(), e);
         }
         finally
         {
-            out.close();
-            out.flush();
             pageReturn();
         }
 
@@ -608,6 +584,7 @@ public class SetAttributeHandler extends PageActionHandler
 
             List<String> files = getFiles(root);
             Map<String, Object> returnValue = new HashMap();
+            returnValue.put("label", getFileLabel(root));
             returnValue.put("files", files);
             out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
         }

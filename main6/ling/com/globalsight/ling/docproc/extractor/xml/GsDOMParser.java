@@ -50,6 +50,8 @@ public class GsDOMParser
                 + Constants.CREATE_ENTITY_REF_NODES_FEATURE, true);
         factory.setFeature(Constants.XERCES_FEATURE_PREFIX
                 + Constants.CREATE_CDATA_NODES_FEATURE, true);
+        factory.setFeature(Constants.XERCES_FEATURE_PREFIX
+                + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE, true);
 
         createBuilder();
     }
@@ -65,7 +67,9 @@ public class GsDOMParser
                 + Constants.CREATE_ENTITY_REF_NODES_FEATURE, true);
         factory.setFeature(Constants.XERCES_FEATURE_PREFIX
                 + Constants.CREATE_CDATA_NODES_FEATURE, true);
-
+        factory.setFeature(Constants.XERCES_FEATURE_PREFIX
+                + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE, true);
+        
         createBuilder();
     }
 

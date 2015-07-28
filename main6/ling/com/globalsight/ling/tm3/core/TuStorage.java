@@ -32,10 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.ling.tm3.core.persistence.BatchStatementBuilder;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
@@ -62,10 +62,12 @@ abstract class TuStorage<T extends TM3Data>
     public TM3Tu<T> createTu(TM3Locale sourceLocale, T sourceTuvData,
             Map<TM3Attribute, Object> attributes, TM3Event event,
             String creationUser, Date creationDate, String modifyUser,
-            Date modifyDate)
+			Date modifyDate, Date lastUsageDate, long jobId, String jobName,
+			long previousHash, long nextHash, String sid)
     {
-        TM3Tuv<T> sourceTuv = new TM3Tuv<T>(sourceLocale, sourceTuvData, event,
-                creationUser, creationDate, modifyUser, modifyDate);
+		TM3Tuv<T> sourceTuv = new TM3Tuv<T>(sourceLocale, sourceTuvData, event,
+				creationUser, creationDate, modifyUser, modifyDate,
+				lastUsageDate, jobId, jobName, previousHash, nextHash, sid);
         return new TM3Tu<T>(storage.getTm(), this, sourceTuv, attributes);
     }
 
@@ -157,8 +159,18 @@ abstract class TuStorage<T extends TM3Data>
         }
         try
         {
-            // Events will cascade
-            StatementBuilder sb = new StatementBuilder("DELETE FROM ")
+			StatementBuilder sb = new StatementBuilder("DELETE FROM ")
+					.append(storage.getTuvExtTableName())
+					.append(" WHERE tuvId IN (?").addValue(tuvs.get(0).getId());
+			for (int i = 1; i < tuvs.size(); i++)
+        	{
+        		sb.append(",?").addValue(tuvs.get(i).getId());
+        	}
+            sb.append(")");
+        	SQLUtil.exec(conn, sb);
+
+        	// Events will cascade
+            sb = new StatementBuilder("DELETE FROM ")
                     .append(storage.getTuvTableName())
                     .append(" WHERE id IN (?").addValue(tuvs.get(0).getId());
             for (int i = 1; i < tuvs.size(); i++)
@@ -252,17 +264,13 @@ abstract class TuStorage<T extends TM3Data>
         StatementBuilder sb = new StatementBuilder("UPDATE ").append(
                 getStorage().getTuTableName()).append(" SET ");
         boolean first = true;
-        TM3TuTuvAttribute sidAttr = null;
         for (Map.Entry<TM3Attribute, Object> e : attributes.entrySet())
         {
             // SID attribute is always stored into another table
             if (".sid".equalsIgnoreCase(e.getKey().getName()))
             {
-                sidAttr = new TM3TuTuvAttribute(tuId,
-                        TM3TuTuvAttribute.OBJECT_TYPE_TU,
-                        TM3TuTuvAttribute.NAME_SID);
-                sidAttr.setTextValue((String) e.getValue());
-                sidAttr.setTmId(getStorage().getId());
+            	String sid = (String) e.getValue();
+                long tmId = getStorage().getId();
                 continue;
             }
 
@@ -276,11 +284,6 @@ abstract class TuStorage<T extends TM3Data>
         }
         sb.append(" WHERE id = ? ").addValue(tuId);
         SQLUtil.exec(conn, sb);
-
-        if (sidAttr != null)
-        {
-            updateTuTuvAttribute(conn, sidAttr);
-        }
     }
 
     /**
@@ -293,79 +296,16 @@ abstract class TuStorage<T extends TM3Data>
     abstract void saveCustomAttributes(Connection conn, long tuId,
             Map<TM3Attribute, String> attributes) throws SQLException;
 
-    /**
-     * Save "special" attributes (such as long SID) from TU/TUV tables.
-     * 
-     * @param conn
-     * @param attributes
-     * @throws SQLException
-     */
-    protected void saveTuTuvAttributes(Connection conn,
-            List<TM3TuTuvAttribute> attributes) throws SQLException
-    {
-        if (attributes.isEmpty())
-        {
-            return;
-        }
-        BatchStatementBuilder sb = new BatchStatementBuilder()
-                .append("INSERT INTO ")
-                .append(getStorage().getTuTuvAttrTableName())
-                .append(" (tm_id, object_id, object_type, name, varchar_value, text_value, long_value, date_value) values (?, ?, ?, ?, ?, ?, ?, ?)");
-        for (TM3TuTuvAttribute att : attributes)
-        {
-            sb.addBatch(att.getTmId(), att.getObjectId(), att.getObjectType(),
-                    att.getName(), att.getVarcharValue(), att.getTextValue(),
-                    att.getLongValue(), att.getDateValue());
-        }
-        SQLUtil.execBatch(conn, sb);
-    }
-
-    /**
-     * Update "special" attributes (such as long SID) from TU/TUV tables.
-     * 
-     * @param conn
-     * @param attribute
-     * @throws SQLException
-     */
-    protected void updateTuTuvAttribute(Connection conn,
-            TM3TuTuvAttribute attribute) throws SQLException
-    {
-        if (attribute != null)
-        {
-            deleteTuTuvAttribute(conn, attribute);
-
-            List<TM3TuTuvAttribute> attributes = new ArrayList<TM3TuTuvAttribute>();
-            attributes.add(attribute);
-            saveTuTuvAttributes(conn, attributes);
-        }
-    }
-
-    private void deleteTuTuvAttribute(Connection conn,
-            TM3TuTuvAttribute attribute) throws SQLException
-    {
-        if (attribute != null)
-        {
-            StatementBuilder sb = new StatementBuilder("DELETE FROM ")
-                    .append(getStorage().getTuTuvAttrTableName())
-                    .append(" WHERE object_type = ? ")
-                    .addValue(attribute.getObjectType())
-                    .append(" AND object_id = ? ")
-                    .addValue(attribute.getObjectId()).append(" AND name = ? ")
-                    .addValue(attribute.getName());
-            SQLUtil.exec(conn, sb);
-        }
-    }
-
     private void deleteCustomAttribute(Connection conn, long tuId)
             throws SQLException
     {
         try
         {
-            SQLUtil.exec(
-                    conn,
-                    new StatementBuilder("DELETE FROM ")
-                            .append(storage.getAttrValTableName())
-                            .append(" WHERE tuId = ?").addValue(tuId));
+			SQLUtil.exec(
+					conn,
+					new StatementBuilder("DELETE FROM ")
+							.append(storage.getAttrValTableName())
+							.append(" WHERE tuId = ?").addValue(tuId));
         }
         catch (Exception e)
         {
@@ -413,9 +353,6 @@ abstract class TuStorage<T extends TM3Data>
             return Collections.emptyList();
         }
         List<TuData<T>> tuDatas = getTuData(conn, tuIds, locking);
-
-        // Update SID attributes that are stored in "tm3_tu_tuv_attr_shared_xx".
-        loadTuTuvSidAttrs(conn, tuIds, tuDatas);
 
         // Now fetch TUVs
         loadTuvs(conn, tuIds, tuDatas, locking);
@@ -548,48 +485,9 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    // Long SID (>255) is stored in "tm3_tu_tuv_shared_xx" table
-    private void loadTuTuvSidAttrs(Connection conn, List<Long> tuIds,
-            List<TuData<T>> tuDatas) throws SQLException
-    {
-        StatementBuilder sb = new StatementBuilder(
-                "SELECT id, tm_id, object_id, object_type, name, varchar_value, text_value, long_value, date_value FROM ")
-                .append(getStorage().getTuTuvAttrTableName())
-                .append(" WHERE name = 'SID' AND object_type = 'TU' AND object_id IN")
-                .append(SQLUtil.longGroup(tuIds));
-        try
-        {
-            PreparedStatement ps = sb.toPreparedStatement(conn);
-            ResultSet rs = SQLUtil.execQuery(ps);
-
-            Iterator<TuData<T>> tus = tuDatas.iterator();
-            TuData<T> current = null;
-            while (rs.next())
-            {
-                long tuId = rs.getLong("object_id");
-                String sid = rs.getString("text_value");
-                current = advanceToTu(current, tus, tuId);
-                if (current != null)
-                {
-                    for (TM3Attribute att : getStorage().getInlineAttributes())
-                    {
-                        if (att != null && att.getName().equals(".sid"))
-                        {
-                            // reset SID attribute
-                            current.attrs.put(att, sid);
-                            break;
-                        }
-                    }
-                }
-            }
-            ps.close();
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-    }
-
+    /**
+     * Load data from "tm3_tuv_shared_xx" and "tm3_tuv_ext_shared_xx" tables.
+     */
     private void loadTuvs(Connection conn, List<Long> tuIds,
             List<TuData<T>> tuDatas, boolean locking) throws SQLException
     {
@@ -603,7 +501,6 @@ abstract class TuStorage<T extends TM3Data>
         {
             PreparedStatement ps = sb.toPreparedStatement(conn);
             ResultSet rs = SQLUtil.execQuery(ps);
-
             // In order to avoid a hidden ResultSet in the data factory
             // invalidating our current one, we must defer looking up
             // the locales until after we've read all of the data.
@@ -616,6 +513,44 @@ abstract class TuStorage<T extends TM3Data>
                         .getTimestamp(9), rs.getString(10), rs.getTimestamp(11)));
             }
             ps.close();
+
+            // Load TUV extension data into TUV objects.
+            HashMap<Long, TuvData<T>> rawTuvsMap = new HashMap<Long, TuvData<T>>();
+            for (TuvData<T> tuvData : rawTuvs)
+            {
+            	rawTuvsMap.put(tuvData.id, tuvData);
+            }
+			sb = new StatementBuilder("SELECT ")
+					.append("tuvId, tuId, tmId, lastUsageDate, jobId, jobName, previousHash, nextHash, sid ")
+					.append("FROM ").append(getStorage().getTuvExtTableName())
+					.append(" WHERE tuId IN").append(SQLUtil.longGroup(tuIds));
+			ps = sb.toPreparedStatement(conn);
+			rs = SQLUtil.execQuery(ps);
+			TuvData<T> tuvData = null;
+			while (rs.next())
+			{
+				tuvData = rawTuvsMap.get(rs.getLong("tuvId"));
+				if (tuvData != null)
+				{
+					tuvData.setLastUsageDate(rs.getTimestamp("lastUsageDate"));
+					tuvData.setJobId(rs.getLong("jobId"));
+					tuvData.setJobName(rs.getString("jobName"));
+					tuvData.setPreviousHash(rs.getLong("previousHash"));
+					tuvData.setNextHash(rs.getLong("nextHash"));
+					tuvData.setSid(rs.getString("sid"));
+				}
+			}
+			ps.close();
+
+			TM3Attribute sidAttr = null;
+			for (TM3Attribute att : getStorage().getInlineAttributes())
+			{
+				if (att != null && att.getName().equals(".sid"))
+				{
+					sidAttr = att;
+					break;
+				}
+			}
 
             Iterator<TuData<T>> tus = tuDatas.iterator();
             TuData<T> current = null;
@@ -637,6 +572,11 @@ abstract class TuStorage<T extends TM3Data>
                 else
                 {
                     current.tgtTuvs.add(tuv);
+                }
+                // Put srcTuv SID to in-line SID attribute.
+				if (sidAttr != null && StringUtils.isNotEmpty(tuv.getSid()))
+				{
+                    current.attrs.put(sidAttr, tuv.getSid());
                 }
             }
         }
@@ -720,6 +660,12 @@ abstract class TuStorage<T extends TM3Data>
         tuv.setCreationDate(rawData.creationDate);
         tuv.setModifyUser(rawData.modifyUser);
         tuv.setModifyDate(rawData.modifyDate);
+        tuv.setLastUsageDate(rawData.lastUsageDate);
+        tuv.setJobId(rawData.jobId);
+        tuv.setJobName(rawData.jobName);
+        tuv.setPreviousHash(rawData.previousHash);
+        tuv.setNextHash(rawData.nextHash);
+        tuv.setSid(rawData.sid);
 
         return tuv;
     }
@@ -765,6 +711,12 @@ abstract class TuStorage<T extends TM3Data>
         Date creationDate = null;
         String modifyUser = null;
         Date modifyDate = null;
+        Date lastUsageDate = null;
+        long jobId = -1;
+        String jobName = null;
+        long previousHash = -1;
+        long nextHash = -1;
+        String sid = null;
 
         TuvData(long tuId, long id, long localeId, long fingerprint,
                 String content, long firstEventId, long lastEventId,
@@ -782,6 +734,30 @@ abstract class TuStorage<T extends TM3Data>
             this.creationDate = creationDate;
             this.modifyUser = modifyUser;
             this.modifyDate = modifyDate;
+        }
+
+        void setLastUsageDate(Date lastUsageDate) {
+        	this.lastUsageDate = lastUsageDate;
+        }
+
+        void setJobId(long jobId) {
+        	this.jobId = jobId;
+        }
+
+        void setJobName(String jobName) {
+        	this.jobName = jobName;
+        }
+
+        void setPreviousHash(long previousHash) {
+        	this.previousHash = previousHash;
+        }
+
+        void setNextHash(long nextHash) {
+        	this.nextHash = nextHash;
+        }
+
+        void setSid(String sid) {
+        	this.sid = sid;
         }
     }
 
@@ -910,33 +886,12 @@ abstract class TuStorage<T extends TM3Data>
     // Data Handle backends
     //
 
-
-    public abstract long getTuCount(Date start, Date end) throws SQLException;
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract long getTuCount(Date start, Date end,
-            Set<String> jobAttributeSet) throws SQLException;
-
 	public abstract long getTuCountByParamMap(Map<String, Object> paramMap)
 			throws SQLException;
 
     public abstract long getTuvCount(Date start, Date end) throws SQLException;
 
     public abstract void deleteTus(Date start, Date end) throws SQLException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract long getTuCountByLocales(List<TM3Locale> localeList,
-            Date start, Date end) throws SQLException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract long getTuCountByLocales(List<TM3Locale> localeList,
-            Date start, Date end, Set<String> jobAttributeSet)
-            throws SQLException;
 
 	public abstract long getTuCountByLocalesAndParamMap(
 			List<TM3Locale> localeList, Map<String, Object> paramMap)
@@ -948,22 +903,6 @@ abstract class TuStorage<T extends TM3Data>
     public abstract void deleteTuvsByLocale(TM3Locale locale)
             throws SQLException;
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract long getTuCountByAttributes(
-            Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end)
-            throws SQLException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract long getTuCountByAttributes(
-            Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end,
-            Set<String> jobAttributeSet) throws SQLException;
-
 	public abstract long getTuCountByAttributesAndParamMap(
 			Map<TM3Attribute, Object> inlineAttrs,
 			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
@@ -974,56 +913,12 @@ abstract class TuStorage<T extends TM3Data>
             Map<TM3Attribute, String> customAttrs, Date start, Date end)
             throws SQLException;
 
-    // Paging interface for data handles
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract List<TM3Tu<T>> getTuPage(long startId, int count,
-            Date start, Date end) throws SQLException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract List<TM3Tu<T>> getTuPage(long startId, int count,
-            Date start, Date end, Set<String> jobAttributeSet)
-            throws SQLException;
-
 	public abstract List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
 			Map<String, Object> paramMap) throws SQLException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
-            List<TM3Locale> localeList, Date start, Date end)
-            throws SQLException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
-            List<TM3Locale> localeList, Date start, Date end,
-            Set<String> jobAttributeSet) throws SQLException;
 
 	public abstract List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
 			int count, List<TM3Locale> localeList, Map<String, Object> paramMap)
 			throws SQLException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract List<TM3Tu<T>> getTuPageByAttributes(long startId,
-            int count, Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end)
-            throws SQLException;
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public abstract List<TM3Tu<T>> getTuPageByAttributes(long startId,
-            int count, Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end,
-            Set<String> jobAttributeSet) throws SQLException;
 
 	public abstract List<TM3Tu<T>> getTuPageByAttributesAndParamMap(
 			long startId, int count, Map<TM3Attribute, Object> inlineAttrs,

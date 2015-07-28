@@ -599,20 +599,20 @@ public class Tmx2Xliff20
     {
         String i = Tmx2Xliff20Handler.getId(p_hAttributes);
         
-        String type = p_hAttributes.getProperty("type");
-        if (type != null)
-        {
-            PseudoOverrideMapItem item = data.getOverrideMapItem(type);
-            if (item != null && !item.m_bNumbered)
-            {
-                String bId = getBptId(p_hAttributes);
-                ept2bpt2.put(bId, type);
-                return type;
-            }
-        }
-        
         if (p_strTmxTagName.equals("bpt"))
         {
+            String type = p_hAttributes.getProperty("type");
+            if (type != null)
+            {
+                PseudoOverrideMapItem item = data.getOverrideMapItem(type);
+                if (item != null && !item.m_bNumbered)
+                {
+                    String bId = getBptId(p_hAttributes);
+                    ept2bpt2.put(bId, type);
+                    return type;
+                }
+            }
+            
             String bId = getBptId(p_hAttributes);
             ept2bpt.put(bId, i);
             

@@ -102,13 +102,13 @@ public class SpecifyServerDialog extends JDialog
         pathLabel.setLocation(20, 50);
         this.add(pathLabel);
 
-        pathField.setSize(265, NUTTON_HEIGHT);
+        pathField.setSize(245, NUTTON_HEIGHT);
         pathField.setLocation(135, 50);
         this.add(pathField);
 
         browserButton.setToolTipText(Resource.get("tip.chooser"));
-        browserButton.setSize(BUTTON_WIDTH, NUTTON_HEIGHT);
-        browserButton.setLocation(405, 50);
+        browserButton.setSize(BUTTON_WIDTH + 20, NUTTON_HEIGHT);
+        browserButton.setLocation(385, 50);
         this.add(browserButton);
 
         cancelButton.setSize(BUTTON_WIDTH, NUTTON_HEIGHT);

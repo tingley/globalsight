@@ -189,7 +189,6 @@ public class XmlExtractor extends AbstractExtractor implements
 
     private boolean m_preserveEmptyTag = true;
     private final String ATTRIBUTE_PRESERVE_CLOSED_TAG = "GS_XML_ATTRIBUTE_PRESERVE_CLOSED_TAG";
-    public static String DOCTYPE_HTML = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
 
     private List<ExtractRule> rules = new ArrayList<ExtractRule>();
 
@@ -272,8 +271,6 @@ public class XmlExtractor extends AbstractExtractor implements
                 // files
                 preserveEmptyTag();
             }
-            addDoctype();
-
             Reader reader = readInput(m_baseFilter);
             if (m_checkWellFormed)
             {
@@ -364,7 +361,8 @@ public class XmlExtractor extends AbstractExtractor implements
     {
         String s = e.getMessage();
         // ignore below errors
-        if (s.matches("Attribute .*? was already specified for element[\\s\\S]*"))
+        if (s.matches("Attribute .*? was already specified for element[\\s\\S]*")
+                || s.matches(".*The entity \"[^\"]*?\" was referenced, but not declared."))
         {
             return;
         }
@@ -2658,54 +2656,6 @@ public class XmlExtractor extends AbstractExtractor implements
         m_admin.reset(null);
 
         getOutput().addGsaEnd();
-    }
-
-    /**
-     * Adds "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0
-     * Transitional//EN" "http
-     * ://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">" to avoid xml parse
-     * error "The entity "xxx" was referenced, but not declared."
-     * 
-     * @since GBS-3955
-     */
-    private void addDoctype()
-    {
-        File f = getInput().getFile();
-        if (f == null)
-        {
-            return;
-        }
-        try
-        {
-            String encoding = FileUtil.guessEncoding(f);
-            if (encoding == null)
-            {
-                encoding = getInput().getCodeset();
-            }
-            String content = FileUtil.readFile(f, encoding);
-            if (content.contains("<!DOCTYPE"))
-            {
-                return;
-            }
-            Pattern p = Pattern.compile("<\\?xml[^>]*?\\?>");
-            Matcher m = p.matcher(content);
-            if (m.find())
-            {
-                String declaration = m.group();
-                String newDeclaration = declaration + DOCTYPE_HTML;
-                content = StringUtil.replace(content, declaration,
-                        newDeclaration);
-            }
-            else
-            {
-                content = DOCTYPE_HTML + content;
-            }
-            FileUtil.writeFile(f, content, encoding);
-        }
-        catch (Exception e)
-        {
-            s_logger.error("Error happens while addDoctype().", e);
-        }
     }
 
     /**

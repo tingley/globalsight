@@ -396,7 +396,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    // For now, this API is never used in system.
     public SegmentResultSet getAllSegments(Tm tm, long startTUId,
             Connection conn) throws LingManagerException
     {
@@ -416,30 +415,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
             return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getAllData(
                     parseDate(createdAfter), parseDate(createdBefore))
-                    .iterator());
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
-            String createdAfter, Connection conn,Set<String> jobAttributeSet)
-    		throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm)
-                    + " createdBefore " + createdBefore + " createdAfter "
-                    + createdAfter);
-
-            return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getAllData(
-                    parseDate(createdAfter), parseDate(createdBefore),jobAttributeSet)
                     .iterator());
         }
         catch (TM3Exception e)
@@ -494,29 +469,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getAllSegmentsCount(Tm tm, String createdBefore,
-            String createdAfter, Set<String> jobAttributeSet) throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm)
-                    + " createdBefore " + createdBefore + " createdAfter "
-                    + createdAfter);
-
-            return Long.valueOf(
-                    tm3tm.getAllData(parseDate(createdAfter),
-                            parseDate(createdBefore),jobAttributeSet).getCount()).intValue();
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
-
 	@Override
 	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, Object> paramMap)
 			throws LingManagerException
@@ -530,57 +482,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 			return Long.valueOf(
 					tm3tm.getAllDataByParamMap(paramMap).getCount())
 					.intValue();
-		}
-		catch (TM3Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeCodeList,
-            String createdBefore, String createdAfter, Connection conn)
-            throws LingManagerException
-	{
-		try
-		{
-			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-			LOGGER.info("getSegmentsByLocales("
-					+ getLocaleCodeStr(localeCodeList) + "): "
-					+ describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-					+ " createdAfter " + createdAfter);
-			List localeList = getLocaleList(localeCodeList);
-			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocales(
-					localeList, parseDate(createdAfter),
-					parseDate(createdBefore)).iterator());
-		}
-		catch (TM3Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeCodeList,
-            String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
-            throws LingManagerException
-	{
-		try
-		{
-			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-			LOGGER.info("getSegmentsByLocale("
-					+ getLocaleCodeStr(localeCodeList) + "): "
-					+ describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-					+ " createdAfter " + createdAfter);
-			List localeList = getLocaleList(localeCodeList);
-			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocales(
-					localeList, parseDate(createdAfter),
-					parseDate(createdBefore), jobAttributeSet).iterator());
 		}
 		catch (TM3Exception e)
 		{
@@ -610,58 +511,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-	public int getSegmentsCountByLocales(Tm tm, List<String> localeCodeList,
-			String createdBefore, String createdAfter)
-			throws LingManagerException
-	{
-		try
-		{
-			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-			LOGGER.info("getSegmentsCountByLocale("
-					+ getLocaleCodeStr(localeCodeList) + "): "
-					+ describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-					+ " createdAfter " + createdAfter);
-			List localeList = getLocaleList(localeCodeList);
-			return Long.valueOf(
-					tm3tm.getDataByLocales(localeList, parseDate(createdAfter),
-							parseDate(createdBefore)).getCount()).intValue();
-		}
-		catch (TM3Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getSegmentsCountByLocales(Tm tm, List<String> localeCodeList,
-            String createdBefore, String createdAfter, Set<String> jobAttributeSet)
-            throws LingManagerException
-	{
-		try
-		{
-			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-			LOGGER.info("getSegmentsCountByLocales("
-					+ getLocaleCodeStr(localeCodeList) + "): "
-					+ describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-					+ " createdAfter " + createdAfter);
-			List localeList = getLocaleList(localeCodeList);
-			return Long.valueOf(
-					tm3tm.getDataByLocales(localeList, parseDate(createdAfter),
-							parseDate(createdBefore), jobAttributeSet)
-							.getCount()).intValue();
-		}
-		catch (TM3Exception e)
-		{
-			throw new LingManagerException(e);
-		}
-	}
-
 	@Override
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
 			List<String> localeCodeList, Map<String, Object> paramMap)
@@ -682,61 +531,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 			throw new LingManagerException(e);
 		}
 	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Connection conn)
-            throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsByProjectName(" + projectName + "): "
-                    + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-                    + " createdAfter " + createdAfter);
-            TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
-                    UPDATED_BY_PROJECT);
-            return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
-                    .getDataByAttributes(
-                            TM3Attributes.one(projectAttr, projectName),
-                            parseDate(createdAfter), parseDate(createdBefore))
-                    .iterator());
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
-            throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsByProjectName(" + projectName + "): "
-                    + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
-                    + " createdAfter " + createdAfter);
-            TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
-                    UPDATED_BY_PROJECT);
-            return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
-                    .getDataByAttributes(
-                            TM3Attributes.one(projectAttr, projectName),
-                            parseDate(createdAfter), parseDate(createdBefore),jobAttributeSet)
-                    .iterator());
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
 
 	@Override
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
@@ -760,67 +554,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 			throw new LingManagerException(e);
 		}
 	}
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    @Override
-    public int getSegmentsCountByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter)
-            throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            if (LOGGER.isDebugEnabled())
-            {
-                LOGGER.debug("getSegmentsCountByProjectName(" + projectName
-                        + "): " + describeTm(tm, tm3tm) + " createdBefore "
-                        + createdBefore + " createdAfter " + createdAfter);
-            }
-            TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
-                    UPDATED_BY_PROJECT);
-            return Long.valueOf(
-                    tm3tm.getDataByAttributes(
-                            TM3Attributes.one(projectAttr, projectName),
-                            parseDate(createdAfter), parseDate(createdBefore))
-                            .getCount()).intValue();
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public int getSegmentsCountByProjectName(Tm tm, String projectName,
-            String createdBefore, String createdAfter, Set<String> jobAttributeSet)
-            throws LingManagerException
-    {
-        try
-        {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            if (LOGGER.isDebugEnabled())
-            {
-                LOGGER.debug("getSegmentsCountByProjectName(" + projectName
-                        + "): " + describeTm(tm, tm3tm) + " createdBefore "
-                        + createdBefore + " createdAfter " + createdAfter);
-            }
-            TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
-                    UPDATED_BY_PROJECT);
-            return Long.valueOf(
-                    tm3tm.getDataByAttributes(
-                            TM3Attributes.one(projectAttr, projectName),
-                            parseDate(createdAfter), parseDate(createdBefore),jobAttributeSet)
-                            .getCount()).intValue();
-        }
-        catch (TM3Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
 
 	@Override
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
@@ -1010,7 +743,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
 
-    @Override
+	@Override
     public boolean removeTmData(Tm pTm, GlobalSightLocale pLocale,
             ProgressReporter pReporter, InterruptMonitor pMonitor)
             throws LingManagerException
@@ -1239,7 +972,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             Set<GlobalSightLocale> pTargetLocales, int pMode,
             boolean pFromTmImport)
     {
-
+    	int BATCH_SIZE = 1000;
         LOGGER.info("saveToSegmentTm: " + pSegmentsToSave.size()
                 + " segs, srcLocale=" + pSourceLocale + ", pMode=" + pMode
                 + ", fromTmImport=" + pFromTmImport);
@@ -1307,7 +1040,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             for (BaseTmTu base : usr.getAllTus())
             {
             	batch.add(base);
-            	if (batch.size() == 500)
+            	if (batch.size() == BATCH_SIZE)
             	{
             		batches.add(batch);
             		batch = new ArrayList<BaseTmTu>();
@@ -1331,22 +1064,30 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                     // NB SegmentTmTu's idea of source tuv is the first tuv with
                     // the source locale
                     BaseTmTuv srcTuv = srcTu.getSourceTuv();
-                    TM3Saver<GSTuvData>.Tu tuToSave = saver.tu(
-                            new GSTuvData(srcTuv), pSourceLocale,
-                            sourceEvents.getEventForTuv(srcTuv),
-                            srcTuv.getCreationUser(), srcTuv.getCreationDate(),
-                            srcTuv.getModifyUser(), srcTuv.getModifyDate());
+					TM3Saver<GSTuvData>.Tu tuToSave = saver.tu(new GSTuvData(
+							srcTuv), pSourceLocale, sourceEvents
+							.getEventForTuv(srcTuv), srcTuv.getCreationUser(),
+							srcTuv.getCreationDate(), srcTuv.getModifyUser(),
+							srcTuv.getModifyDate(), srcTuv.getLastUsageDate(),
+							srcTuv.getJobId(), srcTuv.getJobName(),
+							srcTuv.getPreviousHash(), srcTuv.getNextHash(),
+							srcTuv.getSid());
                     for (BaseTmTuv tuv : srcTu.getTuvs())
                     {
                         if (tuv.equals(srcTuv))
                         {
                             continue;
                         }
-                        tuToSave.target(new GSTuvData(tuv), tuv.getLocale(),
-                                targetEvents.getEventForTuv(tuv),
-                                decideTargetTuvCreationUser(srcTuv, tuv, pFromTmImport),
-                                tuv.getCreationDate(), tuv.getModifyUser(),
-                                tuv.getModifyDate());
+						tuToSave.target(
+								new GSTuvData(tuv),
+								tuv.getLocale(),
+								targetEvents.getEventForTuv(tuv),
+								decideTargetTuvCreationUser(srcTuv, tuv, pFromTmImport),
+								tuv.getCreationDate(),
+								tuv.getModifyUser(), tuv.getModifyDate(),
+								tuv.getLastUsageDate(), tuv.getJobId(),
+								tuv.getJobName(), tuv.getPreviousHash(),
+								tuv.getNextHash(), tuv.getSid());
                     }
 
                     // handle TU properties

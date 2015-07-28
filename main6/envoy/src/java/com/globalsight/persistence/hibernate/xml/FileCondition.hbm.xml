@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-	<class name="com.globalsight.cxe.entity.customAttribute.FileCondition" table="File_CONDITION">
+	<class name="com.globalsight.cxe.entity.customAttribute.FileCondition" table="ATTRIBUTE_CONDITION_FILE">
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>

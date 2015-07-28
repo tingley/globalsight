@@ -22,6 +22,7 @@ public class OperationLog {
     public static final String EVENT_ADD = "add";
     public static final String EVENT_EDIT = "edit";
     public static final String EVENT_DELETE = "delete";
+    public static final String EVENT_TM_IMPORT = "tmImport";
 
     public static final String COMPONET_WORKFLOW = "Workflow";
     public static final String COMPONET_TM = "TM";
@@ -43,34 +44,6 @@ public class OperationLog {
             if (operationDateStr != null && operationUser != null
                     && operationAction != null && gsComponent != null
                     && componentName != null)
-            {
-                operationLog.info("<" + operationDateStr + ">" + "<"
-                        + operationUser + ">" + "<" + operationAction + ">"
-                        + "<" + gsComponent + ":\"" + componentName + "\">");
-            }
-        }
-        catch (Exception e)
-        {
-            log.error("Problem logging start event", e);
-        }
-    }
-    
-    public static void log(String operationAction, String gsComponent,
-            String componentName)
-    {
-        String operationUser;
-        try
-        {
-            UserInfo userInfo = LoggedUser.getInstance().getLoggedUserInfo();
-            if (userInfo != null)
-                operationUser = userInfo.getUserId();
-            else
-                operationUser = "Unknown";
-
-			String operationDateStr = new SimpleDateFormat(
-					"yyyy-MM-dd HH:mm:ss").format(new Date());
-            if (operationDateStr != null && operationAction != null
-                    && gsComponent != null && componentName != null)
             {
                 operationLog.info("<" + operationDateStr + ">" + "<"
                         + operationUser + ">" + "<" + operationAction + ">"

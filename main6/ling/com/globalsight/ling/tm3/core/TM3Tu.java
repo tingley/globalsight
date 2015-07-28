@@ -222,7 +222,8 @@ public class TM3Tu<T extends TM3Data>
      */
     public TM3Tuv<T> addTargetTuv(TM3Locale locale, T content, TM3Event event,
             String creationUser, Date creationDate, String modifyUser,
-            Date modifyDate)
+			Date modifyDate, Date lastUsageDate, long jobId, String jobName,
+			long previousHash, long nextHash, String sid)
     {
         if (event == null)
         {
@@ -237,8 +238,9 @@ public class TM3Tu<T extends TM3Data>
                 return null;
             }
         }
-        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event, creationUser,
-                creationDate, modifyUser, modifyDate);
+		TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event, creationUser,
+				creationDate, modifyUser, modifyDate, lastUsageDate, jobId,
+				jobName, previousHash, nextHash, sid);
         targetTuvs.add(tuv);
         tuv.setTu(this);
         return tuv;
@@ -285,7 +287,6 @@ public class TM3Tu<T extends TM3Data>
         attributes.put(attribute, value);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object o)
     {

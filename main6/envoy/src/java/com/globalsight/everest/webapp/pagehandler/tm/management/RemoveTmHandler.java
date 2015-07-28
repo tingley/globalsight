@@ -38,6 +38,7 @@ import com.globalsight.everest.tm.TmRemover;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.log.OperationLog;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -52,6 +53,7 @@ public class RemoveTmHandler extends PageHandler implements WebAppConstants
             .getLogger(RemoveTmHandler.class);
 
     private static ProjectHandler projectHandler = null;
+    String m_userId;
 
     public RemoveTmHandler()
     {
@@ -90,6 +92,7 @@ public class RemoveTmHandler extends PageHandler implements WebAppConstants
         HttpSession session = p_request.getSession();
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
+        m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         String action = (String) p_request.getParameter(TM_ACTION);
         ResourceBundle bundle = PageHandler.getBundle(session);
         String errorMsg = null;
@@ -146,7 +149,7 @@ public class RemoveTmHandler extends PageHandler implements WebAppConstants
         try
         {
             // Start remove TM in a separate thread.
-            TmRemover tmRemover = new TmRemover(tmIdsArray);
+            TmRemover tmRemover = new TmRemover(tmIdsArray, m_userId);
             if (!StringUtil.isEmpty(languageList))
             {
                 tmRemover.setLocaleId(Long.parseLong(languageList));

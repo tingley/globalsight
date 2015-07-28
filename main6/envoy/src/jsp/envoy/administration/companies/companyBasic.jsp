@@ -69,6 +69,12 @@
     String enableDitaChecksChecked = "";
     String enableWorkflowStatePosts = "";
     
+    String inCtxRvKey = (String) request.getAttribute("incontext_review_key");
+    String inCtxRvDirIndd = (String) request.getAttribute("incontext_review_dir_indd");
+    String inCtxRvDirOffice = (String) request.getAttribute("incontext_review_dir_office");
+    
+    String enableInCtxRvTool = "true".equals(inCtxRvKey) ? "checked" : "";
+    
     if (company != null)
     {
         companyName = company.getName();
@@ -310,6 +316,21 @@ function onEnableSSO(checked)
 	ele.style.display = display;
 }
 
+function onEnableInCtxRvToolSwitch()
+{
+	onEnableInCtxRvTool(companyForm.enableInCtxRvToolField.checked);
+}
+
+function onEnableInCtxRvTool(checked)
+{
+	var ele1 = document.getElementById("inctxrvDirIndd");
+	var ele2 = document.getElementById("inctxrvDirOffice");
+	var display = checked ? "" : "none";
+	ele1.style.display = display;
+	ele2.style.display = display;
+}
+
+
 function doOnload()
 {
     loadGuides();
@@ -333,7 +354,10 @@ function doOnload()
     else
     {
     	onEnableSSO(eval("<%=isSsoChecked%>"));
-    }   
+    }
+    
+    var enableInCtxRv = <%=inCtxRvKey%>;
+    onEnableInCtxRvTool(enableInCtxRv);
 }
 
 function move(f,t) {
@@ -750,7 +774,7 @@ function addQualityTo()
         <tr id="ssoIdpUrlCC">
             <td valign="top"><%=bundle.getString("lb_sso_IdpUrl")%>:</td>
             <td colspan="2">
-                <input type="textfield" name="<%=CompanyConstants.SSO_IDP_URL%>" maxlength="256" size="30" value="<%=ssoIdpUrl%>">
+                <input type="text" style="width:350px;" name="<%=CompanyConstants.SSO_IDP_URL%>" maxlength="256" value="<%=ssoIdpUrl%>">
             </td>
         </tr>
 
@@ -801,6 +825,25 @@ function addQualityTo()
         <td>
         	<input class="standardText" type="checkbox" name="<%=CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS%>" <%=enableWorkflowStatePosts%>/>
         </td>
+        </tr>
+        
+        <tr id="inctxrvCheck">
+            <td valign="top"><%=bundle.getString("lb_incontext_review_key")%>:</td>
+            <td colspan="2">
+                <input class="standardText" type="checkbox" id="enableInCtxRvToolId" onclick="onEnableInCtxRvToolSwitch()" name="<%=CompanyConstants.ENABLE_INCTXRV_TOOL%>" <%=enableInCtxRvTool%>/>
+            </td>
+        </tr>
+        <tr id="inctxrvDirIndd">
+            <td valign="top"><%=bundle.getString("lb_incontext_review_dir_indd")%>:</td>
+            <td colspan="2">
+                <input type="text" style="width:350px;" name="<%=CompanyConstants.INCTXRV_DIR_INDD%>" maxlength="256" value="<%=inCtxRvDirIndd%>">
+            </td>
+        </tr>
+        <tr id="inctxrvDirOffice">
+            <td valign="top"><%=bundle.getString("lb_incontext_review_dir_office")%>:</td>
+            <td colspan="2">
+                <input type="text" style="width:350px;" name="<%=CompanyConstants.INCTXRV_DIR_OFFICE%>" maxlength="256" value="<%=inCtxRvDirOffice%>">
+            </td>
         </tr>
 
         <tr valign="top">

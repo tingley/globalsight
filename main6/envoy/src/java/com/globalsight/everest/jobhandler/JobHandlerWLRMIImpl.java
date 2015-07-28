@@ -390,31 +390,31 @@ public class JobHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getJobByJobName(p_jobName);
     }
 
-    @Override
-    public String[] getJobIdsByCompany(String p_companyId, int p_offset,
-            int p_count, boolean p_isDescOrder) throws RemoteException,
-            JobException
-    {
-        return m_localReference.getJobIdsByCompany(p_companyId, p_offset,
-                p_count, p_isDescOrder);
-    }
+	@Override
+	public String[] getJobIdsByCompany(String p_companyId, int p_offset,
+			int p_count, boolean p_isDescOrder, String currentUserId)
+			throws RemoteException, JobException
+	{
+		return m_localReference.getJobIdsByCompany(p_companyId, p_offset,
+				p_count, p_isDescOrder, currentUserId);
+	}
 
     @Override
-    public String[] getJobIdsByState(String p_companyId, String p_state,
-            int p_offset, int p_count, boolean p_isDescOrder)
-            throws RemoteException, JobException
-    {
-        return m_localReference.getJobIdsByState(p_companyId, p_state,
-                p_offset, p_count, p_isDescOrder);
-    }
+	public String[] getJobIdsByState(String p_companyId, String p_state,
+			int p_offset, int p_count, boolean p_isDescOrder,
+			String currentUserId) throws RemoteException, JobException
+	{
+		return m_localReference.getJobIdsByState(p_companyId, p_state,
+				p_offset, p_count, p_isDescOrder, currentUserId);
+	}
     
     @Override
     public String[] getJobIdsByCreator(long p_companyId, String p_creatorUserId,
-            int p_offset, int p_count, boolean p_isDescOrder)
+            int p_offset, int p_count, boolean p_isDescOrder,String currentUserId)
             throws RemoteException, JobException
     {
         return m_localReference.getJobIdsByCreator(p_companyId, p_creatorUserId,
-                p_offset, p_count, p_isDescOrder);
+                p_offset, p_count, p_isDescOrder,currentUserId);
     }
 
     public HashMap<String, Integer> getCountsByJobState(String p_companyId)

@@ -35,6 +35,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 
+import com.globalsight.config.SystemParameter;
+import com.globalsight.config.SystemParameterImpl;
+import com.globalsight.config.SystemParameterPersistenceManager;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.everest.company.Category;
@@ -51,6 +54,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.CompanyComparator;
 import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
@@ -913,6 +917,93 @@ public class CompanyMainHandler extends PageActionHandler implements
         if ("on".equalsIgnoreCase(enableWorkflowStatePosts))
         {
             company.setEnableWorkflowStatePosts(true);
+        }
+        
+        String enableInCtxRv = p_request
+                .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL);
+        String inCtxRvDirIndd = p_request
+                .getParameter(CompanyConstants.INCTXRV_DIR_INDD);
+        String inCtxRvDirOffice = p_request
+                .getParameter(CompanyConstants.INCTXRV_DIR_OFFICE);
+        
+        if ("on".equalsIgnoreCase(enableInCtxRv))
+        {
+            enableInCtxRv = "true";
+        }
+        try
+        {
+            String companyId = "" + company.getId();
+            SystemParameterPersistenceManager spm = ServerProxy
+                    .getSystemParameterPersistenceManager();
+
+            SystemParameter spEnable = null;
+            try
+            {
+                spEnable = spm.getSystemParameter(
+                        SystemConfigParamNames.INCTXRV_ENABLE, companyId);
+            }
+            catch (Exception ee)
+            {
+                logger.error(ee);
+            }
+
+            if (spEnable == null)
+            {
+                spEnable = new SystemParameterImpl(
+                        SystemConfigParamNames.INCTXRV_ENABLE, enableInCtxRv,
+                        company.getId());
+                HibernateUtil.save(spEnable);
+            }
+            spEnable.setValue(enableInCtxRv);
+            spm.updateSystemParameter(spEnable);
+
+            SystemParameter spDirIndd = null;
+            try
+            {
+                spDirIndd = spm.getSystemParameter(
+                        SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
+                        companyId);
+            }
+            catch (Exception ee)
+            {
+                logger.error(ee);
+            }
+
+            if (spDirIndd == null)
+            {
+                spDirIndd = new SystemParameterImpl(
+                        SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
+                        inCtxRvDirIndd, company.getId());
+                HibernateUtil.save(spDirIndd);
+            }
+            spDirIndd.setValue(inCtxRvDirIndd);
+            spm.updateSystemParameter(spDirIndd);
+
+            SystemParameter spDirOffice = null;
+            try
+            {
+                spDirOffice = spm.getSystemParameter(
+                        SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
+                        companyId);
+            }
+            catch (Exception ee)
+            {
+                logger.error(ee);
+            }
+
+            if (spDirOffice == null)
+            {
+                spDirOffice = new SystemParameterImpl(
+                        SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
+                        inCtxRvDirOffice, company.getId());
+                HibernateUtil.save(spDirOffice);
+            }
+            spDirOffice.setValue(inCtxRvDirOffice);
+            spm.updateSystemParameter(spDirOffice);
+        }
+        catch (Exception ex)
+        {
+            logger.error(ex);
         }
     }
 

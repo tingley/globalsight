@@ -912,6 +912,13 @@ public class TmxWriter implements IWriter
             result.append("\" ");
         }
 
+        if (p_tuv.getLastUsageDate() != null)
+        {
+            result.append(Tmx.LASTUSAGEDATE);
+            result.append("=\"");
+            result.append(UTC.valueOfNoSeparators(p_tuv.getLastUsageDate()));
+            result.append("\" ");
+        }
         result.append(">\r\n");
 
         // Property for TUV's update project.

@@ -75,6 +75,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.PermissionGroupImpl;
+import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.persistence.l10nprofile.L10nProfileDescriptorModifier;
@@ -92,6 +93,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.config.ConfigMainHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoSearchCriteria;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManager;
@@ -2650,10 +2652,10 @@ public class JobHandlerLocal implements JobHandler
         return result;
     }
 
-    public String[] getJobIdsByCompany(String p_companyId, int p_offset,
-            int p_count, boolean p_isDescOrder) throws RemoteException,
-            JobException
-    {
+	public String[] getJobIdsByCompany(String p_companyId, int p_offset,
+			int p_count, boolean p_isDescOrder, String currentUserId)
+			throws RemoteException, JobException
+	{
         if (StringUtil.isEmpty(p_companyId))
             return null;
         if (p_offset < 1)
@@ -2666,13 +2668,24 @@ public class JobHandlerLocal implements JobHandler
         try
         {
             StringBuilder sb = new StringBuilder();
-            sb.append("SELECT j.* FROM Job j WHERE 1=1");
-
+            sb.append("SELECT DISTINCT j.* FROM Job j ");
+            //GBS-3987:fetchJobsPerCompany does not work correctly
+            sb.append("  left outer join REQUEST r on j.ID = r.JOB_ID ");
+            sb.append("  left outer join L10N_PROFILE l on j.L10N_PROFILE_ID = l.ID ");
+            sb.append("  left outer join PROJECT p on l.PROJECT_ID = p.PROJECT_SEQ ");
+            sb.append("  left outer join WORKFLOW w on j.ID=w.JOB_ID ");
+            sb.append("  left outer join WORKFLOW_OWNER wo on w.IFLOW_INSTANCE_ID=wo.WORKFLOW_ID ");
+            sb.append(" WHERE 1=1 ");
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(p_companyId))
             {
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(Long.parseLong(p_companyId));
             }
+			// GBS-3987:fetchJobsPerCompany does not work correctly
+			if (currentUserId != null)
+			{
+				userExpression(currentUserId, sb);
+			}
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)
                 sb.append(" DESC");
@@ -2703,10 +2716,10 @@ public class JobHandlerLocal implements JobHandler
         }
     }
 
-    public String[] getJobIdsByState(String p_companyId, String p_state,
-            int p_offset, int p_count, boolean p_isDescOrder)
-            throws RemoteException, JobException
-    {
+	public String[] getJobIdsByState(String p_companyId, String p_state,
+			int p_offset, int p_count, boolean p_isDescOrder,
+			String currentUserId) throws RemoteException, JobException
+	{
         if (StringUtil.isEmpty(p_companyId))
             return null;
         if (p_offset < 1)
@@ -2719,7 +2732,13 @@ public class JobHandlerLocal implements JobHandler
         try
         {
             StringBuilder sb = new StringBuilder();
-            sb.append("SELECT j.* FROM Job j WHERE 1=1");
+            sb.append("SELECT DISTINCT j.* FROM Job j ");
+            sb.append("  left outer join REQUEST r on j.ID = r.JOB_ID ");
+            sb.append("  left outer join L10N_PROFILE l on j.L10N_PROFILE_ID = l.ID ");
+            sb.append("  left outer join PROJECT p on l.PROJECT_ID = p.PROJECT_SEQ ");
+            sb.append("  left outer join WORKFLOW w on j.ID=w.JOB_ID ");
+            sb.append("  left outer join WORKFLOW_OWNER wo on w.IFLOW_INSTANCE_ID=wo.WORKFLOW_ID ");
+            sb.append(" WHERE 1=1 ");
             if (!StringUtil.isEmpty(p_state))
             {
                 sb.append(" AND j.STATE IN ('").append(p_state.toUpperCase())
@@ -2730,6 +2749,12 @@ public class JobHandlerLocal implements JobHandler
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(Long.parseLong(p_companyId));
             }
+        	// GBS-3987:fetchJobsPerCompany does not work correctly
+			if (currentUserId != null)
+			{
+				userExpression(currentUserId, sb);
+			}
+			
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)
                 sb.append(" DESC");
@@ -2760,10 +2785,11 @@ public class JobHandlerLocal implements JobHandler
         }
     }
 
-    public String[] getJobIdsByCreator(long p_companyId,
-            String p_creatorUserId, int p_offset, int p_count,
-            boolean p_isDescOrder) throws RemoteException, JobException
-    {
+	public String[] getJobIdsByCreator(long p_companyId,
+			String p_creatorUserId, int p_offset, int p_count,
+			boolean p_isDescOrder, String currentUserId)
+			throws RemoteException, JobException
+	{
         if (p_offset < 1)
             p_offset = 0;
         p_count = p_count <= 0 ? 1 : p_count;
@@ -2774,7 +2800,14 @@ public class JobHandlerLocal implements JobHandler
         try
         {
             StringBuilder sb = new StringBuilder();
-            sb.append("SELECT j.* FROM Job j WHERE 1=1");
+            sb.append("SELECT DISTINCT j.* FROM Job j ");
+            //GBS-3987:fetchJobsPerCompany does not work correctly
+            sb.append("  left outer join REQUEST r on j.ID = r.JOB_ID ");
+            sb.append("  left outer join L10N_PROFILE l on j.L10N_PROFILE_ID = l.ID ");
+            sb.append("  left outer join PROJECT p on l.PROJECT_ID = p.PROJECT_SEQ ");
+            sb.append("  left outer join WORKFLOW w on j.ID=w.JOB_ID ");
+            sb.append("  left outer join WORKFLOW_OWNER wo on w.IFLOW_INSTANCE_ID=wo.WORKFLOW_ID ");
+            sb.append("WHERE 1=1");
             if (!StringUtil.isEmpty(p_creatorUserId))
             {
                 sb.append(" AND j.CREATE_USER_ID = ('").append(p_creatorUserId)
@@ -2786,6 +2819,12 @@ public class JobHandlerLocal implements JobHandler
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(p_companyId);
             }
+            //GBS-3987:fetchJobsPerCompany does not work correctly
+			if (currentUserId != null)
+			{
+				userExpression(currentUserId, sb);
+			}
+            
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)
                 sb.append(" DESC");
@@ -2816,6 +2855,77 @@ public class JobHandlerLocal implements JobHandler
         }
     }
 
+    private void userExpression(String currentUserId,StringBuilder sb)
+    {
+        PermissionSet perms = new PermissionSet();
+        JobVoSearchCriteria vo = new JobVoSearchCriteria();
+        try
+        {
+            perms = Permission.getPermissionManager().getPermissionSetForUser(
+            		currentUserId);
+        }
+        catch (Exception e)
+        {
+        	c_category.error("Failed to get permissions for user " + currentUserId, e);
+        }
+
+        if (perms.getPermissionFor(Permission.JOB_SCOPE_ALL))
+        {
+            return;
+        }
+        else
+        {
+            if (perms.getPermissionFor(Permission.PROJECTS_MANAGE))
+            {
+            	sb.append(" and ( p.MANAGER_USER_ID ='").append(currentUserId).append("'");
+                if (perms
+                        .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
+                {
+                    sb.append(" or wo.OWNER_ID = '").append(currentUserId).append("'");
+                }
+                if (perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
+                {
+                    List allProjectsIds = vo.getMyProjects(currentUserId);
+                    String projectsIdsStr = convertList(allProjectsIds);
+                    sb.append(" or l.PROJECT_ID in ("
+                            + projectsIdsStr + ") ");
+                }
+                sb.append(")");
+            }
+            else
+            {
+                if (perms
+                        .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
+                {
+                	sb.append(" and ( wo.OWNER_ID = '").append(currentUserId).append("'");
+                    if (perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
+                    {
+                        List allProjectsIds = vo.getMyProjects(currentUserId);
+                        String projectsIdsStr = convertList(allProjectsIds);
+                        sb.append(" or l.PROJECT_ID in ("
+                                + projectsIdsStr + ") ");
+                    }
+                    sb.append(")");
+                }
+                else
+                {
+                    if (perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
+                    {
+                        List allProjectsIds = vo.getMyProjects(currentUserId);
+                        String projectsIdsStr = convertList(allProjectsIds);
+                        sb.append(" and ( l.PROJECT_ID in ("
+                                + projectsIdsStr + ") ");
+                        sb.append(")");
+                    }
+                    else
+                    {
+                        sb.append("and 1=2");
+                    }
+                }
+            }
+        }
+    }
+    
     public HashMap<String, Integer> getCountsByJobState(String p_companyId)
             throws RemoteException, JobException
     {

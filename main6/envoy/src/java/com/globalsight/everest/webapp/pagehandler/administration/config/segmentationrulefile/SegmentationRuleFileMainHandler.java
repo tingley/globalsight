@@ -48,6 +48,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.log.OperationLog;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 
@@ -59,6 +60,7 @@ public class SegmentationRuleFileMainHandler extends PageHandler
 {
     private static final Logger CATEGORY = Logger
             .getLogger(SendDownloadFileHelper.class);
+    String m_userId;
 
     /**
      * Invokes this PageHandler
@@ -79,6 +81,7 @@ public class SegmentationRuleFileMainHandler extends PageHandler
     {
         p_request.setCharacterEncoding("UTF-8");
         HttpSession session = p_request.getSession(false);
+        m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         String action = p_request.getParameter("action");
         boolean noInvoke = false;
 
@@ -173,6 +176,8 @@ public class SegmentationRuleFileMainHandler extends PageHandler
 
         ServerProxy.getSegmentationRuleFilePersistenceManager()
                 .createSegmentationRuleFile(ruleFile);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_SEGMENTATION_RULE, ruleFile.getName());
     }
 
     /**
@@ -199,6 +204,8 @@ public class SegmentationRuleFileMainHandler extends PageHandler
 
         ServerProxy.getSegmentationRuleFilePersistenceManager()
                 .updateSegmentationRuleFile(ruleFile);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_SEGMENTATION_RULE, ruleFile.getName());
     }
 
     /**
@@ -245,6 +252,9 @@ public class SegmentationRuleFileMainHandler extends PageHandler
 
                 ServerProxy.getSegmentationRuleFilePersistenceManager()
                         .deleteSegmentationRuleFile(segmentationRuleFile);
+                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                        OperationLog.COMPONET_SEGMENTATION_RULE,
+                        segmentationRuleFile.getName());
             }
         }
     }

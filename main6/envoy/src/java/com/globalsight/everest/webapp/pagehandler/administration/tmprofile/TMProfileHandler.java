@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+
 //import javax.jms.JMSException;
 //import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -48,6 +49,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFilePersistenceManager;
@@ -67,6 +69,7 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
     private static final Logger CATEGORY = Logger
             .getLogger(TMProfileHandler.class);
     private static final String COMMA = ",";
+    String m_userId;
 
     public TMProfileHandler()
     {
@@ -99,6 +102,7 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             EnvoyServletException
     {
         HttpSession sess = p_request.getSession(false);
+        m_userId = (String) sess.getAttribute(WebAppConstants.USER_NAME);
         SessionManager sessionMgr = (SessionManager) sess
                 .getAttribute(SESSION_MANAGER);
         TranslationMemoryProfile tmProfile = (TranslationMemoryProfile) sessionMgr
@@ -122,6 +126,10 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
                     String tmpAttributes = p_request.getParameter("tmpAttributes");
                     TMPAttributeManager.setTMPAttributes(tmProfile, tmpAttributes);
                     TMProfileHandlerHelper.saveTMProfile(tmProfile);
+
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                            OperationLog.COMPONET_TM_PROFILE,
+                            tmProfile.getName());
                     clearSessionExceptTableInfo(sess, TMP_KEY);
                     saveRelationShipWithSR(p_request, tmProfile);
                 }
@@ -132,6 +140,8 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
                 String tmpAttributes = p_request.getParameter("tmpAttributes");
                 TMPAttributeManager.setTMPAttributes(tmProfile, tmpAttributes);
                 TMProfileHandlerHelper.saveTMProfile(tmProfile);
+                OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                        OperationLog.COMPONET_TM_PROFILE, tmProfile.getName());
                 clearSessionExceptTableInfo(sess, TMP_KEY);
 
                 // log event before "saveRelationShipWithSR()".
@@ -848,6 +858,10 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
 			{
 				ServerProxy.getProjectHandler().removeTmProfile(
 						tmProfileToBeDeleted);
+
+                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                        OperationLog.COMPONET_TM_PROFILE,
+                        tmProfileToBeDeleted.getName());
 				clearSessionExceptTableInfo(p_request.getSession(false), TMP_KEY);
 				SegmentationRuleFile ruleFile = ServerProxy
 						.getSegmentationRuleFilePersistenceManager()

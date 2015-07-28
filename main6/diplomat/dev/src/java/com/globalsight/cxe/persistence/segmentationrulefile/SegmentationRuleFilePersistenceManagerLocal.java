@@ -34,7 +34,6 @@ import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -62,9 +61,6 @@ public class SegmentationRuleFilePersistenceManagerLocal implements
                     .parseLong(CompanyThreadLocal.getInstance().getValue()));
 
             HibernateUtil.save(p_segmentationRuleFile);
-            OperationLog.log(OperationLog.EVENT_ADD,
-                    OperationLog.COMPONET_SEGMENTATION_RULE,
-                    p_segmentationRuleFile.getName());
             return p_segmentationRuleFile;
         }
         catch (Exception e)
@@ -103,9 +99,6 @@ public class SegmentationRuleFilePersistenceManagerLocal implements
         {
             HibernateUtil
                     .delete((SegmentationRuleFileImpl) p_segmentationRuleFile);
-            OperationLog.log(OperationLog.EVENT_DELETE,
-                    OperationLog.COMPONET_SEGMENTATION_RULE,
-                    p_segmentationRuleFile.getName());
         }
         catch (Exception e)
         {
@@ -126,9 +119,6 @@ public class SegmentationRuleFilePersistenceManagerLocal implements
         {
             HibernateUtil
                     .update((SegmentationRuleFileImpl) p_segmentationRuleFile);
-            OperationLog.log(OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_SEGMENTATION_RULE,
-                    p_segmentationRuleFile.getName());
         }
         catch (Exception e)
         {

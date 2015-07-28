@@ -52,6 +52,7 @@ import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUpl
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.log.OperationLog;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.StringUtil;
 
@@ -66,7 +67,7 @@ public class WorkflowTemplateHandler extends PageHandler implements
 
     // non user related state
     private int m_numOfWfsPerPage; // number of workflow templates per page
-
+    String m_userId;
     // ////////////////////////////////////////////////////////////////////
     // Begin: Constructor
     // //////////////////////////////////////////////////////////////////
@@ -110,6 +111,7 @@ public class WorkflowTemplateHandler extends PageHandler implements
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
+        m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         WfTemplateSearchParameters params;
 //        preDataForDropBox(p_request, session);
         
@@ -199,6 +201,15 @@ public class WorkflowTemplateHandler extends PageHandler implements
 
             WorkflowTemplateHandlerHelper.importWorkflowTemplateInfo(doc,
                     alist, name, projectId, getBundle(session));
+            for (LocalePair localePair : alist)
+            {
+                String importWorkflowTemplateName = generateName(name,localePair);
+                OperationLog
+                        .log(m_userId, OperationLog.EVENT_ADD,
+                                OperationLog.COMPONET_WORKFLOW,
+                                importWorkflowTemplateName);
+            }
+            
         }
         catch (Exception e)
         {
@@ -386,13 +397,32 @@ public class WorkflowTemplateHandler extends PageHandler implements
             WorkflowTemplateHandlerHelper.duplicateWorkflowTemplateInfo(
                     Long.parseLong(wftiId), alist, name, project,
                     getBundle(session));
+            for (LocalePair localePair : alist)
+            {
+                String dupWorkflowTemplateName = generateName(name,localePair);
+                OperationLog
+                        .log(m_userId, OperationLog.EVENT_ADD,
+                                OperationLog.COMPONET_WORKFLOW,
+                                dupWorkflowTemplateName);
+            }
         }
         catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
     }
-    
+
+    private String generateName(String name, LocalePair localePair)
+    {
+        StringBuffer sb = new StringBuffer();
+        sb.append(name);
+        sb.append("_");
+        sb.append(localePair.getSource().toString());
+        sb.append("_");
+        sb.append(localePair.getTarget().toString());
+        return sb.toString();
+    }
+
     private void setNumberPerPage(HttpServletRequest req) {
         String pageSize = (String) req.getParameter("numOfPageSize");
         if (!StringUtil.isEmpty(pageSize)) {

@@ -75,6 +75,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -111,7 +112,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
             }
             catch (Exception ignore)
             {
-                logger.error("Error found in generating ProjectHandler.",
+                logger.error("Error found in generating ProjectHandler.", 
                         ignore);
             }
         }
@@ -326,6 +327,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                         // update existing TM
                         tm.setId(Long.parseLong(id));
                         projectHandler.modifyProjectTM(tm);
+                        OperationLog.log(userId, OperationLog.EVENT_EDIT, OperationLog.COMPONET_TM,
+                                tm.getName());
                     }
                     else
                     {
@@ -334,6 +337,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                         {
                             // create new
                             projectHandler.createProjectTM(tm);
+                            OperationLog.log(userId, OperationLog.EVENT_ADD, OperationLog.COMPONET_TM,
+                                    tm.getName());
                             if (!isAdmin && !isSuperAdmin)
                             {
                                 long tId = tm.getId();

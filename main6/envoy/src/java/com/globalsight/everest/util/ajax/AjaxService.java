@@ -108,12 +108,15 @@ public class AjaxService extends HttpServlet
     private HttpServletResponse response;
     private PrintWriter writer;
     private long companyId;
+    String m_userId;
 
     public void service(HttpServletRequest request, HttpServletResponse response)
     {
         this.request = request;
         this.response = response;
         boolean check = setCompanyId();
+        HttpSession session = request.getSession(false);
+        m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
 
         response.setCharacterEncoding(request.getCharacterEncoding());
         String method = request.getParameter("action");
@@ -256,6 +259,8 @@ public class AjaxService extends HttpServlet
                 .saveJavaPropertiesFilter(filterName, filterDesc, isSupportSid,
                         isUnicodeEscape, isPreserveSpaces, companyId,
                         secondFilterId, secondFilterTableName, internalTexts);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filterId,
                 FilterConstants.JAVAPROPERTIES_TABLENAME);
         writer.write(filterId + "");
@@ -298,6 +303,8 @@ public class AjaxService extends HttpServlet
                 filterName, filterDesc, isSupportSid, isUnicodeEscape,
                 isPreserveSpaces, companyId, secondFilterId,
                 secondFilterTableName, internalTexts);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
 
         if (filterId > 0)
         {
@@ -331,6 +338,8 @@ public class AjaxService extends HttpServlet
         long filterId = FilterHelper.saveMSOfficeExcelFilter(filterName,
                 filterDesc, companyId, altTranslate, tabNamesTranslate,
                 contentPostFilterId, contentPostFilterTableName);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filterId, FilterConstants.MSOFFICEEXCEL_TABLENAME);
 
         writer.write(filterId + "");
@@ -361,6 +370,8 @@ public class AjaxService extends HttpServlet
         long filterId = FilterHelper.updateMSOfficeExcelFilter(fId, filterName,
                 filterDesc, companyId, altTranslate, tabNamesTranslate,
                 contentPostFilterId, contentPostFilterTableName);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         if (filterId > 0)
         {
             saveBaseFilterMapping(filterId,
@@ -377,7 +388,7 @@ public class AjaxService extends HttpServlet
         loadPPTFilterParameter(filter);
 
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filter.getId(),
                 FilterConstants.MSOFFICEPPT_TABLENAME);
@@ -400,7 +411,7 @@ public class AjaxService extends HttpServlet
         {
             loadPPTFilterParameter(filter);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                     OperationLog.COMPONET_FILTER_CONFIGURATION,
                     filter.getFilterName());
             saveBaseFilterMapping(filter.getId(),
@@ -447,7 +458,7 @@ public class AjaxService extends HttpServlet
         loadPOFilterParameter(filter);
 
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filter.getId(), FilterConstants.PO_TABLENAME);
         writer.write(Long.toString(filter.getId()));
@@ -468,7 +479,7 @@ public class AjaxService extends HttpServlet
         {
             loadPOFilterParameter(filter);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                     OperationLog.COMPONET_FILTER_CONFIGURATION,
                     filter.getFilterName());
             saveBaseFilterMapping(filter.getId(), FilterConstants.PO_TABLENAME);
@@ -508,6 +519,8 @@ public class AjaxService extends HttpServlet
                 .getParameter("enableUnicodeEscape"));
         long filterId = FilterHelper.saveJavaScriptFilter(filterName,
                 filterDesc, jsFunctionText, companyId, enableUnicodeEscape);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filterId, FilterConstants.JAVASCRIPT_TABLENAME);
         writer.write(filterId + "");
     }
@@ -522,6 +535,8 @@ public class AjaxService extends HttpServlet
                 .getParameter("enableUnicodeEscape"));
         FilterHelper.updateJavaScriptFilter(filterId, filterName, filterDesc,
                 jsFunctionText, companyId, enableUnicodeEscape);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filterId, FilterConstants.JAVASCRIPT_TABLENAME);
     }
 
@@ -529,6 +544,9 @@ public class AjaxService extends HttpServlet
     {
         PlainTextFilter filter = readOutPlainTextFilter();
         long filterId = FilterHelper.saveFilter(filter);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.PLAINTEXT_TABLENAME);
 
         writer.write(filterId + "");
@@ -582,6 +600,9 @@ public class AjaxService extends HttpServlet
         PlainTextFilter filter = readOutPlainTextFilter();
         filter.setId(filterId);
         FilterHelper.updateFilter(filter);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.PLAINTEXT_TABLENAME);
     }
 
@@ -665,6 +686,9 @@ public class AjaxService extends HttpServlet
         InddFilter filter = new InddFilter();
         loadInddFilterParameter(filter);
         long filterId = FilterHelper.saveFilter(filter);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
         writer.write(filterId + "");
     }
 
@@ -683,7 +707,7 @@ public class AjaxService extends HttpServlet
         {
             loadInddFilterParameter(filter);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                     OperationLog.COMPONET_FILTER_CONFIGURATION,
                     filter.getFilterName());
         }
@@ -697,7 +721,7 @@ public class AjaxService extends HttpServlet
         filter.setFilterName(filterName);
         loadDocFilterParameter(filter);
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filter.getId(),
                 FilterConstants.MSOFFICEDOC_TABLENAME);
@@ -767,7 +791,7 @@ public class AjaxService extends HttpServlet
         {
             loadDocFilterParameter(filter);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                     OperationLog.COMPONET_FILTER_CONFIGURATION,
                     filter.getFilterName());
             saveBaseFilterMapping(filter.getId(),
@@ -783,7 +807,7 @@ public class AjaxService extends HttpServlet
         filter.setFilterName(filterName);
         loadOpenOfficeFilterParameter(filter);
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         writer.write(Long.toString(filter.getId()));
     }
@@ -826,7 +850,7 @@ public class AjaxService extends HttpServlet
         {
             loadOpenOfficeFilterParameter(filter);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                     OperationLog.COMPONET_FILTER_CONFIGURATION,
                     filter.getFilterName());
         }
@@ -840,7 +864,7 @@ public class AjaxService extends HttpServlet
         filter.setFilterName(filterName);
         loadMSOffice2010FilterParameter(filter);
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filter.getId(),
                 FilterConstants.OFFICE2010_TABLENAME);
@@ -971,7 +995,7 @@ public class AjaxService extends HttpServlet
         {
             loadMSOffice2010FilterParameter(filter);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
+            OperationLog.log(m_userId,OperationLog.EVENT_EDIT,
                     OperationLog.COMPONET_FILTER_CONFIGURATION,
                     filter.getFilterName());
             saveBaseFilterMapping(filter.getId(),
@@ -1013,7 +1037,7 @@ public class AjaxService extends HttpServlet
                 }
                 else
                 {
-                    FilterHelper.deleteFilter(filterTableName, filterId);
+                    FilterHelper.deleteFilter(filterTableName, filterId, m_userId);
                 }
             }
         }
@@ -1044,7 +1068,7 @@ public class AjaxService extends HttpServlet
         {
             try
             {
-                FilterHelper.deleteFilters(specialFilterToDeletes);
+                FilterHelper.deleteFilters(specialFilterToDeletes, m_userId);
                 rmInfo.setDeleted("true");
                 rmInfo.setExistInFileProfile(false);
                 rmInfo.setFilterInfos(new ArrayList());
@@ -1141,6 +1165,9 @@ public class AjaxService extends HttpServlet
     {
         XMLRuleFilter filter = readXmlFilterFromRequest();
         long filterId = FilterHelper.saveXmlRuleFilter(filter);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.XMLRULE_TABLENAME);
         writer.write(filterId + "");
     }
@@ -1152,6 +1179,9 @@ public class AjaxService extends HttpServlet
         filter.setId(filterId);
         saveBaseFilterMapping(filterId, FilterConstants.XMLRULE_TABLENAME);
         FilterHelper.updateFilter(filter);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
     }
 
     private XMLRuleFilter readXmlFilterFromRequest()
@@ -1258,6 +1288,9 @@ public class AjaxService extends HttpServlet
     {
         QAFilter filter = readQAFilterFromRequest();
         long filterId = FilterHelper.saveFilter(filter);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
         writer.write(filterId + "");
     }
 
@@ -1267,6 +1300,9 @@ public class AjaxService extends HttpServlet
         QAFilter filter = readQAFilterFromRequest();
         filter.setId(filterId);
         FilterHelper.updateFilter(filter);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
     }
 
     private QAFilter readQAFilterFromRequest()
@@ -1318,6 +1354,9 @@ public class AjaxService extends HttpServlet
         BaseFilter filter = readBaseFilterFromRequest();
         long filterId = FilterHelper.saveFilter(filter);
         writer.write(filterId + "");
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
     }
 
     public void updateBaseFilter()
@@ -1326,6 +1365,9 @@ public class AjaxService extends HttpServlet
         BaseFilter filter = readBaseFilterFromRequest();
         filter.setId(filterId);
         FilterHelper.updateFilter(filter);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                filter.getFilterName());
     }
 
     private BaseFilter readBaseFilterFromRequest()
@@ -1398,7 +1440,11 @@ public class AjaxService extends HttpServlet
 
     public void saveHtmlFilter()
     {
-        long filterId = FilterHelper.saveFilter(loadHtmlFilter());
+        HtmlFilter htmlFilter = loadHtmlFilter();
+        long filterId = FilterHelper.saveFilter(htmlFilter);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                htmlFilter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.HTML_TABLENAME);
         writer.write(filterId + "");
     }
@@ -1508,6 +1554,9 @@ public class AjaxService extends HttpServlet
         htmlFilter.setId(filterId);
 
         FilterHelper.updateFilter(htmlFilter);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                htmlFilter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.HTML_TABLENAME);
     }
 
@@ -1522,6 +1571,9 @@ public class AjaxService extends HttpServlet
         Filter jspFilter = new JSPFilter(filterName, filterDesc, companyId,
                 isAdditionalHeadAdded, isEscapeEntity);
         long filterId = FilterHelper.saveFilter(jspFilter);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                jspFilter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.JSP_TABLENAME);
         writer.write(filterId + "");
     }
@@ -1538,6 +1590,9 @@ public class AjaxService extends HttpServlet
         Filter jspFilter = new JSPFilter(filterId, filterName, filterDesc,
                 companyId, isAdditionalHeadAdded, isEscapeEntity);
         FilterHelper.updateFilter(jspFilter);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                jspFilter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.JSP_TABLENAME);
     }
 
@@ -1560,6 +1615,9 @@ public class AjaxService extends HttpServlet
                 exposeOtherMasterPage);
         mfFilter.setTableOfContentTranslate(isTOCTranslate);
         long filterId = FilterHelper.saveFilter(mfFilter);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                mfFilter.getFilterName());
         writer.write(filterId + "");
     }
 
@@ -1583,6 +1641,9 @@ public class AjaxService extends HttpServlet
                 exposeOtherMasterPage);
         mfFilter.setTableOfContentTranslate(isTOCTranslate);
         FilterHelper.updateFilter(mfFilter);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION,
+                mfFilter.getFilterName());
     }
 
     public void uploadFile()

@@ -34,6 +34,7 @@ import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.tm2.TmCoreManager;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -68,14 +69,18 @@ public class TmRemover extends MultiCompanySupportedThread implements
     private boolean deleteLanguageFlag = false;
 
     private long localeID;
+    
+    String m_userId;
 
     /**
      * TmRemover constructor.
+     * @param m_userId 
      */
-    public TmRemover(ArrayList<String> tmIds)
+    public TmRemover(ArrayList<String> tmIds, String m_userId)
     {
         super();
         this.tmIds = tmIds;
+        this.m_userId = m_userId;
     }
 
     public void run()
@@ -130,10 +135,14 @@ public class TmRemover extends MultiCompanySupportedThread implements
                         locale = ServerProxy.getLocaleManager().getLocaleById(
                                 localeID);
                         manager.removeTmData(tm, locale, this, m_monitor);
+                        OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                                OperationLog.COMPONET_TM, tm.getName());
                     }
                     else
                     {
                         manager.removeTmData(tm, this, m_monitor);
+                        OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                                OperationLog.COMPONET_TM, tm.getName());
                         ptUsers.deleteAllUsers(String.valueOf(tmId), "TM");
                     }
 

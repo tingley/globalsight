@@ -82,6 +82,7 @@ public class FilterConfigurationImportHandler extends PageHandler
             .getLogger(FilterConfigurationImportHandler.class);
     private Map<String, Integer> filter_percentage_map = new HashMap<String, Integer>();
     private Map<String, String> filter_error_map = new HashMap<String, String>();
+    String m_userId;
 
     /**
      * Invokes this PageHandler
@@ -107,6 +108,7 @@ public class FilterConfigurationImportHandler extends PageHandler
         String sessionId = session.getId();
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
+        m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         String companyId = CompanyThreadLocal.getInstance().getValue();
         sessionMgr.setAttribute("companyId", companyId);
         String action = p_request.getParameter("action");
@@ -772,7 +774,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                             "QAFilter");
                     qaFilter.setFilterName(newFilterName);
                     HibernateUtil.save(qaFilter);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                     addMessage("<b>" + newFilterName
@@ -815,7 +817,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new id
                     Long newId = selectNewId(newFilterName, "BaseFilter");
                     baseFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -857,7 +859,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new id
                     Long newId = selectNewId(newFilterName, "HtmlFilter");
                     htmlFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -899,7 +901,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new id
                     Long newId = selectNewId(newFilterName, "JavaScriptFilter");
                     javaScriptFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1071,7 +1073,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new id
                     Long newId = selectNewId(newFilterName, "XMLRuleFilter");
                     xmlRuleFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1124,7 +1126,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     Long newId = selectNewId(newFilterName,
                             "JavaPropertiesFilter");
                     javaPropertiesFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1179,7 +1181,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     Long newId = selectNewId(newFilterName,
                             "MSOffice2010Filter");
                     msOffice2010FilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1234,7 +1236,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new id
                     Long newId = selectNewId(newFilterName, "MSOfficeDocFilter");
                     msOfficeDocFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1290,7 +1292,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     Long newId = selectNewId(newFilterName,
                             "MSOfficeExcelFilter");
                     msOfficeExcelFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1345,7 +1347,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new id
                     Long newId = selectNewId(newFilterName, "MSOfficePPTFilter");
                     msOfficePPTFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1381,7 +1383,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     fmFilter.setFilterName(newFilterName);
                     // store data to database
                     HibernateUtil.save(fmFilter);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                     addMessage("<b>" + newFilterName
@@ -1419,7 +1421,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     jspFilter.setFilterName(newFilterName);
                     // store data to database
                     HibernateUtil.save(jspFilter);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                     addMessage("<b>" + newFilterName
@@ -1457,7 +1459,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     openOfficeFilter.setFilterName(newFilterName);
                     // store data to database
                     HibernateUtil.save(openOfficeFilter);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                     addMessage("<b>" + newFilterName
@@ -1495,7 +1497,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     inddFilter.setFilterName(newFilterName);
                     // store data to database
                     HibernateUtil.save(inddFilter);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                     addMessage("<b>" + newFilterName
@@ -1558,7 +1560,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new id
                     Long newId = selectNewId(newFilterName, "POFilter");
                     poFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1619,7 +1621,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new id
                     Long newId = selectNewId(newFilterName, "PlainTextFilter");
                     plainTextFilterIdMap.put(id, newId);
-                    OperationLog.log(OperationLog.EVENT_ADD,
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                             OperationLog.COMPONET_FILTER_CONFIGURATION,
                             newFilterName);
                 }
@@ -1744,9 +1746,6 @@ public class FilterConfigurationImportHandler extends PageHandler
                     }
                     // store data to database
                     HibernateUtil.save(baseFilterMapping);
-                    // OperationLog.log(OperationLog.EVENT_ADD,
-                    // OperationLog.COMPONET_FILTER_CONFIGURATION,
-                    // baseFilterMapping.);
                 }
             }
             catch (Exception e)

@@ -160,8 +160,6 @@ public class FilterHelper
         filter.setInternalTextJson(internalTexts);
 
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         return filter.getId();
     }
 
@@ -185,8 +183,6 @@ public class FilterHelper
             filter.setSecondFilterTableName(secondFilterTableName);
             filter.setInternalTextJson(internalTexts);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         }
 
         return filter != null ? filter.getId() : -2;
@@ -207,8 +203,6 @@ public class FilterHelper
         filter.setContentPostFilterTableName(contentPostFilterTableName);
 
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         return filter.getId();
     }
 
@@ -230,8 +224,6 @@ public class FilterHelper
             filter.setContentPostFilterId(contentPostFilterId);
             filter.setContentPostFilterTableName(contentPostFilterTableName);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
             return filter.getId();
         }
         return -2;
@@ -248,8 +240,6 @@ public class FilterHelper
         filter.setJsFunctionText(jsFunctionText);
         filter.setEnableUnicodeEscape(enableUnicodeEscape);
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         return filter.getId();
     }
 
@@ -268,8 +258,6 @@ public class FilterHelper
             filter.setJsFunctionText(jsFunctionText);
             filter.setEnableUnicodeEscape(enableUnicodeEscape);
             HibernateUtil.update(filter);
-            OperationLog.log(OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         }
     }
 
@@ -311,17 +299,16 @@ public class FilterHelper
         return HibernateUtil.get(filter.getClass(), filterId);
     }
 
-    public static void deleteFilter(String filterTableName, long filterId)
+    public static void deleteFilter(String filterTableName, long filterId, String m_userId )
             throws Exception
     {
-
         // Filter filter = MapOfTableNameAndSpecialFilter
         // .getFilterInstance(filterTableName);
         List<Filter> list = getFilterByMapping(filterId, filterTableName);
         Filter filter = list.get(0);
         String sql = "delete from " + filterTableName + " where id=" + filterId;
         HibernateUtil.executeSql(sql);
-        OperationLog.log(OperationLog.EVENT_DELETE,
+        OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
                 OperationLog.COMPONET_FILTER_CONFIGURATION,
                 filter.getFilterName());
     }
@@ -338,7 +325,7 @@ public class FilterHelper
     }
 
     public static void deleteFilters(
-            ArrayList<SpecialFilterToDelete> specialFilterToDeletes)
+            ArrayList<SpecialFilterToDelete> specialFilterToDeletes, String m_userId)
             throws Exception
     {
         for (int i = 0; i < specialFilterToDeletes.size(); i++)
@@ -346,7 +333,7 @@ public class FilterHelper
             String filterTableName = specialFilterToDeletes.get(i)
                     .getFilterTableName();
             long filterId = specialFilterToDeletes.get(i).getSpecialFilterId();
-            deleteFilter(filterTableName, filterId);
+            deleteFilter(filterTableName, filterId, m_userId);
             BaseFilterManager
                     .deleteBaseFilterMapping(filterId, filterTableName);
         }
@@ -844,18 +831,12 @@ public class FilterHelper
     public static long saveXmlRuleFilter(XMLRuleFilter filter)
     {
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
         return filter.getId();
     }
 
     public static void updateFilter(Filter filter)
     {
         HibernateUtil.update(filter);
-        OperationLog.log(OperationLog.EVENT_EDIT,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
     }
 
     public static HtmlFilter getHtmlFilter(long filterId)
@@ -876,9 +857,6 @@ public class FilterHelper
     public static long saveFilter(Filter filter)
     {
         HibernateUtil.saveOrUpdate(filter);
-        OperationLog.log(OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
         return filter.getId();
     }
 

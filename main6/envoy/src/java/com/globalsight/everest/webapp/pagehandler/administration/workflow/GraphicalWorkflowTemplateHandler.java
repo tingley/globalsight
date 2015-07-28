@@ -63,7 +63,7 @@ import com.globalsight.util.GlobalSightLocale;
 public class GraphicalWorkflowTemplateHandler extends PageHandler implements
         WorkflowTemplateConstants
 {
-
+    String m_userId;
     // ////////////////////////////////////////////////////////////////////
     // Begin: Constructor
     // ////////////////////////////////////////////////////////////////////
@@ -410,6 +410,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
         Vector outData = null;
         SessionManager sessionMgr = (SessionManager) p_appletSession
                 .getAttribute(SESSION_MANAGER);
+        m_userId = (String) p_appletSession.getAttribute(WebAppConstants.USER_NAME);
         try
         {
             ObjectInputStream inputFromApplet = new ObjectInputStream(
@@ -562,7 +563,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
         p_workflowTemplate.setDescription(wfti.getDescription());
 
         WorkflowTemplateHandlerHelper.saveWorkflowTemplateInfo(wfti,
-                p_workflowTemplate);
+                p_workflowTemplate, m_userId);
 
         clearWorkflowSessionExceptTableInfo(p_session, KEY);
     }

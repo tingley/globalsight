@@ -172,5 +172,26 @@ public interface BaseTmTuv
     public String toDebugString();
     
     public String getSid();
+
     public void setSid(String sid);
+
+    public void setLastUsageDate(Timestamp lastUsageDate);
+
+    public Timestamp getLastUsageDate();
+
+    public void setJobId(long jobId);
+
+    public long getJobId();
+
+    public void setJobName(String jobName);
+
+    public String getJobName();
+
+    public void setPreviousHash(long previousHash);
+
+    public long getPreviousHash();
+
+    public void setNextHash(long nextHash);
+
+    public long getNextHash();
 }

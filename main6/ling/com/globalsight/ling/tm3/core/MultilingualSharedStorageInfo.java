@@ -92,8 +92,8 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
                     .append(getAttrValTableName()).append(" where tmId = ?")
                     .addValue(getTm().getId()));
             SQLUtil.exec(conn, new StatementBuilder().append("delete from ")
-            		.append(getTuTuvAttrTableName()).append(" where tm_id = ?")
-            		.addValue(getTm().getId()));
+                    .append(getTuvExtTableName()).append(" where tmId = ?")
+                    .addValue(getTm().getId()));
             SQLUtil.exec(conn, new StatementBuilder().append("delete from ")
                     .append(getTuvTableName()).append(" where tmId = ?")
                     .addValue(getTm().getId()));
@@ -104,7 +104,6 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             throw new SQLException(e);
         }
         finally
@@ -141,12 +140,12 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
         }
         tm.setTuTableName(SharedStorageTables.getTuTableName(sharedStorageId));
         tm.setTuvTableName(SharedStorageTables.getTuvTableName(sharedStorageId));
+		tm.setTuvExtTableName(SharedStorageTables
+				.getTuvExtTableName(sharedStorageId));
         tm.setFuzzyIndexTableName(SharedStorageTables.getFuzzyIndexTableName(
                 sharedStorageId, id));
         tm.setAttrValTableName(SharedStorageTables
                 .getAttrValTableName(sharedStorageId));
-		tm.setTuTuvAttrTableName(SharedStorageTables
-				.getTuTuvAttrTableName(sharedStorageId));
     }
 
     //
@@ -202,13 +201,4 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
     {
     }
 
-	@Override
-	protected void createTuTuvAttrTable(Connection conn) throws SQLException
-	{
-	}
-
-	@Override
-	protected void destroyTuTuvAttrTable(Connection conn) throws SQLException
-	{
-	}
 }

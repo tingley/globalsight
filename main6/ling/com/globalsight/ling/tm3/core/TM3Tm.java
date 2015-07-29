@@ -281,11 +281,6 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public TM3Handle<T> getAllData(Date start, Date end);
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public TM3Handle<T> getAllData(Date start, Date end, Set<String> jobAttributeSet);
-    
 	public TM3Handle<T> getAllDataByParamMap(Map<String, Object> paramMap);
 
     /**
@@ -303,11 +298,6 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end);
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end,  Set<String> jobAttributeSet);
-    
 	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
 			Map<String, Object> paramMap);
 
@@ -330,12 +320,6 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
                                             Date start, Date end);
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
-            Date start, Date end,  Set<String> jobAttributeSet);
 
 	public TM3Handle<T> getDataByAttributesAndParamMap(
 			Map<TM3Attribute, Object> attrs, Map<String, Object> paramMap);

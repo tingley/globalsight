@@ -46,9 +46,9 @@ abstract class StorageInfo<T extends TM3Data>
 
     static final String TU_TABLE_NAME = "TM3_TU";
     static final String TUV_TABLE_NAME = "TM3_TUV";
+    static final String TUV_EXT_TABLE_NAME = "TM3_TUV_EXT";
     static final String INDEX_TABLE_NAME = "TM3_INDEX";
     static final String ATTR_VAL_TABLE_NAME = "TM3_ATTR_VAL";
-    static final String TU_TUV_ATTR_TABLE_NAME = "TM3_TU_TUV_ATTR";
 
     protected StorageInfo(BaseTm<T> tm, TM3TmType type)
     {
@@ -99,6 +99,11 @@ abstract class StorageInfo<T extends TM3Data>
         return tm.getTuvTableName();
     }
 
+    String getTuvExtTableName()
+    {
+        return tm.getTuvExtTableName();
+    }
+
     String getFuzzyIndexTableName()
     {
         return tm.getFuzzyIndexTableName();
@@ -107,11 +112,6 @@ abstract class StorageInfo<T extends TM3Data>
     String getAttrValTableName()
     {
         return tm.getAttrValTableName();
-    }
-
-    String getTuTuvAttrTableName()
-    {
-    	return tm.getTuTuvAttrTableName();
     }
 
     public TM3TmType getType()
@@ -145,8 +145,6 @@ abstract class StorageInfo<T extends TM3Data>
             // Other tables
             createAttrTable(conn);
 
-            createTuTuvAttrTable(conn);
-
             conn.commit();
         }
         catch (Exception e)
@@ -178,7 +176,6 @@ abstract class StorageInfo<T extends TM3Data>
 
             destroyAttrTable(conn);
             destroyFuzzyIndex(conn);
-            destroyTuTuvAttrTable(conn);
             destroyTuStorage(conn);
             conn.commit();
         }
@@ -289,12 +286,6 @@ abstract class StorageInfo<T extends TM3Data>
             throws SQLException;
 
     protected abstract void destroyAttrTable(Connection conn)
-            throws SQLException;
-
-	protected abstract void createTuTuvAttrTable(Connection conn)
-			throws SQLException;
-
-	protected abstract void destroyTuTuvAttrTable(Connection conn)
             throws SQLException;
 
 	protected static String getTableName(long id, String baseName)

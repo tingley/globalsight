@@ -171,7 +171,9 @@
 
     try
     {
-        enabledInContextReview = sysConfig.getBooleanParameter("incontext.review.enable");
+        enabledInContextReview = "true".equals(sysConfig.getStringParameter(
+                SystemConfigParamNames.INCTXRV_ENABLE,
+                "" + jobImpl.getCompanyId()));
     }
     catch (Exception ex)
     {

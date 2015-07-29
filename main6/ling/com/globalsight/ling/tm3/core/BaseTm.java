@@ -16,6 +16,8 @@
  */
 package com.globalsight.ling.tm3.core;
 
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.SID;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.integration.GSTuvData;
+import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -51,9 +54,9 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     private long id;
     private String tuTableName;
     private String tuvTableName;
+    private String tuvExtTableName;
     private String indexTableName;
     private String attrValTableName;
-    private String tuTuvAttrTableName;
     private Set<TM3Attribute> attributes = new HashSet<TM3Attribute>();
 
     // Injected
@@ -118,6 +121,16 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         this.tuvTableName = tuvTableName;
     }
 
+    String getTuvExtTableName()
+    {
+        return tuvExtTableName;
+    }
+
+    void setTuvExtTableName(String tuvExtTableName)
+    {
+        this.tuvExtTableName = tuvExtTableName;
+    }
+
     String getFuzzyIndexTableName()
     {
         return indexTableName;
@@ -136,16 +149,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     void setAttrValTableName(String name)
     {
         this.attrValTableName = name;
-    }
-
-    String getTuTuvAttrTableName()
-    {
-    	return tuTuvAttrTableName;
-    }
-
-    void setTuTuvAttrTableName(String name)
-    {
-    	this.tuTuvAttrTableName = name;
     }
 
     TM3Manager getManager()
@@ -526,14 +529,26 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             tuData.srcTuv.getCreationUser(),
                             tuData.srcTuv.getCreationDate(),
                             tuData.srcTuv.getModifyUser(),
-                            tuData.srcTuv.getModifyDate());
+                            tuData.srcTuv.getModifyDate(),
+                            tuData.srcTuv.getLastUsageDate(),
+                            tuData.srcTuv.getJobId(),
+                            tuData.srcTuv.getJobName(),
+                            tuData.srcTuv.getPreviousHash(),
+                            tuData.srcTuv.getNextHash(),
+                            tuData.srcTuv.getSid());
                     for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                     {
                         tu.addTargetTuv(tuvData.locale, tuvData.content,
                                 tuvData.event, tuvData.getCreationUser(),
                                 tuvData.getCreationDate(),
                                 tuvData.getModifyUser(),
-                                tuvData.getModifyDate());
+                                tuvData.getModifyDate(),
+                                tuvData.getLastUsageDate(),
+                                tuvData.getJobId(),
+                                tuvData.getJobName(),
+                                tuvData.getPreviousHash(),
+                                tuvData.getNextHash(),
+                                tuvData.getSid());
                     }
                     tuStorage.saveTu(conn, tu);
                     getStorageInfo().getFuzzyIndex().index(conn,
@@ -564,7 +579,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                     tuData.srcTuv.getCreationUser(),
                                     tuData.srcTuv.getCreationDate(),
                                     tuData.srcTuv.getModifyUser(),
-                                    tuData.srcTuv.getModifyDate());
+                                    tuData.srcTuv.getModifyDate(),
+                                    tuData.srcTuv.getLastUsageDate(),
+                                    tuData.srcTuv.getJobId(),
+                                    tuData.srcTuv.getJobName(),
+                                    tuData.srcTuv.getPreviousHash(),
+                                    tuData.srcTuv.getNextHash(),
+                                    tuData.srcTuv.getSid());
                             Set<TM3Locale> overWritedLocales = new HashSet<TM3Locale>();
                             for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                             {
@@ -574,7 +595,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                         tuvData.getCreationUser(),
                                         tuvData.getCreationDate(),
                                         tuvData.getModifyUser(),
-                                        tuvData.getModifyDate());
+                                        tuvData.getModifyDate(),
+                                        tuvData.getLastUsageDate(),
+                                        tuvData.getJobId(),
+                                        tuvData.getJobName(),
+                                        tuvData.getPreviousHash(),
+                                        tuvData.getNextHash(),
+                                        tuvData.getSid());
                             }
                             for (TM3Tuv<T> oldTuv : tu.getTargetTuvs())
                             {
@@ -586,7 +613,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             				oldTuv.getCreationUser(),
                             				oldTuv.getCreationDate(),
                             				oldTuv.getModifyUser(),
-                            				oldTuv.getModifyDate());
+                            				oldTuv.getModifyDate(),
+                            				oldTuv.getLastUsageDate(),
+                            				oldTuv.getJobId(),
+                            				oldTuv.getJobName(),
+                            				oldTuv.getPreviousHash(),
+                            				oldTuv.getNextHash(),
+                            				oldTuv.getSid());
                             	}
                             }
                             tuStorage.saveTu(conn, newTu);
@@ -648,7 +681,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                         tuData.srcTuv.getCreationUser(),
                                         tuData.srcTuv.getCreationDate(),
                                         tuData.srcTuv.getModifyUser(),
-                                        tuData.srcTuv.getModifyDate());
+                                        tuData.srcTuv.getModifyDate(),
+                                        tuData.srcTuv.getLastUsageDate(),
+                                        tuData.srcTuv.getJobId(),
+                                        tuData.srcTuv.getJobName(),
+                                        tuData.srcTuv.getPreviousHash(),
+                                        tuData.srcTuv.getNextHash(),
+                                        tuData.srcTuv.getSid());
                                 for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                                 {
                                     newtu.addTargetTuv(tuvData.locale,
@@ -656,7 +695,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                             tuvData.getCreationUser(),
                                             tuvData.getCreationDate(),
                                             tuvData.getModifyUser(),
-                                            tuvData.getModifyDate());
+                                            tuvData.getModifyDate(),
+                                            tuvData.getLastUsageDate(),
+                                            tuvData.getJobId(),
+                                            tuvData.getJobName(),
+                                            tuvData.getPreviousHash(),
+                                            tuvData.getNextHash(),
+                                            tuvData.getSid());
                                 }
                                 tuStorage.saveTu(conn, newtu);
                                 getStorageInfo().getFuzzyIndex().index(conn,
@@ -675,7 +720,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             {
                                 newtu = tu;
                                 List<TM3Tuv<T>> addedTuv = new ArrayList<TM3Tuv<T>>();
-                                List<TM3Tuv<T>> deletedTuv = new ArrayList<TM3Tuv<T>>();
+//                                List<TM3Tuv<T>> deletedTuv = new ArrayList<TM3Tuv<T>>();
                                 for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                                 {
                                     TM3Tuv<T> newTuv = tu.addTargetTuv(
@@ -684,14 +729,20 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                             tuvData.getCreationUser(),
                                             tuvData.getCreationDate(),
                                             tuvData.getModifyUser(),
-                                            tuvData.getModifyDate());
+                                            tuvData.getModifyDate(),
+                                            tuvData.getLastUsageDate(),
+                                            tuvData.getJobId(),
+                                            tuvData.getJobName(),
+                                            tuvData.getPreviousHash(),
+                                            tuvData.getNextHash(),
+                                            tuvData.getSid());
                                     if (newTuv != null)
                                     {
                                         addedTuv.add(newTuv);
                                     }
                                 }
                                 tuStorage.addTuvs(conn, tu, addedTuv);
-                                tuStorage.deleteTuvs(conn, deletedTuv);
+//                                tuStorage.deleteTuvs(conn, deletedTuv);
                                 if (indexTarget)
                                 {
                                     for (TM3Tuv<T> tuv : addedTuv)
@@ -926,7 +977,16 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         {
             throw new IllegalArgumentException("Null event value");
         }
-
+        // to be safe...
+        for (TM3Tuv<T> tuv : tu.getAllTuv())
+        {
+        	TM3Attribute sidAttr = TM3Util.getAttr((TM3Tm<GSTuvData>) this, SID);
+        	Object sid = tu.getAttribute(sidAttr);
+        	if (sid != null)
+        	{
+            	tuv.setSid((String) sid);
+        	}
+        }
         TuStorage<T> storage = getStorageInfo().getTuStorage();
         Connection conn = null;
         try
@@ -939,7 +999,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             List<TM3Tuv<T>> added = new ArrayList<TM3Tuv<T>>();
             List<TM3Tuv<T>> modified = new ArrayList<TM3Tuv<T>>();
 
-            TM3Tu<T> copy = storage.getTu(tu.getId(), true);
+            TM3Tu<T> tuInDb = storage.getTu(tu.getId(), true);
             // For GBS-2442,
             // 1. If edit source, source TUV need to update
             // 2. If the SID or target changed, the modify date and modify user
@@ -947,7 +1007,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
 
             // Now check the attributes
             boolean sidNeedUpdate = false;
-            if (!copy.getAttributes().equals(tu.getAttributes()))
+            if (!tuInDb.getAttributes().equals(tu.getAttributes()))
             {
                 storage.updateAttributes(conn, tu,
                         getInlineAttributes(tu.getAttributes()),
@@ -955,15 +1015,16 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 sidNeedUpdate = true;
             }
             TM3Tuv<T> srcTuv = tu.getSourceTuv();
-            if (!copy.getSourceTuv().getContent().equals(srcTuv.getContent()))
+			if (!tuInDb.getSourceTuv().getContent().equals(srcTuv.getContent())
+					|| (srcTuv.getSid() != null && !srcTuv.getSid().equals(
+							tuInDb.getSourceTuv().getSid())))
             {
                 modified.add(srcTuv);
             }
             // Now check target TUVs
-            Map<Long, TM3Tuv<T>> oldMap = buildIdMap(copy.getTargetTuvs());
+            Map<Long, TM3Tuv<T>> oldMap = buildIdMap(tuInDb.getTargetTuvs());
             Map<Long, TM3Tuv<T>> newMap = buildIdMap(tu.getTargetTuvs());
             // First, check for deleted or added TUVs
-
             for (TM3Tuv<T> tuv : oldMap.values())
             {
                 if (!newMap.containsKey(tuv.getId()))
@@ -980,8 +1041,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                     added.add(tuv);
                 }
                 else if (!oldTuv.getSerializedForm().equals(
-                        tuv.getSerializedForm())
-                        || sidNeedUpdate)
+                        tuv.getSerializedForm()) || sidNeedUpdate)
                 {
                     modified.add(tuv);
                 }
@@ -1125,38 +1185,17 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new AllTusDataHandle<T>(this, start, end);
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public TM3Handle<T> getAllData(Date start, Date end,Set<String> jobAttributeSet)
-    {
-        checkDateRange(start, end);
-        return new AllTusDataHandle<T>(this, start, end, jobAttributeSet);
-    }
-
 	@Override
 	public TM3Handle<T> getAllDataByParamMap(Map<String, Object> paramMap)
 	{
 		return new AllTusDataHandle<T>(this, paramMap);
 	}
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end)
     {
         checkDateRange(start, end);
         return new LocaleDataHandle<T>(this, localeList, start, end);
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end, Set<String> jobAttributeSet)
-    {
-        checkDateRange(start, end);
-        return new LocaleDataHandle<T>(this, localeList, start, end, jobAttributeSet);
     }
 
 	@Override
@@ -1172,9 +1211,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new ByIdDataHandle<T>(this, tuIds);
     }
 
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
     @Override
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
             Date start, Date end)
@@ -1182,17 +1218,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         checkDateRange(start, end);
         return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
                 getCustomAttributes(attrs), start, end);
-    }
-
-	/**
-	 * @deprecated Not in use since 8.6.2
-	 * */
-    public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
-            Date start, Date end, Set<String> jobAttributeSet)
-    {
-        checkDateRange(start, end);
-        return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
-                getCustomAttributes(attrs), start, end, jobAttributeSet);
     }
 
 	@Override

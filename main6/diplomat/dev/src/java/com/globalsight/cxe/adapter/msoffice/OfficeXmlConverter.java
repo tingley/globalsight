@@ -21,13 +21,24 @@ import com.globalsight.util.zip.ZipIt;
 
 public class OfficeXmlConverter
 {
-    private static String convertDir = null;
-    private static String convertDir_incontextReview = null;
+    private String convertDir = null;
+    private String convertDir_incontextReview = null;
 
     private boolean isIncontextReview = false;
+    private long companyId = 1;
 
     public OfficeXmlConverter()
     {
+    }
+
+    public long getCompanyId()
+    {
+        return companyId;
+    }
+
+    public void setCompanyId(long companyId)
+    {
+        this.companyId = companyId;
     }
 
     public String convertOfficeToXml(String p_odFile, String p_dir) throws Exception
@@ -150,7 +161,7 @@ public class OfficeXmlConverter
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
             convertDir = sc.getStringParameter(SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
-                    CompanyWrapper.SUPER_COMPANY_ID);
+                    "" + companyId);
         }
 
         if (convertDir_incontextReview == null)
@@ -158,7 +169,7 @@ public class OfficeXmlConverter
             SystemConfiguration sc = SystemConfiguration.getInstance();
             convertDir_incontextReview = sc
                     .getStringParameter(SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
-                            CompanyWrapper.SUPER_COMPANY_ID);
+                            "" + companyId);
         }
 
         return isIncontextReview ? convertDir_incontextReview : convertDir;

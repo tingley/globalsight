@@ -17,6 +17,7 @@
 package com.globalsight.everest.webapp.pagehandler.tm.corpus;
 
 import java.rmi.RemoteException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -149,6 +150,8 @@ public class TMSearchAddEntryHandlerHelper
         srcTuv.setLocale(sourceLocale);
         srcTuv.setCreationUser(userId);
         srcTuv.setModifyUser(userId);
+        srcTuv.setSid(sid);
+        srcTuv.setLastUsageDate(new Timestamp(System.currentTimeMillis()));
 
         // New a target TUV
         SegmentTmTuv trgTuv = new SegmentTmTuv();
@@ -157,6 +160,7 @@ public class TMSearchAddEntryHandlerHelper
         trgTuv.setCreationUser(userId);
         trgTuv.setModifyUser(userId);
         trgTuv.setSid(sid);
+        trgTuv.setLastUsageDate(new Timestamp(System.currentTimeMillis()));
 
         // New a TU
         SegmentTmTu tu = new SegmentTmTu();

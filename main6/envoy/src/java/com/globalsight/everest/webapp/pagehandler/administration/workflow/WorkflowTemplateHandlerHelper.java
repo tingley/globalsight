@@ -57,6 +57,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.calendars.Calen
 import com.globalsight.everest.workflow.SystemAction;
 import com.globalsight.everest.workflow.WorkflowOwners;
 import com.globalsight.everest.workflow.WorkflowTemplate;
+import com.globalsight.log.OperationLog;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -699,7 +700,7 @@ public class WorkflowTemplateHandlerHelper
 
     // first save the iflow template and then the workflow template info...
     static void saveWorkflowTemplateInfo(WorkflowTemplateInfo p_wfti,
-            WorkflowTemplate p_wfTemplate) throws EnvoyServletException
+            WorkflowTemplate p_wfTemplate, String m_userId) throws EnvoyServletException
     {
         try
         {
@@ -722,6 +723,8 @@ public class WorkflowTemplateHandlerHelper
 
                 ServerProxy.getProjectHandler().createWorkflowTemplateInfo(
                         p_wfti);
+                OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                        OperationLog.COMPONET_WORKFLOW, p_wfti.getName());
             }
             else
             {
@@ -741,7 +744,8 @@ public class WorkflowTemplateHandlerHelper
                 p_wfti.setWorkflowTemplate(wft);
 
                 ServerProxy.getProjectHandler().modifyWorkflowTemplate(p_wfti);
-
+                OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                        OperationLog.COMPONET_WORKFLOW, p_wfti.getName());
                 // now try removing the old template (to cleanup template table)
                 // removeWorkflowTemplate(oldTemplateId);
             }

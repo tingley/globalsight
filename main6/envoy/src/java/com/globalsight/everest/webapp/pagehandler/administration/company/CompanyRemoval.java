@@ -407,12 +407,12 @@ public class CompanyRemoval
     private static final String SQL_JOB_QUERY_ATTRIBUTES_TEXT = "select CONDITION_ID from ATTRIBUTE_CLONE where TYPE='text' and ID in ";
     private static final String SQL_JOB_QUERY_ATTRIBUTES_LIST = "select CONDITION_ID from ATTRIBUTE_CLONE where TYPE='list' and ID in ";
     private static final String SQL_JOB_QUERY_ATTRIBUTES_FILE_ID = "select ID from ATTRIBUTE_CLONE where TYPE='file' and ID in ";
-    private static final String SQL_JOB_DELETE_ATTRIBUTES_DATE = "delete from DATE_CONDITION where ID in ";
-    private static final String SQL_JOB_DELETE_ATTRIBUTES_FILE = "delete from FILE_CONDITION where ID in ";
-    private static final String SQL_JOB_DELETE_ATTRIBUTES_FLOAT = "delete from FLOAT_CONDITION where ID in ";
-    private static final String SQL_JOB_DELETE_ATTRIBUTES_INT = "delete from INT_CONDITION where ID in ";
-    private static final String SQL_JOB_DELETE_ATTRIBUTES_TEXT = "delete from TEXT_CONDITION where ID in ";
-    private static final String SQL_JOB_DELETE_ATTRIBUTES_LIST = "delete from LIST_CONDITION where ID in ";
+    private static final String SQL_JOB_DELETE_ATTRIBUTES_DATE = "delete from ATTRIBUTE_CONDITION_DATE where ID in ";
+    private static final String SQL_JOB_DELETE_ATTRIBUTES_FILE = "delete from ATTRIBUTE_CONDITION_FILE where ID in ";
+    private static final String SQL_JOB_DELETE_ATTRIBUTES_FLOAT = "delete from ATTRIBUTE_CONDITION_FLOAT where ID in ";
+    private static final String SQL_JOB_DELETE_ATTRIBUTES_INT = "delete from ATTRIBUTE_CONDITION_INT where ID in ";
+    private static final String SQL_JOB_DELETE_ATTRIBUTES_TEXT = "delete from ATTRIBUTE_CONDITION_TEXT where ID in ";
+    private static final String SQL_JOB_DELETE_ATTRIBUTES_LIST = "delete from ATTRIBUTE_CONDITION_LIST where ID in ";
     private static final String SQL_JOB_DELETE_ATTRIBUTES_LIST_SELECT = "delete from SELECT_OPTION where LIST_CONDITION_ID in ";
     private static final String SQL_JOB_DELETE_ATTRIBUTE = "delete from ATTRIBUTE_CLONE where ID in ";
 
@@ -2358,59 +2358,59 @@ public class CompanyRemoval
     private void removeDateConditions(Connection conn,
             List<List<Object>> jobAttributeIds) throws SQLException
     {
-        logStart("DATE_CONDITION");
+        logStart("ATTRIBUTE_CONDITION_DATE");
         List<List<Object>> dateConditionIds = queryBatchList(conn,
                 SQL_JOB_QUERY_ATTRIBUTES_DATE, jobAttributeIds);
         if (dateConditionIds.size() > 0)
         {
             exec(conn, SQL_JOB_DELETE_ATTRIBUTES_DATE, dateConditionIds);
         }
-        logEnd("DATE_CONDITION");
+        logEnd("ATTRIBUTE_CONDITION_DATE");
     }
 
     private void removeFloatConditions(Connection conn,
             List<List<Object>> jobAttributeIds) throws SQLException
     {
-        logStart("FLOAT_CONDITION");
+        logStart("ATTRIBUTE_CONDITION_FLOAT");
         List<List<Object>> floatConditionIds = queryBatchList(conn,
                 SQL_JOB_QUERY_ATTRIBUTES_FLOAT, jobAttributeIds);
         if (floatConditionIds.size() > 0)
         {
             exec(conn, SQL_JOB_DELETE_ATTRIBUTES_FLOAT, floatConditionIds);
         }
-        logEnd("FLOAT_CONDITION");
+        logEnd("ATTRIBUTE_CONDITION_FLOAT");
     }
 
     private void removeIntConditions(Connection conn,
             List<List<Object>> jobAttributeIds) throws SQLException
     {
-        logStart("INT_CONDITION");
+        logStart("ATTRIBUTE_CONDITION_INT");
         List<List<Object>> intConditionIds = queryBatchList(conn,
                 SQL_JOB_QUERY_ATTRIBUTES_INT, jobAttributeIds);
         if (intConditionIds.size() > 0)
         {
             exec(conn, SQL_JOB_DELETE_ATTRIBUTES_INT, intConditionIds);
         }
-        logEnd("INT_CONDITION");
+        logEnd("ATTRIBUTE_CONDITION_INT");
     }
 
     private void removeTextConditions(Connection conn,
             List<List<Object>> jobAttributeIds) throws SQLException
     {
-        logStart("TEXT_CONDITION");
+        logStart("ATTRIBUTE_CONDITION_TEXT");
         List<List<Object>> textConditionIds = queryBatchList(conn,
                 SQL_JOB_QUERY_ATTRIBUTES_TEXT, jobAttributeIds);
         if (textConditionIds.size() > 0)
         {
             exec(conn, SQL_JOB_DELETE_ATTRIBUTES_TEXT, textConditionIds);
         }
-        logEnd("TEXT_CONDITION");
+        logEnd("ATTRIBUTE_CONDITION_TEXT");
     }
 
     private void removeListConditions(Connection conn,
             List<List<Object>> jobAttributeIds) throws SQLException
     {
-        logStart("LIST_CONDITION");
+        logStart("ATTRIBUTE_CONDITION_LIST");
         List<List<Object>> listConditionIds = queryBatchList(conn,
                 SQL_JOB_QUERY_ATTRIBUTES_LIST, jobAttributeIds);
         if (listConditionIds.size() > 0)
@@ -2418,14 +2418,14 @@ public class CompanyRemoval
             exec(conn, SQL_JOB_DELETE_ATTRIBUTES_LIST_SELECT, listConditionIds);
             exec(conn, SQL_JOB_DELETE_ATTRIBUTES_LIST, listConditionIds);
         }
-        logEnd("LIST_CONDITION");
+        logEnd("ATTRIBUTE_CONDITION_LIST");
     }
 
     @SuppressWarnings("unchecked")
     private void removeFileConditions(Connection conn,
             List<List<Object>> jobAttributeIds) throws SQLException
     {
-        logStart("FILE_CONDITION");
+        logStart("ATTRIBUTE_CONDITION_FILE");
         List<List<Object>> fileConditionIds = queryBatchList(conn,
                 SQL_JOB_QUERY_ATTRIBUTES_FILE, jobAttributeIds);
         if (fileConditionIds.size() > 0)
@@ -2456,7 +2456,7 @@ public class CompanyRemoval
                 }
             }
         }
-        logEnd("FILE_CONDITION");
+        logEnd("ATTRIBUTE_CONDITION_FILE");
     }
 
     private void removeJobAttributes(Connection conn,

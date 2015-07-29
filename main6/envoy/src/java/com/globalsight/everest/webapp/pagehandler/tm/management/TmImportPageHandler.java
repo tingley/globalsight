@@ -45,6 +45,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.importer.IImportManager;
 import com.globalsight.ling.common.URLEncoder;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.StringUtil;
@@ -461,6 +462,7 @@ public class TmImportPageHandler extends PageHandler implements
 
                     importer.attachListener(status);
                     importer.doImport();
+                    OperationLog.log(userId, OperationLog.EVENT_TM_IMPORT, OperationLog.COMPONET_TM, (String)sessionMgr.getAttribute(TM_TM_NAME));
                 }
                 catch (Throwable ex)
                 {

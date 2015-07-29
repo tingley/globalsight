@@ -123,8 +123,8 @@ public class TMSearchEditEntryHandlerHelper
         ProjectHandler ph = ServerProxy.getProjectHandler();
         Tm tm = ph.getProjectTMById(tmId, false);
         SegmentTmTu tu = getTu(tm, tuId);
-        SegmentTmTuv srcTuv = getTrgTuv(tu, sourceLocale, sourceTuvId);
-        SegmentTmTuv trgTuv = getTrgTuv(tu, targetLocale, targetTuvId);
+        SegmentTmTuv srcTuv = getTuvById(tu, sourceLocale, sourceTuvId);
+        SegmentTmTuv trgTuv = getTuvById(tu, targetLocale, targetTuvId);
 
         // Use SegmentManager to check error
         String srcSegment = GxmlUtil.stripRootTag(srcTuv.getSegment());
@@ -204,8 +204,9 @@ public class TMSearchEditEntryHandlerHelper
 
         if (tm.getTm3Id() != null)
         {
-            // For TM3, TUV has no SID, the SID would be saved to TU
             tu.setSID(newSid);
+            srcTuv.setSid(newSid);
+            trgTuv.setSid(newSid);
         }
         else
         {
@@ -243,8 +244,8 @@ public class TMSearchEditEntryHandlerHelper
         ProjectHandler ph = ServerProxy.getProjectHandler();
         Tm tm = ph.getProjectTMById(tmId, false);
         SegmentTmTu tu = getTu(tm, tuId);
-        SegmentTmTuv srcTuv = getTrgTuv(tu, sourceLocale, sourceTuvId);
-        SegmentTmTuv trgTuv = getTrgTuv(tu, targetLocale, targetTuvId);
+        SegmentTmTuv srcTuv = getTuvById(tu, sourceLocale, sourceTuvId);
+        SegmentTmTuv trgTuv = getTuvById(tu, targetLocale, targetTuvId);
 
         request.setAttribute("sourceLocale", srcTuv.getLocale().toString());
         request.setAttribute("targetLocale", targetLocaleStr);
@@ -409,7 +410,7 @@ public class TMSearchEditEntryHandlerHelper
      * @return
      * @throws Exception
      */
-    private static SegmentTmTuv getTrgTuv(SegmentTmTu tu,
+    private static SegmentTmTuv getTuvById(SegmentTmTu tu,
             GlobalSightLocale targetLocale, long tuvId) throws Exception
     {
         SegmentTmTuv trgTuv = null;

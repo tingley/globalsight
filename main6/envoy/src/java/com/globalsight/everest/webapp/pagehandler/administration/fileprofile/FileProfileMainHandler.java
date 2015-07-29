@@ -83,6 +83,7 @@ public class FileProfileMainHandler extends PageHandler
     static private final Logger logger = Logger
             .getLogger(FileProfileMainHandler.class);
     private static int NUM_PER_PAGE = 10;
+    String m_userId;
 
     /**
      * Invokes this PageHandler
@@ -102,6 +103,7 @@ public class FileProfileMainHandler extends PageHandler
             EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
+        m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
         String action = p_request.getParameter("action");
@@ -209,6 +211,8 @@ public class FileProfileMainHandler extends PageHandler
 
             ServerProxy.getFileProfilePersistenceManager()
                     .createFileProfile(fp);
+            OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                    OperationLog.COMPONET_FILE_PROFILE, fp.getName());
 
             updateXslPath(p_request, fp);
         }
@@ -310,9 +314,8 @@ public class FileProfileMainHandler extends PageHandler
             }
 
             HibernateUtil.commit(tx);
-            OperationLog.log(OperationLog.EVENT_EDIT,
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                     OperationLog.COMPONET_FILE_PROFILE, newName);
-            
         }
         catch (Exception e)
         {
@@ -417,6 +420,8 @@ public class FileProfileMainHandler extends PageHandler
 
                 ServerProxy.getFileProfilePersistenceManager()
                         .deleteFileProfile(fp);
+                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                        OperationLog.COMPONET_FILE_PROFILE, fp.getName());
 
                 // Don't really remove
                 // removeRelevantXslFile(id);

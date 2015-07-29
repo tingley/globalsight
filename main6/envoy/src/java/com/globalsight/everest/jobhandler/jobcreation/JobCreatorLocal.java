@@ -53,7 +53,6 @@ import com.globalsight.everest.comment.CommentManagerWLRemote;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.comment.IssueHistoryImpl;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.corpus.CorpusDoc;
 import com.globalsight.everest.corpus.CorpusDocGroup;
 import com.globalsight.everest.corpus.CorpusManagerWLRemote;
@@ -257,7 +256,9 @@ public class JobCreatorLocal implements JobCreator
                 try
                 {
                     SystemConfiguration sc = SystemConfiguration.getInstance();
-                    enabled = sc.getBooleanParameter("incontext.review.enable");
+                    enabled = "true".equals(sc.getStringParameter(
+                            SystemConfigParamNames.INCTXRV_ENABLE,
+                            "" + job.getCompanyId()));
                 }
                 catch (Exception ex)
                 {

@@ -162,11 +162,17 @@ public class TM3Util
             stuv.setModifyDate(getModifyDate(tuv));
             stuv.setModifyUser(tuv.getModifyUser());
             stuv.setUpdatedProject((String) tm3tu.getAttribute(projectAttr));
+            stuv.setLastUsageDate(getLastUsageDate(tuv));
+            stuv.setJobId(tuv.getJobId());
+            stuv.setJobName(tuv.getJobName());
+            stuv.setSid(tuv.getSid());
+            // to be safe...
+            if (tuv.getSid() != null && tu.getSID() == null) {
+            	tu.setSID(tuv.getSid());
+            }
+            stuv.setPreviousHash(tuv.getPreviousHash());
+            stuv.setNextHash(tuv.getNextHash());
 
-            // I'm leaving some fields blank, like
-            // - setExactMatchKey
-            // - setOrgSegment
-            // TODO: figure out which of these are important
             tu.addTuv(stuv);
         }
         return tu;
@@ -192,5 +198,16 @@ public class TM3Util
         }
 
         return null;
+    }
+
+    private static Timestamp getLastUsageDate(TM3Tuv<GSTuvData> tuv)
+    {
+    	Date lastUsageDate = tuv.getLastUsageDate();
+    	if (lastUsageDate != null)
+    	{
+    		return new Timestamp(lastUsageDate.getTime());
+    	}
+
+    	return null;
     }
 }

@@ -91,8 +91,5 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (80, 'adobe.cs
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (81, 'winpe.installKey', '%%winpe_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (82, 'winpe.dir', '%%winpe_dir%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (83, 'adobe.cs6.dir', '%%adobe_cs6_dir%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (84, 'incontext.review.enable', '%%incontext_review_key%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (85, 'incontext.review.dir', '%%incontext_review_dir%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (86, 'incontext.review.dir.office', '%%incontext_review_dir_office%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (87, 'adobe.cc2014.dir', '%%adobe_cc2014_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (84, 'adobe.cc2014.dir', '%%adobe_cc2014_dir%%', '1');
 commit;

@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -50,6 +51,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.log.OperationLog;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -64,6 +66,7 @@ public class LocProfileMainHandler extends PageHandler implements
 
     private static int numPerPage = 20;
     long wfStatePostProfileId = -1;
+    String m_userId;
     // Category for log4j logging.
     private static final Logger CATEGORY = Logger
             .getLogger(LocProfileMainHandler.class.getName());
@@ -87,6 +90,7 @@ public class LocProfileMainHandler extends PageHandler implements
             EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
+        m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         String action = p_request.getParameter("action");
         if ("save".equals(action))
         {
@@ -166,7 +170,7 @@ public class LocProfileMainHandler extends PageHandler implements
         String name = (String) p_request.getParameter("nameTF").trim();
         try
         {
-            ArrayList alist = new ArrayList();
+            ArrayList<LocalePair> alist = new ArrayList<LocalePair>();
             StringTokenizer st = new StringTokenizer(list, ",");
             while (st.hasMoreTokens())
             {
@@ -177,12 +181,30 @@ public class LocProfileMainHandler extends PageHandler implements
 
             LocProfileHandlerHelper.duplicateL10nProfile(Long.parseLong(lpId),
                     alist, name, getBundle(session));
+            for (LocalePair localePair : alist)
+            {
+                String importWorkflowTemplateName = generateName(name,localePair);
+                OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                        OperationLog.COMPONET_WORKFLOW,
+                        importWorkflowTemplateName);
+            }
         }
         catch (Exception e)
         {
             CATEGORY.error("The exception is " + e);
             throw new EnvoyServletException(e);
         }
+    }
+
+    private String generateName(String name, LocalePair localePair)
+    {
+        StringBuffer sb = new StringBuffer();
+        sb.append(name);
+        sb.append("_");
+        sb.append(localePair.getSource().toString());
+        sb.append("_");
+        sb.append(localePair.getTarget().toString());
+        return sb.toString();
     }
 
     private void doRemove(HttpServletRequest p_request, HttpSession p_session)
@@ -200,6 +222,9 @@ public class LocProfileMainHandler extends PageHandler implements
             if (deps == null)
             {
                 LocProfileHandlerHelper.removeL10nProfile(locprofile);
+                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                        OperationLog.COMPONET_L10N_PROFILE,
+                        locprofile.getName());
             }
             else
             {
@@ -388,11 +413,15 @@ public class LocProfileMainHandler extends PageHandler implements
                 .getParameter("EditLocProfileId"));
         LocProfileHandlerHelper.modifyL10nProfile(locprofile,
                 getWorkflowInfos(p_request), originalLocId);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_L10N_PROFILE, locprofile.getName());
     }
 
     private void createL10nProfile(BasicL10nProfile locprofile)
     {
         LocProfileHandlerHelper.addL10nProfile(locprofile);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_L10N_PROFILE, locprofile.getName());
     }
 
     /**

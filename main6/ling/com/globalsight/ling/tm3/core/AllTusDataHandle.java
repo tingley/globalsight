@@ -5,14 +5,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A handle to the entire TM.
  */
-class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
-	
-	private Set<String> m_jobAttributeSet;
+class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T>
+{
 	private Map<String, Object> m_paramMap;
 
     AllTusDataHandle(BaseTm<T> tm) {
@@ -23,11 +21,6 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
         super(tm, start, end);
     }
     
-    AllTusDataHandle(BaseTm<T> tm, Date start, Date end,Set<String> jobAttributeSet) {
-        super(tm, start, end);
-        m_jobAttributeSet = jobAttributeSet;
-    }
-
 	AllTusDataHandle(BaseTm<T> tm, Map<String, Object> paramMap)
 	{
 		super(tm);

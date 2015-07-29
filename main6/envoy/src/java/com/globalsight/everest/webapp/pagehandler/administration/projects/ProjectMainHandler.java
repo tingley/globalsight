@@ -61,6 +61,7 @@ public class ProjectMainHandler extends PageHandler
     public static final String PROJECT_KEY = "project";
     public static final String PROJECT_LIST = "projects";
     private static int NUM_PER_PAGE = 10;
+    String m_userId;
 
     private static final Logger s_logger = Logger
             .getLogger(ProjectMainHandler.class);
@@ -85,6 +86,8 @@ public class ProjectMainHandler extends PageHandler
         HttpSession session = request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
+        m_userId = (String) session
+                .getAttribute(WebAppConstants.USER_NAME);
 
         // Clear session manager for project import/export schedules.
         clearSessionManagerForProjectSchedules(request);
@@ -163,6 +166,8 @@ public class ProjectMainHandler extends PageHandler
         ProjectHandlerHelper.extractUsers(project, request, sessionMgr);
 
         ProjectHandlerHelper.addProject(project);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_PROJECT, project.getName());
     }
 
     /**
@@ -239,6 +244,8 @@ public class ProjectMainHandler extends PageHandler
         
         String modifierId = (String) session.getAttribute(USER_NAME);
         ProjectHandlerHelper.modifyProject(project, modifierId);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_PROJECT, project.getName());
         String newPM = project.getProjectManagerId();
 
         // for gbs-1302, activity dashboard
@@ -412,8 +419,7 @@ public class ProjectMainHandler extends PageHandler
             if (project != null)
             {
                 project.deactivate();
-                OperationLog.log(OperationLog.EVENT_DELETE, OperationLog.COMPONET_PROJECT,
-                        project.getName());
+                String originName = project.getName();
                 // change the in-active project name to an unique value
                 long time = (new Date()).getTime();
                 String changedProjectName = project.getName() + "_" + time;
@@ -423,7 +429,8 @@ public class ProjectMainHandler extends PageHandler
                 }
                 project.setName(changedProjectName);
                 HibernateUtil.saveOrUpdate(project);
-
+                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                        OperationLog.COMPONET_PROJECT, originName);
                 // not delete users info from 'project_user' table
             }
         }

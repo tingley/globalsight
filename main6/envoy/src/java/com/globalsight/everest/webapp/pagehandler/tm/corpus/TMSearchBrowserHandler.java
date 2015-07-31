@@ -12,6 +12,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.util.StringUtil;
 
 public class TMSearchBrowserHandler extends PageActionHandler
 {
@@ -88,9 +89,19 @@ public class TMSearchBrowserHandler extends PageActionHandler
         {
             // Full text search
             tms = tms.substring(tms.indexOf('"') + 1, tms.lastIndexOf('"'));
-            searchResult = TMSearchBroswerHandlerHelper.searchFullText(request,
-                    searchText, sourceLocale, targetLocale, tms, uiLocale,
-                    maxEntriesPerPageStr, searchIn, replaceText);
+            String sids = (String) request.getParameter("sids");
+			if (StringUtil.isNotEmpty(sids) && StringUtil.isEmpty(searchText))
+			{
+				searchResult = TMSearchBroswerHandlerHelper.searchFullTextBySid(request,
+						searchText, sourceLocale, targetLocale, tms, uiLocale,
+						maxEntriesPerPageStr, searchIn, replaceText);
+			}
+			else
+			{
+				searchResult = TMSearchBroswerHandlerHelper.searchFullText(request,
+						searchText, sourceLocale, targetLocale, tms, uiLocale,
+						maxEntriesPerPageStr, searchIn, replaceText);
+			}
         }
 
         response.setCharacterEncoding("UTF-8");

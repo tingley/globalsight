@@ -51,13 +51,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
 {
     private static Logger LOGGER = Logger.getLogger(BaseTm.class);
 
-    private long id;
-    private String tuTableName;
-    private String tuvTableName;
-    private String tuvExtTableName;
-    private String indexTableName;
-    private String attrValTableName;
-    private Set<TM3Attribute> attributes = new HashSet<TM3Attribute>();
+    public long id;
+    public String tuTableName;
+    public String tuvTableName;
+    public String tuvExtTableName;
+    public String indexTableName;
+    public String attrValTableName;
+    public Set<TM3Attribute> attributes = new HashSet<TM3Attribute>();
 
     // Injected
     private TM3Manager manager;
@@ -101,52 +101,52 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return storage;
     }
 
-    String getTuTableName()
+    public String getTuTableName()
     {
         return tuTableName;
     }
 
-    void setTuTableName(String tuTableName)
+    public void setTuTableName(String tuTableName)
     {
         this.tuTableName = tuTableName;
     }
 
-    String getTuvTableName()
+    public String getTuvTableName()
     {
         return tuvTableName;
     }
 
-    void setTuvTableName(String tuvTableName)
+    public void setTuvTableName(String tuvTableName)
     {
         this.tuvTableName = tuvTableName;
     }
 
-    String getTuvExtTableName()
+    public String getTuvExtTableName()
     {
         return tuvExtTableName;
     }
 
-    void setTuvExtTableName(String tuvExtTableName)
+    public void setTuvExtTableName(String tuvExtTableName)
     {
         this.tuvExtTableName = tuvExtTableName;
     }
 
-    String getFuzzyIndexTableName()
+    public String getFuzzyIndexTableName()
     {
         return indexTableName;
     }
 
-    void setFuzzyIndexTableName(String indexTableName)
+    public void setFuzzyIndexTableName(String indexTableName)
     {
         this.indexTableName = indexTableName;
     }
 
-    String getAttrValTableName()
+    public String getAttrValTableName()
     {
         return attrValTableName;
     }
 
-    void setAttrValTableName(String name)
+    public void setAttrValTableName(String name)
     {
         this.attrValTableName = name;
     }

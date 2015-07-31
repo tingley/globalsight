@@ -1055,6 +1055,22 @@ $(document).ready(function(){
    				}
    		     }
     		 sids = $("#sids").val();
+    		 if(searchText=="" && sids=="" )
+	    	 {
+	    		 alert("${msg_tm_search_search_text_and_sid}");
+	    		 return;
+	         }
+	    	 else if(searchText=="*")
+	    	 {
+	    		 alert("${msg_tm_search_text_invalid}");
+	    		 return;
+	    	 }
+	    	 else if(searchText=="\"*\"")
+	    	 {
+	    		 alert("${msg_tm_search_text_invalid2}");
+	    		 return;
+	    	 }
+    		 
     		 isRegex = document.getElementById("isRegex").checked;
     		 createUser = $("#createUser").val();
     		 if(hasSomeSpecialChars(createUser))
@@ -1131,20 +1147,23 @@ $(document).ready(function(){
        	 }
 
     	 var searchParams;
-    	 if(searchText=="")
+    	 if(!advancedSearch)
     	 {
-    		 alert("${msg_tm_search_search_text}");
-    		 return;
-         }
-    	 else if(searchText=="*")
-    	 {
-    		 alert("${msg_tm_search_text_invalid}");
-    		 return;
-    	 }
-    	 else if(searchText=="\"*\"")
-    	 {
-    		 alert("${msg_tm_search_text_invalid2}");
-    		 return;
+	    	 if(searchText=="")
+	    	 {
+	    		 alert("${msg_tm_search_search_text}");
+	    		 return;
+	         }
+	    	 else if(searchText=="*")
+	    	 {
+	    		 alert("${msg_tm_search_text_invalid}");
+	    		 return;
+	    	 }
+	    	 else if(searchText=="\"*\"")
+	    	 {
+	    		 alert("${msg_tm_search_text_invalid2}");
+	    		 return;
+	    	 }
     	 }
     		 
     	 if(sourceLocale==-1)

@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,8 +88,10 @@ import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.segmenttm.TMidTUid;
+import com.globalsight.ling.tm3.core.BaseTm;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
+import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PtagStringFormatter;
@@ -202,6 +207,7 @@ public class TMSearchBroswerHandlerHelper
         setLableToJsp(request, bundle, "lb_terminology_search_entries");
         setLableToJsp(request, bundle, "msg_tm_search_text_invalid");
         setLableToJsp(request, bundle, "msg_tm_search_text_invalid2");
+        setLableToJsp(request, bundle, "msg_tm_search_search_text_and_sid");
         setLableToJsp(request, bundle, "msg_tm_search_with_replace_text");
         setLableToJsp(request, bundle, "msg_tm_search_no_entry_selected");
         setLableToJsp(request, bundle, "msg_tm_search_confirm_deleted");
@@ -579,60 +585,15 @@ public class TMSearchBroswerHandlerHelper
         boolean advancedSearch = "true".equals((String) request
                 .getParameter("advancedSearch"));
 
-        HashMap filterMap = new HashMap();
-		String createStartDateOption = null;
-		Date createStartDate = null;
-		String createEndDateOption = null;
-		Date createEndDate = null;
-		String modifyStartDateOption = null;
-		Date modifyStartDate = null;
-		String modifyEndDateOption = null;
-		Date modifyEndDate = null;
-		String tuIds = null;
-		String sids = null;
-		String isRegex = null;
-		String createUser = null;
-		String modifyUser = null;
-		String attributeName = null;
+        HashMap filterMap = getFilterMap(request,advancedSearch);
+        String attributeName = null;
 		String attributeValue = null;
-		
 		if (advancedSearch)
 		{
-			createStartDateOption = (String) request.getParameter("createStartDateOption");
-			createStartDate = parseDate((String) request.getParameter("createStartDate"));
-			createEndDateOption = (String) request.getParameter("createEndDateOption");
-			createEndDate = parseDate((String) request.getParameter("createEndDate"));
-			
-			modifyStartDateOption = (String) request.getParameter("modifyStartDateOption");
-			modifyStartDate = parseDate((String) request.getParameter("modifyStartDate"));
-			modifyEndDateOption = (String) request.getParameter("modifyEndDateOption");
-			modifyEndDate = parseDate((String) request.getParameter("modifyEndDate"));
-			
-			tuIds = (String) request.getParameter("tuIds");
-			sids = (String) request.getParameter("sids");
-			isRegex = (String) request.getParameter("isRegex");
-			createUser = (String) request.getParameter("createUser");
-			modifyUser = (String) request.getParameter("modifyUser");
 			attributeName = (String) request.getParameter("attributeName");
 			attributeValue = (String) request.getParameter("attributeValue");
-			
-			filterMap.put("createStartDateOption", createStartDateOption);
-			filterMap.put("createStartDate", createStartDate);
-			filterMap.put("createEndDateOption", createEndDateOption);
-			filterMap.put("createEndDate", createEndDate);
-			filterMap.put("modifyStartDateOption", modifyStartDateOption);
-			filterMap.put("modifyStartDate", modifyStartDate);
-			filterMap.put("modifyEndDateOption", modifyEndDateOption);
-			filterMap.put("modifyEndDate", modifyEndDate);
-			filterMap.put("tuIds", tuIds);
-			filterMap.put("sids", sids);
-			filterMap.put("isRegex", isRegex);
-			filterMap.put("createUser", createUser);
-			filterMap.put("modifyUser", modifyUser);
 		}
-		
         LocaleManager lm = ServerProxy.getLocaleManager();
-
         GlobalSightLocale sourceGSL = lm.getLocaleById(Long
                 .parseLong(sourceLocaleId));
         GlobalSightLocale targetGSL = lm.getLocaleById(Long
@@ -827,7 +788,7 @@ public class TMSearchBroswerHandlerHelper
                 maxEntriesPerPageStr);
         return JsonUtil.toJson(temp);
     }
-
+	
     /**
      * Full text search
      * 
@@ -842,55 +803,13 @@ public class TMSearchBroswerHandlerHelper
         boolean searchInSource = "source".equals(searchIn);
         boolean advancedSearch = "true".equals((String) request
                 .getParameter("advancedSearch"));
-        HashMap filterMap = new HashMap();
-		String createStartDateOption = null;
-		Date createStartDate = null;
-		String createEndDateOption = null;
-		Date createEndDate = null;
-		String modifyStartDateOption = null;
-		Date modifyStartDate = null;
-		String modifyEndDateOption = null;
-		Date modifyEndDate = null;
-		String tuIds = null;
-		String sids = null;
-		String isRegex = null;
-		String createUser = null;
-		String modifyUser = null;
-		String attributeName = null;
+        HashMap filterMap = getFilterMap(request,advancedSearch);
+        String attributeName = null;
 		String attributeValue = null;
 		if (advancedSearch)
 		{
-			createStartDateOption = (String) request.getParameter("createStartDateOption");
-			createStartDate = parseDate((String) request.getParameter("createStartDate"));
-			createEndDateOption = (String) request.getParameter("createEndDateOption");
-			createEndDate = parseDate((String) request.getParameter("createEndDate"));
-			
-			modifyStartDateOption = (String) request.getParameter("modifyStartDateOption");
-			modifyStartDate = parseDate((String) request.getParameter("modifyStartDate"));
-			modifyEndDateOption = (String) request.getParameter("modifyEndDateOption");
-			modifyEndDate = parseDate((String) request.getParameter("modifyEndDate"));
-			
-			tuIds = (String) request.getParameter("tuIds");
-			sids = (String) request.getParameter("sids");
-			isRegex = (String) request.getParameter("isRegex");
-			createUser = (String) request.getParameter("createUser");
-			modifyUser = (String) request.getParameter("modifyUser");
 			attributeName = (String) request.getParameter("attributeName");
 			attributeValue = (String) request.getParameter("attributeValue");
-			
-			filterMap.put("createStartDateOption", createStartDateOption);
-			filterMap.put("createStartDate", createStartDate);
-			filterMap.put("createEndDateOption", createEndDateOption);
-			filterMap.put("createEndDate", createEndDate);
-			filterMap.put("modifyStartDateOption", modifyStartDateOption);
-			filterMap.put("modifyStartDate", modifyStartDate);
-			filterMap.put("modifyEndDateOption", modifyEndDateOption);
-			filterMap.put("modifyEndDate", modifyEndDate);
-			filterMap.put("tuIds", tuIds);
-			filterMap.put("sids", sids);
-			filterMap.put("isRegex", isRegex);
-			filterMap.put("createUser", createUser);
-			filterMap.put("modifyUser", modifyUser);
 		}
 		
         LocaleManager lm = ServerProxy.getLocaleManager();
@@ -1030,6 +949,510 @@ public class TMSearchBroswerHandlerHelper
                 maxEntriesPerPageStr);
         return JsonUtil.toJson(temp);
     }
+    
+    public static String searchFullTextBySid(HttpServletRequest request,
+            String searchText, String sourceLocaleId, String targetLocaleId,
+            String tms, Locale uiLocale, String maxEntriesPerPageStr,
+            String searchIn, String replaceText) throws Exception
+    {
+		boolean searchInSource = "source".equals(searchIn);
+		boolean advancedSearch = "true".equals((String) request
+				.getParameter("advancedSearch"));
+		HashMap filterMap = getFilterMap(request, advancedSearch);
+		LocaleManager lm = ServerProxy.getLocaleManager();
+		GlobalSightLocale sourceGSL = lm.getLocaleById(Long
+				.parseLong(sourceLocaleId));
+		GlobalSightLocale targetGSL = lm.getLocaleById(Long
+				.parseLong(targetLocaleId));
+		if (searchInSource)
+		{
+			filterMap.put("localeIds", sourceGSL.getId());
+		}
+		else
+		{
+			filterMap.put("localeIds", targetGSL.getId());
+		}
+
+		String attributeName = null;
+		String attributeValue = null;
+		if (advancedSearch)
+		{
+			attributeName = (String) request.getParameter("attributeName");
+			attributeValue = (String) request.getParameter("attributeValue");
+		}
+		
+		// get all selected TMS
+		Connection conn = DbUtil.getConnection();
+         String[] tmsArray = tms.split(",");
+         List<TMidTUid> queryResult = new ArrayList<TMidTUid>();
+		for (String tm : tmsArray)
+		{
+			StatementBuilder sb = new StatementBuilder();
+			long tmId = Long.parseLong(tm);
+			ProjectTM projectTM = ServerProxy.getProjectHandler()
+					.getProjectTMById(tmId, false);
+			// tm3
+			if (projectTM.getTm3Id() != null)
+			{
+				BaseTm baseTM = TM3Util.getBaseTm(projectTM.getTm3Id());
+				getTm3SqlByParamMap(sb, filterMap, baseTM, projectTM.getTm3Id());
+				List<TMidTUid> tuId = getIdList(conn, sb, projectTM.getTm3Id());
+				queryResult.addAll(tuId);
+			}
+			// tm2
+			else
+			{
+				getTm2SqlByParamMap(sb, filterMap, tmId);
+				List<TMidTUid> tuId = getIdList(conn, sb, tmId);
+				queryResult.addAll(tuId);
+			}
+		}
+         
+		// Get all TUS by queryResult, then get all needed properties
+        List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager()
+                .getSegmentsById(queryResult);
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        String findText = EditUtil.encodeHtmlEntities(searchText);
+        replaceText = EditUtil.encodeHtmlEntities(replaceText);
+        Set<Long> attributeFilterTuIds = new HashSet<Long>();
+        boolean attributeFilter = false;
+        if(advancedSearch && StringUtil.isNotEmpty(attributeName) && StringUtil.isNotEmpty(attributeValue))
+        {
+        	attributeFilter = true;
+        	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
+        }
+        for (int i = 0, max = tus.size(); i < max; i++)
+        {
+            try
+            {
+                SegmentTmTu tu = tus.get(i);
+                if (tu == null)
+                {
+                    continue;
+                }
+                long tuId = tu.getId();
+                if(attributeFilter)
+                {
+                	if( attributeFilterTuIds.size() ==0 || !attributeFilterTuIds.contains(tuId))
+                	{
+                		continue;
+                	}
+                }
+                BaseTmTuv srcTuv = tu.getFirstTuv(sourceGSL);
+				if (advancedSearch && searchInSource)
+				{
+					if (!searchFilterBySid(filterMap, srcTuv))
+						continue;
+				}
+                String gxml = GxmlUtil.stripRootTag(srcTuv.getSegment());
+
+                BaseTmTuv trgTuv;
+                Collection targetTuvs = tu.getTuvList(targetGSL);
+                
+                for (Iterator it = targetTuvs.iterator(); it.hasNext();)
+                {
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    trgTuv = (BaseTmTuv) it.next();
+					if (advancedSearch && !searchInSource)
+					{
+						if (!searchFilterBySid(filterMap, trgTuv))
+							continue;
+					}
+                    String sid = trgTuv.getSid();
+                    long tuvId = trgTuv.getId();
+                    if (null == sid)
+                    {
+                        sid = "N/A";
+                    }
+
+                    // get formatted source and target with highlight
+                    Map<String, String> formattedSource = getFormattedSegment(
+                            searchInSource ? findText : null, replaceText, srcTuv);
+                    Map<String, String> formattedTarget = getFormattedSegment(
+                            searchInSource ? null : findText, replaceText, trgTuv);
+                    String targetLocale = trgTuv.getLocale().toString();
+                    long tmId = trgTuv.getTu().getTmId();
+                    String tmName = ServerProxy.getProjectHandler()
+                            .getProjectTMById(tmId, false).getName();
+                    map.put("sid", sid);
+                    map.put("originSource", gxml);
+                    map.put("source", formattedSource);
+                    map.put("target", formattedTarget);
+                    map.put("tm", tmName);
+                    map.put("tuId", tuId);
+                    map.put("sourceTuvId", srcTuv.getId());
+                    map.put("targetTuvId", tuvId);
+                    map.put("tmId", tmId);
+                    map.put("sourceLocale", srcTuv.getLocale().toString());
+                    map.put("targetLocale", targetLocale);
+                    result.add(map);
+                }                
+            }
+            catch (Exception e)
+            {
+                // ignore this.
+            }
+        }
+
+        // Find the exact match and put the exact match record to beginning
+        List<Map<String, Object>> resultExact = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> resultTemp = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> resultNew = new ArrayList<Map<String, Object>>();
+        for (Map<String, Object> map : result)
+        {
+            if (searchText.equals(map.get("originSource")))
+            {
+                resultExact.add(map);
+            }
+            else
+            {
+                resultTemp.add(map);
+            }
+        }
+        resultNew.addAll(resultExact);
+        resultNew.addAll(resultTemp);
+
+        // Set the search result to session
+        HttpSession session = request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        sessionMgr.setAttribute("searchResult", resultNew);
+
+        // Get the displayed result according records number and the max number
+        // per pages
+        Map<String, Object> temp = getDisplayResult(resultNew, 1,
+                maxEntriesPerPageStr);
+        return JsonUtil.toJson(temp);
+    }
+
+	private static void getTm2SqlByParamMap(StatementBuilder sb,
+			HashMap paramMap,long tmId)
+	{
+		sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ")
+				.append(" PROJECT_TM_TU_T AS tu, ")
+				.append(" PROJECT_TM_TUV_T AS tuv").append(" WHERE 1=1 ")
+				.append(" AND tu.TM_ID = ?").addValue(tmId)
+				.append(" AND tu.id = tuv.TU_ID ");
+		sb.append(" AND tuv.sid is not null ");
+		getParameterSql(sb, paramMap, "TM2");
+	}
+	
+	private static void getTm3SqlByParamMap(StatementBuilder sb,
+			HashMap paramMap, BaseTm baseTM, long tmId)
+	{
+		sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ")
+				.append(baseTM.getTuvTableName()).append(" as tuv, ")
+				.append(baseTM.getTuvExtTableName()).append(" AS ext,")
+				.append(baseTM.getTuTableName()).append(" as tu ")
+				.append(" WHERE 1 = 1").append(" AND tuv.id = ext.tuvId ")
+				.append(" AND tu.id = ext.tuId ").append(" AND tuv.tmId = ?")
+				.addValue(tmId);
+		getParameterSql(sb, paramMap, "TM3");
+		sb.append(" AND ext.sid IS NOT NULL ");
+	}
+    
+    private static void getParameterSql(StatementBuilder sb,
+    		HashMap paramMap,String tmType)
+	{
+		if (paramMap != null)
+		{
+			String createStartDateOption = (String) paramMap.get("createStartDateOption");
+			String createEndDateOption = (String) paramMap.get("createEndDateOption");
+			Date createStartDate = (Date) paramMap.get("createStartDate");
+			Date createEndDate = (Date) paramMap.get("createEndDate");
+
+			String modifyStartDateOption = (String) paramMap.get("modifyStartDateOption");
+			String modifyEndDateOption = (String) paramMap.get("modifyEndDateOption");
+			Date modifyStartDate = (Date) paramMap.get("modifyStartDate");
+			Date modifyEndDate = (Date) paramMap.get("modifyEndDate");
+			
+			String createUser = (String) paramMap.get("createUser");
+			String modifyUser = (String) paramMap.get("modifyUser");
+			long localeId = (Long) paramMap.get("localeIds");
+			//create date
+			if (createStartDate != null)
+			{
+				if (createStartDateOption.equals(DATE_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.creationDate >= ? ").addValue(parseStartDate(createStartDate));
+						sb.append(" AND tuv.creationDate <= ? ").addValue(parseEndDate(createStartDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.CREATION_DATE >= ? ").addValue(parseStartDate(createStartDate));
+						sb.append(" AND tuv.CREATION_DATE <= ? ").addValue(parseEndDate(createStartDate));
+					}
+				}
+				else if (createStartDateOption.equals(DATE_NOT_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.creationDate < ? ").addValue(parseStartDate(createStartDate));
+						sb.append(" AND tuv.creationDate > ? ").addValue(parseEndDate(createStartDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.CREATION_DATE < ? ").addValue(parseStartDate(createStartDate));
+						sb.append(" AND tuv.CREATION_DATE > ? ").addValue(parseEndDate(createStartDate));
+					}
+				}
+				else if (createStartDateOption.equals(DATE_GREATER_THAN))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.creationDate > ? ").addValue(parseStartDate(createStartDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.CREATION_DATE > ? ").addValue(parseStartDate(createStartDate));
+					}
+				}
+
+				else if (createStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.creationDate >= ? ").addValue(parseStartDate(createStartDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.CREATION_DATE >= ?").addValue(parseStartDate(createStartDate));
+					}
+				}
+			}
+			
+			if (createEndDate != null)
+			{
+				if (createEndDateOption.equals(DATE_LESS_THAN))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.creationDate < ? ").addValue(parseEndDate(createEndDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.CREATION_DATE < ?").addValue(parseEndDate(createEndDate));
+					}
+				}
+				else if (createEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.creationDate <= ? ").addValue(parseEndDate(createEndDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.CREATION_DATE <= ?").addValue(parseEndDate(createEndDate));
+					}
+				}
+			}
+			
+			// modify date
+			if (modifyStartDate != null)
+			{
+				if (modifyStartDateOption.equals(DATE_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.modifyDate >= ? ").addValue(parseStartDate(modifyStartDate));
+						sb.append(" AND tuv.modifyDate <= ? ").addValue(parseEndDate(modifyStartDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.MODIFY_DATE >= ? ").addValue(parseStartDate(modifyStartDate));
+						sb.append(" AND tuv.MODIFY_DATE <= ? ").addValue(parseEndDate(modifyStartDate));
+					}
+				}
+				else if (modifyStartDateOption.equals(DATE_NOT_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.modifyDate < ? ").addValue(parseStartDate(modifyStartDate));
+						sb.append(" AND tuv.modifyDate > ? ").addValue(parseEndDate(modifyStartDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.MODIFY_DATE < ? ").addValue(parseStartDate(modifyStartDate));
+						sb.append(" AND tuv.MODIFY_DATE > ? ").addValue(parseEndDate(modifyStartDate));
+					}
+				}
+				else if (modifyStartDateOption.equals(DATE_GREATER_THAN))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.modifyDate > ? ").addValue(parseStartDate(modifyStartDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.MODIFY_DATE > ?").addValue(parseStartDate(modifyStartDate));
+					}
+				}
+				else if (modifyStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.modifyDate >= ? ").addValue(parseStartDate(modifyStartDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.MODIFY_DATE >= ?").addValue(parseStartDate(modifyStartDate));
+					}
+				}
+			}
+			
+			if (modifyEndDate != null)
+			{
+				if (modifyEndDateOption.equals(DATE_LESS_THAN))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.modifyDate < ? ").addValue(parseEndDate(modifyEndDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.MODIFY_DATE < ?").addValue(parseEndDate(modifyEndDate));
+					}
+				}
+				else if (modifyEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND tuv.modifyDate <= ? ").addValue(parseEndDate(modifyEndDate));
+					}
+					else if (tmType.equalsIgnoreCase("TM2"))
+					{
+						sb.append(" AND tuv.MODIFY_DATE <= ?").addValue(parseEndDate(modifyEndDate));
+					}
+				}
+			}
+			//create user
+			if (StringUtil.isNotEmpty(createUser))
+			{
+				if (tmType.equalsIgnoreCase("TM3"))
+				{
+					sb.append(" AND tuv.creationUser = ? ").addValues(createUser);
+				}
+				else if (tmType.equalsIgnoreCase("TM2"))
+				{
+					sb.append(" AND tuv.CREATION_USER = ? ").addValues(createUser);
+				}
+			}
+			//modify user
+			if (StringUtil.isNotEmpty(modifyUser))
+			{
+				if (tmType.equalsIgnoreCase("TM3"))
+				{
+					sb.append(" AND tuv.modifyUser = ? ").addValues(modifyUser);
+				}
+				else if (tmType.equalsIgnoreCase("TM2"))
+				{
+					sb.append(" AND tuv.MODIFY_USER = ? ")
+							.addValues(modifyUser);
+				}
+			}
+			
+			if (StringUtil.isNotEmpty(String.valueOf(localeId)))
+			{
+				if (tmType.equalsIgnoreCase("TM3"))
+				{
+					sb.append(" AND tuv.localeId = ? ").addValue(localeId);
+				}
+				else if (tmType.equalsIgnoreCase("TM2"))
+				{
+					sb.append(" AND tuv.LOCALE_ID = ? ").addValue(localeId);
+				}
+			}
+		}
+	}
+
+	private static String parseStartDate(Date start)
+	{
+		String startDate = format.format(start);
+		if (StringUtil.isNotEmpty(startDate))
+			return startDate + " 00:00:00";
+		else return null;
+	}
+
+	private static String parseEndDate(Date end)
+	{
+		String endDate = format.format(end);
+		if (StringUtil.isNotEmpty(endDate))
+			return endDate + " 23:59:59";
+		else return null;
+	}
+    
+	private static List<TMidTUid> getIdList(Connection conn, StatementBuilder sb,
+			long tmId) throws SQLException
+	{
+		List<TMidTUid> idList = new ArrayList<TMidTUid>();
+		PreparedStatement ps = sb.toPreparedStatement(conn);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next())
+		{
+			TMidTUid tt = new TMidTUid(tmId, rs.getLong(1));
+			if (!idList.contains(tt))
+			{
+				idList.add(tt);
+			}
+		}
+		ps.close();
+		return idList;
+	}
+	
+    private static HashMap getFilterMap(HttpServletRequest request,
+			boolean advancedSearch)
+	{
+		HashMap filterMap = new HashMap();
+		String createStartDateOption = null;
+		Date createStartDate = null;
+		String createEndDateOption = null;
+		Date createEndDate = null;
+		String modifyStartDateOption = null;
+		Date modifyStartDate = null;
+		String modifyEndDateOption = null;
+		Date modifyEndDate = null;
+		String tuIds = null;
+		String sids = null;
+		String isRegex = null;
+		String createUser = null;
+		String modifyUser = null;
+
+		if (advancedSearch)
+		{
+			createStartDateOption = (String) request.getParameter("createStartDateOption");
+			createStartDate = parseDate((String) request.getParameter("createStartDate"));
+			createEndDateOption = (String) request.getParameter("createEndDateOption");
+			createEndDate = parseDate((String) request.getParameter("createEndDate"));
+
+			modifyStartDateOption = (String) request.getParameter("modifyStartDateOption");
+			modifyStartDate = parseDate((String) request.getParameter("modifyStartDate"));
+			modifyEndDateOption = (String) request.getParameter("modifyEndDateOption");
+			modifyEndDate = parseDate((String) request.getParameter("modifyEndDate"));
+
+			tuIds = (String) request.getParameter("tuIds");
+			sids = (String) request.getParameter("sids");
+			isRegex = (String) request.getParameter("isRegex");
+			createUser = (String) request.getParameter("createUser");
+			modifyUser = (String) request.getParameter("modifyUser");
+
+			filterMap.put("createStartDateOption", createStartDateOption);
+			filterMap.put("createStartDate", createStartDate);
+			filterMap.put("createEndDateOption", createEndDateOption);
+			filterMap.put("createEndDate", createEndDate);
+			filterMap.put("modifyStartDateOption", modifyStartDateOption);
+			filterMap.put("modifyStartDate", modifyStartDate);
+			filterMap.put("modifyEndDateOption", modifyEndDateOption);
+			filterMap.put("modifyEndDate", modifyEndDate);
+			filterMap.put("tuIds", tuIds);
+			filterMap.put("sids", sids);
+			filterMap.put("isRegex", isRegex);
+			filterMap.put("createUser", createUser);
+			filterMap.put("modifyUser", modifyUser);
+		}
+		return filterMap;
+	}
     
     private static String getTuIds(Iterator<LeverageMatches> itLeverageMatches)
     {
@@ -1226,6 +1649,83 @@ public class TMSearchBroswerHandlerHelper
     	return true;
     }
 
+    private static boolean searchFilterBySid(HashMap filterMap, BaseTmTuv tuv)
+	{
+		String tuIds = (String) filterMap.get("tuIds");
+		String sids = (String) filterMap.get("sids");
+		String isRegex = (String) filterMap.get("isRegex");
+
+		if (StringUtil.isNotEmpty(tuIds))
+		{
+			boolean tuidMatch = false;
+			if (tuIds.indexOf(",") > 0)
+			{
+				String[] temp = tuIds.split(",");
+				for (String tuid : temp)
+				{
+					if (tuid.indexOf("-") > 0)
+					{
+						String[] temp2 = tuid.split("-");
+						Long minTuid = Long.parseLong(temp2[0]);
+						Long maxTuid = Long.parseLong(temp2[1]);
+						Long tuId = tuv.getTu().getId();
+						if (tuId >= minTuid && tuId <= maxTuid)
+						{
+							tuidMatch = true;
+							break;
+						}
+					}
+					else if (tuv.getTu().getId() == Long.parseLong(tuid))
+					{
+						tuidMatch = true;
+						break;
+					}
+				}
+			}
+			else if (tuIds.indexOf("-") > 0)
+			{
+				String[] temp = tuIds.split("-");
+				Long minTuid = Long.parseLong(temp[0]);
+				Long maxTuid = Long.parseLong(temp[1]);
+				Long tuId = tuv.getTu().getId();
+				if (tuId >= minTuid && tuId <= maxTuid)
+				{
+					tuidMatch = true;
+				}
+			}
+			else if (tuv.getTu().getId() == Long.parseLong(tuIds))
+			{
+				tuidMatch = true;
+			}
+
+			if (!tuidMatch)
+			{
+				return false;
+			}
+		}
+
+		if (StringUtil.isNotEmpty(sids))
+		{
+			if (isRegex.equals("true"))
+			{
+				Pattern p = Pattern.compile(sids);
+				Matcher m = p.matcher(tuv.getSid());
+				if (!m.matches())
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (!sids.equals(tuv.getSid()))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+    
 	private static boolean searchByDate(String searchByDataType,
 			String startDateOption, String endDateOption, Date startDate,
 			Date endDate, BaseTmTuv tuv)

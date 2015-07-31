@@ -286,7 +286,7 @@ public class StringUtil
         {
             Locale en = new Locale("en");
             DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(en);
-            df.applyPattern("0.00");
+//            df.applyPattern("0.00");
 
             // Changes default Rounding Mode
 //            df.setRoundingMode(RoundingMode.DOWN);

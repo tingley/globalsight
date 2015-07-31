@@ -75,7 +75,7 @@ Collection tbMatches = view.getTbMatchResults();
 
 NumberFormat percent = NumberFormat.getPercentInstance(
   (Locale)session.getAttribute(WebAppConstants.UILOCALE));
-percent.setMinimumFractionDigits(2);
+/* percent.setMinimumFractionDigits(2); */
 
 boolean b_rtl = EditUtil.isRTLLocale(state.getTargetLocale());
 boolean b_source_rtl = EditUtil.isRTLLocale(state.getSourceLocale());

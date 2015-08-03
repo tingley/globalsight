@@ -932,12 +932,11 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		{
 			stringId = (String) paramMap.get("stringId");
 		}
-		// TODO: How about the performance ???
+
 		if (StringUtil.isNotEmpty(stringId))
 		{
 			// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...
-			sb.append("SELECT tuId,sid FROM (")
-					.append("SELECT DISTINCT tuv.tuId AS tuId, ext.sid AS sid FROM ")
+			sb.append("SELECT DISTINCT tuv.tuId AS tuId, ext.sid AS sid FROM ")
 					.append(getStorage().getTuvTableName()).append(" as tuv, ")
 					.append(getStorage().getTuvExtTableName())
 					.append(" AS ext");
@@ -955,30 +954,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
 						.addValues(startId, count);
 			}
-			sb.append(") attrAndTuvAndTu");
-
-			sb.append(" UNION ");
-
-			// If SID is not empty, query "tm3_tu_shared_xx" table as "old" SID
-			// are stored in TU table. Can be removed in future.
-			sb.append("SELECT tuId,sid FROM (")
-					.append("SELECT DISTINCT tuv.tuId AS tuId, tu.sid AS sid  FROM ")
-					.append(getStorage().getTuvTableName()).append(" as tuv, ")
-					.append(getStorage().getTuTableName()).append(" as tu ");
-			if (customAttrs != null && !customAttrs.isEmpty())
-			{
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-			}
-
-			getParameterSql(sb, paramMap, localeIds, inlineAttrs);
-			sb.append(" AND tuv.tuId = tu.id ").append(
-					" AND tu.sid IS NOT NULL");
-			if (startId != -1 && count != -1)
-			{
-				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
-						.addValues(startId, count);
-			}
-			sb.append(") tuvAndTu");
 		}
 		else
 		{

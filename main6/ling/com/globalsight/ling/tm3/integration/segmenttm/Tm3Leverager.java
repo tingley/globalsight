@@ -158,16 +158,16 @@ class Tm3Leverager {
                 ltuv.setCreationDate(getCreationDate(tuv));
                 ltuv.setCreationUser(tuv.getCreationUser());
                 ltuv.setUpdatedProject((String) tu.getAttribute(projectAttr));
-               
-                // I'm leaving some fields blank, like 
-                // - setExactMatchKey
-                // - setOrgSegment
-                // etc.
-                // I am pretty sure these are not used with leveraged
-                // segments.  This is a sign that the Tu/v interface
-                // hierarchy needs cleaning up or splitting up -- 
-                // since LeveragedTu/v inherits fields it has no 
-                // need for.
+                ltuv.setLastUsageDate(getLastUsageDate(tuv));
+                ltuv.setJobId(tuv.getJobId());
+                ltuv.setJobName(tuv.getJobName());
+                ltuv.setPreviousHash(tuv.getPreviousHash());
+                ltuv.setNextHash(tuv.getNextHash());
+                if (tuv.getSid() != null)
+                {
+                	ltuv.setSid(tuv.getSid());
+                }
+
                 ltu.addTuv(ltuv);
             }
             if (LOGGER.isDebugEnabled()) {
@@ -210,6 +210,17 @@ class Tm3Leverager {
         if (modifyDate != null)
         {
             return new Timestamp(modifyDate.getTime());
+        }
+
+        return null;
+    }
+
+    private Timestamp getLastUsageDate(TM3Tuv<GSTuvData> tuv)
+    {
+        Date lastUsageDate = tuv.getLastUsageDate();
+        if (lastUsageDate != null)
+        {
+            return new Timestamp(lastUsageDate.getTime());
         }
 
         return null;

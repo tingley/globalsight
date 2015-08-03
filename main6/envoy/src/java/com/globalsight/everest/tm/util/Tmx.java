@@ -93,6 +93,10 @@ public class Tmx
     static final public String PROP_SOURCE_TM_NAME = "x-sourcetmname";
     static final public String PROP_UPDATED_BY_PROJECT = "x-updatedbyproject";
     static final public String PROP_CREATION_PROJECT = "x-creationproject";
+    static final public String PROP_PREVIOUS_HASH = "x-hash-prev";
+    static final public String PROP_NEXT_HASH = "x-hash-next";
+    static final public String PROP_JOB_ID = "x-creationjobid";
+    static final public String PROP_JOB_NAME = "x-creationjobname";
 
     static final public String PROP_TM_UDA_SID = "x-idiom-tm-uda-SID";
     //

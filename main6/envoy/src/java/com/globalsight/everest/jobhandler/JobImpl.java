@@ -147,6 +147,8 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private String tuvArchiveTable = null;
     private String lmTable = null;
     private String lmArchiveTable = null;
+    private String lmExtTable = null;
+    private String lmExtArchiveTable = null;
 
     public JobImpl()
     {
@@ -1654,7 +1656,23 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         this.tuvArchiveTable = tuvArchiveTable;
     }
 
-    public String getTuvTable()
+    public String getLmExtTable() {
+		return lmExtTable;
+	}
+
+	public void setLmExtTable(String lmExtTable) {
+		this.lmExtTable = lmExtTable;
+	}
+
+	public String getLmExtArchiveTable() {
+		return lmExtArchiveTable;
+	}
+
+	public void setLmExtArchiveTable(String lmExtArchiveTable) {
+		this.lmExtArchiveTable = lmExtArchiveTable;
+	}
+
+	public String getTuvTable()
     {
         return tuvTable;
     }

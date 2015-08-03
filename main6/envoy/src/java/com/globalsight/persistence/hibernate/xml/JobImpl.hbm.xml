@@ -65,6 +65,10 @@
             type="string" not-null="false" />
         <property name="lmArchiveTable" length="128" column="LM_ARCHIVE_TABLE"
             type="string" not-null="false" />
+        <property name="lmExtTable" length="128" column="LM_EXT_TABLE"
+            type="string" not-null="false" />
+        <property name="lmExtArchiveTable" length="128" column="LM_EXT_ARCHIVE_TABLE"
+            type="string" not-null="false" />
 
         <property name="isMigrated" column="IS_MIGRATED"
             type="yes_no" not-null="false" />

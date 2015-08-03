@@ -87,47 +87,53 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     private static Set<String> differentCases = null;
 
     private static final String LM_TABLE_NAME_PLACE_HOLDER = TuvQueryConstants.LM_TABLE_PLACEHOLDER;
+    private static final String LM_EXT_TABLE_NAME_PLACE_HOLDER = TuvQueryConstants.LM_EXT_TABLE_PLACEHOLDER;
 
     private static final String SELECT_COLUMNS = "SELECT "
-            + " SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, MATCHED_TEXT_STRING, "
-            + " TARGET_LOCALE_ID, MATCH_TYPE, ORDER_NUM, SCORE_NUM, MATCHED_TUV_ID, "
-            + " MATCHED_TABLE_TYPE, PROJECT_TM_INDEX, TM_ID, TM_PROFILE_ID, MT_NAME, "
-            + " MATCHED_ORIGINAL_SOURCE, JOB_DATA_TU_ID, SID, CREATION_USER, CREATION_DATE, "
-            + " MODIFY_USER, MODIFY_DATE FROM ";
+            + " lm.SOURCE_PAGE_ID, lm.ORIGINAL_SOURCE_TUV_ID, lm.SUB_ID, lm.MATCHED_TEXT_STRING, "
+            + " lm.TARGET_LOCALE_ID, lm.MATCH_TYPE, lm.ORDER_NUM, lm.SCORE_NUM, lm.MATCHED_TUV_ID, "
+            + " lm.MATCHED_TABLE_TYPE, lm.PROJECT_TM_INDEX, lm.TM_ID, lm.TM_PROFILE_ID, lm.MT_NAME, "
+            + " lm.MATCHED_ORIGINAL_SOURCE, lm.JOB_DATA_TU_ID, lm.SID, lm.CREATION_USER, lm.CREATION_DATE, "
+            + " lm.MODIFY_USER, lm.MODIFY_DATE, ext.LAST_USAGE_DATE, ext.JOB_ID, ext.JOB_NAME, "
+            + " ext.PREVIOUS_HASH, ext.NEXT_HASH, ext.SID FROM "
+            + LM_TABLE_NAME_PLACE_HOLDER + " lm LEFT JOIN " + LM_EXT_TABLE_NAME_PLACE_HOLDER + " ext "
+            + " ON lm.ORIGINAL_SOURCE_TUV_ID = ext.ORIGINAL_SOURCE_TUV_ID AND lm.SUB_ID = ext.SUB_ID "
+            + " AND lm.TARGET_LOCALE_ID = ext.TARGET_LOCALE_ID AND lm.ORDER_NUM = ext.ORDER_NUM ";
 
     /**
      * Used to get all exact matches despite of where they come from.
      */
     private static final String EXACT_LEVERAGE_MATCH_SQL = SELECT_COLUMNS
-            + LM_TABLE_NAME_PLACE_HOLDER + " WHERE SOURCE_PAGE_ID = ?"
-            + " AND TARGET_LOCALE_ID = ?" + " AND SCORE_NUM = 100";
+    		+ " WHERE lm.SOURCE_PAGE_ID = ?"
+            + " AND lm.TARGET_LOCALE_ID = ?"
+    		+ " AND lm.SCORE_NUM = 100";
 
     private static final String FUZZY_LEVERAGE_MATCH_SQL = SELECT_COLUMNS
-            + LM_TABLE_NAME_PLACE_HOLDER + "  where SOURCE_PAGE_ID = ? "
-            + "  and TARGET_LOCALE_ID = ? " + "  and SCORE_NUM < 100 "
-            + "  and MATCH_TYPE != 'STATISTICS_MATCH'"
-            + "  and MATCH_TYPE != 'NOT_A_MATCH'";
+            + "  where lm.SOURCE_PAGE_ID = ? "
+            + "  and lm.TARGET_LOCALE_ID = ? "
+            + "  and lm.SCORE_NUM < 100 "
+            + "  and lm.MATCH_TYPE != 'STATISTICS_MATCH'"
+            + "  and lm.MATCH_TYPE != 'NOT_A_MATCH'";
 
     private static final String ALL_LEVERAGE_MATCHES_FOR_TUV_SQL = SELECT_COLUMNS
-            + LM_TABLE_NAME_PLACE_HOLDER
-            + " WHERE ORIGINAL_SOURCE_TUV_ID = ? "
-            + " AND TARGET_LOCALE_ID = ? "
-            + " AND SUB_ID = ? "
-            + " AND MATCH_TYPE != 'STATISTICS_MATCH' "
-            + " AND MATCH_TYPE != 'NOT_A_MATCH' "
-            + " AND TM_ID in (tmId_list) ";
+            + " WHERE lm.ORIGINAL_SOURCE_TUV_ID = ? "
+            + " AND lm.TARGET_LOCALE_ID = ? "
+            + " AND lm.SUB_ID = ? "
+            + " AND lm.MATCH_TYPE != 'STATISTICS_MATCH' "
+            + " AND lm.MATCH_TYPE != 'NOT_A_MATCH' "
+            + " AND lm.TM_ID in (tmId_list) ";
 
     private static final String BEST_LEVERAGE_MATCH_SQL = SELECT_COLUMNS
-            + LM_TABLE_NAME_PLACE_HOLDER + " WHERE SOURCE_PAGE_ID = ? "
-            + " AND TARGET_LOCALE_ID = ? "
-            + " ORDER BY ORIGINAL_SOURCE_TUV_ID, ORDER_NUM ";
+            + " WHERE lm.SOURCE_PAGE_ID = ? "
+            + " AND lm.TARGET_LOCALE_ID = ? "
+            + " ORDER BY lm.ORIGINAL_SOURCE_TUV_ID, lm.ORDER_NUM ";
 
     private static final String LEVERAGE_MATCH_FOR_OFFLINE_SQL = SELECT_COLUMNS
-            + LM_TABLE_NAME_PLACE_HOLDER + " WHERE SOURCE_PAGE_ID = ? "
-            + " AND TARGET_LOCALE_ID = ? "
-            + " AND MATCH_TYPE != 'STATISTICS_MATCH'"
-            + " AND MATCH_TYPE != 'NOT_A_MATCH'"
-            + " ORDER BY ORIGINAL_SOURCE_TUV_ID, ORDER_NUM ";
+            + " WHERE lm.SOURCE_PAGE_ID = ? "
+            + " AND lm.TARGET_LOCALE_ID = ? "
+            + " AND lm.MATCH_TYPE != 'STATISTICS_MATCH'"
+            + " AND lm.MATCH_TYPE != 'NOT_A_MATCH'"
+            + " ORDER BY lm.ORIGINAL_SOURCE_TUV_ID, lm.ORDER_NUM ";
 
     /**
      * Get all order_num existed in DB by sourceTuvId, targetLocaleId and subId.
@@ -153,6 +159,12 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             + "  JOB_DATA_TU_ID, SID, CREATION_USER, CREATION_DATE, MODIFY_USER, MODIFY_DATE, MATCHED_TEXT_CLOB) "
             + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+    private static final String INSERT_INTO_LM_EXT_SQL = "INSERT INTO "
+    		+ LM_EXT_TABLE_NAME_PLACE_HOLDER
+    		+ " (SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, TARGET_LOCALE_ID, ORDER_NUM, "
+    		+ " LAST_USAGE_DATE, JOB_ID, JOB_NAME, PREVIOUS_HASH, NEXT_HASH, SID) "
+    		+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    
     /**
      * Indicate whether MT matches should be returned in the query results.
      * Default is true. For word-count statistics,if for WorldServer xliff file,
@@ -191,8 +203,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             String lmTableName = BigTableUtil
                     .getLMTableJobDataInBySourcePageId(p_sourcePageId);
+			String lmExtTableName = BigTableUtil
+					.getLMExtTableJobDataInBySourcePageId(p_sourcePageId);
             String sql = FUZZY_LEVERAGE_MATCH_SQL.replace(
-                    LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
+                    LM_TABLE_NAME_PLACE_HOLDER, lmTableName).replace(
+        					LM_EXT_TABLE_NAME_PLACE_HOLDER, lmExtTableName);
 
             connection = DbUtil.getConnection();
             ps = connection.prepareStatement(sql);
@@ -235,8 +250,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             conn = DbUtil.getConnection();
             String lmTableName = BigTableUtil.getLMTableJobDataInByJobId(jobId);
-            String sql = ALL_LEVERAGE_MATCHES_FOR_TUV_SQL.replace(
-                    LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
+			String lmExtTableName = BigTableUtil
+					.getLMExtTableJobDataInByJobId(jobId);
+			String sql = ALL_LEVERAGE_MATCHES_FOR_TUV_SQL.replace(
+					LM_TABLE_NAME_PLACE_HOLDER, lmTableName).replace(
+					LM_EXT_TABLE_NAME_PLACE_HOLDER, lmExtTableName);
             if (isTmProcedence)
             {
                 sql += " ORDER BY ORIGINAL_SOURCE_TUV_ID asc, SCORE_NUM desc, MATCHED_TEXT_STRING asc";
@@ -572,8 +590,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
             String lmTableName = BigTableUtil
                     .getLMTableJobDataInBySourcePageId(p_sourcePageId);
-            String sql = EXACT_LEVERAGE_MATCH_SQL.replace(
-                    LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
+			String lmExtTableName = BigTableUtil
+					.getLMExtTableJobDataInBySourcePageId(p_sourcePageId);
+			String sql = EXACT_LEVERAGE_MATCH_SQL.replace(
+					LM_TABLE_NAME_PLACE_HOLDER, lmTableName).replace(
+					LM_EXT_TABLE_NAME_PLACE_HOLDER, lmExtTableName);
 
             ps = connection.prepareStatement(sql);
             ps.setLong(1, p_sourcePageId);
@@ -617,8 +638,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             connection = DbUtil.getConnection();
 
             String lmTableName = BigTableUtil.getLMTableJobDataInByJobId(jobId);
-            String sql = BEST_LEVERAGE_MATCH_SQL.replace(
-                    LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
+			String lmExtTableName = BigTableUtil
+					.getLMExtTableJobDataInByJobId(jobId);
+			String sql = BEST_LEVERAGE_MATCH_SQL.replace(
+					LM_TABLE_NAME_PLACE_HOLDER, lmTableName).replace(
+					LM_EXT_TABLE_NAME_PLACE_HOLDER, lmExtTableName);
 
             ps = connection.prepareStatement(sql);
             ps.setLong(1, p_sourcePageId);
@@ -758,10 +782,10 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             connection = DbUtil.getConnection();
             connection.setAutoCommit(false);
 
-            // Delete leverage match attributes first.
-			LeverageMatchAttributeUtil.deleteLMAttributes(
-					p_OriginalSourceTuvId, p_subId, p_targetLocaleId,
-					p_orderNum, p_jobId);
+			// Delete from "leverage_match_ext_xx" or
+			// "leverage_match_ext_xx_archived" table first.
+			deleteLMExtAttributes(p_OriginalSourceTuvId, p_subId,
+					p_targetLocaleId, p_orderNum, p_jobId);
 
             // Delete
             String sql = getDeleteSql(p_OriginalSourceTuvId, p_subId,
@@ -786,7 +810,59 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
     }
 
-    private String getDeleteSql(Long p_OriginalSourceTuvId, String p_subId,
+	/**
+	 * Delete leverage match extension info.
+	 * 
+	 * @param p_OriginalSourceTuvId
+	 * @param p_subId
+	 * @param p_targetLocaleId
+	 * @param p_orderNum
+	 * @param p_jobId
+	 * @throws Exception
+	 */
+	private static void deleteLMExtAttributes(Long p_OriginalSourceTuvId,
+			String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId)
+			throws Exception
+	{
+		Connection connection = null;
+		PreparedStatement ps = null;
+
+		try
+		{
+			connection = DbUtil.getConnection();
+			connection.setAutoCommit(false);
+
+			StringBuffer sql = new StringBuffer("DELETE FROM ")
+					.append(BigTableUtil.getLMExtTableJobDataInByJobId(p_jobId))
+					.append(" WHERE original_source_tuv_id = ? ")
+					.append(" AND sub_id = ? ")
+					.append(" AND target_locale_id = ? ")
+					.append(" AND order_num = ? ");
+			ps = connection.prepareStatement(sql.toString());
+			ps.setLong(1, p_OriginalSourceTuvId);
+			ps.setString(2, p_subId);
+			ps.setLong(3, p_targetLocaleId);
+			ps.setLong(4, p_orderNum);
+
+			ps.executeUpdate();
+
+			connection.commit();
+		}
+		catch (Exception ex)
+		{
+			c_logger.error(
+					"Failed to delete leverage matche extension data by originalSourceTuvID : "
+							+ p_OriginalSourceTuvId, ex);
+			throw ex;
+		}
+		finally
+		{
+			DbUtil.silentClose(ps);
+			DbUtil.silentReturnConnection(connection);
+		}
+	}
+
+	private String getDeleteSql(Long p_OriginalSourceTuvId, String p_subId,
             Long p_targetLocaleId, Long p_orderNum, long p_jobId)
             throws Exception
     {
@@ -878,8 +954,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
             String lmTableName = BigTableUtil
                     .getLMTableJobDataInBySourcePageId(p_sourcePageId);
-            String sql = LEVERAGE_MATCH_FOR_OFFLINE_SQL.replace(
-                    LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
+			String lmExtTableName = BigTableUtil
+					.getLMExtTableJobDataInBySourcePageId(p_sourcePageId);
+			String sql = LEVERAGE_MATCH_FOR_OFFLINE_SQL.replace(
+					LM_TABLE_NAME_PLACE_HOLDER, lmTableName).replace(
+					LM_EXT_TABLE_NAME_PLACE_HOLDER, lmExtTableName);
 
             ps = connection.prepareStatement(sql);
             ps.setLong(1, p_sourcePageId);
@@ -1051,6 +1130,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         Map<Long, List<LeverageMatch>> groups = groupLeverageMatchesByCompany(p_leverageMatchList);
 
         PreparedStatement ps = null;
+        PreparedStatement ps2 = null;
         int max = 500;
         int count = 0;
         try
@@ -1073,8 +1153,6 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                         .getLMTableJobDataInByJobId(p_jobId);
                 String insertSql = INSERT_INTO_LEVERAGE_MATCH_SQL.replace(
                         LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
-
-                List<LeverageMatchAttribute> sidAttrs = new ArrayList<LeverageMatchAttribute>();
                 ps = p_connection.prepareStatement(insertSql);
                 for (LeverageMatch lm : lms)
                 {
@@ -1107,23 +1185,14 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     ps.setString(15, lm.getMatchedOriginalSource());
 
                     ps.setLong(16, lm.getJobDataTuId());
-					// SID is always saved into "leverage_match_attr_xx" table
-					// since 8.6.1.
+					// SID is saved into "leverage_match_ext_xx" table
+					// since 8.6.4.
                     ps.setString(17, null);
-                    if (StringUtil.isNotEmpty(lm.getSid()))
+                	// Also save it into original table if not too long.
+					if (StringUtil.isNotEmpty(lm.getSid())
+							&& lm.getSid().length() < 254)
                     {
-                    	// Also save it into original table if not too long.
-                    	if (lm.getSid().length() < 254)
-                    	{
-                    		ps.setString(17, lm.getSid());
-                    	}
-						LeverageMatchAttribute sidAttr = new LeverageMatchAttribute(
-								lm.getSourcePageId(),
-								lm.getOriginalSourceTuvId(), lm.getSubId(),
-								lm.getOrderNum(), lm.getTargetLocaleId());
-                    	sidAttr.setName(LeverageMatchAttribute.SID);
-                    	sidAttr.setTextValue(lm.getSid());
-                    	sidAttrs.add(sidAttr);
+                    	ps.setString(17, lm.getSid());
                     }
                     ps.setString(18, lm.getCreationUser());
                     // creation date
@@ -1145,16 +1214,51 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     }
                 }
                 
-                if(count  > 0)
+                if(count > 0)
                 {
                 	ps.executeBatch();
                     p_connection.commit();
                 }
 
-                if (sidAttrs.size() > 0)
+				String lmExtTableName = BigTableUtil
+						.getLMExtTableJobDataInByJobId(p_jobId);
+				String insertExtSql = INSERT_INTO_LM_EXT_SQL.replace(
+						LM_EXT_TABLE_NAME_PLACE_HOLDER, lmExtTableName);
+                ps2 = p_connection.prepareStatement(insertExtSql);
+                count = 0;
+                for (LeverageMatch lm : lms)
                 {
-    				LeverageMatchAttributeUtil.saveLeverageMatchAttributes(
-    						p_connection, sidAttrs, p_jobId);                	
+                    ps2.setLong(1, lm.getSourcePageId());
+                    ps2.setLong(2, lm.getOriginalSourceTuvId());
+                    ps2.setString(3, lm.getSubId());
+                    ps2.setLong(4, lm.getTargetLocaleId());
+                    ps2.setShort(5, lm.getOrderNum());
+                    ps2.setTimestamp(6, null);
+                    if (lm.getLastUsageDate() != null)
+                    {
+                    	ps2.setTimestamp(6,  new java.sql.Timestamp(lm.getLastUsageDate().getTime()));
+                    }
+                    ps2.setLong(7, lm.getJobId());
+                    ps2.setString(8, lm.getJobName());
+                    ps2.setLong(9, lm.getPreviousHash());
+                    ps2.setLong(10, lm.getNextHash());
+                    ps2.setString(11, lm.getSid());
+
+                    ps2.addBatch();
+                    count ++;
+                    if(count == max)
+                    {
+                    	ps2.executeBatch();
+                        p_connection.commit();
+                        ps2.clearBatch();
+                        count = 0;
+                    }
+                }
+                
+                if(count > 0)
+                {
+                	ps2.executeBatch();
+                    p_connection.commit();
                 }
             }
         }
@@ -1166,6 +1270,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         finally
         {
             DbUtil.silentClose(ps);
+            DbUtil.silentClose(ps2);
         }
     }
 
@@ -1325,6 +1430,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 lm.setCreationDate(matchedTuv.getCreationDate());
                 lm.setModifyUser(matchedTuv.getModifyUser());
                 lm.setModifyDate(matchedTuv.getModifyDate());
+                lm.setLastUsageDate(matchedTuv.getLastUsageDate());
+                lm.setJobId(matchedTuv.getJobId());
+                lm.setJobName(matchedTuv.getJobName());
+                lm.setPreviousHash(matchedTuv.getPreviousHash());
+                lm.setNextHash(matchedTuv.getNextHash());
 
                 allLeverageMatches.add(lm);
             }
@@ -1861,8 +1971,6 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             throws Exception
     {
         List<LeverageMatch> leverageMatches = new ArrayList<LeverageMatch>();
-        long sourcePageId = -1;
-        long trgLocaleId = -1;
         while (rs.next())
         {
             LeverageMatch lm = new LeverageMatch();
@@ -1882,7 +1990,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             lm.setMtName(rs.getString(14));
             lm.setMatchedOriginalSource(rs.getString(15));
             lm.setJobDataTuId(rs.getLong(16));
-            lm.setSid(rs.getString(17));
+            lm.setSid(rs.getString(17));//to be abandoned
             lm.setCreationUser(rs.getString(18));
             try
             {
@@ -1901,42 +2009,24 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             {
                 lm.setModifyDate(null);
             }
+            try
+            {
+            	lm.setLastUsageDate(new Date(rs.getTimestamp(22).getTime()));
+            }
+            catch (Exception e)
+            {
+            	lm.setLastUsageDate(null);
+            }
+            lm.setJobId(rs.getLong(23));
+            lm.setJobName(rs.getString(24));
+            lm.setPreviousHash(rs.getLong(25));
+            lm.setNextHash(rs.getLong(26));
+            if (rs.getString(27) != null)
+            {
+                lm.setSid(rs.getString(27));
+            }
 
             leverageMatches.add(lm);
-
-			// we assume all leverage matches in the ResultSet is for same
-			// source page and target locale.
-            if (sourcePageId == -1)
-            {
-            	sourcePageId = lm.getSourcePageId();
-            }
-            if (trgLocaleId == -1)
-            {
-            	trgLocaleId = lm.getTargetLocaleId();
-            }
-        }
-
-        if (sourcePageId != -1 && trgLocaleId != -1)
-        {
-    		List<LeverageMatchAttribute> attrs = LeverageMatchAttributeUtil
-    				.getLeverageMatchAttrbutes(sourcePageId, trgLocaleId);
-    		HashMap<String, LeverageMatchAttribute> sidAttrMap = new HashMap<String, LeverageMatchAttribute>(); 
-    		for (LeverageMatchAttribute attr : attrs)
-    		{
-    			if (LeverageMatchAttribute.SID.equalsIgnoreCase(attr.getName()))
-    			{
-    				sidAttrMap.put(attr.getUniqueKey(), attr);
-    			}
-    		}
-    		for (LeverageMatch lm : leverageMatches)
-    		{
-    			String key = lm.getOriginalSourceTuvId() + "_" + lm.getSubId()
-    					+ "_" + lm.getOrderNum() + "_" + lm.getTargetLocaleId();
-    			if (sidAttrMap.get(key) != null)
-    			{
-    				lm.setSid(sidAttrMap.get(key).getTextValue());
-    			}
-    		}
         }
 
         return leverageMatches;

@@ -191,6 +191,15 @@ class Tm3LeveragerAcrossMutipleTms
                 ltuv.setCreationDate(getCreationDate(tuv));
                 ltuv.setCreationUser(tuv.getCreationUser());
                 ltuv.setUpdatedProject((String) tu.getAttribute(projectAttr));
+                ltuv.setLastUsageDate(getLastUsageDate(tuv));
+                ltuv.setJobId(tuv.getJobId());
+                ltuv.setJobName(tuv.getJobName());
+                ltuv.setPreviousHash(tuv.getPreviousHash());
+                ltuv.setNextHash(tuv.getNextHash());
+                if (tuv.getSid() != null)
+                {
+                	ltuv.setSid(tuv.getSid());
+                }
 
                 ltu.addTuv(ltuv);
             }
@@ -246,6 +255,17 @@ class Tm3LeveragerAcrossMutipleTms
         if (modifyDate != null)
         {
             return new Timestamp(modifyDate.getTime());
+        }
+
+        return null;
+    }
+
+    private Timestamp getLastUsageDate(TM3Tuv<GSTuvData> tuv)
+    {
+        Date lastUsageDate = tuv.getLastUsageDate();
+        if (lastUsageDate != null)
+        {
+            return new Timestamp(lastUsageDate.getTime());
         }
 
         return null;

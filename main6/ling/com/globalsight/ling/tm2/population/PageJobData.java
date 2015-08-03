@@ -33,10 +33,13 @@ import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvMerger;
 import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.ling.common.DiplomatBasicParser;
+import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.ling.tm3.core.Fingerprint;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -89,7 +92,12 @@ public class PageJobData
 
     public void addTu(PageTmTu p_tu)
     {
-        m_tentativeTus.add(p_tu);
+    	PageTmTu previousTu = null;
+        if (m_tentativeTus.size() > 0)
+        {
+        	previousTu = m_tentativeTus.get(m_tentativeTus.size() - 1);
+        }
+    	m_tentativeTus.add(p_tu);
         // Use current date as "creationDate", "modifyDate" and "lastUsageDate".
     	for (BaseTmTuv tuv : p_tu.getTuvs())
         {
@@ -98,7 +106,35 @@ public class PageJobData
         	tuv.setLastUsageDate(now);
         	tuv.setCreationDate(now);
         	tuv.setModifyDate(now);
+
+        	tuv.setPreviousHash(BaseTmTuv.FIRST_HASH);
+    		tuv.setNextHash(BaseTmTuv.LAST_HASH);
+        	if (previousTu != null)
+        	{
+				BaseTmTuv preTuv = (BaseTmTuv) previousTu
+						.getTuvList(tuv.getLocale()).iterator().next();
+				preTuv.setNextHash(getHashValue(tuv.getSegment()));
+				tuv.setPreviousHash(getHashValue(preTuv.getSegment()));
+        	}
         }
+    }
+
+    private long getHashValue(String data)
+    {
+        try
+        {
+            SegmentTmExactMatchFormatHandler handler =
+                new SegmentTmExactMatchFormatHandler();
+            DiplomatBasicParser diplomatParser =
+                new DiplomatBasicParser(handler);
+            diplomatParser.parse(data);
+            return Fingerprint.fromString(handler.toString());
+        }
+        catch (Exception ex)
+        {
+        	c_logger.error("Error to get hash value for data: " + data, ex);
+        }
+    	return -1;
     }
 
     /**

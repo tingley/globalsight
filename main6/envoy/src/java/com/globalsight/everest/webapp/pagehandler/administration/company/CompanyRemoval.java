@@ -2582,20 +2582,29 @@ public class CompanyRemoval
             logEnd("LEVERAGE_MATCH_ARCHIVED");
         }
 
-        String lmAttrTable = "LEVERAGE_MATCH_ATTR_" + companyId;
-        if (DbUtil.isTableExisted(conn, lmAttrTable))
+        // Drop all leverage match extension tables for current company.
+        List<Long> jobIds = getJobIdsByCompanyId(companyId);
+        List<String> lmExtTables = new ArrayList<String>();
+        lmExtTables.add("LEVERAGE_MATCH_EXT_" + companyId);
+        lmExtTables.add("LEVERAGE_MATCH_EXT_" + companyId + "_ARCHIVED");
+        for (long jobId : jobIds)
         {
-            logStart(lmAttrTable);
-            execOnce(conn, SQL_DROP + lmAttrTable);
-            logEnd(lmAttrTable);
+        	lmExtTables.add("LEVERAGE_MATCH_EXT_" + companyId + "_" + jobId);
+        }
+        for (String tableName : lmExtTables)
+        {
+            if (DbUtil.isTableExisted(conn, tableName))
+            {
+                logStart(tableName);
+                execOnce(conn, SQL_DROP + tableName);
+                logEnd(tableName);
+            }
         }
 
         // Drop all leverage match tables for current company.
         List<String> lmTables = new ArrayList<String>();
         lmTables.add("LEVERAGE_MATCH_" + companyId);
         lmTables.add("LEVERAGE_MATCH_" + companyId + "_ARCHIVED");
-        
-        List<Long> jobIds = getJobIdsByCompanyId(companyId);
         for (long jobId : jobIds)
         {
             lmTables.add("LEVERAGE_MATCH_" + companyId + "_" + jobId);
@@ -2620,7 +2629,8 @@ public class CompanyRemoval
         tables.add("LEVERAGE_MATCH_ARCHIVED");
         tables.add("LEVERAGE_MATCH_" + companyId);
         tables.add("LEVERAGE_MATCH_" + companyId + "_ARCHIVED");
-        tables.add("LEVERAGE_MATCH_ATTR_" + companyId);
+        tables.add("LEVERAGE_MATCH_EXT_" + companyId);
+        tables.add("LEVERAGE_MATCH_EXT_" + companyId + "_ARCHIVED");
 
         for (String tableName : tables)
         {
@@ -4136,6 +4146,7 @@ public class CompanyRemoval
         tableNames.add("TRANSLATION_UNIT_" + companyId + "_" + jobId);
         tableNames.add("TRANSLATION_UNIT_VARIANT_" + companyId + "_" + jobId);
         tableNames.add("LEVERAGE_MATCH_" + companyId + "_" + jobId);
+        tableNames.add("LEVERAGE_MATCH_EXT_" + companyId + "_" + jobId);
 
         for (String tableName : tableNames)
         {

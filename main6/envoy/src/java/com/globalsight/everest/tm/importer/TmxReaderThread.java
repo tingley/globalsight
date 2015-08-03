@@ -654,6 +654,10 @@ public class TmxReaderThread
 			{
 				result.setJobName(value);
 			}
+			else if (Tmx.PROP_CREATION_PROJECT.equalsIgnoreCase(type))
+			{
+				result.setUpdatedProject(value);
+			}
 		}
         // Segment text: need to produce root elements <translatable>
         // and <localizable> depending on TU type.

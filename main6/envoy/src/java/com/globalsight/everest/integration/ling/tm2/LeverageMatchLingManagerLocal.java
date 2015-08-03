@@ -248,7 +248,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
         try
         {
-            conn = DbUtil.getConnection();
+        	conn = DbUtil.getConnection();
             String lmTableName = BigTableUtil.getLMTableJobDataInByJobId(jobId);
 			String lmExtTableName = BigTableUtil
 					.getLMExtTableJobDataInByJobId(jobId);
@@ -280,7 +280,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             }
             else
             {
-                sql = sql.replace("AND TM_ID in (tmId_list) ", "");
+                sql = sql.replace("AND lm.TM_ID in (tmId_list) ", "");
             }
 
             ps = conn.prepareStatement(sql);

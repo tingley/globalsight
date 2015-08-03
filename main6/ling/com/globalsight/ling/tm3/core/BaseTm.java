@@ -51,13 +51,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
 {
     private static Logger LOGGER = Logger.getLogger(BaseTm.class);
 
-    public long id;
-    public String tuTableName;
-    public String tuvTableName;
-    public String tuvExtTableName;
-    public String indexTableName;
-    public String attrValTableName;
-    public Set<TM3Attribute> attributes = new HashSet<TM3Attribute>();
+    private long id;
+    private String tuTableName;
+    private String tuvTableName;
+    private String tuvExtTableName;
+    private String indexTableName;
+    private String attrValTableName;
+    private Set<TM3Attribute> attributes = new HashSet<TM3Attribute>();
 
     // Injected
     private TM3Manager manager;

@@ -144,6 +144,7 @@ public class JobDataMigration
             BigTableUtil.checkTemplatePartArchiveTable("TEMPLATE_PART_ARCHIVED");
 
             // migrate data
+            migrateLeverageMatchExtData(connection, jobId);
             migrateLeverageMatchData(connection, jobId);
             migrateTuvData(connection, jobId);
             migrateTuData(connection, jobId);
@@ -168,6 +169,46 @@ public class JobDataMigration
                 archivingJobs.remove(jobId);
         	}
             DbUtil.silentReturnConnection(connection);
+        }
+    }
+
+    
+    /**
+	 * Move leverage match extension data to its archived table for specified
+	 * job and remove them from original working table.
+	 * 
+	 * @param connection
+	 * @param jobId
+	 * @throws SQLException
+	 */
+    private static void migrateLeverageMatchExtData(Connection connection,
+            long jobId) throws Exception
+    {
+        String columns = "SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, TARGET_LOCALE_ID, ORDER_NUM, LAST_USAGE_DATE, JOB_ID, JOB_NAME, PREVIOUS_HASH, NEXT_HASH, SID";
+        try
+        {
+            Job job = BigTableUtil.getJobById(jobId);
+			StringBuilder sql = new StringBuilder("REPLACE INTO ")
+					.append(job.getLmExtArchiveTable())
+					.append(" (").append(columns).append(") ")
+					.append("SELECT ").append(columns)
+					.append(" FROM ").append(job.getLmExtTable())
+					.append(" WHERE SOURCE_PAGE_ID IN ");
+
+            List<List<Object>> spIdList = queryBatchList(connection,
+					"SELECT page_id FROM request req WHERE job_id = ? ", jobId,
+					5);
+
+            exec(connection, sql.toString(), spIdList);
+
+			exec(connection, "DELETE FROM " + job.getLmExtTable()
+					+ " WHERE source_page_id IN ", spIdList);
+        }
+        catch (SQLException sqlEx)
+        {
+			logger.error("Failed to migrate leverage match extension data for job "
+					+ jobId);
+            throw sqlEx;
         }
     }
 

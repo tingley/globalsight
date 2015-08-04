@@ -929,13 +929,38 @@ public class TmxWriter implements IWriter
             result.append(prop.asXML());
         }
 
+        // previous hash value
+        long hash = p_tuv.getPreviousHash();
+        if (hash != -1)
+        {
+        	prop = new Tmx.Prop(Tmx.PROP_PREVIOUS_HASH, String.valueOf(hash));
+            result.append(prop.asXML());
+        }
+
+        // previous hash value
+        hash = p_tuv.getNextHash();
+        if (hash != -1)
+        {
+        	prop = new Tmx.Prop(Tmx.PROP_NEXT_HASH, String.valueOf(hash));
+            result.append(prop.asXML());
+        }
+
+        long jobId = p_tuv.getJobId();
+        if (jobId > 0)
+        {
+        	prop = new Tmx.Prop(Tmx.PROP_JOB_ID, String.valueOf(jobId));
+            result.append(prop.asXML());
+        }
+
+        String jobName = p_tuv.getJobName();
+        if (jobName != null && jobName.length() > 0)
+        {
+        	prop = new Tmx.Prop(Tmx.PROP_JOB_NAME, String.valueOf(jobName));
+            result.append(prop.asXML());
+        }
+
         // TODO: preserve the sub ids and locType in <prop>.
         result.append(convertToTmx(p_tuv.getSegment(), outputFormat));
-
-        // result.append("<seg>");
-        // result.append(GxmlUtil.stripRootTag(p_tuv.getSegment()));
-        // result.append("</seg>\r\n");
-
         result.append("</tuv>\r\n");
 
         return result.toString();

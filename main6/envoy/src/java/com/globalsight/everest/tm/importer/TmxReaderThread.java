@@ -632,6 +632,33 @@ public class TmxReaderThread
 			result.setLastUsageDate(new Timestamp(date.getTime()));
 		}
 
+		List tuvPropNodes = p_root.elements("prop");
+		for (int i = 0; i < tuvPropNodes.size(); i++)
+		{
+			Element elem = (Element) tuvPropNodes.get(i);
+			String type = elem.attributeValue("type");
+			String value = elem.getText();
+			if (Tmx.PROP_PREVIOUS_HASH.equalsIgnoreCase(type))
+			{
+				result.setPreviousHash(Long.parseLong(value));
+			}
+			else if (Tmx.PROP_NEXT_HASH.equalsIgnoreCase(type))
+			{
+				result.setNextHash(Long.parseLong(value));
+			}
+			else if (Tmx.PROP_JOB_ID.equalsIgnoreCase(type))
+			{
+				result.setJobId(Long.parseLong(value));
+			}
+			else if (Tmx.PROP_JOB_NAME.equalsIgnoreCase(type))
+			{
+				result.setJobName(value);
+			}
+			else if (Tmx.PROP_CREATION_PROJECT.equalsIgnoreCase(type))
+			{
+				result.setUpdatedProject(value);
+			}
+		}
         // Segment text: need to produce root elements <translatable>
         // and <localizable> depending on TU type.
         StringBuffer segment = new StringBuffer();

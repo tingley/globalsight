@@ -73,6 +73,9 @@ public class TMSearchEditEntryHandlerHelper
         setLableToJsp(request, bundle, "msg_tm_search_add_target_null");
         setLableToJsp(request, bundle, "msg_tm_search_no_changed");
         setLableToJsp(request, bundle, "msg_internal_moved_continue");
+        setLableToJsp(request, bundle, "job_id");
+        setLableToJsp(request, bundle, "job_name");
+        setLableToJsp(request, bundle, "lb_last_usage_date");
     }
 
     /**
@@ -278,7 +281,7 @@ public class TMSearchEditEntryHandlerHelper
         String createdOn = UTC.valueOf(trgTuv.getCreationDate());
         String modifyUser = trgTuv.getModifyUser();
         String modifyDate = UTC.valueOf(trgTuv.getModifyDate());
-
+        
 		entryInfo.put("sid", sid == null ? na : fixString(EditUtil.encodeXmlEntities(sid)));
         String createdByName = UserUtil.getUserNameById(createdBy);
         entryInfo.put("createdBy", createdBy == null ? 
@@ -291,7 +294,17 @@ public class TMSearchEditEntryHandlerHelper
         entryInfo.put("sourceLocale", srcTuv.getLocale().getDisplayName());
         entryInfo.put("targetLocale", targetLocale.getDisplayName());
         entryInfo.put("tmName", fixString(EditUtil.encodeXmlEntities(tm.getName())));
-
+		entryInfo.put("lastUsageDate", trgTuv.getLastUsageDate() == null ? na
+				: UTC.valueOf(trgTuv.getLastUsageDate()));
+		entryInfo.put(
+				"jobId",
+				trgTuv.getJobId() == -1 ? na
+						: String.valueOf(trgTuv.getJobId()));
+		entryInfo.put("jobName",
+				trgTuv.getJobName() == null
+						|| trgTuv.getJobName().equalsIgnoreCase("null") ? na
+						: trgTuv.getJobName());
+        
         String srcSegment = GxmlUtil.stripRootTag(srcTuv.getSegment());
         SegmentManager segmentManagerSource = new SegmentManager();
         segmentManagerSource.setInputSegment(srcSegment, "", "html");

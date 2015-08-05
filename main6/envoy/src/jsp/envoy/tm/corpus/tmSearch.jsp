@@ -182,6 +182,10 @@ var modifyStartDateOption;
 var modifyStartDate;
 var modifyEndDateOption;
 var modifyEndDate;
+var lastUsageStartDateOption;
+var lastUsageStartDate;
+var lastUsageEndDateOption;
+var lastUsageEndDate;
 var tuIds;
 var sids;
 var createUser;
@@ -189,6 +193,7 @@ var modifyUser;
 var attributeName;
 var attributeValue;
 var isRegex;
+var jobIds;
 
 var result = new Array();
 var searchType;
@@ -727,6 +732,22 @@ $(document).ready(function(){
 		}
 	});
 	
+	$("#lusf").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#luef").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#luef").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#lusf").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
 	 loadGuides();  
 	 init();
 	 shareConditionTMAndTermSearch();
@@ -943,6 +964,17 @@ $(document).ready(function(){
 			 $("#modifyEndDateOption").attr("disabled",true);
 			 $("#mef").attr("disabled",true);
 		 }
+	  	lastUsageStartDateOption = $("#lastUsageStartDateOption").val();
+	  	 if(lastUsageStartDateOption == "eq")
+	  	 {
+	  		 $("#lastUsageEndDateOption").attr("disabled",true);
+	  		 $("#luef").attr("disabled",true);
+	  	 }
+	  	 else if(lastUsageStartDateOption == "neq")
+		 {
+			 $("#lastUsageEndDateOption").attr("disabled",true);
+			 $("#luef").attr("disabled",true);
+		 }
    	     advancedSearch = true;
    	     searchClick();
      })
@@ -1098,6 +1130,30 @@ $(document).ready(function(){
     		 }
     		 attributeValue = $("#attributeValue").val();
     		 
+    		 jobIds = $("#jobIds").val();
+    		 if(checkSomeSpecialChar(jobIds))
+    		 {
+    			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_job_id"))%> " +
+   		              "<%=EditUtil.toJavascript(bundle
+							.getString("msg_invalid_entry8"))%>");
+    			 return false;
+    		 }
+    		 if(jobIds.trim() != "" && jobIds.trim() != null)
+    		 {
+	    		 var temp=/^\d+(\.\d+)?$/;
+	    		 var jobIdArr = jobIds.trim().split(",");
+	    		 for(var i =0;i<jobIdArr.length;i++)
+	    		 {
+	    			 if(temp.test(jobIdArr[i])==false)
+	    			 {
+	    				 alert("<%=EditUtil.toJavascript(bundle.getString("lb_job_id"))%> " +
+	    			              "<%=EditUtil.toJavascript(bundle
+	    							.getString("msg_invalid_entry8"))%>");
+	    				 return false;
+	    			 }
+	    		 }
+    		 }
+    		 
     		 createStartDateOption = $("#createStartDateOption").val();
     		 createStartDate = $("#csf").val();
     		 createEndDateOption = $("#createEndDateOption").val();
@@ -1144,6 +1200,28 @@ $(document).ready(function(){
      			}
      		}
     		 
+       	     lastUsageStartDateOption = $("#lastUsageStartDateOption").val();
+    		 lastUsageStartDate = $("#lusf").val();
+    		 lastUsageEndDateOption = $("#lastUsageEndDateOption").val();
+    		 lastUsageEndDate = $("#luef").val();
+    		 if(lastUsageStartDateOption == "gt" && lastUsageEndDateOption == "lt"){
+    			if(lastUsageStartDate == lastUsageEndDate){
+    				alert("${lb_tm_check_date_greater_less}");
+    				return;
+    			}
+    		}
+    		 if(lastUsageStartDateOption == "gt" && lastUsageEndDateOption == "lteq"){
+     			if(lastUsageStartDate == lastUsageEndDate){
+     				alert("${lb_tm_check_date_greater_less_equal}");
+     				return;
+     			}
+     		}
+    		 if(lastUsageStartDateOption == "gteq" && lastUsageEndDateOption == "lt"){
+     			if(lastUsageStartDate == lastUsageEndDate){
+     				alert("${lb_tm_check_date_greater_equal_less}");
+     				return;
+     			}
+     		}
        	 }
 
     	 var searchParams;
@@ -1217,6 +1295,11 @@ $(document).ready(function(){
 			           "modifyStartDate":modifyStartDate,
 			           "modifyEndDateOption":modifyEndDateOption,
 			           "modifyEndDate":modifyEndDate,
+			           "lastUsageStartDateOption":lastUsageStartDateOption,
+			           "lastUsageStartDate":lastUsageStartDate,
+			           "lastUsageEndDateOption":lastUsageEndDateOption,
+			           "lastUsageEndDate":lastUsageEndDate,
+			           "jobIds":jobIds,
 			           "tuIds":tuIds,
 			           "sids":sids,
 			           "isRegex":isRegex,
@@ -1244,6 +1327,11 @@ $(document).ready(function(){
 			           "modifyStartDate":modifyStartDate,
 			           "modifyEndDateOption":modifyEndDateOption,
 			           "modifyEndDate":modifyEndDate,
+			           "lastUsageStartDateOption":lastUsageStartDateOption,
+			           "lastUsageStartDate":lastUsageStartDate,
+			           "lastUsageEndDateOption":lastUsageEndDateOption,
+			           "lastUsageEndDate":lastUsageEndDate,
+			           "jobIds":jobIds,
 			           "tuIds":tuIds,
 			           "sids":sids,
 			           "isRegex":isRegex,
@@ -1346,6 +1434,28 @@ function disableModifyOption(){
 		$("#mef").attr("disabled",false);
 	}
 }
+
+function disableLastUsageOption(){
+	lastUsageStartDateOption = $("#lastUsageStartDateOption").val();
+	if(lastUsageStartDateOption == "eq")
+	{
+		$("#lastUsageEndDateOption").attr("disabled",true);
+		$("#luef").attr("value","");
+		$("#luef").attr("disabled",true);
+	}
+	else if(lastUsageStartDateOption == "neq")
+	{
+		$("#lastUsageEndDateOption").attr("disabled",true);
+		$("#luef").attr("value","");
+		$("#luef").attr("disabled",true);
+	}
+	else
+	{
+		$("#lastUsageEndDateOption").attr("disabled",false);
+		$("#luef").attr("value","");
+		$("#luef").attr("disabled",false);
+	}
+}
 </script>
 </head>
 <body>
@@ -1435,10 +1545,10 @@ function disableModifyOption(){
 							<table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
 							  <tr>
 							    <td class="search_content"nowrap>
-							       <%=bundle.getString("lb_export_tu_id") %>: <input type="text" id="tuIds" name="tuIds" value=""/>
+							       ${lb_export_tu_id}: <input type="text" id="tuIds" name="tuIds" value=""/>
 							    </td>
 							    <td class="search_content" nowrap>
-							    	<%=bundle.getString("lb_export_sid") %>: <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/><%=bundle.getString("lb_export_regex") %> 
+							    	${lb_export_sid}: <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/>${lb_export_regex}
       							</td>
       							<td class="search_content" nowrap>
 							     	Attribute Name: <input type="text" id="attributeName" name="attributeName" value=""/>
@@ -1451,10 +1561,13 @@ function disableModifyOption(){
 							 <table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
 							  <tr>
 							  	<td class="search_content" nowrap>
-							     	<%=bundle.getString("lb_export_create_user") %>: <input type="text" id="createUser" name="createUser" value=""/>
+							     	${lb_export_create_user}: <input type="text" id="createUser" name="createUser" value=""/>
       							</td>
-      							<td class="search_content"  width="100%" nowrap>
-							     	<%=bundle.getString("lb_export_modify_user") %>: <input type="text" id="modifyUser" name="modifyUser" value=""/>
+      							<td class="search_content"   nowrap>
+							     	${lb_export_modify_user}: <input type="text" id="modifyUser" name="modifyUser" value=""/>
+      							</td>
+      							<td class="search_content"  width="100%" nowrap >
+							     	${lb_job_id}: <input type="text" id="jobIds" name="jobIds" value=""/>
       							</td>
 							  </tr>
 							 </table>
@@ -1510,6 +1623,34 @@ function disableModifyOption(){
 							    </td>
 							    <td class="search_content">
 							    	<input type="text" name="mef"  id="mef"">
+      							</td>
+      							<td class="search_content"  width="100%">
+      								<span class='info'>(MM/DD/YYYY)</span>
+      							</td>
+							  </tr>
+							  <tr>
+							  	<td class="search_content" nowrap>
+							  		${lb_last_usage_date}
+							    </td>
+							    <td class="search_content" nowrap>${lb_report_startDate}: 
+							    	<select id="lastUsageStartDateOption" onchange="disableLastUsageOption()">
+							       		<option value="eq" id="eqStart">${lb_equal_to}</option>
+							       		<option value="neq">${lb_not_equal_to}</option>
+							       		<option value="gt"  id="gtStart">${lb_greater_than}</option>
+							       		<option value="gteq"  id="gteqStart">${lb_greater_than_or_equal_to}</option>
+							       </select>
+							    </td>
+							    <td class="search_content">
+							   	    <input type="text" name="lusf" id="lusf">
+      							</td>
+							    <td class="search_content" nowrap>${lb_report_endDate}: 
+							   		<select id="lastUsageEndDateOption">
+							       		<option value="lt" id="ltEnd">${lb_less_than}</option>
+							       		<option value="lteq" id="lteqEnd">${lb_less_than_or_equal_to}</option>
+							       </select>
+							    </td>
+							    <td class="search_content">
+							    	<input type="text" name="luef"  id="luef"">
       							</td>
       							<td class="search_content"  width="100%">
       								<span class='info'>(MM/DD/YYYY)</span>

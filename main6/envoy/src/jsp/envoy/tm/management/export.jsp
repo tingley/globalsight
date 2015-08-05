@@ -108,7 +108,7 @@ function parseExportOptions()
 {
   var form = document.oDummyForm;
   var node;
-  var createdAfter, createdBefore,modifyAfter,modifyBefore,createUser,modifyUser,tuId,sId,isRegex;
+  var createdAfter, createdBefore,modifyAfter,modifyBefore,lastUsageAfter,lastUsageBefore,createUser,modifyUser,tuId,sId,isRegex,jobId;
   var selectMode, selectLanguage, duplicateHandling, fileType, fileEncoding, selectChangeCreationId;
 
   var $xml = $( $.parseXML( xmlExportOptions ) );
@@ -125,6 +125,11 @@ function parseExportOptions()
   createdBefore = node.find("createdbefore").text();
   modifyAfter = node.find("modifiedafter").text();
   modifyBefore = node.find("modifiedbefore").text();
+  
+  lastUsageAfter = node.find("lastusageafter").text();
+  lastUsageBefore = node.find("lastusagebefore").text();
+  jobId = node.find("jobId").text();
+  
   createUser = node.find("createdby").text();
   modifyUser = node.find("modifiedby").text();
   tuId = node.find("tuId").text();
@@ -149,6 +154,11 @@ function parseExportOptions()
   form.fltModifiedUser.value = modifyUser;
   form.fltTuId.value = tuId;
   form.fltSID.value = sId;
+  
+  form.fltLastUsageAfter.value = lastUsageAfter;
+  form.fltLastUsageBefore.value = lastUsageBefore;
+  form.fltJobId.value = jobId;
+  
   if(isRegex == "true"){
 	  form.fltIsRegex.checked = true;
   }
@@ -274,6 +284,37 @@ function buildExportOptions()
   //Modify Date
   node.find("modifiedafter").text(form.fltModifiedAfter.value);
   node.find("modifiedbefore").text(form.fltModifiedBefore.value);
+  //Last Usage Date
+  node.find("lastusageafter").text(form.fltLastUsageAfter.value);
+  node.find("lastusagebefore").text(form.fltLastUsageBefore.value);
+  
+ if(checkSomeSpecialChar(form.fltJobId.value))
+ {
+	 alert("<%=EditUtil.toJavascript(bundle.getString("lb_job_id"))%> " +
+              "<%=EditUtil.toJavascript(bundle
+				.getString("msg_invalid_entry8"))%>");
+	 return false;
+ }
+ else
+ {
+	 if(form.fltJobId.value.trim() != "" && form.fltJobId.value.trim() != null)
+	 {
+		 var temp=/^\d+(\.\d+)?$/;
+		 var jobIdArr = form.fltJobId.value.split(",");
+		 for(var i =0;i<jobIdArr.length;i++)
+		 {
+			 if(temp.test(jobIdArr[i])==false)
+			 {
+				 alert("<%=EditUtil.toJavascript(bundle.getString("lb_job_id"))%> " +
+			              "<%=EditUtil.toJavascript(bundle
+							.getString("msg_invalid_entry8"))%>");
+				 return false;
+			 }
+		 }
+	 }	 
+	  //Job id
+	  node.find("jobId").text(form.fltJobId.value);
+ }
   //Create User
   node.find("createdby").text(form.fltCreatedUser.value);
   //Modify User
@@ -773,6 +814,22 @@ function doOnLoad()
 		}
 	});
 	
+	$("#idLtUgs").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#idLtUge").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#idLtUge").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#idLtUgs").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
    // Load the Guides
    loadGuides();
 
@@ -859,6 +916,13 @@ function doOnLoad()
       <input name="fltTuId" id="fltTuId" type="text" size="30">
     </td>
    </tr>
+   <%--JOB ID --%>
+   <tr>
+ 	<td><%=bundle.getString("lb_job_id") %>:</td>
+    <td>
+      <input name="fltJobId" id="fltJobId" type="text" size="30">
+    </td>
+   </tr>
    <%-- SID --%>
    <tr>
  	<td><%=bundle.getString("lb_export_sid") %>:</td>
@@ -903,7 +967,17 @@ function doOnLoad()
       <span class='info'>(MM/DD/YYYY)</span>
     </td>
    </tr>
-   
+   <%-- last usage date --%>
+   <tr>
+ 	<td><%=bundle.getString("lb_last_usage_date") %>:</td>
+    <td>
+      <%=bundle.getString("lb_start").toLowerCase() %>: 
+      <input name="fltLastUsageAfter" id="idLtUgs" type="text" size="15">
+      <%=bundle.getString("lb_end").toLowerCase() %>: 
+      <input name="fltLastUsageBefore" id="idLtUge" type="text" size="15">
+      <span class='info'>(MM/DD/YYYY)</span>
+    </td>
+   </tr>
   </TABLE>
  </div>
  <div style="margin-bottom:10px">

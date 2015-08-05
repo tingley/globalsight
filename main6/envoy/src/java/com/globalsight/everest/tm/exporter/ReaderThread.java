@@ -189,7 +189,10 @@ public class ReaderThread extends Thread
 		String tuIds = filterString.m_tuId;
 		String stringId = filterString.m_sid;
 		String isRegex = filterString.m_regex;
-
+		String jobId = filterString.m_jobId;
+		String lastUsageAfter = filterString.m_lastUsageAfter;
+		String lastUsageBefore = filterString.m_lastUsageBefore;
+		
 		if (StringUtil.isNotEmpty(createUser))
 		{
 			paramMap.put("createUser", createUser);
@@ -223,6 +226,19 @@ public class ReaderThread extends Thread
 			paramMap.put("stringId", stringId);
 			paramMap.put("isRegex", isRegex);
 		}
+		if (StringUtil.isNotEmpty(jobId))
+		{
+			paramMap.put("jobId", jobId);
+		}
+		if (StringUtil.isNotEmpty(lastUsageAfter))
+		{
+			paramMap.put("lastUsageAfter", lastUsageAfter);
+		}
+		if (StringUtil.isNotEmpty(lastUsageBefore))
+		{
+			paramMap.put("lastUsageBefore", lastUsageBefore);
+		}
+		
 		return paramMap;
 	}
 }

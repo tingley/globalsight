@@ -218,6 +218,7 @@ public class TMSearchBroswerHandlerHelper
         setLableToJsp(request, bundle, "lb_report_endDate");
         setLableToJsp(request, bundle, "lb_modified_on");
         setLableToJsp(request, bundle, "lb_created_on");
+        setLableToJsp(request, bundle, "lb_last_usage_date");
         setLableToJsp(request, bundle, "lb_equal_to");
         setLableToJsp(request, bundle, "lb_not_equal_to");
         setLableToJsp(request, bundle, "lb_greater_than");
@@ -228,6 +229,12 @@ public class TMSearchBroswerHandlerHelper
         setLableToJsp(request, bundle, "lb_tm_check_date_greater_less");
         setLableToJsp(request, bundle, "lb_tm_check_date_greater_equal_less");
         setLableToJsp(request, bundle, "lb_tm_check_date_greater_less_equal");
+        setLableToJsp(request, bundle, "lb_export_create_user");
+        setLableToJsp(request, bundle, "lb_export_modify_user");
+        setLableToJsp(request, bundle, "lb_job_id");
+        setLableToJsp(request, bundle, "lb_export_tu_id");
+        setLableToJsp(request, bundle, "lb_export_sid");
+        setLableToJsp(request, bundle, "lb_export_regex");
     }
 
     /**
@@ -1166,9 +1173,15 @@ public class TMSearchBroswerHandlerHelper
 			Date modifyStartDate = (Date) paramMap.get("modifyStartDate");
 			Date modifyEndDate = (Date) paramMap.get("modifyEndDate");
 			
+			String lastUsageStartDateOption = (String) paramMap.get("lastUsageStartDateOption");
+			String lastUsageEndDateOption = (String) paramMap.get("lastUsageEndDateOption");
+			Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
+			Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
+			
 			String createUser = (String) paramMap.get("createUser");
 			String modifyUser = (String) paramMap.get("modifyUser");
 			long localeId = (Long) paramMap.get("localeIds");
+			String jobIds = (String) paramMap.get("jobIds");
 			//create date
 			if (createStartDate != null)
 			{
@@ -1327,6 +1340,70 @@ public class TMSearchBroswerHandlerHelper
 					}
 				}
 			}
+			
+			// last usage date
+			if (lastUsageStartDate != null)
+			{
+				if (lastUsageStartDateOption.equals(DATE_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND ext.lastUsageDate >= ? ").addValue(
+								parseStartDate(lastUsageStartDate));
+						sb.append(" AND ext.lastUsageDate <= ? ").addValue(
+								parseEndDate(lastUsageStartDate));
+					}
+				}
+				else if (lastUsageStartDateOption.equals(DATE_NOT_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND ext.lastUsageDate < ? ").addValue(
+								parseStartDate(lastUsageStartDate));
+						sb.append(" AND ext.lastUsageDate > ? ").addValue(
+								parseEndDate(lastUsageStartDate));
+					}
+				}
+				else if (lastUsageStartDateOption.equals(DATE_GREATER_THAN))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND ext.lastUsageDate > ? ").addValue(
+								parseStartDate(lastUsageStartDate));
+					}
+				}
+				else if (lastUsageStartDateOption
+						.equals(DATE_GREATER_THAN_OR_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND ext.lastUsageDate >= ? ").addValue(
+								parseStartDate(lastUsageStartDate));
+					}
+				}
+			}
+
+			if (lastUsageEndDate != null)
+			{
+				if (lastUsageEndDateOption.equals(DATE_LESS_THAN))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND ext.lastUsageDate < ? ").addValue(
+								parseEndDate(lastUsageEndDate));
+					}
+				}
+				else if (lastUsageEndDateOption
+						.equals(DATE_LESS_THAN_OR_EQUALS))
+				{
+					if (tmType.equalsIgnoreCase("TM3"))
+					{
+						sb.append(" AND ext.lastUsageDate <= ? ").addValue(
+								parseEndDate(lastUsageEndDate));
+					}
+				}
+			}
+						
 			//create user
 			if (StringUtil.isNotEmpty(createUser))
 			{
@@ -1362,6 +1439,14 @@ public class TMSearchBroswerHandlerHelper
 				else if (tmType.equalsIgnoreCase("TM2"))
 				{
 					sb.append(" AND tuv.LOCALE_ID = ? ").addValue(localeId);
+				}
+			}
+			
+			if (StringUtil.isNotEmpty(jobIds))
+			{
+				if (tmType.equalsIgnoreCase("TM3"))
+				{
+					sb.append(" AND ext.jobId in (").append(jobIds).append(")");
 				}
 			}
 		}
@@ -1413,12 +1498,17 @@ public class TMSearchBroswerHandlerHelper
 		Date modifyStartDate = null;
 		String modifyEndDateOption = null;
 		Date modifyEndDate = null;
+		String lastUsageStartDateOption = null;
+		Date lastUsageStartDate = null;
+		String lastUsageEndDateOption = null;
+		Date lastUsageEndDate = null;
 		String tuIds = null;
 		String sids = null;
 		String isRegex = null;
 		String createUser = null;
 		String modifyUser = null;
-
+		String jobIds = null;
+		
 		if (advancedSearch)
 		{
 			createStartDateOption = (String) request.getParameter("createStartDateOption");
@@ -1431,12 +1521,18 @@ public class TMSearchBroswerHandlerHelper
 			modifyEndDateOption = (String) request.getParameter("modifyEndDateOption");
 			modifyEndDate = parseDate((String) request.getParameter("modifyEndDate"));
 
+			lastUsageStartDateOption = (String) request.getParameter("lastUsageStartDateOption");
+			lastUsageStartDate = parseDate((String) request.getParameter("lastUsageStartDate"));
+			lastUsageEndDateOption = (String) request.getParameter("lastUsageEndDateOption");
+			lastUsageEndDate = parseDate((String) request.getParameter("lastUsageEndDate"));
+			
 			tuIds = (String) request.getParameter("tuIds");
 			sids = (String) request.getParameter("sids");
 			isRegex = (String) request.getParameter("isRegex");
 			createUser = (String) request.getParameter("createUser");
 			modifyUser = (String) request.getParameter("modifyUser");
-
+			jobIds = (String)request.getParameter("jobIds");
+			
 			filterMap.put("createStartDateOption", createStartDateOption);
 			filterMap.put("createStartDate", createStartDate);
 			filterMap.put("createEndDateOption", createEndDateOption);
@@ -1445,11 +1541,16 @@ public class TMSearchBroswerHandlerHelper
 			filterMap.put("modifyStartDate", modifyStartDate);
 			filterMap.put("modifyEndDateOption", modifyEndDateOption);
 			filterMap.put("modifyEndDate", modifyEndDate);
+			filterMap.put("lastUsageStartDateOption", lastUsageStartDateOption);
+			filterMap.put("lastUsageStartDate", lastUsageStartDate);
+			filterMap.put("lastUsageEndDateOption", lastUsageEndDateOption);
+			filterMap.put("lastUsageEndDate", lastUsageEndDate);
 			filterMap.put("tuIds", tuIds);
 			filterMap.put("sids", sids);
 			filterMap.put("isRegex", isRegex);
 			filterMap.put("createUser", createUser);
 			filterMap.put("modifyUser", modifyUser);
+			filterMap.put("jobIds", jobIds);
 		}
 		return filterMap;
 	}
@@ -1541,11 +1642,16 @@ public class TMSearchBroswerHandlerHelper
 		Date modifyStartDate = (Date) filterMap.get("modifyStartDate");
 		String modifyEndDateOption =(String)  filterMap.get("modifyEndDateOption");
 		Date modifyEndDate = (Date) filterMap.get("modifyEndDate");
+		String lastUsageStartDateOption = (String) filterMap.get("lastUsageStartDateOption");
+		Date lastUsageStartDate = (Date) filterMap.get("lastUsageStartDate");
+		String lastUsageEndDateOption =(String)  filterMap.get("lastUsageEndDateOption");
+		Date lastUsageEndDate = (Date) filterMap.get("lastUsageEndDate");
 		String tuIds = (String) filterMap.get("tuIds");
 		String sids = (String) filterMap.get("sids");
 		String isRegex = (String) filterMap.get("isRegex");
 		String createUser = (String) filterMap.get("createUser");
 		String modifyUser = (String) filterMap.get("modifyUser");
+    	String jobIds = (String) filterMap.get("jobIds");
     	
     	boolean checkCreateDate = searchByDate("create", createStartDateOption, 
     			createEndDateOption, createStartDate, createEndDate, tuv);
@@ -1557,6 +1663,13 @@ public class TMSearchBroswerHandlerHelper
     	boolean checkModifyDate = searchByDate("modify", modifyStartDateOption, 
     			modifyEndDateOption, modifyStartDate, modifyEndDate, tuv);
     	if(!checkModifyDate)
+    	{
+    		return false;
+    	}
+    	
+      	boolean checkLastUsageDate = searchByDate("lastUsage", lastUsageStartDateOption, 
+      			lastUsageEndDateOption, lastUsageStartDate, lastUsageEndDate, tuv);
+    	if(!checkLastUsageDate)
     	{
     		return false;
     	}
@@ -1645,6 +1758,14 @@ public class TMSearchBroswerHandlerHelper
     	    		return false;
     	    }
     	}
+    	
+		if (StringUtil.isNotEmpty(jobIds))
+		{
+			if (!jobIds.contains(String.valueOf(tuv.getJobId())))
+			{
+				return false;
+			}
+		}
     	
     	return true;
     }
@@ -1745,6 +1866,10 @@ public class TMSearchBroswerHandlerHelper
 				else if (searchByDataType.equalsIgnoreCase("modify"))
 				{
 					date = format.parse(format.format(tuv.getModifyDate()));
+				}
+				else if (searchByDataType.equalsIgnoreCase("lastUsage"))
+				{
+					date = format.parse(format.format(tuv.getLastUsageDate()));
 				}
 			}
 		}

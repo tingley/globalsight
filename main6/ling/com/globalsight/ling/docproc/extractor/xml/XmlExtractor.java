@@ -68,6 +68,8 @@ import com.globalsight.ling.docproc.Segmentable;
 import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.xml.xmlrule.CommentRuleItem;
+import com.globalsight.util.Emoji;
+import com.globalsight.util.EmojiManager;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.SegmentUtil;
@@ -191,6 +193,10 @@ public class XmlExtractor extends AbstractExtractor implements
     private final String ATTRIBUTE_PRESERVE_CLOSED_TAG = "GS_XML_ATTRIBUTE_PRESERVE_CLOSED_TAG";
 
     private List<ExtractRule> rules = new ArrayList<ExtractRule>();
+    // GBS-3997
+    public static final String MARK_EMOJI = "emoji-";
+    public static final Pattern P_EMOJI_TAG = Pattern
+            .compile("(<ph[^>]*?erasable=\"yes\"[^>]*?type=\"(emoji-[^<]*?)\"[^>]*?>)[^<]*?(</ph>)");
 
     //
     // Constructors
@@ -782,6 +788,8 @@ public class XmlExtractor extends AbstractExtractor implements
                             isInline, isPreserveWS);
                     // GBS-3577
                     temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
+                    // GBS-3997
+                    temp = parseEmojiToAliasTag(temp);
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
                 else
@@ -814,6 +822,8 @@ public class XmlExtractor extends AbstractExtractor implements
 
                     // GBS-3577
                     temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
+                    // GBS-3997
+                    temp = parseEmojiToAliasTag(temp);
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
 
@@ -907,9 +917,10 @@ public class XmlExtractor extends AbstractExtractor implements
                 }
                 else
                 {
-                    outputExtractedStuff(
-                            m_xmlEncoder.encodeStringBasic(nodeValue),
-                            isTranslatable, false);
+                    nodeValue = m_xmlEncoder.encodeStringBasic(nodeValue);
+                    // GBS-3997
+                    nodeValue = parseEmojiToAliasTag(nodeValue);
+                    outputExtractedStuff(nodeValue, isTranslatable, false);
                 }
                 outputSkeleton("]]>");
             }
@@ -995,6 +1006,25 @@ public class XmlExtractor extends AbstractExtractor implements
                 outputSkeleton(name);
             }
         }
+    }
+
+    /**
+     * Replaces the emoji's unicode occurrences by erasable tags.
+     * 
+     * @since GBS-3997
+     */
+    private String parseEmojiToAliasTag(String text)
+    {
+        String result = text;
+        String tag = "<ph erasable=\"yes\" type=\"emoji-emojiAlias\">emojiDescription</ph>";
+        for (Emoji emoji : EmojiManager.getAll())
+        {
+            String newTag = tag
+                    .replace("emojiAlias", emoji.getAliases().get(0));
+            newTag = newTag.replace("emojiDescription", emoji.getDescription());
+            result = result.replace(emoji.getUnicode(), newTag);
+        }
+        return result;
     }
 
     private String nbspPh()
@@ -2328,6 +2358,8 @@ public class XmlExtractor extends AbstractExtractor implements
                 wrapAsEntity("copy", "&copy;"));
         chunk = StringUtil.replace(chunk, "_ampcopyright_",
                 wrapAsEntity("copy", "&amp;copy;"));
+        // GBS-3997
+        chunk = parseEmojiToAliasTag(chunk);
 
         if (isCdata)
         {

@@ -33,7 +33,10 @@ import java.sql.Timestamp;
 
 public interface BaseTmTuv
 {
-    public long getId();
+	public static final int FIRST_HASH = 0;
+	public static final int LAST_HASH = 1;
+
+	public long getId();
     
     public void setId(long p_id);
     

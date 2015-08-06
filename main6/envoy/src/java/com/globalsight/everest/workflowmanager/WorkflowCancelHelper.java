@@ -147,7 +147,7 @@ public class WorkflowCancelHelper
             deleteSegmentComment(conn, workflow);
 
             List<List<Object>> spIdBatchList = getSourcePageIds(workflow);
-            deleteLMAttributes(conn, trgLocaleId, spIdBatchList, jobId);
+            deleteLmExtInfo(conn, trgLocaleId, spIdBatchList, jobId);
             deleteLeverageMatch(conn, trgLocaleId, spIdBatchList, jobId);
             deleteTuTuvAttributeByTuvIds(conn, trgLocaleId, spIdBatchList, jobId);
             deleteTuv(conn, trgLocaleId, spIdBatchList, jobId);
@@ -367,18 +367,18 @@ public class WorkflowCancelHelper
         logEnd(lmTableName.toUpperCase());
     }
 
-	private static void deleteLMAttributes(Connection conn, long trgLocaleId,
+	private static void deleteLmExtInfo(Connection conn, long trgLocaleId,
 			List<List<Object>> spIdBatchList, long p_jobId) throws Exception
 	{
-		String lmAttrTable = BigTableUtil.getLMAttributeTableByJobId(p_jobId);
+		String lmExtTable = BigTableUtil.getLMExtTableJobDataInByJobId(p_jobId);
 		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM ").append(lmAttrTable)
+		sql.append("DELETE FROM ").append(lmExtTable)
 				.append(" WHERE target_locale_id = ").append(trgLocaleId)
 				.append(" AND source_page_id IN ");
 
-		logStart(lmAttrTable.toUpperCase());
+		logStart(lmExtTable.toUpperCase());
 		exec(conn, sql.toString(), spIdBatchList);
-		logEnd(lmAttrTable.toUpperCase());
+		logEnd(lmExtTable.toUpperCase());
 	}
 
 	private static void deleteTuTuvAttributeByTuvIds(Connection conn,

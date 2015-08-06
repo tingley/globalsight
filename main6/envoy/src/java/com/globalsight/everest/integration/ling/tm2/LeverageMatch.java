@@ -100,6 +100,12 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     private String modifyUser;
     private Date modifyDate;
 
+    private Date lastUsageDate = null;
+    private long jobId = -1;
+    private String jobName = null;
+    private long previousHash = -1;
+    private long nextHash = -1;
+
     // Helper object - still necessary?
     // private SegmentTagsAligner m_tagAligner;
 
@@ -139,6 +145,11 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         creationDate = p_other.creationDate;
         modifyUser = p_other.modifyUser;
         modifyDate = p_other.modifyDate;
+        lastUsageDate = p_other.lastUsageDate;
+        jobId = p_other.jobId;
+        jobName = p_other.jobName;
+        previousHash = p_other.previousHash;
+        nextHash = p_other.nextHash;
     }
 
     public long getTmProfileId()
@@ -320,7 +331,47 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         this.creationDate = creationDate;
     }
 
-    public boolean isExactMatch()
+    public Date getLastUsageDate() {
+		return lastUsageDate;
+	}
+
+	public void setLastUsageDate(Date lastUsageDate) {
+		this.lastUsageDate = lastUsageDate;
+	}
+
+	public long getJobId() {
+		return jobId;
+	}
+
+	public void setJobId(long jobId) {
+		this.jobId = jobId;
+	}
+
+	public String getJobName() {
+		return jobName;
+	}
+
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
+	}
+
+	public long getPreviousHash() {
+		return previousHash;
+	}
+
+	public void setPreviousHash(long previousHash) {
+		this.previousHash = previousHash;
+	}
+
+	public long getNextHash() {
+		return nextHash;
+	}
+
+	public void setNextHash(long nextHash) {
+		this.nextHash = nextHash;
+	}
+
+	public boolean isExactMatch()
     {
         return m_scoreNum == 100
                 && !m_matchType.equals(MatchState.UNVERIFIED_EXACT_MATCH

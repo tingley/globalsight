@@ -932,70 +932,35 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		{
 			stringId = (String) paramMap.get("stringId");
 		}
-		// TODO: How about the performance ???
+
+		// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...
 		if (StringUtil.isNotEmpty(stringId))
 		{
-			// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...
-			sb.append("SELECT tuId,sid FROM (")
-					.append("SELECT DISTINCT tuv.tuId AS tuId, ext.sid AS sid FROM ")
-					.append(getStorage().getTuvTableName()).append(" as tuv, ")
-					.append(getStorage().getTuvExtTableName())
-					.append(" AS ext");
-			if (inlineAttrs != null && !inlineAttrs.isEmpty())
-			{
-				sb.append(",").append(getStorage().getTuTableName())
-						.append(" as tu ");
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-			}
-			getParameterSql(sb, paramMap, localeIds, inlineAttrs);
-			sb.append(" AND tuv.id = ext.tuvId ").append(
-					"AND ext.sid IS NOT NULL ");
-			if (startId != -1 && count != -1)
-			{
-				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
-						.addValues(startId, count);
-			}
-			sb.append(") attrAndTuvAndTu");
-
-			sb.append(" UNION ");
-
-			// If SID is not empty, query "tm3_tu_shared_xx" table as "old" SID
-			// are stored in TU table. Can be removed in future.
-			sb.append("SELECT tuId,sid FROM (")
-					.append("SELECT DISTINCT tuv.tuId AS tuId, tu.sid AS sid  FROM ")
-					.append(getStorage().getTuvTableName()).append(" as tuv, ")
-					.append(getStorage().getTuTableName()).append(" as tu ");
-			if (customAttrs != null && !customAttrs.isEmpty())
-			{
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-			}
-
-			getParameterSql(sb, paramMap, localeIds, inlineAttrs);
-			sb.append(" AND tuv.tuId = tu.id ").append(
-					" AND tu.sid IS NOT NULL");
-			if (startId != -1 && count != -1)
-			{
-				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
-						.addValues(startId, count);
-			}
-			sb.append(") tuvAndTu");
+			sb.append("SELECT DISTINCT tuv.tuId AS tuId, ext.sid AS sid FROM ");
 		}
 		else
 		{
-			sb.append("SELECT DISTINCT tuv.tuId FROM ")
-					.append(getStorage().getTuvTableName()).append(" as tuv ");
-			if (inlineAttrs != null && !inlineAttrs.isEmpty())
-			{
-				sb.append(",").append(getStorage().getTuTableName())
-						.append(" as tu ");
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-			}
-			getParameterSql(sb, paramMap, localeIds, inlineAttrs);
-			if (startId != -1 && count != -1)
-			{
-				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ? ")
-						.addValues(startId, count);
-			}
+			sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ");
+		}
+		sb.append(getStorage().getTuvTableName()).append(" as tuv, ")
+				.append(getStorage().getTuvExtTableName()).append(" AS ext");
+
+		if (inlineAttrs != null && !inlineAttrs.isEmpty())
+		{
+			sb.append(",").append(getStorage().getTuTableName())
+					.append(" as tu ");
+			getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+		}
+		getParameterSql(sb, paramMap, localeIds, inlineAttrs);
+		if (StringUtil.isNotEmpty(stringId))
+		{
+			sb.append(" AND tuv.id = ext.tuvId ").append(
+					"AND ext.sid IS NOT NULL ");
+		}
+		if (startId != -1 && count != -1)
+		{
+			sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
+					.addValues(startId, count);
 		}
 	}
 
@@ -1018,6 +983,10 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			String createdAfter = (String) paramMap.get("createdAfter");
 			String createdBefore = (String) paramMap.get("createdBefore");
 			String tuIds = (String) paramMap.get("tuIds");
+			String jobId = (String) paramMap.get("jobId");
+			String lastUsageAfter = (String) paramMap.get("lastUsageAfter");
+			String lastUsageBefore = (String) paramMap.get("lastUsageBefore");
+			
 			Set<String> jobAttributeSet = (Set<String>) paramMap
 					.get("jobAttributeSet");
 
@@ -1036,6 +1005,21 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 						.addValues(parseStartDate(new Date(modifyAfter)),
 								parseEndDate(new Date(modifyBefore)));
 			}
+			
+			if (StringUtil.isNotEmpty(lastUsageAfter)
+					&& StringUtil.isNotEmpty(lastUsageBefore))
+			{
+				sb.append(
+						" AND ext.lastUsageDate >= ? AND ext.lastUsageDate <= ?")
+						.addValues(parseStartDate(new Date(lastUsageAfter)),
+								parseEndDate(new Date(lastUsageBefore)));
+			}
+			
+			if(StringUtil.isNotEmpty(jobId))
+			{
+				sb.append(" AND ext.jobId in (").append(jobId).append(")");
+			}
+			
 			if (StringUtil.isNotEmpty(createUser))
 			{
 				sb.append(" AND tuv.creationUser = ? ").addValues(createUser);

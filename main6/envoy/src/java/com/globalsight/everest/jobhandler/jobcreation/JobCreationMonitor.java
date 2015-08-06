@@ -143,13 +143,18 @@ public class JobCreationMonitor
             String lmArchiveTable = BigTableUtil
                     .decideLMArchiveTableForJobCreation(companyId);
             String tuTuvAttrTable = "translation_tu_tuv_attr_" + companyId;
-            String lmAttrTable = "leverage_match_attr_" + companyId;
-            job.setTuTable(tuTable);
+            String lmExtTable = BigTableUtil
+					.decideLMExtWorkingTableForJobCreation(companyId, jobId);
+			String lmExtArchiveTable = BigTableUtil
+					.decideLMExtArchiveTableForJobCreation(companyId);
+			job.setTuTable(tuTable);
             job.setTuArchiveTable(tuArchiveTable);
             job.setTuvTable(tuvTable);
             job.setTuvArchiveTable(tuvArchiveTable);
             job.setLmTable(lmTable);
             job.setLmArchiveTable(lmArchiveTable);
+            job.setLmExtTable(lmExtTable);
+            job.setLmExtArchiveTable(lmExtArchiveTable);
             HibernateUtil.saveOrUpdate(job);
 
             if (!DbUtil.isTableExisted(tuTable))
@@ -180,9 +185,13 @@ public class JobCreationMonitor
             {
             	BigTableUtil.createTuTuvAttrTable(tuTuvAttrTable);
             }
-            if (!DbUtil.isTableExisted(lmAttrTable))
+            if (!DbUtil.isTableExisted(lmExtTable))
             {
-            	BigTableUtil.createLMAttrTable(lmAttrTable);
+            	BigTableUtil.createLMExtTable(lmExtTable);
+            }
+            if (!DbUtil.isTableExisted(lmExtArchiveTable))
+            {
+            	BigTableUtil.createLMExtTable(lmExtArchiveTable);
             }
         }
         catch (Exception e)

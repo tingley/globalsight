@@ -101,52 +101,52 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return storage;
     }
 
-    String getTuTableName()
+    public String getTuTableName()
     {
         return tuTableName;
     }
 
-    void setTuTableName(String tuTableName)
+    public void setTuTableName(String tuTableName)
     {
         this.tuTableName = tuTableName;
     }
 
-    String getTuvTableName()
+    public String getTuvTableName()
     {
         return tuvTableName;
     }
 
-    void setTuvTableName(String tuvTableName)
+    public void setTuvTableName(String tuvTableName)
     {
         this.tuvTableName = tuvTableName;
     }
 
-    String getTuvExtTableName()
+    public String getTuvExtTableName()
     {
         return tuvExtTableName;
     }
 
-    void setTuvExtTableName(String tuvExtTableName)
+    public void setTuvExtTableName(String tuvExtTableName)
     {
         this.tuvExtTableName = tuvExtTableName;
     }
 
-    String getFuzzyIndexTableName()
+    public String getFuzzyIndexTableName()
     {
         return indexTableName;
     }
 
-    void setFuzzyIndexTableName(String indexTableName)
+    public void setFuzzyIndexTableName(String indexTableName)
     {
         this.indexTableName = indexTableName;
     }
 
-    String getAttrValTableName()
+    public String getAttrValTableName()
     {
         return attrValTableName;
     }
 
-    void setAttrValTableName(String name)
+    public void setAttrValTableName(String name)
     {
         this.attrValTableName = name;
     }

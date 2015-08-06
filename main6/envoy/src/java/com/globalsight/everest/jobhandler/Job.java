@@ -432,4 +432,12 @@ public interface Job extends WorkObject
     public String getTuTable();
 
     public void setTuTable(String tuTable);
+
+    public String getLmExtTable();
+
+	public void setLmExtTable(String lmExtTable);
+
+	public String getLmExtArchiveTable();
+
+	public void setLmExtArchiveTable(String lmExtArchiveTable);
 }

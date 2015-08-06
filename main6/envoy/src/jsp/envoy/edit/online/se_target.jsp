@@ -75,7 +75,6 @@ Collection tbMatches = view.getTbMatchResults();
 
 NumberFormat percent = NumberFormat.getPercentInstance(
   (Locale)session.getAttribute(WebAppConstants.UILOCALE));
-/* percent.setMinimumFractionDigits(2); */
 
 boolean b_rtl = EditUtil.isRTLLocale(state.getTargetLocale());
 boolean b_source_rtl = EditUtil.isRTLLocale(state.getSourceLocale());
@@ -162,7 +161,7 @@ if (tmMatches != null)
         }
         else
         {
-            stb_segments.append(percent.format(Math.floor(p.getMatchPercentage()*100)/10000.0));
+            stb_segments.append(percent.format(Math.floor(p.getMatchPercentage())*100/10000.0));
         }
         String tmName = p.getTmName();
         stb_segments.append("(");

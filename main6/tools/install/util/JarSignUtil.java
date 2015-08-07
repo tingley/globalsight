@@ -150,7 +150,7 @@ public class JarSignUtil
 	
 	public static boolean signJar(File f, String JKS, String keyPass, String keyAlias) 
 	{
-		String[] cmd = new String[] { "jarsigner", "-keystore",
+		String[] cmd = new String[] { "jarsigner", "-tsa", "https://timestamp.geotrust.com/tsa", "-keystore",
 				JKS, "-storepass", keyPass,
 				f.getAbsolutePath(), keyAlias };
 		try

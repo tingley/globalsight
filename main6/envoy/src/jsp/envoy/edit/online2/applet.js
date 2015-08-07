@@ -10,18 +10,21 @@ var isMF = navigator.userAgent.indexOf("Firefox") != -1;
 
 function InitDisplayHtml(gxml, datatype, g_ptagsVerbose, preserveWhitespace, dataformat)
 {
-    var result;
-	applet.setInputSegment(gxml, "", datatype);
+	var data = {
+			gxml : gxml,
+			datatype : datatype,
+			ptagsVerbose : g_ptagsVerbose
+	};
+	
+    var result = getOnlineAjaxValue("initDisplayHtml", data);
+	
 	
 	if (g_ptagsVerbose)
 	{
-	    applet.getVerbose();
-        result = applet.makeVerboseColoredPtags(gxml);
+	    // do nothing
 	}
 	else
-	{
-	    applet.getCompact();
-        result = applet.makeCompactColoredPtags(gxml);
+	{	   
         result = ptagStringToHtml(result);
 	}
 	
@@ -35,6 +38,27 @@ function InitDisplayHtml(gxml, datatype, g_ptagsVerbose, preserveWhitespace, dat
 	}
 	
 	return result;
+}
+
+var ajaxReturnString;
+function getOnlineAjaxValue(method, data)
+{
+	$.ajax({
+		url : 'Online2Service?action=' + method,
+		async : false,
+		cache : false,
+		dataType : 'text',
+		data : data,
+		success : function(data) {
+			ajaxReturnString = data;
+		},
+		error : function(request, error, status) {
+			ajaxReturnString = "";
+			alert(error);
+		}
+	});
+	
+	return ajaxReturnString;
 }
 
 function FixLeftSpace(p_s, p_format)
@@ -54,12 +78,11 @@ function FixLeftSpace(p_s, p_format)
 
 function GetTargetDisplayHtml(gxml, datatype)
 {
-    var result;
-
-    applet.setInputSegment(gxml, "", datatype);
-    applet.getCompact(); // discard
-    result = applet.makeCompactColoredPtags(gxml);
-
+	var data = {
+		gxml : gxml,
+		datatype : datatype
+	}
+    var result = getOnlineAjaxValue("getTargetDisplayHtml", data);
     result = ptagStringToHtml(result);
 
     return result;
@@ -67,45 +90,101 @@ function GetTargetDisplayHtml(gxml, datatype)
 
 function GetTargetDisplayHtmlForPreview(gxml, datatype)
 {
-    var result;
-
-    applet.setInputSegment(gxml, "", datatype);
-    applet.getVerbose(); // discard - verbose for images
-    result = applet.makeInlineVerboseColoredPtags(gxml);
-
+	var data = {
+			gxml : gxml,
+			datatype : datatype
+	}
+	
+    var result = getOnlineAjaxValue("getTargetDisplayHtmlForPreview", data);
     result = ptagStringToHtmlForPreview(result);
 
     return result;
 }
 
+function getTargetDiplomat(gxml)
+{
+	var data = {
+			gxml : gxml
+	}
+	
+	var result = getOnlineAjaxValue("getTargetDiplomat", data);
+    return result;
+}
+
+function doErrorCheck(ptagstring)
+{
+	var data = {
+			text : ptagstring,
+			source : g_sourceGxml
+	}
+	
+	var result = getOnlineAjaxValue("doErrorCheck", data);
+	var ob = eval("(" + result + ")");
+	
+	var msg = ob.msg;
+	internalTagMsg = ob.internalTagMsg;
+	
+	if (msg == "" || msg == null || msg == "null")
+    {
+    	var newTarget = ob.newTarget;
+    	
+    	if (newTarget != null && newTarget != "")
+    	{
+    		s_ptagstring = newTarget;
+    	}
+    	
+        return null;
+    }
+    else
+    {
+        return msg;
+    }
+}
+
+function getPtagToNativeMappingTable() {
+	var result = getOnlineAjaxValue("getPtagToNativeMappingTable", null);
+	return result;
+}
+
 function GetTargetDisplayHtmlForTmPreview(gxml, datatype)
 {
-    var result;
-
-    applet.setInputSegment(gxml, "", datatype);
-    applet.getCompact(); // discard
-    result = applet.makeCompactColoredPtags(gxml);
-
+	var data = {
+			gxml : gxml,
+			datatype : datatype
+	}
+	
+    var result = getOnlineAjaxValue("getTargetDisplayHtmlForTmPreview", data);
     result = ptagStringToHtmlForTmPreview(result);
 
     return result;
 }
 
+function initTmHelper(gxml, datatype)
+{
+	var data = {
+			gxml : gxml,
+			datatype : datatype
+	};
+	
+    var result = getOnlineAjaxValue("initTmHelper", data);	
+}
+
 function GetTargetDisplayHtmlForTmPreview2(gxml, datatype, g_ptagsVerbose)
 {
-    var result;
-
-    applet.setInputSegment(gxml, "", datatype);
+	var data = {
+			gxml : gxml,
+			datatype : datatype,
+			ptagsVerbose : g_ptagsVerbose
+	};
+	
+    var result = getOnlineAjaxValue("getTargetDisplayHtmlForTmPreview2", data);
     
     if (g_ptagsVerbose)
 	{
-	    applet.getVerbose();
-        result = applet.makeVerboseColoredPtags(gxml);
+	    // do nothing
 	}
 	else
 	{
-	    applet.getCompact();
-        result = applet.makeCompactColoredPtags(gxml);
         result = ptagStringToHtml(result);
 	}
 
@@ -114,11 +193,12 @@ function GetTargetDisplayHtmlForTmPreview2(gxml, datatype, g_ptagsVerbose)
 
 function GetSourceDisplayHtml(gxml, datatype)
 {
-    var result;
-
-    applet.setInputSegment(gxml, "", datatype);
-    applet.getCompact(); // discard
-    result = applet.makeCompactColoredPtags(gxml);
+	var data = {
+			gxml : gxml,
+			datatype : datatype
+	}
+	
+    var result = getOnlineAjaxValue("getSourceDisplayHtml", data);
 
     result = ptagStringToHtml(result);
 
@@ -130,11 +210,12 @@ function GetSourceDisplayHtml(gxml, datatype)
 // best in a try {} finally {} handler.
 function GetPTagString(text, datatype)
 {
-    var result;
-
-    applet.setInputSegment(text, "", datatype);
-    applet.getCompact(); // discard
-    result = applet.makeCompactColoredPtags(text);
+	var data = {
+		gxml : text,
+		datatype : datatype
+	}
+	
+    var result = getOnlineAjaxValue("getPTagString", data);
 
     return result;
 }
@@ -142,8 +223,7 @@ function GetPTagString(text, datatype)
 // Must reset applet state to source string and its ptags.
 function EndGetPTagStrings()
 {
-    applet.setInputSegment(sourceGxml, "", datatype);
-    applet.getCompact(); // discard
+    GetPTagString(sourceGxml, datatype);
 }
 
 function ptagStringToHtml(result)

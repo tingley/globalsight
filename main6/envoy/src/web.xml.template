@@ -327,6 +327,28 @@
 </servlet-mapping>
 <!-- end ajax service configuration-->
 
+<!-- start online service configuration-->
+<servlet>
+    <servlet-name>OnlineService</servlet-name>
+    <servlet-class>com.globalsight.everest.util.online.OnlineService</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>OnlineService</servlet-name>
+    <url-pattern>/OnlineService</url-pattern>
+</servlet-mapping>
+
+<servlet>
+    <servlet-name>Online2Service</servlet-name>
+    <servlet-class>com.globalsight.everest.util.online.Online2Service</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>Online2Service</servlet-name>
+    <url-pattern>/Online2Service</url-pattern>
+</servlet-mapping>
+<!-- end online service configuration-->
+
 
 <!-- end InetSoft Reports Configuration -->
 

@@ -16,23 +16,23 @@
  */
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
-import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatBasicParser;
-import com.globalsight.ling.tw.HtmlTableWriter;
+import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.HtmlEntities;
+import com.globalsight.ling.tw.HtmlTableWriter;
+import com.globalsight.ling.tw.PseudoBaseHandler;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoErrorChecker;
 import com.globalsight.ling.tw.PseudoOverrideItemException;
 import com.globalsight.ling.tw.PseudoParser;
-import com.globalsight.ling.tw.PseudoBaseHandler;
 import com.globalsight.ling.tw.PseudoParserException;
+import com.globalsight.ling.tw.Tmx2HtmlPreviewHandler;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.XmlEntities;
-import com.globalsight.ling.tw.Tmx2HtmlPreviewHandler;
 
 /**
- * Provides access to PTag API for the editor(Copy of "OnlineApplet.java").
+ * Provides access to PTag API for the editor. Just same as onlineApplet
  * <p>
  * 
  * In regards to the PTags , a simple session would progress be as follows:
@@ -52,11 +52,11 @@ import com.globalsight.ling.tw.Tmx2HtmlPreviewHandler;
  * <p>
  * <p>
  */
-public class OnlineTagHelper implements PseudoBaseHandler
+
+public class OnlineHelper implements PseudoBaseHandler
 {
     private String m_inputSegment = null;
     private String m_outputSegment = null;
-    private String m_targetEncoding = null;
     private String m_segmentFormat = null;
     private TmxPseudo m_converter = null;
     private PseudoData m_withPtags = null;
@@ -66,11 +66,40 @@ public class OnlineTagHelper implements PseudoBaseHandler
     private StringBuffer m_coloredPtags = null;
     private PseudoParser m_ptagParser = null;
 
-    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=false>";
+    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>";
     private static final String PTAG_COLOR_END = "</SPAN>";
     private PseudoErrorChecker m_errChecker = null;
+    private String m_internalErrMsg = "";
 
-    public OnlineTagHelper()
+
+    /**
+     * Returns information about this applet.
+     * 
+     * @return a string of information about this applet
+     */
+    public String getAppletInfo()
+    {
+        return "Copyright 2000-2004 GlobalSight Corporation";
+    }
+    
+    
+
+    public OnlineHelper()
+    {
+        super();
+        init();
+    }
+
+
+
+    /**
+     * Initializes the applet.
+     * 
+     * @see #start
+     * @see #stop
+     * @see #destroy
+     */
+    public void init()
     {
         m_coloredPtags = new StringBuffer();
         m_ptagParser = new PseudoParser(this);
@@ -109,7 +138,9 @@ public class OnlineTagHelper implements PseudoBaseHandler
         if (m_bPTagResourcesInitialized)
         {
             m_withPtags.setPTagTargetString(p_target);
-            return m_errChecker.check(m_withPtags);
+            String errors = m_errChecker.check(m_withPtags);
+            m_internalErrMsg = m_errChecker.geStrInternalErrMsg();
+            return errors;
         }
         else
         {
@@ -151,6 +182,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     /**
      * Generate the HTML table (rows only) containing the p-tag to native map.
      */
+    @SuppressWarnings("static-access")
     public String getPtagToNativeMappingTable()
             throws DiplomatBasicParserException
     {
@@ -169,6 +201,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     /**
      * Generate a string of ptags separated by comma ("l1,/l1,g1,/g1").
      */
+    @SuppressWarnings("static-access")
     public String getPtagString() throws DiplomatBasicParserException
     {
         if (m_bPTagResourcesInitialized)
@@ -205,6 +238,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     /**
      * Get the translated target string encoded with Diplomat tags.
      */
+    @SuppressWarnings("static-access")
     public String getTargetDiplomat(String p_target)
             throws PseudoParserException
     {
@@ -233,6 +267,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
 
     }
 
+    @SuppressWarnings("static-access")
     private void convertToPtags(int p_mode) throws DiplomatBasicParserException
     {
         m_withPtags.setMode(p_mode);
@@ -269,41 +304,6 @@ public class OnlineTagHelper implements PseudoBaseHandler
      * value disables addables.
      */
     public void setInputSegment(String p_source, String p_encoding,
-            String p_segmentFormat) throws PseudoOverrideItemException
-    {
-        // Empty strings arrive as NULL pointer somehow, so fix that
-        if (p_source == null)
-        {
-            p_source = "";
-        }
-
-        // we must init things here because we cannot throw exceptions
-        // from the applets init() method.
-        if (!m_bPTagResourcesInitialized)
-        {
-            initPTagResources();
-            m_bPTagResourcesInitialized = true;
-        }
-
-        m_inputSegment = p_source;
-        m_targetEncoding = p_encoding;
-        m_segmentFormat = p_segmentFormat;
-
-        m_withPtags.setAddables(p_segmentFormat);
-    }
-    
-    /*
-     * Set the Diplomat input string and convert it to p-tags internally. After
-     * setting the string, you can getCompact() or getVerbose().
-     * 
-     * @param p_source String
-     * 
-     * @param p_encoding String
-     * 
-     * @param p_segmentFormat String - an empty, null or otherwise incorrect
-     * value disables addables.
-     */
-    public void setInputSegment(String p_source, String p_encoding,
             String p_segmentFormat, boolean p_isFromSourceTargetPanel)
             throws PseudoOverrideItemException
     {
@@ -322,11 +322,16 @@ public class OnlineTagHelper implements PseudoBaseHandler
         }
 
         m_inputSegment = p_source;
-        m_targetEncoding = p_encoding;
         m_segmentFormat = p_segmentFormat;
 
         m_withPtags.setAddables(p_segmentFormat);
         m_withPtags.setIsFromSourceTargetPanel(p_isFromSourceTargetPanel);
+    }
+
+    public void setInputSegment(String p_source, String p_encoding,
+            String p_segmentFormat) throws PseudoOverrideItemException
+    {
+        setInputSegment(p_source, p_encoding, p_segmentFormat, true);
     }
 
     /*
@@ -384,6 +389,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
 
     /**
      */
+    @SuppressWarnings("static-access")
     public String makeCompactColoredPtags(String p_diplomat)
             throws DiplomatBasicParserException, PseudoOverrideItemException,
             PseudoParserException
@@ -406,6 +412,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
 
     /**
      */
+    @SuppressWarnings("static-access")
     public String makeVerboseColoredPtags(String p_diplomat)
             throws DiplomatBasicParserException, PseudoOverrideItemException,
             PseudoParserException
@@ -426,6 +433,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
         return convertToColored(withPtags.getWrappedPTagSourceString());
     }
 
+    @SuppressWarnings("static-access")
     public String makeInlineVerboseColoredPtags(String p_diplomat)
             throws DiplomatBasicParserException, PseudoOverrideItemException,
             PseudoParserException
@@ -544,9 +552,12 @@ public class OnlineTagHelper implements PseudoBaseHandler
             // compact/verbose mode.
             m_withPtags.setPTagTargetString(p_target);
 
-            return m_errChecker.check(m_withPtags, p_sourceWithSubContent,
-                    p_gxmlMaxLen, p_gxmlStorageEncoding, p_nativeContentMaxLen,
+            String errors = m_errChecker.check(m_withPtags,
+                    p_sourceWithSubContent, p_gxmlMaxLen,
+                    p_gxmlStorageEncoding, p_nativeContentMaxLen,
                     p_nativeStorageEncoding);
+            m_internalErrMsg = m_errChecker.geStrInternalErrMsg();
+            return errors;
         }
         else
         {
@@ -562,39 +573,21 @@ public class OnlineTagHelper implements PseudoBaseHandler
             m_errChecker.setStyles(styles);
         }
     }
-    
-    public static void main(String[] args)
+
+    public String getInternalErrMsg()
     {
-        try
+        if (m_internalErrMsg != null && m_internalErrMsg.contains("&"))
         {
-            String p_gxml = "<bpt erasable=\"yes\" i=\"1\" type=\"bold\" x=\"1\">&lt;b&gt;</bpt>Welocalize - About Us<ept i=\"1\">&lt;/b&gt;</ept>";
-            String target = "[u]Welocalize - About Us test[/u]";
-
-            OnlineTagHelper helper = new OnlineTagHelper();
-            helper.setInputSegment(p_gxml, "", "html");
-
-            String compact = helper.getCompact();
-            System.out.println("compact :: " + compact);
-            String compactColoredTags = helper.makeCompactColoredPtags(p_gxml);
-            System.out.println("compactColoredTags :: " + compactColoredTags);
-
-            String verbose = helper.getVerbose();
-            System.out.println("verbose :: " + verbose);
-            String verboseColoredPtags = helper.makeVerboseColoredPtags(p_gxml);
-            System.out.println("verboseColoredPtags :: " + verboseColoredPtags);
-
-            String aa = helper.getPtagToNativeMappingTable();
-            System.out.println("detailed :: " + aa);
-
-            String trgGxml = helper.getTargetDiplomat(target);
-            System.out.println("trgGxml :: " + trgGxml);
-
-            String ptagString = helper.getPtagString();
-            System.out.println("ptagString :: " + ptagString);
+            return m_xmlCodec.decodeString(m_internalErrMsg);
         }
-        catch (Exception e)
+        else
         {
-            e.printStackTrace();
+            return m_internalErrMsg;
         }
+    }
+
+    public void setInternalErrMsg(String internalErrMsg)
+    {
+        this.m_internalErrMsg = internalErrMsg;
     }
 }

@@ -1152,7 +1152,7 @@ function save()
         	ptagstring = s_ptagstring;
         }
         
-        g_targetGxml = applet.getTargetDiplomat(ptagstring);
+        g_targetGxml = getTargetDiplomat(ptagstring);
         //debug("New GXML = `" + g_targetGxml + "'");
         g_targetHTML = GetTargetDisplayHtmlForPreview(g_targetGxml, g_datatype);
         //debug("New display HTML = `" + g_targetHTML + "'");
@@ -1246,30 +1246,6 @@ function checkError(ptagstring)
     }
     
     return 0;
-}
-
-function doErrorCheck(ptagstring)
-{
-    applet.setUntranslateStyle(<%="\"" + SegmentUtil2.getTAGS() + "\""%>);
-    var msg = applet.errorCheck(ptagstring, g_sourceGxml,
-      max_segment_len, gsa_encoding, db_segment_len, db_encoding);
-    internalTagMsg = applet.getInternalErrMsg();
-
-    if (msg == "" || msg == null || msg == "null")
-    {
-    	var newTarget = applet.getNewPTagTargetString();
-    	
-    	if (newTarget != null && newTarget != "")
-    	{
-    		s_ptagstring = newTarget;
-    	}
-    	
-        return null;
-    }
-    else
-    {
-        return msg;
-    }
 }
 
 function saveSegment(p_segid, p_targetGxml)
@@ -1620,7 +1596,7 @@ function showPTags()
   {
   	if (!ptagwin || ptagwin.closed)
   	{
-    	var ptags = applet.getPtagString();
+    	var ptags = getPtagString();
     	args = { _opener: window, _data: ptags.split(",") };
    
     		ptagwin = showModelessDialog("/globalsight/envoy/edit/online/selectptag.jsp",
@@ -1633,7 +1609,7 @@ function showPTags()
   }
   else
   {
-  	var ptags = applet.getPtagString();
+  	var ptags = getPtagString();
   	var data = ptags.split(",");
   	if (ptags.length > 0 )
   	{
@@ -1716,7 +1692,7 @@ function GetDetails()
 {
   if (!g_target) return null;
 
-  return applet.getPtagToNativeMappingTable();
+  return getPtagToNativeMappingTable();
 }
 
 var detailswin = null;
@@ -2309,9 +2285,6 @@ function doInit()
   	document.recalc(true);
   }
 
-  applet.setLocale(g_uiLocale);
-  applet.setDataType(g_dataFormat);
-
   idSegments.focus();
 
   if (openOnLoad)
@@ -2502,7 +2475,7 @@ function getTargetDiplomatString()
 
     if (!checkError(ptagstring))
     {
-        g_targetGxml = applet.getTargetDiplomat(ptagstring);
+        g_targetGxml = getTargetDiplomat(ptagstring);
     }
     else
     {
@@ -3271,15 +3244,7 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
   border: 1px solid black; overflow: auto; padding: 8px;margin:5px;">
 <%=str_pageHtml%>
 </div>
-<APPLET
-  style="display:inline"
-  archive="/globalsight/applet/lib/online.jar"
-  code="com.globalsight.ling.tw.online.OnlineApplet"
-  id="applet"
-  name="applet"
-  width="0"
-  height="0" MAYSCRIPT>
-</APPLET>
+
 <iframe id="idDummy" name="idDummy" src ="about:blank" style="display:none"></iframe>
 <iframe id="idShutdown" name="idShutdown" src ="about:blank" style="display:none"></iframe>
 

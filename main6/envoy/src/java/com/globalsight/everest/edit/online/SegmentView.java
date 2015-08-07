@@ -16,13 +16,22 @@
  */
 package com.globalsight.everest.edit.online;
 
-import com.globalsight.util.gxml.GxmlElement;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
-
-import java.util.*;
-import java.io.Serializable;
+import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.gxml.GxmlElement;
 
 /**
  * A data object that holds the viewing elements for segment editor.
@@ -30,6 +39,7 @@ import java.io.Serializable;
 public class SegmentView
     implements Serializable
 {
+    private static final long serialVersionUID = 7558068750222384152L;
     private GxmlElement m_sourceSegment = null;
     private GxmlElement m_targetSegment = null;
     private long m_subId = -1;
@@ -54,6 +64,9 @@ public class SegmentView
     private Set xliffAlt = null;
     private Tuv targetTuv = null;
     private String pagePath = "";
+    
+    static private final Logger s_logger = Logger
+            .getLogger(SegmentView.class);
     
 
     //////////////////////////////////////////////////////////////////
@@ -316,4 +329,65 @@ public class SegmentView
 	public long getTargetLocaleId() {
 		return m_targetLocaleId;
 	}
+	
+	public String getSourceHtmlString(String pTagFormat) 
+	{
+	    OnlineTagHelper applet = new OnlineTagHelper();
+	    String seg = GxmlUtil.getInnerXml(getSourceSegment());
+        try
+        {
+            applet.setInputSegment(seg, "", getDataType());
+            if (EditorConstants.PTAGS_VERBOSE.equals(pTagFormat))
+            {
+                applet.getVerbose();
+                seg = applet.makeVerboseColoredPtags(seg);
+            }
+            else
+            {
+                applet.getCompact();
+                seg = applet.makeCompactColoredPtags(seg);
+            }
+            return seg;
+        }
+        catch (Exception e)
+        {
+            s_logger.info("getSourceHtmlString Error.", e);
+        }
+        
+        return seg;
+	}
+	
+	   public String getTargetHtmlString(String pTagFormat, boolean colorPtags) 
+	    {
+	        OnlineTagHelper applet = new OnlineTagHelper();
+	        String seg = GxmlUtil.getInnerXml(getTargetSegment());
+	        String result = seg;	        	       
+	        
+	        try
+	        {
+	            applet.setInputSegment(seg, "", getDataType());
+	            if (EditorConstants.PTAGS_VERBOSE.equals(pTagFormat))
+	            {
+	                result = applet.getVerbose();
+	                if (colorPtags)
+	                {
+	                    result = applet.makeVerboseColoredPtags(seg);
+	                }
+	            }
+	            else
+	            {
+	                result = applet.getCompact();
+	                if (colorPtags)
+                    {
+	                    result = applet.makeCompactColoredPtags(seg);
+                    }
+	            }
+	        }
+	        catch (Exception e)
+	        {
+	            s_logger.info("getTargetHtmlString Error.", e);
+	        }
+	        
+	        return result;
+	    }
 }

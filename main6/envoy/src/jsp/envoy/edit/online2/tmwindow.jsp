@@ -189,6 +189,7 @@ String title = bundle.getString("lb_tm_window");
 <title><%=title %></title>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/overlib.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.9.1.min.js"></script>
 <script src="/globalsight/envoy/edit/online2/applet.js"></script>
 <SCRIPT src="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <link type="text/css" rel="StyleSheet"
@@ -518,9 +519,7 @@ function convertMatches(sourceGxml, datatype)
 {
   if (a_tmSegments.length > 0)
   {
-    applet.setInputSegment(sourceGxml, "", datatype);
-    applet.getCompact();
-
+    initTmHelper(sourceGxml, datatype);
     for (var i = 0; i < a_tmSegments.length; i++)
     {
       var gxml = a_tmSegments[i].data;
@@ -662,8 +661,6 @@ function doOnload()
 {
   opener.showingTmWindow(window);
 
-  applet.setLocale(uiLocale);
-
   Clear();
 
   if (opener.g_sourceHTML)
@@ -772,15 +769,6 @@ function context(url, e)
 </head>
 <body id="idBody" onload="doOnload()" onbeforeunload="doBeforeUnload()"
  onkeydown="doKeyDown()">
-<APPLET
-  style="display:inline"
-  archive="/globalsight/applet/lib/online.jar"
-  code="com.globalsight.ling.tw.online.OnlineApplet"
-  id="applet"
-  name="applet"
-  width="0"
-  height="0">
-</APPLET>
 <div class="header" style="position: absolute; top: 0; left: 0; right: 0;
  width: expression(idBody.clientWidth); height: 30;
  padding-left: 10px; padding-top: 6px;">

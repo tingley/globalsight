@@ -30,10 +30,12 @@ public class InternalTextUtil
     private final static Pattern INTERNAL_START_REGEX_1 = Pattern.compile("<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>");
     private final static Pattern INTERNAL_START_REGEX_2 = Pattern.compile("<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</bpt>");
     private final static Pattern INTERNAL_START_REGEX_3 = Pattern.compile("<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?/>");
+    private final static Pattern INTERNAL_START_REGEX_5 = Pattern.compile("<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?[^>]*?/>");
     
     private final static String INTERNAL_ALL_REGEX_1 = "<bpt[^>]*?i=\"%n%\"[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>(.*?)<ept i=\"%n%\"[^>]*?>[^<]*?</ept>";
     private final static String INTERNAL_ALL_REGEX_2 = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"%n%\"[^>]*?>[^<]*?</bpt>(.*?)<ept i=\"%n%\"[^>]*?>[^<]*?</ept>";
     private final static String INTERNAL_ALL_REGEX_3 = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"%n%\"[^>]*?/>(.*?)<ept[^>]*?i=\"%n%\"[^>]*?/>";
+    private final static String INTERNAL_ALL_REGEX_5 = "<bpt[^>]*?i=\"%n%\"[^>]*?internal=\"yes\"[^>]*?/>(.*?)<ept[^>]*?i=\"%n%\"[^>]*?/>";
     
     private final static String MRK_TAG = "<mrk ";
     private final static Pattern INTERNAL_START_REGEX_4 = Pattern.compile("<mrk[^>]*?comment=\"internal text, i=(\\d*?)\"[^>]*?/>");
@@ -239,6 +241,7 @@ public class InternalTextUtil
         indexs.addAll(getInternalIndex(segment, INTERNAL_START_REGEX_1));
         indexs.addAll(getInternalIndex(segment, INTERNAL_START_REGEX_2));
         indexs.addAll(getInternalIndex(segment, INTERNAL_START_REGEX_3));
+        indexs.addAll(getInternalIndex(segment, INTERNAL_START_REGEX_5));
 
         return indexs;
     }
@@ -252,6 +255,8 @@ public class InternalTextUtil
                 INTERNAL_ALL_REGEX_2);
         segment = preProcessInternalText(segment, INTERNAL_START_REGEX_3,
                 INTERNAL_ALL_REGEX_3);
+        segment = preProcessInternalText(segment, INTERNAL_START_REGEX_5,
+                INTERNAL_ALL_REGEX_5);
         if (segment.contains(MRK_TAG))
         {
             segment = preProcessInternalText(segment, INTERNAL_START_REGEX_4,

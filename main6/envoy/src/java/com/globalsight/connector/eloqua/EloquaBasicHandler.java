@@ -60,12 +60,11 @@ public class EloquaBasicHandler extends PageActionHandler
                     .getAttribute(WebAppConstants.SESSION_MANAGER);
             sessionManager.setAttribute("EloquaConnector", conn);
             logger.debug("Saving eloqua connector...");
-            EloquaConnector connector = (EloquaConnector) form;
-            HibernateUtil.saveOrUpdate(connector);
+            HibernateUtil.saveOrUpdate(conn);
             logger.debug("Saving eloqua connector finished.");
             
             JSONObject ob = new JSONObject();
-            ob.put("id", connector.getId());
+            ob.put("id", conn.getId());
             out.write(ob.toString().getBytes("UTF-8"));
         }
         else
@@ -89,20 +88,25 @@ public class EloquaBasicHandler extends PageActionHandler
             
             EloquaHelper helper = new EloquaHelper(conn);
             
+            JSONObject ob = new JSONObject();
             if (helper.doTest()) 
             {
                 HttpSession session = request.getSession();
                 SessionManager sessionManager = (SessionManager) session
                         .getAttribute(WebAppConstants.SESSION_MANAGER);
                 sessionManager.setAttribute("EloquaConnector", conn);
-                out.write("ok".getBytes("UTF-8"));
+                
+                ob.put("canUse", true);
+                ob.put("url", conn.getUrl());
+                
             }
             else
             {
-                String s = "({\"error\" : "
-                        + JsonUtil.toObjectJson(bundle.getString("error_eloqua_connector")) + "})";
-                out.write(s.getBytes("UTF-8"));
+                ob.put("canUse", false);
+                ob.put("error", bundle.getString("error_eloqua_connector"));
             }
+            
+            out.write(ob.toString().getBytes("UTF-8"));
         } 
         catch (Exception e) 
         {

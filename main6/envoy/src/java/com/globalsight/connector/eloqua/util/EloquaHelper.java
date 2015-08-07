@@ -51,6 +51,7 @@ public class EloquaHelper
 //    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(><span )(elqid=\"[^\"]*\" elqtype=\"DynamicContent\")([^>]*>[\\d\\D]*?</span><)");
     private static Pattern DYNAMIC_PATTERN = Pattern.compile("(<span )elqid=\"[^\"]*\" elqtype=\"DynamicContent\"([^>]*>)([\\d\\D]*?)</span>");
 //    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(><span elqid=\")([^\"]*)(\" elqtype=\"DynamicContent\"[^>]*>)([\\d\\D]*?)(</span><)");
+    private EloquaConnector conn;
     
     static
     {
@@ -59,6 +60,7 @@ public class EloquaHelper
     
     public EloquaHelper(EloquaConnector conn)
     {
+        this.conn = conn;
         _client = new Client(conn.getCompany() + "\\" + conn.getUsername(),
                 conn.getPassword(), conn.getUrl());
     }
@@ -69,8 +71,42 @@ public class EloquaHelper
         _client = new Client(site + "\\" + user, password, baseUrl);
     }
     
+    public String login()
+    {
+        Response response = _client.get("/id");
+        String s = response.body;
+        if (s != null && s.startsWith("{"))
+        {
+            try
+            {
+                JSONObject o = new JSONObject(s);
+                String url = o.getJSONObject("urls").getJSONObject("apis").getJSONObject("rest").getString("standard");
+                url = StringUtil.replace(url, "{version}", "2.0");
+                
+                return url;
+            }
+            catch (JSONException e)
+            {
+                return null;
+            }
+            
+        }
+        
+        return null;
+    }
+    
     public boolean doTest()
     {
+        if (conn.getUrl().startsWith("https://login.eloqua.com"))
+        {
+            String s = login();
+            if (s == null)
+                return false;
+            
+            conn.setUrl(s);
+            return true;
+        }
+        
         try
         {
             Response response = _client.get("/assets/emails?page=1&count=1");

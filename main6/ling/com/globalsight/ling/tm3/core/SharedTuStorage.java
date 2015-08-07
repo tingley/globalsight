@@ -118,59 +118,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         return sb;
     }
 
-    @Override
-    protected StatementBuilder getExactMatchStatement(T key,
-            TM3Locale srcLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget,
-            List<Long> tm3TmIds)
-    {
-        StatementBuilder sb = new StatementBuilder(
-                "SELECT tuv.id, tuv.tuId FROM ").append(getStorage()
-                .getTuvTableName() + " AS tuv");
-        if (!inlineAttrs.isEmpty() || !lookupTarget)
-        {
-            sb.append(" join " + getStorage().getTuTableName() + " as tu")
-                    .append(" on tu.id = tuv.tuId");
-        }
-        sb.append(" WHERE fingerprint = ? AND localeId = ? ")
-                .addValues(key.getFingerprint(), srcLocale.getId())
-                .append("AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
-        if (!lookupTarget)
-        {
-            sb.append("AND tu.srcLocaleId = ? ").addValue(srcLocale.getId());
-        }
-        if (!inlineAttrs.isEmpty())
-        {
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                if (e.getKey().getAffectsIdentity())
-                {
-                    sb.append(" AND tu." + e.getKey().getColumnName() + " = ?");
-                    sb.addValue(e.getValue());
-                }
-            }
-        }
-        if (targetLocales != null)
-        {
-            // an exists subselect seems simpler, but mysql bug 46947 causes
-            // exists subselects to take locks even in repeatable read
-            List<Long> targetLocaleIds = new ArrayList<Long>();
-            for (TM3Locale locale : targetLocales)
-            {
-                targetLocaleIds.add(locale.getId());
-            }
-            sb = new StatementBuilder()
-                    .append("SELECT DISTINCT result.* FROM (").append(sb)
-                    .append(") AS result, ")
-                    .append(getStorage().getTuvTableName() + " AS targetTuv ")
-                    .append("WHERE targetTuv.tuId = result.tuId AND ")
-                    .append("targetTuv.localeId IN")
-                    .append(SQLUtil.longGroup(targetLocaleIds));
-        }
-        return sb;
-    }
-
-
     /**
      * Save custom attributes. This is the same across all table types.
      * 

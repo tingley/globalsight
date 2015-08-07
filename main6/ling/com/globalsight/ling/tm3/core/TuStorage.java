@@ -97,7 +97,20 @@ abstract class TuStorage<T extends TM3Data>
     {
         try
         {
-            // TUV, Events, and AttrVals should both cascade.
+        	// tm3_attr_val_shared_xx
+            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
+                    .append(storage.getAttrValTableName()).append(" WHERE tuId = ?")
+                    .addValue(tu.getId()));
+            // tm3_tuv_ext_shared_xx
+            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
+                    .append(storage.getTuvExtTableName()).append(" WHERE tuId = ?")
+                    .addValue(tu.getId()));
+            // TODO: not care event table
+            // tm3_tuv_shared_xx
+            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
+                    .append(storage.getTuvTableName()).append(" WHERE tuId = ?")
+                    .addValue(tu.getId()));
+            // tm3_tu_shared_xx
             SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
                     .append(storage.getTuTableName()).append(" WHERE id = ?")
                     .addValue(tu.getId()));
@@ -811,6 +824,39 @@ abstract class TuStorage<T extends TM3Data>
         }
         ps.close();
 
+   		// If SID is not empty/null, need filter the candidate TUs here.
+        // To avoid slow query, we filter TUs via 2 queries.
+        String sid = null;
+        if (!inlineAttributes.isEmpty())
+        {
+            for (Map.Entry<TM3Attribute, Object> e : inlineAttributes.entrySet())
+            {
+				if (e.getKey().getAffectsIdentity()
+						&& "sid".equalsIgnoreCase(e.getKey().getColumnName()))
+                {
+					sid = (String) e.getValue();
+                }
+            }
+        }
+        if (tuvIds.size() > 0 && sid != null && sid.length() > 0)
+        {
+			sb = new StatementBuilder("SELECT tuvId, tuId FROM ")
+					.append(getStorage().getTuvExtTableName())
+					.append(" WHERE sid = ?").addValue(sid)
+					.append(" AND tuvId IN ")
+					.append(SQLUtil.longGroup(new ArrayList<Long>(tuvIds)));
+            ps = sb.toPreparedStatement(conn);
+            rs = SQLUtil.execQuery(ps);
+            tuvIds.clear();
+            tuIds.clear();
+            while (rs.next())
+            {
+                tuvIds.add(rs.getLong(1));
+                tuIds.add(rs.getLong(2));
+            }
+            ps.close();
+        }
+
         // XXX Could save a query by having the lookup fetch the TU row, or even
         // the TU row + TUV source row (and lazily load rest...)
         List<TM3Tu<T>> tus = getTu(conn, tuIds, locking);
@@ -838,10 +884,58 @@ abstract class TuStorage<T extends TM3Data>
     }
 
     // Note for implementors: targetLocales may be null, but will not be empty
-    protected abstract StatementBuilder getExactMatchStatement(T key,
-            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget,
-            List<Long> tm3TmIds);
+	private StatementBuilder getExactMatchStatement(T key, TM3Locale srcLocale,
+			Set<? extends TM3Locale> targetLocales,
+			Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget,
+			List<Long> tm3TmIds)
+    {
+        StatementBuilder sb = new StatementBuilder(
+                "SELECT tuv.id, tuv.tuId FROM ").append(getStorage()
+                .getTuvTableName() + " AS tuv");
+        if (!inlineAttrs.isEmpty() || !lookupTarget)
+        {
+            sb.append(" join " + getStorage().getTuTableName() + " as tu")
+                    .append(" on tu.id = tuv.tuId");
+        }
+        sb.append(" WHERE fingerprint = ? AND localeId = ? ")
+                .addValues(key.getFingerprint(), srcLocale.getId())
+                .append("AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
+        if (!lookupTarget)
+        {
+            sb.append("AND tu.srcLocaleId = ? ").addValue(srcLocale.getId());
+        }
+        if (!inlineAttrs.isEmpty())
+        {
+            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
+            {
+            	// As SID is in extension table now, ignore sid here
+				if (e.getKey().getAffectsIdentity()
+						&& !"sid".equalsIgnoreCase(e.getKey().getColumnName()))
+                {
+                    sb.append(" AND tu." + e.getKey().getColumnName() + " = ?");
+                    sb.addValue(e.getValue());
+                }
+            }
+        }
+        if (targetLocales != null)
+        {
+            // an exists subselect seems simpler, but mysql bug 46947 causes
+            // exists subselects to take locks even in repeatable read
+            List<Long> targetLocaleIds = new ArrayList<Long>();
+            for (TM3Locale locale : targetLocales)
+            {
+                targetLocaleIds.add(locale.getId());
+            }
+            sb = new StatementBuilder()
+                    .append("SELECT DISTINCT result.* FROM (").append(sb)
+                    .append(") AS result, ")
+                    .append(getStorage().getTuvTableName() + " AS targetTuv ")
+                    .append("WHERE targetTuv.tuId = result.tuId AND ")
+                    .append("targetTuv.localeId IN")
+                    .append(SQLUtil.longGroup(targetLocaleIds));
+        }
+        return sb;
+    }
 
     /**
      * Generate SQL to apply attribute matching as a filter to another result

@@ -637,14 +637,6 @@ $(document).ready(function(){
           <td><span id="createdBy"></span></td>
 		</tr>
 		<tr>
-		  <td>${job_id}:</td>
-          <td><span id="jobId"></span></td>
-		</tr>
-		<tr>
-		  <td>${job_name}:</td>
-          <td><span id="jobName"></span></td>
-		</tr>
-		<tr>
 		  <td>${lb_created_on}:</td>
           <td><span id="createdOn"></span></td>
 		</tr>
@@ -659,6 +651,14 @@ $(document).ready(function(){
 	    <tr>
 		  <td>${lb_last_usage_date}:</td>
           <td><span id="lastUsageDate"></span></td>
+		</tr>
+		<tr>
+		  <td>${job_id}:</td>
+          <td><span id="jobId"></span></td>
+		</tr>
+		<tr>
+		  <td>${job_name}:</td>
+          <td><span id="jobName"></span></td>
 		</tr>
 		<tr>
 		  <td valign="top">${lb_tm_search_tu_attributes}:</td>

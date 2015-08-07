@@ -138,12 +138,12 @@ function testConnect()
      $("#eloquaForm").ajaxSubmit({  
            type: 'post',  
            url: "<%=testURL%>" , 
-           dataType:'text',
-           timeout:100000000,
+           dataType:'json',
            success: function(data){  
             $("#idDiv").unmask("<%=bundle.getString("msg_eloqua_wait_connect")%>");            
-               if("ok" == data){
+            if (data.canUse){
                     eloquaForm.action = "<%=saveURL%>";
+                    $("#url").val(data.url);
                     eloquaForm.submit();
                }else{
             	   alert("<%=errorConnect%>");

@@ -74,6 +74,7 @@ BEGIN
 			PREPARE stmt1 FROM @sql1;
 			EXECUTE stmt1;
 			DEALLOCATE PREPARE stmt1;
+			commit;
 		END IF;
 		SET lmExtTableCount = 0;
 
@@ -114,6 +115,7 @@ BEGIN
 			PREPARE stmt2 FROM @sql2;
 			EXECUTE stmt2;
 			DEALLOCATE PREPARE stmt2;
+			commit;
 		END IF;
 		SET lmExtTableCount = 0;
 
@@ -134,13 +136,14 @@ BEGIN
 			PREPARE stmt3 FROM @sql3;
 			EXECUTE stmt3;
 			DEALLOCATE PREPARE stmt3;
+			commit;
 		END IF;
 		SET lmAttrTableCount = 0;
 
-		SELECT COUNT(*) INTO lmAttrTableCount FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = lmExtArchiveTable;
+		SELECT COUNT(*) INTO lmAttrTableCount FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = lmAttrTable;
 		SELECT lmAttrTableCount AS IS_CURRENT_LM_ATTR_ARCHIVE_TABLE_EXISTED;
 		IF lmAttrTableCount = 1 THEN
-			SET @sql3 = CONCAT(
+			SET @sql4 = CONCAT(
 				"REPLACE INTO ", lmExtArchiveTable, " (SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, TARGET_LOCALE_ID, ORDER_NUM, LAST_USAGE_DATE, JOB_ID, JOB_NAME, PREVIOUS_HASH,NEXT_HASH, SID) ",
 				"SELECT SOURCE_PAGE_ID, ORIGINAL_SOURCE_TUV_ID, SUB_ID, TARGET_LOCALE_ID, ORDER_NUM, NULL, -1,	NULL, -1, -1, TEXT_VALUE FROM ", lmAttrTable, " attr, request, job ",
 				"WHERE attr.SOURCE_PAGE_ID = request.PAGE_ID ",
@@ -149,10 +152,11 @@ BEGIN
 				"AND attr.TEXT_VALUE IS NOT NULL; "
 			);
 			## logger
-			SELECT @sql3 AS SQL3;
-			PREPARE stmt3 FROM @sql3;
-			EXECUTE stmt3;
-			DEALLOCATE PREPARE stmt3;
+			SELECT @sql4 AS SQL4;
+			PREPARE stmt4 FROM @sql4;
+			EXECUTE stmt4;
+			DEALLOCATE PREPARE stmt4;
+			commit;
 		END IF;
 		SET lmAttrTableCount = 0;
 

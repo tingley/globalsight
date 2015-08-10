@@ -516,6 +516,11 @@ public class AmbFileStoragePathUtils
         return getCustomerDownloadDir(companyId);
     }
 
+    public static File getCustomerDownloadDir(Long p_companyId)
+    {
+    	return getCustomerDownloadDir(String.valueOf(p_companyId));
+    }
+
     public static File getCustomerDownloadDir(String p_companyId)
     {
         if (customerDownloadDirs.get(p_companyId) == null)

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Locale;
 
 import javax.naming.NamingException;
@@ -170,6 +171,18 @@ public class SegmentationRuleFileMainHandler extends PageHandler
     private void createRule(HttpServletRequest p_request, HttpSession p_session)
             throws RemoteException, NamingException, GeneralException
     {
+    	// If "name" has been existed, just return;
+        String name = p_request.getParameter("saveRuleName");
+		Iterator it = ServerProxy.getSegmentationRuleFilePersistenceManager()
+				.getAllSegmentationRuleFiles().iterator();
+        while (it.hasNext())
+        {
+        	if (((SegmentationRuleFileImpl) it.next()).getName().equals(name))
+        	{
+        		return;
+        	}
+        }
+
         SegmentationRuleFileImpl ruleFile = new SegmentationRuleFileImpl();
 
         getParams(p_request, ruleFile);
@@ -278,7 +291,8 @@ public class SegmentationRuleFileMainHandler extends PageHandler
         {
             name += "__";
         }
-        File tmpDir = AmbFileStoragePathUtils.getCustomerDownloadDir();
+		File tmpDir = AmbFileStoragePathUtils
+				.getCustomerDownloadDir(segmentationRuleFile.getCompanyId());
         File tmpFile = File.createTempFile(name, ".xml", tmpDir);
         FileUtils.write(tmpFile, segmentationRuleFile.getRuleText(),
                 p_request.getCharacterEncoding());

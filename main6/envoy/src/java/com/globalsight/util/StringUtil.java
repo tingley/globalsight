@@ -290,7 +290,7 @@ public class StringUtil
 
             // Changes default Rounding Mode
 //            df.setRoundingMode(RoundingMode.DOWN);
-            result = df.format(num)+"%";
+            result = df.format(((Number) num).intValue())+"%";
         }
         else
         {

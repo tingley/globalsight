@@ -317,6 +317,7 @@ public class TMSearchEditEntryHandlerHelper
         source = source.replace("\r", "\\r");
         source = source.replace("\n", "\\n");
         source = source.replace("\t", "\\t");
+        source = getSegmentWithBR(source);
         String ptagsSource = segmentManagerSource.getPtagString();
         SegmentUtil sutil = new SegmentUtil(null);
         List<String> sourceInternals = sutil.getInternalWords(srcSegment);
@@ -357,6 +358,7 @@ public class TMSearchEditEntryHandlerHelper
         target = target.replace("\r", "\\r");
         target = target.replace("\n", "\\n");
         target = target.replace("\t", "\\t");
+        target = getSegmentWithBR(target);
         String ptagsTarget = segmentManagerTarget.getPtagString();
         entryInfo.put("target", target);
         entryInfo.put("ptagsTarget", ptagsTarget);
@@ -386,6 +388,15 @@ public class TMSearchEditEntryHandlerHelper
 
         request.setAttribute("entryInfo", JsonUtil.toJson(entryInfo));
     }
+    
+	private static String getSegmentWithBR(String segment)
+	{
+		if (segment.contains("\\r\\n") || segment.contains("\\n"))
+		{
+			segment = segment.replace("\\n", "\\n<br>");
+		}
+		return segment;
+	}
 
     /**
      * Get TU by tmId, tuId

@@ -3860,7 +3860,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
             p_session.saveOrUpdate(jobClone);
         }
-        if (LOCALIZED_STATE == lowest)
+        if (lowest >= LOCALIZED_STATE)
         {
             TaskEmailInfo p_emailInfo = createTaskEmailInfo(job, p_wf);
             p_emailInfo.setAssigneesName(job.getCreateUser().getFirstName());

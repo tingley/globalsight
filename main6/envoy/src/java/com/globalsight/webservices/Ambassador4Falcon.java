@@ -2014,25 +2014,25 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * Create new user
      * 
      * @param p_accessToken
-     *            String Access token. This field cannot be null
+     *            String Access token. REQUIRED.
      * @param p_userId
-     *            String User ID. This field cannot be null. 
+     *            String User ID. REQUIRED.
      *            Example: 'qaadmin'
      * @param p_password
-     *            String Password. This field cannot be null
+     *            String Password. It requires 8 characters at least. REQUIRED.
      * @param p_firstName
-     *            String First name. This field cannot be null
+     *            String First name. It can have 100 characters at most. REQUIRED.
      * @param p_lastName
-     *            String Last name. This field cannot be null
+     *            String Last name. It can have 100 characters at most. REQUIRED.
      * @param p_email
-     *            String Email address. This field cannot be null. 
+     *            String Email address. REQUIRED.
      *            If the email address is not vaild then the user's status will be set up as inactive
      * @param p_permissionGrps
      *            String[] Permission groups which the new user belongs to.
      *            The element in the array is the name of permission group.
      *            Example: [{"Administrator"}, {"ProjectManager"}]
      * @param p_roles
-     *            Roles String information of user. It uses a string with XML format to mark all roles information of user.
+     *            Roles String information of user. It uses a string with XML format to mark all roles information of user. REQUIRED.
      *            Example:
      *              <?xml version=\"1.0\"?>
      *                <roles>
@@ -2067,7 +2067,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *						</role>
      *					</roles>
      * @param p_isInAllProject
-     *            boolean If the user need to be included in all project.
+     *            boolean If the user need to be included in all project. REQUIRED.
      * @param p_projectIds
      *            String[] ID of projects which user should be included in. If p_isInAllProject is true, this will not take effect.
      *            Example: [{"1"}, {"3"}]
@@ -2106,19 +2106,19 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * Modify user
      * 
      * @param p_accessToken
-     *            String Access token. This field cannot be null
+     *            String Access token. REQUIRED.
      * @param p_userId
-     *            String User ID. This field cannot be null. 
+     *            String User ID. REQUIRED.
      *            Example: 'qaadmin'
      * @param p_password
-     *            String Password. This field cannot be null
+     *            String Password. It requires 8 characters at least.
      * @param p_firstName
-     *            String First name. This field cannot be null
+     *            String First name. It can have 100 characters at most.
      * @param p_lastName
-     *            String Last name. This field cannot be null
+     *            String Last name. It can have 100 characters at most.
      * @param p_email
-     *            String Email address. This field cannot be null. 
-     *            If the email address is not vaild then the user's status will be set up as inactive
+     *            String Email address.
+     *            If the email address is invalid, the user status will be set up as inactive.
      * @param p_permissionGrps
      *            String[] Permission groups which the new user belongs to.
      *            The element in the array is the name of permission group.
@@ -2159,7 +2159,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *						</role>
      *					</roles>
      * @param p_isInAllProject
-     *            boolean If the user need to be included in all project.
+     *            boolean If the user need to be included in all project. REQUIRED.
      * @param p_projectIds
      *            String[] ID of projects which user should be included in. If p_isInAllProject is true, this will not take effect.
      *            Example: [{"1"}, {"3"}]

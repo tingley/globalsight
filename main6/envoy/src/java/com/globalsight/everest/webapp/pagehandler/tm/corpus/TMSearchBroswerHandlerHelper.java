@@ -793,7 +793,9 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(leverageResult, 1,
                 maxEntriesPerPageStr);
-        return JsonUtil.toJson(temp);
+        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
+        
+        return jsonStr;
     }
 	
     /**
@@ -954,7 +956,9 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1,
                 maxEntriesPerPageStr);
-        return JsonUtil.toJson(temp);
+        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
+        
+        return jsonStr;
     }
     
     public static String searchFullTextBySid(HttpServletRequest request,
@@ -1129,9 +1133,21 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1,
                 maxEntriesPerPageStr);
-        return JsonUtil.toJson(temp);
+        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
+        return jsonStr;
     }
 
+	private static String getJsonStr(Map<String, Object> map, String jsonStr)
+	{
+		if ((!map.toString().contains("\\r\\n") || !map.toString().contains(
+				"\\n"))
+				&& (jsonStr.contains("\\r\\n") || jsonStr.contains("\\n")))
+		{
+			jsonStr = jsonStr.replace("\\n", "\\n<br>");
+		}
+		return jsonStr;
+	}
+    
 	private static void getTm2SqlByParamMap(StatementBuilder sb,
 			HashMap paramMap,long tmId)
 	{

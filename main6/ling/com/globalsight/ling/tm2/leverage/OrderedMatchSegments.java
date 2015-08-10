@@ -701,15 +701,6 @@ class OrderedMatchSegments
             int projectTmIndex1 = Leverager.getProjectTmIndex(options, tmId1);
             int projectTmIndex2 = Leverager.getProjectTmIndex(options, tmId2);
             int result = 0;
-            if (options.isTmProcedence())
-            {
-                result = projectTmIndex1 - projectTmIndex2;
-                if (result != 0)
-                {
-                    return result;
-                }
-            }
-
             result = (int) (score2 - score1);
             if (result != 0)
             {
@@ -723,6 +714,12 @@ class OrderedMatchSegments
                 {
                     return result;
                 }
+            }
+
+            result = projectTmIndex1 - projectTmIndex2;
+            if (result != 0)
+            {
+            	return result;
             }
 
             // Ok, same score. Compare match state.

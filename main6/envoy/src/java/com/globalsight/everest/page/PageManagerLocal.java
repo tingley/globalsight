@@ -1031,7 +1031,7 @@ public final class PageManagerLocal implements PageManager
         return p_page;
     }
 
-    private void performExport(ExportParameters p_exportParameters,
+    private void performExport(ExportParameters exportParameters,
             Integer p_genericPageType, List p_ids, long p_exportBatchId)
             throws PageException
     {
@@ -1046,12 +1046,13 @@ public final class PageManagerLocal implements PageManager
             ArrayList<Hashtable> otherPages = new ArrayList<Hashtable>();
 
             // loop through all pages....
-            String exportCode = p_exportParameters.getExportCodeset();
+            String exportCode = exportParameters.getExportCodeset();
             for (int i = 0; i < pageCount; i++)
             {
+                ExportParameters eParameters = exportParameters.clone();
                 // set the values in a hashtable
                 Hashtable map = new Hashtable();
-                map.put(new Integer(EXPORT_PARAMETERS), p_exportParameters);
+                map.put(new Integer(EXPORT_PARAMETERS), eParameters);
                 map.put(new Integer(TARGET_PAGE), p_genericPageType);
                 map.put(new Integer(PAGE_COUNT), new Integer(pageCount));
                 map.put(ExportConstants.EXPORT_BATCH_ID, new Long(
@@ -1083,10 +1084,10 @@ public final class PageManagerLocal implements PageManager
                     String exportSubDir = tpage.getExportSubDir();
                     // update target page only when export dir is changed.
                     if (exportSubDir == null
-                            || !exportSubDir.equals(p_exportParameters
+                            || !exportSubDir.equals(eParameters
                                     .getLocaleSubDir()))
                     {
-                        tpage.setExportSubDir(p_exportParameters
+                        tpage.setExportSubDir(eParameters
                                 .getLocaleSubDir());
                         PagePersistenceAccessor.updateTargetPage(tpage);
                     }
@@ -1111,7 +1112,7 @@ public final class PageManagerLocal implements PageManager
                         FileProfile fileProfile = (FileProfile) HibernateUtil
                                 .get(FileProfileImpl.class, fileProfileId,
                                         false);
-                        p_exportParameters.setExportCodeset(exportCode.replace(
+                        eParameters.setExportCodeset(exportCode.replace(
                                 JobManagementHandler.SAME_AS_SOURCE,
                                 fileProfile.getCodeSet()));
                     }

@@ -228,15 +228,6 @@ function trapKeys()
   </TR>
 </TABLE>
 </DIV>
-<APPLET
-  style="display:inline"
-  archive="/globalsight/applet/lib/online.jar"
-  code="com.globalsight.ling.tw.online.OnlineApplet"
-  id="applet"
-  name="applet"
-  width="0"
-  height="0">
-</APPLET>
 </BODY>
 <script>
 init();

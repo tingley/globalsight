@@ -16,6 +16,11 @@
  */
 package com.globalsight.everest.page.pageexport;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyWrapper;
@@ -34,7 +39,7 @@ import com.globalsight.util.StringUtil;
  * same workflow, we need to gather the generic info required for export and
  * link management prior to page retrieval.
  */
-public class ExportParameters implements java.io.Serializable
+public class ExportParameters implements java.io.Serializable, Cloneable 
 {
     private static final long serialVersionUID = 219733514107887560L;
 
@@ -402,5 +407,30 @@ public class ExportParameters implements java.io.Serializable
     public int getXlfSrcAsTrg()
     {
         return this.m_xlfSrcAsTrg;
+    }
+    
+    /**
+     * Needs deep clone.
+     */
+    public ExportParameters clone() throws CloneNotSupportedException
+    {
+        ByteArrayOutputStream  byteOut = new ByteArrayOutputStream();             
+        ObjectOutputStream out;
+        try
+        {
+            out = new ObjectOutputStream(byteOut);
+            out.writeObject(this);                    
+            ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());             
+            ObjectInputStream in = new ObjectInputStream(byteIn);  
+            
+            return (ExportParameters) in.readObject();
+        } 
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }             
+        
+        return (ExportParameters) super.clone();
     }
 }

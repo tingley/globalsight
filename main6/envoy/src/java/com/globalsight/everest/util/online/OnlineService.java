@@ -17,6 +17,7 @@
 package com.globalsight.everest.util.online;
 
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -181,9 +182,9 @@ public class OnlineService extends HttpServlet
      * 
      * @throws PseudoParserException
      */
-    public void getTargetDiplomat() throws PseudoParserException
+    public void getTargetDiplomat() throws Exception
     {
-        String text = request.getParameter("text");
+        String text = getTarget();
         String seg = helper.getTargetDiplomat(text);
         writeString(seg);
     }
@@ -206,7 +207,7 @@ public class OnlineService extends HttpServlet
      */
     public void getHtmlSegment() throws Exception
     {
-        String text = request.getParameter("text");
+        String text = getTarget();
         String isFromTarget = request.getParameter("isFromTarget");
         helper.setInputSegment(text, "", segmentView.getDataType(), Boolean.parseBoolean(isFromTarget));
         
@@ -223,6 +224,13 @@ public class OnlineService extends HttpServlet
         writeString(result);
     }
     
+    private String getTarget() throws UnsupportedEncodingException
+    {
+        String text = request.getParameter("text");
+        text = new String(text.getBytes("iso8859-1"),"utf-8"); 
+        return text;
+    }
+    
     /**
      * Do error check and send the result back.
      * 
@@ -230,8 +238,7 @@ public class OnlineService extends HttpServlet
      */
     public void doErrorCheck() throws Exception
     {
-        String text = request.getParameter("text");
-        
+        String text = getTarget();
         Map<String, String> m = new HashMap<String, String>();
         
         helper.setUntranslateStyle(SegmentUtil2.getTAGS());

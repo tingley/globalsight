@@ -17,6 +17,7 @@
 package com.globalsight.everest.util.online;
 
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -135,10 +136,16 @@ public class Online2Service extends HttpServlet
      * 
      * @param name
      * @return
+     * @throws UnsupportedEncodingException 
      */
-    private String get(String name)
+    private String get(String name) throws UnsupportedEncodingException
     {
-        return request.getParameter(name);
+        String text = request.getParameter(name);
+        if (text == null)
+            return null;
+        
+        text = new String(text.getBytes("iso8859-1"),"utf-8"); 
+        return text;
     }
     
     /**
@@ -146,7 +153,7 @@ public class Online2Service extends HttpServlet
      * 
      * @throws PseudoOverrideItemException
      */
-    public void initGxml() throws PseudoOverrideItemException
+    public void initGxml() throws Exception
     {
         String gxml = get("gxml");
         helper.setInputSegment(gxml, "", get("datatype"));   
@@ -313,8 +320,8 @@ public class Online2Service extends HttpServlet
      */
     public void doErrorCheck() throws Exception
     {
-        String text = request.getParameter("text");
-        String source = request.getParameter("source");
+        String text = get("text");
+        String source = get("source");
         
         Map<String, String> m = new HashMap<String, String>();
         

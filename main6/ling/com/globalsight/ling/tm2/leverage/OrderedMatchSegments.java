@@ -737,6 +737,13 @@ class OrderedMatchSegments
             }
 
             result = LeverageUtil.compareTime(tuv1, tuv2, options);
+            if (result != 0)
+            {
+                return result;
+            }
+
+            result = tuv1.getOrder() - tuv2.getOrder();
+
             return result;
         }
     }

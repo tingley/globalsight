@@ -391,9 +391,12 @@ public class TMSearchEditEntryHandlerHelper
     
 	private static String getSegmentWithBR(String segment)
 	{
-		if (segment.contains("\\r\\n") || segment.contains("\\n"))
+		if (!segment.contains("\\\\r\\\\n") && !segment.contains("\\\\n"))
 		{
-			segment = segment.replace("\\n", "\\n<br>");
+			if (segment.contains("\\r\\n") || segment.contains("\\n"))
+			{
+				segment = segment.replace("\\n", "\\n<br>");
+			}
 		}
 		return segment;
 	}

@@ -327,7 +327,7 @@ function initSegments()
 
 function initTarget(trg_segment, changed)
 {
-    var edit_segment = "<%=EditUtil.toJavascript(targetHtml)%>";
+    var edit_segment = initTarget2(trg_segment);
    
     fr_editor.SetTargetSegment(edit_segment, changed, IsWhitePreserving());
     fr_editor.SetVerbosePTags(verbose == "<%=EditorConstants.PTAGS_VERBOSE%>");

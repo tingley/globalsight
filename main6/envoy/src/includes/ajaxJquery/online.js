@@ -77,6 +77,30 @@ function getHtmlSegment(text, isFromTarget) {
 	return htmlSegmentReturn;
 }
 
+var initTargetReturn;
+function initTarget2(text)
+{
+    $.ajax({
+	url : 'OnlineService?action=initTarget',
+	async : false,
+	cache : false,
+	data : {
+		text : text,
+		verbose : verbose,
+		colorPtags : colorPtags
+	},
+	dataType : 'text',
+	success : function(data) {
+	    initTargetReturn = data;
+	},
+	error : function(request, error, status) {
+		alert(error);
+	}
+    });
+    
+    return initTargetReturn;
+}   
+
 var errorCheckReturn;
 var newTargetReturn;
 var errorMsgReturn;

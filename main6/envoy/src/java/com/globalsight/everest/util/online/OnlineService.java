@@ -37,6 +37,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineHelper;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.util.JsonUtil;
@@ -229,6 +230,36 @@ public class OnlineService extends HttpServlet
         String text = request.getParameter("text");
         text = new String(text.getBytes("iso8859-1"),"utf-8"); 
         return text;
+    }
+    
+    /**
+     * Init the target
+     */
+    public void initTarget() throws Exception
+    {
+        String text = getTarget();
+        String result = text;
+        
+        OnlineTagHelper applet = new OnlineTagHelper();
+        applet.setInputSegment(text, "", segmentView.getDataType());
+        if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
+        {
+            applet.getVerbose();
+            if (Boolean.parseBoolean(request.getParameter("colorPtags")))
+            {
+                result = applet.makeVerboseColoredPtags(text);
+            }
+        }
+        else
+        {
+            applet.getCompact();
+            if (Boolean.parseBoolean(request.getParameter("colorPtags")))
+            {
+                result = applet.makeCompactColoredPtags(text);
+            }
+        }
+        
+        writeString(result);
     }
     
     /**

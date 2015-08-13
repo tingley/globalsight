@@ -1007,15 +1007,21 @@ public class TMSearchBroswerHandlerHelper
 			{
 				BaseTm baseTM = TM3Util.getBaseTm(projectTM.getTm3Id());
 				getTm3SqlByParamMap(sb, filterMap, baseTM, projectTM.getTm3Id());
-				List<TMidTUid> tuId = getIdList(conn, sb, projectTM.getTm3Id());
-				queryResult.addAll(tuId);
+				List<TMidTUid> tuId = getIdList(conn, sb, tmId);
+				if (tuId != null && tuId.size() > 0)
+				{
+					queryResult.addAll(tuId);
+				}
 			}
 			// tm2
 			else
 			{
 				getTm2SqlByParamMap(sb, filterMap, tmId);
 				List<TMidTUid> tuId = getIdList(conn, sb, tmId);
-				queryResult.addAll(tuId);
+				if (tuId != null && tuId.size() > 0)
+				{
+					queryResult.addAll(tuId);
+				}
 			}
 		}
          
@@ -1151,7 +1157,7 @@ public class TMSearchBroswerHandlerHelper
 	private static void getTm2SqlByParamMap(StatementBuilder sb,
 			HashMap paramMap,long tmId)
 	{
-		sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ")
+		sb.append("SELECT DISTINCT tuv.TU_ID AS tuId FROM ")
 				.append(" PROJECT_TM_TU_T AS tu, ")
 				.append(" PROJECT_TM_TUV_T AS tuv").append(" WHERE 1=1 ")
 				.append(" AND tu.TM_ID = ?").addValue(tmId)
@@ -1161,7 +1167,7 @@ public class TMSearchBroswerHandlerHelper
 	}
 	
 	private static void getTm3SqlByParamMap(StatementBuilder sb,
-			HashMap paramMap, BaseTm baseTM, long tmId)
+			HashMap paramMap, BaseTm baseTM, long tm3Id)
 	{
 		sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ")
 				.append(baseTM.getTuvTableName()).append(" as tuv, ")
@@ -1169,7 +1175,7 @@ public class TMSearchBroswerHandlerHelper
 				.append(baseTM.getTuTableName()).append(" as tu ")
 				.append(" WHERE 1 = 1").append(" AND tuv.id = ext.tuvId ")
 				.append(" AND tu.id = ext.tuId ").append(" AND tuv.tmId = ?")
-				.addValue(tmId);
+				.addValue(tm3Id);
 		getParameterSql(sb, paramMap, "TM3");
 		sb.append(" AND ext.sid IS NOT NULL ");
 	}

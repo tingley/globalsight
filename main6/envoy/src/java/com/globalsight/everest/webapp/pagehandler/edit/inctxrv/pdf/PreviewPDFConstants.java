@@ -23,6 +23,7 @@ public interface PreviewPDFConstants
     public static final String OFFICE_DOCX = "docx";
     public static final String OFFICE_PPTX = "pptx";
     public static final String OFFICE_XLSX = "xlsx";
+    public static final String FILETYPE_XML = ".xml";
 
     public static final String PDF_SUFFIX = ".pdf";
     public static final String XML_SUFFIX = ".xml";
@@ -50,5 +51,7 @@ public interface PreviewPDFConstants
     public static final int TYPE_OFFICE_DOCX = 1001;
     public static final int TYPE_OFFICE_PPTX = 1002;
     public static final int TYPE_OFFICE_XLSX = 1003;
+    
+    public static final int TYPE_XML = 2000;
     
 }

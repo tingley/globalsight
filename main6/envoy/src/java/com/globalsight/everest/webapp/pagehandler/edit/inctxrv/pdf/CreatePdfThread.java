@@ -22,6 +22,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
@@ -47,14 +49,23 @@ public class CreatePdfThread extends MultiCompanySupportedThread
         {
             Collection<SourcePage> sourcePages = job.getSourcePages();
             String userid = job.getCreateUserId();
+            FileProfile fp = job.getFileProfile();
 
             for (SourcePage sourcePage : sourcePages)
             {
                 String pageName = sourcePage.getExternalPageId().toLowerCase();
                 if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
                         || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
-                        || pageName.endsWith(".xlsx"))
+                        || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
                 {
+                    if (pageName.endsWith(".xml"))
+                    {
+                        if (!FileProfileUtil.isXmlPreviewPDF(fp))
+                        {
+                            continue;
+                        }
+                    }
+                    
                     PreviewPDFHelper previewHelper = new PreviewPDFHelper();
                     File pdfFile = previewHelper.createPDF(sourcePage.getId(),
                             userid, false);

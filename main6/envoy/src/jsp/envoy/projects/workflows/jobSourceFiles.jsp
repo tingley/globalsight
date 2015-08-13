@@ -2,7 +2,23 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="com.globalsight.everest.jobhandler.Job,com.globalsight.everest.permission.Permission,com.globalsight.everest.permission.PermissionSet,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.util.system.SystemConfigParamNames,com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,com.globalsight.everest.util.system.SystemConfiguration,com.globalsight.everest.company.CompanyThreadLocal,com.globalsight.everest.page.JobSourcePageDisplay,com.globalsight.everest.foundation.User,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.webapp.pagehandler.PageHandler,java.text.MessageFormat,java.util.*"
+    import="com.globalsight.everest.jobhandler.Job,com.globalsight.everest.permission.Permission,
+    com.globalsight.cxe.entity.fileprofile.FileProfile,
+    com.globalsight.cxe.entity.fileprofile.FileProfileUtil,
+    com.globalsight.everest.servlet.util.ServerProxy,
+    com.globalsight.everest.permission.PermissionSet,com.globalsight.everest.webapp.WebAppConstants,
+    com.globalsight.everest.util.system.SystemConfigParamNames,
+    com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+    com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
+    com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
+    com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,
+    com.globalsight.everest.util.system.SystemConfiguration,
+    com.globalsight.everest.company.CompanyThreadLocal,
+    com.globalsight.everest.page.JobSourcePageDisplay,
+    com.globalsight.everest.foundation.User,
+    com.globalsight.everest.servlet.util.SessionManager,
+    com.globalsight.everest.webapp.pagehandler.PageHandler,
+    java.text.MessageFormat,java.util.*"
     session="true"
 %>
 <jsp:useBean id="jobDetails" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -215,6 +231,7 @@
 </style>
 <script type="text/javascript">
 var pageNames = new Array();
+var xmlPDFs = new Array();
 
 function contorlTargetLocale(){
 	var localeSelect = document.getElementById("<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>");
@@ -679,6 +696,7 @@ function contextForPage(url, e, displayName)
 
     var allowEditSource = eval('${allowEditSourcePage}');
     var canEditSource = eval('${canEditSourcePage}');
+    var xmlPdf = xmlPDFs[displayName];
     displayName = pageNames[displayName];
     
     var fileName = displayName;
@@ -693,6 +711,11 @@ function contextForPage(url, e, displayName)
     
     var showInContextReview = displayName && (fileName.toLowerCase().match(/\.indd$/) || fileName.toLowerCase().match(/\.idml$/)
     		|| fileName.toLowerCase().match(/\.docx$/) || fileName.toLowerCase().match(/\.pptx$/) || fileName.toLowerCase().match(/\.xlsx$/));
+    
+    if (!showInContextReview && 1 == xmlPdf)
+    {
+    	showInContextReview = true;
+    }
     
     <% if (!enabledInContextReview) {%>
     showInContextReview = false;
@@ -989,8 +1012,10 @@ JobSourcePageDisplay jobSourcePageDisplay = null;
 for (int i = 0; i < jobSourcePageDisplayList.size(); i++)
 {
 	jobSourcePageDisplay = jobSourcePageDisplayList.get(i);
+	FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(jobSourcePageDisplay.getSourcePage().getRequest().getDataSourceId());
     {%>
        	pageNames[<%=i%>] = "<%=jobSourcePageDisplay.getSourcePage().getDisplayPageName().replace("\\","/")%>";
+       	xmlPDFs[<%=i%>] = <%=(FileProfileUtil.isXmlPreviewPDF(fp) ? 1 : 0 )%>;
   <%}
 }
 %>

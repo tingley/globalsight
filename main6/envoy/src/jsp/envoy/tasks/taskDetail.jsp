@@ -6,6 +6,7 @@
       com.globalsight.config.UserParamNames,      
       com.globalsight.config.UserParameter,
       com.globalsight.cxe.entity.fileprofile.FileProfile,
+      com.globalsight.cxe.entity.fileprofile.FileProfileUtil,
       com.globalsight.everest.comment.CommentFile,      
       com.globalsight.everest.comment.CommentManager,
       com.globalsight.everest.company.CompanyThreadLocal,
@@ -774,6 +775,7 @@ var b_isReviewActivity = eval("<%=isReviewActivity%>");
 var needWarning = false;
 var helpFile = "<%=helpFile%>";
 var pageNames = new Array();
+var xmlPDFs = new Array();
 
 var openIssuesDom = XmlDocument.create();
 var taskId = <%=task_id%>;
@@ -818,6 +820,7 @@ function contextForPage(url, e, displayName)
     var lb_context_item_inline_editor;
     var lb_context_item_popup_editor ;
     var fontB1 = "<B>", fontB2 = "</B>";
+    var xmlPdf = xmlPDFs[displayName];
     displayName = pageNames[displayName];
     
     var fileName = displayName;
@@ -833,6 +836,11 @@ function contextForPage(url, e, displayName)
     var showInContextReview = displayName && (fileName.toLowerCase().match(/\.indd$/) || fileName.toLowerCase().match(/\.idml$/)
     		|| fileName.toLowerCase().match(/\.docx$/) || fileName.toLowerCase().match(/\.pptx$/) || fileName.toLowerCase().match(/\.xlsx$/));
     var inctxTitle = "Open In Context Review";
+    
+    if (!showInContextReview && 1 == xmlPdf)
+    {
+    	showInContextReview = true;
+    }
     
     <% if (!enabledInContextReview) {%>
     showInContextReview = false;
@@ -1647,6 +1655,7 @@ if (targetPgsSize > 0)
     	tPage = (TargetPage)targetPgs.get(i);
         boolean isExtracted =
           tPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE;
+        FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(tPage.getSourcePage().getRequest().getDataSourceId());
 
         if (isExtracted)
         {
@@ -1661,6 +1670,7 @@ if (targetPgsSize > 0)
         if (isExtracted)
         {%>
            	pageNames[<%=i%>] = "<%=pageName%>";
+           	xmlPDFs[<%=i%>] = <%=(FileProfileUtil.isXmlPreviewPDF(fp) ? 1 : 0 )%>;
       <%}
     }
 }%>

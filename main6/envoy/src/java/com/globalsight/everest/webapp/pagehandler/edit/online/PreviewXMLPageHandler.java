@@ -16,9 +16,14 @@
  */
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.util.Arrays;
 
 import javax.servlet.ServletContext;
@@ -26,10 +31,22 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.sax.SAXSource;
 
+import org.apache.fop.apps.FOUserAgent;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.MimeConstants;
 import org.apache.log4j.Logger;
+import org.xml.sax.InputSource;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
@@ -83,7 +100,7 @@ public class PreviewXMLPageHandler extends PageHandler
 
         try
         {
-            File xslFile = getXsl(fp);
+            File xslFile = FileProfileUtil.getXsl(fp);
             if (xslFile == null)
             {
                 CATEGORY.info("No XSL file found.");
@@ -159,6 +176,7 @@ public class PreviewXMLPageHandler extends PageHandler
 
                 FileInputStream xmlInputStream = null;
                 FileInputStream xslInputStream = null;
+                OutputStream out = null;
 
                 try
                 {
@@ -167,11 +185,43 @@ public class PreviewXMLPageHandler extends PageHandler
                     xslInputStream = new FileInputStream(
                             xslFile.getAbsolutePath());
 
-                    String html = XmlTransformer.transform(xslInputStream,
+                    String result = XmlTransformer.transform(xslInputStream,
                             xmlInputStream);
 
-                    p_response.setCharacterEncoding("UTF-8");
-                    p_response.getWriter().write(html);
+                    // html
+                    if (result.contains("<html") && result.contains("<body"))
+                    {
+                        p_response.setCharacterEncoding("UTF-8");
+                        p_response.getWriter().write(result);
+                    }
+                    // FO
+                    else if (result.contains("<fo:root"))
+                    {
+                        String fopRoot = p_context.getRealPath("") + "/WEB-INF";
+                        final FopFactory fopFactory = FopFactory.newInstance(new File(fopRoot).toURI());
+
+                        FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+                        
+                        File tempFile = File.createTempFile("GS-fo-text", "txt");
+                        FileOutputStream fileOut = new FileOutputStream(tempFile);
+                        out = new BufferedOutputStream(fileOut);
+                        
+                        Fop fop = fopFactory.newFop(MimeConstants.MIME_PLAIN_TEXT, foUserAgent, out);
+                        
+                        TransformerFactory factory = TransformerFactory.newInstance();
+                        Transformer transformer = factory.newTransformer();
+                        StringReader sr = new StringReader(result);
+                        InputSource isource = new InputSource(sr);
+                        Source src = new SAXSource(isource);
+                        Result res = new SAXResult(fop.getDefaultHandler());
+                        
+                        transformer.transform(src, res);
+                        
+                        String text = FileUtil.readFile(tempFile, "UTF-8");
+                        result = "<html><body><pre>" + text + "</pre></body></html>";
+                        p_response.setCharacterEncoding("UTF-8");
+                        p_response.getWriter().write(result);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -196,6 +246,17 @@ public class PreviewXMLPageHandler extends PageHandler
                     }
                     catch (Exception exp)
                     {
+                    }
+                    try
+                    {
+                        if (out != null)
+                        {
+                            out.close();
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        // ignore;
                     }
                 }
             }
@@ -239,7 +300,6 @@ public class PreviewXMLPageHandler extends PageHandler
             sb.append("document.location=\"" + contentLocation + "\";");
             sb.append("</SCRIPT>");
             p_response.getWriter().write(sb.toString());
-
         }
     }
 
@@ -277,33 +337,6 @@ public class PreviewXMLPageHandler extends PageHandler
         }
 
         return targetFile;
-    }
-
-    private File getXsl(FileProfile fp)
-    {
-        File xslFile = null;
-
-        StringBuffer xslPath = new StringBuffer(AmbFileStoragePathUtils
-                .getXslDir(fp.getId()).getPath()).append("/")
-                .append(fp.getId()).append("/");
-        File xslParent = new File(xslPath.toString());
-        if (xslParent.exists())
-        {
-            File[] files = xslParent.listFiles();
-            if (files.length > 0)
-            {
-                String fileName = files[0].getName();
-                if (fileName.toLowerCase().endsWith("xsl")
-                        || fileName.toLowerCase().endsWith("xml")
-                        || fileName.toLowerCase().endsWith("xslt"))
-                {
-                    xslFile = files[0];
-                }
-            }
-
-        }
-
-        return xslFile;
     }
 
     /**

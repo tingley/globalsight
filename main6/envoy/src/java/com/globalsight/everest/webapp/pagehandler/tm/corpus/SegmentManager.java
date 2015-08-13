@@ -37,7 +37,7 @@ public class SegmentManager implements PseudoBaseHandler
     private StringBuffer coloredPtags = null;
     private PseudoParser ptagParser = null;
 
-    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=false>";
+    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>";
     private static final String PTAG_COLOR_END = "</SPAN>";
     private PseudoErrorChecker errChecker = null;
 

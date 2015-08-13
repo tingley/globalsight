@@ -61,6 +61,11 @@ public class CreatePDFTask implements Callable<File>, PreviewPDFConstants
                             m_isTarget);
                     break;
                     
+                case TYPE_XML:
+                    pdfFile = helper.createPDF4XML(m_page, m_userId,
+                            m_isTarget);
+                    break;
+                    
                 case TYPE_OFFICE_DOCX:
                 case TYPE_OFFICE_PPTX:
                 case TYPE_OFFICE_XLSX:

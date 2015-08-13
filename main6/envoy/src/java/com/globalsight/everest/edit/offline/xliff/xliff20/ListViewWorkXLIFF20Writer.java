@@ -454,8 +454,10 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         for (TemplatePart tp : templatePartList)
         {
             String richSkeletonString = tp.getSkeletonString();
-            if (StringUtil.isNotEmpty(richSkeletonString))
-            {
+			if (StringUtil.isNotEmpty(richSkeletonString)
+					&& richSkeletonString.contains("<skeleton>")
+					&& richSkeletonString.contains("</skeleton>"))
+			{
                 String skeleton = richSkeletonString.substring(
                         richSkeletonString.indexOf("<skeleton>") + 10,
                         richSkeletonString.indexOf("</skeleton>"));

@@ -633,14 +633,14 @@ function download()
 	
 	$("#reportType").val(reportType);
 	
-	var withCompactTags;
+	var withCompactTags,withCompactTagsSimple;
 	if(reportType == "ReviewersCommentsReport")
 	{
 		withCompactTags = document.getElementById("ReviewersIncludeTags").checked;
 	}
 	else if(reportType == "ReviewersCommentsSimpleReport")
 	{
-		withCompactTags = document.getElementById("ReviewersSimpleIncludeTags").checked;
+		withCompactTagsSimple = document.getElementById("ReviewersSimpleIncludeTags").checked;
 	}
 	
 	if(withCompactTags)
@@ -648,11 +648,17 @@ function download()
 		withCompactTags = "on";
 	}
 	
+	if(withCompactTagsSimple)
+	{
+		withCompactTagsSimple = "on";
+	}
+	
 	var obj = {
 			inputJobIDS : "<%=task.getJobId()%>",
 			targetLocalesList: "<%=task.getTargetLocale().getId()%>",
 			reportType:reportType,
 			withCompactTags:withCompactTags,
+			withCompactTagsSimple:withCompactTagsSimple,
 			random:Math.random()
 	}	
 	

@@ -34,6 +34,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineHelper;
+import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoOverrideItemException;
 import com.globalsight.util.JsonUtil;
 import com.globalsight.util.StringUtil;
@@ -291,7 +292,7 @@ public class Online2Service extends HttpServlet
     }
     
     /**
-     * Gets ptags as string.
+     * Gets string with compact colored ptags.
      * 
      * @throws Exception
      */
@@ -299,6 +300,17 @@ public class Online2Service extends HttpServlet
     {
         getCompactColoredPtags();
     }
+    
+    /**
+     * Gets ptag string  with OnlineHelper.
+     * 
+     * @throws DiplomatBasicParserException
+     */
+    public void getPtagString() throws DiplomatBasicParserException
+    {
+        writeString(helper.getPtagString());
+    }
+    
     
     /**
      * Gets target diplomat.

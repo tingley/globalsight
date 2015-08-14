@@ -57,8 +57,8 @@ public class StringIndex
                 StringIndex si = new StringIndex(src.substring(st, index_e),
                         st, index_e);
                 si.allStart = index_s;
-                si.allEnd = index_e + 1;
-                si.allValue = src.substring(index_s, index_e + 1);
+                si.allEnd = index_e + end.length();
+                si.allValue = src.substring(index_s, index_e + end.length());
 
                 return si;
             }
@@ -81,8 +81,8 @@ public class StringIndex
                 StringIndex si = new StringIndex(src.substring(st, index_e),
                         st, index_e);
                 si.allStart = index_s;
-                si.allEnd = index_e + 1;
-                si.allValue = src.substring(index_s, index_e + 1);
+                si.allEnd = index_e + end.length();
+                si.allValue = src.substring(index_s, index_e + end.length());
 
                 return si;
             }
@@ -135,8 +135,8 @@ public class StringIndex
                 StringIndex si = new StringIndex(src.substring(st, index_e),
                         st, index_e);
                 si.allStart = index_s;
-                si.allEnd = index_e + 1;
-                si.allValue = src.substring(index_s, index_e + 1);
+                si.allEnd = index_e + end.length();
+                si.allValue = src.substring(index_s, index_e + end.length());
 
                 return si;
             }
@@ -189,8 +189,8 @@ public class StringIndex
                 StringIndex si = new StringIndex(src.substring(st, index_e),
                         st, index_e);
                 si.allStart = index_s;
-                si.allEnd = index_e + 1;
-                si.allValue = src.substring(index_s, index_e + 1);
+                si.allEnd = index_e + end.length();
+                si.allValue = src.substring(index_s, index_e + end.length());
 
                 return si;
             }

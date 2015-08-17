@@ -128,27 +128,3 @@ function doErrorCheck()
 
 	return errorMsgReturn;
 }
-
-function doErrorCheck2(callback)
-{
-    var data = "{}";
-    eval(callback+'(data)');
-    return;
-    
-	var text = fr_editor.GetTargetSegment();
-	$.ajax({
-		url : 'OnlineService?action=doErrorCheck',
-		cache : false,
-		data : {
-			text : text
-		},
-		dataType : 'text',
-		success : function(data) {
-		    
-		    eval(callback+'(data)');
-		},
-		error : function(request, error, status) {
-		    alert(error);
-		}
-	});
-}

@@ -54,6 +54,7 @@ import org.hibernate.Transaction;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 import org.w3c.dom.Element;
 
+import com.alibaba.fastjson.JSONObject;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
@@ -81,6 +82,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -436,11 +438,28 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 			long companyId = (Long) sessionMgr.getAttribute("companyId");
 			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
 					companyId, jobIdSet, exportFilesSet, localesSet);
-			sessionMgr.removeElement("jobIdSet");
-			sessionMgr.removeElement("exportFilesSet");
-			sessionMgr.removeElement("localesSet");
+            sessionMgr.removeElement("jobIdSet");
+            sessionMgr.removeElement("exportFilesSet");
+            sessionMgr.removeElement("localesSet");
 			return;
 		}
+        else if ("retrieveTranslatedText".equals(p_request
+                .getParameter("action")))
+        {
+            String workflowId = p_request.getParameter("workflowId");
+            Workflow workflow = ServerProxy.getWorkflowManager()
+                    .getWorkflowById(Long.parseLong(workflowId));
+            int percentage = 0;
+            JSONObject jsonObject = null;
+            Task task = (Task) workflow.getTasks().values().iterator().next();
+            percentage = SegmentTuvUtil.getTranslatedPercentageForTask(task);
+            jsonObject = new JSONObject();
+            jsonObject.put("workflowId", Long.parseLong(workflowId));
+            jsonObject.put("percent", percentage);
+
+            p_response.getWriter().write(jsonObject.toJSONString());
+            return;
+        }
         // deal with ajax request.End.
 
         boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
@@ -465,7 +484,39 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 p_context);
     }
 
-	public boolean checkQAReport(SessionManager sessionMgr, long companyId,
+    private void getPercent(HttpServletResponse p_response,
+            String[] workflowIdsArray)
+    {
+        try
+        {
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < workflowIdsArray.length; i++)
+            {
+
+                Workflow workflow = ServerProxy.getWorkflowManager()
+                        .getWorkflowById(Long.parseLong(workflowIdsArray[i]));
+                Task task = (Task) workflow.getTasks().values().iterator()
+                        .next();
+                int percent = SegmentTuvUtil
+                        .getTranslatedPercentageForTask(task);
+                sb.append(percent).append(",");
+            }
+
+            if (sb.length() != 0)
+            {
+                PrintWriter out = p_response.getWriter();
+                p_response.setContentType("text/html");
+                out.write(sb.toString());
+                out.close();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean checkQAReport(SessionManager sessionMgr, long companyId,
 			String jobId, String[] wfIds)
 	{
 		Company company = CompanyWrapper.getCompanyById(companyId);
@@ -1793,7 +1844,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return formatType;

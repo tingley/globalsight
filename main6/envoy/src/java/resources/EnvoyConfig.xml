@@ -1509,6 +1509,7 @@
         <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
         <PageLink linkName="jobDetailsPDFs" destinationPageName="JOBDETAILSPDFS"></PageLink>
         <PageLink linkName="jobScorecard" destinationPageName="SCORECARD"></PageLink>
+        <PageLink linkName="translatedTextList" destinationPageName="WFTTL"></PageLink>
       </WebPage>
       <WebPage pageName="SCORECARD" isDefault="false" jspName="/envoy/projects/workflows/jobScorecard.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobWorkflowsHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
@@ -1734,6 +1735,9 @@
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
         <PageLink linkName="jobInProgress" destinationPageName="WF3"></PageLink>
         <PageLink linkName="jobReady" destinationPageName="WF2"></PageLink>
+      </WebPage>
+      <WebPage pageName="WFTTL" isDefault="false" jspName="/envoy/projects/workflows/translatedTextList.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.TranslatedTextHandler">
+      	<PageLink linkName="self" destinationPageName="WFTTL"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>

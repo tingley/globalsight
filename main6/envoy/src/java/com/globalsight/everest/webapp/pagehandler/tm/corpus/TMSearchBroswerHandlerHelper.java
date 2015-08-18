@@ -1145,11 +1145,16 @@ public class TMSearchBroswerHandlerHelper
 
 	private static String getJsonStr(Map<String, Object> map, String jsonStr)
 	{
-		if ((!map.toString().contains("\\r\\n") || !map.toString().contains(
-				"\\n"))
-				&& (jsonStr.contains("\\r\\n") || jsonStr.contains("\\n")))
+		if (!map.toString().contains("\\r\\n")
+				&& !map.toString().contains("\\n"))
 		{
-			jsonStr = jsonStr.replace("\\n", "\\n<br>");
+			if (!jsonStr.contains("\\\\r\\\\n") && !jsonStr.contains("\\\\n"))
+			{
+				if (jsonStr.contains("\\r\\n") || jsonStr.contains("\\n"))
+				{
+					jsonStr = jsonStr.replace("\\n", "\\n<br>");
+				}
+			}
 		}
 		return jsonStr;
 	}

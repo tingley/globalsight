@@ -402,6 +402,9 @@
     String stfCreationState = theTask.getStfCreationState();
     String sourceLocale = theTask.getSourceLocale().getDisplayName(uiLocale);
     String targetLocale = theTask.getTargetLocale().getDisplayName(uiLocale);
+    boolean isEstimatedCompletionDateOverrided = theTask.getWorkflow().isEstimatedCompletionDateOverrided();
+    ts.setDate(theTask.getWorkflow().getEstimatedCompletionDate());
+    String estimatedCompletionDate = ts.toString();
     ts.setDate(theTask.getEstimatedCompletionDate());
     String dueDate = ts.toString();
     ts.setDate(theTask.getCompletedDate());
@@ -520,7 +523,14 @@
 
     //  Majority of cases it is Due Date
     labelABorDBorCODate = labelDueDate;
-    valueABorDBorCODate = dueDate;
+    if(isEstimatedCompletionDateOverrided)
+    {
+ 		 valueABorDBorCODate = estimatedCompletionDate;
+    }
+    else
+    {
+    	 valueABorDBorCODate = dueDate;
+    }
 
     switch (state)
     {
@@ -532,7 +542,14 @@
             status = labelFinished;
             disableButtons = true;
             labelABorDBorCODate = labelCompletedOn;
-            valueABorDBorCODate = completedOn;
+            if(isEstimatedCompletionDateOverrided)
+            {
+           		 valueABorDBorCODate = estimatedCompletionDate;
+            }
+            else
+            {
+            	valueABorDBorCODate = completedOn;
+            }
             break;
         case Task.STATE_REJECTED:
             status = labelRejected;
@@ -544,7 +561,14 @@
         case Task.STATE_ACTIVE:
             status = labelAvailable;
             labelABorDBorCODate = labelAcceptBy;
-            valueABorDBorCODate = acceptBy;
+            if(isEstimatedCompletionDateOverrided)
+            {
+          		 valueABorDBorCODate = estimatedCompletionDate;
+           }
+            else
+            {
+           	valueABorDBorCODate = acceptBy;
+           }
             rowspan = 12;
             break;
         case Task.STATE_DISPATCHED_TO_TRANSLATION:

@@ -78,8 +78,10 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.EmojiUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -121,7 +123,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         catch (Throwable e)
         {
-            if (CATEGORY.isDebugEnabled()) {
+            if (CATEGORY.isDebugEnabled())
+            {
                 CATEGORY.debug("Error when get 'editalltargetpages.allowed' and 'editallsnippets.allowed' configurations");
             }
             // Do nothing if configuration is not available.
@@ -240,7 +243,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
             sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
-            // store jobId, target language and source page id for Lisa QA report
+            // store jobId, target language and source page id for Lisa QA
+            // report
             sessionMgr.setAttribute(WebAppConstants.JOB_ID,
                     Long.parseLong(jobId));
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
@@ -392,8 +396,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             CATEGORY.error("Problem getting job from database ", e);
             throw new EnvoyServletException(e);
         }
-        
-        if(result.length() > 0 && result.toString().endsWith(",")){
+
+        if (result.length() > 0 && result.toString().endsWith(","))
+        {
             result.deleteCharAt(result.length() - 1);
         }
 
@@ -545,12 +550,13 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 bUpdateSource = true;
                 p_request.setAttribute("refreshSource", "true");
             }
-            
+
             long targetPageId = p_state.getTargetPageId().longValue();
             long sourceLocaleId = p_state.getSourceLocale().getId();
             long targetLocaleId = p_state.getTargetLocale().getId();
-            SegmentView segmentView = EditorHelper.getSegmentView(p_state, tuId, tuvId,
-                    subId, targetPageId, sourceLocaleId, targetLocaleId);
+            SegmentView segmentView = EditorHelper.getSegmentView(p_state,
+                    tuId, tuvId, subId, targetPageId, sourceLocaleId,
+                    targetLocaleId);
             p_sessionMgr.setAttribute(WebAppConstants.SEGMENTVIEW, segmentView);
         }
 
@@ -600,9 +606,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 bUpdateTarget = true;
                 if (layout.isSinglePage())
                 {
-                    if (layout.singlePageIsSource()) {
+                    if (layout.singlePageIsSource())
+                    {
                         bUpdateTarget = false;
-                    } else {
+                    }
+                    else
+                    {
                         bUpdateSource = false;
                     }
                 }
@@ -627,9 +636,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 bUpdateTarget = true;
                 if (layout.isSinglePage())
                 {
-                    if (layout.singlePageIsSource()) {
+                    if (layout.singlePageIsSource())
+                    {
                         bUpdateTarget = false;
-                    } else {
+                    }
+                    else
+                    {
                         bUpdateSource = false;
                     }
                 }
@@ -689,8 +701,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     .getSourcePageId().toString();
             p_sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID,
                     currentSrcPageId);
-            
-            if(SegmentFilter.isFilterSegment(p_state))
+
+            if (SegmentFilter.isFilterSegment(p_state))
             {
                 bUpdateTarget = true;
                 bUpdateSource = true;
@@ -769,8 +781,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
     private boolean isIE(HttpServletRequest p_request)
     {
-        return (p_request.getHeader("User-Agent").toLowerCase()
-                .indexOf("msie")) != -1 ? true : false;
+        return (p_request.getHeader("User-Agent").toLowerCase().indexOf("msie")) != -1 ? true
+                : false;
     }
 
     private HashMap<String, String> getSearchParamsInMap(
@@ -1001,6 +1013,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             html = EditorHelper.getSourcePageView(p_state, false, p_searchMap);
             html = OfficeContentPostFilterHelper.fixHtmlForSkeleton(html);
             html = replaceImgForFirefox(html, p_isIE);
+            // GBS-4066
+            html = removeEmojiAliasesInSkeleton(html);
+
             p_state.setSourcePageHtml(viewMode, html);
         }
     }
@@ -1021,8 +1036,22 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         html = OfficeContentPostFilterHelper.fixHtmlForSkeleton(html);
         html = replaceImgForFirefox(html, p_isIE);
+        // GBS-4066
+        html = removeEmojiAliasesInSkeleton(html);
 
         p_state.setTargetPageHtml(html);
+    }
+
+    /**
+     * Removes emoji aliases in skeleton string.
+     * 
+     * @since GBS-4066
+     */
+    private String removeEmojiAliasesInSkeleton(String html)
+    {
+        String regex = EmojiUtil.TYPE_EMOJI + ":[^:]*?:";
+
+        return StringUtil.replaceWithRE(html, regex, "");
     }
 
     /**
@@ -1116,7 +1145,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         EditorHelper.initializeFromActivity(p_state, p_session, p_userId,
                 p_taskId, p_request, p_uiLocale);
 
-        setCurrentPageFromActivity(p_session,p_state, p_srcPageId);
+        setCurrentPageFromActivity(p_session, p_state, p_srcPageId);
         EditorState.PagePair currentPage = p_state.getCurrentPage();
 
         p_state.setTargetViewLocale(currentPage.getTargetPageLocale(new Long(
@@ -1213,7 +1242,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             // If the PM requests a specific target page...
 
-            setCurrentPage(p_request.getSession(),p_state, p_srcPageId, p_trgPageId);
+            setCurrentPage(p_request.getSession(), p_state, p_srcPageId,
+                    p_trgPageId);
 
             EditorState.PagePair currentPage = p_state.getCurrentPage();
 
@@ -1224,14 +1254,15 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             // No target page/locale requested, find a suitable one.
 
-            setCurrentPage(p_request.getSession(),p_state, p_srcPageId);
+            setCurrentPage(p_request.getSession(), p_state, p_srcPageId);
 
             // If no locale is set or the set locale doesn't exist in the
             // list of target locales in the job (fix for def_5545),
             // determine the default locale to display in target window.
             GlobalSightLocale viewLocale = p_state.getTargetViewLocale();
             Vector trgLocales = p_state.getJobTargetLocales();
-            GlobalSightLocale local = (GlobalSightLocale)sessionMgr.getAttribute("targetLocale");
+            GlobalSightLocale local = (GlobalSightLocale) sessionMgr
+                    .getAttribute("targetLocale");
             if (viewLocale == null || !trgLocales.contains(viewLocale))
             {
                 if (trgLocales.contains(local))
@@ -1396,8 +1427,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
      * Scans the pagelist for the first pair having the right source page id and
      * set the pair to be shown first.
      */
-    private void setCurrentPageFromActivity(HttpSession p_session,EditorState p_state,
-            String p_srcPageId)
+    private void setCurrentPageFromActivity(HttpSession p_session,
+            EditorState p_state, String p_srcPageId)
     {
         ArrayList pages = p_state.getPages();
         pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
@@ -1805,7 +1836,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         return editorMode;
     }
-    
+
     private List<EditorState.PagePair> getPagePairList(HttpSession p_session,
             List<EditorState.PagePair> pages)
     {

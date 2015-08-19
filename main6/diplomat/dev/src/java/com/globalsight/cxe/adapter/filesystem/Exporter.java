@@ -81,6 +81,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.X
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.common.MapOfHtmlEntity;
+import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -216,12 +217,12 @@ public class Exporter
                 fileTargetEncoding = (String) messageTargetCharset;
             }
 
-			// added by Walter, In GSEdition, the ServerB's exported xliff file
-			// needed to be uploaded in serverA, if the xliff file have no bom
-			// format, it will throw exception when check.
-			Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
-					(Long.parseLong(m_cxeMessage.getParameters()
-							.get("WorkflowId").toString())));
+            // added by Walter, In GSEdition, the ServerB's exported xliff file
+            // needed to be uploaded in serverA, if the xliff file have no bom
+            // format, it will throw exception when check.
+            Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
+                    (Long.parseLong(m_cxeMessage.getParameters()
+                            .get("WorkflowId").toString())));
             if ("xlz".equals(m_formatType) || "xlf".equals(m_formatType))
             {
                 String fileEncoding = FileUtil.guessEncoding(finalFile);
@@ -350,6 +351,25 @@ public class Exporter
                             default:
                                 break;
                         }
+                    }
+                }
+                else
+                {
+                    // GBS-4066, add bom to txt or not
+                    List<String> fileTypes = new ArrayList<String>();
+                    fileTypes.add(IFormatNames.FORMAT_PLAINTEXT);
+
+                    StringBuilder sourceFileName = new StringBuilder();
+                    sourceFileName.append(AmbFileStoragePathUtils
+                            .getCxeDocDirPath(fp.getCompanyId()));
+                    sourceFileName.append(File.separator);
+                    sourceFileName.append(m_sourceFileName);
+
+                    if (fileTypes.contains(m_formatType)
+                            && isSourceHasBom(new File(
+                                    sourceFileName.toString())))
+                    {
+                        FileUtil.addBom(finalFile, fileTargetEncoding);
                     }
                 }
             }
@@ -610,6 +630,24 @@ public class Exporter
     }
 
     /**
+     * Checks if source file has BOM or not.
+     * 
+     * @since GBS-4066
+     */
+    private boolean isSourceHasBom(File sourceFile) throws IOException
+    {
+        if (sourceFile != null && sourceFile.exists())
+        {
+            String sourceFileEncoding = FileUtil.guessEncoding(sourceFile);
+            if (sourceFileEncoding != null)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * When export, post contents/tags back to MindTouch server.
      * 
      * @param finalFileName
@@ -693,10 +731,11 @@ public class Exporter
                 String relativeFilePath = infos.get("relativeFilePath");
                 String sourceFileMappingPath = relativeFilePath;
                 String sourceFolderMappingPath = "";
-                if(sourceFileMappingPath.indexOf(File.separator) > 0)
+                if (sourceFileMappingPath.indexOf(File.separator) > 0)
                 {
-                	sourceFolderMappingPath = sourceFileMappingPath
-                				.substring(0, sourceFileMappingPath.lastIndexOf(File.separator));
+                    sourceFolderMappingPath = sourceFileMappingPath.substring(
+                            0,
+                            sourceFileMappingPath.lastIndexOf(File.separator));
                 }
                 String suffix;
                 if (mappings.size() == 0)
@@ -731,12 +770,14 @@ public class Exporter
                                     .lastIndexOf("."));
                 }
 
-                String dstFilePath = gitFolder.getPath() + File.separator + suffix;
+                String dstFilePath = gitFolder.getPath() + File.separator
+                        + suffix;
                 String srcFilePath = finalFileName;
 
                 GitConnectorCacheFile cacheFile = new GitConnectorCacheFile();
                 cacheFile.setFilePath(suffix);
-                cacheFile.setGitConnectorId(gitConnectorJob.getGitConnectorId());
+                cacheFile
+                        .setGitConnectorId(gitConnectorJob.getGitConnectorId());
                 cacheFile.setSrcFilePath(srcFilePath);
                 cacheFile.setDstFilePath(dstFilePath);
                 HibernateUtil.save(cacheFile);
@@ -776,7 +817,6 @@ public class Exporter
 
         return mappings;
     }
-    
 
     private void handleEloquaFiles(String finalFileName, FileProfile fp,
             Workflow wf, boolean hasScript)
@@ -821,15 +861,16 @@ public class Exporter
                     {
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
-                        
-                        String targetLocale = wf.getTargetLocale()
-                                .toString();
-                        
-                        boolean isHtml = m.updateFromFile(emailFile, uploaded, targetLocale);
+
+                        String targetLocale = wf.getTargetLocale().toString();
+
+                        boolean isHtml = m.updateFromFile(emailFile, uploaded,
+                                targetLocale);
                         if (isHtml)
                         {
                             String html = m.getHtml();
-                            String newContent = h.updateDynamicContent(html, targetLocale);
+                            String newContent = h.updateDynamicContent(html,
+                                    targetLocale);
                             m.setHtml(newContent);
                         }
 
@@ -847,7 +888,7 @@ public class Exporter
                                 m.setName(eloquaName);
                             }
 
-                            m.setId("");                            
+                            m.setId("");
                             m = h.saveEmail(m);
                         }
 
@@ -867,14 +908,16 @@ public class Exporter
                     if (m.getName() != null)
                     {
                         String targetLocale = wf.getTargetLocale().toString();
-                        boolean isHtml = m.updateFromFile(saveFile, uploaded, targetLocale);
+                        boolean isHtml = m.updateFromFile(saveFile, uploaded,
+                                targetLocale);
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
-                        
+
                         if (isHtml)
                         {
                             String html = m.getHtml();
-                            String newContent = h.updateDynamicContent(html, targetLocale);
+                            String newContent = h.updateDynamicContent(html,
+                                    targetLocale);
                             m.setHtml(newContent);
                         }
 
@@ -887,7 +930,7 @@ public class Exporter
                             if (!uploaded)
                             {
                                 String eloquaName = m.getName();
-                                
+
                                 eloquaName = eloquaName + "(" + targetLocale
                                         + ")";
                                 m.setName(eloquaName);

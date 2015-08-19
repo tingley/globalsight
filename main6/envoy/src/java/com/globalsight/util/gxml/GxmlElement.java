@@ -31,17 +31,19 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.ling.tm2.TmxTypeMapper;
 import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.util.EmojiUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.exception.BooleanConvertingException;
 
 /**
- * <p>In GXML or Paginated ResultSet, each XML tag pairs and the
- * content in between are taken as a single Gxml element.  GxmlElement
- * class is generalized the features of all element types.  Text
- * content of the element is stored in a TextNode.</p>
+ * <p>
+ * In GXML or Paginated ResultSet, each XML tag pairs and the content in between
+ * are taken as a single Gxml element. GxmlElement class is generalized the
+ * features of all element types. Text content of the element is stored in a
+ * TextNode.
+ * </p>
  */
-public class GxmlElement
-    implements Serializable
+public class GxmlElement implements Serializable
 {
     private static final long serialVersionUID = -7065428615407672282L;
 
@@ -76,16 +78,15 @@ public class GxmlElement
     public static final int TEXT_NODE = 22;
     public static final int GS = 23;
 
-    public static final int[] TRANSLATABLE_AND_LOCALIZABLE_TYPES =
-        new int[]{GxmlElement.TRANSLATABLE,
-                  GxmlElement.LOCALIZABLE};
-    public static final int[] SUB_TYPE =
-        new int[]{GxmlElement.SUB};
-    public static final int[] TEXT_NODE_TYPE =
-        new int[]{GxmlElement.TEXT_NODE};
-    public static final int[] USPECIFIED_TYPE =
-        new int[]{GxmlElement.UNSPECIFIED};
-    
+    public static final int[] TRANSLATABLE_AND_LOCALIZABLE_TYPES = new int[]
+    { GxmlElement.TRANSLATABLE, GxmlElement.LOCALIZABLE };
+    public static final int[] SUB_TYPE = new int[]
+    { GxmlElement.SUB };
+    public static final int[] TEXT_NODE_TYPE = new int[]
+    { GxmlElement.TEXT_NODE };
+    public static final int[] USPECIFIED_TYPE = new int[]
+    { GxmlElement.UNSPECIFIED };
+
     public static final String XLF = "xlf";
 
     // member variables
@@ -117,10 +118,11 @@ public class GxmlElement
         m_name = p_name;
     }
 
-
     /**
      * Shallow copy constructor.
-     * @param p_gxmlElement construct a GxmlElement from p_gxmlElement
+     * 
+     * @param p_gxmlElement
+     *            construct a GxmlElement from p_gxmlElement
      */
     public GxmlElement(GxmlElement p_gxmlElement)
     {
@@ -147,9 +149,9 @@ public class GxmlElement
     }
 
     /**
-     * Get the Translatable and Localizable elements from this
-     * document structure.  The results are a List and it keeps the
-     * same order as the elements appear in the document.
+     * Get the Translatable and Localizable elements from this document
+     * structure. The results are a List and it keeps the same order as the
+     * elements appear in the document.
      *
      * @return a List of elements of translatable or localizable
      */
@@ -160,6 +162,7 @@ public class GxmlElement
 
     /**
      * To get the element type
+     * 
      * @return the type of the element.
      */
     public int getType()
@@ -168,8 +171,8 @@ public class GxmlElement
     }
 
     /**
-     * To get the element name, the name is the tag name in Gxml
-     * document.
+     * To get the element name, the name is the tag name in Gxml document.
+     * 
      * @return name of the elment as a String.
      */
     public String getName()
@@ -178,14 +181,14 @@ public class GxmlElement
     }
 
     /**
-     * Get the text value of the element.  The text value is defined
-     * as the the content of the TextNode, if it is a TextNode, and if
-     * it is not a TextNode, it returns the summation of the content
-     * of the immediate children TextNodes
+     * Get the text value of the element. The text value is defined as the the
+     * content of the TextNode, if it is a TextNode, and if it is not a
+     * TextNode, it returns the summation of the content of the immediate
+     * children TextNodes
      *
-     * @return the text content of the element as a String.  Returns
-     * an empty String if the GxmlElement is not a TextNode or it has
-     * no immediate child TextNodes.
+     * @return the text content of the element as a String. Returns an empty
+     *         String if the GxmlElement is not a TextNode or it has no
+     *         immediate child TextNodes.
      */
     public String getTextValue()
     {
@@ -196,24 +199,23 @@ public class GxmlElement
             return "";
         }
 
-        StringBuffer result = new StringBuffer(10*children.size());
+        StringBuffer result = new StringBuffer(10 * children.size());
 
         for (int i = 0; i < children.size(); i++)
         {
-            result.append(((TextNode)children.get(i)).getTextNodeValue());
+            result.append(((TextNode) children.get(i)).getTextNodeValue());
         }
 
         return result.toString();
     }
 
-
     /**
-     * Get the text value of a TextNode element.  The TextNode value
-     * is defined as the content of a TextNode.  If the GxmlElement is
-     * not a TextNode, an empty String is returned.
+     * Get the text value of a TextNode element. The TextNode value is defined
+     * as the content of a TextNode. If the GxmlElement is not a TextNode, an
+     * empty String is returned.
      *
-     * @return the content of a TextNode GxmlElement as a String.
-     * Returns an empty String if it is not a TextNode.
+     * @return the content of a TextNode GxmlElement as a String. Returns an
+     *         empty String if it is not a TextNode.
      */
     public String getTextNodeValue()
     {
@@ -221,13 +223,11 @@ public class GxmlElement
         return "";
     }
 
-
     /**
-     * Get the total text value of the element. The total text value
-     * is defined as the the content of the TextNode, if it is a
-     * TextNode, and if it is not a TextNode, it returns the summation
-     * of the content of all the descendant TextNodes.  Returns an
-     * empty String if there are no TextNodes.
+     * Get the total text value of the element. The total text value is defined
+     * as the the content of the TextNode, if it is a TextNode, and if it is not
+     * a TextNode, it returns the summation of the content of all the descendant
+     * TextNodes. Returns an empty String if there are no TextNodes.
      *
      * @return the content of the element as a String.
      */
@@ -240,23 +240,37 @@ public class GxmlElement
             return "";
         }
 
-        StringBuffer result = new StringBuffer(10*descendants.size());
+        StringBuffer result = new StringBuffer(10 * descendants.size());
 
         for (int i = 0; i < descendants.size(); i++)
         {
-            result.append(((TextNode)descendants.get(i)).getTextNodeValue());
+            // GBS-3997&GBS-4066
+            TextNode tn = (TextNode) descendants.get(i);
+            GxmlElement parent = tn.getParent();
+            if (parent != null)
+            {
+                int nodeType = parent.getType();
+                if (PH == nodeType)
+                {
+                    String type = parent.getAttribute(GxmlNames.PH_TYPE);
+                    if (type != null && type.startsWith(EmojiUtil.TYPE_EMOJI))
+                    {
+                        continue;
+                    }
+                }
+            }
+            result.append(((TextNode) descendants.get(i)).getTextNodeValue());
         }
 
         return result.toString();
     }
-
 
     /**
      * To set an attribute value by name.
      */
     public void setAttribute(String p_attributeName, String p_value)
     {
-        //Initialize the hashmap for the first time
+        // Initialize the hashmap for the first time
         if (m_attributes == null)
         {
             m_attributes = new LinkedHashMap(7, 1);
@@ -269,8 +283,8 @@ public class GxmlElement
     /**
      * To get an attribute value by its name.
      *
-     * @return an attribute value as a String, return null if the
-     * attribute is not set.
+     * @return an attribute value as a String, return null if the attribute is
+     *         not set.
      */
     public String getAttribute(String p_attributeName)
     {
@@ -279,21 +293,21 @@ public class GxmlElement
             return null;
         }
 
-        return (String)m_attributes.get(p_attributeName);
+        return (String) m_attributes.get(p_attributeName);
     }
 
     /**
      * To get an attribute value as Boolean type by its name.
      *
-     * @return an attribute value as a boolean, return null if the
-     * attribute is not set.
+     * @return an attribute value as a boolean, return null if the attribute is
+     *         not set.
      *
-     * @exception BooleanConvertingException, a globalsight Exception,
-     * thrown when the attribute is not a boolean value e.g. true or
-     * false
+     * @exception BooleanConvertingException
+     *                , a globalsight Exception, thrown when the attribute is
+     *                not a boolean value e.g. true or false
      */
     public Boolean getAttributeAsBoolean(String p_attributeName)
-        throws BooleanConvertingException
+            throws BooleanConvertingException
     {
         if (m_attributes == null)
         {
@@ -301,12 +315,12 @@ public class GxmlElement
         }
 
         Boolean output = null;
-        String attr = (String)m_attributes.get(p_attributeName);
+        String attr = (String) m_attributes.get(p_attributeName);
 
         if (attr != null)
         {
-            if ("true".equals(attr.toLowerCase()) ||
-                "false".equals(attr.toLowerCase()))
+            if ("true".equals(attr.toLowerCase())
+                    || "false".equals(attr.toLowerCase()))
             {
                 output = new Boolean(attr);
             }
@@ -322,14 +336,15 @@ public class GxmlElement
     /**
      * To get an attribute value as Integer type by its name.
      *
-     * @return an attribute value as an Integer, return null if the
-     * attribute is not set.
+     * @return an attribute value as an Integer, return null if the attribute is
+     *         not set.
      *
-     * @exception NumberFormatException, thrown when the attribute
-     * value is not a number e.g. true or false
+     * @exception NumberFormatException
+     *                , thrown when the attribute value is not a number e.g.
+     *                true or false
      */
     public Integer getAttributeAsInteger(String p_attributeName)
-        throws NumberFormatException
+            throws NumberFormatException
     {
         if (m_attributes == null)
         {
@@ -370,6 +385,7 @@ public class GxmlElement
 
     /**
      * To get the whole child element list.
+     * 
      * @return List of all child elements.
      */
     public List getChildElements()
@@ -433,9 +449,10 @@ public class GxmlElement
 
     /**
      * To get a list of immediate child elements of specified types.
-     * @param p_types - an array of element types
-     * @return a List of child elements having the specified element
-     * types
+     * 
+     * @param p_types
+     *            - an array of element types
+     * @return a List of child elements having the specified element types
      */
     public List getChildElements(int[] p_types)
     {
@@ -448,7 +465,7 @@ public class GxmlElement
 
         for (int i = 0; i < m_childElements.size(); i++)
         {
-            GxmlElement child = (GxmlElement)m_childElements.get(i);
+            GxmlElement child = (GxmlElement) m_childElements.get(i);
 
             if (isNumberInArray(child.getType(), p_types))
             {
@@ -461,9 +478,10 @@ public class GxmlElement
 
     /**
      * To get a list of immediate child elements of a specified type.
-     * @param p_type - an element type
-     * @return a List of child elements having the specified element
-     * type
+     * 
+     * @param p_type
+     *            - an element type
+     * @return a List of child elements having the specified element type
      */
     public List getChildElements(int p_type)
     {
@@ -475,25 +493,26 @@ public class GxmlElement
     /**
      * To get an element by index.
      *
-     * @return a child GxmlElement, return null if the index is out
-     * off range, or if there is no child elements existing.
+     * @return a child GxmlElement, return null if the index is out off range,
+     *         or if there is no child elements existing.
      */
     public GxmlElement getChildElement(int p_index)
     {
-        if (p_index == -1 || m_childElements == null ||
-            p_index >= m_childElements.size())
+        if (p_index == -1 || m_childElements == null
+                || p_index >= m_childElements.size())
         {
             return null;
         }
 
-        return (GxmlElement)m_childElements.get(p_index);
+        return (GxmlElement) m_childElements.get(p_index);
     }
 
     /**
      * To get a list of descendant elements of specified types.
-     * @param p_types - an array of element types
-     * @return a List of descendant elements having the specified
-     * element types
+     * 
+     * @param p_types
+     *            - an array of element types
+     * @return a List of descendant elements having the specified element types
      */
     public List<GxmlElement> getDescendantElements(int[] p_types,
             boolean... fromPage)
@@ -509,10 +528,10 @@ public class GxmlElement
 
         for (int i = 0; i < m_childElements.size(); i++)
         {
-            GxmlElement child = (GxmlElement)m_childElements.get(i);
-            if(fromPage != null && fromPage.length != 0 && fromPage[0])
+            GxmlElement child = (GxmlElement) m_childElements.get(i);
+            if (fromPage != null && fromPage.length != 0 && fromPage[0])
             {
-                if(!child.isSkip())
+                if (!child.isSkip())
                 {
                     if (isNumberInArray(child.getType(), p_types))
                     {
@@ -537,9 +556,11 @@ public class GxmlElement
     }
 
     /**
-     * For each descendant element of one of the specified types, add
-     * it's parent to the returned List.
-     * @param p_types - an array of element types
+     * For each descendant element of one of the specified types, add it's
+     * parent to the returned List.
+     * 
+     * @param p_types
+     *            - an array of element types
      * @return a List of parents of descendant elements.
      */
     public List getDescendantElementsParent(int[] p_types)
@@ -550,7 +571,7 @@ public class GxmlElement
         Iterator it = descendantElements.iterator();
         while (it.hasNext())
         {
-            GxmlElement descendant = (GxmlElement)it.next();
+            GxmlElement descendant = (GxmlElement) it.next();
 
             descendantParents.add(descendant.getParent());
         }
@@ -559,7 +580,8 @@ public class GxmlElement
     }
 
     /**
-     * To get the parent GxmlElement.  May be null if no parent.
+     * To get the parent GxmlElement. May be null if no parent.
+     * 
      * @return the parent GxmlElement.
      */
     public GxmlElement getParent()
@@ -569,18 +591,19 @@ public class GxmlElement
 
     /**
      * Set the parent element.
-     * @param p_parent the parent GxmlElement.
+     * 
+     * @param p_parent
+     *            the parent GxmlElement.
      */
     void setParent(GxmlElement p_parent)
     {
         m_parent = p_parent;
     }
 
-
     /**
-     * Gets the end tag of this element.  If the tag is empty
-     * (i.e. has no child nodes) the start tag is printed as empty
-     * &lt;.../&gt; and this method returns the empty string.
+     * Gets the end tag of this element. If the tag is empty (i.e. has no child
+     * nodes) the start tag is printed as empty &lt;.../&gt; and this method
+     * returns the empty string.
      *
      * @return element end tag as a String.
      */
@@ -595,17 +618,17 @@ public class GxmlElement
     }
 
     /**
-     * Gets the start tag of this element.  The start tag includes all
-     * the attributes defined.  If the tag is empty (i.e. has no child
-     * nodes) the start tag is printed as empty &lt;.../&gt; and
-     * getEndTag() returns the empty string.
+     * Gets the start tag of this element. The start tag includes all the
+     * attributes defined. If the tag is empty (i.e. has no child nodes) the
+     * start tag is printed as empty &lt;.../&gt; and getEndTag() returns the
+     * empty string.
      *
-     * @return  element start tag as String.
+     * @return element start tag as String.
      */
     public String getStartTag(boolean isXliff)
     {
         StringBuffer output = new StringBuffer(
-            GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH);
+                GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH);
 
         output.append("<");
         output.append(getName());
@@ -620,16 +643,17 @@ public class GxmlElement
 
         return output.toString();
     }
-    
+
     public String getStartTag()
     {
         return getStartTag(false);
     }
 
     /**
-     * Prints this element out as XML including all its child
-     * elements, placing new lines before start-tags.
-     * @return  the element as a String
+     * Prints this element out as XML including all its child elements, placing
+     * new lines before start-tags.
+     * 
+     * @return the element as a String
      */
     public String toLines()
     {
@@ -638,7 +662,8 @@ public class GxmlElement
 
     /**
      * A String representation of the object.
-     * @return  a String representation of the object.
+     * 
+     * @return a String representation of the object.
      */
     public String toString()
     {
@@ -651,79 +676,81 @@ public class GxmlElement
             Iterator it = m_childElements.iterator();
             while (it.hasNext())
             {
-                GxmlElement gxmlElement = (GxmlElement)it.next();
+                GxmlElement gxmlElement = (GxmlElement) it.next();
 
                 children += gxmlElement.toString()
-                    + GlobalSightCategory.getLineContinuation();
+                        + GlobalSightCategory.getLineContinuation();
             }
         }
 
-        return "m_name=" + (m_name != null ? m_name : "null")
-            + " m_type=" + Integer.toString(m_type)
-            + " m_parent="
-            + (m_parent != null ? m_parent.getName() : "null")
-            + " m_attributes="
-            + (m_attributes != null ? m_attributes.toString() : "null")
-            + " children={" + children + "} "
-            + " m_name=" + (m_name != null ? m_name : "null");
+        return "m_name=" + (m_name != null ? m_name : "null") + " m_type="
+                + Integer.toString(m_type) + " m_parent="
+                + (m_parent != null ? m_parent.getName() : "null")
+                + " m_attributes="
+                + (m_attributes != null ? m_attributes.toString() : "null")
+                + " children={" + children + "} " + " m_name="
+                + (m_name != null ? m_name : "null");
     }
 
-
     /**
-     * Reverse this element to XML content, including converting all
-     * its child elements.
-     * @return  the element as a Gxml String
+     * Reverse this element to XML content, including converting all its child
+     * elements.
+     * 
+     * @return the element as a Gxml String
      */
     public String toGxml()
     {
         return toGxml("", false, false);
     }
-    
-    public String toGxml(String dataType) 
+
+    public String toGxml(String dataType)
     {
         if (dataType != null && "javascript".equalsIgnoreCase(dataType))
         {
             return toGxml("", false, true);
         }
-        else if(XLF.equalsIgnoreCase(dataType)) 
+        else if (XLF.equalsIgnoreCase(dataType))
         {
             return toGxml("", false, false, true);
         }
-        else 
+        else
         {
             return toGxml("", false, false);
         }
     }
-    
+
     protected String toGxml(String p_startTagDelimiter,
-            boolean p_excludeTopTags, boolean p_handleNRT) 
+            boolean p_excludeTopTags, boolean p_handleNRT)
     {
         return toGxml(p_startTagDelimiter, p_excludeTopTags, p_handleNRT, false);
     }
-    
+
     /**
-     * Reverse this element to XML content, including converting all
-     * its child elements.
-     * @param p_startTagDelimiter placed before start-tag
-     * @return  the element as a Gxml String
+     * Reverse this element to XML content, including converting all its child
+     * elements.
+     * 
+     * @param p_startTagDelimiter
+     *            placed before start-tag
+     * @return the element as a Gxml String
      */
     protected String toGxml(String p_startTagDelimiter,
-        boolean p_excludeTopTags, boolean p_handleNRT, boolean isXlf)
+            boolean p_excludeTopTags, boolean p_handleNRT, boolean isXlf)
     {
         StringBuffer result = null;
 
         if (p_excludeTopTags)
         {
-            result = new StringBuffer((m_childElements != null ?
-                m_childElements.size() * STRING_BUFFER_LENGTH : 0));
+            result = new StringBuffer(
+                    (m_childElements != null ? m_childElements.size()
+                            * STRING_BUFFER_LENGTH : 0));
         }
         else
         {
             result = new StringBuffer(
-                GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH +
-                (m_childElements != null ?
-                    m_childElements.size() * STRING_BUFFER_LENGTH : 0) +
-                GxmlSaxHelper.END_TAG_STRING_BUFFER_LENGTH);
+                    GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH
+                            + (m_childElements != null ? m_childElements.size()
+                                    * STRING_BUFFER_LENGTH : 0)
+                            + GxmlSaxHelper.END_TAG_STRING_BUFFER_LENGTH);
         }
 
         result.append(p_startTagDelimiter);
@@ -739,25 +766,19 @@ public class GxmlElement
             for (int i = 0; i < m_childElements.size(); i++)
             {
                 GxmlElement child = (GxmlElement) m_childElements.get(i);
-/*
-                if (isXlf && child instanceof TextNode)
-                {
-                    String str = child.getTextNodeValue();
-                    str = str.replaceAll("&amp;", "&amp;amp;");
-                    str = str.replaceAll("&quot;", "&amp;quot;");
-                    str = str.replaceAll("&apos;", "&amp;apos;");
-                    str = str.replaceAll("&#xd;", "&amp;#xd;");
-                    str = str.replaceAll("&#x9;", "&amp;#x9;");
-                    str = str.replaceAll("&#xa;", "&amp;#xa;");
-                    //str = str.replaceAll("<", "&lt;");
-                    //str = str.replaceAll(">", "&gt;");
-                    result.append(str);
-                }
-                else
-                {
-*/                    result.append(child.toGxml(p_startTagDelimiter, false,
-                            p_handleNRT, isXlf));
-                //}
+                /*
+                 * if (isXlf && child instanceof TextNode) { String str =
+                 * child.getTextNodeValue(); str = str.replaceAll("&amp;",
+                 * "&amp;amp;"); str = str.replaceAll("&quot;", "&amp;quot;");
+                 * str = str.replaceAll("&apos;", "&amp;apos;"); str =
+                 * str.replaceAll("&#xd;", "&amp;#xd;"); str =
+                 * str.replaceAll("&#x9;", "&amp;#x9;"); str =
+                 * str.replaceAll("&#xa;", "&amp;#xa;"); //str =
+                 * str.replaceAll("<", "&lt;"); //str = str.replaceAll(">",
+                 * "&gt;"); result.append(str); } else {
+                 */result.append(child.toGxml(p_startTagDelimiter, false,
+                        p_handleNRT, isXlf));
+                // }
             }
         }
 
@@ -770,11 +791,11 @@ public class GxmlElement
     }
 
     /**
-     * Reverse this element to XML content, including converting all
-     * its child elements, excluding the top element start-tag and
-     * end-tag.
-     * @return the element as a Gxml String excluding the top element
-     * start-tag and end-tag.
+     * Reverse this element to XML content, including converting all its child
+     * elements, excluding the top element start-tag and end-tag.
+     * 
+     * @return the element as a Gxml String excluding the top element start-tag
+     *         and end-tag.
      */
     public String toGxmlExcludeTopTags()
     {
@@ -794,15 +815,15 @@ public class GxmlElement
             }
 
             StringBuffer output = new StringBuffer(
-                GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH);
+                    GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH);
 
             Set keys = m_attributes.keySet();
 
-            for (Iterator it = keys.iterator(); it.hasNext(); )
+            for (Iterator it = keys.iterator(); it.hasNext();)
             {
-                String attrName = (String)it.next();
-                String attrValue = (String)m_attributes.get(attrName);
-                
+                String attrName = (String) it.next();
+                String attrValue = (String) m_attributes.get(attrName);
+
                 if (isXliff)
                 {
                     attrValue = EditUtil.encodeXmlEntities(attrValue);
@@ -823,71 +844,56 @@ public class GxmlElement
 
         return m_attributesAsString;
     }
-    
+
     public String attributesToGxml()
     {
         return attributesToGxml(false);
     }
 
-
     /**
-     * Returns the nearest descendant that has the specified value of
-     * the attribute.  It could be this element.  All elements must
-     * belong to the same tree structure of elements.
-     * @param p_attributeName attribute name
-     * @param p_attributeValue attribute value
-     * @param GxmlElement type
-     * @return nearest descendant that has the specified value of the
-     * attribute, or null if there is none.
+     * Returns the nearest descendant that has the specified value of the
+     * attribute. It could be this element. All elements must belong to the same
+     * tree structure of elements.
+     * 
+     * @param p_attributeName
+     *            attribute name
+     * @param p_attributeValue
+     *            attribute value
+     * @param GxmlElement
+     *            type
+     * @return nearest descendant that has the specified value of the attribute,
+     *         or null if there is none.
      */
     public GxmlElement getDescendantByAttributeValue(String p_attributeName,
-        String p_attributeValue, int p_type)
+            String p_attributeValue, int p_type)
     {
-        return getNthDescendantByAttributeValue(
-            p_attributeName, p_attributeValue, p_type, 1);
+        return getNthDescendantByAttributeValue(p_attributeName,
+                p_attributeValue, p_type, 1);
     }
 
-
     /**
-     * Returns the N-th descendant that has the specified value of
-     * the attribute.  It could be this element.  All elements must
-     * belong to the same tree structure of elements.
-     * @param p_attributeName attribute name
-     * @param p_attributeValue attribute value
-     * @param p_type GxmlElement type
-     * @param p_position position of the element. The position starts
-     * from 1. If you want to get the nearest descendant, specify 1
-     * here. If 0 is specified, null is returned.
-     * @return N-th descendant that has the specified value of the
-     * attribute, or null if there is none.
+     * Returns the N-th descendant that has the specified value of the
+     * attribute. It could be this element. All elements must belong to the same
+     * tree structure of elements.
+     * 
+     * @param p_attributeName
+     *            attribute name
+     * @param p_attributeValue
+     *            attribute value
+     * @param p_type
+     *            GxmlElement type
+     * @param p_position
+     *            position of the element. The position starts from 1. If you
+     *            want to get the nearest descendant, specify 1 here. If 0 is
+     *            specified, null is returned.
+     * @return N-th descendant that has the specified value of the attribute, or
+     *         null if there is none.
      */
     public GxmlElement getNthDescendantByAttributeValue(String p_attributeName,
-        String p_attributeValue, int p_type, int p_position)
+            String p_attributeValue, int p_type, int p_position)
     {
         List possibleReturns = getAllDescendantByAttributeValue(
-            p_attributeName, p_attributeValue, p_type);
-
-        p_position = p_position -1;
-        if(p_position < 0 || p_position >= possibleReturns.size())
-        {
-            return null;
-        }
-
-        // order the descendants by nearness to this element.  return
-        // first one
-        return (GxmlElement)orderByNearestDescendant(possibleReturns)
-            .get(p_position);
-    }
-    
-    /**
-    * Returns the N-th descendant that has non specified attribute.  
-    * It could be this element.  All elements must
-    * belong to the same tree structure of elements.
-    */
-    public GxmlElement getNthDescendantByAttributeNone(String p_attributeName, int p_type,
-            int p_position)
-    {
-        List possibleReturns = getAllDescendantByAttributeNone(p_attributeName, p_type);
+                p_attributeName, p_attributeValue, p_type);
 
         p_position = p_position - 1;
         if (p_position < 0 || p_position >= possibleReturns.size())
@@ -897,23 +903,50 @@ public class GxmlElement
 
         // order the descendants by nearness to this element. return
         // first one
-        return (GxmlElement) orderByNearestDescendant(possibleReturns).get(p_position);
+        return (GxmlElement) orderByNearestDescendant(possibleReturns).get(
+                p_position);
     }
 
+    /**
+     * Returns the N-th descendant that has non specified attribute. It could be
+     * this element. All elements must belong to the same tree structure of
+     * elements.
+     */
+    public GxmlElement getNthDescendantByAttributeNone(String p_attributeName,
+            int p_type, int p_position)
+    {
+        List possibleReturns = getAllDescendantByAttributeNone(p_attributeName,
+                p_type);
+
+        p_position = p_position - 1;
+        if (p_position < 0 || p_position >= possibleReturns.size())
+        {
+            return null;
+        }
+
+        // order the descendants by nearness to this element. return
+        // first one
+        return (GxmlElement) orderByNearestDescendant(possibleReturns).get(
+                p_position);
+    }
 
     /**
-     * Returns all descendants that have the specified value of
-     * the attribute.  It could contain this element.  All elements must
-     * belong to the same tree structure of elements.
-     * @param p_attributeName attribute name
-     * @param p_attributeValue attribute value
-     * @param GxmlElement type
-     * @return A List of all descendants (GxmlElement) that have the
-     * specified value of the attribute. If none is found, an empty
-     * List is returned.
+     * Returns all descendants that have the specified value of the attribute.
+     * It could contain this element. All elements must belong to the same tree
+     * structure of elements.
+     * 
+     * @param p_attributeName
+     *            attribute name
+     * @param p_attributeValue
+     *            attribute value
+     * @param GxmlElement
+     *            type
+     * @return A List of all descendants (GxmlElement) that have the specified
+     *         value of the attribute. If none is found, an empty List is
+     *         returned.
      */
     public List getAllDescendantByAttributeValue(String p_attributeName,
-        String p_attributeValue, int p_type)
+            String p_attributeValue, int p_type)
     {
         List allElements = new ArrayList();
 
@@ -921,11 +954,10 @@ public class GxmlElement
         GxmlElement gxmlElement = this;
         if (gxmlElement.getType() == p_type)
         {
-            String attributeValue =
-                gxmlElement.getAttribute(p_attributeName);
+            String attributeValue = gxmlElement.getAttribute(p_attributeName);
 
-            if (attributeValue != null &&
-                attributeValue.equals(p_attributeValue))
+            if (attributeValue != null
+                    && attributeValue.equals(p_attributeValue))
             {
                 allElements.add(gxmlElement);
             }
@@ -933,7 +965,7 @@ public class GxmlElement
                     && "type".equals(p_attributeName))
             {
                 allElements.add(gxmlElement);
-            }                
+            }
         }
 
         // test all children
@@ -951,9 +983,9 @@ public class GxmlElement
                     continue;
                 }
 
-                List elements = ((GxmlElement)child).
-                    getAllDescendantByAttributeValue(p_attributeName,
-                        p_attributeValue, p_type);
+                List elements = ((GxmlElement) child)
+                        .getAllDescendantByAttributeValue(p_attributeName,
+                                p_attributeValue, p_type);
 
                 allElements.addAll(elements);
             }
@@ -961,11 +993,12 @@ public class GxmlElement
 
         return allElements;
     }
-    
+
     /**
      * Returns all elements that has non specified attribute.
      */
-    public List getAllDescendantByAttributeNone(String p_attributeName, int p_type)
+    public List getAllDescendantByAttributeNone(String p_attributeName,
+            int p_type)
     {
         List allElements = new ArrayList();
 
@@ -996,8 +1029,9 @@ public class GxmlElement
                     continue;
                 }
 
-                List elements = ((GxmlElement) child).getAllDescendantByAttributeNone(
-                        p_attributeName, p_type);
+                List elements = ((GxmlElement) child)
+                        .getAllDescendantByAttributeNone(p_attributeName,
+                                p_type);
 
                 allElements.addAll(elements);
             }
@@ -1007,11 +1041,12 @@ public class GxmlElement
     }
 
     /**
-     * Order the list of GxmlElements so the nearest descendants to
-     * this element come first.  All elements must belong to the same
-     * tree structure of elements.
-     * @param p_gxmlElements list of GxmlElements that are descendants
-     * of this one.
+     * Order the list of GxmlElements so the nearest descendants to this element
+     * come first. All elements must belong to the same tree structure of
+     * elements.
+     * 
+     * @param p_gxmlElements
+     *            list of GxmlElements that are descendants of this one.
      * @return list of GxmlElements ordered by nearness to this one.
      */
     public List orderByNearestDescendant(List p_gxmlElements)
@@ -1040,7 +1075,7 @@ public class GxmlElement
                 continue;
             }
 
-            GxmlElement child = (GxmlElement)o;
+            GxmlElement child = (GxmlElement) o;
             Iterator it = p_gxmlElements.iterator();
 
             while (it.hasNext())
@@ -1051,7 +1086,7 @@ public class GxmlElement
                     continue;
                 }
 
-                GxmlElement gxmlElement = (GxmlElement)o2;
+                GxmlElement gxmlElement = (GxmlElement) o2;
 
                 if (child.equals(gxmlElement))
                 {
@@ -1071,7 +1106,7 @@ public class GxmlElement
                 continue;
             }
 
-            GxmlElement child = (GxmlElement)o;
+            GxmlElement child = (GxmlElement) o;
 
             // order the remaining descendants by nearness to each child
             returnList.addAll(child.orderByNearestDescendant(tempList));
@@ -1081,19 +1116,19 @@ public class GxmlElement
     }
 
     /**
-     * Order the List of GxmlElements so the parents come before their
-     * children.  All elements must belong to the same tree structure
-     * of elements.
-     * @param p_gxmlElements GxmlElements to order
-     * @return ordered List of GxmlElements with parents before their
-     * children.
+     * Order the List of GxmlElements so the parents come before their children.
+     * All elements must belong to the same tree structure of elements.
+     * 
+     * @param p_gxmlElements
+     *            GxmlElements to order
+     * @return ordered List of GxmlElements with parents before their children.
      */
     public static List orderByParent(Collection p_gxmlElements)
     {
         ArrayList result = new ArrayList(p_gxmlElements.size());
         ArrayList temp = new ArrayList(p_gxmlElements);
 
-        while (! temp.isEmpty())
+        while (!temp.isEmpty())
         {
             Iterator it = temp.iterator();
             Object o = it.next();
@@ -1103,9 +1138,8 @@ public class GxmlElement
                 continue;
             }
 
-            GxmlElement gxmlElement = (GxmlElement)o;
-            GxmlElement highestAncestor =
-                getHighestAncestor(gxmlElement, temp);
+            GxmlElement gxmlElement = (GxmlElement) o;
+            GxmlElement highestAncestor = getHighestAncestor(gxmlElement, temp);
 
             // if it is not descended from another element in the
             // array it can go first
@@ -1126,8 +1160,8 @@ public class GxmlElement
     }
 
     /**
-     * Returns the highest root element of this document, which can be
-     * a GxmlRootElement or a PrsRootElement.
+     * Returns the highest root element of this document, which can be a
+     * GxmlRootElement or a PrsRootElement.
      */
     public static GxmlElement getRootElement(GxmlElement p_element)
     {
@@ -1140,14 +1174,13 @@ public class GxmlElement
     }
 
     /**
-     * Returns the highest GxmlRootElement in the document, regardless
-     * of the document being a Gxml document or a Prs with an embedded
-     * Gxml document.
+     * Returns the highest GxmlRootElement in the document, regardless of the
+     * document being a Gxml document or a Prs with an embedded Gxml document.
      */
     public static GxmlElement getGxmlRootElement(GxmlElement p_element)
     {
-        while (p_element.getType() != GXML_ROOT &&
-            p_element.getParent() != null)
+        while (p_element.getType() != GXML_ROOT
+                && p_element.getParent() != null)
         {
             p_element = p_element.getParent();
         }
@@ -1161,18 +1194,20 @@ public class GxmlElement
     }
 
     /**
-     * Return the GxmlElement highest ancestor of p_gxmlElement that
-     * is also in p_gxmlElements.  Returns null if no ancestor in
-     * p_gxmlElements.  All elements must belong to the same tree
-     * structure of elements.
-     * @param p_gxmlElement element to find highest ancestor for
-     * @param p_gxmlElements Collection of GxmlElements of possible
-     * ancestors to find the highest in.
-     * @return highest ancestor of p_gxmlElement that is also in
-     * p_gxmlElements.  Returns null if no ancestor in p_gxmlElements.
+     * Return the GxmlElement highest ancestor of p_gxmlElement that is also in
+     * p_gxmlElements. Returns null if no ancestor in p_gxmlElements. All
+     * elements must belong to the same tree structure of elements.
+     * 
+     * @param p_gxmlElement
+     *            element to find highest ancestor for
+     * @param p_gxmlElements
+     *            Collection of GxmlElements of possible ancestors to find the
+     *            highest in.
+     * @return highest ancestor of p_gxmlElement that is also in p_gxmlElements.
+     *         Returns null if no ancestor in p_gxmlElements.
      */
     public static GxmlElement getHighestAncestor(GxmlElement p_gxmlElement,
-        Collection p_gxmlElements)
+            Collection p_gxmlElements)
     {
         GxmlElement highestAncestor = null;
         GxmlElement parent = p_gxmlElement.getParent();
@@ -1189,7 +1224,7 @@ public class GxmlElement
                     continue;
                 }
 
-                GxmlElement gxmlElement = (GxmlElement)o;
+                GxmlElement gxmlElement = (GxmlElement) o;
                 if (parent == gxmlElement)
                 {
                     highestAncestor = parent;
@@ -1203,35 +1238,35 @@ public class GxmlElement
         return highestAncestor;
     }
 
-
     /**
-     * Copy the un-set attributes in the target element from the
-     * source element.
-     * @param p_targetElement the element to have un-sets be copied to.
-     * @param p_sourceElement the element to have attributes copied
-     * from.
-     * @param p_elementType the first element of this type in the tree
-     * to have the operation applied to.  If Gxml.UNSPECIFIED, then
-     * apply the operation to the p_targetElement itself only.
+     * Copy the un-set attributes in the target element from the source element.
+     * 
+     * @param p_targetElement
+     *            the element to have un-sets be copied to.
+     * @param p_sourceElement
+     *            the element to have attributes copied from.
+     * @param p_elementType
+     *            the first element of this type in the tree to have the
+     *            operation applied to. If Gxml.UNSPECIFIED, then apply the
+     *            operation to the p_targetElement itself only.
      */
-    public static void copyShallowUnsetAttributes(
-        GxmlElement p_targetElement, GxmlElement p_sourceElement,
-        int p_elementType)
+    public static void copyShallowUnsetAttributes(GxmlElement p_targetElement,
+            GxmlElement p_sourceElement, int p_elementType)
     {
         GxmlElement target = p_targetElement;
 
-        if (! (p_elementType == GxmlElement.UNSPECIFIED)
-            && target.getType() != p_elementType)
+        if (!(p_elementType == GxmlElement.UNSPECIFIED)
+                && target.getType() != p_elementType)
         {
-            List descendants = p_targetElement.getDescendantElements(
-                new int[]{p_elementType});
+            List descendants = p_targetElement.getDescendantElements(new int[]
+            { p_elementType });
 
             if (descendants == null || descendants.isEmpty())
             {
                 return;
             }
 
-            target = (GxmlElement)descendants.get(0);
+            target = (GxmlElement) descendants.get(0);
         }
 
         if (p_sourceElement.m_attributes == null)
@@ -1244,25 +1279,26 @@ public class GxmlElement
 
         while (keysIt.hasNext())
         {
-            String key = (String)keysIt.next();
+            String key = (String) keysIt.next();
             String attributeValue = target.getAttribute(key);
 
             if (attributeValue == null)
             {
-                target.setAttribute(key,
-                    p_sourceElement.getAttribute(key));
+                target.setAttribute(key, p_sourceElement.getAttribute(key));
             }
         }
     }
 
-
     /**
      * Replace the p_oldElement in the tree with p_replacementElement.
-     * @param p_oldElement the element to be replaced
-     * @param p_replacementElement the element to replace the old one
+     * 
+     * @param p_oldElement
+     *            the element to be replaced
+     * @param p_replacementElement
+     *            the element to replace the old one
      */
     public static void replace(GxmlElement p_oldElement,
-        GxmlElement p_replacementElement)
+            GxmlElement p_replacementElement)
     {
         GxmlElement parent = p_oldElement.getParent();
 
@@ -1271,7 +1307,7 @@ public class GxmlElement
 
         if (parent == null)
         {
-            return;     // nothing more to do
+            return; // nothing more to do
         }
 
         List children = parent.getChildElements();
@@ -1281,29 +1317,28 @@ public class GxmlElement
         parent.setChildElements(children);
     }
 
-
     /**
      * Normalize "type" attribute according to TmxTypeMapper class.
      */
     public void normalizeAllDescendentsType()
     {
         int[] elementTypes =
-            {GxmlElement.BPT, GxmlElement.PH, GxmlElement.IT};
+        { GxmlElement.BPT, GxmlElement.PH, GxmlElement.IT };
 
         List elements = getDescendantElements(elementTypes);
         Iterator it = elements.iterator();
-        while(it.hasNext())
+        while (it.hasNext())
         {
-            GxmlElement elem = (GxmlElement)it.next();
+            GxmlElement elem = (GxmlElement) it.next();
             String type = elem.getAttribute(GxmlNames.BPT_TYPE);
-            if(type != null)
+            if (type != null)
             {
-                elem.setAttribute(
-                    GxmlNames.BPT_TYPE, TmxTypeMapper.normalizeType(type));
+                elem.setAttribute(GxmlNames.BPT_TYPE,
+                        TmxTypeMapper.normalizeType(type));
             }
         }
     }
-    
+
     public boolean equals(Object p_object)
     {
         if (this == p_object)
@@ -1313,7 +1348,7 @@ public class GxmlElement
 
         if (p_object instanceof GxmlElement)
         {
-            return this.equals((GxmlElement)p_object);
+            return this.equals((GxmlElement) p_object);
         }
 
         return false;
@@ -1331,8 +1366,8 @@ public class GxmlElement
             return false;
         }
 
-        if ((m_childElements == null && p_other.m_childElements != null) ||
-            (m_childElements != null && p_other.m_childElements == null))
+        if ((m_childElements == null && p_other.m_childElements != null)
+                || (m_childElements != null && p_other.m_childElements == null))
         {
             return false;
         }
@@ -1343,22 +1378,22 @@ public class GxmlElement
             Iterator ito = p_other.m_childElements.iterator();
             while (it.hasNext() && ito.hasNext())
             {
-                GxmlElement gxmlElement = (GxmlElement)it.next();
-                GxmlElement gxmlElementO = (GxmlElement)ito.next();
+                GxmlElement gxmlElement = (GxmlElement) it.next();
+                GxmlElement gxmlElementO = (GxmlElement) ito.next();
                 if (!gxmlElement.equals(gxmlElementO))
                 {
                     return false;
                 }
             }
         }
-        if ((m_attributes == null && p_other.m_attributes != null) ||
-            (m_attributes != null && p_other.m_attributes == null))
+        if ((m_attributes == null && p_other.m_attributes != null)
+                || (m_attributes != null && p_other.m_attributes == null))
         {
             return false;
         }
-        if(this instanceof TextNode)
+        if (this instanceof TextNode)
         {
-            if(!(this.getTotalTextValue().equals(p_other.getTotalTextValue())))
+            if (!(this.getTotalTextValue().equals(p_other.getTotalTextValue())))
             {
                 return false;
             }
@@ -1371,12 +1406,13 @@ public class GxmlElement
     }
 
     /**
-     * Determine equality of two Maps independant of the order of the
-     * elements.
-     * @param p_map1 first Map
-     * @param p_map2 second Map
-     * @return true if the elements are equal regardless of their
-     * order.
+     * Determine equality of two Maps independant of the order of the elements.
+     * 
+     * @param p_map1
+     *            first Map
+     * @param p_map2
+     *            second Map
+     * @return true if the elements are equal regardless of their order.
      */
     public static final boolean unorderedEquals(Map p_map1, Map p_map2)
     {
@@ -1384,12 +1420,14 @@ public class GxmlElement
     }
 
     /**
-     * Determines if p_map2 contains all the keys and values in
-     * p_map1.  Returns true if so.
-     * @param p_map1 first Map
-     * @param p_map2 second Map
-     * @return true if p_map2 contains all the keys and values in
-     * p_map1
+     * Determines if p_map2 contains all the keys and values in p_map1. Returns
+     * true if so.
+     * 
+     * @param p_map1
+     *            first Map
+     * @param p_map2
+     *            second Map
+     * @return true if p_map2 contains all the keys and values in p_map1
      */
     public static final boolean contains(Map p_map1, Map p_map2)
     {
@@ -1402,7 +1440,7 @@ public class GxmlElement
             Object value1 = p_map1.get(key);
             Object value2 = p_map2.get(key);
 
-            if(key.toString().equals("wordcount"))
+            if (key.toString().equals("wordcount"))
             {
                 continue;
             }
@@ -1417,7 +1455,7 @@ public class GxmlElement
                 return false;
             }
 
-            if (value1 != null && value2 != null && ! value1.equals(value2))
+            if (value1 != null && value2 != null && !value1.equals(value2))
             {
                 return false;
             }
@@ -1425,7 +1463,6 @@ public class GxmlElement
 
         return true;
     }
-
 
     /**
      * Tests if a number is in a number array.
@@ -1442,7 +1479,7 @@ public class GxmlElement
 
         return false;
     }
-    
+
     private boolean isSkip()
     {
         return "true".equals(this.getAttribute("isSkip"));

@@ -793,8 +793,7 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(leverageResult, 1,
                 maxEntriesPerPageStr);
-        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
-        
+        String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
 	
@@ -956,8 +955,7 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1,
                 maxEntriesPerPageStr);
-        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
-        
+        String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
     
@@ -1139,24 +1137,32 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1,
                 maxEntriesPerPageStr);
-        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
+        String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
 
-	private static String getJsonStr(Map<String, Object> map, String jsonStr)
+	private static String getJsonStr(String jsonStr)
 	{
-		if (!map.toString().contains("\\r\\n")
-				&& !map.toString().contains("\\n"))
+		char[] crArr = jsonStr.toCharArray();
+		StringBuffer bufer = new StringBuffer();
+		char cr;
+		for (int i = 0; i < crArr.length; i++)
 		{
-			if (!jsonStr.contains("\\\\r\\\\n") && !jsonStr.contains("\\\\n"))
+			cr = crArr[i];
+			bufer.append(cr);
+			if (cr == '\\')
 			{
-				if (jsonStr.contains("\\r\\n") || jsonStr.contains("\\n"))
+				if (i < crArr.length - 1 && i > 0)
 				{
-					jsonStr = jsonStr.replace("\\n", "\\n<br>");
+					if (crArr[i + 1] == 'n' && crArr[i - 1] != '\\')
+					{
+						bufer.append(crArr[i + 1]).append("<br>");
+						i++;
+					}
 				}
 			}
 		}
-		return jsonStr;
+		return bufer.toString();
 	}
     
 	private static void getTm2SqlByParamMap(StatementBuilder sb,

@@ -244,7 +244,7 @@ public class OnlineService extends HttpServlet
         applet.setInputSegment(text, "", segmentView.getDataType());
         if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
         {
-            applet.getVerbose();
+            result = applet.getVerbose();
             if (Boolean.parseBoolean(request.getParameter("colorPtags")))
             {
                 result = applet.makeVerboseColoredPtags(text);
@@ -252,7 +252,7 @@ public class OnlineService extends HttpServlet
         }
         else
         {
-            applet.getCompact();
+            result = applet.getCompact();
             if (Boolean.parseBoolean(request.getParameter("colorPtags")))
             {
                 result = applet.makeCompactColoredPtags(text);

@@ -244,7 +244,7 @@ public class OnlineService extends HttpServlet
         applet.setInputSegment(text, "", segmentView.getDataType());
         if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
         {
-            applet.getVerbose();
+            result = applet.getVerbose();
             if (Boolean.parseBoolean(request.getParameter("colorPtags")))
             {
                 result = applet.makeVerboseColoredPtags(text);
@@ -252,7 +252,7 @@ public class OnlineService extends HttpServlet
         }
         else
         {
-            applet.getCompact();
+            result = applet.getCompact();
             if (Boolean.parseBoolean(request.getParameter("colorPtags")))
             {
                 result = applet.makeCompactColoredPtags(text);
@@ -293,6 +293,42 @@ public class OnlineService extends HttpServlet
         
         if (newTarget != null)
             m.put("newTarget", newTarget);
+        
+        writeString(JsonUtil.toJson(m));
+    }
+    
+    /**
+     * Do error check and send the result back. Note that this method only used
+     * for save form richeditor with firefox. Because there are something wrong
+     * with firefox and ajax.
+     * 
+     * @throws Exception
+     */
+    public void doErrorCheck2() throws Exception
+    {
+        String text = getTarget();
+        Map<String, String> m = new HashMap<String, String>();
+        
+        helper.setUntranslateStyle(SegmentUtil2.getTAGS());
+        String msg = helper.errorCheck(text, getSource(), 0, "UTF8", 0, "UTF8");
+        String internalTagMsg = helper.getInternalErrMsg();
+        String newTarget = "";
+        if (msg == null || msg.length() == 0)
+        {
+            newTarget = helper.getNewPTagTargetString();
+        }
+        
+        if (msg != null)
+            m.put("msg", msg);
+        
+        if (internalTagMsg != null)
+            m.put("internalTagMsg", internalTagMsg);
+        
+        if (newTarget == null || newTarget.length() == 0)
+        {
+            newTarget = helper.getTargetDiplomat(text);
+        }
+        m.put("newTarget", newTarget);
         
         writeString(JsonUtil.toJson(m));
     }

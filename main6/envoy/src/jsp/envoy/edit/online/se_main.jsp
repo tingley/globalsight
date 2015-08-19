@@ -685,6 +685,73 @@ function showHourglassInDocument(doc)
   }
 }
 
+function saveFromFirefoxRichedit()
+{
+    if (!g_initialized) 
+	    return;
+    
+    if (g_refreshing) 
+	    return;
+    
+    g_refreshing = true;
+    var text = fr_editor.GetTargetSegment();
+	$.ajax({
+		url : 'OnlineService?action=doErrorCheck2',
+		cache : false,
+		data : {
+			text : text
+		},
+		dataType : 'text',
+		success : function(data) {
+			var ob = eval("(" + data+ ")");
+			internalTagMsg = ob.internalTagMsg;
+			newTargetReturn = ob.newTarget;
+			errorMsgReturn = ob.msg;
+			
+			if (ob.msg != null)
+		    {
+		        alert(ob.msg);
+		        fr_target.SetFocus();
+		        
+		        g_refreshing = false;
+		        return;
+		    }
+		    if (ob.internalTagMsg != null && ob.internalTagMsg != "")
+		    {
+		    	var rrr = confirm("<%=bundle.getString("msg_internal_moved_continue")%>" + "\n\r\t" + ob.internalTagMsg);
+		    	if (rrr == false)
+		    	{
+		    		fr_target.SetFocus();
+		    		
+		    		g_refreshing = false;
+		    		return;
+		    	}
+		    }
+		    
+		    var o_form = menu.document.Save;
+
+		    if (ob.newTarget != null && ob.newTarget != "")
+			{
+				o_form.save.value    = ob.newTarget;
+			}
+	        o_form.refresh.value = 0;
+	        o_form.releverage.value = "false";
+	        o_form.tuId.value    = "<%=l_tuId%>";
+	        o_form.tuvId.value   = "<%=l_tuvId%>";
+	        o_form.subId.value   = "<%=l_subId%>";
+	        o_form.ptags.value   = verbose;
+	        o_form.isClosedComment.value = fr_source.getIsClosedComment();
+	        o_form.submit();
+		        
+		    g_refreshing = false;
+		},
+		error : function(request, error, status) {
+		    g_refreshing = false;
+		    alert(error);
+		}
+	});
+}
+
 function doRefresh(direction, save)
 {
     if (!g_initialized) return;

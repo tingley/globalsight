@@ -55,7 +55,6 @@ import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
@@ -85,6 +84,7 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.segmenttm.TMidTUid;
@@ -627,25 +627,7 @@ public class TMSearchBroswerHandlerHelper
         Long tmProfileId = Long.parseLong(tmpId);
         TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
                 .getTMProfileById(tmProfileId.longValue(), false);
-
-        ProjectTM ptm = ServerProxy.getProjectHandler().getProjectTMById(
-                tmp.getProjectTmIdForSave(), false);
-
-        ArrayList tmNamesOverride = new ArrayList();
-        Vector<LeverageProjectTM> leverageProjectTms = tmp
-                .getProjectTMsToLeverageFrom();
-        for (int j = 0; j < leverageProjectTms.size(); j++)
-        {
-            LeverageProjectTM tm = leverageProjectTms.get(j);
-            tmNamesOverride.add(tm.getProjectTmId());
-        }
-
-        OverridableLeverageOptions levOptions = new OverridableLeverageOptions(
-                tmp, searchLevLocales);
-        long thresHold = tmp.getFuzzyMatchThreshold();
-        levOptions.setMatchThreshold(new Long(thresHold).intValue());
-        levOptions.setTmsToLeverageFrom(tmNamesOverride);
-
+        LeverageOptions levOptions = new LeverageOptions(tmp, searchLevLocales);
         // fix for GBS-2448, user could search target locale in TM Search Page
         levOptions.setFromTMSearchPage(true);
 
@@ -703,7 +685,7 @@ public class TMSearchBroswerHandlerHelper
     						continue;
     				}
                     long score = new Float(matchedTuv.getScore()).longValue();
-                    if (score < thresHold)
+                    if (score < tmp.getFuzzyMatchThreshold())
                     {
                         // if match score less than thres hold, do not display
                         continue;
@@ -793,8 +775,7 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(leverageResult, 1,
                 maxEntriesPerPageStr);
-        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
-        
+        String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
 	
@@ -956,8 +937,7 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1,
                 maxEntriesPerPageStr);
-        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
-        
+        String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
     
@@ -1007,15 +987,21 @@ public class TMSearchBroswerHandlerHelper
 			{
 				BaseTm baseTM = TM3Util.getBaseTm(projectTM.getTm3Id());
 				getTm3SqlByParamMap(sb, filterMap, baseTM, projectTM.getTm3Id());
-				List<TMidTUid> tuId = getIdList(conn, sb, projectTM.getTm3Id());
-				queryResult.addAll(tuId);
+				List<TMidTUid> tuId = getIdList(conn, sb, tmId);
+				if (tuId != null && tuId.size() > 0)
+				{
+					queryResult.addAll(tuId);
+				}
 			}
 			// tm2
 			else
 			{
 				getTm2SqlByParamMap(sb, filterMap, tmId);
 				List<TMidTUid> tuId = getIdList(conn, sb, tmId);
-				queryResult.addAll(tuId);
+				if (tuId != null && tuId.size() > 0)
+				{
+					queryResult.addAll(tuId);
+				}
 			}
 		}
          
@@ -1133,25 +1119,38 @@ public class TMSearchBroswerHandlerHelper
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1,
                 maxEntriesPerPageStr);
-        String jsonStr = getJsonStr(temp,JsonUtil.toJson(temp));
+        String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
 
-	private static String getJsonStr(Map<String, Object> map, String jsonStr)
+	private static String getJsonStr(String jsonStr)
 	{
-		if ((!map.toString().contains("\\r\\n") || !map.toString().contains(
-				"\\n"))
-				&& (jsonStr.contains("\\r\\n") || jsonStr.contains("\\n")))
+		char[] crArr = jsonStr.toCharArray();
+		StringBuffer bufer = new StringBuffer();
+		char cr;
+		for (int i = 0; i < crArr.length; i++)
 		{
-			jsonStr = jsonStr.replace("\\n", "\\n<br>");
+			cr = crArr[i];
+			bufer.append(cr);
+			if (cr == '\\')
+			{
+				if (i < crArr.length - 1 && i > 0)
+				{
+					if (crArr[i + 1] == 'n' && crArr[i - 1] != '\\')
+					{
+						bufer.append(crArr[i + 1]).append("<br>");
+						i++;
+					}
+				}
+			}
 		}
-		return jsonStr;
+		return bufer.toString();
 	}
     
 	private static void getTm2SqlByParamMap(StatementBuilder sb,
 			HashMap paramMap,long tmId)
 	{
-		sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ")
+		sb.append("SELECT DISTINCT tuv.TU_ID AS tuId FROM ")
 				.append(" PROJECT_TM_TU_T AS tu, ")
 				.append(" PROJECT_TM_TUV_T AS tuv").append(" WHERE 1=1 ")
 				.append(" AND tu.TM_ID = ?").addValue(tmId)
@@ -1161,7 +1160,7 @@ public class TMSearchBroswerHandlerHelper
 	}
 	
 	private static void getTm3SqlByParamMap(StatementBuilder sb,
-			HashMap paramMap, BaseTm baseTM, long tmId)
+			HashMap paramMap, BaseTm baseTM, long tm3Id)
 	{
 		sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ")
 				.append(baseTM.getTuvTableName()).append(" as tuv, ")
@@ -1169,7 +1168,7 @@ public class TMSearchBroswerHandlerHelper
 				.append(baseTM.getTuTableName()).append(" as tu ")
 				.append(" WHERE 1 = 1").append(" AND tuv.id = ext.tuvId ")
 				.append(" AND tu.id = ext.tuId ").append(" AND tuv.tmId = ?")
-				.addValue(tmId);
+				.addValue(tm3Id);
 		getParameterSql(sb, paramMap, "TM3");
 		sb.append(" AND ext.sid IS NOT NULL ");
 	}

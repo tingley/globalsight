@@ -66,7 +66,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     private StringBuffer m_coloredPtags = null;
     private PseudoParser m_ptagParser = null;
 
-    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=false>";
+    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>";
     private static final String PTAG_COLOR_END = "</SPAN>";
     private PseudoErrorChecker m_errChecker = null;
 

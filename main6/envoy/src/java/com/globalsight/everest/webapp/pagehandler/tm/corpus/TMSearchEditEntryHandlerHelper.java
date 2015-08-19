@@ -391,14 +391,26 @@ public class TMSearchEditEntryHandlerHelper
     
 	private static String getSegmentWithBR(String segment)
 	{
-		if (!segment.contains("\\\\r\\\\n") && !segment.contains("\\\\n"))
+		char[] crArr = segment.toCharArray();
+		StringBuffer bufer = new StringBuffer();
+		char cr;
+		for (int i = 0; i < crArr.length; i++)
 		{
-			if (segment.contains("\\r\\n") || segment.contains("\\n"))
+			cr = crArr[i];
+			bufer.append(cr);
+			if (cr == '\\')
 			{
-				segment = segment.replace("\\n", "\\n<br>");
+				if (i < crArr.length - 1 && i > 0)
+				{
+					if (crArr[i + 1] == 'n' && crArr[i - 1] != '\\')
+					{
+						bufer.append(crArr[i + 1]).append("<br>");
+						i++;
+					}
+				}
 			}
 		}
-		return segment;
+		return bufer.toString();
 	}
 
     /**

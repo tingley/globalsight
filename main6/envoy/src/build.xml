@@ -91,6 +91,11 @@
 				<include name="server-config.wsdd" />
 			</fileset>
 		</copy>
+		<copy todir="${globalsight_home}/globalsight-web.war/WEB-INF/conf">
+			<fileset dir="${cap.srcBase}">
+				<include name="fop.xconf" />
+			</fileset>
+		</copy>
 		<copy todir="${globalsight_home}/globalsight-web.war/WEB-INF/tlds">
 			<fileset dir="${cap.javaSrcBase}/com/globalsight/everest/webapp/tags">
 				<include name="globalsight.tld" />

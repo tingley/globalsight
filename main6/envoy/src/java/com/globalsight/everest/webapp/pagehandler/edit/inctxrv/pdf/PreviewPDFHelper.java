@@ -17,6 +17,7 @@
 package com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -28,6 +29,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,9 +48,21 @@ import java.util.concurrent.Future;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 
+import org.apache.fop.apps.FOUserAgent;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.MimeConstants;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
+import org.xml.sax.InputSource;
 
 import com.globalsight.cxe.adapter.adobe.AdobeConfiguration;
 import com.globalsight.cxe.adapter.adobe.AdobeHelper;
@@ -62,6 +76,8 @@ import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
 import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.util.XmlUtil;
@@ -96,6 +112,7 @@ import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.XmlTransformer;
 import com.globalsight.util.file.FileWaiter;
 import com.globalsight.util.system.ConfigException;
 import com.lowagie.text.Document;
@@ -123,6 +140,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     private static final ExecutorService serviceForPPTX = Executors
             .newSingleThreadExecutor();
     private static final ExecutorService serviceForXLSX = Executors
+            .newSingleThreadExecutor();
+    private static final ExecutorService serviceForXML = Executors
             .newSingleThreadExecutor();
 
     private static final int BUFFERSIZE = 4096;
@@ -248,6 +267,12 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             task = new CreatePDFTask(p_page, p_userId, TYPE_OFFICE_XLSX,
                     isTarget);
             future = serviceForXLSX.submit(task);
+            createPDFMap.put(key, future);
+        }
+        else if (externalPageId.endsWith(XML_SUFFIX))
+        {
+            task = new CreatePDFTask(p_page, p_userId, TYPE_XML, isTarget);
+            future = serviceForXML.submit(task);
             createPDFMap.put(key, future);
         }
     }
@@ -433,7 +458,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
             String trgLocale = isTarget ? tp.getGlobalSightLocale().toString()
                     : sp.getGlobalSightLocale().toString();
-            converterDir = getConvertDir(p_params, true, p_companyId) + trgLocale;
+            converterDir = getConvertDir(p_params, true, p_companyId)
+                    + trgLocale;
             new File(converterDir).mkdirs();
 
             // test converter is started or not
@@ -458,9 +484,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     trgLocale, p_job.getL10nProfile().getTargetLocales());
 
             // Upload indd and xmp file to converter.
-            backupInddFile(newFileNameMap, getConvertDir(p_params, false, p_companyId),
-                    getConvertDir(p_params, true, p_companyId), trgLocale, oriXmlFileName,
-                    p_fileSuffix, p_job);
+            backupInddFile(newFileNameMap,
+                    getConvertDir(p_params, false, p_companyId),
+                    getConvertDir(p_params, true, p_companyId), trgLocale,
+                    oriXmlFileName, p_fileSuffix, p_job);
             // Upload XML file to converter
             String xmlFilePath = converterDir + File.separator
                     + (String) newFileNameMap.get(XML_SUFFIX);
@@ -524,8 +551,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         try
         {
-            String converterDir = getConvertDir(params, true, companyId) + File.separator
-                    + locale;
+            String converterDir = getConvertDir(params, true, companyId)
+                    + File.separator + locale;
             new File(converterDir).mkdirs();
 
             String xmlFilePath = converterDir + File.separator
@@ -557,6 +584,102 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             StringBuffer msg = new StringBuffer("Create PDF error for page:");
             msg.append(trgPagePath).append(", by user:").append(p_userId);
             LOGGER.error(msg.toString(), e);
+        }
+
+        return pdfFile;
+    }
+
+    File createPDF4XML(Page p_page, String p_userId, boolean isTarget)
+    {
+        TargetPage tp = isTarget ? (TargetPage) p_page : null;
+        SourcePage sp = isTarget ? null : (SourcePage) p_page;
+        long spId = isTarget ? tp.getSourcePage().getId() : sp.getId();
+
+        String trgPagePath = getPagePath(p_page, isTarget);
+        long pageid = p_page.getId();
+        long companyId = isTarget ? tp.getCompanyId() : sp.getCompanyId();
+        String locale = p_page.getGlobalSightLocale().toString();
+        File pdfFile = getPreviewPdf(trgPagePath, companyId, null);
+        PreviewPDFBO params = determineConversionParameters(spId);
+        OutputStream out = null;
+
+        try
+        {
+            File tempDir = AmbFileStoragePathUtils.getTempFileDir();
+            Job job = isTarget ? tp.getWorkflowInstance().getJob()
+                    : ServerProxy.getJobHandler().getJobById(sp.getJobId());
+            FileProfile fileProfile = job.getFileProfile();
+
+            File xmlFile = File.createTempFile("GS-xml", ".xml", tempDir);
+            String xmlFilePath = xmlFile.getAbsolutePath();
+            // write xml file
+            writeXMLFileToConvertDir(xmlFilePath, locale, pageid, params,
+                    p_userId, isTarget);
+
+            if (FileProfileUtil.isXmlPreviewPDF(fileProfile))
+            {
+                File jarFile = new File(this.getClass().getProtectionDomain()
+                        .getCodeSource().getLocation().getFile());
+                String fopRoot = jarFile.getParent()
+                        + "/globalsight-web.war/WEB-INF";
+                final FopFactory fopFactory = FopFactory
+                        .newInstance(new File(fopRoot).toURI());
+
+                FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+                if (!pdfFile.exists())
+                {
+                    pdfFile.getParentFile().mkdirs();
+                    pdfFile.createNewFile();
+                }
+                FileOutputStream fileOut = new FileOutputStream(pdfFile);
+                out = new BufferedOutputStream(fileOut);
+
+                Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent,
+                        out);
+                
+                File xslFile = FileProfileUtil.getXsl(fileProfile);
+                
+                TransformerFactory factory = TransformerFactory.newInstance();
+                Transformer transformer = factory.newTransformer(new StreamSource(xslFile));
+                transformer.setParameter("versionParam", "2.0");
+                
+                Source src = new StreamSource(xmlFile);
+                Result res = new SAXResult(fop.getDefaultHandler());
+                transformer.transform(src, res);
+            }
+            else
+            {
+                throw new Exception(
+                        "Use XML-FO xsl file for In Context Review!");
+            }
+        }
+        catch (InterruptedException e)
+        {
+        }
+        catch (ConfigException ce)
+        {
+            LOGGER.error(
+                    "Please set the correct InDesign conversion dir for In Context Review Tool.");
+        }
+        catch (Exception e)
+        {
+            StringBuffer msg = new StringBuffer("Create PDF error for page:");
+            msg.append(trgPagePath).append(", by user:").append(p_userId);
+            LOGGER.error(msg.toString(), e);
+        }
+        finally
+        {
+            try
+            {
+                if (out != null)
+                {
+                    out.close();
+                }
+            }
+            catch(Exception ex)
+            {
+                // ignore;
+            }
         }
 
         return pdfFile;
@@ -594,8 +717,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         try
         {
-            String converterDir = getConvertDir(params, true, companyId) + File.separator
-                    + locale;
+            String converterDir = getConvertDir(params, true, companyId)
+                    + File.separator + locale;
             new File(converterDir).mkdirs();
             String xmlFilePath = converterDir + File.separator
                     + params.getRelSafeName();
@@ -869,8 +992,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             }
         }
 
-        copyAdobeFiles(srcLocale, p_trgLocale, getConvertedFileName(previewDir,
-                p_trgPageName, p_trgLocale, allTrgLocales), p_params, p_companyId);
+        copyAdobeFiles(
+                srcLocale, p_trgLocale, getConvertedFileName(previewDir,
+                        p_trgPageName, p_trgLocale, allTrgLocales),
+                p_params, p_companyId);
     }
 
     /**
@@ -946,7 +1071,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     }
 
     private void copyAdobeFiles(String p_existedLocale, String p_trgLocale,
-            String p_convertedFileName, PreviewPDFBO p_params, long companyId) throws Exception
+            String p_convertedFileName, PreviewPDFBO p_params, long companyId)
+                    throws Exception
     {
         String conDir = getConvertDir(p_params, false, companyId);
         String conDir_inctxrv = getConvertDir(p_params, true, companyId);
@@ -1478,6 +1604,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             {
                 formatType = "xlsx";
             }
+            else if (displayNameLower.endsWith(".xml"))
+            {
+                formatType = "xml";
+            }
         }
 
         formatType = formatType.trim();
@@ -1513,6 +1643,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             fileVersionType = ADOBE_CS6;
         }
+        else if ("xml".equals(formatType))
+        {
+            fileVersionType = TYPE_XML;
+        }
         else
         {
             fileVersionType = (formatType.equals("indd")
@@ -1543,11 +1677,20 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     isTranslateMaster, isTranslateHiddenLayer, relSafeName,
                     safeBaseFileName);
         }
-        else if (displayNameLower.endsWith("idml"))
+        else if (displayNameLower.endsWith(".idml"))
         {
             fileType = ADOBE_IDML;
             fileSuffix = IDML_SUFFIX;
             fileVersionType = ADOBE_TYPE_IDML;
+            return new PreviewPDFBO(fileVersionType, fileType, fileSuffix,
+                    isTranslateMaster, isTranslateHiddenLayer, relSafeName,
+                    safeBaseFileName);
+        }
+        else if (displayNameLower.endsWith(".xml"))
+        {
+            fileType = FILETYPE_XML;
+            fileSuffix = XML_SUFFIX;
+            fileVersionType = TYPE_XML;
             return new PreviewPDFBO(fileVersionType, fileType, fileSuffix,
                     isTranslateMaster, isTranslateHiddenLayer, relSafeName,
                     safeBaseFileName);

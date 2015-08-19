@@ -74,6 +74,7 @@ import com.globalsight.ling.tm2.PageTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -671,42 +672,20 @@ public class BrowseCorpusMainHandler extends PageHandler
         TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
                 .getTMProfileById(tmProfileId.longValue(), false);
 
-        ArrayList tmNamesOverride = new ArrayList();
-        // if (tmIndexParams != null)
-        // {
-        // for (int j = 0; j < tmIndexParams.length; j++)
-        // {
-        // int index = Integer.parseInt(tmIndexParams[j]);
-        // String tmName = (String)tmNames.get(index);
-        // ProjectTM aTm = ServerProxy.getProjectHandler().
-        // getProjectTMByName(tmName, false);
-        //
-        // tmNamesOverride.add(aTm.getIdAsLong());
-        // }
-        // }
-
         Vector<LeverageProjectTM> leverageProjectTms = tmp
                 .getProjectTMsToLeverageFrom();
         Map<Long, String> map = new HashMap<Long, String>();
         for (int j = 0; j < leverageProjectTms.size(); j++)
         {
             LeverageProjectTM tm = leverageProjectTms.get(j);
-            tmNamesOverride.add(tm.getProjectTmId());
             ProjectTM projectTM = ServerProxy.getProjectHandler()
                     .getProjectTMById(tm.getProjectTmId(), false);
             map.put(tm.getProjectTmId(), projectTM.getName());
         }
         p_request.setAttribute("mapTmIdName", map);
-        OverridableLeverageOptions levOptions = new OverridableLeverageOptions(
-                tmp, levLocales);
+        LeverageOptions levOptions = new LeverageOptions(tmp, levLocales);
 
-        Integer fuzzyOverride = (Integer) p_request
-                .getAttribute("fuzzyOverride");
-        // levOptions.setMatchThreshold(fuzzyOverride.intValue());
-        // levOptions.setTmsToLeverageFrom(tmNamesOverride);
-        levOptions.setMatchThreshold(new Long(tmp.getFuzzyMatchThreshold())
-                .intValue());
-        levOptions.setTmsToLeverageFrom(tmNamesOverride);
+        Integer fuzzyOverride = (Integer) p_request.getAttribute("fuzzyOverride");
 
         String queryText = (String) p_request.getAttribute("queryText");
         String segment = "<segment>" + queryText + "</segment>";
@@ -718,10 +697,10 @@ public class BrowseCorpusMainHandler extends PageHandler
 
         c_logger.debug("Leveraging with fuzzy threshold: " + fuzzyOverride);
 
-        LeverageDataCenter leverageDataCenter = LingServerProxy
-                .getTmCoreManager().leverageSegments(
-                        Collections.singletonList(tuv), sourceGSL, trgLocales,
-                        levOptions);
+		LeverageDataCenter leverageDataCenter = LingServerProxy
+				.getTmCoreManager().leverageSegments(
+						Collections.singletonList(tuv), sourceGSL, trgLocales,
+						levOptions);
         Iterator<LeverageMatches> itLeverageMatches = leverageDataCenter
                 .leverageResultIterator();
         boolean hasMatches = false;

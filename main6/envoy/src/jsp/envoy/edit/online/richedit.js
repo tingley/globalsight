@@ -600,7 +600,7 @@ function initRichEdit(el)
                 event.stopPropagation();
                 event.preventDefault();
                 // doc.designMode = "Inherit";
-                parent.parent.doRefresh(0, true);
+                parent.parent.saveFromFirefoxRichedit();
                 return;
               }
               else if (key == 33) // PAGE UP

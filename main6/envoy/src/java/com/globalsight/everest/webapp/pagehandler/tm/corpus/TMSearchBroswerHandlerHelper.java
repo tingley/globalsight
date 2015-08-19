@@ -55,7 +55,6 @@ import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
@@ -85,6 +84,7 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.segmenttm.TMidTUid;
@@ -627,25 +627,7 @@ public class TMSearchBroswerHandlerHelper
         Long tmProfileId = Long.parseLong(tmpId);
         TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
                 .getTMProfileById(tmProfileId.longValue(), false);
-
-        ProjectTM ptm = ServerProxy.getProjectHandler().getProjectTMById(
-                tmp.getProjectTmIdForSave(), false);
-
-        ArrayList tmNamesOverride = new ArrayList();
-        Vector<LeverageProjectTM> leverageProjectTms = tmp
-                .getProjectTMsToLeverageFrom();
-        for (int j = 0; j < leverageProjectTms.size(); j++)
-        {
-            LeverageProjectTM tm = leverageProjectTms.get(j);
-            tmNamesOverride.add(tm.getProjectTmId());
-        }
-
-        OverridableLeverageOptions levOptions = new OverridableLeverageOptions(
-                tmp, searchLevLocales);
-        long thresHold = tmp.getFuzzyMatchThreshold();
-        levOptions.setMatchThreshold(new Long(thresHold).intValue());
-        levOptions.setTmsToLeverageFrom(tmNamesOverride);
-
+        LeverageOptions levOptions = new LeverageOptions(tmp, searchLevLocales);
         // fix for GBS-2448, user could search target locale in TM Search Page
         levOptions.setFromTMSearchPage(true);
 
@@ -703,7 +685,7 @@ public class TMSearchBroswerHandlerHelper
     						continue;
     				}
                     long score = new Float(matchedTuv.getScore()).longValue();
-                    if (score < thresHold)
+                    if (score < tmp.getFuzzyMatchThreshold())
                     {
                         // if match score less than thres hold, do not display
                         continue;

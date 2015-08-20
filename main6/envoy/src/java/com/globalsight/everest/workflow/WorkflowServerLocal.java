@@ -3823,7 +3823,7 @@ public class WorkflowServerLocal implements WorkflowServer
             for (int i = 0; i < wfmUserNames.size(); i++)
             {
                 if (!(p_emailInfo.getProjectManagerId()
-                        .equalsIgnoreCase(wfmUserNames.get(i))))
+                        .equalsIgnoreCase(wfmUserNames.get(i))&&notifyPm))
                 {
                     sendMail(p_fromUserId,
                             getEmailInfo((String) wfmUserNames.get(i)),

@@ -2158,8 +2158,7 @@ public class WorkflowServerLocal implements WorkflowServer
                         WorkflowOwner owner = new WorkflowOwner();
                         owner.setWorkflow(workflow);
                         owner.setOwnerId(userId);
-                        owner.setOwnerType(((WorkflowOwner) workflow
-                                .getWorkflowOwners().get(0)).getOwnerType());
+                        owner.setOwnerType(Permission.GROUP_WORKFLOW_MANAGER);
                         owners.add(owner);
                         ServerProxy.getWorkflowManager()
                                 .reassignWorkflowOwners(workflow.getId(),
@@ -3793,16 +3792,11 @@ public class WorkflowServerLocal implements WorkflowServer
 
             boolean notifyPm = p_emailInfo.notifyProjectManager();
             List<String> wfmUserNames = p_emailInfo.getWorkflowManagerIds();
-            // do not send email if not required
-            if (!notifyPm && wfmUserNames.size() == 0)
-            {
-                return;
-            }
 
             // Delete the ignored receipt, Details in GBS-2461&2462.
             Set<String> ignoredReceipt = p_emailInfo.getIgnoredReceipt();
             if (ignoredReceipt != null && ignoredReceipt.size() > 0)
-            {
+            { 
                 if (ignoredReceipt.contains(p_emailInfo.getProjectManagerId()))
                     notifyPm = false;
 
@@ -3828,9 +3822,14 @@ public class WorkflowServerLocal implements WorkflowServer
             // notify all workflow managers (if any)
             for (int i = 0; i < wfmUserNames.size(); i++)
             {
-                sendMail(p_fromUserId,
-                        getEmailInfo((String) wfmUserNames.get(i)), subject,
-                        message, p_messageArgs, companyIdStr);
+                if (!(p_emailInfo.getProjectManagerId()
+                        .equalsIgnoreCase(wfmUserNames.get(i))))
+                {
+                    sendMail(p_fromUserId,
+                            getEmailInfo((String) wfmUserNames.get(i)),
+                            subject, message, p_messageArgs, companyIdStr);
+                }
+
             }
         }
         catch (Exception e)

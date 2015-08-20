@@ -149,7 +149,7 @@
 			<tr>
 			    <td class="tableHeadingBasic myTableHeading"><input id="selectAllWorkflows" type="checkbox" onclick="selectAllWorkflows()"></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_target_locale")%>&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
-			    <td class="wordCountHeadingWhite myTableHeading" style="text-align:center"><%=bundle.getString("lb_word_count")%>&nbsp;&nbsp;&nbsp;</td>
+			    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><%=bundle.getString("lb_word_count")%>&nbsp;&nbsp;&nbsp;</td>
 			    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><span class="whiteBold">&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_percent_complete")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_state")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_current_activity")%>&nbsp;&nbsp;&nbsp;</span></td>
@@ -167,7 +167,7 @@
 		</thead>
 		<tbody id="jobWorkflowDisplayList">
 		<c:forEach items="${JobWorkflowDisplayList}" var="item">
-			<c:choose>
+			 <c:choose>
 				<c:when test="${(item.workflow.state == 'EXPORT_FAILED') || (item.workflow.state == 'IMPORT_FAILED')}">
 					<tr class="warningText">
 				</c:when>
@@ -198,7 +198,7 @@
 						<td>${item.estimatedStartTimestamp}</td>
 					</amb:permission>
 			    </c:if>
-			    <td>
+		 		<td>
 			    	<c:if test="${item.workflow.state == 'READY_TO_BE_DISPATCHED' || item.workflow.state == 'DISPATCHED'}">
 			    		<amb:permission name="<%=Permission.JOBS_ESTIMATEDTRANSLATECOMPDATE%>">
 			    			<a class="standardHREF" style="word-wrap:break-word;word-break:break-all;" href="${estimatedTranslateCompletionDate.pageURL}&jobId=${jobId}">
@@ -272,12 +272,14 @@
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_WORDCOUNT%>" >
                <input id="WordCount" class="standardText" type="button" name="WordCount" value="<%=bundle.getString("lb_detailed_word_counts")%>..." onclick="submitForm('WordCount');"/>
            </amb:permission>
+            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_TRANSLATED_TEXT%>" >
+               <input id="Translated Text" class="standardText" type="button" name="Translated Text" value="<%=bundle.getString("lb_translated_text")%>..." onclick="submitForm('TranslatedText');"/>
+           </amb:permission>
 		<c:if test="${isVendorManagementInstalled}">
 			<amb:permission  name="<%=Permission.JOB_WORKFLOWS_RATEVENDOR%>" >
 				<input id="Rate" class="standardText" type="button" name="Rate" value="<%=bundle.getString("lb_rate_vendor")%>" onclick="submitForm('Rate');"/>
 			</amb:permission>
 		</c:if>
-		<input id="Translated Text" class="standardText" type="button" name="Translated Text" value="<%=bundle.getString("lb_translated_text")%>..." onclick="submitForm('TranslatedText');"/>
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_ARCHIVE%>" >
                 <input id="Archive" class="standardText" type="button" name="Archive" value="<%=bundle.getString("lb_archive")%>" onclick="submitForm('Archive');"/>
            </amb:permission>
@@ -828,9 +830,8 @@ function realSubmitForm(specificButton){
    else if(specificButton == "TranslatedText")
 	{
 	var url = "${translatedTextList.pageURL}&wfId=" + wfId + "&jobId=${jobId}";
-	var specs = "width=1200,height=800,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no";
-   	controlWindow = window.open(url, "RecentReports", specs);
-   	controlWindow.focus(); 
+	 $("#workflowForm").attr("action", url);
+	    $("#workflowForm").submit(); 
 	}
    else if (specificButton == "Archive")
    {

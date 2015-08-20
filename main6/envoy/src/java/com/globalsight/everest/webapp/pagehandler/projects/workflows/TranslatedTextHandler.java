@@ -98,7 +98,7 @@ public class TranslatedTextHandler extends PageHandler
                 p_request.setAttribute("workflows", sublist);
                 p_request.setAttribute("jobName", job.getJobName());
                 p_request.setAttribute("sourcePages", job.getSourcePages());
-                p_request.setAttribute("jobId", jobId);
+                p_request.setAttribute(JobManagementHandler.JOB_ID, jobId+"");
             }
         }
         catch (Exception e)

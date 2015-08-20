@@ -1738,6 +1738,7 @@
       </WebPage>
       <WebPage pageName="WFTTL" isDefault="false" jspName="/envoy/projects/workflows/translatedTextList.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.TranslatedTextHandler">
       	<PageLink linkName="self" destinationPageName="WFTTL"></PageLink>
+      	<PageLink linkName="back" destinationPageName="DTLS"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>

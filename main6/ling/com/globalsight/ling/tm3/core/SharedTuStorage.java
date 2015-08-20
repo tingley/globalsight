@@ -190,13 +190,12 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
         BatchStatementBuilder sb = new BatchStatementBuilder("UPDATE ")
                 .append(getStorage().getTuvTableName())
-                .append(" SET content = ?, fingerprint = ?, lastEventId = ?, modifyUser = ?, modifyDate = ?")
+                .append(" SET content = ?, fingerprint = ?, modifyUser = ?, modifyDate = ?")
                 .append(" WHERE id = ?");
         for (TM3Tuv<T> tuv : tuvs)
         {
-            sb.addBatch(tuv.getSerializedForm(), tuv.getFingerprint(),
-                    event.getId(), event.getUsername(), event.getTimestamp(),
-                    tuv.getId());
+			sb.addBatch(tuv.getSerializedForm(), tuv.getFingerprint(),
+					tuv.getModifyUser(), tuv.getModifyDate(), tuv.getId());
         }
         SQLUtil.execBatch(conn, sb);
 
@@ -224,8 +223,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             {
 				sb2 = new StatementBuilder("UPDATE ")
 						.append(getStorage().getTuvExtTableName())
-						.append(" SET sid = ? ").addValue(tuv.getSid())
-						.append(" WHERE tuvId = ?").addValue(tuv.getId());
+						.append(" SET sid = ?, lastUsageDate = ? ")
+						.append(" WHERE tuvId = ?")
+						.addValues(tuv.getSid(), tuv.getLastUsageDate(), tuv.getId());
                 SQLUtil.exec(conn, sb2);
             }
         }

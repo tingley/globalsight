@@ -292,7 +292,7 @@ $(document).ready(function(){
          <TR id="ReviewersSimpleIncludeTagsTR" CLASS="standardText">
          	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
         	<TD>
-        		<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="withCompactTags"><%=bundle.getString("with_compact_tags")%>
+        		<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="withCompactTagsSimple"><%=bundle.getString("with_compact_tags")%>
         	</TD>
         	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
         	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>

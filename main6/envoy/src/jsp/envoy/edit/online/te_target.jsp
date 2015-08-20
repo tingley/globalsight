@@ -326,15 +326,6 @@ function addText(strText)
 </SCRIPT>
 </HEAD>
 <BODY scroll="no" onbeforeunload="doOnBeforeUnload();" onresize="init();">
-<APPLET
-  style="display:inline"
-  archive="/globalsight/applet/lib/online.jar"
-  code="com.globalsight.ling.tw.online.OnlineApplet"
-  id="applet"
-  name="applet"
-  width="0"
-  height="0">
-</APPLET>
 
 <HR COLOR="#0C1476" WIDTH="95%">
 

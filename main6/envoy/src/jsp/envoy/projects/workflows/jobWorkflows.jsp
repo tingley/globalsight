@@ -67,6 +67,8 @@
 <jsp:useBean id="jobCosts" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobDetailsPDFs" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
+<jsp:useBean id="translatedTextList" scope="request" 
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <% 
 //jobSummary child page needed started.
    ResourceBundle bundle = PageHandler.getBundle(session);
@@ -142,7 +144,7 @@
 	<input type="hidden" id="downloadJobId" name="<%=DownloadFileHandler.PARAM_JOB_ID%>" value=""/>
 </form>
 	<div id="workflowBlockTitle" class="standardTextBold" style="margin:0;padding:0"><%=bundle.getString("lb_workflows")%></div>
-	<table cellpadding="2" cellspacing="0" border="0" style="min-width:1024px;width:80%;border:solid 1px slategray">
+	<table cellpadding="2" cellspacing="0" border="0" style="min-width:1024px;width:85%;border:solid 1px slategray">
 		<thead>
 			<tr>
 			    <td class="tableHeadingBasic myTableHeading"><input id="selectAllWorkflows" type="checkbox" onclick="selectAllWorkflows()"></td>
@@ -160,6 +162,7 @@
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_estimated_workflow_completion_date")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold">Uploading&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_priority")%>&nbsp;&nbsp;&nbsp;</span></td>
+			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><input type="button" id="translatedTextBtn" value='<%=bundle.getString("lb_translated_text")%>'></span>&nbsp;&nbsp;&nbsp;</td>
 			</tr>
 		</thead>
 		<tbody id="jobWorkflowDisplayList">
@@ -229,7 +232,7 @@
 			    		No
 			    	</c:if>
 			    </td>
-			    <td style="text-align:center">
+			    <td style="text-align:left">
 				    <select class="workflowPrioritySelect" onchange="changeWorkflowPriority('${item.workflow.id}',this.value)"  style="display:none">
 						<c:forEach var="wfPriority" begin="1" end="5" step="1">
 							<option value="${wfPriority}" 
@@ -240,11 +243,14 @@
 					</select>
 					<span class="workflowPriority">${item.workflow.priority}</span>
 			    </td>
+			    <td style="text-align:center">
+			    	<span class="standardText" id="oPara${item.workflow.id}" style = "font-weight:600"></span>
+			    </td>
 			</tr>
 		</c:forEach>
 		</tbody>
 	</table>
-	<div id="workflowButton" style="padding-top:5px;min-width:1024px;width:80%">
+	<div id="workflowButton" style="padding-top:5px;min-width:1024px;width:85%">
 	<c:if test="${!isSuperAdmin}">
 			<c:if test="${isCustomerAccessGroupInstalled}">
 				<amb:permission  name="<%=Permission.JOB_WORKFLOWS_REASSIGN%>" >
@@ -271,6 +277,7 @@
 				<input id="Rate" class="standardText" type="button" name="Rate" value="<%=bundle.getString("lb_rate_vendor")%>" onclick="submitForm('Rate');"/>
 			</amb:permission>
 		</c:if>
+		<input id="Translated Text" class="standardText" type="button" name="Translated Text" value="<%=bundle.getString("lb_translated_text")%>..." onclick="submitForm('TranslatedText');"/>
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_ARCHIVE%>" >
                 <input id="Archive" class="standardText" type="button" name="Archive" value="<%=bundle.getString("lb_archive")%>" onclick="submitForm('Archive');"/>
            </amb:permission>
@@ -333,6 +340,42 @@ var exportEnd = false;
 var exportDownloadRandom;
 var exportFrom = "jobWorkflow";
 var exportPercent = 0;
+
+$("#translatedTextBtn").bind("click",function(){
+	var temp=document.getElementsByName('wfId');
+	var workflowIds="";
+    for(var i=0;i<temp.length;i++){
+        workflowIds +=temp[i].value+",";
+    }
+    workflowIds = workflowIds.substring(0,workflowIds.length-1);
+    var random = Math.random();
+    workflowIds = workflowIds.split(",");
+    var j = 0;
+    var count = setInterval(function translatedTextc(){
+    	$.getJSON("${self.pageURL}",{
+    		action:"retrieveTranslatedText",
+            workflowId:workflowIds[j],
+            random:random	
+    	},function(data){
+    		var workflowId = data.workflowId;
+    		var percent = data.percent;
+    		var objName = "oPara" + workflowId;
+            var obj = document.getElementById(objName);
+    		if(percent<100){
+    			obj.style.color = "red";
+            	obj.innerHTML = "(" + percent + "%)";
+    		}
+    		else{
+    			obj.style.color = "black";
+            	obj.innerHTML = "(" + percent + "%)";
+    		}
+    	});
+    	 j++;
+    	 if(j>=workflowIds.length)
+     		clearInterval(count);
+    },200);
+}); 
+
 function startExport()
 {
 	var selectedCheckbox = $(":checkbox:checked:not(#selectAllWorkflows)");
@@ -782,6 +825,13 @@ function realSubmitForm(specificButton){
 	    $("#workflowForm").attr("action", url);
 	    $("#workflowForm").submit();
    }
+   else if(specificButton == "TranslatedText")
+	{
+	var url = "${translatedTextList.pageURL}&wfId=" + wfId + "&jobId=${jobId}";
+	var specs = "width=1200,height=800,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no";
+   	controlWindow = window.open(url, "RecentReports", specs);
+   	controlWindow.focus(); 
+	}
    else if (specificButton == "Archive")
    {
       // You can only archive workflows that are in the EXPORTED state.

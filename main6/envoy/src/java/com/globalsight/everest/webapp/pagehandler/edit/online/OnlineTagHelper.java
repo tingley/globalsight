@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatBasicParser;
-
 import com.globalsight.ling.tw.HtmlTableWriter;
 import com.globalsight.ling.tw.HtmlEntities;
 import com.globalsight.ling.tw.PseudoConstants;
@@ -67,7 +66,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     private StringBuffer m_coloredPtags = null;
     private PseudoParser m_ptagParser = null;
 
-    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=false>";
+    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>";
     private static final String PTAG_COLOR_END = "</SPAN>";
     private PseudoErrorChecker m_errChecker = null;
 
@@ -291,6 +290,43 @@ public class OnlineTagHelper implements PseudoBaseHandler
         m_segmentFormat = p_segmentFormat;
 
         m_withPtags.setAddables(p_segmentFormat);
+    }
+    
+    /*
+     * Set the Diplomat input string and convert it to p-tags internally. After
+     * setting the string, you can getCompact() or getVerbose().
+     * 
+     * @param p_source String
+     * 
+     * @param p_encoding String
+     * 
+     * @param p_segmentFormat String - an empty, null or otherwise incorrect
+     * value disables addables.
+     */
+    public void setInputSegment(String p_source, String p_encoding,
+            String p_segmentFormat, boolean p_isFromSourceTargetPanel)
+            throws PseudoOverrideItemException
+    {
+        // Empty strings arrive as NULL pointer somehow, so fix that
+        if (p_source == null)
+        {
+            p_source = "";
+        }
+
+        // we must init things here because we cannot throw exceptions
+        // from the applets init() method.
+        if (!m_bPTagResourcesInitialized)
+        {
+            initPTagResources();
+            m_bPTagResourcesInitialized = true;
+        }
+
+        m_inputSegment = p_source;
+        m_targetEncoding = p_encoding;
+        m_segmentFormat = p_segmentFormat;
+
+        m_withPtags.setAddables(p_segmentFormat);
+        m_withPtags.setIsFromSourceTargetPanel(p_isFromSourceTargetPanel);
     }
 
     /*

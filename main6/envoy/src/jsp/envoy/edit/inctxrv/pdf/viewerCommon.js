@@ -101,7 +101,7 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
     
     
     // find segment
-    var isOfficeXml = ("office-xml" == format);
+    var isOfficeXml = ("office-xml" == format || "xml" == format);
     var find = false;
     var loPn = p_lnPn ? p_lnPn : PDFViewerApplication.pdfViewer.location.pageNumber;
     
@@ -446,7 +446,7 @@ function buildPageContent(pageNum, localData, isTarget)
 	for (var i = 0; i < localData.source.length; i++)
 	{
 		var seg = isTarget ? localData.target[i] : localData.source[i];
-		var isOfficeXml = "office-xml" == seg.format;
+		var isOfficeXml = ("office-xml" == seg.format || "xml" == seg.format);
 		format1 = seg.format;
 		
 		if (isOfficeXml || (seg.pageNum && seg.pageNum == pageNum))
@@ -571,7 +571,7 @@ function sendAjax(obj)
 
 function getSegment(pageContent, o, i, divArr)
 {
-    var isOfficeXml = "office-xml" == pageContent.format;
+    var isOfficeXml = ("office-xml" == pageContent.format || "xml" == pageContent.format);
     
 	if (i == 0 && !isOfficeXml)
 	{

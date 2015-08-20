@@ -110,9 +110,11 @@ String str_sourceSegment = GxmlUtil.getInnerXml(view.getSourceSegment());
 String str_targetSegment = GxmlUtil.getInnerXml(view.getTargetSegment());
 String str_dataType = view.getDataType();
 String str_itemType = view.getItemType();
+String str_ptags = state.getPTagFormat();
+String sourceHtml = view.getSourceHtmlString(str_ptags);
+String targetHtml = view.getTargetHtmlString(str_ptags, b_colorPtags);
 String str_srcLocale = state.getSourceLocale().toString();
 String str_trgLocale = state.getTargetLocale().toString();
-String str_ptags = state.getPTagFormat();
 String str_preserveWS = SegmentProtectionManager.isPreserveWhiteSpace(view.getSourceSegment()) ? "true" : "false";
 String needUpdatePopupEditor = state.getNeedUpdatePopUpEditor();
 
@@ -193,6 +195,8 @@ if (newStatus != null)
 <HEAD>
 <TITLE><%=lb_title%></TITLE>
 <script src="/globalsight/envoy/edit/online/richedit.js"></script>
+<script src="/globalsight/includes/ajaxJquery/online.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.9.1.min.js"></script>
 <SCRIPT type="text/javascript">
 window.focus();
 
@@ -232,7 +236,6 @@ var w_details = null;
 var match_details = null;
 var w_options = null;
 var w_concordance = null;
-var applet = null;
 var g_initialized = false;
 var g_refreshing = false;
 var b_initlized = false;
@@ -250,10 +253,6 @@ function init()
     fr_source = editor.source;
     fr_target = editor.target;
 	fr_tm = editor.tm;
-
-    applet = fr_target.document.applet;
-	applet.setLocale(uilocale);
-	applet.setDataType(datatype);
     
     //initAllRichEdits();
     initSegments();
@@ -328,36 +327,8 @@ function initSegments()
 
 function initTarget(trg_segment, changed)
 {
-    var edit_segment;
-    //alert(trg_segment);
-    //alert("verbose : " + verbose);
-    //alert("colorPtags : " + colorPtags);
-
-    applet.setInputSegment(trg_segment, "", datatype);
-    if (verbose == "<%=EditorConstants.PTAGS_VERBOSE%>")
-    {
-        if (colorPtags == "true")
-        {
-            applet.getVerbose(); // discard
-            edit_segment = applet.makeVerboseColoredPtags(trg_segment);
-        }
-        else
-        {
-            edit_segment = applet.getVerbose();
-        }
-    }
-    else
-    {
-        if (colorPtags == "true")
-        {
-            applet.getCompact(); // discard
-            edit_segment = applet.makeCompactColoredPtags(trg_segment);
-        }
-        else
-        {
-            edit_segment = applet.getCompact();
-        }
-    }
+    var edit_segment = initTarget2(trg_segment);
+   
     fr_editor.SetTargetSegment(edit_segment, changed, IsWhitePreserving());
     fr_editor.SetVerbosePTags(verbose == "<%=EditorConstants.PTAGS_VERBOSE%>");
     //alert(edit_segment);
@@ -365,18 +336,9 @@ function initTarget(trg_segment, changed)
 
 function initSource()
 {
-    applet.setInputSegment(source_segment, "", datatype);
+	var sourceHtml = "<%=EditUtil.toJavascript(sourceHtml)%>";
+	showSource(sourceHtml);
 
-    if (verbose == "<%=EditorConstants.PTAGS_VERBOSE%>")
-    {
-        applet.getVerbose(); // discard
-        showSource(applet.makeVerboseColoredPtags(source_segment));
-    }
-    else
-    {
-        applet.getCompact(); // discard
-        showSource(applet.makeCompactColoredPtags(source_segment));
-    }
     if(<%=source_rtl%>)
     {
         if(editor.source.idSourceCell)
@@ -405,37 +367,13 @@ function updateTarget(text, changed)
 // best in a try {} finally {} handler.
 function GetPTagString(text, verbose)
 {
-    var result;
-
-    // GBS-3722, mark if this string is from source target panel or other Match Results panels 
-    var isFromTarget = false;
-    applet.setInputSegment(text, "", datatype, isFromTarget);
-    if (verbose == "<%=EditorConstants.PTAGS_VERBOSE%>")
-    {
-        applet.getVerbose(); // discard
-        result = applet.makeVerboseColoredPtags(text);
-    }
-    else
-    {
-        applet.getCompact(); // discard
-        result = applet.makeCompactColoredPtags(text);
-    }
-
-    return result;
+    return getHtmlSegment(text, false);;
 }
 
 // Must reset applet state to source string and its ptags.
 function EndGetPTagStrings()
 {
-    applet.setInputSegment(source_segment, "", datatype);
-    if (verbose == "<%=EditorConstants.PTAGS_VERBOSE%>")
-    {
-        applet.getVerbose(); // discard
-    }
-    else
-    {
-        applet.getCompact(); // discard
-    }
+	//do nothing. the applet has been removed.
 }
 
 function setVerbose()
@@ -503,33 +441,15 @@ function checkError()
     	}
     }
     
+    if (newTargetReturn != null && newTargetReturn != "")
+	{
+		SetSegment(newTargetReturn);
+	}
+    
     return 0;
 }
 
-function doErrorCheck()
-{
-    applet.setUntranslateStyle(<%="\"" + SegmentUtil2.getTAGS() + "\""%>);
-    var msg = applet.errorCheck(fr_editor.GetTargetSegment(), source_segment,
-      max_segment_len, gsa_encoding, db_segment_len, db_encoding);
-    internalTagMsg = applet.getInternalErrMsg();
 
-    if (msg == "" || msg == null || msg == "null")
-    {
-    	var newTarget = applet.getNewPTagTargetString();
-    	
-    	if (newTarget != null && newTarget != "")
-    	{
-    		newTarget = applet.getTargetDiplomat(newTarget);
-    		SetSegment(newTarget);
-    	}
-    	
-        return null;
-    }
-    else
-    {
-        return msg;
-    }
-}
 
 function getTargetDiplomatString()
 {
@@ -537,17 +457,12 @@ function getTargetDiplomatString()
 
     if (text != "")
     {
-        return applet.getTargetDiplomat(text);
+        return getTargetDiplomat(text);
     }
     else
     {
         return "";
     }
-}
-
-function getPtagToNativeMappingTable()
-{
-    return applet.getPtagToNativeMappingTable();
 }
 
 function showSource(text)
@@ -768,6 +683,73 @@ function showHourglassInDocument(doc)
   {
     if(elements[j].style) elements[j].style.cursor = 'wait';
   }
+}
+
+function saveFromFirefoxRichedit()
+{
+    if (!g_initialized) 
+	    return;
+    
+    if (g_refreshing) 
+	    return;
+    
+    g_refreshing = true;
+    var text = fr_editor.GetTargetSegment();
+	$.ajax({
+		url : 'OnlineService?action=doErrorCheck2',
+		cache : false,
+		data : {
+			text : text
+		},
+		dataType : 'text',
+		success : function(data) {
+			var ob = eval("(" + data+ ")");
+			internalTagMsg = ob.internalTagMsg;
+			newTargetReturn = ob.newTarget;
+			errorMsgReturn = ob.msg;
+			
+			if (ob.msg != null)
+		    {
+		        alert(ob.msg);
+		        fr_target.SetFocus();
+		        
+		        g_refreshing = false;
+		        return;
+		    }
+		    if (ob.internalTagMsg != null && ob.internalTagMsg != "")
+		    {
+		    	var rrr = confirm("<%=bundle.getString("msg_internal_moved_continue")%>" + "\n\r\t" + ob.internalTagMsg);
+		    	if (rrr == false)
+		    	{
+		    		fr_target.SetFocus();
+		    		
+		    		g_refreshing = false;
+		    		return;
+		    	}
+		    }
+		    
+		    var o_form = menu.document.Save;
+
+		    if (ob.newTarget != null && ob.newTarget != "")
+			{
+				o_form.save.value    = ob.newTarget;
+			}
+	        o_form.refresh.value = 0;
+	        o_form.releverage.value = "false";
+	        o_form.tuId.value    = "<%=l_tuId%>";
+	        o_form.tuvId.value   = "<%=l_tuvId%>";
+	        o_form.subId.value   = "<%=l_subId%>";
+	        o_form.ptags.value   = verbose;
+	        o_form.isClosedComment.value = fr_source.getIsClosedComment();
+	        o_form.submit();
+		        
+		    g_refreshing = false;
+		},
+		error : function(request, error, status) {
+		    g_refreshing = false;
+		    alert(error);
+		}
+	});
 }
 
 function doRefresh(direction, save)

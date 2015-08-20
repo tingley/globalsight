@@ -75,7 +75,6 @@ Collection tbMatches = view.getTbMatchResults();
 
 NumberFormat percent = NumberFormat.getPercentInstance(
   (Locale)session.getAttribute(WebAppConstants.UILOCALE));
-/* percent.setMinimumFractionDigits(2); */
 
 boolean b_rtl = EditUtil.isRTLLocale(state.getTargetLocale());
 boolean b_source_rtl = EditUtil.isRTLLocale(state.getSourceLocale());
@@ -162,7 +161,7 @@ if (tmMatches != null)
         }
         else
         {
-            stb_segments.append(percent.format(Math.floor(p.getMatchPercentage()*100)/10000.0));
+            stb_segments.append(percent.format(Math.floor(p.getMatchPercentage())*100/10000.0));
         }
         String tmName = p.getTmName();
         stb_segments.append("(");
@@ -462,6 +461,8 @@ catch (Exception e) { }
 <script SRC="/globalsight/xdespellchecker/noapplet/SpellCheckNoApplet.js"></script>
 <SCRIPT SRC="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dnd/DragAndDrop.js"></SCRIPT>
+<script src="/globalsight/includes/ajaxJquery/online.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.9.1.min.js"></script>
 <link type="text/css" rel="StyleSheet" id="cssPtag"
   href="/globalsight/envoy/edit/online2/ptag.css">
 <link type="text/css" rel="StyleSheet"
@@ -1389,6 +1390,7 @@ function doOnBeforeUnload()
   try { w_ptags.close(); } catch (ignore) {}
   try { w_corpus.close(); } catch (ignore) {}
 }
+
 var flag = false;
 function showPTags()
 {
@@ -1396,7 +1398,7 @@ function showPTags()
   {
   	if (w_ptags == null || w_ptags.closed)
   	{
-    	var ptags = applet.getPtagString();
+    	var ptags = getPtagString();
     	var args = { _opener: window, _data: ptags.split(",") };
 
     	w_ptags = showModelessDialog("/globalsight/envoy/edit/online/selectptag.jsp",
@@ -1410,7 +1412,7 @@ function showPTags()
   }
   else
   {
-  	var ptags = applet.getPtagString();
+  	var ptags = getPtagString();
   	var data = ptags.split(",");
   	if (ptags.length > 0 )
   	{
@@ -1936,15 +1938,6 @@ function showMatchdetailInfo()
 </SCRIPT>
 </HEAD>
 <BODY id="idBody" onbeforeunload="doOnBeforeUnload()" onLoad="doLoad();">
-<APPLET
-  style="display:inline"
-  archive="/globalsight/applet/lib/online.jar"
-  code="com.globalsight.ling.tw.online.OnlineApplet"
-  id="applet"
-  name="applet"
-  width="0"
-  height="0" MAYSCRIPT>
-</APPLET>
 <div id="idSourceSegment" style="display:none"></div>
 <HR style="position: relative; top: 0; left: 0;" COLOR="#0C1476" WIDTH="95%">
 <!-- Target -->

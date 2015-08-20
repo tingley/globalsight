@@ -38,6 +38,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.ling.tw.internal.ColorInternalTag;
+import com.globalsight.util.EmojiUtil;
 import com.globalsight.util.Replacer;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -928,6 +929,16 @@ public class GxmlUtil
             case GxmlElement.IT: // fallthru
             case GxmlElement.UT: // fallthru
 
+                // GBS-3997&GBS-4066
+                if (GxmlElement.PH == nodeType)
+                {
+                    itemType = p_node.getAttribute(GxmlNames.PH_TYPE);
+                    if (itemType != null
+                            && itemType.startsWith(EmojiUtil.TYPE_EMOJI))
+                    {
+                        break;
+                    }
+                }
                 childNodes = p_node.getChildElements();
 
                 if (childNodes != null)

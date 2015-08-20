@@ -685,9 +685,10 @@ public class SegmentTmPersistence
                 ps.setString(1, tuv.getSegment());
                 ps.setLong(2, tuv.getExactMatchKey());
                 ps.setString(3, tuv.getModifyUser());
-                if (tuv.getSid() != null && tuv.getSid().length() > 254)
+                sid = tuv.getSid();
+                if (sid != null && sid.length() > 254)
                 {
-                	sid = tuv.getSid().substring(0, 254);
+                	sid = sid.substring(0, 254);
                 }
                 ps.setString(4, sid);
                 ps.setLong(5, tuv.getId());

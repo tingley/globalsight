@@ -118,59 +118,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         return sb;
     }
 
-    @Override
-    protected StatementBuilder getExactMatchStatement(T key,
-            TM3Locale srcLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget,
-            List<Long> tm3TmIds)
-    {
-        StatementBuilder sb = new StatementBuilder(
-                "SELECT tuv.id, tuv.tuId FROM ").append(getStorage()
-                .getTuvTableName() + " AS tuv");
-        if (!inlineAttrs.isEmpty() || !lookupTarget)
-        {
-            sb.append(" join " + getStorage().getTuTableName() + " as tu")
-                    .append(" on tu.id = tuv.tuId");
-        }
-        sb.append(" WHERE fingerprint = ? AND localeId = ? ")
-                .addValues(key.getFingerprint(), srcLocale.getId())
-                .append("AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
-        if (!lookupTarget)
-        {
-            sb.append("AND tu.srcLocaleId = ? ").addValue(srcLocale.getId());
-        }
-        if (!inlineAttrs.isEmpty())
-        {
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
-            {
-                if (e.getKey().getAffectsIdentity())
-                {
-                    sb.append(" AND tu." + e.getKey().getColumnName() + " = ?");
-                    sb.addValue(e.getValue());
-                }
-            }
-        }
-        if (targetLocales != null)
-        {
-            // an exists subselect seems simpler, but mysql bug 46947 causes
-            // exists subselects to take locks even in repeatable read
-            List<Long> targetLocaleIds = new ArrayList<Long>();
-            for (TM3Locale locale : targetLocales)
-            {
-                targetLocaleIds.add(locale.getId());
-            }
-            sb = new StatementBuilder()
-                    .append("SELECT DISTINCT result.* FROM (").append(sb)
-                    .append(") AS result, ")
-                    .append(getStorage().getTuvTableName() + " AS targetTuv ")
-                    .append("WHERE targetTuv.tuId = result.tuId AND ")
-                    .append("targetTuv.localeId IN")
-                    .append(SQLUtil.longGroup(targetLocaleIds));
-        }
-        return sb;
-    }
-
-
     /**
      * Save custom attributes. This is the same across all table types.
      * 
@@ -933,44 +880,34 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			stringId = (String) paramMap.get("stringId");
 		}
 
+		// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...
 		if (StringUtil.isNotEmpty(stringId))
 		{
-			// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...
-			sb.append("SELECT DISTINCT tuv.tuId AS tuId, ext.sid AS sid FROM ")
-					.append(getStorage().getTuvTableName()).append(" as tuv, ")
-					.append(getStorage().getTuvExtTableName())
-					.append(" AS ext");
-			if (inlineAttrs != null && !inlineAttrs.isEmpty())
-			{
-				sb.append(",").append(getStorage().getTuTableName())
-						.append(" as tu ");
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-			}
-			getParameterSql(sb, paramMap, localeIds, inlineAttrs);
-			sb.append(" AND tuv.id = ext.tuvId ").append(
-					"AND ext.sid IS NOT NULL ");
-			if (startId != -1 && count != -1)
-			{
-				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
-						.addValues(startId, count);
-			}
+			sb.append("SELECT DISTINCT tuv.tuId AS tuId, ext.sid AS sid FROM ");
 		}
 		else
 		{
-			sb.append("SELECT DISTINCT tuv.tuId FROM ")
-					.append(getStorage().getTuvTableName()).append(" as tuv ");
-			if (inlineAttrs != null && !inlineAttrs.isEmpty())
-			{
-				sb.append(",").append(getStorage().getTuTableName())
-						.append(" as tu ");
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-			}
-			getParameterSql(sb, paramMap, localeIds, inlineAttrs);
-			if (startId != -1 && count != -1)
-			{
-				sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ? ")
-						.addValues(startId, count);
-			}
+			sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ");
+		}
+		sb.append(getStorage().getTuvTableName()).append(" as tuv, ")
+				.append(getStorage().getTuvExtTableName()).append(" AS ext");
+
+		if (inlineAttrs != null && !inlineAttrs.isEmpty())
+		{
+			sb.append(",").append(getStorage().getTuTableName())
+					.append(" as tu ");
+			getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+		}
+		getParameterSql(sb, paramMap, localeIds, inlineAttrs);
+		if (StringUtil.isNotEmpty(stringId))
+		{
+			sb.append(" AND tuv.id = ext.tuvId ").append(
+					"AND ext.sid IS NOT NULL ");
+		}
+		if (startId != -1 && count != -1)
+		{
+			sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
+					.addValues(startId, count);
 		}
 	}
 
@@ -993,6 +930,10 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			String createdAfter = (String) paramMap.get("createdAfter");
 			String createdBefore = (String) paramMap.get("createdBefore");
 			String tuIds = (String) paramMap.get("tuIds");
+			String jobId = (String) paramMap.get("jobId");
+			String lastUsageAfter = (String) paramMap.get("lastUsageAfter");
+			String lastUsageBefore = (String) paramMap.get("lastUsageBefore");
+			
 			Set<String> jobAttributeSet = (Set<String>) paramMap
 					.get("jobAttributeSet");
 
@@ -1011,6 +952,21 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 						.addValues(parseStartDate(new Date(modifyAfter)),
 								parseEndDate(new Date(modifyBefore)));
 			}
+			
+			if (StringUtil.isNotEmpty(lastUsageAfter)
+					&& StringUtil.isNotEmpty(lastUsageBefore))
+			{
+				sb.append(
+						" AND ext.lastUsageDate >= ? AND ext.lastUsageDate <= ?")
+						.addValues(parseStartDate(new Date(lastUsageAfter)),
+								parseEndDate(new Date(lastUsageBefore)));
+			}
+			
+			if(StringUtil.isNotEmpty(jobId))
+			{
+				sb.append(" AND ext.jobId in (").append(jobId).append(")");
+			}
+			
 			if (StringUtil.isNotEmpty(createUser))
 			{
 				sb.append(" AND tuv.creationUser = ? ").addValues(createUser);

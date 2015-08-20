@@ -149,7 +149,7 @@ public abstract class OutputWriter
         for (int i = 0; i < str.length(); i++)
         {
             char c = str.charAt(i);
-            if (c == ' ' || c == '\n' || c == '\r')
+            if (c == ' ' || c == '\n' || c == '\r' || c == '\t')
             {
                 preBlank.append(c);
             }
@@ -170,7 +170,7 @@ public abstract class OutputWriter
         for (int i = str.length() - 1; i >= 0; i--)
         {
             char c = str.charAt(i);
-            if (c == ' ' || c == '\n' || c == '\r')
+            if (c == ' ' || c == '\n' || c == '\r' || c == '\t')
             {
                 suffixBlank.insert(0, c);
             }

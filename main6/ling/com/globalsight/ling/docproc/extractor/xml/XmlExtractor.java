@@ -43,6 +43,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import com.globalsight.cxe.adapter.ling.ExtractRule;
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
@@ -68,6 +69,8 @@ import com.globalsight.ling.docproc.Segmentable;
 import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.xml.xmlrule.CommentRuleItem;
+import com.globalsight.util.Emoji;
+import com.globalsight.util.EmojiManager;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.SegmentUtil;
@@ -185,12 +188,17 @@ public class XmlExtractor extends AbstractExtractor implements
     private boolean m_isElementPost = false;
     private boolean m_isElementPostToHtml = false;
     private boolean m_isOriginalXmlNode = false;
+    private List<String> m_originalXmlNode = new ArrayList<String>();
     private boolean m_isCdataPost = false;
 
     private boolean m_preserveEmptyTag = true;
     private final String ATTRIBUTE_PRESERVE_CLOSED_TAG = "GS_XML_ATTRIBUTE_PRESERVE_CLOSED_TAG";
 
     private List<ExtractRule> rules = new ArrayList<ExtractRule>();
+    // GBS-3997
+    public static final String MARK_EMOJI = "emoji-";
+    public static final Pattern P_EMOJI_TAG = Pattern
+            .compile("(<ph[^>]*?erasable=\"yes\"[^>]*?type=\"(emoji-[^<]*?)\"[^>]*?>)[^<]*?(</ph>)");
 
     //
     // Constructors
@@ -782,6 +790,8 @@ public class XmlExtractor extends AbstractExtractor implements
                             isInline, isPreserveWS);
                     // GBS-3577
                     temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
+                    // GBS-3997
+                    temp = parseEmojiToAliasTag(temp);
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
                 else
@@ -814,6 +824,8 @@ public class XmlExtractor extends AbstractExtractor implements
 
                     // GBS-3577
                     temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
+                    // GBS-3997
+                    temp = parseEmojiToAliasTag(temp);
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
 
@@ -907,9 +919,10 @@ public class XmlExtractor extends AbstractExtractor implements
                 }
                 else
                 {
-                    outputExtractedStuff(
-                            m_xmlEncoder.encodeStringBasic(nodeValue),
-                            isTranslatable, false);
+                    nodeValue = m_xmlEncoder.encodeStringBasic(nodeValue);
+                    // GBS-3997
+                    nodeValue = parseEmojiToAliasTag(nodeValue);
+                    outputExtractedStuff(nodeValue, isTranslatable, false);
                 }
                 outputSkeleton("]]>");
             }
@@ -995,6 +1008,25 @@ public class XmlExtractor extends AbstractExtractor implements
                 outputSkeleton(name);
             }
         }
+    }
+
+    /**
+     * Replaces the emoji's unicode occurrences by erasable tags.
+     * 
+     * @since GBS-3997
+     */
+    private String parseEmojiToAliasTag(String text)
+    {
+        String result = text;
+        String tag = "<ph erasable=\"yes\" type=\"emoji-emojiAlias\">emojiDescription</ph>";
+        for (Emoji emoji : EmojiManager.getAll())
+        {
+            String newTag = tag
+                    .replace("emojiAlias", emoji.getAliases().get(0));
+            newTag = newTag.replace("emojiDescription", emoji.getDescription());
+            result = result.replace(emoji.getUnicode(), newTag);
+        }
+        return result;
     }
 
     private String nbspPh()
@@ -1182,6 +1214,10 @@ public class XmlExtractor extends AbstractExtractor implements
                 || (isInExtraction && extracts && isEmbeddable && m_isElementPostToHtml))
         {
             m_isOriginalXmlNode = true;
+            if (!m_originalXmlNode.contains(name))
+            {
+                m_originalXmlNode.add(name);
+            }
             if (isInternalTag && hasOnlyOneOrNoChildNode(p_node))
             {
                 handleInternalTagNode(p_node, isEmptyTag, isTranslatable,
@@ -2253,7 +2289,7 @@ public class XmlExtractor extends AbstractExtractor implements
                             {
                                 segmentableElement.setChunk(chunk);
                                 fixEntitiesForOtherFormat(segmentableElement,
-                                        (isCdata || m_isOriginalXmlNode));
+                                        isCdata, m_isOriginalXmlNode, m_originalXmlNode);
                                 outputDocumentElement(element, sid);
                             }
                             break;
@@ -2267,8 +2303,16 @@ public class XmlExtractor extends AbstractExtractor implements
                                 skeleton = StringUtil.replace(skeleton, "�",
                                         "&nbsp;");
                             }
-                            skeleton = (isCdata || m_isOriginalXmlNode) ? m_xmlEncoder
-                                    .decodeStringBasic(skeleton) : skeleton;
+                            
+                            if (isCdata)
+                            {
+                                skeleton = m_xmlEncoder.decodeStringBasic(skeleton);
+                            }
+                            if (m_isOriginalXmlNode)
+                            {
+                                skeleton = fixOriginalXmlNode(skeleton, m_originalXmlNode, false);
+                            }
+                            
                             outputSkeleton(skeleton);
                             break;
                     }
@@ -2288,7 +2332,48 @@ public class XmlExtractor extends AbstractExtractor implements
         m_switchExtractionBuffer = new String();
         m_switchExtractionSid = null;
         m_isOriginalXmlNode = false;
+        m_originalXmlNode.clear();
         // m_otherFormat = null;
+    }
+
+    private String fixOriginalXmlNode(String segment, List<String> originalXmlNode, boolean doubleEntity)
+    {
+        List<String> oriXmlNodes = new ArrayList<String>();
+        for(int i = 0; i < originalXmlNode.size(); i ++)
+        {
+            String nodeName = originalXmlNode.get(i);
+            String start = doubleEntity ? "&amp;lt;" + nodeName : "&lt;" + nodeName;
+            String end = doubleEntity ? "&amp;gt;" : "&gt;";
+            
+            int startI = 0;
+            StringIndex si = StringIndex.getValueBetween(segment, startI, start, end);
+            
+            while (si != null)
+            {
+                oriXmlNodes.add(si.allValue);
+                startI = si.allEnd;
+                
+                si = StringIndex.getValueBetween(segment, startI, start, end);
+            }
+            
+            String endTag = doubleEntity ?  "&amp;lt;/" + nodeName + "&amp;gt;" : "&lt;/" + nodeName + "&gt;";
+            if (segment.contains(endTag))
+            {
+                oriXmlNodes.add(endTag);
+            }
+        }
+        
+        if (oriXmlNodes.size() > 0)
+        {
+            for (String oriNode : oriXmlNodes)
+            {
+                String newNode = m_xmlEncoder.decodeStringBasic(oriNode);
+                
+                segment = segment.replace(oriNode, newNode);
+            }
+        }
+        
+        return segment;
     }
 
     /**
@@ -2328,6 +2413,8 @@ public class XmlExtractor extends AbstractExtractor implements
                 wrapAsEntity("copy", "&copy;"));
         chunk = StringUtil.replace(chunk, "_ampcopyright_",
                 wrapAsEntity("copy", "&amp;copy;"));
+        // GBS-3997
+        chunk = parseEmojiToAliasTag(chunk);
 
         if (isCdata)
         {
@@ -2404,23 +2491,30 @@ public class XmlExtractor extends AbstractExtractor implements
         m_switchExtractionBuffer = new String();
         m_switchExtractionSid = null;
         m_isOriginalXmlNode = false;
+        m_originalXmlNode.clear();
     }
 
     /**
      * encode twice for this kind of element text : &amp;lt;p&amp;gt; here is p
      * &amp;lt;/p&amp;gt; TODO : but not for original XML element
      */
-    private void fixEntitiesForOtherFormat(Segmentable element, boolean isCdata)
+    private void fixEntitiesForOtherFormat(Segmentable element, boolean isCdata,
+            boolean isOriXmlNode, List<String> oriXmlNodeNames)
     {
         if (isCdata)
         {
             return;
         }
 
-        String[] tagNames =
-        { "bpt", "ept", "it", "ph" };
+        String[] tagNames = { "bpt", "ept", "it", "ph" };
         String result = encodingEntitiesForOtherFormat(element.getChunk(),
                 tagNames);
+        
+        if (isOriXmlNode && oriXmlNodeNames != null && oriXmlNodeNames.size() > 0)
+        {
+            result = fixOriginalXmlNode(result, oriXmlNodeNames, true);
+        }
+        
         element.setChunk(result);
     }
 

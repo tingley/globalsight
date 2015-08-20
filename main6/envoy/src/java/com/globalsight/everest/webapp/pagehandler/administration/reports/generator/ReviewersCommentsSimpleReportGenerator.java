@@ -216,7 +216,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
         
         m_isCalculatePercent = true;
 
-        String withCompactTags = p_request.getParameter("withCompactTags");
+        String withCompactTags = p_request.getParameter("withCompactTagsSimple");
         if("on".equals(withCompactTags))
         {
         	isIncludeCompactTags = true;

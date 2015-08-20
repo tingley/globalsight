@@ -815,22 +815,23 @@ public class AmbassadorHelper extends JsonTypeWebService
 			this.fromIndex = fromIndex;
 		}
 	}
-    /**
+
+	/**
      * Create new user
      * 
      * @param p_accessToken
-     *            String Access token. This field cannot be null
+     *            String Access token. REQUIRED.
      * @param p_userId
-     *            String User ID. This field cannot be null. 
+     *            String User ID. REQUIRED.
      *            Example: 'qaadmin'
      * @param p_password
-     *            String Password. This field cannot be null
+     *            String Password. It requires 8 characters at least. REQUIRED.
      * @param p_firstName
-     *            String First name. This field cannot be null
+     *            String First name. It can have 100 characters at most. REQUIRED.
      * @param p_lastName
-     *            String Last name. This field cannot be null
+     *            String Last name. It can have 100 characters at most. REQUIRED.
      * @param p_email
-     *            String Email address. This field cannot be null. 
+     *            String Email address. REQUIRED.
      *            If the email address is not vaild then the user's status will be set up as inactive
      * @param p_permissionGrps
      *            String[] Permission groups which the new user belongs to.
@@ -839,7 +840,7 @@ public class AmbassadorHelper extends JsonTypeWebService
      * @param p_status
      *            String Status of user. This parameter is not using now, it should be null.
      * @param p_roles
-     *            Roles String information of user. It uses a string with XML format to mark all roles information of user.
+     *            Roles String information of user. It uses a string with XML format to mark all roles information of user. REQUIRED.
      *            Example:
      *              <?xml version=\"1.0\"?>
      *                <roles>
@@ -856,25 +857,8 @@ public class AmbassadorHelper extends JsonTypeWebService
      *                    </activities>
      *                  </role>
      *                </roles>
-     *              If super user create user,Roles Example:
-     *                <?xml version=\"1.0\"?>
-     *					<roles>
-     *						<role>
-     *							<companyName>allie</companyName>
-     *							<sourceLocale>en_US</sourceLocale>
-     *							<targetLocale>de_DE</targetLocale>
-     *							<activities>
-     *								<activity>
-     *								<name>Dtp1</name>
-     *								</activity>
-     *								<activity>
-     *									<name>Dtp2</name>
-     *								</activity>
-     *							</activities>
-     *						</role>
-     *					</roles>
      * @param p_isInAllProject
-     *            boolean If the user need to be included in all project.
+     *            boolean If the user need to be included in all project. REQUIRED.
      * @param p_projectIds
      *            String[] ID of projects which user should be included in. If p_isInAllProject is true, this will not take effect.
      *            Example: [{"1"}, {"3"}]
@@ -904,24 +888,37 @@ public class AmbassadorHelper extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, "createUser");
-		String returnStr = checkPermissionReturnStr(p_accessToken,
-				Permission.USERS_NEW);
-		if (StringUtil.isNotEmpty(returnStr))
-			return INVALD_PERMISSION;
-
-        int checkResult = validateUserInfo(p_accessToken, p_userId, p_password,
-                p_firstName, p_lastName, p_email, p_permissionGrps,
-                p_isInAllProject, p_projectIds, true);
-        if (checkResult > 0)
-            return checkResult;
-        
+        ActivityLog.Start activityStart = null;
         try
         {
-            // Get current user as requesting user
-
-            UserManagerWLRemote userManager = ServerProxy.getUserManager();
-
             User loggedUser = getUser(getUsernameFromSession(p_accessToken));
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", loggedUser.getUserName());
+            activityArgs.put("userId", p_userId);
+            activityArgs.put("password", p_password);
+            activityArgs.put("firstName", p_firstName);
+            activityArgs.put("lastName", p_lastName);
+            activityArgs.put("email", p_email);
+            activityArgs.put("permissionGrps", stringArr2Str(p_permissionGrps));
+            activityArgs.put("roles", p_roles);
+            activityArgs.put("isInAllProject", p_isInAllProject);
+            activityArgs.put("projectIds", stringArr2Str(p_projectIds));
+			activityStart = ActivityLog.start(AmbassadorHelper.class,
+					"createUser", activityArgs);
+
+			String returnStr = checkPermissionReturnStr(p_accessToken,
+					Permission.USERS_NEW);
+			if (StringUtil.isNotEmpty(returnStr))
+				return INVALD_PERMISSION;
+
+	        int checkResult = validateUserInfo(p_accessToken, p_userId, p_password,
+	                p_firstName, p_lastName, p_email, p_permissionGrps,
+	                p_isInAllProject, p_projectIds, true);
+	        if (checkResult > 0)
+	            return checkResult;
+
+			// Get current user as requesting user
+            UserManagerWLRemote userManager = ServerProxy.getUserManager();
             Company company = ServerProxy.getJobHandler().getCompany(
                     loggedUser.getCompanyName());
             long companyId = company.getId();
@@ -1000,6 +997,13 @@ public class AmbassadorHelper extends JsonTypeWebService
             logger.error(e.getMessage(), e);
             return UNKNOWN_ERROR;
         }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
 
         return SUCCESS;
     }
@@ -1063,7 +1067,6 @@ public class AmbassadorHelper extends JsonTypeWebService
 
         // Check user id
         User user = null;
-        String k = "";
         try
         {
             UserManagerWLRemote userManager = ServerProxy.getUserManager();
@@ -1075,7 +1078,7 @@ public class AmbassadorHelper extends JsonTypeWebService
                 {
                     if (iUser.getUserName().equalsIgnoreCase(userId))
                         return USER_EXISTS;
-                } 
+                }
             }
             else
             {
@@ -1160,19 +1163,19 @@ public class AmbassadorHelper extends JsonTypeWebService
      * Modify user
      * 
      * @param p_accessToken
-     *            String Access token. This field cannot be null
+     *            String Access token. REQUIRED.
      * @param p_userId
-     *            String User ID. This field cannot be null. 
+     *            String User ID.  REQUIRED.
      *            Example: 'qaadmin'
      * @param p_password
-     *            String Password. This field cannot be null
+     *            String Password. It requires 8 characters at least.
      * @param p_firstName
-     *            String First name. This field cannot be null
+     *            String First name. It can have 100 characters at most.
      * @param p_lastName
-     *            String Last name. This field cannot be null
+     *            String Last name. It can have 100 characters at most.
      * @param p_email
-     *            String Email address. This field cannot be null. 
-     *            If the email address is not vaild then the user's status will be set up as inactive
+     *            String Email address.
+     *            If the email address is not valid, the user's status will be set up as inactive.
      * @param p_permissionGrps
      *            String[] Permission groups which the new user belongs to.
      *            The element in the array is the name of permission group.
@@ -1197,25 +1200,8 @@ public class AmbassadorHelper extends JsonTypeWebService
      *                    </activities>
      *                  </role>
      *                </roles>
-     *                If super user modify user,Roles Example:
-     *                <?xml version=\"1.0\"?>
-     *					<roles>
-     *						<role>
-     *							<companyName>allie</companyName>
-     *							<sourceLocale>en_US</sourceLocale>
-     *							<targetLocale>de_DE</targetLocale>
-     *							<activities>
-     *								<activity>
-     *								<name>Dtp1</name>
-     *								</activity>
-     *								<activity>
-     *									<name>Dtp2</name>
-     *								</activity>
-     *							</activities>
-     *						</role>
-     *					</roles>
      * @param p_isInAllProject
-     *            boolean If the user need to be included in all project.
+     *            boolean If the user need to be included in all project. REQUIRED.
      * @param p_projectIds
      *            String[] ID of projects which user should be included in. If p_isInAllProject is true, this will not take effect.
      *            Example: [{"1"}, {"3"}]
@@ -1233,7 +1219,7 @@ public class AmbassadorHelper extends JsonTypeWebService
      *       10 -- Invalid email address 
      *       11 -- Invalid permission groups 
      *       12 -- Invalid project information 
-     *       13 -- Invalid role information
+     *       13 -- Invalid role information 
      *       14-- Current login user does not have enough permission
      *       -1 -- Unknown exception
      * @throws WebServiceException
@@ -1246,32 +1232,46 @@ public class AmbassadorHelper extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, "modifyUser");
-		String returnStr = checkPermissionReturnStr(p_accessToken,
-				Permission.USERS_EDIT);
-		if (StringUtil.isNotEmpty(returnStr))
-			return INVALD_PERMISSION;
-        
-        int checkResult = validateUserInfo(p_accessToken, p_userId, p_password,
-                p_firstName, p_lastName, p_email, p_permissionGrps,
-                p_isInAllProject, p_projectIds, false);
-        if (checkResult > 0)
-            return checkResult;
-
+        ActivityLog.Start activityStart = null;
         try
         {
             // Get current user as requesting user
-            User currentUser = getUser(getUsernameFromSession(p_accessToken));
+            User loggedUser = getUser(getUsernameFromSession(p_accessToken));
+
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", loggedUser.getUserName());
+            activityArgs.put("userId", p_userId);
+            activityArgs.put("password", p_password);
+            activityArgs.put("firstName", p_firstName);
+            activityArgs.put("lastName", p_lastName);
+            activityArgs.put("email", p_email);
+            activityArgs.put("permissionGrps", stringArr2Str(p_permissionGrps));
+            activityArgs.put("roles", p_roles);
+            activityArgs.put("isInAllProject", p_isInAllProject);
+            activityArgs.put("projectIds", stringArr2Str(p_projectIds));
+			activityStart = ActivityLog.start(AmbassadorHelper.class,
+					"modifyUser", activityArgs);
+
+			String returnStr = checkPermissionReturnStr(p_accessToken,
+    				Permission.USERS_EDIT);
+    		if (StringUtil.isNotEmpty(returnStr))
+    			return INVALD_PERMISSION;
+            
+            int checkResult = validateUserInfo(p_accessToken, p_userId, p_password,
+                    p_firstName, p_lastName, p_email, p_permissionGrps,
+                    p_isInAllProject, p_projectIds, false);
+            if (checkResult > 0)
+                return checkResult;
+
             UserManagerWLRemote userManager = ServerProxy.getUserManager();
             PermissionManager permissionManager = Permission
                     .getPermissionManager();
-
             Company company = ServerProxy.getJobHandler().getCompany(
-                    currentUser.getCompanyName());
+                    loggedUser.getCompanyName());
             long companyId = company.getId();
 
             // Set up basic user information
             User user = userManager.getUser(p_userId);
-            
             if (StringUtil.isNotEmpty(p_firstName))
                 user.setFirstName(p_firstName.trim());
             if (StringUtil.isNotEmpty(p_lastName))
@@ -1309,13 +1309,13 @@ public class AmbassadorHelper extends JsonTypeWebService
             }
 
             List<UserRole> roles = parseRoles(user, p_roles);
-            if (roles == null)
-                return INVALID_ROLES;
-            
-            for (UserRole ur : roles)
-                ur.setUser(user.getUserId());
+            if (roles != null && roles.size() > 0)
+            {
+                for (UserRole ur : roles)
+                    ur.setUser(user.getUserId());
+            }
 
-            // Check the argument of permssion groups
+            // Check the argument of permission groups
             // Get all permission groups in special company
             ArrayList updatePermissionGroups = null;
             if (p_permissionGrps != null && p_permissionGrps.length > 0) {
@@ -1331,10 +1331,10 @@ public class AmbassadorHelper extends JsonTypeWebService
                 
                 for (String pgName : p_permissionGrps)
                     updatePermissionGroups.add(permissionGroupsMap.get(pgName));
-            }            
+            }
 
             // Modify user
-            userManager.modifyUser(currentUser, user, projectIds, null, roles);
+            userManager.modifyUser(loggedUser, user, projectIds, null, roles);
 
             // Set up user's permission groups
             updatePermissionGroups(p_userId, updatePermissionGroups);
@@ -1343,6 +1343,13 @@ public class AmbassadorHelper extends JsonTypeWebService
         {
             logger.error(e.getMessage(), e);
             return UNKNOWN_ERROR;
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
         }
 
         return SUCCESS;
@@ -3183,4 +3190,23 @@ public class AmbassadorHelper extends JsonTypeWebService
             return makeErrorXml(p_method, p_message);
         }
     }
+
+	private String stringArr2Str(String[] arr)
+	{
+		StringBuffer sb = new StringBuffer();
+		if (arr == null || arr.length == 0) return "";
+
+		for (int i = 0; i < arr.length; i++)
+		{
+			if (i < arr.length - 1)
+			{
+				sb.append(arr[i]).append(",");
+			}
+			else
+			{
+				sb.append(arr[i]);
+			}
+		}
+		return sb.toString();
+	}
 }

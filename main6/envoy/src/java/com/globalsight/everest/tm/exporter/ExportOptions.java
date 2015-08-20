@@ -203,7 +203,9 @@ public class ExportOptions
         public String m_createdBefore = "";
         public String m_modifiedAfter = "";
         public String m_modifiedBefore = "";
-
+        public String m_lastUsageAfter = "";
+        public String m_lastUsageBefore = "";
+        
         /** Entry status: proposed, reviewed, approved. */
         public String m_status = "";
         public String m_domain = "";
@@ -215,6 +217,8 @@ public class ExportOptions
         public String m_sid = "";
         //is regex
         public String m_regex = "";
+        //job id
+        public String m_jobId = "";
         /**
          * List of FilterCondition objects that describe filters that
          * are not applicable in the database but need to be evaluated
@@ -249,6 +253,12 @@ public class ExportOptions
             result.append("<modifiedbefore>");
             result.append(EditUtil.encodeXmlEntities(m_modifiedBefore));
             result.append("</modifiedbefore>");
+            result.append("<lastusageafter>");
+            result.append(EditUtil.encodeXmlEntities(m_lastUsageAfter));
+            result.append("</lastusageafter>");
+            result.append("<lastusagebefore>");
+            result.append(EditUtil.encodeXmlEntities(m_lastUsageBefore));
+            result.append("</lastusagebefore>");
             result.append("<tuId>");
             result.append(EditUtil.encodeXmlEntities(m_tuId));
             result.append("</tuId>");
@@ -263,6 +273,9 @@ public class ExportOptions
             result.append("<regex>");
             result.append(EditUtil.encodeXmlEntities(m_regex));
             result.append("</regex>");
+            result.append("<jobId>");
+            result.append(EditUtil.encodeXmlEntities(m_jobId));
+            result.append("</jobId>");
             result.append("<status>");
             result.append(EditUtil.encodeXmlEntities(m_status));
             result.append("</status>");
@@ -465,12 +478,15 @@ public class ExportOptions
             m_filterOptions.m_createdBefore = elem.elementText("createdbefore");
             m_filterOptions.m_modifiedAfter = elem.elementText("modifiedafter");
             m_filterOptions.m_modifiedBefore = elem.elementText("modifiedbefore");
+            m_filterOptions.m_lastUsageAfter = elem.elementText("lastusageafter");
+            m_filterOptions.m_lastUsageBefore = elem.elementText("lastusagebefore");
             m_filterOptions.m_createdBy = elem.elementText("createdby");
             m_filterOptions.m_modifiedBy = elem.elementText("modifiedby");
             m_filterOptions.m_tuId = elem.elementText("tuId");
             m_filterOptions.m_sid = elem.elementText("stringId");
             m_filterOptions.m_regex = elem.elementText("regex");
             m_filterOptions.m_identifyKey = elem.elementText("identifyKey");
+            m_filterOptions.m_jobId = elem.elementText("jobId");
             m_filterOptions.m_conditions.clear();
             
 

@@ -1004,18 +1004,18 @@ public class Ambassador extends AbstractWebService
      * Create new user
      * 
      * @param p_accessToken
-     *            String Access token. This field cannot be null
+     *            String Access token. REQUIRED.
      * @param p_userId
-     *            String User ID. This field cannot be null. 
+     *            String User ID. REQUIRED.
      *            Example: 'qaadmin'
      * @param p_password
-     *            String Password. This field cannot be null
+     *            String Password. It requires 8 characters at least. REQUIRED.
      * @param p_firstName
-     *            String First name. This field cannot be null
+     *            String First name. It can have 100 characters at most. REQUIRED.
      * @param p_lastName
-     *            String Last name. This field cannot be null
+     *            String Last name. It can have 100 characters at most. REQUIRED.
      * @param p_email
-     *            String Email address. This field cannot be null. 
+     *            String Email address. REQUIRED.
      *            If the email address is not vaild then the user's status will be set up as inactive
      * @param p_permissionGrps
      *            String[] Permission groups which the new user belongs to.
@@ -1024,7 +1024,7 @@ public class Ambassador extends AbstractWebService
      * @param p_status
      *            String Status of user. This parameter is not using now, it should be null.
      * @param p_roles
-     *            Roles String information of user. It uses a string with XML format to mark all roles information of user.
+     *            Roles String information of user. It uses a string with XML format to mark all roles information of user. REQUIRED.
      *            Example:
      *              <?xml version=\"1.0\"?>
      *                <roles>
@@ -1042,7 +1042,7 @@ public class Ambassador extends AbstractWebService
      *                  </role>
      *                </roles>
      * @param p_isInAllProject
-     *            boolean If the user need to be included in all project.
+     *            boolean If the user need to be included in all project. REQUIRED.
      * @param p_projectIds
      *            String[] ID of projects which user should be included in. If p_isInAllProject is true, this will not take effect.
      *            Example: [{"1"}, {"3"}]
@@ -1081,19 +1081,19 @@ public class Ambassador extends AbstractWebService
      * Modify user
      * 
      * @param p_accessToken
-     *            String Access token. This field cannot be null
+     *            String Access token. REQUIRED.
      * @param p_userId
-     *            String User ID. This field cannot be null. 
+     *            String User ID.  REQUIRED.
      *            Example: 'qaadmin'
      * @param p_password
-     *            String Password. This field cannot be null
+     *            String Password. It requires 8 characters at least.
      * @param p_firstName
-     *            String First name. This field cannot be null
+     *            String First name. It can have 100 characters at most.
      * @param p_lastName
-     *            String Last name. This field cannot be null
+     *            String Last name. It can have 100 characters at most.
      * @param p_email
-     *            String Email address. This field cannot be null. 
-     *            If the email address is not vaild then the user's status will be set up as inactive
+     *            String Email address.
+     *            If the email address is not valid, the user's status will be set up as inactive.
      * @param p_permissionGrps
      *            String[] Permission groups which the new user belongs to.
      *            The element in the array is the name of permission group.
@@ -1119,7 +1119,7 @@ public class Ambassador extends AbstractWebService
      *                  </role>
      *                </roles>
      * @param p_isInAllProject
-     *            boolean If the user need to be included in all project.
+     *            boolean If the user need to be included in all project. REQUIRED.
      * @param p_projectIds
      *            String[] ID of projects which user should be included in. If p_isInAllProject is true, this will not take effect.
      *            Example: [{"1"}, {"3"}]
@@ -18482,84 +18482,103 @@ public class Ambassador extends AbstractWebService
 			return makeErrorXml(TM_EXPORT_STATUS, "Invaild access token.");
 		// Check access token
 		checkAccess(p_accessToken, TM_EXPORT_STATUS);
+        ActivityLog.Start activityStart = null;
+        StringBuilder returnXml = null;
+        try
+        {
+            User loggedUser = getUser(getUsernameFromSession(p_accessToken));
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", loggedUser.getUserName());
+            activityArgs.put("p_identifyKey", p_identifyKey);
+			activityStart = ActivityLog.start(Ambassador.class,
+					"getTmExportStatus", activityArgs);
+			
+			if (StringUtil.isEmpty(p_identifyKey))
+				return makeErrorXml(TM_EXPORT_STATUS, "Invaild identifyKey.");
 
-		if (StringUtil.isEmpty(p_identifyKey))
-			return makeErrorXml(TM_EXPORT_STATUS, "Invaild identifyKey.");
-
-		StringBuilder returnXml = new StringBuilder(XML_HEAD);
-		String root = AmbassadorUtil.getCapLoginOrPublicUrl();
-		String superFSDir = AmbFileStoragePathUtils.getFileStorageDirPath(1)
-				.replace("\\", "/");
-		String directory = ExportUtil.getExportDirectory();
-		directory = directory.replace("\\", "/");
-		String path = directory.substring(directory.indexOf(superFSDir)
-				+ superFSDir.length());
-		path = root + "/DownloadTM" + path + "/" + p_identifyKey + "/";
-		String failed = directory + "/" + p_identifyKey + "/" + "failed";
-		String inprogress = directory + "/" + p_identifyKey + "/"
-				+ "inprogress";
-		File failedFile = new File(failed);
-		File inporgressFile = new File(inprogress);
-		returnXml.append("<exportStatus>\r\n");
-		if (failedFile.exists())
-		{
-			returnXml.append("\t<status>").append("failed")
-					.append("</status>\r\n");
-			returnXml.append("\t<url></url>\r\n");
-		}
-		else if (inporgressFile.exists() && !failedFile.exists())
-		{
-			returnXml.append("\t<status>").append("exporting")
-					.append("</status>\r\n");
-			returnXml.append("\t<url></url>\r\n");
-		}
-		else
-		{
-			try
+			returnXml = new StringBuilder(XML_HEAD);
+			String root = AmbassadorUtil.getCapLoginOrPublicUrl();
+			String superFSDir = AmbFileStoragePathUtils.getFileStorageDirPath(1)
+					.replace("\\", "/");
+			String directory = ExportUtil.getExportDirectory();
+			directory = directory.replace("\\", "/");
+			String path = directory.substring(directory.indexOf(superFSDir)
+					+ superFSDir.length());
+			path = root + "/DownloadTM" + path + "/" + p_identifyKey + "/";
+			String failed = directory + "/" + p_identifyKey + "/" + "failed";
+			String inprogress = directory + "/" + p_identifyKey + "/"
+					+ "inprogress";
+			File failedFile = new File(failed);
+			File inporgressFile = new File(inprogress);
+			returnXml.append("<exportStatus>\r\n");
+			if (failedFile.exists())
 			{
-				File file = new File(directory + "/" + p_identifyKey);
-				String fileName = file.list()[0];
-				if (fileName.toLowerCase().endsWith(".xml")
-						|| fileName.toLowerCase().endsWith(".tmx"))
-				{
-					String zipPath = directory + "/" + p_identifyKey + "/";
-					String zipName = null;
-					if (fileName.endsWith(".xml"))
-					{
-						zipName = fileName.substring(0,
-								fileName.lastIndexOf(".xml"))
-								+ ".zip";
-						zipPath += zipName;
-						path += zipName;
-					}
-					else if (fileName.endsWith(".tmx"))
-					{
-						zipName = fileName.substring(0,
-								fileName.lastIndexOf(".tmx"))
-								+ ".zip";
-						zipPath += zipName;
-						path += zipName;
-					}
-					String xmlPath = directory + "/" + p_identifyKey + "/"
-							+ fileName;
-					compressionXml(zipPath, new File(xmlPath));
-				}
-				else
-				{
-					path += fileName;
-				}
+				returnXml.append("\t<status>").append("failed")
+						.append("</status>\r\n");
+				returnXml.append("\t<url></url>\r\n");
 			}
-			catch (Exception e)
+			else if (inporgressFile.exists() && !failedFile.exists())
 			{
-				return makeErrorXml(TM_EXPORT_STATUS,
-						"Compression is incorrect.");
+				returnXml.append("\t<status>").append("exporting")
+						.append("</status>\r\n");
+				returnXml.append("\t<url></url>\r\n");
 			}
+			else
+			{
+				try
+				{
+					File file = new File(directory + "/" + p_identifyKey);
+					String fileName = file.list()[0];
+					if (fileName.toLowerCase().endsWith(".xml")
+							|| fileName.toLowerCase().endsWith(".tmx"))
+					{
+						String zipPath = directory + "/" + p_identifyKey + "/";
+						String zipName = null;
+						if (fileName.endsWith(".xml"))
+						{
+							zipName = fileName.substring(0,
+									fileName.lastIndexOf(".xml"))
+									+ ".zip";
+							zipPath += zipName;
+							path += zipName;
+						}
+						else if (fileName.endsWith(".tmx"))
+						{
+							zipName = fileName.substring(0,
+									fileName.lastIndexOf(".tmx"))
+									+ ".zip";
+							zipPath += zipName;
+							path += zipName;
+						}
+						String xmlPath = directory + "/" + p_identifyKey + "/"
+								+ fileName;
+						compressionXml(zipPath, new File(xmlPath));
+					}
+					else
+					{
+						path += fileName;
+					}
+				}
+				catch (Exception e)
+				{
+					return makeErrorXml(TM_EXPORT_STATUS,
+							"Compression is incorrect.");
+				}
 
-			returnXml.append("\t<status>").append("finished")
-					.append("</status>\r\n");
-			returnXml.append("\t<url>").append(path).append("</url>\r\n");
-		}
-		returnXml.append("</exportStatus>\r\n");
+				returnXml.append("\t<status>").append("finished")
+						.append("</status>\r\n");
+				returnXml.append("\t<url>").append(path).append("</url>\r\n");
+			}
+			returnXml.append("</exportStatus>\r\n");
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
+
 		return returnXml.toString();
 	}
     
@@ -18598,140 +18617,160 @@ public class Ambassador extends AbstractWebService
 			return makeErrorXml(EXPORT_TM, "Invaild access token.");
 		// Check access token
 		checkAccess(p_accessToken, EXPORT_TM);
-
-		if (StringUtil.isEmpty(p_tmName))
-			return makeErrorXml(EXPORT_TM, "Invaild tm name.");
-
-		if (StringUtil.isNotEmpty(p_exportedFileName))
-		{
-			String specialChars = "~!@#$%^&*()+=[]\\';,./{}|\":<>?";
-			for (int i = 0; i < p_exportedFileName.trim().length(); i++)
-			{
-				char c = p_exportedFileName.trim().charAt(i);
-				if (specialChars.indexOf(c) > -1)
-				{
-					return makeErrorXml(EXPORT_TM, ERROR_EXPORT_FILE_NAME);
-				}
-			}
-		}
-		
-		if(p_exportedFileName != null && p_exportedFileName.length() > 0)
-			p_exportedFileName = p_exportedFileName.trim();
-
-		if(p_exportedFileName != null && p_exportedFileName.length() == 0)
-			p_exportedFileName = null;
-		
+		ActivityLog.Start activityStart = null;
 		String identifyKey = null;
-		IExportManager exporter = null;
-		String options = null;
-		String startDate = null;
-		String finishDate = null;
-		String fileType = null;
-
 		try
 		{
-			exporter = TmManagerLocal.getProjectTmExporter(p_tmName);
-			options = exporter.getExportOptions();
-		}
-		catch (Exception e)
-		{
-			return makeErrorXml(EXPORT_TM, "Invaild tm name.");
-		}
-		if (StringUtil.isEmpty(p_startDate))
-		{
-			return makeErrorXml(EXPORT_TM, "Invaild start date.");
-		}
-		else
-		{
-			startDate = checkDate(p_startDate);
-			if (startDate.equals("error"))
-			{
-				return makeErrorXml(EXPORT_TM, "Invaild start date.");
-			}
-		}
+			User loggedUser = getUser(getUsernameFromSession(p_accessToken));
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", loggedUser.getUserName());
+			activityArgs.put("p_tmName", p_tmName);
+			activityArgs.put("p_languages", p_languages);
+			activityArgs.put("p_startDate", p_startDate);
+			activityArgs.put("p_finishDate", p_finishDate);
+			activityArgs.put("p_exportFormat", p_exportFormat);
+			activityArgs.put("p_exportedFileName", p_exportedFileName);
+			activityStart = ActivityLog.start(Ambassador.class, "exportTM",
+					activityArgs);
 
-		if (!StringUtil.isEmpty(p_finishDate))
-		{
-			finishDate = checkDate(p_finishDate);
-			if (finishDate.equals("error"))
+			if (StringUtil.isEmpty(p_tmName))
+				return makeErrorXml(EXPORT_TM, "Invaild tm name.");
+
+			if (StringUtil.isNotEmpty(p_exportedFileName))
 			{
-				return makeErrorXml(EXPORT_TM, "Invaild finish date.");
-			}
-			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-			try
-			{
-				Date fshDate = sdf.parse(finishDate);
-				Date staDate = sdf.parse(startDate);
-				if (fshDate.before(staDate))
+				String specialChars = "~!@#$%^&*()+=[]\\';,./{}|\":<>?";
+				for (int i = 0; i < p_exportedFileName.trim().length(); i++)
 				{
-					return makeErrorXml(EXPORT_TM,
-							"Invaild start date and finish date.");
+					char c = p_exportedFileName.trim().charAt(i);
+					if (specialChars.indexOf(c) > -1)
+					{
+						return makeErrorXml(EXPORT_TM, ERROR_EXPORT_FILE_NAME);
+					}
 				}
 			}
-			catch (ParseException e)
-			{
-				e.printStackTrace();
-			}
-		}
+			
+			if(p_exportedFileName != null && p_exportedFileName.length() > 0)
+				p_exportedFileName = p_exportedFileName.trim();
 
-		if (StringUtil.isNotEmpty(p_languages))
-		{
-			String[] languageArr = p_languages.split(",");
-			for (String lang : languageArr)
-			{
-				lang = lang.replace("-", "_");
-				GlobalSightLocale locale = GSDataFactory
-						.localeFromCode(lang.trim());
-				if (locale == null)
-				{
-					return makeErrorXml(EXPORT_TM, "Invaild language : "
-							+ lang);
-				}
-			}
-			p_languages = p_languages.replace("-", "_");
-		}
-
-		if (StringUtil.isEmpty(p_exportFormat)
-				|| !p_exportFormat.trim().equalsIgnoreCase("GMX")
-				&& !p_exportFormat.trim().equalsIgnoreCase("TMX1.4b"))
-			return makeErrorXml(EXPORT_TM, "Invaild export format.");
-
-		if (p_exportFormat.equalsIgnoreCase("GMX"))
-		{
-			fileType = "xml";
-		}
-		else if (p_exportFormat.equalsIgnoreCase("TMX1.4b"))
-		{
-			fileType = "tmx2";
-		}
-		if (options != null)
-		{
-			String directory = ExportUtil.getExportDirectory();
-			identifyKey = AmbassadorUtil.getRandomFeed();
-			directory = directory + "/" + identifyKey + "/" + "inprogress";
-			new File(directory).mkdirs();
-			options = joinXml(options, startDate, finishDate, fileType,
-					p_languages, p_exportedFileName);
+			if(p_exportedFileName != null && p_exportedFileName.length() == 0)
+				p_exportedFileName = null;
+			
+			IExportManager exporter = null;
+			String options = null;
+			String startDate = null;
+			String finishDate = null;
+			String fileType = null;
 			try
 			{
-				exporter.setExportOptions(options);
-				options = exporter.analyze();
-				// pass down new options from client
-				exporter.setExportOptions(options);
-				((com.globalsight.everest.tm.exporter.ExportOptions) exporter
-						.getExportOptionsObject()).setIdentifyKey(identifyKey);
-				ProcessStatus status = new ProcessStatus();
-				ResourceBundle bundle = PageHandler.getBundle(null);
-				status.setResourceBundle(bundle);
-				exporter.attachListener(status);
-				exporter.doExport();
+				exporter = TmManagerLocal.getProjectTmExporter(p_tmName);
+				options = exporter.getExportOptions();
 			}
 			catch (Exception e)
 			{
-				ExportUtil.handleTmExportFlagFile(identifyKey, "failed", true);
+				return makeErrorXml(EXPORT_TM, "Invaild tm name.");
+			}
+			if (StringUtil.isEmpty(p_startDate))
+			{
+				return makeErrorXml(EXPORT_TM, "Invaild start date.");
+			}
+			else
+			{
+				startDate = checkDate(p_startDate);
+				if (startDate.equals("error"))
+				{
+					return makeErrorXml(EXPORT_TM, "Invaild start date.");
+				}
+			}
+
+			if (!StringUtil.isEmpty(p_finishDate))
+			{
+				finishDate = checkDate(p_finishDate);
+				if (finishDate.equals("error"))
+				{
+					return makeErrorXml(EXPORT_TM, "Invaild finish date.");
+				}
+				SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+				try
+				{
+					Date fshDate = sdf.parse(finishDate);
+					Date staDate = sdf.parse(startDate);
+					if (fshDate.before(staDate))
+					{
+						return makeErrorXml(EXPORT_TM,
+								"Invaild start date and finish date.");
+					}
+				}
+				catch (ParseException e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			if (StringUtil.isNotEmpty(p_languages))
+			{
+				String[] languageArr = p_languages.split(",");
+				for (String lang : languageArr)
+				{
+					lang = lang.replace("-", "_");
+					GlobalSightLocale locale = GSDataFactory
+							.localeFromCode(lang.trim());
+					if (locale == null)
+					{
+						return makeErrorXml(EXPORT_TM, "Invaild language : "
+								+ lang);
+					}
+				}
+				p_languages = p_languages.replace("-", "_");
+			}
+
+			if (StringUtil.isEmpty(p_exportFormat)
+					|| !p_exportFormat.trim().equalsIgnoreCase("GMX")
+					&& !p_exportFormat.trim().equalsIgnoreCase("TMX1.4b"))
+				return makeErrorXml(EXPORT_TM, "Invaild export format.");
+
+			if (p_exportFormat.equalsIgnoreCase("GMX"))
+			{
+				fileType = "xml";
+			}
+			else if (p_exportFormat.equalsIgnoreCase("TMX1.4b"))
+			{
+				fileType = "tmx2";
+			}
+			if (options != null)
+			{
+				String directory = ExportUtil.getExportDirectory();
+				identifyKey = AmbassadorUtil.getRandomFeed();
+				directory = directory + "/" + identifyKey + "/" + "inprogress";
+				new File(directory).mkdirs();
+				options = joinXml(options, startDate, finishDate, fileType,
+						p_languages, p_exportedFileName);
+				try
+				{
+					exporter.setExportOptions(options);
+					options = exporter.analyze();
+					// pass down new options from client
+					exporter.setExportOptions(options);
+					((com.globalsight.everest.tm.exporter.ExportOptions) exporter
+							.getExportOptionsObject()).setIdentifyKey(identifyKey);
+					ProcessStatus status = new ProcessStatus();
+					ResourceBundle bundle = PageHandler.getBundle(null);
+					status.setResourceBundle(bundle);
+					exporter.attachListener(status);
+					exporter.doExport();
+				}
+				catch (Exception e)
+				{
+					ExportUtil.handleTmExportFlagFile(identifyKey, "failed", true);
+				}
 			}
 		}
-
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
 		return identifyKey;
 	}
 	

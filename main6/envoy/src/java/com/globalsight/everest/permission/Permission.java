@@ -268,6 +268,7 @@ public class Permission
     static public final String JOB_WORKFLOWS_DISCARD = "job.workflows.discard";
     static public final String JOB_WORKFLOWS_VIEW_ERROR = "job.workflows.viewerror";
     static public final String JOB_WORKFLOWS_WORDCOUNT = "job.workflows.wordcount";
+    static public final String JOB_WORKFLOWS_TRANSLATED_TEXT = "job.workflows.translated.text";
     static public final String JOB_WORKFLOWS_DETAIL_STATISTICS = "job.workflows.detailStatistics";
     static public final String JOB_WORKFLOWS_RATEVENDOR = "job.workflows.ratevendor";
     static public final String JOB_WORKFLOWS_ARCHIVE = "job.workflows.archive";
@@ -1093,6 +1094,7 @@ public class Permission
         added = addPermission(418, REPORTS_POST_REVIEW_QA) || added;
         added = addPermission(419, GIT_CONNECTOR) || added;
         added = addPermission(420, REPORTS_TRANSLATIONS_VERIFICATION) || added;
+        added = addPermission(422, JOB_WORKFLOWS_TRANSLATED_TEXT) || added;
         return added;
     }
 

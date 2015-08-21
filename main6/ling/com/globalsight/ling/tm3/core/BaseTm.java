@@ -719,8 +719,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             else
                             {
                                 newtu = tu;
-                                List<TM3Tuv<T>> addedTuv = new ArrayList<TM3Tuv<T>>();
-//                                List<TM3Tuv<T>> deletedTuv = new ArrayList<TM3Tuv<T>>();
+                                List<TM3Tuv<T>> addedTuvs = new ArrayList<TM3Tuv<T>>();
+                                List<TM3Tuv<T>> updatedTuvs = new ArrayList<TM3Tuv<T>>();
                                 for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                                 {
                                     TM3Tuv<T> newTuv = tu.addTargetTuv(
@@ -736,16 +736,37 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                             tuvData.getPreviousHash(),
                                             tuvData.getNextHash(),
                                             tuvData.getSid());
-                                    if (newTuv != null)
+                                    // Current TU has same TUV already(with same locale and content).
+                                    if (newTuv == null)
                                     {
-                                        addedTuv.add(newTuv);
+                                    	for (TM3Tuv<T> tuv : tu.getTargetTuvs())
+                                    	{
+                                    		if (tuv.getLocale().equals(tuvData.locale)
+                                    				&& tuv.getContent().equals(tuvData.content))
+                                    		{
+                                    			tuv.setLastUsageDate(tuvData.getLastUsageDate());
+                                    			if (tuv.getPreviousHash() == -1)
+                                    				tuv.setPreviousHash(tuvData.getPreviousHash());
+                                    			if (tuv.getNextHash() == -1)
+                                    				tuv.setNextHash(tuvData.getNextHash());
+                                    			if (tuv.getJobId() == -1)
+                                    				tuv.setJobId(tuvData.getJobId());
+                                    			if (tuv.getJobName() == null)
+                                    				tuv.setJobName(tuvData.getJobName());
+                                    			updatedTuvs.add(tuv);
+                                    		}
+                                    	}
+                                    }
+                                    else
+                                    {
+                                    	addedTuvs.add(newTuv);
                                     }
                                 }
-                                tuStorage.addTuvs(conn, tu, addedTuv);
-//                                tuStorage.deleteTuvs(conn, deletedTuv);
+                                tuStorage.updateTuvs(conn, newtu, updatedTuvs, null);
+                                tuStorage.addTuvs(conn, tu, addedTuvs);
                                 if (indexTarget)
                                 {
-                                    for (TM3Tuv<T> tuv : addedTuv)
+                                    for (TM3Tuv<T> tuv : addedTuvs)
                                     {
                                         getStorageInfo().getFuzzyIndex().index(
                                                 conn, tuv);

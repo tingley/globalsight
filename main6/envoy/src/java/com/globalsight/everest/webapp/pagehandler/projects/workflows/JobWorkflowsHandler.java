@@ -484,38 +484,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 p_context);
     }
 
-    private void getPercent(HttpServletResponse p_response,
-            String[] workflowIdsArray)
-    {
-        try
-        {
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < workflowIdsArray.length; i++)
-            {
-
-                Workflow workflow = ServerProxy.getWorkflowManager()
-                        .getWorkflowById(Long.parseLong(workflowIdsArray[i]));
-                Task task = (Task) workflow.getTasks().values().iterator()
-                        .next();
-                int percent = SegmentTuvUtil
-                        .getTranslatedPercentageForTask(task);
-                sb.append(percent).append(",");
-            }
-
-            if (sb.length() != 0)
-            {
-                PrintWriter out = p_response.getWriter();
-                p_response.setContentType("text/html");
-                out.write(sb.toString());
-                out.close();
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     public boolean checkQAReport(SessionManager sessionMgr, long companyId,
 			String jobId, String[] wfIds)
 	{

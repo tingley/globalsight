@@ -439,6 +439,7 @@
     <% if (b_vendorManagement) { %>
               <permission id="<%=Permission.JOB_WORKFLOWS_RATEVENDOR%>"/>
     <% } %>
+    		<permission id="<%=Permission.JOB_WORKFLOWS_TRANSLATED_TEXT%>"/>
               <permission id="<%=Permission.JOB_WORKFLOWS_ARCHIVE%>"/>
               <permission id="<%=Permission.JOB_WORKFLOWS_DETAILS%>">
                   <permission id="<%=Permission.JOB_WORKFLOWS_ESTCOMPDATE%>"/>

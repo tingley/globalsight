@@ -57,7 +57,6 @@ import com.globalsight.ling.docproc.extractor.xliff.WSConstants;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.worldserver.WsSkeletonDispose;
 import com.globalsight.machineTranslation.MTHelper;
-import com.globalsight.util.EmojiParser;
 import com.globalsight.util.EmojiUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -422,7 +421,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         // before it's converted NCR or any other escaped form
         String newText = CtrlCharConverter.convertToCtrl(p_text);
 
-        NativeEnDecoder encoder = getEncoder(p_format);
+        NativeEnDecoder encoder = FORMAT_PLAINTEXT.equals(p_mainFormat) ? getEncoder(p_mainFormat)
+                : getEncoder(p_format);
         encoder.setLastChar(String.valueOf(p_lastOutputChar));
 
         String type = p_type;
@@ -796,7 +796,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 }
             }
             // GBS-3997&GBS-4066
-            tmp = parseEmojiAliasToUnicode(tmp);
+            tmp = EmojiUtil.parseEmojiAliasToUnicode(tmp);
 
             m_l10nContent.addContent(tmp);
         }
@@ -953,7 +953,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         }
                     }
                     // GBS-3997&GBS-4066
-                    chunk = parseEmojiDescriptionToAlias(chunk);
+                    chunk = EmojiUtil.parseEmojiTagToAlias(chunk);
 
                     // GBS-3722
                     chunk = MTHelper.cleanMTTagsForExport(chunk);
@@ -1056,7 +1056,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         }
                     }
                     // GBS-3997&GBS-4066
-                    tmp = parseEmojiAliasToUnicodeForSkeleton(tmp);
+                    tmp = EmojiUtil.parseEmojiAliasToUnicode(tmp);
 
                     m_l10nContent.addContent(tmp);
 
@@ -1101,67 +1101,6 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         m_error);
             }
         }
-    }
-
-    /**
-     * Changes emoji's aliases occurrences back to their unicodes.
-     * 
-     * @since GBS-3997&GBS-4066
-     */
-    private String parseEmojiAliasToUnicode(String text)
-    {
-        if (!isContent() && text.startsWith(EmojiUtil.TYPE_EMOJI))
-        {
-            String alias = text.substring(6);
-            String unicode = EmojiParser.parseToUnicode(":" + alias + ":");
-            if (!unicode.equals(alias))
-            {
-                text = unicode;
-            }
-        }
-        return text;
-    }
-
-    /**
-     * Replaces emoji's aliases occurrences back to their unicodes.
-     * 
-     * @since GBS-3997&GBS-4066
-     */
-    private String parseEmojiAliasToUnicodeForSkeleton(String skeleton)
-    {
-        if (skeleton.contains(EmojiUtil.TYPE_EMOJI))
-        {
-            String aliases = StringUtil.replace(skeleton, EmojiUtil.TYPE_EMOJI,
-                    "");
-            String unicodes = EmojiParser.parseToUnicode(aliases);
-            if (!unicodes.equals(aliases))
-            {
-                skeleton = unicodes;
-            }
-        }
-        return skeleton;
-    }
-
-    /**
-     * Replaces the emoji's description occurrences by their aliases.
-     * 
-     * @since GBS-3997&GBS-4066
-     */
-    private String parseEmojiDescriptionToAlias(String chunk)
-    {
-        Matcher m = EmojiUtil.P_EMOJI_TAG.matcher(chunk);
-        while (m.find())
-        {
-            String alias = m.group(2);
-            if (alias.startsWith(EmojiUtil.TYPE_EMOJI))
-            {
-                alias = alias.substring(6);
-                String replace = m.group(1) + EmojiUtil.TYPE_EMOJI + alias
-                        + m.group(3);
-                chunk = StringUtil.replace(chunk, m.group(), replace);
-            }
-        }
-        return chunk;
     }
 
     private String entityEncodeForPassolo(String skeleton)

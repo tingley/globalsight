@@ -41,7 +41,6 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.ling.common.PTEscapeSequence;
-import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.ExtractorException;
@@ -51,7 +50,6 @@ import com.globalsight.ling.docproc.LineString;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.Segmentable;
 import com.globalsight.ling.docproc.SkeletonElement;
-import com.globalsight.util.EmojiUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 
@@ -87,7 +85,6 @@ public class Extractor extends AbstractExtractor implements
     private static final String PLACEHOLDER_RIGHT_TAG = "GS_PLACEHOLDER_RIGHT_TAG";
     private static final String PLACEHOLDER_LEFT_NATIVE = "GS_PLACEHOLDER_LEFT_NATIVE";
     private static final String PLACEHOLDER_RIGHT_NATIVE = "GS_PLACEHOLDER_RIGHT_NATIVE";
-    private XmlEntities m_xmlEncoder = new XmlEntities();
 
     static
     {
@@ -197,17 +194,12 @@ public class Extractor extends AbstractExtractor implements
                             PLACEHOLDER_LEFT_NATIVE, "&lt;");
                     content = StringUtil.replace(content,
                             PLACEHOLDER_RIGHT_NATIVE, "&gt;");
-                    // GBS-4066
-                    content = EmojiUtil.parseEmojiToAliasTag(content);
                     getOutput().addTranslatableTmx(content, null, true,
                             m_postFormat);
                 }
                 else
                 {
-                    // GBS-4066
-                    content = m_xmlEncoder.encodeStringBasic(content);
-                    content = EmojiUtil.parseEmojiToAliasTag(content);
-                    getOutput().addTranslatableTmx(content);
+                    getOutput().addTranslatable(content);
                 }
             }
             else
@@ -318,9 +310,7 @@ public class Extractor extends AbstractExtractor implements
                         {
                             LineString lineStr = lines.get(i);
 
-                            getOutput().addSkeleton(
-                                    EmojiUtil.parseEmojiToAliasString(lineStr
-                                            .getLine()));
+                            getOutput().addSkeleton(lineStr.getLine());
                             if (i != (lines.size() - 1))
                             {
                                 getOutput().addSkeleton(lineterminator);
@@ -343,13 +333,8 @@ public class Extractor extends AbstractExtractor implements
                                     : allStr.substring(lineIndex.getSidStart(),
                                             lineIndex.getSidEnd()));
 
-                            if (!StringUtil.isEmpty(sid))
-                            {
-                                sid = EmojiUtil.parseEmojiToAliasString(sid);
-                            }
                             if (s0 != null && s0.length() > 0)
                             {
-                                s0 = EmojiUtil.parseEmojiToAliasString(s0);
                                 getOutput().addSkeleton(s0);
                             }
                             if (s1 != null && s1.length() > 0)
@@ -360,9 +345,7 @@ public class Extractor extends AbstractExtractor implements
                                 }
                                 else
                                 {
-                                    s1 = m_xmlEncoder.encodeStringBasic(s1);
-                                    s1 = EmojiUtil.parseEmojiToAliasTag(s1);
-                                    getOutput().addTranslatableTmx(s1, sid);
+                                    getOutput().addTranslatable(s1, sid);
                                 }
                             }
 
@@ -373,7 +356,6 @@ public class Extractor extends AbstractExtractor implements
                         {
                             String endStr = allStr.substring(start,
                                     allStr.length());
-                            endStr = EmojiUtil.parseEmojiToAliasString(endStr);
                             getOutput().addSkeleton(endStr);
                         }
                     }
@@ -391,7 +373,6 @@ public class Extractor extends AbstractExtractor implements
                                 m_customTextRules);
                         if (index == null)
                         {
-                            line = EmojiUtil.parseEmojiToAliasString(line);
                             getOutput().addSkeleton(line);
                         }
                         else if (index.length == 2 && index[0] < index[1])
@@ -409,16 +390,12 @@ public class Extractor extends AbstractExtractor implements
                                             sidIndex[1]);
                                 }
                             }
-                            if (!StringUtil.isEmpty(sid))
-                            {
-                                sid = EmojiUtil.parseEmojiToAliasString(sid);
-                            }
+
                             String s0 = line.substring(0, index[0]);
                             String s1 = line.substring(index[0], index[1]);
                             String s2 = line.substring(index[1]);
                             if (s0 != null && s0.length() > 0)
                             {
-                                s0 = EmojiUtil.parseEmojiToAliasString(s0);
                                 getOutput().addSkeleton(s0);
                             }
                             if (s1 != null && s1.length() > 0)
@@ -429,20 +406,16 @@ public class Extractor extends AbstractExtractor implements
                                 }
                                 else
                                 {
-                                    s1 = m_xmlEncoder.encodeStringBasic(s1);
-                                    s1 = EmojiUtil.parseEmojiToAliasTag(s1);
-                                    getOutput().addTranslatableTmx(s1, sid);
+                                    getOutput().addTranslatable(s1, sid);
                                 }
                             }
                             if (s2 != null && s2.length() > 0)
                             {
-                                s2 = EmojiUtil.parseEmojiToAliasString(s2);
                                 getOutput().addSkeleton(s2);
                             }
                         }
                         else
                         {
-                            line = EmojiUtil.parseEmojiToAliasString(line);
                             getOutput().addSkeleton(line);
                         }
 
@@ -600,7 +573,6 @@ public class Extractor extends AbstractExtractor implements
                             "&lt;");
                     chunk = StringUtil.replace(chunk, PLACEHOLDER_RIGHT_NATIVE,
                             "&gt;");
-                    chunk = EmojiUtil.parseEmojiToAliasTag(chunk);
                     segmentableElement.setChunk(chunk);
                     if (sid != null && sid.length() > 0)
                     {

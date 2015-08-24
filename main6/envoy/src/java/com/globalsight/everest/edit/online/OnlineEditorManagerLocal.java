@@ -20,6 +20,8 @@ import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -6027,7 +6029,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             {
                 Iterator it = p_searchMap.entrySet().iterator();
 
-                if (it.hasNext())
+                while (it.hasNext())
                 {
                     @SuppressWarnings("unchecked")
                     Map.Entry<String, String> entry = (Map.Entry<String, String>) it
@@ -6287,10 +6289,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         JSONObject mainJson = new JSONObject();
         JSONArray targetjArray = new JSONArray();
         JSONArray sourcejArray = new JSONArray();
-        JSONArray mappingjArray = new JSONArray();
+        JSONArray originalTargetjArray = new JSONArray();
+        JSONArray approvejArray = new JSONArray();
         editorState = p_state;
         searchMap = p_searchMap;
         long p_trgPageId = p_state.getTargetPageId().longValue();
+        
+        boolean needOriginalTarget = false;
+        if(p_searchMap.get("needOriginalTarget") != null 
+        		&& p_searchMap.get("needOriginalTarget").equals("true"))
+        {
+        	needOriginalTarget = true;
+        }
 
         RenderingOptions options = p_state.getRenderingOptions();
         Vector p_excludedItemTypes = p_state.getExcludedItems();
@@ -6377,6 +6387,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 }
             }
             targetTuvs = targetTuvs2;
+            
+            HashMap<Long, Tuv> originalTargetTuvMap = new HashMap<Long, Tuv>();
+            if(needOriginalTarget)
+            {
+            	List<Tuv> allTargetTuvs = SegmentTuvUtil.getAllTargetTuvs(targetPage);
+            	setOriginalTargetTuvMap(targetTuvs, allTargetTuvs, originalTargetTuvMap);
+            }
 
             // Gets the filtered source and target tuvs, and reset
             // PaginateInfo.
@@ -6475,10 +6492,41 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 
                 targetjArray.put(targetj);
                 sourcejArray.put(sourcej);
+                
+                if(needOriginalTarget)
+                {
+                	JSONObject originalTargetj = new JSONObject();
+                	String temp = "";
+                	if(originalTargetTuvMap.size() > 0)
+                	{
+                		if(originalTargetTuvMap.get(trgTuv.getId()) != null)
+                		{
+                			temp = originalTargetTuvMap.get(trgTuv.getId()).getGxmlElement().getTextValue();
+                		}
+                	}
+                	originalTargetj.put("originalTarget", temp);
+                	originalTargetjArray.put(originalTargetj);
+                	
+                	JSONObject approvej = new JSONObject();
+                	if(trgTuv.getState().getValue() == TuvState.APPROVED.getValue())
+                	{
+                		approvej.put("approve","checked");
+                	}
+                	else
+                	{
+                		approvej.put("approve","");
+                	}
+                	approvejArray.put(approvej);
+                }
             }
             
             mainJson.put("target", targetjArray);
             mainJson.put("source", sourcejArray);
+            if(needOriginalTarget)
+            {
+            	mainJson.put("original", originalTargetjArray);
+            	mainJson.put("approve", approvejArray);
+            }
         }
         catch (Exception ex)
         {
@@ -6492,6 +6540,64 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
 
         return mainJson.toString();
+    }
+    
+    private void setOriginalTargetTuvMap(List<Tuv> filterTargetTuvs, 
+    		List<Tuv> allTargetTuvs, HashMap<Long, Tuv> setOriginalTargetTuvMap)
+    {
+    	for(Tuv filterTuv: filterTargetTuvs)
+    	{
+    		long localeId = filterTuv.getLocaleId();
+    		List<Tuv> tempTuvList = new ArrayList<Tuv>();
+    		for(Tuv allTargetTuv: allTargetTuvs)
+    		{
+    			if(localeId == allTargetTuv.getLocaleId() 
+    				&& allTargetTuv.getState().getValue() == TuvState.OUT_OF_DATE.getValue())
+    			{
+    				tempTuvList.add(allTargetTuv);
+    			}
+    		}
+    		if(tempTuvList.size() > 0)
+    		{
+    			sortById(tempTuvList);
+    			for(Tuv tuv: tempTuvList)
+    			{
+    				if(filterTuv.getTuId() == tuv.getTuId() &&
+    						!tuv.getGxmlElement().equals(filterTuv.getGxmlElement()))
+    				{
+    					setOriginalTargetTuvMap.put(filterTuv.getId(), tuv);
+    					break;
+    				}
+    			}
+    		}
+    	}
+    }
+    
+    private static void sortById(List<Tuv> tempTuvList)
+    {
+    	if(tempTuvList.size() > 1)
+    	{
+    		Collections.sort(tempTuvList, new Comparator<Tuv>() 
+    		{  
+                public int compare(Tuv arg0, Tuv arg1) 
+                {  
+                    long id0 = arg0.getId();
+                    long id1 = arg1.getId();  
+                    if (id1 > id0) 
+                    {  
+                        return 1;  
+                    } 
+                    else if (id1 == id0) 
+                    {  
+                        return 0;  
+                    }
+                    else
+                    {
+                        return -1;  
+                    }  
+                }  
+            });
+    	}
     }
 
     // THE KEY ONEreadyCase

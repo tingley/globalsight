@@ -73,6 +73,11 @@ public class LeverageOptions
         return m_tmProfile.isSaveUnLocSegToProjectTM();
     }
     
+    public boolean saveLocalizedInSegmentTM()
+    {
+    	return m_tmProfile.isSaveLocSegToProjectTM();
+    }
+    
     public boolean savesApprovedInSegmentTm()
     {
         return m_tmProfile.isSaveApprovedSegToProjectTM();

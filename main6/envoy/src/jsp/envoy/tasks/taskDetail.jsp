@@ -87,6 +87,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editor" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="newEditor" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="incontextreiview" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editorSameWindow" scope="request"
@@ -280,6 +282,9 @@
     String editorParaUrl = editorSameWindow.getPageURL();
     String editorListUrl = editor.getPageURL();
     String editorReviewUrl = editor.getPageURL() +
+       "&" + WebAppConstants.REVIEW_MODE + "=true";
+    String newEditorListUrl = newEditor.getPageURL();
+    String newEditorReviewUrl = newEditor.getPageURL() +
        "&" + WebAppConstants.REVIEW_MODE + "=true";
     String incontextreviewUrl = incontextreiview.getPageURL();
     String incontextreviewUrlRe = incontextreiview.getPageURL() +
@@ -874,6 +879,7 @@ function contextForPage(url, e, displayName)
     {
     	lb_context_item_inline_editor  = "<%=bundle.getString("lb_context_item_inline_editor") %>";
         lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_popup_editor") %>";
+        lb_context_item_post_review_editor = "<%=bundle.getString("lb_context_item_post_review_editor") %>";
         
     	if (b_editInSameWindow)
         {
@@ -887,7 +893,9 @@ function contextForPage(url, e, displayName)
         new ContextItem(lb_context_item_inline_editor,
           function(){ openParaEditor(url, e);}),
         new ContextItem(lb_context_item_popup_editor,
-          function(){ openListEditor(url, e);})
+          function(){ openListEditor(url, e);}),
+        new ContextItem(lb_context_item_post_review_editor,
+          function(){ openNewListEditor(url, e);})
         ];
       
       if (showInContextReview)
@@ -899,6 +907,7 @@ function contextForPage(url, e, displayName)
     else
     {
       var title = "<%=bundle.getString("lb_context_item_popup_editor") %>";
+      var title2 = "<%=bundle.getString("lb_context_item_post_review_editor") %>";
   
       if (b_isReviewActivity)
       {
@@ -906,7 +915,8 @@ function contextForPage(url, e, displayName)
       }
   
       popupoptions = [
-   		new ContextItem(title, function(){ openListEditor(url, e);})
+   		new ContextItem(title, function(){ openListEditor(url, e);}),
+   		new ContextItem(title2, function(){ openNewListEditor(url, e);})
         ];
       
       if (showInContextReview)
@@ -956,6 +966,32 @@ function openInContextReview(url, e)
            url = "<%=incontextreviewUrl%>" + url;
         }
 		 url += "&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>"));
+         w_editor = window.open(url, 'MainEditor',
+          'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
+          ',width=' + (screen.availWidth - 20));
+    }
+}
+
+function openNewListEditor(url, e)
+{
+    if (!canClose())
+    {
+        cancelEvent(e);
+        raiseSegmentEditor();
+    }
+    else
+    {
+        hideContextMenu();
+		
+        if (b_isReviewActivity)
+        {
+          url = "<%=newEditorReviewUrl%>" + url;
+        }
+        else
+        {
+           url = "<%=newEditorListUrl%>" + url;
+        }
+		 url += "&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")); 
          w_editor = window.open(url, 'MainEditor',
           'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
           ',width=' + (screen.availWidth - 20));

@@ -416,14 +416,24 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             tmProfile.setProjectTmIdForSave(projectTmIdToSave);
         }
         // 4
-        String saveToProjectTm = p_request.getParameter("isSaveToProjectTm");
-        if (saveToProjectTm == null)
+        String saveUnlocToProjectTm = p_request.getParameter("isSaveUnlocSegToProjectTm");
+        if (saveUnlocToProjectTm == null)
         {
             tmProfile.setSaveUnLocSegToProjectTM(false);
         }
-        else if (saveToProjectTm.equals("true"))
+        else if (saveUnlocToProjectTm.equals("true"))
         {
             tmProfile.setSaveUnLocSegToProjectTM(true);
+        }
+        
+        String saveLocToProjectTm = p_request.getParameter("isSaveLocSegToProjectTm");
+        if (saveLocToProjectTm == null)
+        {
+            tmProfile.setSaveLocSegToProjectTM(false);
+        }
+        else if (saveLocToProjectTm.equals("true"))
+        {
+            tmProfile.setSaveLocSegToProjectTM(true);
         }
         // 5
         String saveToPageTm = p_request.getParameter("isSaveToPageTm");
@@ -762,7 +772,7 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         {
             tmProfile.setSaveApprovedSegToProjectTM(false);
         }
-        else if (saveApprovedToProjectTm.equals("on"))
+        else if (saveApprovedToProjectTm.equals("true"))
         {
             tmProfile.setSaveApprovedSegToProjectTM(true);
         }

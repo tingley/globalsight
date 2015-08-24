@@ -40,6 +40,8 @@ public interface TMProfileConstants
     public static final String PROJECT_TM_ID_TO_SAVE = "projectTMIdToSave";
     public static final String SAVE_UNLOC_SEGS_TO_PROJECT_TM = "isSaveToProjectTm";
     public static final String SAVE_ALL_UNLOC_SEGS_TO_PROJECT_TM = "isSaveAllUnlocSegToProjectTm";
+    public static final String SAVE_UN_LOC_SEGS_TO_PROJECT_TM = "isSaveUnlocSegToProjectTm";
+    public static final String SAVE_LOC_SEGS_TO_PROJECT_TM = "isSaveLocSegToProjectTm";
     public static final String SAVE_APPROVED_SEGS_TO_PROJECT_TM = "isSaveApprovedToProjectTm";
     public static final String SAVE_EXACT_MATCH_SEGS_TO_PROJECT_TM = "isSaveExactMatchToProjectTm";
     public static final String SAVE_UNLOC_SEGS_TO_PAGE_TM = "isSaveToPageTm";

@@ -235,13 +235,13 @@ $(document).ready(function(){
               				    <%	
               					   }
               					 %>
-	              				<div title="Select Values" id="uptadeSelectedDiv<%=attribute.getId()%>" style="display:none;">
+	              				<div class="standardText" title="Select Values" id="uptadeSelectedDiv<%=attribute.getId()%>" style="display:none;">
 		                        	<table>
 		                        		<tr valign="middle">
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<select  name="selectOption<%=attribute.getId()%>" id = "selectOption<%=attribute.getId()%>" hasDownArrow="true" style="width:120px;" <%= isMultiple%>>
+			                        			<select  name="selectOption<%=attribute.getId()%>" id = "selectOption<%=attribute.getId()%>" hasDownArrow="true" style="width:200px;" <%= isMultiple%>>
 					    						  <%
 					    			                 for (SelectOption option : allOptions){
 					    			                     String selected = selectOptions.contains(option) ? "selected" : "";%>
@@ -279,7 +279,7 @@ $(document).ready(function(){
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<input style="width:100px; height:25px;" name ="updateIntValue<%=attribute.getId()%>" id ="updateIntValue<%=attribute.getId()%>" value="<%=label%>">
+			                        			<input style="width:180px; height:25px;" name ="updateIntValue<%=attribute.getId()%>" id ="updateIntValue<%=attribute.getId()%>" value="<%=label%>">
 		                        			</td>
 		                        			<td>
 		                        				<input type="button" name = "intButtonClose" id = "intButtonClose" onclick = "$('#uptadeIntDiv<%=attribute.getId()%>').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
@@ -308,7 +308,7 @@ $(document).ready(function(){
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<input style="width:100px; height:25px;" name ="updateFloatValue<%=attribute.getId()%>" id ="updateFloatValue<%=attribute.getId()%>" value="<%=label%>">
+			                        			<input style="width:180px; height:25px;" name ="updateFloatValue<%=attribute.getId()%>" id ="updateFloatValue<%=attribute.getId()%>" value="<%=label%>">
 		                        			</td>
 		                        			<td>
 		                        				<input type="button" name = "floatButtonClose" id = "floatButtonClose" onclick = "$('#uptadeFloatDiv<%=attribute.getId()%>').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
@@ -353,7 +353,7 @@ $(document).ready(function(){
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<input style="width:100px; height:25px;" name ="updateTextValue" id ="updateTextValue<%=attribute.getId()%>" value="<%=label%>">
+			                        			<input style="width:180px; height:25px;" name ="updateTextValue" id ="updateTextValue<%=attribute.getId()%>" value="<%=label%>">
 		                        			</td>
 		                        			<td>
 		                        				<input type="button" name = "textButtonClose" id = "textButtonClose" onclick = "$('#uptadeTextDiv<%=attribute.getId()%>').dialog('close')" value = "<%=bundle.getString("lb_close") %>">
@@ -857,6 +857,6 @@ function disPlayInput(inputId)
 
 function disPlayListInput(inputId)
 {
-	   $("#"+inputId).dialog({width: 200, height: 200, resizable:false});
+	   $("#"+inputId).dialog({width: 240, height: 190, resizable:false});
 }
 </SCRIPT>

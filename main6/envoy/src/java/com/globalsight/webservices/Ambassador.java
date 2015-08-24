@@ -338,6 +338,8 @@ public class Ambassador extends AbstractWebService
     public static final String CANCEL_JOB = "cancelJob";
 
     public static final String EXPORT_WORKFLOW = "exportWorkflow";
+    
+    public static final String EDIT_JOB_DETAIL_INFO="editJobDetailInfo";
 
     public static final String EXPORT_JOB = "exportJob";
 
@@ -3928,6 +3930,266 @@ public class Ambassador extends AbstractWebService
             }
         }
     }
+
+	/**
+	 * Edit job detail info.
+	 * 
+	 * @param p_accessToken
+	 *            - The access token received from the login.
+	 * @param p_jobId
+	 *            - Job id is not empty and exist in GS server.
+	 * @param p_jobName
+	 *            - Job name can be empty.
+	 * @param p_estimatedDateXml
+	 *            - EstimatedDateXml can be empty. If not empty,example :
+	 *            <estimatedDates> 
+	 *            		<workflow> 
+	 *            			<targetLocale>zh_CN</targetLocale>
+	 *            			<estimatedTranslateCompletionDate>yyyyMMdd HHmmss</estimatedTranslateCompletionDate>
+	 *            			<estimatedWorkflowCompletionDate>yyyyMMdd HHmmss</estimatedWorkflowCompletionDate> 
+	 *            		</workflow>
+	 *            		<workflow> ... ... </workflow> 
+	 *            </estimatedDates>
+	 * @param p_priority Priority can be empty.If not empty,priority must be 1,2,3,4 or 5;
+	 * */
+	public String editJobDetailInfo(String p_accessToken, String p_jobId,
+			String p_jobName, String p_estimatedDateXml, String p_priority)
+			throws WebServiceException
+	{
+		checkAccess(p_accessToken, EDIT_JOB_DETAIL_INFO);
+		checkPermission(p_accessToken, Permission.JOBS_DETAILS);
+		String userName = getUsernameFromSession(p_accessToken);
+		Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+		activityArgs.put("loggedUserName", userName);
+		activityArgs.put("jobId", p_jobId);
+		activityArgs.put("jobName", p_jobName);
+		activityArgs.put("estimatedDateXml", p_estimatedDateXml);
+		activityArgs.put("priority", p_priority);
+		ActivityLog.Start activityStart = ActivityLog
+				.start(Ambassador.class,
+						"editJobDetailInfo(p_accessToken,p_jobId,p_jobName,p_estimatedDateXml,p_priority)",
+						activityArgs);
+
+		Map<String, Object> paramter = new HashMap<String, Object>();
+		try
+		{
+			Assert.assertNotEmpty(p_jobId);
+			Assert.assertIsInteger(p_jobId);
+			if (StringUtil.isNotEmpty(p_priority))
+			{
+				Assert.assertIsInteger(p_priority);
+
+				int priority = Integer.parseInt(p_priority);
+				if (priority != 1 && priority != 2 && priority != 3
+						&& priority != 4 && priority != 5)
+				{
+					return makeErrorXml(
+							EDIT_JOB_DETAIL_INFO,
+							"Invalid priority : "
+									+ p_priority
+									+ ", it should be limited in 1, 2, 3, 4, 5 or empty.");
+				}
+				paramter.put("priority", p_priority);
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
+		}
+
+		try
+		{
+			Job job = ServerProxy.getJobHandler().getJobById(
+					Long.parseLong(p_jobId));
+			if (job == null)
+			{
+				return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid job id :"
+						+ p_jobId);
+			}
+			
+			if (!isInSameCompany(userName, String.valueOf(job.getCompanyId())))
+			{
+				return makeErrorXml(
+						EDIT_JOB_DETAIL_INFO,
+						"Invalid job id :"
+								+ p_jobId
+								+ ",current user is not in the same company with the job.");
+			}
+			paramter.put("jobId", p_jobId);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
+		}
+		// get unique job name
+		if (StringUtil.isNotEmpty(p_jobName))
+		{
+			p_jobName = getUniqueJobName(p_accessToken, p_jobName);
+			paramter.put("jobName", p_jobName);
+		}
+
+		if (StringUtil.isNotEmpty(p_estimatedDateXml))
+		{
+			Document doc;
+			SimpleDateFormat sfm = new SimpleDateFormat("yyyyMMdd HHmmss");
+			try
+			{
+				doc = DocumentHelper.parseText(p_estimatedDateXml);
+				Element rootElt = doc.getRootElement();
+				List elements = rootElt.elements();
+				Map<Long, Map<String, Date>> workMap = new HashMap<Long, Map<String, Date>>();
+				for (int i = 0; i < elements.size(); i++)
+				{
+					Element et = (Element) elements.get(i);
+					Map<String, Date> dateMap = new HashMap<String, Date>();
+
+					String targetLocale = null;
+					String tranComDateStr = null;
+					String workComDateStr = null;
+					try
+					{
+						targetLocale = et.element("targetLocale").getText();
+						tranComDateStr = et.element(
+								"estimatedTranslateCompletionDate").getText();
+						workComDateStr = et.element(
+								"estimatedWorkflowCompletionDate").getText();
+					}
+					catch (Exception e)
+					{
+						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+								"Invalid estimatedDateXml,xml spelling errors.");
+					}
+
+					if (StringUtil.isEmpty(targetLocale))
+					{
+						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+								"Invalid estimatedDateXml, targetLocale can not empty.");
+					}
+					GlobalSightLocale targetGSLocale = null;
+					try
+					{
+						targetGSLocale = getLocaleByName(targetLocale);
+						if (targetGSLocale == null)
+						{
+							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+									"Invalid source locale : " + targetLocale);
+						}
+					}
+					catch (Exception e)
+					{
+						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+								"Invalid source locale : " + targetLocale);
+					}
+
+					if (StringUtil.isNotEmpty(tranComDateStr))
+					{
+						try
+						{
+							Date tranComDate = sfm.parse(tranComDateStr);
+							dateMap.put("estimatedTranslateCompletionDate",
+									tranComDate);
+						}
+						catch (ParseException e)
+						{
+							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+									"Invalid estimatedTranslateCompletionDate : "
+											+ tranComDateStr);
+						}
+					}
+
+					if (StringUtil.isNotEmpty(workComDateStr))
+					{
+						try
+						{
+							Date workComDate = sfm.parse(workComDateStr);
+							dateMap.put("estimatedWorkflowCompletionDate",
+									workComDate);
+						}
+						catch (ParseException e)
+						{
+							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+									"Invalid estimatedWorkflowCompletionDate : "
+											+ workComDateStr);
+						}
+					}
+
+					if (!dateMap.isEmpty()
+							&& !workMap.containsKey(targetGSLocale.getId()))
+					{
+						workMap.put(targetGSLocale.getId(), dateMap);
+					}
+				}
+				//put workflow date paramter
+				paramter.put("estimatedDates", workMap);
+				updateJobDetailInfo(paramter);
+			}
+			catch (DocumentException e)
+			{
+				return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+						"Invalid estimated date xml,xml spelling errors.");
+			}
+		}
+		
+		return "SUCCESS";
+	}
+	
+	private static void updateJobDetailInfo(Map<String, Object> paramter)
+	{
+		String jobId = (String) paramter.get("jobId");
+		String jobName = (String) paramter.get("jobName");
+		String priority = (String) paramter.get("priority");
+		Map<Long, Map<String, Date>> workMap = (Map<Long, Map<String, Date>>) paramter
+				.get("estimatedDates");
+		
+		JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(jobId));
+		if (StringUtil.isNotEmpty(jobName))
+		{
+			job.setJobName(EditUtil.removeCRLF(jobName));
+		}
+		if (StringUtil.isNotEmpty(priority))
+		{
+			job.setPriority(Integer.parseInt(priority));
+		}
+		HibernateUtil.merge(job);
+		
+		String hql = "from WorkflowImpl w where w.job.id = :jId "
+                + "and w.targetLocale.id = :tId";
+        Map map = new HashMap();
+        map.put("jId", Long.parseLong(jobId));
+		if (!workMap.isEmpty())
+		{
+			Set<Long> tgLocaleKeySet = workMap.keySet();
+			for (Long targetLocaleId : tgLocaleKeySet)
+			{
+				map.put("tId", targetLocaleId);
+				WorkflowImpl wf = (WorkflowImpl) HibernateUtil.search(hql, map)
+						.get(0);
+				Map<String, Date> dateMap = workMap.get(targetLocaleId);
+				Iterator iter = dateMap.entrySet().iterator();
+				while (iter.hasNext())
+				{
+					Map.Entry entry = (Map.Entry) iter.next();
+					String key = (String) entry.getKey();
+					Date date = (Date) entry.getValue();
+					if (key.equalsIgnoreCase("estimatedTranslateCompletionDate"))
+					{
+						wf.setEstimatedTranslateCompletionDate(date);
+						wf.setEstimatedTranslateCompletionDateOverrided(true);
+					}
+					else if (key
+							.equalsIgnoreCase("estimatedWorkflowCompletionDate"))
+					{
+						wf.setEstimatedCompletionDate(date);
+						wf.setEstimatedCompletionDateOverrided(true);
+					}
+				}
+				HibernateUtil.merge(wf);
+				map.remove("tId");
+			}
+		}
+	}
 
     /**
      * Exports the job. If p_workflowLocale is null then all pages for all
@@ -7882,11 +8144,11 @@ public class Ambassador extends AbstractWebService
                     tmp.getProjectTmIdForSave(), false);
             String companyId = String.valueOf(ptm.getCompanyId());
 
-            Set tmNamesOverride = new HashSet();
+            Set tmIdsOverride = new HashSet();
             Vector<LeverageProjectTM> tms = tmp.getProjectTMsToLeverageFrom();
             for (LeverageProjectTM tm : tms)
             {
-                tmNamesOverride.add(tm.getProjectTmId());
+            	tmIdsOverride.add(tm.getProjectTmId());
             }
 
             OverridableLeverageOptions levOptions = new OverridableLeverageOptions(
@@ -7894,7 +8156,7 @@ public class Ambassador extends AbstractWebService
 
             int threshold = (int) tmp.getFuzzyMatchThreshold();
             levOptions.setMatchThreshold(threshold);
-            levOptions.setTmsToLeverageFrom(tmNamesOverride);
+            levOptions.setTmsToLeverageFrom(tmIdsOverride);
             boolean isTmProcedence = tmp.isTmProcendence();
             String segment = wrapSegment(p_string,
                     Boolean.valueOf(escapeString));

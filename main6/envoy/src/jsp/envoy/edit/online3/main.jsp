@@ -488,7 +488,7 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 </script>
 </HEAD>
 <BODY id="idBody" oncontextmenu="contextForX(event)">
-<FORM name="SaveForm" METHOD="POST" ACTION="<%=url_refresh%>">
+<FORM name="SaveForm" METHOD="POST" ACTION="<%=url_refresh%>&action=segment">
 <INPUT TYPE="hidden" NAME="save" VALUE="">
 <INPUT TYPE="hidden" NAME="refresh" VALUE="0">
 <INPUT TYPE="hidden" NAME="tuId" VALUE="">

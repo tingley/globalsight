@@ -45,6 +45,7 @@ import com.globalsight.everest.edit.online.PageInfo;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.RenderingOptions;
 import com.globalsight.everest.edit.online.SegmentFilter;
+import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.PageManager;
@@ -72,7 +73,9 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportC
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
+import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
@@ -378,6 +381,64 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
             }
         }
 
+    }
+    
+    @ActionHandler(action = "segment", formClass = "")
+    public void segment(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+    	HttpSession session = request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+        		.getAttribute(WebAppConstants.SESSION_MANAGER);
+        EditorState state = (EditorState) sessionMgr
+        		.getAttribute(WebAppConstants.EDITORSTATE);
+        User user = TaskHelper.getUser(session);
+        String userId = user.getUserId();
+    	
+    	long tuId = state.getTuId();
+        long tuvId = state.getTuvId();
+        long subId = state.getSubId();
+        String value = request.getParameter("save");
+        try
+        {
+            // Updated segment arrives in UTF-8, decode to Unicode
+            value = EditUtil.utf8ToUnicode(value);
+            SegmentView segmentView = (SegmentView) sessionMgr
+                    .getAttribute(WebAppConstants.SEGMENTVIEW);
+            EditorHelper.updateSegment(state, segmentView, tuId, tuvId,
+                    subId, value, userId);
+
+            // Delete the old pdf file for the Indd preview
+            PreviewPDFHelper.deleteOldPdf(state.getTargetPageId()
+                    .longValue(), state.getTargetLocale().getId());
+            PreviewPageHandler.deleteOldPreviewFile(state
+                    .getTargetPageId().longValue(), state
+                    .getTargetLocale().getId());
+        }
+        catch (EnvoyServletException e)
+        {
+            // This should, of course, never fail. If it fails,
+            // we just redisplay the current state.
+            CATEGORY.error("ME ignoring update exception ", e);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("ME ignoring update exception ", e);
+        }
+
+        if (OnlineEditorConstants.SEGMENT_FILTER_ICE.equals(state
+                .getSegmentFilter()))
+        {
+            request.setAttribute("refreshSource", "true");
+        }
+
+        long targetPageId = state.getTargetPageId().longValue();
+        long sourceLocaleId = state.getSourceLocale().getId();
+        long targetLocaleId = state.getTargetLocale().getId();
+        SegmentView segmentView = EditorHelper.getSegmentView(state,
+                tuId, tuvId, subId, targetPageId, sourceLocaleId,
+                targetLocaleId);
+        sessionMgr.setAttribute(WebAppConstants.SEGMENTVIEW, segmentView);
     }
     
     @ActionHandler(action = "comment", formClass = "")
@@ -706,37 +767,37 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 				}
 			}
 		}
-		if(StringUtil.isNotEmpty(unApproveIds))
-		{
-			unApproveIds = unApproveIds.substring(0, unApproveIds.length() - 1);
-			String[] tempIds = unApproveIds.split(",");
-			for(String tempId: tempIds)
-			{
-				String[] temp = tempId.split("_");
-				String tuId = temp[0];
-				String tuvId = temp[1];
-				
-				Tuv tuv = tuvMap.get(tuId + "_" + tuvId);
-				TuvState tuvState = tuv.getState();
-				if(tuvState.getValue() == TuvState.APPROVED.getValue())
-				{
-					List<Long> tuvIdList = new ArrayList<Long>();
-					tuvIdList.add(tuv.getIdAsLong());
-					List<TuTuvAttributeImpl>  tuTuvAttributeImplList
-						= SegmentTuTuvAttributeUtil.getStateAttributesByTuvIds(tuvIdList, jobId);
-					if(tuTuvAttributeImplList.size() > 0)
-					{
-						int stateInt = (int) tuTuvAttributeImplList.get(0).getLongValue();
-						TuvState originalState = TuvState.valueOf(stateInt);
-						tuv.setState(originalState);
-						tuvImplList.add((TuvImpl) tuv);
-						
-						SegmentTuTuvAttributeUtil.deleteStateAttributes(
-								conn, tuTuvAttributeImplList, jobId);
-					}
-				}
-			}
-		}
+//		if(StringUtil.isNotEmpty(unApproveIds))
+//		{
+//			unApproveIds = unApproveIds.substring(0, unApproveIds.length() - 1);
+//			String[] tempIds = unApproveIds.split(",");
+//			for(String tempId: tempIds)
+//			{
+//				String[] temp = tempId.split("_");
+//				String tuId = temp[0];
+//				String tuvId = temp[1];
+//				
+//				Tuv tuv = tuvMap.get(tuId + "_" + tuvId);
+//				TuvState tuvState = tuv.getState();
+//				if(tuvState.getValue() == TuvState.APPROVED.getValue())
+//				{
+//					List<Long> tuvIdList = new ArrayList<Long>();
+//					tuvIdList.add(tuv.getIdAsLong());
+//					List<TuTuvAttributeImpl>  tuTuvAttributeImplList
+//						= SegmentTuTuvAttributeUtil.getStateAttributesByTuvIds(tuvIdList, jobId);
+//					if(tuTuvAttributeImplList.size() > 0)
+//					{
+//						int stateInt = (int) tuTuvAttributeImplList.get(0).getLongValue();
+//						TuvState originalState = TuvState.valueOf(stateInt);
+//						tuv.setState(originalState);
+//						tuvImplList.add((TuvImpl) tuv);
+//						
+//						SegmentTuTuvAttributeUtil.deleteStateAttributes(
+//								conn, tuTuvAttributeImplList, jobId);
+//					}
+//				}
+//			}
+//		}
 		conn.close();
 		
 		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);

@@ -21,7 +21,7 @@ public enum SegmentTmAttribute {
     FORMAT(".format", new FormatType(), "format", false),
     SID(".sid", new SidType(), "sid", true),
     FROM_WORLDSERVER(".from_ws", new FromWsType(), "from_ws", false),
-    UPDATED_BY_PROJECT(".project", new ProjectType(), "project", true);
+    UPDATED_BY_PROJECT(".project", new ProjectType(), "project", false);
 
     private String key;
     private TM3AttributeValueType valueType;

@@ -68,6 +68,7 @@ import com.globalsight.ling.docproc.merger.html.HtmlPreviewerHelper;
 import com.globalsight.ling.docproc.merger.jsp.JspPostMergeProcessor;
 import com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.EmojiUtil;
 
 /**
  * The public API for the GXML Extractor Framework.
@@ -171,12 +172,13 @@ public class DiplomatAPI implements IFormatNames
             .getName());
 
     private List<ExtractRule> rules = new ArrayList<ExtractRule>();
-    
+
     private AbstractExtractor extractor = null;
     public static final String m_tag_internal_start = "&lt;GS-INTERNAL-TEXT&gt;";
     public static final String m_tag_internal_end = "&lt;/GS-INTERNAL-TEXT&gt;";
     public static final String tag_internal_start = "<GS-INTERNAL-TEXT>";
     public static final String tag_internal_end = "</GS-INTERNAL-TEXT>";
+
     /**
      * Diplomat Extractor Options.
      */
@@ -455,32 +457,33 @@ public class DiplomatAPI implements IFormatNames
 
     private String filterTableName;
     private boolean isSecondFilter = false;
-   
+
     public boolean getisSecondFilter()
     {
         return isSecondFilter;
     }
-    
+
     public void setIsSecondFilter(boolean isSecondFilter)
     {
         this.isSecondFilter = isSecondFilter;
     }
-    
-    public FileProfileImpl getFileProfile()
-	{
-		return fileProfile;
-	}
-    
-	public void setFileProfile(FileProfileImpl fileProfile)
-	{
-		this.fileProfile = fileProfile;
-	}
 
-	public String getFilterTableName()
+    public FileProfileImpl getFileProfile()
+    {
+        return fileProfile;
+    }
+
+    public void setFileProfile(FileProfileImpl fileProfile)
+    {
+        this.fileProfile = fileProfile;
+    }
+
+    public String getFilterTableName()
     {
         return filterTableName;
     }
-	public void setFilterTableName(String filterTableName)
+
+    public void setFilterTableName(String filterTableName)
     {
         this.filterTableName = filterTableName;
     }
@@ -1058,9 +1061,9 @@ public class DiplomatAPI implements IFormatNames
 
         if (extractor == null)
         {
-        	extractor = createExtractor(m_inputFormat);
+            extractor = createExtractor(m_inputFormat);
         }
-//        AbstractExtractor extractor = createExtractor(m_inputFormat);
+        // AbstractExtractor extractor = createExtractor(m_inputFormat);
 
         m_output = new Output();
         Filter mainFilter = getMainFilter();
@@ -1101,20 +1104,24 @@ public class DiplomatAPI implements IFormatNames
             com.globalsight.ling.docproc.extractor.xml.Extractor xmlExtractor = (com.globalsight.ling.docproc.extractor.xml.Extractor) extractor;
             if (fileProfileId != null)
             {
-                isIdmlXml = IdmlHelper.isIdmlFileProfile(Long.parseLong(fileProfileId));
+                isIdmlXml = IdmlHelper.isIdmlFileProfile(Long
+                        .parseLong(fileProfileId));
                 xmlExtractor.setIsIdmlXml(isIdmlXml);
 
                 if (!isIdmlXml)
                 {
-                    FileProfileImpl f = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(fileProfileId),
-                            false);
+                    FileProfileImpl f = HibernateUtil.get(
+                            FileProfileImpl.class,
+                            Long.parseLong(fileProfileId), false);
                     if (f != null)
                     {
                         long id = f.getKnownFormatTypeId();
-                        KnownFormatTypeImpl type = HibernateUtil.get(KnownFormatTypeImpl.class, id);
+                        KnownFormatTypeImpl type = HibernateUtil.get(
+                                KnownFormatTypeImpl.class, id);
                         if (type != null)
                         {
-                            isInddXml = type.getFormatType().startsWith("indd_");
+                            isInddXml = type.getFormatType()
+                                    .startsWith("indd_");
                         }
                     }
                 }
@@ -1156,6 +1163,9 @@ public class DiplomatAPI implements IFormatNames
         // protect internal text / internal tag for segmentation
         List<String> internalTexts = InternalTextHelper
                 .protectInternalTexts(m_output);
+
+        // GBS-3997&GBS-4066, protect emoji's unicodes
+        EmojiUtil.protectEmojiUnicodes(m_output);
 
         if (m_options.m_sentenceSegmentation)
         {
@@ -1229,31 +1239,31 @@ public class DiplomatAPI implements IFormatNames
         {
             InternalTextHelper.restoreInternalTexts(m_output, internalTexts);
         }
-        
+
         // # GBS-2894 : do segmentation before internal text
-		if (extractor.isDoSegBeforeInlText())
-		{
-			boolean checkPOAndProp = checkPOAndPropertiesFilter(mainFilter);
-			if (checkPOAndProp)
-			{
-				if (fileProfile != null)
-				{
-					Filter filter = FilterHelper.getFilter(
-							fileProfile.getFilterTableName(),
-							fileProfile.getFilterId());
-					InternalTextHelper.handleOutput(m_output, filter, true);
-				}
-				else
-				{
-					InternalTextHelper.handleOutput(m_output, mainFilter, true);
-				}
-			}
-		}
-		
-		if (!isSecondFilter)
-		{
-		    EscapingHelper.handleOutput4Import(m_output, mainFilter);
-		}
+        if (extractor.isDoSegBeforeInlText())
+        {
+            boolean checkPOAndProp = checkPOAndPropertiesFilter(mainFilter);
+            if (checkPOAndProp)
+            {
+                if (fileProfile != null)
+                {
+                    Filter filter = FilterHelper.getFilter(
+                            fileProfile.getFilterTableName(),
+                            fileProfile.getFilterId());
+                    InternalTextHelper.handleOutput(m_output, filter, true);
+                }
+                else
+                {
+                    InternalTextHelper.handleOutput(m_output, mainFilter, true);
+                }
+            }
+        }
+
+        if (!isSecondFilter)
+        {
+            EscapingHelper.handleOutput4Import(m_output, mainFilter);
+        }
 
         if (m_debug)
         {
@@ -1266,11 +1276,14 @@ public class DiplomatAPI implements IFormatNames
         wc.setLocalizableWordcount(m_options.m_localizableWordCount);
         wc.countDiplomatDocument(m_output);
         m_output = wc.getOutput();
-        
+
         if (isIdmlXml || isInddXml)
         {
             InddTuMappingHelper.processOutput(m_output, isIdmlXml, isInddXml);
         }
+
+        // GBS-3997&GBS-4066, tag emoji's unicodes
+        EmojiUtil.tagEmojiUnicodes(m_output);
 
         // call GC here to free some memory used in extracting
         // System.gc();
@@ -1329,45 +1342,46 @@ public class DiplomatAPI implements IFormatNames
      * 
      * 
      * */
-	private boolean checkPOAndPropertiesFilter(Filter mainFilter)
-	{
-		if (mainFilter != null)
-		{
-			boolean propFilter = mainFilter instanceof JavaPropertiesFilter ? true
-					: false;
-			boolean poFilter = mainFilter instanceof POFilter ? true : false;
-			if ((!propFilter && fileProfile == null) && (!poFilter && fileProfile == null))
-			{
-				return true;
-			}
-			else if (propFilter || poFilter && fileProfile == null)
-			{
-				boolean useBptTag = true;
-				if (propFilter)
-				{
-					JavaPropertiesFilter jf = (JavaPropertiesFilter) mainFilter;
-					long scid = jf.getSecondFilterId();
-					String scTableName = jf.getSecondFilterTableName();
-					useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
-					return useBptTag;
-				}
-				else if (poFilter)
-				{
-					POFilter po = (POFilter) mainFilter;
-					long scid = po.getSecondFilterId();
-					String scTableName = po.getSecondFilterTableName();
-					useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
-					return useBptTag;
-				}
-			}
-			else if (!propFilter || !poFilter && fileProfile != null)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	
+    private boolean checkPOAndPropertiesFilter(Filter mainFilter)
+    {
+        if (mainFilter != null)
+        {
+            boolean propFilter = mainFilter instanceof JavaPropertiesFilter ? true
+                    : false;
+            boolean poFilter = mainFilter instanceof POFilter ? true : false;
+            if ((!propFilter && fileProfile == null)
+                    && (!poFilter && fileProfile == null))
+            {
+                return true;
+            }
+            else if (propFilter || poFilter && fileProfile == null)
+            {
+                boolean useBptTag = true;
+                if (propFilter)
+                {
+                    JavaPropertiesFilter jf = (JavaPropertiesFilter) mainFilter;
+                    long scid = jf.getSecondFilterId();
+                    String scTableName = jf.getSecondFilterTableName();
+                    useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
+                    return useBptTag;
+                }
+                else if (poFilter)
+                {
+                    POFilter po = (POFilter) mainFilter;
+                    long scid = po.getSecondFilterId();
+                    String scTableName = po.getSecondFilterTableName();
+                    useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
+                    return useBptTag;
+                }
+            }
+            else if (!propFilter || !poFilter && fileProfile != null)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Filter getMainFilter() throws Exception
     {
         if (filterId >= 0 && filterTableName != null)
@@ -1828,8 +1842,8 @@ public class DiplomatAPI implements IFormatNames
             }
 
             AbstractExtractor result = (AbstractExtractor) Class.forName(
-                        strClass).newInstance();
-            
+                    strClass).newInstance();
+
             // For "html_filter" and office filters
             if ((FilterConstants.HTML_TABLENAME.equals(filterTableName) && p_format == 1)
                     || isMsOfficeFormat(p_format))
@@ -1903,7 +1917,7 @@ public class DiplomatAPI implements IFormatNames
         }
 
         return new Boolean[]
-        { isUseSecondaryHtmlFilter, isConvertHtmlEntity };        
+        { isUseSecondaryHtmlFilter, isConvertHtmlEntity };
     }
 
     public String getJsFilterRegex()
@@ -1934,12 +1948,14 @@ public class DiplomatAPI implements IFormatNames
         rules.add(rule);
     }
 
-	public AbstractExtractor getExtractor() {
-		return extractor;
-	}
+    public AbstractExtractor getExtractor()
+    {
+        return extractor;
+    }
 
-	public void setExtractor(AbstractExtractor extractor) {
-		this.extractor = extractor;
-	}
+    public void setExtractor(AbstractExtractor extractor)
+    {
+        this.extractor = extractor;
+    }
 
 }

@@ -3,9 +3,11 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -95,10 +97,12 @@ public class TranslatedTextHandler extends PageHandler
                         sublist.add(wf);
                     }
                 }
+                Collections
+                .sort(sublist, new WorkflowComparator(Locale.getDefault()));
                 p_request.setAttribute("workflows", sublist);
                 p_request.setAttribute("jobName", job.getJobName());
                 p_request.setAttribute("sourcePages", job.getSourcePages());
-                p_request.setAttribute("jobId", jobId);
+                p_request.setAttribute(JobManagementHandler.JOB_ID, jobId+"");
             }
         }
         catch (Exception e)

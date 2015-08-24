@@ -1308,11 +1308,17 @@ public class AmbassadorHelper extends JsonTypeWebService
                 }
             }
 
-            List<UserRole> roles = parseRoles(user, p_roles);
-            if (roles != null && roles.size() > 0)
+            List<UserRole> roles = null;
+            if (StringUtil.isNotEmpty(p_roles))
             {
-                for (UserRole ur : roles)
-                    ur.setUser(user.getUserId());
+                roles = parseRoles(user, p_roles);
+                if (roles == null || roles.size() == 0)
+                	return INVALID_ROLES;
+                else
+                {
+                    for (UserRole ur : roles)
+                        ur.setUser(user.getUserId());
+                }
             }
 
             // Check the argument of permission groups

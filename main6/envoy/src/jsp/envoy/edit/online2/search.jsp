@@ -244,7 +244,18 @@ function Search() {
         
         window.opener.location = urlTarget;
         
-    <%}%> 
+    <%} else if(from.equals("online3")) {%>
+	    var urlTarget = window.opener.location + "";
+	
+	    if(urlTarget.indexOf("searchByUser=") > -1) {
+	        urlTarget = urlTarget.substring(0, urlTarget.indexOf("&searchByUser=")) + "&searchByUser=" + value;
+	    }
+	    else {
+	        urlTarget = urlTarget + "&searchByUser=" + value;
+	    }
+	    
+	    window.opener.location = urlTarget; 
+	<%}%>
     }
     else if(type1) {
         var elements = document.all("sidIdRadio");
@@ -285,6 +296,18 @@ function Search() {
             window.opener.parent.content.target.content.location = urlTarget;
         
         <% } else if(from.equals("online2")) {%>
+
+            var urlTarget = window.opener.location + "";
+            
+            if(urlTarget.indexOf("searchBySid=") > -1) {
+                urlTarget = urlTarget.substring(0, urlTarget.indexOf("&searchBySid=")) + "&searchBySid=" + value;
+            }
+            else {
+                urlTarget = urlTarget + "&searchBySid=" + value;
+            }
+
+            window.opener.location = urlTarget;
+        <% } else if(from.equals("online3")) {%>
 
             var urlTarget = window.opener.location + "";
             

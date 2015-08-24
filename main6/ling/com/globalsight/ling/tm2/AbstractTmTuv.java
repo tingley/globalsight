@@ -317,8 +317,6 @@ public abstract class AbstractTmTuv
             if (p_other instanceof BaseTmTuv)
             {
                 BaseTmTuv otherTuv = (BaseTmTuv)p_other;
-				boolean isProjectSame = (m_updatedByProject != null && m_updatedByProject.equals(otherTuv.getUpdatedProject()))
-						|| (m_updatedByProject == null && otherTuv.getUpdatedProject() == null);
                 if (this == otherTuv)
                 {
                     ret = true;
@@ -329,7 +327,6 @@ public abstract class AbstractTmTuv
                         && m_exactMatchKey == otherTuv.getExactMatchKey()
                         && getExactMatchFormat().equals(
                                 otherTuv.getExactMatchFormat())
-						&& isProjectSame
                         && hashCode() == otherTuv.hashCode())
                 {
                     ret = true;

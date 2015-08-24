@@ -76,6 +76,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.jobhandler.JobHandler;
+import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -459,7 +460,22 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
             p_response.getWriter().write(jsonObject.toJSONString());
             return;
-        }
+		}
+		else if ("updatePriority".equals(p_request.getParameter("action")))
+		{
+			ServletOutputStream out = p_response.getOutputStream();
+			String jobId = p_request.getParameter("jobId");
+			String selectOption = p_request.getParameter("selectOption");
+			JobImpl jobImpl = HibernateUtil.get(JobImpl.class,
+					Long.parseLong(jobId));
+			jobImpl.setPriority(Integer.parseInt(selectOption));
+			HibernateUtil.merge(job);
+
+			Map<String, Object> returnValue = new HashMap();
+			returnValue.put("newPriority", jobImpl.getPriority());
+			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+			return;
+		}
         // deal with ajax request.End.
 
         boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
@@ -482,38 +498,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         jobSummaryHelper.updateMRUJob(p_request, job, p_response);
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
-    }
-
-    private void getPercent(HttpServletResponse p_response,
-            String[] workflowIdsArray)
-    {
-        try
-        {
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < workflowIdsArray.length; i++)
-            {
-
-                Workflow workflow = ServerProxy.getWorkflowManager()
-                        .getWorkflowById(Long.parseLong(workflowIdsArray[i]));
-                Task task = (Task) workflow.getTasks().values().iterator()
-                        .next();
-                int percent = SegmentTuvUtil
-                        .getTranslatedPercentageForTask(task);
-                sb.append(percent).append(",");
-            }
-
-            if (sb.length() != 0)
-            {
-                PrintWriter out = p_response.getWriter();
-                p_response.setContentType("text/html");
-                out.write(sb.toString());
-                out.close();
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
     }
 
     public boolean checkQAReport(SessionManager sessionMgr, long companyId,

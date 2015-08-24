@@ -226,6 +226,13 @@ function EndGetPTagStrings()
     GetPTagString(sourceGxml, datatype);
 }
 
+//This is just get the ptag.
+function getPtagString() {
+    var result = getOnlineAjaxValue("getPtagString", null);
+
+    return result;
+}
+
 function ptagStringToHtml(result)
 {
     result = result.replace(/<SPAN [^>]*>\[b(old)?\]<\/SPAN>/gi, "<B>");

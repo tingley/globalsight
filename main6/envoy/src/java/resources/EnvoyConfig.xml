@@ -1738,6 +1738,7 @@
       </WebPage>
       <WebPage pageName="WFTTL" isDefault="false" jspName="/envoy/projects/workflows/translatedTextList.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.TranslatedTextHandler">
       	<PageLink linkName="self" destinationPageName="WFTTL"></PageLink>
+      	<PageLink linkName="back" destinationPageName="DTLS"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>
@@ -1752,6 +1753,24 @@
   <WebModule webModuleName="serviceware">
     <WebActivity webActivityName="swimport" clearSession="false">
       <WebPage pageName="SW1" isDefault="true" jspName="/envoy/serviceware/swimport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.serviceware.ServiceWareMainHandler"></WebPage>
+    </WebActivity>
+  </WebModule>
+  <WebModule webModuleName="newEditor">
+     <WebActivity webActivityName="edit3">
+      <WebPage pageName="NEWED1" isDefault="true" jspName="/envoy/edit/online3/main.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online3.EditorPageHandler">
+        <PageLink linkName="self" destinationPageName="NEWED1"></PageLink>
+        <PageLink linkName="refresh" destinationPageName="NEWED1"></PageLink>
+        <PageLink linkName="pageInfo" destinationPageName="ED10"></PageLink>
+        <PageLink linkName="resources" destinationPageName="ED12"></PageLink>
+        <PageLink linkName="termbases" destinationPageName="ED13"></PageLink>
+        <PageLink linkName="options" destinationPageName="ED14"></PageLink>
+        <PageLink linkName="help" destinationPageName="ED11"></PageLink>
+        <PageLink linkName="search" destinationPageName="NEWED19"></PageLink>
+        <PageLink linkName="autoPropagate" destinationPageName="ED20"></PageLink>
+        <PageLink linkName="segmentEditor" destinationPageName="SE1"></PageLink>
+        <PageLink linkName="commentEditor" destinationPageName="CE1"></PageLink>
+      </WebPage>
+      <WebPage pageName="NEWED19" isDefault="false" jspName="/envoy/edit/online2/search.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online3.EditorPageHandler"></WebPage>
     </WebActivity>
   </WebModule>
  <WebModule webModuleName="editor">
@@ -2075,6 +2094,7 @@
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="dtpUpload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
+        <PageLink linkName="newEditor" destinationPageName="NEWED1"></PageLink>
         <PageLink linkName="incontextreiview" destinationPageName="inctxrvED1"></PageLink>
         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>

@@ -2158,8 +2158,7 @@ public class WorkflowServerLocal implements WorkflowServer
                         WorkflowOwner owner = new WorkflowOwner();
                         owner.setWorkflow(workflow);
                         owner.setOwnerId(userId);
-                        owner.setOwnerType(((WorkflowOwner) workflow
-                                .getWorkflowOwners().get(0)).getOwnerType());
+                        owner.setOwnerType(Permission.GROUP_WORKFLOW_MANAGER);
                         owners.add(owner);
                         ServerProxy.getWorkflowManager()
                                 .reassignWorkflowOwners(workflow.getId(),
@@ -3792,6 +3791,7 @@ public class WorkflowServerLocal implements WorkflowServer
             }
 
             boolean notifyPm = p_emailInfo.notifyProjectManager();
+            String projectManager = p_emailInfo.getProjectManagerId();
             List<String> wfmUserNames = p_emailInfo.getWorkflowManagerIds();
             // do not send email if not required
             if (!notifyPm && wfmUserNames.size() == 0)
@@ -3803,14 +3803,15 @@ public class WorkflowServerLocal implements WorkflowServer
             Set<String> ignoredReceipt = p_emailInfo.getIgnoredReceipt();
             if (ignoredReceipt != null && ignoredReceipt.size() > 0)
             {
-                if (ignoredReceipt.contains(p_emailInfo.getProjectManagerId()))
+                if (ignoredReceipt.contains(projectManager))
                     notifyPm = false;
 
-                for (int i = 0; i < wfmUserNames.size(); i++)
+				for (Iterator<String> it = wfmUserNames.iterator(); it.hasNext();)
                 {
-                    String wfm = wfmUserNames.get(i);
-                    if (ignoredReceipt.contains(wfm))
-                        wfmUserNames.remove(wfm);
+                    if (ignoredReceipt.contains(it.next()))
+                    {
+                    	it.remove();
+                    }
                 }
             }
 
@@ -3820,17 +3821,19 @@ public class WorkflowServerLocal implements WorkflowServer
 
             if (notifyPm)
             {
-                sendMail(p_fromUserId,
-                        getEmailInfo(p_emailInfo.getProjectManagerId()),
-                        subject, message, p_messageArgs, companyIdStr);
+				sendMail(p_fromUserId, getEmailInfo(projectManager), subject,
+						message, p_messageArgs, companyIdStr);
             }
 
             // notify all workflow managers (if any)
             for (int i = 0; i < wfmUserNames.size(); i++)
             {
-                sendMail(p_fromUserId,
-                        getEmailInfo((String) wfmUserNames.get(i)), subject,
-                        message, p_messageArgs, companyIdStr);
+				if (notifyPm
+						&& projectManager.equalsIgnoreCase(wfmUserNames.get(i)))
+            		continue;
+
+				sendMail(p_fromUserId, getEmailInfo(wfmUserNames.get(i)),
+						subject, message, p_messageArgs, companyIdStr);
             }
         }
         catch (Exception e)

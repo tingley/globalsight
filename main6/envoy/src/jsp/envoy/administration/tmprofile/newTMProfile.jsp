@@ -1046,7 +1046,7 @@ function doOnLoad()
                                     </TR>
                                     <TR ALIGN="LEFT">
                                         <TD COLSPAN=2>
-                                        	<INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>" CHECKED><%=lbsaveUnlSegToTm%>
+                                        	<INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>"><%=lbsaveUnlSegToTm%>
                                         </TD>
                                     </TR>
                                     <TR ALIGN="LEFT">
@@ -1059,7 +1059,7 @@ function doOnLoad()
 			                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" CHECKED><%=lbsaveApprovedSegToTM%>
 			                           </TD>
 			                        </TR>
-                                    <TR ALIGN="LEFT">
+                                    <TR ALIGN="LEFT" style="display:none">
                                         <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" CHECKED><%=lbisSaveExactMatchToProjectTm%></TD>
                                     </TR>
                                     <TR ALIGN="LEFT">

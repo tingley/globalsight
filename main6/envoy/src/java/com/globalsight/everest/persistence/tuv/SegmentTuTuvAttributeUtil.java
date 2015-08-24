@@ -81,6 +81,14 @@ public class SegmentTuTuvAttributeUtil extends SegmentTuTuvCacheManager
 		return queryAttributes(p_tuvIds, TuTuvAttributeImpl.OBJECT_TYPE_TUV,
 				TuTuvAttributeImpl.SID, p_jobId);
 	}
+	
+	public static List<TuTuvAttributeImpl> getStateAttributesByTuvIds(
+			List<Long> p_tuvIds, long p_jobId)
+			throws Exception
+	{
+		return queryAttributes(p_tuvIds, TuTuvAttributeImpl.OBJECT_TYPE_TUV,
+				TuTuvAttributeImpl.STATE, p_jobId);
+	}
 
 	/**
 	 * Query attributes.
@@ -290,6 +298,56 @@ public class SegmentTuTuvAttributeUtil extends SegmentTuTuvCacheManager
 
 			// Save new values.
 			saveTuTuvAttributes(p_connection, attibutes, p_jobId);
+		}
+		catch (Exception e)
+		{
+			logger.error("Error when update tu/tuv attributes into table '"
+					+ attributeTable + "'.", e);
+			throw e;
+		}
+		finally
+		{
+			DbUtil.silentClose(ps);
+		}
+	}
+	
+	public static void deleteStateAttributes(Connection p_connection,
+			List<TuTuvAttributeImpl> sidAttibutes, long p_jobId)
+			throws Exception
+	{
+		deleteTuTuvAttributes(p_connection, sidAttibutes,
+				TuTuvAttributeImpl.OBJECT_TYPE_TUV,
+				TuTuvAttributeImpl.STATE, p_jobId);
+	}
+	
+	private static void deleteTuTuvAttributes(Connection p_connection,
+			List<TuTuvAttributeImpl> attibutes, String p_objectType,
+			String p_name, long p_jobId) throws Exception
+	{
+		PreparedStatement ps = null;
+		String attributeTable = null;
+
+		try
+		{
+			// Delete attributes by object IDs first.
+			attributeTable = BigTableUtil
+					.getTuTuvAttributeTableByJobId(p_jobId);
+			StringBuffer objectIdsBuf = new StringBuffer();
+			for (TuTuvAttributeImpl attr : attibutes)
+			{
+				objectIdsBuf.append(attr.getObjectId()).append(",");
+			}
+			String objectIdsClause = objectIdsBuf
+					.substring(0, objectIdsBuf.length() - 1);
+
+			String sql = DEL_ATTR_BY_TUVID_SQL.replace(
+					TU_TUV_ATTR_TABLE_PLACEHOLDER, attributeTable).replace(
+					"_OBJECT_ID_PLACEHOLDER_", objectIdsClause);
+			ps = p_connection.prepareStatement(sql);
+			ps.setString(1, p_objectType);
+			ps.setString(2, p_name);
+			ps.execute();
+			p_connection.commit();
 		}
 		catch (Exception e)
 		{

@@ -165,6 +165,8 @@ public class TranslationMemoryProfile extends PersistentObject
     
     private boolean m_isSaveApprovedSegToProjectTM = true;
     
+    private boolean m_isSaveLocSegToProjectTM = true;
+    
     private boolean m_isSaveExactMatchSegToProjectTM = true;
 
     public TranslationMemoryProfile()
@@ -994,4 +996,13 @@ public class TranslationMemoryProfile extends PersistentObject
         this.uniqueFromMultipleTranslation = uniqueFromMultipleTranslation;
     }
 
+    public boolean isSaveLocSegToProjectTM()
+    {
+        return m_isSaveLocSegToProjectTM;
+    }
+    
+    public void setSaveLocSegToProjectTM(boolean p_isSaveLocSegToProjectTM)
+    {
+        m_isSaveLocSegToProjectTM = p_isSaveLocSegToProjectTM;
+    }
 }

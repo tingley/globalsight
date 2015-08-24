@@ -160,9 +160,10 @@ public class PageJobData
 			LeverageOptions p_options) throws Exception
 	{
         boolean saveUntranslated = p_options.savesUntranslatedInSegmentTm();
+        boolean saveLocailzed = p_options.saveLocalizedInSegmentTM();
         boolean saveApproved = p_options.savesApprovedInSegmentTm();
         boolean saveExactMatch = p_options.savesExactMatchInSegmentTm();
-        return getTusToSave(saveUntranslated, saveApproved, saveExactMatch);
+        return getTusToSave(saveUntranslated,saveLocailzed, saveApproved, saveExactMatch);
     }
 
     /**
@@ -203,7 +204,7 @@ public class PageJobData
     }
     
     //To Project TM
-	private Collection<PageTmTu> getTusToSave(boolean p_saveUntranslated,
+	private Collection<PageTmTu> getTusToSave(boolean p_saveUntranslated, boolean p_saveLocalized,
 			boolean p_saveApproved, boolean p_saveExactMatch) throws Exception
 	{
 		populateMergedTus();
@@ -211,36 +212,24 @@ public class PageJobData
 		Collection<PageTmTu> tuList = null;
 		Set<String> excludeStates = new HashSet<String>();
 		excludeStates.add(TuvState.COMPLETE.getName());
-		if (p_saveUntranslated)
+		
+		if(!p_saveUntranslated)
 		{
-			if(!p_saveExactMatch)
-			{	
-				excludeStates.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
-			}
-			if(p_saveApproved)
-		    {	
-				excludeStates.add(TuvState.NOT_LOCALIZED.getName());
-		    }
-			if(excludeStates.size() > 0)
-			{				
-				tuList = getTusByState(excludeStates, EXCLUDE_STATE);
-			}
-			else 
-			{
-				tuList = m_mergedTus;
-			}
+			excludeStates.add(TuvState.NOT_LOCALIZED.getName());
 		}
-		else
+		if(!p_saveLocalized)
 		{
-		    if(!p_saveExactMatch)
-		    {
-		    	excludeStates.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
-		    }
-		    excludeStates.add(TuvState.APPROVED.getName());
-		    excludeStates.add(TuvState.NOT_LOCALIZED.getName());
-		    excludeStates.add(TuvState.DO_NOT_TRANSLATE.getName());
-		    tuList = getTusByState(excludeStates, EXCLUDE_STATE);
+			excludeStates.add(TuvState.LOCALIZED.getName());
 		}
+		if(!p_saveApproved)
+		{
+			excludeStates.add(TuvState.APPROVED.getName());
+		}
+		if(!p_saveExactMatch)
+	    {
+	    	excludeStates.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
+	    }
+		tuList = getTusByState(excludeStates, EXCLUDE_STATE);
 		
 		return tuList;
 	}

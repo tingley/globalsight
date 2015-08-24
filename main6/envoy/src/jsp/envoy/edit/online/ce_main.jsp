@@ -343,8 +343,8 @@ function doOk()
     }
     var share = document.getElementById("share").checked;
     var overwrite = document.getElementById("overwrite").checked;
-    var main=rootWindow.parent.parent.parent.parent;
-   	main.localData=null;
+   // var main=rootWindow.parent.parent.parent.parent;
+   	//main.localData=null;
 	try {rootWindow.SaveComment2(g_tuId, g_tuvId, g_subId, action, title, comment, priority, status, category, share, overwrite);
  } catch (ex) {  window.opener.SaveComment2(g_tuId, g_tuvId, g_subId,  action, title, comment, priority, status, category, share, overwrite);
  }

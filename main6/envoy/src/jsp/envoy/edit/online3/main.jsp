@@ -472,6 +472,7 @@ var url_search = "<%=url_search%>";
 var url_resources = "<%=url_resources%>";
 var url_termbases = "<%=url_termbases%>";
 var url_options = "<%=url_options%>";
+var url_pageInfo = "<%=url_pageInfo%>";
 var isFirstPage = '<%=state.isFirstPage()%>';
 var isLastPage = '<%=state.isLastPage()%>';
 var isFirstBatch = '<%=state.isFirstBatch()%>';
@@ -560,7 +561,6 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 	         }
 	      %>
 		  <A href="#" onclick="showPtagsTest();" id="showPtags" CLASS="HREFBoldWhite" title="<%=lable%>"><%=lable%></A> |
-		  <A href="#" onclick="searchByUserOrSid(); return false;" CLASS="HREFBoldWhite" title="<%=bundle.getString("lb_search")%>"><%=bundle.getString("lb_search")%></A> |
 		  <amb:permission name="<%=Permission.REPORTS_COMMENTS_ANALYSIS%>">
 		  	<A href="#" onclick="createLisaQAReport(); return false;" CLASS="HREFBoldWhite" title="Create Comments Analysis Report"> Comments Analysis</A> |
 	      </amb:permission>
@@ -589,7 +589,7 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 </TABLE>
 </div>
 <div id="nav" class="nav" style="overflow:auto;">
-<TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"style="max-height:300px;height:300px;border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;font-family: Arial, Helvetica, sans-serif;font-size: 10pt;">
+<TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;font-family: Arial, Helvetica, sans-serif;font-size: 10pt;">
   <THEAD>
     <TR CLASS="tableHeadingGray" style="height:19pt;">
       <TD ALIGN="CENTER" class="sourceTempClass"  width='25'><%=lb_id%></TD>

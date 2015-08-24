@@ -1481,7 +1481,7 @@ function doOnLoad()
                            <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" VALUE="true" <%=isSaveApprovedToProjectTMChecked %>><%=lbsaveApprovedSegToTM%>
                            </TD>
                         </TR>
-                        <TR ALIGN="LEFT">
+                        <TR ALIGN="LEFT" style="display:none">
                            <TD COLSPAN=2>
                            <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=isSaveExactMatchToProjectTMChecked%>><%=lbisSaveExactMatchToProjectTm%>
                             </TD>

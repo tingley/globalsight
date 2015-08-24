@@ -50,6 +50,12 @@ function showOptions()
       "resizable=no,scrollbars=no,width=470,height=590");
 }
 
+function showPageInfo()
+{
+    w_pageinfo = window.open(url_pageInfo, "MEPageInfo",
+      "resizable,width=400,height=400");
+}
+
 function showSupportFiles()
 {
     w_resources = window.open(url_resources, "MESupportFiles",
@@ -145,38 +151,6 @@ function EnterPress(e)
 		    }
 	    }
 	}
-}
-
-function searchByUserOrSid() {
-
-      var url = url_search+"&search=true&action=search";
-      
-      if(document.recalc)
-      {
-          if (!w_search || w_search.closed)
-      	  {
-            	var args = { _opener: window, _data: false };
-              w_search = window.open(url,"","height=480px, width=700px,status=no,resizable=yes,modal=yes,scrollbars=yes"); 		
-              		
-          }
-          else
-          {
-    	        w_search.focus();
-  	      }
-      }
-      else
-      {
-          if (!w_search || w_search.closed)
-      	  {
-      		window.myAction=this;
-      		window.myArguments=true;
-      		w_search = window.open(url,"","height=480px, width=700px,status=no,resizable=yes,modal=yes,scrollbars=yes");
-      		}
-      		else
-          {
-    	        w_search.focus();
-  	      }
-      }
 }
 
 var parseQueryString = function(_query,match) {
@@ -333,7 +307,7 @@ function recursion(data,beginIndex){
 	
 	if(i<max){
 		setTimeout(function(){
-			recursion(sourceData,targetData,i);
+			recursion(data,i);
 		}, 100);
 	}else{
 		$(".ul:even").addClass("alt");

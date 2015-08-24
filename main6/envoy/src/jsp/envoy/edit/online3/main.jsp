@@ -483,11 +483,16 @@ var g_readOnly = eval("<%=b_readOnly%>");
 var currentIssuesSize = "<%=currentIssuesSize%>";
 var closeeAllCommentWarning = "<%=closeeAllCommentWarning%>";
 var g_disableComment = eval("<%=disableComment%>");
-var helpFile = "<%=bundle.getString("help_main_editor")%>";
+var helpFile = "<%=bundle.getString("help_main_editor2")%>";
 var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 </script>
 </HEAD>
 <BODY id="idBody" oncontextmenu="contextForX(event)">
+<FORM name="ShutdownForm" METHOD="POST" TARGET="idShutdown" ACTION="/globalsight/envoy/common/shutdownPopup.jsp">
+<input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=jobId%>">
+<input type="hidden" name="<%=ReportConstants.TARGETLOCALE_LIST%>" value="<%=tgtIDS%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="">
+</FORM>
 <FORM name="SaveForm" METHOD="POST" ACTION="<%=url_refresh%>&action=segment">
 <INPUT TYPE="hidden" NAME="save" VALUE="">
 <INPUT TYPE="hidden" NAME="refresh" VALUE="0">

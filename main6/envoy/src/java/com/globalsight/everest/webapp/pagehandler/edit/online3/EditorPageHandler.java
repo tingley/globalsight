@@ -801,6 +801,11 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		conn.close();
 		
 		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
+		
+		ServletOutputStream out = response.getOutputStream();
+		out.write("true".getBytes("UTF-8"));
+		out.close();
+    	pageReturn();
     }
     
     @ActionHandler(action = "getData", formClass = "")

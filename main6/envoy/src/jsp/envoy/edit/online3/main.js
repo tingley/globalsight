@@ -5,6 +5,7 @@ var showSource = false;
 var showList = false;
 var showPtags = false;
 var showRepeated = false;	
+var w_editor;
 window.focus();
 
 function helpSwitch()
@@ -39,9 +40,19 @@ function closeWindow()
 	window.close();
 }
 
+function CanClose()
+{
+	w_editor.close();
+}
+
 function refresh(direction)
 {
 	document.location = url_self + "&action=refresh&refresh=" + direction+"&random="+Math.random();
+}
+
+function Refresh(p_url)
+{
+    document.location = p_url;
 }
 
 function showOptions()
@@ -216,7 +227,9 @@ function approve()
 		approveIds:approveIds,
 		unApproveIds:unApproveIds,
 		random:Math.random()
-	}, function(data){});
+	}, function(data){
+		alert("Approve the Sgement(s).");
+	});
 }
 
 var modeId="";
@@ -513,6 +526,10 @@ function editSegment(tuId, tuvId, subId)
       "&tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId +
       "&refresh=0&releverage=false";
 
+    if(w_editor)
+    {
+    	w_editor.close();
+    }
     w_editor = window.open(str_url, "SegmentEditor",
       "resizable,width=560,height=" + segmentEditorHeight +
        ",top=0,left=0");
@@ -523,6 +540,10 @@ function editComment(tuId, tuvId, subId)
     var str_url = url_commentEditor +
       "&tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId + "&refresh=0";
 
+    if(w_editor)
+    {
+    	w_editor.close();
+    }
     w_editor = window.open(str_url, "CommentEditor",
       "width=550,height=610,top=100,left=100");
 }

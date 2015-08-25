@@ -224,7 +224,7 @@ function approve()
 		unApproveIds:unApproveIds,
 		random:Math.random()
 	}, function(data){
-		alert("Approve the Sgement(s).");
+		alert("Approved the Segment(s).");
 	});
 }
 

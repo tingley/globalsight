@@ -603,10 +603,10 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
       <TD ALIGN="CENTER" class="sourceTempClass"  width='25'><%=lb_id%></TD>
       <TD ALIGN="LEFT"><%=lb_segment%></TD>
       <TD ALIGN="LEFT">Original Translation</TD>
-      <TD ALIGN="LEFT">Currnt Translation</TD>
-      <TD ALIGN="LEFT" width='80'>
+      <TD ALIGN="LEFT">Current Translation</TD>
+      <TD ALIGN="LEFT" width='100'>
       	<input type="checkbox" id="checkAll" onclick="checkAll()" style="vertical-align:middle;"/>
-      	<a href="#" onclick="approve();" CLASS="HREFBoldWhite" style="vertical-align:middle;" >Approve</a>
+      	<input type="button" value="Approve" onclick="approve();">
       </TD>
     </TR>
   </THEAD>

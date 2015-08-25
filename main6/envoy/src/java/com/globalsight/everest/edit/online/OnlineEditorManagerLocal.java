@@ -6575,7 +6575,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     			{
     				if(!tempTuv.getGxmlElement().equals(tuv.getGxmlElement()))
     				{
-    					setOriginalTargetTuvMap.put(tuv.getId(), tuv);
+    					setOriginalTargetTuvMap.put(tuv.getId(), tempTuv);
     					break;
     				}
     			}

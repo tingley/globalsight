@@ -6392,7 +6392,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if(needOriginalTarget)
             {
             	List<Tuv> allTargetTuvs = SegmentTuvUtil.getAllTargetTuvs(targetPage);
-            	setOriginalTargetTuvMap(targetTuvs, allTargetTuvs, originalTargetTuvMap);
+            	setOriginalTargetTuvMap(targetTuvs, allTargetTuvs, originalTargetTuvMap, targetLocaleId);
             }
 
             // Gets the filtered source and target tuvs, and reset
@@ -6542,30 +6542,40 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return mainJson.toString();
     }
     
-    private void setOriginalTargetTuvMap(List<Tuv> filterTargetTuvs, 
-    		List<Tuv> allTargetTuvs, HashMap<Long, Tuv> setOriginalTargetTuvMap)
+    private void setOriginalTargetTuvMap(List<Tuv> filterTargetTuvs, List<Tuv> allTargetTuvs, 
+    		HashMap<Long, Tuv> setOriginalTargetTuvMap, long targetLocaleId)
     {
-    	for(Tuv filterTuv: filterTargetTuvs)
+    	HashMap<Long, List<Tuv>> tempHashMap = new HashMap<Long, List<Tuv>>();
+    	for(Tuv tuv: allTargetTuvs)
     	{
-    		long localeId = filterTuv.getLocaleId();
-    		List<Tuv> tempTuvList = new ArrayList<Tuv>();
-    		for(Tuv allTargetTuv: allTargetTuvs)
+    		long tuId = tuv.getTuId();
+    		if(tuv.getLocaleId() == targetLocaleId && tuv.getState().equals(TuvState.OUT_OF_DATE))
     		{
-    			if(localeId == allTargetTuv.getLocaleId() 
-    				&& allTargetTuv.getState().getValue() == TuvState.OUT_OF_DATE.getValue())
+    			if(tempHashMap.get(tuId) == null)
     			{
-    				tempTuvList.add(allTargetTuv);
+    				List<Tuv> tempTuvList = new ArrayList<Tuv>();
+    				tempTuvList.add(tuv);
+    				tempHashMap.put(tuId, tempTuvList);
+    			}
+    			else
+    			{
+    				tempHashMap.get(tuId).add(tuv);
     			}
     		}
-    		if(tempTuvList.size() > 0)
+    	}
+    	
+    	for(Tuv tuv: filterTargetTuvs)
+    	{
+    		long tuId = tuv.getTuId();
+    		List<Tuv> tempTuvList = tempHashMap.get(tuId);
+    		if(tempTuvList != null)
     		{
     			sortById(tempTuvList);
-    			for(Tuv tuv: tempTuvList)
+    			for(Tuv tempTuv: tempTuvList)
     			{
-    				if(filterTuv.getTuId() == tuv.getTuId() &&
-    						!tuv.getGxmlElement().equals(filterTuv.getGxmlElement()))
+    				if(!tempTuv.getGxmlElement().equals(tuv.getGxmlElement()))
     				{
-    					setOriginalTargetTuvMap.put(filterTuv.getId(), tuv);
+    					setOriginalTargetTuvMap.put(tuv.getId(), tuv);
     					break;
     				}
     			}

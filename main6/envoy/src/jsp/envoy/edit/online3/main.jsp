@@ -317,6 +317,9 @@ boolean isAssignee = assigneeValue == null ? true :
 boolean b_readOnly = state.isReadOnly();
 boolean b_isReviewActivity = state.getIsReviewActivity();
 boolean disableComment = isAssignee && b_readOnly;
+long lastTuId  = state.getTuId();
+long lastTuvId = state.getTuvId();
+long lastSubId = state.getSubId();
 
 String lb_sourceLocale = bundle.getString("lb_source_locale");
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
@@ -750,5 +753,18 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <script>
 ContextMenu.intializeContextMenu();
+
+var g_lastTuId  = "<%=lastTuId%>";
+var g_lastTuvId = "<%=lastTuvId%>";
+var g_lastSubId = "<%=lastSubId%>";
+HighlightSegment(g_lastTuId, g_lastTuvId, g_lastSubId);
+var updatePopupEditorFlag = "<%=state.getNeedUpdatePopUpEditor()%>";
+if (updatePopupEditorFlag != null && updatePopupEditorFlag != "null"
+    && g_lastTuId != null && g_lastTuId != "0"
+    && g_lastTuvId != null && g_lastTuvId != "0" )
+{
+    <%state.setNeedUpdatePopUpEditor(null);%>
+    editSegment(g_lastTuId, g_lastTuvId, g_lastSubId);
+}
 </script>
 </HTML>

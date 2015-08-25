@@ -6,6 +6,7 @@ var showList = false;
 var showPtags = false;
 var showRepeated = false;	
 var w_editor;
+var postReviewEditor = "postReviewEditor";
 window.focus();
 
 function helpSwitch()
@@ -48,11 +49,6 @@ function CanClose()
 function refresh(direction)
 {
 	document.location = url_self + "&action=refresh&refresh=" + direction+"&random="+Math.random();
-}
-
-function Refresh(p_url)
-{
-    document.location = p_url;
 }
 
 function showOptions()

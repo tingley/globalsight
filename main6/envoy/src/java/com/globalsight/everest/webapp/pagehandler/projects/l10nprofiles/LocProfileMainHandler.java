@@ -219,12 +219,16 @@ public class LocProfileMainHandler extends PageHandler implements
                     .getL10nProfile(Long.parseLong(id));
             String deps = LocProfileHandlerHelper.checkForDependencies(
                     locprofile, PageHandler.getBundle(p_session));
+            boolean isActive = locprofile.getIsActive();
             if (deps == null)
             {
-                LocProfileHandlerHelper.removeL10nProfile(locprofile);
-                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
-                        OperationLog.COMPONET_L10N_PROFILE,
-                        locprofile.getName());
+                if (isActive)
+                {
+                    LocProfileHandlerHelper.removeL10nProfile(locprofile);
+                    OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                            OperationLog.COMPONET_L10N_PROFILE,
+                            locprofile.getName());
+                }
             }
             else
             {

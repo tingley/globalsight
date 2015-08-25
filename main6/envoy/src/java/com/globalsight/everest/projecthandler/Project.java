@@ -300,4 +300,6 @@ public interface Project
     public boolean getAutoSendDitaQaReport();
 
     public void setAutoSendDitaQaReport(boolean autoSendQaReport);
+    
+    public boolean getIsActive();
 }

@@ -416,10 +416,13 @@ public class ProjectMainHandler extends PageHandler
         {
             Project project = ServerProxy.getProjectHandler().getProjectById(
                     projectId);
-            if (project != null)
+            boolean isActive = project.getIsActive();
+            if (project != null && isActive)
             {
                 project.deactivate();
-                String originName = project.getName();
+                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                        OperationLog.COMPONET_PROJECT, project.getName());
+//                String originName = project.getName();
                 // change the in-active project name to an unique value
                 long time = (new Date()).getTime();
                 String changedProjectName = project.getName() + "_" + time;
@@ -429,8 +432,8 @@ public class ProjectMainHandler extends PageHandler
                 }
                 project.setName(changedProjectName);
                 HibernateUtil.saveOrUpdate(project);
-                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
-                        OperationLog.COMPONET_PROJECT, originName);
+//                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+//                        OperationLog.COMPONET_PROJECT, originName);
                 // not delete users info from 'project_user' table
             }
         }

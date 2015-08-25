@@ -2158,7 +2158,17 @@ public class WorkflowServerLocal implements WorkflowServer
                         WorkflowOwner owner = new WorkflowOwner();
                         owner.setWorkflow(workflow);
                         owner.setOwnerId(userId);
-                        owner.setOwnerType(Permission.GROUP_WORKFLOW_MANAGER);
+                        List wfManagerIds = workflow
+                                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER);
+                        if (wfManagerIds.size() > 0
+                                && wfManagerIds.contains(userId))
+                        {
+                            owner.setOwnerType(Permission.GROUP_WORKFLOW_MANAGER);
+                        }
+                        else
+                        {
+                            owner.setOwnerType(Permission.GROUP_PROJECT_MANAGER);
+                        }
                         owners.add(owner);
                         ServerProxy.getWorkflowManager()
                                 .reassignWorkflowOwners(workflow.getId(),

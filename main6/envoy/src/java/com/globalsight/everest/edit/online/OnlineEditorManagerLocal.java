@@ -6499,9 +6499,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 	String temp = "";
                 	if(originalTargetTuvMap.size() > 0)
                 	{
-                		if(originalTargetTuvMap.get(trgTuv.getId()) != null)
+                		Tuv tempTuv = originalTargetTuvMap.get(trgTuv.getId());
+                		if(tempTuv != null)
                 		{
-                			temp = originalTargetTuvMap.get(trgTuv.getId()).getGxmlElement().getTextValue();
+                	        String dataType = tempTuv.getDataType(jobId);
+                			String segment = GxmlUtil.getDisplayHtml(tempTuv.getGxmlElement(),
+                	                dataType, options.getViewMode());
+                			temp = getEditorSegment(tempTuv,
+                	                EditorConstants.PTAGS_COMPACT, segment,
+                	                editorState.getNeedShowPTags(), jobId);
                 		}
                 	}
                 	originalTargetj.put("originalTarget", temp);
@@ -6573,7 +6579,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     			sortById(tempTuvList);
     			for(Tuv tempTuv: tempTuvList)
     			{
-    				if(!tempTuv.getGxmlElement().equals(tuv.getGxmlElement()))
+    				if(!tempTuv.getGxml().equals(tuv.getGxml()))
     				{
     					setOriginalTargetTuvMap.put(tuv.getId(), tempTuv);
     					break;

@@ -389,7 +389,7 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 function getNodeByClass(item, se_able){
 	var temp;
 	// if "mainstyle.match("SE ")", it should display right click context menus.
-	var scriptFlag = inner_reviewMode || item.mainstyle.match("SE ") || se_able == "target";
+	var scriptFlag = inner_reviewMode || item.mainstyle.match("SE ");
 
 	if(scriptFlag){
 		temp=SEnode.clone(true);

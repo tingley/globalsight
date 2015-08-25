@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Vector;
 
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
@@ -289,4 +290,6 @@ public interface OnlineEditorManager extends UIConstants
 
     public String getTargetJsonData(EditorState state, boolean isAssignee,
             HashMap<String, String> hm, boolean fromInCtxRv);
+
+	public void updateApprovedTuvCache(List<Long> approvedTuvIds);
 }

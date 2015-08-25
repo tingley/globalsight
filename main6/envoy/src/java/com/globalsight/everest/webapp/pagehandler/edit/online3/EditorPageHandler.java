@@ -740,6 +740,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		String unApproveIds = request.getParameter("unApproveIds");
 		Connection conn = DbUtil.getConnection();
 		conn.setAutoCommit(false);
+		List<Long> approvedTuvIds = new ArrayList<Long>();
 		if(StringUtil.isNotEmpty(approveIds))
 		{
 			approveIds = approveIds.substring(0, approveIds.length() - 1);
@@ -764,6 +765,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 					tuTuvAttributeImpl.setLongValue(tuvState.getValue());
 					tuTuvAttributeImplList.add(tuTuvAttributeImpl);
 					SegmentTuTuvAttributeUtil.saveTuTuvAttributes(conn, tuTuvAttributeImplList, jobId);
+					
+					approvedTuvIds.add(tuv.getId());
 				}
 			}
 		}
@@ -801,6 +804,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		conn.close();
 		
 		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
+		state.getEditorManager().updateApprovedTuvCache(approvedTuvIds);
 		
 		ServletOutputStream out = response.getOutputStream();
 		out.write("true".getBytes("UTF-8"));

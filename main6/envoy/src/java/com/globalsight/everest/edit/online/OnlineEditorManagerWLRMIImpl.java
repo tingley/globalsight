@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Vector;
 
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
@@ -336,5 +337,11 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
             HashMap<String, String> hm, boolean fromInCtxRv)
     {
         return m_localReference.getTargetJsonData(p_state, isAssignee, hm, fromInCtxRv);
+    }
+    
+    @Override
+    public void updateApprovedTuvCache(List<Long> approvedTuvIds)
+    {
+    	  m_localReference.updateApprovedTuvCache(approvedTuvIds);
     }
 }

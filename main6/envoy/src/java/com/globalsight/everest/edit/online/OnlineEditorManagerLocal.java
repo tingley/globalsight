@@ -6276,6 +6276,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 	
 	@Override
+	public void updateApprovedTuvCache(List<Long> approvedTuvIds) 
+	{
+		for(Tuv tuv: m_pageCache.getTargetTuvs())
+		{
+			if(approvedTuvIds.contains(tuv.getId()))
+			{
+				tuv.setState(TuvState.APPROVED);
+			}
+		}
+	}
+	
+	@Override
 	public String getTargetJsonData(EditorState p_state, boolean isAssignee,
             HashMap<String, String> p_searchMap)
 	{

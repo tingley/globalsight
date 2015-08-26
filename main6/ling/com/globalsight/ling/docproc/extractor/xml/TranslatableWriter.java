@@ -16,12 +16,9 @@
  */
 package com.globalsight.ling.docproc.extractor.xml;
 
-import java.util.regex.Matcher;
-
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.ExtractorRegistry;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.util.StringUtil;
 
 /**
  * Utility class used in Extractor
@@ -66,8 +63,6 @@ class TranslatableWriter extends OutputWriter
             }
             else if (isTmxTagsOnly(toAdd))
             {
-                // GBS-3997
-                toAdd = parseEmojiAlias(toAdd);
                 output.addSkeletonTmx(removeTags(toAdd));
             }
             else
@@ -90,29 +85,6 @@ class TranslatableWriter extends OutputWriter
                 }
             }
         }
-    }
-
-    /**
-     * Replaces the emoji's description occurrences by their aliases for export
-     * conversion.
-     * 
-     * @since GBS-3997
-     */
-    private String parseEmojiAlias(String content)
-    {
-        Matcher m = XmlExtractor.P_EMOJI_TAG.matcher(content);
-        while (m.find())
-        {
-            String alias = m.group(2);
-            if (alias.startsWith(XmlExtractor.MARK_EMOJI))
-            {
-                alias = alias.substring(6);
-                String replace = m.group(1) + XmlExtractor.MARK_EMOJI + ":"
-                        + alias + ":" + m.group(3);
-                content = StringUtil.replace(content, m.group(), replace);
-            }
-        }
-        return content;
     }
 
     private String removeTags(String content)

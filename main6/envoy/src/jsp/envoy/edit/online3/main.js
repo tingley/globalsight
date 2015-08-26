@@ -416,6 +416,8 @@ function getNodeByClass(item, se_able){
 	{
 		temp.addClass(item.mainstyle.replace("editorComment", "").replace("isHighLight", ""));
 	}
+	
+	temp.addClass("noUnderline");
 
 	if(item.subArray){
 		var stable=subtable.clone(true);
@@ -433,6 +435,7 @@ function getNodeByClass(item, se_able){
 			}
 
 			span.addClass(this.subclass);
+			span.addClass("noUnderline");
 			span.html(this.segment);
 			sub.children('td').eq(1).attr("id","seg"+item.tuId+"_"+item.tuvId+"_"+this.subId);
 			sub.children('td').eq(1).append(span);

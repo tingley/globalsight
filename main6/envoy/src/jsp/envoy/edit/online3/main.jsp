@@ -451,6 +451,8 @@ String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_commen
 .open   { background-color: red !important; }
 .closed { background-color: lawngreen !important; }
 
+.noUnderline{text-decoration:none;}
+
 .clickable    	{ cursor: hand; cursor:pointer; }
 .commentTitle 	{ font-weight: bold; }
 .commentBy    	{ font-weight: bold; }

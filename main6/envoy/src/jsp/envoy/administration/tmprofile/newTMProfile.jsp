@@ -96,6 +96,8 @@
    String lbsaveToProjectTmId = bundle.getString("msg_save_to_project_tm");
    String lbisSaveToProjectTm = bundle.getString("msg_is_save_to_project_tm");
    String lbsaveAllUnlSegToTM = bundle.getString("msg_save_all_unlocalized_sgments_to_tm");
+   String lblocalizedApprovedSegments = bundle.getString("msg_localized_approved_segments");
+   String lbsaveBothtoTM =  bundle.getString("msg_save_both_to_tm");
    String lbonlySaveApprovedSegToTM = bundle.getString("msg_save_approved_segments_to_tm_only");
    String lbsaveUnlSegToTm =  bundle.getString("msg_save_unlocalized_segments_to_tm");
    String lbsavelocSegToTm =  bundle.getString("msg_save_localized_segments_to_tm");
@@ -1050,13 +1052,18 @@ function doOnLoad()
                                         </TD>
                                     </TR>
                                     <TR ALIGN="LEFT">
-		                               <TD COLSPAN=2>
-			                               <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" CHECKED><%=lbsavelocSegToTm%>
+                                        <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        	<%=lblocalizedApprovedSegments%>
+                                        </TD>
+                                    </TR>
+                                    <TR ALIGN="LEFT">
+		                               <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			                               <INPUT name="<%=isSaveLocToProjectTm%>" TYPE="radio" value="saveBoth" checked><%=lbsaveBothtoTM%>
 			                           </TD>
 			                        </TR>
 			                        <TR ALIGN="LEFT">
-			                           <TD COLSPAN=2>
-			                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" CHECKED><%=lbsaveApprovedSegToTM%>
+			                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			                               <INPUT name="<%=isSaveLocToProjectTm%>" TYPE="radio" value="saveApprovedOnly"><%=lbonlySaveApprovedSegToTM%>
 			                           </TD>
 			                        </TR>
                                     <TR ALIGN="LEFT" style="display:none">

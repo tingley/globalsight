@@ -431,10 +431,16 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         {
             tmProfile.setSaveLocSegToProjectTM(false);
         }
-        else if (saveLocToProjectTm.equals("true"))
+        else if (saveLocToProjectTm.equals("saveBoth"))
         {
             tmProfile.setSaveLocSegToProjectTM(true);
         }
+        else if(saveLocToProjectTm.equals("saveApprovedOnly"))
+        {
+        	 tmProfile.setSaveLocSegToProjectTM(false);
+        }
+        
+        tmProfile.setSaveApprovedSegToProjectTM(true);
         // 5
         String saveToPageTm = p_request.getParameter("isSaveToPageTm");
         if (saveToPageTm == null)
@@ -765,16 +771,6 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         else if ("true".equals(isTmProcendence))
         {
             tmProfile.setTmProcendence(true);
-        }
-
-        String saveApprovedToProjectTm = p_request.getParameter("isSaveApprovedToProjectTm");
-        if (saveApprovedToProjectTm == null)
-        {
-            tmProfile.setSaveApprovedSegToProjectTM(false);
-        }
-        else if (saveApprovedToProjectTm.equals("true"))
-        {
-            tmProfile.setSaveApprovedSegToProjectTM(true);
         }
 
         String saveExactMatchToProjectTm = p_request.getParameter("isSaveExactMatchToProjectTm");

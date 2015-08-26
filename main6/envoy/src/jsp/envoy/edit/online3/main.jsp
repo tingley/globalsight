@@ -289,6 +289,9 @@ String lb_pageNavigation = bundle.getString("lb_pageNavigation");
 String lb_showSupportFiles = bundle.getString("lb_showSupportFiles");
 String lb_showTermbases = bundle.getString("lb_showTermbases");
 String lb_source = bundle.getString("lb_source");
+String lb_source_segment = bundle.getString("lb_source_segment");
+String lb_initial_translation = bundle.getString("lb_initial_translation");
+String lb_current_translation = bundle.getString("lb_current_translation");
 String lb_supportFiles = bundle.getString("lb_supportFiles");
 String lb_target = bundle.getString("lb_target");
 String lb_termbases = bundle.getString("lb_termbases");
@@ -603,9 +606,9 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
   <THEAD>
     <TR CLASS="tableHeadingGray" style="height:19pt;">
       <TD ALIGN="CENTER" class="sourceTempClass"  width='25'><%=lb_id%></TD>
-      <TD ALIGN="LEFT"><%=lb_segment%></TD>
-      <TD ALIGN="LEFT">Original Translation</TD>
-      <TD ALIGN="LEFT">Current Translation</TD>
+      <TD ALIGN="LEFT"><%=lb_source_segment%></TD>
+      <TD ALIGN="LEFT"><%=lb_initial_translation%></TD>
+      <TD ALIGN="LEFT"><%=lb_current_translation%></TD>
       <TD ALIGN="LEFT" width='100'>
       	<input type="checkbox" id="checkAll" onclick="checkAll()" style="vertical-align:middle;"/>
       	<input type="button" value="Approve" onclick="approve();">

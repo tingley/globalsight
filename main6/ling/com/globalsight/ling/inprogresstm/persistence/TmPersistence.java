@@ -29,15 +29,15 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTu;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTuv;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.Sequence;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * TmPersistence class is responsible for accessing persistence layer of
@@ -110,14 +110,14 @@ public class TmPersistence
     static private final String INSERT_INTO = "INSERT INTO ";
 
     static private final String INSERT_NON_CLOB_SRC = " (id, job_id, population_tm_id, locale_id, type, exact_match_key, "
-            + "segment_string) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            + "segment_string, segment_clob) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    static private final String INSERT_NON_CLOB_TRG = " (id, src_id, tu_id, locale_id, segment_string) "
-            + "VALUES (?, ?, ?, ?, ?)";
+    static private final String INSERT_NON_CLOB_TRG = " (id, src_id, tu_id, locale_id, segment_string, segment_clob) "
+            + "VALUES (?, ?, ?, ?, ?, ?)";
 
     // update sql
     private static final String UPDATE = "UPDATE ";
-    private static final String UPDATE_SET_SEGMENT_STRING = " SET segment_string = ?, segment_clob = null WHERE id = ?";
+    private static final String UPDATE_SET_SEGMENT_STRING = " SET segment_string = ?, segment_clob = ? WHERE id = ?";
 
     private Connection m_connection;
 
@@ -389,10 +389,6 @@ public class TmPersistence
 
         String insertSql = INSERT_INTO + tableName + INSERT_NON_CLOB_SRC;
 
-        // String insertSql = INSERT_INTO + tableName
-        // + (p_sourceSegment.isClobSegment()
-        // ? INSERT_CLOB_SRC : INSERT_NON_CLOB_SRC);
-
         String seqName = (p_sourceSegment.isTranslatable() ? Sequence.SRC_T_SEQ
                 : Sequence.SRC_L_SEQ);
         long id = Sequence.allocateIds(seqName, 1);
@@ -407,7 +403,20 @@ public class TmPersistence
             ps.setLong(4, p_sourceSegment.getLocale().getId());
             ps.setString(5, p_sourceSegment.getType());
             ps.setLong(6, p_sourceSegment.getExactMatchKey());
-            ps.setString(7, p_sourceSegment.getSegment());
+            String segment = p_sourceSegment.getSegment();
+            ps.setString(7, null);
+            ps.setString(8, null);
+            if (segment != null)
+            {
+                if (EditUtil.getUTF8Len(segment) <= PersistentObject.CLOB_THRESHOLD)
+                {
+                	ps.setString(7, segment);
+                }
+                else
+                {
+                	ps.setString(8, segment);
+                }
+            }
 
             ps.executeUpdate();
         }
@@ -453,7 +462,20 @@ public class TmPersistence
             ps.setLong(2, p_srcId);
             ps.setLong(3, p_tuId);
             ps.setLong(4, p_targetSegment.getLocale().getId());
-            ps.setString(5, p_targetSegment.getSegment());
+            ps.setString(5, null);
+            ps.setString(6, null);
+            String segment = p_targetSegment.getSegment();
+            if (segment != null)
+            {
+                if (EditUtil.getUTF8Len(segment) <= PersistentObject.CLOB_THRESHOLD)
+                {
+                	ps.setString(5, segment);
+                }
+                else
+                {
+                	ps.setString(6, segment);
+                }
+            }
 
             ps.executeUpdate();
         }
@@ -488,8 +510,21 @@ public class TmPersistence
         try
         {
             ps = m_connection.prepareStatement(updateSql);
-            ps.setString(1, p_targetSegment.getSegment());
-            ps.setLong(2, p_id);
+            String segment = p_targetSegment.getSegment();
+            if (segment != null)
+            {
+                if (EditUtil.getUTF8Len(segment) <= PersistentObject.CLOB_THRESHOLD)
+                {
+                	ps.setString(1, segment);
+                	ps.setString(2, null);
+                }
+                else
+                {
+                	ps.setString(1, null);
+                	ps.setString(2, segment);
+                }
+            }
+            ps.setLong(3, p_id);
 
             ps.executeUpdate();
         }

@@ -798,7 +798,7 @@ public class TaskSearchUtil
 		{
 			StringBuffer workflowSql = new StringBuffer();
 			workflowSql
-					.append("SELECT DISTINCT t.TASK_ID,w.IFLOW_INSTANCE_ID,w.ESTIMATED_COMPLETION_DATE ");
+					.append("SELECT DISTINCT t.TASK_ID,w.ESTIMATED_COMPLETION_DATE ");
 			workflowSql
 					.append(" FROM task_info t ,workflow w WHERE t.WORKFLOW_ID = w.IFLOW_INSTANCE_ID AND w.IS_ESTI_CMPLTN_DATE_OVERRIDED = 'Y' ");
 			workflowSql
@@ -809,7 +809,7 @@ public class TaskSearchUtil
 					workflowSql.toString(), null);
 			for (int i = 0; i < workflowResult.size(); i++)
 			{
-				Object[] contents = (Object[]) result.get(i);
+				Object[] contents = (Object[]) workflowResult.get(i);
 				workflowMap.put(Long.parseLong(contents[0].toString()),
 						(Timestamp) contents[1]);
 			}
@@ -830,7 +830,13 @@ public class TaskSearchUtil
 			tasksMap.put(key, taskVo);
 		}
 
-		return (List<TaskVo>) tasksMap.values();
+		List<TaskVo> taskVoList = new ArrayList<TaskVo>();
+		for (TaskVo tv : tasksMap.values())
+		{
+			taskVoList.add(tv);
+		}
+		
+		return taskVoList;
     }
 
     /**

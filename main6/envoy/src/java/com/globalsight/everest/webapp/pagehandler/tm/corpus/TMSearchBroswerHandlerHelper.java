@@ -836,6 +836,7 @@ public class TMSearchBroswerHandlerHelper
         	attributeFilter = true;
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
         }
+        String jobIds = (String) filterMap.get("jobIds");
         for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
@@ -873,6 +874,15 @@ public class TMSearchBroswerHandlerHelper
 						if (!searchFilter(filterMap, trgTuv))
 							continue;
 					}
+					//0001181: TM Search: Job ID search is incorrect
+					if (StringUtil.isNotEmpty(jobIds))
+					{
+						if (!jobIds.contains(String.valueOf(trgTuv.getJobId())))
+						{
+							continue;
+						}
+					}
+					
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
                     if (null == sid)
@@ -1018,6 +1028,8 @@ public class TMSearchBroswerHandlerHelper
         	attributeFilter = true;
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
         }
+        
+        String jobIds = (String) filterMap.get("jobIds");
         for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
@@ -1055,6 +1067,15 @@ public class TMSearchBroswerHandlerHelper
 						if (!searchFilterBySid(filterMap, trgTuv))
 							continue;
 					}
+					//0001181: TM Search: Job ID search is incorrect
+					if (StringUtil.isNotEmpty(jobIds))
+					{
+						if (!jobIds.contains(String.valueOf(trgTuv.getJobId())))
+						{
+							continue;
+						}
+					}
+					
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
                     if (null == sid)
@@ -1196,7 +1217,7 @@ public class TMSearchBroswerHandlerHelper
 			String createUser = (String) paramMap.get("createUser");
 			String modifyUser = (String) paramMap.get("modifyUser");
 			long localeId = (Long) paramMap.get("localeIds");
-			String jobIds = (String) paramMap.get("jobIds");
+//			String jobIds = (String) paramMap.get("jobIds");
 			//create date
 			if (createStartDate != null)
 			{
@@ -1457,13 +1478,13 @@ public class TMSearchBroswerHandlerHelper
 				}
 			}
 			
-			if (StringUtil.isNotEmpty(jobIds))
-			{
-				if (tmType.equalsIgnoreCase("TM3"))
-				{
-					sb.append(" AND ext.jobId in (").append(jobIds).append(")");
-				}
-			}
+//			if (StringUtil.isNotEmpty(jobIds))
+//			{
+//				if (tmType.equalsIgnoreCase("TM3"))
+//				{
+//					sb.append(" AND ext.jobId in (").append(jobIds).append(")");
+//				}
+//			}
 		}
 	}
 
@@ -1666,7 +1687,7 @@ public class TMSearchBroswerHandlerHelper
 		String isRegex = (String) filterMap.get("isRegex");
 		String createUser = (String) filterMap.get("createUser");
 		String modifyUser = (String) filterMap.get("modifyUser");
-    	String jobIds = (String) filterMap.get("jobIds");
+//    	String jobIds = (String) filterMap.get("jobIds");
     	
     	boolean checkCreateDate = searchByDate("create", createStartDateOption, 
     			createEndDateOption, createStartDate, createEndDate, tuv);
@@ -1774,13 +1795,13 @@ public class TMSearchBroswerHandlerHelper
     	    }
     	}
     	
-		if (StringUtil.isNotEmpty(jobIds))
-		{
-			if (!jobIds.contains(String.valueOf(tuv.getJobId())))
-			{
-				return false;
-			}
-		}
+//		if (StringUtil.isNotEmpty(jobIds))
+//		{
+//			if (!jobIds.contains(String.valueOf(tuv.getJobId())))
+//			{
+//				return false;
+//			}
+//		}
     	
     	return true;
     }

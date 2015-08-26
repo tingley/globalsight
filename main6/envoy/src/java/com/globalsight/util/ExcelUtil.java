@@ -74,7 +74,7 @@ public class ExcelUtil
             if (isXls(filename))
                 workbook = new HSSFWorkbook(is);
             else
-                workbook = new XSSFWorkbook(OPCPackage.open(is));
+                workbook = new XSSFWorkbook(OPCPackage.open(file));
         }
         catch (Exception e)
         {

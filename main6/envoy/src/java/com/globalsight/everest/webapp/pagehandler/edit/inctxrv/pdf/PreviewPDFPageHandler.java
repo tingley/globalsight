@@ -43,6 +43,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
+import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.lowagie.text.DocumentException;
@@ -331,5 +332,19 @@ public class PreviewPDFPageHandler extends PageHandler implements
             return (Long) p_obj;
 
         return Long.valueOf((String) p_obj);
+    }
+    
+    public static boolean okForInContextReview(PagePair pagep)
+    {
+        String pageName = pagep.getPageName().toLowerCase();
+        
+        if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
+                || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
+                || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
+        {
+            return true;
+        }
+        
+        return false;
     }
 }

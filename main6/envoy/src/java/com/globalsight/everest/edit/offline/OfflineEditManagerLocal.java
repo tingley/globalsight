@@ -532,6 +532,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 }
                 finally
                 {
+                    HibernateUtil.closeSession();
+                    
                     synchronized (LOCKER)
                     {
                         RUNNING_FORMS.remove(form);

@@ -622,9 +622,9 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 <div class="foot">
 <TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="0" BORDER="0">
   <TR CLASS="tableHeadingBasic" style="height:30px">
-    <TD><%=lb_sourceLocale%>: <%=str_sourceLocale%></TD>
+    <TD width="50%"><%=lb_sourceLocale%>: <%=str_sourceLocale%></TD>
     <TD bgcolor="lightgrey" style="width:2px">&nbsp;</TD>
-    <TD>&nbsp;&nbsp;<%=lb_targetLocale%>: <%=str_targetLocale.toString()%></TD>
+    <TD width="50%">&nbsp;&nbsp;<%=lb_targetLocale%>: <%=str_targetLocale.toString()%></TD>
   </TR>
 </TABLE>
 </div>

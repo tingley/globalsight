@@ -1468,15 +1468,15 @@ function doOnLoad()
                               </SELECT>
                            </TD>
                         </TR>
+                        </TABLE>
+                        <TABLE CELLPADDING="0" CELLSPACING="2" BORDER="0" CLASS="standardText">
                         <TR ALIGN="LEFT">
-                           <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>" VALUE="true" <%=isSaveUnlocToProjectTMChecked%>><%=lbsaveUnlSegToTm%>
-                           </TD>
+                           <TD><INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>" VALUE="true" <%=isSaveUnlocToProjectTMChecked%>></TD>
+                           <TD><%=lbsaveUnlSegToTm%></TD>
                         </TR>
                         <TR ALIGN="LEFT">
-                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            	<%=lblocalizedApprovedSegments%>
-                           </TD>
+                           <TD></TD>
+                           <TD><%=lblocalizedApprovedSegments%>:</TD>
                         </TR>
                         <TR ALIGN="LEFT">
                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1494,9 +1494,8 @@ function doOnLoad()
                             </TD>
                         </TR>
                         <TR ALIGN="LEFT">
-                           <TD COLSPAN=2>
-                              <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=isSaveToPageTMChecked%>><%=lbisSaveToPageTm%>
-                           </TD>
+                           <TD> <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=isSaveToPageTMChecked%>></TD>
+                           <TD><%=lbisSaveToPageTm%></TD>
                         </TR>
                      </TABLE>
                      <BR><BR>

@@ -1046,15 +1046,15 @@ function doOnLoad()
                                            </SELECT>
                                         </TD>
                                     </TR>
+                                   </TABLE>
+                                   <TABLE CELLPADDING="0" CELLSPACING="2" BORDER="0" CLASS="standardText">
                                     <TR ALIGN="LEFT">
-                                        <TD COLSPAN=2>
-                                        	<INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>"><%=lbsaveUnlSegToTm%>
-                                        </TD>
+                                    	<TD><INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>"></TD>
+                                        <TD><%=lbsaveUnlSegToTm%></TD>
                                     </TR>
                                     <TR ALIGN="LEFT">
-                                        <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                        	<%=lblocalizedApprovedSegments%>
-                                        </TD>
+                                    	<TD></TD>
+                                        <TD><%=lblocalizedApprovedSegments%>:</TD>
                                     </TR>
                                     <TR ALIGN="LEFT">
 		                               <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1070,7 +1070,8 @@ function doOnLoad()
                                         <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" CHECKED><%=lbisSaveExactMatchToProjectTm%></TD>
                                     </TR>
                                     <TR ALIGN="LEFT">
-                                        <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" CHECKED><%=lbisSaveToPageTm%></TD>
+                                    	<TD><INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" CHECKED></TD>
+                                        <TD COLSPAN=2><%=lbisSaveToPageTm%></TD>
                                     </TR>
                                 </TABLE>
                                 <BR>

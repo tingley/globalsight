@@ -411,13 +411,14 @@ public class FileProfileMainHandler extends PageHandler
             if (idString != null)
             {
                 String id = idString.split(",")[0];
-                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                        .getFileProfileById(Long.parseLong(id), true);
+				FileProfileImpl fp = (FileProfileImpl) ServerProxy
+						.getFileProfilePersistenceManager().getFileProfileById(
+								Long.parseLong(id), true);
 
                 // CVSFileProfileManagerLocal cvsFPManager = new
                 // CVSFileProfileManagerLocal();
                 // cvsFPManager.removeByFileProfileId(fp.getId());
-                if (fp.getIsActive())
+                if (fp.isActive())
                 {
                     ServerProxy.getFileProfilePersistenceManager()
                             .deleteFileProfile(fp);

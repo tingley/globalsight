@@ -5,6 +5,8 @@ var showSource = false;
 var showList = false;
 var showPtags = false;
 var showRepeated = false;	
+var w_editor;
+var postReviewEditor = "postReviewEditor";
 window.focus();
 
 function helpSwitch()
@@ -39,6 +41,11 @@ function closeWindow()
 	window.close();
 }
 
+function CanClose()
+{
+	w_editor.close();
+}
+
 function refresh(direction)
 {
 	document.location = url_self + "&action=refresh&refresh=" + direction+"&random="+Math.random();
@@ -48,6 +55,12 @@ function showOptions()
 {
     w_options = window.open(url_options, "MEOptions",
       "resizable=no,scrollbars=no,width=470,height=590");
+}
+
+function showPageInfo()
+{
+    w_pageinfo = window.open(url_pageInfo, "MEPageInfo",
+      "resizable,width=400,height=400");
 }
 
 function showSupportFiles()
@@ -147,38 +160,6 @@ function EnterPress(e)
 	}
 }
 
-function searchByUserOrSid() {
-
-      var url = url_search+"&search=true&action=search";
-      
-      if(document.recalc)
-      {
-          if (!w_search || w_search.closed)
-      	  {
-            	var args = { _opener: window, _data: false };
-              w_search = window.open(url,"","height=480px, width=700px,status=no,resizable=yes,modal=yes,scrollbars=yes"); 		
-              		
-          }
-          else
-          {
-    	        w_search.focus();
-  	      }
-      }
-      else
-      {
-          if (!w_search || w_search.closed)
-      	  {
-      		window.myAction=this;
-      		window.myArguments=true;
-      		w_search = window.open(url,"","height=480px, width=700px,status=no,resizable=yes,modal=yes,scrollbars=yes");
-      		}
-      		else
-          {
-    	        w_search.focus();
-  	      }
-      }
-}
-
 var parseQueryString = function(_query,match) {
     var args = new Object();
     var pairs = _query.split(match);
@@ -242,7 +223,9 @@ function approve()
 		approveIds:approveIds,
 		unApproveIds:unApproveIds,
 		random:Math.random()
-	}, function(data){});
+	}, function(data){
+		alert("Approved the Segment(s).");
+	});
 }
 
 var modeId="";
@@ -333,7 +316,7 @@ function recursion(data,beginIndex){
 	
 	if(i<max){
 		setTimeout(function(){
-			recursion(sourceData,targetData,i);
+			recursion(data,i);
 		}, 100);
 	}else{
 		$(".ul:even").addClass("alt");
@@ -406,7 +389,7 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 function getNodeByClass(item, se_able){
 	var temp;
 	// if "mainstyle.match("SE ")", it should display right click context menus.
-	var scriptFlag = inner_reviewMode || item.mainstyle.match("SE ") || se_able == "target";
+	var scriptFlag = inner_reviewMode || item.mainstyle.match("SE ");
 
 	if(scriptFlag){
 		temp=SEnode.clone(true);
@@ -433,6 +416,8 @@ function getNodeByClass(item, se_able){
 	{
 		temp.addClass(item.mainstyle.replace("editorComment", "").replace("isHighLight", ""));
 	}
+	
+	temp.addClass("noUnderline");
 
 	if(item.subArray){
 		var stable=subtable.clone(true);
@@ -450,6 +435,7 @@ function getNodeByClass(item, se_able){
 			}
 
 			span.addClass(this.subclass);
+			span.addClass("noUnderline");
 			span.html(this.segment);
 			sub.children('td').eq(1).attr("id","seg"+item.tuId+"_"+item.tuvId+"_"+this.subId);
 			sub.children('td').eq(1).append(span);
@@ -539,6 +525,10 @@ function editSegment(tuId, tuvId, subId)
       "&tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId +
       "&refresh=0&releverage=false";
 
+    if(w_editor)
+    {
+    	w_editor.close();
+    }
     w_editor = window.open(str_url, "SegmentEditor",
       "resizable,width=560,height=" + segmentEditorHeight +
        ",top=0,left=0");
@@ -549,6 +539,10 @@ function editComment(tuId, tuvId, subId)
     var str_url = url_commentEditor +
       "&tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId + "&refresh=0";
 
+    if(w_editor)
+    {
+    	w_editor.close();
+    }
     w_editor = window.open(str_url, "CommentEditor",
       "width=550,height=610,top=100,left=100");
 }

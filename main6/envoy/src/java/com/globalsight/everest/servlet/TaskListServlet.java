@@ -976,24 +976,6 @@ public class TaskListServlet extends HttpServlet
                     taskImpl.setState(state);
                 task.setState(taskImpl.getState());
                 task.setStateString(bundle);
-                //GBS-4041 : Modify fixed due date
-				Workflow workflow = ServerProxy.getWorkflowManager()
-						.getWorkflowById(task.getWorkflowId());
-				if (workflow.isEstimatedCompletionDateOverrided())
-				{
-					Timestamp time = null;
-					time = (Timestamp) workflow.getEstimatedCompletionDate();
-					if (searchState == Task.STATE_ALL)
-					{
-						task.setEstimatedAcceptanceDate(new Date(time.getTime()));
-					}
-					else
-					{
-						if (time != null)
-							task.setEstimatedCompletionDate(new Date(time
-									.getTime()));
-					}
-				}
                 task.setTaskDateString(params.getUILocale(), params.getTimeZone(), searchState);
                 task.setEstimatedCompletionDateString(params.getUILocale(), params.getTimeZone());
                 

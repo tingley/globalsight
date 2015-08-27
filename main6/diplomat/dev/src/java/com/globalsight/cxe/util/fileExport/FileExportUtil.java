@@ -42,6 +42,7 @@ import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectHandlerLocal;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.PropertiesFactory;
 
 /**
@@ -212,6 +213,8 @@ public class FileExportUtil
         }
         finally
         {
+            HibernateUtil.closeSession();
+            
             RUNNING_REQUEST.remove(key);
 
             // Export a file that has been hold.

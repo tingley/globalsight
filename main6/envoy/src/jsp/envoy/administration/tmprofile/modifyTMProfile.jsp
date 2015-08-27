@@ -99,6 +99,8 @@
    String lbisSaveToProjectTm = bundle.getString("msg_is_save_to_project_tm");
    String lbsaveAllUnlSegToTM = bundle.getString("msg_save_all_unlocalized_sgments_to_tm");
    String lbonlySaveApprovedSegToTM = bundle.getString("msg_save_approved_segments_to_tm_only");
+   String lblocalizedApprovedSegments = bundle.getString("msg_localized_approved_segments");
+   String lbsaveBothtoTM =  bundle.getString("msg_save_both_to_tm");
    String lbsaveUnlSegToTm =  bundle.getString("msg_save_unlocalized_segments_to_tm");
    String lbsavelocSegToTm =  bundle.getString("msg_save_localized_segments_to_tm");
    String lbsaveApprovedSegToTM = bundle.getString("msg_save_approved_segments_to_tm");
@@ -162,17 +164,17 @@
    {
 	   isSaveUnlocToProjectTMChecked = "CHECKED";
    }
-   String chosenSaveApprovedToProjectTM = new Boolean(tmProfile.isSaveApprovedSegToProjectTM()).toString();
-   String isSaveApprovedToProjectTMChecked = "";
-   if (chosenSaveApprovedToProjectTM.equals("true"))
-   {
-	   isSaveApprovedToProjectTMChecked = "CHECKED";
-   }
+   
    String chosenSaveLocToProjectTM = new Boolean(tmProfile.isSaveLocSegToProjectTM()).toString();
    String isSaveLocToProjectTMChecked = "";
+   String isSaveApprovedToProjectTMChecked = "";
    if(chosenSaveLocToProjectTM.equals("true"))
    {
 	   isSaveLocToProjectTMChecked = "CHECKED";
+   }
+   else
+   {
+	   isSaveApprovedToProjectTMChecked = "CHECKED";
    }
    
    String chosenSaveExactMatchToProjectTM = new Boolean(tmProfile.isSaveExactMatchSegToProjectTM()).toString();
@@ -1472,16 +1474,21 @@ function doOnLoad()
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
-                           <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" VALUE="true" <%=isSaveLocToProjectTMChecked%>><%=lbsavelocSegToTm%>
+                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            	<%=lblocalizedApprovedSegments%>
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
-                           <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" VALUE="true" <%=isSaveApprovedToProjectTMChecked %>><%=lbsaveApprovedSegToTM%>
-                           </TD>
+                          <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <INPUT name="<%=isSaveLocToProjectTm%>" TYPE="radio" value="saveBoth" <%=isSaveLocToProjectTMChecked%>><%=lbsaveBothtoTM%>
+                          </TD>
                         </TR>
                         <TR ALIGN="LEFT">
+                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <INPUT name="<%=isSaveLocToProjectTm%>" TYPE="radio" value="saveApprovedOnly" <%=isSaveApprovedToProjectTMChecked %>><%=lbonlySaveApprovedSegToTM%>
+                           </TD>
+                        </TR>
+                        <TR ALIGN="LEFT" style="display:none">
                            <TD COLSPAN=2>
                            <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=isSaveExactMatchToProjectTMChecked%>><%=lbisSaveExactMatchToProjectTm%>
                             </TD>

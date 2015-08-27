@@ -234,6 +234,8 @@ public class FileImportUtil
         }
         finally
         {
+            HibernateUtil.closeSession();
+            
             RUNNING_REQUEST.remove(key);
 
             // Import a file that has been hold.

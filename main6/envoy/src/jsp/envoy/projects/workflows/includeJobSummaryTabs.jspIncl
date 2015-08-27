@@ -20,6 +20,12 @@
 	padding: 10px 5px 10px 10px;
 }
 </style>
+<% 
+	String updatePriorityUrl = jobDetails.getPageURL()+"&action=updatePriority";
+   Job jobParameters = (Job)request.getAttribute("Job");
+   int priority = jobParameters.getPriority();
+   List<Integer> priorityList = (List<Integer>)request.getAttribute("priorityList");
+%>
 <link rel="stylesheet" type="text/css" href="/globalsight/jquery/jQueryUI.redmond.css"/>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></SCRIPT>
@@ -35,7 +41,11 @@ $(
 		function (){
 			$("#editJobName").click(function(){
 				vilidateRename();
-				
+			})
+			
+			$("#editPriority").click(function(){
+				$("#uptadePrioritySpan").show();
+				$(".priority"+${jobId}).hide();
 			})
 			
 			var dialog=$("#dialog-complActivity").dialog({
@@ -53,11 +63,35 @@ $(
 		            }
 		        }
 		    });
-		    
-			
 		}
 )
 
+ function updatePriorityValue(selectOption){
+  	var selectValue = selectOption.value;
+ 	$.ajax({
+		   type: "POST",
+		   dataType : "text",
+		   url: "<%=updatePriorityUrl%>",
+		   data: "jobId="+${jobId}+"&selectOption="+selectValue,
+		   success: function(data){
+		  	  var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	          }
+	          else
+	          {
+	          	$(".priority"+${jobId}).text(returnData.newPriority);
+	          }
+		   },
+	   	   error:function(error)
+	       {
+          alert(error.message);
+        }
+		});
+		$("#uptadePrioritySpan").hide();
+		$(".priority"+${jobId}).show();
+ }
 
 function isInteger(str){  
       var regu = /^[-]{0,1}[0-9]{1,}$/; 
@@ -181,7 +215,19 @@ function vilidateRename(){
 		</div>
 		<div>
 			<span class="jobSummaryContentName"><%=bundle.getString("lb_source_locale")%>:</span><span class="jobSummaryContentValue">${srcLocale}</span>
-			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_priority")%>:</span><span class="jobSummaryContentValue">${Job.priority}</span>
+			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_priority")%>(<a id="editPriority" href="#" class="standardHREFDetail" ><%=bundle.getString("lb_edit")%></A>):</span>
+			<span class="jobSummaryContentValue"><span class="priority${jobId}" id="priority${jobId}">${Job.priority}</span> 
+				<span id="uptadePrioritySpan" style="display:none;">
+					<select >
+						<%for(int i=0;i<priorityList.size();i++){
+	    						String selected = priorityList.get(i) == priority ? "selected" : "";
+	    				%>
+	    						<option value="<%=priorityList.get(i)%>" <%=selected %> onclick = "updatePriorityValue(this);"><%=priorityList.get(i)%></option>
+	    				<%}%>
+					</select>
+				</span>
+			</span>
+			
 		</div>
 		<div>
 			<span class="jobSummaryContentName"><%=bundle.getString("lb_number_languages")%>:</span><span class="jobSummaryContentValue">${numberLanguages}</span>

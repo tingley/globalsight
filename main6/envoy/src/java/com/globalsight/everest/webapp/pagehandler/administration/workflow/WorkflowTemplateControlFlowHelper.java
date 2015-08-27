@@ -274,9 +274,13 @@ class WorkflowTemplateControlFlowHelper
         try
         {
             WorkflowTemplateInfo wfti = getWorkflowTemplateInfo(wftiId);
-            ServerProxy.getProjectHandler().removeWorkflowTemplate(Long.parseLong(wftiId));
-            OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
-                    OperationLog.COMPONET_WORKFLOW, wfti.getName());
+            if (wfti.getIsActive())
+            {
+                ServerProxy.getProjectHandler().removeWorkflowTemplate(
+                        Long.parseLong(wftiId));
+                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                        OperationLog.COMPONET_WORKFLOW, wfti.getName());
+            }
         }
 	catch (GeneralException ge)
 	{

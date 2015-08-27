@@ -1544,12 +1544,12 @@ function disableLastUsageOption(){
 						  <td>
 							<table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
 							  <tr>
-							    <td class="search_content"nowrap>
-							       ${lb_export_tu_id}: <input type="text" id="tuIds" name="tuIds" value=""/>
-							    </td>
 							    <td class="search_content" nowrap>
 							    	${lb_export_sid}: <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/>${lb_export_regex}
       							</td>
+							    <td class="search_content"nowrap>
+							       ${lb_export_tu_id}: <input type="text" id="tuIds" name="tuIds" value=""/>
+							    </td>
       							<td class="search_content" nowrap>
 							     	Attribute Name: <input type="text" id="attributeName" name="attributeName" value=""/>
       							</td>

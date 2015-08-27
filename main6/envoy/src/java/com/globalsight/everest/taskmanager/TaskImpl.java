@@ -1080,18 +1080,28 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     /**
      * @see Task.getEstimatedAcceptanceDate()
      */
-    public Date getEstimatedAcceptanceDate()
-    {
-        return m_estimatedAcceptanceDate;
-    }
+	public Date getEstimatedAcceptanceDate()
+	{
+		if (m_workflow != null
+				&& m_workflow.isEstimatedCompletionDateOverrided())
+		{
+			m_estimatedAcceptanceDate = m_workflow.getEstimatedCompletionDate();
+		}
+		return m_estimatedAcceptanceDate;
+	}
 
     /**
      * @see Task.getEstimatedCompletionDate()
      */
     public Date getEstimatedCompletionDate()
-    {
-        return m_estimatedCompletionDate;
-    }
+	{
+		if (m_workflow != null
+				&& m_workflow.isEstimatedCompletionDateOverrided())
+		{
+			m_estimatedCompletionDate = m_workflow.getEstimatedCompletionDate();
+		}
+		return m_estimatedCompletionDate;
+	}
 
     /**
      * @see Task.setEstimatedAcceptanceDate(Date)

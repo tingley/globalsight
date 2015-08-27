@@ -102,7 +102,7 @@ public class JobSummaryHelper
             jobNotFound(p_request, p_response, p_context, job);
             return false;
         }
-        
+		
         // check user permission for this job
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
@@ -137,11 +137,19 @@ public class JobSummaryHelper
             throws EnvoyServletException
     {
 		HttpSession session = p_request.getSession(false);
+		List<Integer> priorityList = new ArrayList<Integer>();
+		priorityList.add(1);
+		priorityList.add(2);
+		priorityList.add(3);
+		priorityList.add(4);
+		priorityList.add(5);
+	
 		SessionManager sessionMgr = (SessionManager) session
 				.getAttribute(WebAppConstants.SESSION_MANAGER);
 		Locale uiLocale = (Locale) session
 				.getAttribute(WebAppConstants.UILOCALE);
 
+		p_request.setAttribute("priorityList", priorityList);
 		p_request.setAttribute("Job", job);
 		p_request.setAttribute("jobId", job.getJobId());
 		p_request.setAttribute("dateCreated",

@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -729,9 +730,10 @@ public class TaskSearchUtil
         //logger.info("Search SQL == " + sql);
 
         List result = HibernateUtil.searchWithSql(sql, params);
+        String taskIdStr = "";
         int state = (Integer) sp.getParameters()
                 .get(TaskSearchParameters.STATE);
-        List<TaskVo> tasks = new ArrayList<TaskVo>();
+        Map<Long,TaskVo> tasksMap = new HashMap<Long,TaskVo>();
         for (int i = 0; i < result.size(); i++)
         {
             Object[] contents = (Object[]) result.get(i);
@@ -740,6 +742,7 @@ public class TaskSearchUtil
             // for issue : After click on the download button in available
             // activity list, the activity will not go to the In Progress list
             long taskId = Long.parseLong(contents[0].toString());
+            taskIdStr += taskId +",";
             if (state == WorkflowConstants.TASK_ACTIVE)
             {
                 // force to close session in order to get the latest task from
@@ -787,11 +790,53 @@ public class TaskSearchUtil
             taskVo.setSourceLocaleId(Long.parseLong(contents[11].toString()));
             taskVo.setTaskType(contents[12].toString());
             taskVo.setCompanyId(Long.parseLong(contents[13].toString()));
-
-            tasks.add(taskVo);
+            tasksMap.put(taskId, taskVo);
         }
 
-        return tasks;
+		Map<Long, Timestamp> workflowMap = new HashMap<Long, Timestamp>();
+		if (taskIdStr.endsWith(","))
+		{
+			StringBuffer workflowSql = new StringBuffer();
+			workflowSql
+					.append("SELECT DISTINCT t.TASK_ID,w.ESTIMATED_COMPLETION_DATE ");
+			workflowSql
+					.append(" FROM task_info t ,workflow w WHERE t.WORKFLOW_ID = w.IFLOW_INSTANCE_ID AND w.IS_ESTI_CMPLTN_DATE_OVERRIDED = 'Y' ");
+			workflowSql
+					.append(" AND t.TASK_ID IN (")
+					.append(taskIdStr.subSequence(0, taskIdStr.lastIndexOf(",")))
+					.append(")");
+			List workflowResult = HibernateUtil.searchWithSql(
+					workflowSql.toString(), null);
+			for (int i = 0; i < workflowResult.size(); i++)
+			{
+				Object[] contents = (Object[]) workflowResult.get(i);
+				workflowMap.put(Long.parseLong(contents[0].toString()),
+						(Timestamp) contents[1]);
+			}
+		}
+		Iterator it = workflowMap.entrySet().iterator();
+		TaskVo taskVo;
+		while (it.hasNext())
+		{
+			Map.Entry entry = (Map.Entry) it.next();
+			long key = (Long) entry.getKey();
+			Timestamp value = (Timestamp) entry.getValue();
+			taskVo = tasksMap.get(key);
+			if (taskVo != null)
+			{
+				taskVo.setEstimatedAcceptanceDate(new Date(value.getTime()));
+				taskVo.setEstimatedCompletionDate(new Date(value.getTime()));
+			}
+			tasksMap.put(key, taskVo);
+		}
+
+		List<TaskVo> taskVoList = new ArrayList<TaskVo>();
+		for (TaskVo tv : tasksMap.values())
+		{
+			taskVoList.add(tv);
+		}
+		
+		return taskVoList;
     }
 
     /**

@@ -237,6 +237,4 @@ public interface FileProfile
     public int getBOMType();
 
     public void setBOMType(int p_BOMType);
-    
-    public boolean getIsActive();
 }

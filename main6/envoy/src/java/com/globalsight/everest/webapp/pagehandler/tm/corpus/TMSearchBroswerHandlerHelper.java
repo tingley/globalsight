@@ -875,7 +875,7 @@ public class TMSearchBroswerHandlerHelper
 							continue;
 					}
 					//0001181: TM Search: Job ID search is incorrect
-					if (jobIdSet != null)
+					if (jobIdSet != null && jobIdSet.size() > 0)
 					{
 						if (!jobIdSet
 								.contains(String.valueOf(trgTuv.getJobId())))
@@ -1069,7 +1069,7 @@ public class TMSearchBroswerHandlerHelper
 							continue;
 					}
 					//0001181: TM Search: Job ID search is incorrect
-					if (jobIdSet != null)
+					if (jobIdSet != null && jobIdSet.size() > 0)
 					{
 						if (!jobIdSet
 								.contains(String.valueOf(trgTuv.getJobId())))
@@ -1545,7 +1545,7 @@ public class TMSearchBroswerHandlerHelper
 		String isRegex = null;
 		String createUser = null;
 		String modifyUser = null;
-		Set<String> jobIdSet = new HashSet<String>();
+		Set<String> jobIdSet = null;
 		
 		if (advancedSearch)
 		{
@@ -1570,9 +1570,13 @@ public class TMSearchBroswerHandlerHelper
 			createUser = (String) request.getParameter("createUser");
 			modifyUser = (String) request.getParameter("modifyUser");
 			String jobIds = (String)request.getParameter("jobIds");
-			for (String jobId : jobIds.split(","))
+			if (StringUtil.isNotEmpty(jobIds) && jobIds.contains(","))
 			{
-				jobIdSet.add(jobId);
+				jobIdSet = new HashSet<String>();
+				for (String jobId : jobIds.split(","))
+				{
+					jobIdSet.add(jobId);
+				}
 			}
 			
 			filterMap.put("createStartDateOption", createStartDateOption);

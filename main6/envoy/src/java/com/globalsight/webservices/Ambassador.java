@@ -3998,9 +3998,10 @@ public class Ambassador extends AbstractWebService
 			return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
 		}
 
+		Job job = null;
 		try
 		{
-			Job job = ServerProxy.getJobHandler().getJobById(
+			job = ServerProxy.getJobHandler().getJobById(
 					Long.parseLong(p_jobId));
 			if (job == null)
 			{
@@ -4065,7 +4066,7 @@ public class Ambassador extends AbstractWebService
 					if (StringUtil.isEmpty(targetLocale))
 					{
 						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-								"Invalid estimatedDateXml, targetLocale can not empty.");
+								"Invalid estimatedDateXml, target locale can not empty.");
 					}
 					GlobalSightLocale targetGSLocale = null;
 					try
@@ -4074,15 +4075,30 @@ public class Ambassador extends AbstractWebService
 						if (targetGSLocale == null)
 						{
 							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-									"Invalid source locale : " + targetLocale);
+									"Invalid target locale : " + targetLocale);
+						}
+						
+						long sameId = -1;
+						for (Workflow wf : job.getWorkflows())
+						{
+							if (targetGSLocale.getId() == wf.getTargetLocale()
+									.getId())
+							{
+								sameId = wf.getTargetLocale().getId();
+							}
+						}
+						if (sameId == -1)
+						{
+							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+									"Error when invoking this method, please check the parameters you input.");
 						}
 					}
 					catch (Exception e)
 					{
 						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-								"Invalid source locale : " + targetLocale);
+								"Invalid target locale : " + targetLocale);
 					}
-
+					
 					if (StringUtil.isNotEmpty(tranComDateStr))
 					{
 						try
@@ -4123,7 +4139,6 @@ public class Ambassador extends AbstractWebService
 				}
 				//put workflow date paramter
 				paramter.put("estimatedDates", workMap);
-				updateJobDetailInfo(paramter);
 			}
 			catch (DocumentException e)
 			{
@@ -4131,11 +4146,12 @@ public class Ambassador extends AbstractWebService
 						"Invalid estimated date xml,xml spelling errors.");
 			}
 		}
+		String returnStr = updateJobDetailInfo(paramter);
 		
-		return "SUCCESS";
+		return returnStr;
 	}
 	
-	private static void updateJobDetailInfo(Map<String, Object> paramter)
+	private static String updateJobDetailInfo(Map<String, Object> paramter)
 	{
 		String jobId = (String) paramter.get("jobId");
 		String jobName = (String) paramter.get("jobName");
@@ -4144,21 +4160,24 @@ public class Ambassador extends AbstractWebService
 				.get("estimatedDates");
 		
 		JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(jobId));
-		if (StringUtil.isNotEmpty(jobName))
+		if (StringUtil.isNotEmpty(jobName) || StringUtil.isNotEmpty(priority))
 		{
-			job.setJobName(EditUtil.removeCRLF(jobName));
+			if (StringUtil.isNotEmpty(jobName))
+			{
+				job.setJobName(EditUtil.removeCRLF(jobName));
+			}
+			if (StringUtil.isNotEmpty(priority))
+			{
+				job.setPriority(Integer.parseInt(priority));
+			}
+			HibernateUtil.merge(job);
 		}
-		if (StringUtil.isNotEmpty(priority))
-		{
-			job.setPriority(Integer.parseInt(priority));
-		}
-		HibernateUtil.merge(job);
 		
 		String hql = "from WorkflowImpl w where w.job.id = :jId "
                 + "and w.targetLocale.id = :tId";
         Map map = new HashMap();
         map.put("jId", Long.parseLong(jobId));
-		if (!workMap.isEmpty())
+		if (workMap != null)
 		{
 			Set<Long> tgLocaleKeySet = workMap.keySet();
 			for (Long targetLocaleId : tgLocaleKeySet)
@@ -4189,6 +4208,13 @@ public class Ambassador extends AbstractWebService
 				map.remove("tId");
 			}
 		}
+		
+		if (StringUtil.isNotEmpty(jobName) || StringUtil.isNotEmpty(priority)
+				|| workMap != null)
+		{
+			return "Success.";
+		}
+		return "Nothing has been changed.";
 	}
 
     /**

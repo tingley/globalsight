@@ -836,7 +836,7 @@ public class TMSearchBroswerHandlerHelper
         	attributeFilter = true;
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
         }
-        String jobIds = (String) filterMap.get("jobIds");
+        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
         for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
@@ -875,9 +875,10 @@ public class TMSearchBroswerHandlerHelper
 							continue;
 					}
 					//0001181: TM Search: Job ID search is incorrect
-					if (StringUtil.isNotEmpty(jobIds))
+					if (jobIdSet != null)
 					{
-						if (!jobIds.contains(String.valueOf(trgTuv.getJobId())))
+						if (!jobIdSet
+								.contains(String.valueOf(trgTuv.getJobId())))
 						{
 							continue;
 						}
@@ -1029,7 +1030,7 @@ public class TMSearchBroswerHandlerHelper
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
         }
         
-        String jobIds = (String) filterMap.get("jobIds");
+        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
         for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
@@ -1068,9 +1069,10 @@ public class TMSearchBroswerHandlerHelper
 							continue;
 					}
 					//0001181: TM Search: Job ID search is incorrect
-					if (StringUtil.isNotEmpty(jobIds))
+					if (jobIdSet != null)
 					{
-						if (!jobIds.contains(String.valueOf(trgTuv.getJobId())))
+						if (!jobIdSet
+								.contains(String.valueOf(trgTuv.getJobId())))
 						{
 							continue;
 						}
@@ -1543,7 +1545,7 @@ public class TMSearchBroswerHandlerHelper
 		String isRegex = null;
 		String createUser = null;
 		String modifyUser = null;
-		String jobIds = null;
+		Set<String> jobIdSet = new HashSet<String>();
 		
 		if (advancedSearch)
 		{
@@ -1567,7 +1569,11 @@ public class TMSearchBroswerHandlerHelper
 			isRegex = (String) request.getParameter("isRegex");
 			createUser = (String) request.getParameter("createUser");
 			modifyUser = (String) request.getParameter("modifyUser");
-			jobIds = (String)request.getParameter("jobIds");
+			String jobIds = (String)request.getParameter("jobIds");
+			for (String jobId : jobIds.split(","))
+			{
+				jobIdSet.add(jobId);
+			}
 			
 			filterMap.put("createStartDateOption", createStartDateOption);
 			filterMap.put("createStartDate", createStartDate);
@@ -1586,7 +1592,7 @@ public class TMSearchBroswerHandlerHelper
 			filterMap.put("isRegex", isRegex);
 			filterMap.put("createUser", createUser);
 			filterMap.put("modifyUser", modifyUser);
-			filterMap.put("jobIds", jobIds);
+			filterMap.put("jobIds", jobIdSet);
 		}
 		return filterMap;
 	}

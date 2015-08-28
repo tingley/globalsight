@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -733,7 +734,7 @@ public class TaskSearchUtil
         String taskIdStr = "";
         int state = (Integer) sp.getParameters()
                 .get(TaskSearchParameters.STATE);
-        Map<Long,TaskVo> tasksMap = new HashMap<Long,TaskVo>();
+        List<TaskVo> taskVoList = new ArrayList<TaskVo>();
         for (int i = 0; i < result.size(); i++)
         {
             Object[] contents = (Object[]) result.get(i);
@@ -790,7 +791,7 @@ public class TaskSearchUtil
             taskVo.setSourceLocaleId(Long.parseLong(contents[11].toString()));
             taskVo.setTaskType(contents[12].toString());
             taskVo.setCompanyId(Long.parseLong(contents[13].toString()));
-            tasksMap.put(taskId, taskVo);
+            taskVoList.add(taskVo);
         }
 
 		Map<Long, Timestamp> workflowMap = new HashMap<Long, Timestamp>();
@@ -814,26 +815,19 @@ public class TaskSearchUtil
 						(Timestamp) contents[1]);
 			}
 		}
-		Iterator it = workflowMap.entrySet().iterator();
-		TaskVo taskVo;
-		while (it.hasNext())
+		
+		Set<Long> keySet = workflowMap.keySet();
+		for (int i = 0; i < taskVoList.size(); i++)
 		{
-			Map.Entry entry = (Map.Entry) it.next();
-			long key = (Long) entry.getKey();
-			Timestamp value = (Timestamp) entry.getValue();
-			taskVo = tasksMap.get(key);
-			if (taskVo != null)
+			if (keySet.contains(taskVoList.get(i).getTaskId()))
 			{
-				taskVo.setEstimatedAcceptanceDate(new Date(value.getTime()));
-				taskVo.setEstimatedCompletionDate(new Date(value.getTime()));
+				Timestamp value = workflowMap
+						.get(taskVoList.get(i).getTaskId());
+				taskVoList.get(i).setEstimatedAcceptanceDate(
+						new Date(value.getTime()));
+				taskVoList.get(i).setEstimatedCompletionDate(
+						new Date(value.getTime()));
 			}
-			tasksMap.put(key, taskVo);
-		}
-
-		List<TaskVo> taskVoList = new ArrayList<TaskVo>();
-		for (TaskVo tv : tasksMap.values())
-		{
-			taskVoList.add(tv);
 		}
 		
 		return taskVoList;

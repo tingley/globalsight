@@ -44,6 +44,7 @@ var ajaxReturnString;
 function getOnlineAjaxValue(method, data)
 {
 	$.ajax({
+		type : "POST",
 		url : 'Online2Service?action=' + method,
 		async : false,
 		cache : false,

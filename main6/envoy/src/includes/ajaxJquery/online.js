@@ -1,6 +1,7 @@
 var ptagsReturn;
 function getPtagString() {
 	$.ajax({
+		type : "POST",
 		url : 'OnlineService?action=getPtagString',
 		async : false,
 		cache : false,
@@ -19,6 +20,7 @@ function getPtagString() {
 var targetDiplomatReturn;
 function getTargetDiplomat(text) {
 	$.ajax({
+		type : "POST",
 		url : 'OnlineService?action=getTargetDiplomat',
 		async : false,
 		cache : false,
@@ -40,6 +42,7 @@ function getTargetDiplomat(text) {
 var ptagToNativeMappingTableReturn;
 function getPtagToNativeMappingTable() {
 	$.ajax({
+		type : "POST",
 		url : 'OnlineService?action=getPtagToNativeMappingTable',
 		async : false,
 		cache : false,
@@ -58,6 +61,7 @@ function getPtagToNativeMappingTable() {
 var htmlSegmentReturn;
 function getHtmlSegment(text, isFromTarget) {
 	$.ajax({
+		type : "POST",
 		url : 'OnlineService?action=getHtmlSegment',
 		async : false,
 		cache : false,
@@ -78,36 +82,36 @@ function getHtmlSegment(text, isFromTarget) {
 }
 
 var initTargetReturn;
-function initTarget2(text)
-{
-    $.ajax({
-	url : 'OnlineService?action=initTarget',
-	async : false,
-	cache : false,
-	data : {
-		text : text,
-		verbose : verbose,
-		colorPtags : colorPtags
-	},
-	dataType : 'text',
-	success : function(data) {
-	    initTargetReturn = data;
-	},
-	error : function(request, error, status) {
-		alert(error);
-	}
-    });
-    
-    return initTargetReturn;
-}   
+function initTarget2(text) {
+	$.ajax({
+		type : "POST",
+		url : 'OnlineService?action=initTarget',
+		async : false,
+		cache : false,
+		data : {
+			text : text,
+			verbose : verbose,
+			colorPtags : colorPtags
+		},
+		dataType : 'text',
+		success : function(data) {
+			initTargetReturn = data;
+		},
+		error : function(request, error, status) {
+			alert(error);
+		}
+	});
+
+	return initTargetReturn;
+}
 
 var errorCheckReturn;
 var newTargetReturn;
 var errorMsgReturn;
-function doErrorCheck()
-{
+function doErrorCheck() {
 	var text = fr_editor.GetTargetSegment();
 	$.ajax({
+		type : "POST",
 		url : 'OnlineService?action=doErrorCheck',
 		async : false,
 		cache : false,
@@ -116,7 +120,7 @@ function doErrorCheck()
 		},
 		dataType : 'text',
 		success : function(data) {
-			var ob = eval("(" + data+ ")");
+			var ob = eval("(" + data + ")");
 			internalTagMsg = ob.internalTagMsg;
 			newTargetReturn = ob.newTarget;
 			errorMsgReturn = ob.msg;

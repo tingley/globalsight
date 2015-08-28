@@ -107,8 +107,7 @@ $(document).ready(function(){
 <amb:header title="<%=jobName%>" />
 
 
-<%=bundle.getString("helper_text_detailed")%>
-<BR><BR>
+<p class="standardText"><%=bundle.getString("helper_text_detailed")%></p>
 <form name="txForm" method="post" action="<%=action%>"> 
 <table cellpadding="2" cellspacing="0" border="0" style="border:solid 1px slategray">
 	<thead>
@@ -122,9 +121,11 @@ $(document).ready(function(){
 	<tbody id="translatedTextList">
 	<c:forEach items="${sourcePages}" var="item">
 		<tr>
-		<td style="width:250px">${item.shortPageName}</td>
+		<td style="width:250px" class="standardText">${item.shortPageName}</td>
 		<c:forEach items="${workflows}" var="item2">
-			<td class="standardText" style="text-align:center;width:100px" id="${item.id}_${item2.targetLocale.id}"></td>
+			<td style="text-align:center">
+			<span class="standardText" id="${item.id}_${item2.targetLocale.id}" style = "font-weight:600"></span>
+			</td>
    		</c:forEach>
    		</tr>
 	</c:forEach>

@@ -514,7 +514,12 @@ $(document).ready(function() {
       }
       bindEvent();
       initUI();
-              
+      alert(idButTm.getValue())
+      if (idButTm.getValue() == false)
+      {
+      	idButTm.setValue(!idButTm.getValue());
+      }
+      alert(2);
 });
 
 function readUI(href,newUrlKey){
@@ -1355,7 +1360,11 @@ function HasPTags()
       g_datatype == "sgml" ||
       g_datatype == "xptag" ||
       g_datatype == "rtf" ||
-      g_datatype.indexOf("troff") >= 0)
+      g_datatype.indexOf("troff") >= 0||
+      g_datatype =="office-xml"||
+      g_datatype =="po"||
+      g_datatype =="mif"||
+      g_datatype =="fm")
   {
     return true;
   }
@@ -1805,18 +1814,6 @@ function spellCheck()
 
 function showTmWindow()
 {
-  if (idButTm.getValue() == false)
-  {
-    // hide window
-    if (w_tmwin && !w_tmwin.closed)
-    {
-      w_tmwin.close();
-    }
-    w_tmwin = null;
-  }
-  else
-  {
-    // show window
     if (!w_tmwin || w_tmwin.closed)
     {
       w_tmwin = openInfoWin();
@@ -1824,7 +1821,6 @@ function showTmWindow()
     }
 
     try { w_tmwin.focus(); } catch (ignoreonie55) {}
-  }
 }
 
 function closingTmWindow()

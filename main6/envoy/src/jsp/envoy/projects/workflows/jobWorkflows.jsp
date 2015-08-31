@@ -352,7 +352,7 @@ $("#translatedTextBtn").bind("click",function(){
     workflowIds = workflowIds.substring(0,workflowIds.length-1);
     var random = Math.random();
     workflowIds = workflowIds.split(",");
-    if(!workflowIds.length) return;
+    if(workflowIds == "") return;
     var j = 0;
     var count = setInterval(function translatedTextc(){
     	$.getJSON("${self.pageURL}",{

@@ -6547,8 +6547,46 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 			temp = getEditorSegment(tempTuv,
                 	                EditorConstants.PTAGS_COMPACT, segment,
                 	                editorState.getNeedShowPTags(), jobId);
+                			List subflows = tempTuv.getSubflowsAsGxmlElements(true);
+                	        boolean b_subflows = (subflows != null && subflows.size() > 0);
+                	        if (b_subflows)
+            	            {
+            	                JSONArray subArray = new JSONArray();
+            	                for (int j = 0; j < subflows.size(); j++)
+            	                {
+            	                    JSONObject subObj = new JSONObject();
+            	                    GxmlElement subElmt = (GxmlElement) subflows.get(i);
+            	                    String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
+            	                    dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
+
+            	                    // Inherit datatype from parent element...
+            	                    if (dataType == null)
+            	                    {
+            	                        GxmlElement node = subElmt.getParent();
+
+            	                        while (dataType == null && node != null)
+            	                        {
+            	                            dataType = node.getAttribute(GxmlNames.SUB_DATATYPE);
+            	                            node = node.getParent();
+            	                        }
+            	                    }
+
+            	                    if (dataType == null)
+            	                    {
+            	                        dataType = trgTuv.getDataType(jobId);
+            	                    }
+            	                    
+            	                    segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
+            	                            options.getViewMode());
+            	                    subObj.put("subId", subId);
+            	                    subObj.put("segment", segment);
+            	                    subArray.put(subObj);
+            	                }
+            	                originalTargetj.put("subArray", subArray);
+            	            }
                 		}
                 	}
+                	originalTargetj.put("tuId", trgTuv.getTuId());
                 	originalTargetj.put("originalTarget", temp);
                 	originalTargetjArray.put(originalTargetj);
                 	

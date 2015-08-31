@@ -28,6 +28,7 @@ function reviewMode()
 {
 	var lable=$("#reviewMode").text();
 	lable=$.trim(lable);
+	
     var action="true";
     if(comments[0]==lable)
     {
@@ -414,7 +415,12 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 	}
 	
 	//Original
-	temp.children('td').eq(2).append(originalTargetData.originalTarget);
+	htmlcontent=getNodeByClass2(originalTargetData, "");
+	if(originalTargetData.subArray){
+		temp.children('td').eq(2).html("<table width='100%' cellspacing='0' cellpadding='2'>"+htmlcontent.html()+"</table>");
+	}else{
+		temp.children('td').eq(2).append(htmlcontent);
+	}
 	
 	//target
 	temp.children('td').eq(3).attr("id","seg"+targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId);
@@ -497,6 +503,26 @@ function getNodeByClass(item, se_able){
 			span.addClass("noUnderline");
 			span.html(this.segment);
 			sub.children('td').eq(1).attr("id","seg"+item.tuId+"_"+item.tuvId+"_"+this.subId);
+			sub.children('td').eq(1).append(span);
+			stable.append(sub);
+		});
+		return stable;
+	}
+	return temp;
+}
+
+function getNodeByClass2(item, se_able){
+	var temp=spanNode.clone(true);
+	temp.html(item.originalTarget);
+	if(item.subArray){
+		var stable=subtable.clone(true);
+		stable.append(temp);
+		$.each(item.subArray,function(j){
+			var sub=subnode.clone(true);
+			sub.children('td').eq(0).text(item.tuId+"."+this.subId);
+			var span=spanNode.clone(true);
+
+			span.html(this.segment);
 			sub.children('td').eq(1).append(span);
 			stable.append(sub);
 		});

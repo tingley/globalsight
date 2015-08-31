@@ -6288,6 +6288,33 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 	}
 	
 	@Override
+	public void updateUnapprovedTuvCache(List<Long> unapprovedTuvIds,
+			HashMap<Long, TuvState> originalStateMap)
+	{
+		for(Tuv tuv: m_pageCache.getTargetTuvs())
+		{
+			if(unapprovedTuvIds.contains(tuv.getId()))
+			{
+				tuv.setState(originalStateMap.get(tuv.getId()));
+			}
+		}
+	}
+	
+	@Override
+	public void updateRevertTuvCache(List<Long> revertTuvIds,
+			HashMap<Long, String> originalGxmlMap) 
+	{
+		for(Tuv tuv: m_pageCache.getTargetTuvs())
+		{
+			if(revertTuvIds.contains(tuv.getId()))
+			{
+				tuv.setGxml(originalGxmlMap.get(tuv.getId()));
+			}
+		}
+		
+	}
+	
+	@Override
 	public String getTargetJsonData(EditorState p_state, boolean isAssignee,
             HashMap<String, String> p_searchMap)
 	{
@@ -6536,6 +6563,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 	}
                 	approvejArray.put(approvej);
                 }
+                
+                mainJson.put("currentPageNum", pi.getCurrentPageNum());
+                mainJson.put("totalPageNum", pi.getTotalPageNum());
+                mainJson.put("isFirstBatch", p_state.isFirstBatch());
+                mainJson.put("isLastBatch", p_state.isLastBatch());
             }
             
             mainJson.put("target", targetjArray);

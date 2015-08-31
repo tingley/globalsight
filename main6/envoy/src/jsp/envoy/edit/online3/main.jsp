@@ -266,7 +266,7 @@ else if (state.isReadOnly())
 }
 else
 {
-	lb_title = bundle.getString("lb_main_editor");
+	lb_title = "Post Review Editor";
 }
 lb_title = lb_title + " - " + state.getSimpleSourcePageName();
 
@@ -463,6 +463,13 @@ String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_commen
 .comment      	{ margin-left: 20px; width: 100%; word-wrap: break-word; }
 .highlight	  	{ background-color: lightskyblue;}
 .stripe			{ background-color: #eeeeee;}
+
+ul									{ list-style: none;}
+ul.dropdown                         { position: relative;padding-left:20px}
+ul.dropdown li                      { font-weight: bold; }
+ul.dropdown li a                    { display: block; padding: 4px 8px;color: #222; }
+ul.dropdown ul 						{ visibility: hidden; position: absolute; top: 100%; left: -70px; }
+ul.dropdown li:hover > ul 		    { visibility: visible;}
 </STYLE>
 <link type="text/css" rel="StyleSheet" id="cssEditor" href="/globalsight/envoy/edit/online/editor.css">
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
@@ -543,7 +550,7 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 		    <label id="fileNavNext"><%=lb_nextFile%></label>
 		  </TD>
 		  <TD WIDTH="20">&nbsp;</TD>
-		  <TD NOWRAP VALIGN="TOP" ALIGN="CENTER"><%=lb_pageNavigation%>&nbsp;(<%=pi.getCurrentPageNum()%> of <%=pi.getTotalPageNum()%>)<BR/>
+		  <TD NOWRAP VALIGN="TOP" ALIGN="CENTER"><%=lb_pageNavigation%>&nbsp;(<span id="currentPageNum"><%=pi.getCurrentPageNum()%></span> of <span id="totalPageNum"><%=pi.getTotalPageNum()%></span>)<BR/>
 		    <label id="pageNavPre"><%=lb_prevPage%></label>
 		    <label id="pageNavNext"><%=lb_nextPage%></label> 
 		    <label style="position: relative; bottom: 6px; left: 8px; hight: 1px">Goto
@@ -609,9 +616,16 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
       <TD ALIGN="LEFT"><%=lb_source_segment%></TD>
       <TD ALIGN="LEFT"><%=lb_initial_translation%></TD>
       <TD ALIGN="LEFT"><%=lb_current_translation%></TD>
-      <TD ALIGN="LEFT" width='100'>
-      	<input type="checkbox" id="checkAll" onclick="checkAll()" style="vertical-align:middle;"/>
-      	<input type="button" value="Approve" onclick="approve();">
+      <TD ALIGN="LEFT" width='50'>
+        <ul class="dropdown" style="padding: 0px;margin: 0px;" >
+        	<li style="background:#708EB3;"><input type="checkbox" id="checkAll" style="float:left;margin-top:5px" onclick="checkAll()"/><a href="#" style="padding: 0px;"><img src="/globalsight/envoy/edit/online3/action.jpg"></a>
+        		<ul class="sub_menu">
+        			 <li style="background:#ccc;"><a href="#" onclick="approve();">Approve</a></li>
+        			 <li style="background:#ccc;"><a href="#" onclick="unapprove();">Unapprove</a></li>
+        			 <li style="background:#ccc;"><a href="#" onclick="revert();">Revert</a></li>
+        		</ul>
+        	</li>
+        </ul>
       </TD>
     </TR>
   </THEAD>

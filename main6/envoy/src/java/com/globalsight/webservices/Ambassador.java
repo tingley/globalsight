@@ -3998,13 +3998,6 @@ public class Ambassador extends AbstractWebService
 			return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
 		}
 		
-		// get unique job name
-		if (StringUtil.isNotEmpty(p_jobName))
-		{
-			p_jobName = getUniqueJobName(p_accessToken, p_jobName);
-			paramter.put("jobName", p_jobName);
-		}
-
 		Job job = null;
 		try
 		{
@@ -4040,6 +4033,42 @@ public class Ambassador extends AbstractWebService
 			return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
 		}
 
+		// get unique job name
+		if (StringUtil.isNotEmpty(p_jobName))
+		{
+			try
+			{
+				p_jobName = EditUtil.removeCRLF(p_jobName);
+				Job checkJob = ServerProxy.getJobHandler().getJobByJobName(
+						p_jobName);
+				if (checkJob == null)
+				{
+					paramter.put("jobName", p_jobName);
+				}
+				else
+				{
+					if (checkJob.getId() == Long.parseLong(p_jobId))
+					{
+						return makeErrorXml(
+								EDIT_JOB_DETAIL_INFO,
+								"Invalid job name :"
+										+ p_jobName
+										+ ", the modify name and the name of the current job is no difference.");
+					}
+					else
+					{
+						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+								"Invalid job name :" + p_jobName
+										+ ", job name already exists.");
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
+			}
+		}
+				
 		if (StringUtil.isNotEmpty(p_estimatedDateXml))
 		{
 			Document doc;

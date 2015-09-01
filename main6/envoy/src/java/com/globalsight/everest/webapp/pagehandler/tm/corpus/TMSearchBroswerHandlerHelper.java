@@ -655,6 +655,7 @@ public class TMSearchBroswerHandlerHelper
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(itLeverageMatches), attributeName, attributeValue);
         }
         long jobId = -1; // -1 is fine here
+        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
         while (itLeverageMatches.hasNext())
         {
             LeverageMatches levMatches = itLeverageMatches.next();
@@ -679,6 +680,17 @@ public class TMSearchBroswerHandlerHelper
                     		continue;
                     	}
                     }
+                    
+                  //0001181: TM Search: Job ID search is incorrect
+					if (jobIdSet != null && jobIdSet.size() > 0)
+					{
+						if (!jobIdSet.contains(String.valueOf(matchedTuv
+								.getJobId())))
+						{
+							continue;
+						}
+					}
+                    
             		if (advancedSearch && !searchInSource)
     				{
     					if (!searchFilter(filterMap, matchedTuv))
@@ -1570,7 +1582,7 @@ public class TMSearchBroswerHandlerHelper
 			createUser = (String) request.getParameter("createUser");
 			modifyUser = (String) request.getParameter("modifyUser");
 			String jobIds = (String)request.getParameter("jobIds");
-			if (StringUtil.isNotEmpty(jobIds) && jobIds.contains(","))
+			if (StringUtil.isNotEmpty(jobIds))
 			{
 				jobIdSet = new HashSet<String>();
 				for (String jobId : jobIds.split(","))

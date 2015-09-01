@@ -226,6 +226,7 @@ function approve()
 		random:Math.random()
 	}, function(data){
 		alert("Approved the Segment(s).");
+		setInterval(getDataByFrom(url),1000);
 	});
 }
 

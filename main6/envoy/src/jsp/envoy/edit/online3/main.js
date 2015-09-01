@@ -225,7 +225,8 @@ function approve()
 		approveIds:approveIds,
 		random:Math.random()
 	}, function(data){
-		alert("Approved the Segment(s).");
+		alert("Approval is done.");
+		setInterval(getDataByFrom(url),1000);
 	});
 }
 
@@ -251,7 +252,7 @@ function unapprove()
 		unApproveIds:unApproveIds,
 		random:Math.random()
 	}, function(data){
-		alert("Unapproved the Segment(s).");
+		alert("Un-approval is done.");
 		setInterval(getDataByFrom(url),1000);
 	});
 }
@@ -278,7 +279,7 @@ function revert()
 		revertIds:revertIds,
 		random:Math.random()
 	}, function(data){
-		alert("Revert the Segment(s).");
+		alert("Reversion is done.");
 		setInterval(getDataByFrom(url),1000);
 	});
 }
@@ -348,14 +349,13 @@ function getDataByFrom(url){
 }
 
 function buildData(data){
+	var idPageHtml=$("#idPageHtml");
+	idPageHtml.html("");
 	$("#currentPageNum").html(data.currentPageNum);
 	$("#totalPageNum").html(data.totalPageNum);
 	isFirstBatch = data.isFirstBatch;
 	isLastBatch = data.isLastBatch;
 	updatePageNavigationArrow();
-	
-	var idPageHtml=$("#idPageHtml");
-	idPageHtml.html("");
 	$(".repstyle").remove();
 	$(".commentstyle").remove();
 	localData=data;

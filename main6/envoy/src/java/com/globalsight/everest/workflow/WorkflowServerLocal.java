@@ -439,7 +439,6 @@ public class WorkflowServerLocal implements WorkflowServer
                 p_emailInfo.getAssigneesName(),
                 capLoginUrl(),
                 p_emailInfo.getPriorityAsString(),
-                p_emailInfo.getJobName(),
                 WorkflowHelper.localePair(p_emailInfo.getSourceLocale(),
                         p_emailInfo.getTargetLocale(), "en_US"), state };
         sendTaskActionEmailToUser(p_emailInfo.getAssigneesName(), p_emailInfo,
@@ -2158,17 +2157,7 @@ public class WorkflowServerLocal implements WorkflowServer
                         WorkflowOwner owner = new WorkflowOwner();
                         owner.setWorkflow(workflow);
                         owner.setOwnerId(userId);
-                        List wfManagerIds = workflow
-                                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER);
-                        if (wfManagerIds.size() > 0
-                                && wfManagerIds.contains(userId))
-                        {
-                            owner.setOwnerType(Permission.GROUP_WORKFLOW_MANAGER);
-                        }
-                        else
-                        {
-                            owner.setOwnerType(Permission.GROUP_PROJECT_MANAGER);
-                        }
+                        owner.setOwnerType(Permission.GROUP_WORKFLOW_MANAGER);
                         owners.add(owner);
                         ServerProxy.getWorkflowManager()
                                 .reassignWorkflowOwners(workflow.getId(),

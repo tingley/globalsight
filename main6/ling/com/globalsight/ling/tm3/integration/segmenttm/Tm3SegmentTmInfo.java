@@ -295,6 +295,9 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             for (SegmentTmTuv tuv : pTuvs)
             {
                 modifyUser = tuv.getModifyUser();
+                if (modifyUser == null) {
+                    modifyUser = "system";
+                }
                 SegmentTmTu stu = (SegmentTmTu) tuv.getTu();
                 long tuId = stu.getId();
                 TM3Tu<GSTuvData> tu = map.get(tuv.getTu().getId());
@@ -318,15 +321,12 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                         // Update the segment content
                         tm3tuv.setContent(factory.fromSerializedForm(
                                 tuv.getLocale(), tuv.getSegment()));
+                        tm3tuv.setModifyDate(tuv.getModifyDate());
+                        tm3tuv.setModifyUser(modifyUser);
                     }
-
                 }
             }
 
-            if (modifyUser == null)
-            {
-                modifyUser = "system";
-            }
             TM3Event event = tm3tm.addEvent(EventType.TUV_MODIFY.getValue(),
                     modifyUser, null);
             List<TM3Tu<GSTuvData>> newTus = new ArrayList<TM3Tu<GSTuvData>>();

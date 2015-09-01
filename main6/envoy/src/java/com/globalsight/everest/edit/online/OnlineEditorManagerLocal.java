@@ -149,6 +149,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     public static final String STYLE_FUZZY_MATCH = "editorSegmentFuzzy";
     public static final String STYLE_NO_MATCH = "editorSegment";
     public static final String STYLE_UPDATED = "editorSegmentUpdated";
+    public static final String STYLE_APPROVED = "editorSegmentApproved";
     public static final String STYLE_LOCKED = "editorSegmentLocked";
     public static final String STYLE_EXCLUDED = "editorSegmentExcluded";
     public static final String STYLE_MT = "editorSegmentMT";
@@ -5100,6 +5101,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         if (p_trgTuv.isLocalized())
         {
             return STYLE_UPDATED;
+        }
+        
+        if(p_trgTuv.getState().equals(TuvState.APPROVED))
+        {
+        	return STYLE_APPROVED;
         }
 
         return getMatchStyleByLM(p_matchTypes, p_srcTuv, p_trgTuv, p_subId,

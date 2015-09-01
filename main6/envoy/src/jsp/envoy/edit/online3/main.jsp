@@ -471,7 +471,7 @@ ul.dropdown li a                    { display: block; padding: 4px 8px;color: #2
 ul.dropdown ul 						{ visibility: hidden; position: absolute; top: 100%; left: -70px; }
 ul.dropdown li:hover > ul 		    { visibility: visible;}
 </STYLE>
-<link type="text/css" rel="StyleSheet" id="cssEditor" href="/globalsight/envoy/edit/online/editor.css">
+<link type="text/css" rel="StyleSheet" id="cssEditor" href="/globalsight/envoy/edit/online3/editor.css">
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script>
 var tempTotalPageNum = <%=(pi.getTotalPageNum())%>;

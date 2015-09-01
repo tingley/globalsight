@@ -4022,9 +4022,9 @@ public class Ambassador extends AbstractWebService
 					&& StringUtil.isNotEmpty(p_jobName))
 			{
 				return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-						"Only job is ready state, can modify the job name.");
+						"Only job in ready state is allowed to modify job name.");
 			}
-			
+
 			paramter.put("jobId", p_jobId);
 		}
 		catch (Exception e)

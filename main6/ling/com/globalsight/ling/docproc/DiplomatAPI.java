@@ -1160,12 +1160,12 @@ public class DiplomatAPI implements IFormatNames
                 || IFormatNames.FORMAT_PASSOLO.equals(formatName);
         boolean isPO = IFormatNames.FORMAT_PO.equals(formatName);
 
+        // GBS-3997&GBS-4066, protect emoji's unicodes
+        EmojiUtil.protectEmojiUnicodes(m_output);
+
         // protect internal text / internal tag for segmentation
         List<String> internalTexts = InternalTextHelper
                 .protectInternalTexts(m_output);
-
-        // GBS-3997&GBS-4066, protect emoji's unicodes
-        EmojiUtil.protectEmojiUnicodes(m_output);
 
         if (m_options.m_sentenceSegmentation)
         {

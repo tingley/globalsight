@@ -291,7 +291,7 @@ var jsonUrl=url_self+"&dataFormat=json"+"&srcViewMode=" + modeId+"&random="+Math
 var localData;
 var isReviwMode;
 var url;
-var trnode=$("<tr class='ul'><td width='25'></td><td class='segtd'></td><td class='segtd'></td><td class='segtd'></td><td width='50'></td></tr>");
+var trnode=$("<tr class='ul'><td width='25'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td width='50'></td></tr>");
 var repNode=$("<td class='rep'></td>");
 var subnode=$("<tr><td style='font-size: 10pt' nowrap=''></td><td></td></tr>")
 var subtable=$("<table width='100%' cellspacing='0' cellpadding='2'><colgroup><col width='1%' valign='TOP' class='editorId'><col width='99%' valign='TOP'></colgroup><tbody></tbody></table>")

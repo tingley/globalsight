@@ -437,14 +437,10 @@ String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_commen
 .foot {width:100%;position:absolute;Z-INDEX: 10; LEFT: 0px;bottom:<%=footBottom%>;}
 .commentDiv{width:100%;position:absolute;Z-INDEX: 10; LEFT: 0px;bottom:0;height:270px;}
 
-#idCommentTable { font-family: verdana; font-size: 10pt;
-                  border-bottom: 1px solid black;
-                }
-#idCommentTable TH {
-    font-size: 9pt;
-    color: <%=skin.getProperty("skin.tableHeading.fgColor")%>;
-    background-color: <%=skin.getProperty("skin.tableHeading.bgColor")%>;
-}
+.segmentTd{word-break: break-all;word-wrap : break-word; overflow:hidden;}
+
+#idCommentTable { font-family: verdana; font-size: 10pt;border-bottom: 1px solid black;}
+#idCommentTable TH {font-size: 9pt;color: <%=skin.getProperty("skin.tableHeading.fgColor")%>;background-color: <%=skin.getProperty("skin.tableHeading.bgColor")%>;}
 #idCommentTable TH SPAN { cursor: hand;  cursor:pointer;}
 
 #idCommentTable P { margin-top: 0px; margin-bottom: 0px; }
@@ -466,7 +462,7 @@ String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_commen
 
 ul									{ list-style: none;}
 ul.dropdown                         { position: relative;padding-left:20px}
-ul.dropdown li                      { font-weight: bold; }
+ul.dropdown li                      { font-weight: bold;background:white;border-top:solid 1px black;border-left:solid 1px black;border-right:solid 1px black; }
 ul.dropdown li a                    { display: block; padding: 4px 8px;color: #222; }
 ul.dropdown ul 						{ visibility: hidden; position: absolute; top: 100%; left: -70px; }
 ul.dropdown li:hover > ul 		    { visibility: visible;}
@@ -620,9 +616,9 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
         <ul class="dropdown" style="padding: 0px;margin: 0px;" >
         	<li style="background:#708EB3;"><input type="checkbox" id="checkAll" style="float:left;margin-top:5px" onclick="checkAll()"/><a href="#" style="padding: 0px;"><img src="/globalsight/envoy/edit/online3/action.jpg"></a>
         		<ul class="sub_menu">
-        			 <li style="background:#ccc;"><a href="#" onclick="approve();">Approve</a></li>
-        			 <li style="background:#ccc;"><a href="#" onclick="unapprove();">Unapprove</a></li>
-        			 <li style="background:#ccc;"><a href="#" onclick="revert();">Revert</a></li>
+        			 <li><a href="#" class="noUnderline" onclick="approve();">Approve</a></li>
+        			 <li><a href="#" class="noUnderline" onclick="unapprove();">Unapprove</a></li>
+        			 <li style="border-bottom:solid 1px black"><a href="#" class="noUnderline" onclick="revert();">Revert</a></li>
         		</ul>
         	</li>
         </ul>

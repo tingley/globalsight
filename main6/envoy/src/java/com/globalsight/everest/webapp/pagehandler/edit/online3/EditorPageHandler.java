@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -737,7 +739,6 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 			tuvMap.put(tuv.getTuId() + "_" + tuv.getId(), tuv);
 		}
 		String approveIds = request.getParameter("approveIds");
-		String unApproveIds = request.getParameter("unApproveIds");
 		Connection conn = DbUtil.getConnection();
 		conn.setAutoCommit(false);
 		List<Long> approvedTuvIds = new ArrayList<Long>();
@@ -770,37 +771,6 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 				}
 			}
 		}
-//		if(StringUtil.isNotEmpty(unApproveIds))
-//		{
-//			unApproveIds = unApproveIds.substring(0, unApproveIds.length() - 1);
-//			String[] tempIds = unApproveIds.split(",");
-//			for(String tempId: tempIds)
-//			{
-//				String[] temp = tempId.split("_");
-//				String tuId = temp[0];
-//				String tuvId = temp[1];
-//				
-//				Tuv tuv = tuvMap.get(tuId + "_" + tuvId);
-//				TuvState tuvState = tuv.getState();
-//				if(tuvState.getValue() == TuvState.APPROVED.getValue())
-//				{
-//					List<Long> tuvIdList = new ArrayList<Long>();
-//					tuvIdList.add(tuv.getIdAsLong());
-//					List<TuTuvAttributeImpl>  tuTuvAttributeImplList
-//						= SegmentTuTuvAttributeUtil.getStateAttributesByTuvIds(tuvIdList, jobId);
-//					if(tuTuvAttributeImplList.size() > 0)
-//					{
-//						int stateInt = (int) tuTuvAttributeImplList.get(0).getLongValue();
-//						TuvState originalState = TuvState.valueOf(stateInt);
-//						tuv.setState(originalState);
-//						tuvImplList.add((TuvImpl) tuv);
-//						
-//						SegmentTuTuvAttributeUtil.deleteStateAttributes(
-//								conn, tuTuvAttributeImplList, jobId);
-//					}
-//				}
-//			}
-//		}
 		conn.close();
 		
 		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
@@ -810,6 +780,221 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		out.write("true".getBytes("UTF-8"));
 		out.close();
     	pageReturn();
+    }
+	
+	@ActionHandler(action = "unapprove", formClass = "")
+    public void unapprove(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+		HttpSession session = request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        EditorState state = (EditorState) sessionMgr
+                .getAttribute(WebAppConstants.EDITORSTATE);
+		long p_trgPageId = state.getTargetPageId().longValue();
+		PageManager pageManager = ServerProxy.getPageManager();
+		TargetPage targetPage = pageManager.getTargetPage(p_trgPageId);
+		targetPage.setGlobalSightLocale(targetPage.getGlobalSightLocale());
+		List<Tuv> tuvList= SegmentTuvUtil.getAllTargetTuvs(targetPage);
+		
+		Task theTask = (Task) TaskHelper.retrieveObject(session,
+                WebAppConstants.WORK_OBJECT);
+		long jobId = theTask.getJobId();
+		
+		List<TuvImpl> tuvImplList = new ArrayList<TuvImpl>();
+		HashMap<String,Tuv> tuvMap = new HashMap<String,Tuv>(); 
+		for(Tuv tuv : tuvList)
+		{
+			tuvMap.put(tuv.getTuId() + "_" + tuv.getId(), tuv);
+		}
+		String unApproveIds = request.getParameter("unApproveIds");
+		Connection conn = DbUtil.getConnection();
+		conn.setAutoCommit(false);
+		List<Long> unapprovedTuvIds = new ArrayList<Long>();
+		HashMap<Long, TuvState> originalStateMap = new HashMap<Long, TuvState>();
+		if(StringUtil.isNotEmpty(unApproveIds))
+		{
+			unApproveIds = unApproveIds.substring(0, unApproveIds.length() - 1);
+			String[] tempIds = unApproveIds.split(",");
+			for(String tempId: tempIds)
+			{
+				String[] temp = tempId.split("_");
+				String tuId = temp[0];
+				String tuvId = temp[1];
+				
+				Tuv tuv = tuvMap.get(tuId + "_" + tuvId);
+				TuvState tuvState = tuv.getState();
+				if(tuvState.getValue() == TuvState.APPROVED.getValue())
+				{
+					List<Long> tuvIdList = new ArrayList<Long>();
+					tuvIdList.add(tuv.getIdAsLong());
+					List<TuTuvAttributeImpl>  tuTuvAttributeImplList
+						= SegmentTuTuvAttributeUtil.getStateAttributesByTuvIds(tuvIdList, jobId);
+					if(tuTuvAttributeImplList.size() > 0)
+					{
+						int stateInt = (int) tuTuvAttributeImplList.get(0).getLongValue();
+						TuvState originalState = TuvState.valueOf(stateInt);
+						tuv.setState(originalState);
+						tuvImplList.add((TuvImpl) tuv);
+						
+						originalStateMap.put(tuv.getId(), originalState);
+						
+						SegmentTuTuvAttributeUtil.deleteStateAttributes(
+								conn, tuTuvAttributeImplList, jobId);
+					}
+					else
+					{
+						tuv.setState(TuvState.NOT_LOCALIZED);
+						tuvImplList.add((TuvImpl) tuv);
+						
+						originalStateMap.put(tuv.getId(), TuvState.NOT_LOCALIZED);
+					}
+					unapprovedTuvIds.add(tuv.getId());
+				}
+			}
+		}
+		conn.close();
+		
+		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
+		state.getEditorManager().updateUnapprovedTuvCache(unapprovedTuvIds, originalStateMap);
+		
+		ServletOutputStream out = response.getOutputStream();
+		out.write("true".getBytes("UTF-8"));
+		out.close();
+    	pageReturn();
+    }
+	
+	@ActionHandler(action = "revert", formClass = "")
+    public void revert(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+		HttpSession session = request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        EditorState state = (EditorState) sessionMgr
+                .getAttribute(WebAppConstants.EDITORSTATE);
+		long p_trgPageId = state.getTargetPageId().longValue();
+		PageManager pageManager = ServerProxy.getPageManager();
+		TargetPage targetPage = pageManager.getTargetPage(p_trgPageId);
+		targetPage.setGlobalSightLocale(targetPage.getGlobalSightLocale());
+		List<Tuv> allTuvList = SegmentTuvUtil.getAllTargetTuvs(targetPage);
+		List<TuvImpl> tuvList = SegmentTuvUtil.getTargetTuvs(targetPage);
+		HashMap<Long, Tuv> originalTargetTuvMap = new HashMap<Long, Tuv>();
+		Long targetLocaleId = targetPage.getGlobalSightLocale().getIdAsLong();
+		setOriginalTargetTuvMap(tuvList, allTuvList, originalTargetTuvMap, targetLocaleId);
+		
+		Task theTask = (Task) TaskHelper.retrieveObject(session,
+                WebAppConstants.WORK_OBJECT);
+		long jobId = theTask.getJobId();
+		
+		List<TuvImpl> tuvImplList = new ArrayList<TuvImpl>();
+		HashMap<String,Tuv> tuvMap = new HashMap<String,Tuv>(); 
+		for(Tuv tuv : tuvList)
+		{
+			tuvMap.put(tuv.getTuId() + "_" + tuv.getId(), tuv);
+		}
+		String revertIds = request.getParameter("revertIds");
+		List<Long> revertTuvIds = new ArrayList<Long>();
+		HashMap<Long, String> originalGxmlMap = new HashMap<Long, String>();
+		Connection conn = DbUtil.getConnection();
+		conn.setAutoCommit(false);
+		if(StringUtil.isNotEmpty(revertIds))
+		{
+			revertIds = revertIds.substring(0, revertIds.length() - 1);
+			String[] tempIds = revertIds.split(",");
+			for(String tempId: tempIds)
+			{
+				String[] temp = tempId.split("_");
+				String tuId = temp[0];
+				String tuvId = temp[1];
+				
+				Tuv tuv = tuvMap.get(tuId + "_" + tuvId);
+				if(originalTargetTuvMap.get(Long.parseLong(tuvId)) != null)
+				{
+					tuv.setGxml(originalTargetTuvMap.get(Long.parseLong(tuvId)).getGxml());
+					tuvImplList.add((TuvImpl) tuv);
+					revertTuvIds.add(tuv.getId());
+					originalGxmlMap.put(tuv.getId(), originalTargetTuvMap.get(Long.parseLong(tuvId)).getGxml());
+				}
+			}
+		}
+		conn.close();
+		
+		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
+		state.getEditorManager().updateRevertTuvCache(revertTuvIds, originalGxmlMap);
+		
+		ServletOutputStream out = response.getOutputStream();
+		out.write("true".getBytes("UTF-8"));
+		out.close();
+    	pageReturn();
+    }
+	
+	private void setOriginalTargetTuvMap(List<TuvImpl> tuvList, List<Tuv> allTargetTuvs, 
+    		HashMap<Long, Tuv> setOriginalTargetTuvMap, long targetLocaleId)
+    {
+    	HashMap<Long, List<Tuv>> tempHashMap = new HashMap<Long, List<Tuv>>();
+    	for(Tuv tuv: allTargetTuvs)
+    	{
+    		long tuId = tuv.getTuId();
+    		if(tuv.getLocaleId() == targetLocaleId && tuv.getState().equals(TuvState.OUT_OF_DATE))
+    		{
+    			if(tempHashMap.get(tuId) == null)
+    			{
+    				List<Tuv> tempTuvList = new ArrayList<Tuv>();
+    				tempTuvList.add(tuv);
+    				tempHashMap.put(tuId, tempTuvList);
+    			}
+    			else
+    			{
+    				tempHashMap.get(tuId).add(tuv);
+    			}
+    		}
+    	}
+    	
+    	for(Tuv tuv: tuvList)
+    	{
+    		long tuId = tuv.getTuId();
+    		List<Tuv> tempTuvList = tempHashMap.get(tuId);
+    		if(tempTuvList != null)
+    		{
+    			sortById(tempTuvList);
+    			for(Tuv tempTuv: tempTuvList)
+    			{
+    				if(!tempTuv.getGxml().equals(tuv.getGxml()))
+    				{
+    					setOriginalTargetTuvMap.put(tuv.getId(), tempTuv);
+    					break;
+    				}
+    			}
+    		}
+    	}
+    }
+	
+	private static void sortById(List<Tuv> tempTuvList)
+    {
+    	if(tempTuvList.size() > 1)
+    	{
+    		Collections.sort(tempTuvList, new Comparator<Tuv>() 
+    		{  
+                public int compare(Tuv arg0, Tuv arg1) 
+                {  
+                    long id0 = arg0.getId();
+                    long id1 = arg1.getId();  
+                    if (id1 > id0) 
+                    {  
+                        return 1;  
+                    } 
+                    else if (id1 == id0) 
+                    {  
+                        return 0;  
+                    }
+                    else
+                    {
+                        return -1;  
+                    }  
+                }  
+            });
+    	}
     }
     
     @ActionHandler(action = "getData", formClass = "")

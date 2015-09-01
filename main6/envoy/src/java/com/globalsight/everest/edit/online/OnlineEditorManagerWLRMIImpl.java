@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Vector;
 
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.util.GeneralException;
@@ -344,4 +345,18 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
     {
     	  m_localReference.updateApprovedTuvCache(approvedTuvIds);
     }
+
+	@Override
+	public void updateUnapprovedTuvCache(List<Long> unapprovedTuvIds,
+			HashMap<Long, TuvState> originalStateMap) 
+	{
+		m_localReference.updateUnapprovedTuvCache(unapprovedTuvIds, originalStateMap);
+	}
+
+	@Override
+	public void updateRevertTuvCache(List<Long> revertTuvIds,
+			HashMap<Long, String> originalGxmlMap) 
+	{
+		m_localReference.updateRevertTuvCache(revertTuvIds, originalGxmlMap) ;
+	}
 }

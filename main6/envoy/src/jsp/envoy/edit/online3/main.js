@@ -28,6 +28,7 @@ function reviewMode()
 {
 	var lable=$("#reviewMode").text();
 	lable=$.trim(lable);
+	
     var action="true";
     if(comments[0]==lable)
     {
@@ -116,14 +117,14 @@ function updateFileNavigationArrow()
 
 function updatePageNavigationArrow()
 {
-    if (isFirstBatch == 'false')
+    if (isFirstBatch == 'false' || isFirstBatch == false)
     {
         pageNavPre = "<A HREF='#' onclick='refresh(-11); return false;' onfocus='this.blur()'>"
             + "<IMG SRC='/globalsight/images/editorPreviousPage.gif' BORDER=0 HSPACE=2 VSPACE=4></A>";
         document.getElementById("pageNavPre").innerHTML = pageNavPre;
     }
-
-	if (isLastBatch == 'false')
+    
+	if (isLastBatch == 'false' || isLastBatch == false)
 	{
         pageNavNext = "<A HREF='#' onclick='refresh(11); return false;' onfocus='this.blur()'>"
             + "<IMG SRC='/globalsight/images/editorNextPage.gif' BORDER=0 HSPACE=2 VSPACE=4></A>";
@@ -205,26 +206,80 @@ function checkAll()
 function approve()
 {
 	var approveIds = "";
-	var unApproveIds = "";
 	$("input[name='approveCheckBox']").each(function(){
 		if($(this).is(":checked"))
 		{
 			approveIds = approveIds + $(this).attr("id") + ",";
 		}
-		else
-		{
-			unApproveIds = unApproveIds + $(this).attr("id") + ",";
-		}
 	});
+	
+	if(approveIds == "")
+	{
+		alert("Please select some segments.");
+		return false;
+	}
 	
 	$.getJSON(url_self, 
 	{
 		action:"approve",
 		approveIds:approveIds,
-		unApproveIds:unApproveIds,
 		random:Math.random()
 	}, function(data){
 		alert("Approved the Segment(s).");
+	});
+}
+
+function unapprove()
+{
+	var unApproveIds = "";
+	$("input[name='approveCheckBox']").each(function(){
+		if($(this).is(":checked"))
+		{
+			unApproveIds = unApproveIds + $(this).attr("id") + ",";
+		}
+	});
+	
+	if(unApproveIds == "")
+	{
+		alert("Please select some segments.");
+		return false;
+	}
+	
+	$.getJSON(url_self, 
+	{
+		action:"unapprove",
+		unApproveIds:unApproveIds,
+		random:Math.random()
+	}, function(data){
+		alert("Unapproved the Segment(s).");
+		setInterval(getDataByFrom(url),1000);
+	});
+}
+
+function revert()
+{
+	var revertIds = "";
+	$("input[name='approveCheckBox']").each(function(){
+		if($(this).is(":checked"))
+		{
+			revertIds = revertIds + $(this).attr("id") + ",";
+		}
+	});
+	
+	if(revertIds == "")
+	{
+		alert("Please select some segments.");
+		return false;
+	}
+	
+	$.getJSON(url_self, 
+	{
+		action:"revert",
+		revertIds:revertIds,
+		random:Math.random()
+	}, function(data){
+		alert("Revert the Segment(s).");
+		setInterval(getDataByFrom(url),1000);
 	});
 }
 
@@ -278,7 +333,6 @@ $(
 		var pageName=isNull ? "target"  : ((args.pageName.indexOf("ED4") >= 0)?"source":"target");
 		
 		updateFileNavigationArrow();
-	    updatePageNavigationArrow();
 		
 		url=jsonUrl;
 		getDataByFrom(url);
@@ -294,6 +348,12 @@ function getDataByFrom(url){
 }
 
 function buildData(data){
+	$("#currentPageNum").html(data.currentPageNum);
+	$("#totalPageNum").html(data.totalPageNum);
+	isFirstBatch = data.isFirstBatch;
+	isLastBatch = data.isLastBatch;
+	updatePageNavigationArrow();
+	
 	var idPageHtml=$("#idPageHtml");
 	idPageHtml.html("");
 	$(".repstyle").remove();
@@ -355,7 +415,12 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 	}
 	
 	//Original
-	temp.children('td').eq(2).append(originalTargetData.originalTarget);
+	htmlcontent=getNodeByClass2(originalTargetData, "");
+	if(originalTargetData.subArray){
+		temp.children('td').eq(2).html("<table width='100%' cellspacing='0' cellpadding='2'>"+htmlcontent.html()+"</table>");
+	}else{
+		temp.children('td').eq(2).append(htmlcontent);
+	}
 	
 	//target
 	temp.children('td').eq(3).attr("id","seg"+targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId);
@@ -381,7 +446,7 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 	
 	//approve
 	var approveId = targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId;
-	temp.children('td').eq(4).html("<input id='" + approveId + "' name='approveCheckBox' type='checkbox' " + approveData.approve + ">");
+	temp.children('td').eq(4).html("<input id='" + approveId + "' name='approveCheckBox' type='checkbox'>");
 
 	idPageHtml.append(temp);
 }
@@ -438,6 +503,26 @@ function getNodeByClass(item, se_able){
 			span.addClass("noUnderline");
 			span.html(this.segment);
 			sub.children('td').eq(1).attr("id","seg"+item.tuId+"_"+item.tuvId+"_"+this.subId);
+			sub.children('td').eq(1).append(span);
+			stable.append(sub);
+		});
+		return stable;
+	}
+	return temp;
+}
+
+function getNodeByClass2(item, se_able){
+	var temp=spanNode.clone(true);
+	temp.html(item.originalTarget);
+	if(item.subArray){
+		var stable=subtable.clone(true);
+		stable.append(temp);
+		$.each(item.subArray,function(j){
+			var sub=subnode.clone(true);
+			sub.children('td').eq(0).text(item.tuId+"."+this.subId);
+			var span=spanNode.clone(true);
+
+			span.html(this.segment);
 			sub.children('td').eq(1).append(span);
 			stable.append(sub);
 		});

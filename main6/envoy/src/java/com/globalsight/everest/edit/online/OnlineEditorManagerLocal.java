@@ -149,6 +149,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     public static final String STYLE_FUZZY_MATCH = "editorSegmentFuzzy";
     public static final String STYLE_NO_MATCH = "editorSegment";
     public static final String STYLE_UPDATED = "editorSegmentUpdated";
+    public static final String STYLE_APPROVED = "editorSegmentApproved";
     public static final String STYLE_LOCKED = "editorSegmentLocked";
     public static final String STYLE_EXCLUDED = "editorSegmentExcluded";
     public static final String STYLE_MT = "editorSegmentMT";
@@ -5101,6 +5102,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             return STYLE_UPDATED;
         }
+        
+        if(p_trgTuv.getState().equals(TuvState.APPROVED))
+        {
+        	return STYLE_APPROVED;
+        }
 
         return getMatchStyleByLM(p_matchTypes, p_srcTuv, p_trgTuv, p_subId,
                 p_unlock, p_repetitions, p_jobId);
@@ -6288,6 +6294,33 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 	}
 	
 	@Override
+	public void updateUnapprovedTuvCache(List<Long> unapprovedTuvIds,
+			HashMap<Long, TuvState> originalStateMap)
+	{
+		for(Tuv tuv: m_pageCache.getTargetTuvs())
+		{
+			if(unapprovedTuvIds.contains(tuv.getId()))
+			{
+				tuv.setState(originalStateMap.get(tuv.getId()));
+			}
+		}
+	}
+	
+	@Override
+	public void updateRevertTuvCache(List<Long> revertTuvIds,
+			HashMap<Long, String> originalGxmlMap) 
+	{
+		for(Tuv tuv: m_pageCache.getTargetTuvs())
+		{
+			if(revertTuvIds.contains(tuv.getId()))
+			{
+				tuv.setGxml(originalGxmlMap.get(tuv.getId()));
+			}
+		}
+		
+	}
+	
+	@Override
 	public String getTargetJsonData(EditorState p_state, boolean isAssignee,
             HashMap<String, String> p_searchMap)
 	{
@@ -6520,8 +6553,46 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 			temp = getEditorSegment(tempTuv,
                 	                EditorConstants.PTAGS_COMPACT, segment,
                 	                editorState.getNeedShowPTags(), jobId);
+                			List subflows = tempTuv.getSubflowsAsGxmlElements(true);
+                	        boolean b_subflows = (subflows != null && subflows.size() > 0);
+                	        if (b_subflows)
+            	            {
+            	                JSONArray subArray = new JSONArray();
+            	                for (int j = 0; j < subflows.size(); j++)
+            	                {
+            	                    JSONObject subObj = new JSONObject();
+            	                    GxmlElement subElmt = (GxmlElement) subflows.get(i);
+            	                    String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
+            	                    dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
+
+            	                    // Inherit datatype from parent element...
+            	                    if (dataType == null)
+            	                    {
+            	                        GxmlElement node = subElmt.getParent();
+
+            	                        while (dataType == null && node != null)
+            	                        {
+            	                            dataType = node.getAttribute(GxmlNames.SUB_DATATYPE);
+            	                            node = node.getParent();
+            	                        }
+            	                    }
+
+            	                    if (dataType == null)
+            	                    {
+            	                        dataType = trgTuv.getDataType(jobId);
+            	                    }
+            	                    
+            	                    segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
+            	                            options.getViewMode());
+            	                    subObj.put("subId", subId);
+            	                    subObj.put("segment", segment);
+            	                    subArray.put(subObj);
+            	                }
+            	                originalTargetj.put("subArray", subArray);
+            	            }
                 		}
                 	}
+                	originalTargetj.put("tuId", trgTuv.getTuId());
                 	originalTargetj.put("originalTarget", temp);
                 	originalTargetjArray.put(originalTargetj);
                 	
@@ -6536,6 +6607,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 	}
                 	approvejArray.put(approvej);
                 }
+                
+                mainJson.put("currentPageNum", pi.getCurrentPageNum());
+                mainJson.put("totalPageNum", pi.getTotalPageNum());
+                mainJson.put("isFirstBatch", p_state.isFirstBatch());
+                mainJson.put("isLastBatch", p_state.isLastBatch());
             }
             
             mainJson.put("target", targetjArray);

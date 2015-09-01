@@ -3997,7 +3997,7 @@ public class Ambassador extends AbstractWebService
 			logger.error(e.getMessage(), e);
 			return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
 		}
-
+		
 		Job job = null;
 		try
 		{
@@ -4017,6 +4017,14 @@ public class Ambassador extends AbstractWebService
 								+ p_jobId
 								+ ",current user is not in the same company with the job.");
 			}
+			
+			if (!job.getDisplayState().equalsIgnoreCase("ready")
+					&& StringUtil.isNotEmpty(p_jobName))
+			{
+				return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+						"Only job is ready state, can modify the job name.");
+			}
+			
 			paramter.put("jobId", p_jobId);
 		}
 		catch (Exception e)
@@ -4024,13 +4032,43 @@ public class Ambassador extends AbstractWebService
 			logger.error(e.getMessage(), e);
 			return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
 		}
+
 		// get unique job name
 		if (StringUtil.isNotEmpty(p_jobName))
 		{
-			p_jobName = getUniqueJobName(p_accessToken, p_jobName);
-			paramter.put("jobName", p_jobName);
+			try
+			{
+				p_jobName = EditUtil.removeCRLF(p_jobName);
+				Job checkJob = ServerProxy.getJobHandler().getJobByJobName(
+						p_jobName);
+				if (checkJob == null)
+				{
+					paramter.put("jobName", p_jobName);
+				}
+				else
+				{
+					if (checkJob.getId() == Long.parseLong(p_jobId))
+					{
+						return makeErrorXml(
+								EDIT_JOB_DETAIL_INFO,
+								"Invalid job name :"
+										+ p_jobName
+										+ ", the modify name and the name of the current job is no difference.");
+					}
+					else
+					{
+						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+								"Invalid job name :" + p_jobName
+										+ ", job name already exists.");
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				return makeErrorXml(EDIT_JOB_DETAIL_INFO, e.getMessage());
+			}
 		}
-
+				
 		if (StringUtil.isNotEmpty(p_estimatedDateXml))
 		{
 			Document doc;
@@ -4151,7 +4189,7 @@ public class Ambassador extends AbstractWebService
 		return returnStr;
 	}
 	
-	private static String updateJobDetailInfo(Map<String, Object> paramter)
+	private String updateJobDetailInfo(Map<String, Object> paramter)
 	{
 		String jobId = (String) paramter.get("jobId");
 		String jobName = (String) paramter.get("jobName");
@@ -4185,6 +4223,13 @@ public class Ambassador extends AbstractWebService
 				map.put("tId", targetLocaleId);
 				WorkflowImpl wf = (WorkflowImpl) HibernateUtil.search(hql, map)
 						.get(0);
+				if (!wf.getState().equals("DISPATCHED")
+						&& !wf.getState().equals("READY_TO_BE_DISPATCHED"))
+				{
+					return makeErrorXml(
+							EDIT_JOB_DETAIL_INFO,
+							"Only the workflow is ready or in progress state, can modify the date information.");
+				}
 				Map<String, Date> dateMap = workMap.get(targetLocaleId);
 				Iterator iter = dateMap.entrySet().iterator();
 				while (iter.hasNext())
@@ -16610,9 +16655,10 @@ public class Ambassador extends AbstractWebService
 	{
 		String message = "";
 		// Validate inputting parameters
+		User user = null;
 		try
 		{
-			User user = ServerProxy.getUserManager().getUserByName(
+			user = ServerProxy.getUserManager().getUserByName(
 					getUsernameFromSession(p_accessToken));
 			PermissionSet ps = Permission.getPermissionManager()
 					.getPermissionSetForUser(user.getUserId());
@@ -16683,7 +16729,7 @@ public class Ambassador extends AbstractWebService
                                     "Invaild workflow id: " + wfId
                                             + ", cost center attribute or required attributes are not set.");
                         }
-						else if (UserUtil.isInProject(userName, projectId))
+						else if (UserUtil.isInProject(user.getUserId(), projectId))
 						{
 							wfm.dispatch(wf);
 						}

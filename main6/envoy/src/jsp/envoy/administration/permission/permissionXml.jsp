@@ -135,7 +135,6 @@
      <permission id="<%=Permission.USERS_EXPORT%>"/>
   </permission>
   <permission id="<%=Permission.TM_VIEW%>">
-     <permission id="<%=Permission.TM_BROWSER%>"/>     
      <permission id="<%=Permission.TM_STATS%>"/>     
      <permission id="<%=Permission.TM_MAINTENANCE%>"/>
      <permission id="<%=Permission.TM_IMPORT%>"/>

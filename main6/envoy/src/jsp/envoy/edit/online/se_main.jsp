@@ -710,6 +710,7 @@ function saveFromFirefoxRichedit()
     g_refreshing = true;
     var text = fr_editor.GetTargetSegment();
 	$.ajax({
+		type : "POST",
 		url : 'OnlineService?action=doErrorCheck2',
 		cache : false,
 		data : {

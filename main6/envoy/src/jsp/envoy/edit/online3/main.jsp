@@ -426,6 +426,7 @@ if (sessionMgr.getAttribute("taskStatus") != null)
 }
 
 String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_comments_warning");
+String approveAction = (String)request.getAttribute("approveAction");
 %>
 <HTML>
 <HEAD>
@@ -444,7 +445,7 @@ String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_commen
 #idCommentTable TH SPAN { cursor: hand;  cursor:pointer;}
 
 #idCommentTable P { margin-top: 0px; margin-bottom: 0px; }
-.editorId   { font-weight: bold; }
+.editorId   { font-weight: bold;}
 
 /* Background colors for issue status, class name is the status token. */
 .open   { background-color: red !important; }
@@ -462,10 +463,13 @@ String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_commen
 
 ul									{ list-style: none;}
 ul.dropdown                         { position: relative;padding-left:20px}
-ul.dropdown li                      { font-weight: bold;background:white;border-top:solid 1px black;border-left:solid 1px black;border-right:solid 1px black; }
+ul.dropdown li                      { font-weight: bold;}
 ul.dropdown li a                    { display: block; padding: 4px 8px;color: #222; }
 ul.dropdown ul 						{ visibility: hidden; position: absolute; top: 100%; left: -70px; }
+<%if(approveAction.equals("true")){%>
 ul.dropdown li:hover > ul 		    { visibility: visible;}
+<%}%>
+.actionli{background:white;border-top:solid 1px black;border-left:solid 1px black;border-right:solid 1px black; }
 </STYLE>
 <link type="text/css" rel="StyleSheet" id="cssEditor" href="/globalsight/envoy/edit/online3/editor.css">
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
@@ -616,9 +620,9 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
         <ul class="dropdown" style="padding: 0px;margin: 0px;" >
         	<li style="background:#708EB3;"><input type="checkbox" id="checkAll" style="float:left;margin-top:5px" onclick="checkAll()"/><a href="#" style="padding: 0px;"><img src="/globalsight/envoy/edit/online3/action.jpg"></a>
         		<ul class="sub_menu">
-        			 <li><a href="#" class="noUnderline" onclick="approve();">Approve</a></li>
-        			 <li><a href="#" class="noUnderline" onclick="unapprove();">Unapprove</a></li>
-        			 <li style="border-bottom:solid 1px black"><a href="#" class="noUnderline" onclick="revert();">Revert</a></li>
+        			 <li class="actionli"><a href="#" class="noUnderline" onclick="approve();">Approve</a></li>
+        			 <li class="actionli"><a href="#" class="noUnderline" onclick="unapprove();">Unapprove</a></li>
+        			 <li class="actionli" style="border-bottom:solid 1px black"><a href="#" class="noUnderline" onclick="revert();">Revert</a></li>
         		</ul>
         	</li>
         </ul>

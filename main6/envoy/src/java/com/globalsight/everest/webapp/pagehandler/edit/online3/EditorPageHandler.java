@@ -21,12 +21,15 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -50,6 +53,7 @@ import com.globalsight.everest.edit.online.SegmentFilter;
 import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -67,6 +71,7 @@ import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
@@ -82,10 +87,12 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManageme
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
@@ -99,6 +106,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 	private static final Logger CATEGORY = Logger
             .getLogger(EditorPageHandler.class);
 	private static int DEFAULT_VIEWMODE_IF_NO_PREVIEW = VIEWMODE_TEXT;
+	public boolean s_pmCanEditTargetPages = false;
+	public boolean s_pmCanEditSnippets = false;
 	
 	@ActionHandler(action = "refresh", formClass = "")
     public void refresh(HttpServletRequest request,
@@ -1106,9 +1115,11 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                 WebAppConstants.IS_ASSIGNEE);
         boolean isAssignee = assigneeValue == null ? true : assigneeValue
                 .booleanValue();
+        String jobId = request.getParameter(WebAppConstants.JOB_ID);
     	String taskId = request.getParameter(WebAppConstants.TASK_ID);
     	String srcPageId = request.getParameter(WebAppConstants.SOURCE_PAGE_ID);
         String trgPageId = request.getParameter(WebAppConstants.TARGET_PAGE_ID);
+        String approveAction = "true";
         
     	if (taskId != null && srcPageId != null && trgPageId != null)
         {
@@ -1136,6 +1147,32 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 
             initState(state, session);
         }
+    	else if (jobId != null && srcPageId != null)
+        {
+    		SystemConfiguration sc = SystemConfiguration.getInstance();
+    		s_pmCanEditTargetPages = sc.getBooleanParameter("editalltargetpages.allowed");
+    		s_pmCanEditSnippets = sc.getBooleanParameter("editallsnippets.allowed");
+            isAssignee = false;
+            TaskHelper.storeObject(session, IS_ASSIGNEE,new Boolean(isAssignee));
+
+            state = new EditorState();
+            EditorHelper.initEditorManager(state);
+            EditorHelper.initEditorOptions(state, session);
+            sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
+            sessionMgr.setAttribute(WebAppConstants.JOB_ID,
+                    Long.parseLong(jobId));
+            sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
+                    getTargetIDS(jobId, srcPageId));
+            sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
+
+            initializeFromJob(state, request, jobId, srcPageId, trgPageId,
+                    uiLocale, user);
+
+            initState(state, session);
+            
+            approveAction = "false";
+        }
+    	request.setAttribute("approveAction", approveAction);
     	
     	HashMap<String, String> hm = getSearchParamsInMap(request);
         updateSourcePageView(state, request, isAssignee,
@@ -1152,6 +1189,23 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
             if (StringUtil.isNotEmpty(request.getParameter("sortComments")))
             {
                 view.sort(request.getParameter("sortComments"));
+            }
+        }
+        
+        if (StringUtil.isNotEmpty(request.getParameter("trgViewLocale")))
+        {
+            state.setCommentThreads(null);
+
+            state.setTargetViewLocale(EditorHelper.getLocale(request.getParameter("trgViewLocale")));
+            state.setTargetPageHtml(null);
+
+            sessionMgr.setAttribute("trgViewLocale",
+                    EditorHelper.getLocale(request.getParameter("trgViewLocale")).getDisplayName());
+
+            if (state.hasGsaTags())
+            {
+                state.clearSourcePageHtml();
+                EditorHelper.invalidateCachedTemplates(state);
             }
         }
         
@@ -1176,6 +1230,189 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                 state.setEditorMode();
             }
         }
+    }
+    
+    private void initializeFromJob(EditorState p_state,
+            HttpServletRequest p_request, String p_jobId, String p_srcPageId,
+            String p_trgPageId, Locale p_uiLocale, User p_user)
+            throws EnvoyServletException
+    {
+        p_state.setUserIsPm(true);
+        HttpSession session = p_request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        PermissionSet perms = (PermissionSet) p_request.getSession()
+                .getAttribute(WebAppConstants.PERMISSIONS);
+        // Reset all options because the state may be inherited from a
+        // previous page.
+        EditorHelper.initEditorOptions(p_state, p_request.getSession());
+        // Initializes pages, target locales, excluded items, and termbases
+        EditorHelper.initializeFromJob(p_state, p_jobId, p_srcPageId,
+                p_uiLocale, p_user.getUserId(), perms);
+
+        if (p_trgPageId != null && p_trgPageId.length() > 0)
+        {
+            // If the PM requests a specific target page...
+
+            setCurrentPage(p_request.getSession(), p_state, p_srcPageId,
+                    p_trgPageId);
+
+            EditorState.PagePair currentPage = p_state.getCurrentPage();
+
+            p_state.setTargetViewLocale(currentPage
+                    .getTargetPageLocale(new Long(p_trgPageId)));
+        }
+        else
+        {
+            // No target page/locale requested, find a suitable one.
+
+            setCurrentPage(p_request.getSession(), p_state, p_srcPageId);
+
+            GlobalSightLocale viewLocale = p_state.getTargetViewLocale();
+            Vector trgLocales = p_state.getJobTargetLocales();
+            GlobalSightLocale local = (GlobalSightLocale) sessionMgr
+                    .getAttribute("targetLocale");
+            if (viewLocale == null || !trgLocales.contains(viewLocale))
+            {
+                if (trgLocales.contains(local))
+                {
+                    Iterator it = trgLocales.iterator();
+                    while (it.hasNext())
+                    {
+                        GlobalSightLocale trgLocale = (GlobalSightLocale) it
+                                .next();
+                        if (local.getLocale().equals(trgLocale.getLocale()))
+                        {
+
+                            p_state.setTargetViewLocale((GlobalSightLocale) trgLocale);
+                        }
+                    }
+                }
+                else
+                {
+                    p_state.setTargetViewLocale((GlobalSightLocale) trgLocales
+                            .elementAt(0));
+                }
+            }
+        }
+
+        if (s_pmCanEditTargetPages
+                && EditorHelper.pmCanEditCurrentPage(p_state))
+        {
+            p_state.setReadOnly(false);
+            p_state.setAllowEditAll(true);
+            p_state.setEditAllState(EDIT_ALL);
+        }
+        else
+        {
+            p_state.setReadOnly(true);
+        }
+
+        p_state.setAllowEditSnippets(s_pmCanEditSnippets);
+
+        p_state.setReviewMode();
+    }
+    
+    private void setCurrentPage(HttpSession p_session, EditorState p_state,
+            String p_srcPageId, String p_trgPageId)
+    {
+        ArrayList pages = p_state.getPages();
+        pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
+        Long srcPageId = new Long(p_srcPageId);
+        Long trgPageId = new Long(p_trgPageId);
+        int i_index = 0;
+
+        for (int i = 0, max = pages.size(); i < max; i++)
+        {
+            EditorState.PagePair pair = (EditorState.PagePair) pages.get(i);
+            ++i_index;
+
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Pagepair= " + pair.toString() + " p_srcPageId="
+                        + p_srcPageId + " p_trgPageId=" + p_trgPageId);
+            }
+
+            // See if this page pair object is for this source page.
+            // If so, see if this page pair object contains the
+            // specified target page id.
+
+            if (pair.getSourcePageId().equals(srcPageId)
+                    && pair.getTargetPageLocale(trgPageId) != null)
+            {
+                p_state.setCurrentPage(pair);
+                break;
+            }
+        }
+
+        p_state.setIsFirstPage(i_index == 1);
+        p_state.setIsLastPage(pages.size() == i_index);
+    }
+    
+    private void setCurrentPage(HttpSession p_session, EditorState p_state,
+            String p_srcPageId)
+    {
+        ArrayList pages = p_state.getPages();
+        pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
+        Long srcPageId = new Long(p_srcPageId);
+        int i_offset = 0;
+
+        for (int i = 0, max = pages.size(); i < max; i++)
+        {
+            EditorState.PagePair pair = (EditorState.PagePair) pages.get(i);
+            ++i_offset;
+
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Pagepair= " + pair.toString() + " p_srcPageId="
+                        + p_srcPageId);
+            }
+
+            if (pair.getSourcePageId().equals(srcPageId))
+            {
+                p_state.setCurrentPage(pair);
+                break;
+            }
+        }
+
+        p_state.setIsFirstPage(i_offset == 1);
+        p_state.setIsLastPage(pages.size() == i_offset);
+    }
+    
+    private String getTargetIDS(String p_jobId, String p_srcPageId)
+            throws EnvoyServletException
+    {
+        StringBuffer result = new StringBuffer();
+        try
+        {
+            Job job = ServerProxy.getJobHandler().getJobById(
+                    Long.parseLong(p_jobId));
+            Collection<Workflow> wfs = job.getWorkflows();
+            for (Iterator<Workflow> it = wfs.iterator(); it.hasNext();)
+            {
+                Workflow wf = (Workflow) it.next();
+                if (Workflow.CANCELLED.equals(wf.getState())
+                        || Workflow.EXPORT_FAILED.equals(wf.getState())
+                        || Workflow.IMPORT_FAILED.equals(wf.getState()))
+                {
+                    continue;
+                }
+
+                result.append(wf.getTargetLocale().getId()).append(",");
+            }
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Problem getting job from database ", e);
+            throw new EnvoyServletException(e);
+        }
+
+        if (result.length() > 0 && result.toString().endsWith(","))
+        {
+            result.deleteCharAt(result.length() - 1);
+        }
+
+        return result.toString();
     }
     
     private void updateSourcePageView(EditorState p_state,

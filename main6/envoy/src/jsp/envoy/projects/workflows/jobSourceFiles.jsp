@@ -31,6 +31,7 @@
 <jsp:useBean id="editPages" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="addSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="neweditor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="sourceEditor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="allStatus" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editSourcePageWc" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -684,6 +685,27 @@ function openViewerWindow(url)
 	});
 }
 
+function openNewViewerWindow(url)
+{
+	document.getElementById("idBody").focus();
+	
+	var ajaxUrl = "<%=checkPageExistURL%>&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")) +"&targetLocale="+"<%=thisTargetLocaleId%>"+ url;
+	$.get(ajaxUrl,function(data){
+		if(data==""){
+        	if (w_viewer != null && !w_viewer.closed)
+            {
+                w_viewer.focus();
+                return;
+            }
+
+            var style = "resizable=yes,top=0,left=0,height=" + (screen.availHeight - 60) + ",width=" + (screen.availWidth - 20);
+            w_viewer = window.open('${neweditor.pageURL}' + url, 'Viewer', style);
+		}else{
+			alert(data);
+		}
+	});
+}
+
 function contextForPage(url, e, displayName)
 {
     if(e instanceof Object)
@@ -726,6 +748,8 @@ function contextForPage(url, e, displayName)
        popupoptions = [
          new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
            function(){ openViewerWindow(url);}),
+         new ContextItem("<B><%=bundle.getString("lb_context_item_post_review_editor")%></B>",
+           function(){ openNewViewerWindow(url);}),
          new ContextItem("<%=bundle.getString("lb_context_item_edit_src_page")%>",
            function(){ openGxmlEditor(url,"${sourceEditor.pageURL}");}, !canEditSource)
        ];
@@ -740,7 +764,9 @@ function contextForPage(url, e, displayName)
     {
        popupoptions = [
          new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
-           function(){ openViewerWindow(url);})
+           function(){ openViewerWindow(url);}),
+         new ContextItem("<B><%=bundle.getString("lb_context_item_post_review_editor")%></B>",
+           function(){ openNewViewerWindow(url);})
        ];
        
        if (showInContextReview)

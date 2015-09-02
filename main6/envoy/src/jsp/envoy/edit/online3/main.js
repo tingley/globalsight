@@ -22,6 +22,11 @@ function SegmentFilter(p_segmentFilter)
     document.location = url_self+"&refresh=0&segmentFilter=" + p_segmentFilter;
 }
 
+function switchTargetLocale(p_locale)
+{
+	document.location = url_self+"&refresh=0&trgViewLocale=" + p_locale;
+}
+
 var comments=["Hide Comments","Show Comments"]
 
 function reviewMode()
@@ -351,10 +356,22 @@ function getDataByFrom(url){
 function buildData(data){
 	var idPageHtml=$("#idPageHtml");
 	idPageHtml.html("");
-	$("#currentPageNum").html(data.currentPageNum);
-	$("#totalPageNum").html(data.totalPageNum);
-	isFirstBatch = data.isFirstBatch;
-	isLastBatch = data.isLastBatch;
+	if(data == "null" || data == null)
+	{
+		$("#currentPageNum").html(1);
+		$("#totalPageNum").html(1);
+		tempTotalPageNum = 1;
+		isFirstBatch = true;
+		isLastBatch = true;
+	}
+	else
+	{
+		$("#currentPageNum").html(data.currentPageNum);
+		$("#totalPageNum").html(data.totalPageNum);
+		tempTotalPageNum = data.totalPageNum;
+		isFirstBatch = data.isFirstBatch;
+		isLastBatch = data.isLastBatch;
+	}
 	updatePageNavigationArrow();
 	$(".repstyle").remove();
 	$(".commentstyle").remove();

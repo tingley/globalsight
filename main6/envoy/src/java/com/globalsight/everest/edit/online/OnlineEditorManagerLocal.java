@@ -6608,10 +6608,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 	approvejArray.put(approvej);
                 }
                 
-                mainJson.put("currentPageNum", pi.getCurrentPageNum());
-                mainJson.put("totalPageNum", pi.getTotalPageNum());
-                mainJson.put("isFirstBatch", p_state.isFirstBatch());
-                mainJson.put("isLastBatch", p_state.isLastBatch());
             }
             
             mainJson.put("target", targetjArray);
@@ -6620,6 +6616,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             {
             	mainJson.put("original", originalTargetjArray);
             	mainJson.put("approve", approvejArray);
+            	mainJson.put("currentPageNum", pi.getCurrentPageNum());
+            	mainJson.put("totalPageNum", pi.getTotalPageNum());
+            	mainJson.put("isFirstBatch", p_state.isFirstBatch());
+            	mainJson.put("isLastBatch", p_state.isLastBatch());
             }
         }
         catch (Exception ex)

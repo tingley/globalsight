@@ -1558,6 +1558,7 @@
         <PageLink linkName="pageSearch" destinationPageName="SOURCEFILES"></PageLink>
         <PageLink linkName="addSourceFiles" destinationPageName="ADDSOURCE"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
+        <PageLink linkName="neweditor" destinationPageName="NEWED1"></PageLink>
         <PageLink linkName="sourceEditor" destinationPageName="EDS1"></PageLink>
         <PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
         <PageLink linkName="editSourcePageWc" destinationPageName="EDITSOURCEPAGEWC"></PageLink>

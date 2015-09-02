@@ -1074,23 +1074,23 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             // indexTarget, because it might have been indexed in the past
 			for (TM3Tuv<T> tuv : modified)
 			{
-				// do not remove fuzzy index of source tuv.
-				if (tuv.getId() != srcTuv.getId())
-				{
-					getStorageInfo().getFuzzyIndex().deleteFingerprints(conn, tuv);
-				}
+				getStorageInfo().getFuzzyIndex().deleteFingerprints(conn, tuv);
             }
-			
-            if (indexTarget)
+
+            for (TM3Tuv<T> tuv : added)
             {
-                for (TM3Tuv<T> tuv : added)
-                {
-                    getStorageInfo().getFuzzyIndex().index(conn, tuv);
-                }
-                for (TM3Tuv<T> tuv : modified)
-                {
-                    getStorageInfo().getFuzzyIndex().index(conn, tuv);
-                }
+            	if (tuv.getId() == srcTuv.getId() || indexTarget)
+            	{
+            		getStorageInfo().getFuzzyIndex().index(conn, tuv);
+            	}
+            }
+
+            for (TM3Tuv<T> tuv : modified)
+            {
+            	if (tuv.getId() == srcTuv.getId() || indexTarget)
+            	{
+            		getStorageInfo().getFuzzyIndex().index(conn, tuv);
+            	}
             }
 
             return tu;

@@ -30,6 +30,8 @@ String action = back.getPageURL() + "&action=wcBack";
 if(jobId != null && jobId != ""){
 	action += "&"+ WebAppConstants.JOB_ID + "=" + jobId;
 }
+int num = ((ArrayList)request.getAttribute("workflows")).size();
+int size = 500/num;
 %>
 
 <!-- This JSP is envoy/projects/workflows/translatedTextList.jsp -->
@@ -112,9 +114,13 @@ $(document).ready(function(){
 <table cellpadding="2" cellspacing="0" border="0" style="border:solid 1px slategray">
 	<thead>
 		<tr>
-		    <td class="tableHeadingBasic myTableHeading" style="width:250px"><span class="whiteBold"><%=bundle.getString("lb_SourceFiles")%>&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
+		    <td class="tableHeadingBasic myTableHeading" style="width:350px"><span class="whiteBold"><%=bundle.getString("lb_SourceFiles")%>&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
 		    <c:forEach items="${workflows}" var="item">
-	    	<td class="wordCountHeadingWhite myTableHeading" style="text-align:center;width:100px"><span class="whiteBold">${item.targetLocale }&nbsp;&nbsp;&nbsp;</span></td>
+		     <%if(num<6){ %>
+		     <td class="wordCountHeadingWhite myTableHeading" style="text-align:left;width:<%=size%>px"><span class="whiteBold">${item.targetLocale}&nbsp;&nbsp;&nbsp;</span></td>
+		    <%}else{ %>
+	    	<td class="wordCountHeadingWhite myTableHeading" style="text-align:left;width:100px"><span class="whiteBold">${item.targetLocale }&nbsp;&nbsp;&nbsp;</span></td>
+		   	<%} %>
 		   	</c:forEach>
 		</tr>
 	</thead>
@@ -123,7 +129,7 @@ $(document).ready(function(){
 		<tr>
 		<td style="width:250px" class="standardText">${item.shortPageName}</td>
 		<c:forEach items="${workflows}" var="item2">
-			<td style="text-align:center">
+			<td style="text-align:left">
 			<span class="standardText" id="${item.id}_${item2.targetLocale.id}" style = "font-weight:600"></span>
 			</td>
    		</c:forEach>

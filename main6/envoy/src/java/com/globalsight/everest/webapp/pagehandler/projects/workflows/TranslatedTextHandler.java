@@ -84,7 +84,7 @@ public class TranslatedTextHandler extends PageHandler
                 Hashtable hash = new Hashtable();
                 StringTokenizer st = new StringTokenizer(wfids, " ");
                 while (st.hasMoreTokens())
-                {
+                { 
                     hash.put(st.nextToken(), "1");
                 }
 
@@ -97,8 +97,7 @@ public class TranslatedTextHandler extends PageHandler
                         sublist.add(wf);
                     }
                 }
-                Collections
-                .sort(sublist, new WorkflowComparator(Locale.getDefault()));
+                Collections.sort(sublist, new WorkflowComparator(Locale.getDefault()));
                 p_request.setAttribute("workflows", sublist);
                 p_request.setAttribute("jobName", job.getJobName());
                 p_request.setAttribute("sourcePages", job.getSourcePages());

@@ -426,7 +426,7 @@ if (sessionMgr.getAttribute("taskStatus") != null)
 }
 
 String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_comments_warning");
-String approveAction = (String)request.getAttribute("approveAction");
+String approveAction = (String)sessionMgr.getAttribute("approveAction");
 %>
 <HTML>
 <HEAD>

@@ -938,6 +938,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 				if(originalTargetTuvMap.get(Long.parseLong(tuvId)) != null)
 				{
 					tuv.setGxml(originalTargetTuvMap.get(Long.parseLong(tuvId)).getGxml());
+					tuv.setState(TuvState.LOCALIZED);
 					tuv.setLastModified(modifyDate);
 					tuv.setLastModifiedUser(userId);
 					tuvImplList.add((TuvImpl) tuv);
@@ -1147,7 +1148,6 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
     	String taskId = request.getParameter(WebAppConstants.TASK_ID);
     	String srcPageId = request.getParameter(WebAppConstants.SOURCE_PAGE_ID);
         String trgPageId = request.getParameter(WebAppConstants.TARGET_PAGE_ID);
-        String approveAction = "true";
         
     	if (taskId != null && srcPageId != null && trgPageId != null)
         {
@@ -1174,6 +1174,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                     srcPageId, trgPageId, isAssignee, request, uiLocale);
 
             initState(state, session);
+            
+            sessionMgr.setAttribute("approveAction", "true");
         }
     	else if (jobId != null && srcPageId != null)
         {
@@ -1198,27 +1200,12 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 
             initState(state, session);
             
-            approveAction = "false";
+            sessionMgr.setAttribute("approveAction", "false");
         }
-    	request.setAttribute("approveAction", approveAction);
     	
     	HashMap<String, String> hm = getSearchParamsInMap(request);
         updateSourcePageView(state, request, isAssignee,
                 isIE(request), hm);
-        
-        CommentThreadView view = state.getCommentThreads();
-        if (view == null)
-        {
-            view = EditorHelper.getCommentThreads(state);
-            state.setCommentThreads(view);
-        }
-        if (view != null)
-        {
-            if (StringUtil.isNotEmpty(request.getParameter("sortComments")))
-            {
-                view.sort(request.getParameter("sortComments"));
-            }
-        }
         
         if (StringUtil.isNotEmpty(request.getParameter("trgViewLocale")))
         {
@@ -1234,6 +1221,20 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
             {
                 state.clearSourcePageHtml();
                 EditorHelper.invalidateCachedTemplates(state);
+            }
+        }
+        
+        CommentThreadView view = state.getCommentThreads();
+        if (view == null)
+        {
+            view = EditorHelper.getCommentThreads(state);
+            state.setCommentThreads(view);
+        }
+        if (view != null)
+        {
+            if (StringUtil.isNotEmpty(request.getParameter("sortComments")))
+            {
+                view.sort(request.getParameter("sortComments"));
             }
         }
         

@@ -6320,11 +6320,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 			if(revertTuvIds.contains(tuv.getId()))
 			{
 				tuv.setGxml(originalGxmlMap.get(tuv.getId()));
+				tuv.setState(TuvState.LOCALIZED);
 				tuv.setLastModified(modifiedDate);
 				tuv.setLastModifiedUser(user);
 			}
 		}
-		
 	}
 	
 	@Override

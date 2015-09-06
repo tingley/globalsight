@@ -748,7 +748,7 @@ function contextForPage(url, e, displayName)
        popupoptions = [
          new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
            function(){ openViewerWindow(url);}),
-         new ContextItem("<B><%=bundle.getString("lb_context_item_post_review_editor")%></B>",
+         new ContextItem("<%=bundle.getString("lb_context_item_post_review_editor")%>",
            function(){ openNewViewerWindow(url);}),
          new ContextItem("<%=bundle.getString("lb_context_item_edit_src_page")%>",
            function(){ openGxmlEditor(url,"${sourceEditor.pageURL}");}, !canEditSource)
@@ -765,7 +765,7 @@ function contextForPage(url, e, displayName)
        popupoptions = [
          new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
            function(){ openViewerWindow(url);}),
-         new ContextItem("<B><%=bundle.getString("lb_context_item_post_review_editor")%></B>",
+         new ContextItem("<%=bundle.getString("lb_context_item_post_review_editor")%>",
            function(){ openNewViewerWindow(url);})
        ];
        

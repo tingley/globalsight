@@ -50,11 +50,19 @@ function closeWindow()
 
 function CanClose()
 {
-	w_editor.close();
+	if(w_editor)
+    {
+    	w_editor.close();
+    }
+	return true;
 }
 
 function refresh(direction)
 {
+	if(w_editor)
+    {
+    	w_editor.close();
+    }
 	document.location = url_self + "&action=refresh&refresh=" + direction+"&random="+Math.random();
 }
 
@@ -812,7 +820,7 @@ function getSegmentIdFromHref(href)
 {
     href = href.substring(href.indexOf('(') + 1);
     href = href.substring(0, href.indexOf(')'));
-    return href.split(',');
+    return href.split(',');l
 }
 
 $(document).ready(function(){

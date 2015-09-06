@@ -19,11 +19,13 @@ package com.globalsight.everest.webapp.pagehandler.edit.online3;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -751,6 +753,9 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		Connection conn = DbUtil.getConnection();
 		conn.setAutoCommit(false);
 		List<Long> approvedTuvIds = new ArrayList<Long>();
+		Date modifyDate = new Date();
+		User user = TaskHelper.getUser(session);
+        String userId = user.getUserId();
 		if(StringUtil.isNotEmpty(approveIds))
 		{
 			approveIds = approveIds.substring(0, approveIds.length() - 1);
@@ -767,6 +772,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 				if(tuvState.getValue() != TuvState.APPROVED.getValue())
 				{
 					tuv.setState(TuvState.APPROVED);
+					tuv.setLastModified(modifyDate);
+					tuv.setLastModifiedUser(userId);
 					tuvImplList.add((TuvImpl) tuv);
 					
 					List<TuTuvAttributeImpl>  tuTuvAttributeImplList = new ArrayList<TuTuvAttributeImpl>();
@@ -783,7 +790,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		conn.close();
 		
 		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
-		state.getEditorManager().updateApprovedTuvCache(approvedTuvIds);
+		state.getEditorManager().updateApprovedTuvCache(approvedTuvIds, modifyDate, userId);
 		
 		ServletOutputStream out = response.getOutputStream();
 		out.write("true".getBytes("UTF-8"));
@@ -821,6 +828,9 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		conn.setAutoCommit(false);
 		List<Long> unapprovedTuvIds = new ArrayList<Long>();
 		HashMap<Long, TuvState> originalStateMap = new HashMap<Long, TuvState>();
+		Date modifyDate = new Date();
+		User user = TaskHelper.getUser(session);
+        String userId = user.getUserId();
 		if(StringUtil.isNotEmpty(unApproveIds))
 		{
 			unApproveIds = unApproveIds.substring(0, unApproveIds.length() - 1);
@@ -844,6 +854,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 						int stateInt = (int) tuTuvAttributeImplList.get(0).getLongValue();
 						TuvState originalState = TuvState.valueOf(stateInt);
 						tuv.setState(originalState);
+						tuv.setLastModified(modifyDate);
+						tuv.setLastModifiedUser(userId);
 						tuvImplList.add((TuvImpl) tuv);
 						
 						originalStateMap.put(tuv.getId(), originalState);
@@ -854,6 +866,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 					else
 					{
 						tuv.setState(TuvState.NOT_LOCALIZED);
+						tuv.setLastModified(modifyDate);
+						tuv.setLastModifiedUser(userId);
 						tuvImplList.add((TuvImpl) tuv);
 						
 						originalStateMap.put(tuv.getId(), TuvState.NOT_LOCALIZED);
@@ -865,7 +879,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		conn.close();
 		
 		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
-		state.getEditorManager().updateUnapprovedTuvCache(unapprovedTuvIds, originalStateMap);
+		state.getEditorManager().updateUnapprovedTuvCache(unapprovedTuvIds, originalStateMap, modifyDate, userId);
 		
 		ServletOutputStream out = response.getOutputStream();
 		out.write("true".getBytes("UTF-8"));
@@ -907,6 +921,9 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		HashMap<Long, String> originalGxmlMap = new HashMap<Long, String>();
 		Connection conn = DbUtil.getConnection();
 		conn.setAutoCommit(false);
+		Date modifyDate = new Date();
+		User user = TaskHelper.getUser(session);
+        String userId = user.getUserId();
 		if(StringUtil.isNotEmpty(revertIds))
 		{
 			revertIds = revertIds.substring(0, revertIds.length() - 1);
@@ -921,6 +938,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 				if(originalTargetTuvMap.get(Long.parseLong(tuvId)) != null)
 				{
 					tuv.setGxml(originalTargetTuvMap.get(Long.parseLong(tuvId)).getGxml());
+					tuv.setLastModified(modifyDate);
+					tuv.setLastModifiedUser(userId);
 					tuvImplList.add((TuvImpl) tuv);
 					revertTuvIds.add(tuv.getId());
 					originalGxmlMap.put(tuv.getId(), originalTargetTuvMap.get(Long.parseLong(tuvId)).getGxml());
@@ -930,7 +949,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 		conn.close();
 		
 		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
-		state.getEditorManager().updateRevertTuvCache(revertTuvIds, originalGxmlMap);
+		state.getEditorManager().updateRevertTuvCache(revertTuvIds, originalGxmlMap, modifyDate, userId);
 		
 		ServletOutputStream out = response.getOutputStream();
 		out.write("true".getBytes("UTF-8"));
@@ -1115,6 +1134,15 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                 WebAppConstants.IS_ASSIGNEE);
         boolean isAssignee = assigneeValue == null ? true : assigneeValue
                 .booleanValue();
+        String pageSearchText = request
+                .getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
+        if (StringUtil.isNotEmpty(pageSearchText))
+        {
+            pageSearchText = URLDecoder.decode(pageSearchText, "UTF-8");
+            sessionMgr.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
+                    pageSearchText);
+        }
+        
         String jobId = request.getParameter(WebAppConstants.JOB_ID);
     	String taskId = request.getParameter(WebAppConstants.TASK_ID);
     	String srcPageId = request.getParameter(WebAppConstants.SOURCE_PAGE_ID);

@@ -19,6 +19,7 @@ package com.globalsight.everest.edit.online;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -341,22 +342,22 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
     }
     
     @Override
-    public void updateApprovedTuvCache(List<Long> approvedTuvIds)
+    public void updateApprovedTuvCache(List<Long> approvedTuvIds, Date modifiedDate, String user)
     {
-    	  m_localReference.updateApprovedTuvCache(approvedTuvIds);
+    	  m_localReference.updateApprovedTuvCache(approvedTuvIds, modifiedDate, user);
     }
 
 	@Override
 	public void updateUnapprovedTuvCache(List<Long> unapprovedTuvIds,
-			HashMap<Long, TuvState> originalStateMap) 
+			HashMap<Long, TuvState> originalStateMap, Date modifiedDate, String user) 
 	{
-		m_localReference.updateUnapprovedTuvCache(unapprovedTuvIds, originalStateMap);
+		m_localReference.updateUnapprovedTuvCache(unapprovedTuvIds, originalStateMap, modifiedDate, user);
 	}
 
 	@Override
 	public void updateRevertTuvCache(List<Long> revertTuvIds,
-			HashMap<Long, String> originalGxmlMap) 
+			HashMap<Long, String> originalGxmlMap, Date modifiedDate, String user) 
 	{
-		m_localReference.updateRevertTuvCache(revertTuvIds, originalGxmlMap) ;
+		m_localReference.updateRevertTuvCache(revertTuvIds, originalGxmlMap, modifiedDate, user) ;
 	}
 }

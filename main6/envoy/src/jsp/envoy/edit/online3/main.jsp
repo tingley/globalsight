@@ -290,7 +290,7 @@ String lb_showSupportFiles = bundle.getString("lb_showSupportFiles");
 String lb_showTermbases = bundle.getString("lb_showTermbases");
 String lb_source = bundle.getString("lb_source");
 String lb_source_segment = bundle.getString("lb_source_segment");
-String lb_initial_translation = bundle.getString("lb_initial_translation");
+String lb_previous_translation = bundle.getString("lb_previous_translation");
 String lb_current_translation = bundle.getString("lb_current_translation");
 String lb_supportFiles = bundle.getString("lb_supportFiles");
 String lb_target = bundle.getString("lb_target");
@@ -476,6 +476,7 @@ ul.dropdown li:hover > ul 		    { visibility: visible;}
 <script>
 var tempTotalPageNum = <%=(pi.getTotalPageNum())%>;
 var g_disableLink = eval("<%=disableComment%>");
+
 var g_reviewMode = eval("<%=state.isReviewMode()%>");
 var marklable = "<%=marklable%>";
 var unmarklable = "<%=unmarklable%>";
@@ -484,7 +485,6 @@ var url_commentEditor = "<%=url_commentEditor%>";
 var url_self = "<%=url_self%>";
 var url_refresh = "<%=url_refresh%>";
 var url_search = "<%=url_search%>";
-var url_resources = "<%=url_resources%>";
 var url_termbases = "<%=url_termbases%>";
 var url_options = "<%=url_options%>";
 var url_pageInfo = "<%=url_pageInfo%>";
@@ -598,7 +598,6 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 		    <A href="#" onclick="showSupportFiles(); return false;" CLASS="HREFBoldWhite" title="<%=lb_showSupportFiles%>"><%=lb_supportFiles%></A> |
 		    <A href="#" onclick="showTermbases(); return false;" CLASS="HREFBoldWhite" title="<%=lb_showTermbases%>"><%=lb_termbases%></A> |
 		    <A HREF="#" onclick="showPageInfo(); return false;" CLASS="HREFBoldWhite"><%=lb_pageInfo%></A> |
-		    <A HREF="#" onclick="showOptions(); return false;" CLASS="HREFBoldWhite"><%=lb_options%></A> |
 		    <A HREF="#" onclick="closeWindow(); return false;" CLASS="HREFBoldWhite"><%=lb_close%></A> |
 		    <A HREF="#" onclick="helpSwitch(); return false;" CLASS="HREFBoldWhite"><%=lb_help%></A>&nbsp;
 		  </TD>
@@ -614,7 +613,7 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
     <TR CLASS="tableHeadingGray" style="height:19pt;">
       <TD ALIGN="CENTER" class="sourceTempClass"  width='25'><%=lb_id%></TD>
       <TD ALIGN="LEFT"><%=lb_source_segment%></TD>
-      <TD ALIGN="LEFT"><%=lb_initial_translation%></TD>
+      <TD ALIGN="LEFT"><%=lb_previous_translation%></TD>
       <TD ALIGN="LEFT"><%=lb_current_translation%></TD>
       <TD ALIGN="LEFT" width='50'>
         <ul class="dropdown" style="padding: 0px;margin: 0px;" >

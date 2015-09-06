@@ -8,6 +8,7 @@ var showRepeated = false;
 var w_editor;
 var postReviewEditor = "postReviewEditor";
 window.focus();
+var canAction = false;
 
 function helpSwitch()
 {
@@ -55,12 +56,6 @@ function CanClose()
 function refresh(direction)
 {
 	document.location = url_self + "&action=refresh&refresh=" + direction+"&random="+Math.random();
-}
-
-function showOptions()
-{
-    w_options = window.open(url_options, "MEOptions",
-      "resizable=no,scrollbars=no,width=470,height=590");
 }
 
 function showPageInfo()
@@ -224,6 +219,12 @@ function approve()
 		return false;
 	}
 	
+	if(!canAction)
+	{
+		alert("Please Accpet the activity frist.");
+		return false;
+	}
+	
 	$.getJSON(url_self, 
 	{
 		action:"approve",
@@ -251,6 +252,12 @@ function unapprove()
 		return false;
 	}
 	
+	if(!canAction)
+	{
+		alert("Please Accpet the activity frist.");
+		return false;
+	}
+	
 	$.getJSON(url_self, 
 	{
 		action:"unapprove",
@@ -275,6 +282,12 @@ function revert()
 	if(revertIds == "")
 	{
 		alert("Please select some segments.");
+		return false;
+	}
+	
+	if(!canAction)
+	{
+		alert("Please Accpet the activity frist.");
 		return false;
 	}
 	
@@ -477,6 +490,7 @@ function getNodeByClass(item, se_able){
 		temp=SEnode.clone(true);
 		var funP="javascript:SE("+item.tuId+","+item.tuvId+","+item.subId+")";
 		temp.attr("href",funP);
+		canAction = true;
 	}else{
 		temp=spanNode.clone(true);
 	}

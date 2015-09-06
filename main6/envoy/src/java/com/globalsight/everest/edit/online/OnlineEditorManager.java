@@ -19,6 +19,7 @@ package com.globalsight.everest.edit.online;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -292,11 +293,11 @@ public interface OnlineEditorManager extends UIConstants
     public String getTargetJsonData(EditorState state, boolean isAssignee,
             HashMap<String, String> hm, boolean fromInCtxRv);
 
-	public void updateApprovedTuvCache(List<Long> approvedTuvIds);
+	public void updateApprovedTuvCache(List<Long> approvedTuvIds, Date modifiedDate, String user);
 
 	public void updateUnapprovedTuvCache(List<Long> unapprovedTuvIds,
-			HashMap<Long, TuvState> originalStateMap);
+			HashMap<Long, TuvState> originalStateMap, Date modifiedDate, String user);
 
 	public void updateRevertTuvCache(List<Long> revertTuvIds,
-			HashMap<Long, String> originalGxmlMap);
+			HashMap<Long, String> originalGxmlMap, Date modifiedDate, String user);
 }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -6282,39 +6283,45 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 	
 	@Override
-	public void updateApprovedTuvCache(List<Long> approvedTuvIds) 
+	public void updateApprovedTuvCache(List<Long> approvedTuvIds, Date modifiedDate, String user) 
 	{
 		for(Tuv tuv: m_pageCache.getTargetTuvs())
 		{
 			if(approvedTuvIds.contains(tuv.getId()))
 			{
 				tuv.setState(TuvState.APPROVED);
+				tuv.setLastModified(modifiedDate);
+				tuv.setLastModifiedUser(user);
 			}
 		}
 	}
 	
 	@Override
 	public void updateUnapprovedTuvCache(List<Long> unapprovedTuvIds,
-			HashMap<Long, TuvState> originalStateMap)
+			HashMap<Long, TuvState> originalStateMap, Date modifiedDate, String user)
 	{
 		for(Tuv tuv: m_pageCache.getTargetTuvs())
 		{
 			if(unapprovedTuvIds.contains(tuv.getId()))
 			{
 				tuv.setState(originalStateMap.get(tuv.getId()));
+				tuv.setLastModified(modifiedDate);
+				tuv.setLastModifiedUser(user);
 			}
 		}
 	}
 	
 	@Override
 	public void updateRevertTuvCache(List<Long> revertTuvIds,
-			HashMap<Long, String> originalGxmlMap) 
+			HashMap<Long, String> originalGxmlMap, Date modifiedDate, String user) 
 	{
 		for(Tuv tuv: m_pageCache.getTargetTuvs())
 		{
 			if(revertTuvIds.contains(tuv.getId()))
 			{
 				tuv.setGxml(originalGxmlMap.get(tuv.getId()));
+				tuv.setLastModified(modifiedDate);
+				tuv.setLastModifiedUser(user);
 			}
 		}
 		
@@ -6561,7 +6568,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             	                for (int j = 0; j < subflows.size(); j++)
             	                {
             	                    JSONObject subObj = new JSONObject();
-            	                    GxmlElement subElmt = (GxmlElement) subflows.get(i);
+            	                    GxmlElement subElmt = (GxmlElement) subflows.get(j);
             	                    String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
             	                    dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
 

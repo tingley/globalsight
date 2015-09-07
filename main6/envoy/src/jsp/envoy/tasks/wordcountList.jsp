@@ -109,23 +109,20 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
-<DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
+<DIV ID="contentLayer" STYLE="POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px; WIDTH:1300px;">
 
 <amb:header title="<%=title%>" />
-<BR>
 
 <form name="wcForm" method="post" action="<%=action%>">
 <% if (userPerms.getPermissionFor(Permission.ACTIVITIES_DETAIL_STATISTICS)){
    noWordCountPermission = false;
 %>
 <amb:header title="<%=detailedStatistics%>" />
-<%=bundle.getString("helper_text_detailed_statistics")%>
-<BR><BR>
+<p class="standardText"><%=bundle.getString("helper_text_detailed_statistics")%></p>
 <table cellpadding=0 cellspacing=0 border=0 class="standardText">
   <tr valign="top">
     <td align="right">
       <amb:tableNav bean="tasks" key="<%=WordCountHandler.TASK_KEY%>" pageUrl="self" />
-      
     </td>
   </tr>
   <tr>
@@ -142,11 +139,11 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
              sortBy="<%=TaskComparator.JOB_NAME%>">
             <%= task.getJobName() %>
         </amb:column>
-        <amb:column label="lb_activity" width="150px"
+        <amb:column label="lb_activity" width="100px"
              sortBy="<%=TaskComparator.ACTIVITY%>">
             <%= task.getTaskDisplayName() %>
         </amb:column>
-        <amb:column label="lb_leverage_match_option" width="50px">
+        <amb:column label="lb_leverage_match_option" width="180px">
 	      <% 
 	      if(isInContextMatch){
 			  	out.print(bundle.getString("lb_leverage_in_context_matches"));
@@ -161,53 +158,53 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
 	    </amb:column>
       
         <%if(isInContextMatch){ %>
-            <amb:column label="lb_100" width="50px"
+            <amb:column label="lb_100" width="60px"
                  sortBy="<%=TaskComparator.EXACT%>">
                 <%= task.getWorkflow().getSegmentTmWordCount() %>
             </amb:column>
         <%}else if(isDefaultContextMatch){ %>
-            <amb:column label="lb_100" width="50px"
+            <amb:column label="lb_100" width="60px"
                  sortBy="<%=TaskComparator.DEFAULT_CONTEXT_EXACT%>">
                 <%=task.getWorkflow().getTotalExactMatchWordCount() - task.getWorkflow().getContextMatchWordCount()%>
             </amb:column>
         <%
             } else {
         %>
-            <amb:column label="lb_100" width="50px"
+            <amb:column label="lb_100" width="60px"
                  sortBy="<%=TaskComparator.TOTAL_EXACT%>">
                 <%=task.getWorkflow().getTotalExactMatchWordCount()%>
             </amb:column>
 		<%
 		    }
 		%>
-        <amb:column label="lb_95" width="50px"
+        <amb:column label="lb_95" width="60px"
              sortBy="<%=TaskComparator.BAND1%>">
             <%=task.getWorkflow().getHiFuzzyMatchWordCount()%>
         </amb:column>
-        <amb:column label="lb_85" width="50px"
+        <amb:column label="lb_85" width="60px"
              sortBy="<%=TaskComparator.BAND2%>">
             <%=task.getWorkflow().getMedHiFuzzyMatchWordCount()%>
         </amb:column>
-        <amb:column label="lb_75" width="50px"
+        <amb:column label="lb_75" width="60px"
              sortBy="<%=TaskComparator.BAND3%>">
             <%=task.getWorkflow().getMedFuzzyMatchWordCount()%>
         </amb:column>
-        <amb:column label="lb_50" width="50px"
+        <amb:column label="lb_50" width="60px"
              sortBy="<%=TaskComparator.BAND4%>">
             <%=task.getWorkflow().getLowFuzzyMatchWordCount()%>
         </amb:column>
-        <amb:column label="lb_no_match" width="50px"
+        <amb:column label="lb_no_match" width="60px"
              sortBy="<%=TaskComparator.NO_MATCH%>">
             <%=task.getWorkflow().getNoMatchWordCount()%>
         </amb:column>
-        <amb:column label="lb_repetition_word_cnt" width="50px"
+        <amb:column label="lb_repetition_word_cnt" width="70px"
              sortBy="<%=TaskComparator.REPETITIONS%>">
             <%=task.getWorkflow().getRepetitionWordCount()%>
         </amb:column>
         <%
             if(isInContextMatch){
         %>
-	        <amb:column label="lb_in_context_tm" width="50px"
+	        <amb:column label="lb_in_context_tm" width="120px"
 		      sortBy="<%=TaskComparator.IN_CONTEXT%>">
 		      <%=task.getWorkflow().getInContextMatchWordCount()%>
 		     </amb:column>
@@ -217,7 +214,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
 			<%
 			    if(isDefaultContextMatch){
 			%>
-		        <amb:column label="lb_context_tm" width="50px"
+		        <amb:column label="lb_context_tm" width="120px"
 		             sortBy="<%=TaskComparator.CONTEXT%>">
 		            <%=task.getWorkflow().getContextMatchWordCount()%>
 		        </amb:column>
@@ -228,7 +225,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
 	         }
 	     %>
         
-        <amb:column label="lb_total" width="50px"
+        <amb:column label="lb_total" width="60px"
              sortBy="<%=TaskComparator.WC_TOTAL%>">
             <%=task.getWorkflow().getTotalWordCount()%>
         </amb:column>
@@ -243,8 +240,7 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
    noWordCountPermission = false;
 %>
 <amb:header title="<%=summaryStatistics%>" />
-<%=bundle.getString("helper_text_summary_statistics")%>
-<BR><BR>
+<p class="standardText"><%=bundle.getString("helper_text_summary_statistics")%></p>
 <table cellpadding=0 cellspacing=0 border=0 class="standardText">
   <tr valign="top">
     <td align="right">
@@ -281,19 +277,15 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
              sortBy="<%=TaskComparator.JOB_ID%>">
             <%=wf == null ? 0 : wf.getJob().getJobId()%>
         </amb:column>
-        <amb:column label="lb_job_name" width="150px"
+        <amb:column label="lb_job_name" width="200px"
              sortBy="<%=TaskComparator.JOB_NAME%>">
             <%=task.getJobName()%>
-        </amb:column>
-        <amb:column label="lb_leverage_match_threshold" width="80px"
-             sortBy="<%=TaskComparator.LMT%>">
-            <%=lmt%>
         </amb:column>
         <amb:column label="lb_activity" width="100px"
              sortBy="<%=TaskComparator.ACTIVITY%>">
             <%=task.getTaskDisplayName()%>
         </amb:column>
-        <amb:column label="lb_leverage_match_option" width="50px">
+        <amb:column label="lb_leverage_match_option" width="180px">
 	      <%
 	          if(isInContextMatch){
 	      			  	out.print(bundle.getString("lb_leverage_in_context_matches"));
@@ -306,75 +298,72 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
 	      		      }
 	      %>
 	    </amb:column>
-      
-        
-        <%
-                          if(isInContextMatch){
-                      %>
-	        <amb:column label="lb_100" width="50px"
+
+        <%  if(isInContextMatch){ %>
+	        <amb:column label="lb_100" width="60px"
 	             sortBy="<%=TaskComparator.EXACT%>">
 	            <%=wf == null ? 0 : wf.getSegmentTmWordCount()%>
 	        </amb:column>
         <%
             }else if(isDefaultContextMatch){
         %>
-            <amb:column label="lb_100" width="50px"
+            <amb:column label="lb_100" width="60px"
                  sortBy="<%=TaskComparator.DEFAULT_CONTEXT_EXACT%>">
                 <%=wf == null ? 0 :(wf.getTotalExactMatchWordCount() - wf.getContextMatchWordCount())%>
             </amb:column>
         <%
             } else {
         %>
-	        <amb:column label="lb_100" width="50px"
+	        <amb:column label="lb_100" width="60px"
 	             sortBy="<%=TaskComparator.TOTAL_EXACT%>">
 	            <%=wf == null ? 0 : wf.getTotalExactMatchWordCount()%>
 	        </amb:column>
         <%} %>
         <%if (isDell) {%>
-        <amb:column label="lb_fuzzy_match" width="80px"
+        <amb:column label="lb_fuzzy_match" width="60px"
              sortBy="<%=TaskComparator.TOTAL_FUZZY%>">
             <%= totalFuzzy %>
         </amb:column>
         <%}
         else{%>
-        <amb:column label="lb_95" width="50px"
+        <amb:column label="lb_95" width="60px"
              sortBy="<%=TaskComparator.BAND1%>">
             <%= wf == null ? 0 : wf.getThresholdHiFuzzyWordCount() %>
         </amb:column>
-        <amb:column label="lb_85" width="50px"
+        <amb:column label="lb_85" width="60px"
              sortBy="<%=TaskComparator.BAND2%>">
             <%= wf == null ? 0 : wf.getThresholdMedHiFuzzyWordCount() %>             
         </amb:column>
-        <amb:column label="lb_75" width="50px"
+        <amb:column label="lb_75" width="60px"
              sortBy="<%=TaskComparator.BAND3%>">
             <%= wf == null ? 0 : wf.getThresholdMedFuzzyWordCount() %>                          
         </amb:column>
         <%}%>
         
         <%if (threshold < 75) {%>
-        <amb:column label="lb_74_and_below" width="50px"
+        <amb:column label="lb_74_and_below" width="60px"
              sortBy="<%=TaskComparator.BAND4%>">
             <%= wf == null ? 0 : wf.getThresholdLowFuzzyWordCount() %>
         </amb:column>
         <%}%>        
         
-        <amb:column label="lb_no_match" width="50px"
+        <amb:column label="lb_no_match" width="60px"
              sortBy="<%=TaskComparator.NO_MATCH%>">
             <%= wf == null ? 0 : wf.getThresholdNoMatchWordCount()%>
         </amb:column>
-        <amb:column label="lb_repetition_word_cnt" width="50px"
+        <amb:column label="lb_repetition_word_cnt" width="70px"
              sortBy="<%=TaskComparator.REPETITIONS%>">
             <%= wf == null ? 0 : wf.getRepetitionWordCount()%>
         </amb:column>
         <%if (!isDell) {%>
         <%if(isInContextMatch){ %>
-        <amb:column label="lb_in_context_tm" width="50px"
+        <amb:column label="lb_in_context_tm" width="120px"
 	       sortBy="<%=TaskComparator.IN_CONTEXT%>">
 	       <%= task.getWorkflow().getInContextMatchWordCount() %>
 	      </amb:column>
         <%}else{%>
 	        <%if(isDefaultContextMatch){ %>
-		        <amb:column label="lb_context_tm" width="50px"
+		        <amb:column label="lb_context_tm" width="120px"
 		             sortBy="<%=TaskComparator.CONTEXT%>">
 		            <%= wf == null ? 0 : wf.getContextMatchWordCount() %>
 		        </amb:column>
@@ -383,10 +372,11 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         <%} %>
         <%}%>
  
-        <amb:column label="lb_total" width="50px"
+        <amb:column label="lb_total" width="60px"
              sortBy="<%=TaskComparator.WC_TOTAL%>">
             <%= wf == null ? 0 : wf.getTotalWordCount() %>
         </amb:column>
+        <amb:column label="lb_leverage_match_threshold" width="150px" sortBy="<%=TaskComparator.LMT%>"><%=lmt%></amb:column>
       </amb:table>
     </td>
   </tr>

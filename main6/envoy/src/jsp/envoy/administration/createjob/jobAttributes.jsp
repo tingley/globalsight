@@ -453,7 +453,7 @@ function showCalendar(attributeId) {
 		    			<input type="hidden" name="attributeConditionType" value="5">
 		    			<input type="hidden" name="attributeId" value="${ja.attribute.id}">
 		    			<input type="hidden" id="input${ja.attribute.id}_req" value="${ja.attribute.required}">
-				        <select id="input${ja.attribute.id}" name="inputValue" style="width:200px;" <c:out value="${ja.multi}"/>>
+				        <select id="input${ja.attribute.id}" name="inputValue" style="min-width:200px;width:auto;" <c:out value="${ja.multi}"/>>
 				        	<c:if test="${ja.multi eq ''}">
 				        		<option value=""></option>
 				        	</c:if>

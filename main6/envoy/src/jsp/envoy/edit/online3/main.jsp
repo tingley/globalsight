@@ -500,6 +500,7 @@ var closeeAllCommentWarning = "<%=closeeAllCommentWarning%>";
 var g_disableComment = eval("<%=disableComment%>");
 var helpFile = "<%=bundle.getString("help_main_editor2")%>";
 var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
+var approveAction = "<%=approveAction%>";
 </script>
 </HEAD>
 <BODY id="idBody" oncontextmenu="contextForX(event)">
@@ -615,6 +616,7 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
       <TD ALIGN="LEFT"><%=lb_source_segment%></TD>
       <TD ALIGN="LEFT"><%=lb_previous_translation%></TD>
       <TD ALIGN="LEFT"><%=lb_current_translation%></TD>
+      <%if(approveAction.equals("true")){%>
       <TD ALIGN="LEFT" width='50'>
         <ul class="dropdown" style="padding: 0px;margin: 0px;" >
         	<li style="background:#708EB3;"><input type="checkbox" id="checkAll" style="float:left;margin-top:5px" onclick="checkAll()"/><a href="#" style="padding: 0px;"><img src="/globalsight/envoy/edit/online3/action.jpg"></a>
@@ -626,6 +628,7 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
         	</li>
         </ul>
       </TD>
+      <%}%>
     </TR>
   </THEAD>
   <TBODY id="idPageHtml">

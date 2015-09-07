@@ -8,7 +8,6 @@ var showRepeated = false;
 var w_editor;
 var postReviewEditor = "postReviewEditor";
 window.focus();
-var canAction = false;
 
 function helpSwitch()
 {
@@ -227,12 +226,6 @@ function approve()
 		return false;
 	}
 	
-	if(!canAction)
-	{
-		alert("Please Accpet the activity frist.");
-		return false;
-	}
-	
 	$.getJSON(url_self, 
 	{
 		action:"approve",
@@ -257,12 +250,6 @@ function unapprove()
 	if(unApproveIds == "")
 	{
 		alert("Please select some segments.");
-		return false;
-	}
-	
-	if(!canAction)
-	{
-		alert("Please Accpet the activity frist.");
 		return false;
 	}
 	
@@ -293,12 +280,6 @@ function revert()
 		return false;
 	}
 	
-	if(!canAction)
-	{
-		alert("Please Accpet the activity frist.");
-		return false;
-	}
-	
 	$.getJSON(url_self, 
 	{
 		action:"revert",
@@ -317,7 +298,11 @@ var jsonUrl=url_self+"&dataFormat=json"+"&srcViewMode=" + modeId+"&random="+Math
 var localData;
 var isReviwMode;
 var url;
-var trnode=$("<tr class='ul'><td width='25'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td width='50'></td></tr>");
+var trnode=$("<tr class='ul'><td width='25'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td></tr>");
+if(approveAction == "true")
+{
+	trnode=$("<tr class='ul'><td width='25'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td width='50'></td></tr>");
+}
 var repNode=$("<td class='rep'></td>");
 var subnode=$("<tr><td style='font-size: 10pt' nowrap=''></td><td></td></tr>")
 var subtable=$("<table width='100%' cellspacing='0' cellpadding='2'><colgroup><col width='1%' valign='TOP' class='editorId'><col width='99%' valign='TOP'></colgroup><tbody></tbody></table>")
@@ -482,9 +467,11 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 		temp.children('td').eq(3).children("a").children("span").attr("dir","rtl");
 	}
 	
-	//approve
-	var approveId = targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId;
-	temp.children('td').eq(4).html("<input id='" + approveId + "' name='approveCheckBox' type='checkbox'>");
+	if(approveAction == "true")
+	{
+		var approveId = targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId;
+		temp.children('td').eq(4).html("<input id='" + approveId + "' name='approveCheckBox' type='checkbox'>");
+	}
 
 	idPageHtml.append(temp);
 }
@@ -498,7 +485,6 @@ function getNodeByClass(item, se_able){
 		temp=SEnode.clone(true);
 		var funP="javascript:SE("+item.tuId+","+item.tuvId+","+item.subId+")";
 		temp.attr("href",funP);
-		canAction = true;
 	}else{
 		temp=spanNode.clone(true);
 	}

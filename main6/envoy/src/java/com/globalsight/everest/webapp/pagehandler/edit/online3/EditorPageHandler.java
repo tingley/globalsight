@@ -1175,7 +1175,14 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 
             initState(state, session);
             
-            sessionMgr.setAttribute("approveAction", "true");
+            if(user.getUserId().equals(theTask.getAcceptor()))
+            {
+            	sessionMgr.setAttribute("approveAction", "true");
+            }
+            else
+            {
+            	sessionMgr.setAttribute("approveAction", "false");
+            }
         }
     	else if (jobId != null && srcPageId != null)
         {

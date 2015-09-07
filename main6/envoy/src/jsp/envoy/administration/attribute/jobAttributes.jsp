@@ -241,7 +241,7 @@ $(document).ready(function(){
 		                        			<td>
 		                        				<input type="hidden" name="attributeId<%=attribute.getId()%>" id="attributeId<%=attribute.getId()%>"  value="<%=attribute.getId()%>">
 		    					      	    	<input type="hidden" id="jobAtt<%=attribute.getId()%>" name="jobAttributeId<%=attribute.getId()%>" value="<%=jobAtt.getId()%>">
-			                        			<select  name="selectOption<%=attribute.getId()%>" id = "selectOption<%=attribute.getId()%>" hasDownArrow="true" style="width:200px;" <%= isMultiple%>>
+			                        			<select  name="selectOption<%=attribute.getId()%>" id = "selectOption<%=attribute.getId()%>" hasDownArrow="true" style="width:100%;" <%= isMultiple%>>
 					    						  <%
 					    			                 for (SelectOption option : allOptions){
 					    			                     String selected = selectOptions.contains(option) ? "selected" : "";%>
@@ -857,6 +857,6 @@ function disPlayInput(inputId)
 
 function disPlayListInput(inputId)
 {
-	   $("#"+inputId).dialog({width: 240, height: 190, resizable:false});
+	   $("#"+inputId).dialog({width: 280, height: 190, resizable: true});
 }
 </SCRIPT>

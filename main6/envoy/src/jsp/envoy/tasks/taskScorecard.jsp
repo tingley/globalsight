@@ -1291,7 +1291,7 @@ function submitForm()
 	var allChecked = true;
 	var i= 0;
 	$(':input:radio').each(function(){
-		if($(this).is(':checked'))
+		if($(this).is(':checked') && $(this).attr("name") != "RadioBtn")
 		{
 			i++;
 		}

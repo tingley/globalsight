@@ -4105,8 +4105,15 @@ public class Ambassador extends AbstractWebService
 		{
 			Document doc;
 			SimpleDateFormat sfm = new SimpleDateFormat("yyyyMMdd HHmmss");
+			String userId = UserUtil.getUserIdByName(userName);
 			try
 			{
+				User user = ServerProxy.getUserManager().getUser(userId);
+				TimeZone timeZone = ServerProxy.getCalendarManager()
+						.findUserTimeZone(userId);
+				Timestamp ts = new Timestamp(Timestamp.DATE, timeZone);
+				Locale uiLocale = new Locale(user.getDefaultUILocale());
+				ts.setLocale(uiLocale);
 				doc = DocumentHelper.parseText(p_estimatedDateXml);
 				Element rootElt = doc.getRootElement();
 				List elements = rootElt.elements();
@@ -4147,7 +4154,7 @@ public class Ambassador extends AbstractWebService
 							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
 									"Invalid target locale: " + targetLocale);
 						}
-						
+
 						long sameId = -1;
 						for (Workflow wf : job.getWorkflows())
 						{
@@ -4171,14 +4178,15 @@ public class Ambassador extends AbstractWebService
 						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
 								"Invalid target locale: " + targetLocale);
 					}
-					
+
 					if (StringUtil.isNotEmpty(tranComDateStr))
 					{
 						try
 						{
 							Date tranComDate = sfm.parse(tranComDateStr);
+							ts.setDate(tranComDate);
 							dateMap.put("estimatedTranslateCompletionDate",
-									tranComDate);
+									ts.getDate());
 						}
 						catch (ParseException e)
 						{
@@ -4193,8 +4201,9 @@ public class Ambassador extends AbstractWebService
 						try
 						{
 							Date workComDate = sfm.parse(workComDateStr);
+							ts.setDate(workComDate);
 							dateMap.put("estimatedWorkflowCompletionDate",
-									workComDate);
+									ts.getDate());
 						}
 						catch (ParseException e)
 						{
@@ -4210,10 +4219,10 @@ public class Ambassador extends AbstractWebService
 						workMap.put(targetGSLocale.getId(), dateMap);
 					}
 				}
-				//put workflow date paramter
+				// put workflow date paramter
 				paramter.put("estimatedDates", workMap);
 			}
-			catch (DocumentException e)
+			catch (Exception e)
 			{
 				return makeErrorXml(EDIT_JOB_DETAIL_INFO,
 						"Invalid estimatedDateXml: XML parse error.");

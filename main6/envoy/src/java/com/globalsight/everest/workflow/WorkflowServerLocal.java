@@ -2153,6 +2153,15 @@ public class WorkflowServerLocal implements WorkflowServer
                         {
                             return;
                         }
+                        List owners = new ArrayList();
+                        WorkflowOwner owner = new WorkflowOwner();
+                        owner.setWorkflow(workflow);
+                        owner.setOwnerId(userId);
+                        owner.setOwnerType(Permission.GROUP_WORKFLOW_MANAGER);
+                        owners.add(owner);
+                        ServerProxy.getWorkflowManager()
+                                .reassignWorkflowOwners(workflow.getId(),
+                                        owners);
                         ServerProxy.getTaskManager().acceptTask(userId, task,
                                 true);
                         if (i == indexInDefaultPath)
@@ -2266,6 +2275,16 @@ public class WorkflowServerLocal implements WorkflowServer
                         {
                             return;
                         }
+                        List owners = new ArrayList();
+                        WorkflowOwner owner = new WorkflowOwner();
+                        owner.setWorkflow(workflow);
+                        owner.setOwnerId(userId);
+                        owner.setOwnerType(((WorkflowOwner) workflow
+                                .getWorkflowOwners().get(0)).getOwnerType());
+                        owners.add(owner);
+                        ServerProxy.getWorkflowManager()
+                                .reassignWorkflowOwners(workflow.getId(),
+                                        owners);
                         ServerProxy.getTaskManager().acceptTask(userId, task,
                                 true);
                         if (task.getTaskName().equals("Exit"))

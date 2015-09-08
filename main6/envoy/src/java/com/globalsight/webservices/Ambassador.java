@@ -3985,7 +3985,7 @@ public class Ambassador extends AbstractWebService
 				{
 					return makeErrorXml(
 							EDIT_JOB_DETAIL_INFO,
-							"Invalid priority : "
+							"Invalid priority: "
 									+ p_priority
 									+ ", it should be limited in 1, 2, 3, 4, 5 or empty.");
 				}
@@ -4005,7 +4005,7 @@ public class Ambassador extends AbstractWebService
 					Long.parseLong(p_jobId));
 			if (job == null)
 			{
-				return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid job id :"
+				return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid job id: "
 						+ p_jobId);
 			}
 			
@@ -4013,9 +4013,9 @@ public class Ambassador extends AbstractWebService
 			{
 				return makeErrorXml(
 						EDIT_JOB_DETAIL_INFO,
-						"Invalid job id :"
+						"Invalid job id: "
 								+ p_jobId
-								+ ",current user is not in the same company with the job.");
+								+ ", current user is not in the same company with the job.");
 			}
 			
 			if (!job.getDisplayState().equalsIgnoreCase("ready")
@@ -4039,10 +4039,42 @@ public class Ambassador extends AbstractWebService
 			try
 			{
 				p_jobName = EditUtil.removeCRLF(p_jobName);
+				if (p_jobName.length() > 120)
+				{
+					return makeErrorXml(
+							EDIT_JOB_DETAIL_INFO,
+							"Invalid job name: "
+									+ p_jobName
+									+ ",  the max lenght for job name limits to 120 characters.");
+				}
 				Job checkJob = ServerProxy.getJobHandler().getJobByJobName(
 						p_jobName);
 				if (checkJob == null)
 				{
+					String[] jobNameArr = p_jobName.split("_");
+					if (jobNameArr.length > 1
+							&& jobNameArr[jobNameArr.length - 1] != null
+							&& jobNameArr[jobNameArr.length - 1] != "")
+					{
+						try
+						{
+							Assert.assertIsInteger(jobNameArr[jobNameArr.length - 1]);
+							if (jobNameArr[jobNameArr.length - 1].length() > 6)
+							{
+								p_jobName = getUniqueJobName(p_accessToken,
+										p_jobName);
+							}
+						}
+						catch (Exception e)
+						{
+							p_jobName = getUniqueJobName(p_accessToken,
+									p_jobName);
+						}
+					}
+					else
+					{
+						p_jobName = getUniqueJobName(p_accessToken, p_jobName);
+					}
 					paramter.put("jobName", p_jobName);
 				}
 				else
@@ -4051,14 +4083,14 @@ public class Ambassador extends AbstractWebService
 					{
 						return makeErrorXml(
 								EDIT_JOB_DETAIL_INFO,
-								"Invalid job name :"
+								"Invalid job name: "
 										+ p_jobName
-										+ ", the modify name and the name of the current job is no difference.");
+										+ ", the modify name is identical to current one.");
 					}
 					else
 					{
 						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-								"Invalid job name :" + p_jobName
+								"Invalid job name: " + p_jobName
 										+ ", job name already exists.");
 					}
 				}
@@ -4104,7 +4136,7 @@ public class Ambassador extends AbstractWebService
 					if (StringUtil.isEmpty(targetLocale))
 					{
 						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-								"Invalid estimatedDateXml, target locale can not empty.");
+								"Invalid estimatedDateXml: target locale can not be empty.");
 					}
 					GlobalSightLocale targetGSLocale = null;
 					try
@@ -4113,7 +4145,7 @@ public class Ambassador extends AbstractWebService
 						if (targetGSLocale == null)
 						{
 							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-									"Invalid target locale : " + targetLocale);
+									"Invalid target locale: " + targetLocale);
 						}
 						
 						long sameId = -1;
@@ -4127,14 +4159,17 @@ public class Ambassador extends AbstractWebService
 						}
 						if (sameId == -1)
 						{
-							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-									"Error when invoking this method, please check the parameters you input.");
+							return makeErrorXml(
+									EDIT_JOB_DETAIL_INFO,
+									"Invalid target locale: "
+											+ targetLocale
+											+ ", current job has no workflow with this target locale.");
 						}
 					}
 					catch (Exception e)
 					{
 						return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-								"Invalid target locale : " + targetLocale);
+								"Invalid target locale: " + targetLocale);
 					}
 					
 					if (StringUtil.isNotEmpty(tranComDateStr))
@@ -4148,7 +4183,7 @@ public class Ambassador extends AbstractWebService
 						catch (ParseException e)
 						{
 							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-									"Invalid estimatedTranslateCompletionDate : "
+									"Invalid estimatedTranslateCompletionDate: "
 											+ tranComDateStr);
 						}
 					}
@@ -4164,7 +4199,7 @@ public class Ambassador extends AbstractWebService
 						catch (ParseException e)
 						{
 							return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-									"Invalid estimatedWorkflowCompletionDate : "
+									"Invalid estimatedWorkflowCompletionDate: "
 											+ workComDateStr);
 						}
 					}
@@ -4181,7 +4216,7 @@ public class Ambassador extends AbstractWebService
 			catch (DocumentException e)
 			{
 				return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-						"Invalid estimated date xml,xml spelling errors.");
+						"Invalid estimatedDateXml: XML parse error.");
 			}
 		}
 		String returnStr = updateJobDetailInfo(paramter);
@@ -4228,7 +4263,7 @@ public class Ambassador extends AbstractWebService
 				{
 					return makeErrorXml(
 							EDIT_JOB_DETAIL_INFO,
-							"Only the workflow is ready or in progress state, can modify the date information.");
+							"Only when workflow is in ready or in progress state, estimated completion dates are allowed to modify.");
 				}
 				Map<String, Date> dateMap = workMap.get(targetLocaleId);
 				Iterator iter = dateMap.entrySet().iterator();

@@ -445,6 +445,11 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 		temp.children('td').eq(2).append(htmlcontent);
 	}
 	
+	if(originalTargetData.originalTarget == "")
+	{
+		temp.children('td').eq(2).addClass("center");
+	}
+	
 	//target
 	temp.children('td').eq(3).attr("id","seg"+targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId);
 
@@ -538,7 +543,14 @@ function getNodeByClass(item, se_able){
 
 function getNodeByClass2(item, se_able){
 	var temp=spanNode.clone(true);
-	temp.html(item.originalTarget);
+	if(item.originalTarget != "")
+	{
+		temp.html(item.originalTarget);
+	}
+	else
+	{
+		temp.html("-");
+	}
 	if(item.subArray){
 		var stable=subtable.clone(true);
 		stable.append(temp);

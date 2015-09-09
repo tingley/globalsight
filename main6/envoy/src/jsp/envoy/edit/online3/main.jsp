@@ -439,6 +439,7 @@ String approveAction = (String)sessionMgr.getAttribute("approveAction");
 .commentDiv{width:100%;position:absolute;Z-INDEX: 10; LEFT: 0px;bottom:0;height:270px;}
 
 .segmentTd{word-break: break-all;word-wrap : break-word; overflow:hidden;}
+.center{text-align:center;}
 
 #idCommentTable { font-family: verdana; font-size: 10pt;border-bottom: 1px solid black;}
 #idCommentTable TH {font-size: 9pt;color: <%=skin.getProperty("skin.tableHeading.fgColor")%>;background-color: <%=skin.getProperty("skin.tableHeading.bgColor")%>;}

@@ -3973,7 +3973,11 @@ public class Ambassador extends AbstractWebService
 		Map<String, Object> paramter = new HashMap<String, Object>();
 		try
 		{
-			Assert.assertNotEmpty(p_jobId);
+			if (!Assert.assertNotEmpty(p_jobId))
+			{
+				return makeErrorXml(EDIT_JOB_DETAIL_INFO,
+						"Job id can not be empty");
+			}
 			Assert.assertIsInteger(p_jobId);
 			if (StringUtil.isNotEmpty(p_priority))
 			{
@@ -4051,30 +4055,6 @@ public class Ambassador extends AbstractWebService
 						p_jobName);
 				if (checkJob == null)
 				{
-					String[] jobNameArr = p_jobName.split("_");
-					if (jobNameArr.length > 1
-							&& jobNameArr[jobNameArr.length - 1] != null
-							&& jobNameArr[jobNameArr.length - 1] != "")
-					{
-						try
-						{
-							Assert.assertIsInteger(jobNameArr[jobNameArr.length - 1]);
-							if (jobNameArr[jobNameArr.length - 1].length() > 6)
-							{
-								p_jobName = getUniqueJobName(p_accessToken,
-										p_jobName);
-							}
-						}
-						catch (Exception e)
-						{
-							p_jobName = getUniqueJobName(p_accessToken,
-									p_jobName);
-						}
-					}
-					else
-					{
-						p_jobName = getUniqueJobName(p_accessToken, p_jobName);
-					}
 					paramter.put("jobName", p_jobName);
 				}
 				else

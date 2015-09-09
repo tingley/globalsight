@@ -16,11 +16,14 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -45,6 +48,7 @@ public class TranslatedTextHandler extends PageHandler
     {
         try
         {
+            HttpSession session = p_request.getSession(false);
             String action = (String) p_request.getParameter("action");
             Long jobId = new Long(
                     (String) p_request
@@ -98,6 +102,8 @@ public class TranslatedTextHandler extends PageHandler
                     }
                 }
                 Collections.sort(sublist, new WorkflowComparator(Locale.getDefault()));
+                p_request.setAttribute("shortOrFullPageNameDisplay",
+                        getShortOrFullPageNameDisplay(session));
                 p_request.setAttribute("workflows", sublist);
                 p_request.setAttribute("jobName", job.getJobName());
                 p_request.setAttribute("sourcePages", job.getSourcePages());
@@ -110,5 +116,12 @@ public class TranslatedTextHandler extends PageHandler
         }
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
+    }
+
+    private String getShortOrFullPageNameDisplay(HttpSession session)
+    {
+        UserParameter param = PageHandler.getUserParameter(session,
+                UserParamNames.PAGENAME_DISPLAY);
+        return param.getValue();
     }
 }

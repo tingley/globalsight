@@ -31,6 +31,7 @@ public class SegmentationRuleConstant
     public static final String VALIDATE = "validate";
     public static final String TEST = "test";
     public static final String UPLOAD = "upload";
+    public static final String SET_DEFAULT = "setDefault";
 
     public static final String SEGMENTATIONRULE_KEY = "segmentationRuleFile";
     public static final String SEGMENTATIONRULE_LIST = "segmentationRuleFiles";

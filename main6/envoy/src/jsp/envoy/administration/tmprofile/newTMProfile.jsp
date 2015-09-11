@@ -1000,15 +1000,14 @@ function doOnLoad()
                             </B>
                             <SELECT NAME="<%=selectedSR%>" CLASS="standardText">
                                 <OPTION VALUE="-1" SELECTED><%=bundle.getString("lb_choose_1")%>
-                                <OPTION VALUE="-2" ><%=bundle.getString("lb_default")%>
                      <%
                        Iterator it_s = segmentationRules.iterator();
                        while (it_s.hasNext())
                        {
                            SegmentationRuleFileImpl sr = (SegmentationRuleFileImpl)it_s.next();
-                           String srName = sr.getName();
+                           String srName = sr.getName() + (sr.getIsDefault() ? " (Default)" : "");
                            long id  = sr.getId();
-                           %> <OPTION VALUE = "<%=id%>"><%=srName%><%
+                           %> <OPTION VALUE = "<%=id%>" ><%=srName%><%
                        }%>
 
                                 </SELECT>

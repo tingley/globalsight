@@ -672,6 +672,7 @@
         <PageLink linkName="dup" destinationPageName="SERF2"></PageLink>
         <PageLink linkName="rem" destinationPageName="SERF1"></PageLink>
         <PageLink linkName="export" destinationPageName="SERF1"></PageLink>
+        <PageLink linkName="setDefault" destinationPageName="SERF1"></PageLink>
         <PageLink linkName="upload" destinationPageName="SERF3"></PageLink>
         <PageLink linkName="self" destinationPageName="SERF1"></PageLink>
       </WebPage>

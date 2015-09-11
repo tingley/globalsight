@@ -25,6 +25,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="export" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="setDefault" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="self" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="upload" scope="request"
@@ -40,6 +42,7 @@
   String dupURL = dup.getPageURL() + "&action=" + SegmentationRuleConstant.DUPLICATE;
   String remURL = rem.getPageURL() + "&action=" + SegmentationRuleConstant.REMOVE;
   String exportURL = export.getPageURL() + "&action=" + SegmentationRuleConstant.EXPORT;
+  String setDefaultURL = setDefault.getPageURL() + "&action=" + SegmentationRuleConstant.SET_DEFAULT;
   String uploadURL = upload.getPageURL();
   
   String title= bundle.getString("lb_segmentation_rules");
@@ -104,6 +107,10 @@ function submitForm(button)
         	}
             segmentationForm.action = "<%=exportURL%>";
         }
+        else if (button == "SetDefault")
+        {
+        	segmentationForm.action = "<%=setDefaultURL%>";
+        }
     }
 
     if (isOk)
@@ -116,6 +123,8 @@ function enableButtons()
 {
     if (segmentationForm.editBtn)
         segmentationForm.editBtn.disabled = false;
+    if (segmentationForm.setDefaultBtn)
+        segmentationForm.setDefaultBtn.disabled = false;
     if (segmentationForm.dupBtn)
         segmentationForm.dupBtn.disabled = false;
     if (segmentationForm.remBtn)
@@ -165,6 +174,10 @@ function gotoTMP()
             width="100px">
              <% out.print(SegmentationRuleFileType.getTypeString(segmentationRuleFile.getType())); %>
            </amb:column>
+        <amb:column label="lb_is_default" sortBy="<%=SegmentationRuleFileComparator.IS_DEFAULT%>"
+            width="100px">
+             <% out.print(segmentationRuleFile.getIsDefault() ? "<IMG SRC='/globalsight/images/checkmark.gif' HEIGHT=9 WIDTH=13 HSPACE=10 VSPACE=3></IMG>" : ""); %>
+           </amb:column>
         <amb:column label="lb_description" sortBy="<%=SegmentationRuleFileComparator.DESC%>"
          width="400px">
           <% out.print(segmentationRuleFile.getDescription() == null ? "" :
@@ -195,6 +208,8 @@ function gotoTMP()
     <amb:permission name="<%=Permission.SEGMENTATIONRULE_EDIT%>" >
      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit")%>..."
      name="editBtn" disabled onclick="submitForm('Edit');">
+     <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_set_default")%>"
+     name="setDefaultBtn" disabled onclick="submitForm('SetDefault');">
     </amb:permission>
     <amb:permission name="<%=Permission.SEGMENTATIONRULE_NEW%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_upload")%>..."

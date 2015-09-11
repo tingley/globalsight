@@ -31,6 +31,7 @@ public class SegmentationRuleFileComparator extends StringComparator
 	public static final int DESC = 1;
 	public static final int ASC_COMPANY = 2;
 	public static final int TYPE = 3;
+	public static final int IS_DEFAULT = 4;
 
 	/**
 	* Creates a SegmentationRuleFileComparator with the given type and locale.
@@ -81,6 +82,11 @@ public class SegmentationRuleFileComparator extends StringComparator
 			bValue = String.valueOf(b.getType());
 			rv = this.compareStrings(aValue,bValue);
 			break;
+		case IS_DEFAULT:
+            aValue = String.valueOf(a.getIsDefault());
+            bValue = String.valueOf(b.getIsDefault());
+            rv = this.compareStrings(aValue,bValue);
+            break;
 		}
 		return rv;
 	}

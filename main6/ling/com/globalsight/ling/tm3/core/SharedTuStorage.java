@@ -891,18 +891,21 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		}
 		sb.append(getStorage().getTuvTableName()).append(" as tuv, ")
 				.append(getStorage().getTuvExtTableName()).append(" AS ext");
-
+		
 		if (inlineAttrs != null && !inlineAttrs.isEmpty())
 		{
 			sb.append(",").append(getStorage().getTuTableName())
 					.append(" as tu ");
 			getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
 		}
+		
+		sb.append(" WHERE tuv.tmId = ?").addValue(tmId);
+		sb.append(" AND tuv.id = ext.tuvId");
 		getParameterSql(sb, paramMap, localeIds, inlineAttrs);
+		
 		if (StringUtil.isNotEmpty(stringId))
 		{
-			sb.append(" AND tuv.id = ext.tuvId ").append(
-					"AND ext.sid IS NOT NULL ");
+			sb.append(" AND ext.sid IS NOT NULL ");
 		}
 		if (startId != -1 && count != -1)
 		{
@@ -915,7 +918,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			Map<String, Object> paramMap, String localeIds,
 			Map<TM3Attribute, Object> inlineAttrs)
 	{
-		sb.append(" WHERE tuv.tmId = ?").addValue(tmId);
 		if (inlineAttrs != null && !inlineAttrs.isEmpty())
 		{
 			sb.append(" AND tu.id = tuv.tuId ");

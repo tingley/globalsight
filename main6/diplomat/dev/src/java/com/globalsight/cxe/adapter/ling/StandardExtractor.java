@@ -429,7 +429,7 @@ public class StandardExtractor
         String ruleText = srf.getRuleText();
         // Validate xml rule text
         SegmentationRuleFileValidator val = new SegmentationRuleFileValidator();
-        if (ruleText == null || ruleText.equalsIgnoreCase("default") || srf.getIsDefault())
+        if (ruleText == null || ruleText.equalsIgnoreCase("default"))
         {
             // Use existing segmentaion function in GlobalSight.
             ruleText = "default";

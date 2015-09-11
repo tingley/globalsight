@@ -35,7 +35,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.edit.online.SegmentFilter;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -519,20 +518,22 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     {
         TuvImpl tuv = null;
 
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        PreparedStatement ps1 = null;
+        ResultSet rs1 = null;
+        PreparedStatement ps2 = null;
+        ResultSet rs2 = null;
         try
         {
             String sql = GET_TUV_BY_TU_ID_LOCALE_ID_SQL.replace(
                     TUV_TABLE_PLACEHOLDER,
                     BigTableUtil.getTuvTableJobDataInByJobId(p_jobId));
 
-            ps = p_connection.prepareStatement(sql);
-            ps.setLong(1, p_localeId);
-            ps.setLong(2, p_tuId);
-            rs = ps.executeQuery();
+            ps1 = p_connection.prepareStatement(sql);
+            ps1.setLong(1, p_localeId);
+            ps1.setLong(2, p_tuId);
+            rs1 = ps1.executeQuery();
 
-            List<TuvImpl> result = convertResultSetToTuv(rs, true, p_jobId);
+            List<TuvImpl> result = convertResultSetToTuv(rs1, true, p_jobId);
             if (result != null && result.size() > 0)
             {
                 tuv = result.get(0);
@@ -544,12 +545,12 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                         TUV_TABLE_PLACEHOLDER,
                         BigTableUtil.getTuvArchiveTableByJobId(p_jobId));
 
-                ps = p_connection.prepareStatement(sql);
-                ps.setLong(1, p_localeId);
-                ps.setLong(2, p_tuId);
-                rs = ps.executeQuery();
+                ps2 = p_connection.prepareStatement(sql);
+                ps2.setLong(1, p_localeId);
+                ps2.setLong(2, p_tuId);
+                rs2 = ps2.executeQuery();
 
-                result = convertResultSetToTuv(rs, true, p_jobId);
+                result = convertResultSetToTuv(rs2, true, p_jobId);
                 if (result != null && result.size() > 0)
                 {
                     tuv = result.get(0);
@@ -564,7 +565,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         }
         finally
         {
-            releaseRsPsConnection(rs, ps, null);
+            releaseRsPsConnection(rs1, ps1, null);
+            releaseRsPsConnection(rs2, ps2, null);
         }
 
         return tuv;
@@ -610,27 +612,29 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     {
         List<TuvImpl> result = new ArrayList<TuvImpl>();
 
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        PreparedStatement ps1 = null;
+        ResultSet rs1 = null;
+        PreparedStatement ps2 = null;
+        ResultSet rs2 = null;
         try
         {
             String sql = GET_TUVS_BY_TU_ID_SQL.replace(TUV_TABLE_PLACEHOLDER,
                     BigTableUtil.getTuvTableJobDataInByJobId(p_jobId));
 
-            ps = connection.prepareStatement(sql);
-            ps.setLong(1, p_tuId);
-            rs = ps.executeQuery();
+            ps1 = connection.prepareStatement(sql);
+            ps1.setLong(1, p_tuId);
+            rs1 = ps1.executeQuery();
 
-            result = convertResultSetToTuv(rs, true, p_jobId);
+            result = convertResultSetToTuv(rs1, true, p_jobId);
             if (result == null || result.size() == 0)
             {
                 sql = GET_TUVS_BY_TU_ID_SQL.replace(TUV_TABLE_PLACEHOLDER,
                         BigTableUtil.getTuvArchiveTableByJobId(p_jobId));
-                ps = connection.prepareStatement(sql);
-                ps.setLong(1, p_tuId);
-                rs = ps.executeQuery();
+                ps2 = connection.prepareStatement(sql);
+                ps2.setLong(1, p_tuId);
+                rs2 = ps2.executeQuery();
 
-                result = convertResultSetToTuv(rs, true, p_jobId);
+                result = convertResultSetToTuv(rs2, true, p_jobId);
             }
         }
         catch (Exception e)
@@ -640,7 +644,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         }
         finally
         {
-            releaseRsPsConnection(rs, ps, null);
+            releaseRsPsConnection(rs1, ps1, null);
+            releaseRsPsConnection(rs2, ps2, null);
         }
 
         return result;
@@ -1349,8 +1354,6 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             {
                 // Load XliffAlt data if current TUV has.
                 // loadXliffAlt(tuv);
-                // Load IssueEditionRelation for GS edition
-                // loadIssueEditionRelation(tuv);
             }
 
             result.add(tuv);
@@ -1405,41 +1408,6 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             }
 
             recordWhichTuvExtraDataAlreadyLoaded(tuv.getIdAsLong(), XLIFF_ALT);
-        }
-    }
-
-    /**
-     * Load IssueEditionRelation data for current TuvImpl if it is GS edition
-     * TUV.
-     *
-     * @param tuv
-     *            -- TuvImpl object
-     */
-    @SuppressWarnings("unchecked")
-    public static void loadIssueEditionRelation(TuvImpl tuv)
-    {
-        boolean isIERLoaded = isTuvExtraDataLoaded(tuv.getIdAsLong(),
-                ISSUE_EDITION_RELATION);
-        if (!isIERLoaded)
-        {
-            Set<IssueEditionRelation> issueERs = new HashSet<IssueEditionRelation>();
-            String hql = "from IssueEditionRelation ier where ier.tuvId = "
-                    + tuv.getId();
-            List<IssueEditionRelation> relations = (List<IssueEditionRelation>) HibernateUtil
-                    .search(hql);
-            if (relations != null && relations.size() > 0)
-            {
-                for (IssueEditionRelation relation : relations)
-                {
-                    relation.setTuv(tuv);
-                }
-
-                issueERs.addAll(relations);
-                tuv.setIssueEditionRelation(issueERs);
-            }
-
-            recordWhichTuvExtraDataAlreadyLoaded(tuv.getIdAsLong(),
-                    ISSUE_EDITION_RELATION);
         }
     }
 

@@ -106,8 +106,6 @@ public class RequestImpl extends PersistentObject implements Request,
 
     private String m_priority = null;
 
-    private HashMap m_editionParams = null;
-
     private long m_sourcePageId = -1;
 
     // This hashtable holds any target locales this request/page
@@ -940,16 +938,6 @@ public class RequestImpl extends PersistentObject implements Request,
     public void setPriority(String mPriority)
     {
         m_priority = mPriority;
-    }
-
-    public void setEditionJobParams(HashMap p_editionParams)
-    {
-        m_editionParams = p_editionParams;
-    }
-
-    public HashMap getEditionJobParams()
-    {
-        return m_editionParams;
     }
 
     public long getFileProfileId()

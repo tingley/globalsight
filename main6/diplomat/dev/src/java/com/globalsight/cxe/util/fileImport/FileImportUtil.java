@@ -475,38 +475,10 @@ public class FileImportUtil
         // 1.Create the request object
         RequestImpl req = prepareL10nRequest(p_cxeMessage, p_requestType,
                 p_contentFileName, p_eventFlowXml, p_exception);
-        // 2.Set job parameters for GS Edition
-        setEditionJobParams(req, p_cxeMessage.getParameters());
-        // 3.Submit request
+
+        // 2.Submit request
         RequestHandlerLocal h = new RequestHandlerLocal();
         h.submitRequest(req);
-    }
-
-    /**
-     * Set job parameters for Editions job.
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    static private void setEditionJobParams(RequestImpl p_request,
-            HashMap parametersInMap)
-    {
-        if (p_request == null || parametersInMap == null)
-            return;
-
-        String originalTaskId = (String) parametersInMap.get("taskId");
-        if (originalTaskId != null && !"".equals(originalTaskId))
-        {
-            HashMap editionJobParams = new HashMap();
-            editionJobParams.put("taskId", originalTaskId);
-            editionJobParams.put("wsdlUrl", parametersInMap.get("wsdlUrl"));
-            editionJobParams.put("userName", parametersInMap.get("userName"));
-            editionJobParams.put("password", parametersInMap.get("password"));
-            editionJobParams.put("jobComments",
-                    parametersInMap.get("jobComments"));
-            editionJobParams.put("segComments",
-                    parametersInMap.get("segComments"));
-
-            p_request.setEditionJobParams(editionJobParams);
-        }
     }
 
     /**

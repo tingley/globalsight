@@ -40,7 +40,6 @@ import java.util.Vector;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -71,7 +70,9 @@ import com.globalsight.util.date.DateHelper;
 public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
         EnvoyAppletConstants
 {
-    //
+	private static final long serialVersionUID = 8788256466542369578L;
+
+	//
     // PRIVATE MEMBER VARIABLES
     //
     private TextField m_daysToAccept;
@@ -245,45 +246,12 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
         {
             public void itemStateChanged(ItemEvent e)
             {
-                if (e.getStateChange() == e.SELECTED)
+                if (e.getStateChange() == ItemEvent.SELECTED)
                 {
-                    Activity activity = getSelectedActivity(m_activityTypeChoice
-                            .getSelectedItem());
-
-                    String note = AppletHelper
-                            .getI18nContent("msg_note_ok_gray");
+                    String note = AppletHelper.getI18nContent("msg_note_ok_gray");
                     noteText.setText(note);
-                    if (activity != null)
-                    {
-                        if (activity.isType(activity.TYPE_AUTOACTION))
-                        {
-                            m_userRoleTable
-                                    .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-                            note = note + "\n\n";
-                            note = note + "          ";
-                            note = note
-                                    + AppletHelper
-                                            .getI18nContent("msg_note_auto_action");
-                            noteText.setText(note);
-                        }
-                        else if (activity.isType(activity.TYPE_GSEDITION))
-                        {
-                            m_userRoleTable
-                                    .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-                            note = note + "\n\n";
-                            note = note + "          ";
-                            note = note
-                                    + AppletHelper
-                                            .getI18nContent("msg_note_gs_action");
-                            noteText.setText(note);
-                        }
-                        else
-                        {
-                            m_participantChoice.enable();
-                        }
-                    }
+                    m_participantChoice.enable();
                 }
             }
         });
@@ -1152,22 +1120,6 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                     showHideHourlyRateField(false);
                 }
             }
-
-            Activity activity = getSelectedActivity(p_workflowtask
-                    .getActivityDisplayName());
-
-            if (activity.isType(activity.TYPE_AUTOACTION))
-            {
-                m_userRoleTable
-                        .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-                String note = AppletHelper.getI18nContent("msg_note_ok_gray");
-                note = note + "\n\n";
-                note = note + "          ";
-                note = note
-                        + AppletHelper.getI18nContent("msg_note_auto_action");
-                noteText.setText(note);
-            }
         }
         else
         {
@@ -1201,59 +1153,6 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 .getSelectedItem();
         Activity activity = getSelectedActivity(selectedActivityDisplayName);
         String selectedActivityName = activity.getActivityName();
-
-        boolean isAllQualified = m_participantDefaultChoice
-                .equals(m_participantChoice.getSelectedItem());
-
-        if ((activity.isType(activity.TYPE_AUTOACTION) || activity
-                .isType(activity.TYPE_GSEDITION)) && isAllQualified)
-        {
-            // Get all auto action users, if user numbers more than one,
-            // forbidden to select one user.
-            // ask the parent screen to get the grid data from the server side
-            List<Object[]> roleInfos = null;
-
-            if (m_isWorkflowTaskInstance)
-            {
-                WorkflowTask workflowtask = (WorkflowTask) getValue("wft");
-                long taskId = workflowtask.getTaskId();
-
-                roleInfos = (selectedActivityDisplayName
-                        .equals(m_defaultChoose)) ? new ArrayList<Object[]>()
-                        : m_parent.getRoleInfo(selectedActivityName, true,
-                                taskId);
-            }
-            else
-            {
-                roleInfos = (selectedActivityDisplayName
-                        .equals(m_defaultChoose)) ? new ArrayList<Object[]>()
-                        : m_parent.getRoleInfo(selectedActivityName, true);
-            }
-
-            if (roleInfos.size() > 1)
-            {
-                if (activity.isType(activity.TYPE_AUTOACTION))
-                {
-                    m_parent.getEnvoyJApplet().getErrorDlg(m_messages[1]);
-                }
-                else if (activity.isType(activity.TYPE_GSEDITION))
-                {
-                    m_parent.getEnvoyJApplet().getErrorDlg(m_messages[4]);
-                }
-
-                return;
-            }
-        }
-
-        if (activity.isType(activity.TYPE_GSEDITION))
-        {
-            int[] selectedRows = m_userRoleTable.getSelectedRows();
-            if (selectedRows.length > 1)
-            {
-                m_parent.getEnvoyJApplet().getErrorDlg(m_messages[4]);
-                return;
-            }
-        }
 
         long acceptMillis = DateHelper.milliseconds(
                 parseLong(m_daysToAccept.getText()),

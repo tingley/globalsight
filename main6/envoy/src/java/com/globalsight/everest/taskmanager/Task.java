@@ -91,7 +91,6 @@ public interface Task extends WorkObject
     // task types
     public static final int TYPE_TRANSLATE = Activity.TYPE_TRANSLATE;
     public static final int TYPE_REVIEW = Activity.TYPE_REVIEW;
-    public static final int TYPE_AUTOACTION = Activity.TYPE_AUTOACTION;
 
     // For sla report
     // This type is only in Task, not in Activity.

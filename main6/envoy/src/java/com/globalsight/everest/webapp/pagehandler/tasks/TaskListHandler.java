@@ -102,7 +102,6 @@ import com.globalsight.everest.workflow.WorkflowProcessAdapter;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -576,22 +575,6 @@ public class TaskListHandler extends PageHandler
             };
             Thread t = new MultiCompanySupportedThread(runnable);
             t.start();
-        }
-        else if (RECREATE_EDITION_JOB.equals(action))
-        {
-            // TaskImpl task = (TaskImpl) TaskHelper.retrieveObject(p_session,
-            // WORK_OBJECT);
-            String taskIdParam = p_request.getParameter(TASK_ID);
-            long taskId = TaskHelper.getLong(taskIdParam);
-
-            String taskStateParam = p_request.getParameter(TASK_STATE);
-            int taskState = TaskHelper.getInt(taskStateParam, -10);
-
-            TaskImpl task = (TaskImpl) TaskHelper.getTask(p_user.getUserId(),
-                    taskId, taskState);
-
-            WorkflowManagerLocal wfm = new WorkflowManagerLocal();
-            wfm.recreateGSEdtionJob(task);
         }
         else if (TASK_ACTION_REJECT.equals(action))
         {

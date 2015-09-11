@@ -13,11 +13,7 @@
             not-null="true" unique="false" />
         <property name="creatorId" length="82" column="CREATOR_USER_ID"
             type="string" not-null="true" unique="false" />
-        <property name="originalId" column="ORIGINAL_ID"
-            type="string" not-null="false" unique="false" />
-        <property name="originalWsdlUrl" column="WSDL_URL"
-            type="string" not-null="false" unique="false" />
-            
+
         <any name="object" id-type="long" meta-type="string">
             <meta-value value="J"
                 class="com.globalsight.everest.jobhandler.JobImpl" />

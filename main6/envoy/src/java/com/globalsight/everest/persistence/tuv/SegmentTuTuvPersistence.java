@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
@@ -167,7 +166,6 @@ public class SegmentTuTuvPersistence
 
             // Save XliffAlt & IssueEditionRelation
             Set<XliffAlt> xlfAlts = new HashSet<XliffAlt>();
-            Set<IssueEditionRelation> issueEditionRelations = new HashSet<IssueEditionRelation>();
             for (Iterator it = p_targetTuvs.iterator(); it.hasNext();)
             {
                 TuvImpl targetTuv = (TuvImpl) it.next();
@@ -175,14 +173,8 @@ public class SegmentTuTuvPersistence
                 {
                     xlfAlts.addAll(targetTuv.getXliffAlt(false));
                 }
-                if (targetTuv.getIssueEditionRelation() != null)
-                {
-                    issueEditionRelations.addAll(targetTuv
-                            .getIssueEditionRelation());
-                }
             }
             HibernateUtil.save(xlfAlts);
-            HibernateUtil.save(issueEditionRelations);
 
             conn.commit();
             conn.setAutoCommit(autoCommit);

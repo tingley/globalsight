@@ -167,16 +167,6 @@ public class ActivityMainHandler extends PageHandler implements
         act.setAfterJobDispatch(p_request.getParameter("afterJobDispatch"));
         act.setAfterActivityStart(p_request.getParameter("afterActivityStart"));
 
-        if (getType(p_request) == Activity.TYPE_AUTOACTION)
-        {
-            act.setAutoActionID(p_request.getParameter("SelectAutoAction"));
-        }
-        else if (getType(p_request) == Activity.TYPE_GSEDITION)
-        {
-            act.setEditionActionID(p_request
-                    .getParameter("SelectEditionAction"));
-        }
-
         String isDitaAct = p_request
                 .getParameter(ActivityConstants.IS_DITA_QA_CHECK_ACTIVITY);
         act.setRunDitaQAChecks(false);
@@ -211,23 +201,6 @@ public class ActivityMainHandler extends PageHandler implements
         act.setAfterJobCreation(p_request.getParameter("afterJobCreation"));
         act.setAfterJobDispatch(p_request.getParameter("afterJobDispatch"));
         act.setAfterActivityStart(p_request.getParameter("afterActivityStart"));
-
-        if (getType(p_request) == Activity.TYPE_AUTOACTION)
-        {
-            act.setAutoActionID(p_request.getParameter("SelectAutoAction"));
-            act.setEditionActionID(null);
-        }
-        else if (getType(p_request) == Activity.TYPE_GSEDITION)
-        {
-            act.setEditionActionID(p_request
-                    .getParameter("SelectEditionAction"));
-            act.setAutoActionID(null);
-        }
-        else
-        {
-            act.setAutoActionID(null);
-            act.setEditionActionID(null);
-        }
 
         Company company = ServerProxy.getJobHandler()
                 .getCompanyById(act.getCompanyId());
@@ -285,25 +258,13 @@ public class ActivityMainHandler extends PageHandler implements
     private int getType(HttpServletRequest p_request)
     {
         int type = Activity.TYPE_TRANSLATE;
+
         String typeStr = new String(
                 p_request.getParameter(ActivityConstants.TYPE));
-
-        if (typeStr.equals(ActivityConstants.REVIEW_NOT_EDITABLE)
-                || typeStr.equals(ActivityConstants.REVIEW_EDITABLE))
+        if (ActivityConstants.REVIEW_NOT_EDITABLE.equals(typeStr)
+                || ActivityConstants.REVIEW_EDITABLE.equals(typeStr))
         {
             type = Activity.TYPE_REVIEW;
-        }
-        else if (typeStr.equals(ActivityConstants.AUTO_ACTION))
-        {
-            type = Activity.TYPE_AUTOACTION;
-        }
-        else if (typeStr.equals(ActivityConstants.GSEDITION))
-        {
-            type = Activity.TYPE_GSEDITION;
-        }
-        else
-        {
-            type = Activity.TYPE_TRANSLATE;
         }
 
         return type;

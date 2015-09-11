@@ -16,13 +16,8 @@
  */
 package com.globalsight.everest.workflowmanager;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,7 +31,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -48,8 +42,6 @@ import java.util.concurrent.Executors;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -60,7 +52,6 @@ import org.jbpm.JbpmContext;
 import org.jbpm.graph.def.Node;
 import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.taskmgmt.exe.TaskInstance;
-import org.w3c.dom.NodeList;
 
 import com.globalsight.calendar.BaseFluxCalendar;
 import com.globalsight.calendar.CalendarManager;
@@ -69,14 +60,11 @@ import com.globalsight.calendar.ReservedTime;
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.comment.CommentException;
 import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.comment.CommentImpl;
 import com.globalsight.everest.comment.CommentManager;
-import com.globalsight.everest.comment.IssueEditionRelation;
-import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.costing.AmountOfWork;
@@ -85,27 +73,19 @@ import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.coti.util.COTIUtilEnvoy;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.download.JobPackageZipper;
-import com.globalsight.everest.edit.offline.download.PtagPageGenerator;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflinePageDataGenerator;
-import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.PageData;
-import com.globalsight.everest.edit.offline.xliff.ListViewWorkXLIFFWriter;
 import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.Timestamp;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.gsedition.GSEditionActivity;
-import com.globalsight.everest.gsedition.GSEditionActivityManagerLocal;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
@@ -134,11 +114,9 @@ import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.taskmanager.TaskInfo;
-import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.everest.tuv.TaskTuv;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
@@ -149,7 +127,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.TaskInfoBean;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
@@ -159,7 +136,6 @@ import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfi
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDataMigration;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.everest.workflow.AssigneeFilter;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflow.SkipActivityVo;
 import com.globalsight.everest.workflow.SystemAction;
@@ -175,12 +151,9 @@ import com.globalsight.everest.workflow.WorkflowJbpmPersistenceHandler;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
 import com.globalsight.everest.workflow.WorkflowMailerConstants;
 import com.globalsight.everest.workflow.WorkflowNodeParameter;
-import com.globalsight.everest.workflow.WorkflowProcessAdapter;
 import com.globalsight.everest.workflow.WorkflowServerWLRemote;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
-import com.globalsight.ling.tm2.SegmentTmTuv;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.log.GlobalSightCategory;
@@ -194,8 +167,6 @@ import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.modules.Modules;
 import com.globalsight.util.zip.ZipIt;
-import com.globalsight.webservices.client.Ambassador;
-import com.globalsight.webservices.client.WebServiceClientHelper;
 
 public class WorkflowManagerLocal implements WorkflowManager
 {
@@ -857,99 +828,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 if (task != null)
                 {
                     task.setProjectManagerName(pm);
-
                     TaskHelper.autoAcceptTask(task);
-
-                    Activity act = ServerProxy.getJobHandler().getActivity(
-                            task.getTaskName());
-
-                    if (act.isType(Activity.TYPE_AUTOACTION))
-                    {
-                        if (returnValue.get(2) != null)
-                        {
-                            downloadOfflineFiles(task, j,
-                                    (ArrayList) returnValue.get(2));
-                        }
-                    }
-                    else if (act.isType(Activity.TYPE_GSEDITION))
-                    {
-                        // first automaticly accept the task.
-                        Task taskClone = (Task) session.get(TaskImpl.class,
-                                new Long(taskId));
-                        ArrayList profiles = j.getAllFileProfiles();
-
-                        boolean isAllUnExtracted = true;
-                        // Check if all the files are un-extracted file,if they
-                        // all are,
-                        // don't do any GS Edition distribute.
-                        // If the job have extracted file and also have
-                        // un-extacted file,
-                        // just create GS Edition job on serverB for extracted
-                        // file, and
-                        // un-extracted file don't do any thing.
-                        for (int i = 0; i < profiles.size(); i++)
-                        {
-                            FileProfile fileProfile = (FileProfile) profiles
-                                    .get(i);
-                            KnownFormatType format = ServerProxy
-                                    .getFileProfilePersistenceManager()
-                                    .queryKnownFormatType(
-                                            fileProfile.getKnownFormatTypeId());
-
-                            if (!format.getName().equals("Un-extracted"))
-                            {
-                                isAllUnExtracted = false;
-                            }
-                        }
-
-                        if (!isAllUnExtracted)
-                        {
-                            ctx = WorkflowConfiguration.getInstance()
-                                    .getJbpmContext();
-                            ProcessInstance processInstance = ctx
-                                    .getProcessInstance(wfClone.getId());
-                            WorkflowInstance workflowInstance = WorkflowProcessAdapter
-                                    .getProcessInstance(processInstance);
-
-                            Node node = WorkflowJbpmUtil.getNodeById(
-                                    processInstance.getProcessDefinition(),
-                                    taskClone.getId());
-                            WorkflowTaskInstance taskInstance = WorkflowJbpmUtil
-                                    .getCurrentTaskInstance(workflowInstance
-                                            .getWorkflowInstanceTasks(), node
-                                            .getName());
-
-                            String roles = taskInstance.getRolesAsString();
-                            String[] userIds = AssigneeFilter.getAssigneeList(
-                                    roles.split(","), emailInfo
-                                            .getProjectIdAsLong().longValue());
-                            TaskHelper.acceptTaskForGSEdition(userIds[0],
-                                    taskClone);
-
-                            // set the state to be
-                            // STATE_REDEAY_DISPATCH_GSEDTION, if the
-                            // crete edition job fail, can know it failed.
-                            taskClone
-                                    .setState(taskClone.STATE_REDEAY_DISPATCH_GSEDTION);
-
-                            tx = session.beginTransaction();
-                            session.saveOrUpdate(taskClone);
-                            tx.commit();
-
-                            try
-                            {
-                                tx = session.beginTransaction();
-                                createGSEdtionJob(task, j);
-                                taskClone
-                                        .setState(task.STATE_DISPATCHED_TO_TRANSLATION);
-                                session.saveOrUpdate(taskClone);
-                                tx.commit();
-                            }
-                            catch (Exception e)
-                            {
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -976,232 +855,6 @@ public class WorkflowManagerLocal implements WorkflowManager
                 ctx.close();
             }
         }
-    }
-
-    /**
-     * Gets the all the data rerquired by writers to create the next download
-     * file.
-     * 
-     * @return OfflinePageData - all the data for a given download page.
-     */
-    private OfflinePageData getNextExtractedOfflinePage(String p_pageId,
-            String p_pageName, boolean p_canUseUrl, TargetPage p_trgPage,
-            DownloadParams m_downloadParams) throws AmbassadorDwUpException
-    {
-        try
-        {
-            OfflinePageDataGenerator m_OPG = new OfflinePageDataGenerator();
-            PageData data = m_OPG.getDownloadPageData(p_pageId, p_pageName,
-                    p_canUseUrl, m_downloadParams, p_trgPage);
-            return data.getOfflinePageData();
-        }
-        catch (GeneralException ex)
-        {
-            throw new AmbassadorDwUpException(ex);
-        }
-    }
-
-    private MatchTypeStatistics getMatchesStatistics(String p_pageId,
-            String p_pageName, boolean p_canUseUrl, TargetPage p_trgPage,
-            DownloadParams m_downloadParams)
-    {
-        try
-        {
-            OfflinePageDataGenerator m_OPG = new OfflinePageDataGenerator();
-            PageData data = m_OPG.getDownloadPageData(p_pageId, p_pageName,
-                    p_canUseUrl, m_downloadParams, p_trgPage);
-            return data.getMatchTypeStatistics();
-        }
-        catch (GeneralException ex)
-        {
-            throw new AmbassadorDwUpException(ex);
-        }
-    }
-
-    /**
-     * @deprecated GS Edition method, does not work.
-     */
-    private OfflinePageData updateOfflinePageData(OfflinePageData opd,
-            MatchTypeStatistics matchs, ArrayList splittedTuvs,
-            DownloadParams m_downloadParams)
-    {
-        Vector vector = opd.getSegmentList();
-        Vector excludedTypes = m_downloadParams.getExcludedTypeNames();
-        long jobId = m_downloadParams.getJob().getId();
-        for (int i = 0; i < vector.size(); i++)
-        {
-            OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
-            if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
-                    new Vector(), jobId))
-            {
-                segment = (OfflineSegmentData) vector.get(i);
-                segment.setDisplayMatchType("Context Exact Match");
-                vector.set(i, segment);
-            }
-        }
-
-        for (int i = 0; i < splittedTuvs.size(); i++)
-        {
-            if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
-                    excludedTypes, jobId))
-            {
-                long id = ((SegmentTmTuv) splittedTuvs.get(i)).getId();
-                for (int j = 0; j < vector.size(); j++)
-                {
-                    OfflineSegmentData segment = (OfflineSegmentData) vector
-                            .get(j);
-                    Tuv tuv = segment.getSourceTuv();
-                    if (tuv != null && tuv.getId() == id)
-                    {
-                        segment.setDisplayMatchType("Context Exact Match");
-                        break;
-                    }
-                }
-            }
-        }
-
-        opd.setSegmentList(vector);
-        return opd;
-    }
-
-    /**
-     * @deprecated This is for GS-Edition only, does not work.
-     */
-    public List getPageData(Task task, Job p_job)
-    {
-        TargetPage trgPage = null;
-        List<OfflinePageData> datas = new ArrayList<OfflinePageData>();
-
-        try
-        {
-            DownloadParams m_downloadParams = getDownloadParams(task, p_job);
-            ListIterator m_PSF_Ids = m_downloadParams.getPageListIterator();
-            ListIterator m_PSF_Names = m_downloadParams
-                    .getPageNameListIterator();
-            ListIterator m_PSF_canUseUrl = m_downloadParams
-                    .getCanUseUrlListIterator();
-
-            while (m_PSF_Ids.hasNext())
-            {
-                Long srcPageId = (Long) m_PSF_Ids.next();
-                String srcPageName = (String) m_PSF_Names.next();
-                boolean srcCanUseUrl = ((Boolean) m_PSF_canUseUrl.next())
-                        .booleanValue();
-
-                trgPage = ServerProxy.getPageManager().getTargetPage(
-                        srcPageId.longValue(),
-                        m_downloadParams.getTargetLocale().getId());
-
-                OfflinePageData OPD = getNextExtractedOfflinePage(
-                        srcPageId.toString(), srcPageName, srcCanUseUrl,
-                        trgPage, m_downloadParams);
-                // Add tmx file before formatting, because formating will
-                // cause
-                // native code missing.
-                MatchTypeStatistics matchs = getMatchesStatistics(
-                        srcPageId.toString(), srcPageName, srcCanUseUrl,
-                        trgPage, m_downloadParams);
-                Job job = trgPage.getSourcePage().getRequest().getJob();
-
-                // For auto action job, the last page will not get the job,
-                // so use the job which was set in downloaParams.
-                if (job == null)
-                {
-                    if (m_downloadParams.getJob() != null)
-                    {
-                        job = m_downloadParams.getJob();
-                    }
-                }
-
-                boolean isUseInContext = job.getL10nProfile()
-                        .getTranslationMemoryProfile()
-                        .getIsContextMatchLeveraging();
-                boolean isInContextMatch = false;
-                try
-                {
-                    isInContextMatch = PageHandler.isInContextMatch(job,
-                            isUseInContext);
-                }
-                catch (Exception e)
-                {
-                    s_logger.error("Can not get the value of in context match",
-                            e);
-                }
-
-                boolean isDefaultContextMatch = PageHandler
-                        .isDefaultContextMatch(job);
-                ArrayList<Tuv> srcTuvs = SegmentTuvUtil.getSourceTuvs(trgPage
-                        .getSourcePage());
-                ArrayList splittedTuvs = null;
-                try
-                {
-                    splittedTuvs = StatisticsService.splitSourceTuvs(srcTuvs,
-                            trgPage.getGlobalSightLocale(), job.getId());
-                }
-                catch (Exception e)
-                {
-                    s_logger.error("Can not get source tuvs.", e);
-                }
-                if (isInContextMatch)
-                {
-                    OPD = updateOfflinePageData(OPD, matchs, splittedTuvs,
-                            m_downloadParams);
-                }
-                else if (isDefaultContextMatch
-                        && trgPage.getIsDefaultContextMatch())
-                {
-                    OPD = updateDefaultContextOfflinePageDate(OPD, matchs);
-                }
-
-                datas.add(OPD);
-
-                formatOfflineSegments(OPD, m_downloadParams);
-            }
-        }
-        catch (Exception e)
-        {
-        }
-
-        return datas;
-    }
-
-    @SuppressWarnings("unchecked")
-    private OfflinePageData updateDefaultContextOfflinePageDate(
-            OfflinePageData opd, MatchTypeStatistics matchs)
-    {
-        Vector vector = opd.getSegmentList();
-
-        for (int i = 0; i < vector.size(); i++)
-        {
-            OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
-
-            if (segment.getMatchValue() == 100
-                    && segment.getTargetTuv().getState().getValue() == TuvState.EXACT_MATCH_LOCALIZED
-                            .getValue())
-            {
-                segment = (OfflineSegmentData) vector.get(i);
-                segment.setDisplayMatchType("Default Context Exact Match");
-                vector.set(i, segment);
-            }
-        }
-        opd.setSegmentList(vector);
-
-        return opd;
-    }
-
-    /**
-     * Wraps the code to convert segments to ptag segments.
-     * 
-     * @param p_pageData
-     *            the offline page data to convert
-     * @param params
-     *            the format to convert to
-     */
-    private void formatOfflineSegments(OfflinePageData p_pageData,
-            DownloadParams params) throws AmbassadorDwUpException
-    {
-        PtagPageGenerator generator = new PtagPageGenerator();
-        generator.convertAllGxmlToPtag(p_pageData, params);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1282,12 +935,6 @@ public class WorkflowManagerLocal implements WorkflowManager
         return downloadParams;
     }
 
-    public File downloadOfflineFiles(Task task, Job p_job, ArrayList p_nodeEmail)
-            throws GeneralException, NamingException, IOException
-    {
-        return downloadOfflineFiles(task, p_job, p_nodeEmail, null, false);
-    }
-
     public File downloadOfflineFiles(Task task, Job p_job,
             ArrayList p_nodeEmail, String lockedSegEditType,
             boolean isIncludeXmlNodeContextInformation)
@@ -1342,390 +989,6 @@ public class WorkflowManagerLocal implements WorkflowManager
         zipper.closeZipFile();
 
         return temp;
-    }
-
-    /**
-     * @deprecated GS Edition method, does not work.
-     */
-    public void createGSEdtionJob(Task task, Job p_job) throws Exception
-    {
-        BufferedOutputStream bos = null;
-        boolean isShortOfWorkflow = false;
-        GSEditionActivityManagerLocal gsActivityManager = new GSEditionActivityManagerLocal();
-
-        try
-        {
-            Activity act = ServerProxy.getJobHandler().getActivity(
-                    task.getTaskName());
-
-            GSEditionActivity ga = gsActivityManager
-                    .getGSEditionActivityByID(Long.parseLong(act
-                            .getEditionActionID()));
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    ga.getGsEdition().getHostName(), ga.getGsEdition()
-                            .getHostPort(), ga.getGsEdition().getUserName(), ga
-                            .getGsEdition().getPassword(), ga.getGsEdition()
-                            .getEnableHttps());
-
-            String fullAccessToken = ambassador.login(ga.getGsEdition()
-                    .getUserName(), ga.getGsEdition().getPassword());
-            String realAccessToken = WebServiceClientHelper
-                    .getRealAccessToken(fullAccessToken);
-
-            String judge = ambassador.isSupportCurrentLocalePair(
-                    realAccessToken, Long.toString(ga.getFileProfile()), task
-                            .getSourceLocale().getLanguage()
-                            + "_"
-                            + task.getSourceLocale().getCountry(), task
-                            .getTargetLocale().getLanguage()
-                            + "_"
-                            + task.getTargetLocale().getCountry());
-
-            if (judge != null && judge.equals("yes"))
-            {
-                DownloadParams downloadParams = getDownloadParams(task, p_job);
-                List pageDataList = getPageData(task, p_job);
-                String directory = ExportUtil.getExportDirectory();
-                String companyId = CompanyThreadLocal.getInstance().getValue();
-                String companyName = ServerProxy.getJobHandler()
-                        .getCompanyById(Long.parseLong(companyId)).getName();
-                String filepath = directory + companyName + File.separator
-                        + p_job.getJobName() + File.separator
-                        + task.getTargetLocale() + File.separator;
-
-                File file_Path = new File(filepath);
-
-                if (!file_Path.exists())
-                {
-                    file_Path.mkdirs();
-                }
-
-                HashMap args = new HashMap();
-                args.put("accessToken", realAccessToken);
-                args.put("jobName", task.getJobName());
-                String jobName = ambassador.getUniqueJobName(args);
-                args.put("jobName", jobName);
-
-                HashMap<String, Serializable> jobMap = new HashMap<String, Serializable>();
-                jobMap.put("accessToken", realAccessToken);
-                jobMap.put("jobName", jobName);
-                Vector<String> filePaths = new Vector<String>();
-
-                Vector<String> fileProfileIds = new Vector<String>();
-                Vector<Serializable> targetLocales = new Vector<Serializable>();
-                HashMap segComments = new HashMap();
-
-                // this for excel and ppt uploading source file to GS Edition
-                // server.
-                // The excel and ppt source file just only need be upload once.
-                boolean SourceFileUploadOnce = false;
-
-                for (int i = 0; i < pageDataList.size(); i++)
-                {
-                    OfflinePageData pagedata = (OfflinePageData) pageDataList
-                            .get(i);
-
-                    // Translate the original source file to the GS Edition
-                    // server
-                    if (ga.getSourceFileReference() == 1
-                            && !SourceFileUploadOnce)
-                    {
-                        HashMap<String, Object> sourceFileArgs = new HashMap<String, Object>();
-                        sourceFileArgs.put("accessToken", realAccessToken);
-                        sourceFileArgs.put("jobName", jobName);
-                        sourceFileArgs.put("filePath", pagedata.getPageName());
-                        sourceFileArgs.put("targetLocale", task
-                                .getTargetLocale().toString());
-
-                        String fullName = pagedata.getFullPageName();
-                        String trueFileName = "";
-
-                        if (fullName.indexOf("(sheet") > -1
-                                || fullName.indexOf("(tabstrip") > -1)
-                        {
-                            String preName = fullName.substring(0,
-                                    fullName.indexOf("(sheet"));
-                            trueFileName = fullName.substring(fullName
-                                    .indexOf("(sheet"));
-                            trueFileName = preName
-                                    + trueFileName.substring(
-                                            trueFileName.indexOf(")") + 1,
-                                            trueFileName.length());
-                            SourceFileUploadOnce = true;
-                        }
-                        else if (fullName.indexOf("(slide") > -1)
-                        {
-                            String preName = fullName.substring(0,
-                                    fullName.indexOf("(slide"));
-                            trueFileName = fullName.substring(fullName
-                                    .indexOf("(slide"));
-                            trueFileName = preName
-                                    + trueFileName.substring(
-                                            trueFileName.indexOf(")") + 1,
-                                            trueFileName.length());
-                            SourceFileUploadOnce = true;
-                        }
-                        else if (fullName.indexOf("(master") > -1)
-                        {
-                            String preName = fullName.substring(0,
-                                    fullName.indexOf("(master"));
-                            trueFileName = fullName.substring(fullName
-                                    .indexOf("(master"));
-                            trueFileName = preName
-                                    + trueFileName.substring(
-                                            trueFileName.indexOf(")") + 1,
-                                            trueFileName.length());
-                            SourceFileUploadOnce = true;
-                        }
-                        else
-                        {
-                            trueFileName = fullName;
-                        }
-
-                        trueFileName = trueFileName.trim();
-                        File sourceFile = new File(
-                                AmbFileStoragePathUtils.getCxeDocDir(),
-                                trueFileName);
-                        byte[] bytesSource = new byte[(int) sourceFile.length()];
-                        FileInputStream inputSource = new FileInputStream(
-                                sourceFile);
-                        inputSource.read(bytesSource, 0, bytesSource.length);
-                        inputSource.close();
-
-                        sourceFileArgs.put("bytes", bytesSource);
-                        ambassador.uploadOriginalSourceFile(sourceFileArgs);
-                    }
-
-                    // Generate the xliff file of the job
-                    String pagename = pagedata.getFullPageName();
-                    String pagePath = pagename.substring(0,
-                            pagename.lastIndexOf(File.separator));
-                    pagePath = pagePath.substring(pagePath.indexOf(task
-                            .getJobName()) + task.getJobName().length());
-                    file_Path = new File(filepath + pagePath);
-
-                    if (!file_Path.exists())
-                    {
-                        file_Path.mkdirs();
-                    }
-
-                    if (pagename.indexOf("sheet") > -1
-                            || pagename.indexOf("tabstrip") > -1
-                            || pagename.indexOf("slide") > -1)
-                    {
-                        pagename = pagename.substring(
-                                pagename.indexOf("(") + 1,
-                                pagename.indexOf(")"))
-                                + pagedata.getPageName();
-                    }
-                    else
-                    {
-                        pagename = pagedata.getPageName();
-                    }
-
-                    pagename = pagename.substring(0, pagename.lastIndexOf("."))
-                            + "_"
-                            + pagename.substring(pagename.lastIndexOf(".") + 1,
-                                    pagename.length()) + ".xlf";
-
-                    File temp = new File(filepath + pagePath, pagename);
-                    FileOutputStream fos = new FileOutputStream(temp);
-                    bos = new BufferedOutputStream(fos, 4096);
-                    ListViewWorkXLIFFWriter writer = new ListViewWorkXLIFFWriter();
-
-                    writer.write(downloadParams, pagedata, bos,
-                            GlobalSightLocale
-                                    .makeLocaleFromString(downloadParams
-                                            .getUiLocale()));
-
-                    // Upload the xliff file to the remote GS Edition server.
-                    File xliffFile = new File(filepath + pagePath
-                            + File.separator + pagename);
-                    FileInputStream is = new FileInputStream(xliffFile);
-                    byte[] bytes = new byte[(int) xliffFile.length()];
-                    is.read(bytes, 0, bytes.length);
-                    is.close();
-
-                    String uplodaPath = task.getTargetLocale() + pagePath
-                            + File.separator + pagename;
-                    args.put("filePath", uplodaPath);
-                    args.put("fileProfileId",
-                            Long.toString(ga.getFileProfile()));
-                    args.put("bytes", bytes);
-                    ambassador.uploadFile(args);
-
-                    // create job on remote GS Edition server.
-                    filePaths.add(uplodaPath);
-                    fileProfileIds.add(Long.toString(ga.getFileProfile()));
-                    targetLocales.add(task.getTargetLocale().toString());
-
-                    segComments.putAll(pagedata.getTUVIssueMap(p_job.getId()));
-                }
-
-                jobMap.put("filePaths", filePaths);
-                jobMap.put("fileProfileIds", fileProfileIds);
-                jobMap.put("targetLocales", targetLocales);
-                jobMap.put("taskId", Long.toString(task.getId()));
-                // wsdlUrl
-                String capurl = getSystemConfigValue(SystemConfigParamNames.CAP_LOGIN_URL);
-                String wsdlUrl = capurl + "/services/AmbassadorWebService?wsdl"
-                        + " ";
-                jobMap.put("wsdlUrl", wsdlUrl);
-
-                UserManager userManager = ServerProxy.getUserManager();
-                User aUser = userManager.getUser(((TaskImpl) task)
-                        .getProjectManagerId());
-
-                jobMap.put("userName", aUser.getUserId());
-                jobMap.put("password", aUser.getPassword());
-
-                if (task.getTaskComments() != null)
-                {
-                    jobMap.put("jobComments",
-                            new Vector(task.getTaskComments()));
-                }
-                else
-                {
-                    jobMap.put("jobComments", new Vector());
-                }
-
-                jobMap.put("segComments", segComments);
-
-                ambassador.createEditionJob(jobMap);
-            }
-            else
-            {
-                UserManager userManager = ServerProxy.getUserManager();
-                User from = userManager.getUser(((TaskImpl) task)
-                        .getProjectManagerId());
-                String userInfoXml = ambassador.getUserInfo(realAccessToken, ga
-                        .getGsEdition().getUserName());
-
-                DocumentBuilderFactory dbf = DocumentBuilderFactory
-                        .newInstance();
-                DocumentBuilder db = dbf.newDocumentBuilder();
-                ByteArrayInputStream stream = new ByteArrayInputStream(
-                        userInfoXml.getBytes());
-                org.w3c.dom.Document doc = db.parse(stream);
-
-                NodeList useridNL = doc.getElementsByTagName("userid");
-                String userid = useridNL.item(0).getChildNodes().item(0)
-                        .getNodeValue();
-
-                NodeList firstNameNL = doc.getElementsByTagName("firstName");
-                String firstName = firstNameNL.item(0).getChildNodes().item(0)
-                        .getNodeValue();
-
-                NodeList lastNameNL = doc.getElementsByTagName("lastName");
-                String lastName = lastNameNL.item(0).getChildNodes().item(0)
-                        .getNodeValue();
-
-                NodeList emailNL = doc.getElementsByTagName("email");
-                String mail = emailNL.item(0).getChildNodes().item(0)
-                        .getNodeValue();
-
-                NodeList defaultUILocaleNL = doc
-                        .getElementsByTagName("defaultUILocale");
-                String defaultUILocale = defaultUILocaleNL.item(0)
-                        .getChildNodes().item(0).getNodeValue();
-
-                String remoteUrl = "http://" + ga.getGsEdition().getHostName()
-                        + ":" + ga.getGsEdition().getHostPort()
-                        + "/globalsight";
-
-                String[] args =
-                {
-                        task.getSourceLocale().toString() + "_"
-                                + task.getTargetLocale().toString(),
-                        ga.getFileProfileName(), remoteUrl };
-
-                EmailInformation emailInfo = new EmailInformation(userid,
-                        firstName + " " + lastName, mail, defaultUILocale,
-                        ServerProxy.getCalendarManager().findUserTimeZone(
-                                from.getUserId()));
-
-                ServerProxy
-                        .getMailer()
-                        .sendMail(
-                                from.getUserId(),
-                                emailInfo,
-                                WorkflowMailerConstants.SHORT_OF_WORKFLOW_GSEDITION_SUBJECT,
-                                WorkflowMailerConstants.SHORT_OF_WORKFLOW_GSEDITION_MESSAGE,
-                                args, String.valueOf(p_job.getCompanyId()));
-                isShortOfWorkflow = true;
-                throw new Exception();
-            }
-        }
-        catch (Exception ex)
-        {
-            if (isShortOfWorkflow)
-            {
-                s_logger.warn("For the remote GS Edition server's file profile, its localization profile has no corresponding language workflow, so GS Edition job can not be created.");
-            }
-            else
-            {
-                s_logger.error("Create GS Edition job error:" + ex);
-            }
-
-            throw new Exception();
-        }
-        finally
-        {
-            try
-            {
-                bos.close();
-            }
-            catch (IOException e)
-            {
-                s_logger.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
-     * After the translator server complete the job, send back all the issue and
-     * the issue history to GS Edition.
-     * 
-     * @deprecated GS Edition method, does not work.
-     */
-    public void sendBackIssuesForGSEdition(Task task, Job p_job,
-            Ambassador ambassador, String p_accessToken)
-    {
-        try
-        {
-            List pageDataList = getPageData(task, p_job);
-
-            for (int i = 0; i < pageDataList.size(); i++)
-            {
-                OfflinePageData pagedata = (OfflinePageData) pageDataList
-                        .get(i);
-                HashMap segComments = pagedata.getTUVIssueMap(p_job.getId());
-                HashMap newSegComments = new HashMap();
-                Iterator iter = segComments.entrySet().iterator();
-
-                while (iter.hasNext())
-                {
-                    Map.Entry me = (Map.Entry) iter.next();
-                    Long TUID = (Long) me.getKey();
-                    HashMap issueMap = (HashMap) me.getValue();
-                    IssueEditionRelation ir = getIssueEditionRelation((Long) issueMap
-                            .get("LevelObjectId"));
-                    issueMap.put("OriginalIssueHistoryId",
-                            ir.getOriginalIssueHistoryId());
-                    long oldTUID = ir.getOriginalTuId();
-                    newSegComments.put(oldTUID, issueMap);
-                }
-
-                ambassador
-                        .sendSegmentCommentBack(p_accessToken, newSegComments);
-            }
-        }
-        catch (Exception ex)
-        {
-            s_logger.error(ex.getMessage(), ex);
-            throw new AmbassadorDwUpException(
-                    AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
-        }
     }
 
     // get a system configuration value for a given name.
@@ -1822,106 +1085,6 @@ public class WorkflowManagerLocal implements WorkflowManager
                         map.put(new Long(taskId), wfClone);
                     }
                     session.saveOrUpdate(wfClone);
-
-                    if (task != null)
-                    {
-                        task.setProjectManagerName(emailInfo
-                                .getProjectManagerId());
-
-                        Activity act = ServerProxy.getJobHandler().getActivity(
-                                task.getTaskName());
-
-                        if (act.isType(Activity.TYPE_AUTOACTION))
-                        {
-                            if (returnValue.get(2) != null)
-                            {
-                                downloadOfflineFiles(task, p_job,
-                                        (ArrayList) returnValue.get(2));
-                            }
-                        }
-                        else if (act.isType(Activity.TYPE_GSEDITION))
-                        {
-                            // first automaticly accept the task.
-                            Task taskClone = (Task) session.get(TaskImpl.class,
-                                    new Long(taskId));
-                            ArrayList profiles = p_job.getAllFileProfiles();
-                            boolean isAllUnExtracted = true;
-                            // Check if all the files are un-extracted file,if
-                            // they all are,
-                            // don't do any GS Edition distribute.
-                            // If the job have extracted file and also have
-                            // un-extacted file,
-                            // just create GS Edition job on serverB for
-                            // extracted file, and
-                            // un-extracted file don't do any thing.
-                            for (int i = 0; i < profiles.size(); i++)
-                            {
-                                FileProfile fileProfile = (FileProfile) profiles
-                                        .get(i);
-                                KnownFormatType format = ServerProxy
-                                        .getFileProfilePersistenceManager()
-                                        .queryKnownFormatType(
-                                                fileProfile
-                                                        .getKnownFormatTypeId());
-
-                                if (!format.getName().equals("Un-extracted"))
-                                {
-                                    isAllUnExtracted = false;
-                                }
-                            }
-
-                            if (!isAllUnExtracted)
-                            {
-                                ctx = WorkflowConfiguration.getInstance()
-                                        .getJbpmContext();
-                                ProcessInstance processInstance = ctx
-                                        .getProcessInstance(wfClone.getId());
-                                WorkflowInstance workflowInstance = WorkflowProcessAdapter
-                                        .getProcessInstance(processInstance);
-
-                                Node node = WorkflowJbpmUtil.getNodeById(
-                                        processInstance.getProcessDefinition(),
-                                        taskClone.getId());
-                                WorkflowTaskInstance taskInstance = WorkflowJbpmUtil
-                                        .getCurrentTaskInstance(
-                                                workflowInstance
-                                                        .getWorkflowInstanceTasks(),
-                                                node.getName());
-
-                                String roles = taskInstance.getRolesAsString();
-                                String[] userIds = AssigneeFilter
-                                        .getAssigneeList(roles.split(","),
-                                                emailInfo.getProjectIdAsLong()
-                                                        .longValue());
-
-                                if (userIds != null && userIds.length > 0)
-                                {
-                                    TaskHelper.acceptTaskForGSEdition(
-                                            userIds[0], taskClone);
-
-                                    // set the state to be
-                                    // STATE_REDEAY_DISPATCH_GSEDTION, if the
-                                    // crete edition job fail, can know it
-                                    // failed.
-                                    taskClone
-                                            .setState(taskClone.STATE_REDEAY_DISPATCH_GSEDTION);
-
-                                    session.saveOrUpdate(taskClone);
-
-                                    try
-                                    {
-                                        createGSEdtionJob(task, p_job);
-                                        taskClone
-                                                .setState(task.STATE_DISPATCHED_TO_TRANSLATION);
-                                        session.saveOrUpdate(taskClone);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
@@ -4520,40 +3683,6 @@ public class WorkflowManagerLocal implements WorkflowManager
                 // Set up completed date of job
                 job.setCompletedDate(currentTime);
                 session.saveOrUpdate(job);
-
-                JobEditionInfo je = getGSEditionJobByJobID(wfClone.getJob()
-                        .getId());
-                // Session HibSession = HibernateUtil.getSession();
-
-                if (je != null)
-                {
-                    String wsdl = je.getUrl();
-                    Ambassador ambassador = WebServiceClientHelper
-                            .getClientAmbassador(wsdl, je.getUserName(),
-                                    je.getPassword());
-                    String fullAccessToken = ambassador.login(je.getUserName(),
-                            je.getPassword());
-                    String realAccessToken = WebServiceClientHelper
-                            .getRealAccessToken(fullAccessToken);
-
-                    sendBackIssuesForGSEdition(task, job, ambassador,
-                            realAccessToken);
-                    ambassador.updateTaskState(realAccessToken,
-                            je.getOriginalTaskId(),
-                            Long.toString(Task.STATE_TRANSLATION_COMPLETED));
-
-                    if (je.getSendingBackStatus().equals("begin"))
-                    {
-                        je.setSendingBackStatus("sending_back_edition_issue");
-                    }
-                    else if (je.getSendingBackStatus().equals(
-                            "sending_back_edition_job"))
-                    {
-                        je.setSendingBackStatus("sending_back_edition_finished");
-                    }
-
-                    session.saveOrUpdate(je);
-                }
             }
             else
             {
@@ -4579,19 +3708,6 @@ public class WorkflowManagerLocal implements WorkflowManager
                             .get(3) : null;
                 }
 
-                Activity act = ServerProxy.getJobHandler().getActivity(
-                        task.getTaskName());
-
-                // Auto-action
-                if (act.isType(Activity.TYPE_AUTOACTION))
-                {
-                    if (task != null)
-                    {
-                        downloadOfflineFiles(task, job,
-                                (ArrayList) returnValue.get(2));
-                    }
-                }
-
                 nextTaskId = ((Long) returnValue.get(0)).longValue();
             }
 
@@ -4614,68 +3730,6 @@ public class WorkflowManagerLocal implements WorkflowManager
             // now remove the reserved time from the user's calendar.
             // This does not need to be part of the same transaction
             removeReservedTime(task.getId(), p_userId);
-
-            // For create GS Edition, after compelete activity, first change
-            // the next activity state to be STATE_REDEAY_DISPATCH_GSEDTION,
-            // then create new job on GS Edition server, if succeed, the next
-            // activity state will be changed to be
-            // STATE_DISPATCHED_TO_TRANSLATION.
-            // If fail, the state will be STATE_REDEAY_DISPATCH_GSEDTION, the
-            // JSP page
-            // will know the create job on GS Edition server failed, and can
-            // show the
-            // "Ready for dispatching to translation" to user for create the GS
-            // job again.
-
-            if (!isCompleted && nextTaskId != -1)
-            {
-                TaskImpl nextTask = (TaskImpl) wfClone.getTasks().get(
-                        nextTaskId);
-                Activity nextTaskActivity = ServerProxy.getJobHandler()
-                        .getActivity(nextTask.getTaskName());
-                if (nextTaskActivity.isType(Activity.TYPE_GSEDITION))
-                {
-                    // first automaticly accept the task.
-                    ctx = WorkflowConfiguration.getInstance().getJbpmContext();
-                    ProcessInstance processInstance = ctx
-                            .getProcessInstance(wfClone.getId());
-                    WorkflowInstance workflowInstance = WorkflowProcessAdapter
-                            .getProcessInstance(processInstance);
-
-                    Node node = WorkflowJbpmUtil.getNodeById(
-                            processInstance.getProcessDefinition(),
-                            nextTask.getId());
-                    WorkflowTaskInstance taskInstance = WorkflowJbpmUtil
-                            .getCurrentTaskInstance(
-                                    workflowInstance.getWorkflowInstanceTasks(),
-                                    node.getName());
-
-                    String roles = taskInstance.getRolesAsString();
-                    String[] userIds = AssigneeFilter.getAssigneeList(roles
-                            .split(","), emailInfo.getProjectIdAsLong()
-                            .longValue());
-
-                    if (userIds != null && userIds.length > 0)
-                    {
-                        TaskHelper.acceptTaskForGSEdition(userIds[0], nextTask);
-
-                        // set the state to be STATE_REDEAY_DISPATCH_GSEDTION,
-                        // if the
-                        // crete edition job fail, can know it failed.
-                        nextTask.setState(nextTask.STATE_REDEAY_DISPATCH_GSEDTION);
-
-                        tx = session.beginTransaction();
-                        session.saveOrUpdate(nextTask);
-                        tx.commit();
-
-                        tx = session.beginTransaction();
-                        createGSEdtionJob(nextTask, job);
-                        nextTask.setState(nextTask.STATE_DISPATCHED_TO_TRANSLATION);
-                        session.saveOrUpdate(nextTask);
-                        tx.commit();
-                    }
-                }
-            }
         }
         catch (AmbassadorDwUpException e)
         {
@@ -4852,33 +3906,6 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             s_logger.error("Error in WorkflowManagerLocal.processXLZFiles. "
                     + e.toString());
-        }
-    }
-
-    public void recreateGSEdtionJob(TaskImpl task)
-    {
-        try
-        {
-            Activity nextTaskActivity = ServerProxy.getJobHandler()
-                    .getActivity(task.getTaskName());
-            Session session = HibernateUtil.getSession();
-            Task taskClone = (Task) session.get(TaskImpl.class,
-                    new Long(task.getId()));
-
-            if (nextTaskActivity.isType(Activity.TYPE_GSEDITION))
-            {
-                createGSEdtionJob(task, task.getWorkflow().getJob());
-                Transaction tx = session.beginTransaction();
-                taskClone.setState(task.STATE_DISPATCHED_TO_TRANSLATION);
-                session.saveOrUpdate(taskClone);
-                tx.commit();
-            }
-        }
-        catch (Exception e)
-        {
-            s_logger.warn("Re-Create GS Edition job failed: " + task.getId()
-                    + ", workflow " + task.getWorkflow().getId() + ", job "
-                    + task.getWorkflow().getJob().getId());
         }
     }
 
@@ -6072,51 +5099,6 @@ public class WorkflowManagerLocal implements WorkflowManager
     {
         try
         {
-            // For GSEdition skip, if current activity is GSEdition Activity,
-            // then discard the remote server's job of the activity.
-            if (list != null && list.size() == 1)
-            {
-                GSEditionActivityManagerLocal gsActivityManager = new GSEditionActivityManagerLocal();
-                Entry<String, String> entry = (Entry<String, String>) list
-                        .get(0);
-                String workflowId = entry.getKey();
-                Iterator it = ServerProxy.getTaskManager()
-                        .getCurrentTasks(Long.parseLong(workflowId)).iterator();
-                Task task = null;
-
-                while (it.hasNext())
-                {
-                    task = (Task) (it.next());
-                    Activity act = ServerProxy.getJobHandler().getActivity(
-                            task.getTaskName());
-
-                    if (act.getEditionActionID() != null)
-                    {
-                        GSEditionActivity ga = gsActivityManager
-                                .getGSEditionActivityByID(Long.parseLong(act
-                                        .getEditionActionID()));
-                        Ambassador ambassador = WebServiceClientHelper
-                                .getClientAmbassador(ga.getGsEdition()
-                                        .getHostName(), ga.getGsEdition()
-                                        .getHostPort(), ga.getGsEdition()
-                                        .getUserName(), ga.getGsEdition()
-                                        .getPassword(), ga.getGsEdition()
-                                        .getEnableHttps());
-
-                        String fullAccessToken = ambassador.login(ga
-                                .getGsEdition().getUserName(), ga
-                                .getGsEdition().getPassword());
-                        String realAccessToken = WebServiceClientHelper
-                                .getRealAccessToken(fullAccessToken);
-
-                        ambassador.discardJob(realAccessToken, ga
-                                .getGsEdition().getUserName(), Long
-                                .toString(task.getId()));
-                    }
-                }
-            }
-
-            // Do skip activity
             ServerProxy.getWorkflowServer().setSkipActivity(list, userId, true);
         }
         catch (Exception e)
@@ -6274,51 +5256,6 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
 
         return skippedTaskIds;
-    }
-
-    public JobEditionInfo getGSEditionJobByJobID(long jobID)
-    {
-        JobEditionInfo je = new JobEditionInfo();
-
-        try
-        {
-            String hql = "from JobEditionInfo a where a.jobId = :id";
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("id", Long.toString(jobID));
-            Collection servers = HibernateUtil.search(hql, map);
-            Iterator i = servers.iterator();
-            je = i.hasNext() ? (JobEditionInfo) i.next() : null;
-        }
-        catch (Exception pe)
-        {
-            s_logger.error(
-                    "Persistence Exception when retrieving JobEditionInfo", pe);
-        }
-
-        return je;
-    }
-
-    private IssueEditionRelation getIssueEditionRelation(long tuvid)
-    {
-        IssueEditionRelation ir = new IssueEditionRelation();
-
-        try
-        {
-            String hql = "from IssueEditionRelation a where a.tuv.id = :tuvid";
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            map.put("tuvid", tuvid);
-            Collection servers = HibernateUtil.search(hql, map);
-            Iterator i = servers.iterator();
-            ir = i.hasNext() ? (IssueEditionRelation) i.next() : null;
-        }
-        catch (Exception pe)
-        {
-            s_logger.error(
-                    "Persistence Exception when retrieving IssueEditionRelation",
-                    pe);
-        }
-
-        return ir;
     }
 
     /* Get email address of a user based on the user name */

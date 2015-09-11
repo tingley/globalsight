@@ -2112,8 +2112,6 @@
         <PageLink linkName="pageSearch" destinationPageName="TK2"></PageLink>
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="downloadQAReport" destinationPageName="QA_downloadQAReport"></PageLink>
-        <PageLink linkName="originalSourceFile" destinationPageName="gsEditionMain"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
         <PageLink linkName="searchText" destinationPageName="TK2"></PageLink>
@@ -2146,8 +2144,6 @@
         <PageLink linkName="pageSearch" destinationPageName="TK2"></PageLink>
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="downloadQAReport" destinationPageName="QA_downloadQAReport"></PageLink>
-        <PageLink linkName="originalSourceFile" destinationPageName="gsEditionMain"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
         <PageLink linkName="taskScorecard" destinationPageName="TK2_scorecard"></PageLink>
@@ -2179,8 +2175,6 @@
         <PageLink linkName="pageSearch" destinationPageName="TK2"></PageLink>
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="downloadQAReport" destinationPageName="QA_downloadQAReport"></PageLink>
-        <PageLink linkName="originalSourceFile" destinationPageName="gsEditionMain"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
         <PageLink linkName="taskScorecard" destinationPageName="TK2_scorecard"></PageLink>
@@ -2223,7 +2217,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2252,7 +2245,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2279,7 +2271,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2308,7 +2299,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2335,7 +2325,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2379,7 +2368,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2410,7 +2398,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2443,7 +2430,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -2484,7 +2470,6 @@
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
         <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
@@ -3494,20 +3479,6 @@
       </WebPage>
     </WebActivity>
   </WebModule>
-    <WebModule webModuleName="automaticActions"> 
-    <WebActivity webActivityName="automaticActions">
-      <WebPage pageName="automaticActionsMain" isDefault="true" jspName="/envoy/administration/autoaction/automaticActionsMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.automaticActions.AutomaticActionsMainHandler">
-        <PageLink linkName="new1" destinationPageName="automaticActionsNewEdit"></PageLink>
-        <PageLink linkName="edit" destinationPageName="automaticActionsNewEdit"></PageLink>
-        <PageLink linkName="remove" destinationPageName="automaticActionsMain"></PageLink>
-        <PageLink linkName="self" destinationPageName="automaticActionsMain"></PageLink>
-      </WebPage>
-      <WebPage pageName="automaticActionsNewEdit" isDefault="false" jspName="/envoy/administration/autoaction/automaticActionsBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.automaticActions.AutoActionsBasicHandler">
-        <PageLink linkName="save" destinationPageName="automaticActionsMain"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="automaticActionsMain"></PageLink>
-      </WebPage>
-    </WebActivity>
-  </WebModule>
   <WebModule webModuleName="gsEdition"> 
     <WebActivity webActivityName="gsEdition">
       <WebPage pageName="gsEditionMain" isDefault="true" jspName="/envoy/administration/gsedition/gsEditionMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.gsedition.GSEditionMainHandler">
@@ -3515,26 +3486,10 @@
         <PageLink linkName="edit" destinationPageName="gsEditionNewEdit"></PageLink>
         <PageLink linkName="remove" destinationPageName="gsEditionMain"></PageLink>
         <PageLink linkName="self" destinationPageName="gsEditionMain"></PageLink>
-        <PageLink linkName="gsactivity" destinationPageName="gsEditionActionsMain"></PageLink>
       </WebPage>
       <WebPage pageName="gsEditionNewEdit" isDefault="false" jspName="/envoy/administration/gsedition/gsEditionBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.gsedition.GSEditionBasicHandler">
         <PageLink linkName="save" destinationPageName="gsEditionMain"></PageLink>
         <PageLink linkName="cancel" destinationPageName="gsEditionMain"></PageLink>
-      </WebPage>
-    </WebActivity>
-  </WebModule>
-   <WebModule webModuleName="gsEditionActions"> 
-    <WebActivity webActivityName="gsEditionActions">
-      <WebPage pageName="gsEditionActionsMain" isDefault="true" jspName="/envoy/administration/gsedition/gsEditionActivityMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.gsedition.GSEditionActionsMainHandler">
-        <PageLink linkName="new1" destinationPageName="gsEditionActionsNewEdit"></PageLink>
-        <PageLink linkName="edit" destinationPageName="gsEditionActionsNewEdit"></PageLink>
-        <PageLink linkName="remove" destinationPageName="gsEditionActionsMain"></PageLink>
-        <PageLink linkName="self" destinationPageName="gsEditionActionsMain"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="gsEditionMain"></PageLink>
-      </WebPage>
-      <WebPage pageName="gsEditionActionsNewEdit" isDefault="false" jspName="/envoy/administration/gsedition/gsEditionActivityBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.gsedition.GSEditionActionsBasicHandler">
-        <PageLink linkName="save" destinationPageName="gsEditionActionsMain"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="gsEditionActionsMain"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>

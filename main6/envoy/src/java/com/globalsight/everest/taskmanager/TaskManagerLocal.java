@@ -47,7 +47,6 @@ import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.page.PageEventObserver;
 import com.globalsight.everest.page.PageStateValidator;
 import com.globalsight.everest.permission.Permission;
@@ -85,8 +84,6 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.modules.Modules;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
-import com.globalsight.webservices.client.Ambassador;
-import com.globalsight.webservices.client.WebServiceClientHelper;
 
 /**
  * TaskManagerLocal implements TaskManager interface. It is responsible for
@@ -1673,21 +1670,6 @@ public class TaskManagerLocal implements TaskManager
     private TaskInfo updateAcceptedTask(Date p_baseDate, TaskImpl p_clonedTask,
             String p_userId, Session p_session) throws Exception
     {
-        JobEditionInfo je = getGSEditionJobByJobID(p_clonedTask.getJobId());
-
-        if (je != null)
-        {
-            String wsdl = je.getUrl();
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    wsdl, je.getUserName(), je.getPassword());
-            String fullAccessToken = ambassador.login(je.getUserName(),
-                    je.getPassword());
-            String realAccessToken = WebServiceClientHelper
-                    .getRealAccessToken(fullAccessToken);
-            ambassador.updateTaskState(realAccessToken, je.getOriginalTaskId(),
-                    Long.toString(Task.STATE_IN_TRANSLATION));
-        }
-
         if (Task.STATE_FINISHING != p_clonedTask.getState())
         {
             p_clonedTask.setState(Task.STATE_ACCEPTED);
@@ -1834,28 +1816,6 @@ public class TaskManagerLocal implements TaskManager
         }
 
         return task;
-    }
-
-    private JobEditionInfo getGSEditionJobByJobID(long jobID)
-    {
-        JobEditionInfo je = new JobEditionInfo();
-
-        try
-        {
-            String hql = "from JobEditionInfo a where a.jobId = :id";
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("id", Long.toString(jobID));
-            Collection servers = HibernateUtil.search(hql, map);
-            Iterator i = servers.iterator();
-            je = i.hasNext() ? (JobEditionInfo) i.next() : null;
-        }
-        catch (Exception pe)
-        {
-            CATEGORY.error(
-                    "Persistence Exception when retrieving JobEditionInfo", pe);
-        }
-
-        return je;
     }
 
     /**

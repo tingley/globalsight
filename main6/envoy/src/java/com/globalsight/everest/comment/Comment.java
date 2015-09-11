@@ -68,16 +68,4 @@ public interface Comment
      * is associated with.
      */
     WorkObject getWorkObject();
-    
-    /**
-     * Set original Id for current comment.
-     * If current comment is from another GS server,
-     * remember its original Id for later use.
-     * @param p_originalId
-     */
-    void setOriginalId(String p_originalId);
-    String getOriginalId();
-    
-    void setOriginalWsdlUrl(String p_originalWsdlUrl);
-    String getOriginalWsdlUrl();
 }

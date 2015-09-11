@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
@@ -133,9 +132,8 @@ public class RequestHandlerLocal implements RequestHandler
             // 1.Create the request object
             req = prepareL10nRequest(p_requestType, p_contentFileName,
                     p_l10nRequestXml, p_eventFlowXml, p_exception);
-            // 2.Set job parameters for GS Edition
-            setEditionJobParams(req, p_hashmap);
-            // 3.Submit request
+
+            // 2.Submit request
             submitRequest(req);
         }
         catch (RequestHandlerException rhe)
@@ -648,37 +646,6 @@ public class RequestHandlerLocal implements RequestHandler
         catch (Exception e)
         {
             c_logger.error("Error when set target locales in RequestImpl.", e);
-        }
-    }
-
-    /**
-     * Set job parameters for Editions job.
-     */
-    private void setEditionJobParams(RequestImpl p_request, HashMap p_hashMap)
-    {
-        if (p_request == null || p_hashMap == null)
-            return;
-
-        HashMap parametersInMap = (HashMap) p_hashMap.get("parametersInMap");
-        String originalTaskId = (String) parametersInMap.get("taskId");
-        if (originalTaskId != null && !"".equals(originalTaskId))
-        {
-            HashMap editionJobParams = new HashMap();
-
-            String originalEndpoint = (String) parametersInMap.get("wsdlUrl");
-            String originalUserName = (String) parametersInMap.get("userName");
-            String originalPassword = (String) parametersInMap.get("password");
-            Vector jobComments = (Vector) parametersInMap.get("jobComments");
-            HashMap segComments = (HashMap) parametersInMap.get("segComments");
-
-            editionJobParams.put("taskId", originalTaskId);
-            editionJobParams.put("wsdlUrl", originalEndpoint);
-            editionJobParams.put("userName", originalUserName);
-            editionJobParams.put("password", originalPassword);
-            editionJobParams.put("jobComments", jobComments);
-            editionJobParams.put("segComments", segComments);
-
-            p_request.setEditionJobParams(editionJobParams);
         }
     }
 

@@ -130,7 +130,6 @@ public interface WebAppConstants
     public static final String TASK_ACTION_DOWNLOAD_SOURCEPAGES = "downloadSourcePages";
     public static final String TASK_ACTION_SCORECARD = "scorecard";
     public static final String TASK_ACTION_SAVE_SCORECARD = "saveScorecard";
-    public static final String RECREATE_EDITION_JOB = "recreateEditionJob";
     public static final String UPDATE_LEVERAGE = "updateLeverage";
 
     public static final String TASK_COMMENT = "taskComment";

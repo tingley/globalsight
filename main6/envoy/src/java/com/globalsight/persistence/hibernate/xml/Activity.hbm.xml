@@ -23,10 +23,6 @@
 			not-null="false" unique="false" />
 		<property name="qaChecks" column="QA_CHECKS" type="yes_no"
 			not-null="false" unique="false" />
-		<property name="autoActionID" column="AUTOMATIC_ACTION_ID"
-			type="string" not-null="false" unique="false" />
-		<property name="editionActionID" column="GSEDITION_ACTION_ID"
-			type="string" not-null="false" unique="false" />
 		<property name="runDitaQAChecks" column="RUN_DITA_QA_CHECKS"
 			type="yes_no" not-null="true" unique="false" />
 		<property name="autoCompleteActivity" column="AUTO_COMPLETE_ACTIVITY" type="yes_no"

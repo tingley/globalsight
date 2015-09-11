@@ -158,8 +158,6 @@ public class CapImporter
             hm.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
             hm.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
             hm.put(CxeToCapRequest.EXCEPTION, exception);
-            // for GS Edition job
-            hm.put("parametersInMap", m_cxeMessage.getParameters());
 
             // See whether the CXE import type was l10n or aligner.
             if (m_cxeImportRequestType.equals(CxeProxy.IMPORT_TYPE_ALIGNER))
@@ -224,8 +222,6 @@ public class CapImporter
             hm.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
             hm.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
             hm.put(CxeToCapRequest.EXCEPTION, exception);
-            // for GS Edition job
-            hm.put("parametersInMap", m_cxeMessage.getParameters());
 
             // See whether the CXE import type was l10n or aligner.
             if (m_cxeImportRequestType.equals(CxeProxy.IMPORT_TYPE_ALIGNER))

@@ -19,8 +19,6 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="remove" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="gsactivity" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="self" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 
@@ -245,5 +243,3 @@ function enableButtons()
 </SCRIPT>
 </BODY>
 </html>
-
-

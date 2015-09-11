@@ -1,6 +1,5 @@
 package com.globalsight.everest.gsedition;
 
-import java.util.Set;
 import com.globalsight.everest.persistence.PersistentObject;
 
 public class GSEdition extends PersistentObject{
@@ -18,7 +17,6 @@ public class GSEdition extends PersistentObject{
     private long company_id;
     private String description = "";
     private boolean enableHttps = false;
-    private Set activities;
 
     public String getName() {
         return name;
@@ -76,16 +74,6 @@ public class GSEdition extends PersistentObject{
     
     public void setDescription(String description) {
         this.description = description;
-    }
-    
-    public Set<GSEditionActivity> getGsEditionActivities()
-    {
-        return activities;
-    }
-
-    public void setGsEditionActivities(Set<GSEditionActivity> activities)
-    {
-        this.activities = activities;
     }
     
     public void setEnableHttps(boolean enableHttps)

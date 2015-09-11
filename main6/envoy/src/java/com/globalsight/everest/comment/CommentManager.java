@@ -67,34 +67,6 @@ public interface CommentManager
             CommentException;
 
     /**
-     * Save the comment attached to a WorkObject (job or task).
-     * 
-     * NOTE that the comment should not be more than 4000 characters. Otherwise
-     * it should be added as a comment reference/attachment.
-     * 
-     * @param p_wo
-     *            The work object the comment is attached to.
-     * @param p_id
-     *            The id of the work object.
-     * @param p_creatorUserName
-     *            The name of the user creating the comment.
-     * @param p_comment
-     *            The comment string
-     * @param p_originalId
-     *            The original comment id if the comment is from another GS
-     *            server.
-     * @param p_originalWsdlUrl
-     *            The original wsdlUrl this comment is from.
-     * 
-     * @return The newly created and saved Comment.
-     * @throws RemoteException
-     *             , TaskException
-     */
-    public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserId, String p_comment, String p_originalId,
-            String p_originalWsdlUrl) throws RemoteException, CommentException;
-
-    /**
      * Save the comment attached to a WorkObject (job or task). NOTE that the
      * comment should not be more than 4000 characters. Otherwise it should be
      * added as a comment reference/attachment.

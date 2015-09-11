@@ -1888,16 +1888,12 @@ public class JobHandlerLocal implements JobHandler
     {
         try
         {
-            Vector args = new Vector();
-            args.add(p_activity.getIdAsLong());
             Activity clone = (Activity) HibernateUtil.get(Activity.class,
                     p_activity.getId());
             clone.setDescription(p_activity.getDescription());
             clone.setType(p_activity.getType());
             clone.setIsEditable(p_activity.getIsEditable());
             clone.setQaChecks(p_activity.getQaChecks());
-            clone.setAutoActionID(p_activity.getAutoActionID());
-            clone.setEditionActionID(p_activity.getEditionActionID());
             clone.setRunDitaQAChecks(p_activity.getRunDitaQAChecks());
             clone.setAutoCompleteActivity(p_activity.getAutoCompleteActivity());
             clone.setAfterJobCreation(p_activity.getAfterJobCreation());

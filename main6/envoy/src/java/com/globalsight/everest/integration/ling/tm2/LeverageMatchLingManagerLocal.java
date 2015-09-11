@@ -20,6 +20,7 @@ package com.globalsight.everest.integration.ling.tm2;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,6 +70,8 @@ import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.ling.tm3.core.persistence.SQLUtil;
+import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -759,7 +762,110 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     }
 
     /**
+	 * Delete leverage matches for specified TUVs.
+	 * 
+	 * @param p_originalSourceTuvIds
+	 *            -- Can not be null
+	 * @param p_targetLocale
+	 * @param p_deleteFlag
+	 * 			  -- 0 (DEL_LEV_MATCHES_ALL): delete all matches.
+	 *            -- 1 (DEL_LEV_MATCHES_GOLD_TM_ONLY): delete matches from gold TM.
+	 *            -- 2 (DEL_LEV_MATCHES_IP_TM_ONLY): delete matches from in-progress TM.
+	 *            -- 3 (DEL_LEV_MATCHES_MT_ONLY): delete matches from MT engine.
+	 * @param p_jobId
+	 *            -- job ID
+	 */
+	@Override
+	public void deleteLeverageMatches(List<Long> p_originalSourceTuvIds,
+			GlobalSightLocale p_targetLocale, int p_deleteFlag, long p_jobId)
+	{
+		if (p_originalSourceTuvIds == null
+				|| p_originalSourceTuvIds.size() == 0)
+        {
+            return;
+        }
+
+		Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String lmExtTable = BigTableUtil
+					.getLMExtTableJobDataInByJobId(p_jobId);
+			String lmTable = BigTableUtil.getLMTableJobDataInByJobId(p_jobId);
+
+			StringBuilder sb = new StringBuilder(
+					"SELECT original_source_tuv_id, sub_id, target_locale_id, order_num FROM ")
+					.append(lmTable).append(" WHERE target_locale_id = ")
+					.append(p_targetLocale.getId())
+					.append(" AND original_source_tuv_id IN ")
+					.append(SQLUtil.longGroup(p_originalSourceTuvIds));
+			if (p_deleteFlag == DEL_LEV_MATCHES_GOLD_TM_ONLY)
+			{
+				sb.append(" AND project_tm_index >= 0");
+			}
+			else if (p_deleteFlag == DEL_LEV_MATCHES_IP_TM_ONLY)
+			{
+				sb.append(" AND project_tm_index = ").append(
+						String.valueOf(Leverager.IN_PROGRESS_TM_PRIORITY));
+			}
+			else if (p_deleteFlag == DEL_LEV_MATCHES_MT_ONLY)
+			{
+				sb.append(" AND project_tm_index = ").append(
+						String.valueOf(Leverager.MT_PRIORITY));
+			}
+
+			Statement s = conn.createStatement();
+			ResultSet rs = SQLUtil.execQuery(s, sb.toString());
+
+			long srcTuvId = -1;
+			long trgLocaleId = -1;
+			String subId = null;
+			int orderNum = -1;
+			StatementBuilder stat = null;
+            while (rs.next())
+            {
+            	srcTuvId = rs.getLong(1);
+            	subId = rs.getString(2);
+            	trgLocaleId = rs.getLong(3);
+            	orderNum = rs.getInt(4);
+
+            	stat = new StatementBuilder().append("DELETE FROM ")
+						.append(lmExtTable)
+						.append(" WHERE original_source_tuv_id = ?").addValue(srcTuvId)
+						.append(" AND sub_id = ?").addValue(subId)
+						.append(" AND target_locale_id = ?").addValue(trgLocaleId)
+						.append(" AND order_num = ?").addValue(orderNum);
+    			SQLUtil.exec(conn, stat);
+
+				stat = new StatementBuilder().append("DELETE FROM ")
+						.append(lmTable)
+    					.append(" WHERE original_source_tuv_id = ?").addValue(srcTuvId)
+    					.append(" AND sub_id = ?").addValue(subId)
+    					.append(" AND target_locale_id = ?").addValue(trgLocaleId)
+    					.append(" AND order_num = ?").addValue(orderNum);
+				SQLUtil.exec(conn, stat);
+            }
+
+            s.close();
+			conn.commit();
+        }
+        catch (Exception e)
+        {
+        	c_logger.error("Fail to delete leverage matches.", e);
+        	throw new LingManagerException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+	}
+
+	/**
      * Delete leverage matches for specified TUV.
+     * 
+     * @deprecated Not recommended because of poor performance.
      * 
      * @param p_OriginalSourceTuvId
      *            -- Can not be null
@@ -997,8 +1103,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             throws LingManagerException
     {
         long jobId = p_sourcePage.getJobId();
-        Set<LeverageMatch> nonClobMatches = new HashSet<LeverageMatch>();
-        // Collection clobMatches = new ArrayList();
+        // Use "List" to keep sequence
+        ArrayList<LeverageMatch> nonClobMatches = new ArrayList<LeverageMatch>();
         LeverageOptions leverageOptions = p_leverageDataCenter
                 .getLeverageOptions();
         // walk through all LeverageMatches in p_leverageDataCenter

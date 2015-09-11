@@ -262,23 +262,7 @@ public class LeverageOptions
 
     public int getMultipleExactMatcheMode()
     {
-        int mode = 0;
-        String modeString = m_tmProfile.getMultipleExactMatches();
-        if (modeString.equals(TranslationMemoryProfile.LATEST_EXACT_MATCH))
-        {
-            mode = PICK_LATEST;
-        }
-        else if (modeString.equals(TranslationMemoryProfile.OLDEST_EXACT_MATCH))
-        {
-            mode = PICK_OLDEST;
-        }
-        else if (modeString
-                .equals(TranslationMemoryProfile.DEMOTED_EXACT_MATCH))
-        {
-            mode = DEMOTE;
-        }
-
-        return mode;
+    	return m_tmProfile.getMultipleExactMatcheMode();
     }
 
     public int getMultiTransPenalty()

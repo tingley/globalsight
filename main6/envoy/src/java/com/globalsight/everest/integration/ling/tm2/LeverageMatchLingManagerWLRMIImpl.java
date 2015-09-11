@@ -58,6 +58,7 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance;
     }
 
+	@Override
     public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
             String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId)
             throws LingManagerException
@@ -66,7 +67,15 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
                 p_targetLocaleId, p_orderNum, p_jobId);
     }
 
-    public HashMap<Long, LeverageSegment> getExactMatches(Long p_spLgId,
+	@Override
+	public void deleteLeverageMatches(List<Long> p_originalSourceTuvIds,
+			GlobalSightLocale p_targetLocale, int p_deleteFlag, long p_jobId)
+	{
+		m_localInstance.deleteLeverageMatches(p_originalSourceTuvIds,
+				p_targetLocale, p_deleteFlag, p_jobId);
+	}
+
+	public HashMap<Long, LeverageSegment> getExactMatches(Long p_spLgId,
             Long p_targetLocaleId) throws RemoteException, LingManagerException
     {
         return m_localInstance.getExactMatches(p_spLgId, p_targetLocaleId);

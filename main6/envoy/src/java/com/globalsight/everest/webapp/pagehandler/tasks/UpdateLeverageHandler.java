@@ -164,9 +164,9 @@ public class UpdateLeverageHandler extends PageActionHandler
         StringBuffer readyWfIds = new StringBuffer();
         StringBuffer nonReadyWfs = new StringBuffer();
         int count = 0;
-        for (Iterator it = wfIds.iterator(); it.hasNext();)
+        for (Iterator<Long> it = wfIds.iterator(); it.hasNext();)
         {
-            Long wfId = (Long) it.next();
+            Long wfId = it.next();
             Workflow wf = workflowManager.getWorkflowById(wfId);
             if (Workflow.READY_TO_BE_DISPATCHED.equals(wf.getState()))
             {
@@ -467,9 +467,9 @@ public class UpdateLeverageHandler extends PageActionHandler
                     {
                         int count = 0;
                         int total = validWfIds.size() * sourcePageNumber * 2;
-                        for (Iterator it = validWfIds.iterator(); it.hasNext();)
+                        for (Iterator<Long> it = validWfIds.iterator(); it.hasNext();)
                         {
-                            Long wfId = (Long) it.next();
+                            Long wfId = it.next();
                             Workflow wf = workflowManager.getWorkflowById(wfId);
                             List<TargetPage> targetPages = wf
                                     .getTargetPages(PrimaryFile.EXTRACTED_FILE);
@@ -547,55 +547,36 @@ public class UpdateLeverageHandler extends PageActionHandler
         }
 
         // 3. Re-leverage reference TMs
-        LeverageDataCenter levDataCenter = UpdateLeverageHelper
-                .reApplyReferenceTMs(p_wf, sourceTuvs);
-
-        Map<Long, LeverageMatches> ipMatches = new HashMap<Long, LeverageMatches>();
-        if (levDataCenter != null)
+        LeverageDataCenter levDataCenter = null;
+        if (sourceTuvs.size() > 0)
         {
-            Iterator itLeverageMatches = levDataCenter.leverageResultIterator();
-            while (itLeverageMatches.hasNext())
-            {
-                LeverageMatches tmLevMatches = (LeverageMatches) itLeverageMatches
-                        .next();
-                if (tmLevMatches.getLeveragedTus().size() > 0)
-                {
-                    long originalSourceTuvId = tmLevMatches.getOriginalTuv()
-                            .getId();
-                    LeverageMatches ipLevMatches = ipMatches
-                            .get(originalSourceTuvId);
-                    if (ipLevMatches != null)
-                    {
-                        ipLevMatches.merge(tmLevMatches);
-                    }
-                    else
-                    {
-                        ipMatches.put(originalSourceTuvId, tmLevMatches);
-                    }
-                }
-            }
+			levDataCenter = UpdateLeverageHelper.reApplyReferenceTMs(p_wf,
+					sourceTuvs);
         }
 
-        // 4. Ignore duplicated matches,always pick latest.
-        Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
-                .removeMatchesExistedInDB(ipMatches, targetLocale, jobId);
-
-        if (mergedLevMatches != null && mergedLevMatches.size() > 0)
+        // 4. Re-save leverage matches
+        if (levDataCenter != null)
         {
-            // 5. Save merged matches into "leverage_match"
-            L10nProfile lp = p_wf.getJob().getL10nProfile();
-            TranslationMemoryProfile tmProfile = lp
-                    .getTranslationMemoryProfile();
-            LeveragingLocales leveragingLocales = lp.getLeveragingLocales();
-            LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
-                    leveragingLocales);
+        	List<Long> originalSourceTuvIds = new ArrayList<Long>();
+			Iterator<LeverageMatches> itLeverageMatches = levDataCenter
+					.leverageResultIterator();
+            while (itLeverageMatches.hasNext())
+            {
+				LeverageMatches levMatches = itLeverageMatches.next();
+                originalSourceTuvIds.add(levMatches.getOriginalTuv().getId());
+            }
+
+			leverageMatchLingManager.deleteLeverageMatches(
+					originalSourceTuvIds, targetLocale,
+					LeverageMatchLingManager.DEL_LEV_MATCHES_GOLD_TM_ONLY,
+					jobId);
+
             Connection conn = null;
             try
             {
                 conn = DbUtil.getConnection();
-                leverageMatchLingManager.saveLeverageResults(conn,
-                        sourcePageId, mergedLevMatches, targetLocale,
-                        leverageOptions);
+				leverageMatchLingManager.saveLeverageResults(conn, sp,
+						levDataCenter);
             }
             catch (Exception e)
             {
@@ -605,12 +586,17 @@ public class UpdateLeverageHandler extends PageActionHandler
             {
                 DbUtil.silentReturnConnection(conn);
             }
+        }
 
-            // 6. Populate into target TUVs
+        // 5. Populate into target TUVs
+        if (untranslatedSrcTuvs != null && untranslatedSrcTuvs.size() > 0)
+        {
+			TranslationMemoryProfile tmProfile = p_wf.getJob().getL10nProfile()
+					.getTranslationMemoryProfile();
             int mode = UpdateLeverageHelper.getMode(tmProfile);
-            Map<Long, ArrayList<LeverageSegment>> exactMap = leverageMatchLingManager
-                    .getExactMatchesWithSetInside(sourcePageId,
-                            targetLocale.getIdAsLong(), mode, tmProfile);
+			Map<Long, ArrayList<LeverageSegment>> exactMap = leverageMatchLingManager
+					.getExactMatchesWithSetInside(sourcePageId,
+							targetLocale.getIdAsLong(), mode, tmProfile);
             if (exactMap != null && exactMap.size() > 0)
             {
                 try
@@ -653,31 +639,33 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         // 3. Update from jobs
         Map<Long, LeverageMatches> ipMatches = new HashMap<Long, LeverageMatches>();
+        TranslationMemoryProfile tmProfile = UpdateLeverageHelper
+                .getTMProfile(p_workflow);
         // 3.1 Get in progress translations from jobs
-        ipMatches = UpdateLeverageHelper.getInProgressTranslationFromJobs(
-                p_workflow, sourceTuvs, p_selectedJobIds);
-        // 3.2 Apply In Progress TM penalty
-        Iterator iter = ipMatches.entrySet().iterator();
-        while (iter.hasNext())
+        if (sourceTuvs.size() > 0)
         {
-            Map.Entry entry = (Map.Entry) iter.next();
-            LeverageMatches levMatches = (LeverageMatches) entry.getValue();
-            TranslationMemoryProfile tmProfile = UpdateLeverageHelper
-                    .getTMProfile(p_workflow);
-            UpdateLeverageHelper.applyInProgressTmPenalty(levMatches,
-                    tmProfile, targetLocale, p_ipTmPenalty);
+            ipMatches = UpdateLeverageHelper.getInProgressTranslationFromJobs(
+                    p_workflow, sourceTuvs, p_selectedJobIds);
         }
 
-        // 4. Ignore duplicated matches,always pick latest.
-        Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
-                .removeMatchesExistedInDB(ipMatches, targetLocale, jobId);
-
-        if (mergedLevMatches != null && mergedLevMatches.size() > 0)
+        if (ipMatches.size() > 0)
         {
-            // 5. Save merged matches into "leverage_match"
+            // Apply In Progress TM penalty
+            List<Long> originalSourceTuvIds = new ArrayList<Long>();
+            for (LeverageMatches levMatches : ipMatches.values())
+            {
+                UpdateLeverageHelper.applyInProgressTmPenalty(levMatches,
+                        tmProfile, targetLocale, p_ipTmPenalty);
+                originalSourceTuvIds.add(levMatches.getOriginalTuv().getId());
+            }
+
+            // Delete original in-progress matches
+			leverageMatchLingManager.deleteLeverageMatches(
+					originalSourceTuvIds, targetLocale,
+					LeverageMatchLingManager.DEL_LEV_MATCHES_IP_TM_ONLY, jobId);
+
+            // Save new matches into "leverage_match"
             L10nProfile lp = p_workflow.getJob().getL10nProfile();
-            TranslationMemoryProfile tmProfile = lp
-                    .getTranslationMemoryProfile();
             LeveragingLocales leveragingLocales = lp.getLeveragingLocales();
             LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
                     leveragingLocales);
@@ -686,7 +674,7 @@ public class UpdateLeverageHandler extends PageActionHandler
             {
                 conn = DbUtil.getConnection();
                 leverageMatchLingManager.saveLeverageResults(conn,
-                        sourcePageId, mergedLevMatches, targetLocale,
+                        sourcePageId, ipMatches, targetLocale,
                         leverageOptions);
             }
             catch (Exception e)
@@ -698,7 +686,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                 DbUtil.silentReturnConnection(conn);
             }
 
-            // 6. Populate into target TUVs
+            // Populate into target TUVs
             int mode = UpdateLeverageHelper.getMode(tmProfile);
             Map<Long, ArrayList<LeverageSegment>> exactMap = leverageMatchLingManager
                     .getExactMatchesWithSetInside(sourcePageId,

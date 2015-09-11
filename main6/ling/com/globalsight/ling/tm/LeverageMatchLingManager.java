@@ -64,10 +64,17 @@ public interface LeverageMatchLingManager
     public static final int IN_PROGRESS_TM_T = 5;
     public static final int IN_PROGRESS_TM_L = 6;
 
+    public static final int DEL_LEV_MATCHES_ALL = 0;
+    public static final int DEL_LEV_MATCHES_GOLD_TM_ONLY = 1;
+    public static final int DEL_LEV_MATCHES_IP_TM_ONLY = 2;
+    public static final int DEL_LEV_MATCHES_MT_ONLY = 3;
+
     /**
      * Delete leverage matches for specified TUV.
      * 
-     * @param p_OriginalSourceTuvId
+     * @deprecated Not recommended because of poor performance.
+     * 
+     * @param p_originalSourceTuvId
      *            -- Can not be null
      * @param p_subId
      *            -- Can be null
@@ -78,8 +85,25 @@ public interface LeverageMatchLingManager
      * @param p_jobId
      *            -- job ID
      */
-    public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
+    public void deleteLeverageMatches(Long p_originalSourceTuvId,
             String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId);
+
+    /**
+	 * Delete leverage matches for specified TUVs.
+	 * 
+	 * @param p_originalSourceTuvIds
+	 *            -- Can not be null
+	 * @param p_targetLocale
+	 * @param p_deleteFlag
+	 * 			  -- 0 (DEL_LEV_MATCHES_ALL): delete all matches.
+	 *            -- 1 (DEL_LEV_MATCHES_GOLD_TM_ONLY): delete matches from gold TM.
+	 *            -- 2 (DEL_LEV_MATCHES_IP_TM_ONLY): delete matches from in-progress TM.
+	 *            -- 3 (DEL_LEV_MATCHES_MT_ONLY): delete matches from MT engine.
+	 * @param p_jobId
+	 *            -- job ID
+	 */
+	public void deleteLeverageMatches(List<Long> p_originalSourceTuvIds,
+			GlobalSightLocale p_targetLocale, int p_deleteFlag, long p_jobId);
 
     /**
      * For each source Tuv find any exact matches in the LEVERAGE_MATCH table

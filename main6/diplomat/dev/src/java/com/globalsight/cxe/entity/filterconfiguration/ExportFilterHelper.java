@@ -1069,9 +1069,14 @@ public class ExportFilterHelper
                             .getExcelCellStyles())).append(NEW_LINE);
             buffer.append("office2010_filter.")
                     .append(msOffice2010Filter.getId())
-                    .append(".INTERNAL_TEXT_CHARACTER_STYLES = ")
+                    .append(".WORD_INTERNAL_TEXT_STYLES = ")
                     .append(editUtil.removeCRLF(msOffice2010Filter
-                            .getInternalTextStyles())).append(NEW_LINE);
+                            .getWordInternalTextStyles())).append(NEW_LINE);
+            buffer.append("office2010_filter.")
+                    .append(msOffice2010Filter.getId())
+                    .append(".EXCEL_INTERNAL_TEXT_STYLES = ")
+                    .append(editUtil.removeCRLF(msOffice2010Filter
+                            .getExcelInternalTextStyles())).append(NEW_LINE);
             buffer.append("office2010_filter.")
                     .append(msOffice2010Filter.getId())
                     .append(".IS_HEADER_TRANSLATE = ")

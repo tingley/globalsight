@@ -51,7 +51,6 @@ import org.w3c.dom.NodeList;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterParser;
-import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleBase;
 import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
 import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
@@ -578,7 +577,8 @@ public class AjaxService extends HttpServlet
         try
         {
             configXml = PlainTextFilterParser.toXml(jsonArrayCustomTextRules,
-                    jsonArrayCustomTextRuleSids, elementPostFilter, elementPostFilterId);
+                    jsonArrayCustomTextRuleSids, elementPostFilter,
+                    elementPostFilterId);
         }
         catch (Exception e)
         {
@@ -955,11 +955,19 @@ public class AjaxService extends HttpServlet
         String allExcelCellStyles = request.getParameter("allExcelCellStyles");
         filter.setExcelCellStyles(selectExcelCellStyles, allExcelCellStyles);
 
-        String selectInternalTextStyles = request
-                .getParameter("selectedInternalTextStyles");
-        String allInternalTextStyles = request
-                .getParameter("allInternalTextStyles");
-        filter.setInTextStyles(selectInternalTextStyles, allInternalTextStyles);
+        String selectedWordInternalTextStyles = request
+                .getParameter("selectedWordInternalTextStyles");
+        String allWordInternalTextStyles = request
+                .getParameter("allWordInternalTextStyles");
+        filter.setWordInTextStyles(selectedWordInternalTextStyles,
+                allWordInternalTextStyles);
+
+        String selectedExcelInternalTextStyles = request
+                .getParameter("selectedExcelInternalTextStyles");
+        String allExcelInternalTextStyles = request
+                .getParameter("allExcelInternalTextStyles");
+        filter.setExcelInTextStyles(selectedExcelInternalTextStyles,
+                allExcelInternalTextStyles);
 
         long xmlFilterId = tryParse(request.getParameter("xmlFilterId"), -2);
         filter.setXmlFilterId(xmlFilterId);
@@ -995,7 +1003,7 @@ public class AjaxService extends HttpServlet
         {
             loadMSOffice2010FilterParameter(filter);
             HibernateUtil.update(filter);
-            OperationLog.log(m_userId,OperationLog.EVENT_EDIT,
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                     OperationLog.COMPONET_FILTER_CONFIGURATION,
                     filter.getFilterName());
             saveBaseFilterMapping(filter.getId(),
@@ -1037,7 +1045,8 @@ public class AjaxService extends HttpServlet
                 }
                 else
                 {
-                    FilterHelper.deleteFilter(filterTableName, filterId, m_userId);
+                    FilterHelper.deleteFilter(filterTableName, filterId,
+                            m_userId);
                 }
             }
         }

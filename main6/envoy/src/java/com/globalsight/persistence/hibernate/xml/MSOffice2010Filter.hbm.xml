@@ -52,8 +52,11 @@
 		<property name="excelCellStyles" length="4000"
 			column="UNEXTRACTABLE_EXCEL_CELL_STYLES" type="string" not-null="true"
 			unique="false" />
-		<property name="internalTextStyles" length="4000"
+		<property name="wordInternalTextStyles" length="4000"
 			column="INTERNAL_TEXT_CHARACTER_STYLES" type="string" not-null="true"
+			unique="false" />
+		<property name="excelInternalTextStyles" length="1000"
+			column="EXCEL_INTERNAL_TEXT_STYLES" type="string" not-null="true"
 			unique="false" />
 		<property name="xmlFilterId" column="XML_FILTER_ID" type="long"
 			not-null="true" unique="false" />

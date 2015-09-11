@@ -61,8 +61,10 @@ public class MSOffice2010Filter implements Filter
     private List<String> allParagraphStyles = new ArrayList<String>();
     private List<String> allCharacterStyles = new ArrayList<String>();
     private List<String> allExcelCellStyles = new ArrayList<String>();
-    private List<String> allInternalTextStyles = new ArrayList<String>();
-    private List<String> selectedInternalTextStyles = new ArrayList<String>();
+    private List<String> allWordInternalTextStyles = new ArrayList<String>();
+    private List<String> selectedWordInternalTextStyles = new ArrayList<String>();
+    private List<String> allExcelInternalTextStyles = new ArrayList<String>();
+    private List<String> selectedExcelInternalTextStyles = new ArrayList<String>();
 
     private final String ENTIEY_START = "<entities>";
     private final String ENTIEY_END = "</entities>";
@@ -78,8 +80,8 @@ public class MSOffice2010Filter implements Filter
         allCharacterStyles.add("DONOTTRANSLATE_char");
         allCharacterStyles.add("tw4winExternal");
 
-        allInternalTextStyles.add("tw4winInternal");
-
+        allWordInternalTextStyles.add("tw4winInternal");
+        allExcelInternalTextStyles.add("tw4winInternal");
         allExcelCellStyles.add("tw4winExternal");
     }
 
@@ -175,28 +177,59 @@ public class MSOffice2010Filter implements Filter
         return unextractableExcelCellStyles;
     }
 
-    public String getInternalTextStyles()
+    public String getWordInternalTextStyles()
     {
-        return buildToXml(selectedInternalTextStyles, allInternalTextStyles);
+        return buildToXml(selectedWordInternalTextStyles,
+                allWordInternalTextStyles);
     }
 
-    public void setInternalTextStyles(String styles)
+    public String getExcelInternalTextStyles()
     {
-        selectedInternalTextStyles = getSelectedStyles(styles);
-        allInternalTextStyles = getAllStyles(styles);
-        FilterHelper.sort(selectedInternalTextStyles);
-        FilterHelper.sort(allInternalTextStyles);
+        return buildToXml(selectedExcelInternalTextStyles,
+                allExcelInternalTextStyles);
     }
 
-    public void setInTextStyles(String selectedStyles, String allStyles)
+    public void setWordInternalTextStyles(String styles)
     {
-        selectedInternalTextStyles = toList(selectedStyles);
-        allInternalTextStyles = toList(allStyles);
+        selectedWordInternalTextStyles = getSelectedStyles(styles);
+        allWordInternalTextStyles = getAllStyles(styles);
+        FilterHelper.sort(selectedWordInternalTextStyles);
+        FilterHelper.sort(allWordInternalTextStyles);
     }
 
-    public String getSelectedInternalTextStyles()
+    public void setExcelInternalTextStyles(String styles)
     {
-        return toString(selectedInternalTextStyles);
+        selectedExcelInternalTextStyles = getSelectedStyles(styles);
+        allExcelInternalTextStyles = getAllStyles(styles);
+        FilterHelper.sort(selectedExcelInternalTextStyles);
+        FilterHelper.sort(allExcelInternalTextStyles);
+    }
+
+    public void setWordInTextStyles(String selectedStyles, String allStyles)
+    {
+        selectedWordInternalTextStyles = toList(selectedStyles);
+        allWordInternalTextStyles = toList(allStyles);
+    }
+
+    public void setExcelInTextStyles(String selectedStyles, String allStyles)
+    {
+        selectedExcelInternalTextStyles = toList(selectedStyles);
+        allExcelInternalTextStyles = toList(allStyles);
+    }
+
+    public String getSelectedWordInternalTextStyles()
+    {
+        return toString(selectedWordInternalTextStyles);
+    }
+
+    public String getSelectedExcelInternalTextStylesAsString()
+    {
+        return toString(selectedExcelInternalTextStyles);
+    }
+
+    public List<String> getSelectedExcelInternalTextStylesAsList()
+    {
+        return selectedExcelInternalTextStyles;
     }
 
     public static String toString(List<String> styles)
@@ -282,7 +315,6 @@ public class MSOffice2010Filter implements Filter
         sb.append("\"allCharacterStyles\":").append("\"")
                 .append(FilterHelper.escape(toString(allCharacterStyles)))
                 .append("\"").append(",");
-
         sb.append("\"unextractableExcelCellStyles\":")
                 .append("\"")
                 .append(FilterHelper
@@ -291,19 +323,25 @@ public class MSOffice2010Filter implements Filter
         sb.append("\"allExcelCellStyles\":").append("\"")
                 .append(FilterHelper.escape(toString(allExcelCellStyles)))
                 .append("\"").append(",");
-
-        sb.append("\"selectedInternalTextStyles\":")
+        sb.append("\"selectedWordInternalTextStyles\":")
                 .append("\"")
                 .append(FilterHelper
-                        .escape(toString(selectedInternalTextStyles)))
+                        .escape(toString(selectedWordInternalTextStyles)))
                 .append("\"").append(",");
-        sb.append("\"selectedInternalTextStyles\":")
+        sb.append("\"allWordInternalTextStyles\":")
                 .append("\"")
                 .append(FilterHelper
-                        .escape(toString(selectedInternalTextStyles)))
+                        .escape(toString(allWordInternalTextStyles)))
                 .append("\"").append(",");
-        sb.append("\"allInternalTextStyles\":").append("\"")
-                .append(FilterHelper.escape(toString(allInternalTextStyles)))
+        sb.append("\"selectedExcelInternalTextStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(selectedExcelInternalTextStyles)))
+                .append("\"").append(",");
+        sb.append("\"allExcelInternalTextStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(allExcelInternalTextStyles)))
                 .append("\"").append(",");
         sb.append("\"headerTranslate\":").append(headerTranslate).append(",");
         sb.append("\"footendnoteTranslate\":").append(footendnoteTranslate)

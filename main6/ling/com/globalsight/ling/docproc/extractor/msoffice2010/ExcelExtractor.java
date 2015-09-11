@@ -65,6 +65,7 @@ public class ExcelExtractor extends AbstractExtractor
     private List<String> unSis = null;
     private List<String> unNumStyleIds = null;
     private List<String> unCell = null;
+    private List<String> internalSis = null;
 
     private static Pattern PATTERN_URL = Pattern
             .compile(
@@ -86,6 +87,7 @@ public class ExcelExtractor extends AbstractExtractor
     private XmlFilterHelper filterHelp = new XmlFilterHelper(null);
 
     private int siIndex = 0;
+    private int siIndexForInternal = 0;
 
     public static Set<String> EXTRACT_NODE = new HashSet<String>();
     static
@@ -270,6 +272,28 @@ public class ExcelExtractor extends AbstractExtractor
         {
             if (c.getNodeType() == Node.TEXT_NODE)
             {
+                // GBS-3944
+                Node parent = node.getParentNode();
+                if (parent != null)
+                {
+                    if (isInternalSi(parent.getNodeName()))
+                    {
+                        int n = ++index;
+
+                        sb.append("<bpt i=\"").append(n)
+                                .append("\" internal=\"yes\"></bpt>");
+
+                        sb.append(escapeString(c.getTextContent()));
+
+                        sb.append("<ept i=\"").append(n).append("\"></ept>");
+
+                        outputTranslatableTmx(sb.toString());
+                        sb = new StringBuffer();
+
+                        continue;
+                    }
+                }
+
                 sb.append(c.getTextContent());
             }
             else
@@ -686,6 +710,17 @@ public class ExcelExtractor extends AbstractExtractor
         return com.globalsight.diplomat.util.XmlUtil.escapeString(s);
     }
 
+    private List<String> getInternalSis()
+    {
+        if (internalSis == null)
+        {
+            internalSis = MSOffice2010Filter.toList(options
+                    .get("excelInternalTextCellStyles"));
+        }
+
+        return internalSis;
+    }
+
     private List<String> getUnSis()
     {
         if (unSis == null)
@@ -928,6 +963,21 @@ public class ExcelExtractor extends AbstractExtractor
                 return true;
         }
 
+        return false;
+    }
+
+    private boolean isInternalSi(String nodeName)
+    {
+        if ("sst".equalsIgnoreCase(rootName))
+        {
+            if ("si".equals(nodeName))
+            {
+                List<String> internalSis = getInternalSis();
+                String siId = Integer.toString(siIndexForInternal);
+                siIndexForInternal++;
+                return internalSis.contains(siId);
+            }
+        }
         return false;
     }
 

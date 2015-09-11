@@ -889,8 +889,10 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		{
 			sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ");
 		}
-		sb.append(getStorage().getTuvTableName()).append(" as tuv, ")
-				.append(getStorage().getTuvExtTableName()).append(" AS ext");
+		sb.append(getStorage().getTuvTableName()).append(" as tuv ")
+				.append(" LEFT JOIN ")
+				.append(getStorage().getTuvExtTableName())
+				.append(" AS ext ON tuv.id = ext.tuvId ");
 		
 		if (inlineAttrs != null && !inlineAttrs.isEmpty())
 		{
@@ -900,7 +902,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		}
 		
 		sb.append(" WHERE tuv.tmId = ?").addValue(tmId);
-		sb.append(" AND tuv.id = ext.tuvId");
 		getParameterSql(sb, paramMap, localeIds, inlineAttrs);
 		
 		if (StringUtil.isNotEmpty(stringId))

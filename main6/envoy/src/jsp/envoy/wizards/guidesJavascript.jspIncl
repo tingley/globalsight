@@ -5,7 +5,6 @@
             com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             java.util.Locale, 
             com.globalsight.util.modules.Modules,
-            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             java.util.ResourceBundle"
  %>
 <%!
@@ -255,9 +254,7 @@ function activateNodes(obj, guide)
       obj_attributes = getRef('attributes');
       obj_attributeGroups = getRef('attributeGroups');
       obj_localePairs = getRef('localePairs');
-      obj_autoAction = getRef('autoAction');
       obj_gsEdition = getRef('gsEdition');
-      obj_gsEditionAction = getRef('gsEditionAction');
       obj_activityType = getRef('activityType');
       obj_permissionGroups = getRef('permissionGroups');
       obj_users = getRef('users');
@@ -285,14 +282,8 @@ function activateNodes(obj, guide)
                  obj_attributeGroups,
 <% } %>                 
                  obj_localePairs,
-<% if (userPers.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) { %>
-                 obj_autoAction,
-<% } %>
 <% if (userPers.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
                  obj_gsEdition,
-<% } %>
-<% if (userPers.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) { %>
-                 obj_gsEditionAction,
 <% } %>
                  obj_activityType, 
 <%if (b_costingGuideJs) {%>

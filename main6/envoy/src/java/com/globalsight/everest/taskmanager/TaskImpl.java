@@ -616,16 +616,9 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         {
             return m_state;
         }
-        if (m_wfTaskInstance != null && m_wfTaskInstance.getActivity() != null)
+        if (m_wfTaskInstance != null)
         {
-            if (m_wfTaskInstance.getActivity().getEditionActionID() != null)
-            {
-                return m_state;
-            }
-            else
-            {
-                return m_wfTaskInstance.getTaskStateForAssignee();
-            }
+        	return m_wfTaskInstance.getTaskStateForAssignee();
         }
 
         return m_state;

@@ -768,9 +768,6 @@ function doUploadingCheck(urlSent)
 	        (state == stateInProgress && perms.getPermissionFor(Permission.ACTIVITIES_EXPORT_INPROGRESS))))
 	    {%>
 	         <INPUT TYPE=BUTTON NAME=ExportButton VALUE="<%= bundle.getString("lb_export")%>..." ONCLICK="doUploadingCheck('<%= exportLink.toString() %>')">
-	    <%}	    
-	    if(Task.STATE_REDEAY_DISPATCH_GSEDTION == state) {%>
-	        <INPUT TYPE=BUTTON NAME=ReCreateGSEditionJobButton VALUE="<%= bundle.getString("lb_recreate_edition_job") %>..." ONCLICK="recreateGSEdition('<%= recreateGSUrl %>')">
 	    <%}
 	//<!-- For the issue of "add download button to my activities" -->
 	    if (!disableButtons &&

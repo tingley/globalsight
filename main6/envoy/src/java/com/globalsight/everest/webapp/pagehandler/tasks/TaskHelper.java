@@ -340,37 +340,6 @@ public class TaskHelper
         return pattern;
     }
 
-    /**
-     * To accept a Task by a user for GS Edition. Every GS Edition activity will
-     * accept the activity automaticly before create GS Edition job on remte GS
-     * Edition server.
-     */
-    public static void acceptTaskForGSEdition(String p_userId, Task p_task)
-            throws EnvoyServletException
-    {
-        try
-        {
-            ServerProxy.getTaskManager().acceptTask(p_userId, p_task, false);
-        }
-
-        catch (TaskException te)
-        {
-            CATEGORY.debug(te);
-            throw new EnvoyServletException(te.getMessageKey(),
-                    te.getMessageArguments(), te, te.getPropertyFileName());
-        }
-        catch (GeneralException ge)
-        {
-            CATEGORY.debug(ge);
-            throw new EnvoyServletException(ge);
-        }
-        catch (RemoteException e)
-        {
-            CATEGORY.debug(e);
-            throw new EnvoyServletException(GeneralException.EX_REMOTE, e);
-        }
-    }
-
     // Auto accept all active tasks of the Job.
     public static void autoAcceptTaskInJob(Job p_job)
     {
@@ -446,13 +415,7 @@ public class TaskHelper
     }
 
     /**
-     * To accept a Task by a user. When a activity is GS Edition activity,
-     * before create GS Edition job on remote server, the activity should be
-     * accept automatic, but if the workflow is duplicated, the acitivity's user
-     * maybe is null, then nothing will be done. So after the activity is set
-     * user, the user will accept the activity manually. After accepting the
-     * activity, then judge if the activity is GS Edition activity, then create
-     * the GS Edition job to remote server.
+     * To accept a Task by a user.
      * 
      * @throws NamingException
      */

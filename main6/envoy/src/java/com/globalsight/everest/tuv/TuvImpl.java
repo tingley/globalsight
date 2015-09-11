@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistentObject;
@@ -106,7 +105,6 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     private long tuId = 0;
     private GlobalSightLocale m_globalSightLocale = null;
     private Set<XliffAlt> xliff_alt = new HashSet<XliffAlt>();
-    private Set<IssueEditionRelation> issue_edition_relation = new HashSet<IssueEditionRelation>();
 
     /**
      * Holds the LeverageMatchType.
@@ -1480,17 +1478,6 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     public void setXliffAlt(Set<XliffAlt> p_alt)
     {
         this.xliff_alt = p_alt;
-    }
-
-    public Set<IssueEditionRelation> getIssueEditionRelation()
-    {
-        return this.issue_edition_relation;
-    }
-
-    public void setIssueEditionRelation(
-            Set<IssueEditionRelation> p_issue_edition)
-    {
-        this.issue_edition_relation = p_issue_edition;
     }
 
     private String srcComment = null;

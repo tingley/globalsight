@@ -84,7 +84,6 @@ public class CompanyRemoval
     private static final String SQL_DELETE_ATTRIBUTE_CLONE = "delete from ATTRIBUTE_CLONE where COMPANY_ID=?";
     private static final String SQL_DELETE_ATTRIBUTE_SET = "delete from ATTRIBUTE_SET where COMPANY_ID=?";
     private static final String SQL_DELETE_ATTRIBUTE_SET_ATTRIBUTE = "delete from ATTRIBUTE_SET_ATTRIBUTE where SET_ID in ";
-    private static final String SQL_DELETE_AUTOACTION = "delete from AUTOACTION where COMPANY_ID=?";
     private static final String SQL_DELETE_BASE_FILTER = "delete from BASE_FILTER where COMPANY_ID=?";
     private static final String SQL_DELETE_BASE_FILTER_MAPPING = "delete from BASE_FILTER_MAPPING where BASE_FILTER_ID in ";
     private static final String SQL_DELETE_CALENDAR = "delete from CALENDAR where COMPANY_ID=?";
@@ -117,13 +116,11 @@ public class CompanyRemoval
     private static final String SQL_DELETE_FILTER_CONFIGURATION = "delete from FILTER_CONFIGURATION where COMPANY_ID=?";
     private static final String SQL_DELETE_FRAME_MAKER_FILTER = "delete from FRAME_MAKER_FILTER where COMPANY_ID=?";
     private static final String SQL_DELETE_GS_EDITION = "delete from GS_EDITION where COMPANYID=?";
-    private static final String SQL_DELETE_GS_EDITION_ACTIVITY = "delete from GS_EDITION_ACTIVITY where GSEDITION_ID in ";
     private static final String SQL_DELETE_HOLIDAY = "delete from HOLIDAY where COMPANY_ID=?";
     private static final String SQL_DELETE_HTML_FILTER = "delete from HTML_FILTER where COMPANY_ID=?";
     private static final String SQL_DELETE_IMAGE_REPLACE_FILE_MAP = "delete from IMAGE_REPLACE_FILE_MAP where TARGET_PAGE_ID in ";
     private static final String SQL_DELETE_INDD_FILTER = "delete from INDD_FILTER where COMPANY_ID=?";
     private static final String SQL_DELETE_ISSUE = "delete from ISSUE where CREATOR_USER_ID in ";
-    private static final String SQL_DELETE_ISSUE_EDITION_RELATION = "delete from ISSUE_EDITION_RELATION where ORIGINAL_ISSUE_HISTORY_ID in ";
     private static final String SQL_DELETE_ISSUE_HISTORY = "delete from ISSUE_HISTORY where ISSUE_ID in ";
     private static final String SQL_DELETE_IP_TM_INDEX = "delete from IP_TM_INDEX where JOB_ID in ";
     private static final String SQL_DELETE_IP_TM_SRC_L = "delete from IP_TM_SRC_L where JOB_ID in ";
@@ -155,7 +152,6 @@ public class CompanyRemoval
     private static final String SQL_DELETE_JOB = "delete from JOB where COMPANY_ID=?";
     private static final String SQL_DELETE_JOB_ATTRIBUTE = "delete from JOB_ATTRIBUTE where JOB_ID in ";
     private static final String SQL_DELETE_JOB_ATTRIBUTE_SELECT_OPTION = "delete from JOB_ATTRIBUTE_SELECT_OPTION where JOB_ATTRIBUTE_ID in ";
-    private static final String SQL_DELETE_JOB_GSEDITION_INFO = "delete from JOB_GSEDITION_INFO where JOB_ID in ";
     private static final String SQL_DELETE_JSP_FILTER = "delete from JSP_FILTER where COMPANY_ID=?";
     private static final String SQL_DELETE_L10N_PROFILE = "delete from L10N_PROFILE where COMPANYID=?";
     private static final String SQL_DELETE_MT_PROFILE = "delete from MT_PROFILE where COMPANY_ID=?";
@@ -276,9 +272,7 @@ public class CompanyRemoval
     private static final String SQL_QUERY_CVS_SERVER = "select ID from CVS_SERVER where COMPANYID=?";
     private static final String SQL_QUERY_EXPORT_BATCH_EVENT = "select ID from EXPORT_BATCH_EVENT where JOB_ID in ";
     private static final String SQL_QUERY_FILE_PROFILE = "select ID from FILE_PROFILE where COMPANYID=?";
-    private static final String SQL_QUERY_GS_EDITION = "select ID from GS_EDITION where COMPANYID=?";
     private static final String SQL_QUERY_ISSUE = "select ID from ISSUE where CREATOR_USER_ID in ";
-    private static final String SQL_QUERY_ISSUE_HISTORY = "select ID from ISSUE_HISTORY where ISSUE_ID in ";
     private static final String SQL_QUERY_IP_TM_SRC_L = "select ID from IP_TM_SRC_L where JOB_ID in ";
     private static final String SQL_QUERY_IP_TM_SRC_T = "select ID from IP_TM_SRC_T where JOB_ID in ";
     private static final String SQL_QUERY_JBPM_DELEGATION = "select ID_ from JBPM_DELEGATION where PROCESSDEFINITION_ in ";
@@ -377,8 +371,6 @@ public class CompanyRemoval
 //    private static final String SQL_JOB_DELETE_CVS_SOURCE_FILES = "delete from CVS_SOURCE_FILES where JOB_ID=?";
 
     private static final String SQL_JOB_QUERY_ISSUE = "select ID from ISSUE where ISSUE_OBJECT_TYPE='S' and ISSUE_OBJECT_ID in ";
-    private static final String SQL_JOB_QUERY_ISSUE_HISTORY = "select ID from ISSUE_HISTORY where ISSUE_ID in ";
-    private static final String SQL_JOB_DELETE_ISSUE_EDITION_RELATION = "delete from ISSUE_EDITION_RELATION where ORIGINAL_ISSUE_HISTORY_ID in ";
     private static final String SQL_JOB_DELETE_ISSUE_HISTORY = "delete from ISSUE_HISTORY where ISSUE_ID in ";
     private static final String SQL_JOB_DELETE_ISSUE = "delete from ISSUE where ID in ";
 
@@ -567,7 +559,6 @@ public class CompanyRemoval
             removeIpTmIndex(conn, jobIds);
             removeIpTmSrcL(conn, jobIds);
             removeIpTmSrcT(conn, jobIds);
-            removeJobGsEditionInfo(conn, jobIds);
             
             //remove job cost
             removeJobCost(conn, jobId);
@@ -651,9 +642,8 @@ public class CompanyRemoval
     private void removeIssues(Connection conn, List<List<Object>> tuvIds) throws SQLException
     {
         List<List<Object>> issueIds = queryBatchList(conn, SQL_JOB_QUERY_ISSUE, tuvIds);
-        if (issueIds.size() > 0) {
-            List<List<Object>> issueHistoryIds = queryBatchList(conn, SQL_JOB_QUERY_ISSUE_HISTORY, issueIds);
-            exec(conn, SQL_JOB_DELETE_ISSUE_EDITION_RELATION, issueHistoryIds);
+        if (issueIds.size() > 0)
+        {
             exec(conn, SQL_JOB_DELETE_ISSUE_HISTORY, issueIds);
             exec(conn, SQL_JOB_DELETE_ISSUE, issueIds);
             
@@ -950,8 +940,6 @@ public class CompanyRemoval
             removeActivity(conn);
             // remove attributes
             removeAttribute(conn);
-            // remove auto actions
-            removeAutoAction(conn);
             // remove categories
             removeCategory(conn);
             // remove currency conversions
@@ -1514,13 +1502,6 @@ public class CompanyRemoval
         logEnd("ATTRIBUTE_SET_ATTRIBUTE");
     }
 
-    private void removeAutoAction(Connection conn) throws SQLException
-    {
-        logStart("AUTOACTION");
-        execOnce(conn, SQL_DELETE_AUTOACTION, company.getId());
-        logEnd("AUTOACTION");
-    }
-
     private void removeBaseFilter(Connection conn) throws SQLException
     {
         long companyId = company.getId();
@@ -1875,23 +1856,9 @@ public class CompanyRemoval
     private void removeGsEdition(Connection conn) throws SQLException
     {
         long companyId = company.getId();
-        List<List<Object>> gsEditionIds = queryBatchList(conn,
-                SQL_QUERY_GS_EDITION, companyId);
-        if (gsEditionIds.size() > 0)
-        {
-            removeGsEditionActivity(conn, gsEditionIds);
-        }
         logStart("GS_EDITION");
         execOnce(conn, SQL_DELETE_GS_EDITION, companyId);
         logEnd("GS_EDITION");
-    }
-
-    private void removeGsEditionActivity(Connection conn,
-            List<List<Object>> gsEditionIds) throws SQLException
-    {
-        logStart("GS_EDITION_ACTIVITY");
-        exec(conn, SQL_DELETE_GS_EDITION_ACTIVITY, gsEditionIds);
-        logEnd("GS_EDITION_ACTIVITY");
     }
 
     private void removeHoliday(Connection conn) throws SQLException
@@ -1922,23 +1889,9 @@ public class CompanyRemoval
         logEnd("ISSUE");
     }
 
-    private void removeIssueEditionRelation(Connection conn,
-            List<List<Object>> issueHistoryIds) throws SQLException
-    {
-        logStart("ISSUE_EDITION_RELATION");
-        exec(conn, SQL_DELETE_ISSUE_EDITION_RELATION, issueHistoryIds);
-        logEnd("ISSUE_EDITION_RELATION");
-    }
-
     private void removeIssueHistory(Connection conn, List<List<Object>> issueIds)
             throws SQLException
     {
-        List<List<Object>> issueHistoryIds = queryBatchList(conn,
-                SQL_QUERY_ISSUE_HISTORY, issueIds);
-        if (issueHistoryIds.size() > 0)
-        {
-            removeIssueEditionRelation(conn, issueHistoryIds);
-        }
         logStart("ISSUE_HISTORY");
         exec(conn, SQL_DELETE_ISSUE_HISTORY, issueIds);
         logEnd("ISSUE_HISTORY");
@@ -2286,7 +2239,6 @@ public class CompanyRemoval
             removeIpTmIndex(conn, jobIds);
             removeIpTmSrcL(conn, jobIds);
             removeIpTmSrcT(conn, jobIds);
-            removeJobGsEditionInfo(conn, jobIds);
             removeJobAttribute(conn, jobIds);
             removeExportBatchEvent(conn, jobIds);
             removeAddingSourcePage(conn, jobIds);
@@ -2473,14 +2425,6 @@ public class CompanyRemoval
         logStart("JOB_ATTRIBUTE_SELECT_OPTION");
         exec(conn, SQL_DELETE_JOB_ATTRIBUTE_SELECT_OPTION, jobAttributeIds);
         logEnd("JOB_ATTRIBUTE_SELECT_OPTION");
-    }
-
-    private void removeJobGsEditionInfo(Connection conn,
-            List<List<Object>> jobIds) throws SQLException
-    {
-        logStart("JOB_GSEDITION_INFO");
-        exec(conn, SQL_DELETE_JOB_GSEDITION_INFO, jobIds);
-        logEnd("JOB_GSEDITION_INFO");
     }
 
     private void removeJspFilter(Connection conn) throws SQLException

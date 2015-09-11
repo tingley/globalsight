@@ -65,7 +65,6 @@
 <jsp:useBean id="accept" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="reject" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="finish" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="recreateGS" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="taskSecondaryTargetFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="wordcountList" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
@@ -327,14 +326,6 @@
                         "=" + theTask.getId()+
                         "&" + WebAppConstants.TASK_STATE+
                         "=" + theTask.getState();
-    String recreateGSUrl = recreateGS.getPageURL() + 
-                            "&" + WebAppConstants.TASK_ACTION +
-                            "=" + WebAppConstants.RECREATE_EDITION_JOB+
-                            //GBS 2913 add taskId and state
-                            "&" + WebAppConstants.TASK_ID+
-                            "=" + theTask.getId()+
-                            "&" + WebAppConstants.TASK_STATE+
-                            "=" + theTask.getState();
     
     String wordCountUrl = wordcountList.getPageURL() + "&action=tpList"+
                         //GBS-2913 Added to the url parameter taskId,state;

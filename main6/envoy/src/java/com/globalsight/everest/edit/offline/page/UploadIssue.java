@@ -33,14 +33,15 @@ import com.globalsight.everest.comment.Issue;
  * and reports any errors. After error checking, these values are used
  * to create a new issue or update an existing one.
  */
-public class UploadIssue
-    implements Issue, Serializable
+public class UploadIssue implements Issue, Serializable
 {
     // The logical key stored in the database is composed of
     // targetpageid_tuid_tuvid_subid, so we need to store the
     // individual components.
 
-    // This is the TU ID.
+	private static final long serialVersionUID = 5037032960389554756L;
+
+	// This is the TU ID.
     private long m_tuId = -1;
     // TUV ID must be set manually since it's not stored in offline
     // files (only tu_sub is).
@@ -221,24 +222,6 @@ public class UploadIssue
     {
     }
     
-    public void setOriginalId(String p_arg)
-    {
-    }
-    
-    public String getOriginalId()
-    {
-    	return null;
-    }
-    
-    public void setOriginalWsdlUrl(String p_arg)
-    {    	
-    }
-    
-    public String getOriginalWsdlUrl()
-    {
-    	return null;
-    }
-
     public String toString()
     {
         StringBuffer sb = new StringBuffer();

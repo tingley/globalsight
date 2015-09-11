@@ -46,7 +46,6 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.taskmanager.TaskManagerLocal;
 import com.globalsight.everest.util.comparator.GSEditionComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
@@ -61,8 +60,8 @@ import com.globalsight.webservices.client.WebServiceClientHelper;
  */
 public class GSEditionMainHandler extends PageHandler
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(TaskManagerLocal.class.getName());
+    private static final Logger logger = Logger
+            .getLogger(GSEditionMainHandler.class.getName());
 
     private GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
 
@@ -98,7 +97,6 @@ public class GSEditionMainHandler extends PageHandler
                 {
                     editGSEdition(p_request);
                 }
-
                 else if (action.equals("remove"))
                 {
                     removeGSEdition(p_request);
@@ -169,6 +167,7 @@ public class GSEditionMainHandler extends PageHandler
                         {
                             ut.write(buf, 0, len);
                         }
+                        br.close();
                     }
 
                     return;
@@ -440,32 +439,16 @@ public class GSEditionMainHandler extends PageHandler
             }
             catch (Exception e)
             {
-
+            	logger.error(e);
             }
 
-            try
+            if (!canBeRemoved)
             {
-                GSEdition edition = gsEditionManager.getGSEditionByID(id);
+                p_request.setAttribute("canBeRemoved", "false");
+                return;
+            }
 
-                if (edition.getGsEditionActivities() != null
-                        && edition.getGsEditionActivities().size() > 0)
-                {
-                    p_request.setAttribute("canBeRemoved", "false");
-                }
-                else if (!canBeRemoved)
-                {
-                    p_request.setAttribute("canBeRemoved", "false");
-                }
-                else
-                {
-                    gsEditionManager.removeAction(id);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new EnvoyServletException(
-                        EnvoyServletException.EX_GENERAL, e);
-            }
+            gsEditionManager.removeAction(id);
         }
     }
 }

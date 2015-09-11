@@ -23,11 +23,7 @@
         <property name="description" length="200" column="DESCRIPTION" type="string" />
         
         <property name="enableHttps" column="ENABLE_HTTPS" type="yes_no" not-null="false"/>
-        
-        <set name="gsEditionActivities" inverse="true"  lazy="false">
-            <key column="GSEDITION_ID" />
-            <one-to-many class="com.globalsight.everest.gsedition.GSEditionActivity" />
-        </set>
+
     </class>
 
 </hibernate-mapping>

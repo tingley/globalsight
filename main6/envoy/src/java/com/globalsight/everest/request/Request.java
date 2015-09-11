@@ -16,8 +16,6 @@
  */
 package com.globalsight.everest.request;
 
-//globalsight
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -350,10 +348,6 @@ public interface Request
     public String getPriority();
 
     public void setPriority(String p_priority);
-
-    public void setEditionJobParams(HashMap p_editionParams);
-
-    public HashMap getEditionJobParams();
 
     public long getFileProfileId();
 }

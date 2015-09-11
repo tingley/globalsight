@@ -2,10 +2,6 @@
          errorPage="/envoy/common/activityError.jsp"
          import="com.globalsight.everest.servlet.util.SessionManager,
                  com.globalsight.util.edit.EditUtil,
-				         com.globalsight.everest.autoactions.AutoAction,
-				         com.globalsight.everest.gsedition.GSEditionActivity,
-				         com.globalsight.everest.autoactions.AutoActionManagerLocal,
-				         com.globalsight.everest.gsedition.GSEditionActivityManagerLocal,
                  com.globalsight.everest.webapp.WebAppConstants,
                  com.globalsight.everest.webapp.javabean.NavigationBean,
                  com.globalsight.everest.webapp.pagehandler.PageHandler,
@@ -33,8 +29,6 @@
     ResourceBundle bundle = PageHandler.getBundle(session);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-    AutoActionManagerLocal actionManager = new AutoActionManagerLocal();
-    GSEditionActivityManagerLocal gsManager = new GSEditionActivityManagerLocal();
 
     // UI fields
 
@@ -66,15 +60,11 @@
     String desc = "";
     String activityUseType = "";
     String isDitaCheckChecked = "";
-	int autoActionID = 0;
-	int gsEditionActionID = 0;
 
     // For sla report issue
     boolean isTranslate = false;
     boolean isReviewEditable = false;
     boolean isReviewNotEditable = false;
-	boolean isAutoAction = false;
-	boolean isGSEdition = false;
 	String qaChecks = "";
 	Company company = null;
 	boolean enableQAChecks = false;
@@ -131,22 +121,6 @@
             else
             {
                 isReviewNotEditable = true;
-            }
-        }
-		else if(activity.isType(Activity.TYPE_AUTOACTION))
-		{
-		    isAutoAction = true;
-		    if(activity.getAutoActionID() != null)
-		    {
-		        autoActionID = Integer.parseInt(activity.getAutoActionID());
-		    }
-        }
-        else if(activity.isType(Activity.TYPE_GSEDITION))
-        {
-            isGSEdition = true;
-            if(activity.getEditionActionID() != null)
-            {
-                gsEditionActionID = Integer.parseInt(activity.getEditionActionID());
             }
         }
         else
@@ -394,17 +368,6 @@ function doOnload()
     }
 }
 
-function radioClick() {
-	var radio = document.all.radios;
-
-    if (radio[3].checked) {
-		autoActionDiv.style.display='';
-	}
-	else {
-        autoActionDiv.style.display='none';
-	}
-}
-
 $(document).ready(function(){
 
 	if(("true" == "<%=isAutoCompleteActivity%>"))
@@ -481,67 +444,10 @@ function setDisableTR(trId, isDisabled)
 <br>
 <br>
 
-  <%
-  String autoAbleFlag = "";
-  String GSEditionAbleFlag = "";
-  boolean  autoActionShowFlag = false;
-  boolean GSEditionShowFlag = false;
-  if (!userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) {
-	    if(edit && isAutoAction) {
-          autoActionShowFlag = true;
-      }
-    
-     autoAbleFlag = "disabled";
-  }
-  else {
-     autoActionShowFlag = true;
-  }
-
-  if (!userPerms.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) {
-	    if(edit && isGSEdition) {
-         GSEditionShowFlag = true;
-      }
-    
-    GSEditionAbleFlag = "disabled";
-  }
-  else {
-     GSEditionShowFlag = true;
-  }
-	%>
-	
 <script>
- function radioClick() {
+function radioClick()
+{
 	var radio = document.all.radios;
-
-<%if(GSEditionShowFlag && autoActionShowFlag) {%>
-  if (radio[3].checked) {
-      autoActionDiv.style.display='';
-      GSEditionDiv.style.display='none';
-	}
-	else if (radio[4].checked) {
-      GSEditionDiv.style.display='';
-      autoActionDiv.style.display='none';
-	}
-	else {
-      autoActionDiv.style.display='none';
-      GSEditionDiv.style.display='none';
-	}
-<%}else if(!GSEditionShowFlag && autoActionShowFlag) {%>
-
-  if (radio[3].checked) {
-      autoActionDiv.style.display='';
-	}
-	else {
-      autoActionDiv.style.display='none';
-	}
-<%}else if(GSEditionShowFlag && !autoActionShowFlag) {%>
-  if (radio[3].checked) {
-      GSEditionDiv.style.display='';
-	}
-	else {
-      GSEditionDiv.style.display='none';
-	}
-<%}%>
 
 	if(!document.getElementById("afterJobCreation").checked)
 	{
@@ -601,21 +507,7 @@ function setDisableTR(trId, isDisabled)
           </td>
         </tr>
         <tr><td colspan="3">&nbsp;</td></tr>
-  <%
-  String ableFlag = "";
-  boolean showFlag = false;
-	if (!userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) {
-	    if(edit && isAutoAction) {
-        showFlag = true;
-      }
-    
-    ableFlag = "disabled";
-  }
-  else {
-    showFlag = true;
-  }
-	%>
-<TR>
+    <TR>
 	  <TD><%=bundle.getString("lb_type")%>:</TD>
 	  <TD colspan="2">
 	    <input type="radio" name="<%=ActivityConstants.TYPE%>" id ="radios" value="<%=ActivityConstants.TRANSLATE%>" <%=isTranslate ? "checked" : ""%> onclick="radioClick()">
@@ -626,17 +518,7 @@ function setDisableTR(trId, isDisabled)
 
         <input type="radio" name="<%=ActivityConstants.TYPE%>" id ="radios" value="<%=ActivityConstants.REVIEW_NOT_EDITABLE%>" <%=isReviewNotEditable ? "checked" : ""%> onclick="radioClick()">
         <%=bundle.getString("lb_review_notEditable")%>&nbsp;&nbsp;&nbsp;&nbsp;
-        
-        <%if(autoActionShowFlag) {%>
-		    <input type="radio" name="<%=ActivityConstants.TYPE%>" id ="radios" value="<%=ActivityConstants.AUTO_ACTION%>" <%=isAutoAction ? "checked" : ""%> onclick="radioClick()" <%=autoAbleFlag%>>
-        <%=bundle.getString("lb_automatic_actions")%>&nbsp;&nbsp;
-        <%}%>
-        
-        <%if(GSEditionShowFlag) {%>
-		    <input type="radio" name="<%=ActivityConstants.TYPE%>" id ="radios" value="<%=ActivityConstants.GSEDITION%>" <%=isGSEdition ? "checked" : ""%> onclick="radioClick()" <%=GSEditionAbleFlag%>>
-        <%=bundle.getString("lb_gsedition_actions")%>&nbsp;&nbsp;
-        <%}%>
-		</TD>
+	  </TD>
 	</TR>
 	<tr><td colspan="3">&nbsp;</td></tr>
 	<TR>
@@ -664,60 +546,6 @@ function setDisableTR(trId, isDisabled)
      <input type="text" name="afterActivityStartH" id ="afterActivityStartH" size="3" value="<%=afterActivityStartH%>">&nbsp;h&nbsp;
      <input type="text" name="afterActivityStartM" id ="afterActivityStartM" size="3" value="<%=afterActivityStartM%>">&nbsp;m&nbsp;
 	</TD></TR>
-	
-	<!----------Automatic Action---------------->
-	<%if(autoActionShowFlag) {%>
-	<TR id="autoActionDiv" style="display<%=isAutoAction ? "" : ":none"%>;">
-	    <TD><%=bundle.getString("lb_select_autoactions")%>:</TD>
-	    <TD colspan="2">
-
-		<SELECT ID="SelectAutoAction" NAME="SelectAutoAction" <%=autoAbleFlag%>>
-		<%
-    ArrayList autoactions = (ArrayList) actionManager.getAllActions();
-
-		for(int i = 0; i < autoactions.size(); i++) {
-		    AutoAction autoaction = (AutoAction)autoactions.get(i);
-			  String selected = "";
-
-			  if(autoaction.getId() == autoActionID) {
-            selected = "SELECTED";
-			  }
-	    %>
-		<OPTION VALUE="<%=autoaction.getId()%>" <%=selected%>><%=autoaction.getName()%></OPTION>
-		<%
-		}
-		%>
-        </SELECT>
-
-	  </TD>
-	</TR>
-	<%}%>
-	<!----------GS Edition Action---------------->
-  <%if(GSEditionShowFlag) {%>
-	<TR id="GSEditionDiv" style="display<%=isGSEdition ? "" : ":none"%>;">
-	    <TD><%=bundle.getString("lb_select_gsedition_action")%>:</TD>
-	    <TD colspan="2">
-
-		  <SELECT ID="SelectEditionAction" NAME="SelectEditionAction" <%=GSEditionAbleFlag%>>
-		  <%
-      ArrayList gsactions = (ArrayList) gsManager.getAllActions();
-
-		  for(int i = 0; i < gsactions.size(); i++) {
-		      GSEditionActivity gsEditionActivity = (GSEditionActivity)gsactions.get(i);
-			    String selected = "";
-
-			    if(gsEditionActivity.getId() == gsEditionActionID) {
-              selected = "SELECTED";
-			}
-	    %>
-		      <OPTION VALUE="<%=gsEditionActivity.getId()%>" <%=selected%>><%=gsEditionActivity.getName()%></OPTION>
-		  <%
-		  }
-		  %>
-      </SELECT>
-	  </TD>
-	</TR>
-	<%}%>
 	
 	<% if (enableQAChecks) {%>
     <tr>

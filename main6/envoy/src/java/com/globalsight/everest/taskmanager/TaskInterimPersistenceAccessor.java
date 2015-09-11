@@ -21,7 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,10 +35,8 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskVo;
-import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
-import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -194,11 +191,6 @@ public class TaskInterimPersistenceAccessor
     {
         String activityName = WorkflowJbpmUtil.getActivityName(taskInstance
                 .getName());
-        if (isGSEditionActivity(activityName))
-        {
-            // ignore GS Edition activity
-            return;
-        }
         Connection cnn = null;
         PreparedStatement ps = null;
         long taskId = taskInstance.getTask().getTaskNode().getId();
@@ -639,58 +631,6 @@ public class TaskInterimPersistenceAccessor
                 // this is request from deleteInterimUser() which needs to close
                 // connection right away
                 ConnectionPool.silentReturnConnection(c);
-            }
-        }
-    }
-
-    /**
-     * Checks if this is an activity of GS Edition type.
-     * 
-     * @param activityName
-     *            The activity name.
-     * 
-     * @return true or false.
-     */
-    private static boolean isGSEditionActivity(String activityName)
-    {
-        try
-        {
-            Activity activity = ServerProxy.getJobHandler().getActivity(
-                    activityName);
-            if (activity != null && activity.isType(Activity.TYPE_GSEDITION))
-            {
-                return true;
-            }
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to get activity " + activityName, e);
-        }
-
-        return false;
-    }
-
-    /**
-     * Removes special tasks that are out of date.
-     * 
-     * @param tasks
-     *            The tasks to be filtered.
-     */
-    private static void removeSpecialTasks(List<?> tasks)
-    {
-        Iterator<?> it = tasks.iterator();
-        while (it.hasNext())
-        {
-            Task t = (Task) it.next();
-            Workflow wf = t.getWorkflow();
-            if (wf != null)
-            {
-                String wfState = wf.getState();
-                if ((Workflow.CANCELLED).equals(wfState)
-                        || (Workflow.ARCHIVED).equals(wfState))
-                {
-                    it.remove();
-                }
             }
         }
     }

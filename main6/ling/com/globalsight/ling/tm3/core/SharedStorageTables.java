@@ -2,9 +2,9 @@ package com.globalsight.ling.tm3.core;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import java.util.Set;
 
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 
 class SharedStorageTables {
@@ -74,101 +74,117 @@ class SharedStorageTables {
         return base + "_SHARED_" + id;
     }
     
-    protected void createAttrTable() throws SQLException {
-        SQLUtil.exec(conn, 
-            "CREATE TABLE " + getAttrValTableName(poolId) + " (" +
-            "tmId      bigint NOT NULL, " +
-            "tuId      bigint NOT NULL, " + 
-            "attrId    bigint NOT NULL, " + 
-            "value     varchar(" + StorageInfo.MAX_ATTR_VALUE_LEN + ") not null, " + 
-            "UNIQUE KEY(tuId, attrId), " +
-            "KEY (tmid, attrId), " + 
-            "FOREIGN KEY (tuId) REFERENCES " + getTuTableName(poolId) + 
-                    " (id) ON DELETE CASCADE, " +
-            "FOREIGN KEY (attrId) REFERENCES TM3_ATTR (id) ON DELETE CASCADE " +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
-        );
+    protected void createAttrTable() throws SQLException
+    {
+    	String attrValTable = getAttrValTableName(poolId);
+    	if (!DbUtil.isTableExisted(conn, attrValTable))
+    	{
+            SQLUtil.exec(conn,
+                    "CREATE TABLE " + attrValTable + " (" +
+                    "tmId      bigint NOT NULL, " +
+                    "tuId      bigint NOT NULL, " + 
+                    "attrId    bigint NOT NULL, " + 
+                    "value     varchar(" + StorageInfo.MAX_ATTR_VALUE_LEN + ") not null, " + 
+                    "UNIQUE KEY(tuId, attrId), " +
+                    "KEY (tmid, attrId), " + 
+                    "FOREIGN KEY (tuId) REFERENCES " + getTuTableName(poolId) + 
+                            " (id) ON DELETE CASCADE, " +
+                    "FOREIGN KEY (attrId) REFERENCES TM3_ATTR (id) ON DELETE CASCADE " +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+            );
+    	}
     }
 
     protected void createTuStorage(Set<TM3Attribute> inlineAttributes)
-            throws SQLException {
-        String tuTableName = getTuTableName(poolId);
-        
-        StringBuilder stmt = new StringBuilder(
-            "CREATE TABLE " + tuTableName + " (" +
-            "tmId bigint NOT NULL, " +
-            "id bigint NOT NULL, " +
-            "srcLocaleId bigint NOT NULL, ");
-        for (TM3Attribute attr : inlineAttributes) {
-            stmt.append(attr.getColumnName() + " ")
-                .append(attr.getValueType().getSqlType())
-                .append(", ");
-        }
-        stmt.append("PRIMARY KEY (id)");
-        stmt.append(") ENGINE=InnoDB");
-        SQLUtil.exec(conn, stmt.toString());
+            throws SQLException
+    {
+    	StringBuilder stmt = null;
+
+    	String tuTableName = getTuTableName(poolId);
+		if (!DbUtil.isTableExisted(conn, tuTableName))
+        {
+            stmt = new StringBuilder(
+                    "CREATE TABLE " + tuTableName + " (" +
+                    "tmId bigint NOT NULL, " +
+                    "id bigint NOT NULL, " +
+                    "srcLocaleId bigint NOT NULL, ");
+                for (TM3Attribute attr : inlineAttributes) {
+                    stmt.append(attr.getColumnName() + " ")
+                        .append(attr.getValueType().getSqlType())
+                        .append(", ");
+                }
+                stmt.append("PRIMARY KEY (id)");
+                stmt.append(") ENGINE=InnoDB");
+                SQLUtil.exec(conn, stmt.toString());        	
+       	}
         
         // Now create the TUV table.  Note the denormalized tmId
         // (to avoid an extra join during fuzzy lookup)
         String tuvTableName = getTuvTableName(poolId);
-        SQLUtil.exec(conn,
-            "CREATE TABLE " + tuvTableName + " (" +
-            "id bigint NOT NULL, " +
-            "tuId bigint NOT NULL, " +
-            "tmId bigint NOT NULL, " +
-            "localeId bigint NOT NULL, " +
-            "fingerprint bigint NOT NULL, " +
-            "content mediumtext NOT NULL, " + 
-            "firstEventId bigint NOT NULL, " +
-            "lastEventId bigint NOT NULL, " +
-            "creationUser varchar(80) DEFAULT NULL, " +
-            "creationDate datetime NOT NULL, " +
-            "modifyUser varchar(80) DEFAULT NULL, " +
-            "modifyDate datetime NOT NULL, " +
-            "PRIMARY KEY (id), " +
-            "KEY (tmId, localeId, fingerprint), " +
-            "KEY (tuId, localeId), " + 
-            "FOREIGN KEY (tuId) REFERENCES " + tuTableName + " (id) ON DELETE CASCADE, " +
-            "FOREIGN KEY (firstEventID) REFERENCES TM3_EVENTS (id), " +
-            "FOREIGN KEY (lastEventID) REFERENCES TM3_EVENTS (id) " +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
-        );
+		if (!DbUtil.isTableExisted(conn, tuvTableName))
+		{
+	        SQLUtil.exec(conn,
+	                "CREATE TABLE " + tuvTableName + " (" +
+	                "id bigint NOT NULL, " +
+	                "tuId bigint NOT NULL, " +
+	                "tmId bigint NOT NULL, " +
+	                "localeId bigint NOT NULL, " +
+	                "fingerprint bigint NOT NULL, " +
+	                "content mediumtext NOT NULL, " + 
+	                "firstEventId bigint NOT NULL, " +
+	                "lastEventId bigint NOT NULL, " +
+	                "creationUser varchar(80) DEFAULT NULL, " +
+	                "creationDate datetime NOT NULL, " +
+	                "modifyUser varchar(80) DEFAULT NULL, " +
+	                "modifyDate datetime NOT NULL, " +
+	                "PRIMARY KEY (id), " +
+	                "KEY (tmId, localeId, fingerprint), " +
+	                "KEY (tuId, localeId), " + 
+	                "FOREIGN KEY (tuId) REFERENCES " + tuTableName + " (id) ON DELETE CASCADE, " +
+	                "FOREIGN KEY (firstEventID) REFERENCES TM3_EVENTS (id), " +
+	                "FOREIGN KEY (lastEventID) REFERENCES TM3_EVENTS (id) " +
+	                ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+	            );
 
-        //Create index on TUV table
-        stmt = new StringBuilder();
-        stmt.append("CREATE INDEX INDEX_").append(tuvTableName)
-            .append("_TMID ON ").append(tuvTableName) 
-            .append(" (tmId)");
-        SQLUtil.exec(conn, stmt.toString());
+	            //Create index on TUV table
+	            stmt = new StringBuilder();
+	            stmt.append("CREATE INDEX INDEX_").append(tuvTableName)
+	                .append("_TMID ON ").append(tuvTableName) 
+	                .append(" (tmId)");
+	            SQLUtil.exec(conn, stmt.toString());
+		}
 
         // Create TUV extension table to store extra attributes
         String tuvExtTableName = getTuvExtTableName(poolId);
-        stmt = new StringBuilder();
-		stmt.append("CREATE TABLE ").append(tuvExtTableName).append(" (")
-				.append("tuvId BIGINT(20) NOT NULL, ")
-				.append("tuId BIGINT(20) NOT NULL, ")
-				.append("tmId BIGINT(20) NOT NULL, ")
-				.append("lastUsageDate DATETIME DEFAULT NULL, ")
-				.append("jobId BIGINT(20) DEFAULT -1, ")
-				.append("jobName VARCHAR(320) DEFAULT NULL, ")
-				.append("previousHash BIGINT(20) DEFAULT -1, ")
-				.append("nextHash BIGINT(20) DEFAULT -1, ")
-				.append("sid TEXT DEFAULT NULL, ")
-				.append("varchar1 VARCHAR(512), ")
-				.append("varchar2 VARCHAR(512), ")
-				.append("varchar3 VARCHAR(512), ")
-				.append("varchar4 VARCHAR(512), ")
-				.append("text1 TEXT, ")
-				.append("text2 TEXT, ")
-				.append("long1 BIGINT(20), ")
-				.append("long2 BIGINT(20), ")
-				.append("date1 DATETIME, ")
-				.append("date2 DATETIME, ")
-				.append("UNIQUE KEY tuvId (tuvId), ")
-				.append("KEY tuId (tuId), ")
-				.append("KEY tmId (tmId) ")
-				.append(") ENGINE=INNODB;");
-		SQLUtil.exec(conn, stmt.toString());
+        if (!DbUtil.isTableExisted(conn, tuvExtTableName))
+        {
+			stmt = new StringBuilder().append("CREATE TABLE ")
+					.append(tuvExtTableName).append(" (")
+    				.append("tuvId BIGINT(20) NOT NULL, ")
+    				.append("tuId BIGINT(20) NOT NULL, ")
+    				.append("tmId BIGINT(20) NOT NULL, ")
+    				.append("lastUsageDate DATETIME DEFAULT NULL, ")
+    				.append("jobId BIGINT(20) DEFAULT -1, ")
+    				.append("jobName VARCHAR(320) DEFAULT NULL, ")
+    				.append("previousHash BIGINT(20) DEFAULT -1, ")
+    				.append("nextHash BIGINT(20) DEFAULT -1, ")
+    				.append("sid TEXT DEFAULT NULL, ")
+    				.append("varchar1 VARCHAR(512), ")
+    				.append("varchar2 VARCHAR(512), ")
+    				.append("varchar3 VARCHAR(512), ")
+    				.append("varchar4 VARCHAR(512), ")
+    				.append("text1 TEXT, ")
+    				.append("text2 TEXT, ")
+    				.append("long1 BIGINT(20), ")
+    				.append("long2 BIGINT(20), ")
+    				.append("date1 DATETIME, ")
+    				.append("date2 DATETIME, ")
+    				.append("UNIQUE KEY tuvId (tuvId), ")
+    				.append("KEY tuId (tuId), ")
+    				.append("KEY tmId (tmId) ")
+    				.append(") ENGINE=INNODB;");
+    		SQLUtil.exec(conn, stmt.toString());
+        }
     }
 
     protected void destroyAttrTable() throws SQLException {

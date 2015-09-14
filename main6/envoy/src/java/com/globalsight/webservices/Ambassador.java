@@ -4178,7 +4178,6 @@ public class Ambassador extends AbstractWebService
 				.start(Ambassador.class,
 						"getTranslationPercentage(p_accessToken,p_jobId,p_targetLocales)",
 						activityArgs);
-
 		try
 		{
 			Assert.assertNotEmpty(p_jobId);
@@ -4198,16 +4197,16 @@ public class Ambassador extends AbstractWebService
 			if (job == null)
 			{
 				return makeErrorXml(GET_TRANSLATION_PERCENTAGE,
-						"Invalid job id :" + p_jobId);
+						"Invalid job id:" + p_jobId);
 			}
 
 			if (!isInSameCompany(userName, String.valueOf(job.getCompanyId())))
 			{
 				return makeErrorXml(
 						GET_TRANSLATION_PERCENTAGE,
-						"Invalid job id :"
+						"Invalid job id:"
 								+ p_jobId
-								+ ",current user is not in the same company with the job.");
+								+ ", current user is not in the same company with the job.");
 			}
 		}
 		catch (Exception e)
@@ -4230,7 +4229,7 @@ public class Ambassador extends AbstractWebService
 					{
 						return makeErrorXml(
 								GET_TRANSLATION_PERCENTAGE,
-								"Invalid target locale : "
+								"Invalid target locale: "
 										+ trgLocalArr[i].trim());
 					}
 
@@ -4248,15 +4247,15 @@ public class Ambassador extends AbstractWebService
 					{
 						return makeErrorXml(
 								GET_TRANSLATION_PERCENTAGE,
-								"Invalid target locale : "
+								"Invalid target locale: "
 										+ trgLocalArr[i]
-										+ ",the current job is not included the target locale.");
+										+ ", the current job is not included the target locale.");
 					}
 				}
 				catch (Exception e)
 				{
 					return makeErrorXml(GET_TRANSLATION_PERCENTAGE,
-							"Invalid target locale : " + trgLocalArr[i].trim());
+							"Invalid target locale: " + trgLocalArr[i].trim());
 				}
 			}
 		}
@@ -4283,6 +4282,9 @@ public class Ambassador extends AbstractWebService
 			xml.append("\t\t\t<targetLocal>")
 					.append(wf.getTargetLocale().getDisplayName())
 					.append("</targetLocal>\r\n");
+			xml.append("\t\t\t<percentageCompletion>")
+					.append(wf.getPercentageCompletion())
+					.append("%</percentageCompletion>\r\n");
 			xml.append("\t\t\t<targetPages>\r\n");
 			Vector<TargetPage> trgPages = wf.getTargetPages();
 			Iterator<TargetPage> itPages = trgPages.iterator();
@@ -4295,9 +4297,9 @@ public class Ambassador extends AbstractWebService
 						.append("</pageName>\r\n");
 				int pagePercentage = SegmentTuvUtil
 						.getTranslatedPercentageForTargetPage(page.getId());
-				xml.append("\t\t\t\t\t<pageTranslationPrecentage>")
+				xml.append("\t\t\t\t\t<pageTranslationPercentage>")
 						.append(pagePercentage)
-						.append("%</pageTranslationPrecentage>\r\n");
+						.append("%</pageTranslationPercentage>\r\n");
 				xml.append("\t\t\t\t</targetPage>\r\n");
 			}
 			xml.append("\t\t\t</targetPages>\r\n");
@@ -4305,6 +4307,9 @@ public class Ambassador extends AbstractWebService
 		}
 		xml.append("\t</workflows>\r\n");
 		xml.append("</job>");
+		
+		activityStart.end();
+		
 		return xml.toString();
 	}
 

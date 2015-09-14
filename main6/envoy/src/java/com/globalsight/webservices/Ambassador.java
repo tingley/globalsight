@@ -391,6 +391,8 @@ public class Ambassador extends AbstractWebService
     public static final String GENERATE_QA_CHECKS_REPORTS = "generateQAChecksReports";
     
     public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
+    
+    public static final String GET_TRANSLATION_PERCENTAGE = "getTranslationPercentage";
 
     public static String ERROR_JOB_NAME = "You cannot have \\, /, :, ;, *, ?, |, \", &lt;, &gt;, % or &amp; in the Job Name.";
 
@@ -4129,6 +4131,181 @@ public class Ambassador extends AbstractWebService
 			return "Success.";
 		}
 		return "Nothing has been changed.";
+	}
+
+	/**
+	 * Get job translation percentage
+	 * 
+	 * @param p_jobId
+	 *            Job id can not empty.
+	 * @param p_targetLocales
+	 *            Target locale can be empty, can be one or more.
+	 * @return Return xml, for example: <?xml version="1.0" encoding="UTF-8" ?>
+	 *         <job> 
+	 *         		<id>280</id> 
+	 *         		<name>job_4012_861430940</name> 
+	 *         		<workflows>
+	 *         			<workflow> 
+	 *         				<targetLocal>French (France) [fr_FR]</targetLocal>
+	 *         				<targetPages> 
+	 *         					<targetPage>
+	 *         						<pageName>en_US\280\Welocalize_Company_IncludingRepeat_Codesensitive.html</pageName>
+	 *         						<pageTranslationPrecentage>0%</pageTranslationPrecentage>
+	 *         					</targetPage> 
+	 *         					<targetPage>
+	 *         						<pageName>en_US\280\Welocalize_Company_IncludingRepeat_Leverage Match Threshold.html</pageName>
+	 *         						<pageTranslationPrecentage>0%</pageTranslationPrecentage>
+	 *         					</targetPage> 
+	 *         					<targetPage>
+	 *         						<pageName>en_US\280\Welocalize_Company_IncludingRepeat.html</pageName>
+	 *        						<pageTranslationPrecentage>0%</pageTranslationPrecentage>
+	 *         					</targetPage>
+	 *         				</targetPages> 
+	 *         			</workflow> 
+	 *         		</workflows>
+	 *         </job>
+	 * */
+	public String getTranslationPercentage(String p_accessToken,
+			String p_jobId, String p_targetLocales) throws WebServiceException
+	{
+		checkAccess(p_accessToken, GET_TRANSLATION_PERCENTAGE);
+		String userName = getUsernameFromSession(p_accessToken);
+		Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+		activityArgs.put("loggedUserName", userName);
+		activityArgs.put("jobId", p_jobId);
+		activityArgs.put("targetLocales", p_targetLocales);
+		ActivityLog.Start activityStart = ActivityLog
+				.start(Ambassador.class,
+						"getTranslationPercentage(p_accessToken,p_jobId,p_targetLocales)",
+						activityArgs);
+
+		try
+		{
+			Assert.assertNotEmpty(p_jobId);
+			Assert.assertIsInteger(p_jobId);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorXml(GET_TRANSLATION_PERCENTAGE, e.getMessage());
+		}
+
+		Job job = null;
+		try
+		{
+			job = ServerProxy.getJobHandler().getJobById(
+					Long.parseLong(p_jobId));
+			if (job == null)
+			{
+				return makeErrorXml(GET_TRANSLATION_PERCENTAGE,
+						"Invalid job id :" + p_jobId);
+			}
+
+			if (!isInSameCompany(userName, String.valueOf(job.getCompanyId())))
+			{
+				return makeErrorXml(
+						GET_TRANSLATION_PERCENTAGE,
+						"Invalid job id :"
+								+ p_jobId
+								+ ",current user is not in the same company with the job.");
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+			return makeErrorXml(GET_TRANSLATION_PERCENTAGE, e.getMessage());
+		}
+
+		Set<Long> trgLocalIdSet = new HashSet<Long>();
+		if (StringUtil.isNotEmpty(p_targetLocales))
+		{
+			String[] trgLocalArr = p_targetLocales.split(",");
+			GlobalSightLocale targetGSLocale = null;
+			for (int i = 0; i < trgLocalArr.length; i++)
+			{
+				try
+				{
+					targetGSLocale = getLocaleByName(trgLocalArr[i].trim());
+					if (targetGSLocale == null)
+					{
+						return makeErrorXml(
+								GET_TRANSLATION_PERCENTAGE,
+								"Invalid target locale : "
+										+ trgLocalArr[i].trim());
+					}
+
+					long sameId = -1;
+					for (Workflow wf : job.getWorkflows())
+					{
+						if (targetGSLocale.getId() == wf.getTargetLocale()
+								.getId())
+						{
+							sameId = wf.getTargetLocale().getId();
+							trgLocalIdSet.add(targetGSLocale.getId());
+						}
+					}
+					if (sameId == -1)
+					{
+						return makeErrorXml(
+								GET_TRANSLATION_PERCENTAGE,
+								"Invalid target locale : "
+										+ trgLocalArr[i]
+										+ ",the current job is not included the target locale.");
+					}
+				}
+				catch (Exception e)
+				{
+					return makeErrorXml(GET_TRANSLATION_PERCENTAGE,
+							"Invalid target locale : " + trgLocalArr[i].trim());
+				}
+			}
+		}
+
+		StringBuffer xml = new StringBuffer(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+		xml.append("<job>\r\n");
+		xml.append("\t<id>").append(job.getId()).append("</id>\r\n");
+		xml.append("\t<name>").append(job.getJobName()).append("</name>\r\n");
+		xml.append("\t<workflows>\r\n");
+		Iterator<Workflow> it = job.getWorkflows().iterator();
+		while (it.hasNext())
+		{
+			Workflow wf = (Workflow) it.next();
+			if (trgLocalIdSet != null && trgLocalIdSet.size() > 0)
+			{
+				if (!trgLocalIdSet.contains(wf.getTargetLocale().getId()))
+				{
+					continue;
+				}
+			}
+
+			xml.append("\t\t<workflow>\r\n");
+			xml.append("\t\t\t<targetLocal>")
+					.append(wf.getTargetLocale().getDisplayName())
+					.append("</targetLocal>\r\n");
+			xml.append("\t\t\t<targetPages>\r\n");
+			Vector<TargetPage> trgPages = wf.getTargetPages();
+			Iterator<TargetPage> itPages = trgPages.iterator();
+			while (itPages.hasNext())
+			{
+				TargetPage page = (TargetPage) itPages.next();
+				xml.append("\t\t\t\t<targetPage>\r\n");
+				xml.append("\t\t\t\t\t<pageName>")
+						.append(page.getExternalPageId())
+						.append("</pageName>\r\n");
+				int pagePercentage = SegmentTuvUtil
+						.getTranslatedPercentageForTargetPage(page.getId());
+				xml.append("\t\t\t\t\t<pageTranslationPrecentage>")
+						.append(pagePercentage)
+						.append("%</pageTranslationPrecentage>\r\n");
+				xml.append("\t\t\t\t</targetPage>\r\n");
+			}
+			xml.append("\t\t\t</targetPages>\r\n");
+			xml.append("\t\t</workflow>\r\n");
+		}
+		xml.append("\t</workflows>\r\n");
+		xml.append("</job>");
+		return xml.toString();
 	}
 
     /**

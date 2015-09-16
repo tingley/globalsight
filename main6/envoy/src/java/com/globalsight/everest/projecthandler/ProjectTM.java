@@ -50,8 +50,9 @@ public class ProjectTM extends PersistentObject implements Tm
     private long m_lastTUId = -1;
     private long m_convertedTM3Id = -1;
     private String m_status = "";
-
     private boolean indexTarget = false;
+
+    private Set<TMAttribute> attributes;
 
     public String getStatus()
     {
@@ -208,8 +209,6 @@ public class ProjectTM extends PersistentObject implements Tm
     {
         this.m_tm3Id = tm3Id;
     }
-
-    private Set<TMAttribute> attributes;
 
     public List<TMAttribute> getAllTMAttributes()
     {

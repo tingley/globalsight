@@ -225,7 +225,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TEMPLATE = "delete from TEMPLATE where ID in ";
     private static final String SQL_DELETE_TEMPLATE_PART = "delete from TEMPLATE_PART where ID in ";
     private static final String SQL_DELETE_TEMPLATE_PART_ARCHIVED = "delete from TEMPLATE_PART_ARCHIVED where ID in ";
-    private static final String SQL_DELETE_TM_ATTRIBUTE = "delete from TM_ATTRIBUTE where TM_ID in ";
+    private static final String SQL_DELETE_TM_ATTRIBUTE = "delete from PROJECT_TM_ATTRIBUTE where TM_ID in ";
     private static final String SQL_DELETE_TM_PROFILE_PROJECT_TM_INFO = "delete from TM_PROFILE_PROJECT_TM_INFO where PROJECT_TM_ID in ";
     private static final String SQL_DELETE_TM_PROFILE = "delete from TM_PROFILE where PROJECT_TM_ID_FOR_SAVE in ";
     private static final String SQL_DELETE_TM_PROFILE_ATTRIBUTE = "delete from TM_PROFILE_ATTRIBUTE where TMP_ID in ";
@@ -3523,9 +3523,9 @@ public class CompanyRemoval
     private void removeTmAttribute(Connection conn,
             List<List<Object>> projectTmIds) throws SQLException
     {
-        logStart("TM_ATTRIBUTE");
+        logStart("PROJECT_TM_ATTRIBUTE");
         exec(conn, SQL_DELETE_TM_ATTRIBUTE, projectTmIds);
-        logEnd("TM_ATTRIBUTE");
+        logEnd("PROJECT_TM_ATTRIBUTE");
     }
 
     private void removeTmProfileProjectTmInfo(Connection conn,

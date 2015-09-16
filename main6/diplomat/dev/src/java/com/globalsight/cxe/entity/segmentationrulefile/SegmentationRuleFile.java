@@ -100,4 +100,8 @@ public interface SegmentationRuleFile
      */
     public void inActive();
 
+    
+    public void setIsDefault(boolean isDefault);
+    
+    public boolean getIsDefault();
 }

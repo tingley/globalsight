@@ -1072,20 +1072,25 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             storage.updateTuvs(conn, tu, modified, event);
             // delete old fingerprints from updated tuv even without
             // indexTarget, because it might have been indexed in the past
+			for (TM3Tuv<T> tuv : modified)
+			{
+				getStorageInfo().getFuzzyIndex().deleteFingerprints(conn, tuv);
+            }
+
+            for (TM3Tuv<T> tuv : added)
+            {
+            	if (tuv.getId() == srcTuv.getId() || indexTarget)
+            	{
+            		getStorageInfo().getFuzzyIndex().index(conn, tuv);
+            	}
+            }
+
             for (TM3Tuv<T> tuv : modified)
             {
-                getStorageInfo().getFuzzyIndex().deleteFingerprints(conn, tuv);
-            }
-            if (indexTarget)
-            {
-                for (TM3Tuv<T> tuv : added)
-                {
-                    getStorageInfo().getFuzzyIndex().index(conn, tuv);
-                }
-                for (TM3Tuv<T> tuv : modified)
-                {
-                    getStorageInfo().getFuzzyIndex().index(conn, tuv);
-                }
+            	if (tuv.getId() == srcTuv.getId() || indexTarget)
+            	{
+            		getStorageInfo().getFuzzyIndex().index(conn, tuv);
+            	}
             }
 
             return tu;

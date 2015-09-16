@@ -16,7 +16,6 @@
       com.globalsight.everest.foundation.Timestamp,
       com.globalsight.everest.foundation.User,
       com.globalsight.everest.jobhandler.Job,
-      com.globalsight.everest.jobhandler.JobEditionInfo,
       com.globalsight.everest.page.PageWordCounts,
       com.globalsight.everest.page.PrimaryFile,
       com.globalsight.everest.page.SourcePage,
@@ -125,12 +124,7 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadDitaReport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="originalSourceFile" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="taskCommentList" scope="request"
- class="java.util.ArrayList" />
-<jsp:useBean id="recreateGS" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="taskCommentList" scope="request" class="java.util.ArrayList" />
 <jsp:useBean id="updateLeverage" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="pageSearch" scope="request"
@@ -305,14 +299,7 @@
 				        "="+theTask.getId()+
 				        "&"+WebAppConstants.TASK_STATE+
 				        "="+theTask.getState();
-        
-    String recreateGSUrl = recreateGS.getPageURL() +
-				    		"&" + WebAppConstants.TASK_ACTION +
-				        	"=" + WebAppConstants.RECREATE_EDITION_JOB+
-					     	 //GBS-2913 Added to the url parameter taskId,state
-					        "&"+WebAppConstants.TASK_ID+"="+theTask.getId()+
-					        "&"+WebAppConstants.TASK_STATE+"="+theTask.getState();
-    
+
     String downloadUrl = download.getPageURL()
 				    		//GBS 2913 add taskID and taskState
 				    		+ "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
@@ -407,9 +394,6 @@
     String stfCreationState = theTask.getStfCreationState();
     String sourceLocale = theTask.getSourceLocale().getDisplayName(uiLocale);
     String targetLocale = theTask.getTargetLocale().getDisplayName(uiLocale);
-    boolean isEstimatedCompletionDateOverrided = theTask.getWorkflow().isEstimatedCompletionDateOverrided();
-    ts.setDate(theTask.getWorkflow().getEstimatedCompletionDate());
-    String estimatedCompletionDate = ts.toString();
     ts.setDate(theTask.getEstimatedCompletionDate());
     String dueDate = ts.toString();
     ts.setDate(theTask.getCompletedDate());
@@ -528,14 +512,7 @@
 
     //  Majority of cases it is Due Date
     labelABorDBorCODate = labelDueDate;
-    if(isEstimatedCompletionDateOverrided)
-    {
- 		 valueABorDBorCODate = estimatedCompletionDate;
-    }
-    else
-    {
-    	 valueABorDBorCODate = dueDate;
-    }
+    valueABorDBorCODate = dueDate;
 
     switch (state)
     {
@@ -547,14 +524,7 @@
             status = labelFinished;
             disableButtons = true;
             labelABorDBorCODate = labelCompletedOn;
-            if(isEstimatedCompletionDateOverrided)
-            {
-           		 valueABorDBorCODate = estimatedCompletionDate;
-            }
-            else
-            {
-            	valueABorDBorCODate = completedOn;
-            }
+            valueABorDBorCODate = completedOn;
             break;
         case Task.STATE_REJECTED:
             status = labelRejected;
@@ -566,14 +536,7 @@
         case Task.STATE_ACTIVE:
             status = labelAvailable;
             labelABorDBorCODate = labelAcceptBy;
-            if(isEstimatedCompletionDateOverrided)
-            {
-          		 valueABorDBorCODate = estimatedCompletionDate;
-           }
-            else
-            {
            	valueABorDBorCODate = acceptBy;
-           }
             rowspan = 12;
             break;
         case Task.STATE_DISPATCHED_TO_TRANSLATION:
@@ -1080,10 +1043,6 @@ function doUnload()
     w_updateLeverage = null;
 }
 
-function recreateGSEdition(urlSent) {
-    location.replace(urlSent);
-}
-
 function submitDtpForm(form, buttonClicked, linkParam) {
     if(buttonClicked == "DtpDownload") {
         form.action = "<%=dtpDownloadURL%>&taskAction=<%=WebAppConstants.DTP_DOWNLOAD%>" + linkParam;
@@ -1480,68 +1439,6 @@ function searchPages(){
 	</div>
 </amb:permission>
 <!-- End Pages table -->
-
-<!-- Original Source File -->
-<%
-WorkflowManagerLocal wml =  new WorkflowManagerLocal();
-JobEditionInfo je = wml.getGSEditionJobByJobID(Long.parseLong(jobId));
-if(je != null) {
-%>
-<BR>
-    <Div class="tableContainer" id="data" style="height:100%;border:solid 1px slategray;">
-    <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width=900>
-    <THEAD id=scroll>
-      <COL> <!-- Icon -->
-        
-      <TR CLASS="tableHeadingBasic">
-        <TD COLSPAN=2 style="width: 100%;"><%=bundle.getString("lb_original_source_file_heading")%>
-          <SPAN CLASS="smallWhiteItalic">(<%=labelClickToView%>)</SPAN>
-        </TD>
-     </TR>
-   </THEAD>
-   <tbody>
-       <%
-       StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                .getInstance().getStringParameter(
-                        SystemConfigParamNames.FILE_STORAGE_DIR));
-
-       fileStorageRoot = fileStorageRoot.append(File.separator).append(
-                WebAppConstants.VIRTUALDIR_TOPLEVEL).append(File.separator).append(
-                WebAppConstants.ORIGINAL_SORUCE_FILE).append(File.separator)
-                .append(jobName).append(File.separator).append(theTask.getTargetLocale());
-                
-       File parentFilePath = new File(fileStorageRoot.toString());
-       File[] files = parentFilePath.listFiles();
-        
-    	 if (files != null && files.length > 0){
-        	 for (int i=0; i<files.length; i++) {
-        			File file = files[i];
-        			String fileName = file.getName();
-        			String fileLink = originalSourceFile.getPageURL() + 
-        			    "&action=downloadSourceFile&local="+theTask.getTargetLocale() + 
-        			    "&fileName=" + fileName + "&jobName=" +  jobName;
-        			fileLink = URLEncoder.encodeUrlStr(fileLink);
-        			fileLink = fileLink.replace("%2F", "/");
-       %>
-        			<TR  VALIGN=TOP CLASS="standardText">
-            			
-                  <TD CLASS="standardText">
-                  <IMG SRC="<%=unExtractedImage%>"
-                    ALT="<%=bundle.getString("lb_original_source_file_heading")%>"  
-                    WIDTH=13 HEIGHT=15>
-                  <A CLASS="standardHREF" HREF="<%=fileLink%>" target="_blank"><%=fileName%>
-                  </A>
-                  </TD>
-             </TR>  
-       <%
-           }
-       }
-       %>
-        
-    </TBODY>
-	</TABLE>
-</DIV>
-<%}%>
 
 <!-- Primary Unextracted Source File table -->
 <%

@@ -442,7 +442,7 @@ function editEntry(tmId, tuId, sourceLocale, sourceTuvId, targetLocale, targetTu
 		editWindow=null;
 	}
 	var editEntry = "<%=editEntryUrl%>"+"&tmId=" + tmId + "&tuId=" + tuId+"&sourceLocale="+sourceLocale+"&sourceTuvId="+sourceTuvId+"&targetLocale="+targetLocale+"&targetTuvId=" + targetTuvId;
-	editWindow = window.open(editEntry, "EditEntry", "resizable,width=700,height=630, scrollbars" + ",top=200,left=300");
+	editWindow = window.open(editEntry, "EditEntry", "resizable,width=700,height=690, scrollbars" + ",top=200,left=300");
 }
 
 function showNoResults()
@@ -1544,12 +1544,12 @@ function disableLastUsageOption(){
 						  <td>
 							<table cellspacing="0" cellpadding="4" border="0" class="standardTextNew">
 							  <tr>
-							    <td class="search_content"nowrap>
-							       ${lb_export_tu_id}: <input type="text" id="tuIds" name="tuIds" value=""/>
-							    </td>
 							    <td class="search_content" nowrap>
 							    	${lb_export_sid}: <input type="text" id="sids" name="sids" value=""/>&nbsp;&nbsp;<input type="checkbox" id="isRegex" name="isRegex"/>${lb_export_regex}
       							</td>
+							    <td class="search_content"nowrap>
+							       ${lb_export_tu_id}: <input type="text" id="tuIds" name="tuIds" value=""/>
+							    </td>
       							<td class="search_content" nowrap>
 							     	Attribute Name: <input type="text" id="attributeName" name="attributeName" value=""/>
       							</td>

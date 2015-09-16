@@ -37,11 +37,9 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.foundation.WorkObject;
-import com.globalsight.everest.gsedition.GSEditionException;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.JobPersistenceAccessor;
-import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.comment.CommentQueryResultHandler;
 import com.globalsight.everest.persistence.comment.CommentUnnamedQueries;
 import com.globalsight.everest.persistence.comment.IssueUnnamedQueries;
@@ -269,7 +267,7 @@ public class CommentManagerLocal implements CommentManager
             CommentException
     {
         return saveComment(p_wo, p_id, p_creatorUserId, p_comment, Calendar
-                .getInstance().getTime(), null, null);
+                .getInstance().getTime());
     }
 
     /**
@@ -277,29 +275,6 @@ public class CommentManagerLocal implements CommentManager
      */
     public Comment saveComment(WorkObject p_wo, long p_id,
             String p_creatorUserId, String p_comment, Date p_date)
-            throws RemoteException, CommentException
-    {
-        return saveComment(p_wo, p_id, p_creatorUserId, p_comment, p_date,
-                null, null);
-    }
-
-    /**
-     * @see CommentManager.save(WorkObject, long, String, String, String)
-     */
-    public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserId, String p_comment, String p_originalId,
-            String p_originalWsdlUrl) throws RemoteException, CommentException
-    {
-        return saveComment(p_wo, p_id, p_creatorUserId, p_comment, Calendar
-                .getInstance().getTime(), p_originalId, p_originalWsdlUrl);
-    }
-
-    /**
-     * @see CommentManager.save(WorkObject, long, String, String, Date)
-     */
-    public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserId, String p_comment, Date p_date,
-            String p_originalId, String p_originalWsdlUrl)
             throws RemoteException, CommentException
     {
         // not supposed to save null comment
@@ -325,8 +300,6 @@ public class CommentManagerLocal implements CommentManager
         try
         {
             comment = new CommentImpl(p_date, p_creatorUserId, p_comment, p_wo);
-            comment.setOriginalId(p_originalId);
-            comment.setOriginalWsdlUrl(p_originalWsdlUrl);
             session.save(comment);
 
             if (p_wo instanceof Job)
@@ -1002,31 +975,6 @@ public class CommentManagerLocal implements CommentManager
             p_originalComment.setComment(p_updatedComment);
             p_originalComment.setModifierId(p_modifierUserId);
             p_originalComment.setModifiedDate(Calendar.getInstance().getTime());
-        }
-    }
-
-    public void saveIssuEditionRelation(IssueEditionRelation ier)
-            throws RemoteException, GSEditionException
-    {
-        Session session = null;
-        Transaction transaction = null;
-
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-            session.save(ier);
-            transaction.commit();
-        }
-        catch (PersistenceException e)
-        {
-            try
-            {
-                transaction.rollback();
-            }
-            catch (Exception e2)
-            {
-            }
         }
     }
 

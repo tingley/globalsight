@@ -616,16 +616,9 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         {
             return m_state;
         }
-        if (m_wfTaskInstance != null && m_wfTaskInstance.getActivity() != null)
+        if (m_wfTaskInstance != null)
         {
-            if (m_wfTaskInstance.getActivity().getEditionActionID() != null)
-            {
-                return m_state;
-            }
-            else
-            {
-                return m_wfTaskInstance.getTaskStateForAssignee();
-            }
+        	return m_wfTaskInstance.getTaskStateForAssignee();
         }
 
         return m_state;
@@ -1080,18 +1073,28 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     /**
      * @see Task.getEstimatedAcceptanceDate()
      */
-    public Date getEstimatedAcceptanceDate()
-    {
-        return m_estimatedAcceptanceDate;
-    }
+	public Date getEstimatedAcceptanceDate()
+	{
+		if (m_workflow != null
+				&& m_workflow.isEstimatedCompletionDateOverrided())
+		{
+			m_estimatedAcceptanceDate = m_workflow.getEstimatedCompletionDate();
+		}
+		return m_estimatedAcceptanceDate;
+	}
 
     /**
      * @see Task.getEstimatedCompletionDate()
      */
     public Date getEstimatedCompletionDate()
-    {
-        return m_estimatedCompletionDate;
-    }
+	{
+		if (m_workflow != null
+				&& m_workflow.isEstimatedCompletionDateOverrided())
+		{
+			m_estimatedCompletionDate = m_workflow.getEstimatedCompletionDate();
+		}
+		return m_estimatedCompletionDate;
+	}
 
     /**
      * @see Task.setEstimatedAcceptanceDate(Date)

@@ -290,14 +290,28 @@ function init()
     if (needUpdatePopupEditor == "next" && !hasRefreshPopupEditorFlag)
     {
     	hasRefreshPopupEditorFlag = true;
-    	parentRefreshUrl = "/globalsight/ControlServlet?linkName=refresh&pageName=ED2&refresh=11&where=se";
-    	window.opener.parent.parent.parent.Refresh(parentRefreshUrl);
+    	if(typeof(window.opener.postReviewEditor) == "undefined")
+    	{
+    		parentRefreshUrl = "/globalsight/ControlServlet?linkName=refresh&pageName=ED2&refresh=11&where=se";
+        	window.opener.parent.parent.parent.Refresh(parentRefreshUrl);
+    	}
+    	else
+    	{
+        	window.opener.refresh(11);
+    	}
     }
     else if (needUpdatePopupEditor == "previous" && !hasRefreshPopupEditorFlag)
     {
     	hasRefreshPopupEditorFlag = true;
-    	parentRefreshUrl = "/globalsight/ControlServlet?linkName=refresh&pageName=ED2&refresh=-11&where=se";
-    	window.opener.parent.parent.parent.Refresh(parentRefreshUrl);
+    	if(typeof(window.opener.postReviewEditor) == "undefined")
+    	{
+	    	parentRefreshUrl = "/globalsight/ControlServlet?linkName=refresh&pageName=ED2&refresh=-11&where=se";
+	    	window.opener.parent.parent.parent.Refresh(parentRefreshUrl);
+    	}
+    	else
+    	{
+	    	window.opener.refresh(-11);
+    	}
     }
 }
 
@@ -696,6 +710,7 @@ function saveFromFirefoxRichedit()
     g_refreshing = true;
     var text = fr_editor.GetTargetSegment();
 	$.ajax({
+		type : "POST",
 		url : 'OnlineService?action=doErrorCheck2',
 		cache : false,
 		data : {

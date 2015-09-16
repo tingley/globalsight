@@ -17,14 +17,12 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -59,13 +57,9 @@ import com.globalsight.config.UserParamNames;
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
 import com.globalsight.cxe.engine.util.XmlUtils;
-import com.globalsight.cxe.entity.exportlocation.ExportLocation;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
-import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
-import com.globalsight.everest.comment.CommentManagerLocal;
-import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
@@ -74,12 +68,10 @@ import com.globalsight.everest.foundation.ContainerRole;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.jobhandler.JobHandler;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
@@ -90,9 +82,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.tuv.LeverageGroup;
-import com.globalsight.everest.tuv.Tu;
-import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -119,8 +108,6 @@ import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.modules.Modules;
-import com.globalsight.webservices.client.Ambassador;
-import com.globalsight.webservices.client.WebServiceClientHelper;
 
 public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 {
@@ -423,7 +410,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 			{
 				download = "fail";
 			}
-			Map<String, Object> returnValue = new HashMap();
+			Map<String, Object> returnValue = new HashMap<String, Object>();
 			returnValue.put("download", download);
 			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
 			return;
@@ -471,7 +458,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 			jobImpl.setPriority(Integer.parseInt(selectOption));
 			HibernateUtil.merge(job);
 
-			Map<String, Object> returnValue = new HashMap();
+			Map<String, Object> returnValue = new HashMap<String, Object>();
 			returnValue.put("newPriority", jobImpl.getPriority());
 			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
 			return;
@@ -486,7 +473,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
         parseRequestParameterDistribute(p_request, job);
         packJobWorkflowInfoView(p_request, job);
-        dealWithGSEditionJob(p_request, job);
         packSessionMgrAttr(p_request);
         
         if (Job.CANCELLED.equals(job.getState()))
@@ -711,8 +697,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            	CATEGORY.error(e);
             }
 
             List<String> targetLocales = new ArrayList<String>();
@@ -726,8 +711,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 }
                 catch (Exception e)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                	CATEGORY.error(e);
                 }
             }
 
@@ -895,8 +879,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 Modules.isCustomerAccessGroupInstalled());
         p_request.setAttribute("isVendorManagementInstalled",
                 Modules.isVendorManagementInstalled());
-        // TODO p_request.setAttribute("canReSendingBack",
-        // canReSendingBack(job));
         p_request.setAttribute("reimportOption", getReimportOption());
         // control Estimated Review Start column access permission
         p_request
@@ -917,209 +899,12 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 		}
     }
 
-    private void dealWithGSEditionJob(HttpServletRequest p_request, Job job)
-    {
-        JobEditionInfo je = getGSEditionJobByJobID(job.getId());
-        if (je != null)
-        {
-            if ("sendingbackEditionJob"
-                    .equals(p_request.getParameter("action")))
-            {
-                sendEditionFilesAndCommentsBack(je, job);
-            }
-            if ((job.getState().equals(Job.EXPORTED) || job.getState().equals(
-                    Job.LOCALIZED))
-                    && je.getSendingBackStatus() != null)
-            {
-                if (!je.getSendingBackStatus().equals(
-                        "sending_back_edition_finished"))
-                {
-                    p_request.setAttribute("sending_back_edition", true);
-                }
-            }
-        }
-    }
-
     private boolean isSuperAdmin(HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
         String userId = (String) session
                 .getAttribute(WebAppConstants.USER_NAME);
         return UserUtil.isSuperAdmin(userId);
-    }
-
-    private JobEditionInfo getGSEditionJobByJobID(long jobID)
-    {
-        JobEditionInfo je = new JobEditionInfo();
-
-        try
-        {
-            String hql = "from JobEditionInfo a where a.jobId = :id";
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("id", Long.toString(jobID));
-            Collection servers = HibernateUtil.search(hql, map);
-            Iterator i = servers.iterator();
-            je = i.hasNext() ? (JobEditionInfo) i.next() : null;
-        }
-        catch (Exception pe)
-        {
-            // s_logger.error("Persistence Exception when retrieving JobEditionInfo",
-            // pe);
-        }
-
-        return je;
-    }
-
-    /**
-     * Send GS edition files and comment data back to original GS server.
-     * 
-     * @param p_editionInfo
-     * @param p_job
-     */
-    private void sendEditionFilesAndCommentsBack(JobEditionInfo p_editionInfo,
-            Job p_job)
-    {
-        try
-        {
-            ExportLocationPersistenceManager mgr = ServerProxy
-                    .getExportLocationPersistenceManager();
-            ExportLocation eLoc = mgr.getDefaultExportLocation();
-            String exportLocation = eLoc.getLocation();
-            List workflows = JobExportHandler.activeWorkflows(p_job);
-
-            String wsdl = p_editionInfo.getUrl();
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    wsdl, p_editionInfo.getUserName(),
-                    p_editionInfo.getPassword());
-
-            String fullAccessToken = ambassador.login(
-                    p_editionInfo.getUserName(), p_editionInfo.getPassword());
-
-            String realAccessToken = WebServiceClientHelper
-                    .getRealAccessToken(fullAccessToken);
-            // GS Edition job only have one workflow
-            Workflow workflow = (Workflow) workflows.get(0);
-            if (!p_editionInfo.getSendingBackStatus().equals(
-                    "sending_back_edition_finished"))
-            {
-                sendingBackEditionIssue(workflow, ambassador, realAccessToken);
-                sendingBackEditionJob(workflow, ambassador, realAccessToken,
-                        exportLocation, p_editionInfo);
-                Session HibSession = HibernateUtil.getSession();
-                Transaction tx = HibSession.beginTransaction();
-                p_editionInfo
-                        .setSendingBackStatus("sending_back_edition_finished");
-                tx.commit();
-            }
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Re-Sending back edition job error", e);
-        }
-    }
-
-    private void sendingBackEditionIssue(Workflow workflow,
-            Ambassador ambassador, String realAccessToken)
-    {
-        try
-        {
-            Iterator<TargetPage> iter = workflow.getTargetPages().iterator();
-
-            while (iter.hasNext())
-            {
-                TargetPage tp = iter.next();
-                List<LeverageGroup> lg = tp.getExtractedFile()
-                        .getLeverageGroupSet();
-
-                for (int x = 0; x < lg.size(); x++)
-                {
-                    LeverageGroup leverageGroup = lg.get(x);
-                    Iterator<Tu> tus = leverageGroup.getTus().iterator();
-                    HashMap<Long, HashMap> segComments = new HashMap<Long, HashMap>();
-
-                    while (tus.hasNext())
-                    {
-                        Tu tu = tus.next();
-                        Tuv tuv = tu.getTuv(tp.getLocaleId(), workflow.getJob()
-                                .getId());
-                        CommentManagerLocal cm = new CommentManagerLocal();
-                        HashMap tempMap = cm.getIssuesMapByTuv(tuv);
-                        long oldTUID = getOldTuIDForGSEditionJob(tuv.getId());
-                        segComments.put(oldTUID, tempMap);
-                    }
-
-                    ambassador.sendSegmentCommentBack(realAccessToken,
-                            segComments);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-        }
-    }
-
-    private void sendingBackEditionJob(Workflow workflow,
-            Ambassador ambassador, String realAccessToken,
-            String exportLocation, JobEditionInfo je)
-    {
-        try
-        {
-            Iterator iter = workflow.getTargetPages().iterator();
-
-            while (iter.hasNext())
-            {
-                TargetPage tp = (TargetPage) iter.next();
-                String exportingFileName = tp.getExternalPageId();
-                int index = exportingFileName.indexOf(File.separator);
-                exportingFileName = exportingFileName.substring(index + 1);
-                exportingFileName = exportLocation + File.separator
-                        + tp.getGlobalSightLocale().getLanguage() + "_"
-                        + tp.getGlobalSightLocale().getCountry()
-                        + File.separator + exportingFileName;
-                File finalFile = new File(exportingFileName);
-
-                FileInputStream is = new FileInputStream(finalFile);
-                byte[] bytes = new byte[(int) finalFile.length()];
-                is.read(bytes, 0, bytes.length);
-                is.close();
-
-                String pagename = exportingFileName.substring(exportingFileName
-                        .lastIndexOf(File.separator) + 1);
-
-                ambassador.uploadEditionFileBack(realAccessToken,
-                        je.getOriginalTaskId(), pagename, bytes);
-            }
-
-            ambassador.importOfflineTargetFiles(realAccessToken,
-                    je.getOriginalTaskId());
-        }
-        catch (Exception e)
-        {
-        }
-    }
-
-    private long getOldTuIDForGSEditionJob(long tuvid)
-    {
-        long oldTuID = -1;
-
-        try
-        {
-            String hql = "from IssueEditionRelation a where a.tuv.id = :tuvid";
-            HashMap map = new HashMap();
-            map.put("tuvid", tuvid);
-            Collection servers = HibernateUtil.search(hql, map);
-            Iterator i = servers.iterator();
-            IssueEditionRelation ir = i.hasNext() ? (IssueEditionRelation) i
-                    .next() : null;
-            oldTuID = ir.getOriginalTuId();
-        }
-        catch (Exception pe)
-        {
-            // s_logger.error("Persistence Exception when retrieving IssueEditionRelation",
-            // pe);
-        }
-
-        return oldTuID;
     }
 
     private int getReimportOption()

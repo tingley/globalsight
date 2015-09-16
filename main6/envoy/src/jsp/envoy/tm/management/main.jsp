@@ -567,7 +567,8 @@ function filterItems(e) {
     <TD>
       <P>
       <DIV ALIGN="left">
-      <% if (b_corpus) { %>
+      <!-- hide "Coupus Browser" button -->
+      <% if (false) { %>
     <amb:permission name="<%=Permission.TM_BROWSER%>" >
       <INPUT CLASS="standardText" TYPE="BUTTON"
       VALUE="<%=bundle.getString("lb_corpus_browser")%>"

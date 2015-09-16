@@ -34,7 +34,7 @@ import com.globalsight.ling.docproc.TranslatableElement;
  */
 public class EmojiUtil
 {
-    public static final String TYPE_EMOJI = "emoji-";
+    public static final String TYPE_EMOJI = "gs-protect-emoji-";
     public static final Pattern P_EMOJI_TAG = Pattern
             .compile("(<ph[^>]*?erasable=\"yes\"[^>]*?type=\"(emoji-[^<]*?)\"[^>]*?>)[^<]*?(</ph>)");
     public static final Pattern P_SUB_TAG = Pattern
@@ -117,10 +117,10 @@ public class EmojiUtil
         Matcher m = P_EMOJI_TAG.matcher(result);
         while (m.find())
         {
-            String alias = m.group(2);
-            if (alias.startsWith(TYPE_EMOJI))
+            String type = m.group(2);
+            if (type.startsWith("emoji-"))
             {
-                alias = alias.substring(6);
+                String alias = type.substring(6);
                 String replaced = TYPE_EMOJI + ":" + alias + ":";
                 result = StringUtil.replace(result, m.group(), replaced);
             }

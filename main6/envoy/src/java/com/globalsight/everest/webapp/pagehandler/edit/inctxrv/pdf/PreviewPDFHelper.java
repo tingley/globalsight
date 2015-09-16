@@ -608,7 +608,11 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             File tempDir = AmbFileStoragePathUtils.getTempFileDir();
             Job job = isTarget ? tp.getWorkflowInstance().getJob()
                     : ServerProxy.getJobHandler().getJobById(sp.getJobId());
-            FileProfile fileProfile = job.getFileProfile();
+            SourcePage sourcepage = isTarget ? tp.getSourcePage() : sp;
+            long dataSourceId = sourcepage.getRequest().getDataSourceId();
+            FileProfile fileProfile = ServerProxy
+                    .getFileProfilePersistenceManager()
+                    .readFileProfile(dataSourceId);
 
             File xmlFile = File.createTempFile("GS-xml", ".xml", tempDir);
             String xmlFilePath = xmlFile.getAbsolutePath();

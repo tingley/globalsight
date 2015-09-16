@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
@@ -166,28 +165,6 @@ public class CxeProxy
                 p_fileProfileId, p_pageCount, p_pageNum, p_docPageCount,
                 p_docPageNum, p_isAutoImport, Boolean.FALSE,
                 p_importRequestType, p_importInitiatorId, p_exitValueByScript);
-    }
-
-    /**
-     *@deprecated -- for GS Edition. 
-     */
-    static public void importFromFileSystem(String p_fileName,
-            String p_jobName, String p_batchId, String p_fileProfileId,
-            Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
-            Integer p_docPageNum, Boolean p_isAutoImport,
-            String p_importRequestType, String p_importInitiatorId,
-            Integer p_exitValueByScript, String p_priority,
-            String p_originalTaskId, String p_originalEndpoint,
-            String p_originalUserName, String p_originalPassword,
-            Vector p_jobComments, HashMap p_segComments) throws JMSException,
-            NamingException
-    {
-        importFromFileSystem(p_fileName, p_jobName, p_batchId, p_fileProfileId,
-                p_pageCount, p_pageNum, p_docPageCount, p_docPageNum,
-                p_isAutoImport, Boolean.FALSE, p_importRequestType,
-                p_importInitiatorId, p_exitValueByScript, p_priority,
-                p_originalTaskId, p_originalEndpoint, p_originalUserName,
-                p_originalPassword, p_jobComments, p_segComments);
     }
 
     /**
@@ -391,75 +368,6 @@ public class CxeProxy
         params.put("ImportInitiator", p_importInitiatorId);
         params.put("ScriptOnImport", p_exitValueByScript);
         params.put("priority", p_priority);
-
-        if (p_isAutoImport.booleanValue() == false)
-        {
-            simulateAutoImportIfNeeded(params);
-        }
-
-        // make target locales selectable when import file
-        String key = p_batchId + p_fileName + p_pageNum.intValue();
-        if (s_targetLocales.containsKey(key))
-        {
-            String targetLocales = (String) s_targetLocales.get(key);
-            if (!targetLocales.equals(""))
-                params.put("TargetLocales", targetLocales);
-            s_targetLocales.remove(key);
-        }
-
-        String jmsTopic = EventTopicMap.JMS_PREFIX
-                + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-        sendCxeMessage(cxeMessage, jmsTopic);
-    }
-
-    static public void importFromFileSystem(String p_fileName,
-            String p_jobName, String p_batchId, String p_fileProfileId,
-            Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
-            Integer p_docPageNum, Boolean p_isAutoImport,
-            Boolean p_overrideFileProfileAsUnextracted,
-            String p_importRequestType, String p_importInitiatorId,
-            Integer p_exitValueByScript, String p_priority,
-            String p_originalTaskId, String p_originalEndpoint,
-            String p_originalUserName, String p_originalPassword,
-            Vector p_jobComments, HashMap p_segComments) throws JMSException,
-            NamingException
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = cxeMessage.getParameters();
-        params.put("Filename", p_fileName);
-        String jobName = p_jobName;
-        if (p_jobName == null || p_jobName.length() == 0)
-        {
-            long timeInSec = System.currentTimeMillis() / 1000L;
-            jobName = "job_" + timeInSec;
-        }
-
-        // To make JMS message support CompanyThreadLocal, we have to do so.
-        String currentCompanyId = getCompanyIdByFileProfileId(p_fileProfileId);
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, currentCompanyId);
-
-        params.put("JobName", jobName);
-        params.put("BatchId", p_batchId);
-        params.put("FileProfileId", p_fileProfileId);
-        params.put("PageCount", p_pageCount);
-        params.put("PageNum", p_pageNum);
-        params.put("DocPageCount", p_docPageCount);
-        params.put("DocPageNum", p_docPageNum);
-        params.put("IsAutomaticImport", p_isAutoImport);
-        params.put("OverrideFileProfileAsUnextracted",
-                p_overrideFileProfileAsUnextracted);
-        params.put(IMPORT_TYPE, p_importRequestType);
-        params.put("ImportInitiator", p_importInitiatorId);
-        params.put("ScriptOnImport", p_exitValueByScript);
-        params.put("priority", p_priority);
-        params.put("taskId", p_originalTaskId);
-        params.put("wsdlUrl", p_originalEndpoint);
-        params.put("userName", p_originalUserName);
-        params.put("password", p_originalPassword);
-        params.put("jobComments", p_jobComments);
-        params.put("segComments", p_segComments);
 
         if (p_isAutoImport.booleanValue() == false)
         {

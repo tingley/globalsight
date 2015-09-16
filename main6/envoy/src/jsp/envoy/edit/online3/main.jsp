@@ -266,7 +266,7 @@ else if (state.isReadOnly())
 }
 else
 {
-	lb_title = bundle.getString("lb_main_editor");
+	lb_title = "Post Review Editor";
 }
 lb_title = lb_title + " - " + state.getSimpleSourcePageName();
 
@@ -289,6 +289,9 @@ String lb_pageNavigation = bundle.getString("lb_pageNavigation");
 String lb_showSupportFiles = bundle.getString("lb_showSupportFiles");
 String lb_showTermbases = bundle.getString("lb_showTermbases");
 String lb_source = bundle.getString("lb_source");
+String lb_source_segment = bundle.getString("lb_source_segment");
+String lb_previous_translation = bundle.getString("lb_previous_translation");
+String lb_current_translation = bundle.getString("lb_current_translation");
 String lb_supportFiles = bundle.getString("lb_supportFiles");
 String lb_target = bundle.getString("lb_target");
 String lb_termbases = bundle.getString("lb_termbases");
@@ -317,6 +320,9 @@ boolean isAssignee = assigneeValue == null ? true :
 boolean b_readOnly = state.isReadOnly();
 boolean b_isReviewActivity = state.getIsReviewActivity();
 boolean disableComment = isAssignee && b_readOnly;
+long lastTuId  = state.getTuId();
+long lastTuvId = state.getTuvId();
+long lastSubId = state.getSubId();
 
 String lb_sourceLocale = bundle.getString("lb_source_locale");
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
@@ -420,6 +426,7 @@ if (sessionMgr.getAttribute("taskStatus") != null)
 }
 
 String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_comments_warning");
+String approveAction = (String)sessionMgr.getAttribute("approveAction");
 %>
 <HTML>
 <HEAD>
@@ -431,22 +438,21 @@ String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_commen
 .foot {width:100%;position:absolute;Z-INDEX: 10; LEFT: 0px;bottom:<%=footBottom%>;}
 .commentDiv{width:100%;position:absolute;Z-INDEX: 10; LEFT: 0px;bottom:0;height:270px;}
 
-#idCommentTable { font-family: verdana; font-size: 10pt;
-                  border-bottom: 1px solid black;
-                }
-#idCommentTable TH {
-    font-size: 9pt;
-    color: <%=skin.getProperty("skin.tableHeading.fgColor")%>;
-    background-color: <%=skin.getProperty("skin.tableHeading.bgColor")%>;
-}
+.segmentTd{word-break: break-all;word-wrap : break-word; overflow:hidden;}
+.center{text-align:center;}
+
+#idCommentTable { font-family: verdana; font-size: 10pt;border-bottom: 1px solid black;}
+#idCommentTable TH {font-size: 9pt;color: <%=skin.getProperty("skin.tableHeading.fgColor")%>;background-color: <%=skin.getProperty("skin.tableHeading.bgColor")%>;}
 #idCommentTable TH SPAN { cursor: hand;  cursor:pointer;}
 
 #idCommentTable P { margin-top: 0px; margin-bottom: 0px; }
-.editorId   { font-weight: bold; }
+.editorId   { font-weight: bold;}
 
 /* Background colors for issue status, class name is the status token. */
 .open   { background-color: red !important; }
 .closed { background-color: lawngreen !important; }
+
+.noUnderline{text-decoration:none;}
 
 .clickable    	{ cursor: hand; cursor:pointer; }
 .commentTitle 	{ font-weight: bold; }
@@ -455,12 +461,23 @@ String closeeAllCommentWarning = bundle.getString("jsmsg_editor_close_all_commen
 .comment      	{ margin-left: 20px; width: 100%; word-wrap: break-word; }
 .highlight	  	{ background-color: lightskyblue;}
 .stripe			{ background-color: #eeeeee;}
+
+ul									{ list-style: none;}
+ul.dropdown                         { position: relative;padding-left:20px}
+ul.dropdown li                      { font-weight: bold;}
+ul.dropdown li a                    { display: block; padding: 4px 8px;color: #222; }
+ul.dropdown ul 						{ visibility: hidden; position: absolute; top: 100%; left: -70px; }
+<%if(approveAction.equals("true")){%>
+ul.dropdown li:hover > ul 		    { visibility: visible;}
+<%}%>
+.actionli{background:white;border-top:solid 1px black;border-left:solid 1px black;border-right:solid 1px black; }
 </STYLE>
-<link type="text/css" rel="StyleSheet" id="cssEditor" href="/globalsight/envoy/edit/online/editor.css">
+<link type="text/css" rel="StyleSheet" id="cssEditor" href="/globalsight/envoy/edit/online3/editor.css">
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script>
 var tempTotalPageNum = <%=(pi.getTotalPageNum())%>;
 var g_disableLink = eval("<%=disableComment%>");
+
 var g_reviewMode = eval("<%=state.isReviewMode()%>");
 var marklable = "<%=marklable%>";
 var unmarklable = "<%=unmarklable%>";
@@ -469,7 +486,6 @@ var url_commentEditor = "<%=url_commentEditor%>";
 var url_self = "<%=url_self%>";
 var url_refresh = "<%=url_refresh%>";
 var url_search = "<%=url_search%>";
-var url_resources = "<%=url_resources%>";
 var url_termbases = "<%=url_termbases%>";
 var url_options = "<%=url_options%>";
 var url_pageInfo = "<%=url_pageInfo%>";
@@ -485,6 +501,7 @@ var closeeAllCommentWarning = "<%=closeeAllCommentWarning%>";
 var g_disableComment = eval("<%=disableComment%>");
 var helpFile = "<%=bundle.getString("help_main_editor2")%>";
 var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
+var approveAction = "<%=approveAction%>";
 </script>
 </HEAD>
 <BODY id="idBody" oncontextmenu="contextForX(event)">
@@ -535,7 +552,7 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 		    <label id="fileNavNext"><%=lb_nextFile%></label>
 		  </TD>
 		  <TD WIDTH="20">&nbsp;</TD>
-		  <TD NOWRAP VALIGN="TOP" ALIGN="CENTER"><%=lb_pageNavigation%>&nbsp;(<%=pi.getCurrentPageNum()%> of <%=pi.getTotalPageNum()%>)<BR/>
+		  <TD NOWRAP VALIGN="TOP" ALIGN="CENTER"><%=lb_pageNavigation%>&nbsp;(<span id="currentPageNum"><%=pi.getCurrentPageNum()%></span> of <span id="totalPageNum"><%=pi.getTotalPageNum()%></span>)<BR/>
 		    <label id="pageNavPre"><%=lb_prevPage%></label>
 		    <label id="pageNavNext"><%=lb_nextPage%></label> 
 		    <label style="position: relative; bottom: 6px; left: 8px; hight: 1px">Goto
@@ -583,7 +600,6 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 		    <A href="#" onclick="showSupportFiles(); return false;" CLASS="HREFBoldWhite" title="<%=lb_showSupportFiles%>"><%=lb_supportFiles%></A> |
 		    <A href="#" onclick="showTermbases(); return false;" CLASS="HREFBoldWhite" title="<%=lb_showTermbases%>"><%=lb_termbases%></A> |
 		    <A HREF="#" onclick="showPageInfo(); return false;" CLASS="HREFBoldWhite"><%=lb_pageInfo%></A> |
-		    <A HREF="#" onclick="showOptions(); return false;" CLASS="HREFBoldWhite"><%=lb_options%></A> |
 		    <A HREF="#" onclick="closeWindow(); return false;" CLASS="HREFBoldWhite"><%=lb_close%></A> |
 		    <A HREF="#" onclick="helpSwitch(); return false;" CLASS="HREFBoldWhite"><%=lb_help%></A>&nbsp;
 		  </TD>
@@ -598,13 +614,22 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
   <THEAD>
     <TR CLASS="tableHeadingGray" style="height:19pt;">
       <TD ALIGN="CENTER" class="sourceTempClass"  width='25'><%=lb_id%></TD>
-      <TD ALIGN="LEFT"><%=lb_segment%></TD>
-      <TD ALIGN="LEFT">Original Translation</TD>
-      <TD ALIGN="LEFT">Currnt Translation</TD>
-      <TD ALIGN="LEFT" width='80'>
-      	<input type="checkbox" id="checkAll" onclick="checkAll()" style="vertical-align:middle;"/>
-      	<a href="#" onclick="approve();" CLASS="HREFBoldWhite" style="vertical-align:middle;" >Approve</a>
+      <TD ALIGN="LEFT"><%=lb_source_segment%></TD>
+      <TD ALIGN="LEFT"><%=lb_previous_translation%></TD>
+      <TD ALIGN="LEFT"><%=lb_current_translation%></TD>
+      <%if(approveAction.equals("true")){%>
+      <TD ALIGN="LEFT" width='50'>
+        <ul class="dropdown" style="padding: 0px;margin: 0px;" >
+        	<li style="background:#708EB3;"><input type="checkbox" id="checkAll" style="float:left;margin-top:5px" onclick="checkAll()"/><a href="#" style="padding: 0px;"><img src="/globalsight/envoy/edit/online3/action.jpg"></a>
+        		<ul class="sub_menu">
+        			 <li class="actionli"><a href="#" class="noUnderline" onclick="approve();">Approve</a></li>
+        			 <li class="actionli"><a href="#" class="noUnderline" onclick="unapprove();">Unapprove</a></li>
+        			 <li class="actionli" style="border-bottom:solid 1px black"><a href="#" class="noUnderline" onclick="revert();">Revert</a></li>
+        		</ul>
+        	</li>
+        </ul>
       </TD>
+      <%}%>
     </TR>
   </THEAD>
   <TBODY id="idPageHtml">
@@ -614,9 +639,9 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 <div class="foot">
 <TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="0" BORDER="0">
   <TR CLASS="tableHeadingBasic" style="height:30px">
-    <TD><%=lb_sourceLocale%>: <%=str_sourceLocale%></TD>
+    <TD width="50%"><%=lb_sourceLocale%>: <%=str_sourceLocale%></TD>
     <TD bgcolor="lightgrey" style="width:2px">&nbsp;</TD>
-    <TD>&nbsp;&nbsp;<%=lb_targetLocale%>: <%=str_targetLocale.toString()%></TD>
+    <TD width="50%">&nbsp;&nbsp;<%=lb_targetLocale%>: <%=str_targetLocale.toString()%></TD>
   </TR>
 </TABLE>
 </div>
@@ -750,5 +775,18 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <script>
 ContextMenu.intializeContextMenu();
+
+var g_lastTuId  = "<%=lastTuId%>";
+var g_lastTuvId = "<%=lastTuvId%>";
+var g_lastSubId = "<%=lastSubId%>";
+HighlightSegment(g_lastTuId, g_lastTuvId, g_lastSubId);
+var updatePopupEditorFlag = "<%=state.getNeedUpdatePopUpEditor()%>";
+if (updatePopupEditorFlag != null && updatePopupEditorFlag != "null"
+    && g_lastTuId != null && g_lastTuId != "0"
+    && g_lastTuvId != null && g_lastTuvId != "0" )
+{
+    <%state.setNeedUpdatePopUpEditor(null);%>
+    editSegment(g_lastTuId, g_lastTuvId, g_lastSubId);
+}
 </script>
 </HTML>

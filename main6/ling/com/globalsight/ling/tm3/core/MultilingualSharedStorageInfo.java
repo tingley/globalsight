@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
+import com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute;
 
 class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
 {
@@ -53,6 +54,10 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
         {
             conn = DbUtil.getConnection();
             conn.setAutoCommit(false);
+            // Had better have this
+			DefaultManager.create().createStoragePool(conn, sharedStorageId,
+					SegmentTmAttribute.inlineAttributes());
+			// Required
             createFuzzyIndex(conn);
             conn.commit();
         }

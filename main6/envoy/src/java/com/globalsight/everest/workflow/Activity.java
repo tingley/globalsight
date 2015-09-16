@@ -35,12 +35,9 @@ public class Activity extends PersistentObject
     public static final int TYPE_TRANSLATE = 1;
     public static final int TYPE_REVIEW = 2;
     public static final int TYPE_REVIEW_EDITABLE = 3;
-    public static final int TYPE_GSEDITION = 4;
-    public static final int TYPE_AUTOACTION = 5;
+
     public static final String TYPE_TRANSLATE_STR = "TRANSLATE";
     public static final String TYPE_REVIEW_STR = "REVIEW";
-    public static final String TYPE_AUTO_STR = "AUTOACTION";
-    public static final String TYPE_GSEDITION_STR = "GSEDITIONACTION";
 
     public static final String USE_TYPE_TRANS = "TRANS";
     public static final String USE_TYPE_DTP = "DTP";
@@ -54,9 +51,6 @@ public class Activity extends PersistentObject
     // id of the company which this activity belong to
     private long m_companyId;
     private String m_displayName;
-
-    private String m_autoActionID;
-    private String m_GSEditionID;
 
     // for MaCfee "Trisoft (LiveContent Architect) DITA Checks"
     private boolean m_runDitaQAChecks = false;
@@ -335,8 +329,7 @@ public class Activity extends PersistentObject
      */
     static public boolean isValidType(int p_type)
     {
-        if (p_type != TYPE_TRANSLATE && p_type != TYPE_REVIEW
-                && p_type != TYPE_AUTOACTION && p_type != TYPE_GSEDITION)
+        if (p_type != TYPE_TRANSLATE && p_type != TYPE_REVIEW)
         {
             return false;
         }
@@ -351,14 +344,6 @@ public class Activity extends PersistentObject
         {
             type = TYPE_REVIEW;
         }
-        else if (TYPE_AUTO_STR.equalsIgnoreCase(p_type))
-        {
-            type = TYPE_AUTOACTION;
-        }
-        else if (TYPE_GSEDITION_STR.equalsIgnoreCase(p_type))
-        {
-            type = TYPE_GSEDITION;
-        }
 
         return type;
     }
@@ -369,14 +354,6 @@ public class Activity extends PersistentObject
         if (p_type == TYPE_REVIEW)
         {
             typeString = TYPE_REVIEW_STR;
-        }
-        else if (p_type == TYPE_AUTOACTION)
-        {
-            typeString = TYPE_AUTO_STR;
-        }
-        else if (p_type == TYPE_GSEDITION)
-        {
-            typeString = TYPE_GSEDITION_STR;
         }
 
         return typeString;
@@ -406,30 +383,9 @@ public class Activity extends PersistentObject
         }
     }
 
-    public void setAutoActionID(String p_id)
-    {
-        this.m_autoActionID = p_id;
-    }
-
-    public String getAutoActionID()
-    {
-        return m_autoActionID;
-    }
-
-    public void setEditionActionID(String p_id)
-    {
-        this.m_GSEditionID = p_id;
-    }
-
-    public String getEditionActionID()
-    {
-        return m_GSEditionID;
-    }
-
     public static boolean isTranslateActivity(int type)
     {
-        return type == Task.TYPE_TRANSLATE || type == Task.TYPE_AUTOACTION
-                || type == Activity.TYPE_GSEDITION;
+        return type == Task.TYPE_TRANSLATE;
     }
 
     public int getActivityType()

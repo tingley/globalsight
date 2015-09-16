@@ -40,7 +40,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
-import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
@@ -614,9 +613,6 @@ public abstract class AbstractTargetPagePersistence implements
                     }
                 }
             }
-
-            // 5. Edition method !!!
-            moveIssueEditionRelationToTargetTuv(sourceTuv, targetTuv);
         }
         // Save all leverage matches into DB.
         LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(
@@ -850,7 +846,8 @@ public abstract class AbstractTargetPagePersistence implements
         if (needHitTDAMap != null && needHitTDAMap.size() > 0)
         {
             TdaHelper tdaHelper = new TdaHelper();
-            String directory = AmbFileStoragePathUtils.getFileStorageDirPath();
+			String directory = AmbFileStoragePathUtils
+					.getFileStorageDirPath(p_sourcePage.getCompanyId());
 
             String filepath = directory + File.separator + "TDA"
                     + File.separator + p_targetLocale;
@@ -900,6 +897,7 @@ public abstract class AbstractTargetPagePersistence implements
             zipout.closeEntry();
             zipout.flush();
             zipout.close();
+            xliffStream.close();
 
             File zipFile = new File(strZipName);
 
@@ -1438,31 +1436,6 @@ public abstract class AbstractTargetPagePersistence implements
         }
 
         return 0;
-    }
-
-    /**
-     * Editions method: In ExtractedFileImporter we add the IssueEditionRelation
-     * to source TUV now we remove it from source TUV ,and add the
-     * IssueEditionRelation to target TUV.
-     */
-    private void moveIssueEditionRelationToTargetTuv(Tuv p_sourceTuv,
-            Tuv p_targetTuv)
-    {
-        Set<IssueEditionRelation> issueEditionRelation = ((TuvImpl) p_sourceTuv)
-                .getIssueEditionRelation();
-        if (issueEditionRelation != null && issueEditionRelation.size() > 0)
-        {
-            ((TuvImpl) p_sourceTuv).setIssueEditionRelation(null);
-            ((TuvImpl) p_targetTuv)
-                    .setIssueEditionRelation(issueEditionRelation);
-
-            Iterator i = issueEditionRelation.iterator();
-            while (i.hasNext())
-            {
-                IssueEditionRelation ier = (IssueEditionRelation) i.next();
-                ier.setTuv((TuvImpl) p_targetTuv);
-            }
-        }
     }
 
     private Tuv modifyTUV(Tuv tuv, LeverageSegment leverageSegment)

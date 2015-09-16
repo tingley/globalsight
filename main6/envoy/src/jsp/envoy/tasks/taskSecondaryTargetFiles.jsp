@@ -15,7 +15,6 @@
       com.globalsight.everest.foundation.Timestamp,
       com.globalsight.everest.foundation.User,
       com.globalsight.everest.jobhandler.Job,
-      com.globalsight.everest.jobhandler.JobEditionInfo,
       com.globalsight.everest.projecthandler.ProjectImpl,
       com.globalsight.everest.workflowmanager.WorkflowImpl,
       com.globalsight.everest.page.PageWordCounts,
@@ -118,12 +117,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadDitaReport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="originalSourceFile" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="taskCommentList" scope="request"
  class="java.util.ArrayList" />
-<jsp:useBean id="recreateGS" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="updateLeverage" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%!
@@ -400,11 +395,6 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
         				"&"+WebAppConstants.TASK_ID+"="+theTask.getId()+
         	            "&"+WebAppConstants.TASK_STATE+"="+theTask.getState();
         	    		
-    String recreateGSUrl = recreateGS.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
-        						"=" + WebAppConstants.RECREATE_EDITION_JOB+
-        						//GBS-2913 Added to the url parameter taskId,state
-    					        "&"+WebAppConstants.TASK_ID+"="+theTask.getId()+
-    					        "&"+WebAppConstants.TASK_STATE+"="+theTask.getState();
     String downloadUrl = download.getPageURL()
     		//GBS 2913 add taskID and taskState
     		+ "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()

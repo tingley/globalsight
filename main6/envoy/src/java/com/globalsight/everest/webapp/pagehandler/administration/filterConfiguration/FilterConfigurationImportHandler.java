@@ -2385,10 +2385,14 @@ public class FilterConfigurationImportHandler extends PageHandler
                 {
                     msOffice2010Filter.setExcelCellStyles(valueField);
                 }
-                else if (keyField
-                        .equalsIgnoreCase("INTERNAL_TEXT_CHARACTER_STYLES"))
+                else if (keyField.equalsIgnoreCase("WORD_INTERNAL_TEXT_STYLES"))
                 {
-                    msOffice2010Filter.setInternalTextStyles(valueField);
+                    msOffice2010Filter.setWordInternalTextStyles(valueField);
+                }
+                else if (keyField
+                        .equalsIgnoreCase("EXCEL_INTERNAL_TEXT_STYLES"))
+                {
+                    msOffice2010Filter.setExcelInternalTextStyles(valueField);
                 }
                 else if (keyField.equalsIgnoreCase("IS_HEADER_TRANSLATE"))
                 {

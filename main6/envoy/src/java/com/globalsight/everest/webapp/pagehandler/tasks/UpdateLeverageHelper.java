@@ -329,8 +329,6 @@ public class UpdateLeverageHelper
 
         LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
                 newLeveragingLocales);
-        // levOptions.setMatchThreshold(threshold);
-        // levOptions.setTmsToLeverageFrom(tmIdsOverride);
 
         // Leverage reference TMs
         LeverageDataCenter leverageDataCenter = null;
@@ -353,6 +351,8 @@ public class UpdateLeverageHelper
     /**
      * Check if there are duplicated matches in DB, if have, always pick the
      * latest.
+     * 
+     * @deprecated not in use since 8.6.5
      */
     public static Map<Long, LeverageMatches> removeMatchesExistedInDB(
             Map<Long, LeverageMatches> p_leverageMatchesMap,

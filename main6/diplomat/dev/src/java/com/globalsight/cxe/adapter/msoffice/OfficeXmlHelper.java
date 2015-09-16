@@ -113,7 +113,7 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private static SystemConfiguration m_sc = SystemConfiguration.getInstance();
 
-//    private String m_eventFlowXml;
+    // private String m_eventFlowXml;
     private CxeMessage m_cxeMessage;
     private EventFlowXml m_eventFlow;
 
@@ -124,6 +124,7 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private List<String> m_hideCellStyleIds = new ArrayList<String>();
     private Set<String> m_unextractableExcelCellStyles = new HashSet<String>();
+    private Set<String> m_excelInternalTextCellStyles = new HashSet<String>();
 
     private static Hashtable<String, Integer> s_exportBatches = new Hashtable<String, Integer>();
     private static Object s_exportBatchesLocker = new Object();
@@ -481,8 +482,8 @@ public class OfficeXmlHelper implements IConverterHelper2
                     msgs[i] = cxeMessage;
                 }
             }
-//            writeDebugFile(m_conversionType + "_" + getBaseFileName()
-//                    + "_sa.xml", m_eventFlow.serializeToXml());
+            // writeDebugFile(m_conversionType + "_" + getBaseFileName()
+            // + "_sa.xml", m_eventFlow.serializeToXml());
 
             if (m_type == OFFICE_PPTX)
             {
@@ -649,6 +650,10 @@ public class OfficeXmlHelper implements IConverterHelper2
         }
     }
 
+    /**
+     * Handles Unextractable Excel Cell Styles and Excel Internal Text Cell
+     * Styles.
+     */
     private void handleExcelStyleIds(String dir)
     {
         if (m_type != OFFICE_XLSX)
@@ -672,10 +677,13 @@ public class OfficeXmlHelper implements IConverterHelper2
             Node stylesNode = stylesDoc.getDocumentElement();
 
             Set<String> hiddenStyles = new HashSet<String>();
+            Set<String> excelInternalTextStyles = new HashSet<String>();
             MSOffice2010Filter msf = getMainFilter();
             if (msf != null)
             {
                 hiddenStyles.addAll(msf.getUnextractableExcelCellStyles());
+                excelInternalTextStyles.addAll(msf
+                        .getSelectedExcelInternalTextStylesAsList());
             }
 
             Set<String> hiddenXfIds = new HashSet<String>();
@@ -698,6 +706,26 @@ public class OfficeXmlHelper implements IConverterHelper2
                     }
                 }
             }
+            // GBS-3944
+            Set<String> internalXfIds = new HashSet<String>();
+            Set<String> internalXfxIds = new HashSet<String>();
+            for (String style : excelInternalTextStyles)
+            {
+                String xpath = "//*[local-name()=\"cellStyles\"]/*[local-name()=\"cellStyle\"][@name=\""
+                        + style + "\"]";
+                NodeList affectedNodes = XPathAPI.selectNodeList(stylesNode,
+                        xpath);
+
+                if (affectedNodes != null && affectedNodes.getLength() > 0)
+                {
+                    int len = affectedNodes.getLength();
+                    for (int i = 0; i < len; i++)
+                    {
+                        Element node = (Element) affectedNodes.item(i);
+                        internalXfIds.add(node.getAttribute("xfId"));
+                    }
+                }
+            }
 
             String xpath = "//*[local-name()=\"cellXfs\"]/*[local-name()=\"xf\"]";
 
@@ -713,6 +741,12 @@ public class OfficeXmlHelper implements IConverterHelper2
                     String xfId = node.getAttribute("xfId");
                     String applyNumberFormat = node
                             .getAttribute("applyNumberFormat");
+
+                    // GBS-3944
+                    if (internalXfIds.contains(xfId))
+                    {
+                        internalXfxIds.add(i + "");
+                    }
 
                     if (hiddenXfIds.contains(xfId))
                     {
@@ -753,7 +787,8 @@ public class OfficeXmlHelper implements IConverterHelper2
             });
 
             // Unextractable Excel Cell Styles
-            Set<String> result = new HashSet<String>();
+            Set<String> unextractable = new HashSet<String>();
+            Set<String> internal = new HashSet<String>();
             for (File sheet : sheets)
             {
                 for (String id : hiddenXfxIds)
@@ -774,7 +809,35 @@ public class OfficeXmlHelper implements IConverterHelper2
                                 if ("s".equals(ss))
                                 {
                                     String vnid = getExcelVText(ce);
-                                    result.add(vnid);
+                                    unextractable.add(vnid);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        m_logger.error(e);
+                    }
+                }
+                // GBS-3944
+                for (String id : internalXfxIds)
+                {
+                    xpath = "//*[local-name()=\"c\"][@s=\"" + id + "\"]";
+                    try
+                    {
+                        affectedNodes = getAffectedNodes(
+                                sheet.getAbsolutePath(), xpath);
+                        if (affectedNodes != null
+                                && affectedNodes.getLength() > 0)
+                        {
+                            for (int j = 0; j < affectedNodes.getLength(); j++)
+                            {
+                                Element ce = (Element) affectedNodes.item(j);
+                                String ss = ce.getAttribute("t");
+                                if ("s".equals(ss))
+                                {
+                                    String vnid = getExcelVText(ce);
+                                    internal.add(vnid);
                                 }
                             }
                         }
@@ -785,8 +848,8 @@ public class OfficeXmlHelper implements IConverterHelper2
                     }
                 }
             }
-
-            m_unextractableExcelCellStyles.addAll(result);
+            m_unextractableExcelCellStyles.addAll(unextractable);
+            m_excelInternalTextCellStyles.addAll(internal);
         }
         catch (Exception e)
         {
@@ -836,7 +899,7 @@ public class OfficeXmlHelper implements IConverterHelper2
         else if (STYLE_CATEGORY_CHARACTER_INTERNAL.equals(p_styleCatogery))
         {
             isChar = true;
-            styles = msf.getSelectedInternalTextStyles();
+            styles = msf.getSelectedWordInternalTextStyles();
         }
 
         List<String> stylesList = MSOffice2010Filter.toList(styles);
@@ -1389,8 +1452,8 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     protected void modifyEventFlowXmlForImport(String p_xmlFilename,
             int p_docPageNum, int p_docPageCount, String unParaStyles,
-            String unCharStyles, String internalCharStyles, String numStyleIds, EventFlowXml newEventFlowXml)
-            throws Exception
+            String unCharStyles, String internalCharStyles, String numStyleIds,
+            EventFlowXml newEventFlowXml) throws Exception
     {
         if (unParaStyles == null || unParaStyles.length() == 0)
         {
@@ -1426,7 +1489,7 @@ public class OfficeXmlHelper implements IConverterHelper2
         {
             hiddenSharedSI = m_hiddenSharedId;
         }
-        
+
         String postMergeEvent;
         String formatType;
         String safeBaseFileName;
@@ -1450,24 +1513,25 @@ public class OfficeXmlHelper implements IConverterHelper2
             originalFileSize = String.valueOf(m_cxeMessage.getMessageData()
                     .getSize());
         }
-        
+
         Category newC = new Category();
         newC.setName(CATEGORY_NAME);
-        
+
         newC.addValue("postMergeEvent", postMergeEvent);
         newC.addValue("formatType", formatType);
         newC.addValue("safeBaseFileName", safeBaseFileName);
         newC.addValue("originalFileSize", originalFileSize);
         newC.addValue("unParaStyles", unParaStyles);
         newC.addValue("unCharStyles", unCharStyles);
-        newC.addValue("internalCharStyles",
-                internalCharStyles);
+        newC.addValue("internalCharStyles", internalCharStyles);
         newC.addValue("numStyleIds", numStyleIds);
         newC.addValue("hiddenSharedSI", hiddenSharedSI);
         newC.addValue("sheetHiddenCell", sheetHiddenCell);
         newC.addValue("unextractableExcelCellStyles",
                 MSOffice2010Filter.toString(new ArrayList<String>(
                         m_unextractableExcelCellStyles)));
+        newC.addValue("excelInternalTextCellStyles", MSOffice2010Filter
+                .toString(new ArrayList<String>(m_excelInternalTextCellStyles)));
         newC.addValue("isTableOfContentTranslate",
                 String.valueOf(isTableOfContentTranslate));
         newC.addValue("isHeaderFooterTranslate",
@@ -3196,7 +3260,8 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private String writeContentToXmlBox() throws IOException
     {
-        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory().getValue("relSafeName"));
+        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory()
+                .getValue("relSafeName"));
         File saveFile = new File(saveFileName);
 
         m_cxeMessage.getMessageData().copyTo(saveFile);

@@ -1000,15 +1000,14 @@ function doOnLoad()
                             </B>
                             <SELECT NAME="<%=selectedSR%>" CLASS="standardText">
                                 <OPTION VALUE="-1" SELECTED><%=bundle.getString("lb_choose_1")%>
-                                <OPTION VALUE="-2" ><%=bundle.getString("lb_default")%>
                      <%
                        Iterator it_s = segmentationRules.iterator();
                        while (it_s.hasNext())
                        {
                            SegmentationRuleFileImpl sr = (SegmentationRuleFileImpl)it_s.next();
-                           String srName = sr.getName();
+                           String srName = sr.getName() + (sr.getIsDefault() ? " (Default)" : "");
                            long id  = sr.getId();
-                           %> <OPTION VALUE = "<%=id%>"><%=srName%><%
+                           %> <OPTION VALUE = "<%=id%>" ><%=srName%><%
                        }%>
 
                                 </SELECT>
@@ -1054,14 +1053,14 @@ function doOnLoad()
 			                               <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" CHECKED><%=lbsavelocSegToTm%>
 			                           </TD>
 			                        </TR>
+                                    <TR ALIGN="LEFT">
+                                        <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" CHECKED><%=lbisSaveExactMatchToProjectTm%></TD>
+                                    </TR>
 			                        <TR ALIGN="LEFT">
 			                           <TD COLSPAN=2>
 			                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" CHECKED><%=lbsaveApprovedSegToTM%>
 			                           </TD>
 			                        </TR>
-                                    <TR ALIGN="LEFT" style="display:none">
-                                        <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" CHECKED><%=lbisSaveExactMatchToProjectTm%></TD>
-                                    </TR>
                                     <TR ALIGN="LEFT">
                                         <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" CHECKED><%=lbisSaveToPageTm%></TD>
                                     </TR>

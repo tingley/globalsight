@@ -63,10 +63,10 @@ public class Permission
     static public final String ACTIVITY_TYPES_REMOVE = "activityTypes.remove";
     static public final String ACTIVITY_TYPES_EDIT = "activityTypes.edit";
     static public final String ACTIVITY_TYPES_NEW = "activityTypes.new";
-    static public final String AUTOMATIC_ACTIONS_VIEW = "automaticActions.view";
-    static public final String AUTOMATIC_ACTIONS_REMOVE = "automaticActions.remove";
-    static public final String AUTOMATIC_ACTIONS_EDIT = "automaticActions.edit";
-    static public final String AUTOMATIC_ACTIONS_NEW = "automaticActions.new";
+//    static public final String AUTOMATIC_ACTIONS_VIEW = "automaticActions.view";
+//    static public final String AUTOMATIC_ACTIONS_REMOVE = "automaticActions.remove";
+//    static public final String AUTOMATIC_ACTIONS_EDIT = "automaticActions.edit";
+//    static public final String AUTOMATIC_ACTIONS_NEW = "automaticActions.new";
     static public final String CURRENCY_VIEW = "currency.view";
     static public final String CURRENCY_EDIT = "currency.edit";
     static public final String CURRENCY_NEW = "currency.new";
@@ -498,10 +498,10 @@ public class Permission
     static public final String GSEDITION_REMOVE = "gsedition.remove";
     static public final String GSEDITION_EDIT = "gsedition.edit";
     static public final String GSEDITION_NEW = "gsedition.new";
-    static public final String GSEDITION_ACTIONS_VIEW = "gseditionActions.view";
-    static public final String GSEDITION_ACTIONS_REMOVE = "gseditionActions.remove";
-    static public final String GSEDITION_ACTIONS_EDIT = "gseditionActions.edit";
-    static public final String GSEDITION_ACTIONS_NEW = "gseditionActions.new";
+//    static public final String GSEDITION_ACTIONS_VIEW = "gseditionActions.view";
+//    static public final String GSEDITION_ACTIONS_REMOVE = "gseditionActions.remove";
+//    static public final String GSEDITION_ACTIONS_EDIT = "gseditionActions.edit";
+//    static public final String GSEDITION_ACTIONS_NEW = "gseditionActions.new";
 
     static public final String ADD_SOURCE_FILES = "sourceFiles.add";
     static public final String DELETE_SOURCE_FILES = "sourceFiles.delete";
@@ -927,11 +927,11 @@ public class Permission
         added = addPermission(301, CVS_OPERATE) || added;
 
         // AUTOMATIC ACTION
-        added = addPermission(302, AUTOMATIC_ACTIONS_VIEW) || added;
-        added = addPermission(303, AUTOMATIC_ACTIONS_REMOVE) || added;
-        added = addPermission(304, AUTOMATIC_ACTIONS_EDIT) || added;
-        added = addPermission(305, AUTOMATIC_ACTIONS_NEW) || added;
-        // END
+//        added = addPermission(302, AUTOMATIC_ACTIONS_VIEW) || added;
+//        added = addPermission(303, AUTOMATIC_ACTIONS_REMOVE) || added;
+//        added = addPermission(304, AUTOMATIC_ACTIONS_EDIT) || added;
+//        added = addPermission(305, AUTOMATIC_ACTIONS_NEW) || added;
+
         added = addPermission(306, JOB_WORKFLOWS_PRIORITY) || added;
 
         added = addPermission(307, UILOCALE_VIEW) || added;
@@ -971,10 +971,10 @@ public class Permission
         added = addPermission(334, GSEDITION_NEW) || added;
 
         // GSEdition ACTION
-        added = addPermission(335, GSEDITION_ACTIONS_VIEW) || added;
-        added = addPermission(336, GSEDITION_ACTIONS_REMOVE) || added;
-        added = addPermission(337, GSEDITION_ACTIONS_EDIT) || added;
-        added = addPermission(338, GSEDITION_ACTIONS_NEW) || added;
+//        added = addPermission(335, GSEDITION_ACTIONS_VIEW) || added;
+//        added = addPermission(336, GSEDITION_ACTIONS_REMOVE) || added;
+//        added = addPermission(337, GSEDITION_ACTIONS_EDIT) || added;
+//        added = addPermission(338, GSEDITION_ACTIONS_NEW) || added;
 
         added = addPermission(339, CVS_Servers) || added;
         added = addPermission(340, CVS_Servers_NEW) || added;
@@ -1102,7 +1102,7 @@ public class Permission
     static private PermissionManager s_permissionManager = null;
 
     /** Hashmap which maps permission names to real ids. */
-    static private HashMap s_idMap = new HashMap();
+    static private HashMap<String, Long> s_idMap = new HashMap<String, Long>();
 
     /** The permission XML. **/
     // static private String s_permissionXml = null;
@@ -1454,7 +1454,7 @@ public class Permission
         return added;
     }
 
-    public static HashMap getAllPermissions()
+    public static HashMap<String, Long> getAllPermissions()
     {
         return s_idMap;
     }

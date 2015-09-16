@@ -655,6 +655,7 @@ public class TMSearchBroswerHandlerHelper
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(itLeverageMatches), attributeName, attributeValue);
         }
         long jobId = -1; // -1 is fine here
+        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
         while (itLeverageMatches.hasNext())
         {
             LeverageMatches levMatches = itLeverageMatches.next();
@@ -679,6 +680,17 @@ public class TMSearchBroswerHandlerHelper
                     		continue;
                     	}
                     }
+                    
+                  //0001181: TM Search: Job ID search is incorrect
+					if (jobIdSet != null && jobIdSet.size() > 0)
+					{
+						if (!jobIdSet.contains(String.valueOf(matchedTuv
+								.getJobId())))
+						{
+							continue;
+						}
+					}
+                    
             		if (advancedSearch && !searchInSource)
     				{
     					if (!searchFilter(filterMap, matchedTuv))
@@ -836,6 +848,7 @@ public class TMSearchBroswerHandlerHelper
         	attributeFilter = true;
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
         }
+        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
         for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
@@ -873,6 +886,16 @@ public class TMSearchBroswerHandlerHelper
 						if (!searchFilter(filterMap, trgTuv))
 							continue;
 					}
+					//0001181: TM Search: Job ID search is incorrect
+					if (jobIdSet != null && jobIdSet.size() > 0)
+					{
+						if (!jobIdSet
+								.contains(String.valueOf(trgTuv.getJobId())))
+						{
+							continue;
+						}
+					}
+					
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
                     if (null == sid)
@@ -1018,6 +1041,8 @@ public class TMSearchBroswerHandlerHelper
         	attributeFilter = true;
         	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
         }
+        
+        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
         for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
@@ -1055,6 +1080,16 @@ public class TMSearchBroswerHandlerHelper
 						if (!searchFilterBySid(filterMap, trgTuv))
 							continue;
 					}
+					//0001181: TM Search: Job ID search is incorrect
+					if (jobIdSet != null && jobIdSet.size() > 0)
+					{
+						if (!jobIdSet
+								.contains(String.valueOf(trgTuv.getJobId())))
+						{
+							continue;
+						}
+					}
+					
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
                     if (null == sid)
@@ -1196,7 +1231,7 @@ public class TMSearchBroswerHandlerHelper
 			String createUser = (String) paramMap.get("createUser");
 			String modifyUser = (String) paramMap.get("modifyUser");
 			long localeId = (Long) paramMap.get("localeIds");
-			String jobIds = (String) paramMap.get("jobIds");
+//			String jobIds = (String) paramMap.get("jobIds");
 			//create date
 			if (createStartDate != null)
 			{
@@ -1457,13 +1492,13 @@ public class TMSearchBroswerHandlerHelper
 				}
 			}
 			
-			if (StringUtil.isNotEmpty(jobIds))
-			{
-				if (tmType.equalsIgnoreCase("TM3"))
-				{
-					sb.append(" AND ext.jobId in (").append(jobIds).append(")");
-				}
-			}
+//			if (StringUtil.isNotEmpty(jobIds))
+//			{
+//				if (tmType.equalsIgnoreCase("TM3"))
+//				{
+//					sb.append(" AND ext.jobId in (").append(jobIds).append(")");
+//				}
+//			}
 		}
 	}
 
@@ -1522,7 +1557,7 @@ public class TMSearchBroswerHandlerHelper
 		String isRegex = null;
 		String createUser = null;
 		String modifyUser = null;
-		String jobIds = null;
+		Set<String> jobIdSet = null;
 		
 		if (advancedSearch)
 		{
@@ -1546,7 +1581,15 @@ public class TMSearchBroswerHandlerHelper
 			isRegex = (String) request.getParameter("isRegex");
 			createUser = (String) request.getParameter("createUser");
 			modifyUser = (String) request.getParameter("modifyUser");
-			jobIds = (String)request.getParameter("jobIds");
+			String jobIds = (String)request.getParameter("jobIds");
+			if (StringUtil.isNotEmpty(jobIds))
+			{
+				jobIdSet = new HashSet<String>();
+				for (String jobId : jobIds.split(","))
+				{
+					jobIdSet.add(jobId);
+				}
+			}
 			
 			filterMap.put("createStartDateOption", createStartDateOption);
 			filterMap.put("createStartDate", createStartDate);
@@ -1565,7 +1608,7 @@ public class TMSearchBroswerHandlerHelper
 			filterMap.put("isRegex", isRegex);
 			filterMap.put("createUser", createUser);
 			filterMap.put("modifyUser", modifyUser);
-			filterMap.put("jobIds", jobIds);
+			filterMap.put("jobIds", jobIdSet);
 		}
 		return filterMap;
 	}
@@ -1666,7 +1709,7 @@ public class TMSearchBroswerHandlerHelper
 		String isRegex = (String) filterMap.get("isRegex");
 		String createUser = (String) filterMap.get("createUser");
 		String modifyUser = (String) filterMap.get("modifyUser");
-    	String jobIds = (String) filterMap.get("jobIds");
+//    	String jobIds = (String) filterMap.get("jobIds");
     	
     	boolean checkCreateDate = searchByDate("create", createStartDateOption, 
     			createEndDateOption, createStartDate, createEndDate, tuv);
@@ -1774,13 +1817,13 @@ public class TMSearchBroswerHandlerHelper
     	    }
     	}
     	
-		if (StringUtil.isNotEmpty(jobIds))
-		{
-			if (!jobIds.contains(String.valueOf(tuv.getJobId())))
-			{
-				return false;
-			}
-		}
+//		if (StringUtil.isNotEmpty(jobIds))
+//		{
+//			if (!jobIds.contains(String.valueOf(tuv.getJobId())))
+//			{
+//				return false;
+//			}
+//		}
     	
     	return true;
     }

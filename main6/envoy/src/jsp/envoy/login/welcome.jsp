@@ -245,15 +245,9 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.LOCALE_PAIRS_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=localePairsUrl%>"><%=bundle.getString("lb_locale_pairs")%></A><BR>
         </amb:permission>
-        <amb:permission name="<%=Permission.AUTOMATIC_ACTIONS_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=automaticActionUrl%>"><%=bundle.getString("lb_automatic_actions")%></A><BR>
-        </amb:permission> 
         <amb:permission name="<%=Permission.GSEDITION_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=gsEditionUrl%>"><%=bundle.getString("lb_gseditions")%></A><BR> 
-        </amb:permission>  
-        <amb:permission name="<%=Permission.GSEDITION_ACTIONS_NEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=gsEditionActionUrl%>"><%=bundle.getString("lb_gsedition_actions")%></A><BR>
-        </amb:permission>        
+        </amb:permission>
         <amb:permission name="<%=Permission.ACTIVITY_TYPES_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=activityTypesUrl%>"><%=bundle.getString("lb_activity_types")%></A><BR>
         </amb:permission>

@@ -23,6 +23,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import javax.naming.NamingException;
@@ -126,6 +127,18 @@ public class SegmentationRuleFileMainHandler extends PageHandler
                 clearSessionExceptTableInfo(session,
                         SegmentationRuleConstant.SEGMENTATIONRULE_KEY);
             }
+            else if (SegmentationRuleConstant.SET_DEFAULT.equals(action))
+            {
+                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=segmentationrules");
+                    return;
+                }
+                setDefaultRule(p_request, session);
+                clearSessionExceptTableInfo(session,
+                        SegmentationRuleConstant.SEGMENTATIONRULE_KEY);
+            }
             else if (SegmentationRuleConstant.EXPORT.equals(action))
             {
                 if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
@@ -220,6 +233,49 @@ public class SegmentationRuleFileMainHandler extends PageHandler
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                 OperationLog.COMPONET_SEGMENTATION_RULE, ruleFile.getName());
     }
+    
+    private void setDefaultRule(HttpServletRequest p_request, HttpSession p_session)
+            throws RemoteException, NamingException, GeneralException
+    {
+        String id = (String) p_request.getParameter(RADIO_BUTTON);
+        StringBuffer invalid = new StringBuffer();
+
+        if (id.equals("1"))
+        {
+            p_request.setAttribute("invalid",
+                    "Cannot set default Segmentation Rule. ");
+        }
+        else
+        {
+            List<SegmentationRuleFile> srxRules = (List<SegmentationRuleFile>) ServerProxy
+                    .getSegmentationRuleFilePersistenceManager()
+                    .getAllSegmentationRuleFiles();
+
+            SegmentationRuleFile lastDefault = null;
+            for (SegmentationRuleFile srf : srxRules)
+            {
+                if (srf.getIsDefault())
+                {
+                    lastDefault = srf;
+                }
+            }
+
+            lastDefault.setIsDefault(false);
+            ServerProxy.getSegmentationRuleFilePersistenceManager()
+                    .updateSegmentationRuleFile(lastDefault);
+
+            SegmentationRuleFile segmentationRuleFile = ServerProxy
+                    .getSegmentationRuleFilePersistenceManager()
+                    .readSegmentationRuleFile(Long.parseLong(id));
+            segmentationRuleFile.setIsDefault(true);
+            ServerProxy.getSegmentationRuleFilePersistenceManager()
+                    .updateSegmentationRuleFile(segmentationRuleFile);
+
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                    OperationLog.COMPONET_SEGMENTATION_RULE,
+                    segmentationRuleFile.getName());
+        }
+    }
 
     /**
      * Remove an existing rule. Check dependence first.
@@ -233,7 +289,7 @@ public class SegmentationRuleFileMainHandler extends PageHandler
         if (id.equals("1"))
         {
             p_request.setAttribute("invalid",
-                    "Can not remove default Segmentation Rule. ");
+                    "Cannot remove default Segmentation Rule. ");
         }
         else
         {

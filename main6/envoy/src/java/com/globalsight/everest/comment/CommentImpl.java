@@ -36,8 +36,6 @@ public class CommentImpl extends PersistentObject implements Comment,
     protected Date m_createDate = null;
     protected String m_creatorId = null;
     protected String m_commentString = null;
-    protected String m_originalId = null;
-    protected String m_originalWsdlUrl = null;
 
     // points to the object the comment is associated with.
     protected WorkObject m_object = null;
@@ -277,26 +275,6 @@ public class CommentImpl extends PersistentObject implements Comment,
         this.m_object = m_object;
     }
     
-    public void setOriginalId(String p_originalId)
-    {
-    	this.m_originalId = p_originalId;
-    }
-    
-    public String getOriginalId()
-    {
-    	return this.m_originalId;
-    }
-    
-    public void setOriginalWsdlUrl(String p_originalWsdlUrl)
-    {
-    	this.m_originalWsdlUrl = p_originalWsdlUrl;
-    }
-    
-    public String getOriginalWsdlUrl()
-    {
-    	return this.m_originalWsdlUrl;
-    }
-
     // ////////////////////////////////////////////////////////////////////
     // End: Override Methods
     // ////////////////////////////////////////////////////////////////////

@@ -116,7 +116,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnectorFileMapping.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnectorJob.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RemoteIp.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/AutoAction.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/JSPFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CVSFileProfile.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/XliffAlt.hbm.xml" />
@@ -137,10 +136,7 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TextCondition.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/DateCondition.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AttributeClone.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/JobEditionInfo.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/IssueEditionRelation.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/GSEdition.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/GSEditionActivity.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RssFeed.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RssItem.hbm.xml" />	
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TuConceptRelation.hbm.xml" />

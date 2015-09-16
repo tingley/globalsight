@@ -7,7 +7,8 @@ function MSOffice2010Filter()
 	this.paragraphStyles = "unextractableWordParagraphStyles";
 	this.characterStyles = "unextractableWordCharacterStyles";
 	this.excelCellStyles = "unextractableExcelCellStyles";
-	this.internalTextStyles = "selectedInternalTextStyles";
+	this.wordInternalTextStyles = "selectedWordInternalTextStyles";
+	this.excelInternalTextStyles = "selectedExcelInternalTextStyles";
 	this.excelOrder = "n";
 	
 	this.defaultUnextractableWordParagraphStyles = "DONOTTRANSLATE_para,tw4winExternal";
@@ -15,13 +16,15 @@ function MSOffice2010Filter()
 	this.defaultUnextractableExcelCellStyles = "tw4winExternal";
 
 	this.defaultUnextractableWordCharacterStyles = "DONOTTRANSLATE_char,tw4winExternal";
-	this.defaultSelectedInternalTextStyles = "tw4winInternal";
+	this.defaultSelectedWordInternalTextStyles = "tw4winInternal";
+	this.defaultSelectedExcelInternalTextStyles = "tw4winInternal";
 	
 	this.selectTagsMap = new Object();
 	this.selectTagsMap[this.paragraphStyles] = this.defaultUnextractableWordParagraphStyles;
 	this.selectTagsMap[this.characterStyles] = this.defaultUnextractableWordCharacterStyles;
 	this.selectTagsMap[this.excelCellStyles] = this.defaultUnextractableExcelCellStyles;
-	this.selectTagsMap[this.internalTextStyles] = this.defaultSelectedInternalTextStyles;
+	this.selectTagsMap[this.wordInternalTextStyles] = this.defaultSelectedWordInternalTextStyles;
+	this.selectTagsMap[this.excelInternalTextStyles] = this.defaultSelectedExcelInternalTextStyles;
 	
     this.currentOption = "unextractableWordParagraphStyles";
     this.currentPage = 1;
@@ -32,7 +35,8 @@ function MSOffice2010Filter()
 	this.allSelectTagsOption[this.paragraphStyles] = this.defaultUnextractableWordParagraphStyles;
     this.allSelectTagsOption[this.characterStyles] = this.defaultUnextractableWordCharacterStyles;
     this.allSelectTagsOption[this.excelCellStyles] = this.defaultUnextractableExcelCellStyles;
-    this.allSelectTagsOption[this.internalTextStyles] = this.defaultSelectedInternalTextStyles;
+    this.allSelectTagsOption[this.wordInternalTextStyles] = this.defaultSelectedWordInternalTextStyles;
+    this.allSelectTagsOption[this.excelInternalTextStyles] = this.defaultSelectedExcelInternalTextStyles;
 }
 
 MSOffice2010Filter.prototype.setFilter = function (filter)
@@ -43,7 +47,8 @@ MSOffice2010Filter.prototype.setFilter = function (filter)
 	this.optionMap[this.paragraphStyles] = jsUnextractableWordParagraphStyles;
     this.optionMap[this.characterStyles] = jsUnextractableWordCharacterStyles;
     this.optionMap[this.excelCellStyles] = jsUnextractableExcelCellStyles;
-    this.optionMap[this.internalTextStyles] = jsWordInternalTextCharacterStyles;
+    this.optionMap[this.wordInternalTextStyles] = jsWordInternalTextCharacterStyles;
+    this.optionMap[this.excelInternalTextStyles] = jsExcelInternalTextCellStyles;
 
 }
 
@@ -56,11 +61,13 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	msoffice2010DocFilter.selectTagsMap[this.paragraphStyles] = this.filter.unextractableWordParagraphStyles;
 	msoffice2010DocFilter.selectTagsMap[this.characterStyles] = this.filter.unextractableWordCharacterStyles;
 	msoffice2010DocFilter.selectTagsMap[this.excelCellStyles] = this.filter.unextractableExcelCellStyles;
-	msoffice2010DocFilter.selectTagsMap[this.internalTextStyles] = this.filter.selectedInternalTextStyles;
+	msoffice2010DocFilter.selectTagsMap[this.wordInternalTextStyles] = this.filter.selectedWordInternalTextStyles;
+	msoffice2010DocFilter.selectTagsMap[this.excelInternalTextStyles] = this.filter.selectedExcelInternalTextStyles;
 	msoffice2010DocFilter.allSelectTagsOption[this.paragraphStyles] = this.filter.allParagraphStyles;
 	msoffice2010DocFilter.allSelectTagsOption[this.characterStyles] = this.filter.allCharacterStyles;
 	msoffice2010DocFilter.allSelectTagsOption[this.excelCellStyles] = this.filter.allExcelCellStyles;
-	msoffice2010DocFilter.allSelectTagsOption[this.internalTextStyles] = this.filter.allInternalTextStyles;
+	msoffice2010DocFilter.allSelectTagsOption[this.wordInternalTextStyles] = this.filter.allWordInternalTextStyles;
+	msoffice2010DocFilter.allSelectTagsOption[this.excelInternalTextStyles] = this.filter.allExcelInternalTextStyles;
 	
 	msoffice2010DocFilter.init();
 	
@@ -223,7 +230,8 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	str.append("<option value='unextractableWordParagraphStyles'>" + jsO2010UnextractableWordParagraphStyles + "</option>");
 	str.append("<option value='unextractableWordCharacterStyles'>" + jsO2010UnextractableWordCharacterStyles + "</option>");
     str.append("<option value='unextractableExcelCellStyles'>" + jsUnextractableExcelCellStyles + "</option>");
-	str.append("<option value='selectedInternalTextStyles'>" + jsWordInternalTextCharacterStyles + "</option>");
+	str.append("<option value='selectedWordInternalTextStyles'>" + jsWordInternalTextCharacterStyles + "</option>");
+	str.append("<option value='selectedExcelInternalTextStyles'>" + jsExcelInternalTextCellStyles + "</option>");
 	str.append("</select>");
 
 	str.append("</td><td nowrap align=right>");
@@ -444,7 +452,8 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<option value='unextractableWordParagraphStyles'>" + jsO2010UnextractableWordParagraphStyles + "</option>");
 	str.append("<option value='unextractableWordCharacterStyles'>" + jsO2010UnextractableWordCharacterStyles + "</option>");
 	str.append("<option value='unextractableExcelCellStyles'>" + jsUnextractableExcelCellStyles + "</option>");
-	str.append("<option value='selectedInternalTextStyles'>" + jsWordInternalTextCharacterStyles + "</option>");
+	str.append("<option value='selectedWordInternalTextStyles'>" + jsWordInternalTextCharacterStyles + "</option>");
+	str.append("<option value='selectedExcelInternalTextStyles'>" + jsExcelInternalTextCellStyles + "</option>");
 	str.append("</select>");
 
 	str.append("</td><td nowrap align=right>");
@@ -457,11 +466,13 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.paragraphStyles] = "";
 	msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.characterStyles] = "";
 	msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelCellStyles] = "";
-	msoffice2010DocFilter.selectTagsMap[officeDocFilter.internalTextStyles] = "";
+	msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.wordInternalTextStyles] = "";
+	msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelInternalTextStyles] = "";
 	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.paragraphStyles] = msoffice2010DocFilter.defaultUnextractableWordParagraphStyles;
 	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.characterStyles] = msoffice2010DocFilter.defaultUnextractableWordCharacterStyles;
 	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.excelCellStyles] = msoffice2010DocFilter.defaultUnextractableExcelCellStyles;
-	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.internalTextStyles] = msoffice2010DocFilter.defaultSelectedInternalTextStyles;
+	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.wordInternalTextStyles] = msoffice2010DocFilter.defaultSelectedWordInternalTextStyles;
+	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.excelInternalTextStyles] = msoffice2010DocFilter.defaultSelectedExcelInternalTextStyles;
 	checkAll2010Styles = false;
 	
 	msoffice2010DocFilter.init();
@@ -641,7 +652,8 @@ MSOffice2010Filter.prototype.setDeleteButtonStyle = function()
 {
 	var isDisabled = msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.paragraphStyles].length == 0
 			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.characterStyles].length == 0
-			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.internalTextStyles].length == 0
+			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.wordInternalTextStyles].length == 0
+			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelInternalTextStyles].length == 0
 			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelCellStyles].length == 0;
 
 	document.getElementById("O2010DeleteButton").disabled = isDisabled;
@@ -769,7 +781,13 @@ MSOffice2010Filter.prototype.isCheckOrClearAll = function( checkOrClear )
         checkBoxObjs[j].checked = checkOrClear;
     }
     
-    checkBoxObjs = document.getElementsByName(msoffice2010DocFilter.internalTextStyles);
+    checkBoxObjs = document.getElementsByName(msoffice2010DocFilter.wordInternalTextStyles);
+    for(var j = 0; j < checkBoxObjs.length; j++)
+    {
+        checkBoxObjs[j].checked = checkOrClear;
+    }
+    
+    checkBoxObjs = document.getElementsByName(msoffice2010DocFilter.excelInternalTextStyles);
     for(var j = 0; j < checkBoxObjs.length; j++)
     {
         checkBoxObjs[j].checked = checkOrClear;
@@ -819,12 +837,14 @@ MSOffice2010Filter.prototype.deleteStyles = function()
 {
 	var paragraphStylesToDelete = document.getElementsByName(msoffice2010DocFilter.paragraphStyles);
 	var characterStylesToDelete = document.getElementsByName(msoffice2010DocFilter.characterStyles);
-	var internalTextStylesToDelete = document.getElementsByName(msoffice2010DocFilter.internalTextStyles);
+	var wordInternalTextStylesToDelete = document.getElementsByName(msoffice2010DocFilter.wordInternalTextStyles);
+	var excelInternalTextStylesToDelete = document.getElementsByName(msoffice2010DocFilter.excelInternalTextStyles);
 	var excelCellStylesToDelete = document.getElementsByName(msoffice2010DocFilter.excelCellStyles);
 		
 	msoffice2010DocFilter.buildTagsString(paragraphStylesToDelete);
 	msoffice2010DocFilter.buildTagsString(characterStylesToDelete);
-	msoffice2010DocFilter.buildTagsString(internalTextStylesToDelete);
+	msoffice2010DocFilter.buildTagsString(wordInternalTextStylesToDelete);
+	msoffice2010DocFilter.buildTagsString(excelInternalTextStylesToDelete);
 	msoffice2010DocFilter.buildTagsString(excelCellStylesToDelete);
 	
 	closePopupDialog('deleteO2010StyleDialog');
@@ -1409,8 +1429,10 @@ function saveMSOffice2010DocFilter()
 			allParagraphStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.paragraphStyles],
 			allCharacterStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.characterStyles],
 			allExcelCellStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.excelCellStyles],
-			selectedInternalTextStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.internalTextStyles],
-			allInternalTextStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.internalTextStyles],
+			selectedWordInternalTextStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.wordInternalTextStyles],
+			selectedExcelInternalTextStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelInternalTextStyles],
+			allWordInternalTextStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.wordInternalTextStyles],
+			allExcelInternalTextStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.excelInternalTextStyles],
 			companyId:companyId,
 			contentPostFilterId:contentPostFilterId,
 			contentPostFilterTableName:contentPostFilterTableName,
@@ -1480,8 +1502,10 @@ function updateMSOffice2010FilterCallback(data)
 		jpFilter.allParagraphStyles = checkExistMSOffice2010FilterCallback.obj.allParagraphStyles;
 		jpFilter.allCharacterStyles = checkExistMSOffice2010FilterCallback.obj.allCharacterStyles;
 		jpFilter.allExcelCellStyles = checkExistMSOffice2010FilterCallback.obj.allExcelCellStyles;
-		jpFilter.selectedInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.selectedInternalTextStyles;
-		jpFilter.allInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.allInternalTextStyles;
+		jpFilter.selectedWordInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.selectedWordInternalTextStyles;
+		jpFilter.selectedExcelInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.selectedExcelInternalTextStyles;
+		jpFilter.allWordInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.allWordInternalTextStyles;
+		jpFilter.allExcelInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.allExcelInternalTextStyles;
 		jpFilter.companyId = companyId;
 		jpFilter.contentPostFilterId = checkExistMSOffice2010FilterCallback.obj.contentPostFilterId;
 		jpFilter.contentPostFilterTableName = checkExistMSOffice2010FilterCallback.obj.contentPostFilterTableName;
@@ -1525,8 +1549,10 @@ function saveMSOffice2010FilterCallback(data)
 		jpFilter.allParagraphStyles = checkExistMSOffice2010FilterCallback.obj.allParagraphStyles;
 		jpFilter.allCharacterStyles = checkExistMSOffice2010FilterCallback.obj.allCharacterStyles;
 		jpFilter.allExcelCellStyles = checkExistMSOffice2010FilterCallback.obj.allExcelCellStyles;
-		jpFilter.selectedInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.selectedInternalTextStyles;
-		jpFilter.allInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.allInternalTextStyles;
+		jpFilter.selectedWordInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.selectedWordInternalTextStyles;
+		jpFilter.selectedExcelInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.selectedExcelInternalTextStyles;
+		jpFilter.allWordInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.allWordInternalTextStyles;
+		jpFilter.allExcelInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.allExcelInternalTextStyles;
 		jpFilter.companyId = companyId;
 		jpFilter.contentPostFilterId = checkExistMSOffice2010FilterCallback.obj.contentPostFilterId;
 		jpFilter.contentPostFilterTableName = checkExistMSOffice2010FilterCallback.obj.contentPostFilterTableName;

@@ -29,6 +29,7 @@ public class SegmentationRuleFileImpl extends PersistentObject implements
     private String m_ruleText;
     private long m_companyId;
     private int m_type;
+    private boolean isDefault;
 
     public boolean useActive = true;
 
@@ -182,5 +183,15 @@ public class SegmentationRuleFileImpl extends PersistentObject implements
     public String toString()
     {
         return m_name;
+    }
+
+    public boolean getIsDefault()
+    {
+        return isDefault;
+    }
+
+    public void setIsDefault(boolean isDefault)
+    {
+        this.isDefault = isDefault;
     }
 }

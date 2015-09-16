@@ -411,17 +411,20 @@ public class FileProfileMainHandler extends PageHandler
             if (idString != null)
             {
                 String id = idString.split(",")[0];
-                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                        .getFileProfileById(Long.parseLong(id), true);
+				FileProfileImpl fp = (FileProfileImpl) ServerProxy
+						.getFileProfilePersistenceManager().getFileProfileById(
+								Long.parseLong(id), true);
 
                 // CVSFileProfileManagerLocal cvsFPManager = new
                 // CVSFileProfileManagerLocal();
                 // cvsFPManager.removeByFileProfileId(fp.getId());
-
-                ServerProxy.getFileProfilePersistenceManager()
-                        .deleteFileProfile(fp);
-                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
-                        OperationLog.COMPONET_FILE_PROFILE, fp.getName());
+                if (fp.isActive())
+                {
+                    ServerProxy.getFileProfilePersistenceManager()
+                            .deleteFileProfile(fp);
+                    OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                            OperationLog.COMPONET_FILE_PROFILE, fp.getName());
+                }
 
                 // Don't really remove
                 // removeRelevantXslFile(id);

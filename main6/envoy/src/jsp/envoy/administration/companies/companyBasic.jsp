@@ -63,7 +63,6 @@
     String ssoIdpUrl = "";
     String sessionTime = "";
     boolean isReviewOnly = false;
-    String enableTM3Checked = "checked";
     String useSeparateTablesPerJobChecked = "";
     String qaChecks = "";
     String enableDitaChecksChecked = "";
@@ -114,10 +113,7 @@
         
         ssoIdpUrl = company.getSsoIdpUrl();
         ssoIdpUrl = ssoIdpUrl == null ? "" : ssoIdpUrl;
-        
-        if (company.getTmVersion().getValue() != 3)
-            enableTM3Checked = "";
-        
+
         if (company.getBigDataStoreLevel() == 2) {
             useSeparateTablesPerJobChecked = "checked";
         }
@@ -778,13 +774,6 @@ function addQualityTo()
             </td>
         </tr>
 
-        <tr>
-            <td valign="top"><%=bundle.getString("lb_tm_tm3_enable")%>:</td>
-            <td colspan="2">
-                <input class="standardText" type="checkbox" id="<%=CompanyConstants.TM3_VERSION%>" name="<%=CompanyConstants.TM3_VERSION%>" value="3" <%=enableTM3Checked%>/>
-            </td>
-        </tr>
-        
         <tr>
             <td valign="top"><%=bundle.getString("lb_enableTMAccessControl")%>:</td>
             <td colspan="2">

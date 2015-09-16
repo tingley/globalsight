@@ -27,7 +27,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +68,6 @@ import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.everest.cvsconfig.CVSUtil;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportConstants;
@@ -180,6 +178,7 @@ public class Exporter
      * 
      * @return New CxeMessage result
      */
+    @SuppressWarnings("deprecation")
     CxeMessage export()
     {
         CxeMessage exportStatusMsg;
@@ -233,12 +232,6 @@ public class Exporter
 
                 changeTargetLocale(wf.getTargetLocale().toString(), finalFile,
                         fileEncoding);
-
-                JobEditionInfo je = getGSEditionJobByJobID(wf.getJob().getId());
-                if (je != null)
-                {
-                    FileUtil.addBom(finalFile, fileTargetEncoding);
-                }
             }
 
             exportStatusMsg = makeExportSuccessMessage(finalFile);
@@ -1830,27 +1823,4 @@ public class Exporter
             tempfile.delete();
         }
     }
-
-    private JobEditionInfo getGSEditionJobByJobID(long jobID)
-    {
-        JobEditionInfo je = new JobEditionInfo();
-
-        try
-        {
-            String hql = "from JobEditionInfo a where a.jobId = :id";
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("id", Long.toString(jobID));
-            Collection servers = HibernateUtil.search(hql, map);
-            Iterator i = servers.iterator();
-            je = i.hasNext() ? (JobEditionInfo) i.next() : null;
-        }
-        catch (Exception pe)
-        {
-            // s_logger.error("Persistence Exception when retrieving JobEditionInfo",
-            // pe);
-        }
-
-        return je;
-    }
-
 }

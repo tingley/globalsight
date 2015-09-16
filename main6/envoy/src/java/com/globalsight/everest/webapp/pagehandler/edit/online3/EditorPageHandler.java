@@ -19,12 +19,19 @@ package com.globalsight.everest.webapp.pagehandler.edit.online3;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -48,6 +55,7 @@ import com.globalsight.everest.edit.online.SegmentFilter;
 import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -65,6 +73,7 @@ import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
@@ -80,10 +89,12 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManageme
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
@@ -97,6 +108,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 	private static final Logger CATEGORY = Logger
             .getLogger(EditorPageHandler.class);
 	private static int DEFAULT_VIEWMODE_IF_NO_PREVIEW = VIEWMODE_TEXT;
+	public boolean s_pmCanEditTargetPages = false;
+	public boolean s_pmCanEditSnippets = false;
 	
 	@ActionHandler(action = "refresh", formClass = "")
     public void refresh(HttpServletRequest request,
@@ -737,9 +750,12 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 			tuvMap.put(tuv.getTuId() + "_" + tuv.getId(), tuv);
 		}
 		String approveIds = request.getParameter("approveIds");
-		String unApproveIds = request.getParameter("unApproveIds");
 		Connection conn = DbUtil.getConnection();
 		conn.setAutoCommit(false);
+		List<Long> approvedTuvIds = new ArrayList<Long>();
+		Date modifyDate = new Date();
+		User user = TaskHelper.getUser(session);
+        String userId = user.getUserId();
 		if(StringUtil.isNotEmpty(approveIds))
 		{
 			approveIds = approveIds.substring(0, approveIds.length() - 1);
@@ -756,6 +772,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 				if(tuvState.getValue() != TuvState.APPROVED.getValue())
 				{
 					tuv.setState(TuvState.APPROVED);
+					tuv.setLastModified(modifyDate);
+					tuv.setLastModifiedUser(userId);
 					tuvImplList.add((TuvImpl) tuv);
 					
 					List<TuTuvAttributeImpl>  tuTuvAttributeImplList = new ArrayList<TuTuvAttributeImpl>();
@@ -764,48 +782,248 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 					tuTuvAttributeImpl.setLongValue(tuvState.getValue());
 					tuTuvAttributeImplList.add(tuTuvAttributeImpl);
 					SegmentTuTuvAttributeUtil.saveTuTuvAttributes(conn, tuTuvAttributeImplList, jobId);
+					
+					approvedTuvIds.add(tuv.getId());
 				}
 			}
 		}
-//		if(StringUtil.isNotEmpty(unApproveIds))
-//		{
-//			unApproveIds = unApproveIds.substring(0, unApproveIds.length() - 1);
-//			String[] tempIds = unApproveIds.split(",");
-//			for(String tempId: tempIds)
-//			{
-//				String[] temp = tempId.split("_");
-//				String tuId = temp[0];
-//				String tuvId = temp[1];
-//				
-//				Tuv tuv = tuvMap.get(tuId + "_" + tuvId);
-//				TuvState tuvState = tuv.getState();
-//				if(tuvState.getValue() == TuvState.APPROVED.getValue())
-//				{
-//					List<Long> tuvIdList = new ArrayList<Long>();
-//					tuvIdList.add(tuv.getIdAsLong());
-//					List<TuTuvAttributeImpl>  tuTuvAttributeImplList
-//						= SegmentTuTuvAttributeUtil.getStateAttributesByTuvIds(tuvIdList, jobId);
-//					if(tuTuvAttributeImplList.size() > 0)
-//					{
-//						int stateInt = (int) tuTuvAttributeImplList.get(0).getLongValue();
-//						TuvState originalState = TuvState.valueOf(stateInt);
-//						tuv.setState(originalState);
-//						tuvImplList.add((TuvImpl) tuv);
-//						
-//						SegmentTuTuvAttributeUtil.deleteStateAttributes(
-//								conn, tuTuvAttributeImplList, jobId);
-//					}
-//				}
-//			}
-//		}
 		conn.close();
 		
 		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
+		state.getEditorManager().updateApprovedTuvCache(approvedTuvIds, modifyDate, userId);
 		
 		ServletOutputStream out = response.getOutputStream();
 		out.write("true".getBytes("UTF-8"));
 		out.close();
     	pageReturn();
+    }
+	
+	@ActionHandler(action = "unapprove", formClass = "")
+    public void unapprove(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+		HttpSession session = request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        EditorState state = (EditorState) sessionMgr
+                .getAttribute(WebAppConstants.EDITORSTATE);
+		long p_trgPageId = state.getTargetPageId().longValue();
+		PageManager pageManager = ServerProxy.getPageManager();
+		TargetPage targetPage = pageManager.getTargetPage(p_trgPageId);
+		targetPage.setGlobalSightLocale(targetPage.getGlobalSightLocale());
+		List<Tuv> tuvList= SegmentTuvUtil.getAllTargetTuvs(targetPage);
+		
+		Task theTask = (Task) TaskHelper.retrieveObject(session,
+                WebAppConstants.WORK_OBJECT);
+		long jobId = theTask.getJobId();
+		
+		List<TuvImpl> tuvImplList = new ArrayList<TuvImpl>();
+		HashMap<String,Tuv> tuvMap = new HashMap<String,Tuv>(); 
+		for(Tuv tuv : tuvList)
+		{
+			tuvMap.put(tuv.getTuId() + "_" + tuv.getId(), tuv);
+		}
+		String unApproveIds = request.getParameter("unApproveIds");
+		Connection conn = DbUtil.getConnection();
+		conn.setAutoCommit(false);
+		List<Long> unapprovedTuvIds = new ArrayList<Long>();
+		HashMap<Long, TuvState> originalStateMap = new HashMap<Long, TuvState>();
+		Date modifyDate = new Date();
+		User user = TaskHelper.getUser(session);
+        String userId = user.getUserId();
+		if(StringUtil.isNotEmpty(unApproveIds))
+		{
+			unApproveIds = unApproveIds.substring(0, unApproveIds.length() - 1);
+			String[] tempIds = unApproveIds.split(",");
+			for(String tempId: tempIds)
+			{
+				String[] temp = tempId.split("_");
+				String tuId = temp[0];
+				String tuvId = temp[1];
+				
+				Tuv tuv = tuvMap.get(tuId + "_" + tuvId);
+				TuvState tuvState = tuv.getState();
+				if(tuvState.getValue() == TuvState.APPROVED.getValue())
+				{
+					List<Long> tuvIdList = new ArrayList<Long>();
+					tuvIdList.add(tuv.getIdAsLong());
+					List<TuTuvAttributeImpl>  tuTuvAttributeImplList
+						= SegmentTuTuvAttributeUtil.getStateAttributesByTuvIds(tuvIdList, jobId);
+					if(tuTuvAttributeImplList.size() > 0)
+					{
+						int stateInt = (int) tuTuvAttributeImplList.get(0).getLongValue();
+						TuvState originalState = TuvState.valueOf(stateInt);
+						tuv.setState(originalState);
+						tuv.setLastModified(modifyDate);
+						tuv.setLastModifiedUser(userId);
+						tuvImplList.add((TuvImpl) tuv);
+						
+						originalStateMap.put(tuv.getId(), originalState);
+						
+						SegmentTuTuvAttributeUtil.deleteStateAttributes(
+								conn, tuTuvAttributeImplList, jobId);
+					}
+					else
+					{
+						tuv.setState(TuvState.NOT_LOCALIZED);
+						tuv.setLastModified(modifyDate);
+						tuv.setLastModifiedUser(userId);
+						tuvImplList.add((TuvImpl) tuv);
+						
+						originalStateMap.put(tuv.getId(), TuvState.NOT_LOCALIZED);
+					}
+					unapprovedTuvIds.add(tuv.getId());
+				}
+			}
+		}
+		conn.close();
+		
+		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
+		state.getEditorManager().updateUnapprovedTuvCache(unapprovedTuvIds, originalStateMap, modifyDate, userId);
+		
+		ServletOutputStream out = response.getOutputStream();
+		out.write("true".getBytes("UTF-8"));
+		out.close();
+    	pageReturn();
+    }
+	
+	@ActionHandler(action = "revert", formClass = "")
+    public void revert(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+		HttpSession session = request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        EditorState state = (EditorState) sessionMgr
+                .getAttribute(WebAppConstants.EDITORSTATE);
+		long p_trgPageId = state.getTargetPageId().longValue();
+		PageManager pageManager = ServerProxy.getPageManager();
+		TargetPage targetPage = pageManager.getTargetPage(p_trgPageId);
+		targetPage.setGlobalSightLocale(targetPage.getGlobalSightLocale());
+		List<Tuv> allTuvList = SegmentTuvUtil.getAllTargetTuvs(targetPage);
+		List<TuvImpl> tuvList = SegmentTuvUtil.getTargetTuvs(targetPage);
+		HashMap<Long, Tuv> originalTargetTuvMap = new HashMap<Long, Tuv>();
+		Long targetLocaleId = targetPage.getGlobalSightLocale().getIdAsLong();
+		setOriginalTargetTuvMap(tuvList, allTuvList, originalTargetTuvMap, targetLocaleId);
+		
+		Task theTask = (Task) TaskHelper.retrieveObject(session,
+                WebAppConstants.WORK_OBJECT);
+		long jobId = theTask.getJobId();
+		
+		List<TuvImpl> tuvImplList = new ArrayList<TuvImpl>();
+		HashMap<String,Tuv> tuvMap = new HashMap<String,Tuv>(); 
+		for(Tuv tuv : tuvList)
+		{
+			tuvMap.put(tuv.getTuId() + "_" + tuv.getId(), tuv);
+		}
+		String revertIds = request.getParameter("revertIds");
+		List<Long> revertTuvIds = new ArrayList<Long>();
+		HashMap<Long, String> originalGxmlMap = new HashMap<Long, String>();
+		Connection conn = DbUtil.getConnection();
+		conn.setAutoCommit(false);
+		Date modifyDate = new Date();
+		User user = TaskHelper.getUser(session);
+        String userId = user.getUserId();
+		if(StringUtil.isNotEmpty(revertIds))
+		{
+			revertIds = revertIds.substring(0, revertIds.length() - 1);
+			String[] tempIds = revertIds.split(",");
+			for(String tempId: tempIds)
+			{
+				String[] temp = tempId.split("_");
+				String tuId = temp[0];
+				String tuvId = temp[1];
+				
+				Tuv tuv = tuvMap.get(tuId + "_" + tuvId);
+				if(originalTargetTuvMap.get(Long.parseLong(tuvId)) != null)
+				{
+					tuv.setGxml(originalTargetTuvMap.get(Long.parseLong(tuvId)).getGxml());
+					tuv.setState(TuvState.LOCALIZED);
+					tuv.setLastModified(modifyDate);
+					tuv.setLastModifiedUser(userId);
+					tuvImplList.add((TuvImpl) tuv);
+					revertTuvIds.add(tuv.getId());
+					originalGxmlMap.put(tuv.getId(), originalTargetTuvMap.get(Long.parseLong(tuvId)).getGxml());
+				}
+			}
+		}
+		conn.close();
+		
+		SegmentTuvUtil.updateTuvs(tuvImplList, jobId);
+		state.getEditorManager().updateRevertTuvCache(revertTuvIds, originalGxmlMap, modifyDate, userId);
+		
+		ServletOutputStream out = response.getOutputStream();
+		out.write("true".getBytes("UTF-8"));
+		out.close();
+    	pageReturn();
+    }
+	
+	private void setOriginalTargetTuvMap(List<TuvImpl> tuvList, List<Tuv> allTargetTuvs, 
+    		HashMap<Long, Tuv> setOriginalTargetTuvMap, long targetLocaleId)
+    {
+    	HashMap<Long, List<Tuv>> tempHashMap = new HashMap<Long, List<Tuv>>();
+    	for(Tuv tuv: allTargetTuvs)
+    	{
+    		long tuId = tuv.getTuId();
+    		if(tuv.getLocaleId() == targetLocaleId && tuv.getState().equals(TuvState.OUT_OF_DATE))
+    		{
+    			if(tempHashMap.get(tuId) == null)
+    			{
+    				List<Tuv> tempTuvList = new ArrayList<Tuv>();
+    				tempTuvList.add(tuv);
+    				tempHashMap.put(tuId, tempTuvList);
+    			}
+    			else
+    			{
+    				tempHashMap.get(tuId).add(tuv);
+    			}
+    		}
+    	}
+    	
+    	for(Tuv tuv: tuvList)
+    	{
+    		long tuId = tuv.getTuId();
+    		List<Tuv> tempTuvList = tempHashMap.get(tuId);
+    		if(tempTuvList != null)
+    		{
+    			sortById(tempTuvList);
+    			for(Tuv tempTuv: tempTuvList)
+    			{
+    				if(!tempTuv.getGxml().equals(tuv.getGxml()))
+    				{
+    					setOriginalTargetTuvMap.put(tuv.getId(), tempTuv);
+    					break;
+    				}
+    			}
+    		}
+    	}
+    }
+	
+	private static void sortById(List<Tuv> tempTuvList)
+    {
+    	if(tempTuvList.size() > 1)
+    	{
+    		Collections.sort(tempTuvList, new Comparator<Tuv>() 
+    		{  
+                public int compare(Tuv arg0, Tuv arg1) 
+                {  
+                    long id0 = arg0.getId();
+                    long id1 = arg1.getId();  
+                    if (id1 > id0) 
+                    {  
+                        return 1;  
+                    } 
+                    else if (id1 == id0) 
+                    {  
+                        return 0;  
+                    }
+                    else
+                    {
+                        return -1;  
+                    }  
+                }  
+            });
+    	}
     }
     
     @ActionHandler(action = "getData", formClass = "")
@@ -917,6 +1135,16 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                 WebAppConstants.IS_ASSIGNEE);
         boolean isAssignee = assigneeValue == null ? true : assigneeValue
                 .booleanValue();
+        String pageSearchText = request
+                .getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
+        if (StringUtil.isNotEmpty(pageSearchText))
+        {
+            pageSearchText = URLDecoder.decode(pageSearchText, "UTF-8");
+            sessionMgr.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
+                    pageSearchText);
+        }
+        
+        String jobId = request.getParameter(WebAppConstants.JOB_ID);
     	String taskId = request.getParameter(WebAppConstants.TASK_ID);
     	String srcPageId = request.getParameter(WebAppConstants.SOURCE_PAGE_ID);
         String trgPageId = request.getParameter(WebAppConstants.TARGET_PAGE_ID);
@@ -946,11 +1174,63 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                     srcPageId, trgPageId, isAssignee, request, uiLocale);
 
             initState(state, session);
+            
+            if(theTask.getStateAsString().equals(Task.STATE_ACCEPTED_STR) && 
+            		user.getUserId().equals(theTask.getAcceptor()))
+            {
+            	sessionMgr.setAttribute("approveAction", "true");
+            }
+            else
+            {
+            	sessionMgr.setAttribute("approveAction", "false");
+            }
+        }
+    	else if (jobId != null && srcPageId != null)
+        {
+    		SystemConfiguration sc = SystemConfiguration.getInstance();
+    		s_pmCanEditTargetPages = sc.getBooleanParameter("editalltargetpages.allowed");
+    		s_pmCanEditSnippets = sc.getBooleanParameter("editallsnippets.allowed");
+            isAssignee = false;
+            TaskHelper.storeObject(session, IS_ASSIGNEE,new Boolean(isAssignee));
+
+            state = new EditorState();
+            EditorHelper.initEditorManager(state);
+            EditorHelper.initEditorOptions(state, session);
+            sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
+            sessionMgr.setAttribute(WebAppConstants.JOB_ID,
+                    Long.parseLong(jobId));
+            sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
+                    getTargetIDS(jobId, srcPageId));
+            sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
+
+            initializeFromJob(state, request, jobId, srcPageId, trgPageId,
+                    uiLocale, user);
+
+            initState(state, session);
+            
+            sessionMgr.setAttribute("approveAction", "false");
         }
     	
     	HashMap<String, String> hm = getSearchParamsInMap(request);
         updateSourcePageView(state, request, isAssignee,
                 isIE(request), hm);
+        
+        if (StringUtil.isNotEmpty(request.getParameter("trgViewLocale")))
+        {
+            state.setCommentThreads(null);
+
+            state.setTargetViewLocale(EditorHelper.getLocale(request.getParameter("trgViewLocale")));
+            state.setTargetPageHtml(null);
+
+            sessionMgr.setAttribute("trgViewLocale",
+                    EditorHelper.getLocale(request.getParameter("trgViewLocale")).getDisplayName());
+
+            if (state.hasGsaTags())
+            {
+                state.clearSourcePageHtml();
+                EditorHelper.invalidateCachedTemplates(state);
+            }
+        }
         
         CommentThreadView view = state.getCommentThreads();
         if (view == null)
@@ -987,6 +1267,189 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                 state.setEditorMode();
             }
         }
+    }
+    
+    private void initializeFromJob(EditorState p_state,
+            HttpServletRequest p_request, String p_jobId, String p_srcPageId,
+            String p_trgPageId, Locale p_uiLocale, User p_user)
+            throws EnvoyServletException
+    {
+        p_state.setUserIsPm(true);
+        HttpSession session = p_request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        PermissionSet perms = (PermissionSet) p_request.getSession()
+                .getAttribute(WebAppConstants.PERMISSIONS);
+        // Reset all options because the state may be inherited from a
+        // previous page.
+        EditorHelper.initEditorOptions(p_state, p_request.getSession());
+        // Initializes pages, target locales, excluded items, and termbases
+        EditorHelper.initializeFromJob(p_state, p_jobId, p_srcPageId,
+                p_uiLocale, p_user.getUserId(), perms);
+
+        if (p_trgPageId != null && p_trgPageId.length() > 0)
+        {
+            // If the PM requests a specific target page...
+
+            setCurrentPage(p_request.getSession(), p_state, p_srcPageId,
+                    p_trgPageId);
+
+            EditorState.PagePair currentPage = p_state.getCurrentPage();
+
+            p_state.setTargetViewLocale(currentPage
+                    .getTargetPageLocale(new Long(p_trgPageId)));
+        }
+        else
+        {
+            // No target page/locale requested, find a suitable one.
+
+            setCurrentPage(p_request.getSession(), p_state, p_srcPageId);
+
+            GlobalSightLocale viewLocale = p_state.getTargetViewLocale();
+            Vector trgLocales = p_state.getJobTargetLocales();
+            GlobalSightLocale local = (GlobalSightLocale) sessionMgr
+                    .getAttribute("targetLocale");
+            if (viewLocale == null || !trgLocales.contains(viewLocale))
+            {
+                if (trgLocales.contains(local))
+                {
+                    Iterator it = trgLocales.iterator();
+                    while (it.hasNext())
+                    {
+                        GlobalSightLocale trgLocale = (GlobalSightLocale) it
+                                .next();
+                        if (local.getLocale().equals(trgLocale.getLocale()))
+                        {
+
+                            p_state.setTargetViewLocale((GlobalSightLocale) trgLocale);
+                        }
+                    }
+                }
+                else
+                {
+                    p_state.setTargetViewLocale((GlobalSightLocale) trgLocales
+                            .elementAt(0));
+                }
+            }
+        }
+
+        if (s_pmCanEditTargetPages
+                && EditorHelper.pmCanEditCurrentPage(p_state))
+        {
+            p_state.setReadOnly(false);
+            p_state.setAllowEditAll(true);
+            p_state.setEditAllState(EDIT_ALL);
+        }
+        else
+        {
+            p_state.setReadOnly(true);
+        }
+
+        p_state.setAllowEditSnippets(s_pmCanEditSnippets);
+
+        p_state.setReviewMode();
+    }
+    
+    private void setCurrentPage(HttpSession p_session, EditorState p_state,
+            String p_srcPageId, String p_trgPageId)
+    {
+        ArrayList pages = p_state.getPages();
+        pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
+        Long srcPageId = new Long(p_srcPageId);
+        Long trgPageId = new Long(p_trgPageId);
+        int i_index = 0;
+
+        for (int i = 0, max = pages.size(); i < max; i++)
+        {
+            EditorState.PagePair pair = (EditorState.PagePair) pages.get(i);
+            ++i_index;
+
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Pagepair= " + pair.toString() + " p_srcPageId="
+                        + p_srcPageId + " p_trgPageId=" + p_trgPageId);
+            }
+
+            // See if this page pair object is for this source page.
+            // If so, see if this page pair object contains the
+            // specified target page id.
+
+            if (pair.getSourcePageId().equals(srcPageId)
+                    && pair.getTargetPageLocale(trgPageId) != null)
+            {
+                p_state.setCurrentPage(pair);
+                break;
+            }
+        }
+
+        p_state.setIsFirstPage(i_index == 1);
+        p_state.setIsLastPage(pages.size() == i_index);
+    }
+    
+    private void setCurrentPage(HttpSession p_session, EditorState p_state,
+            String p_srcPageId)
+    {
+        ArrayList pages = p_state.getPages();
+        pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
+        Long srcPageId = new Long(p_srcPageId);
+        int i_offset = 0;
+
+        for (int i = 0, max = pages.size(); i < max; i++)
+        {
+            EditorState.PagePair pair = (EditorState.PagePair) pages.get(i);
+            ++i_offset;
+
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Pagepair= " + pair.toString() + " p_srcPageId="
+                        + p_srcPageId);
+            }
+
+            if (pair.getSourcePageId().equals(srcPageId))
+            {
+                p_state.setCurrentPage(pair);
+                break;
+            }
+        }
+
+        p_state.setIsFirstPage(i_offset == 1);
+        p_state.setIsLastPage(pages.size() == i_offset);
+    }
+    
+    private String getTargetIDS(String p_jobId, String p_srcPageId)
+            throws EnvoyServletException
+    {
+        StringBuffer result = new StringBuffer();
+        try
+        {
+            Job job = ServerProxy.getJobHandler().getJobById(
+                    Long.parseLong(p_jobId));
+            Collection<Workflow> wfs = job.getWorkflows();
+            for (Iterator<Workflow> it = wfs.iterator(); it.hasNext();)
+            {
+                Workflow wf = (Workflow) it.next();
+                if (Workflow.CANCELLED.equals(wf.getState())
+                        || Workflow.EXPORT_FAILED.equals(wf.getState())
+                        || Workflow.IMPORT_FAILED.equals(wf.getState()))
+                {
+                    continue;
+                }
+
+                result.append(wf.getTargetLocale().getId()).append(",");
+            }
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Problem getting job from database ", e);
+            throw new EnvoyServletException(e);
+        }
+
+        if (result.length() > 0 && result.toString().endsWith(","))
+        {
+            result.deleteCharAt(result.length() - 1);
+        }
+
+        return result.toString();
     }
     
     private void updateSourcePageView(EditorState p_state,

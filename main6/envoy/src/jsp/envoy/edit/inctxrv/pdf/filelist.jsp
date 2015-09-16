@@ -12,6 +12,7 @@
       com.globalsight.everest.workflowmanager.Workflow,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair,
+            com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFPageHandler,
             java.util.*"
 	session="true"%>
 <%
@@ -90,16 +91,18 @@ var pageParas = new Array();
 
 <%for (int i = 0; i < pages.size(); i++)
             {
-                PagePair pagep = pages.get(i);%>
-    
-                pageNames[<%=i%>] = "<%=pagep.getPageName()%>";
+                PagePair pagep = pages.get(i);
+                if (PreviewPDFPageHandler.okForInContextReview(pagep))
+                {
+%>
+                pageNames[pageNames.length] = "<%=pagep.getPageName()%>";
                 
                 <% if (theTask != null) { %>
-                pageParas[<%=i%>] = "&sourcePageId=<%=pagep.getSourcePageId() %>&targetPageId=<%=pagep.getTargetPageId(state.getTargetLocale()) %>&taskId=<%= theTask.getId()%>";
+                pageParas[pageParas.length] = "&sourcePageId=<%=pagep.getSourcePageId() %>&targetPageId=<%=pagep.getTargetPageId(state.getTargetLocale()) %>&taskId=<%= theTask.getId()%>";
                 <%} else {%>
-                pageParas[<%=i%>] = "&sourcePageId=<%=pagep.getSourcePageId() %>&targetPageId=<%=pagep.getTargetPageId(state.getTargetLocale()) %>&jobId=<%= theJob.getId()%>";
+                pageParas[pageParas.length] = "&sourcePageId=<%=pagep.getSourcePageId() %>&targetPageId=<%=pagep.getTargetPageId(state.getTargetLocale()) %>&jobId=<%= theJob.getId()%>";
                 <% } %>
-<%}%>
+<%}}%>
 	$(function() {
 		$("#selectable").selectable({
 			stop : function() {
@@ -154,18 +157,21 @@ var pageParas = new Array();
 				    {
 				        PagePair pagep = pages.get(i);
 
-				        if (pagep.getSourcePageId() == curPageId)
-				        {
-				%>
-				<li class="ui-widget-content ui-selected"><%=pagep.getPageName()%></li>
-				<%
-				    }
-				        else
-				        {
-				%>
-				<li class="ui-widget-content"><%=pagep.getPageName()%></li>
-				<%
-				    }
+				        if (PreviewPDFPageHandler.okForInContextReview(pagep))
+		                {
+					        if (pagep.getSourcePageId() == curPageId)
+					        {
+					%>
+					<li class="ui-widget-content ui-selected"><%=pagep.getPageName()%></li>
+					<%
+					    	}
+					        else
+					        {
+					%>
+					<li class="ui-widget-content"><%=pagep.getPageName()%></li>
+					<%
+					    	}
+				    	}
 				    }
 				%>
 			</ol>

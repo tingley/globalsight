@@ -63,20 +63,10 @@
      <permission id="<%=Permission.LOCALE_NEW%>"/>
 <% } %>
   </permission>
-  <permission id="<%=Permission.AUTOMATIC_ACTIONS_VIEW%>">
-     <permission id="<%=Permission.AUTOMATIC_ACTIONS_REMOVE%>"/>
-     <permission id="<%=Permission.AUTOMATIC_ACTIONS_EDIT%>"/>     
-     <permission id="<%=Permission.AUTOMATIC_ACTIONS_NEW%>"/>
-  </permission>
   <permission id="<%=Permission.GSEDITION_VIEW%>">
      <permission id="<%=Permission.GSEDITION_REMOVE%>"/>
      <permission id="<%=Permission.GSEDITION_EDIT%>"/>     
      <permission id="<%=Permission.GSEDITION_NEW%>"/>
-  </permission>
-  <permission id="<%=Permission.GSEDITION_ACTIONS_VIEW%>">
-         <permission id="<%=Permission.GSEDITION_ACTIONS_REMOVE%>"/>
-         <permission id="<%=Permission.GSEDITION_ACTIONS_EDIT%>"/>     
-         <permission id="<%=Permission.GSEDITION_ACTIONS_NEW%>"/>
   </permission>
   <permission id="<%=Permission.ACTIVITY_TYPES_VIEW%>">
      <permission id="<%=Permission.ACTIVITY_TYPES_REMOVE%>"/>
@@ -135,7 +125,6 @@
      <permission id="<%=Permission.USERS_EXPORT%>"/>
   </permission>
   <permission id="<%=Permission.TM_VIEW%>">
-     <permission id="<%=Permission.TM_BROWSER%>"/>     
      <permission id="<%=Permission.TM_STATS%>"/>     
      <permission id="<%=Permission.TM_MAINTENANCE%>"/>
      <permission id="<%=Permission.TM_IMPORT%>"/>

@@ -307,6 +307,7 @@ var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
 //Added for firefox issue: image filter on Menu Bar.
 var imgIdArr,imgSrcArr,imgGraySrcArr;
 var graySub = "pic/gray";
+var tmFlag = true;//show tm 
 
 // segment that has "focus", i.e. was opened last.
 var g_current = null;
@@ -514,7 +515,7 @@ $(document).ready(function() {
       }
       bindEvent();
       initUI();
-              
+      
 });
 
 function readUI(href,newUrlKey){
@@ -762,7 +763,6 @@ function doKeyDown()
 	
 	if (key == 73) // Ctrl-I
     {
-      idButTm.setValue(!idButTm.getValue());
       showTmWindow();
       return cancelEvent();
     }
@@ -788,7 +788,6 @@ function doKeyDown()
     }
     else if (key == 84) // Alt-T
     {
-      idButTm.setValue(!idButTm.getValue());
       showTmWindow();
       return cancelEvent();
     }
@@ -1340,7 +1339,11 @@ function HasFormattingTags()
 
 function openPtags()
 {
-	return g_datatype == "xlf";
+	if (g_datatype == "xlf" || g_datatype == "mif" || g_datatype == "fm"
+       || g_datatype == "po" || g_datatype =="office-xml")
+    {
+       return true;
+    } 
 }
 
 function HasPTags()
@@ -1805,16 +1808,7 @@ function spellCheck()
 
 function showTmWindow()
 {
-  if (idButTm.getValue() == false)
-  {
-    // hide window
-    if (w_tmwin && !w_tmwin.closed)
-    {
-      w_tmwin.close();
-    }
-    w_tmwin = null;
-  }
-  else
+  if (tmFlag)
   {
     // show window
     if (!w_tmwin || w_tmwin.closed)
@@ -1824,6 +1818,17 @@ function showTmWindow()
     }
 
     try { w_tmwin.focus(); } catch (ignoreonie55) {}
+    tmFlag = false;
+  }
+  else
+  {
+	  // hide window
+	    if (w_tmwin && !w_tmwin.closed)
+	    {
+	      w_tmwin.close();
+	    }
+	    w_tmwin = null;
+	    tmFlag = true;
   }
 }
 

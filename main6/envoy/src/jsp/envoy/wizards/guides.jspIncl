@@ -21,9 +21,7 @@
     //URL of the menu items
     String companiesUrlGuide = LinkHelper.getWebActivityURL(request, "companies");
     String activityTypesUrlGuide = LinkHelper.getWebActivityURL(request, "activities");
-    String autoActionUrlGuide = LinkHelper.getWebActivityURL(request, "automaticActions");
     String gsEditionUrlGuide = LinkHelper.getWebActivityURL(request, "gsEdition");
-    String gsEditionActionUrlGuide = LinkHelper.getWebActivityURL(request, "gsEditionActions");
     String calendarsUrlGuide = LinkHelper.getWebActivityURL(request, "calendars");
     String currencyUrlGuide = LinkHelper.getWebActivityURL(request, "currency");
     String dbConnectionsUrlGuide = LinkHelper.getWebActivityURL(request, "dbconnections");
@@ -107,19 +105,9 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="localePairsDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
-<% if (userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) { %>
-<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
-    NAME="autoActionDotTop" HEIGHT=2 WIDTH=7></TD>
-<TD WIDTH=10  HEIGHT=2></TD>
-<% } %>
 <% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="gsEditionDotTop" HEIGHT=2 WIDTH=7></TD>
-<TD WIDTH=10  HEIGHT=2></TD>
-<% } %>
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) { %>
-<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
-    NAME="gsEditionActionDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
 <% } %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
@@ -187,17 +175,9 @@
 <% } %>
 <TD ID="localePairsBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="localePairsBarSpacer" WIDTH=10 HEIGHT=2></TD>
-<% if (userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) { %>
-<TD ID="autoActionBar" HEIGHT=3 ALIGN="CENTER"></TD>
-<TD ID="autoActionBarSpacer" WIDTH=10 HEIGHT=2></TD>
-<% } %>
 <% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
 <TD ID="gsEditionBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="gsEditionBarSpacer" WIDTH=10 HEIGHT=2></TD>
-<% } %>
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) { %>
-<TD ID="gsEditionActionBar" HEIGHT=3 ALIGN="CENTER"></TD>
-<TD ID="gsEditionActionBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <% } %>
 <TD ID="activityTypeBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="activityTypeBarSpacer" WIDTH=10 HEIGHT=2></TD>
@@ -262,21 +242,13 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="localePairsDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
-<% if (userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) { %>
-<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
-    NAME="autoActionDotBottom" HEIGHT=2 WIDTH=7></TD>
-<TD WIDTH=10  HEIGHT=2></TD>
-<% } %>
+
 <% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="gsEditionDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
 <% } %>
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) { %>
-<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
-    NAME="gsEditionActionDotBottom" HEIGHT=2 WIDTH=7></TD>
-<TD WIDTH=10  HEIGHT=2></TD>
-<% } %>
+
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="activityTypeDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
@@ -366,27 +338,11 @@
            HREF="javascript:loadUrl('<%=localePairsUrlGuide%>')" ><%= menuBundle.getString("lb_locale_pairs") %></A>
     </TD>
         <TD WIDTH=10></TD>
-<% if (userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) { %>
-    <TD CLASS="wizardCell" ID="autoAction">
-        <A ID="autoActionLink"
-           CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=autoActionUrlGuide%>')" ><%= menuBundle.getString("lb_automatic_actions") %></A>
-    </TD>
-    <TD WIDTH=10></TD>
-<% } %>
 <% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
     <TD CLASS="wizardCell" ID="gsEdition"> 
         <A ID="gsEditionLink"
            CLASS="wizardLinks" 
            HREF="javascript:loadUrl('<%=gsEditionUrlGuide%>')" ><%= menuBundle.getString("lb_gseditions") %></A>
-    </TD>
-    <TD WIDTH=10></TD>
-<% } %>
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) { %>
-    <TD CLASS="wizardCell" ID="gsEditionAction">
-        <A ID="gsEditionActionLink"
-           CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=gsEditionActionUrlGuide%>')" ><%= menuBundle.getString("lb_gsedition_actions") %></A>
     </TD>
     <TD WIDTH=10></TD>
 <% } %>

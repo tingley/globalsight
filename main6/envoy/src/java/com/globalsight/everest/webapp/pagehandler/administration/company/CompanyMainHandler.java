@@ -886,17 +886,9 @@ public class CompanyMainHandler extends PageActionHandler implements
         company.setEnableSSOLogin("on".equalsIgnoreCase(enableSso));
         String ssoIdpUrl = p_request.getParameter(CompanyConstants.SSO_IDP_URL);
         company.setSsoIdpUrl(ssoIdpUrl);
-        int TM3Version = 2;
-        try
-        {
-            TM3Version = Integer.parseInt(p_request
-                    .getParameter(CompanyConstants.TM3_VERSION));
-        }
-        catch (NumberFormatException nfe)
-        {
-            TM3Version = 2;
-        }
-        company.setTmVersion(TmVersion.fromValue(TM3Version));
+
+        // always enable TM3
+        company.setTmVersion(TmVersion.fromValue(3));
 
         if ("on".equalsIgnoreCase(useSeparateTablesPerJob))
         {
@@ -1075,17 +1067,9 @@ public class CompanyMainHandler extends PageActionHandler implements
         company.setEnableSSOLogin("on".equalsIgnoreCase(enableSso));
         String ssoIdpUrl = p_request.getParameter(CompanyConstants.SSO_IDP_URL);
         company.setSsoIdpUrl(ssoIdpUrl);
-        int TM3Version = 2;
-        try
-        {
-            TM3Version = Integer.parseInt(p_request
-                    .getParameter(CompanyConstants.TM3_VERSION));
-        }
-        catch (NumberFormatException nfe)
-        {
-            TM3Version = 2;
-        }
-        company.setTmVersion(TmVersion.fromValue(TM3Version));
+
+        // always enable TM3
+        company.setTmVersion(TmVersion.fromValue(3));
 
         if ("on".equalsIgnoreCase(useSeparateTablesPerJob))
         {

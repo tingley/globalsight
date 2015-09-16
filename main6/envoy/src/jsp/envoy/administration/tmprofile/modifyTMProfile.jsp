@@ -1410,13 +1410,12 @@ function doOnLoad()
                          </B>
                          <SELECT NAME="<%=selectedSR%>" CLASS="standardText">
                              <OPTION VALUE="-1" SELECTED><%=bundle.getString("lb_choose_1")%>
-                             <OPTION VALUE="-2" <%=(oldRuleId == -2l)? "SELECTED":""%>><%=bundle.getString("lb_default")%>
                   <%
                     Iterator it_s = segmentationRules.iterator();
                     while (it_s.hasNext())
                     {
                         SegmentationRuleFileImpl sr = (SegmentationRuleFileImpl)it_s.next();
-                        String srName = sr.getName();
+                        String srName = sr.getName() + (sr.getIsDefault() ? " (Default)" : "");
                         long id  = sr.getId();
                         %> <OPTION VALUE = "<%=id%>" <%=(oldRuleId == id)? "SELECTED":""%>><%=srName%>
                    <%}%>
@@ -1478,13 +1477,13 @@ function doOnLoad()
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" VALUE="true" <%=isSaveApprovedToProjectTMChecked %>><%=lbsaveApprovedSegToTM%>
-                           </TD>
-                        </TR>
-                        <TR ALIGN="LEFT" style="display:none">
-                           <TD COLSPAN=2>
                            <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=isSaveExactMatchToProjectTMChecked%>><%=lbisSaveExactMatchToProjectTm%>
                             </TD>
+                        </TR>
+                        <TR ALIGN="LEFT">
+                           <TD COLSPAN=2>
+                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" VALUE="true" <%=isSaveApprovedToProjectTMChecked %>><%=lbsaveApprovedSegToTM%>
+                           </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>

@@ -33,9 +33,7 @@
     if (userPerms.getPermissionFor(Permission.COMPANY_VIEW) ||
         userPerms.getPermissionFor(Permission.LOCALE_PAIRS_VIEW) ||
         userPerms.getPermissionFor(Permission.ACTIVITY_TYPES_VIEW) ||
-        userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW) ||  
         userPerms.getPermissionFor(Permission.GSEDITION_VIEW) ||
-        userPerms.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW) ||
         userPerms.getPermissionFor(Permission.CURRENCY_VIEW) || 
         userPerms.getPermissionFor(Permission.RATES_VIEW) || 
         userPerms.getPermissionFor(Permission.SYS_CAL_VIEW) || 
@@ -137,9 +135,7 @@
    String calendarsUrl = LinkHelper.getWebActivityURL(request, "calendars");
    String corpusAlignerUrl = LinkHelper.getWebActivityURL(request, "aligner");
    String currencyUrl = LinkHelper.getWebActivityURL(request, "currency");
-   String automaticActionUrl = LinkHelper.getWebActivityURL(request, "automaticActions");
    String gsEditionUrl = LinkHelper.getWebActivityURL(request, "gsEdition");
-   String gsEditionActionUrl = LinkHelper.getWebActivityURL(request, "gsEditionActions");
    String customUrl = LinkHelper.getWebActivityURL(request, "customPage");
    String customerUploadUrl = LinkHelper.getWebActivityURL(request, "customerView");
    String customerJobsUrl = LinkHelper.getWebActivityURL(request, "customerJobs");
@@ -331,16 +327,8 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_attribute_group
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_locale_pairs")%>", "javascript:goToUrl('<%=localePairsUrl%>');", ""));
 <% } %>
 
-<% if (userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) { %>
-setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_automatic_actions")%>", "javascript:goToUrl('<%=automaticActionUrl%>');", ""));
-<% } %>
-
 <% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_gseditions")%>", "javascript:goToUrl('<%=gsEditionUrl%>');", ""));
-<% } %>
-
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) { %>
-setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_gsedition_actions")%>", "javascript:goToUrl('<%=gsEditionActionUrl%>');", ""));
 <% } %>
 
 <% if (userPerms.getPermissionFor(Permission.ACTIVITY_TYPES_VIEW)) { %>

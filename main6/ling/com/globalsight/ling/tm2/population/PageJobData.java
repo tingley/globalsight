@@ -225,10 +225,10 @@ public class PageJobData
 		{
 			excludeStates.add(TuvState.APPROVED.getName());
 		}
-//		if(!p_saveExactMatch)
-//	    {
-//	    	excludeStates.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
-//	    }
+		if(!p_saveExactMatch)
+	    {
+	    	excludeStates.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
+	    }
 		tuList = getTusByState(excludeStates, EXCLUDE_STATE);
 		
 		return tuList;

@@ -6,6 +6,7 @@ var showList = false;
 var showPtags = false;
 var showRepeated = false;	
 var w_editor;
+var postReviewEditor = "postReviewEditor";
 window.focus();
 
 function helpSwitch()
@@ -21,12 +22,18 @@ function SegmentFilter(p_segmentFilter)
     document.location = url_self+"&refresh=0&segmentFilter=" + p_segmentFilter;
 }
 
+function switchTargetLocale(p_locale)
+{
+	document.location = url_self+"&refresh=0&trgViewLocale=" + p_locale;
+}
+
 var comments=["Hide Comments","Show Comments"]
 
 function reviewMode()
 {
 	var lable=$("#reviewMode").text();
 	lable=$.trim(lable);
+	
     var action="true";
     if(comments[0]==lable)
     {
@@ -42,23 +49,20 @@ function closeWindow()
 
 function CanClose()
 {
-	w_editor.close();
+	if(w_editor)
+    {
+    	w_editor.close();
+    }
+	return true;
 }
 
 function refresh(direction)
 {
+	if(w_editor)
+    {
+    	w_editor.close();
+    }
 	document.location = url_self + "&action=refresh&refresh=" + direction+"&random="+Math.random();
-}
-
-function Refresh(p_url)
-{
-    document.location = p_url;
-}
-
-function showOptions()
-{
-    w_options = window.open(url_options, "MEOptions",
-      "resizable=no,scrollbars=no,width=470,height=590");
 }
 
 function showPageInfo()
@@ -120,14 +124,14 @@ function updateFileNavigationArrow()
 
 function updatePageNavigationArrow()
 {
-    if (isFirstBatch == 'false')
+    if (isFirstBatch == 'false' || isFirstBatch == false)
     {
         pageNavPre = "<A HREF='#' onclick='refresh(-11); return false;' onfocus='this.blur()'>"
             + "<IMG SRC='/globalsight/images/editorPreviousPage.gif' BORDER=0 HSPACE=2 VSPACE=4></A>";
         document.getElementById("pageNavPre").innerHTML = pageNavPre;
     }
-
-	if (isLastBatch == 'false')
+    
+	if (isLastBatch == 'false' || isLastBatch == false)
 	{
         pageNavNext = "<A HREF='#' onclick='refresh(11); return false;' onfocus='this.blur()'>"
             + "<IMG SRC='/globalsight/images/editorNextPage.gif' BORDER=0 HSPACE=2 VSPACE=4></A>";
@@ -209,26 +213,81 @@ function checkAll()
 function approve()
 {
 	var approveIds = "";
-	var unApproveIds = "";
 	$("input[name='approveCheckBox']").each(function(){
 		if($(this).is(":checked"))
 		{
 			approveIds = approveIds + $(this).attr("id") + ",";
 		}
-		else
-		{
-			unApproveIds = unApproveIds + $(this).attr("id") + ",";
-		}
 	});
+	
+	if(approveIds == "")
+	{
+		alert("Please select some segments.");
+		return false;
+	}
 	
 	$.getJSON(url_self, 
 	{
 		action:"approve",
 		approveIds:approveIds,
+		random:Math.random()
+	}, function(data){
+		alert("Approval is done.");
+		setInterval(getDataByFrom(url),1000);
+	});
+}
+
+function unapprove()
+{
+	var unApproveIds = "";
+	$("input[name='approveCheckBox']").each(function(){
+		if($(this).is(":checked"))
+		{
+			unApproveIds = unApproveIds + $(this).attr("id") + ",";
+		}
+	});
+	
+	if(unApproveIds == "")
+	{
+		alert("Please select some segments.");
+		return false;
+	}
+	
+	$.getJSON(url_self, 
+	{
+		action:"unapprove",
 		unApproveIds:unApproveIds,
 		random:Math.random()
 	}, function(data){
-		alert("Approve the Sgement(s).");
+		alert("Un-approval is done.");
+		setInterval(getDataByFrom(url),1000);
+	});
+}
+
+function revert()
+{
+	var revertIds = "";
+	$("input[name='approveCheckBox']").each(function(){
+		if($(this).is(":checked"))
+		{
+			revertIds = revertIds + $(this).attr("id") + ",";
+		}
+	});
+	
+	if(revertIds == "")
+	{
+		alert("Please select some segments.");
+		return false;
+	}
+	
+	$.getJSON(url_self, 
+	{
+		action:"revert",
+		revertIds:revertIds,
+		random:Math.random()
+	}, function(data){
+		alert("Reversion is done.");
+		setInterval(getDataByFrom(url),1000);
 	});
 }
 
@@ -239,7 +298,11 @@ var jsonUrl=url_self+"&dataFormat=json"+"&srcViewMode=" + modeId+"&random="+Math
 var localData;
 var isReviwMode;
 var url;
-var trnode=$("<tr class='ul'><td width='25'></td><td class='segtd'></td><td class='segtd'></td><td class='segtd'></td><td width='50'></td></tr>");
+var trnode=$("<tr class='ul'><td width='25'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td></tr>");
+if(approveAction == "true")
+{
+	trnode=$("<tr class='ul'><td width='25'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td class='segtd segmentTd'></td><td width='50'></td></tr>");
+}
 var repNode=$("<td class='rep'></td>");
 var subnode=$("<tr><td style='font-size: 10pt' nowrap=''></td><td></td></tr>")
 var subtable=$("<table width='100%' cellspacing='0' cellpadding='2'><colgroup><col width='1%' valign='TOP' class='editorId'><col width='99%' valign='TOP'></colgroup><tbody></tbody></table>")
@@ -282,7 +345,6 @@ $(
 		var pageName=isNull ? "target"  : ((args.pageName.indexOf("ED4") >= 0)?"source":"target");
 		
 		updateFileNavigationArrow();
-	    updatePageNavigationArrow();
 		
 		url=jsonUrl;
 		getDataByFrom(url);
@@ -300,6 +362,23 @@ function getDataByFrom(url){
 function buildData(data){
 	var idPageHtml=$("#idPageHtml");
 	idPageHtml.html("");
+	if(data == "null" || data == null)
+	{
+		$("#currentPageNum").html(1);
+		$("#totalPageNum").html(1);
+		tempTotalPageNum = 1;
+		isFirstBatch = true;
+		isLastBatch = true;
+	}
+	else
+	{
+		$("#currentPageNum").html(data.currentPageNum);
+		$("#totalPageNum").html(data.totalPageNum);
+		tempTotalPageNum = data.totalPageNum;
+		isFirstBatch = data.isFirstBatch;
+		isLastBatch = data.isLastBatch;
+	}
+	updatePageNavigationArrow();
 	$(".repstyle").remove();
 	$(".commentstyle").remove();
 	localData=data;
@@ -359,7 +438,17 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 	}
 	
 	//Original
-	temp.children('td').eq(2).append(originalTargetData.originalTarget);
+	htmlcontent=getNodeByClass2(originalTargetData, "");
+	if(originalTargetData.subArray){
+		temp.children('td').eq(2).html("<table width='100%' cellspacing='0' cellpadding='2'>"+htmlcontent.html()+"</table>");
+	}else{
+		temp.children('td').eq(2).append(htmlcontent);
+	}
+	
+	if(originalTargetData.originalTarget == "")
+	{
+		temp.children('td').eq(2).addClass("center");
+	}
 	
 	//target
 	temp.children('td').eq(3).attr("id","seg"+targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId);
@@ -383,9 +472,11 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 		temp.children('td').eq(3).children("a").children("span").attr("dir","rtl");
 	}
 	
-	//approve
-	var approveId = targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId;
-	temp.children('td').eq(4).html("<input id='" + approveId + "' name='approveCheckBox' type='checkbox' " + approveData.approve + ">");
+	if(approveAction == "true")
+	{
+		var approveId = targetData.tuId+"_"+targetData.tuvId+"_"+targetData.subId;
+		temp.children('td').eq(4).html("<input id='" + approveId + "' name='approveCheckBox' type='checkbox'>");
+	}
 
 	idPageHtml.append(temp);
 }
@@ -393,7 +484,7 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 function getNodeByClass(item, se_able){
 	var temp;
 	// if "mainstyle.match("SE ")", it should display right click context menus.
-	var scriptFlag = inner_reviewMode || item.mainstyle.match("SE ") || se_able == "target";
+	var scriptFlag = inner_reviewMode || item.mainstyle.match("SE ");
 
 	if(scriptFlag){
 		temp=SEnode.clone(true);
@@ -420,6 +511,8 @@ function getNodeByClass(item, se_able){
 	{
 		temp.addClass(item.mainstyle.replace("editorComment", "").replace("isHighLight", ""));
 	}
+	
+	temp.addClass("noUnderline");
 
 	if(item.subArray){
 		var stable=subtable.clone(true);
@@ -437,8 +530,36 @@ function getNodeByClass(item, se_able){
 			}
 
 			span.addClass(this.subclass);
+			span.addClass("noUnderline");
 			span.html(this.segment);
 			sub.children('td').eq(1).attr("id","seg"+item.tuId+"_"+item.tuvId+"_"+this.subId);
+			sub.children('td').eq(1).append(span);
+			stable.append(sub);
+		});
+		return stable;
+	}
+	return temp;
+}
+
+function getNodeByClass2(item, se_able){
+	var temp=spanNode.clone(true);
+	if(item.originalTarget != "")
+	{
+		temp.html(item.originalTarget);
+	}
+	else
+	{
+		temp.html("-");
+	}
+	if(item.subArray){
+		var stable=subtable.clone(true);
+		stable.append(temp);
+		$.each(item.subArray,function(j){
+			var sub=subnode.clone(true);
+			sub.children('td').eq(0).text(item.tuId+"."+this.subId);
+			var span=spanNode.clone(true);
+
+			span.html(this.segment);
 			sub.children('td').eq(1).append(span);
 			stable.append(sub);
 		});
@@ -697,7 +818,7 @@ function getSegmentIdFromHref(href)
 {
     href = href.substring(href.indexOf('(') + 1);
     href = href.substring(0, href.indexOf(')'));
-    return href.split(',');
+    return href.split(',');l
 }
 
 $(document).ready(function(){

@@ -95,6 +95,7 @@ var jsUnextractableWordCharacterStyles = "<%= bundle.getString("lb_filter_Unextr
 var jsUnextractableExcelCellStyles = "<%= bundle.getString("lb_filter_UnextractableExcelCellStyles")%>";
 var jsInternalTextCharacterStyles = "<%= bundle.getString("lb_filter_InternalTextCharacterStyles")%>";
 var jsWordInternalTextCharacterStyles = "<%= bundle.getString("lb_filter_wordInternalTextCharacterStyles")%>";
+var jsExcelInternalTextCellStyles = "<%= bundle.getString("lb_filter_excelInternalTextCellStyles")%>";
 var jsTranslateHeaderInformation = "<%= bundle.getString("lb_filter_TranslateHeaderInformation")%>";
 var jsInternalTextPostFilter = "<%= bundle.getString("lb_filter_InternalTextPostFilter")%>";
 var jsStyleType = "<%= bundle.getString("lb_filter_StyleType")%>";

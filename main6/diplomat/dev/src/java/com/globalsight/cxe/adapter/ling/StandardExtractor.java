@@ -133,6 +133,8 @@ public class StandardExtractor
     private String m_xlsx_hiddenSharedSI = null;
     private String m_xlsx_sheetHiddenCell = null;
     private String m_xlsx_unextractableCellStyles = null;
+    // GBS-3944
+    private String m_xlsx_excelInternalTextCellStyles = null;
     private String m_isHeaderFooterTranslate = null;
     private String m_isToolTipsTranslate = null;
     private String m_isHiddenTextTranslate = null;
@@ -368,6 +370,8 @@ public class StandardExtractor
                 m_xlsx_unextractableCellStyles);
         e.addOptions("isHeaderFooterTranslate", m_isHeaderFooterTranslate);
         e.addOptions("m_xlsx_sheetHiddenCell", m_xlsx_sheetHiddenCell);
+        e.addOptions("excelInternalTextCellStyles",
+                m_xlsx_excelInternalTextCellStyles);
 
         return e;
     }
@@ -681,7 +685,7 @@ public class StandardExtractor
                         String temp = node.getSegment();
                         boolean hasLtGt = temp.contains("&lt;")
                                 || temp.contains("&gt;");
-						// protect "<" and ">" to ensure html filter will work
+                        // protect "<" and ">" to ensure html filter will work
                         temp = temp.replace("&amp;lt;", "_leftAmpLt_");
                         temp = temp.replace("&amp;gt;", "_rightAmpGt_");
                         temp = temp.replace("&amp;quot;", "_ampQuot_");
@@ -696,7 +700,8 @@ public class StandardExtractor
                         temp = InternalTextHelper.protectInternalTexts(temp,
                                 internalTexts);
                         String segmentValue = xe.decodeStringBasic(temp);
-                        // decode TWICE to make sure secondary parser can work as expected
+                        // decode TWICE to make sure secondary parser can work
+                        // as expected
                         if (segmentValue.indexOf("&") > -1)
                         {
                             segmentValue = xe.decodeStringBasic(segmentValue);
@@ -779,7 +784,7 @@ public class StandardExtractor
                             }
                             extractedOutPut.addDocumentElement(element2);
                         }
-                        
+
                         diplomat.setIsSecondFilter(false);
                     }
                 }
@@ -1067,6 +1072,7 @@ public class StandardExtractor
             String headerFooterRule = createRuleForHeaderFooter();
             String toolTipsRule = createRuleForToolTips();
             String unextractableExcelCellStyleTextRule = createRuleForUnextractableExcelCell();
+            String excelInternalTextCellStyleRule = createRuleForExcelInternalTextCellStyles();
             String tableOfContentRule = createRuleForTableOfContent();
 
             StringBuffer result = new StringBuffer();
@@ -1076,6 +1082,8 @@ public class StandardExtractor
             result.append(toolTipsRule != null ? toolTipsRule : "");
             result.append(tableOfContentRule != null ? tableOfContentRule : "");
             result.append(unextractableExcelCellStyleTextRule != null ? unextractableExcelCellStyleTextRule
+                    : "");
+            result.append(excelInternalTextCellStyleRule != null ? excelInternalTextCellStyleRule
                     : "");
 
             return result.toString();
@@ -1317,6 +1325,43 @@ public class StandardExtractor
         if (added)
         {
             styleRule = styleSB.toString();
+        }
+        return styleRule;
+    }
+
+    /**
+     * Creates rules for the texts with Excel Internal Text Cell Styles in excel
+     * 2010 documents.
+     * 
+     * @since GBS-3944
+     */
+    private String createRuleForExcelInternalTextCellStyles()
+    {
+        String styleRule = null;
+        boolean added = false;
+        StringBuilder sb = new StringBuilder();
+        sb.append("\r\n");
+        sb.append("<ruleset schema=\"sst\">");
+        sb.append("\r\n");
+
+        List<String> ids = MSOffice2010Filter
+                .toList(m_xlsx_excelInternalTextCellStyles);
+
+        for (String idstr : ids)
+        {
+            int id = Integer.parseInt(idstr) + 1;
+            added = true;
+            sb.append("<internal path='//*[local-name()=\"si\"][" + id
+                    + "]/*[local-name()=\"t\"]' />");
+            sb.append("\r\n");
+        }
+
+        sb.append("</ruleset>");
+        sb.append("\r\n");
+
+        if (added)
+        {
+            styleRule = sb.toString();
         }
         return styleRule;
     }
@@ -1599,6 +1644,8 @@ public class StandardExtractor
                         .getValue("sheetHiddenCell"));
                 m_xlsx_unextractableCellStyles = noNull(eventFlowObject
                         .getValue("unextractableExcelCellStyles"));
+                m_xlsx_excelInternalTextCellStyles = noNull(eventFlowObject
+                        .getValue("excelInternalTextCellStyles"));
                 m_isHeaderFooterTranslate = noNull(eventFlowObject
                         .getValue("isHeaderFooterTranslate"));
                 m_isToolTipsTranslate = noNull(eventFlowObject
@@ -1766,7 +1813,7 @@ public class StandardExtractor
                             {
                                 String sidRile = "<sid path=\"//*[local-name()='Object']/*[local-name()='ID']\" root=\"Object\"/>";
                                 rule.insert(index, sidRile);
-                                
+
                                 m_ruleFile = rule.toString();
                             }
                         }
@@ -1776,7 +1823,7 @@ public class StandardExtractor
                                     .read(StandardExtractor.class
                                             .getResourceAsStream("/properties/AuthorITXmlRule.properties"));
                         }
-                        
+
                     }
                     catch (Exception e)
                     {

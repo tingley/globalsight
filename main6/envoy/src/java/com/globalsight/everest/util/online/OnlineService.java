@@ -228,7 +228,6 @@ public class OnlineService extends HttpServlet
     private String getTarget() throws UnsupportedEncodingException
     {
         String text = request.getParameter("text");
-        text = new String(text.getBytes("iso8859-1"),"utf-8"); 
         return text;
     }
     

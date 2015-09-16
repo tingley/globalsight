@@ -145,7 +145,6 @@ public class Online2Service extends HttpServlet
         if (text == null)
             return null;
         
-        text = new String(text.getBytes("iso8859-1"),"utf-8"); 
         return text;
     }
     

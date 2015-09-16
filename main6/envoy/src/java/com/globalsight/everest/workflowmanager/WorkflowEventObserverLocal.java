@@ -17,7 +17,6 @@
 package com.globalsight.everest.workflowmanager;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Date;
@@ -28,13 +27,10 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.globalsight.cxe.entity.exportlocation.ExportLocation;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManager;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.jobhandler.JobEventObserverWLRemote;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.DataSourceType;
@@ -53,8 +49,6 @@ import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseList;
 import com.globalsight.terminology.indexer.IIndexManager;
 import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.webservices.client.Ambassador;
-import com.globalsight.webservices.client.WebServiceClientHelper;
 
 public class WorkflowEventObserverLocal implements WorkflowEventObserver
 {
@@ -313,51 +307,6 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
         {
             JobImpl jobClone = (JobImpl) p_wf.getJob();
 
-            String jobCompanyName = null;
-            try
-            {
-                long jobCompanyId = jobClone.getCompanyId();
-                jobCompanyName = ServerProxy.getJobHandler()
-                        .getCompanyById(jobCompanyId).getCompanyName();
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            // added by Walter, for sending back the job to GS Edition server.
-            JobEditionInfo je = getGSEditionJobByJobID(jobClone.getId());
-            if (je != null)
-            {
-                if (!je.getSendingBackStatus().equals(
-                        "sending_back_edition_finished"))
-                {
-                    ExportLocationPersistenceManager mgr = ServerProxy
-                            .getExportLocationPersistenceManager();
-                    ExportLocation eLoc = mgr.getDefaultExportLocation();
-                    String exportLocation = eLoc.getLocation();
-                    if (jobCompanyName != null
-                            && !exportLocation.endsWith(jobCompanyName))
-                    {
-                        exportLocation = exportLocation + File.separator
-                                + jobCompanyName;
-                    }
-                    String wsdl = je.getUrl();
-                    Ambassador ambassador = WebServiceClientHelper
-                            .getClientAmbassador(wsdl, je.getUserName(),
-                                    je.getPassword());
-
-                    String fullAccessToken = ambassador.login(je.getUserName(),
-                            je.getPassword());
-
-                    String realAccessToken = WebServiceClientHelper
-                            .getRealAccessToken(fullAccessToken);
-
-                    sendingBackEditionJob(p_wf, ambassador, realAccessToken,
-                            exportLocation, je);
-                }
-            }
-
             jobClone.setState(p_wfState);
             HibernateUtil.update(jobClone);
 
@@ -380,84 +329,6 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
                     jobDir.mkdirs();
                 }
             }
-        }
-    }
-
-    private JobEditionInfo getGSEditionJobByJobID(long jobID)
-    {
-        JobEditionInfo je = new JobEditionInfo();
-
-        try
-        {
-            String hql = "from JobEditionInfo a where a.jobId = :id";
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("id", Long.toString(jobID));
-            Collection servers = HibernateUtil.search(hql, map);
-            Iterator i = servers.iterator();
-            je = i.hasNext() ? (JobEditionInfo) i.next() : null;
-        }
-        catch (Exception pe)
-        {
-            // s_logger.error("Persistence Exception when retrieving JobEditionInfo",
-            // pe);
-        }
-
-        return je;
-    }
-
-    private void sendingBackEditionJob(Workflow workflow,
-            Ambassador ambassador, String realAccessToken,
-            String exportLocation, JobEditionInfo je)
-    {
-        try
-        {
-            Iterator iter = workflow.getTargetPages().iterator();
-
-            while (iter.hasNext())
-            {
-                TargetPage tp = (TargetPage) iter.next();
-                String exportingFileName = tp.getExternalPageId();
-                int index = exportingFileName.indexOf(File.separator);
-                exportingFileName = exportingFileName.substring(index + 1);
-                exportingFileName = exportLocation + File.separator
-                        + tp.getGlobalSightLocale().getLanguage() + "_"
-                        + tp.getGlobalSightLocale().getCountry()
-                        + File.separator + exportingFileName;
-                File finalFile = new File(exportingFileName);
-
-                if (finalFile.exists() && finalFile.isFile())
-                {
-                    FileInputStream is = new FileInputStream(finalFile);
-                    byte[] bytes = new byte[(int) finalFile.length()];
-                    is.read(bytes, 0, bytes.length);
-                    is.close();
-
-                    String pagename = exportingFileName
-                            .substring(exportingFileName
-                                    .lastIndexOf(File.separator) + 1);
-
-                    ambassador.uploadEditionFileBack(realAccessToken,
-                            je.getOriginalTaskId(), pagename, bytes);
-                }
-                else
-                {
-                    String msg = "The final file does not exist or is not a file : "
-                            + finalFile.getAbsolutePath();
-                    s_logger.error(msg);
-                }
-            }
-
-            ambassador.importOfflineTargetFiles(realAccessToken,
-                    je.getOriginalTaskId());
-
-            Session HibSession = HibernateUtil.getSession();
-            Transaction tx = HibSession.beginTransaction();
-            je.setSendingBackStatus("sending_back_edition_finished");
-            tx.commit();
-        }
-        catch (Exception e)
-        {
-            s_logger.error(e.getMessage(), e);
         }
     }
 
@@ -601,11 +472,9 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
         }
     }
 
-    private Collection getWorkflows(Workflow p_workflow)
+    private Collection<Workflow> getWorkflows(Workflow p_workflow)
     {
-        Job j = p_workflow.getJob();
-        Collection c = j.getWorkflows();
-        return c;
+    	return p_workflow.getJob().getWorkflows();
     }
 
     private JobEventObserverWLRemote getJobEventObserver() throws Exception

@@ -43,6 +43,7 @@ import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.LocaleCreater;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
+import com.globalsight.util.EmojiUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 
 /**
@@ -209,7 +210,7 @@ public class DiplomatWordCounter
             m_locale = getLocale();
             m_si = GlobalsightRuleBasedBreakIterator.getWordInstance(m_locale);
         }
-        
+
         isCJK = DiplomatWordCountUtil.isCJKLocale(m_locale);
 
         switch (p_de.type())
@@ -437,7 +438,8 @@ public class DiplomatWordCounter
                     }
                 }
             }
-            else if (Extractor.XLIFF_PART_SEGSOURCE.equalsIgnoreCase(xlfPartAtt))
+            else if (Extractor.XLIFF_PART_SEGSOURCE
+                    .equalsIgnoreCase(xlfPartAtt))
             {
                 if (xlfPart.get(Extractor.IWS_WORDCOUNT) != null)
                 {
@@ -476,6 +478,9 @@ public class DiplomatWordCounter
             {
                 segment = removeInternalTagsForWordCounter(segment);
             }
+            // GBS-3997&GBS-4066, remove emoji alias occurrences before word
+            // counting
+            segment = segment.replaceAll(EmojiUtil.TYPE_EMOJI + ":[^:]*?:", "");
 
             Document doc = parse("<AllYourBaseAreBelongToUs>" + segment
                     + "</AllYourBaseAreBelongToUs>");
@@ -550,9 +555,11 @@ public class DiplomatWordCounter
 
             if (!isSkipElement(sub))
             {
-                String subLocType = sub.attributeValue(DiplomatNames.Attribute.LOCTYPE);
+                String subLocType = sub
+                        .attributeValue(DiplomatNames.Attribute.LOCTYPE);
                 if (subLocType == null
-                        || subLocType.equals(DiplomatNames.Element.TRANSLATABLE))
+                        || subLocType
+                                .equals(DiplomatNames.Element.TRANSLATABLE))
                 {
                     words = countWords(sub);
                 }
@@ -732,7 +739,7 @@ public class DiplomatWordCounter
                     {
                         words++;
                     }
-                    
+
                     if (isCJK && DiplomatWordCountUtil.isCJKChar(ch))
                     {
                         int len = iEnd - iStart;

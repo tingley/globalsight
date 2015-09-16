@@ -46,8 +46,6 @@ import org.jbpm.taskmgmt.exe.PooledActor;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.everest.autoactions.AutoAction;
-import com.globalsight.everest.autoactions.AutoActionManagerLocal;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.foundation.Timestamp;
@@ -74,7 +72,6 @@ import com.globalsight.everest.workflowmanager.ArrorInfo;
 import com.globalsight.everest.workflowmanager.DefaultPathTasks;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.everest.workflowmanager.WorkflowOwner;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -124,11 +121,6 @@ public class WorkflowServerLocal implements WorkflowServer
     private HashMap<String, String> taskDeatilUrlParam = new HashMap<String, String>();
 
     private static final String EXIT_NODE = "Exit";
-
-    // this for automatic action, the email will send to the address which
-    // is assigned in automatic action.
-    private String autoActionEmailAddress = null;
-    private boolean isAutoAction = false;
 
     //
     // PUBLIC CONSTRUCTORS
@@ -439,7 +431,6 @@ public class WorkflowServerLocal implements WorkflowServer
                 p_emailInfo.getAssigneesName(),
                 capLoginUrl(),
                 p_emailInfo.getPriorityAsString(),
-                p_emailInfo.getJobName(),
                 WorkflowHelper.localePair(p_emailInfo.getSourceLocale(),
                         p_emailInfo.getTargetLocale(), "en_US"), state };
         sendTaskActionEmailToUser(p_emailInfo.getAssigneesName(), p_emailInfo,
@@ -2154,15 +2145,6 @@ public class WorkflowServerLocal implements WorkflowServer
                         {
                             return;
                         }
-                        List owners = new ArrayList();
-                        WorkflowOwner owner = new WorkflowOwner();
-                        owner.setWorkflow(workflow);
-                        owner.setOwnerId(userId);
-                        owner.setOwnerType(Permission.GROUP_WORKFLOW_MANAGER);
-                        owners.add(owner);
-                        ServerProxy.getWorkflowManager()
-                                .reassignWorkflowOwners(workflow.getId(),
-                                        owners);
                         ServerProxy.getTaskManager().acceptTask(userId, task,
                                 true);
                         if (i == indexInDefaultPath)
@@ -2276,16 +2258,6 @@ public class WorkflowServerLocal implements WorkflowServer
                         {
                             return;
                         }
-                        List owners = new ArrayList();
-                        WorkflowOwner owner = new WorkflowOwner();
-                        owner.setWorkflow(workflow);
-                        owner.setOwnerId(userId);
-                        owner.setOwnerType(((WorkflowOwner) workflow
-                                .getWorkflowOwners().get(0)).getOwnerType());
-                        owners.add(owner);
-                        ServerProxy.getWorkflowManager()
-                                .reassignWorkflowOwners(workflow.getId(),
-                                        owners);
                         ServerProxy.getTaskManager().acceptTask(userId, task,
                                 true);
                         if (task.getTaskName().equals("Exit"))
@@ -3181,9 +3153,6 @@ public class WorkflowServerLocal implements WorkflowServer
             case WorkflowMailerConstants.ACTIVATE_REVIEW_TASK:
                 subject = WorkflowMailerConstants.ACTIVATE_REVIEW_TASK_SUBJECT;
                 break;
-            case WorkflowMailerConstants.AUTOACTION_TASK:
-                subject = WorkflowMailerConstants.AUTOACTION_TASK_SUBJECT;
-                break;
             case WorkflowMailerConstants.CANCEL_TASK:
                 subject = WorkflowMailerConstants.CANCEL_TASK_SUBJECT;
                 break;
@@ -3232,9 +3201,6 @@ public class WorkflowServerLocal implements WorkflowServer
                 break;
             case WorkflowMailerConstants.ACTIVATE_REVIEW_TASK:
                 message = WorkflowMailerConstants.ACTIVATE_REVIEW_TASK_MESSAGE;
-                break;
-            case WorkflowMailerConstants.AUTOACTION_TASK:
-                message = WorkflowMailerConstants.AUTOACTION_TASK_MESSAGE;
                 break;
             case WorkflowMailerConstants.CANCEL_TASK:
                 message = WorkflowMailerConstants.CANCEL_TASK_MESSAGE;
@@ -3454,24 +3420,6 @@ public class WorkflowServerLocal implements WorkflowServer
                 String[] toUsers = getNodeAssignees(p_node, processInstance);
                 emailInfos = (ArrayList) getMailer().getEmailAddresses(toUsers);
                 int ActionType = WorkflowMailerConstants.ACTIVATE_TASK;
-
-                if (p_taskInfo.getType() == Activity.TYPE_AUTOACTION)
-                {
-                    Activity act = (Activity) ServerProxy.getJobHandler()
-                            .getActivity(p_taskInfo.getName());
-                    String acID = act.getAutoActionID();
-                    AutoActionManagerLocal am = new AutoActionManagerLocal();
-                    AutoAction autoAction = am.getActionByID(Long
-                            .parseLong(acID));
-                    isAutoAction = true;
-                    autoActionEmailAddress = autoAction.getEmail();
-                    ActionType = WorkflowMailerConstants.AUTOACTION_TASK;
-                }
-                else
-                {
-                    isAutoAction = false;
-                    autoActionEmailAddress = null;
-                }
 
                 if (toUsers != null)
                 {
@@ -3878,19 +3826,6 @@ public class WorkflowServerLocal implements WorkflowServer
                                 getEmailSubject(p_taskActionType),
                                 getEmailMessage(p_taskActionType),
                                 p_messageArgs, companyIdStr);
-
-                        if (isAutoAction)
-                        {
-                            to.setIsAutoAction(true);
-                            to.setAutoActionEmailAddress(autoActionEmailAddress);
-                            sendMail(
-                                    p_initiator,
-                                    to,
-                                    getEmailSubject(WorkflowMailerConstants.AUTOACTION_TASK),
-                                    getEmailMessage(WorkflowMailerConstants.AUTOACTION_TASK),
-                                    p_messageArgs, companyIdStr);
-                        }
-
                     }
                 }
             }

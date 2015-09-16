@@ -103,14 +103,6 @@ public class CommentManagerWLRMIImpl extends RemoteServer implements
                 p_comment, p_date);
     }
 
-    public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserId, String p_comment, String p_originalId,
-            String p_originalWsdlUrl) throws RemoteException, CommentException
-    {
-        return m_localInstance.saveComment(p_wo, p_id, p_creatorUserId,
-                p_comment, p_originalId, p_originalWsdlUrl);
-    }
-
     /**
      * @see CommentManager.updateComment(long, int, String, Comment)
      */

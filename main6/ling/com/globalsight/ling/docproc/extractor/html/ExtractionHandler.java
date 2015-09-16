@@ -2289,7 +2289,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         else if ((t.isFromOfficeContent ? m_rules
                 .isContentTranslatableAttribute(attrib.name) : m_rules
                 .isTranslatableAttribute(t.tag, attrib.name))
-                && !m_extractor.exclude() && !isURL(strValue))
+                && !m_extractor.exclude())
         {
             m_output.addSkeleton(" " + attrib.name + "=" + quote);
             m_output.addTranslatable(strValue);
@@ -4465,10 +4465,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 else if ((t.isFromOfficeContent ? m_rules
                         .isContentTranslatableAttribute(attrib.name) : m_rules
                         .isTranslatableAttribute(t.tag, attrib.name))
-                        && !m_extractor.exclude() && !isURL(strValue))
+                        && !m_extractor.exclude())
                 {
-                    // all urls are localizable, nothing to decode here
-
                     m_output.addTranslatable(" " + attrib.name + "=" + quote);
                     m_output.addTranslatableTmx("<sub type=\"");
                     m_output.addTranslatable(attrib.name.toLowerCase());
@@ -6355,24 +6353,6 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             return clazz.startsWith("N") || clazz.startsWith("O");
         }
 
-        return false;
-    }
-
-    /**
-     * Checks if this attribute value is an http or https url
-     * 
-     * @param value
-     *            the value in the attribute
-     * 
-     * @return true | false
-     */
-    private boolean isURL(String value)
-    {
-        String s = value.trim().toLowerCase();
-        if (s.startsWith("http://") || s.startsWith("https://"))
-        {
-            return true;
-        }
         return false;
     }
 

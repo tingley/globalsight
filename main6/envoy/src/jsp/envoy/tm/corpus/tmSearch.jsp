@@ -442,7 +442,7 @@ function editEntry(tmId, tuId, sourceLocale, sourceTuvId, targetLocale, targetTu
 		editWindow=null;
 	}
 	var editEntry = "<%=editEntryUrl%>"+"&tmId=" + tmId + "&tuId=" + tuId+"&sourceLocale="+sourceLocale+"&sourceTuvId="+sourceTuvId+"&targetLocale="+targetLocale+"&targetTuvId=" + targetTuvId;
-	editWindow = window.open(editEntry, "EditEntry", "resizable,width=700,height=630, scrollbars" + ",top=200,left=300");
+	editWindow = window.open(editEntry, "EditEntry", "resizable,width=700,height=690, scrollbars" + ",top=200,left=300");
 }
 
 function showNoResults()

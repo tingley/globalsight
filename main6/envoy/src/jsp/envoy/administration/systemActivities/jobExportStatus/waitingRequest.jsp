@@ -34,6 +34,9 @@
             .getString("lb_job_creation_status");
     String loginBlockConfigUrl = loginBlock.getPageURL();
     String offlineUrl = offline.getPageURL();
+    ArrayList<String> keyList = (ArrayList<String>)request.getAttribute("selectedKeys");
+	if (keyList == null)
+		keyList = new ArrayList<String>();
 %>
 <HTML>
     <HEAD>
@@ -78,6 +81,73 @@
                 }
             }
             
+            function upPriority() {
+            	var s = $('input:checkbox[name=key]:checked');
+                if (s.length == 0)
+                {
+                    alert("<%=bundle.getString("jsmsg_please_select_a_row")%>");
+                    return false;
+                }
+
+                if (confirm('<%=bundle.getString("msg_change_order_import_request")%>')) {
+                    MyForm.action = "<%=selfUrl%>&action=upPriority";
+                    MyForm.submit();
+                }
+            }
+            
+            function downPriority() {
+            	var s = $('input:checkbox[name=key]:checked');
+                if (s.length == 0)
+                {
+                    alert("<%=bundle.getString("jsmsg_please_select_a_row")%>");
+                    return false;
+                }
+
+                if (confirm('<%=bundle.getString("msg_change_order_import_request")%>')) {
+                    MyForm.action = "<%=selfUrl%>&action=downPriority";
+                    MyForm.submit();
+                }
+            }
+            
+            function topPriority() {
+            	var s = $('input:checkbox[name=key]:checked');
+                if (s.length == 0)
+                {
+                    alert("<%=bundle.getString("jsmsg_please_select_a_row")%>");
+                    return false;
+                }
+
+                if (confirm('<%=bundle.getString("msg_change_order_import_request")%>')) {
+                    MyForm.action = "<%=selfUrl%>&action=topPriority";
+                    MyForm.submit();
+                }
+            }
+            
+            function bottomPriority() {
+            	var s = $('input:checkbox[name=key]:checked');
+                if (s.length == 0)
+                {
+                    alert("<%=bundle.getString("jsmsg_please_select_a_row")%>");
+                    return false;
+                }
+
+                if (confirm('<%=bundle.getString("msg_change_order_import_request")%>')) {
+                    MyForm.action = "<%=selfUrl%>&action=bottomPriority";
+                    MyForm.submit();
+                }
+            }
+            
+            $(function() {
+				var obj = $("#contentTd")[0];
+				var h = obj.offsetHeight;
+				var kh = h - 60;
+				$("#sortTd")[0].style.height = kh + "px";
+				
+				<%for (String key : keyList) {%>
+				    $("#<%=key%>").attr("checked",'true');
+				<%}%>
+			});
+            
             function changePageSize(size) {
                 MyForm.action = "<%=selfUrl%>&numOfPageSize=" + size;
                 MyForm.submit();
@@ -98,6 +168,10 @@
                 padding-top: 2px;
                 padding-bottom: 2px;
             }
+            
+            .pointer {
+			  cursor:pointer
+			}
         </STYLE>
         <DIV ID="contentLayer"
              STYLE="POSITION: ABSOLUTE; Z-INDEX: 10; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
@@ -161,11 +235,34 @@
                     <c:out value="${tableNav}" escapeXml="false"></c:out>
                     </div>
                     <FORM NAME="MyForm" METHOD="POST">
+                    <table width="100%">
+					<tr>
+						<td width="40px" valign="top" align="right">
+							<table style="width: 100%; height: 100%;">
+								<tr>
+									<td align="right" style="padding-top: 0px;"><input
+										type="button" value="<%=bundle.getString("lb_move_to_top")%>" onclick='topPriority()'  class="pointer"/></td>
+								</tr>
+								<tr>
+									<td id="sortTd" align="right"><img
+										src='/globalsight/images/sort-up(big).gif'
+										style='margin-bottom: 5px' onclick='upPriority()'  class="pointer"></img><br>
+										<img src='/globalsight/images/sort-down(big).gif'
+										onclick='downPriority()'  class="pointer"></img></td>
+								</tr>
+								<tr>
+									<td align="right"><input type="button"
+										value="<%=bundle.getString("lb_move_to_bottom")%>" onclick='bottomPriority()'  class="pointer"/></td>
+								</tr>
+							</table>
+
+						</td>
+						<td valign="top" id="contentTd">
                         <amb:table bean="requestDefine" id="requestVo" key="requestDefineKey"
                                    dataClass="com.globalsight.everest.webapp.pagehandler.administration.systemActivities.jobExportState.RequestFile"
                                    pageUrl="self" emptyTableMsg="msg_waiting_request_none">
                             <amb:column label="checkbox">
-                                <INPUT TYPE=checkbox NAME=key VALUE="${requestVo.key}">
+                                <INPUT TYPE=checkbox NAME=key VALUE="${requestVo.key}" id="${requestVo.key}">
                         </amb:column>
                          <amb:column label="lb_company" sortBy="<%=ExportRequestComparator.Company%>">
                             ${requestVo.company}
@@ -188,17 +285,24 @@
                         <amb:column label="lb_date_request" sortBy="<%=ExportRequestComparator.REQUEST_TIME%>">
                             ${requestVo.requestTime}
                         </amb:column>
+                        <amb:column label="lb_priority">
+                            ${requestVo.sortIndex}
+                        </amb:column>
                     </amb:table>
-                   
-                   <div align='right' style="padding-top: 5px;">
+                    <div align='right' style="padding-top: 5px;" class="standardText">
                     <c:out value="${tableNav2}" escapeXml="false" ></c:out>
                     <c:out value="${tableNav}" escapeXml="false" ></c:out>
                      <amb:tableNav bean="requestDefine" key="requestDefineKey" pageUrl="self" scope="10,20,50" />
                   </div>
+                   </td>
+					</tr>
+				</table>
+                   
+                  
                 </FORM>
                 <DIV ID="ButtonLayer" ALIGN="LEFT">
                      <INPUT TYPE="BUTTON" NAME="Error" VALUE="<%=bundle.getString("lb_remove")%>"
-                                onClick="cancelFiles();">
+                                onClick="cancelFiles();"  class="pointer">
                 </DIV>
             </DIV>
     </BODY>

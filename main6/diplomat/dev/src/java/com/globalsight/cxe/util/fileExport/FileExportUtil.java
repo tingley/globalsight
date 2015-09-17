@@ -18,6 +18,8 @@ package com.globalsight.cxe.util.fileExport;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -31,6 +33,7 @@ import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.MessageData;
+import com.globalsight.cxe.util.KeyUtil;
 import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -53,7 +56,7 @@ public class FileExportUtil
 {
     static private final Logger logger = Logger.getLogger(FileExportUtil.class);
 
-    private static Object LOCKER = new Object();
+    public static Object LOCKER = new Object();
 
     // max size (in bytes) of the job name
     public static final int MAX_JOBNAME_SIZE = 320;
@@ -69,7 +72,7 @@ public class FileExportUtil
     @SuppressWarnings("rawtypes")
     public static HashMap<String, Hashtable> RUNNING_REQUEST = new HashMap<String, Hashtable>();
     public static HashMap<String, List<BatchInfo>> CANCELED_REQUEST = new HashMap<String, List<BatchInfo>>();
-
+    
     // initialize the USE_JMS and RUN_MAX_MESSAGE from
     // "properties/exportJob.properties"
     static
@@ -141,7 +144,7 @@ public class FileExportUtil
     }
 
     @SuppressWarnings("rawtypes")
-    static private String getName(Hashtable ht)
+    static public String getName(Hashtable ht)
     {
         String file = (String) ht.get("filePath");
         String name = getSuffix(file);
@@ -157,10 +160,25 @@ public class FileExportUtil
     @SuppressWarnings({ "rawtypes", "unchecked" })
     static public void exportFile(Hashtable ht)
     {
-        String key = (String) ht.get("key");
+        String key = (String) ht.get("uiKey");
+        if (key == null)
+        {
+            key = KeyUtil.generateKey();
+            ht.put("uiKey", key);
+        }
+        
         if (ht.get("requestTime") == null)
         {
             ht.put("requestTime", new Date());
+            
+         // the order is according to sort priority, sort time and sort axis.
+            ht.put("sortTime", new Date().getTime());
+            
+            Integer n1 = (Integer) ht.get("priority");
+            if (n1 == null)
+                n1 = 3;
+            ht.put("sortPriority", n1);
+            ht.put("sortAxis", 1);
         }
 
         String name = getName(ht);
@@ -186,6 +204,7 @@ public class FileExportUtil
                 }
 
                 ms.add(ht);
+                sortMessages(ms);
                 WAITING_REQUEST.put(key, ht);
                 return;
             }
@@ -197,9 +216,12 @@ public class FileExportUtil
 
         try
         {
-            WAITING_REQUEST.remove(key);
-            ht.put("startTime", new Date());
-            RUNNING_REQUEST.put(key, ht);
+            synchronized (LOCKER)
+            {
+                WAITING_REQUEST.remove(key);
+                ht.put("startTime", new Date());
+                RUNNING_REQUEST.put(key, ht);
+            }
 
             CompanyThreadLocal.getInstance().setIdValue(
                     (String) ht.get(CompanyWrapper.CURRENT_COMPANY_ID));
@@ -242,7 +264,51 @@ public class FileExportUtil
         }
     }
     
+    @SuppressWarnings("rawtypes")
+    public static void sortWaitingMessage()
+    {
+        synchronized (LOCKER)
+        {
+            for (List<Hashtable> ms : ON_HOLD_MESSAGE.values())
+            {
+                sortMessages(ms);
+            }
+        }
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private static void sortMessages(List<Hashtable> ms) {
+        Collections.sort(ms, new Comparator<Hashtable>()
+        {
+            @Override
+            public int compare(Hashtable o1, Hashtable o2)
+            {
+                Integer n1 = (Integer) o1.get("sortPriority");
+                if (n1 == null)
+                    n1 = 3;
 
+                Integer n2 = (Integer) o2.get("sortPriority");
+                if (n2 == null)
+                    n2 = 3;
+
+                int k = n1 - n2;
+                if (k != 0)
+                    return k;
+
+                long d1 = (Long) o1.get("sortTime");
+                long d2 = (Long) o2.get("sortTime");
+
+                k = (int) (d1 - d2);
+
+                if (k != 0)
+                    return k;
+
+                int axis1 = (Integer) o1.get("sortAxis");
+                int axis2 = (Integer) o2.get("sortAxis");
+                return (int) (axis1 - axis2);
+            }
+        });
+    }
     /**
      * Gets the suffix file name. Take "c:/a.docx" for example, the return value
      * should be "docx".

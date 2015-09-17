@@ -35,6 +35,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.StringUtil;
 import com.sun.beans.editors.BooleanEditor;
 import com.sun.beans.editors.IntegerEditor;
 import com.sun.beans.editors.LongEditor;
@@ -224,8 +225,8 @@ public abstract class PageActionHandler extends PageHandler
                         + name.substring(4);
                 String[] value = parameters.get(key);
 
-                if (value != null)
-                {
+				if (value != null && StringUtil.isNotEmpty(value[0]))
+				{
                     PropertyEditorSupport editor = getEdit(parameterTypes[0]);
                     if (editor != null)
                     {

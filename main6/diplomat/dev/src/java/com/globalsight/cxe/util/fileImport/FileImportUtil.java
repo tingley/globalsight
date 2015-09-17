@@ -18,6 +18,8 @@ package com.globalsight.cxe.util.fileImport;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -60,13 +62,13 @@ import com.globalsight.util.edit.EditUtil;
 
 /**
  * The FileImportUtil class allows clients to make import requests without
- * having to use JMS.
+ * having to use JMS.   
  */
 public class FileImportUtil
 {
     static private final Logger logger = Logger.getLogger(FileImportUtil.class);
 
-    private static Object LOCKER = new Object();
+    public static Object LOCKER = new Object();
 
     // max size (in bytes) of the job name
     public static final int MAX_JOBNAME_SIZE = 320;
@@ -145,7 +147,8 @@ public class FileImportUtil
         t.start();
     }
 
-    static private String getName(CxeMessage cxeMessage)
+    @SuppressWarnings("rawtypes")
+    static public String getName(CxeMessage cxeMessage)
     {
         HashMap map = cxeMessage.getParameters();
         String name = null;
@@ -178,13 +181,25 @@ public class FileImportUtil
      * 
      * @param cxeMessage
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     static public void importFile(CxeMessage cxeMessage)
     {
         HashMap map = cxeMessage.getParameters();
-        String key = (String) map.get("key");
+        String key = (String) map.get("uiKey");
+        
+        // this is first time.
         if (map.get("requestTime") == null)
         {
             map.put("requestTime", new Date());
+            
+            // the order is according to sort priority, sort time and sort axis.
+            map.put("sortTime", new Date().getTime());
+            
+            String n1 = (String) map.get("priority");
+            if (n1 == null)
+                n1 = "3";
+            map.put("sortPriority", Integer.parseInt(n1));
+            map.put("sortAxis", 1);
         }
 
         String name = getName(cxeMessage);
@@ -210,6 +225,8 @@ public class FileImportUtil
                 }
 
                 ms.add(cxeMessage);
+                sortMessages(ms);
+                
                 WAITING_REQUEST.put(key, cxeMessage);
                 return;
             }
@@ -221,9 +238,12 @@ public class FileImportUtil
 
         try
         {
-            WAITING_REQUEST.remove(key);
-            map.put("startTime", new Date());
-            RUNNING_REQUEST.put(key, cxeMessage);
+            synchronized (LOCKER)
+            {
+                WAITING_REQUEST.remove(key);
+                map.put("startTime", new Date());
+                RUNNING_REQUEST.put(key, cxeMessage);
+            }
 
             CxeMessage c = handleSelectedFileEvent(cxeMessage);
             handleCxeMessage(c);
@@ -250,8 +270,7 @@ public class FileImportUtil
                     List<CxeMessage> ms = ON_HOLD_MESSAGE.get(name);
                     if (ms != null && ms.size() > 0)
                     {
-                        holdMsg = ms.get(0);
-                        ms.remove(0);
+                        holdMsg = ms.remove(0);
                     }
                 }
             }
@@ -261,6 +280,51 @@ public class FileImportUtil
                 importFile(holdMsg);
             }
         }
+    }
+    
+    public static void sortWaitingMessage()
+    {
+        synchronized (LOCKER)
+        {
+            for (List<CxeMessage> ms : ON_HOLD_MESSAGE.values())
+            {
+                sortMessages(ms);
+            }
+        }
+    }
+    
+    private static void sortMessages(List<CxeMessage> ms) 
+    {
+        Collections.sort(ms, new Comparator<CxeMessage>()
+        {
+            @SuppressWarnings("rawtypes")
+            @Override
+            public int compare(CxeMessage o1, CxeMessage o2)
+            {
+                HashMap p1 = o1.getParameters();
+                HashMap p2 = o2.getParameters();
+                
+                int n1 = (Integer) p1.get("sortPriority");
+                
+                int n2 = (Integer) p2.get("sortPriority");
+                
+                int k = n1 - n2;
+                if (k != 0)
+                    return k;
+                
+                long d1 = (Long) p1.get("sortTime");
+                long d2 = (Long) p2.get("sortTime");
+                
+                k = (int) (d1 - d2);
+                
+                if (k != 0)
+                    return k;
+                
+                int axis1 = (Integer) p1.get("sortAxis");
+                int axis2 = (Integer) p2.get("sortAxis");
+                return (int) (axis1 - axis2);
+            }
+        });
     }
 
     /**
@@ -311,6 +375,7 @@ public class FileImportUtil
      * 
      * @param p_cxeMessage
      */
+    @SuppressWarnings("rawtypes")
     private static void handleCancelEvent(CxeMessage p_cxeMessage)
     {
         HashMap params = p_cxeMessage.getParameters();

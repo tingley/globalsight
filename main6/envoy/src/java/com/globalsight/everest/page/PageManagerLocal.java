@@ -38,6 +38,7 @@ import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.util.fileExport.FileExportUtil;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.online.OnlineEditorConstants;
+import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
@@ -1160,6 +1161,13 @@ public final class PageManagerLocal implements PageManager
                         map.put("key", key);
                     }
 
+                    long jobId = page.getJobId();
+                    JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
+                    if (job != null)
+                    {
+                        map.put("priority", job.getPriority());
+                    }
+                    
                     FileExportUtil.exportFileWithThread(map);
                 }
             }

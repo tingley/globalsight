@@ -110,6 +110,10 @@ public class RequestFileComparator extends StringComparator
             rv = a.getRequestTimeAsDate().before(b.getRequestTimeAsDate()) ? -1 : 1;
             break;
         }
+        
+        if (rv == 0)
+            rv = a.getSortIndex() - b.getSortIndex();
+        
         return rv;
     }
 }

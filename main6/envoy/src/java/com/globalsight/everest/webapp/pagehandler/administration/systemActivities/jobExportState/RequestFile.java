@@ -39,6 +39,10 @@ public class RequestFile
     private String project;
     private String workflowId;
     private String workflowLocale;
+    
+    private long sortTime;
+    private int sortPriority;
+    private int sortIndex;
 
     /**
      * @return the company
@@ -262,5 +266,35 @@ public class RequestFile
     public void setWorkflowLocale(String workflowLocale)
     {
         this.workflowLocale = workflowLocale;
+    }
+
+    public long getSortTime()
+    {
+        return sortTime;
+    }
+
+    public void setSortTime(long sortTime)
+    {
+        this.sortTime = sortTime;
+    }
+
+    public int getSortPriority()
+    {
+        return sortPriority;
+    }
+
+    public void setSortPriority(int sortPriority)
+    {
+        this.sortPriority = sortPriority;
+    }
+
+    public int getSortIndex()
+    {
+        return sortIndex;
+    }
+
+    public void setSortIndex(int sortIndex)
+    {
+        this.sortIndex = sortIndex;
     }
 }

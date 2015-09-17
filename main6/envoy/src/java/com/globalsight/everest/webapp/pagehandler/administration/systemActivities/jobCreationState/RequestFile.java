@@ -37,6 +37,39 @@ public class RequestFile
     private String key;
     private long size;
     private String project;
+    private long sortTime;
+    private int sortPriority;
+    private int sortIndex;
+
+    public long getSortTime()
+    {
+        return sortTime;
+    }
+
+    public void setSortTime(long sortTime)
+    {
+        this.sortTime = sortTime;
+    }
+    
+    public int getSortIndex()
+    {
+        return sortIndex;
+    }
+
+    public void setSortIndex(int sortIndex)
+    {
+        this.sortIndex = sortIndex;
+    }
+
+    public int getSortPriority()
+    {
+        return sortPriority;
+    }
+
+    public void setSortPriority(int sortPriority)
+    {
+        this.sortPriority = sortPriority;
+    }
 
     /**
      * @return the company

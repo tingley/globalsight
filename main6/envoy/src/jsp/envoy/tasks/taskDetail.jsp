@@ -58,6 +58,7 @@
       com.globalsight.util.date.DateHelper,
       com.globalsight.util.edit.EditUtil,
       com.globalsight.util.StringUtil,
+      com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper,
       java.util.*,
       java.lang.StringBuffer,
       javax.servlet.jsp.JspWriter,
@@ -686,19 +687,9 @@
         }
     }
     
-    boolean enabledInContextReview = false;
-
-    try
-    {
-        SystemConfiguration sc = SystemConfiguration.getInstance();
-        enabledInContextReview = "true".equals(sc.getStringParameter(
-                SystemConfigParamNames.INCTXRV_ENABLE,
-                "" + theTask.getCompanyId()));
-    }
-    catch (Exception ex)
-    {
-        // ignore
-    }
+    boolean okForInContextReview = PreviewPDFHelper.isInContextReviewEnabled();
+    boolean okForInContextReviewIndd = PreviewPDFHelper.isInDesignEnabled("" + theTask.getCompanyId());
+	boolean okForInContextReviewOffice = PreviewPDFHelper.isOfficeEnabled("" + theTask.getCompanyId());
 %>
 <HTML>
 <HEAD>
@@ -767,7 +758,7 @@ var b_isReviewActivity = eval("<%=isReviewActivity%>");
 var needWarning = false;
 var helpFile = "<%=helpFile%>";
 var pageNames = new Array();
-var xmlPDFs = new Array();
+var incontextReviewPDFs = new Array();
 
 var openIssuesDom = XmlDocument.create();
 var taskId = <%=task_id%>;
@@ -812,7 +803,7 @@ function contextForPage(url, e, displayName)
     var lb_context_item_inline_editor;
     var lb_context_item_popup_editor ;
     var fontB1 = "<B>", fontB2 = "</B>";
-    var xmlPdf = xmlPDFs[displayName];
+    var incontextReviewPDF = incontextReviewPDFs[displayName];
     displayName = pageNames[displayName];
     
     var fileName = displayName;
@@ -825,18 +816,8 @@ function contextForPage(url, e, displayName)
     	}
     }
     
-    var showInContextReview = displayName && (fileName.toLowerCase().match(/\.indd$/) || fileName.toLowerCase().match(/\.idml$/)
-    		|| fileName.toLowerCase().match(/\.docx$/) || fileName.toLowerCase().match(/\.pptx$/) || fileName.toLowerCase().match(/\.xlsx$/));
+    var showInContextReview = (1 == incontextReviewPDF);
     var inctxTitle = "Open In Context Review";
-    
-    if (!showInContextReview && 1 == xmlPdf)
-    {
-    	showInContextReview = true;
-    }
-    
-    <% if (!enabledInContextReview) {%>
-    showInContextReview = false;
-    <% } %>
     
     if (b_canEditInSameWindow)
     {
@@ -1625,9 +1606,28 @@ if (targetPgsSize > 0)
             pageName = unextractedFile.getStoragePath().replace("\\", "/");
         }
         if (isExtracted)
-        {%>
+        {
+            String pageNameLow = pageName.toLowerCase();
+            boolean isXml = pageNameLow.endsWith(".xml");
+            boolean isInDesign = pageNameLow.endsWith(".indd") || pageNameLow.endsWith(".idml");
+            boolean isOffice = pageNameLow.endsWith(".docx") || pageNameLow.endsWith(".pptx") || pageNameLow.endsWith(".xlsx");
+            
+            boolean enableInContextReivew = false;
+            if (isXml)
+            {
+                enableInContextReivew = okForInContextReview ? FileProfileUtil.isXmlPreviewPDF(fp) : false;
+            }
+            if (isInDesign)
+            {
+                enableInContextReivew = okForInContextReviewIndd;
+            }
+            if (isOffice)
+            {
+                enableInContextReivew = okForInContextReviewOffice;
+            }
+        %>
            	pageNames[<%=i%>] = "<%=pageName%>";
-           	xmlPDFs[<%=i%>] = <%=(FileProfileUtil.isXmlPreviewPDF(fp) ? 1 : 0 )%>;
+           	incontextReviewPDFs[<%=i%>] = <%=(enableInContextReivew ? 1 : 0 )%>;
       <%}
     }
 }%>

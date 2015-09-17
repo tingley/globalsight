@@ -29,17 +29,41 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class CreatePdfThread extends MultiCompanySupportedThread
 {
+    private SystemConfiguration sc;
     private Job job = null;
     private Logger logger = null;
+    
+    private boolean enableIndd = false;
+    private boolean enableOffice = false;
 
     public CreatePdfThread(Job job, Logger logger)
     {
         this.job = job;
         this.logger = logger;
+
+        try
+        {
+            sc = SystemConfiguration.getInstance();
+
+            long companyId = this.job.getCompanyId();
+
+            enableIndd = "true".equals(sc.getStringParameter(
+                    SystemConfigParamNames.INCTXRV_ENABLE_INDD,
+                    "" + companyId));
+            enableOffice = "true".equals(sc.getStringParameter(
+                    SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
+                    "" + companyId));
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
     }
 
     @Override
@@ -64,6 +88,19 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                         {
                             continue;
                         }
+                    }
+                    
+                    if ((pageName.endsWith(".indd")
+                            || pageName.endsWith(".idml")) && !enableIndd)
+                    {
+                        continue;
+                    }
+                    
+                    if ((pageName.endsWith(".docx")
+                            || pageName.endsWith(".pptx")
+                            || pageName.endsWith(".xlsx")) && !enableOffice)
+                    {
+                        continue;
                     }
                     
                     PreviewPDFHelper previewHelper = new PreviewPDFHelper();

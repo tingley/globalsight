@@ -81,6 +81,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.CreatePdfThread;
+import com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
@@ -238,21 +239,7 @@ public class JobCreatorLocal implements JobCreator
 
                 // in context review tool - Auto-generate PDFs
                 // check if this funtion enabled
-                boolean enabled = false;
-
-                try
-                {
-                    SystemConfiguration sc = SystemConfiguration.getInstance();
-                    enabled = "true".equals(sc.getStringParameter(
-                            SystemConfigParamNames.INCTXRV_ENABLE,
-                            "" + job.getCompanyId()));
-                }
-                catch (Exception ex)
-                {
-                    // ignore
-                }
-                        
-
+                boolean enabled = PreviewPDFHelper.isInContextReviewEnabled();
                 if (enabled)
                 {
                     CreatePdfThread t = new CreatePdfThread(job, c_logger);

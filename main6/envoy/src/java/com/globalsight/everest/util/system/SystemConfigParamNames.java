@@ -305,7 +305,9 @@ public interface SystemConfigParamNames
     public static final String ADOBE_CONV_DIR_CS6 = "adobe.cs6.dir";
     // in context review tool - converter dir
     public static final String INCTXRV_ENABLE = "incontext.review.enable";
-    public static final String INCTXRV_CONV_DIR_INDD = "incontext.review.dir";
+    public static final String INCTXRV_ENABLE_INDD = "incontext.review.enable.indd";
+    public static final String INCTXRV_ENABLE_OFFICE = "incontext.review.enable.office";
+    public static final String INCTXRV_CONV_DIR_INDD = "incontext.review.dir.indd";
     public static final String INCTXRV_CONV_DIR_OFFICE = "incontext.review.dir.office";
 
     // for the passolo adapters

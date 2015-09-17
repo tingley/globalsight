@@ -12,6 +12,7 @@
                  com.globalsight.everest.servlet.util.ServerProxy,
                  com.globalsight.everest.servlet.EnvoyServletException,
                  com.globalsight.everest.util.system.SystemConfigParamNames,
+                 com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper,
                  com.globalsight.util.GeneralException,
                  java.text.MessageFormat,
                  java.util.*"
@@ -68,11 +69,13 @@
     String enableDitaChecksChecked = "";
     String enableWorkflowStatePosts = "";
     
-    String inCtxRvKey = (String) request.getAttribute("incontext_review_key");
-    String inCtxRvDirIndd = (String) request.getAttribute("incontext_review_dir_indd");
-    String inCtxRvDirOffice = (String) request.getAttribute("incontext_review_dir_office");
+    String inCtxRvKeyIndd = (String) request.getAttribute("incontext_review_key_indd");
+    String inCtxRvKeyOffice = (String) request.getAttribute("incontext_review_key_office");
+    String enableInCtxRvToolIndd = "true".equals(inCtxRvKeyIndd) ? "checked" : "";
+    String enableInCtxRvToolOffice = "true".equals(inCtxRvKeyOffice) ? "checked" : "";
     
-    String enableInCtxRvTool = "true".equals(inCtxRvKey) ? "checked" : "";
+    boolean isInDesignEnabled = PreviewPDFHelper.isInDesignEnabled();
+    boolean isOfficeEnabled = PreviewPDFHelper.isOfficeEnabled();
     
     if (company != null)
     {
@@ -312,21 +315,6 @@ function onEnableSSO(checked)
 	ele.style.display = display;
 }
 
-function onEnableInCtxRvToolSwitch()
-{
-	onEnableInCtxRvTool(companyForm.enableInCtxRvToolField.checked);
-}
-
-function onEnableInCtxRvTool(checked)
-{
-	var ele1 = document.getElementById("inctxrvDirIndd");
-	var ele2 = document.getElementById("inctxrvDirOffice");
-	var display = checked ? "" : "none";
-	ele1.style.display = display;
-	ele2.style.display = display;
-}
-
-
 function doOnload()
 {
     loadGuides();
@@ -351,9 +339,6 @@ function doOnload()
     {
     	onEnableSSO(eval("<%=isSsoChecked%>"));
     }
-    
-    var enableInCtxRv = <%=inCtxRvKey%>;
-    onEnableInCtxRvTool(enableInCtxRv);
 }
 
 function move(f,t) {
@@ -816,22 +801,16 @@ function addQualityTo()
         </td>
         </tr>
         
-        <tr id="inctxrvCheck">
-            <td valign="top"><%=bundle.getString("lb_incontext_review_key")%>:</td>
+        <tr id="inctxrvCheckIndd" <% if (!isInDesignEnabled) {%>style="display:none;" <%}%> >
+            <td valign="top"><%=bundle.getString("lb_incontext_review_key_indd")%>:</td>
             <td colspan="2">
-                <input class="standardText" type="checkbox" id="enableInCtxRvToolId" onclick="onEnableInCtxRvToolSwitch()" name="<%=CompanyConstants.ENABLE_INCTXRV_TOOL%>" <%=enableInCtxRvTool%>/>
+                <input class="standardText" type="checkbox" id="enableInCtxRvToolInddId" name="<%=CompanyConstants.ENABLE_INCTXRV_TOOL_INDD%>" <%=enableInCtxRvToolIndd%>/>
             </td>
         </tr>
-        <tr id="inctxrvDirIndd">
-            <td valign="top"><%=bundle.getString("lb_incontext_review_dir_indd")%>:</td>
+        <tr id="inctxrvCheckOffice" <% if (!isOfficeEnabled) {%>style="display:none;" <%}%> >
+            <td valign="top"><%=bundle.getString("lb_incontext_review_key_office")%>:</td>
             <td colspan="2">
-                <input type="text" style="width:350px;" name="<%=CompanyConstants.INCTXRV_DIR_INDD%>" maxlength="256" value="<%=inCtxRvDirIndd%>">
-            </td>
-        </tr>
-        <tr id="inctxrvDirOffice">
-            <td valign="top"><%=bundle.getString("lb_incontext_review_dir_office")%>:</td>
-            <td colspan="2">
-                <input type="text" style="width:350px;" name="<%=CompanyConstants.INCTXRV_DIR_OFFICE%>" maxlength="256" value="<%=inCtxRvDirOffice%>">
+                <input class="standardText" type="checkbox" id="enableInCtxRvToolOfficeId" name="<%=CompanyConstants.ENABLE_INCTXRV_TOOL_OFFICE%>" <%=enableInCtxRvToolOffice%>/>
             </td>
         </tr>
 

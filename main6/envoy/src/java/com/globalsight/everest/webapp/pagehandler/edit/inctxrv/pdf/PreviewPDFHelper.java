@@ -85,6 +85,7 @@ import com.globalsight.cxe.util.fileImport.eventFlow.Category;
 import com.globalsight.cxe.util.fileImport.eventFlow.Da;
 import com.globalsight.cxe.util.fileImport.eventFlow.Dv;
 import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
@@ -390,7 +391,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         return new File(outPutFile);
     }
-    
+
     public static boolean isInContextReviewEnabled()
     {
         boolean enabled = false;
@@ -398,8 +399,9 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            enabled = "true".equals(sc
-                    .getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE));
+            enabled = "true".equals(
+                    sc.getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            CompanyWrapper.SUPER_COMPANY_ID));
         }
         catch (Exception ex)
         {
@@ -408,7 +410,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         return enabled;
     }
-    
+
     public static boolean isInDesignEnabled()
     {
         boolean enabled = false;
@@ -416,8 +418,9 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            enabled = "true".equals(sc
-                    .getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE));
+            enabled = "true".equals(
+                    sc.getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            CompanyWrapper.SUPER_COMPANY_ID));
 
             if (enabled)
             {
@@ -434,7 +437,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         return enabled;
     }
-    
+
     public static boolean isOfficeEnabled()
     {
         boolean enabled = false;
@@ -442,8 +445,9 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            enabled = "true".equals(sc
-                    .getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE));
+            enabled = "true".equals(
+                    sc.getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            CompanyWrapper.SUPER_COMPANY_ID));
 
             if (enabled)
             {
@@ -460,7 +464,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         return enabled;
     }
-    
+
     public static boolean isInDesignEnabled(String companyId)
     {
         boolean enabled = false;
@@ -482,7 +486,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
         return enabled;
     }
-    
+
     public static boolean isOfficeEnabled(String companyId)
     {
         boolean enabled = false;
@@ -755,13 +759,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
                 Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent,
                         out);
-                
+
                 File xslFile = FileProfileUtil.getXsl(fileProfile);
-                
+
                 TransformerFactory factory = TransformerFactory.newInstance();
-                Transformer transformer = factory.newTransformer(new StreamSource(xslFile));
+                Transformer transformer = factory
+                        .newTransformer(new StreamSource(xslFile));
                 transformer.setParameter("versionParam", "2.0");
-                
+
                 Source src = new StreamSource(xmlFile);
                 Result res = new SAXResult(fop.getDefaultHandler());
                 transformer.transform(src, res);
@@ -795,7 +800,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     out.close();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // ignore;
             }

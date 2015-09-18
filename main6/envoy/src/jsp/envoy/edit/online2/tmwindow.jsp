@@ -27,8 +27,6 @@
 
 <jsp:useBean id="tminfo" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
-<jsp:useBean id="concordance" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="skin" scope="application"
  class="com.globalsight.everest.webapp.javabean.SkinBean"/>
 <%@ include file="/envoy/common/installedModules.jspIncl" %>
@@ -37,10 +35,8 @@ ResourceBundle bundle = PageHandler.getBundle(session);
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 
 String url_tmInfo = tminfo.getPageURL();
-String url_concordance = concordance.getPageURL();
 
 String lb_clickToOpenTb = bundle.getString("lb_click_to_open_tb");
-String lb_concordance = bundle.getString("lb_concordance");
 
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
@@ -288,8 +284,6 @@ var g_defaultTermbaseId = "<%=l_defaultTermbaseId%>";
 var g_haveTermbase = eval("<%=b_haveTermbase%>");
 var g_selectedTerm = null;
 
-var w_concordance = null;
-
 var tmp;
 
 // Menus
@@ -307,10 +301,7 @@ var actionMenu = new Menu();
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_releverage") %>", releverage));
 tmp.mnemonic = "r";
 var releverageMni = tmp;
-<% if (b_corpus) { %>
-actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_concordance") %>", showConcordance));
-tmp.mnemonic = "c";
-<% } %>
+
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_browse_termbase") %>", showTermbase));
 tmp.mnemonic = "b";
 tmp.disabled = !g_haveTermbase;
@@ -323,10 +314,6 @@ tmContextMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_insert_selection_i
                   copySelectionToEditor));
 tmp.mnemonic = "s";
 var copyTmSelectionMni = tmp;
-<% if (b_corpus) { %>
-tmContextMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_corpus_context") %>", showCorpus));
-tmp.mnemonic = "x";
-<% } %>
 
 // Termbase Context Menu
 var tbContextMenu = new Menu();
@@ -570,27 +557,6 @@ function showHelp()
     helpWindow.focus();
 }
 
-var w_corpus = null;
-
-function showCorpus()
-{
-   if (a_tmSegments.length == 0) return;
-
-   var tuvId = a_tmSegments[g_segmentIndex].tuvId;
-   var srcLocaleId = a_tmSegments[g_segmentIndex].srcLocaleId;
-   var url = "/globalsight/ControlServlet?activityName=viewCorpusMatches&tuvId=" +
-     tuvId + "&localeDbId=" + srcLocaleId;
-   w_corpus = window.open(url, "corpus",
-     'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=600,HEIGHT=400');
-}
-
-function showConcordance()
-{
-   var url = "<%=url_concordance%>&fromEditor=true";
-   w_concordance = window.open(url, "<%=lb_concordance%>",
-   'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=800,HEIGHT=600');
-}
-
 function showTermbase()
 {
   if (g_haveTermbase)
@@ -693,8 +659,6 @@ function doOnload()
 
 function doBeforeUnload()
 {
-  try { w_corpus.close(); } catch (ignore) {}
-  try { w_concordance.close(); } catch (e) {};
   try { opener.closingTmWindow(); } catch (ignore) {}
 }
 
@@ -787,9 +751,6 @@ function context(url, e)
         <div dojoType="dijit.Menu" id="fileMenu">
             <div dojoType="dijit.MenuItem" onClick="releverage();">
                 <%=bundle.getString("lb_releverage")%>
-            </div>
-            <div dojoType="dijit.MenuItem" onClick="showConcordance();">
-                <%=bundle.getString("lb_concordance")%>
             </div>
             <div dojoType="dijit.MenuItem" onClick="showTermbase();">
                 <%=bundle.getString("lb_browse_termbase")%>

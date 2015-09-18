@@ -41,8 +41,6 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="options" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
-<jsp:useBean id="concordance" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <%
 ResourceBundle bundle = PageHandler.getBundle(session);
 
@@ -67,12 +65,9 @@ String url_imageEditor   = imageEditor.getPageURL();
 String url_textEditor    = textEditor.getPageURL();
 String url_details       = details.getPageURL();
 String url_options       = options.getPageURL();
-String url_concordance   = concordance.getPageURL();
 
 String lb_segmentChanged = bundle.getString("jsmsg_save_segment");
 String lb_saveTheChanges = bundle.getString("jsmsg_save_the_changes");
-
-String lb_concordance = bundle.getString("lb_concordance");
 
 String lb_title;
 String url_theEditor;
@@ -599,15 +594,6 @@ function doRevert()
 {
     initTarget(target_segment, false);
     initSource();
-}
-
-//show the corpus browser for concordance searches
-function doConcordance()
-{
-// var url = "/globalsight/ControlServlet?activityName=browseCorpus&pagename=CTMB";
-   var url = "<%=url_concordance%>" + "&fromEditor=true";
-   w_concordance = window.open(url, "<%=lb_concordance%>",
-   'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=800,HEIGHT=600');
 }
 
 function SetSegment(segment)

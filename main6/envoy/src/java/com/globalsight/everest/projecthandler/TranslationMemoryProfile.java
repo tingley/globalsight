@@ -47,6 +47,13 @@ public class TranslationMemoryProfile extends PersistentObject
     public static final String OLDEST_EXACT_MATCH = "OLDEST";
     public static final String DEMOTED_EXACT_MATCH = "DEMOTED";
 
+    // SID only
+    public static final int ICE_PROMOTION_SID_ONLY = 1;
+    // SID and hash matches
+    public static final int ICE_PROMOTION_SID_HASH_MATCHES = 2;
+    // SID, hash and bracketed matches
+    public static final int ICE_PROMOTION_ALL = 3;
+
     // 1 back pointer to L10nProfile
     private L10nProfile m_l10nProfile = null;
 
@@ -133,9 +140,10 @@ public class TranslationMemoryProfile extends PersistentObject
     private long m_multipleMatchesPenalty = -1;
 
     // 28
-    private boolean m_isExactMatchLeveraging = true;
+    private boolean m_isExactMatchLeveraging = false;
 
     private boolean m_isContextMatchLeveraging = true;
+    private int icePromotionRules = ICE_PROMOTION_ALL;
 
     private boolean m_dynLevFromGoldTm = false;
 
@@ -168,6 +176,8 @@ public class TranslationMemoryProfile extends PersistentObject
     private boolean m_isSaveLocSegToProjectTM = true;
     
     private boolean m_isSaveExactMatchSegToProjectTM = true;
+
+    private Set<TMPAttribute> attributes;
 
     public TranslationMemoryProfile()
     {
@@ -524,24 +534,6 @@ public class TranslationMemoryProfile extends PersistentObject
         return m_l10nProfile;
     }
 
-    /**
-     * Use "getDynLevFromInProgressTm()" instead.
-     * @deprecated
-     */
-    public boolean dynamicLeveragesFromInProgressTm()
-    {
-        return m_dynLevFromInProgressTm;
-    }
-    
-    /**
-     * Use "setDynLevFromInProgressTm(..)" instead.
-     * @deprecated
-     */
-    public void setDynamicLeverageFromInProgressTm(boolean p_value)
-    {
-        m_dynLevFromInProgressTm = p_value;
-    }
-    
     public boolean getDynLevFromInProgressTm()
     {
         return m_dynLevFromInProgressTm;
@@ -562,24 +554,6 @@ public class TranslationMemoryProfile extends PersistentObject
         m_dynLevStopSearch = dynLevStopSearch;
     }
 
-    /**
-     * Use "getDynLevFromGoldTm(...)" as need not duplicated getter.
-     * @deprecated
-     */
-    public boolean dynamicLeveragesFromGoldTm()
-    {
-        return m_dynLevFromGoldTm;
-    }
-    
-    /**
-     * Use "setDynLevFromGoldTm(...)" as need not duplicated setter.
-     * @deprecated
-     */
-    public void setDynamicLeverageFromGoldTm(boolean p_value)
-    {
-        m_dynLevFromGoldTm = p_value;
-    }
-    
     public boolean getDynLevFromGoldTm()
     {
         return m_dynLevFromGoldTm;
@@ -590,24 +564,6 @@ public class TranslationMemoryProfile extends PersistentObject
         m_dynLevFromGoldTm = levFromGoldTm;
     }
 
-    /**
-     * Use "setDynLevFromPopulationTm(...)" as need not duplicated getter.
-     * @deprecated
-     */
-    public boolean dynamicLeveragesFromPopulationTm()
-    {
-        return m_dynLevFromPopulationTm;
-    }
-    
-    /**
-     * Use "setDynLevFromPopulationTm(...)" as need not duplicated setter.
-     * @deprecated
-     */
-    public void setDynamicLeverageFromPopulationTm(boolean p_value)
-    {
-        m_dynLevFromPopulationTm = p_value;
-    }
-    
     public boolean getDynLevFromPopulationTm()
     {
         return m_dynLevFromPopulationTm;
@@ -618,24 +574,6 @@ public class TranslationMemoryProfile extends PersistentObject
         m_dynLevFromPopulationTm = levFromPopulationTm;
     }
 
-    /**
-     * Use "getDynLevFromReferenceTm()" as need not duplicated getter.
-     * @deprecated 
-     */
-    public boolean dynamicLeveragesFromReferenceTm()
-    {
-        return m_dynLevFromReferenceTm;
-    }
-
-    /**
-     * Use "setDynLevFromReferenceTm(...)" as need not duplicated setter.
-     * @deprecated
-     */
-    public void setDynamicLeverageFromReferenceTm(boolean p_value)
-    {
-        m_dynLevFromReferenceTm = p_value;
-    }
-    
     public boolean getDynLevFromReferenceTm()
     {
         return m_dynLevFromReferenceTm;
@@ -665,24 +603,6 @@ public class TranslationMemoryProfile extends PersistentObject
     public void setIsExactMatchLeveraging(boolean exactMatchLeveraging)
     {
         m_isExactMatchLeveraging = exactMatchLeveraging;
-    }
-
-    /**
-     * @deprecated
-     * @see setIsExactMatchLeveraging(boolean exactMatchLeveraging)
-     */
-    public void setIsLeverageExactMatches(boolean p_isExactMatchLeveraging)
-    {
-        m_isExactMatchLeveraging = p_isExactMatchLeveraging;
-    }
-
-    /**
-     * @deprecated
-     * @see getIsExactMatchLeveraging()
-     */
-    public boolean isLeverageExactMatch()
-    {
-        return m_isExactMatchLeveraging;
     }
 
     public boolean getIsTypeSensitiveLeveraging()
@@ -757,7 +677,17 @@ public class TranslationMemoryProfile extends PersistentObject
         m_isContextMatchLeveraging = contextMatchLeveraging;
     }
 
-    public boolean isMatchPercentage()
+    public int getIcePromotionRules()
+    {
+		return this.icePromotionRules;
+	}
+
+	public void setIcePromotionRules(int icePromotionRules)
+	{
+		this.icePromotionRules = icePromotionRules;
+	}
+
+	public boolean isMatchPercentage()
     {
         return isMatchPercentage;
     }
@@ -885,8 +815,6 @@ public class TranslationMemoryProfile extends PersistentObject
     {
         this.tdatm = P_TDATM;
     }
-    
-    private Set<TMPAttribute> attributes;
     
     public List<TMPAttribute> getAllTMPAttributes()
     {

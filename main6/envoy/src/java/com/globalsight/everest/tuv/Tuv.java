@@ -388,4 +388,12 @@ public interface Tuv
     public long getRepetitionOfId();
 
     public void setRepetitionOfId(long repetitionOfId);
+
+	public long getPreviousHash();
+
+	public void setPreviousHash(long previousHash);
+
+	public long getNextHash();
+
+	public void setNextHash(long nextHash);
 }

@@ -487,10 +487,17 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             tmProfile.setIsContextMatchLeveraging(true);
         }
 
+        tmProfile.setIcePromotionRules(TranslationMemoryProfile.ICE_PROMOTION_ALL);
+        try {
+			tmProfile.setIcePromotionRules(Integer.parseInt(p_request
+					.getParameter("icePromotionRules")));
+        } catch (NumberFormatException e) {
+
+        }
         // 9
         String leveragePTM = p_request.getParameter("leveragedProjects");
         String leverageProjectTMIndexs = p_request.getParameter("indexes");
-        Vector leverageProjectTMs = new Vector();
+        Vector<LeverageProjectTM> leverageProjectTMs = new Vector<LeverageProjectTM>();
         if (leveragePTM != null && leveragePTM.length() > 0)
         {
             StringTokenizer tokenizer = new StringTokenizer(leveragePTM, COMMA);

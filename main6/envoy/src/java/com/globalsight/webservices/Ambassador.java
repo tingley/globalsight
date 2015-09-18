@@ -15001,21 +15001,12 @@ public class Ambassador extends AbstractWebService
         boolean isDefaultContextMatch = false;
         try
         {
-            // TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
-            // .getL10nProfile(workflow.getJob().getL10nProfileId())
-            // .getTranslationMemoryProfile();
-            // if (tmp != null)
-            // {
-            // isInContextMatch = tmp.getIsContextMatchLeveraging();
-            // isDefaultContextMatch = PageHandler
-            // .isDefaultContextMatch(workflow.getJob());
-            // }
             Job job = workflow.getJob();
-            if (job.DEFAULT_CONTEXT.equals(job.getLeverageOption()))
+            if (PageHandler.isDefaultContextMatch(job))
             {
                 isDefaultContextMatch = true;
             }
-            else if (job.IN_CONTEXT.equals(job.getLeverageOption()))
+            else if (PageHandler.isInContextMatch(job))
             {
                 isInContextMatch = true;
             }
@@ -16705,23 +16696,12 @@ public class Ambassador extends AbstractWebService
         boolean isDefaultContextMatch = false;
         try
         {
-            // TranslationMemoryProfile tmprofile = ServerProxy
-            // .getProjectHandler()
-            // .getL10nProfile(workflow.getJob().getL10nProfileId())
-            // .getTranslationMemoryProfile();
-            // if (tmprofile != null)
-            // {
-            // isInContextMatch = tmprofile.getIsContextMatchLeveraging();
-            // isDefaultContextMatch = PageHandler
-            // .isDefaultContextMatch(workflow.getJob());
-            // }
-
             Job job = workflow.getJob();
-            if (job.DEFAULT_CONTEXT.equals(job.getLeverageOption()))
+            if (PageHandler.isDefaultContextMatch(job))
             {
                 isDefaultContextMatch = true;
             }
-            else if (job.IN_CONTEXT.equals(job.getLeverageOption()))
+            else if (PageHandler.isInContextMatch(job))
             {
                 isInContextMatch = true;
             }

@@ -276,13 +276,8 @@ public class JobTableModel extends AbstractTableModel
                     {
                         l10nProfile = LocProfileHandlerHelper.getL10nProfile(j
                                 .getL10nProfileId());
-                        boolean isUseInContext = l10nProfile
-                                .getTranslationMemoryProfile()
-                                .getIsContextMatchLeveraging();
-                        boolean isInContextMatch = PageHandler
-                                .isInContextMatch(j, isUseInContext);
-                        boolean isUseDefaultContextMatch = PageHandler
-                                .isDefaultContextMatch(j);
+                        boolean isInContextMatch = PageHandler.isInContextMatch(j);
+                        boolean isUseDefaultContextMatch = PageHandler.isDefaultContextMatch(j);
                         Cost cost1 = getJobCost(j, m_currency, Cost.EXPENSE);
                         o = (isInContextMatch) ? ReportsPackage
                                 .getEstimatedCost(cost1)
@@ -301,11 +296,7 @@ public class JobTableModel extends AbstractTableModel
                     {
                         l10nProfile = LocProfileHandlerHelper.getL10nProfile(j
                                 .getL10nProfileId());
-                        boolean isUseInContext = l10nProfile
-                                .getTranslationMemoryProfile()
-                                .getIsContextMatchLeveraging();
-                        boolean isInContextMatch = PageHandler
-                                .isInContextMatch(j, isUseInContext);
+                        boolean isInContextMatch = PageHandler.isInContextMatch(j);
                         boolean isDefaultContextMatch = PageHandler
                                 .isDefaultContextMatch(j);
                         Cost revenue1 = getJobCost(j, m_currency, Cost.REVENUE);

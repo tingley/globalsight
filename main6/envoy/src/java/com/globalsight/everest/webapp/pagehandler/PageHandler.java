@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,7 +30,6 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -44,7 +42,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.config.UserParameter;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
-import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
@@ -64,7 +61,6 @@ import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -859,27 +855,6 @@ public class PageHandler implements WebAppConstants
         return false;
     }
 
-    public static boolean isInContextMatch(Job job,
-            TranslationMemoryProfile tmProfile)
-    {
-        if (tmProfile == null)
-        {
-            return false;
-        }
-
-        try
-        {
-            return isInContextMatch(job,
-                    tmProfile.getIsContextMatchLeveraging());
-        }
-        catch (Exception e)
-        {
-            s_category.error("Can not get the value of in context match", e);
-        }
-
-        return false;
-    }
-
     public static boolean isInContextMatch(Request request)
     {
         if (request == null)
@@ -946,36 +921,32 @@ public class PageHandler implements WebAppConstants
         }
     }
 
-    public static boolean isInContextMatch(Job job, boolean isUseInContext)
-            throws FileProfileEntityException, RemoteException,
-            GeneralException, NamingException
-    {
-        if (job == null)
-        {
-            return false;
-        }
+	public static boolean isInContextMatch(Job job)
+	{
+		if (job == null)
+		{
+			return false;
+		}
 
-        job = ServerProxy.getJobHandler().getJobById(job.getId());
-        if (Job.IN_CONTEXT.equals(job.getLeverageOption()))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+		try
+		{
+			job = ServerProxy.getJobHandler().getJobById(job.getId());
+			if (Job.IN_CONTEXT.equals(job.getLeverageOption()))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		catch (Exception e)
+		{
+			s_category.error("Can not get job:", e);
+		}
 
-    public static boolean isInContextMatch(Job job)
-    {
-        if (job == null)
-        {
-            return false;
-        }
-
-        return isInContextMatch(job, job.getL10nProfile()
-                .getTranslationMemoryProfile());
-    }
+		return true;
+	}
 
     public static boolean isDefaultContextMatch(TargetPage target)
     {
@@ -1037,7 +1008,7 @@ public class PageHandler implements WebAppConstants
 
         TranslationMemoryProfile tmProfile = request.getL10nProfile()
                 .getTranslationMemoryProfile();
-        if (tmProfile == null || tmProfile.getIsExactMatchLeveraging())
+		if (tmProfile == null || tmProfile.getIsExactMatchLeveraging())
         {
             return false;
         }

@@ -518,9 +518,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 Map<TM3Attribute, Object> inlineAttributes = getInlineAttributes(tuData.attrs);
                 Map<TM3Attribute, String> customAttributes = getCustomAttributes(tuData.attrs);
                 // Always check duplicate in DB
-                TM3Tu<T> tu = findTuForSave(conn, tuData.srcTuv.content,
-                        tuData.srcTuv.locale, inlineAttributes,
-                        customAttributes);
+				TM3Tu<T> tu = findTuForSave(conn, tuData.srcTuv,
+						inlineAttributes, customAttributes);
                 if (tu == null)
                 {
                     tu = tuStorage.createTu(tuData.srcTuv.locale,
@@ -736,26 +735,10 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                             tuvData.getPreviousHash(),
                                             tuvData.getNextHash(),
                                             tuvData.getSid());
-                                    // Current TU has same TUV already(with same locale and content).
+                                    // Current TU has same TUV already(with same locale, content and hash values).
                                     if (newTuv == null)
                                     {
-                                    	for (TM3Tuv<T> tuv : tu.getTargetTuvs())
-                                    	{
-                                    		if (tuv.getLocale().equals(tuvData.locale)
-                                    				&& tuv.getContent().equals(tuvData.content))
-                                    		{
-                                    			tuv.setLastUsageDate(tuvData.getLastUsageDate());
-                                    			if (tuv.getPreviousHash() == -1)
-                                    				tuv.setPreviousHash(tuvData.getPreviousHash());
-                                    			if (tuv.getNextHash() == -1)
-                                    				tuv.setNextHash(tuvData.getNextHash());
-                                    			if (tuv.getJobId() == -1)
-                                    				tuv.setJobId(tuvData.getJobId());
-                                    			if (tuv.getJobName() == null)
-                                    				tuv.setJobName(tuvData.getJobName());
-                                    			updatedTuvs.add(tuv);
-                                    		}
-                                    	}
+                                    	findUpdatedTuvs(updatedTuvs, tu, tuvData);
                                     }
                                     else
                                     {
@@ -813,19 +796,66 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     /**
+     * Decide TUVs that should be updated.
+     */
+	private void findUpdatedTuvs(List<TM3Tuv<T>> updatedTuvs, TM3Tu<T> tu,
+			TM3Saver<T>.Tuv tuvData)
+    {
+    	for (TM3Tuv<T> tuv : tu.getTargetTuvs())
+    	{
+			if (tu.isIdenticalTuv(tuv, tuvData.locale, tuvData.content,
+					tuvData.previousHash, tuvData.nextHash))
+    		{
+    			if (tuvData.lastUsageDate != null)
+    			{
+    				// update lastUsageDate only
+					if (tuv.getLastUsageDate() == null
+							|| tuvData.lastUsageDate.getTime() > tuv
+									.getLastUsageDate().getTime())
+    				{
+            			tuv.setLastUsageDate(tuvData.lastUsageDate);
+    				}
+    			}
+    			if (tuvData.previousHash != -1)
+    			{
+    				tuv.setPreviousHash(tuvData.previousHash);
+    			}
+    			if (tuvData.nextHash != -1)
+    			{
+    				tuv.setNextHash(tuvData.nextHash);
+    			}
+    			if (tuvData.jobId != -1)
+    			{
+    				tuv.setJobId(tuvData.jobId);
+    			}
+    			if (tuvData.jobName != null)
+    			{
+    				tuv.setJobName(tuvData.jobName);
+    			}
+    			if (tuvData.sid != null)
+    			{
+    				tuv.setSid(tuvData.sid);
+    			}
+
+    			updatedTuvs.add(tuv);
+    		}
+    	}
+    }
+
+    /**
      * The exact match lookup guarantees that everything it returns has all of
      * the specified attribute values, but it doesn't ensure that the segment
      * doesn't have OTHER attributes as well. (That is, it only bounds in one
      * direction.) So an extra filtering step is required to check the upper
      * bound. The easiest way to do this is just compared the attribute counts.
      */
-    private TM3Tu<T> findTuForSave(Connection conn, T source,
-            TM3Locale srcLocale, Map<TM3Attribute, Object> inlineAttributes,
-            Map<TM3Attribute, String> customAttributes) throws SQLException
+	private TM3Tu<T> findTuForSave(Connection conn, TM3Saver<T>.Tuv sourceTuv,
+			Map<TM3Attribute, Object> inlineAttributes,
+			Map<TM3Attribute, String> customAttributes) throws SQLException
     {
-        List<TM3Tuv<T>> tuvs = getStorageInfo().getTuStorage().getExactMatches(
-                conn, source, srcLocale, null, inlineAttributes,
-                customAttributes, false, true);
+		List<TM3Tuv<T>> tuvs = getStorageInfo().getTuStorage().getExactMatches(
+				conn, sourceTuv.content, sourceTuv.locale, null,
+				inlineAttributes, customAttributes, false, true);
         List<TM3Tuv<T>> filtered = new ArrayList<TM3Tuv<T>>();
         int desiredAttrCount = requiredCount(inlineAttributes.keySet())
                 + requiredCount(customAttributes.keySet());
@@ -940,6 +970,26 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             {
                 results = resultsSameAtt;
             }
+        }
+
+        // When sourceTuv has hashes, filter candidates.
+        if (sourceTuv.getPreviousHash() != -1 && sourceTuv.getNextHash() != -1)
+        {
+        	for (Iterator<TM3Tuv<T>> it = results.iterator(); it.hasNext();)
+        	{
+        		TM3Tuv<T> tuv = it.next();
+        		// If candidate has no hashes, preserve it (overwrite legacy TUVs)
+        		if (tuv.getPreviousHash() == -1 || tuv.getNextHash() == -1)
+        		{
+        			continue;
+        		}
+        		// If both have hashes, they must equals to each other
+				if (sourceTuv.getPreviousHash() != tuv.getPreviousHash()
+						|| sourceTuv.getNextHash() != tuv.getNextHash())
+        		{
+        			it.remove();
+        		}
+        	}
         }
 
         return results.size() == 0 ? null : results.get(0).getTu();

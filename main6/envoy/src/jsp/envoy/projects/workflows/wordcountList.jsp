@@ -10,6 +10,8 @@
       com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowComparator,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.WordCountHandler,
       com.globalsight.everest.webapp.WebAppConstants,
+      com.globalsight.everest.servlet.util.SessionManager,
+      com.globalsight.everest.permission.Permission,
       java.util.ArrayList,
       java.util.List,
       java.util.Locale,
@@ -58,13 +60,6 @@
     catch (NumberFormatException e)
     {
     }
-%>
-<%!
-	private boolean isUseInContext(Workflow wf){
-	    boolean isUseInContext = false;
-	    isUseInContext = wf.getJob().getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
-	    return isUseInContext;
-	}
 %>
 
 <!-- This JSP is envoy/projects/workflows/wordcountList.jsp -->

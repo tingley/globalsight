@@ -25,7 +25,7 @@ import com.globalsight.ling.tm2.BaseTmTuv;
  */
 
 public interface LeveragedTuv
-    extends BaseTmTuv, SidComparable, ModifyDateComparable 
+    extends BaseTmTuv, SidComparable, DateComparable 
 {
     BaseTmTuv getSourceTuv();
 

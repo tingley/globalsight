@@ -20,7 +20,6 @@ package com.globalsight.cxe.entity.customAttribute;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 
 public class TMPAttribute extends PersistentObject

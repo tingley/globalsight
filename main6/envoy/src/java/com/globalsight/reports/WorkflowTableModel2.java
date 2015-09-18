@@ -311,11 +311,7 @@ public class WorkflowTableModel2 extends AbstractTableModel
         Object o = EMPTY;
         try
         {
-            L10nProfile l10nProfile = w.getJob().getL10nProfile();
-            boolean isUseInContext = l10nProfile.getTranslationMemoryProfile()
-                    .getIsContextMatchLeveraging();
-            boolean isInContextMatch = PageHandler.isInContextMatch(w.getJob(),
-                    isUseInContext);
+            boolean isInContextMatch = PageHandler.isInContextMatch(w.getJob());
             boolean isUseDefaultContext = PageHandler.isDefaultContextMatch(w
                     .getJob());
             switch (c)

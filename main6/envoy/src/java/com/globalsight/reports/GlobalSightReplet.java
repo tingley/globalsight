@@ -51,7 +51,6 @@ import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
@@ -509,7 +508,6 @@ public abstract class GlobalSightReplet extends BasicReplet
     protected void setHeaders(Iterator iter)
     {
         String[] headers = new String[2];
-        TranslationMemoryProfile tmProfile = null;
         while (iter.hasNext())
         {
             Object o = iter.next();
@@ -517,7 +515,6 @@ public abstract class GlobalSightReplet extends BasicReplet
             if (o instanceof Job)
             {
                 job = (Job) iter.next();
-                tmProfile = job.getL10nProfile().getTranslationMemoryProfile();
             }
             else
             {
@@ -525,14 +522,11 @@ public abstract class GlobalSightReplet extends BasicReplet
                 {
                     Workflow workflow = (Workflow) iter.next();
                     job = workflow.getJob();
-                    tmProfile = job.getL10nProfile()
-                            .getTranslationMemoryProfile();
                 }
             }
             try
             {
-                if (PageHandler.isInContextMatch(job,
-                        tmProfile.getIsContextMatchLeveraging()))
+                if (PageHandler.isInContextMatch(job))
                 {
                     // hava tm profile contains in context match
                     headers[0] = "In Context Match";
@@ -554,15 +548,12 @@ public abstract class GlobalSightReplet extends BasicReplet
     protected void setHeaders(ArrayList jobs)
     {
         String[] headers = new String[2];
-        TranslationMemoryProfile tmProfile = null;
         for (int i = 0; i < jobs.size(); i++)
         {
             Job job = (Job) jobs.get(i);
-            tmProfile = job.getL10nProfile().getTranslationMemoryProfile();
             try
             {
-                if (PageHandler.isInContextMatch(job,
-                        tmProfile.getIsContextMatchLeveraging()))
+                if (PageHandler.isInContextMatch(job))
                 {
                     // hava tm profile contains in context match
                     headers[0] = "In Context Match";
@@ -584,12 +575,9 @@ public abstract class GlobalSightReplet extends BasicReplet
     protected void setHeaders(Job job)
     {
         String[] headers = new String[2];
-        TranslationMemoryProfile tmProfile = job.getL10nProfile()
-                .getTranslationMemoryProfile();
         try
         {
-            if (PageHandler.isInContextMatch(job,
-                    tmProfile.getIsContextMatchLeveraging()))
+            if (PageHandler.isInContextMatch(job))
             {
                 // hava tm profile contains in context match
                 headers[0] = "In Context Match";

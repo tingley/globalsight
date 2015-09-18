@@ -23,6 +23,7 @@
             com.globalsight.util.SortUtil,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.everest.util.comparator.SegmentationRuleFileComparator,
+            com.globalsight.everest.permission.Permission,
             java.util.List,
             java.util.Locale,
             java.util.HashMap,
@@ -105,7 +106,6 @@
    String lbgeneralLeverageOptions = bundle.getString("msg_general_leverage_options");
    String lbexcludeItemTypes = bundle.getString("msg_exclude_item_types");
    String lblevLocalizable = bundle.getString("msg_lev_localizable");
-   String lblevDefaultMatches = bundle.getString("msg_lev_default_matches");
    String lblevExactMatches = bundle.getString("msg_lev_exact_matches");
    String levContextMatches = bundle.getString("msg_lev_context_matches");
    String lblevOptionsFreshImport = bundle.getString("msg_lev_options_fresh_import");
@@ -933,16 +933,28 @@ function check(obj)
 	document.getElementById("procendence").checked = false;
 	obj.checked = true;
 }
-function checkLeverageMatchOption(/*Radio Object*/ obj){
-	var exact = document.getElementById("isLevEMChecked");
-	var incontext = document.getElementById("levContextMatches");
-	var defaultMatch = document.getElementById("isLevDefaultMatch");
-	
+
+function checkLeverageMatchOption(obj)
+{
+	var exact = document.getElementById("idIsLevEMChecked");
+	var incontext = document.getElementById("idLevContextMatches");
+	var icePromotionRule1 = document.getElementById("idIcePromotionRules1");
+	var icePromotionRule2 = document.getElementById("idIcePromotionRules2");
+	var icePromotionRule3 = document.getElementById("idIcePromotionRules3");	
+
 	exact.checked = false;
 	incontext.checked = false;
-	defaultMatch.checked = false;
-	
+	icePromotionRule1.disabled = true;
+	icePromotionRule2.disabled = true;
+	icePromotionRule3.disabled = true;
+
 	obj.checked = true;
+	if (incontext.checked == true)
+	{
+		icePromotionRule1.disabled = false;
+		icePromotionRule2.disabled = false;
+		icePromotionRule3.disabled = false;
+	}
 }
 
 function doOnLoad()
@@ -1073,21 +1085,21 @@ function doOnLoad()
                             <TD>
 
                                 <b><%=lbgeneralLeverageOptions%></b><BR>
-
                                 <%=lbexcludeItemTypes%>:<BR>
                                 <TEXTAREA CLASS="standardText" NAME="<%=leverageExcludeType%>" ROWS="5" COLS="50"><%=excludeItemTypesLongList%></TEXTAREA>
                                 <BR>
                                 <INPUT TYPE="checkbox" NAME="<%=levLocalizable%>" VALUE="true" CHECKED><%=lblevLocalizable%>
                                 <BR>
-                                <INPUT id="isLevDefaultMatch" onclick="checkLeverageMatchOption(this);" TYPE="radio" NAME="<%=lblevDefaultMatches%>" VALUE="true"><%=lblevDefaultMatches%>
+                                <INPUT id="idIsLevEMChecked" onclick="checkLeverageMatchOption(this);" TYPE="radio" NAME="<%=levExactMatches%>" VALUE="true"><%=lblevExactMatches%>
                                 <BR>
-                                
-                                <INPUT id="isLevEMChecked" onclick="checkLeverageMatchOption(this);" TYPE="radio" NAME="<%=levExactMatches%>" VALUE="true"><%=lblevExactMatches%>
+                                <INPUT id="idLevContextMatches" onclick="checkLeverageMatchOption(this);" type="radio" name="<%=levContextMatches %>" value ="true" checked><%=levContextMatches%>
                                 <BR>
-                                
-                                <input id="levContextMatches" onclick="checkLeverageMatchOption(this);" type="radio" name="<%=levContextMatches %>" value ="true" checked></input><%=levContextMatches%>
-                                <BR/>
-                                
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								<INPUT TYPE="radio" id="idIcePromotionRules1" NAME="icePromotionRules" VALUE="1"><%=bundle.getString("lb_apply_ice_promotion_rule1")%><BR>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								<INPUT TYPE="radio" id="idIcePromotionRules2" NAME="icePromotionRules" VALUE="2"><%=bundle.getString("lb_apply_ice_promotion_rule2")%><BR>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								<INPUT TYPE="radio" id="idIcePromotionRules3" NAME="icePromotionRules" VALUE="3" CHECKED><%=bundle.getString("lb_apply_ice_promotion_rule3")%><BR>
                                 <BR/>
                             </TD>
                         </TR>

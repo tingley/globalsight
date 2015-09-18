@@ -26,7 +26,6 @@ import com.globalsight.everest.costing.CostByWordCount;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.CurrencyThreadLocal;
@@ -202,8 +201,6 @@ public class ParamTmMatchesPair extends ParamObjectPair
     
     private void countWorkCount(ProjectWorkflowData p_workflowData, Workflow p_workflow)
     {
-        TranslationMemoryProfile tmProfile = p_workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
-
         p_workflowData.setTmInternalRepsWordCount(p_workflow
                 .getRepetitionWordCount());
 
@@ -224,8 +221,8 @@ public class ParamTmMatchesPair extends ParamObjectPair
             p_workflowData.getLowFuzzyMatchWordCount();
         p_workflowData.setTmNewWordsWordCount(tmNewWordsWordCount);
 
-        p_workflowData.setTmExactMatchWordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? p_workflow.getSegmentTmWordCount() : p_workflow.getTotalExactMatchWordCount());
-        p_workflowData.setTmInContextMatchWordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? p_workflow.getInContextMatchWordCount() : p_workflow.getNoUseInContextMatchWordCount());
+        p_workflowData.setTmExactMatchWordCount((PageHandler.isInContextMatch(p_workflow.getJob())) ? p_workflow.getSegmentTmWordCount() : p_workflow.getTotalExactMatchWordCount());
+        p_workflowData.setTmInContextMatchWordCount((PageHandler.isInContextMatch(p_workflow.getJob())) ? p_workflow.getInContextMatchWordCount() : p_workflow.getNoUseInContextMatchWordCount());
 
         long tmTotalWordCount = 
             p_workflowData.getTmFuzzyMatchWordCount() + 
@@ -238,7 +235,6 @@ public class ParamTmMatchesPair extends ParamObjectPair
     
     private void countWordCost(ProjectWorkflowData p_workflowData, Workflow p_workflow)
     {
-        TranslationMemoryProfile tmProfile = p_workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
         Cost wfCost = null;
         try {
             CostingEngine costEngine = ServerProxy.getCostingEngine();
@@ -259,11 +255,11 @@ public class ParamTmMatchesPair extends ParamObjectPair
            //exact match costs
            p_workflowData.setTmExactMatchWordCountCost(
                    p_workflowData.toBigDecimal(
-                           ((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile))) ? 
+                           ((PageHandler.isInContextMatch(p_workflow.getJob()))) ? 
                                    costByWordCount.getSegmentTmMatchCost() : costByWordCount.getNoUseExactMatchCost()));
            p_workflowData.setTmInContextMatchWordCountCost(
                    p_workflowData.toBigDecimal(
-                           ((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile))) ? 
+                           ((PageHandler.isInContextMatch(p_workflow.getJob()))) ? 
                                    costByWordCount.getInContextMatchCost() : costByWordCount.getNoUseInContextMatchCost()));
            
            //fuzzy match costs

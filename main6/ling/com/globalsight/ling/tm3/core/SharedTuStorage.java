@@ -223,9 +223,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             {
 				sb2 = new StatementBuilder("UPDATE ")
 						.append(getStorage().getTuvExtTableName())
-						.append(" SET sid = ?, lastUsageDate = ? ")
-						.append(" WHERE tuvId = ?")
-						.addValues(tuv.getSid(), tuv.getLastUsageDate(), tuv.getId());
+						.append(" SET sid = ?, lastUsageDate = ?, previousHash = ?, nextHash = ?, jobId = ?, jobName = ? ")
+						.addValues(tuv.getSid(), tuv.getLastUsageDate(), tuv.getPreviousHash(), tuv.getNextHash(), tuv.getJobId(), tuv.getJobName())
+						.append(" WHERE tuvId = ?").addValue(tuv.getId());
                 SQLUtil.exec(conn, sb2);
             }
         }

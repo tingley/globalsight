@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -122,12 +121,10 @@ public class WordCountHandler extends PageHandler
 
             boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
             boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
-            boolean isInContextMatch = isInContextMatch(job, isUseInContext);
-            boolean isDefaultContextMatch = isDefaultContextMatch(job);
             p_request.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, new Boolean(isUseInContext));
             p_request.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, new Boolean(exactMatchOnly));
-            p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
-            p_request.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch);
+            p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch(job));
+            p_request.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch(job));
             prepareTaskList(p_request, p_session, p_sessionMgr, tasks);
         }
         catch (RemoteException re)
@@ -135,10 +132,6 @@ public class WordCountHandler extends PageHandler
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
         }
         catch (GeneralException ge)
-        {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
-        }
-        catch (NamingException ge)
         {
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
         }

@@ -16,35 +16,34 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
-import com.globalsight.everest.webapp.tags.TableConstants;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.util.GeneralException;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
-import java.rmi.RemoteException;
 
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.tags.TableConstants;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.util.GeneralException;
 
 /**
  * Pagehandler for word count pages.
@@ -117,12 +116,10 @@ public class WordCountHandler extends PageHandler
             wfs.add(wf);
             boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
             boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
-            boolean isInContextMatch = isInContextMatch(job, isUseInContext);
-            boolean isDefaultContextMatch = isDefaultContextMatch(job);
             p_sessionMgr.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, isUseInContext);
             p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
-            p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
-            p_sessionMgr.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch);
+            p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, PageHandler.isInContextMatch(job));
+            p_sessionMgr.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, PageHandler.isDefaultContextMatch(job));
             p_request.setAttribute(WebAppConstants.JOB_ID,job.getId()+"");
             prepareWorkflowList(p_request, p_session, p_sessionMgr, wfs,
                                 job.getJobName(), String.valueOf(
@@ -133,10 +130,6 @@ public class WordCountHandler extends PageHandler
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
         }
         catch (GeneralException ge)
-        {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
-        }
-        catch (NamingException ge)
         {
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
         }
@@ -164,7 +157,7 @@ public class WordCountHandler extends PageHandler
                 jobId.longValue());
             isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
             exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
-            isInContextMatch = isInContextMatch(job, isUseInContext);
+            isInContextMatch = isInContextMatch(job);
             isDefaultContextMatch = isDefaultContextMatch(job);
         }
         catch (Exception e)

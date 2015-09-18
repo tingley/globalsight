@@ -35,6 +35,7 @@ import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.html.DynamicRules;
+import com.globalsight.ling.tm.LeverageSegment;
 import com.globalsight.ling.tw.PseudoCodec;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
@@ -445,5 +446,51 @@ public class SegmentUtil2
                 resetAttributeValues(ele, attValueList, p_attName);
             }
         }
+    }
+
+	/**
+	 * Return the "best" exact match to populate into target TUV. If tag does
+	 * not match, re-invoke this method to get next one to try.
+	 * 
+	 * @param srcTuv
+	 *            -- Source TUV
+	 * @param lsList
+	 *            -- ArrayList<LeverageSegment>
+	 * @return LeverageSegment
+	 */
+	public static LeverageSegment getNextBestLeverageSegment(Tuv srcTuv,
+			ArrayList<LeverageSegment> lsList)
+    {
+		if (srcTuv == null || lsList == null || lsList.size() == 0)
+			return null;
+
+		// return SID matched leverage segment
+    	String sid = srcTuv.getSid();
+    	if (sid != null)
+    	{
+    		for (int i = 0; i < lsList.size(); i++)
+        	{
+        		LeverageSegment ls = lsList.get(i);
+        		if (sid.equals(ls.getSid()))
+        		{
+        			return lsList.remove(i);
+        		}
+        	}
+    	}
+
+    	// return previous/next hash matched leverage segment
+    	long preHash = srcTuv.getPreviousHash();
+    	long nextHash = srcTuv.getNextHash();
+    	for (int j = 0; j < lsList.size(); j++)
+    	{
+    		LeverageSegment ls = lsList.get(j);
+			if (preHash != -1 && preHash == ls.getPreviousHash()
+					&& nextHash != -1 && nextHash == ls.getNextHash())
+        	{
+        		return lsList.remove(j);
+        	}
+    	}
+
+    	return lsList.remove(0);
     }
 }

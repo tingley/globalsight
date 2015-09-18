@@ -25,6 +25,7 @@
             com.globalsight.everest.util.comparator.ProjectTMComparator,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.everest.util.comparator.SegmentationRuleFileComparator,
+            com.globalsight.everest.permission.Permission,
             java.util.Collections,
             java.util.List,
             java.util.Locale,
@@ -107,7 +108,6 @@
    String lbgeneralLeverageOptions = bundle.getString("msg_general_leverage_options");
    String lbexcludeItemTypes = bundle.getString("msg_exclude_item_types");
    String lblevLocalizable = bundle.getString("msg_lev_localizable");
-   String lblevDefaultMatches = bundle.getString("msg_lev_default_matches");
    String lblevExactMatches = bundle.getString("msg_lev_exact_matches");
    String levContextMatches = bundle.getString("msg_lev_context_matches");
    String lblevOptionsFreshImport = bundle.getString("msg_lev_options_fresh_import");
@@ -150,72 +150,19 @@
    String oldChosenName = chosenName;
    String chosenDesc = tmProfile.getDescription();
    long lProjectTmIdToSave = tmProfile.getProjectTmIdForSave();
-   String chosenSaveUnlocToPageTM = new Boolean(tmProfile.isSaveUnLocSegToPageTM()).toString();
-   String isSaveToPageTMChecked = "";
-   if (chosenSaveUnlocToPageTM.equals("true"))
-   {
-       isSaveToPageTMChecked = "CHECKED";
-   }
-   String chosenSaveUnlocToProjectTM = new Boolean(tmProfile.isSaveUnLocSegToProjectTM()).toString();
-   String isSaveUnlocToProjectTMChecked = "";
-   if (chosenSaveUnlocToProjectTM.equals("true"))
-   {
-	   isSaveUnlocToProjectTMChecked = "CHECKED";
-   }
-   String chosenSaveApprovedToProjectTM = new Boolean(tmProfile.isSaveApprovedSegToProjectTM()).toString();
-   String isSaveApprovedToProjectTMChecked = "";
-   if (chosenSaveApprovedToProjectTM.equals("true"))
-   {
-	   isSaveApprovedToProjectTMChecked = "CHECKED";
-   }
-   String chosenSaveLocToProjectTM = new Boolean(tmProfile.isSaveLocSegToProjectTM()).toString();
-   String isSaveLocToProjectTMChecked = "";
-   if(chosenSaveLocToProjectTM.equals("true"))
-   {
-	   isSaveLocToProjectTMChecked = "CHECKED";
-   }
-   
-   String chosenSaveExactMatchToProjectTM = new Boolean(tmProfile.isSaveExactMatchSegToProjectTM()).toString();
-   String isSaveExactMatchToProjectTMChecked = "";
-   if (chosenSaveExactMatchToProjectTM.equals("true"))
-   {
-	   isSaveExactMatchToProjectTMChecked = "CHECKED";
-   }
+
    String chosenJobExcludeTypes = tmProfile.getJobExcludeTuTypesAsString();
-   String isLeverageLocalizable = new Boolean(tmProfile.isLeverageLocalizable()).toString();
-   String isLevLocChecked = "";
-   if (isLeverageLocalizable.equals("true"))
-   {
-       isLevLocChecked = "CHECKED";
-   }
-   String isLeverageExactMatch = new Boolean(tmProfile.isLeverageExactMatch()).toString();
+
    String isLevEMChecked = "";
-   String isContextMatch = new Boolean(tmProfile.getIsContextMatchLeveraging()).toString();
    String isLevCMChecked = "";
-   String isLevDefault = "";
-   if (isLeverageExactMatch.equals("true"))
-   {
+   if (tmProfile.getIsExactMatchLeveraging()) {
        isLevEMChecked = "CHECKED";
-   }else if(isContextMatch.equals("true")){
+   } else {
 	   isLevCMChecked = "CHECKED";
-   }else{
-	   isLevDefault = "CHECKED";
-   }
-   String isPercentage = new Boolean(tmProfile.isMatchPercentage()).toString();
-   String isMatchingPercentage = "";
-   if("true".equals(isPercentage))
-   {
-	   isMatchingPercentage = "CHECKED";
-   }
-   String isProcendence = new Boolean(tmProfile.isTmProcendence()).toString();
-   String isTMProcendence = "";
-   if("true".equals(isProcendence))
-   {
-	   isTMProcendence = "CHECKED";
    }
 
    String isDynLevGoldChecked = "";
-   if(tmProfile.dynamicLeveragesFromGoldTm())
+   if(tmProfile.getDynLevFromGoldTm())
    {
        isDynLevGoldChecked = "CHECKED";
    }
@@ -227,25 +174,25 @@
    }
 
    String isDynLevInProgressChecked = "";
-   if(tmProfile.dynamicLeveragesFromInProgressTm())
+   if(tmProfile.getDynLevFromInProgressTm())
    {
        isDynLevInProgressChecked = "CHECKED";
    }
 
    String isDynLevPopulationChecked = "";
-   if(tmProfile.dynamicLeveragesFromPopulationTm())
+   if(tmProfile.getDynLevFromPopulationTm())
    {
        isDynLevPopulationChecked = "CHECKED";
    }
 
    String isDynLevReferenceChecked = "";
-   if(tmProfile.dynamicLeveragesFromReferenceTm())
+   if(tmProfile.getDynLevFromPopulationTm())
    {
        isDynLevReferenceChecked = "CHECKED";
    }
 
    String isDynLevInProgressDisabled = "DISABLED";
-   if(tmProfile.dynamicLeveragesFromInProgressTm())
+   if(tmProfile.getDynLevFromInProgressTm())
    {
        isDynLevInProgressDisabled = "";
    }
@@ -1348,16 +1295,28 @@ function check(obj)
 	document.getElementById("procendence").checked = false;
 	obj.checked = true;
 }
-function checkLeverageMatchOption(/*Radio Object*/ obj){
-	var exact = document.getElementById("isLevEMChecked");
-	var incontext = document.getElementById("levContextMatches");
-	var defaultMatch = document.getElementById("isLevDefaultMatch");
-	
+
+function checkLeverageMatchOption(obj)
+{
+	var exact = document.getElementById("idIsLevEMChecked");
+	var incontext = document.getElementById("idLevContextMatches");
+	var icePromotionRule1 = document.getElementById("idIcePromotionRules1");
+	var icePromotionRule2 = document.getElementById("idIcePromotionRules2");
+	var icePromotionRule3 = document.getElementById("idIcePromotionRules3");
+
 	exact.checked = false;
 	incontext.checked = false;
-	defaultMatch.checked = false;
-	
+	icePromotionRule1.disabled = true;
+	icePromotionRule2.disabled = true;
+	icePromotionRule3.disabled = true;
+
 	obj.checked = true;
+	if (incontext.checked == true)
+	{
+		icePromotionRule1.disabled = false;
+		icePromotionRule2.disabled = false;
+		icePromotionRule3.disabled = false;
+	}
 }
 
 function doOnLoad()
@@ -1467,27 +1426,27 @@ function doOnLoad()
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>" VALUE="true" <%=isSaveUnlocToProjectTMChecked%>><%=lbsaveUnlSegToTm%>
+                           <INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>" VALUE="true" <%=tmProfile.isSaveUnLocSegToProjectTM()?"CHECKED":""%>><%=lbsaveUnlSegToTm%>
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" VALUE="true" <%=isSaveLocToProjectTMChecked%>><%=lbsavelocSegToTm%>
+                           <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" VALUE="true" <%=tmProfile.isSaveLocSegToProjectTM()?"CHECKED":""%>><%=lbsavelocSegToTm%>
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=isSaveExactMatchToProjectTMChecked%>><%=lbisSaveExactMatchToProjectTm%>
+                           <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=tmProfile.isSaveExactMatchSegToProjectTM()?"CHECKED":""%>><%=lbisSaveExactMatchToProjectTm%>
                             </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" VALUE="true" <%=isSaveApprovedToProjectTMChecked %>><%=lbsaveApprovedSegToTM%>
+                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" VALUE="true" <%=tmProfile.isSaveApprovedSegToProjectTM()?"CHECKED":"" %>><%=lbsaveApprovedSegToTM%>
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                              <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=isSaveToPageTMChecked%>><%=lbisSaveToPageTm%>
+                              <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=tmProfile.isSaveUnLocSegToPageTM()?"CHECKED":""%>><%=lbisSaveToPageTm%>
                            </TD>
                         </TR>
                      </TABLE>
@@ -1497,17 +1456,19 @@ function doOnLoad()
 
                      <%=lbexcludeItemTypes%>:<BR>
                       <TEXTAREA CLASS="standardText" NAME="<%=leverageExcludeType%>" ROWS="5" COLS="50"><%  if (chosenJobExcludeTypes != null) { %><%=chosenJobExcludeTypes%><%  }%></TEXTAREA><BR>
-                      <INPUT TYPE="checkbox" NAME="<%=levLocalizable%>" VALUE="true" <%=isLevLocChecked%>><%=lblevLocalizable%><BR>
-                      
-                      <INPUT id="isLevDefaultMatch" onclick="checkLeverageMatchOption(this);" TYPE="radio" NAME="<%=lblevDefaultMatches%>" <%=isLevDefault %>><%=lblevDefaultMatches%>
-                                <BR>
-                      <INPUT id="isLevEMChecked" onclick="checkLeverageMatchOption(this);"TYPE="radio" NAME="<%=levExactMatches%>" VALUE="true" <%=isLevEMChecked%>><%=lblevExactMatches%><BR>
-					
-					  <input id="levContextMatches" type="radio" onclick="checkLeverageMatchOption(this);"name="<%=levContextMatches %>" value ="true" <%=isLevCMChecked %>><%=levContextMatches%>
+                      <INPUT TYPE="checkbox" NAME="<%=levLocalizable%>" VALUE="true" <%=tmProfile.isLeverageLocalizable()?"CHECKED":""%>><%=lblevLocalizable%><BR>
 
-                    
-                     <BR>
-                     <BR><BR>
+                      <INPUT id="idIsLevEMChecked" onclick="checkLeverageMatchOption(this);" TYPE="radio" NAME="<%=levExactMatches%>" VALUE="true" <%=isLevEMChecked%>><%=lblevExactMatches%><BR>
+
+					  <INPUT id="idLevContextMatches" onclick="checkLeverageMatchOption(this);" type="radio" name="<%=levContextMatches %>" value ="true" <%=isLevCMChecked %>><%=levContextMatches%><BR>
+
+					  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					  <INPUT TYPE="radio" id="idIcePromotionRules1" NAME="icePromotionRules" VALUE="1" <%=tmProfile.getIcePromotionRules()==1?"CHECKED":"" %> <%=tmProfile.getIsContextMatchLeveraging()?"":"disabled='true'" %>><%=bundle.getString("lb_apply_ice_promotion_rule1")%><BR>
+					  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					  <INPUT TYPE="radio" id="idIcePromotionRules2" NAME="icePromotionRules" VALUE="2" <%=tmProfile.getIcePromotionRules()==2?"CHECKED":"" %> <%=tmProfile.getIsContextMatchLeveraging()?"":"disabled='true'" %>><%=bundle.getString("lb_apply_ice_promotion_rule2")%><BR>
+					  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					  <INPUT TYPE="radio" id="idIcePromotionRules3" NAME="icePromotionRules" VALUE="3" <%=tmProfile.getIcePromotionRules()==3?"CHECKED":"" %> <%=tmProfile.getIsContextMatchLeveraging()?"":"disabled='true'" %>><%=bundle.getString("lb_apply_ice_promotion_rule3")%><BR>
+				      <BR><BR>
                       <TABLE CELLPADDING="2" CELLSPACING="2" BORDER="0" CLASS="standardText">
                         <TR><TD>
                                <B><%=lbDynLevOptions%></B>
@@ -1722,9 +1683,9 @@ function doOnLoad()
 	                        	<%=bundle.getString("lb_tm_display_tm_natches_by") %>:
 	                        </td>
 	                        <td>
-	                        	<input id="percentage" type="radio" onclick="check(this)" name="<%=matchingPercentage %>" value="true" <%=isMatchingPercentage %>><%=bundle.getString("lb_matching_percentage")%></input>
+	                        	<input id="percentage" type="radio" onclick="check(this)" name="<%=matchingPercentage %>" value="true" <%=tmProfile.isMatchPercentage()?"CHECKED":""%> ><%=bundle.getString("lb_matching_percentage")%></input>
 	                        	<br/>
-	                        	<input id="procendence" type="radio" onclick="check(this)" name="<%=tmProcendence %>" value="true" <%=isTMProcendence %>><%=bundle.getString("lb_tm_precedence")%></input>
+	                        	<input id="procendence" type="radio" onclick="check(this)" name="<%=tmProcendence %>" value="true" <%=tmProfile.isTmProcendence()?"CHECKED":""%> ><%=bundle.getString("lb_tm_precedence")%></input>
 	                        </td>
                         </tr>
                      </TABLE>

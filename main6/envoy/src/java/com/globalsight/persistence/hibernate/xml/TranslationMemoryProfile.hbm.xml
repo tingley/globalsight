@@ -38,6 +38,9 @@
         <property name="isContextMatchLeveraging"
             column="IS_CONTEXT_MATCH" type="yes_no" not-null="true"
             unique="false" />
+        <property name="icePromotionRules"
+            column="ICE_PROMOTION_RULES" type="int" not-null="true"
+            unique="false" />
         <property name="isExactMatchLeveraging"
             column="IS_EXACT_MATCH_LEVERAGING" type="yes_no"
             not-null="true" unique="false" />
@@ -135,8 +138,7 @@
             <one-to-many
                 class="com.globalsight.everest.projecthandler.LeverageProjectTM" />
         </set>
-        
-                 
+
         <one-to-one name="tdatm" class="com.globalsight.everest.foundation.TDATM" property-ref="translationMemoryProfile"/> 
 
         <set name="attributes" inverse="true" cascade="all">

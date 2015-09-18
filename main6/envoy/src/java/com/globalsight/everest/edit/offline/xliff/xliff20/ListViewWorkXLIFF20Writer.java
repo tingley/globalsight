@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -650,6 +649,21 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             note.setCategory("SID");
         }
 
+        if (osd.getDisplayMatchType() != null)
+        {
+            Notes notes = unit.getNotes();
+            if (notes == null)
+            {
+                notes = new Notes();
+                unit.setNotes(notes);
+            }
+
+            Note note = new Note();
+        	note.setContent(osd.getDisplayMatchType());
+        	note.setCategory("MatchType");
+        	notes.getNote().add(note);
+        }
+
         // Adds source.
         if (srcSegment != null)
         {
@@ -754,7 +768,13 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
      */
     private boolean isInContextMatch(OfflineSegmentData data)
     {
-        return "Context Exact Match".equals(data.getDisplayMatchType());
+    	String matchType = data.getDisplayMatchType();
+    	if (matchType != null && matchType.startsWith("Context Exact Match"))
+    	{
+    		return true;
+    	}
+
+    	return false;
     }
 
     /**

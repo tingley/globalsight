@@ -230,20 +230,57 @@ public class TM3Tu<T extends TM3Data>
             throw new IllegalArgumentException("event can not be null");
         }
         // Don't save identical (in both locale and content) targets
-        for (TM3Tuv<T> tuv : targetTuvs)
-        {
-            if (tuv.getLocale().equals(locale)
-                    && tuv.getContent().equals(content))
+    	for (TM3Tuv<T> trgTuv : targetTuvs)
+    	{
+            if (isIdenticalTuv(trgTuv, locale, content, previousHash, nextHash))
             {
-                return null;
+            	return null;
             }
-        }
-		TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event, creationUser,
+    	}
+
+        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event, creationUser,
 				creationDate, modifyUser, modifyDate, lastUsageDate, jobId,
 				jobName, previousHash, nextHash, sid);
         targetTuvs.add(tuv);
         tuv.setTu(this);
         return tuv;
+    }
+
+	/**
+	 * Check if the target TUV is an identical TUV.
+	 * 
+	 * The identical target TUV should have:
+	 * 1: same content and locale
+	 * 2: same previous/next hash values or no hash values at all.
+	 * 
+	 * @param trgTuv
+	 * @param locale
+	 * @param content
+	 * @param previousHash
+	 * @param nextHash
+	 * @return boolean
+	 * 
+	 */
+	public boolean isIdenticalTuv(TM3Tuv<T> trgTuv, TM3Locale locale,
+			T content, long previousHash, long nextHash)
+    {
+        if (trgTuv.getLocale().equals(locale)
+                && trgTuv.getContent().equals(content))
+        {
+        	// TUV in DB has no hash values, can update it
+			boolean flag1 = trgTuv.getPreviousHash() == -1
+					|| trgTuv.getNextHash() == -1;
+        	// Or TUV in DB has same hash values, can update it
+			boolean flag2 = trgTuv.getPreviousHash() == previousHash
+					&& trgTuv.getNextHash() == nextHash;
+
+			if (flag1 || flag2)
+			{
+				return true;
+			}
+        }
+
+    	return false;
     }
 
     public TM3EventLog getHistory()

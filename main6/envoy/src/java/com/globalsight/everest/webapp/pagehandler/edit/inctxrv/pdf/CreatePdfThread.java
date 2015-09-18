@@ -29,13 +29,10 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class CreatePdfThread extends MultiCompanySupportedThread
 {
-    private SystemConfiguration sc;
     private Job job = null;
     private Logger logger = null;
     
@@ -49,16 +46,10 @@ public class CreatePdfThread extends MultiCompanySupportedThread
 
         try
         {
-            sc = SystemConfiguration.getInstance();
+            String companyId = "" + this.job.getCompanyId();
 
-            long companyId = this.job.getCompanyId();
-
-            enableIndd = "true".equals(sc.getStringParameter(
-                    SystemConfigParamNames.INCTXRV_ENABLE_INDD,
-                    "" + companyId));
-            enableOffice = "true".equals(sc.getStringParameter(
-                    SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
-                    "" + companyId));
+            enableIndd = PreviewPDFHelper.isInDesignEnabled(companyId);
+            enableOffice = PreviewPDFHelper.isOfficeEnabled(companyId);
         }
         catch (Exception ex)
         {

@@ -33,6 +33,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.Project;
@@ -44,6 +46,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 
@@ -95,9 +98,40 @@ public class ExcelReportsMainHandler extends PageHandler
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
-        String activityName = (String) p_request.getParameter(REPORTNAME);
+        String action = p_request.getParameter("action");
         HttpSession session = p_request.getSession(false);
         uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
+        if ("ajax".equals(action))
+        {
+            try
+            {
+                JSONArray jsonArray = new JSONArray();
+                JSONObject jsonObject = null;
+                String result = "";
+                String jobId = p_request.getParameter("jobId");
+                Job job = ServerProxy.getJobHandler().getJobById(
+                        Long.parseLong(jobId));
+                jsonObject = new JSONObject();
+                for (Workflow wf : job.getWorkflows())
+                {
+                    jsonObject = new JSONObject();
+                    GlobalSightLocale targetLocale = wf.getTargetLocale();
+                    jsonObject.put("targetLocId", targetLocale.getId());
+                    jsonObject.put("targetLocName",targetLocale.getDisplayName());
+                    jsonArray.add(jsonObject);
+                }
+                result = jsonArray.toJSONString();
+                p_response.getWriter().write(result);
+                return;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+        String activityName = (String) p_request.getParameter(REPORTNAME);
 
         User curUser = getUser(session);
         initData(curUser.getUserId(), activityName);
@@ -117,7 +151,7 @@ public class ExcelReportsMainHandler extends PageHandler
                 reportJobInfoList);
         p_request.setAttribute(ReportConstants.PROJECT_LIST, projectList);
         p_request.setAttribute(ReportConstants.TARGETLOCALE_LIST, targetLocales);
-
+        }
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
     }

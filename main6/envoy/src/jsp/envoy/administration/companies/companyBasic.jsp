@@ -71,11 +71,15 @@
     
     String inCtxRvKeyIndd = (String) request.getAttribute("incontext_review_key_indd");
     String inCtxRvKeyOffice = (String) request.getAttribute("incontext_review_key_office");
+    String inCtxRvKeyXML = (String) request.getAttribute("incontext_review_key_xml");
     String enableInCtxRvToolIndd = "true".equals(inCtxRvKeyIndd) ? "checked" : "";
     String enableInCtxRvToolOffice = "true".equals(inCtxRvKeyOffice) ? "checked" : "";
+    String enableInCtxRvToolXML = "true".equals(inCtxRvKeyXML) ? "checked" : "";
     
     boolean isInDesignEnabled = PreviewPDFHelper.isInDesignEnabled();
     boolean isOfficeEnabled = PreviewPDFHelper.isOfficeEnabled();
+    boolean isXMLEnabled = PreviewPDFHelper.isXMLEnabled();
+    boolean showInContextReivew = (isInDesignEnabled ||  isOfficeEnabled || isXMLEnabled);
     
     if (company != null)
     {
@@ -801,16 +805,30 @@ function addQualityTo()
         </td>
         </tr>
         
+        <tr id="inctxrvCheck" <% if (!showInContextReivew) {%>style="display:none;" <%}%> >
+            <td valign="top"><%=bundle.getString("lb_incontext_review")%>:</td>
+            <td colspan="2">
+            </td>
+        </tr>
+        
         <tr id="inctxrvCheckIndd" <% if (!isInDesignEnabled) {%>style="display:none;" <%}%> >
-            <td valign="top"><%=bundle.getString("lb_incontext_review_key_indd")%>:</td>
+            <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_indesign")%>:</td>
             <td colspan="2">
                 <input class="standardText" type="checkbox" id="enableInCtxRvToolInddId" name="<%=CompanyConstants.ENABLE_INCTXRV_TOOL_INDD%>" <%=enableInCtxRvToolIndd%>/>
             </td>
         </tr>
+        
         <tr id="inctxrvCheckOffice" <% if (!isOfficeEnabled) {%>style="display:none;" <%}%> >
-            <td valign="top"><%=bundle.getString("lb_incontext_review_key_office")%>:</td>
+            <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_office2010")%>:</td>
             <td colspan="2">
                 <input class="standardText" type="checkbox" id="enableInCtxRvToolOfficeId" name="<%=CompanyConstants.ENABLE_INCTXRV_TOOL_OFFICE%>" <%=enableInCtxRvToolOffice%>/>
+            </td>
+        </tr>
+        
+        <tr id="inctxrvCheckXML" <% if (!isXMLEnabled) {%>style="display:none;" <%}%> >
+            <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_xml")%>:</td>
+            <td colspan="2">
+                <input class="standardText" type="checkbox" id="enableInCtxRvToolXMLId" name="<%=CompanyConstants.ENABLE_INCTXRV_TOOL_XML%>" <%=enableInCtxRvToolXML%>/>
             </td>
         </tr>
 

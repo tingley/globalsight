@@ -35,9 +35,10 @@ public class CreatePdfThread extends MultiCompanySupportedThread
 {
     private Job job = null;
     private Logger logger = null;
-    
+
     private boolean enableIndd = false;
     private boolean enableOffice = false;
+    private boolean enableXML = false;
 
     public CreatePdfThread(Job job, Logger logger)
     {
@@ -50,6 +51,7 @@ public class CreatePdfThread extends MultiCompanySupportedThread
 
             enableIndd = PreviewPDFHelper.isInDesignEnabled(companyId);
             enableOffice = PreviewPDFHelper.isOfficeEnabled(companyId);
+            enableXML = PreviewPDFHelper.isXMLEnabled(companyId);
         }
         catch (Exception ex)
         {
@@ -70,30 +72,37 @@ public class CreatePdfThread extends MultiCompanySupportedThread
             {
                 String pageName = sourcePage.getExternalPageId().toLowerCase();
                 if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
-                        || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
-                        || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
+                        || pageName.endsWith(".docx")
+                        || pageName.endsWith(".pptx")
+                        || pageName.endsWith(".xlsx")
+                        || pageName.endsWith(".xml"))
                 {
                     if (pageName.endsWith(".xml"))
                     {
+                        if (!enableXML)
+                        {
+                            continue;
+                        }
+                        
                         if (!FileProfileUtil.isXmlPreviewPDF(fp))
                         {
                             continue;
                         }
                     }
-                    
+
                     if ((pageName.endsWith(".indd")
                             || pageName.endsWith(".idml")) && !enableIndd)
                     {
                         continue;
                     }
-                    
+
                     if ((pageName.endsWith(".docx")
                             || pageName.endsWith(".pptx")
                             || pageName.endsWith(".xlsx")) && !enableOffice)
                     {
                         continue;
                     }
-                    
+
                     PreviewPDFHelper previewHelper = new PreviewPDFHelper();
                     File pdfFile = previewHelper.createPDF(sourcePage.getId(),
                             userid, false);
@@ -106,8 +115,8 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                     for (TargetPage targetPage : targetPages)
                     {
                         PreviewPDFHelper previewHelperT = new PreviewPDFHelper();
-                        File pdfFileT = previewHelperT.createPDF(
-                                targetPage.getId(), userid, true);
+                        File pdfFileT = previewHelperT
+                                .createPDF(targetPage.getId(), userid, true);
 
                         logger.debug("Create target PDF " + pdfFileT
                                 + " successfully for job : " + job);
@@ -117,8 +126,8 @@ public class CreatePdfThread extends MultiCompanySupportedThread
         }
         catch (Exception e)
         {
-            logger.error("Could not create In context preview PDF for job : "
-                    + job);
+            logger.error(
+                    "Could not create In context preview PDF for job : " + job);
             throw new EnvoyServletException(e);
         }
         finally

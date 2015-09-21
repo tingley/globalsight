@@ -687,7 +687,7 @@
         }
     }
     
-    boolean okForInContextReview = PreviewPDFHelper.isInContextReviewEnabled();
+    boolean okForInContextReviewXml = PreviewPDFHelper.isXMLEnabled("" + theTask.getCompanyId());
     boolean okForInContextReviewIndd = PreviewPDFHelper.isInDesignEnabled("" + theTask.getCompanyId());
 	boolean okForInContextReviewOffice = PreviewPDFHelper.isOfficeEnabled("" + theTask.getCompanyId());
 %>
@@ -1615,7 +1615,7 @@ if (targetPgsSize > 0)
             boolean enableInContextReivew = false;
             if (isXml)
             {
-                enableInContextReivew = okForInContextReview ? FileProfileUtil.isXmlPreviewPDF(fp) : false;
+                enableInContextReivew = okForInContextReviewXml ? FileProfileUtil.isXmlPreviewPDF(fp) : false;
             }
             if (isInDesign)
             {

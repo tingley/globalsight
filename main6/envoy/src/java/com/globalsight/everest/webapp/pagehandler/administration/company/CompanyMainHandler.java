@@ -924,9 +924,12 @@ public class CompanyMainHandler extends PageActionHandler implements
                 .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_INDD);
         String enableInCtxRvOfficeP = p_request
                 .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_OFFICE);
+        String enableInCtxRvXMLP = p_request
+                .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_XML);
 
         String enableInCtxRvIndd = "on".equalsIgnoreCase(enableInCtxRvInddP) ? "true" : "false";
         String enableInCtxRvOffice = "on".equalsIgnoreCase(enableInCtxRvOfficeP) ? "true" : "false";
+        String enableInCtxRvXML = "on".equalsIgnoreCase(enableInCtxRvXMLP) ? "true" : "false";
 
         try
         {
@@ -940,6 +943,10 @@ public class CompanyMainHandler extends PageActionHandler implements
             updateInContextReview(company, spm,
                     SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
                     enableInCtxRvOffice);
+            
+            updateInContextReview(company, spm,
+                    SystemConfigParamNames.INCTXRV_ENABLE_XML,
+                    enableInCtxRvXML);
         }
         catch (Exception ex)
         {

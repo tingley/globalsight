@@ -185,7 +185,7 @@
 		appletcontent.append(" </APPLET>");
 	}
 	
-	boolean okForInContextReview = PreviewPDFHelper.isInContextReviewEnabled();
+	boolean okForInContextReviewXml = PreviewPDFHelper.isXMLEnabled("" + jobImpl.getCompanyId());
 	boolean okForInContextReviewIndd = PreviewPDFHelper.isInDesignEnabled("" + jobImpl.getCompanyId());
 	boolean okForInContextReviewOffice = PreviewPDFHelper.isOfficeEnabled("" + jobImpl.getCompanyId());
 %>
@@ -1032,7 +1032,7 @@ for (int i = 0; i < jobSourcePageDisplayList.size(); i++)
     boolean enableInContextReivew = false;
     if (isXml)
     {
-        enableInContextReivew = okForInContextReview ? FileProfileUtil.isXmlPreviewPDF(fp) : false;
+        enableInContextReivew = okForInContextReviewXml ? FileProfileUtil.isXmlPreviewPDF(fp) : false;
     }
     if (isInDesign)
     {

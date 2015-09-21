@@ -2192,6 +2192,7 @@ public class Ambassador extends AbstractWebService
                 activityStart.end();
             }
         }
+        logger.info("uploadFileForInitial: "+jobId);
         return jobId;
     }
 
@@ -2874,7 +2875,9 @@ public class Ambassador extends AbstractWebService
                 }
                 jobFiles.addPath(allPath.toString());
             }
-            return com.globalsight.cxe.util.XmlUtil.object2String(jobFiles);
+            String returnStr = com.globalsight.cxe.util.XmlUtil.object2String(jobFiles);
+            logger.info("getJobExportFiles: "+returnStr);
+            return returnStr;
         }
         catch (Exception e)
         {
@@ -4147,19 +4150,16 @@ public class Ambassador extends AbstractWebService
 	 *         		<workflows>
 	 *         			<workflow> 
 	 *         				<targetLocal>French (France) [fr_FR]</targetLocal>
+	 *         				<workflowTranslationPercentage>3%</workflowTranslationPercentage>
 	 *         				<targetPages> 
 	 *         					<targetPage>
 	 *         						<pageName>en_US\280\Welocalize_Company_IncludingRepeat_Codesensitive.html</pageName>
-	 *         						<pageTranslationPrecentage>0%</pageTranslationPrecentage>
+	 *         						<pageTranslationPercentage>100%</pageTranslationPercentage>
 	 *         					</targetPage> 
 	 *         					<targetPage>
 	 *         						<pageName>en_US\280\Welocalize_Company_IncludingRepeat_Leverage Match Threshold.html</pageName>
-	 *         						<pageTranslationPrecentage>0%</pageTranslationPrecentage>
+	 *         						<pageTranslationPercentage>1%</pageTranslationPercentage>
 	 *         					</targetPage> 
-	 *         					<targetPage>
-	 *         						<pageName>en_US\280\Welocalize_Company_IncludingRepeat.html</pageName>
-	 *        						<pageTranslationPrecentage>0%</pageTranslationPrecentage>
-	 *         					</targetPage>
 	 *         				</targetPages> 
 	 *         			</workflow> 
 	 *         		</workflows>
@@ -4282,9 +4282,11 @@ public class Ambassador extends AbstractWebService
 			xml.append("\t\t\t<targetLocal>")
 					.append(wf.getTargetLocale().getDisplayName())
 					.append("</targetLocal>\r\n");
-			xml.append("\t\t\t<percentageCompletion>")
-					.append(wf.getPercentageCompletion())
-					.append("%</percentageCompletion>\r\n");
+			int taskPrecentage = SegmentTuvUtil
+					.getTranslatedPercentageForTargetPages(wf.getTargetPages());
+			xml.append("\t\t\t<workflowTranslationPercentage>")
+					.append(taskPrecentage)
+					.append("%</workflowTranslationPercentage>\r\n");
 			xml.append("\t\t\t<targetPages>\r\n");
 			Vector<TargetPage> trgPages = wf.getTargetPages();
 			Iterator<TargetPage> itPages = trgPages.iterator();

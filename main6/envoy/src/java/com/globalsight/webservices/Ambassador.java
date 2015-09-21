@@ -2109,7 +2109,7 @@ public class Ambassador extends AbstractWebService
                 throw new WebServiceException(makeErrorXml("uploadFileForInitial",
                         extensionMsg));
             }
-            String userName = this.getUsernameFromSession(accessToken);
+            String userName = getUsernameFromSession(accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", jobName);
@@ -2192,8 +2192,9 @@ public class Ambassador extends AbstractWebService
                 activityStart.end();
             }
         }
-        logger.info("uploadFileForInitial: "+jobId);
-        return jobId;
+		logger.info("uploadFileForInitial API returning: " + jobId);
+
+		return jobId;
     }
 
     /**
@@ -2876,7 +2877,10 @@ public class Ambassador extends AbstractWebService
                 jobFiles.addPath(allPath.toString());
             }
             String returnStr = com.globalsight.cxe.util.XmlUtil.object2String(jobFiles);
-            logger.info("getJobExportFiles: "+returnStr);
+            if (returnStr != null && logger.isDebugEnabled())
+            {
+				logger.info("getJobExportFiles API returning: " + returnStr);            	
+            }
             return returnStr;
         }
         catch (Exception e)

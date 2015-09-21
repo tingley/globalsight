@@ -1466,6 +1466,22 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         return calculateTranslatedPercentage(totalCounts, translatedCounts);
     }
 
+	public static int getTranslatedPercentageForTargetPages(
+			List<TargetPage> targetPages)
+	{
+		int totalCounts = 0;
+		int translatedCounts = 0;
+
+		for (TargetPage tp : targetPages)
+		{
+			int[] counts = getTotalAndTranslatedTuvCount(tp.getId());
+			totalCounts += counts[0];
+			translatedCounts += counts[1];
+		}
+
+		return calculateTranslatedPercentage(totalCounts, translatedCounts);
+	}
+    
     private static int calculateTranslatedPercentage(int totalCounts,
             int translatedCounts)
     {

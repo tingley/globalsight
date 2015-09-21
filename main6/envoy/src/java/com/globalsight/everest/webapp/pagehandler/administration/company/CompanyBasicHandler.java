@@ -128,6 +128,7 @@ public class CompanyBasicHandler extends PageHandler implements
                 
                 p_request.setAttribute("incontext_review_key_indd", "false");
                 p_request.setAttribute("incontext_review_key_office", "false");
+                p_request.setAttribute("incontext_review_key_xml", "false");
             }
             else if (action.equals(CompanyConstants.EDIT))
             {
@@ -187,6 +188,7 @@ public class CompanyBasicHandler extends PageHandler implements
                     
                     p_request.setAttribute("incontext_review_key_indd", getInCtxRvEnableIndd(companyID));
                     p_request.setAttribute("incontext_review_key_office", getInCtxRvEnableOffice(companyID));
+                    p_request.setAttribute("incontext_review_key_xml", getInCtxRvEnableXML(companyID));
                 }
                 p_request.setAttribute("edit", "true");
             }
@@ -279,6 +281,24 @@ public class CompanyBasicHandler extends PageHandler implements
         {
             temp = ServerProxy.getSystemParameterPersistenceManager()
                     .getSystemParameter(SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
+                            companyId)
+                    .getValue();
+        }
+        catch (Exception e)
+        {
+            // ignore
+        }
+        return temp;
+    }
+    
+    private String getInCtxRvEnableXML(String companyId)
+    {
+        String temp = "false";
+        try
+        {
+            temp = ServerProxy.getSystemParameterPersistenceManager()
+                    .getSystemParameter(
+                            SystemConfigParamNames.INCTXRV_ENABLE_XML,
                             companyId)
                     .getValue();
         }

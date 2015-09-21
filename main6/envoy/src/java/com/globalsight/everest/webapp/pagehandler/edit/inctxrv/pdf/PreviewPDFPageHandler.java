@@ -33,6 +33,8 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.adapter.idml.IdmlConverter;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.jobhandler.Job;
@@ -337,14 +339,46 @@ public class PreviewPDFPageHandler extends PageHandler implements
     public static boolean okForInContextReview(PagePair pagep)
     {
         String pageName = pagep.getPageName().toLowerCase();
-        
-        if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
-                || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
-                || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
+
+        try
         {
-            return true;
+            if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
+                    || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
+                    || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
+            {
+                SourcePage srcPage = ServerProxy.getPageManager()
+                        .getSourcePage(pagep.getSourcePageId());
+                Job job = srcPage.getRequest().getJob();
+                FileProfile fp = job.getFileProfile();
+                String companyId = "" + job.getCompanyId();
+
+                if (pageName.endsWith(".xml")
+                        && PreviewPDFHelper.isXMLEnabled(companyId)
+                        && FileProfileUtil.isXmlPreviewPDF(fp))
+                {
+                    return true;
+                }
+
+                if ((pageName.endsWith(".indd") || pageName.endsWith(".idml"))
+                        && PreviewPDFHelper.isInDesignEnabled(companyId))
+                {
+                    return true;
+                }
+
+                if ((pageName.endsWith(".docx") || pageName.endsWith(".pptx")
+                        || pageName.endsWith(".xlsx"))
+                        && PreviewPDFHelper.isOfficeEnabled(companyId))
+                {
+                    return true;
+                }
+
+            }
         }
-        
+        catch (Exception ex)
+        {
+            LOGGER.error("pageName = " + pageName, ex);
+        }
+
         return false;
     }
 }

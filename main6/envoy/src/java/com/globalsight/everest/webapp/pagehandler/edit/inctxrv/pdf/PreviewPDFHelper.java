@@ -465,6 +465,25 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         return enabled;
     }
 
+    public static boolean isXMLEnabled()
+    {
+        boolean enabled = false;
+
+        try
+        {
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            enabled = "true".equals(
+                    sc.getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            CompanyWrapper.SUPER_COMPANY_ID));
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
+    }
+
     public static boolean isInDesignEnabled(String companyId)
     {
         boolean enabled = false;
@@ -500,6 +519,28 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 enabled = "true".equals(sc.getStringParameter(
                         SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
                         companyId));
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
+    }
+
+    public static boolean isXMLEnabled(String companyId)
+    {
+        boolean enabled = false;
+
+        try
+        {
+            if (isXMLEnabled())
+            {
+                SystemConfiguration sc = SystemConfiguration.getInstance();
+
+                enabled = "true".equals(sc.getStringParameter(
+                        SystemConfigParamNames.INCTXRV_ENABLE_XML, companyId));
             }
         }
         catch (Exception ex)

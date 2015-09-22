@@ -115,7 +115,7 @@ public class PreviewPDFPageHandler extends PageHandler implements
             long trgPageId = state.getTargetPageId();
     
             String filePath = p_request.getParameter("file");
-            if (filePath.startsWith("(Adobe file information)"))
+            if (filePath.toLowerCase().startsWith("(adobe file information)"))
             {
                 String inddFilePath = filePath
                         .substring(filePath.indexOf(") ") + 2);

@@ -73,7 +73,7 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                 String pageName = sourcePage.getExternalPageId().toLowerCase();
                 
                 // no need to create PDF for (Adobe file information)
-                if (pageName.startsWith("(Adobe file information)"))
+                if (pageName.startsWith("(adobe file information)"))
                 {
                     continue;
                 }

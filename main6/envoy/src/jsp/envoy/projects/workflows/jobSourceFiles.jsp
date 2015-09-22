@@ -1024,7 +1024,7 @@ for (int i = 0; i < jobSourcePageDisplayList.size(); i++)
 	String pageName = jobSourcePageDisplay.getSourcePage().getDisplayPageName().replace("\\","/");
 	FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(jobSourcePageDisplay.getSourcePage().getRequest().getDataSourceId());
 	
-	String pageNameLow = pageName.toLowerCase();
+	String pageNameLow = jobSourcePageDisplay.getSourcePage().getExternalPageId().toLowerCase();
     boolean isXml = pageNameLow.endsWith(".xml");
     boolean isInDesign = pageNameLow.endsWith(".indd") || pageNameLow.endsWith(".idml");
     boolean isOffice = pageNameLow.endsWith(".docx") || pageNameLow.endsWith(".pptx") || pageNameLow.endsWith(".xlsx");

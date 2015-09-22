@@ -161,7 +161,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     .getWorkflowById(workflowId);
             for (TargetPage tp : workflow.getTargetPages())
             {
-                String key = getKey(tp, p_userId);
+                String key = getKey(true, tp, p_userId);
                 Future<File> future = createPDFMap.get(key);
                 if (future != null)
                 {
@@ -193,7 +193,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 page = sourcePage;
             }
 
-            String key = getKey(page, p_userId);
+            String key = getKey(isTarget, page, p_userId);
             Future<File> future = createPDFMap.get(key);
             if (future == null)
             {
@@ -229,7 +229,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             throws WorkflowManagerException, RemoteException
     {
         // Cancel Duplicate Request
-        String key = getKey(p_page, p_userId);
+        String key = getKey(isTarget, p_page, p_userId);
         if (createPDFMap.get(key) != null)
             return;
 
@@ -296,7 +296,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         for (TargetPage tp : p_wf.getTargetPages())
         {
             // Set Status
-            String key = this.getKey(tp, p_userId);
+            String key = getKey(true, tp, p_userId);
             Future<File> future = createPDFMap.get(key);
             if (future != null)
             {
@@ -1224,6 +1224,13 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     {
         String conDir = getConvertDir(p_params, false, companyId);
         String conDir_inctxrv = getConvertDir(p_params, true, companyId);
+        
+        // ignore if same dir
+        if (conDir.equals(conDir_inctxrv))
+        {
+            return;
+        }
+        
         String fileName = FileUtils.getPrefix(p_convertedFileName);
 
         StringBuffer inddFile = new StringBuffer(conDir);
@@ -1967,9 +1974,9 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
     }
 
-    private String getKey(Page p_tp, String p_userId)
+    private String getKey(boolean isTarget, Page p_page, String p_userId)
     {
-        return p_tp.getId() + "_" + p_userId;
+        return (isTarget ? "target_" : "source_") + p_page.getId() + "_" + p_userId;
     }
 
     /*

@@ -29,6 +29,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class CreatePdfThread extends MultiCompanySupportedThread
@@ -66,11 +67,17 @@ public class CreatePdfThread extends MultiCompanySupportedThread
         {
             Collection<SourcePage> sourcePages = job.getSourcePages();
             String userid = job.getCreateUserId();
-            FileProfile fp = job.getFileProfile();
 
             for (SourcePage sourcePage : sourcePages)
             {
                 String pageName = sourcePage.getExternalPageId().toLowerCase();
+                
+                // no need to create PDF for (Adobe file information)
+                if (pageName.startsWith("(Adobe file information)"))
+                {
+                    continue;
+                }
+                
                 if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
                         || pageName.endsWith(".docx")
                         || pageName.endsWith(".pptx")
@@ -83,6 +90,10 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                         {
                             continue;
                         }
+                        
+                        long fpId = sourcePage.getRequest().getDataSourceId();
+                        FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                                .readFileProfile(fpId);
                         
                         if (!FileProfileUtil.isXmlPreviewPDF(fp))
                         {

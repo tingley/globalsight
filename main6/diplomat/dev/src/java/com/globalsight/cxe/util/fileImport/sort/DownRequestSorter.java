@@ -35,7 +35,7 @@ public class DownRequestSorter extends RequestSorter
             CxeMessage cm = ms.get(i);
             HashMap p = cm.getParameters();
             if (!keys.contains(p.get("uiKey")))
-
+                break;
             i++;
         }
         

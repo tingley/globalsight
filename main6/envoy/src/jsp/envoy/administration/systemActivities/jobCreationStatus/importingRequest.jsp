@@ -185,7 +185,7 @@
                         <amb:column label="lb_file_profile" sortBy="<%=RequestFileComparator.FILE_PROFILE%>">
                             ${requestVo.fileProfile}
                         </amb:column>
-                        <amb:column label="lb_priority" sortBy="<%=RequestFileComparator.PRIORITY%>">
+                        <amb:column label="jobinfo.jobdetail.jobpriority" sortBy="<%=RequestFileComparator.PRIORITY%>">
                             ${requestVo.priority}
                         </amb:column>
                         <amb:column label="lb_date_request" sortBy="<%=RequestFileComparator.REQUEST_TIME%>">

@@ -5,9 +5,6 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.usermgr.LoggedUser;
-import com.globalsight.everest.usermgr.UserInfo;
-
 /**
  * A helper class for logging operation within GlobalSight.  The goal is to
  * allows us to see everything happening at any moment.
@@ -23,6 +20,7 @@ public class OperationLog {
     public static final String EVENT_EDIT = "edit";
     public static final String EVENT_DELETE = "delete";
     public static final String EVENT_TM_IMPORT = "tmImport";
+    public static final String EVENT_COMPLETE = "complete";
 
     public static final String COMPONET_WORKFLOW = "Workflow";
     public static final String COMPONET_TM = "TM";
@@ -33,7 +31,8 @@ public class OperationLog {
     public static final String COMPONET_FILTER_CONFIGURATION = "Filter Configuration";
     public static final String COMPONET_SEGMENTATION_RULE = "Segmentation Rule";
     public static final String COMPONET_USERS = "Users";
-
+    public static final String COMPONET_TASK = "Task";
+    
     public static void log(String operationUser, String operationAction,
             String gsComponent, String componentName)
     {

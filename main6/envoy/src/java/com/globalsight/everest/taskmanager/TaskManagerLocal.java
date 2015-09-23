@@ -78,6 +78,7 @@ import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManager;
 import com.globalsight.everest.workflowmanager.WorkflowManagerException;
+import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -326,6 +327,11 @@ public class TaskManagerLocal implements TaskManager
         {
             status.clearTaskFileState(p_task.getId());
         }
+        
+		OperationLog.log(p_userId, OperationLog.EVENT_COMPLETE,
+				OperationLog.COMPONET_TASK, p_task.getJobName() + "-"
+						+ p_task.getTargetLocale().getDisplayName() + "-"
+						+ p_task.getTaskDisplayName());
     }
 
     /**

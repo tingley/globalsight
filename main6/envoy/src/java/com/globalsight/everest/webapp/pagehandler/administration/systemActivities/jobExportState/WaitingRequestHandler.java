@@ -40,6 +40,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.systemActivitie
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.ObjectUtil;
 
 public class WaitingRequestHandler extends RequestAbstractHandler
 {
@@ -116,8 +117,7 @@ public class WaitingRequestHandler extends RequestAbstractHandler
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
         HashMap<String, Hashtable> ms = new HashMap<String, Hashtable>();
         
-        HashMap<String, List<Hashtable>> wms = new HashMap<String, List<Hashtable>>();
-        wms.putAll(FileExportUtil.ON_HOLD_MESSAGE);
+        HashMap<String, List<Hashtable>> wms = ObjectUtil.deepClone(FileExportUtil.ON_HOLD_MESSAGE);
         for (List<Hashtable> ms2 : wms.values())
         {
             int i = 1;

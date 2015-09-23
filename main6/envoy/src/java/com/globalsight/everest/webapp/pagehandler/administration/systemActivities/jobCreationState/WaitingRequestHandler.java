@@ -45,6 +45,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.ObjectUtil;
 
 /**
  * XmldtdFilePageHandler, A page handler to produce the entry page (index.jsp)
@@ -169,8 +170,7 @@ public class WaitingRequestHandler extends PageActionHandler
         HashMap<String, FileProfileImpl> fileProfiles = new HashMap<String, FileProfileImpl>();
         
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
-        HashMap<String, List<CxeMessage>> ms = new HashMap<String, List<CxeMessage>>();
-        ms.putAll(FileImportUtil.ON_HOLD_MESSAGE);
+        HashMap<String, List<CxeMessage>> ms = ObjectUtil.deepClone(FileImportUtil.ON_HOLD_MESSAGE);
         for (List<CxeMessage> ms2 : ms.values())
         {
             int i = 1;

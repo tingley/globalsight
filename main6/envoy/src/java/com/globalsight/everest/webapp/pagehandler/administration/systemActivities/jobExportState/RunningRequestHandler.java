@@ -35,6 +35,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.systemActivitie
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.ObjectUtil;
 
 public class RunningRequestHandler extends RequestAbstractHandler
 {
@@ -59,8 +60,7 @@ public class RunningRequestHandler extends RequestAbstractHandler
         HashMap<String, FileProfileImpl> fileProfiles = new HashMap<String, FileProfileImpl>();
         
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
-        HashMap<String, Hashtable> ms = new HashMap<String, Hashtable>();
-        ms.putAll(FileExportUtil.RUNNING_REQUEST);
+        HashMap<String, Hashtable> ms = ObjectUtil.deepClone(FileExportUtil.RUNNING_REQUEST);
         for (Hashtable args : ms.values())
         {   
 

@@ -30,8 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.util.fileImport.FileImportUtil;
@@ -47,6 +45,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.ObjectUtil;
 
 /**
  * XmldtdFilePageHandler, A page handler to produce the entry page (index.jsp)
@@ -54,9 +53,6 @@ import com.globalsight.util.GeneralException;
  */
 public class ImportingRequestHandler extends PageActionHandler
 {
-    static private final Logger logger = Logger
-            .getLogger(ImportingRequestHandler.class);
-    
     @ActionHandler(action = "remove", formClass = "")
     public void remove(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
@@ -133,17 +129,16 @@ public class ImportingRequestHandler extends PageActionHandler
         return sb.toString();
     }
     
+    @SuppressWarnings("rawtypes")
     private List<RequestFile> getAllRequestVos()
     {
         HashMap<String, String> fileProfileId2priority = new HashMap<String, String>();
         HashMap<String, FileProfileImpl> fileProfiles = new HashMap<String, FileProfileImpl>();
         
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
-        HashMap<String, CxeMessage> ms = new HashMap<String, CxeMessage>();
-        ms.putAll(FileImportUtil.RUNNING_REQUEST);
+        HashMap<String, CxeMessage> ms = ObjectUtil.deepClone(FileImportUtil.RUNNING_REQUEST);
         for (CxeMessage t : ms.values())
         {
-
             RequestFile requestVo = new RequestFile();
             HashMap args = t.getParameters();
             String cId = (String) args.get("currentCompanyId");

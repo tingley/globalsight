@@ -445,17 +445,6 @@ function submitForm(buttonClicked)
       }
    }
 
-   if(buttonClicked == 'Export' || buttonClicked == 'ExportForUpdate'){
-   		ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
-	   JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
-	   jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
-	   JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
-	   if (buttonClicked == "ExportForUpdate")
-	   {
-	      JobForm.action += "&" + "<%=JobManagementHandler.EXPORT_FOR_UPDATE_PARAM%>" + "=true";
-	   }
-	   JobForm.submit();
-   }
 
    var valuesArray;
    var jobId = "";
@@ -538,6 +527,9 @@ function submitForm(buttonClicked)
 	  ShowStatusMessage("<%=bundle.getString("jsmsg_discarding_selected_jobs")%>")
 	  JobForm.action = "<%=refreshUrl%>";
 	  jobActionParam = "<%=JobManagementHandler.DISCARD_JOB_PARAM%>";
+	  JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
+      JobForm.submit();
+      return;
    }
    else if(buttonClicked == 'downloadQAReport')
    {
@@ -563,6 +555,16 @@ function submitForm(buttonClicked)
           		alert(error.message);
            }
 		});   
+   }else   if(buttonClicked == 'Export' || buttonClicked == 'ExportForUpdate'){
+   		ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
+	   JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
+	   jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
+	   JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
+	   if (buttonClicked == "ExportForUpdate")
+	   {
+	      JobForm.action += "&" + "<%=JobManagementHandler.EXPORT_FOR_UPDATE_PARAM%>" + "=true";
+	   }
+	   JobForm.submit();
    }
 }
 

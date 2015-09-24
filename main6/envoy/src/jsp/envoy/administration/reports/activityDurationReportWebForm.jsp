@@ -43,7 +43,7 @@
 <head>
 <title><%= EMEA%> <%=bundle.getString("activity_duration_report_web_form")%></title>
 </head>
-<body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY">
+<body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY" onLoad="doOnload()">
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
@@ -62,6 +62,25 @@ for(int i=0; i<jobList.size(); i++)
 <%
 }
 %>
+
+function setDisableTRWrapper(trid)
+{
+	if(trid == "idTRJobIds")
+	{
+		setDisableTR("idTRJobIds", true);
+		setDisableTR("idTRJobNames", false);
+		setDisableTR("idTRProject", false);
+		setDisableTR("idTRJobStatus", false);
+		filterJob();
+	}
+	else if(trid == "idTRJobNames")
+	{
+		setDisableTR("idTRJobIds", false);
+		setDisableTR("idTRJobNames", true);
+		setDisableTR("idTRProject", true);
+		setDisableTR("idTRJobStatus", true);
+	}
+}
 $(document).ready(function(){
 	$("#csf").datepicker({
 		changeMonth: true,
@@ -84,10 +103,10 @@ $(document).ready(function(){
 function defautSelect(){
 	var jobIdsval;
 	
-	jobIdsval=$("#jobId").val();
+	jobIdsval=$("#jobNameList").val();
 	
 	if(jobIdsval)return;
-     var ops=$("#jobId").children();
+     var ops=$("#jobNameList").children();
      if(ops.length==0){
       return ('No job name(s) is(are) selected.');
      }else{
@@ -195,7 +214,23 @@ function submitForm() {
 function fnGetSelectedJobIds()
 {
 	var jobIDArr = new Array();
-		var selObj = document.getElementById("jobId");
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		var jobIDText = document.getElementById("jobIds").value;
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ",")
+		{
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';			
+			return;
+		}
+		jobIDArr = jobIDText.split(",");
+		if(!validateIDS(jobIDArr, jobInfos))
+		{
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+			return;
+		}
+	}else{
+		var selObj = document.getElementById("jobNameList");
 		for (i=0; i<selObj.options.length; i++) 
 		{
 			if (selObj.options[i].selected) 
@@ -209,13 +244,19 @@ function fnGetSelectedJobIds()
 			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
 			return;
 	    }
-	jobIDArr.sort(sortNumber);
+	}	
+/* 	jobIDArr.sort(sortNumber); */
 	
 	return jobIDArr;
 }
 
 function filterJob(){
-	var jobNameList = document.getElementById("jobId");
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		return;
+	}
+	
+	var jobNameList = document.getElementById("jobNameList");
 	var projectNameList = document.getElementById("projectId");
 	var jobStatus = document.getElementById("status");
 	var targetLocalesList = document.getElementById("targetLocalsList");
@@ -261,13 +302,25 @@ function filterJob(){
 			&& contains(currSelectValueJobStatus, jobInfos[i].jobStatus)
 			&& containsArray(currSelectValueTargetLocale, jobInfos[i].targetLocals))
 		{
-			addOption("jobId", jobInfos[i].jobName, jobInfos[i].jobId);
+			addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
 		}
 	}
 }
 function sortNumber(a,b) 
 { 
 	return a - b 
+}
+
+function doOnload()
+{
+	// Initial jobNameList select options 
+	for(var i=0; i<jobInfos.length; i++)
+	{
+		addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
+	}
+	
+	// Set the jobIds as default check. 
+	setDisableTRWrapper("idTRJobNames");
 }
 </script>
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
@@ -287,21 +340,23 @@ function sortNumber(a,b)
 <input type="hidden" id="dateRange" name="dateRange">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
-    <tr>
-        <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
+  	<tr>
+        <td class="standardText"><%=bundle.getString("lb_report_on")%></td>
         <td class="standardText" VALIGN="BOTTOM">
-        <select id="jobId" name="jobId" MULTIPLE size="6" style="width:300px">
-<%
-            for (ReportJobInfo j : jobList)
-            {
-%>          <option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
-<%          }
-%>
-        </select>
+            <table cellspacing=0>
+                <tr id="idTRJobIds">
+                    <td><input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/><%=bundle.getString("lb_job_ids")%></td>
+                    <td><input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%></td>
+                </tr>
+                <tr id="idTRJobNames">
+                    <td><input type="radio" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:</td>
+                    <td class="standardText" VALIGN="BOTTOM"><select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;"></select></td>
+                </tr>
+            </table>
         </td>
     </tr>
 
-    <tr>
+    <tr id="idTRProject">
         <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
         <select id="projectId" name="projectId" MULTIPLE size=4 onchange="filterJob()">
@@ -315,7 +370,7 @@ function sortNumber(a,b)
         </td>
     </tr>
 
-    <tr>
+    <tr id="idTRJobStatus">
         <td class="standardText"><%=bundle.getString("lb_status")%><span class="asterisk">*</span>:</td>
         <td class="standardText" VALIGN="BOTTOM">
         <select id="status" name="status" MULTIPLE size=4 onchange="filterJob()">

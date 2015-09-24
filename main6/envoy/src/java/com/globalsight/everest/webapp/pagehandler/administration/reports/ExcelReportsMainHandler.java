@@ -101,7 +101,7 @@ public class ExcelReportsMainHandler extends PageHandler
         String action = p_request.getParameter("action");
         HttpSession session = p_request.getSession(false);
         uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
-        if ("ajax".equals(action))
+        if ("ajaxTERS".equals(action))
         {
             try
             {

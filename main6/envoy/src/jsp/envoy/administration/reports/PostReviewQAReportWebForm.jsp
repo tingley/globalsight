@@ -85,8 +85,6 @@ function setDisableTRWrapper(trid)
 	{
 		setDisableTR("idTRJobId", true);
 		setDisableTR("idTRJobName", false);
-		 $("#jobId").attr("value","");
-		filterTargetLocale();
 	}
 	else if(trid == "idTRJobName")
 	{
@@ -112,7 +110,7 @@ function filterTargetLocale()
 		}
 	}
 	$("#targetLocalesList").find("option").remove();
-	var url ="${self.pageURL}&action=ajax"
+	var url ="${self.pageURL}&action=ajaxTERS"
 	$.getJSON(url,{jobId:jobID},function(data){
 		$(data).each(function(i, item){
 			var sel = document.getElementById("targetLocalesList");
@@ -152,7 +150,7 @@ function isNumeric(str){
             <table cellspacing=0>
                 <tr id="idTRJobId">
                     <td><input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobName');" value="jobId"/><%=bundle.getString("lb_job_id")%></td>
-                    <td><input type="text" id="jobId" name="jobId" value="" onBlur="filterTargetLocale()"></td>
+                    <td><input type="text" id="jobId" name="jobId" value=""></td>
                 </tr>
                  <tr>
                  <td/><td/> 
@@ -163,7 +161,7 @@ function isNumeric(str){
                 <tr id="idTRJobName">
                     <td><input type="radio" name="reportOn" onclick="setDisableTRWrapper('idTRJobId');" value="jobName"/><%=bundle.getString("lb_job_name")%>:</td>
                     <td class="standardText" VALIGN="BOTTOM">
-            <select id="jobName" name="jobName" style="width:300px" onChange="filterTargetLocale()">
+            <select id="jobName" name="jobName" style="width:300px">
 <%
           	if (reportJobInfoList == null || reportJobInfoList.size() == 0)
             {

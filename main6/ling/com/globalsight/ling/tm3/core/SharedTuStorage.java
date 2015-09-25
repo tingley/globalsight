@@ -249,7 +249,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				stringId = (String) paramMap.get("stringId");
 				isRegex = (String) paramMap.get("isRegex");
 			}
-			getSqlByParamMap(sb, paramMap, null, null, null, -1, -1);
+			getSqlByParamMap(sb, paramMap, -1, -1);
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
@@ -371,7 +371,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
     }
 
-	@Override
+    @Deprecated
 	public long getTuCountByLocalesAndParamMap(List<TM3Locale> localeList,
 			Map<String, Object> paramMap) throws SQLException
 	{
@@ -390,7 +390,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				stringId = (String) paramMap.get("stringId");
 				isRegex = (String) paramMap.get("isRegex");
 			}
-			getSqlByParamMap(sb, paramMap, localeIds, null, null, -1, -1);
+			getSqlByParamMap(sb, paramMap, -1, -1);
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
@@ -499,8 +499,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
     //
     // AttributeDataHandle
     //
-
-    @Override
+    @Deprecated
 	public long getTuCountByAttributesAndParamMap(
 			Map<TM3Attribute, Object> inlineAttrs,
 			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
@@ -520,8 +519,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				stringId = (String) paramMap.get("stringId");
 				isRegex = (String) paramMap.get("isRegex");
 			}
-			getSqlByParamMap(sb, paramMap, null, inlineAttrs, customAttrs, -1,
-					-1);
+			getSqlByParamMap(sb, paramMap, -1, -1);
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
@@ -611,7 +609,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				stringId = (String) paramMap.get("stringId");
 				isRegex = (String) paramMap.get("isRegex");
 			}
-			getSqlByParamMap(sb, paramMap, null, null, null, startId, count);
+			getSqlByParamMap(sb, paramMap, startId, count);
 			if (StringUtil.isNotEmpty(stringId))
 			{
 				ids = filterTuBySid(conn, sb, stringId, isRegex);
@@ -633,7 +631,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		}
 	}
 
-	@Override
+	@Deprecated
 	public List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
 			int count, List<TM3Locale> localeList, Map<String, Object> paramMap)
 			throws SQLException
@@ -652,8 +650,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				stringId = (String) paramMap.get("stringId");
 				isRegex = (String) paramMap.get("isRegex");
 			}
-			getSqlByParamMap(sb, paramMap, localeIds, null, null, startId,
-					count);
+			getSqlByParamMap(sb, paramMap, startId, count);
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
@@ -676,7 +673,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		}
 	}
 
-	@Override
+	@Deprecated
 	public List<TM3Tu<T>> getTuPageByAttributesAndParamMap(long startId,
 			int count, Map<TM3Attribute, Object> inlineAttrs,
 			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
@@ -695,8 +692,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				stringId = (String) paramMap.get("stringId");
 				isRegex = (String) paramMap.get("isRegex");
 			}
-			getSqlByParamMap(sb, paramMap, null, inlineAttrs, customAttrs,
-					startId, count);
+			getSqlByParamMap(sb, paramMap, startId, count);
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
@@ -870,14 +866,24 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 	}
 
 	private void getSqlByParamMap(StatementBuilder sb,
-			Map<String, Object> paramMap, String localeIds,
-			Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs, long startId, int count)
+			Map<String, Object> paramMap, long startId, int count)
 	{
 		String stringId = null;
+		String localeIds = null;
+		Map<TM3Attribute, Object> inlineAttrs = null;
+		Map<TM3Attribute, String> customAttrs = null;
 		if (paramMap != null)
 		{
 			stringId = (String) paramMap.get("stringId");
+			inlineAttrs = (Map<TM3Attribute, Object>) paramMap
+					.get("inlineAttrs");
+			customAttrs = (Map<TM3Attribute, String>) paramMap
+					.get("customAttrs");
+			List localeIdList = (List) paramMap.get("language");
+			if (localeIdList != null)
+			{
+				localeIds = getLocaleIds(localeIdList);
+			}
 		}
 
 		// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...

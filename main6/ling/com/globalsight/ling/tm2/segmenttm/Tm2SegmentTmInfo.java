@@ -515,8 +515,8 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
 
-	@Override
-	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
+    @Deprecated
+    public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap,
 			Connection conn) throws LingManagerException
 	{
@@ -532,7 +532,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
+    @Deprecated
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException
@@ -554,8 +554,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-
-	@Override
+    @Deprecated
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws LingManagerException
@@ -572,8 +571,8 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
-	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
+    @Deprecated
+    public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException
 	{

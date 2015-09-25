@@ -297,7 +297,7 @@ public interface TM3Tm<T extends TM3Data> {
      * @return handle to the requested TU data
      */
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end);
-
+    @Deprecated
 	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
 			Map<String, Object> paramMap);
 
@@ -320,7 +320,7 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
                                             Date start, Date end);
-
+    @Deprecated
 	public TM3Handle<T> getDataByAttributesAndParamMap(
 			Map<TM3Attribute, Object> attrs, Map<String, Object> paramMap);
 

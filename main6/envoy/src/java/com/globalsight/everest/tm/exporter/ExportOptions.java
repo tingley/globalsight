@@ -69,11 +69,6 @@ public class ExportOptions
         /** If selectMode=filter, the filter spec */
         public String m_selectFilter = "";
 
-        /** If selectMode=filter, the "source" language */
-        public String m_selectLanguage = "";
-
-        public String m_selectPropType = "";
-        
         /** 
          * If true and TM data is from machine translation engine,
          * all "creationId" of exported tmx will be changed to "MT!"(GBS-832),
@@ -93,12 +88,6 @@ public class ExportOptions
             result.append("<selectFilter>");
             result.append(EditUtil.encodeXmlEntities(m_selectFilter));
             result.append("</selectFilter>");
-            result.append("<selectLanguage>");
-            result.append(EditUtil.encodeXmlEntities(m_selectLanguage));
-            result.append("</selectLanguage>");
-            result.append("<selectPropType>");
-            result.append(EditUtil.encodeXmlEntities(m_selectPropType));
-            result.append("</selectPropType>");
             result.append("<selectChangeCreationId>");
             result.append(EditUtil.encodeXmlEntities(Boolean.toString(m_selectChangeCreationId)));
             result.append("</selectChangeCreationId>");
@@ -205,11 +194,12 @@ public class ExportOptions
         public String m_modifiedBefore = "";
         public String m_lastUsageAfter = "";
         public String m_lastUsageBefore = "";
+        public String m_language = "";
+        public String m_projectName = "";
         
         /** Entry status: proposed, reviewed, approved. */
         public String m_status = "";
         public String m_domain = "";
-        public String m_project = "";
         public String m_identifyKey = "";
         //tu id 
         public String m_tuId = "";
@@ -276,15 +266,23 @@ public class ExportOptions
             result.append("<jobId>");
             result.append(EditUtil.encodeXmlEntities(m_jobId));
             result.append("</jobId>");
+            //GBS-3907
+            result.append("<language>");
+            result.append(EditUtil.encodeXmlEntities(m_language));
+            result.append("</language>");
+            result.append("<projectName>");
+            result.append(EditUtil.encodeXmlEntities(m_projectName));
+            result.append("</projectName>");
+            
             result.append("<status>");
             result.append(EditUtil.encodeXmlEntities(m_status));
             result.append("</status>");
             result.append("<domain>");
             result.append(EditUtil.encodeXmlEntities(m_domain));
             result.append("</domain>");
-            result.append("<project>");
-            result.append(EditUtil.encodeXmlEntities(m_project));
-            result.append("</project>");
+//            result.append("<project>");
+//            result.append(EditUtil.encodeXmlEntities(m_project));
+//            result.append("</project>");
             result.append("<identifyKey>");
             result.append(EditUtil.encodeXmlEntities(m_identifyKey));
             result.append("</identifyKey>");
@@ -396,16 +394,6 @@ public class ExportOptions
         m_selectOptions.m_selectMode = p_mode;
     }
 
-    public String getSelectPropType()
-    {
-        return m_selectOptions.m_selectPropType;
-    }
-
-    public void setSelectPropType(String p_propType)
-    {
-        m_selectOptions.m_selectPropType = p_propType;
-    }
-    
     public void setSelectChangeCreationId(boolean m_selectChangeCreationId)
     {
         m_selectOptions.m_selectChangeCreationId = m_selectChangeCreationId;
@@ -424,16 +412,6 @@ public class ExportOptions
     public void setSelectFilter(String p_filter)
     {
         m_selectOptions.m_selectFilter = p_filter;
-    }
-
-    public String getSelectLanguage()
-    {
-        return m_selectOptions.m_selectLanguage;
-    }
-
-    public void setSelectLanguage(String p_language)
-    {
-        m_selectOptions.m_selectLanguage = p_language;
     }
 
     //
@@ -468,8 +446,6 @@ public class ExportOptions
             Element elem = (Element)p_root.selectSingleNode("//selectOptions");
             m_selectOptions.m_selectMode = elem.elementText("selectMode");
             m_selectOptions.m_selectFilter = elem.elementText("selectFilter");
-            m_selectOptions.m_selectLanguage = elem.elementText("selectLanguage");
-            m_selectOptions.m_selectPropType = elem.elementText("selectPropType");
             m_selectOptions.m_selectChangeCreationId = 
                     Boolean.parseBoolean(elem.elementText("selectChangeCreationId"));
             
@@ -487,6 +463,8 @@ public class ExportOptions
             m_filterOptions.m_regex = elem.elementText("regex");
             m_filterOptions.m_identifyKey = elem.elementText("identifyKey");
             m_filterOptions.m_jobId = elem.elementText("jobId");
+            m_filterOptions.m_language = elem.elementText("language");
+            m_filterOptions.m_projectName = elem.elementText("projectName");
             m_filterOptions.m_conditions.clear();
             
 

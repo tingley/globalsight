@@ -18,6 +18,7 @@
 package com.globalsight.everest.tm.exporter;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,9 @@ import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.ling.tm3.integration.GSDataFactory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 import com.globalsight.util.SessionInfo;
@@ -137,13 +140,6 @@ public class ReaderThread extends Thread
 	{
 		com.globalsight.everest.tm.exporter.ExportOptions options = m_options;
 		String mode = options.getSelectMode();
-		String lang = options.getSelectLanguage();
-		List<String> langList = null;
-		if (StringUtil.isNotEmpty(lang))
-		{
-			langList = Arrays.asList(lang.split(","));
-		}
-		String propType = options.getSelectPropType();
 		FilterOptions filterString = options.getFilterOptions();
 
 		JobAttributeOptions jobAttributes = options.getJobAttributeOptions();
@@ -156,16 +152,6 @@ public class ReaderThread extends Thread
 		if (mode.equals(ExportOptions.SELECT_ALL))
 		{
 			return mgr.getAllSegmentsByParamMap(m_database, paramterMap, conn);
-		}
-		else if (mode.equals(ExportOptions.SELECT_FILTERED))
-		{
-			return mgr.getSegmentsByLocalesAndParamMap(m_database, langList,
-					paramterMap, conn);
-		}
-		else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
-		{
-			return mgr.getSegmentsByProjectNameAndParamMap(m_database,
-					propType, paramterMap, conn);
 		}
 		else
 		{
@@ -192,7 +178,26 @@ public class ReaderThread extends Thread
 		String jobId = filterString.m_jobId;
 		String lastUsageAfter = filterString.m_lastUsageAfter;
 		String lastUsageBefore = filterString.m_lastUsageBefore;
-		
+
+		String lang = filterString.m_language;
+		List localelist = null;
+		if (StringUtil.isNotEmpty(lang))
+		{
+			List<String> langList = Arrays.asList(lang.split(","));
+			localelist = getLocaleList(langList);
+		}
+		String propType = filterString.m_projectName;
+
+		if (localelist != null && localelist.size() > 0)
+		{
+			paramMap.put("language", localelist);
+		}
+
+		if (StringUtil.isNotEmpty(propType))
+		{
+			paramMap.put("projectName", propType);
+		}
+
 		if (StringUtil.isNotEmpty(createUser))
 		{
 			paramMap.put("createUser", createUser);
@@ -238,7 +243,22 @@ public class ReaderThread extends Thread
 		{
 			paramMap.put("lastUsageBefore", lastUsageBefore);
 		}
-		
+
 		return paramMap;
+	}
+	
+	private List getLocaleList(List<String> localeCodeList)
+	{
+		List localeList = new ArrayList();
+		GlobalSightLocale locale = null;
+		for (int i = 0; i < localeCodeList.size(); i++)
+		{
+			locale = GSDataFactory.localeFromCode(localeCodeList.get(i));
+			if (locale != null)
+			{
+				localeList.add(locale);
+			}
+		}
+		return localeList;
 	}
 }

@@ -1264,6 +1264,19 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
 	@Override
 	public TM3Handle<T> getAllDataByParamMap(Map<String, Object> paramMap)
 	{
+		if (!paramMap.isEmpty())
+		{
+			Map<TM3Attribute, Object> attrs = (Map<TM3Attribute, Object>) paramMap
+					.get("projectAttr");
+			if (attrs != null)
+			{
+				Map<TM3Attribute, Object> inlineAttrs = getInlineAttributes(attrs);
+				Map<TM3Attribute, String> customAttrs = getCustomAttributes(attrs);
+				paramMap.remove("projectAttr");
+				paramMap.put("inlineAttrs", inlineAttrs);
+				paramMap.put("customAttrs", customAttrs);
+			}
+		}
 		return new AllTusDataHandle<T>(this, paramMap);
 	}
 
@@ -1274,7 +1287,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new LocaleDataHandle<T>(this, localeList, start, end);
     }
 
-	@Override
+    @Deprecated
 	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
 			Map<String, Object> paramMap)
 	{
@@ -1296,8 +1309,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 getCustomAttributes(attrs), start, end);
     }
 
-	@Override
-	public TM3Handle<T> getDataByAttributesAndParamMap(
+    @Deprecated
+    public TM3Handle<T> getDataByAttributesAndParamMap(
 			Map<TM3Attribute, Object> attrs, Map<String, Object> paramMap)
 	{
 		return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),

@@ -987,6 +987,7 @@ abstract class TuStorage<T extends TM3Data>
 
     public abstract void deleteTus(Date start, Date end) throws SQLException;
 
+    @Deprecated
 	public abstract long getTuCountByLocalesAndParamMap(
 			List<TM3Locale> localeList, Map<String, Object> paramMap)
 			throws SQLException;
@@ -996,7 +997,7 @@ abstract class TuStorage<T extends TM3Data>
 
     public abstract void deleteTuvsByLocale(TM3Locale locale)
             throws SQLException;
-
+    @Deprecated
 	public abstract long getTuCountByAttributesAndParamMap(
 			Map<TM3Attribute, Object> inlineAttrs,
 			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
@@ -1009,11 +1010,11 @@ abstract class TuStorage<T extends TM3Data>
 
 	public abstract List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
 			Map<String, Object> paramMap) throws SQLException;
-
+	@Deprecated
 	public abstract List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
 			int count, List<TM3Locale> localeList, Map<String, Object> paramMap)
 			throws SQLException;
-
+	@Deprecated
 	public abstract List<TM3Tu<T>> getTuPageByAttributesAndParamMap(
 			long startId, int count, Map<TM3Attribute, Object> inlineAttrs,
 			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)

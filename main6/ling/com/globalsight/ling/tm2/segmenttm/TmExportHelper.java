@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.exporter.ExportUtil;
+import com.globalsight.ling.tm3.core.TM3Locale;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -44,9 +45,9 @@ public class TmExportHelper {
     }
 
     static int getAllTuCountByParamMap(Connection conn, Tm tm,
-			Map<String, Object> paramMap) throws SQLException
+			Map<String, Object> paramMap) throws Exception
 	{
-		return getTuIdsByParamMap(conn, tm, paramMap, null, null).size();
+		return getTuIdsByParamMap(conn, tm, paramMap).size();
 	}
     /**
      * Get the count of all TUs in the TM.
@@ -268,9 +269,9 @@ public class TmExportHelper {
     }
 
 	static List<Long> getAllTuIdsByParamMap(Connection conn, Tm tm,
-			Map<String, Object> paramMap) throws SQLException
+			Map<String, Object> paramMap) throws Exception
 	{
-		return getTuIdsByParamMap(conn, tm, paramMap, null, null);
+		return getTuIdsByParamMap(conn, tm, paramMap);
 	}
 
     /**
@@ -331,37 +332,38 @@ public class TmExportHelper {
         return result;
     }
     
+    @Deprecated
 	static int getFilteredTuCountByParamMap(Connection conn, Tm tm,
 			List<String> localeList, Map<String, Object> paramMap)
 			throws Exception
 	{
-		String localeIds = getLocaleIds(localeList);
-		return getTuIdsByParamMap(conn, tm, paramMap, localeIds, null).size();
+		return getTuIdsByParamMap(conn, tm, paramMap).size();
 	}
     
+    @Deprecated
 	static List<Long> getFilteredTuIdsByParamMap(Connection conn, Tm tm,
 			List<String> localeList, Map<String, Object> paramMap)
 			throws Exception
 	{
-		String localeIds = getLocaleIds(localeList);
-		return getTuIdsByParamMap(conn, tm, paramMap, localeIds, null);
+		return getTuIdsByParamMap(conn, tm, paramMap);
 	}
 
+    @Deprecated
 	static int getProjectTuCountByParamMap(Connection conn, Tm tm,
 			String projectName, Map<String, Object> paramMap) throws Exception
 	{
-		return getTuIdsByParamMap(conn, tm, paramMap, null, projectName).size();
+		return getTuIdsByParamMap(conn, tm, paramMap).size();
 	}
 
+    @Deprecated
 	static List<Long> getProjectNameTuIdsByParamMap(Connection conn, Tm tm,
 			String projectName, Map<String, Object> paramMap) throws Exception
 	{
-		return getTuIdsByParamMap(conn, tm, paramMap, null, projectName);
+		return getTuIdsByParamMap(conn, tm, paramMap);
 	}
 	
 	private static List<Long> getTuIdsByParamMap(Connection conn, Tm tm,
-			Map<String, Object> paramMap,
-			String localeIds, String projectName) throws SQLException
+			Map<String, Object> paramMap) throws Exception
 	{
 		List<Long> result = null;
 		try
@@ -375,10 +377,16 @@ public class TmExportHelper {
 			{
 				tableSql += getAttributeSql(jobAttributeSet);
 			}
-			if (StringUtils.isNotBlank(localeIds))
+			List localeList = (List) paramMap.get("language");
+			if (localeList != null && localeList.size() > 0)
 			{
-				tableSql += " AND tuv.locale_id in ( " + localeIds + " )";
+				String localeIds = getLocaleIds(localeList);
+				if (StringUtils.isNotBlank(localeIds))
+				{
+					tableSql += " AND tuv.locale_id in ( " + localeIds + " )";
+				}
 			}
+			String projectName = (String)paramMap.get("projectName");
 			if (StringUtils.isNotBlank(projectName))
 			{
 				tableSql += " AND tuv.updated_by_project is NOT NULL AND ("
@@ -544,23 +552,23 @@ public class TmExportHelper {
 		return result.toString();
 
 	}
-
-    private static String getLocaleIds(List<String> localeList) throws Exception{
-    	String localeIds = "";
-    	if (localeList != null && localeList.size() > 0)
+	
+	private static String getLocaleIds(List<TM3Locale> localeList)
+	{
+		String localeIds = "";
+		if (localeList != null && localeList.size() > 0)
 		{
 			for (int i = 0; i < localeList.size(); i++)
 			{
-				localeIds += ExportUtil.getLocaleId(localeList.get(i))
-						+ ",";
+				localeIds += localeList.get(i).getId() + ",";
 			}
 		}
 		if (StringUtil.isNotEmpty(localeIds) && localeIds.endsWith(","))
 		{
 			localeIds = localeIds.substring(0, localeIds.lastIndexOf(","));
 		}
-    	return localeIds;
-    }
+		return localeIds;
+	}
 
 	private static String getTuIds(String p_table, String tuIds)
 	{

@@ -400,6 +400,8 @@ public class Ambassador extends AbstractWebService
     
     public static String ERROR_EXPORT_FILE_NAME = "You cannot have \\, /, :, ;, ,,.,*, ?,!,$,#,@,[,],{,},(,),^,+,=,~, |, \',\", &lt;, &gt;, % or &amp; in the Export File Name.";
     
+    public static String ERROR_EXPORT_PROJECT_NAMES = "You cannot have \\, /, :, ;, .,*, ?,!,$,#,@,[,],{,},(,),^,+,=,~, |, \',\", &lt;, &gt;, % or &amp; in the Project Name.";
+    
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final Logger logger = Logger.getLogger(Ambassador.class);
@@ -18469,6 +18471,17 @@ public class Ambassador extends AbstractWebService
 
 		return returnXml.toString();
 	}
+	
+	public String exportTM(String p_accessToken, String p_tmName,
+			String p_languages, String p_startDate, String p_finishDate,
+			String p_exportFormat, String p_exportedFileName)
+			throws WebServiceException
+	{
+		String returnXml = exportTM(p_accessToken, p_tmName, p_languages,
+				p_startDate, p_finishDate, p_exportFormat, p_exportedFileName,
+				null);
+		return returnXml;
+	}
     
 	/**
 	 * Export TM data.
@@ -18492,14 +18505,18 @@ public class Ambassador extends AbstractWebService
 	 * @param p_exportedFileName
 	 *            -- specified file name, if empty, use GlobalSight default name
 	 *            like "tm_export_n.tmx" or "tm_export_n.xml".
+	 * @param p_projectNames
+	 *            -- project name to export like
+	 *            "project_name_01,project_name_02" or "project_name_01" or
+	 *            empty.
 	 * @return identifyKey -- to help locate where the exported file is.
 	 * @throws WebServiceException
 	 * 
 	 */
 	public String exportTM(String p_accessToken, String p_tmName,
 			String p_languages, String p_startDate, String p_finishDate,
-			String p_exportFormat, String p_exportedFileName)
-			throws WebServiceException
+			String p_exportFormat, String p_exportedFileName,
+			String p_projectNames) throws WebServiceException
 	{
 		if (StringUtil.isEmpty(p_accessToken))
 			return makeErrorXml(EXPORT_TM, "Invaild access token.");
@@ -18518,6 +18535,7 @@ public class Ambassador extends AbstractWebService
 			activityArgs.put("p_finishDate", p_finishDate);
 			activityArgs.put("p_exportFormat", p_exportFormat);
 			activityArgs.put("p_exportedFileName", p_exportedFileName);
+			activityArgs.put("p_projectNames", p_projectNames);
 			activityStart = ActivityLog.start(Ambassador.class, "exportTM",
 					activityArgs);
 
@@ -18611,6 +18629,20 @@ public class Ambassador extends AbstractWebService
 				p_languages = p_languages.replace("-", "_");
 			}
 
+			if (StringUtil.isNotEmpty(p_projectNames))
+			{
+				String specialChars = "~!@#$%^&*()+=[]\\\';./{}|\":<>?";
+				for (int i = 0; i < p_projectNames.trim().length(); i++)
+				{
+					char c = p_projectNames.trim().charAt(i);
+					if (specialChars.indexOf(c) > -1)
+					{
+						return makeErrorXml(EXPORT_TM,
+								ERROR_EXPORT_PROJECT_NAMES);
+					}
+				}
+			}
+			
 			if (StringUtil.isEmpty(p_exportFormat)
 					|| !p_exportFormat.trim().equalsIgnoreCase("GMX")
 					&& !p_exportFormat.trim().equalsIgnoreCase("TMX1.4b"))
@@ -18631,7 +18663,7 @@ public class Ambassador extends AbstractWebService
 				directory = directory + "/" + identifyKey + "/" + "inprogress";
 				new File(directory).mkdirs();
 				options = joinXml(options, startDate, finishDate, fileType,
-						p_languages, p_exportedFileName);
+						p_languages, p_exportedFileName,p_projectNames);
 				try
 				{
 					exporter.setExportOptions(options);
@@ -19051,8 +19083,8 @@ public class Ambassador extends AbstractWebService
 	}
 
 	private String joinXml(String xml, String startDate, String finishDate,
-			String fileType, String languages, String exportedFileName)
-			throws WebServiceException
+			String fileType, String languages, String exportedFileName,
+			String projectNames) throws WebServiceException
 	{
 		Document doc = null;
 		try
@@ -19086,18 +19118,18 @@ public class Ambassador extends AbstractWebService
 			{
 				Element selectEle = (Element) selectIter.next();
 				Element selectModeElem = selectEle.element("selectMode");
-				Element selectLanguage = selectEle.element("selectLanguage");
-				if (StringUtil.isEmpty(languages))
-				{
-					selectModeElem
-							.setText(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_ALL);
-				}
-				else
-				{
-					selectModeElem
-							.setText(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED);
-					selectLanguage.setText(languages);
-				}
+//				Element selectLanguage = selectEle.element("selectLanguage");
+				selectModeElem
+						.setText(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_ALL);
+				// if (StringUtil.isEmpty(languages))
+				// {
+				// }
+				// else
+				// {
+				// selectModeElem
+				// .setText(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED);
+				// selectLanguage.setText(languages);
+				// }
 			}
 
 			Iterator filterIter = rootElt.elementIterator("filterOptions");
@@ -19107,6 +19139,8 @@ public class Ambassador extends AbstractWebService
 				Element createdafterElem = filterEle.element("createdafter");
 				createdafterElem.setText(startDate);
 				Element createdbeforeElem = filterEle.element("createdbefore");
+				Element language = filterEle.element("language");
+				Element projectName = filterEle.element("projectName");
 				if (finishDate == null)
 				{
 					Date nowDate = new Date();
@@ -19118,6 +19152,16 @@ public class Ambassador extends AbstractWebService
 				else
 				{
 					createdbeforeElem.setText(finishDate);
+				}
+				
+				if (StringUtil.isNotEmpty(languages))
+				{
+					language.setText(languages);
+				}
+				
+				if (StringUtil.isNotEmpty(projectNames))
+				{
+					projectName.setText(projectNames);
 				}
 			}
 

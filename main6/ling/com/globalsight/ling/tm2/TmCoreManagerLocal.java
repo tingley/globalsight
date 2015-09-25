@@ -822,7 +822,7 @@ public class TmCoreManagerLocal implements TmCoreManager
 		return getInfo(tm).getAllSegmentsByParamMap(tm, paramMap, conn);
 	}
 
-	@Override
+	@Deprecated
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap,
 			Connection conn) throws RemoteException, LingManagerException
@@ -830,7 +830,7 @@ public class TmCoreManagerLocal implements TmCoreManager
 		return getInfo(tm).getSegmentsByLocalesAndParamMap(tm, localeList,
 				paramMap, conn);
 	}
-
+	@Deprecated
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws RemoteException, LingManagerException
@@ -851,14 +851,14 @@ public class TmCoreManagerLocal implements TmCoreManager
 	{
 		return getInfo(tm).getAllSegmentsCountByParamMap(tm, paramMap);
 	}
-
+	@Deprecated
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException
 	{
 		return getInfo(tm).getSegmentsCountByLocalesAndParamMap(tm, localeList, paramMap);
 	}
-
+	@Deprecated
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException

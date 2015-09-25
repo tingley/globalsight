@@ -1985,6 +1985,10 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 }
 
                 String textContent = note.getText();
+                if (textContent.startsWith("Match Type:"))
+                {
+                	continue;
+                }
                 textContent = entity.decodeString(textContent, null);
 
                 String tuId = foo.attributeValue("id");

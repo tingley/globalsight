@@ -24,9 +24,6 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-
-//import javax.jms.JMSException;
-//import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -804,6 +801,35 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
                 .getParameter("uniqueFromMultTrans");
         tmProfile.setUniqueFromMultipleTranslation("true"
                 .equalsIgnoreCase(isUniqueFromMultTrans));
+
+		String choiceIfAttNotMatched = p_request
+				.getParameter("choiceIfAttNotMatched");
+		if (TranslationMemoryProfile.CHOICE_DISREGARD
+				.equals(choiceIfAttNotMatched))
+        {
+			tmProfile.setChoiceIfAttNotMatch(TranslationMemoryProfile.CHOICE_DISREGARD);
+        }
+        else
+        {
+			tmProfile.setChoiceIfAttNotMatch(TranslationMemoryProfile.CHOICE_PENALIZE);
+        }
+
+		if (TranslationMemoryProfile.CHOICE_PENALIZE.equalsIgnoreCase(tmProfile
+				.getChoiceIfAttNotMatch()))
+		{
+			String tuAttNotMatchPenalty = p_request
+					.getParameter("tuAttNotMatchPenalty");
+			try {
+				tmProfile.setTuAttNotMatchPenalty(Integer
+						.parseInt(tuAttNotMatchPenalty));
+			} catch (NumberFormatException e) {
+				tmProfile.setTuAttNotMatchPenalty(1);
+			}
+		}
+		else
+		{
+			tmProfile.setTuAttNotMatchPenalty(1);
+		}
 
         return tmProfile;
     }

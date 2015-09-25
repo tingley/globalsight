@@ -33,6 +33,7 @@ import com.globalsight.everest.foundation.TDATM;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 public class TranslationMemoryProfile extends PersistentObject
@@ -53,6 +54,10 @@ public class TranslationMemoryProfile extends PersistentObject
     public static final int ICE_PROMOTION_SID_HASH_MATCHES = 2;
     // SID, hash and bracketed matches
     public static final int ICE_PROMOTION_ALL = 3;
+
+    // How to deal with TM matches which TU attributes do not match settings.
+    public static final String CHOICE_DISREGARD = "disregard";
+    public static final String CHOICE_PENALIZE = "penalize";
 
     // 1 back pointer to L10nProfile
     private L10nProfile m_l10nProfile = null;
@@ -178,6 +183,8 @@ public class TranslationMemoryProfile extends PersistentObject
     private boolean m_isSaveExactMatchSegToProjectTM = true;
 
     private Set<TMPAttribute> attributes;
+    private String choiceIfAttNotMatch = null;
+    private int tuAttNotMatchPenalty = 0;
 
     public TranslationMemoryProfile()
     {
@@ -838,8 +845,10 @@ public class TranslationMemoryProfile extends PersistentObject
             while(it.hasNext())
             {
                 TMPAttribute tma = it.next();
-                atts.add(tma.getAttributename());
+                atts.add(tma.getAttributeName());
             }
+
+            SortUtil.sort(atts);
         }
 
         return atts;
@@ -933,4 +942,20 @@ public class TranslationMemoryProfile extends PersistentObject
     {
         m_isSaveLocSegToProjectTM = p_isSaveLocSegToProjectTM;
     }
+
+	public String getChoiceIfAttNotMatch() {
+		return choiceIfAttNotMatch;
+	}
+
+	public void setChoiceIfAttNotMatch(String choiceIfAttNotMatch) {
+		this.choiceIfAttNotMatch = choiceIfAttNotMatch;
+	}
+
+	public int getTuAttNotMatchPenalty() {
+		return tuAttNotMatchPenalty;
+	}
+
+	public void setTuAttNotMatchPenalty(int tuAttNotMatchPenalty) {
+		this.tuAttNotMatchPenalty = tuAttNotMatchPenalty;
+	}
 }

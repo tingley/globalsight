@@ -272,6 +272,7 @@ function Result(message, errorFlag, element)
 
 var strAvailableAttnames = "<%=tmpAvailableAtts %>";
 var strTMPAtts = "<%=tmpAtts %>";
+var maxOrder = 0;
 
 var arrayAvailableAttnames = new Array();
 var arrayTMPAtts = new Array();
@@ -294,9 +295,14 @@ if (strTMPAtts != null)
 		tmpAtt.operator = ttt[1];
 		tmpAtt.valueType = ttt[2];
 		tmpAtt.valueData = ttt[3];
-		tmpAtt.penalty = ttt[4];
+		tmpAtt.order = ttt[4];
+		tmpAtt.andOr = ttt[5];
 		
 		arrayTMPAtts[arrayTMPAtts.length] = tmpAtt;
+		if (maxOrder < tmpAtt.order)
+		{
+			maxOrder = tmpAtt.order;
+		}
 	}
 }
 
@@ -429,6 +435,18 @@ function checkIsVaildPercent(percent){
 	return submit;
 }
 
+function checkIsVaildPercent2(percent){
+    var submit = false;
+	var i_percent = parseInt(percent);
+	if(i_percent > 100 || i_percent < 1){
+		alert("<%=bundle.getString("msg_tm_number_scope_1_100") %>");
+		submit = false;
+	}else{
+		submit = true;
+	}
+	return submit;
+}
+
 function confirmForm(formSent) {
 
     var theName = formSent.<%=TMProfileConstants.NAME_FIELD%>.value;
@@ -534,6 +552,12 @@ function confirmForm(formSent) {
        alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
        return false;
     }
+    if (!isAllDigits(formSent.tuAttNotMatchPenalty.value))
+    {
+       alert("<%= bundle.getString("msg_tu_attribute_penalty") %>" + "<%= bundle.getString("jsmsg_numeric") %>");
+       return false;
+    }
+	
 	//check penalty between 0 and 100;whiteDiffPenalty
 	if (!checkIsVaildPercent(formSent.refTmPenalty.value)){
 	   return false;
@@ -563,6 +587,10 @@ function confirmForm(formSent) {
 	   return false;
 	}
 	if (!checkIsVaildPercent(formSent.multMatchesPenaltyReimport.value)){
+	   return false;
+	}
+	//check penalty between 1 and 100
+	if (!checkIsVaildPercent2(formSent.tuAttNotMatchPenalty.value)){
 	   return false;
 	}
 	
@@ -973,8 +1001,7 @@ function doOnLoad()
 
    <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
-<DIV ID="contentLayer" STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px;
-      POSITION: absolute; WIDTH: 800px; TOP: 108px">
+<DIV ID="contentLayer" STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute; WIDTH: 880px; TOP: 108px">
     <SPAN CLASS="mainHeading">
       <%= lbCreateTmProfile%>
     </SPAN>
@@ -983,7 +1010,7 @@ function doOnLoad()
         <INPUT TYPE="HIDDEN" NAME="formAction" VALUE="">
         <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" CLASS="standardText">
             <TR ALIGN="LEFT" VALIGN="TOP">
-                <TD VALIGN="TOP">
+                <TD VALIGN="TOP" WIDTH="420">
                     <TABLE CELLPADDING="2" CELLSPACING="2" BORDER="0" CLASS="standardText">
                         <TR>
                             <TD><B><%=basicInfo%></B>
@@ -998,7 +1025,7 @@ function doOnLoad()
                                     </TR>
                                     <TR>
                                         <TD valign="top"><%=labelDescription%>:</TD>
-                                        <TD><TEXTAREA CLASS="standardText" NAME="<%=descriptionField%>"ROWS="3" COLS="50"></TEXTAREA></TD>
+                                        <TD><TEXTAREA CLASS="standardText" NAME="<%=descriptionField%>"ROWS="3" COLS="40"></TEXTAREA></TD>
                                     </TR>
                                 </TABLE>
                                 <BR><BR>
@@ -1127,7 +1154,7 @@ function doOnLoad()
                     </TABLE>
                 </TD>
                 <TD STYLE="padding: 4px"></TD>
-                <TD STYLE="padding: 4px"><b><%=lblevOptionsFreshImport%></b>
+                <TD STYLE="padding: 4px" width="440"><b><%=lblevOptionsFreshImport%></b>
                     <TABLE CELLPADDING="2" CELLSPACING="2" BORDER="0" CLASS="standardText">
                         <TR ALIGN="LEFT">
                             <TD ALIGN="LEFT" valign="top">
@@ -1313,34 +1340,45 @@ function doOnLoad()
                                     <%=lbpenalty%>: <INPUT NAME="<%=multMatchesPenaltyReimport%>" SIZE="1" MAXLENGTH="3" VALUE="1">%</TD>
                         </TR>
                     </TABLE>
-                    <amb:permission name="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>" >
-                    <BR><BR>
-                    <b>TU Attributes Match Penalties</b><a id="tuvAttSub" name="tuvAttSub">&nbsp;</a>
-                    <div id="divAtts" class="standardText" style="width:100%">
-                    </div>
-                    <br />
-                    <span CLASS="standardText">
-		<select id="attname">
-		</select>
+
+        <amb:permission name="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>" >
+            <BR><BR>
+            <b><%=bundle.getString("lb_attribute_rules") %></b><a id="tuvAttSub" name="tuvAttSub">&nbsp;</a>
+            <div id="divAtts" class="standardText" style="width:100%"></div><br/>
+            <span CLASS="standardText">
+            	<select id="attname"></select>
+			</span>
+			<span CLASS="standardText">
+			<select id="operator">
+				<option value="<%=TMAttributeCons.OP_EQUAL%>"><%=TMAttributeCons.OP_EQUAL%></option>
+				<option value="<%=TMAttributeCons.OP_CONTAIN%>"><%=TMAttributeCons.OP_CONTAIN%></option>
+				<option value="<%=TMAttributeCons.OP_NOT_CONTAIN%>"><%=TMAttributeCons.OP_NOT_CONTAIN%></option>
+			</select>
 		</span>
 		<span CLASS="standardText">
-		<select id="operator">
-		<option value="<%=TMAttributeCons.OP_EQUAL %>">equal</option>
-		<option value="<%=TMAttributeCons.OP_NOT_EQUAL %>">not equal</option>
-		<option value="<%=TMAttributeCons.OP_MATCH %>">match</option>
-		</select>
-		</span>
-		<span CLASS="standardText">
-		<select id="valueType" onchange="onValueTypeChange()">
-		<option value="<%=TMAttributeCons.VALUE_FROM_JOBATT %>">Value from Job Attribute of same name</option>
-		<option value="<%=TMAttributeCons.VALUE_INPUT %>">Input Value</option>
-		</select>
+			<select id="valueType" onchange="onValueTypeChange()">
+				<option value="<%=TMAttributeCons.VALUE_FROM_JOBATT %>"><%=bundle.getString("lb_value_from_job") %></option>
+				<option value="<%=TMAttributeCons.VALUE_INPUT %>"><%=bundle.getString("lb_input_value") %></option>
+			</select>
 		</span>
 		<span id="inputValueField" CLASS="standardText" style="display:none">
-		<input type="text" id="valueData" size="8" maxlength="20" value="" />
+			<input type="text" id="valueData" size="8" maxlength="20" value="" />
 		</span>
-		<input type="BUTTON" id="addRow" value="Add" onclick="doAddAttribute()"/>
+		<span class="standardText">
+		    <select id="andOr">
+		    	<option value="and">and</option>
+		    	<option value="or">or</option>
+		    </select>
+		</span>
+		<input type="BUTTON" id="addRow" value="Add" onclick="doAddAttribute()"/><br/><br/>
+
+		<span class="standardText">
+			<input type="radio" name="choiceIfAttNotMatched" value="disregard" /><%=bundle.getString("lb_disregard") %><br/>
+			<input type="radio" name="choiceIfAttNotMatched" value="penalize" CHECKED /><%=bundle.getString("lb_penalize") %>
+			&nbsp; Penalty:<input type="text" maxlength="3" size="1" name="tuAttNotMatchPenalty" value="1" />%
+		</span>
 		</amb:permission>
+
                     </TD>
             </TR>
         </TABLE>

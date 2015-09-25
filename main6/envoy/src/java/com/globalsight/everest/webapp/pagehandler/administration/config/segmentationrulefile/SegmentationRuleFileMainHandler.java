@@ -394,6 +394,11 @@ public class SegmentationRuleFileMainHandler extends PageHandler
         String rule = p_request.getParameter("textField");
         String type_str = p_request.getParameter("type");
         int type = Integer.parseInt(type_str);
+        
+        if (name != null)
+        {
+            name = name.trim();
+        }
 
         p_ruleFile.setName(name);
         p_ruleFile.setDescription(desc);

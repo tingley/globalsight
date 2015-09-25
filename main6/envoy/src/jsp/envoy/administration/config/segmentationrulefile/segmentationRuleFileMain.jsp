@@ -119,7 +119,7 @@ function submitForm(button)
     }
 }
 
-function enableButtons()
+function enableButtons(isDefault)
 {
     if (segmentationForm.editBtn)
         segmentationForm.editBtn.disabled = false;
@@ -128,7 +128,12 @@ function enableButtons()
     if (segmentationForm.dupBtn)
         segmentationForm.dupBtn.disabled = false;
     if (segmentationForm.remBtn)
-        segmentationForm.remBtn.disabled = false;
+    {
+        if (isDefault)
+            segmentationForm.remBtn.disabled = true;
+        else
+        	segmentationForm.remBtn.disabled = false;
+    }
     if (segmentationForm.expBtn)
         segmentationForm.expBtn.disabled = false;
 }
@@ -164,7 +169,7 @@ function gotoTMP()
        emptyTableMsg="msg_no_segmentationrulefile" >
         <amb:column label="" width="10px">
           <input type="radio" name="radioBtn" value="<%=segmentationRuleFile.getId()%>"
-           onclick="enableButtons()">
+           onclick="enableButtons(<%=segmentationRuleFile.getIsDefault() ? "true" : "false" %>)">
         </amb:column>
         <amb:column label="lb_name" sortBy="<%=SegmentationRuleFileComparator.NAME%>"
          width="150px">

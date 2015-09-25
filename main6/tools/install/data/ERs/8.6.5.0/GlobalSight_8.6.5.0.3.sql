@@ -7652,17 +7652,23 @@ BEGIN
 <afterbreak>\\s+\\{\\d\\}</afterbreak></rule>
 <rule>
 <beforebreak>[\\.\\?!]+</beforebreak>
-<afterbreak>\\s</afterbreak></rule>
+<afterbreak>(\\s|\\xA0)</afterbreak></rule>
 <rule>
 <beforebreak>\\S:+["''”\\)]?</beforebreak>
-<afterbreak>\\s</afterbreak></rule>
+<afterbreak>(\\s|\\xA0)</afterbreak></rule>
 <rule>
 <beforebreak>\\u2029</beforebreak></rule>
 <rule>
 <beforebreak>\\S[\\.\\?!]+["''”\\)]?</beforebreak>
-<afterbreak>\\s</afterbreak></rule>
+<afterbreak>(\\s|\\xA0)</afterbreak></rule>
 <rule>
 <beforebreak>\\S\\t+</beforebreak></rule>
+<rule break="no">
+<beforebreak>:</beforebreak>
+<afterbreak>(\\s|\\xA0)</afterbreak></rule>
+<rule>
+<beforebreak>[\\.\\?!]+</beforebreak>
+<afterbreak>\\\\n</afterbreak></rule>
 </languagerule>
 </languagerules>
     <maprules>

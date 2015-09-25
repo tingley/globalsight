@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.company;
 
+import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
@@ -41,6 +42,8 @@ import com.globalsight.config.SystemParameterImpl;
 import com.globalsight.config.SystemParameterPersistenceManager;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
+import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl;
+import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFileEntityException;
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.PostReviewCategory;
@@ -64,6 +67,7 @@ import com.globalsight.ling.tm2.TmVersion;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.FileUtil;
 
 public class CompanyMainHandler extends PageActionHandler implements
         CompanyConstants
@@ -231,6 +235,9 @@ public class CompanyMainHandler extends PageActionHandler implements
             initialHTMLFilter(companyId);
             
             setInContextReview(p_request, company);
+            
+            // create default SRX rule
+            createDefaultSRXRule(company);
 
             // Create COMPANY level TU/TUV/LM tables for current company,
             // whatever this company is using separate tables PER JOB or not.
@@ -827,6 +834,35 @@ public class CompanyMainHandler extends PageActionHandler implements
             sessionMgr
                     .setAttribute("companyNumPerpage", companyNumPerpageValue);
         }
+    }
+    
+    private void createDefaultSRXRule(Company company)
+            throws IOException, SegmentationRuleFileEntityException,
+            GeneralException, NamingException
+    {
+        File jarFile = new File(CompanyMainHandler.class.getProtectionDomain()
+                .getCodeSource().getLocation().getFile());
+        File rootDir = jarFile.getParentFile();
+        File gsSRX = new File(rootDir, "lib/classes/com/globalsight/resources/xml/default.srx");
+        String rule = FileUtil.readFile(gsSRX, "UTF-8");
+        
+        // remove the encoding mark if have
+        while(!rule.startsWith("<"))
+        {
+            rule = rule.substring(1);
+        }
+
+        SegmentationRuleFileImpl ruleFile = new SegmentationRuleFileImpl();
+        ruleFile.setName("GlobalSight Predefined");
+        ruleFile.setDescription(
+                "Predefined Segmentation rule for GlobalSight.");
+        ruleFile.setRuleText(rule);
+        ruleFile.setType(0);
+        ruleFile.setCompanyId(company.getId());
+        ruleFile.setIsDefault(true);
+
+        ServerProxy.getSegmentationRuleFilePersistenceManager()
+                .createSegmentationRuleFile(ruleFile);
     }
 
     private void modifyCompany(Company company, HttpServletRequest p_request)

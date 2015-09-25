@@ -57,8 +57,11 @@ public class SegmentationRuleFilePersistenceManagerLocal implements
     {
         try
         {
-            p_segmentationRuleFile.setCompanyId(Long
-                    .parseLong(CompanyThreadLocal.getInstance().getValue()));
+            if (p_segmentationRuleFile.getCompanyId() < 1)
+            {
+                p_segmentationRuleFile.setCompanyId(Long.parseLong(
+                        CompanyThreadLocal.getInstance().getValue()));
+            }
 
             HibernateUtil.save(p_segmentationRuleFile);
             return p_segmentationRuleFile;

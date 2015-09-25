@@ -114,6 +114,7 @@
 <title><%=title%></title>
 <script SRC="/globalsight/includes/utilityScripts.js"></script>
 <script SRC="/globalsight/includes/setStyleSheet.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/filter/StringBuffer.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -200,6 +201,8 @@ function confirmForm()
         return false;
     }
 
+    var nameValue = new StringBuffer(segmentationForm.nameField.value);
+    var nameTrimed = nameValue.trim();
     // check for dups
 <%
     if (names != null)
@@ -208,7 +211,7 @@ function confirmForm()
         {
             String rulename = (String)names.get(i);
 %>
-            if ("<%=rulename%>" == segmentationForm.nameField.value)
+            if ("<%=rulename%>" == nameTrimed)
             {
                 alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_duplicate_segmentationrulefile"))%>");
                 segmentationForm.nameField.focus();

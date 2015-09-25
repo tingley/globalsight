@@ -141,7 +141,10 @@ public class LeverageUtil
 
     private static int compareTime(Date time1, Date time2, int mode)
     {
-        int result = time2.compareTo(time1);
+    	if (time2 == null || time1 == null)
+    		return 0;
+
+    	int result = time2.compareTo(time1);
         if (mode == LeverageOptions.PICK_OLDEST)
         {
             result = -result;

@@ -20,33 +20,20 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.util.edit.EditUtil;
 
-import java.io.UnsupportedEncodingException;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * <p>In GXML or Paginated ResultSet, each XML tag pairs and the
  * content in between are taken as a single Gxml element.  The text
  * content of a GxmlElement is represented by the GxmlElement having a
  * child of class TextNode.  TextNode contains the text content.</p>
  */
-public class TextNode
-    extends GxmlElement
+public class TextNode extends GxmlElement
 {
-    static private final Logger CATEGORY =
-        Logger.getLogger(
-            TextNode.class);
+	private static final long serialVersionUID = 8700131155153140233L;
+
+	static private final Logger logger = Logger.getLogger(TextNode.class);
 
     /** the text content coming between the tag pair */
     private StringBuffer m_textBuffer = null;
-
 
     /**
      * Construct a TextNode with the given type and name.

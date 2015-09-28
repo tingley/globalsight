@@ -434,7 +434,10 @@ public abstract class AbstractTranslator implements MachineTranslator
 	        	injected = StringUtil.replace(injected, "> <", "><");
 //	        	injected = StringUtil.replace(injected, "> ", ">");
 //	        	injected = StringUtil.replace(injected, " <", "<");
-	        	results[i] = heads.get(i) + injected + "</segment>";
+	        	injected = heads.get(i) + injected + "</segment>";
+
+				results[i] = MTHelper.fixInternalTextAfterMTTranslation(
+						segments[i], injected);
 			}
 			catch (Exception e)
 			{

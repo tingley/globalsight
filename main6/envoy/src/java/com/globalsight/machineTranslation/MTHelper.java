@@ -18,6 +18,7 @@ package com.globalsight.machineTranslation;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -821,5 +822,103 @@ public class MTHelper
             }
         }
         return i;
+    }
+
+    /**
+	 * After MT translation, internal text is often translated too. So try to
+	 * revert them to avoid tag check failure.
+	 * 
+	 * @param srcGxml -- source segment with "<segment>" root tag.
+	 * @param trgGxml -- target segment with "<segment>" root tag.
+	 * 
+	 * @return target GXML
+	 */
+	@SuppressWarnings("rawtypes")
+	public static String fixInternalTextAfterMTTranslation(String srcGxml,
+			String trgGxml)
+    {
+		try
+		{
+			HashMap<Integer, String> map = new HashMap<Integer, String>();
+
+			// Try to find original internal text values and their "i" values.
+			String iValue = null;
+			boolean inInternalTag = false;
+			GxmlElement srcEle = getGxmlElement(srcGxml);
+			List srcInternalBpts = srcEle.getAllDescendantByAttributeValue(
+					"internal", "yes", GxmlElement.BPT);
+			if (srcInternalBpts != null && srcInternalBpts.size() > 0)
+			{
+				for (int i = 0; i < srcInternalBpts.size(); i++)
+				{
+					GxmlElement curElement = (GxmlElement) srcInternalBpts.get(i);
+					List brothers = curElement.getParent().getChildElements();
+					for (int j = 0; j < brothers.size(); j++)
+					{
+						GxmlElement brother = (GxmlElement) brothers.get(j);
+						if (brother.equals(curElement))
+						{
+							inInternalTag = true;
+							iValue = brother.getAttribute("i");
+							continue;
+						}
+
+						if (inInternalTag
+								&& brother.getType() == GxmlElement.TEXT_NODE)
+						{
+							map.put(Integer.parseInt(iValue),
+									brother.getTextNodeValue());
+							iValue = null;
+							inInternalTag = false;
+							break;
+						}
+					}
+				}
+			}
+
+			// revert internal text values by "i".
+			iValue = null;
+			inInternalTag = false;
+			GxmlElement trgEle = getGxmlElement(trgGxml);
+			List trgInternalBpts = trgEle.getAllDescendantByAttributeValue(
+					"internal", "yes", GxmlElement.BPT);
+			if (trgInternalBpts != null && trgInternalBpts.size() > 0)
+			{
+				for (int i = 0; i < trgInternalBpts.size(); i++)
+				{
+					GxmlElement curElement = (GxmlElement) trgInternalBpts.get(i);
+					List brothers = curElement.getParent().getChildElements();
+					for (int j = 0; j < brothers.size(); j++)
+					{
+						GxmlElement brother = (GxmlElement) brothers.get(j);
+						if (brother.equals(curElement))
+						{
+							inInternalTag = true;
+							iValue = brother.getAttribute("i");
+							continue;
+						}
+
+						if (inInternalTag
+								&& brother.getType() == GxmlElement.TEXT_NODE)
+						{
+							String originalValue = map.get(Integer.parseInt(iValue));
+							((TextNode) brother).setTextBuffer(
+									new StringBuffer(originalValue));
+							inInternalTag = false;
+							iValue = null;
+							break;
+						}
+					}
+				}
+			}
+
+			return trgEle.toGxml();			
+		}
+		catch (Exception e)
+		{
+			CATEGORY.warn(e);
+		}
+
+		return trgGxml;
     }
 }

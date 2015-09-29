@@ -880,7 +880,7 @@ if (!review_only)
     <TR id="ReviewersSimpleIncludeTagsTR">
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        	<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="ReviewersSimpleIncludeTags"><%=bundle.getString("with_compact_tags")%>
+        	<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="ReviewersSimpleIncludeTags" disabled="true"><%=bundle.getString("with_compact_tags")%>
      	</TD>
     </TR>
 <%   }

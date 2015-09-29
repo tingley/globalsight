@@ -27,10 +27,12 @@ import org.json.JSONObject;
 
 import com.globalsight.connector.mindtouch.util.MindTouchHelper;
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
+import com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 
 public class MindTouchBasicHandler extends PageActionHandler
 {
@@ -47,14 +49,35 @@ public class MindTouchBasicHandler extends PageActionHandler
             MindTouchHelper helper = new MindTouchHelper(mtc);
             String testResult = helper.doTest();
             JSONObject json = new JSONObject();
-            if (testResult == null || "".equals(testResult))
+            String errorMsg = "";
+            if(StringUtil.isNotEmpty(testResult))
             {
-                json.put("error", "");
+            	errorMsg = testResult;
             }
-            else
+            
+            String targetLocaleStr = request.getParameter("targetLocaleStr");
+            if(StringUtil.isNotEmpty(targetLocaleStr))
             {
-                json.put("error", testResult);
+            	String[] targetLocales = targetLocaleStr.split(",");
+            	for(String targetLocale: targetLocales)
+            	{
+            		if(StringUtil.isNotEmpty(targetLocale))
+            		{
+            			mtc.setUrl( request.getParameter("targetUrl" + targetLocale));
+            			mtc.setUsername( request.getParameter("targetUsername" + targetLocale));
+            			mtc.setPassword( request.getParameter("targetPassword" + targetLocale));
+            			helper = new MindTouchHelper(mtc);
+            			testResult = helper.doTest();
+            			if(StringUtil.isNotEmpty(testResult))
+                        {
+                        	errorMsg = testResult;
+                        }
+            		}
+            	}
             }
+            
+            json.put("error", errorMsg);
+            
             out.write(json.toString().getBytes("UTF-8"));
         }
         catch (Exception e)
@@ -88,6 +111,10 @@ public class MindTouchBasicHandler extends PageActionHandler
             MindTouchConnector connector = HibernateUtil.get(
                     MindTouchConnector.class, Long.parseLong(id));
             request.setAttribute("mindtouch", connector);
+            
+            List<MindTouchConnectorTargetServer> targetServers = 
+            		MindTouchManager.getAllTargetServers(Long.parseLong(id));
+            request.setAttribute("targetServers", targetServers);
         }
 
         String names = "";
@@ -103,7 +130,10 @@ public class MindTouchBasicHandler extends PageActionHandler
         }
 
         request.setAttribute("names", names);
+        request.setAttribute("targetLocales", MindTouchHelper.getAllTargetLocales());
 
         response.setCharacterEncoding("utf-8");
     }
+    
+    
 }

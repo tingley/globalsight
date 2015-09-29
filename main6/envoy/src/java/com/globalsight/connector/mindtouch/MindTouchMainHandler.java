@@ -17,6 +17,8 @@
 package com.globalsight.connector.mindtouch;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.connector.mindtouch.form.MindTouchConnectorFilter;
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
+import com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.util.comparator.MindTouchConnectorComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -56,6 +59,51 @@ public class MindTouchMainHandler extends PageActionHandler
         	connector.setCompanyId(Long.parseLong(id));
         }
         HibernateUtil.saveOrUpdate(connector);
+        
+        List<MindTouchConnectorTargetServer> targetServersList = MindTouchManager.getAllTargetServers(connector.getId());
+        HashMap<String, MindTouchConnectorTargetServer> targetServersHashMap = new HashMap<String, MindTouchConnectorTargetServer>();
+        List<MindTouchConnectorTargetServer> tempList = new ArrayList<MindTouchConnectorTargetServer>();
+        for(MindTouchConnectorTargetServer targetServer: targetServersList)
+        {
+        	targetServersHashMap.put(targetServer.getTargetLocale(), targetServer);
+        }
+        
+        String targetLocaleStr = request.getParameter("targetLocaleStr");
+        if(StringUtil.isNotEmpty(targetLocaleStr))
+        {
+        	String[] targetLocales = targetLocaleStr.split(",");
+        	for(String targetLocale: targetLocales)
+        	{
+        		if(StringUtil.isNotEmpty(targetLocale))
+        		{
+        			MindTouchConnectorTargetServer ts = new MindTouchConnectorTargetServer();
+        			if(targetServersHashMap.size() > 0 && targetServersHashMap.get(targetLocale) != null)
+        			{
+        				ts = targetServersHashMap.get(targetLocale);
+        				targetServersHashMap.remove(targetLocale);
+        			}
+        			ts.setTargetLocale(targetLocale);
+        			ts.setUrl(request.getParameter("targetUrl" + targetLocale));
+        			ts.setUsername(request.getParameter("targetUsername" + targetLocale));
+        			ts.setPassword(request.getParameter("targetPassword" + targetLocale));
+        			ts.setSourceServerId(connector.getId());
+        			tempList.add(ts);
+        		}
+        	}
+        }
+        
+        for(String targetLocale :targetServersHashMap.keySet())
+        {
+    		MindTouchConnectorTargetServer ts = targetServersHashMap.get(targetLocale);
+    		ts.setIsActive(false);
+    		tempList.add(ts);
+        }
+        
+        if(tempList.size() > 0)
+        {
+        	HibernateUtil.saveOrUpdate(tempList);
+        }
+        
     }
 
     @ActionHandler(action = "remove", formClass = "")
@@ -69,6 +117,13 @@ public class MindTouchMainHandler extends PageActionHandler
             MindTouchConnector c = HibernateUtil.get(MindTouchConnector.class, cId);
             c.setIsActive(false);
             HibernateUtil.update(c);
+            
+            List<MindTouchConnectorTargetServer> targetServers = MindTouchManager.getAllTargetServers(cId);
+            for(MindTouchConnectorTargetServer targetServer: targetServers)
+            {
+            	targetServer.setIsActive(false);
+            }
+            HibernateUtil.update(targetServers);
         }
     }
 

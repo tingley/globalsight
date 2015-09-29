@@ -16,41 +16,28 @@
  */
 package com.globalsight.cxe.entity.mindtouch;
 
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.persistence.PersistentObject;
 
-public class MindTouchConnector extends PersistentObject 
+public class MindTouchConnectorTargetServer extends PersistentObject 
 {
-    private static final long serialVersionUID = 3955253539878774299L;
-
-    private String name = null;
-    private String description = null;
+	private static final long serialVersionUID = -6949621562709924834L;
+	
+	private String targetLocale = null;
     private String url = null;
     private String username = null;
     private String password = null;
-    private long companyId;
-    private boolean isPostToSourceServer = false;
-
-    public String getName() 
+    private long sourceServerId = 0;
+    
+    public String getTargetLocale() 
     {
-        return name;
-    }
+		return targetLocale;
+	}
 
-    public void setName(String name) 
-    {
-        this.name = name;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
-    }
-
+	public void setTargetLocale(String targetLocale)
+	{
+		this.targetLocale = targetLocale;
+	}
+    
     public String getUrl()
     {
         return url;
@@ -81,29 +68,14 @@ public class MindTouchConnector extends PersistentObject
         this.password = password;
     }
 
-    public long getCompanyId()
-    {
-        return companyId;
-    }
-
-    public void setCompanyId(long companyId)
-    {
-        this.companyId = companyId;
-    }
-    
-    public boolean getIsPostToSourceServer() 
-    {
-		return isPostToSourceServer;
-	}
-
-	public void setIsPostToSourceServer(boolean isPostToSourceServer) 
+	public long getSourceServerId() 
 	{
-		this.isPostToSourceServer = isPostToSourceServer;
+		return sourceServerId;
 	}
 
-    // Utility
-    public String getCompanyName()
-    {
-        return CompanyWrapper.getCompanyNameById(getCompanyId());
-    }
+	public void setSourceServerId(long sourceServerId) 
+	{
+		this.sourceServerId = sourceServerId;
+	}
+
 }

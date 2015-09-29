@@ -15,6 +15,7 @@ public class GitConnectorComparator extends StringComparator
     public static final int USER_NAME = 4;
     public static final int COMPANY_NAME = 5;
     public static final int BRANCH = 6;
+    public static final int EMAIL = 7;
 
     public GitConnectorComparator(Locale p_locale)
     {
@@ -69,6 +70,11 @@ public class GitConnectorComparator extends StringComparator
             bValue = b.getBranch();
             rv = this.compareStrings(aValue, bValue);
             break;
+        case EMAIL:
+        	 aValue = a.getEmail();
+             bValue = b.getEmail();
+             rv = this.compareStrings(aValue, bValue);
+             break;
         }
         return rv;
     }

@@ -15,6 +15,7 @@ public class GitConnector extends PersistentObject {
     private long companyId;
     private String branch = "master";
     private String privateKeyFile = null;
+    private String email = null;
 
     public String getName() 
     {
@@ -97,5 +98,13 @@ public class GitConnector extends PersistentObject {
 
 	public void setPrivateKeyFile(String privateKeyFile) {
 		this.privateKeyFile = privateKeyFile;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

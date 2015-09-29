@@ -1,35 +1,22 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
-
 <hibernate-mapping>
-
-    <class name="com.globalsight.cxe.entity.gitconnector.GitConnector"
-        table="CONNECTOR_GIT">
-
+    <class name="com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer" table="CONNECTOR_MINDTOUCH_TARGET_SERVER">
         <id name="id" column="ID" type="long">
             <generator class="native" />
         </id>
 
-        <property name="name" length="300" column="NAME" type="string"
+        <property name="targetLocale" length="50" column="TARGET_LOCALE" type="string"
             not-null="true" unique="false" />
-        <property name="description" length="4000" column="DESCRIPTION"
-            type="string" not-null="false" unique="false" />
         <property name="url" length="300" column="URL" type="string"
             not-null="true" unique="false" />
         <property name="username" length="300" column="USER_NAME" type="string"
             not-null="false" unique="false" />
         <property name="password" length="300" column="PASSWORD" type="string"
             not-null="false" unique="false" />
-        <property name="email" length="300" column="EMAIL" type="string"
-            not-null="false" unique="false" />
-        <property name="branch" length="300" column="BRANCH" type="string"
-            not-null="false" unique="false" />
-        <property name="privateKeyFile" length="300" column="PRIVATE_KEY_FILE" type="string"
-            not-null="false" unique="false" />
-        <property name="companyId" column="COMPANY_ID" length="20"
+        <property name="sourceServerId" column="SOURCE_SERVER_ID" length="20"
             type="long" not-null="true" />
         <property name="isActive" column="IS_ACTIVE" type="yes_no"
             not-null="true" unique="false" />
     </class>
-
 </hibernate-mapping>

@@ -13,6 +13,7 @@ public class GitConnectorFilter
     private String companyNameFilter;
     private String descriptionFilter;
     private String branchFilter;
+    private String emailFilter;
 
     public List<GitConnector> filter(List<GitConnector> conns)
     {
@@ -46,6 +47,11 @@ public class GitConnectorFilter
             }
             
             if (!like(branchFilter, conn.getBranch()))
+            {
+                continue;
+            }
+            
+            if (!like(emailFilter, conn.getEmail()))
             {
                 continue;
             }
@@ -130,6 +136,14 @@ public class GitConnectorFilter
 
 	public String getBranchFilter() {
 		return branchFilter;
+	}
+
+	public String getEmailFilter() {
+		return emailFilter;
+	}
+
+	public void setEmailFilter(String emailFilter) {
+		this.emailFilter = emailFilter;
 	}
 
     

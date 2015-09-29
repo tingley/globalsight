@@ -82,6 +82,7 @@ public class GitConnectorMainHandler extends PageActionHandler
         request.setAttribute("usernameFilter", filter.getUsernameFilter());
         request.setAttribute("companyNameFilter", filter.getCompanyNameFilter());
         request.setAttribute("branchFilter", filter.getBranchFilter());
+        request.setAttribute("emailFilter", filter.getEmailFilter());
     }
 
     private void dataForTable(HttpServletRequest request)

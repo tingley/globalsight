@@ -41,6 +41,7 @@ public class GitConnectorMainHandler extends PageActionHandler
         {
         	connector.setCompanyId(Long.parseLong(id));
         }
+        checkNull(connector);
         HibernateUtil.saveOrUpdate(connector);
         
         GitConnectorHelper helper = new GitConnectorHelper(connector);
@@ -51,6 +52,26 @@ public class GitConnectorMainHandler extends PageActionHandler
         if(tempFile.exists())
         {
         	tempFile.renameTo(gitFolder);
+        }
+    }
+    
+    private void checkNull(GitConnector connector)
+    {
+    	if(connector.getUsername() == null)
+        {
+        	connector.setUsername("");
+        }
+    	if(connector.getPassword() == null)
+        {
+        	connector.setPassword("");
+        }
+    	if(connector.getPrivateKeyFile() == null)
+        {
+        	connector.setPrivateKeyFile("");
+        }
+        if(connector.getEmail() == null)
+        {
+        	connector.setEmail("");
         }
     }
 

@@ -42,9 +42,12 @@ public class GitConnectorBasicHandler extends PageActionHandler
         
         try 
         {
-        	FileUtil.deleteFile(gitFolder);
-        	
-	        helper.gitConnectorClone();
+        	if("true".equals(request.getParameter("changed")))
+        	{
+        		FileUtil.deleteFile(gitFolder);
+        		
+        		helper.gitConnectorClone();
+        	}
 	        
 	        json.put("error", "");
     		out.write(json.toString().getBytes("UTF-8"));

@@ -524,7 +524,7 @@ public class TmxWriter implements IWriter
 		FilterOptions filterString = options.getFilterOptions();
 		Date createdAfter = parseStartDate(filterString.m_createdAfter);
 		Date createdBefore = parseEndDate(filterString.m_createdBefore);
-		String filterLang = options.getSelectLanguage();
+		String filterLang = filterString.m_language;
         List<String> oldfilterLangList = Arrays.asList(filterLang.split(","));
         List<String> filterLangList = new ArrayList<String>();
 		for (String selectLang : oldfilterLangList)
@@ -640,7 +640,7 @@ public class TmxWriter implements IWriter
 
 		String sourceLang = p_tu.getSourceLocale().toString();
 		sourceLang = handleSpecialLocaleCode(sourceLang);
-		String filterLang = options.getSelectLanguage();
+		String filterLang = filterString.m_language;
         List<String> oldfilterLangList = Arrays.asList(filterLang.split(","));
         HashSet<String> filterLangList = new HashSet<String>();
 		for (String selectLang : oldfilterLangList)
@@ -1521,10 +1521,10 @@ public class TmxWriter implements IWriter
         {
             doFilter = true;
         }
-        String filterLang = m_options.getSelectLanguage();
         FilterOptions filterString = m_options.getFilterOptions();
         Date createdAfter = parseStartDate(filterString.m_createdAfter);
         Date createdBefore = parseEndDate(filterString.m_createdBefore);
+        String filterLang = filterString.m_language;
 		List<String> oldfilterLangList = Arrays.asList(filterLang.split(","));
 		List<String> filterLangList = new ArrayList<String>();
 		for (String selectLang : oldfilterLangList)

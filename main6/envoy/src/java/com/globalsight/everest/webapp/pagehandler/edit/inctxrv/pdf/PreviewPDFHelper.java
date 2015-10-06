@@ -85,6 +85,7 @@ import com.globalsight.cxe.util.fileImport.eventFlow.Category;
 import com.globalsight.cxe.util.fileImport.eventFlow.Da;
 import com.globalsight.cxe.util.fileImport.eventFlow.Dv;
 import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
@@ -160,7 +161,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     .getWorkflowById(workflowId);
             for (TargetPage tp : workflow.getTargetPages())
             {
-                String key = getKey(tp, p_userId);
+                String key = getKey(true, tp, p_userId);
                 Future<File> future = createPDFMap.get(key);
                 if (future != null)
                 {
@@ -192,7 +193,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 page = sourcePage;
             }
 
-            String key = getKey(page, p_userId);
+            String key = getKey(isTarget, page, p_userId);
             Future<File> future = createPDFMap.get(key);
             if (future == null)
             {
@@ -228,7 +229,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             throws WorkflowManagerException, RemoteException
     {
         // Cancel Duplicate Request
-        String key = getKey(p_page, p_userId);
+        String key = getKey(isTarget, p_page, p_userId);
         if (createPDFMap.get(key) != null)
             return;
 
@@ -237,7 +238,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         String externalPageId = p_page.getExternalPageId().toLowerCase();
         if (externalPageId.endsWith(INDD_SUFFIX))
         {
-            task = new CreatePDFTask(p_page, p_userId, ADOBE_CS6, isTarget);
+            task = new CreatePDFTask(p_page, p_userId, ADOBE_CS5_5, isTarget);
             future = serviceForINDD.submit(task);
             createPDFMap.put(key, future);
         }
@@ -295,7 +296,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         for (TargetPage tp : p_wf.getTargetPages())
         {
             // Set Status
-            String key = this.getKey(tp, p_userId);
+            String key = getKey(true, tp, p_userId);
             Future<File> future = createPDFMap.get(key);
             if (future != null)
             {
@@ -389,6 +390,165 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
 
         return new File(outPutFile);
+    }
+
+    public static boolean isInContextReviewEnabled()
+    {
+        boolean enabled = false;
+
+        try
+        {
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            enabled = "true".equals(
+                    sc.getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            CompanyWrapper.SUPER_COMPANY_ID));
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
+    }
+
+    public static boolean isInDesignEnabled()
+    {
+        boolean enabled = false;
+
+        try
+        {
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            enabled = "true".equals(
+                    sc.getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            CompanyWrapper.SUPER_COMPANY_ID));
+
+            if (enabled)
+            {
+                String dir = AmbFileStoragePathUtils
+                        .getInContextReviewInDesignPath();
+
+                enabled = !StringUtil.isEmpty(dir);
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
+    }
+
+    public static boolean isOfficeEnabled()
+    {
+        boolean enabled = false;
+
+        try
+        {
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            enabled = "true".equals(
+                    sc.getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            CompanyWrapper.SUPER_COMPANY_ID));
+
+            if (enabled)
+            {
+                String dir = AmbFileStoragePathUtils
+                        .getInContextReviewOfficePath();
+
+                enabled = !StringUtil.isEmpty(dir);
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
+    }
+
+    public static boolean isXMLEnabled()
+    {
+        boolean enabled = false;
+
+        try
+        {
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            enabled = "true".equals(
+                    sc.getStringParameter(SystemConfigParamNames.INCTXRV_ENABLE,
+                            CompanyWrapper.SUPER_COMPANY_ID));
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
+    }
+
+    public static boolean isInDesignEnabled(String companyId)
+    {
+        boolean enabled = false;
+
+        try
+        {
+            if (isInDesignEnabled())
+            {
+                SystemConfiguration sc = SystemConfiguration.getInstance();
+
+                enabled = "true".equals(sc.getStringParameter(
+                        SystemConfigParamNames.INCTXRV_ENABLE_INDD, companyId));
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
+    }
+
+    public static boolean isOfficeEnabled(String companyId)
+    {
+        boolean enabled = false;
+
+        try
+        {
+            if (isOfficeEnabled())
+            {
+                SystemConfiguration sc = SystemConfiguration.getInstance();
+
+                enabled = "true".equals(sc.getStringParameter(
+                        SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
+                        companyId));
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
+    }
+
+    public static boolean isXMLEnabled(String companyId)
+    {
+        boolean enabled = false;
+
+        try
+        {
+            if (isXMLEnabled())
+            {
+                SystemConfiguration sc = SystemConfiguration.getInstance();
+
+                enabled = "true".equals(sc.getStringParameter(
+                        SystemConfigParamNames.INCTXRV_ENABLE_XML, companyId));
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+
+        return enabled;
     }
 
     public static boolean isINDDAndInx(PreviewPDFBO p_params)
@@ -640,13 +800,14 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
                 Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent,
                         out);
-                
+
                 File xslFile = FileProfileUtil.getXsl(fileProfile);
-                
+
                 TransformerFactory factory = TransformerFactory.newInstance();
-                Transformer transformer = factory.newTransformer(new StreamSource(xslFile));
+                Transformer transformer = factory
+                        .newTransformer(new StreamSource(xslFile));
                 transformer.setParameter("versionParam", "2.0");
-                
+
                 Source src = new StreamSource(xmlFile);
                 Result res = new SAXResult(fop.getDefaultHandler());
                 transformer.transform(src, res);
@@ -680,7 +841,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     out.close();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // ignore;
             }
@@ -829,9 +990,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 || fileVersionType == TYPE_OFFICE_XLSX)
         {
             StringBuffer convDir = null;
-            convDir = new StringBuffer(m_sc.getStringParameter(
-                    SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
-                    "" + companyId));
+            convDir = new StringBuffer(
+                    AmbFileStoragePathUtils.getInContextReviewOfficePath());
 
             convDir.append(File.separator);
 
@@ -856,24 +1016,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         else if (isIncontextReview)
         {
             StringBuffer convDir = null;
-            if (fileVersionType == ADOBE_CS2 || fileVersionType == ADOBE_CS4
-                    || fileVersionType == ADOBE_CS5
-                    || fileVersionType == ADOBE_CS5_5
-                    || fileVersionType == ADOBE_CS6)
-            {
-                convDir = new StringBuffer(m_sc.getStringParameter(
-                        SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
-                        "" + companyId));
-            }
-            else
-            {
-                // These (formatType are "indd_cs3" and "inx_cs3") are adobe
-                // InDesign cs3 files,
-                // we will use cs3 converter to process them.
-                convDir = new StringBuffer(m_sc.getStringParameter(
-                        SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
-                        "" + companyId));
-            }
+            convDir = new StringBuffer(
+                    AmbFileStoragePathUtils.getInContextReviewInDesignPath());
 
             convDir.append(File.separator);
             convDir.append(p_params.getFileType());
@@ -1080,6 +1224,13 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     {
         String conDir = getConvertDir(p_params, false, companyId);
         String conDir_inctxrv = getConvertDir(p_params, true, companyId);
+        
+        // ignore if same dir
+        if (conDir.equals(conDir_inctxrv))
+        {
+            return;
+        }
+        
         String fileName = FileUtils.getPrefix(p_convertedFileName);
 
         StringBuffer inddFile = new StringBuffer(conDir);
@@ -1590,7 +1741,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             if (displayNameLower.endsWith(".indd"))
             {
-                formatType = "indd_cs6";
+                formatType = "indd_cs5.5";
             }
             else if (displayNameLower.endsWith(".idml"))
             {
@@ -1661,6 +1812,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             fileType = OFFICE_DOCX;
             fileSuffix = DOCX_SUFFIX;
+            fileVersionType = TYPE_OFFICE_DOCX;
             return new PreviewPDFBO(fileVersionType, fileType, fileSuffix,
                     isTranslateMaster, isTranslateHiddenLayer, relSafeName,
                     safeBaseFileName);
@@ -1669,6 +1821,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             fileType = OFFICE_PPTX;
             fileSuffix = PPTX_SUFFIX;
+            fileVersionType = TYPE_OFFICE_PPTX;
             return new PreviewPDFBO(fileVersionType, fileType, fileSuffix,
                     isTranslateMaster, isTranslateHiddenLayer, relSafeName,
                     safeBaseFileName);
@@ -1677,6 +1830,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             fileType = OFFICE_XLSX;
             fileSuffix = XLSX_SUFFIX;
+            fileVersionType = TYPE_OFFICE_XLSX;
             return new PreviewPDFBO(fileVersionType, fileType, fileSuffix,
                     isTranslateMaster, isTranslateHiddenLayer, relSafeName,
                     safeBaseFileName);
@@ -1820,9 +1974,9 @@ public class PreviewPDFHelper implements PreviewPDFConstants
 
     }
 
-    private String getKey(Page p_tp, String p_userId)
+    private String getKey(boolean isTarget, Page p_page, String p_userId)
     {
-        return p_tp.getId() + "_" + p_userId;
+        return (isTarget ? "target_" : "source_") + p_page.getId() + "_" + p_userId;
     }
 
     /*

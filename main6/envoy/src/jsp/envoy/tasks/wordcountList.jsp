@@ -9,7 +9,9 @@
       com.globalsight.everest.webapp.pagehandler.tasks.WordCountHandler, 
       com.globalsight.everest.workflowmanager.Workflow,
       com.globalsight.everest.webapp.WebAppConstants,
-      com.globalsight.everest.jobhandler.Job,      
+      com.globalsight.everest.jobhandler.Job,
+      com.globalsight.everest.servlet.util.SessionManager,
+      com.globalsight.everest.permission.Permission,
       java.util.*"
     session="true"
 %>
@@ -68,22 +70,6 @@
     }
     catch (NumberFormatException e)
     {
-    }
-%>
-
-<%!
-    private boolean isUseInContext(Task task) {
-        boolean isUseInContext = false;
-        isUseInContext = task.getWorkflow().getJob().getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
-        try
-        {
-        	isUseInContext = PageHandler.isInContextMatch(task.getWorkflow().getJob(), isUseInContext);
-        }
-        catch(Exception e)
-        {
-        	e.printStackTrace();
-        }
-        return isUseInContext;
     }
 %>
 

@@ -43,7 +43,6 @@ import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -236,11 +235,7 @@ public class ReviewerVendorPoReportDataAssembler
                     continue;
                 }
             }
-            TranslationMemoryProfile tmProfile = j.getL10nProfile()
-                    .getTranslationMemoryProfile();
-            // boolean isUseInContext = tmProfile.getIsContextMatchLeveraging();
-            boolean isInContextMatch = PageHandler.isInContextMatch(j,
-                    tmProfile);
+            boolean isInContextMatch = PageHandler.isInContextMatch(j);
             boolean isDefaultContextMatch = PageHandler
                     .isDefaultContextMatch(j);
             // only handle jobs in these states

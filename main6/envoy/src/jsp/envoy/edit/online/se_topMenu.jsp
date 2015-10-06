@@ -35,7 +35,6 @@ String lb_details = bundle.getString("lb_details");
 String lb_options = bundle.getString("lb_options");
 String lb_close   = bundle.getString("lb_close");
 String lb_help    = bundle.getString("lb_help");
-String lb_concordance = bundle.getString("lb_concordance");
 
 boolean b_ptagsVerbose =
   state.getPTagFormat().equals(EditorConstants.PTAGS_VERBOSE);
@@ -121,10 +120,6 @@ function ShowPTagBox()
       <IMG SRC="/globalsight/images/spacer.gif" HEIGHT="12"><BR>
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"
        onclick="parent.doRevert(); return false;" ><%=lb_revert%></A> |
-<% if (b_corpus) { %>
-      <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"
-       onclick="parent.doConcordance(); return false;"><%=lb_concordance%></A> |
-<% } %>       
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"
        onclick="parent.doDetails(); return false;"><%=lb_details%></A> |
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"

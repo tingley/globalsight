@@ -53,6 +53,8 @@
     branchFilter = branchFilter == null ? "" : branchFilter;
     String usernameFilter = (String) request.getAttribute("usernameFilter");
     usernameFilter = usernameFilter == null ? "" : usernameFilter;
+    String emailFilter = (String) request.getAttribute("emailFilter");
+    emailFilter = emailFilter == null?"" : emailFilter;
     String companyNameFilter = (String) request.getAttribute("companyNameFilter");
     companyNameFilter = companyNameFilter == null ? "" : companyNameFilter;
 %>
@@ -213,6 +215,11 @@ function filterItems(e)
             <amb:column label="lb_username" sortBy="<%=GitConnectorComparator.USER_NAME%>" filter="usernameFilter" filterValue="<%=usernameFilter%>" >
                 <%=gitConnector.getUsername()%>
             </amb:column>
+            
+            <amb:column label="lb_email" sortBy="<%=GitConnectorComparator.EMAIL%>" filter="emailFilter" filterValue="<%=emailFilter%>" >
+                <%=gitConnector.getEmail()%>
+            </amb:column>
+            
 
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=GitConnectorComparator.COMPANY_NAME%>"  filter="companyNameFilter" filterValue="<%=companyNameFilter%>">

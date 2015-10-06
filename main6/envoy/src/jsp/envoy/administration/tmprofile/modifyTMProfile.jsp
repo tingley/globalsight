@@ -25,6 +25,7 @@
             com.globalsight.everest.util.comparator.ProjectTMComparator,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.everest.util.comparator.SegmentationRuleFileComparator,
+            com.globalsight.everest.permission.Permission,
             java.util.Collections,
             java.util.List,
             java.util.Locale,
@@ -107,7 +108,6 @@
    String lbgeneralLeverageOptions = bundle.getString("msg_general_leverage_options");
    String lbexcludeItemTypes = bundle.getString("msg_exclude_item_types");
    String lblevLocalizable = bundle.getString("msg_lev_localizable");
-   String lblevDefaultMatches = bundle.getString("msg_lev_default_matches");
    String lblevExactMatches = bundle.getString("msg_lev_exact_matches");
    String levContextMatches = bundle.getString("msg_lev_context_matches");
    String lblevOptionsFreshImport = bundle.getString("msg_lev_options_fresh_import");
@@ -150,72 +150,19 @@
    String oldChosenName = chosenName;
    String chosenDesc = tmProfile.getDescription();
    long lProjectTmIdToSave = tmProfile.getProjectTmIdForSave();
-   String chosenSaveUnlocToPageTM = new Boolean(tmProfile.isSaveUnLocSegToPageTM()).toString();
-   String isSaveToPageTMChecked = "";
-   if (chosenSaveUnlocToPageTM.equals("true"))
-   {
-       isSaveToPageTMChecked = "CHECKED";
-   }
-   String chosenSaveUnlocToProjectTM = new Boolean(tmProfile.isSaveUnLocSegToProjectTM()).toString();
-   String isSaveUnlocToProjectTMChecked = "";
-   if (chosenSaveUnlocToProjectTM.equals("true"))
-   {
-	   isSaveUnlocToProjectTMChecked = "CHECKED";
-   }
-   String chosenSaveApprovedToProjectTM = new Boolean(tmProfile.isSaveApprovedSegToProjectTM()).toString();
-   String isSaveApprovedToProjectTMChecked = "";
-   if (chosenSaveApprovedToProjectTM.equals("true"))
-   {
-	   isSaveApprovedToProjectTMChecked = "CHECKED";
-   }
-   String chosenSaveLocToProjectTM = new Boolean(tmProfile.isSaveLocSegToProjectTM()).toString();
-   String isSaveLocToProjectTMChecked = "";
-   if(chosenSaveLocToProjectTM.equals("true"))
-   {
-	   isSaveLocToProjectTMChecked = "CHECKED";
-   }
-   
-   String chosenSaveExactMatchToProjectTM = new Boolean(tmProfile.isSaveExactMatchSegToProjectTM()).toString();
-   String isSaveExactMatchToProjectTMChecked = "";
-   if (chosenSaveExactMatchToProjectTM.equals("true"))
-   {
-	   isSaveExactMatchToProjectTMChecked = "CHECKED";
-   }
+
    String chosenJobExcludeTypes = tmProfile.getJobExcludeTuTypesAsString();
-   String isLeverageLocalizable = new Boolean(tmProfile.isLeverageLocalizable()).toString();
-   String isLevLocChecked = "";
-   if (isLeverageLocalizable.equals("true"))
-   {
-       isLevLocChecked = "CHECKED";
-   }
-   String isLeverageExactMatch = new Boolean(tmProfile.isLeverageExactMatch()).toString();
+
    String isLevEMChecked = "";
-   String isContextMatch = new Boolean(tmProfile.getIsContextMatchLeveraging()).toString();
    String isLevCMChecked = "";
-   String isLevDefault = "";
-   if (isLeverageExactMatch.equals("true"))
-   {
+   if (tmProfile.getIsExactMatchLeveraging()) {
        isLevEMChecked = "CHECKED";
-   }else if(isContextMatch.equals("true")){
+   } else {
 	   isLevCMChecked = "CHECKED";
-   }else{
-	   isLevDefault = "CHECKED";
-   }
-   String isPercentage = new Boolean(tmProfile.isMatchPercentage()).toString();
-   String isMatchingPercentage = "";
-   if("true".equals(isPercentage))
-   {
-	   isMatchingPercentage = "CHECKED";
-   }
-   String isProcendence = new Boolean(tmProfile.isTmProcendence()).toString();
-   String isTMProcendence = "";
-   if("true".equals(isProcendence))
-   {
-	   isTMProcendence = "CHECKED";
    }
 
    String isDynLevGoldChecked = "";
-   if(tmProfile.dynamicLeveragesFromGoldTm())
+   if(tmProfile.getDynLevFromGoldTm())
    {
        isDynLevGoldChecked = "CHECKED";
    }
@@ -227,25 +174,25 @@
    }
 
    String isDynLevInProgressChecked = "";
-   if(tmProfile.dynamicLeveragesFromInProgressTm())
+   if(tmProfile.getDynLevFromInProgressTm())
    {
        isDynLevInProgressChecked = "CHECKED";
    }
 
    String isDynLevPopulationChecked = "";
-   if(tmProfile.dynamicLeveragesFromPopulationTm())
+   if(tmProfile.getDynLevFromPopulationTm())
    {
        isDynLevPopulationChecked = "CHECKED";
    }
 
    String isDynLevReferenceChecked = "";
-   if(tmProfile.dynamicLeveragesFromReferenceTm())
+   if(tmProfile.getDynLevFromPopulationTm())
    {
        isDynLevReferenceChecked = "CHECKED";
    }
 
    String isDynLevInProgressDisabled = "DISABLED";
-   if(tmProfile.dynamicLeveragesFromInProgressTm())
+   if(tmProfile.getDynLevFromInProgressTm())
    {
        isDynLevInProgressDisabled = "";
    }
@@ -601,7 +548,19 @@ function checkIsVaildPercent(percent){
 		submit = false;
 	}else{
 		submit = true;
-	}	
+	}
+	return submit;
+}
+
+function checkIsVaildPercent2(percent){
+    var submit = false;
+	var i_percent = parseInt(percent);
+	if(i_percent > 100 || i_percent < 1){
+		alert("<%=bundle.getString("msg_tm_number_scope_1_100") %>");
+		submit = false;
+	}else{
+		submit = true;
+	}
 	return submit;
 }
 
@@ -632,6 +591,7 @@ function Result(message, errorFlag, element)
 
 var strAvailableAttnames = "<%=tmpAvailableAtts %>";
 var strTMPAtts = "<%=tmpAtts %>";
+var maxOrder = 0;
 
 var arrayAvailableAttnames = new Array();
 var arrayTMPAtts = new Array();
@@ -654,9 +614,15 @@ if (strTMPAtts != null)
 		tmpAtt.operator = ttt[1];
 		tmpAtt.valueType = ttt[2];
 		tmpAtt.valueData = ttt[3];
-		tmpAtt.penalty = ttt[4];
+		tmpAtt.order = ttt[4];
+		tmpAtt.andOr = ttt[5];
 		
 		arrayTMPAtts[arrayTMPAtts.length] = tmpAtt;
+
+		if (maxOrder < tmpAtt.order)
+		{
+			maxOrder = tmpAtt.order;
+		}
 	}
 }
 
@@ -943,8 +909,13 @@ function confirmForm(formSent) {
        alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
        return false;
     }
-    	
-	//check penalty between 0 and 100;whiteDiffPenalty
+    if (!isAllDigits(formSent.tuAttNotMatchPenalty.value))
+    {
+       alert("<%= bundle.getString("msg_tu_attribute_penalty") %>" + "<%= bundle.getString("jsmsg_numeric") %>");
+       return false;
+    }
+
+    //check penalty between 0 and 100;whiteDiffPenalty
 	if (!checkIsVaildPercent(formSent.refTmPenalty.value)){
 	   return false;
 	}
@@ -975,7 +946,10 @@ function confirmForm(formSent) {
 	if (!checkIsVaildPercent(formSent.multMatchesPenaltyReimport.value)){
 	   return false;
 	}
-
+	//check penalty between 1 and 100
+	if (!checkIsVaildPercent2(formSent.tuAttNotMatchPenalty.value)){
+	   return false;
+	}
 
     return true;
 }
@@ -1348,16 +1322,28 @@ function check(obj)
 	document.getElementById("procendence").checked = false;
 	obj.checked = true;
 }
-function checkLeverageMatchOption(/*Radio Object*/ obj){
-	var exact = document.getElementById("isLevEMChecked");
-	var incontext = document.getElementById("levContextMatches");
-	var defaultMatch = document.getElementById("isLevDefaultMatch");
-	
+
+function checkLeverageMatchOption(obj)
+{
+	var exact = document.getElementById("idIsLevEMChecked");
+	var incontext = document.getElementById("idLevContextMatches");
+	var icePromotionRule1 = document.getElementById("idIcePromotionRules1");
+	var icePromotionRule2 = document.getElementById("idIcePromotionRules2");
+	var icePromotionRule3 = document.getElementById("idIcePromotionRules3");
+
 	exact.checked = false;
 	incontext.checked = false;
-	defaultMatch.checked = false;
-	
+	icePromotionRule1.disabled = true;
+	icePromotionRule2.disabled = true;
+	icePromotionRule3.disabled = true;
+
 	obj.checked = true;
+	if (incontext.checked == true)
+	{
+		icePromotionRule1.disabled = false;
+		icePromotionRule2.disabled = false;
+		icePromotionRule3.disabled = false;
+	}
 }
 
 function doOnLoad()
@@ -1370,16 +1356,14 @@ function doOnLoad()
 </HEAD>
    <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     ONLOAD="doOnLoad();initProjectTmsInDatabase()">
-   <DIV ID="contentLayer" STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px;
-      POSITION: absolute; WIDTH: 800px; TOP: 108px">
-    <SPAN CLASS="mainHeading">
-      <%= lbEditTmProfile%>
-    </SPAN><p/>
+   <DIV ID="contentLayer" STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute; WIDTH: 880px; TOP: 108px">
+    <SPAN CLASS="mainHeading"><%= lbEditTmProfile%></SPAN><p/>
+
         <FORM NAME="basicTMProfileForm" ACTION= "<%=saveURL%>" METHOD="post">
          <INPUT TYPE="HIDDEN" NAME="formAction" VALUE="">
             <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" CLASS="standardText">
                <TR ALIGN="LEFT" VALIGN="TOP">
-                  <TD VALIGN="TOP">
+                  <TD VALIGN="TOP" width="420">
                      <b><%=basicInfo%></b>
                      <TABLE CELLPADDING="2" CELLSPACING="2" BORDER="0" CLASS="standardText">
                         <TR>
@@ -1398,7 +1382,7 @@ function doOnLoad()
                               <%=labelDescription%>:
                            </TD>
                            <TD>
-                              <TEXTAREA NAME="<%=descriptionField%>" COLS="55" ROWS="3" CLASS="standardText"><% if (chosenDesc != null) %><%=chosenDesc%></TEXTAREA>
+                              <TEXTAREA NAME="<%=descriptionField%>" COLS="40" ROWS="3" CLASS="standardText"><% if (chosenDesc != null) %><%=chosenDesc%></TEXTAREA>
                            </TD>
                         </TR>
                      </TABLE>
@@ -1467,27 +1451,27 @@ function doOnLoad()
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>" VALUE="true" <%=isSaveUnlocToProjectTMChecked%>><%=lbsaveUnlSegToTm%>
+                           <INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>" VALUE="true" <%=tmProfile.isSaveUnLocSegToProjectTM()?"CHECKED":""%>><%=lbsaveUnlSegToTm%>
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" VALUE="true" <%=isSaveLocToProjectTMChecked%>><%=lbsavelocSegToTm%>
+                           <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" VALUE="true" <%=tmProfile.isSaveLocSegToProjectTM()?"CHECKED":""%>><%=lbsavelocSegToTm%>
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=isSaveExactMatchToProjectTMChecked%>><%=lbisSaveExactMatchToProjectTm%>
+                           <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=tmProfile.isSaveExactMatchSegToProjectTM()?"CHECKED":""%>><%=lbisSaveExactMatchToProjectTm%>
                             </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" VALUE="true" <%=isSaveApprovedToProjectTMChecked %>><%=lbsaveApprovedSegToTM%>
+                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" VALUE="true" <%=tmProfile.isSaveApprovedSegToProjectTM()?"CHECKED":"" %>><%=lbsaveApprovedSegToTM%>
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
-                              <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=isSaveToPageTMChecked%>><%=lbisSaveToPageTm%>
+                              <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=tmProfile.isSaveUnLocSegToPageTM()?"CHECKED":""%>><%=lbisSaveToPageTm%>
                            </TD>
                         </TR>
                      </TABLE>
@@ -1497,17 +1481,19 @@ function doOnLoad()
 
                      <%=lbexcludeItemTypes%>:<BR>
                       <TEXTAREA CLASS="standardText" NAME="<%=leverageExcludeType%>" ROWS="5" COLS="50"><%  if (chosenJobExcludeTypes != null) { %><%=chosenJobExcludeTypes%><%  }%></TEXTAREA><BR>
-                      <INPUT TYPE="checkbox" NAME="<%=levLocalizable%>" VALUE="true" <%=isLevLocChecked%>><%=lblevLocalizable%><BR>
-                      
-                      <INPUT id="isLevDefaultMatch" onclick="checkLeverageMatchOption(this);" TYPE="radio" NAME="<%=lblevDefaultMatches%>" <%=isLevDefault %>><%=lblevDefaultMatches%>
-                                <BR>
-                      <INPUT id="isLevEMChecked" onclick="checkLeverageMatchOption(this);"TYPE="radio" NAME="<%=levExactMatches%>" VALUE="true" <%=isLevEMChecked%>><%=lblevExactMatches%><BR>
-					
-					  <input id="levContextMatches" type="radio" onclick="checkLeverageMatchOption(this);"name="<%=levContextMatches %>" value ="true" <%=isLevCMChecked %>><%=levContextMatches%>
+                      <INPUT TYPE="checkbox" NAME="<%=levLocalizable%>" VALUE="true" <%=tmProfile.isLeverageLocalizable()?"CHECKED":""%>><%=lblevLocalizable%><BR>
 
-                    
-                     <BR>
-                     <BR><BR>
+                      <INPUT id="idIsLevEMChecked" onclick="checkLeverageMatchOption(this);" TYPE="radio" NAME="<%=levExactMatches%>" VALUE="true" <%=isLevEMChecked%>><%=lblevExactMatches%><BR>
+
+					  <INPUT id="idLevContextMatches" onclick="checkLeverageMatchOption(this);" type="radio" name="<%=levContextMatches %>" value ="true" <%=isLevCMChecked %>><%=levContextMatches%><BR>
+
+					  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					  <INPUT TYPE="radio" id="idIcePromotionRules1" NAME="icePromotionRules" VALUE="1" <%=tmProfile.getIcePromotionRules()==1?"CHECKED":"" %> <%=tmProfile.getIsContextMatchLeveraging()?"":"disabled='true'" %>><%=bundle.getString("lb_apply_ice_promotion_rule1")%><BR>
+					  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					  <INPUT TYPE="radio" id="idIcePromotionRules2" NAME="icePromotionRules" VALUE="2" <%=tmProfile.getIcePromotionRules()==2?"CHECKED":"" %> <%=tmProfile.getIsContextMatchLeveraging()?"":"disabled='true'" %>><%=bundle.getString("lb_apply_ice_promotion_rule2")%><BR>
+					  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					  <INPUT TYPE="radio" id="idIcePromotionRules3" NAME="icePromotionRules" VALUE="3" <%=tmProfile.getIcePromotionRules()==3?"CHECKED":"" %> <%=tmProfile.getIsContextMatchLeveraging()?"":"disabled='true'" %>><%=bundle.getString("lb_apply_ice_promotion_rule3")%><BR>
+				      <BR><BR>
                       <TABLE CELLPADDING="2" CELLSPACING="2" BORDER="0" CLASS="standardText">
                         <TR><TD>
                                <B><%=lbDynLevOptions%></B>
@@ -1534,9 +1520,9 @@ function doOnLoad()
                 </TD>
 
                 <TD STYLE="padding: 4px" WIDTH="20"></TD>
-                  <TD STYLE="padding: 4px" WIDTH="400">
-                     <b><%=lblevOptionsFreshImport%></b>
-                     <TABLE CELLPADDING="2" CELLSPACING="2" BORDER="0" CLASS="standardText">
+                <TD STYLE="padding: 4px" WIDTH="440">
+                    <b><%=lblevOptionsFreshImport%></b>
+                    <TABLE CELLPADDING="2" CELLSPACING="2" BORDER="0" CLASS="standardText">
                         <TR>
                            <TD ALIGN="LEFT"  valign="top"><%=lblevProjectTm%><SPAN CLASS="asterisk">
                            *
@@ -1722,9 +1708,9 @@ function doOnLoad()
 	                        	<%=bundle.getString("lb_tm_display_tm_natches_by") %>:
 	                        </td>
 	                        <td>
-	                        	<input id="percentage" type="radio" onclick="check(this)" name="<%=matchingPercentage %>" value="true" <%=isMatchingPercentage %>><%=bundle.getString("lb_matching_percentage")%></input>
+	                        	<input id="percentage" type="radio" onclick="check(this)" name="<%=matchingPercentage %>" value="true" <%=tmProfile.isMatchPercentage()?"CHECKED":""%> ><%=bundle.getString("lb_matching_percentage")%></input>
 	                        	<br/>
-	                        	<input id="procendence" type="radio" onclick="check(this)" name="<%=tmProcendence %>" value="true" <%=isTMProcendence %>><%=bundle.getString("lb_tm_precedence")%></input>
+	                        	<input id="procendence" type="radio" onclick="check(this)" name="<%=tmProcendence %>" value="true" <%=tmProfile.isTmProcendence()?"CHECKED":""%> ><%=bundle.getString("lb_tm_precedence")%></input>
 	                        </td>
                         </tr>
                      </TABLE>
@@ -1761,77 +1747,88 @@ function doOnLoad()
                            </TD>
                         </TR>
                      </TABLE>
-                     <amb:permission name="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>" >
-                     <BR><BR>
-                    <b>TU Attributes Match Penalties</b><a id="tuvAttSub" name="tuvAttSub">&nbsp;</a>
-                    <div id="divAtts" class="standardText" style="width:100%">
-                    </div>
-                    <br />
-                    <span CLASS="standardText">
-		<select id="attname">
-		</select>
-		</span>
-		<span CLASS="standardText">
-		<select id="operator">
-		<option value="<%=TMAttributeCons.OP_EQUAL %>">equal</option>
-		<option value="<%=TMAttributeCons.OP_NOT_EQUAL %>">not equal</option>
-		<option value="<%=TMAttributeCons.OP_MATCH %>">match</option>
-		</select>
-		</span>
-		<span CLASS="standardText">
-		<select id="valueType" onchange="onValueTypeChange()">
-		<option value="<%=TMAttributeCons.VALUE_FROM_JOBATT %>">Value from Job Attribute of same name</option>
-		<option value="<%=TMAttributeCons.VALUE_INPUT %>">Input Value</option>
-		</select>
-		</span>
-		<span id="inputValueField" CLASS="standardText" style="display:none">
-		<input type="text" id="valueData" size="8" maxlength="20" value="" />
-		</span>
-		<input type="BUTTON" id="addRow" value="Add" onclick="doAddAttribute()"/>
+
+        <amb:permission name="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>">
+            <BR><BR>
+            <b><%=bundle.getString("lb_attribute_rules") %></b><a id="tuvAttSub" name="tuvAttSub">&nbsp;</a>
+            <div id="divAtts" class="standardText" style="width:100%"></div><br/>
+	        <span CLASS="standardText"><select id="attname"></select></span>
+			<span CLASS="standardText">
+				<select id="operator">
+					<option value="<%=TMAttributeCons.OP_EQUAL %>"><%=TMAttributeCons.OP_EQUAL %></option>
+					<option value="<%=TMAttributeCons.OP_CONTAIN %>"><%=TMAttributeCons.OP_CONTAIN %></option>
+					<option value="<%=TMAttributeCons.OP_NOT_CONTAIN %>"><%=TMAttributeCons.OP_NOT_CONTAIN %></option>
+				</select>
+			</span>
+			<span CLASS="standardText">
+				<select id="valueType" onchange="onValueTypeChange()">
+					<option value="<%=TMAttributeCons.VALUE_FROM_JOBATT %>"><%=bundle.getString("lb_value_from_job") %></option>
+					<option value="<%=TMAttributeCons.VALUE_INPUT %>"><%=bundle.getString("lb_input_value") %></option>
+				</select>
+			</span>
+			<span id="inputValueField" CLASS="standardText" style="display:none">
+				<input type="text" id="valueData" size="8" maxlength="20" value="" />
+			</span>
+			<span class="standardText">
+			    <select id="andOr">
+			    	<option value="and">and</option>
+			    	<option value="or">or</option>
+			    </select>
+			</span>
+			<input type="BUTTON" id="addRow" value="Add" onclick="doAddAttribute()"/><br/><br/>
+
+			<span class="standardText">
+				<input type="radio" name="choiceIfAttNotMatched" value="disregard" <%="disregard".equals(tmProfile.getChoiceIfAttNotMatch())?"CHECKED":"" %> /><%=bundle.getString("lb_disregard") %><br/>
+				<input type="radio" name="choiceIfAttNotMatched" value="penalize" <%="penalize".equals(tmProfile.getChoiceIfAttNotMatch())?"CHECKED":"" %> /><%=bundle.getString("lb_penalize") %>
+				&nbsp; Penalty:<input type="text" maxlength="3" size="1" name="tuAttNotMatchPenalty" value="<%=tmProfile.getTuAttNotMatchPenalty()%>" />%
+			</span>
 		</amb:permission>
+
                   </TD>
                </TR>
             </TABLE>
+
             <input type="hidden" name="tmpAttributes" id="tmpAttributes" value="" />
+
             <P>
                <INPUT TYPE="button" NAME="<%=lbCancel%>" VALUE="<%=lbCancel%>" ONCLICK="submitForm('cancel')">
                <INPUT TYPE="button" NAME="<%=lbSave%>" VALUE="<%=lbSave%>" ONCLICK="submitForm('save')">
             </P>
          </FORM>
       </DIV>
-      <div id='arrangeTmDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:300px;height:180px;position:absolute;top:100px;z-index:100'>
-		<div style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%'>
-			<label class='whiteBold'><%=bundle.getString("lb_tm_arrange_tm_order") %></label>
-		</div>
-		<div id='popupContent' style='margin:20px;margin-top:20px;margin-bottom:40px;margin-left:40px'>
-			<!-- Generate By Program -->
-			<label style='float:left;margin-left:50px;margin-top:2px'><%=bundle.getString("lb_tm_name") %>:</label>
-			<select id='position' style='width:100px'>
-				<option value='tmId'><%=bundle.getString("lb_tm_index") %></option>
-			</select>	
-			
-        </div>
+
+        <div id='arrangeTmDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:300px;height:180px;position:absolute;top:100px;z-index:100'>
+			<div style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%'>
+				<label class='whiteBold'><%=bundle.getString("lb_tm_arrange_tm_order") %></label>
+			</div>
+			<div id='popupContent' style='margin:20px;margin-top:20px;margin-bottom:40px;margin-left:40px'>
+				<!-- Generate By Program -->
+				<label style='float:left;margin-left:50px;margin-top:2px'><%=bundle.getString("lb_tm_name") %>:</label>
+				<select id='position' style='width:100px'>
+					<option value='tmId'><%=bundle.getString("lb_tm_index") %></option>
+				</select>
+	        </div>
 			<div id="div_button_arrangeTm" style="float:left;margin-left:100px;margin-top:20px">
-			<center><input type='submit' value='<%=bundle.getString("lb_ok") %>' onclick='arrangeTms()'/>
-			<input id='exit' style='margin-left:5px' type='submit' value='<%=bundle.getString("lb_cancel") %>' onclick='closePopupDialog()'/>
-			</center>
+				<center><input type='submit' value='<%=bundle.getString("lb_ok") %>' onclick='arrangeTms()'/>
+					<input id='exit' style='margin-left:5px' type='submit' value='<%=bundle.getString("lb_cancel") %>' onclick='closePopupDialog()'/>
+				</center>
 			</div>
 		</div>
 		
 		<div id='confirmChangeDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:300px;height:200px;*height:180px;position:absolute;top:500px;z-index:100'>
-		<div style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%'>
-			<label class='whiteBold'><%=bundle.getString("lb_confirm_change") %></label>
-		</div>
-		<div id='confirmPopupContent' style='margin:20px;margin-top:20px;margin-bottom:40px;margin-left:40px'>
-			<!-- Generate By Program -->
-			<label style='float:left;margin-left:5px;margin-top:2px;width:75%;font-size:14px'>
-				<%=bundle.getString("msg_tm_confirm_save_for_tm_order") %>
-			</label>
-        </div>
+			<div style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%'>
+				<label class='whiteBold'><%=bundle.getString("lb_confirm_change") %></label>
+			</div>
+			<div id='confirmPopupContent' style='margin:20px;margin-top:20px;margin-bottom:40px;margin-left:40px'>
+				<!-- Generate By Program -->
+				<label style='float:left;margin-left:5px;margin-top:2px;width:75%;font-size:14px'>
+					<%=bundle.getString("msg_tm_confirm_save_for_tm_order") %>
+				</label>
+	        </div>
 			<div id="div_button_arrangeTm" style="float:left;margin-left:100px;margin-top:20px;margin-bottom:20px">
-			<center><input type='submit' value='<%=bundle.getString("lb_yes") %>' onclick="submitForm('save','confirmChange')"/>
-			<input id='exit' style='margin-left:5px; width:32px' type='submit' value='<%=bundle.getString("lb_no") %>' onclick="closeConfirmChangePopupDialog()"/>
-			</center>
+				<center><input type='submit' value='<%=bundle.getString("lb_yes") %>' onclick="submitForm('save','confirmChange')"/>
+					<input id='exit' style='margin-left:5px; width:32px' type='submit' value='<%=bundle.getString("lb_no") %>' onclick="closeConfirmChangePopupDialog()"/>
+				</center>
 			</div>
 		</div>
    </BODY>

@@ -425,8 +425,10 @@ function goToCreateJob() {
 
     	var contentsFileName = title + "(contents).xml";
     	var tagsFileName = title + "(tags).xml";
+    	var propertiesFileName = title + "(properties).xml";
     	addFullDivElement(id + "contents", contentsFileName);
         addFullDivElement(id + "tags", tagsFileName);
+        addFullDivElement(id + "properties", propertiesFileName);
     }
 }
 

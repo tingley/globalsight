@@ -3,6 +3,9 @@
 	import="com.globalsight.everest.webapp.pagehandler.PageHandler,
     com.globalsight.util.edit.EditUtil,
     com.globalsight.cxe.entity.mindtouch.MindTouchConnector,
+    com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer,
+     com.globalsight.util.GlobalSightLocale,
+     com.globalsight.everest.webapp.WebAppConstants,
 	java.util.*"
 	session="true"%>
 
@@ -14,6 +17,7 @@
 
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
+	Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 
 	String saveURL = save.getPageURL() + "&action=save";
 	String cancelURL = cancel.getPageURL() + "&action=cancel";
@@ -29,6 +33,8 @@
 	String password = "";
 	String url = "";
 	String desc = "";
+	String postToSourceServer = "";
+	String isPostToSourceServer = "false";
 	long companyId = -1;
 	MindTouchConnector connector = (MindTouchConnector) request.getAttribute("mindtouch");
     boolean edit = false;
@@ -44,11 +50,28 @@
         companyId = connector.getCompanyId();
         desc = connector.getDescription();
         desc = desc == null ? "" : desc;
+        if(connector.getIsPostToSourceServer())
+        {
+        	postToSourceServer = "checked";
+        	isPostToSourceServer = "true";
+        }
 	}
 	else
 	{
 		title = bundle.getString("lb_new_mindtouch_connector");
 	}
+	
+	List<MindTouchConnectorTargetServer> targetServers = (List<MindTouchConnectorTargetServer>) request.getAttribute("targetServers");
+	String targetLocaleStr = "";
+	if(targetServers != null && targetServers.size() > 0)
+	{
+		for(MindTouchConnectorTargetServer ts: targetServers)
+		{
+			targetLocaleStr = targetLocaleStr + ts.getTargetLocale() + ",";
+		}
+	}
+	
+	 Vector<GlobalSightLocale> targetLocales = (Vector)request.getAttribute("targetLocales");
 %>
 
 <html>
@@ -68,6 +91,7 @@
 var guideNode = "MindTouch";
 var needWarning = false;
 var helpFile = "<%=bundle.getString("help_mindtouch_connector_basic")%>";
+var targetLocaleStr = "<%=targetLocaleStr%>";
 
 function cancel()
 {
@@ -85,6 +109,7 @@ function save()
 function testConnect()
 {
     $("#idDiv").mask("<%=bundle.getString("msg_mindtouch_wait_connect")%>");
+    $("#targetLocaleStr").val(targetLocaleStr);
     $("#mindtouchForm").ajaxSubmit({
         type: 'post',  
         url: "<%=testURL%>" , 
@@ -147,7 +172,7 @@ function confirmForm()
 
     return true;
 }
-
+														
 // Ensure the name has no special chars and not an existed one already.
 function validName()
 {
@@ -163,7 +188,7 @@ function validName()
     existNames = existNames.toLowerCase();
 
     if (existNames.indexOf("," + lowerName + ",") != -1)
-    {
+    {									
         alert('<%=bundle.getString("msg_duplicate_name")%>');
         mindtouchForm.name.value.focus();
         return false;
@@ -172,6 +197,108 @@ function validName()
     mindtouchForm.name.value = name;
 
     return true;
+}
+
+function changePostToSourceServer()
+{
+	if($("#postToSourceServer").is(':checked') == true)
+	{
+		$("#isPostToSourceServer").val("true");
+	}
+	else
+	{
+		$("#isPostToSourceServer").val("false");
+	}
+}
+
+var trnode=$("<tr><td></td><td></td><td></td><td></td><td></td></tr>");
+
+function add()
+{
+	if(!confirmTargetServer())
+	{
+		return;	
+	}
+	
+	var targetLocale = $("#targetLocales").val();
+	if(targetLocaleStr.indexOf(targetLocale) >= 0)
+	{
+		alert("Repeat Locale.");
+		return false;
+	}
+	var idPageHtml=$("#idPageHtml");
+	var temp=trnode.clone(true);
+	var targetUrl = $("#targetUrl").val();
+	var targetUsername = "";
+	var targetPassword = "";
+	if($("#useSourceServerUsernamePassword").is(':checked') == true)
+	{
+		var targetUsername = $("#username").val();
+		var targetPassword = $("#password").val();
+	}
+	else
+	{
+		var targetUsername = $("#targetUsername").val();
+		var targetPassword = $("#targetPassword").val();
+	}
+	
+	temp.attr("id","tr"+targetLocale);
+	temp.children('td').eq(0).html(targetLocale + "<input type= 'hidden' name='targetLocale"+targetLocale+"' value='"+targetLocale+"'>");
+	temp.children('td').eq(1).html(targetUrl + "<input type= 'hidden' name='targetUrl"+targetLocale+"' value='"+targetUrl+"'>");
+	temp.children('td').eq(2).html(targetUsername + "<input type= 'hidden' name='targetUsername"+targetLocale+"' value='"+targetUsername+"'>");
+	temp.children('td').eq(3).html("******<input type= 'hidden' name='targetPassword"+targetLocale+"' value='"+targetPassword+"'>");
+	temp.children('td').eq(4).html("<a href='#' onclick='removetest(\""+targetLocale+"\")'>X</a>");
+	
+	idPageHtml.append(temp);
+	
+	targetLocaleStr = targetLocaleStr + "," + targetLocale;
+}
+
+function confirmTargetServer()
+{
+	if (isEmptyString(mindtouchForm.targetUrl.value))
+    {
+        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_url")))%>");
+        return false;
+    }
+	
+	if($("#useSourceServerUsernamePassword").is(':checked') == true)
+	{
+		if (isEmptyString(mindtouchForm.username.value))
+	    {
+	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_user_name")))%>");
+	        return false;
+	    }
+
+	    if (isEmptyString(mindtouchForm.password.value))
+	    {
+	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_password")))%>");
+	        return false;
+	    }
+	}
+	else
+	{
+	    if (isEmptyString(mindtouchForm.targetUsername.value))
+	    {
+	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_user_name")))%>");
+	        return false;
+	    }
+	
+	    if (isEmptyString(mindtouchForm.targetPassword.value))
+	    {
+	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_password")))%>");
+	        return false;
+	    }
+	}
+
+
+    return true;
+}
+
+function removetest(targetLocale)
+{
+	$("tr[id=tr"+targetLocale+"]").remove();
+	targetLocaleStr = targetLocaleStr.replace(targetLocale,"");
 }
 </script>
 </head>
@@ -186,12 +313,14 @@ function validName()
     <div style="float: left;">
     <FORM name="mindtouchForm" id="mindtouchForm" method="post" action="">
     <input type="hidden" name="id" value="<%=id%>" />
+    <input type="hidden" id="isPostToSourceServer" name="isPostToSourceServer" value="<%=isPostToSourceServer%>"/>
+    <input type="hidden" id="targetLocaleStr" name="targetLocaleStr" value="">
     <%if(edit) {%>
     <input type="hidden" name="companyId" value="<%=companyId%>" />
     <%} %>
     <table class="standardText">
     	<tr>
-    		<td ><%=bundle.getString("lb_name")%> <span class="asterisk">*</span>:</td>
+    		<td width="50"><%=bundle.getString("lb_name")%> <span class="asterisk">*</span>:</td>
     		<td><input type="text" name="name" id="name" value="<%=name%>"  maxlength="40" size="30"></td>
     	</tr>
         <tr>
@@ -209,6 +338,76 @@ function validName()
         <tr>
             <td><%=bundle.getString("lb_password")%><span class="asterisk">*</span>:</td>
             <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200"></td>
+        </tr>
+        <tr>
+        	<td colspan="2" align="left"><%=bundle.getString("lb_post_to_source_server")%>:<input type="checkbox" name="postToSourceServer" id="postToSourceServer" <%= postToSourceServer%> onclick="changePostToSourceServer()"></td>
+        </tr>
+    </table>
+    <table class="standardText">
+        <tr>
+            <td colspan="2" align="left">&nbsp;</td>
+        </tr>
+        <tr>
+        	<td valign="top">&nbsp;&nbsp;Target Servers:</td>
+            <td>
+            <TABLE CELLSPACING="0" CELLPADDING="3" BORDER="1"style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;font-family: Arial, Helvetica, sans-serif;font-size: 10pt;">
+			  <THEAD>
+			    <TR CLASS="tableHeadingGray" style="height:15pt;">
+			      <TD ALIGN="LEFT"  WIDTH="100px">Target Locale</TD>
+			      <TD ALIGN="LEFT"  WIDTH="300px">URL</TD>
+			      <TD ALIGN="LEFT"  WIDTH="100px">User Name</TD>
+			      <TD ALIGN="LEFT"  WIDTH="50px">Password</TD>
+			      <TD ALIGN="LEFT"  WIDTH="50px">Delete</TD>
+			    </TR>
+			  </THEAD>
+			  <TBODY id="idPageHtml">
+			  <% if(targetServers != null && targetServers.size() > 0) {
+				  for(MindTouchConnectorTargetServer ts :targetServers)
+				  {%>
+			  		<tr id="tr<%=ts.getTargetLocale()%>">
+			  		<td><%=ts.getTargetLocale()%><input type= 'hidden' name='targetLocale<%=ts.getTargetLocale()%>' value='<%=ts.getTargetLocale()%>'></td>
+			  		<td><%=ts.getUrl()%><input type= 'hidden' name='targetUrl<%=ts.getTargetLocale()%>' value='<%=ts.getUrl()%>'></td>
+			  		<td><%=ts.getUsername()%><input type= 'hidden' name='targetUsername<%=ts.getTargetLocale()%>' value='<%=ts.getUsername()%>'></td>
+			  		<td>******<input type= 'hidden' name='targetPassword<%=ts.getTargetLocale()%>' value='<%=ts.getPassword()%>'></td>
+			  		<td><a href='#' onclick="removetest('<%=ts.getTargetLocale()%>')">X</a></td>
+			  		</tr>
+			  <% }} %>
+			  </TBODY>
+			</TABLE>
+            </td>
+        </tr>
+    </table>
+    <table class="standardText">
+        <tr>
+            <td colspan="2" align="left">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;&nbsp;<%=bundle.getString("lb_target_locale")%>:</td>
+            <td>
+	            <select id="targetLocales" name="targetLocales">
+	            <%for(GlobalSightLocale targetLocale: targetLocales) {%>
+	            <option value="<%= targetLocale.toString()%>"><%= targetLocale.getDisplayName(uiLocale)%> </option>
+	            <%} %>
+	            </select>
+            </td>
+        </tr>
+        <tr>
+            <td>&nbsp;&nbsp;<%=bundle.getString("lb_url")%>:</td>
+            <td><input type="text" name="targetUrl" id="targetUrl" style="width: 360px;" maxLength="200"></td>
+        </tr>
+        <tr>
+            <td>&nbsp;&nbsp;<%=bundle.getString("lb_user_name")%>:</td>
+            <td><input type="text" name="targetUsername" id="targetUsername" style="width: 360px;" maxLength="200"></td>
+        </tr>
+        <tr>
+            <td>&nbsp;&nbsp;<%=bundle.getString("lb_password")%>:</td>
+            <td><input type="password" name="targetPassword" id="targetPassword" style="width: 360px;" maxLength="200"></td>
+        </tr>
+        <tr>
+        	<td colspan="2" align="left">&nbsp;&nbsp;<%=bundle.getString("lb_use_source_server_username_password")%>:<input type="checkbox" id="useSourceServerUsernamePassword"></td>
+        </tr>
+        <tr>
+        	<td colspan="2" align="left">&nbsp;&nbsp;<input type="button" name="addTarget" value="<%=bundle.getString("lb_add")%>" onclick="add()"/></td>
         </tr>
         <tr>
             <td colspan="2" align="left">&nbsp;</td>

@@ -106,6 +106,9 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     private GlobalSightLocale m_globalSightLocale = null;
     private Set<XliffAlt> xliff_alt = new HashSet<XliffAlt>();
 
+    private long previousHash = -1;
+    private long nextHash = -1;
+
     /**
      * Holds the LeverageMatchType.
      * 
@@ -1529,4 +1532,24 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
             }
         }
     }
+
+	@Override
+	public long getPreviousHash() {
+		return previousHash;
+	}
+
+	@Override
+	public void setPreviousHash(long previousHash) {
+		this.previousHash = previousHash;
+	}
+
+	@Override
+	public long getNextHash() {
+		return nextHash;
+	}
+
+	@Override
+	public void setNextHash(long nextHash) {
+		this.nextHash = nextHash;
+	}
 }

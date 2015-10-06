@@ -336,8 +336,9 @@ public class AmbFileStoragePathUtils
         String companyId = CompanyThreadLocal.getInstance().getValue();
         if (unextractedParentDirs.get(companyId) == null)
         {
-			File unextractedParentDir = new File(
-					getFileStorageDirPath(companyId), UNEXTRACTED_SUB_DIRECTORY);
+            File unextractedParentDir = new File(
+                    getFileStorageDirPath(companyId),
+                    UNEXTRACTED_SUB_DIRECTORY);
             unextractedParentDir.mkdirs();
             unextractedParentDirs.put(companyId, unextractedParentDir);
         }
@@ -355,7 +356,8 @@ public class AmbFileStoragePathUtils
         if (unextractedParentDirs.get(companyId) == null)
         {
             File unextractedParentDir = new File(
-                    getFileStorageDirPath(companyId), UNEXTRACTED_SUB_DIRECTORY);
+                    getFileStorageDirPath(companyId),
+                    UNEXTRACTED_SUB_DIRECTORY);
             unextractedParentDir.mkdirs();
             unextractedParentDirs.put(companyId, unextractedParentDir);
         }
@@ -389,7 +391,8 @@ public class AmbFileStoragePathUtils
         if (commentReferenceDirs.get(companyId) == null)
         {
             File commentReferenceDir = new File(
-                    getFileStorageDirPath(companyId), COMMENT_REFERENCE_SUB_DIR);
+                    getFileStorageDirPath(companyId),
+                    COMMENT_REFERENCE_SUB_DIR);
             commentReferenceDir.mkdirs();
             commentReferenceDirs.put(companyId, commentReferenceDir);
         }
@@ -518,7 +521,7 @@ public class AmbFileStoragePathUtils
 
     public static File getCustomerDownloadDir(Long p_companyId)
     {
-    	return getCustomerDownloadDir(String.valueOf(p_companyId));
+        return getCustomerDownloadDir(String.valueOf(p_companyId));
     }
 
     public static File getCustomerDownloadDir(String p_companyId)
@@ -660,8 +663,8 @@ public class AmbFileStoragePathUtils
     {
         if (desktopIconExportedDir.get(companyId) == null)
         {
-            File desktopiconExportedDir = new File(
-                    getDesktopIconDir(companyId), EXPORTED);
+            File desktopiconExportedDir = new File(getDesktopIconDir(companyId),
+                    EXPORTED);
             desktopiconExportedDir.mkdirs();
             desktopIconExportedDir.put(companyId, desktopiconExportedDir);
         }
@@ -760,8 +763,8 @@ public class AmbFileStoragePathUtils
     public static File getPropertiesDir(String companyId)
     {
         String companyName = CompanyWrapper.getCompanyNameById(companyId);
-        URL url = AmbFileStoragePathUtils.class.getResource(PATH_PROPERTIES
-                + companyName);
+        URL url = AmbFileStoragePathUtils.class
+                .getResource(PATH_PROPERTIES + companyName);
         File f = null;
         if (url != null)
         {
@@ -823,8 +826,8 @@ public class AmbFileStoragePathUtils
 
     public static String getOffice2003ConversionPath()
     {
-        return sc
-                .getStringParameter(SystemConfigParamNames.MSOFFICE2003_CONV_DIR);
+        return sc.getStringParameter(
+                SystemConfigParamNames.MSOFFICE2003_CONV_DIR);
     }
 
     public static String getOffice2007ConversionPath()
@@ -854,14 +857,27 @@ public class AmbFileStoragePathUtils
 
     public static String getInddCs55ConversionPath()
     {
-        return sc
-                .getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5_5);
+        return sc.getStringParameter(
+                SystemConfigParamNames.ADOBE_CONV_DIR_CS5_5);
     }
-    
+
     public static String getInddCs6ConversionPath()
     {
-        return sc
-                .getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS6);
+        return sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS6);
+    }
+
+    public static String getInContextReviewInDesignPath()
+    {
+        return sc.getStringParameter(
+                SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
+                CompanyWrapper.SUPER_COMPANY_ID);
+    }
+
+    public static String getInContextReviewOfficePath()
+    {
+        return sc.getStringParameter(
+                SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
+                CompanyWrapper.SUPER_COMPANY_ID);
     }
 
     public static String getWindowsPeConversionPath()

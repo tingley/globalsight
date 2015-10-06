@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -507,14 +508,16 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                         {
                             matchType = LeverageMatchType.UNKNOWN_NAME;
                         }
-                        LeverageSegment ls = new LeverageSegment(matchedGxml,
-                                matchType, null, rootLm.getProjectTmIndex(),
-                                null, rootLm.getMatchedTuvId(),
-                                rootLm.getTmId());
+						LeverageSegment ls = new LeverageSegment(matchedGxml,
+								matchType, null, rootLm.getLastUsageDate(),
+								rootLm.getProjectTmIndex(), null,
+								rootLm.getMatchedTuvId(), rootLm.getTmId());
                         ls.setOrgSid(rootLm.getOrgSid(jobId));
                         Date d = rootLm.getModifyDate() == null ? new Date() : rootLm.getModifyDate();
                         ls.setModifyDate(new Timestamp(d.getTime()));
                         ls.setSid(rootLm.getSid());
+                        ls.setPreviousHash(rootLm.getPreviousHash());
+                        ls.setNextHash(rootLm.getNextHash());
                         ArrayList<LeverageSegment> l = (ArrayList<LeverageSegment>) result
                                 .get(new Long(rootLm.getOriginalSourceTuvId()));
                         if (l != null && l.size() != 0)
@@ -556,13 +559,15 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             String gxml = lm.getMatchedText();
 
-            LeverageSegment ls = new LeverageSegment(gxml,
-                    LeverageDataCenter.getTuvState(lm.getMatchType()), null,
-                    lm.getProjectTmIndex(), null, lm.getMatchedTuvId(),
-                    lm.getTmId());
+			LeverageSegment ls = new LeverageSegment(gxml,
+					LeverageDataCenter.getTuvState(lm.getMatchType()), null,
+					lm.getLastUsageDate(), lm.getProjectTmIndex(), null,
+					lm.getMatchedTuvId(), lm.getTmId());
             Date d = lm.getModifyDate() == null ? new Date() : lm.getModifyDate();
             ls.setModifyDate(new Timestamp(d.getTime()));
             ls.setSid(lm.getSid());
+            ls.setPreviousHash(lm.getPreviousHash());
+            ls.setNextHash(lm.getNextHash());
             result.put(new Long(lm.getOriginalSourceTuvId()), ls);
         }
 
@@ -670,69 +675,66 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             // touch to load into cache for performance.
             SegmentTuUtil.getTusBySourcePageId(p_sourcePageId);
-            SegmentTuvUtil.getSourceTuvs(ServerProxy.getPageManager()
-                    .getSourcePage(p_sourcePageId));
-            // remove lower score_num record
-            for (LeverageMatch match : leverageMatches)
-            {
-                LeverageMatch cloneMatch = new LeverageMatch(match);
-                long originalSourceTuvId = cloneMatch.getOriginalSourceTuvId();
+			ArrayList<Tuv> srcTuvs = SegmentTuvUtil.getSourceTuvs(ServerProxy
+					.getPageManager().getSourcePage(p_sourcePageId));
+			HashMap<Long, Tuv> srcTuvMap = new HashMap<Long, Tuv>();
+			for (Tuv tuv : srcTuvs)
+			{
+				srcTuvMap.put(tuv.getIdAsLong(), tuv);
+			}
 
-                // For WS XLF file,MT translation should NOT impact
-                // word-count,displayed color.
-                if (!isIncludeMtMatches)
-                {
-                    try
-                    {
-                        TuImpl tu = (TuImpl) SegmentTuvUtil.getTuvById(
-                                originalSourceTuvId, jobId).getTu(jobId);
-                        String translationType = tu.getXliffTranslationType();
-                        float tm_score = Float.parseFloat(tu.getIwsScore());
-                        if (Extractor.IWS_TRANSLATION_MANUAL
-                                .equalsIgnoreCase(translationType))
-                        {
-                            cloneMatch.setScoreNum(100);
-                        }
-                        else if (Leverager.MT_PRIORITY == cloneMatch
-                                .getProjectTmIndex())
-                        {
-                            cloneMatch.setScoreNum(tm_score);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                    }
-                }
+            // group matches
+			HashMap<String, ArrayList<LeverageMatch>> lmMap = new HashMap<String, ArrayList<LeverageMatch>>();
+			for (LeverageMatch lm : leverageMatches)
+			{
+				// For WS XLF file,MT translation should NOT impact word-count,displayed color.
+				if (!isIncludeMtMatches)
+				{
+					try
+					{
+						TuImpl tu = (TuImpl) SegmentTuvUtil.getTuvById(
+								lm.getOriginalSourceTuvId(), jobId)
+								.getTu(jobId);
+						if (Extractor.IWS_TRANSLATION_MANUAL
+								.equalsIgnoreCase(tu.getXliffTranslationType()))
+						{
+							lm.setScoreNum(100);
+						}
+						else if (Leverager.MT_PRIORITY == lm.getProjectTmIndex())
+						{
+							lm.setScoreNum(Float.parseFloat(tu.getIwsScore()));
+						}
+					}
+					catch (Exception e)	{}
+				}
 
-                float scoreNum = cloneMatch.getScoreNum();
-                String subId = cloneMatch.getSubId();
-                String idKey = MatchTypeStatistics.makeKey(originalSourceTuvId,
-                        subId);
-                LeverageMatch lm = (LeverageMatch) leveragematchesMap
-                        .get(idKey);
-                if (lm != null)
-                {
-                    if (scoreNum == 100)
-                    {
-                        if ((LeverageUtil.compareSid(lm, cloneMatch, jobId) > 0 && cloneMatch
-                                .getOrderNum() != -1)
-                                || lm.getScoreNum() < scoreNum)
-                        {
-                            leveragematchesMap.remove(idKey);
-                            leveragematchesMap.put(idKey, cloneMatch);
-                        }
-                    }
-                    else if (lm.getScoreNum() < scoreNum)
-                    {
-                        leveragematchesMap.remove(idKey);
-                        leveragematchesMap.put(idKey, cloneMatch);
-                    }
-                }
-                else
-                {
-                    leveragematchesMap.put(idKey, cloneMatch);
-                }
-            }
+				String idKey = MatchTypeStatistics.makeKey(
+						lm.getOriginalSourceTuvId(), lm.getSubId());
+				ArrayList<LeverageMatch> curLmList = lmMap.get(idKey);
+				if (curLmList == null)
+				{
+					curLmList = new ArrayList<LeverageMatch>();
+					lmMap.put(idKey, curLmList);
+				}
+				curLmList.add(lm);
+			}
+
+			// Sort and pick up best match for every segment
+			TranslationMemoryProfile tmProfile = BigTableUtil
+					.getJobById(jobId).getL10nProfile()
+					.getTranslationMemoryProfile();
+			int mode = UpdateLeverageHelper.getMode(tmProfile);
+			for (Entry<String, ArrayList<LeverageMatch>> entry : lmMap.entrySet())
+			{
+				ArrayList<LeverageMatch> matches = entry.getValue();
+				Tuv srcTuv = srcTuvMap.get(matches.get(0).getOriginalSourceTuvId());
+				LeverageMatch bestLm = getBestLeverageMatch(srcTuv, matches,
+						tmProfile, mode, jobId);
+				if (bestLm != null)
+				{
+					leveragematchesMap.put(entry.getKey(), bestLm);
+				}
+			}
         }
         catch (Exception ex)
         {
@@ -740,14 +742,11 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             throw new LingManagerException(ex);
         }
 
-        MatchTypeStatistics result = new MatchTypeStatistics(
-                p_levMatchThreshold);
-
+		MatchTypeStatistics result = new MatchTypeStatistics(
+				p_levMatchThreshold);
         // set the match type with the found leverage matches
-        Collection<LeverageMatch> leverageMatches2 = leveragematchesMap
-                .values();
-        Set<String> keys = new HashSet<String>();
-        for (LeverageMatch match : leverageMatches2)
+		Set<String> keys = new HashSet<String>();
+        for (LeverageMatch match : leveragematchesMap.values())
         {
             String key = MatchTypeStatistics.makeKey(
                     match.getOriginalSourceTuvId(), match.getSubId());
@@ -759,6 +758,148 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
 
         return result;
+    }
+
+    /**
+     * Get best leverage match for current source TUV.
+     */
+	private LeverageMatch getBestLeverageMatch(Tuv srcTuv,
+			ArrayList<LeverageMatch> matches,
+			TranslationMemoryProfile tmProfile, int mode, long jobId)
+    {
+		if (matches == null || matches.size() == 0)
+			return null;
+
+		SortUtil.sort(matches, new ComparatorForBestMatchType(mode, tmProfile,
+				jobId));
+
+		for (int i = 0; i < matches.size(); i++)
+		{
+			LeverageMatch lm = matches.get(i);
+			if (lm.getScoreNum() == 100)
+			{
+				// return SID matched leverage segment
+				if (srcTuv.getSid() != null
+						&& srcTuv.getSid().equals(lm.getSid()))
+		    	{
+		    		return lm;
+		    	}
+
+		    	// return previous/next hash matched leverage segment
+		    	long preHash = srcTuv.getPreviousHash();
+		    	long nextHash = srcTuv.getNextHash();
+				if (preHash != -1 && preHash == lm.getPreviousHash()
+						&& nextHash != -1 && nextHash == lm.getNextHash())
+	        	{
+	        		return lm;
+	        	}
+			}
+		}
+
+    	return matches.get(0);
+    }
+
+    class ComparatorForBestMatchType extends StringComparator
+    {
+		private static final long serialVersionUID = -2943674378412658753L;
+		private int mode = LeverageOptions.PICK_LATEST;
+        private TranslationMemoryProfile tmProfile;
+        private long jobId;
+
+		public ComparatorForBestMatchType(int mode,
+				TranslationMemoryProfile tmProfile, long jobId)
+        {
+            super(Locale.ENGLISH);
+            this.mode = mode;
+            this.tmProfile = tmProfile;
+            this.jobId = jobId;
+        }
+
+        public int compare(Object p_A, Object p_B)
+        {
+            LeverageMatch a = (LeverageMatch) p_A;
+            LeverageMatch b = (LeverageMatch) p_B;
+
+            int result = 0;
+
+            // compare score
+            result = (int) (b.getScoreNum() - a.getScoreNum());
+            if (result != 0)
+            {
+            	return result;
+            }
+            
+            // "SEGMENT_TM_EXACT_MATCH" matches have top priority.
+            String matchType1 = a.getMatchType();
+            String matchType2 = b.getMatchType();
+            if (matchType1 == null
+                    || !MatchState.SEGMENT_TM_EXACT_MATCH.getName().equals(
+                            matchType1))
+            {
+                matchType1 = "";
+            }
+            if (matchType2 == null
+                    || !MatchState.SEGMENT_TM_EXACT_MATCH.getName().equals(
+                            matchType2))
+            {
+                matchType2 = "";
+            }
+            result = super.compareStrings(matchType1, matchType2);
+            if (result != 0)
+            {
+                return -result;
+            }
+
+            // SID
+            result = LeverageUtil.compareSid(a, b, jobId);
+            if (result != 0)
+            {
+                return result;
+            }
+
+            // Compare project TM index
+            if (tmProfile.isTmProcendence())
+            {
+                result = a.getProjectTmIndex() - b.getProjectTmIndex();
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            // Compare lastUsageDate
+            if (a.getLastUsageDate() != null && b.getLastUsageDate() != null)
+            {
+            	result = a.getLastUsageDate().compareTo(b.getLastUsageDate());
+                if (mode == LeverageOptions.PICK_LATEST)
+                {
+                    result = -result;
+                }
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            // Compare modified date
+            if (a.getModifyDate() != null && b.getModifyDate() != null)
+            {
+                result = a.getModifyDate().compareTo(b.getModifyDate());
+                if (mode == LeverageOptions.PICK_LATEST)
+                {
+                    result = -result;
+                }
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            // Compare order NUM
+            result = a.getOrderNum() - b.getOrderNum();
+
+            return result;
+        }
     }
 
     /**
@@ -1739,12 +1880,24 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 }                
             }
 
-            // Compare modified date
-            Date aDate = a.getModifyDate();
-            Date bDate = b.getModifyDate();
-            if (aDate != null && bDate != null)
+            // Compare lastUsageDate
+            if (a.getLastUsageDate() != null && b.getLastUsageDate() != null)
             {
-                result = aDate.compareTo(bDate);
+            	result = a.getLastUsageDate().compareTo(b.getLastUsageDate());
+                if (mode == LeverageOptions.PICK_LATEST)
+                {
+                    result = -result;
+                }
+            }
+            if (result != 0)
+            {
+                return result;
+            }
+
+            // Compare modified date
+            if (a.getModifyDate() != null && b.getModifyDate() != null)
+            {
+                result = a.getModifyDate().compareTo(b.getModifyDate());
                 if (mode == LeverageOptions.PICK_LATEST)
                 {
                     result = -result;
@@ -2052,6 +2205,21 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 }
             }
 
+            // lastUsageDate
+            if (ls1.getLastUsageDate() != null && ls2.getLastUsageDate() != null)
+            {
+            	result = ls1.getLastUsageDate().compareTo(ls2.getLastUsageDate());
+                if (model == LeverageOptions.PICK_LATEST)
+                {
+                    result = -result;
+                }
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            // modifiedDate
             if (ls1.getModifyDate() != null && ls2.getModifyDate() != null)
             {
                 result = ls1.getModifyDate().compareTo(ls2.getModifyDate());

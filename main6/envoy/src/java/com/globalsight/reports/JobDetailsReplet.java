@@ -419,8 +419,7 @@ public class JobDetailsReplet extends GlobalSightReplet
         ArrayList workflows = new ArrayList(c);
         WorkflowTableModel wtm = new WorkflowTableModel(workflows, theSession,
                 m_currency, false);
-        boolean isInContextMatch = PageHandler.isInContextMatch(job,
-                wtm.isUseInContext());
+        boolean isInContextMatch = PageHandler.isInContextMatch(job);
         if (!isInContextMatch)
         {
             String[] columns =

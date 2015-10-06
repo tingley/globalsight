@@ -1242,4 +1242,22 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
     {
         this.m_repetitionOfId = new Long(repetitionOfId);
     }
+
+	@Override
+	public long getPreviousHash() {
+		return -1;
+	}
+
+	@Override
+	public void setPreviousHash(long previousHash) {
+	}
+
+	@Override
+	public long getNextHash() {
+		return -1;
+	}
+
+	@Override
+	public void setNextHash(long nextHash) {
+	}
 }

@@ -19,9 +19,11 @@ package com.globalsight.cxe.entity.customAttribute;
 
 public class TMAttributeCons 
 {
-    public static final String OP_EQUAL = "equal";
-    public static final String OP_NOT_EQUAL = "not equal";
-    public static final String OP_MATCH = "match";
+    public static final String OP_EQUAL = "equal to";
+    public static final String OP_CONTAIN = "contain";
+    public static final String OP_NOT_CONTAIN = "not contain";
+    public static final String OP_NOT_EQUAL = "not equal to";// abandoned
+    public static final String OP_MATCH = "match";// abandoned
     
     public static final String VALUE_INPUT = "VALUE_INPUT";
     public static final String VALUE_FROM_JOBATT = "VALUE_FROM_JOBATT";

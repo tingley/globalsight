@@ -60,9 +60,10 @@ public class ExactMatchedSegments implements Serializable
         return lev;
     }
     
-    public void putLeveragedSegment(GlobalSightLocale p_locale, long p_tuvId,
-            String p_segment, String p_matchType, Date modifyDate, int tmIndex,
-            String sid, long matchedTuvId, long tmId)
+	public void putLeveragedSegment(GlobalSightLocale p_locale, long p_tuvId,
+			String p_segment, String p_matchType, Date modifyDate,
+			Date lastUsageDate, long p_previousHash, long p_nextHash,
+			int tmIndex, String sid, long matchedTuvId, long tmId)
     {
         Map<Long, LeverageSegment> tuvIdMap = (Map<Long, LeverageSegment>) m_localeMap
                 .get(p_locale);
@@ -71,9 +72,12 @@ public class ExactMatchedSegments implements Serializable
             tuvIdMap = new HashMap<Long, LeverageSegment>();
             m_localeMap.put(p_locale, tuvIdMap);
         }
+		LeverageSegment ls = new LeverageSegment(p_segment, p_matchType,
+				modifyDate, lastUsageDate, tmIndex, sid, matchedTuvId, tmId);
+		ls.setPreviousHash(p_previousHash);
+		ls.setNextHash(p_nextHash);
 
-        tuvIdMap.put(new Long(p_tuvId), new LeverageSegment(p_segment,
-                p_matchType, modifyDate, tmIndex, sid, matchedTuvId, tmId));
+		tuvIdMap.put(p_tuvId, ls);
     }
 
 

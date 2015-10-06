@@ -101,7 +101,7 @@ public class TMPAttributeManager
                 {
                     for (TMPAttribute tmpAtt : tmpAts)
                     {
-                        if (tmpAtt.getAttributename().equalsIgnoreCase(
+                        if (tmpAtt.getAttributeName().equalsIgnoreCase(
                                 attribute.getName()))
                         {
                             exists = true;
@@ -157,15 +157,12 @@ public class TMPAttributeManager
             {
                 String value = FilterHelper.escape(tmpa.getValueData());
 
-                sb.append(tmpa.getAttributename());
-                sb.append(":");
-                sb.append(tmpa.getOperator());
-                sb.append(":");
-                sb.append(tmpa.getValueType());
-                sb.append(":");
-                sb.append(value);
-                sb.append(":");
-                sb.append(tmpa.getPenalty());
+                sb.append(tmpa.getAttributeName());
+                sb.append(":").append(tmpa.getOperator());
+                sb.append(":").append(tmpa.getValueType());
+                sb.append(":").append(value);
+                sb.append(":").append(tmpa.getOrder());
+                sb.append(":").append(tmpa.getAndOr());
                 sb.append(",");
             }
 
@@ -232,14 +229,15 @@ public class TMPAttributeManager
                     String o = ooo[i];
                     String[] temp = o.split(":");
 
-                    if (temp != null && temp.length == 5)
+                    if (temp != null && temp.length == 6)
                     {
                         TMPAttribute tmpa = new TMPAttribute();
-                        tmpa.setAttributename(temp[0]);
+                        tmpa.setAttributeName(temp[0]);
                         tmpa.setOperator(temp[1]);
                         tmpa.setValueType(temp[2]);
                         tmpa.setValueData(temp[3]);
-                        tmpa.setPenalty(Integer.parseInt(temp[4]));
+                        tmpa.setOrder(Integer.parseInt(temp[4]));
+                        tmpa.setAndOr(temp[5]);
                         tmpa.setTmprofile(tmp);
 
                         attSet.add(tmpa);
@@ -267,7 +265,7 @@ public class TMPAttributeManager
         {
             for (TMPAttribute tmpa : all)
             {
-                if (tmpa.getAttributename().equalsIgnoreCase(attname))
+                if (tmpa.getAttributeName().equalsIgnoreCase(attname))
                 {
                     return tmpa;
                 }

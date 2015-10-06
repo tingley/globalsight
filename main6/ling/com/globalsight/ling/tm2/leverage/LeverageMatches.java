@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,6 +38,7 @@ import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTmTuT;
 import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.util.comparator.TMPAttributeComparator;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -55,6 +57,7 @@ import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.RuntimeCache;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -230,7 +233,12 @@ public class LeverageMatches
 
             try
             {
-                setTuvAttributeScores(tu);
+				// If "Disregard if TU attributes not matched" is checked and
+				// the TU attributes do not match, remove this candidate match.
+                if (setTuvAttributeScores(tu))
+                {
+                	itLeveragedTu.remove();
+                }
             }
             catch (Exception e)
             {
@@ -256,8 +264,9 @@ public class LeverageMatches
         }
     }
 
-    // for GBS-937, Custom TM attributes
-    private void setTuvAttributeScores(LeveragedTu tu)
+    // for GBS-937, Custom TM attributes originally;
+    // GBS-3564 reverse the logic.
+    private boolean setTuvAttributeScores(LeveragedTu tu)
     {
         float score = tu.getScore();
         long tmId = tu.getTmId();
@@ -266,21 +275,22 @@ public class LeverageMatches
         if (ptm == null)
         {
             c_logger.debug("ptm == null");
-            return;
+            return false;
         }
 
         boolean isTM3 = ptm.getTm3Id() != null;
         long tuId = tu.getId();
         TranslationMemoryProfile tmp = m_leverageOptions.getTmProfile();
-
         if (tmp == null)
         {
             c_logger.debug("tmp == null");
-            return;
+            return false;
         }
 
         Set<ProjectTmTuTProp> tuProps = null;
         List<TMPAttribute> tmpAtts = tmp.getAllTMPAttributes();
+		SortUtil.sort(tmpAtts, new TMPAttributeComparator(
+				TMPAttributeComparator.ORDER, Locale.ENGLISH));
 
         if (!isTM3)
         {
@@ -289,7 +299,7 @@ public class LeverageMatches
             if (tmTU == null)
             {
                 c_logger.debug("tmTU == null");
-                return;
+                return false;
             }
 
             tuProps = tmTU.getProps();
@@ -306,7 +316,7 @@ public class LeverageMatches
                 {
                     TM3Tu tm3tu = tm3tm.getTu(tuId);
                     if (tm3tu == null)
-                        return;
+                        return false;
 
                     Map<TM3Attribute, Object> tm3Attributes = tm3tu
                             .getAttributes();
@@ -381,15 +391,16 @@ public class LeverageMatches
             }
         }
 
+        int penalty = tmp.getTuAttNotMatchPenalty();
         if (tmpAtts != null && tmpAtts.size() > 0)
         {
-            for (TMPAttribute tmpAtt : tmpAtts)
+        	List<Boolean> matchedList = new ArrayList<Boolean>();
+			for (TMPAttribute tmpAtt : tmpAtts)
             {
                 String tmpAttValueType = tmpAtt.getValueType();
-                String tmpAttName = tmpAtt.getAttributename();
+                String tmpAttName = tmpAtt.getAttributeName();
                 String tmpAttOp = tmpAtt.getOperator();
-                int penalty = tmpAtt.getPenalty();
-                Object value = null;
+                Object jobAttValue = null;
                 // get attribute value of TU
                 String tuAttValue = ProjectTmTuTProp.getAttributeValue(tuProps,
                         tmpAttName);
@@ -416,37 +427,92 @@ public class LeverageMatches
                                     .equalsIgnoreCase(tmpAttName))
                             {
                                 Object v = jobAtt.getValue();
-                                value = v == null ? "" : v;
+                                jobAttValue = v == null ? "" : v;
                             }
                         }
                     }
                 }
                 else if (tmpAttValueType.equals(TMAttributeCons.VALUE_INPUT))
                 {
-                    value = tmpAtt.getValueData();
+                    jobAttValue = tmpAtt.getValueData();
                 }
 
-                boolean matched = TMAttributeManager.isTMPAttributeMatched(
-                        tmpAttOp, tuAttValue, value);
-
-                if (matched)
+                Boolean matched = false;
+                try
                 {
-                    score = score - penalty;
-
-                    if (score < 0)
-                    {
-                        score = 0;
-                    }
+					matched = TMAttributeManager.isTMPAttributeMatched(
+							tmpAttOp, tuAttValue, jobAttValue);
                 }
+                catch (Exception e)
+                {
+                	c_logger.error(e);
+                }
+				matchedList.add(new Boolean(matched));
+            }
+
+			// Decide if it is matched for all TM profile TU attributes.
+			String preAndOr = null;
+			String curAndOr = null;
+			boolean preMatched = false;
+			boolean curMatched = false;
+			boolean isFinalMatched = false;
+			for (int i = 0; i < tmpAtts.size(); i++)
+			{
+				TMPAttribute tmpAtt = tmpAtts.get(i);
+				if (i == 0)
+				{
+					preAndOr = tmpAtt.getAndOr();
+					preMatched = matchedList.get(i);
+					isFinalMatched = preMatched;
+				}
+				else
+				{
+					curAndOr = tmpAtt.getAndOr();
+					curMatched = matchedList.get(i);
+					if ("and".equalsIgnoreCase(preAndOr))
+					{
+						isFinalMatched = preMatched && curMatched;
+						preMatched = isFinalMatched;
+						if (!isFinalMatched && "and".equalsIgnoreCase(curAndOr))
+						{
+							break;
+						}
+					}
+					else
+					{
+						isFinalMatched = preMatched || curMatched;
+						preMatched = isFinalMatched;
+					}
+					preAndOr = curAndOr;
+				}
+			}
+
+			if (!isFinalMatched)
+            {
+				// "Disregard if TU attributes not matched"
+				if (TranslationMemoryProfile.CHOICE_DISREGARD.equals(tmp.getChoiceIfAttNotMatch()))
+				{
+					return true;
+				}
+				// "Penalize if TU attributes not matched"
+				else
+				{
+					score = score - penalty;
+					if (score < 0)
+					{
+						score = 0;
+					}
+				}
             }
         }
 
         tu.setScore(score);
-        
         if (oriscore > score)
         {
             tu.setMatchState(MatchState.FUZZY_MATCH);
         }
+
+        return false;
     }
 
     public BaseTmTuv getOriginalTuv()

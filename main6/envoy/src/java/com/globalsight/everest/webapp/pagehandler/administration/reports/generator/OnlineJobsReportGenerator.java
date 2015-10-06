@@ -72,7 +72,6 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -3045,10 +3044,7 @@ public class OnlineJobsReportGenerator implements
             // cost only
             totalAdditionalCost -= tmpTotalAdditionalCost;
 
-            TranslationMemoryProfile tmProfile = j.getL10nProfile()
-                    .getTranslationMemoryProfile();
-            boolean isInContextMatch = PageHandler.isInContextMatch(j,
-                    tmProfile);
+            boolean isInContextMatch = PageHandler.isInContextMatch(j);
             boolean isDefaultContextMatch = PageHandler
                     .isDefaultContextMatch(j);
 

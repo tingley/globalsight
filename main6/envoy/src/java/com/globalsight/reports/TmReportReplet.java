@@ -393,11 +393,7 @@ public class TmReportReplet extends GlobalSightReplet
             ArrayList singleRowDataList = new ArrayList();
 
             Job job = ServerProxy.getJobHandler().getJobById(rs.getLong(1));
-            Boolean isUseInContext = new Boolean(job.getL10nProfile()
-                    .getTranslationMemoryProfile()
-                    .getIsContextMatchLeveraging());
-            boolean isInContextMatch = PageHandler.isInContextMatch(job,
-                    isUseInContext);
+            boolean isInContextMatch = PageHandler.isInContextMatch(job);
             singleRowDataList.add(isInContextMatch);
             // NO_USE_IC_MATCH_WORD_COUNT
             singleRowDataList.add(new Integer(rs.getInt(2)));

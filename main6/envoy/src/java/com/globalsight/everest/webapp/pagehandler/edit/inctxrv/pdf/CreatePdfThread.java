@@ -29,6 +29,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class CreatePdfThread extends MultiCompanySupportedThread
@@ -36,10 +37,27 @@ public class CreatePdfThread extends MultiCompanySupportedThread
     private Job job = null;
     private Logger logger = null;
 
+    private boolean enableIndd = false;
+    private boolean enableOffice = false;
+    private boolean enableXML = false;
+
     public CreatePdfThread(Job job, Logger logger)
     {
         this.job = job;
         this.logger = logger;
+
+        try
+        {
+            String companyId = "" + this.job.getCompanyId();
+
+            enableIndd = PreviewPDFHelper.isInDesignEnabled(companyId);
+            enableOffice = PreviewPDFHelper.isOfficeEnabled(companyId);
+            enableXML = PreviewPDFHelper.isXMLEnabled(companyId);
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
     }
 
     @Override
@@ -49,23 +67,53 @@ public class CreatePdfThread extends MultiCompanySupportedThread
         {
             Collection<SourcePage> sourcePages = job.getSourcePages();
             String userid = job.getCreateUserId();
-            FileProfile fp = job.getFileProfile();
 
             for (SourcePage sourcePage : sourcePages)
             {
                 String pageName = sourcePage.getExternalPageId().toLowerCase();
+                
+                // no need to create PDF for (Adobe file information)
+                if (pageName.startsWith("(adobe file information)"))
+                {
+                    continue;
+                }
+                
                 if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
-                        || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
-                        || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
+                        || pageName.endsWith(".docx")
+                        || pageName.endsWith(".pptx")
+                        || pageName.endsWith(".xlsx")
+                        || pageName.endsWith(".xml"))
                 {
                     if (pageName.endsWith(".xml"))
                     {
+                        if (!enableXML)
+                        {
+                            continue;
+                        }
+                        
+                        long fpId = sourcePage.getRequest().getDataSourceId();
+                        FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                                .readFileProfile(fpId);
+                        
                         if (!FileProfileUtil.isXmlPreviewPDF(fp))
                         {
                             continue;
                         }
                     }
-                    
+
+                    if ((pageName.endsWith(".indd")
+                            || pageName.endsWith(".idml")) && !enableIndd)
+                    {
+                        continue;
+                    }
+
+                    if ((pageName.endsWith(".docx")
+                            || pageName.endsWith(".pptx")
+                            || pageName.endsWith(".xlsx")) && !enableOffice)
+                    {
+                        continue;
+                    }
+
                     PreviewPDFHelper previewHelper = new PreviewPDFHelper();
                     File pdfFile = previewHelper.createPDF(sourcePage.getId(),
                             userid, false);
@@ -78,8 +126,8 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                     for (TargetPage targetPage : targetPages)
                     {
                         PreviewPDFHelper previewHelperT = new PreviewPDFHelper();
-                        File pdfFileT = previewHelperT.createPDF(
-                                targetPage.getId(), userid, true);
+                        File pdfFileT = previewHelperT
+                                .createPDF(targetPage.getId(), userid, true);
 
                         logger.debug("Create target PDF " + pdfFileT
                                 + " successfully for job : " + job);
@@ -89,8 +137,8 @@ public class CreatePdfThread extends MultiCompanySupportedThread
         }
         catch (Exception e)
         {
-            logger.error("Could not create In context preview PDF for job : "
-                    + job);
+            logger.error(
+                    "Could not create In context preview PDF for job : " + job);
             throw new EnvoyServletException(e);
         }
         finally

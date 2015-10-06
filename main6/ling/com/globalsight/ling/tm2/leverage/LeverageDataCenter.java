@@ -383,10 +383,13 @@ public class LeverageDataCenter
                                 .getTmIndexsToLeverageFrom()
                                 .get(matchedTuv.getTu().getTmId()).intValue();
                         long tmId = matchedTuv.getTu().getTmId();
-                        exactMatchedSegments.putLeveragedSegment(targetLocale,
-                                originalTuv.getId(), matchedTuv.getSegment(),
-                                matchType, matchedTuv.getModifyDate(), tmIndex,
-                                matchedTuv.getSid(), matchedTuv.getId(), tmId);
+						exactMatchedSegments.putLeveragedSegment(targetLocale,
+								originalTuv.getId(), matchedTuv.getSegment(),
+								matchType, matchedTuv.getModifyDate(),
+								matchedTuv.getLastUsageDate(),
+								matchedTuv.getPreviousHash(),
+								matchedTuv.getNextHash(), tmIndex,
+								matchedTuv.getSid(), matchedTuv.getId(), tmId);
                     }
                 }
             }

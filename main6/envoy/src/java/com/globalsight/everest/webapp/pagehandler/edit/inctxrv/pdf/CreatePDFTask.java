@@ -76,6 +76,7 @@ public class CreatePDFTask implements Callable<File>, PreviewPDFConstants
                 default:
                     pdfFile = helper.createPDF4INDDAndInx(m_page, m_userId,
                             m_isTarget);
+                    break;
             }
         }
         catch (Exception e)

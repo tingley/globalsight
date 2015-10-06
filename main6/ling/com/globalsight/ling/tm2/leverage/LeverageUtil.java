@@ -24,21 +24,36 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.online.OnlineEditorManagerLocal;
+import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.integration.ling.tm2.Types;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
+import com.globalsight.ling.tm2.leverage.DateComparable;
 
 public class LeverageUtil
 {
     public static final String DUMMY_SUBID = "0";
     static private final Logger logger = Logger.getLogger(LeverageUtil.class);
+
+    public static final int ICE_TYPE_NOT_ICE = 0;
+    public static final int ICE_TYPE_SID_MATCHING = 1;
+    public static final int ICE_TYPE_HASH_MATCHING = 2;
+    public static final int ICE_TYPE_BRACKETED_MATCHING = 3;
+    public static final int ICE_TYPE_PASSOLO_MATCHING = 4;
+    public static final int ICE_TYPE_PO_XLF_MATCHING = 5;
 
     /**
      * Compares the sid of the two {@link LeveragedTuv} instances.
@@ -93,31 +108,16 @@ public class LeverageUtil
         return 0;
     }
 
-    /**
-     * This method compares the last modified time of the two Tuvs. The order of
-     * the sort depends on the option the user chose.
-     * 
-     * @param tuv1
-     * @param tuv2
-     * @param mode
-     * @return
-     */
-    public static int compareTime(ModifyDateComparable tuv1,
-            ModifyDateComparable tuv2, int mode)
-    {
+	public static int compareLastUsageDate(DateComparable tuv1,
+			DateComparable tuv2, LeverageOptions leverageOptions)
+	{
+		int mode = getDateMode(leverageOptions);
 
-        Date time1 = tuv1.getModifyDate();
-        Date time2 = tuv2.getModifyDate();
+		Date time1 = tuv1.getLastUsageDate();
+		Date time2 = tuv2.getLastUsageDate();
 
-        int result = time2.compareTo(time1);
-
-        if (mode == LeverageOptions.PICK_OLDEST)
-        {
-            result = -result;
-        }
-
-        return result;
-    }
+		return compareTime(time1, time2, mode);
+	}
 
     /**
      * This method compares the last modified time of the two Tuvs. The order of
@@ -128,11 +128,29 @@ public class LeverageUtil
      * @param leverageOptions
      * @return
      */
-    public static int compareTime(ModifyDateComparable tuv1,
-            ModifyDateComparable tuv2, LeverageOptions leverageOptions)
+    public static int compareModifyTime(DateComparable tuv1,
+            DateComparable tuv2, LeverageOptions leverageOptions)
     {
         int mode = getDateMode(leverageOptions);
-        return compareTime(tuv1, tuv2, mode);
+
+        Date time1 = tuv1.getModifyDate();
+        Date time2 = tuv2.getModifyDate();
+
+        return compareTime(time1, time2, mode);
+    }
+
+    private static int compareTime(Date time1, Date time2, int mode)
+    {
+    	if (time2 == null || time1 == null)
+    		return 0;
+
+    	int result = time2.compareTo(time1);
+        if (mode == LeverageOptions.PICK_OLDEST)
+        {
+            result = -result;
+        }
+
+        return result;
     }
 
     public static int getDateMode(LeverageOptions leverageOptions)
@@ -155,7 +173,8 @@ public class LeverageUtil
         return mode;
     }
 
-    public static boolean isIncontextMatch(Tuv srcTuv,
+    @SuppressWarnings("rawtypes")
+	public static boolean isIncontextMatch(Tuv srcTuv,
             List<TuvImpl> sourceTuvs, List targetTuvs,
             MatchTypeStatistics tuvMatchTypes,
             Vector<String> excludedItemTypes, long p_jobId)
@@ -194,26 +213,31 @@ public class LeverageUtil
      * Checks the match type is in-context match or not. Note that this only
      * check "DUMMY_SUBID" segment.
      */
-    public static boolean isIncontextMatch(int index, List p_sourceTuvs,
+    @SuppressWarnings("rawtypes")
+	public static boolean isIncontextMatch(int index, List p_sourceTuvs,
             List p_targetTuvs, MatchTypeStatistics p_matchTypes,
             Vector<String> p_excludedItemTypes, long p_jobId)
     {
-        String subId = DUMMY_SUBID;
-        Object o = p_sourceTuvs.get(index);
-        if (o instanceof Tuv)
-        {
-            subId = DUMMY_SUBID;
-        }
-        else
-        {
-            SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
-            subId = ((SegmentTmTu) sourceTuv.getTu()).getSubId();
-        }
+    	String subId = getSubId(index, p_sourceTuvs);
         return isIncontextMatch(index, p_sourceTuvs, p_targetTuvs,
                 p_matchTypes, p_excludedItemTypes, subId, p_jobId);
     }
 
-    /**
+	@SuppressWarnings("rawtypes")
+	public static boolean isIncontextMatch(int index, List p_sourceTuvs,
+			List p_targetTuvs, MatchTypeStatistics p_matchTypes,
+			Vector<String> p_excludedItemTypes, String p_subId, long p_jobId)
+	{
+		int iceType = getIsIncontextMatchType(index, p_sourceTuvs,
+				p_targetTuvs, p_matchTypes,
+				p_excludedItemTypes, p_subId, p_jobId);
+		if (iceType > 0)
+			return true;
+		else
+			return false;
+	}
+
+	/**
      * Checks the match type is in-context match or not.
      * 
      * <p>
@@ -228,40 +252,59 @@ public class LeverageUtil
      * @param p_excludedItemTypes
      * @return
      */
-    public static boolean isIncontextMatch(int index, List p_sourceTuvs,
-            List p_targetTuvs, MatchTypeStatistics p_matchTypes,
-            Vector<String> p_excludedItemTypes, String p_subId, long p_jobId)
+	@SuppressWarnings("rawtypes")
+	public static int getIsIncontextMatchType(int index, List p_sourceTuvs,
+			List p_targetTuvs, MatchTypeStatistics p_matchTypes,
+			Vector<String> p_excludedItemTypes, String p_subId, long p_jobId)
     {
         if (isSIDContextMatch(index, p_sourceTuvs, p_matchTypes))
         {
-            return true;
+            return ICE_TYPE_SID_MATCHING;
         }
 
         if (isPassoloIncontextMatch(p_sourceTuvs.get(index), p_matchTypes,
                 p_jobId))
         {
-            return true;
+            return ICE_TYPE_PASSOLO_MATCHING;
         }
 
         if (isSidExistsAndNotEqual(p_sourceTuvs.get(index), p_matchTypes))
         {
-            return false;
+            return ICE_TYPE_NOT_ICE;
         }
 
         // Check current tuv is exact match.
         if (!isExactMatchLocalized(index, p_sourceTuvs, p_targetTuvs,
                 p_matchTypes, p_subId, p_jobId))
         {
-            return false;
+            return ICE_TYPE_NOT_ICE;
         }
 
         // For PO segment,if its target is valid, count it as "ICE" directly.
         if (isPoXlfICE(index, p_sourceTuvs, p_matchTypes, p_jobId))
         {
-            return true;
+            return ICE_TYPE_PO_XLF_MATCHING;
         }
 
-        // Check previous tuv is exact match.
+        if (isApplySidMatchToIceOnly(p_jobId))
+        {
+        	return ICE_TYPE_NOT_ICE;
+        }
+
+        // Check hash values.
+		if (isKeyMatchICE(index, p_sourceTuvs, p_matchTypes, p_subId, p_jobId))
+        {
+        	return ICE_TYPE_HASH_MATCHING;
+        }
+
+		// Don't apply "bracketed" ICE promotion.
+		if (isBracketIceMatchesDisabled(p_jobId))
+		{
+			return ICE_TYPE_NOT_ICE;
+		}
+
+		// Check if it is bracketed ICE:
+		// Check previous tuv is exact match.
         int previousIndex;
         for (previousIndex = index - 1; previousIndex >= 0; previousIndex--)
         {
@@ -275,13 +318,13 @@ public class LeverageUtil
         // No previous tuv.
         if (previousIndex < 0)
         {
-            return false;
+            return ICE_TYPE_NOT_ICE;
         }
 
         // Previous tuv is not exact match.
         if (!isExactMatch(previousIndex, p_sourceTuvs, p_matchTypes))
         {
-            return false;
+            return ICE_TYPE_NOT_ICE;
         }
 
         // Check next tuv is exact match.
@@ -298,16 +341,16 @@ public class LeverageUtil
         // No next.
         if (nextIndex >= p_sourceTuvs.size())
         {
-            return false;
+            return ICE_TYPE_NOT_ICE;
         }
 
         // Next tuv is not exact match.
         if (!isExactMatch(nextIndex, p_sourceTuvs, p_matchTypes))
         {
-            return false;
+            return ICE_TYPE_NOT_ICE;
         }
 
-        return true;
+        return ICE_TYPE_BRACKETED_MATCHING;
     }
 
     private static String getTuType(Object tuv, long p_jobId)
@@ -396,7 +439,8 @@ public class LeverageUtil
         return result;
     }
 
-    public static boolean isSIDContextMatch(int index, List p_sourceTuvs,
+    @SuppressWarnings("rawtypes")
+	public static boolean isSIDContextMatch(int index, List p_sourceTuvs,
             MatchTypeStatistics p_matchTypes)
     {
         return isSidContextMatch(p_sourceTuvs.get(index), p_matchTypes);
@@ -464,7 +508,8 @@ public class LeverageUtil
         return state == LeverageMatchLingManager.EXACT;
     }
 
-    public static boolean isExactMatch(int index, List p_sourceTuvs,
+    @SuppressWarnings("rawtypes")
+	public static boolean isExactMatch(int index, List p_sourceTuvs,
             MatchTypeStatistics p_matchTypes)
     {
         Object o = p_sourceTuvs.get(index);
@@ -497,7 +542,8 @@ public class LeverageUtil
      * @param p_matchTypes
      * @return
      */
-    public static boolean isExactMatchLocalized(int index, List p_sourceTuvs,
+    @SuppressWarnings("rawtypes")
+	public static boolean isExactMatchLocalized(int index, List p_sourceTuvs,
             List p_targetTuvs, MatchTypeStatistics p_matchTypes,
             String p_subId, long p_jobId)
     {
@@ -530,7 +576,8 @@ public class LeverageUtil
      * For PO segment, if it has a valid(not empty,different from source,
      * language matched) target from source file, take this TUV as ICE directly.
      */
-    private static boolean isPoXlfICE(int index, List p_sourceTuvs,
+    @SuppressWarnings("rawtypes")
+	private static boolean isPoXlfICE(int index, List p_sourceTuvs,
             MatchTypeStatistics p_matchTypes, long p_jobId)
     {
         if (p_sourceTuvs == null || p_sourceTuvs.size() == 0 || index < 0
@@ -572,5 +619,134 @@ public class LeverageUtil
         }
 
         return false;
+    }
+
+    @SuppressWarnings("rawtypes")
+	private static boolean isKeyMatchICE(int index, List p_sourceTuvs,
+            MatchTypeStatistics p_matchTypes, String p_subId, long p_jobId)
+    {
+		LeverageMatch lm = getLeverageMatchObject(index, p_sourceTuvs,
+				p_matchTypes, p_subId);
+		if (lm == null)
+			return false;
+
+        long preHash = -1;
+        long nextHash = -1;
+        Object o = p_sourceTuvs.get(index);
+        if (o instanceof Tuv)
+        {
+        	Tuv sourceTuv = (Tuv) o;
+            preHash = sourceTuv.getPreviousHash();
+            nextHash = sourceTuv.getNextHash();
+        }
+        else
+        {
+            SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
+            preHash = sourceTuv.getPreviousHash();
+            nextHash = sourceTuv.getNextHash();
+        }
+
+        if (preHash != -1 && nextHash != -1 && preHash != BaseTmTuv.FIRST_HASH
+				&& nextHash != BaseTmTuv.LAST_HASH
+				&& preHash == lm.getPreviousHash()
+				&& nextHash == lm.getNextHash())
+		{
+			return true;
+		}
+
+        return false;
+    }
+
+    @SuppressWarnings("rawtypes")
+	private static String getSubId(int index, List p_sourceTuvs)
+    {
+        String subId = DUMMY_SUBID;
+        Object o = p_sourceTuvs.get(index);
+        if (o instanceof Tuv)
+        {
+            subId = DUMMY_SUBID;
+        }
+        else
+        {
+            SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
+            subId = ((SegmentTmTu) sourceTuv.getTu()).getSubId();
+        }
+
+        return subId;
+    }
+
+    @SuppressWarnings("rawtypes")
+	private static LeverageMatch getLeverageMatchObject(int index,
+			List p_sourceTuvs, MatchTypeStatistics p_matchTypes,
+			String p_subId)
+    {
+        if (p_sourceTuvs == null || p_sourceTuvs.size() == 0 || index < 0
+                || index >= p_sourceTuvs.size())
+        {
+            return null;
+        }
+
+        long tuvId = -1;
+        Object o = p_sourceTuvs.get(index);
+        if (o instanceof Tuv)
+        {
+        	Tuv sourceTuv = (Tuv) o;
+            tuvId = sourceTuv.getId();
+        }
+        else
+        {
+            SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
+            tuvId = sourceTuv.getId();
+        }
+        Types types = p_matchTypes.getTypes(tuvId, p_subId);
+        if (types != null)
+        {
+        	return types.getLeverageMatch();
+        }
+
+        return null;
+    }
+
+    private static boolean isApplySidMatchToIceOnly(long jobId)
+    {
+		try
+		{
+			TranslationMemoryProfile tmp = BigTableUtil.getJobById(jobId)
+					.getL10nProfile().getTranslationMemoryProfile();
+			if (tmp.getIsContextMatchLeveraging()
+					&& tmp.getIcePromotionRules() == TranslationMemoryProfile.ICE_PROMOTION_SID_ONLY)
+			{
+				return true;
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+		}
+
+		return false;
+    }
+
+    private static boolean isBracketIceMatchesDisabled(long p_jobId)
+    {
+		try
+		{
+			Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
+			TranslationMemoryProfile tmp = job.getL10nProfile()
+					.getTranslationMemoryProfile();
+			int icePromotionRules = tmp.getIcePromotionRules();
+			if (tmp.getIsContextMatchLeveraging()
+					&& (icePromotionRules == TranslationMemoryProfile.ICE_PROMOTION_SID_ONLY 
+					|| icePromotionRules == TranslationMemoryProfile.ICE_PROMOTION_SID_HASH_MATCHES))
+	    	{
+	    		return true;
+	    	}
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+		}
+
+    	return false;
     }
 }

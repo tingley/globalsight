@@ -43,6 +43,7 @@ import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
@@ -1117,6 +1118,7 @@ public class StatisticsService
             ArrayList<Tuv> p_sourceTuvs, GlobalSightLocale p_sourceLocale,
             long p_jobId) throws Exception
     {
+    	Job job = BigTableUtil.getJobById(p_jobId);
         // sort the list first, put all tuvs whose source content equals
         // "repeated" in front of the list. it will affect worldserver xlf
         // files, other files will not be impacted.
@@ -1137,6 +1139,13 @@ public class StatisticsService
             PageTmTuv pageTmTuv = new PageTmTuv(originalTuv.getId(),
                     originalTuv.getGxml(), p_sourceLocale);
             pageTmTuv.setSid(originalTuv.getSid());
+            pageTmTuv.setPreviousHash(originalTuv.getPreviousHash());
+            pageTmTuv.setNextHash(originalTuv.getNextHash());
+            pageTmTuv.setJobId(p_jobId);
+            if (job != null)
+            {
+                pageTmTuv.setJobName(job.getJobName());
+            }
 
             pageTmTu.addTuv(pageTmTuv);
 
@@ -1185,6 +1194,10 @@ public class StatisticsService
         return result;
     }
 
+    /**
+	 * @deprecated This will not be run since 8.6.5 has removed leveraging
+	 *             default matches from TM profile. To be deleted.
+	 */
     private static boolean isDefaultContextMatch(String sourcePageId,
             SourcePage page)
     {

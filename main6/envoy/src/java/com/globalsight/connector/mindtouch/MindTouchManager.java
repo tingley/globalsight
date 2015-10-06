@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
+import com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -30,7 +31,6 @@ public class MindTouchManager
 {
     private static final Logger logger = Logger
             .getLogger(MindTouchManager.class);
-
 
     /**
      * Return all MindTouch connectors.
@@ -50,6 +50,14 @@ public class MindTouchManager
         }
 
         return HibernateUtil.search(hql, map);
+    }
+    
+    public static List<MindTouchConnectorTargetServer> getAllTargetServers(long sourceServerId)
+    {
+        String hql = "from MindTouchConnectorTargetServer e where e.isActive = 'Y' and e.sourceServerId = :sourceServerId";
+        HashMap<String, Long> map = new HashMap<String, Long>();
+        map.put("sourceServerId", sourceServerId);
+        return (List<MindTouchConnectorTargetServer>) HibernateUtil.search(hql, map);
     }
 
     public static MindTouchConnector getMindTouchConnectorById(long mtcId)

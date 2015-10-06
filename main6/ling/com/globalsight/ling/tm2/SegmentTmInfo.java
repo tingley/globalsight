@@ -135,11 +135,11 @@ public interface SegmentTmInfo
 
     public SegmentResultSet getAllSegments(Tm tm, long startTUId,
             Connection conn) throws LingManagerException;
-
+    @Deprecated
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap,
 			Connection conn) throws LingManagerException;
-
+    @Deprecated
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws LingManagerException;
@@ -152,11 +152,11 @@ public interface SegmentTmInfo
 
     public int getAllSegmentsCount(Tm tm, long startTUId)
             throws LingManagerException;
-
+    @Deprecated
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;
-
+    @Deprecated
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;

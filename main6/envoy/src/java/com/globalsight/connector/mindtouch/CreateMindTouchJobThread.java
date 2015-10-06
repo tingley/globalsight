@@ -384,6 +384,11 @@ public class CreateMindTouchJobThread implements Runnable
                 pageId = f.substring(0, f.indexOf("tags"));
                 flag = "tags";
             }
+            else if (f.endsWith("properties"))
+            {
+            	 pageId = f.substring(0, f.indexOf("properties"));
+                 flag = "properties";
+            }
 
             MindTouchPage mtp = pageInfoMap.get(pageId);
             if (mtp == null)
@@ -408,6 +413,10 @@ public class CreateMindTouchJobThread implements Runnable
                 else if ("tags".equals(flag))
                 {
                     contentsOrTags = helper.getPageTags(Long.parseLong(pageId));
+                }
+                else if("properties".equals(flag))
+                {
+                	contentsOrTags = helper.getPageProperties(Long.parseLong(pageId));
                 }
                 contentsOrTags = EditUtil.decodeXmlEntities(contentsOrTags);
                 FileUtil.writeFile(srcFile, contentsOrTags);
@@ -453,6 +462,10 @@ public class CreateMindTouchJobThread implements Runnable
         else if ("tags".equals(flag))
         {
             filePath.append("(tags).xml");
+        }
+        else if("properties".equals(flag))
+        {
+        	filePath.append("(properties).xml");
         }
 
         String str = filePath.toString().replace("\\", "/");

@@ -672,7 +672,7 @@ public abstract class AbstractTargetPagePersistence implements
 
         }
 
-        for (Iterator it = p_unAppliedTus.iterator(); it.hasNext();)
+        for (Iterator<Tu> it = p_unAppliedTus.iterator(); it.hasNext();)
         {
             TuImpl tu = (TuImpl) it.next();
             Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(tu);
@@ -696,8 +696,10 @@ public abstract class AbstractTargetPagePersistence implements
                         .getIdAsLong());
                 if (lss != null && lss.size() > 0)
                 {
-                    for (LeverageSegment segment : lss)
-                    {
+					LeverageSegment segment = SegmentUtil2
+							.getNextBestLeverageSegment(sourceTuv, lss);
+                	while (segment != null)
+                	{
                         hasOneHundredMatch = true;
 						boolean isTagMatched = SegmentUtil2.canBeModified(
 								targetTuv, segment.getSegment(), jobId);
@@ -723,6 +725,8 @@ public abstract class AbstractTargetPagePersistence implements
                             tuvGotChanged = true;
                             break;
                         }
+						segment = SegmentUtil2.getNextBestLeverageSegment(
+								sourceTuv, lss);
                     }
                 }
             }

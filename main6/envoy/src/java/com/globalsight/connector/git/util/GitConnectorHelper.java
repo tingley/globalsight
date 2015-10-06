@@ -174,7 +174,7 @@ public class GitConnectorHelper
     public void gitConnectorPull() throws IOException, WrongRepositoryStateException, 
     			InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, 
     			CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException
-    {	
+    {
     	FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
     	repositoryBuilder.setMustExist(true);
     	repositoryBuilder.setGitDir(new File(getGitFolder() + File.separator + ".git"));
@@ -247,14 +247,18 @@ public class GitConnectorHelper
     		
     		CommitCommand commitCommand = git.commit();
     		commitCommand.setMessage("GlobalSight Translation");
-    		if(StringUtil.isEmpty(gc.getUsername()))
+    		String username = "GlobalSight";
+    		String email = "";
+    		if(!StringUtil.isEmpty(gc.getUsername()))
     		{
-    			commitCommand.setCommitter("GlobalSight", "");
+    			username = gc.getUsername();
     		}
-    		else
+    		if(!StringUtil.isEmpty(gc.getEmail()))
     		{
-    			commitCommand.setCommitter(gc.getUsername(), "");
+    			email = gc.getEmail();
     		}
+    		commitCommand.setCommitter(username, email);
+    		commitCommand.setAuthor(username, email);
     		commitCommand.call();
     		
     		Set<String> remoteNames = repository.getRemoteNames();

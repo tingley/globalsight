@@ -323,7 +323,7 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
 		return m_localInstance.getAllSegmentsByParamMap(tm, paramMap, conn);
 	}
 
-	@Override
+    @Deprecated
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap,
 			Connection conn) throws RemoteException, LingManagerException
@@ -331,8 +331,7 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
 		return m_localInstance.getSegmentsByLocalesAndParamMap(tm, localeList,
 				paramMap, conn);
 	}
-
-	@Override
+	@Deprecated
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws RemoteException, LingManagerException
@@ -355,7 +354,7 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
 		return m_localInstance.getAllSegmentsCountByParamMap(tm, paramMap);
 	}
 
-	@Override
+	@Deprecated
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException
@@ -363,7 +362,7 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
 		return m_localInstance.getSegmentsCountByLocalesAndParamMap(tm,
 				localeList, paramMap);
 	}
-
+	@Deprecated
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException

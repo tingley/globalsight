@@ -373,18 +373,19 @@ public interface TmCoreManager
 	public int getAllSegmentsCountByParamMap(Tm tm, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;
 
+	@Deprecated
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap,
 			Connection conn) throws RemoteException, LingManagerException;
-
+	@Deprecated
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
 			List<String> localeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;
-
+	@Deprecated
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws RemoteException, LingManagerException;
-
+	@Deprecated
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException;

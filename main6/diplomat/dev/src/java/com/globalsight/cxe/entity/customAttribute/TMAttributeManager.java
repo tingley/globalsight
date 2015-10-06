@@ -31,6 +31,7 @@ import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 public class TMAttributeManager
 {
@@ -288,89 +289,147 @@ public class TMAttributeManager
         return result;
     }
 
-    public static boolean isTMPAttributeMatched(String tmpAttOp,
-            String tuAttValue, Object aValue)
+    /**
+	 * Decide if need disregard or penalize TM matches via checking TU
+	 * attributes and job attributes. If not matched, need disregard or penalize
+	 * TM matches.
+	 * 
+	 */
+    @SuppressWarnings("rawtypes")
+	public static boolean isTMPAttributeMatched(String tmpAttOp,
+            String tuAttValue, Object jobAttValue)
     {
-        boolean matched = false;
-        String strValue = null;
+    	if (isEmptyJobAttribute(jobAttValue) && StringUtil.isEmpty(tuAttValue))
+    	{
+    		return true;
+    	}
 
+    	boolean matched = false;
+        String strValue = null;
         if (TMAttributeCons.OP_EQUAL.equals(tmpAttOp))
         {
-            if (aValue != null && aValue instanceof List)
+            if (jobAttValue != null && jobAttValue instanceof List)
             {
-                if (isAttributeExactEquals(aValue, tuAttValue))
+                if (isAttributeExactEquals(jobAttValue, tuAttValue))
                 {
                     matched = true;
                 }
             }
             else
             {
-                strValue = aValue == null ? "" : aValue.toString();
+                strValue = jobAttValue == null ? "" : jobAttValue.toString();
                 if (tuAttValue != null && tuAttValue.equals(strValue))
                 {
                     matched = true;
                 }
             }
         }
-        else if (TMAttributeCons.OP_NOT_EQUAL.equals(tmpAttOp))
+        else if (TMAttributeCons.OP_CONTAIN.equals(tmpAttOp))
         {
-            if (aValue != null && aValue instanceof List)
-            {
-                boolean isEquals = isAttributeExactEquals(aValue, tuAttValue);
-                if (!isEquals)
-                {
-                    matched = true;
-                }
-            }
-            else
-            {
-                strValue = aValue == null ? "" : aValue.toString();
-                if (tuAttValue != null && !tuAttValue.equals(strValue))
-                {
-                    matched = true;
-                }
+        	if (jobAttValue == null)
+        	{
+        		matched = true;
+        	}
+        	else if (jobAttValue instanceof List)
+        	{
+        		HashSet<String> options = split(tuAttValue);
+        		HashSet<String> jobValues = toStringList((List) jobAttValue);
 
-                if (tuAttValue == null && strValue != null)
-                {
-                    matched = true;
-                }
-            }
+                matched = options.containsAll(jobValues);
+        	}
+        	else
+        	{
+        		strValue = jobAttValue.toString();
+        		if (tuAttValue != null && tuAttValue.indexOf(strValue) > -1)
+        		{
+        			matched = true;
+        		}
+        	}
         }
-        else if (TMAttributeCons.OP_MATCH.equals(tmpAttOp))
+        else if (TMAttributeCons.OP_NOT_CONTAIN.equals(tmpAttOp))
         {
-            if (aValue != null && aValue instanceof List)
-            {
-                List l = (List) aValue;
-                for (Object object : l)
-                {
-                    strValue = object == null ? "" : object.toString();
-                    if (tuAttValue == null || strValue == null)
-                    {
-                        matched = false;
-                        break;
-                    }
-                    else if (tuAttValue.matches(strValue))
-                    {
-                        matched = true;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                strValue = aValue == null ? "" : aValue.toString();
-                if (tuAttValue == null || strValue == null)
-                {
-                    matched = false;
-                }
-                else if (tuAttValue.matches(strValue))
-                {
-                    matched = true;
-                }
-            }
+        	if (jobAttValue == null)
+        	{
+        		matched = true;
+        	}
+        	else if (jobAttValue instanceof List)
+        	{
+        		HashSet<String> options = split(tuAttValue);
+        		HashSet<String> jobValues = toStringList((List) jobAttValue);
+
+        		matched = !options.containsAll(jobValues);
+        	}
+        	else
+        	{
+        		strValue = jobAttValue.toString();
+        		if (tuAttValue != null && tuAttValue.indexOf(strValue) == -1)
+        		{
+        			matched = true;
+        		}
+        	}
         }
 
         return matched;
+    }
+
+    @SuppressWarnings("rawtypes")
+	private static boolean isEmptyJobAttribute(Object jobAttValue)
+    {
+        if (jobAttValue == null)
+        {
+        	return true;
+        }
+        else if (jobAttValue instanceof String)
+		{
+			if (StringUtil.isEmpty((String) jobAttValue))
+			{
+				return true;
+			}
+		}
+		else if (jobAttValue instanceof List)
+		{
+	        if (isEmptyList((List) jobAttValue))
+			{
+				return true;
+			}
+		}
+
+        return false;
+    }
+
+    @SuppressWarnings("rawtypes")
+	private static boolean isEmptyList(List list)
+    {
+    	if (list == null || list.size() == 0) return true;
+
+    	String strValue = null;
+    	for (Object object : list)
+    	{
+    		strValue = object == null ? "" : object.toString();
+    		if (StringUtil.isNotEmpty(strValue))
+    		{
+    			return false;
+    		}
+    	}
+
+    	return true;
+    }
+
+    @SuppressWarnings("rawtypes")
+	private static HashSet<String> toStringList(List list)
+    {
+    	HashSet<String> items = new HashSet<String>();
+    	String strValue = null;
+        for (Object object : list)
+        {
+            strValue = object == null ? "" : object.toString();
+            if (strValue != null && strValue.trim().length() > 0)
+            {
+                items.add(strValue.trim());
+            }
+        }
+
+        return items;
     }
 
     public static Map<String, String> getTUAttributesForPopulator(
@@ -425,12 +484,7 @@ public class TMAttributeManager
         HashSet<String> jobAttValueItems = new HashSet<String>();
         if (jobAttValue != null && jobAttValue instanceof List)
         {
-            List l = (List) jobAttValue;
-            for (Object object : l)
-            {
-                String strValue = object == null ? "" : object.toString();
-                jobAttValueItems.add(strValue);
-            }
+			jobAttValueItems = toStringList((List) jobAttValue);
         }
 
         if (tuAttValueItems.size() != jobAttValueItems.size()
@@ -462,7 +516,8 @@ public class TMAttributeManager
             String[] strs = attValues.split(",");
             for (String str : strs)
             {
-                set.add(str);
+            	if (str != null && str.trim().length() > 0)
+            		set.add(str.trim());
             }
         }
         return set;

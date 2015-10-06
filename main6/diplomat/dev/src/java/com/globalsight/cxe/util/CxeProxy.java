@@ -218,6 +218,9 @@ public class CxeProxy
             s_targetLocales.remove(key);
         }
         params.put("key", key);
+        
+        // the uiKey is used in system activity page.
+        params.put("uiKey", KeyUtil.generateKey());
 
         // for GBS-2137, update the new job to "IN_QUEUE" state
         String state = job.getState();

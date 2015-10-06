@@ -18,6 +18,7 @@ package com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -33,6 +34,8 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.adapter.idml.IdmlConverter;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.jobhandler.Job;
@@ -78,9 +81,10 @@ public class PreviewPDFPageHandler extends PageHandler implements
         }
         else
         {
-            m_company_id = Long.valueOf(CompanyThreadLocal.getInstance()
-                    .getValue());
-            LOGGER.error("If can not view the pdf file besause the company id is incorrect.");
+            m_company_id = Long
+                    .valueOf(CompanyThreadLocal.getInstance().getValue());
+            LOGGER.error(
+                    "If can not view the pdf file besause the company id is incorrect.");
         }
 
         Object userobj = sessionMgr.getAttribute(WebAppConstants.USER);
@@ -92,12 +96,7 @@ public class PreviewPDFPageHandler extends PageHandler implements
         String userid = user == null ? null : user.getUserId();
 
         String action = p_request.getParameter("action");
-        File pdfFile = getPreviewPdf(p_request, userid, action);
-        EditorState state = (EditorState) sessionMgr
-                .getAttribute(WebAppConstants.EDITORSTATE);
-        long srcPageId = state.getSourcePageId();
-        long trgPageId = state.getTargetPageId();
-
+        
         if (action == null)
         {
             LOGGER.error("action is null.");
@@ -105,15 +104,48 @@ public class PreviewPDFPageHandler extends PageHandler implements
                     p_context);
             return;
         }
-
-        PreviewPDFHelper previewHelper = new PreviewPDFHelper();
-        PreviewPDFBO previewParams = previewHelper
-                .determineConversionParameters(srcPageId);
-        if (previewParams.getVersionType() == ADOBE_TYPE_IDML)
+        
+        File pdfFile = getPreviewPdf(p_request, userid, action);
+        
+        if (!pdfFile.exists())
         {
-            try
+            EditorState state = (EditorState) sessionMgr
+                    .getAttribute(WebAppConstants.EDITORSTATE);
+            long srcPageId = state.getSourcePageId();
+            long trgPageId = state.getTargetPageId();
+    
+            SourcePage srcPage = ServerProxy.getPageManager().getSourcePage(
+                    srcPageId);
+            String filePath = srcPage.getExternalPageId();
+            if (filePath.toLowerCase().startsWith("(adobe file information)"))
             {
-                if (!pdfFile.exists())
+                String inddFilePath = filePath
+                        .substring(filePath.indexOf(") ") + 2);
+                inddFilePath = inddFilePath.replace('/', '\\');
+                Collection<SourcePage> sourcePages = (Collection<SourcePage>) m_job
+                        .getSourcePages();
+                for (SourcePage sourcePage : sourcePages)
+                {
+                    String eid = sourcePage.getExternalPageId();
+                    eid = eid.replace('/', '\\');
+                    if (eid.equalsIgnoreCase(inddFilePath))
+                    {
+                        srcPageId = sourcePage.getId();
+                        trgPageId = sourcePage
+                                .getTargetPageByLocaleId(
+                                        state.getTargetLocale().getId())
+                                .getId();
+                        break;
+                    }
+                }
+            }
+            
+            PreviewPDFHelper previewHelper = new PreviewPDFHelper();
+            PreviewPDFBO previewParams = previewHelper
+                    .determineConversionParameters(srcPageId);
+            if (previewParams.getVersionType() == ADOBE_TYPE_IDML)
+            {
+                try
                 {
                     if (action.equals("previewSrc"))
                     {
@@ -126,52 +158,52 @@ public class PreviewPDFPageHandler extends PageHandler implements
                                 true);
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                ResourceBundle rb = PageHandler.getBundle(p_request
-                        .getSession());
-
-                LOGGER.error(e.getMessage(), e);
-                String msg = e.getMessage();
-                String error = "Read PDF Data Error!";
-                if ("idml converter is not started".equals(msg))
+                catch (Exception e)
                 {
-                    error = rb.getString("lb_filter_msg_convert_start_idml");
+                    ResourceBundle rb = PageHandler
+                            .getBundle(p_request.getSession());
+
+                    LOGGER.error(e.getMessage(), e);
+                    String msg = e.getMessage();
+                    String error = "Read PDF Data Error!";
+                    if ("idml converter is not started".equals(msg))
+                    {
+                        error = rb
+                                .getString("lb_filter_msg_convert_start_idml");
+                    }
+
+                    StringBuffer sb = new StringBuffer();
+                    sb.append(
+                            "<%@ page contentType=\"text/html; charset=UTF-8\" errorPage=\"error.jsp\" session=\"true\"%>");
+                    sb.append("<HTML>");
+                    sb.append("<HEAD>");
+                    sb.append(
+                            "<SCRIPT LANGUAGE=\"JavaScript\" SRC=\"/globalsight/includes/setStyleSheet.js\"></SCRIPT>");
+                    sb.append("</HEAD>");
+                    sb.append("<BODY>");
+                    sb.append(
+                            "<DIVSTYLE=\" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;\">");
+                    sb.append(
+                            "<DIV STYLE=\" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;\">");
+                    sb.append("<SPAN CLASS=\"headingError\">" + error
+                            + "</SPAN>");
+                    sb.append("</DIV>");
+                    sb.append("</BODY>");
+                    sb.append("</HTML>");
+                    p_response.getWriter().write(sb.toString());
+                    return;
+                    // super.invokePageHandler(p_pageDescriptor, p_request,
+                    // p_response, p_context);
                 }
 
-                StringBuffer sb = new StringBuffer();
-                sb.append("<%@ page contentType=\"text/html; charset=UTF-8\" errorPage=\"error.jsp\" session=\"true\"%>");
-                sb.append("<HTML>");
-                sb.append("<HEAD>");
-                sb.append("<SCRIPT LANGUAGE=\"JavaScript\" SRC=\"/globalsight/includes/setStyleSheet.js\"></SCRIPT>");
-                sb.append("</HEAD>");
-                sb.append("<BODY>");
-                sb.append("<DIVSTYLE=\" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;\">");
-                sb.append("<DIV STYLE=\" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;\">");
-                sb.append("<SPAN CLASS=\"headingError\">" + error + "</SPAN>");
-                sb.append("</DIV>");
-                sb.append("</BODY>");
-                sb.append("</HTML>");
-                p_response.getWriter().write(sb.toString());
-                return;
-                // super.invokePageHandler(p_pageDescriptor, p_request,
-                // p_response, p_context);
             }
-
-        }
-        else
-        {
-            if (action.equals("previewSrc"))
+            else
             {
-                if (!pdfFile.exists())
+                if (action.equals("previewSrc"))
                 {
                     pdfFile = previewHelper.createPDF(srcPageId, userid, false);
                 }
-            }
-            else if (action.equals("previewTar"))
-            {
-                if (!pdfFile.exists())
+                else if (action.equals("previewTar"))
                 {
                     pdfFile = previewHelper.createPDF(trgPageId, userid, true);
                 }
@@ -187,28 +219,25 @@ public class PreviewPDFPageHandler extends PageHandler implements
                         .getRealPath("/envoy/edit/inctxrv/pdf/");
                 // generate the new file for each preview to avoid PDF.js cache.
                 String fileName = nowDate.getTime() + "_" + pdfFile.getName();
-                
-                File pdfInWeb = new File(
-                        pdfroot + File.separator + "pdf_files",
+
+                File pdfInWeb = new File(pdfroot + File.separator + "pdf_files",
                         fileName);
                 if (pdfInWeb.exists())
                 {
                     pdfInWeb.delete();
                 }
                 pdfInWeb.getParentFile().mkdirs();
-                FileCopier.copyFile(pdfFile, pdfInWeb.getParentFile(), fileName);
-                
-                
+                FileCopier.copyFile(pdfFile, pdfInWeb.getParentFile(),
+                        fileName);
+
                 // start to delete old files on Monday
                 if (nowDate.getDay() == 1)
                 {
                     synchronized (locker)
                     {
-                        File[] files = pdfInWeb.getParentFile()
-                                .listFiles();
+                        File[] files = pdfInWeb.getParentFile().listFiles();
 
                         long newDate = nowDate.getTime();
-                        
 
                         for (File file : files)
                         {
@@ -231,7 +260,7 @@ public class PreviewPDFPageHandler extends PageHandler implements
 
                 String pdfUrl = "pdf_files/" + fileName;
                 p_request.setAttribute("pdfUrl", pdfUrl);
-                
+
                 super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                         p_context);
             }
@@ -242,10 +271,10 @@ public class PreviewPDFPageHandler extends PageHandler implements
         }
         else
         {
-            String msg = "Can not generate PDF file for review: "
-                    + pdfFile;
+            String msg = "Can not generate PDF file for review: " + pdfFile;
             LOGGER.error(msg);
-            p_request.setAttribute("errorMsg", "Can't generate PDF for review, please contact Admin for advice.");
+            p_request.setAttribute("errorMsg",
+                    "Can't generate PDF for review, please contact Admin for advice.");
             super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                     p_context);
         }
@@ -337,14 +366,48 @@ public class PreviewPDFPageHandler extends PageHandler implements
     public static boolean okForInContextReview(PagePair pagep)
     {
         String pageName = pagep.getPageName().toLowerCase();
-        
-        if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
-                || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
-                || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
+
+        try
         {
-            return true;
+            if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
+                    || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
+                    || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
+            {
+                SourcePage sourcePage = ServerProxy.getPageManager()
+                        .getSourcePage(pagep.getSourcePageId());
+                Job job = sourcePage.getRequest().getJob();
+                long fpId = sourcePage.getRequest().getDataSourceId();
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                        .readFileProfile(fpId);
+                String companyId = "" + job.getCompanyId();
+
+                if (pageName.endsWith(".xml")
+                        && PreviewPDFHelper.isXMLEnabled(companyId)
+                        && FileProfileUtil.isXmlPreviewPDF(fp))
+                {
+                    return true;
+                }
+
+                if ((pageName.endsWith(".indd") || pageName.endsWith(".idml"))
+                        && PreviewPDFHelper.isInDesignEnabled(companyId))
+                {
+                    return true;
+                }
+
+                if ((pageName.endsWith(".docx") || pageName.endsWith(".pptx")
+                        || pageName.endsWith(".xlsx"))
+                        && PreviewPDFHelper.isOfficeEnabled(companyId))
+                {
+                    return true;
+                }
+
+            }
         }
-        
+        catch (Exception ex)
+        {
+            LOGGER.error("pageName = " + pageName, ex);
+        }
+
         return false;
     }
 }

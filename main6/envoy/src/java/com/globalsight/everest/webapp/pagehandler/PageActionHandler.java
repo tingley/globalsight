@@ -27,14 +27,18 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.StringUtil;
 import com.sun.beans.editors.BooleanEditor;
 import com.sun.beans.editors.IntegerEditor;
 import com.sun.beans.editors.LongEditor;
@@ -46,6 +50,7 @@ public abstract class PageActionHandler extends PageHandler
             .getLogger(PageActionHandler.class);
     static private Map<Class, Class> EDITS = null;
     private ThreadLocal<Boolean> isReturn = new ThreadLocal<Boolean>();
+    private HttpServletRequest request = null;
 
     /**
      * Invokes this PageHandler
@@ -64,6 +69,7 @@ public abstract class PageActionHandler extends PageHandler
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
+        this.request = p_request;
         isReturn.set(null);
 
         beforeAction(p_request, p_response);
@@ -94,6 +100,37 @@ public abstract class PageActionHandler extends PageHandler
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
+    }
+    
+    /**
+     * Gets attribute from request, session manager and session.
+     * 
+     * @param key
+     * @return
+     */
+    protected Object get(String key)
+    {
+        Object ob = this.request.getAttribute(key);
+        if (ob != null)
+            return ob;
+        
+        ob = this.request.getParameterValues(key);
+        if (ob != null)
+            return ob;
+        
+        HttpSession session = request.getSession(false);
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        
+        ob = sessionManager.getAttribute(key);
+        if (ob != null)
+            return ob;
+        
+        ob = session.getAttribute(key);
+        if (ob != null)
+            return ob;
+        
+        return null;
     }
 
     protected void pageReturn()
@@ -224,8 +261,8 @@ public abstract class PageActionHandler extends PageHandler
                         + name.substring(4);
                 String[] value = parameters.get(key);
 
-                if (value != null)
-                {
+				if (value != null && StringUtil.isNotEmpty(value[0]))
+				{
                     PropertyEditorSupport editor = getEdit(parameterTypes[0]);
                     if (editor != null)
                     {
@@ -311,4 +348,14 @@ public abstract class PageActionHandler extends PageHandler
     public abstract void afterAction(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException,
             EnvoyServletException;
+
+    public HttpServletRequest getRequest()
+    {
+        return request;
+    }
+
+    public void setRequest(HttpServletRequest request)
+    {
+        this.request = request;
+    }
 }

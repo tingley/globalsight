@@ -31,6 +31,9 @@ public class Types
 {
     static private final Logger logger = Logger.getLogger(Types.class);
 
+    // Types values are from LeverageMatch object.
+    private LeverageMatch leverageMatch = null;
+
     private int statisticsType;// Threshold not-related
     private int statisticsTypeByThreshold;// Adjusted by threshold
     private int lingManagerMatchType;
@@ -152,4 +155,12 @@ public class Types
                 || matchState.equals(MatchState.SEGMENT_TM_EXACT_MATCH) || matchState
                     .equals(MatchState.PO_EXACT_MATCH));
     }
+
+	public LeverageMatch getLeverageMatch() {
+		return leverageMatch;
+	}
+
+	public void setLeverageMatch(LeverageMatch leverageMatch) {
+		this.leverageMatch = leverageMatch;
+	}
 }

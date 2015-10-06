@@ -99,9 +99,9 @@ public class MatchTypeStatistics
         Types types = new Types(statisticsType, statisticsTypeByThreshold,
                 lingManagerMatchType, p_matchState, isMtTranslation);
 
+        types.setLeverageMatch(match);
         // Set SID
         String sid = match.getSid();
-        // TmUtil.getSidForTuv(match.getTmId(), match.getMatchedTuvId());
         types.setSid(sid);
 
         m_matchTypes.put(key, types);

@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.systemActiviti
 
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,13 +30,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.util.fileImport.FileImportUtil;
+import com.globalsight.cxe.util.fileImport.sort.ImportRequestSortUtil;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.util.comparator.RequestFileComparator;
@@ -48,6 +45,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.ObjectUtil;
 
 /**
  * XmldtdFilePageHandler, A page handler to produce the entry page (index.jsp)
@@ -55,9 +53,6 @@ import com.globalsight.util.GeneralException;
  */
 public class WaitingRequestHandler extends PageActionHandler
 {
-    static private final Logger logger = Logger
-            .getLogger(WaitingRequestHandler.class);
-
     @ActionHandler(action = "remove", formClass = "")
     public void remove(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
@@ -68,6 +63,39 @@ public class WaitingRequestHandler extends PageActionHandler
             FileImportUtil.cancelUnimportFile(key);
         }
     }
+    
+    @ActionHandler(action = "upPriority", formClass = "")
+    public void upPriority(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+        String[] keys = request.getParameterValues("key");
+        ImportRequestSortUtil.upRequest(keys);
+    }
+    
+    @ActionHandler(action = "downPriority", formClass = "")
+    public void downPriority(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+        String[] keys = request.getParameterValues("key");
+        ImportRequestSortUtil.downRequest(keys);
+    }
+    
+    @ActionHandler(action = "topPriority", formClass = "")
+    public void topPriority(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+        String[] keys = request.getParameterValues("key");
+        ImportRequestSortUtil.topRequest(keys);
+    }
+    
+    @ActionHandler(action = "bottomPriority", formClass = "")
+    public void bottomPriority(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+        String[] keys = request.getParameterValues("key");
+        ImportRequestSortUtil.bottomRequest(keys);
+    }
+    
     
     /**
      * Get list of all rules.
@@ -94,6 +122,7 @@ public class WaitingRequestHandler extends PageActionHandler
         }
         
         List<RequestFile> requestVos = getAllRequestVos();
+        
         Locale uiLocale = (Locale) session
                 .getAttribute(WebAppConstants.UILOCALE);
         setTableNavigation(request, session, requestVos,
@@ -135,72 +164,64 @@ public class WaitingRequestHandler extends PageActionHandler
         return sb.toString();
     }
     
+    @SuppressWarnings("rawtypes")
     private List<RequestFile> getAllRequestVos()
     {
-        HashMap<String, String> fileProfileId2priority = new HashMap<String, String>();
         HashMap<String, FileProfileImpl> fileProfiles = new HashMap<String, FileProfileImpl>();
         
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
-        HashMap<String, CxeMessage> ms = new HashMap<String, CxeMessage>();
-        ms.putAll(FileImportUtil.WAITING_REQUEST);
-        for (CxeMessage t : ms.values())
+        HashMap<String, List<CxeMessage>> ms = ObjectUtil.deepClone(FileImportUtil.ON_HOLD_MESSAGE);
+        for (List<CxeMessage> ms2 : ms.values())
         {
-
-            RequestFile requestVo = new RequestFile();
-            HashMap args = t.getParameters();
-            String cId = (String) args.get("currentCompanyId");
-            String companyName = CompanyWrapper.getCompanyNameById(cId);
-            requestVo.setCompany(companyName);
-
-            String fileName = (String) args.get("Filename");
-            String fullname = AmbFileStoragePathUtils.getCxeDocDirPath()
-                    + File.separator + companyName + File.separator + fileName;
-            requestVo.setFile(fileName);
-            requestVo.setSize(new File(fullname).length());
-            requestVo.setKey((String) args.get("key"));
-            String fileProfileId = (String) args.get("FileProfileId");
-            FileProfileImpl fp = fileProfiles.get(fileProfileId);
-            if (fp == null)
+            int i = 1;
+            for (CxeMessage t : ms2)
             {
-                fp = HibernateUtil.get(FileProfileImpl.class,
-                        Long.parseLong(fileProfileId));
+                RequestFile requestVo = new RequestFile();
+                HashMap args = t.getParameters();
+                String cId = (String) args.get("currentCompanyId");
+                String companyName = CompanyWrapper.getCompanyNameById(cId);
+                requestVo.setCompany(companyName);
+
+                String fileName = (String) args.get("Filename");
+                String fullname = AmbFileStoragePathUtils.getCxeDocDirPath()
+                        + File.separator + companyName + File.separator + fileName;
+                requestVo.setFile(fileName);
+                requestVo.setSize(new File(fullname).length());
+                requestVo.setKey((String) args.get("uiKey"));
+                String fileProfileId = (String) args.get("FileProfileId");
+                FileProfileImpl fp = fileProfiles.get(fileProfileId);
                 if (fp == null)
                 {
-                    String hql = "from FileProfileImpl fp where fp.referenceFP = ?";
-                    fp = (FileProfileImpl) HibernateUtil.getFirst(hql, Long.parseLong(fileProfileId));
+                    fp = HibernateUtil.get(FileProfileImpl.class,
+                            Long.parseLong(fileProfileId));
+                    if (fp == null)
+                    {
+                        String hql = "from FileProfileImpl fp where fp.referenceFP = ?";
+                        fp = (FileProfileImpl) HibernateUtil.getFirst(hql, Long.parseLong(fileProfileId));
+                    }
+                    
+                    fileProfiles.put(fileProfileId, fp);
                 }
                 
-                fileProfiles.put(fileProfileId, fp);
+                requestVo.setFileProfile(fp.getName());
+                String jobId = (String) args.get("JobId");
+                JobImpl job = HibernateUtil.get(JobImpl.class,
+                        Long.parseLong(jobId));
+                requestVo.setJobId(job.getJobId());
+                requestVo.setJobName(job.getJobName());
+                String priority = (String) args.get("priority");
+                int sortPriority = (Integer) args.get("sortPriority");
+                
+                requestVo.setPriority(priority);
+                requestVo.setRequestTime((Date) args.get("requestTime"));
+                requestVo.setProject(job.getProject().getName());
+                requestVo.setSortTime((Long)(args.get("sortTime")));
+                requestVo.setSortPriority(sortPriority);
+                requestVo.setSortIndex(i++);
+                requestVos.add(requestVo);
             }
-            
-            requestVo.setFileProfile(fp.getName());
-            String jobId = (String) args.get("JobId");
-            JobImpl job = HibernateUtil.get(JobImpl.class,
-                    Long.parseLong(jobId));
-            requestVo.setJobId(job.getJobId());
-            requestVo.setJobName(job.getJobName());
-            String priority = (String) args.get("priority");
-            if (priority == null || priority.length() == 0)
-            {
-                priority = fileProfileId2priority.get(fileProfileId);
-                if (priority == null)
-                {
-                    long l10Id = fp.getL10nProfileId();
-                    BasicL10nProfile l10Profile = HibernateUtil.get(
-                            BasicL10nProfile.class, l10Id);
-                    priority = Integer.toString(l10Profile.getPriority());
-                    
-                    fileProfileId2priority.put(fileProfileId, priority);
-                }
-            }
-            
-            requestVo.setPriority(priority);
-            requestVo.setRequestTime((Date) args.get("requestTime"));
-            requestVo.setProject(job.getProject().getName());
-            requestVos.add(requestVo);
-
         }
-
+        
         return requestVos;
     }
 
@@ -209,6 +230,17 @@ public class WaitingRequestHandler extends PageActionHandler
             HttpServletResponse response)
     {
         dataForTable(request);
+        
+        String[] keys = request.getParameterValues("key");
+        if (keys != null)
+        {
+            ArrayList<String> keyList = new ArrayList<String>();
+            for (String key : keys)
+            {
+                keyList.add(key);
+            }
+            request.setAttribute("selectedKeys", keyList);
+        }
     }
 
     @Override

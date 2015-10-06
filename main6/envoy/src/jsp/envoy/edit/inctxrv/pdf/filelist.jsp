@@ -85,7 +85,7 @@ body {
 </style>
 <script>
 
-var curPageName = "<%=curPageName%>";
+var curPageName = "<%=curPageName.replace("\\", "\\\\")%>";
 var pageNames = new Array();
 var pageParas = new Array();
 
@@ -95,7 +95,7 @@ var pageParas = new Array();
                 if (PreviewPDFPageHandler.okForInContextReview(pagep))
                 {
 %>
-                pageNames[pageNames.length] = "<%=pagep.getPageName()%>";
+                pageNames[pageNames.length] = "<%=pagep.getPageName().replace("\\", "\\\\")%>";
                 
                 <% if (theTask != null) { %>
                 pageParas[pageParas.length] = "&sourcePageId=<%=pagep.getSourcePageId() %>&targetPageId=<%=pagep.getTargetPageId(state.getTargetLocale()) %>&taskId=<%= theTask.getId()%>";

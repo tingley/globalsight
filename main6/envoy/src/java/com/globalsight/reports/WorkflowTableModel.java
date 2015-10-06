@@ -221,15 +221,11 @@ public class WorkflowTableModel extends AbstractTableModel
 
                 if (m_jobCosting)
                 {
-                    TranslationMemoryProfile tmProfile = w.getJob()
-                            .getL10nProfile().getTranslationMemoryProfile();
-                    boolean isUseInContext = tmProfile
-                            .getIsContextMatchLeveraging();
                     boolean isInContextMatch = false;
                     try
                     {
-                        isInContextMatch = PageHandler.isInContextMatch(
-                                w.getJob(), isUseInContext);
+						isInContextMatch = PageHandler.isInContextMatch(w
+								.getJob());
                     }
                     catch (Exception e)
                     {

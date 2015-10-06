@@ -432,7 +432,19 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 		{
 			TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
 			LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm));
-
+			if (!paramMap.isEmpty())
+			{
+				String projectName = (String) paramMap.get("projectName");
+				if (StringUtil.isNotEmpty(projectName))
+				{
+					TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+							UPDATED_BY_PROJECT);
+					Map<TM3Attribute, Object> attrs = TM3Attributes.one(
+							projectAttr, projectName);
+					paramMap.remove("projectName");
+					paramMap.put("projectAttr", attrs);
+				}
+			}
 			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
 					.getAllDataByParamMap(paramMap).iterator());
 		}
@@ -479,6 +491,20 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 			LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm)
 					+ " paramMap " + paramMap);
 
+			if (!paramMap.isEmpty())
+			{
+				String projectName = (String) paramMap.get("projectName");
+				if (StringUtil.isNotEmpty(projectName))
+				{
+					TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+							UPDATED_BY_PROJECT);
+					Map<TM3Attribute, Object> attrs = TM3Attributes.one(
+							projectAttr, projectName);
+					paramMap.remove("projectName");
+					paramMap.put("projectAttr", attrs);
+				}
+			}
+			
 			return Long.valueOf(
 					tm3tm.getAllDataByParamMap(paramMap).getCount())
 					.intValue();
@@ -489,7 +515,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
+	@Deprecated
 	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
 			List<String> localeCodeList, Map<String, Object> paramMap,
 			Connection conn) throws LingManagerException
@@ -511,7 +537,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
+	@Deprecated
 	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
 			List<String> localeCodeList, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException
@@ -532,7 +558,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
+	@Deprecated
 	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap, Connection conn)
 			throws LingManagerException
@@ -555,7 +581,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 		}
 	}
 
-	@Override
+	@Deprecated
 	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
 			String projectName, Map<String, Object> paramMap)
 			throws RemoteException, LingManagerException

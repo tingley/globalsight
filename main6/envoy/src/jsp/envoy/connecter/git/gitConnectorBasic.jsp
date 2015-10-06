@@ -27,6 +27,7 @@
 	String name = "";
 	String username = "";
 	String password = "";
+	String email = "";
 	String branch = "master";
 	String url = "";
 	String desc = "";
@@ -42,6 +43,7 @@
 		name = connector.getName();
         username = connector.getUsername();
         password = connector.getPassword();
+        email = connector.getEmail();
         branch = connector.getBranch();
         privateKeyFile = connector.getPrivateKeyFile();
         url = connector.getUrl();
@@ -73,6 +75,24 @@ var guideNode = "GitConnector";
 var needWarning = false;
 var helpFile = "<%=bundle.getString("help_git_connector_basic")%>";
 
+var changed = true;
+<%if(edit){%>
+var originalName = "<%=name%>";
+var originalUsername = "<%=username%>";
+var originalPassword = "<%=password%>";
+var originalUrl = "<%=url%>";
+var originalPrivateKeyFile = "<%=privateKeyFile%>";
+
+function isChanged()
+{
+	if(originalName == $("#name").val() && originalUsername == $("#username").val() && originalPassword == $("#password").val()
+			&& originalUrl == $("#url").val() && originalPrivateKeyFile == $("#privateKeyFile").val())
+	{
+		changed = false;
+	}
+}
+<%}%>
+
 function cancel()
 {
 	$("#gitForm").attr("action", "<%=cancelURL%>").submit();
@@ -84,6 +104,7 @@ function save()
     {
     	<%if(edit){%>
     	$("#branch").attr("disabled",false);
+    	isChanged();
     	<%}%>
         testConnect();
     }
@@ -92,9 +113,10 @@ function save()
 function testConnect()
 {
     $("#idDiv").mask("<%=bundle.getString("msg_git_wait_connect")%>");
+    var url = "<%=testURL%>" + "&changed=" + changed;
     $("#gitForm").ajaxSubmit({
         type: 'post',  
-        url: "<%=testURL%>" , 
+        url: url , 
         dataType:'json',
         timeout:100000000,
         success: function(data){
@@ -145,6 +167,13 @@ function confirmForm()
         return false;
     }
     
+    if(!isEmptyString(gitForm.email.value) && !validEmail(gitForm.email.value))
+    {
+    	alert("<%=bundle.getString("jsmsg_email_invalid")%>");
+    	gitForm.email.focus();
+        return false;
+    }
+    
     var url = $("#url").val();
     if (url.indexOf("http") != 0 && isEmptyString(gitForm.privateKeyFile.value))
     {
@@ -155,8 +184,6 @@ function confirmForm()
 
     if(url.indexOf("http") == 0)
     {
-    	$("#privateKeyFilePath").val("");
-    	
     	var end = url.indexOf("@");
     	if(end > 0)
     	{
@@ -187,10 +214,6 @@ function confirmForm()
     	}
     	
     	$("#privateKeyFile").val("");
-    }
-    else
-    {
-    	$("#username").val("");
     }
 
     return true;
@@ -233,7 +256,7 @@ function validName()
 
     <div style="float: left;">
     <FORM name="gitForm" id="gitForm" method="post" action="">
-    <input type="hidden" name="id" value="<%=id%>" />
+    <input type="hidden" name="id" id="id" value="<%=id%>" />
     <%if(edit){%>
     <input type="hidden" name="companyId" value="<%=companyId%>" />
     <%}%>
@@ -254,13 +277,17 @@ function validName()
             <td><%=bundle.getString("lb_branch")%><span class="asterisk">*</span>:</td>
             <td><input type="text" name="branch" id="branch" style="width: 360px;" value="<%=branch%>" <% if(edit){%>disabled<%} %> maxLength="200"></td>
         </tr>
-        <tr id="usernameTr">
+        <tr>
             <td><%=bundle.getString("lb_user_name")%>:</td>
             <td><input type="text" name="username" id="username" style="width: 360px;" value="<%=username%>" maxLength="200"></td>
         </tr>
         <tr>
             <td><%=bundle.getString("lb_password")%>:</td>
             <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200"></td>
+        </tr>
+        <tr>
+            <td><%=bundle.getString("lb_email")%>:</td>
+            <td><input type="text" name="email" id="email" style="width: 360px;" value="<%=email%>" maxLength="200"></td>
         </tr>
         <tr id="privateKeyFilePathTr">
             <td><%=bundle.getString("lb_private_key_file_path")%><span class="asterisk">*</span>:</td>
@@ -284,12 +311,10 @@ function validName()
 var url = $("#url").val();
 if(url.indexOf("http") == 0)
 {
-	$("#usernameTr").show();
 	$("#privateKeyFilePathTr").hide();
 }
 else
 {
-	$("#usernameTr").hide();
 	$("#privateKeyFilePathTr").show();
 }
 
@@ -297,12 +322,10 @@ $("#url").keyup(function(){
 	var url = $("#url").val();
 	if(url.indexOf("http") == 0)
 	{
-		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
 	else
 	{
-		$("#usernameTr").hide();
 		$("#privateKeyFilePathTr").show();
 	}
 });
@@ -311,12 +334,10 @@ $("#url").keydown(function(){
 	var url = $("#url").val();
 	if(url.indexOf("http") == 0)
 	{
-		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
 	else
 	{
-		$("#usernameTr").hide();
 		$("#privateKeyFilePathTr").show();
 	}
 });
@@ -325,12 +346,10 @@ $("#url").focus(function(){
 	var url = $("#url").val();
 	if(url.indexOf("http") == 0)
 	{
-		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
 	else
 	{
-		$("#usernameTr").hide();
 		$("#privateKeyFilePathTr").show();
 	}
 });
@@ -339,12 +358,10 @@ $("#url").blur(function(){
 	var url = $("#url").val();
 	if(url.indexOf("http") == 0)
 	{
-		$("#usernameTr").show();
 		$("#privateKeyFilePathTr").hide();
 	}
 	else
 	{
-		$("#usernameTr").hide();
 		$("#privateKeyFilePathTr").show();
 	}
 });

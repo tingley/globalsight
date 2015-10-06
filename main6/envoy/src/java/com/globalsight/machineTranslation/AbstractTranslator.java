@@ -432,9 +432,12 @@ public abstract class AbstractTranslator implements MachineTranslator
 				// MS Translator will add extra space before < and after > like
 				// "> <", " <" and "> ".
 	        	injected = StringUtil.replace(injected, "> <", "><");
-	        	injected = StringUtil.replace(injected, "> ", ">");
-	        	injected = StringUtil.replace(injected, " <", "<");
-	        	results[i] = heads.get(i) + injected + "</segment>";
+//	        	injected = StringUtil.replace(injected, "> ", ">");
+//	        	injected = StringUtil.replace(injected, " <", "<");
+	        	injected = heads.get(i) + injected + "</segment>";
+
+				results[i] = MTHelper.fixInternalTextAfterMTTranslation(
+						segments[i], injected);
 			}
 			catch (Exception e)
 			{

@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -39,10 +40,12 @@ import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.TMPAttributeComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.SortUtil;
 
 public class ModifyTMProfileHandler extends PageHandler implements
         TMProfileConstants
@@ -221,6 +224,10 @@ public class ModifyTMProfileHandler extends PageHandler implements
                 .getTMProfileById(tmProfileId);
 
         HttpSession session = p_request.getSession(false);
+		Locale uiLocale = (Locale) session
+				.getAttribute(WebAppConstants.UILOCALE);
+		if (uiLocale == null)
+			uiLocale = Locale.ENGLISH;
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
 
@@ -230,12 +237,14 @@ public class ModifyTMProfileHandler extends PageHandler implements
         String actionType = (String) p_request.getParameter(ACTION);
         sessionMgr.setAttribute(ACTION, actionType);
 
-        List<TMPAttribute> tmpas = tmProfile.getAllTMPAttributes();
         List<String> allAtt = TMPAttributeManager
                 .getAvailableAttributenames(tmProfile);
-
         p_request.setAttribute(TMP_AVAILABLE_ATTS,
                 TMPAttributeManager.toOneStr(allAtt));
+
+        List<TMPAttribute> tmpas = tmProfile.getAllTMPAttributes();
+        SortUtil.sort(tmpas, new TMPAttributeComparator(
+				TMPAttributeComparator.ORDER, uiLocale));
         p_request.setAttribute(TMP_TMP_ATTS, TMPAttributeManager.toOne(tmpas));
     }
 }

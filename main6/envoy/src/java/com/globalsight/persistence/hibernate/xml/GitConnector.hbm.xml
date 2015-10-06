@@ -20,6 +20,8 @@
             not-null="false" unique="false" />
         <property name="password" length="300" column="PASSWORD" type="string"
             not-null="false" unique="false" />
+        <property name="email" length="300" column="EMAIL" type="string"
+            not-null="false" unique="false" />
         <property name="branch" length="300" column="BRANCH" type="string"
             not-null="false" unique="false" />
         <property name="privateKeyFile" length="300" column="PRIVATE_KEY_FILE" type="string"

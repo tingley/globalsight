@@ -654,7 +654,8 @@ public class Exporter
             // MindTouch file name is like "$MindTouch Title$(contents).xml" or
             // ""$MindTouch Title$(tags).xml".
             if (finalFileName.endsWith("(contents).xml")
-                    || finalFileName.endsWith("(tags).xml"))
+                    || finalFileName.endsWith("(tags).xml")
+                    || finalFileName.endsWith("(properties).xml"))
             {
                 finalFileName = finalFileName.replace("/", "\\");
                 String sourceLocale = wf.getJob().getL10nProfile()
@@ -686,6 +687,11 @@ public class Exporter
                         else if (finalFileName.endsWith("(tags).xml"))
                         {
                             helper.putPageTags(trgFile, pageInfo, sourceLocale,
+                                    targetLocale);
+                        }
+                        else if(finalFileName.endsWith("(properties).xml"))
+                        {
+                        	helper.putPageProperties(trgFile, pageInfo, sourceLocale,
                                     targetLocale);
                         }
                     }

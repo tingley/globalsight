@@ -18,6 +18,7 @@
     com.globalsight.everest.foundation.User,
     com.globalsight.everest.servlet.util.SessionManager,
     com.globalsight.everest.webapp.pagehandler.PageHandler,
+    com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper,
     java.text.MessageFormat,java.util.*"
     session="true"
 %>
@@ -184,18 +185,9 @@
 		appletcontent.append(" </APPLET>");
 	}
 	
-    boolean enabledInContextReview = false;
-
-    try
-    {
-        enabledInContextReview = "true".equals(sysConfig.getStringParameter(
-                SystemConfigParamNames.INCTXRV_ENABLE,
-                "" + jobImpl.getCompanyId()));
-    }
-    catch (Exception ex)
-    {
-        // ignore
-    }
+	boolean okForInContextReviewXml = PreviewPDFHelper.isXMLEnabled("" + jobImpl.getCompanyId());
+	boolean okForInContextReviewIndd = PreviewPDFHelper.isInDesignEnabled("" + jobImpl.getCompanyId());
+	boolean okForInContextReviewOffice = PreviewPDFHelper.isOfficeEnabled("" + jobImpl.getCompanyId());
 %>
 <html>
 <head>
@@ -232,7 +224,7 @@
 </style>
 <script type="text/javascript">
 var pageNames = new Array();
-var xmlPDFs = new Array();
+var incontextReviewPDFs = new Array();
 
 function contorlTargetLocale(){
 	var localeSelect = document.getElementById("<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>");
@@ -718,7 +710,7 @@ function contextForPage(url, e, displayName)
 
     var allowEditSource = eval('${allowEditSourcePage}');
     var canEditSource = eval('${canEditSourcePage}');
-    var xmlPdf = xmlPDFs[displayName];
+    var incontextReviewPDF = incontextReviewPDFs[displayName];
     displayName = pageNames[displayName];
     
     var fileName = displayName;
@@ -731,17 +723,8 @@ function contextForPage(url, e, displayName)
     	}
     }
     
-    var showInContextReview = displayName && (fileName.toLowerCase().match(/\.indd$/) || fileName.toLowerCase().match(/\.idml$/)
-    		|| fileName.toLowerCase().match(/\.docx$/) || fileName.toLowerCase().match(/\.pptx$/) || fileName.toLowerCase().match(/\.xlsx$/));
-    
-    if (!showInContextReview && 1 == xmlPdf)
-    {
-    	showInContextReview = true;
-    }
-    
-    <% if (!enabledInContextReview) {%>
-    showInContextReview = false;
-    <% } %>
+    var showInContextReview = (1 == incontextReviewPDF);
+    var inctxTitle = "Open In Context Review";
 
     if (allowEditSource)
     {
@@ -756,7 +739,7 @@ function contextForPage(url, e, displayName)
        
        if (showInContextReview)
        {
-    	   popupoptions[popupoptions.length] = new ContextItem("Open In Context Review",
+    	   popupoptions[popupoptions.length] = new ContextItem(inctxTitle,
        	        function(){ openInContextReview(url);});
        }
     }
@@ -771,7 +754,7 @@ function contextForPage(url, e, displayName)
        
        if (showInContextReview)
        {
-    	   popupoptions[popupoptions.length] = new ContextItem("Open In Context Review",
+    	   popupoptions[popupoptions.length] = new ContextItem(inctxTitle,
        	        function(){ openInContextReview(url);});
        }
     }
@@ -1038,10 +1021,30 @@ JobSourcePageDisplay jobSourcePageDisplay = null;
 for (int i = 0; i < jobSourcePageDisplayList.size(); i++)
 {
 	jobSourcePageDisplay = jobSourcePageDisplayList.get(i);
+	String pageName = jobSourcePageDisplay.getSourcePage().getDisplayPageName().replace("\\","/");
 	FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(jobSourcePageDisplay.getSourcePage().getRequest().getDataSourceId());
+	
+	String pageNameLow = jobSourcePageDisplay.getSourcePage().getExternalPageId().toLowerCase();
+    boolean isXml = pageNameLow.endsWith(".xml");
+    boolean isInDesign = pageNameLow.endsWith(".indd") || pageNameLow.endsWith(".idml");
+    boolean isOffice = pageNameLow.endsWith(".docx") || pageNameLow.endsWith(".pptx") || pageNameLow.endsWith(".xlsx");
+    
+    boolean enableInContextReivew = false;
+    if (isXml)
+    {
+        enableInContextReivew = okForInContextReviewXml ? FileProfileUtil.isXmlPreviewPDF(fp) : false;
+    }
+    if (isInDesign)
+    {
+        enableInContextReivew = okForInContextReviewIndd;
+    }
+    if (isOffice)
+    {
+        enableInContextReivew = okForInContextReviewOffice;
+    }
     {%>
-       	pageNames[<%=i%>] = "<%=jobSourcePageDisplay.getSourcePage().getDisplayPageName().replace("\\","/")%>";
-       	xmlPDFs[<%=i%>] = <%=(FileProfileUtil.isXmlPreviewPDF(fp) ? 1 : 0 )%>;
+       	pageNames[<%=i%>] = "<%=pageName%>";
+       	incontextReviewPDFs[<%=i%>] = <%=(enableInContextReivew ? 1 : 0 )%>;
   <%}
 }
 %>

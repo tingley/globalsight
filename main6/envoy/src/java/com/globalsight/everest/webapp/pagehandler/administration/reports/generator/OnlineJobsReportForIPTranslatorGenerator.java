@@ -46,15 +46,15 @@ import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
@@ -72,7 +72,6 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -3143,12 +3142,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             // cost only
             totalAdditionalCost -= tmpTotalAdditionalCost;
 
-            TranslationMemoryProfile tmProfile = j.getL10nProfile()
-                    .getTranslationMemoryProfile();
-            boolean isInContextMatch = PageHandler.isInContextMatch(j,
-                    tmProfile);
-            boolean isDefaultContextMatch = PageHandler
-                    .isDefaultContextMatch(j);
+			boolean isInContextMatch = PageHandler.isInContextMatch(j);
+			boolean isDefaultContextMatch = PageHandler
+					.isDefaultContextMatch(j);
 
             HashMap<Long, Cost> workflowMap = jobCost.getWorkflowCost();
             for (Workflow w : j.getWorkflows())

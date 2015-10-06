@@ -85,6 +85,7 @@ import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.FileListBuilder;
 import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -846,23 +847,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     repPageData.setServerInstanceID(ServerUtil
                             .getServerInstanceID());
 
-                    boolean isUseInContext = job.getL10nProfile()
-                            .getTranslationMemoryProfile()
-                            .getIsContextMatchLeveraging();
-                    boolean isInContextMatch = false;
-                    try
-                    {
-                        isInContextMatch = PageHandler.isInContextMatch(job,
-                                isUseInContext);
-                    }
-                    catch (Exception e)
-                    {
-                        CATEGORY.error(
-                                "Can not get the value of in context match", e);
-                    }
-                    boolean isDefaultContextMatch = PageHandler
-                            .isDefaultContextMatch(job);
-
                     ArrayList<BaseTmTuv> splittedTuvs = new ArrayList<BaseTmTuv>();
                     try
                     {
@@ -877,11 +861,12 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     {
                         CATEGORY.error("Can not get source tuvs.", e);
                     }
-                    if (isInContextMatch)
+
+					if (PageHandler.isInContextMatch(job))
                     {
-                        OPD = updateOfflinePageData(OPD, matchs, splittedTuvs);
+						OPD = updateOfflinePageData(OPD, matchs, splittedTuvs);
                     }
-                    else if (isDefaultContextMatch
+                    else if (PageHandler.isDefaultContextMatch(job)
                             && trgPage.getIsDefaultContextMatch())
                     {
                         OPD = updateDefaultContextOfflinePageDate(OPD, matchs);
@@ -1306,37 +1291,58 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 subId = segment.getSubflowId();
             }
 
-            if (segment.isProtectedChangeable()
-                    && LeverageUtil.isIncontextMatch(i, splittedTuvs, null,
-                            matchs, new Vector(), subId, jobId))
+            if (segment.isProtectedChangeable())
             {
-                segment = (OfflineSegmentData) vector.get(i);
-                if (opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
-                        || opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE)
-                    segment.setWriteAsProtectedSegment(false);
-                else
-                {
-                    if (segment.getTargetTuv().getState()
-                            .equals(TuvState.LOCALIZED))
-                        segment.setWriteAsProtectedSegment(false);
-                    else
-                        segment.setWriteAsProtectedSegment(true);
-                }
-                segment.setDisplayMatchType("Context Exact Match");
-                vector.set(i, segment);
+				int iceType = LeverageUtil.getIsIncontextMatchType(i,
+						splittedTuvs, null, matchs, new Vector(), subId, jobId);
+				if (iceType > 0)
+				{
+	                segment = (OfflineSegmentData) vector.get(i);
+	                if (opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
+	                        || opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE)
+	                    segment.setWriteAsProtectedSegment(false);
+	                else
+	                {
+	                    if (segment.getTargetTuv().getState()
+	                            .equals(TuvState.LOCALIZED))
+	                        segment.setWriteAsProtectedSegment(false);
+	                    else
+	                        segment.setWriteAsProtectedSegment(true);
+	                }
+
+	                if (iceType == LeverageUtil.ICE_TYPE_SID_MATCHING)
+	                {
+	                	segment.setDisplayMatchType("Context Exact Match(SID Promotion)");
+	                }
+	                else if (iceType == LeverageUtil.ICE_TYPE_HASH_MATCHING)
+	                {
+	                	segment.setDisplayMatchType("Context Exact Match(Hash Promotion)");
+	                }
+	                else if (iceType == LeverageUtil.ICE_TYPE_BRACKETED_MATCHING)
+	                {
+	                	segment.setDisplayMatchType("Context Exact Match(Bracketed Promotion)");
+	                }
+	                else
+	                {
+		                segment.setDisplayMatchType("Context Exact Match");
+	                }
+
+	                vector.set(i, segment);
+				}
             }
         }
 
         for (int i = 0; i < splittedTuvs.size(); i++)
         {
-            if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
-                    excludedTypes, jobId))
+        	String subId = getSubId(i, splittedTuvs);
+			int iceType = LeverageUtil.getIsIncontextMatchType(i, splittedTuvs,
+					null, matchs, excludedTypes, subId, jobId);
+            if (iceType > 0)
             {
                 long id = ((SegmentTmTuv) splittedTuvs.get(i)).getId();
                 for (int j = 0; j < vector.size(); j++)
                 {
-                    OfflineSegmentData segment = (OfflineSegmentData) vector
-                            .get(j);
+                    OfflineSegmentData segment = (OfflineSegmentData) vector.get(j);
                     Tuv tuv = segment.getSourceTuv();
                     // Only apply this to "main" segment
                     if (segment.isProtectedChangeable() && tuv != null
@@ -1347,9 +1353,26 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                                 && opd.getTMEditType() != AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
                                 && !segment.getTargetTuv().getState()
                                         .equals(TuvState.LOCALIZED))
-                            segment.setWriteAsProtectedSegment(true);
+                        {
+                            segment.setWriteAsProtectedSegment(true);                        	
+                        }
 
-                        segment.setDisplayMatchType("Context Exact Match");
+    	                if (iceType == LeverageUtil.ICE_TYPE_SID_MATCHING)
+    	                {
+    	                	segment.setDisplayMatchType("Context Exact Match(SID Promotion)");
+    	                }
+    	                else if (iceType == LeverageUtil.ICE_TYPE_HASH_MATCHING)
+    	                {
+    	                	segment.setDisplayMatchType("Context Exact Match(Hash Promotion)");
+    	                }
+    	                else if (iceType == LeverageUtil.ICE_TYPE_BRACKETED_MATCHING)
+    	                {
+    	                	segment.setDisplayMatchType("Context Exact Match(Bracketed Promotion)");
+    	                }
+    	                else
+    	                {
+    		                segment.setDisplayMatchType("Context Exact Match");
+    	                }
                         break;
                     }
                 }
@@ -1358,6 +1381,24 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
         opd.setSegmentList(vector);
         return opd;
+    }
+
+    @SuppressWarnings("rawtypes")
+	private static String getSubId(int index, List p_sourceTuvs)
+    {
+        String subId = LeverageUtil.DUMMY_SUBID;
+        Object o = p_sourceTuvs.get(index);
+        if (o instanceof Tuv)
+        {
+            subId = LeverageUtil.DUMMY_SUBID;
+        }
+        else
+        {
+            SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
+            subId = ((SegmentTmTu) sourceTuv.getTu()).getSubId();
+        }
+
+        return subId;
     }
 
     /**

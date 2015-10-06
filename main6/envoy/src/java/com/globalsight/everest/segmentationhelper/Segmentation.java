@@ -71,7 +71,7 @@ public class Segmentation
     /**
      * White space is defined as [\t\n\f\r\p{Z}].
      */
-    private static final Pattern whitespace = Pattern.compile("\\s+");
+    private static final Pattern whitespace = Pattern.compile("[\\s\\xA0]+");
 
     // "</  >"
     private static final Pattern closemark = Pattern

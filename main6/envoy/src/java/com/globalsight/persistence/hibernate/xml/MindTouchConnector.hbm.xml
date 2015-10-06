@@ -20,5 +20,7 @@
             type="long" not-null="true" />
         <property name="isActive" column="IS_ACTIVE" type="yes_no"
             not-null="true" unique="false" />
+        <property name="isPostToSourceServer" column="IS_POST_TO_SOURCE_SERVER" type="yes_no"
+            not-null="true" unique="false" />
     </class>
 </hibernate-mapping>

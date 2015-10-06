@@ -1864,7 +1864,6 @@
         <PageLink linkName="bottomMenu" destinationPageName="SE3"></PageLink>
         <PageLink linkName="details" destinationPageName="SE9"></PageLink>
         <PageLink linkName="options" destinationPageName="SE11"></PageLink>
-          <PageLink linkName="concordance" destinationPageName="CTMB"></PageLink>   
       </WebPage>
       <WebPage pageName="SE2" isDefault="false" jspName="/envoy/edit/online/se_topMenu.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.SegmentEditorPageHandler">
         <PageLink linkName="save" destinationPageName="SE1"></PageLink>
@@ -2002,7 +2001,6 @@
         <PageLink linkName="save" destinationPageName="EDN2"></PageLink>
         <PageLink linkName="close" destinationPageName="TK2"></PageLink>
         <PageLink linkName="tminfo" destinationPageName="EDN3"></PageLink>
-        <PageLink linkName="concordance" destinationPageName="CTMB"></PageLink>
         <PageLink linkName="splitmerge" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="refresh" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="search" destinationPageName="EDN2Search"></PageLink>
@@ -2019,7 +2017,6 @@
       jspName="/envoy/edit/online2/tmwindow.jsp" 
       pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.SegmentEditorPageHandler"> 
         <PageLink linkName="tminfo" destinationPageName="EDN3"/>
-        <PageLink linkName="concordance" destinationPageName="CTMB"/>
       </WebPage>
       <WebPage pageName="EDN4" isDefault="false" jspName="/envoy/edit/online2/options.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.OptionsPageHandler">
         <PageLink linkName="options" destinationPageName="EDN4"></PageLink>
@@ -2953,13 +2950,19 @@
       <WebPage pageName="SORRECARDREPORT" isDefault="true" jspName="/envoy/administration/reports/ScorecardReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportPostReviewQA">
-      <WebPage pageName="POSTREVIEWQA" isDefault="true" jspName="/envoy/administration/reports/PostReviewQAReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="POSTREVIEWQA" isDefault="true" jspName="/envoy/administration/reports/PostReviewQAReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      <PageLink linkName="self" destinationPageName="POSTREVIEWQA"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportTranslationsEdit">
-      <WebPage pageName="TRANSLATIONSEDIT" isDefault="true" jspName="/envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="TRANSLATIONSEDIT" isDefault="true" jspName="/envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+      	<PageLink linkName="self" destinationPageName="TRANSLATIONSEDIT"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportTranslationVerification">
-    	<WebPage pageName="TRANSLATIONVERIFICATION" isDefault="true" jspName="/envoy/administration/reports/translationVerificationReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+    	<WebPage pageName="TRANSLATIONVERIFICATION" isDefault="true" jspName="/envoy/administration/reports/translationVerificationReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+    	<PageLink linkName="self" destinationPageName="TRANSLATIONVERIFICATION"></PageLink>
+    	</WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportTranslationProgress">
       <WebPage pageName="TRANSLATIONPROGRESS" isDefault="true" jspName="/envoy/administration/reports/translationProgressXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>

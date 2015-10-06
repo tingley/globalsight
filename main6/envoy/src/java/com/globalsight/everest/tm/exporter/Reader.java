@@ -17,6 +17,7 @@
 
 package com.globalsight.everest.tm.exporter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,8 @@ import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IReader;
 import com.globalsight.ling.tm2.TmCoreManager;
+import com.globalsight.ling.tm3.integration.GSDataFactory;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 import com.globalsight.util.SessionInfo;
@@ -164,19 +167,12 @@ public class Reader implements IReader
      */
     @SuppressWarnings("static-access")
     private ExportOptions doAnalyze()
-    {
-        com.globalsight.everest.tm.exporter.ExportOptions options = (com.globalsight.everest.tm.exporter.ExportOptions) m_options;
-        String identifyKey = null;
-        try
+	{
+		com.globalsight.everest.tm.exporter.ExportOptions options = (com.globalsight.everest.tm.exporter.ExportOptions) m_options;
+		String identifyKey = null;
+		try
 		{
 			String mode = options.getSelectMode();
-			String lang = options.getSelectLanguage();
-			List<String> langList = null;
-			if (StringUtil.isNotEmpty(lang))
-			{
-				langList = Arrays.asList(lang.split(","));
-			}
-			String propType = options.getSelectPropType();
 			int count = -1;
 			FilterOptions filterString = options.getFilterOptions();
 			identifyKey = options.getIdentifyKey();
@@ -196,22 +192,6 @@ public class Reader implements IReader
 				m_options.setStatus(ExportOptions.ANALYZED);
 				m_options.setExpectedEntryCount(count);
 			}
-			else if (mode
-					.equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED))
-			{
-				count = mgr.getSegmentsCountByLocalesAndParamMap(m_database,
-						langList, paramMap);
-
-				m_options.setStatus(ExportOptions.ANALYZED);
-				m_options.setExpectedEntryCount(count);
-			}
-			else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
-			{
-				count = mgr.getSegmentsCountByProjectNameAndParamMap(
-						m_database, propType, paramMap);
-				m_options.setStatus(m_options.ANALYZED);
-				m_options.setExpectedEntryCount(count);
-			}
 			else
 			{
 				String msg = "invalid select mode `" + mode + "'";
@@ -221,15 +201,15 @@ public class Reader implements IReader
 				m_options.setError(msg);
 			}
 		}
-        catch (/* Exporter */Exception ex)
+		catch (/* Exporter */Exception ex)
 		{
-            ExportUtil.handleTmExportFlagFile(identifyKey, "failed", true);
+			ExportUtil.handleTmExportFlagFile(identifyKey, "failed", true);
 			CATEGORY.error("analysis error", ex);
 			m_options.setError(ex.getMessage());
 		}
 
-        return m_options;
-    }
+		return m_options;
+	}
 
 	private Map<String, Object> getParamMap(FilterOptions filterString)
 	{
@@ -246,7 +226,25 @@ public class Reader implements IReader
 		String jobId = filterString.m_jobId;
 		String lastUsageAfter = filterString.m_lastUsageAfter;
 		String lastUsageBefore = filterString.m_lastUsageBefore;
-		
+		List localelist = null;
+		String lang = filterString.m_language;
+		if (StringUtil.isNotEmpty(lang))
+		{
+			List<String> langList = Arrays.asList(lang.split(","));
+			localelist = getLocaleList(langList);
+		}
+		String propType = filterString.m_projectName;
+
+		if (localelist != null && localelist.size() > 0)
+		{
+			paramMap.put("language", localelist);
+		}
+
+		if (StringUtil.isNotEmpty(propType))
+		{
+			paramMap.put("projectName", propType);
+		}
+
 		if (StringUtil.isNotEmpty(createUser))
 		{
 			paramMap.put("createUser", createUser);
@@ -294,5 +292,20 @@ public class Reader implements IReader
 		}
 
 		return paramMap;
+	}
+	
+	private List getLocaleList(List<String> localeCodeList)
+	{
+		List localeList = new ArrayList();
+		GlobalSightLocale locale = null;
+		for (int i = 0; i < localeCodeList.size(); i++)
+		{
+			locale = GSDataFactory.localeFromCode(localeCodeList.get(i));
+			if (locale != null)
+			{
+				localeList.add(locale);
+			}
+		}
+		return localeList;
 	}
 }

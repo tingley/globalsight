@@ -1378,8 +1378,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 m_fuzzyMatchMap = getLeverageMatchMap(leverageMatches);
                 // GBS-3776
                 Job job = ServerProxy.getJobHandler().getJobById(sp.getJobId());
+                int threshold = 0;
                 if (job != null)
                 {
+                	threshold = job.getLeverageMatchThreshold();
                     TranslationMemoryProfile tmp = job.getL10nProfile()
                             .getTranslationMemoryProfile();
                     String refTms = tmp.getRefTMsToLeverageFrom();
@@ -1402,7 +1404,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     }
                 }
                 m_matchTypeStats = getMatchTypesForStatistics(leverageMatches,
-                        0, sp.getJobId());
+                		threshold, sp.getJobId());
             }
         }
         catch (Exception ex)
@@ -1415,6 +1417,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private MatchTypeStatistics getMatchTypesForStatistics(
             List p_leverageMatches, int p_levMatchThreshold, long p_jobId)
     {
+    	// TODO: should this keep same as "LeverageMatchLingManagerLocal.getMatchTypesForStatistics(..)"?
         Map<String, LeverageMatch> leverageMatchesMap = new HashMap<String, LeverageMatch>();
         // remove lower score_num record
         for (Iterator it = p_leverageMatches.iterator(); it.hasNext();)
@@ -1452,7 +1455,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             }
         }
 
-        MatchTypeStatistics result = new MatchTypeStatistics(0);
+        MatchTypeStatistics result = new MatchTypeStatistics(p_levMatchThreshold);
         // set the match type with the found leverage matches
         Collection leverageMatches2 = leverageMatchesMap.values();
         List<String> list = new ArrayList<String>();
@@ -1760,7 +1763,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private String getDisplayMatchType(int p_msgId, boolean p_isProtected,
             String p_score)
     {
-        String prefix = "";
         String msg = "";
         boolean forTrados = false;
 

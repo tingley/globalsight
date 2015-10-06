@@ -29,6 +29,7 @@ public class MindTouchConnector extends PersistentObject
     private String username = null;
     private String password = null;
     private long companyId;
+    private boolean isPostToSourceServer = false;
 
     public String getName() 
     {
@@ -89,6 +90,16 @@ public class MindTouchConnector extends PersistentObject
     {
         this.companyId = companyId;
     }
+    
+    public boolean getIsPostToSourceServer() 
+    {
+		return isPostToSourceServer;
+	}
+
+	public void setIsPostToSourceServer(boolean isPostToSourceServer) 
+	{
+		this.isPostToSourceServer = isPostToSourceServer;
+	}
 
     // Utility
     public String getCompanyName()

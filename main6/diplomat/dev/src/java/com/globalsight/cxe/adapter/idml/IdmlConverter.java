@@ -42,7 +42,7 @@ public class IdmlConverter
     private static boolean isInstalled = false;
 
     private static String convertDir = null;
-    private String convertDir_incontextReview = null;
+    private static String convertDir_incontextReview = null;
     
     private boolean isIncontextReview = false;
     private long companyId = 1;
@@ -125,7 +125,8 @@ public class IdmlConverter
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
             convertDir_incontextReview = sc.getStringParameter(
-                    SystemConfigParamNames.INCTXRV_CONV_DIR_INDD, companyId + "");
+                    SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
+                    CompanyWrapper.SUPER_COMPANY_ID);
         }
 
         return isIncontextReview ? convertDir_incontextReview : convertDir;

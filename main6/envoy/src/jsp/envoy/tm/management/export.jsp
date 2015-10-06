@@ -109,7 +109,7 @@ function parseExportOptions()
   var form = document.oDummyForm;
   var node;
   var createdAfter, createdBefore,modifyAfter,modifyBefore,lastUsageAfter,lastUsageBefore,createUser,modifyUser,tuId,sId,isRegex,jobId;
-  var selectMode, selectLanguage, duplicateHandling, fileType, fileEncoding, selectChangeCreationId;
+  var selectMode, selectLanguage, selectProjectName, duplicateHandling, fileType, fileEncoding, selectChangeCreationId;
 
   var $xml = $( $.parseXML( xmlExportOptions ) );
 
@@ -117,7 +117,6 @@ function parseExportOptions()
   selectMode = node.find("selectMode").text();
 
   selectFilter = node.find("selectFilter").text();
-  selectLanguage = node.find("selectLanguage").text();
   selectChangeCreationId = node.find("selectChangeCreationId").text();
   
   node = $xml.find("exportOptions > filterOptions");
@@ -125,6 +124,9 @@ function parseExportOptions()
   createdBefore = node.find("createdbefore").text();
   modifyAfter = node.find("modifiedafter").text();
   modifyBefore = node.find("modifiedbefore").text();
+  //GBS-3907
+  selectLanguage = node.find("language").text();
+  selectProjectName = node.find("projectName").text();
   
   lastUsageAfter = node.find("lastusageafter").text();
   lastUsageBefore = node.find("lastusagebefore").text();
@@ -164,6 +166,7 @@ function parseExportOptions()
   }
 
   selectValue(form.oEntryLang, selectLanguage);
+  selectValue(form.oEntryPropType, selectProjectName);
   selectValue(form.oEncoding, fileEncoding);
 
   if (fileType == "<%=ExportOptions.TYPE_XML%>")
@@ -208,63 +211,9 @@ function buildExportOptions()
 
   //SELECT OPTIONS
   node = $xml.find("exportOptions > selectOptions");
-  if (form.oEntries[0].checked)
-  {
-	  node.find("selectMode").text("<%=ExportOptions.SELECT_ALL%>");
-  }
-  else
-  {
-    if(form.oEntries[1].checked)
-    {
-        node.find("selectMode").text("<%=ExportOptions.SELECT_FILTERED%>");
-    }
-    else
-    {
-    	node.find("selectMode").text("<%=ExportOptions.SELECT_FILTER_PROP_TYPE%>");
-    }
-  }
+  node.find("selectMode").text("<%=ExportOptions.SELECT_ALL%>");
 
-  sel = form.oEntryLang;
-  if (sel.options.length > 0)
-  {
-	  if(!document.oDummyForm.oEntryLang.disabled){
-		  var language="";
-		  var count = 0;
-		  var selectOption = false;
-		  for(var i = 0;i < sel.options.length;i++ )
-		  {
-		  	 if(sel.options[i].selected)
-		  	 {
-				 count++;
-		  		language += sel.options[i].value+","
-		  	 }  
-		  }
-		  if(count == 0)
-		  {
-			alert("<%=selectLanguage%>");
-			return false;
-		 }
-		  language = language.substring(0,language.lastIndexOf(","));
-	      node.find("selectLanguage").text(language);
-	  }
-  }
-  else
-  {
-	  alert("<%=selectLanguage%>");
-	  return false;
-  }
   
-  sel = form.oEntryPropType;
-  if(sel.options.length > 0)
-  {
-    optionsList = selectMulti(sel);    
-    if(form.oEntries[2].checked && optionsList.length == 0)
-    {
-        alert("<%=bundle.getString("jsmsg_tm_export_select_project") %>")
-        return "";
-    }
-    node.find("selectPropType").text(optionsList.toString());
-  }
 
   sel = form.oChangeCreationId;
   if (sel.checked) 
@@ -328,6 +277,31 @@ function buildExportOptions()
 	 node.find("regex").text("true");
  }else{
 	 node.find("regex").text("false");
+ }
+ 
+ sel = form.oEntryLang;
+ if (sel.options.length > 0)
+ {
+	  var language="";
+	  var count = 0;
+	  var selectOption = false;
+	  for(var i = 0;i < sel.options.length;i++ )
+	  {
+	  	 if(sel.options[i].selected)
+	  	 {
+			 count++;
+	  		language += sel.options[i].value+","
+	  	 }  
+	  }
+	 language = language.substring(0,language.lastIndexOf(","));
+     node.find("language").text(language);
+ }
+ 
+ sel = form.oEntryPropType;
+ if(sel.options.length > 0)
+ {
+   optionsList = selectMulti(sel);    
+   node.find("projectName").text(optionsList.toString());
  }
  
   // FILE OPTIONS
@@ -515,22 +489,6 @@ function doByEntry()
   document.oDummyForm.oEntryPropType.disabled = true;
 }
 
-function doByLanguage()
-{
-  document.oDummyForm.oEntries[1].click();
-  document.oDummyForm.oEntryLang.disabled = false;
-  document.oDummyForm.oEntryPropType.disabled = true;
-}
-function doByPropType(){
-    document.oDummyForm.oEntries[2].click();
-    document.oDummyForm.oEntryPropType.disabled = false;
-    document.oDummyForm.oEntryLang.disabled = true;
-}
-function doByProject(){
-    document.oDummyForm.oEntries[2].click();
-    document.oDummyForm.oEntryPropType.disabled = false;
-    document.oDummyForm.oEntryLang.disabled = true;
-}
 
 function doTypeChanged()
 {
@@ -870,7 +828,7 @@ function doOnLoad()
 </DIV>
 
 <FORM NAME="oDummyForm" ACTION="" METHOD="post">
-
+<!-- 
 <div style="margin-bottom:10px">
 <%=bundle.getString("lb_select_entries_to_export")%>:<BR>
   <div style="margin-left: 40px">
@@ -899,16 +857,28 @@ function doOnLoad()
     <br/>
   </div>
 </div>
-
+ -->
+ 
 <BR>
+ 
 <div style="margin-bottom:10px">
- <%=bundle.getString("lb_tm_filter_entries_by") %>: <BR>
+ <%=bundle.getString("lb_select_entries_to_export")%>: <BR> 
  <div style="margin-left: 40px">
   <TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS=standardText>
    <thead>
     <col align="right" valign="baseline" class="standardText">
     <col align="left"  valign="baseline" class="standardText">
    </thead>
+   <!-- language -->
+   <tr>
+   	 <td><%= bundle.getString("lb_by_language")%></td>
+     <td><select name="oEntryLang" id="idLanguageList"  MULTIPLE  size="6"></select></td>
+   </tr>
+   <!-- project -->
+   <tr>
+        <td><%= propTypeTitle%></td>
+        <td><select name="oEntryPropType" id="idPropTypeList"  MULTIPLE></select></td>
+   </tr>
    <%--TU ID --%>
    <tr>
  	<td><%=bundle.getString("lb_export_tu_id") %>:</td>
@@ -1009,7 +979,7 @@ function doOnLoad()
   </TABLE>
  </div>
 </div>
-</div>
+ </div>
 
 
 <BR>

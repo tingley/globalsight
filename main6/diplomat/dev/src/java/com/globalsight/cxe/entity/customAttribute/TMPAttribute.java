@@ -20,7 +20,6 @@ package com.globalsight.cxe.entity.customAttribute;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 
 public class TMPAttribute extends PersistentObject
@@ -31,20 +30,21 @@ public class TMPAttribute extends PersistentObject
     private static final long serialVersionUID = 4063148292014335592L;
 
     private TranslationMemoryProfile tmprofile;
-    private String attributename;
+    private String attributeName;
     private String operator;
     private String valueType;
     private String valueData;
-    private int penalty;
+    private String andOr;
+    private int order;
 
-    public String getAttributename()
+    public String getAttributeName()
     {
-        return attributename;
+        return attributeName;
     }
 
-    public void setAttributename(String attributename)
+    public void setAttributeName(String attributeName)
     {
-        this.attributename = attributename;
+        this.attributeName = attributeName;
     }
 
     public TranslationMemoryProfile getTmprofile()
@@ -87,21 +87,11 @@ public class TMPAttribute extends PersistentObject
         this.valueData = valueData;
     }
 
-    public int getPenalty()
-    {
-        return penalty;
-    }
-
-    public void setPenalty(int penalty)
-    {
-        this.penalty = penalty;
-    }
-    
     @Override
     public String toString()
     {
         StringBuffer sb = new StringBuffer();
-        sb.append(getAttributename());
+        sb.append(getAttributeName());
         sb.append(":");
         sb.append(getOperator());
         sb.append(":");
@@ -109,8 +99,26 @@ public class TMPAttribute extends PersistentObject
         sb.append(":");
         sb.append(getValueData());
         sb.append(":");
-        sb.append(getPenalty());
+        sb.append(getOrder());
+        sb.append(":");
+        sb.append(getAndOr());
         
         return sb.toString();
     }
+
+	public String getAndOr() {
+		return andOr;
+	}
+
+	public void setAndOr(String andOr) {
+		this.andOr = andOr;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
 }

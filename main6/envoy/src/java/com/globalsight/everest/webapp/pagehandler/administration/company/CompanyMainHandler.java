@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.company;
 
+import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
@@ -36,10 +37,13 @@ import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 
 import com.globalsight.config.SystemParameter;
+import com.globalsight.config.SystemParameterEntityException;
 import com.globalsight.config.SystemParameterImpl;
 import com.globalsight.config.SystemParameterPersistenceManager;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
+import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl;
+import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFileEntityException;
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.PostReviewCategory;
@@ -63,6 +67,7 @@ import com.globalsight.ling.tm2.TmVersion;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.FileUtil;
 
 public class CompanyMainHandler extends PageActionHandler implements
         CompanyConstants
@@ -228,6 +233,11 @@ public class CompanyMainHandler extends PageActionHandler implements
 
             initialFilterConfigurations(companyId);
             initialHTMLFilter(companyId);
+            
+            setInContextReview(p_request, company);
+            
+            // create default SRX rule
+            createDefaultSRXRule(company);
 
             // Create COMPANY level TU/TUV/LM tables for current company,
             // whatever this company is using separate tables PER JOB or not.
@@ -825,6 +835,35 @@ public class CompanyMainHandler extends PageActionHandler implements
                     .setAttribute("companyNumPerpage", companyNumPerpageValue);
         }
     }
+    
+    private void createDefaultSRXRule(Company company)
+            throws IOException, SegmentationRuleFileEntityException,
+            GeneralException, NamingException
+    {
+        File jarFile = new File(CompanyMainHandler.class.getProtectionDomain()
+                .getCodeSource().getLocation().getFile());
+        File rootDir = jarFile.getParentFile();
+        File gsSRX = new File(rootDir, "lib/classes/com/globalsight/resources/xml/default.srx");
+        String rule = FileUtil.readFile(gsSRX, "UTF-8");
+        
+        // remove the encoding mark if have
+        while(!rule.startsWith("<"))
+        {
+            rule = rule.substring(1);
+        }
+
+        SegmentationRuleFileImpl ruleFile = new SegmentationRuleFileImpl();
+        ruleFile.setName("GlobalSight Predefined");
+        ruleFile.setDescription(
+                "Predefined Segmentation rule for GlobalSight.");
+        ruleFile.setRuleText(rule);
+        ruleFile.setType(0);
+        ruleFile.setCompanyId(company.getId());
+        ruleFile.setIsDefault(true);
+
+        ServerProxy.getSegmentationRuleFilePersistenceManager()
+                .createSegmentationRuleFile(ruleFile);
+    }
 
     private void modifyCompany(Company company, HttpServletRequest p_request)
     {
@@ -911,92 +950,69 @@ public class CompanyMainHandler extends PageActionHandler implements
             company.setEnableWorkflowStatePosts(true);
         }
         
-        String enableInCtxRv = p_request
-                .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL);
-        String inCtxRvDirIndd = p_request
-                .getParameter(CompanyConstants.INCTXRV_DIR_INDD);
-        String inCtxRvDirOffice = p_request
-                .getParameter(CompanyConstants.INCTXRV_DIR_OFFICE);
-        
-        if ("on".equalsIgnoreCase(enableInCtxRv))
-        {
-            enableInCtxRv = "true";
-        }
+        setInContextReview(p_request, company);
+    }
+
+    private void setInContextReview(HttpServletRequest p_request,
+            Company company)
+    {
+        String enableInCtxRvInddP = p_request
+                .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_INDD);
+        String enableInCtxRvOfficeP = p_request
+                .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_OFFICE);
+        String enableInCtxRvXMLP = p_request
+                .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_XML);
+
+        String enableInCtxRvIndd = "on".equalsIgnoreCase(enableInCtxRvInddP) ? "true" : "false";
+        String enableInCtxRvOffice = "on".equalsIgnoreCase(enableInCtxRvOfficeP) ? "true" : "false";
+        String enableInCtxRvXML = "on".equalsIgnoreCase(enableInCtxRvXMLP) ? "true" : "false";
+
         try
         {
-            String companyId = "" + company.getId();
             SystemParameterPersistenceManager spm = ServerProxy
                     .getSystemParameterPersistenceManager();
 
-            SystemParameter spEnable = null;
-            try
-            {
-                spEnable = spm.getSystemParameter(
-                        SystemConfigParamNames.INCTXRV_ENABLE, companyId);
-            }
-            catch (Exception ee)
-            {
-                logger.error(ee);
-            }
+            updateInContextReview(company, spm,
+                    SystemConfigParamNames.INCTXRV_ENABLE_INDD,
+                    enableInCtxRvIndd);
 
-            if (spEnable == null)
-            {
-                spEnable = new SystemParameterImpl(
-                        SystemConfigParamNames.INCTXRV_ENABLE, enableInCtxRv,
-                        company.getId());
-                HibernateUtil.save(spEnable);
-            }
-            spEnable.setValue(enableInCtxRv);
-            spm.updateSystemParameter(spEnable);
-
-            SystemParameter spDirIndd = null;
-            try
-            {
-                spDirIndd = spm.getSystemParameter(
-                        SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
-                        companyId);
-            }
-            catch (Exception ee)
-            {
-                logger.error(ee);
-            }
-
-            if (spDirIndd == null)
-            {
-                spDirIndd = new SystemParameterImpl(
-                        SystemConfigParamNames.INCTXRV_CONV_DIR_INDD,
-                        inCtxRvDirIndd, company.getId());
-                HibernateUtil.save(spDirIndd);
-            }
-            spDirIndd.setValue(inCtxRvDirIndd);
-            spm.updateSystemParameter(spDirIndd);
-
-            SystemParameter spDirOffice = null;
-            try
-            {
-                spDirOffice = spm.getSystemParameter(
-                        SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
-                        companyId);
-            }
-            catch (Exception ee)
-            {
-                logger.error(ee);
-            }
-
-            if (spDirOffice == null)
-            {
-                spDirOffice = new SystemParameterImpl(
-                        SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
-                        inCtxRvDirOffice, company.getId());
-                HibernateUtil.save(spDirOffice);
-            }
-            spDirOffice.setValue(inCtxRvDirOffice);
-            spm.updateSystemParameter(spDirOffice);
+            updateInContextReview(company, spm,
+                    SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
+                    enableInCtxRvOffice);
+            
+            updateInContextReview(company, spm,
+                    SystemConfigParamNames.INCTXRV_ENABLE_XML,
+                    enableInCtxRvXML);
         }
         catch (Exception ex)
         {
             logger.error(ex);
         }
+    }
+    
+    private void updateInContextReview(Company company,
+            SystemParameterPersistenceManager spm, String key, String value)
+                    throws Exception, RemoteException,
+                    SystemParameterEntityException
+    {
+        String companyId = "" + company.getId();
+        SystemParameter spEnableIndd = null;
+        try
+        {
+            spEnableIndd = spm.getSystemParameter(key, companyId);
+        }
+        catch (Exception ee)
+        {
+            logger.error(ee);
+        }
+
+        if (spEnableIndd == null)
+        {
+            spEnableIndd = new SystemParameterImpl(key, value, company.getId());
+            HibernateUtil.save(spEnableIndd);
+        }
+        spEnableIndd.setValue(value);
+        spm.updateSystemParameter(spEnableIndd);
     }
 
     /**

@@ -48,10 +48,14 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.ling.common.DiplomatBasicParser;
+import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAltUtil;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.ling.tm3.core.Fingerprint;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
@@ -711,6 +715,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 loadXliffAlts(result, p_sourcePage.getLocaleId(),
                         p_sourcePage.getId(), tuTableName, tuvTableName);
             }
+
+            setHashValues(result);
         }
         catch (Exception e)
         {
@@ -772,6 +778,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                 loadXliffAlts(result, p_localeId, p_sourcePageId, tuTableName,
                         tuvTableName);                
             }
+
+            setHashValues(result);
         }
         catch (Exception e)
         {
@@ -799,7 +807,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     public static List<TuvImpl> getTargetTuvs(TargetPage p_targetPage)
             throws Exception
     {
-        List<TuvImpl> result = new ArrayList<TuvImpl>();
+        List<Tuv> tuvs = new ArrayList<Tuv>();
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -819,17 +827,25 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             ps.setLong(1, p_targetPage.getLocaleId());
             ps.setLong(2, p_targetPage.getId());
             rs = ps.executeQuery();
-
-			result = convertResultSetToTuv(rs, false, p_targetPage
-					.getSourcePage().getJobId());
+			tuvs.addAll(convertResultSetToTuv(rs, false, p_targetPage
+					.getSourcePage().getJobId()));
 
             // Load xliff_alt data in page level to improve performance.
             if (XliffAltUtil.isGenerateXliffAlt(p_targetPage.getSourcePage()))
             {
-                loadXliffAlts2(new ArrayList<Tuv>(result),
+                loadXliffAlts2(new ArrayList<Tuv>(tuvs),
                         p_targetPage.getLocaleId(), p_targetPage.getId(),
                         tuTableName, tuvTableName);                
             }
+
+            setHashValues(tuvs);
+
+            List<TuvImpl> result = new ArrayList<TuvImpl>();
+            for (Tuv tuv : tuvs)
+            {
+            	result.add((TuvImpl) tuv);
+            }
+            return result;
         }
         catch (Exception e)
         {
@@ -843,8 +859,6 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             DbUtil.silentClose(ps);
             DbUtil.silentReturnConnection(conn);
         }
-
-        return result;
     }
 
     /**
@@ -1452,6 +1466,22 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         return calculateTranslatedPercentage(totalCounts, translatedCounts);
     }
 
+	public static int getTranslatedPercentageForTargetPages(
+			List<TargetPage> targetPages)
+	{
+		int totalCounts = 0;
+		int translatedCounts = 0;
+
+		for (TargetPage tp : targetPages)
+		{
+			int[] counts = getTotalAndTranslatedTuvCount(tp.getId());
+			totalCounts += counts[0];
+			translatedCounts += counts[1];
+		}
+
+		return calculateTranslatedPercentage(totalCounts, translatedCounts);
+	}
+    
     private static int calculateTranslatedPercentage(int totalCounts,
             int translatedCounts)
     {
@@ -1647,5 +1677,44 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         {
             throw new EnvoyServletException(e);
         }
+    }
+
+    /**
+     * Set previous hash and next hash for the ordered TUVs.
+     */
+    private static void setHashValues(List<Tuv> tuvs)
+    {
+    	TuvImpl preTuv = null;
+    	TuvImpl curTuv = null;
+    	for (Tuv tuv : tuvs)
+    	{
+    		curTuv = (TuvImpl) tuv;
+    		curTuv.setPreviousHash(BaseTmTuv.FIRST_HASH);
+    		curTuv.setNextHash(BaseTmTuv.LAST_HASH);
+    		if (preTuv != null)
+    		{
+    			curTuv.setPreviousHash(getHashValue(preTuv.getGxml()));
+    			preTuv.setNextHash(getHashValue(curTuv.getGxml()));
+    		}
+    		preTuv = curTuv;
+    	}
+    }
+
+    private static long getHashValue(String data)
+    {
+        try
+        {
+            SegmentTmExactMatchFormatHandler handler =
+                new SegmentTmExactMatchFormatHandler();
+            DiplomatBasicParser diplomatParser =
+                new DiplomatBasicParser(handler);
+            diplomatParser.parse(data);
+            return Fingerprint.fromString(handler.toString());
+        }
+        catch (Exception ex)
+        {
+        	logger.error("Error to get hash value for data: " + data, ex);
+        }
+    	return -1;
     }
 }

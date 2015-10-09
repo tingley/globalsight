@@ -454,6 +454,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                             + MAX_THREAD + ", Running Thread: "
                             + RUNNING_FORMS.size() + ", Waiting Thread: "
                             + WAITING_FORMS.size());
+					s_category.info("The file name is: " + form.getFileName()
+							+ ", user is: " + form.getUser().getUserName());
                     runProcessUploadPage(form.getTmpFile(), form.getUser(),
                             form.getTask(), form.getFileName());
                 }

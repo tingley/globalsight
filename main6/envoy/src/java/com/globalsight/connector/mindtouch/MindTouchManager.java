@@ -16,6 +16,7 @@
  */
 package com.globalsight.connector.mindtouch;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class MindTouchManager
 {
@@ -52,12 +54,28 @@ public class MindTouchManager
         return HibernateUtil.search(hql, map);
     }
     
-    public static List<MindTouchConnectorTargetServer> getAllTargetServers(long sourceServerId)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public static List<MindTouchConnectorTargetServer> getAllTargetServers(long sourceServerId)
     {
         String hql = "from MindTouchConnectorTargetServer e where e.isActive = 'Y' and e.sourceServerId = :sourceServerId";
         HashMap<String, Long> map = new HashMap<String, Long>();
         map.put("sourceServerId", sourceServerId);
-        return (List<MindTouchConnectorTargetServer>) HibernateUtil.search(hql, map);
+		List<MindTouchConnectorTargetServer> trgServers = (List<MindTouchConnectorTargetServer>) HibernateUtil
+				.search(hql, map);
+		// Sort by locale name for displaying on UI
+		SortUtil.sort(trgServers, new Comparator() 
+		{
+			public int compare(Object o1, Object o2) 
+			{
+				String aLocale = ((MindTouchConnectorTargetServer) o1)
+						.getTargetLocale();
+				String bLocale = ((MindTouchConnectorTargetServer) o2)
+						.getTargetLocale();
+				return aLocale.compareToIgnoreCase(bLocale);
+			}
+		});
+
+		return trgServers;
     }
 
     public static MindTouchConnector getMindTouchConnectorById(long mtcId)

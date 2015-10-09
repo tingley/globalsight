@@ -22,10 +22,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -42,6 +44,7 @@ import com.globalsight.connector.mindtouch.vo.MindTouchPage;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
+import com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -76,6 +79,34 @@ public class MindTouchCreateJobHandler extends PageActionHandler
         MindTouchConnector mtc = MindTouchManager
                 .getMindTouchConnectorById(Long.parseLong(mtcId));
         p_request.setAttribute("mindtouchConnector", mtc);
+
+        List<GlobalSightLocale> trgServerLocaleList = new ArrayList<GlobalSightLocale>();
+        HashSet<String> trgServerLocales = new HashSet<String>();
+        List<MindTouchConnectorTargetServer> targetServers = 
+        		MindTouchManager.getAllTargetServers(Long.parseLong(mtcId));
+        for (MindTouchConnectorTargetServer trgServer : targetServers)
+        {
+        	trgServerLocales.add(trgServer.getTargetLocale().toLowerCase());
+        }
+        Vector allLocales = new Vector();
+        try
+        {
+			allLocales = ServerProxy.getLocaleManager().getAvailableLocales();
+			for (int i = 0; i < allLocales.size(); i++)
+			{
+				GlobalSightLocale gsl = (GlobalSightLocale) allLocales.get(i);
+				if (trgServerLocales.contains(gsl.toString().toLowerCase()))
+				{
+					trgServerLocaleList.add(gsl);
+				}
+			}
+		}
+        catch (Exception e)
+        {
+        	logger.error(e);
+		}
+        p_request.setAttribute("allAvailableLocales", allLocales);
+        p_request.setAttribute("targetServerLocales", trgServerLocaleList);
     }
 
     @ActionHandler(action = "initTree", formClass = "")
@@ -459,8 +490,7 @@ public class MindTouchCreateJobHandler extends PageActionHandler
         setLableToJsp(request, bundle, "lb_cancel");// Cancel
         setLableToJsp(request, bundle, "jsmsg_customer_job_name");
         setLableToJsp(request, bundle, "jsmsg_invalid_job_name_1");
-        setLableToJsp(request, bundle,
-                "jsmsg_choose_file_profiles_for_all_files");
+        setLableToJsp(request, bundle, "jsmsg_choose_file_profiles_for_all_files");
         setLableToJsp(request, bundle, "lb_import_select_target_locale");
         setLableToJsp(request, bundle, "jsmsg_customer_job_name");
         setLableToJsp(request, bundle, "jsmsg_customer_comment");
@@ -493,6 +523,7 @@ public class MindTouchCreateJobHandler extends PageActionHandler
         setLableToJsp(request, bundle, "lb_job_attributes");
         setLableToJsp(request, bundle, "lb_mindtouch_create_job_add_file_tip");
         setLableToJsp(request, bundle, "msg_set_job_attributes");
+        setLableToJsp(request, bundle, "msg_mindtouch_no_target_server");
     }
 
     private void setLableToJsp(HttpServletRequest request,

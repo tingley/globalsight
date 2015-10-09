@@ -9,6 +9,7 @@
             com.globalsight.util.resourcebundle.SystemResourceBundle,
             com.globalsight.everest.company.CompanyWrapper,
             com.globalsight.everest.company.CompanyThreadLocal,
+            com.globalsight.util.GlobalSightLocale,
             com.globalsight.cxe.entity.mindtouch.MindTouchConnector,
             java.util.*"
     session="true"
@@ -48,6 +49,11 @@
     Integer creatingJobsNum = (Integer)request.getAttribute("creatingJobsNum");
     if (creatingJobsNum == null)
         creatingJobsNum = 0;
+
+    Vector<GlobalSightLocale> allAvailableLocales =
+		(Vector) request.getAttribute("allAvailableLocales");
+    List<GlobalSightLocale> trgServerLocaleList =
+    	(List<GlobalSightLocale>) request.getAttribute("targetServerLocales");
 %>
 <html>
 <head>
@@ -119,6 +125,24 @@ var isUploading = false;
 var uploadedFiles = new Array();
 var defaultFileProfile = "-1";
 var autoSelectSubPages = true;
+
+var allAvailableLocalesMap = {};
+<%
+for (GlobalSightLocale gsl : allAvailableLocales)
+{%>
+	allAvailableLocalesMap['<%=gsl.getId()%>'] = '<%=gsl.toString()%>';
+<%
+}
+%>
+
+var targetServerLocaleMap = {};
+<%
+	for (GlobalSightLocale gsl : trgServerLocaleList)
+{%>
+    targetServerLocaleMap['<%=gsl.getId()%>'] = '<%=gsl.toString()%>';
+<%
+}
+%>
 
 function changeSelectMode()
 {
@@ -351,6 +375,29 @@ $(document).ready(function ()
             alert("<c:out value='${msg_set_job_attributes}'/>");
             creating = false;
             return;
+        }
+
+        // check selected locales to see which ones have no target servers.
+        var localesNoTrgServer = "";
+        var checkedTrgLocales = $("input[name='targetLocale']:checked");
+        for (var i = 0; i < checkedTrgLocales.length; i++)
+        {
+        	var localeId = checkedTrgLocales[i].value;
+        	var localeName = targetServerLocaleMap[localeId];
+        	if (localeName == null || localeName == "")
+        	{
+        		localesNoTrgServer += allAvailableLocalesMap[localeId] + ", ";
+        	}
+        }
+        if (localesNoTrgServer.length > 0)
+        {
+            localesNoTrgServer = localesNoTrgServer.substring(0, localesNoTrgServer.length - 2);
+            var confirmMsg = '<%=bundle.getString("msg_mindtouch_no_target_server")%>' + '\n\n'	+ localesNoTrgServer;
+            if (!confirm(confirmMsg))
+            {
+                creating = false;
+                return;
+            }
         }
 
         var fileMapFileProfile = "";

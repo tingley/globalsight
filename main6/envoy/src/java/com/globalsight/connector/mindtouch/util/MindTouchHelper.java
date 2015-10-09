@@ -27,9 +27,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -77,10 +75,10 @@ import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -1388,32 +1386,22 @@ public class MindTouchHelper
         return authHeader;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
 	public static Vector<GlobalSightLocale> getAllTargetLocales()
     {
     	Vector<GlobalSightLocale> targetLocales = new Vector<GlobalSightLocale>();
     	try 
 		{
-			targetLocales = ServerProxy.getLocaleManager().getAllTargetLocales();
-			SortUtil.sort(targetLocales, new Comparator() 
-			{
-				public int compare(Object o1, Object o2) 
-				{
-					return ((GlobalSightLocale) o1).getDisplayName(Locale.US)
-							.compareToIgnoreCase(((GlobalSightLocale) o2).getDisplayName(Locale.US));
-				}
-			});
+			targetLocales = ServerProxy.getLocaleManager()
+					.getAllTargetLocales();
+			SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(
+					GlobalSightLocaleComparator.DISPLAYNAME, Locale.US));
 		}
-		catch (RemoteException re)
+		catch (Exception e)
 		{
-			throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-					re);
+			throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
 		}
-		catch (GeneralException ge) 
-		{
-			throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-					ge);
-		}
+
     	return targetLocales;
     }
 }

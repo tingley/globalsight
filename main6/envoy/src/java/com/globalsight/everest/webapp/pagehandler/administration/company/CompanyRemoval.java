@@ -928,6 +928,10 @@ public class CompanyRemoval
             removeGitConnectorFileMapping(conn);
             //remove git connector
             removeGitConnector(conn);
+            // remove mindtouch target servers
+            removeMindTouchTargetServers(conn);
+            // remove mindtouch connectors
+            removeMindTouchConnectors(conn);
             //remove post review category
             romovePostReviewCategory(conn);
             // remove workflows
@@ -3238,20 +3242,35 @@ public class CompanyRemoval
 
         logEnd("SCORECARD_CATEGORY");
     }
-    
+
+    private void removeMindTouchTargetServers(Connection conn) throws SQLException
+    {
+        logStart("CONNECTOR_MINDTOUCH_TARGET_SERVER");
+		String sql = "delete from CONNECTOR_MINDTOUCH_TARGET_SERVER where company_id = ?";
+        execOnce(conn, sql, company.getId());
+        logEnd("CONNECTOR_MINDTOUCH_TARGET_SERVER");
+    }
+
+    private void removeMindTouchConnectors(Connection conn) throws SQLException
+    {
+        logStart("CONNECTOR_MINDTOUCH");
+		String sql = "delete from CONNECTOR_MINDTOUCH where company_id = ?";
+        execOnce(conn, sql, company.getId());
+        logEnd("CONNECTOR_MINDTOUCH");
+    }
+
     private void removeGitConnector(Connection conn) throws SQLException
     {
-        logStart("GIT_CONNECTOR");
+        logStart("CONNECTOR_GIT");
         long companyId = company.getId();
         execOnce(conn, SQL_DELETE_GIT_CONNECTOR_BY_COMPANY_ID, companyId);
 
-        logEnd("GIT_CONNECTOR");
+        logEnd("CONNECTOR_GIT");
     }
     
     private void removeGitConnectorJob(Connection conn) 
     		throws SQLException
     {
-    	logStart("GIT_CONNECTOR_JOB");
     	long companyId = company.getId();
         List<List<Object>> jobIds = queryBatchList(conn, SQL_QUERY_JOB,
                 companyId);
@@ -3259,16 +3278,15 @@ public class CompanyRemoval
         {
         	removeGitConnectorJobByJobId(conn, jobIds);
         }
-    	logEnd("GIT_CONNECTOR_JOB");
     }
     
     private void removeGitConnectorFileMapping(Connection conn) throws SQLException
     {
-        logStart("GIT_CONNECTOR_FILE_MAPPING");
+        logStart("CONNECTOR_GIT_FILE_MAPPING");
         long companyId = company.getId();
         execOnce(conn, SQL_DELETE_GIT_CONNECTOR_FILE_MAPPING_BY_COMPANY_ID, companyId);
 
-        logEnd("GIT_CONNECTOR_FILE_MAPPING");
+        logEnd("CONNECTOR_GIT_FILE_MAPPING");
     }
     
     private void romovePostReviewCategory(Connection conn) throws SQLException
@@ -3966,9 +3984,9 @@ public class CompanyRemoval
     private void removeGitConnectorJobByJobId(Connection conn,
             List<List<Object>> jobIds) throws SQLException
     {
-    	logStart("GIT_CONNECTOR_JOB");
+    	logStart("CONNECTOR_GIT_JOB");
         exec(conn, SQL_DELETE_GIT_CONNECTOR_JOB, jobIds);
-        logEnd("GIT_CONNECTOR_JOB");
+        logEnd("CONNECTOR_GIT_JOB");
     }
 
     private void removeWorkflowRequest(Connection conn,

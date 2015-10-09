@@ -59,10 +59,13 @@ public class MindTouchMainHandler extends PageActionHandler
         	connector.setCompanyId(Long.parseLong(id));
         }
         HibernateUtil.saveOrUpdate(connector);
-        
-        List<MindTouchConnectorTargetServer> targetServersList = MindTouchManager.getAllTargetServers(connector.getId());
-        HashMap<String, MindTouchConnectorTargetServer> targetServersHashMap = new HashMap<String, MindTouchConnectorTargetServer>();
-        List<MindTouchConnectorTargetServer> tempList = new ArrayList<MindTouchConnectorTargetServer>();
+
+		List<MindTouchConnectorTargetServer> targetServersList =
+				MindTouchManager.getAllTargetServers(connector.getId());
+		HashMap<String, MindTouchConnectorTargetServer> targetServersHashMap =
+				new HashMap<String, MindTouchConnectorTargetServer>();
+		List<MindTouchConnectorTargetServer> tempList =
+				new ArrayList<MindTouchConnectorTargetServer>();
         for(MindTouchConnectorTargetServer targetServer: targetServersList)
         {
         	targetServersHashMap.put(targetServer.getTargetLocale(), targetServer);
@@ -87,6 +90,7 @@ public class MindTouchMainHandler extends PageActionHandler
         			ts.setUsername(request.getParameter("targetUsername" + targetLocale));
         			ts.setPassword(request.getParameter("targetPassword" + targetLocale));
         			ts.setSourceServerId(connector.getId());
+        			ts.setCompanyId(connector.getCompanyId());
         			tempList.add(ts);
         		}
         	}
@@ -114,16 +118,17 @@ public class MindTouchMainHandler extends PageActionHandler
         for (String id : ids)
         {
             long cId = Long.parseLong(id);
-            MindTouchConnector c = HibernateUtil.get(MindTouchConnector.class, cId);
-            c.setIsActive(false);
-            HibernateUtil.update(c);
-            
-            List<MindTouchConnectorTargetServer> targetServers = MindTouchManager.getAllTargetServers(cId);
+			List<MindTouchConnectorTargetServer> targetServers = MindTouchManager
+					.getAllTargetServers(cId);
             for(MindTouchConnectorTargetServer targetServer: targetServers)
             {
             	targetServer.setIsActive(false);
             }
             HibernateUtil.update(targetServers);
+
+            MindTouchConnector c = HibernateUtil.get(MindTouchConnector.class, cId);
+            c.setIsActive(false);
+            HibernateUtil.update(c);
         }
     }
 

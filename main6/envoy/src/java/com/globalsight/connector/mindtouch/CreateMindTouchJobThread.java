@@ -366,7 +366,7 @@ public class CreateMindTouchJobThread implements Runnable
         File srcFile = null;
         File objFile = null;
         String flag = null;
-        String contentsOrTags = null;
+        String sourceContent = null;
         // <pageId:MindTouchPage>
         HashMap<String, MindTouchPage> pageInfoMap = new HashMap<String, MindTouchPage>();
         MindTouchHelper helper = new MindTouchHelper(conn);
@@ -406,18 +406,25 @@ public class CreateMindTouchJobThread implements Runnable
                                 + File.separator + externalPageId);
                 if ("contents".equals(flag))
                 {
-                    contentsOrTags = helper.getPageContents(pageId);
+                    sourceContent = helper.getPageContents(pageId);
                 }
                 else if ("tags".equals(flag))
                 {
-                    contentsOrTags = helper.getPageTags(Long.parseLong(pageId));
+                    sourceContent = helper.getPageTags(Long.parseLong(pageId));
                 }
                 else if("properties".equals(flag))
                 {
-                	contentsOrTags = helper.getPageProperties(Long.parseLong(pageId));
+                	sourceContent = helper.getPageProperties(Long.parseLong(pageId));
                 }
-                contentsOrTags = EditUtil.decodeXmlEntities(contentsOrTags);
-                FileUtil.writeFile(srcFile, contentsOrTags);
+				// Per testing, decode is required; but need fix "title"
+				// attribute value for "contents".
+                sourceContent = EditUtil.decodeXmlEntities(sourceContent);
+                if ("contents".equals(flag))
+                {
+					sourceContent = MindTouchHelper
+							.fixTitleValueInContentXml(sourceContent);
+                }
+                FileUtil.writeFile(srcFile, sourceContent);
                 descList.add(externalPageId);
 
                 // save one ".obj" file with same pathname which is used to send
@@ -451,7 +458,10 @@ public class CreateMindTouchJobThread implements Runnable
         String title = mtp.getTitle().replace(" ", "_");
         if (!filePath.toString().endsWith(title))
         {
-            filePath.append(File.separator).append(mtp.getTitle());
+        	// file name should not include "<", ">", "\" and "/".
+        	title = mtp.getTitle().replace("<", "").replace(">", "");
+        	title = title.replace("\\", "").replace("/", "");
+            filePath.append(File.separator).append(title);
         }
         if ("contents".equals(flag))
         {

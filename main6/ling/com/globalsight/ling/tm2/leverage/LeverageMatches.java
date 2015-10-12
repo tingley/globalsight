@@ -199,7 +199,6 @@ public class LeverageMatches
 
                     tu.setScore(score);
                 }
-
                 else if (originalText.equals(matchedSrcText))
                 {
                     // if the strings are exactly the same, match state is
@@ -233,11 +232,30 @@ public class LeverageMatches
 
             try
             {
-				// If "Disregard if TU attributes not matched" is checked and
-				// the TU attributes do not match, remove this candidate match.
-                if (setTuvAttributeScores(tu))
+    			if (!isAllTmpAttrMatched(tu))
                 {
-                	itLeveragedTu.remove();
+                    TranslationMemoryProfile tmp = m_leverageOptions.getTmProfile();
+    				// "Disregard if TU attributes not matched"
+    				if (TranslationMemoryProfile.CHOICE_DISREGARD.equals(tmp.getChoiceIfAttNotMatch()))
+    				{
+    					itLeveragedTu.remove();
+    				}
+    				// "Penalize if TU attributes not matched"
+    				else
+    				{
+    	                float score = tu.getScore();
+    	                float oriscore = score;
+    					score = score - tmp.getTuAttNotMatchPenalty();
+    					if (score < 0)
+    					{
+    						score = 0;
+    					}
+    	    			tu.setScore(score);
+    	                if (oriscore > score)
+    	                {
+    	                    tu.setMatchState(MatchState.FUZZY_MATCH);
+    	                }
+    				}
                 }
             }
             catch (Exception e)
@@ -266,11 +284,9 @@ public class LeverageMatches
 
     // for GBS-937, Custom TM attributes originally;
     // GBS-3564 reverse the logic.
-    private boolean setTuvAttributeScores(LeveragedTu tu)
+    private boolean isAllTmpAttrMatched(LeveragedTu tu)
     {
-        float score = tu.getScore();
         long tmId = tu.getTmId();
-        float oriscore = score;
         ProjectTM ptm = HibernateUtil.get(ProjectTM.class, tmId);
         if (ptm == null)
         {
@@ -391,9 +407,10 @@ public class LeverageMatches
             }
         }
 
-        int penalty = tmp.getTuAttNotMatchPenalty();
+		boolean isFinalMatched = true;
         if (tmpAtts != null && tmpAtts.size() > 0)
         {
+        	// Record if it is matched of every TM profile attributes separately.
         	List<Boolean> matchedList = new ArrayList<Boolean>();
 			for (TMPAttribute tmpAtt : tmpAtts)
             {
@@ -451,17 +468,14 @@ public class LeverageMatches
             }
 
 			// Decide if it is matched for all TM profile TU attributes.
-			String preAndOr = null;
 			String curAndOr = null;
 			boolean preMatched = false;
 			boolean curMatched = false;
-			boolean isFinalMatched = false;
 			for (int i = 0; i < tmpAtts.size(); i++)
 			{
 				TMPAttribute tmpAtt = tmpAtts.get(i);
 				if (i == 0)
 				{
-					preAndOr = tmpAtt.getAndOr();
 					preMatched = matchedList.get(i);
 					isFinalMatched = preMatched;
 				}
@@ -469,50 +483,30 @@ public class LeverageMatches
 				{
 					curAndOr = tmpAtt.getAndOr();
 					curMatched = matchedList.get(i);
-					if ("and".equalsIgnoreCase(preAndOr))
+					if ("and".equalsIgnoreCase(curAndOr))
 					{
 						isFinalMatched = preMatched && curMatched;
 						preMatched = isFinalMatched;
-						if (!isFinalMatched && "and".equalsIgnoreCase(curAndOr))
-						{
-							break;
-						}
 					}
 					else
 					{
 						isFinalMatched = preMatched || curMatched;
 						preMatched = isFinalMatched;
 					}
-					preAndOr = curAndOr;
-				}
-			}
 
-			if (!isFinalMatched)
-            {
-				// "Disregard if TU attributes not matched"
-				if (TranslationMemoryProfile.CHOICE_DISREGARD.equals(tmp.getChoiceIfAttNotMatch()))
-				{
-					return true;
-				}
-				// "Penalize if TU attributes not matched"
-				else
-				{
-					score = score - penalty;
-					if (score < 0)
+					// If up to now it is false, and the next is "and", the
+					// result must be false.
+					if (!preMatched
+							&& (i + 1 < tmpAtts.size())
+							&& "and".equalsIgnoreCase(tmpAtts.get(i + 1).getAndOr()))
 					{
-						score = 0;
+						break;
 					}
 				}
-            }
+			}
         }
 
-        tu.setScore(score);
-        if (oriscore > score)
-        {
-            tu.setMatchState(MatchState.FUZZY_MATCH);
-        }
-
-        return false;
+        return isFinalMatched;
     }
 
     public BaseTmTuv getOriginalTuv()

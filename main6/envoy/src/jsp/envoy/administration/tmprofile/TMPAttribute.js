@@ -36,8 +36,8 @@ function doAddAttribute()
 	}
 	var operator = document.getElementById("operator").value;
 	var andOr = document.getElementById("andOr").value;
-	
-	arrayAvailableAttnames.removeData(attname);
+
+//	arrayAvailableAttnames.removeData(attname);
 
 	var tmpAtt = new Object();
 	tmpAtt.itemid = newId();
@@ -62,7 +62,7 @@ function removeTMPAttribute(itemid)
 		if (tmpatt.itemid == itemid)
 		{
 			removedAttrOrder = tmpatt.order;
-			arrayAvailableAttnames.appendUniqueObj(tmpatt.attributename);
+//			arrayAvailableAttnames.appendUniqueObj(tmpatt.attributename);
 			arrayTMPAtts.splice(i, 1);
 			break;
 		}
@@ -131,11 +131,11 @@ function initAttbutesUI()
 
 		var ccc = new StringBuffer("<table style='width:100%'>");
 		ccc.append("<tr class='thead_tr'>");
+		ccc.append("  <td class='thead_td'>And/Or</td>");
 		ccc.append("  <td class='thead_td'>Attribute Internal Name</td>");
 		ccc.append("  <td class='thead_td'>Operator</td>");
 		ccc.append("  <td class='thead_td'>Value</td>");
 		ccc.append("  <td class='thead_td'>Order</td>");
-		ccc.append("  <td class='thead_td'>And/Or</td>");
 		ccc.append("  <td class='thead_td'>Delete</td>");
 		ccc.append("</tr>");
 		for(var i = 0; i < arrayTMPAtts.length; i++)
@@ -152,20 +152,24 @@ function initAttbutesUI()
 				ccc.append(backgroundColor);
 				ccc.append("'>");
 				ccc.append("  <td class='standardText'>");
+				if (tmpatt.order == 1) {
+					ccc.append("");
+				} else {
+					ccc.append(tmpatt.andOr);
+				}
+				ccc.append("  </td>");
+				ccc.append("  <td class='standardText'>");
 				ccc.append(tmpatt.attributename)
-				ccc.append("</td>");
+				ccc.append("  </td>");
 				ccc.append("  <td class='standardText'>");
 				ccc.append(tmpatt.operator);
-				ccc.append("</td>");
+				ccc.append("  </td>");
 				ccc.append("  <td class='standardText'>");
 				ccc.append(tmpatt.valueType == "VALUE_INPUT" ? "[Input Value] " + tmpatt.valueData : "From Job Attribute of same name");
-				ccc.append("</td>");
+				ccc.append("  </td>");
 				ccc.append("  <td class='standardText'>");
 				ccc.append(tmpatt.order);
-				ccc.append("</td>");
-				ccc.append("  <td class='standardText'>");
-				ccc.append(tmpatt.andOr);
-				ccc.append("</td>");
+				ccc.append("  </td>");
 				ccc.append("  <td class='standardText' align='center'><a href='#tuvAttSub' onclick='removeTMPAttribute(\"");
 				ccc.append(tmpatt.itemid);
 				ccc.append("\")'>X</a></td>");

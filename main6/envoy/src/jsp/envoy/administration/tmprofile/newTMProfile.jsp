@@ -1345,6 +1345,12 @@ function doOnLoad()
             <BR><BR>
             <b><%=bundle.getString("lb_attribute_rules") %></b><a id="tuvAttSub" name="tuvAttSub">&nbsp;</a>
             <div id="divAtts" class="standardText" style="width:100%"></div><br/>
+			<span class="standardText">
+			    <select id="andOr">
+			    	<option value="and">and</option>
+			    	<option value="or">or</option>
+			    </select>
+			</span>
             <span CLASS="standardText">
             	<select id="attname"></select>
 			</span>
@@ -1363,12 +1369,6 @@ function doOnLoad()
 		</span>
 		<span id="inputValueField" CLASS="standardText" style="display:none">
 			<input type="text" id="valueData" size="8" maxlength="20" value="" />
-		</span>
-		<span class="standardText">
-		    <select id="andOr">
-		    	<option value="and">and</option>
-		    	<option value="or">or</option>
-		    </select>
 		</span>
 		<input type="BUTTON" id="addRow" value="Add" onclick="doAddAttribute()"/><br/><br/>
 

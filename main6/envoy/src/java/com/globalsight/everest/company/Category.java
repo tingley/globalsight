@@ -1,6 +1,8 @@
 package com.globalsight.everest.company;
 
-public class Category
+import com.globalsight.everest.persistence.PersistentObject;
+
+public class Category extends PersistentObject
 {
     private long id;
     private String category;

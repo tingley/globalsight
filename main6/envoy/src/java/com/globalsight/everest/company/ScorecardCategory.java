@@ -1,6 +1,8 @@
 package com.globalsight.everest.company;
 
-public class ScorecardCategory
+import com.globalsight.everest.persistence.PersistentObject;
+
+public class ScorecardCategory extends PersistentObject
 {
     private long id;
     private String scorecardCategory;

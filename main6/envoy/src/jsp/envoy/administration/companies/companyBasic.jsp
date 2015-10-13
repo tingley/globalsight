@@ -162,6 +162,10 @@ function submitForm(formAction)
     		var stbox = document.getElementById("scorecardTo");
     		var qtbox = document.getElementById("qualityTo");
     		var mtbox = document.getElementById("marketTo");
+    		var fbox = document.getElementById("from");
+    		var sfbox = document.getElementById("scorecardFrom");
+    		var qfbox = document.getElementById("qualityFrom");
+    		var mfbox = document.getElementById("marketFrom");
     		if (tbox.options.length == 0 
     	    		|| stbox.options.length == 0 || qtbox.options.length == 0 || mtbox.options.length == 0)
     		{
@@ -183,6 +187,22 @@ function submitForm(formAction)
     		for(var i=0;i<mtbox.options.length;i++)
     		{
     			mtbox.options[i].selected=true;
+    		}
+    		for(var i=0;i<fbox.options.length;i++)
+    		{
+    			fbox.options[i].selected=true;
+    		}
+    		for(var i=0;i<sfbox.options.length;i++)
+    		{
+    			sfbox.options[i].selected=true;
+    		}
+    		for(var i=0;i<qfbox.options.length;i++)
+    		{
+    			qfbox.options[i].selected=true;
+    		}
+    		for(var i=0;i<mfbox.options.length;i++)
+    		{
+    			mfbox.options[i].selected=true;
     		}
             
         	companyForm.action = "<%=saveURL%>";

@@ -9,5 +9,7 @@
         <property name="categoryName" length="200" column="CATEGORY_NAME" type="string" not-null="false" unique="false" />
         <property name="categoryType" length="20" column="CATEGORY_TYPE" type="string" not-null="false" unique="false" />
         <property name="companyId" column="COMPANY_ID" type="long" not-null="true"/>
+         <property name="isActive" column="IS_ACTIVE" type="yes_no"
+			not-null="true" unique="false" />
     </class>
 </hibernate-mapping>

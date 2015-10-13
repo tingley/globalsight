@@ -215,21 +215,51 @@ public class CompanyMainHandler extends PageActionHandler implements
         if (company != null)
         {
             long companyId = company.getId();
+            
+            String[] categoriesFrom = p_request.getParameterValues("from");
+            if (categoriesFrom != null && categoriesFrom.length > 0)
+            {
+                createCategory(categoriesFrom, companyId, false);
+            }
+            
+            String[] categoriesTo = p_request.getParameterValues("to");
+            createCategory(categoriesTo, companyId, true);
 
-            String[] categories = p_request.getParameterValues("to");
-            createCategory(categories, companyId);
+            String[] scorecardCategoriesFrom = p_request
+                    .getParameterValues("scorecardFrom");
+            if (scorecardCategoriesFrom != null
+                    && scorecardCategoriesFrom.length > 0)
+            {
+                createScorecardCategory(scorecardCategoriesFrom, companyId,
+                        false);
+            }
 
-            String[] scorecardCategories = p_request
+            String[] scorecardCategoriesTo = p_request
                     .getParameterValues("scorecardTo");
-            createScorecardCategory(scorecardCategories, companyId);
-            
-            String[] qualityCategories = p_request
+            createScorecardCategory(scorecardCategoriesTo, companyId, true);
+
+            String[] qualityCategoriesFrom = p_request
+                    .getParameterValues("qualityFrom");
+            if (qualityCategoriesFrom != null
+                    && qualityCategoriesFrom.length > 0)
+            {
+                createQualityCategory(qualityCategoriesFrom, companyId, false);
+            }
+
+            String[] qualityCategoriesTo = p_request
                     .getParameterValues("qualityTo");
-            createQualityCategory(qualityCategories, companyId);
+            createQualityCategory(qualityCategoriesTo, companyId, true);
+
+            String[] marketCategoriesFrom = p_request
+                    .getParameterValues("marketFrom");
+            if (marketCategoriesFrom != null && marketCategoriesFrom.length > 0)
+            {
+                createMarketCategory(marketCategoriesFrom, companyId, false);
+            }
             
-            String[] marketCategories = p_request
+            String[] marketCategoriesTo = p_request
                     .getParameterValues("marketTo");
-            createMarketCategory(marketCategories, companyId);
+            createMarketCategory(marketCategoriesTo, companyId, true);
 
             initialFilterConfigurations(companyId);
             initialHTMLFilter(companyId);
@@ -285,19 +315,43 @@ public class CompanyMainHandler extends PageActionHandler implements
                 .getAttribute(CompanyConstants.COMPANY);
         modifyCompany(company, p_request);
         ServerProxy.getJobHandler().modifyCompany(company);
-        String[] categories = p_request.getParameterValues("to");
-        String[] scorecardCategories = p_request
+        String[] categoriesFrom = p_request.getParameterValues("from");
+        String[] categoriesTo = p_request.getParameterValues("to");
+        String[] scorecardCategoriesFrom = p_request
+                .getParameterValues("scorecardFrom");
+        String[] scorecardCategoriesTo = p_request
                 .getParameterValues("scorecardTo");
-        String[] qualityCategories = p_request.getParameterValues("qualityTo");
-        String[] marketCategories = p_request.getParameterValues("marketTo");
+        
+        String[] qualityCategoriesFrom = p_request.getParameterValues("qualityFrom");
+        String[] qualityCategoriesTo = p_request.getParameterValues("qualityTo");
+        String[] marketCategoriesFrom = p_request.getParameterValues("marketFrom");
+        String[] marketCategoriesTo = p_request.getParameterValues("marketTo");
         // delete categories first
         deleteCategory(company.getId());
-        createCategory(categories, company.getId());
+        if (categoriesFrom != null && categoriesFrom.length > 0)
+        {
+            createCategory(categoriesFrom, company.getId(), false);
+        }
+        createCategory(categoriesTo, company.getId(), true);
         deleteScorecardCategory(company.getId());
-        createScorecardCategory(scorecardCategories, company.getId());
+        if (scorecardCategoriesFrom != null
+                && scorecardCategoriesFrom.length > 0)
+        {
+            createScorecardCategory(scorecardCategoriesFrom, company.getId(),
+                    false);
+        }
+        createScorecardCategory(scorecardCategoriesTo, company.getId(), true);
         deleteQualityAndMarketCategory(company.getId());
-        createQualityCategory(qualityCategories, company.getId());
-        createMarketCategory(marketCategories, company.getId());
+        if (qualityCategoriesFrom != null && qualityCategoriesFrom.length > 0)
+        {
+            createQualityCategory(qualityCategoriesFrom, company.getId(), false);
+        }
+        createQualityCategory(qualityCategoriesTo, company.getId(), true);
+        if (marketCategoriesFrom != null && marketCategoriesFrom.length > 0)
+        {
+            createMarketCategory(marketCategoriesFrom, company.getId(), false);
+        }
+        createMarketCategory(marketCategoriesTo, company.getId(), true);
         clearSessionExceptTableInfo(session, CompanyConstants.COMPANY_KEY);
     }
 
@@ -465,9 +519,10 @@ public class CompanyMainHandler extends PageActionHandler implements
      * 
      * @param p_request
      * @param companyId
+     * @param active 
      * @throws JobException
      */
-    private boolean createCategory(String[] categories, long companyId)
+    private boolean createCategory(String[] categories, long companyId, boolean active)
             throws JobException
     {
         try
@@ -478,6 +533,7 @@ public class CompanyMainHandler extends PageActionHandler implements
                 Category category = new Category();
                 category.setCategory(categoryString);
                 category.setCompanyId(companyId);
+                category.setIsActive(active);
                 ServerProxy.getJobHandler().createCategory(category);
                 // HibernateUtil.save(category);
             }
@@ -490,7 +546,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         }
     }
 
-    private boolean createScorecardCategory(String[] categories, long companyId)
+    private boolean createScorecardCategory(String[] categories, long companyId, boolean active)
             throws JobException
     {
         try
@@ -501,6 +557,7 @@ public class CompanyMainHandler extends PageActionHandler implements
                 ScorecardCategory scorecardCategory = new ScorecardCategory();
                 scorecardCategory.setScorecardCategory(categoryString);
                 scorecardCategory.setCompanyId(companyId);
+                scorecardCategory.setIsActive(active);
                 ServerProxy.getJobHandler().createScorecardCategory(
                         scorecardCategory);
                 // HibernateUtil.save(category);
@@ -515,7 +572,7 @@ public class CompanyMainHandler extends PageActionHandler implements
     }
     
     private boolean createQualityCategory(String[] qualityCategories,
-            long companyId)
+            long companyId, boolean active)
     {
         try
         {
@@ -526,6 +583,7 @@ public class CompanyMainHandler extends PageActionHandler implements
                 qualityCategory.setCategoryName(categoryString);
                 qualityCategory.setCompanyId(companyId);
                 qualityCategory.setCategoryType("Q");
+                qualityCategory.setIsActive(active);;
                 ServerProxy.getJobHandler().createPostReviewCategory(
                         qualityCategory);
             }
@@ -539,7 +597,7 @@ public class CompanyMainHandler extends PageActionHandler implements
     }
 
     private boolean createMarketCategory(String[] marketCategories,
-            long companyId)
+            long companyId, boolean active)
     {
         try
         {
@@ -550,6 +608,7 @@ public class CompanyMainHandler extends PageActionHandler implements
                 marketCategory.setCategoryName(categoryString);
                 marketCategory.setCompanyId(companyId);
                 marketCategory.setCategoryType("M");
+                marketCategory.setIsActive(active);
                 ServerProxy.getJobHandler().createPostReviewCategory(
                         marketCategory);
             }

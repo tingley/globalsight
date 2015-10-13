@@ -296,7 +296,7 @@ public class CompanyWrapper
 
     public static List<String> getCompanyCategoryList(String companyId)
     {
-        String hql = "select c.category from Category as c where c.companyId = "
+        String hql = "select c.category from Category as c where c.isActive = 'Y' and c.companyId = "
                 + companyId;
         List<String> categoryList = (List<String>) HibernateUtil.search(hql);
 
@@ -314,7 +314,7 @@ public class CompanyWrapper
 
     public static List<String> getCompanyScorecardCategoryList(String companyId)
     {
-        String hql = "select s.scorecardCategory from ScorecardCategory as s where s.companyId = "
+        String hql = "select s.scorecardCategory from ScorecardCategory as s where s.isActive = 'Y' and s.companyId = "
                 + companyId;
         List<String> scorecardCategoryList = (List<String>) HibernateUtil
                 .search(hql);
@@ -332,7 +332,7 @@ public class CompanyWrapper
 
     public static List<String> getCompanyQualityCategoryList(String companyId)
     {
-        String hql = "select q.categoryName from PostReviewCategory as q where q.categoryType ='Q' and q.companyId = "+companyId;
+        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'Y' and q.categoryType ='Q' and q.companyId = "+companyId;
         List<String> qualityCategoryList = (List<String>)HibernateUtil.search(hql);
         if (qualityCategoryList == null || qualityCategoryList.size() == 0)
         {
@@ -345,7 +345,7 @@ public class CompanyWrapper
 
     public static List<String> getCompanyMarketCategoryList(String companyId)
     {
-        String hql = "select q.categoryName from PostReviewCategory as q where q.categoryType ='M' and q.companyId = "+companyId;
+        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'Y' and q.categoryType ='M' and q.companyId = "+companyId;
         List<String> marketCategoryList = (List<String>)HibernateUtil.search(hql);
         if (marketCategoryList == null || marketCategoryList.size() == 0)
         {
@@ -354,6 +354,40 @@ public class CompanyWrapper
             marketCategoryList = Arrays.asList(keyArray);
         }
         return marketCategoryList;
+    }
+    
+    public static List<String> getCompanyCategoryAvailList(String companyId)
+    {
+        String hql = "select c.category from Category as c where c.isActive = 'N' and c.companyId = "
+                + companyId;
+        List<String> availableCategoryList = (List<String>) HibernateUtil.search(hql);
+        
+        return availableCategoryList;
+    }
+    
+    public static List<String> getCompanyScorecardCategoryAvailList(String companyId)
+    {
+        String hql = "select s.scorecardCategory from ScorecardCategory as s where s.isActive = 'N' and s.companyId = "
+                + companyId;
+        List<String> availableScorecardCategoryList = (List<String>) HibernateUtil
+                .search(hql);
+        
+        
+        return availableScorecardCategoryList;
+    }
+    
+    public static List<String> getCompanyQualityCategoryAvailList(String companyId)
+    {
+        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'N' and q.categoryType ='Q' and q.companyId = "+companyId;
+        List<String> availableQualityCategoryList = (List<String>)HibernateUtil.search(hql);
+        return availableQualityCategoryList;
+    }
+    
+    public static List<String> getCompanyMarketCategoryAvailList(String companyId)
+    {
+        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'N' and q.categoryType ='M' and q.companyId = "+companyId;
+        List<String> availableMarketCategoryList = (List<String>)HibernateUtil.search(hql);
+        return availableMarketCategoryList;
     }
 
 }

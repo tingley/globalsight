@@ -11,5 +11,7 @@
             unique="false" />
         <property name="companyId" 
         	column="COMPANY_ID" type="long" not-null="true"/>
+       <property name="isActive" column="IS_ACTIVE" type="yes_no"
+			not-null="true" unique="false" />
     </class>
 </hibernate-mapping>

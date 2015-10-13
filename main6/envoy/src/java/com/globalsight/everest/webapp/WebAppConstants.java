@@ -596,6 +596,7 @@ public interface WebAppConstants
     public static final String TM_ACTION_CLONE = "clone";
     public static final String TM_ACTION_DELETE = "delete";
     public static final String TM_ACTION_DELETE_LANGUAGE = "deleteTMLanguage";
+    public static final String TM_ACTION_DELETE_TULISTING = "deleteTUListing";
     public static final String TM_ACTION_IMPORT = "import";
     public static final String TM_ACTION_EXPORT = "export";
     public static final String TM_ACTION_USERS = "users";

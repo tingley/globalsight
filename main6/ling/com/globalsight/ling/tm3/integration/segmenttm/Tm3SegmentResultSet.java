@@ -46,7 +46,7 @@ public class Tm3SegmentResultSet implements SegmentResultSet
     private TM3Attribute fromWsAttr;
     private TM3Attribute projectAttr;
 
-    Tm3SegmentResultSet(Tm tm, TM3Tm<GSTuvData> tm3tm,
+    public Tm3SegmentResultSet(Tm tm, TM3Tm<GSTuvData> tm3tm,
             Iterator<TM3Tu<GSTuvData>> inner)
     {
         this.tm = tm;

@@ -51,9 +51,11 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.comparator.CommentComparator;
 import com.globalsight.everest.util.comparator.IssueHistoryComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -64,6 +66,10 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobComparator;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.common.DiplomatBasicParserException;
+import com.globalsight.ling.tw.PseudoConstants;
+import com.globalsight.ling.tw.PseudoData;
+import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.SortUtil;
@@ -90,6 +96,7 @@ public class CommentXlsReportHelper
     private String userId = null;
     private CellStyle contentStyle = null;
     private CellStyle headerStyle = null;
+    private boolean showSourAndTar = false;
 
     private final int JOB_FLAG = 1;
     private final int TASK_FLAG = 2;
@@ -121,6 +128,7 @@ public class CommentXlsReportHelper
         // show Category or not
         setShowCategory(p_request);
         setStatus(p_request);
+        setSourceAndTarget(p_request);
         
         Workbook p_workbook = new SXSSFWorkbook();     
         createSheets(p_request, p_workbook, p_response);
@@ -137,7 +145,7 @@ public class CommentXlsReportHelper
         out.close();
         ((SXSSFWorkbook)p_workbook).dispose();
     }
-    
+
     private void createSheets(HttpServletRequest p_request, Workbook p_workbook,
     		HttpServletResponse p_response) throws Exception
     {
@@ -226,26 +234,31 @@ public class CommentXlsReportHelper
         Cell cell_B = getCell(headerRow, col++);
         cell_B.setCellValue(bundle.getString("job_name"));
         cell_B.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col - 1, 15 * 256);
-        
-        Cell cell_C = getCell(headerRow, col++);
-        cell_C.setCellValue(bundle.getString("language"));
-        cell_C.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col - 1, 10 * 256);
-        
-        Cell cell_D = getCell(headerRow, col++);
-        cell_D.setCellValue(bundle.getString("segment_number"));
-        cell_D.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 20 * 256);
         
+        Cell cell_C = getCell(headerRow, col++);
+        cell_C.setCellValue(bundle.getString("comment_type"));
+        cell_C.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 15 * 256);
+        
+        Cell cell_D = getCell(headerRow, col++);
+        cell_D.setCellValue(bundle.getString("language"));
+        cell_D.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+        
         Cell cell_E = getCell(headerRow, col++);
-        cell_E.setCellValue(bundle.getString("by_who"));
+        cell_E.setCellValue(bundle.getString("segment_number"));
         cell_E.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 15 * 256);
         
         Cell cell_F = getCell(headerRow, col++);
-        cell_F.setCellValue(bundle.getString("on_date"));
+        cell_F.setCellValue(bundle.getString("by_who"));
         cell_F.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col - 1, 15 * 256);
+        
+        Cell cell_G = getCell(headerRow, col++);
+        cell_G.setCellValue(bundle.getString("on_date"));
+        cell_G.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 25 * 256);
 
         if (showStatus)
@@ -253,21 +266,35 @@ public class CommentXlsReportHelper
         	Cell cell_Status = getCell(headerRow, col++);
         	cell_Status.setCellValue(bundle.getString("status"));
         	cell_Status.setCellStyle(getHeaderStyle(p_workbook));
+        	p_sheet.setColumnWidth(col - 1, 10 * 256);
         }
-        p_sheet.setColumnWidth(col - 1, 10 * 256);
         if (showPriority)
         {
         	Cell cell_Priority = getCell(headerRow, col++);
         	cell_Priority.setCellValue(bundle.getString("priority"));
         	cell_Priority.setCellStyle(getHeaderStyle(p_workbook));
+        	p_sheet.setColumnWidth(col - 1, 10 * 256);
         }
         if (showCategory)
         {
         	Cell cell_Category = getCell(headerRow, col++);
         	cell_Category.setCellValue(bundle.getString("category"));
         	cell_Category.setCellStyle(getHeaderStyle(p_workbook));
+        	p_sheet.setColumnWidth(col - 1, 40 * 256);
         }
-        p_sheet.setColumnWidth(col - 1, 10 * 256);
+        
+        if (showSourAndTar)
+        {
+            Cell cell_Source = getCell(headerRow, col++);
+            cell_Source.setCellValue(bundle.getString("source_segment"));
+            cell_Source.setCellStyle(getHeaderStyle(p_workbook));
+            p_sheet.setColumnWidth(col - 1, 40 * 256);
+
+            Cell cell_Target = getCell(headerRow, col++);
+            cell_Target.setCellValue(bundle.getString("target_segment"));
+            cell_Target.setCellStyle(getHeaderStyle(p_workbook));
+            p_sheet.setColumnWidth(col - 1, 40 * 256);
+        }
         
         Cell cell_CommentHeader = getCell(headerRow, col++);
         cell_CommentHeader.setCellValue(bundle.getString("comment_header"));
@@ -282,7 +309,7 @@ public class CommentXlsReportHelper
         Cell cell_Link = getCell(headerRow, col++);
         cell_Link.setCellValue(bundle.getString("link"));
         cell_Link.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col - 1, 20 * 256);
+        p_sheet.setColumnWidth(col - 1, 40 * 256);
     }
     
     /**
@@ -437,6 +464,12 @@ public class CommentXlsReportHelper
             {
                 continue;
             }
+            
+            for (TargetPage t : wf.getTargetPages())
+            {
+                // used to SetPageURL;
+                targetPageVar = t;
+            }
 
             Hashtable tasks = wf.getTasks();
             for (Iterator i = tasks.values().iterator(); i.hasNext();)
@@ -451,6 +484,7 @@ public class CommentXlsReportHelper
         addSegmentCommentFilter(p_request, j, p_workbook, taskSheet, row, list, flag);
         // only coment with target locale need to print target language
         curLocale = null;
+        targetPageVar = null;
     }
     
     /**
@@ -569,118 +603,104 @@ public class CommentXlsReportHelper
         Cell cell_B = getCell(p_row, c++);
         cell_B.setCellValue(j.getJobName());
         cell_B.setCellStyle(getContentStyle(p_workbook));
-
-        // 2.5 Lang: Insert each target language identifier for each workflow
-        // in the retrieved Job on a different row.
+        
+        //Insert comment type
         Cell cell_C = getCell(p_row, c++);
-        if ((this.targetPageVar != null)
-                && (this.targetPageVar.getGlobalSightLocale() != null))
-        {
-            cell_C.setCellValue(this.targetPageVar
-                    .getGlobalSightLocale().getDisplayName(uiLocale));
-            cell_C.setCellStyle(getContentStyle(p_workbook));
-        }
-        else
-        {
-            cell_C.setCellValue("");
-            cell_C.setCellStyle(getContentStyle(p_workbook));
-        }
-
-        // 2.6 Word count: Insert Segement Number for the job.
-        Cell cell_D = getCell(p_row, c++);
         if (JOB_FLAG == flag)
         {
-        	cell_D.setCellValue(jobPrefix + comment.getId());
-        	cell_D.setCellStyle(getContentStyle(p_workbook));
+            cell_C.setCellValue(jobPrefix);
+            cell_C.setCellStyle(getContentStyle(p_workbook));
         }
         else if (TASK_FLAG == flag)
         {
-        	cell_D.setCellValue(taskPrefix + comment.getId());
-        	cell_D.setCellStyle(getContentStyle(p_workbook));
+            cell_C.setCellValue(taskPrefix);
+            cell_C.setCellStyle(getContentStyle(p_workbook));
         }
-        else if (SEGMENT_FLAG == flag)
+
+        // 2.5 Lang: Insert each target language identifier for each workflow
+        // in the retrieved Job on a different row.
+        Cell cell_D = getCell(p_row, c++);
+        if ((this.targetPageVar != null)
+                && (this.targetPageVar.getGlobalSightLocale() != null))
         {
-        	cell_D.setCellValue(Integer.valueOf(CommentComparator
-                    .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey())));
-        	cell_D.setCellStyle(getContentStyle(p_workbook));
+            cell_D.setCellValue(this.targetPageVar
+                    .getGlobalSightLocale().getDisplayName(uiLocale));
+            cell_D.setCellStyle(getContentStyle(p_workbook));
         }
+        else
+        {
+            cell_D.setCellValue("");
+            cell_D.setCellStyle(getContentStyle(p_workbook));
+        }
+
+        // 2.6 Word count: Insert Segement Number for the job.
+        Cell cell_E = getCell(p_row, c++);
+        cell_E.setCellValue("");
+        cell_E.setCellStyle(getContentStyle(p_workbook));
 
         // by who
-        Cell cell_E = getCell(p_row, c++);
-    	cell_E.setCellValue(UserUtil.getUserNameById(comment
+        Cell cell_F = getCell(p_row, c++);
+    	cell_F.setCellValue(UserUtil.getUserNameById(comment
                 .getCreatorId()));
-    	cell_E.setCellStyle(getContentStyle(p_workbook));
+    	cell_F.setCellStyle(getContentStyle(p_workbook));
 
         // 2.7 Comment create date: Insert Comment creation date.
-    	Cell cell_F = getCell(p_row, c++);
-    	cell_F.setCellValue(dateFormat.format(comment
+    	Cell cell_G = getCell(p_row, c++);
+    	cell_G.setCellValue(dateFormat.format(comment
                 .getCreatedDateAsDate()));
-    	cell_F.setCellStyle(getContentStyle(p_workbook));
+    	cell_G.setCellStyle(getContentStyle(p_workbook));
 
         // 2.8 add Comment Status
         if (showStatus)
         {
         	Cell cell_Status = getCell(p_row, c++);
-            if (SEGMENT_FLAG == flag)
-            {
-            	cell_Status.setCellValue(((Issue) comment).getStatus());
-            	cell_Status.setCellStyle(getContentStyle(p_workbook));
-            }
-            else
-            {
-            	cell_Status.setCellValue("");
-            	cell_Status.setCellStyle(getContentStyle(p_workbook));
-            }
+        	cell_Status.setCellValue("");
+        	cell_Status.setCellStyle(getContentStyle(p_workbook));
         }
         // 2.9 add Comment priority
         if (showPriority)
         {
         	Cell cell_Priority = getCell(p_row, c++);
-            if (SEGMENT_FLAG == flag)
-            {
-            	cell_Priority.setCellValue(((Issue) comment).getPriority());
-            	cell_Priority.setCellStyle(getContentStyle(p_workbook));
-            }
-            else
-            {
-            	cell_Priority.setCellValue("");
-            	cell_Priority.setCellStyle(getContentStyle(p_workbook));
-            }
+        	cell_Priority.setCellValue("");
+        	cell_Priority.setCellStyle(getContentStyle(p_workbook));
         }
 
         // 2.10 add Comment Category
         if (showCategory)
         {
         	Cell cell_Category = getCell(p_row, c++);
-            if (SEGMENT_FLAG == flag)
-            {
-            	cell_Category.setCellValue(((Issue) comment).getCategory());
-            	cell_Category.setCellStyle(getContentStyle(p_workbook));
-            }
-            else
-            {
-            	cell_Category.setCellValue("");
-            	cell_Category.setCellStyle(getContentStyle(p_workbook));
-            }
+        	cell_Category.setCellValue("");
+        	cell_Category.setCellStyle(getContentStyle(p_workbook));
+        }
+        //add source and target segment
+        if (showSourAndTar)
+        {
+            Cell cell_Source = getCell(p_row, c++);
+            cell_Source.setCellValue("");
+            cell_Source.setCellStyle(getContentStyle(p_workbook));
+            
+            Cell cell_Target = getCell(p_row, c++);
+            cell_Target.setCellValue("");
+            cell_Target.setCellStyle(getContentStyle(p_workbook));
         }
 
         // 2.11 add Comment comment
         Cell cell_CommentHeader = getCell(p_row, c++);
-        cell_CommentHeader.setCellValue(comment.getComment());
+        cell_CommentHeader.setCellValue("");
         cell_CommentHeader.setCellStyle(getContentStyle(p_workbook));
 
         Cell cell_CommentBody = getCell(p_row, c++);
-        cell_CommentBody.setCellValue("");
+        cell_CommentBody.setCellValue(comment.getComment());
         cell_CommentBody.setCellStyle(getContentStyle(p_workbook));
         
     	Cell cell_Link = getCell(p_row, c++);
     	if (flag != SEGMENT_FLAG)
-    	{
-    		cell_Link.setCellValue("");
-    	}else{
-    		cell_Link.setCellFormula("HYPERLINK(\"" + pageUrl
-    				+ "\",\"" + externalPageId + "\")");
-    	}
+        {
+            cell_Link.setCellValue("");
+        }else{
+            cell_Link.setCellFormula("HYPERLINK(\"" + pageUrl
+                    + "\",\"" + externalPageId + "\")");
+        }
     	cell_Link.setCellStyle(getContentStyle(p_workbook));
 
         row.inc();
@@ -697,6 +717,7 @@ public class CommentXlsReportHelper
             Workbook p_workbook, Sheet p_sheet, IntHolder row, Comment comment,
             IssueHistory issueHistory, int flag) throws Exception
     {
+        String segmentPrefix = "Segment Comment";
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 p_request.getParameter("dateFormat"));
         int c = 0;
@@ -711,38 +732,43 @@ public class CommentXlsReportHelper
         Cell cell_B = getCell(p_row, c++);
         cell_B.setCellValue( j.getJobName());
         cell_B.setCellStyle(getContentStyle(p_workbook));
+        
+        Cell cell_C = getCell(p_row, c++);
+        cell_C.setCellValue(segmentPrefix);
+        cell_C.setCellStyle(getContentStyle(p_workbook));
 
         // 2.5.2 Lang: Insert each target language identifier for each workflow
         // in the retrieved Job on a different row.
-        Cell cell_C = getCell(p_row, c++);
+        Cell cell_D = getCell(p_row, c++);
         if ((this.targetPageVar != null)
                 && (this.targetPageVar.getGlobalSightLocale() != null))
         {
-            cell_C.setCellValue(this.targetPageVar
+            cell_D.setCellValue(this.targetPageVar
                     .getGlobalSightLocale().getDisplayName(uiLocale));
-            cell_C.setCellStyle(getContentStyle(p_workbook));
+            cell_D.setCellStyle(getContentStyle(p_workbook));
         }
         else
         {
-            cell_C.setCellValue("");
-            cell_C.setCellStyle(getContentStyle(p_workbook));
+            cell_D.setCellValue("");
+            cell_D.setCellStyle(getContentStyle(p_workbook));
         }
 
         // 2.6.2 Insert Segement Number for the job.
-        Cell cell_D = getCell(p_row, c++);
-        cell_D.setCellValue(Integer.valueOf(CommentComparator
-                .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey())));
-        cell_D.setCellStyle(getContentStyle(p_workbook));
-
-        // by who
         Cell cell_E = getCell(p_row, c++);
-        cell_E.setCellValue(UserUtil.getUserNameById(issueHistory.reportedBy()));
+        Integer segmentNum = Integer.valueOf(CommentComparator
+                .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey()));
+        cell_E.setCellValue(segmentNum);
         cell_E.setCellStyle(getContentStyle(p_workbook));
 
-        // 2.7.2 Comment create date: Insert Comment creation date.\
+        // by who
         Cell cell_F = getCell(p_row, c++);
-        cell_F.setCellValue(dateFormat.format(issueHistory.dateReportedAsDate()));
+        cell_F.setCellValue(UserUtil.getUserNameById(issueHistory.reportedBy()));
         cell_F.setCellStyle(getContentStyle(p_workbook));
+
+        // 2.7.2 Comment create date: Insert Comment creation date.\
+        Cell cell_G = getCell(p_row, c++);
+        cell_G.setCellValue(dateFormat.format(issueHistory.dateReportedAsDate()));
+        cell_G.setCellStyle(getContentStyle(p_workbook));
 
         // 2.8.2 add Comment Status
         if (showStatus)
@@ -766,6 +792,28 @@ public class CommentXlsReportHelper
         	cell_Category.setCellValue(((Issue) comment).getCategory());
         	cell_Category.setCellStyle(getContentStyle(p_workbook));
         }
+        
+        if (showSourAndTar)
+        {
+            long targetLocalId = this.targetPageVar.getGlobalSightLocale()
+                    .getId();
+            long sourceLocalId = j.getSourceLocale().getId();
+            Tuv sourceTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(segmentNum, sourceLocalId,
+                    j.getId());
+            
+            Tuv targetTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(segmentNum,
+                    targetLocalId, j.getId());
+            PseudoData pData = new PseudoData();
+            pData.setMode(PseudoConstants.PSEUDO_COMPACT);
+            
+            Cell cell_SourceSegment = getCell(p_row, c++);
+            cell_SourceSegment.setCellValue(getSegment(pData, sourceTuv, j.getId()));
+            cell_SourceSegment.setCellStyle(getContentStyle(p_workbook));
+            
+            Cell cell_TargetSegment = getCell(p_row, c++);
+            cell_TargetSegment.setCellValue(getSegment(pData, targetTuv, j.getId()));
+            cell_TargetSegment.setCellStyle(getContentStyle(p_workbook));
+        }
 
         // 2.11.2 add comment header
         Cell cell_CommentHeader = getCell(p_row, c++);
@@ -784,6 +832,25 @@ public class CommentXlsReportHelper
         cell_Link.setCellStyle(getContentStyle(p_workbook));
 
         row.inc();
+    }
+
+    private String getSegment(PseudoData pData, Tuv tuv, long p_jobId)
+    {
+        StringBuffer content = new StringBuffer();
+        String dataType = null;
+        try
+        {
+            dataType = tuv.getDataType(p_jobId);
+            pData.setAddables(dataType);
+            TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+            content.append(pData.getPTagSourceString());
+        }
+        catch (DiplomatBasicParserException e)
+        {
+            s_logger.error(tuv.getId(), e);
+        }
+        String result = content.toString();
+        return result;
     }
 
     /**
@@ -1017,13 +1084,29 @@ public class CommentXlsReportHelper
         }
 
     }
+    /**
+     * set source and target
+     */
+    private void setSourceAndTarget(HttpServletRequest p_request)
+    {
+        String[] paramSourAndTar = p_request
+                .getParameterValues("show_SourceAndTarget");
+        if ((null != paramSourAndTar)
+                && ("on".equals(paramSourAndTar[0])))
+        {
+            showSourAndTar = true;
+        }
+        else
+        {
+            showSourAndTar = false;
+        }  
+    }
 
     /**
      * set Targe lang list.
      * 
      */
-    private void setLang(HttpServletRequest p_request)
-    {
+    private void setLang(HttpServletRequest p_request) {
         langList = new ArrayList();
         String[] paramLang = p_request.getParameterValues("targetLang");
 
@@ -1181,6 +1264,9 @@ public class CommentXlsReportHelper
         if (contentStyle == null)
         {
             CellStyle style = p_workbook.createCellStyle();
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
             Font font = p_workbook.createFont();
             font.setFontName("Arial");
             font.setFontHeightInPoints((short) 10);

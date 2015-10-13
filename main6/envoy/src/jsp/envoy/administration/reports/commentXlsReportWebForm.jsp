@@ -162,6 +162,7 @@ function submitForm()
                         <%=bundle.getString("lb_include_segment_status")%> <%=bundle.getString("issue.status." + status)%><br>
 <%                      }
 %>
+						<input type="checkbox" name="show_SourceAndTarget" value="on"> <%=bundle.getString("include_source_target")%><br>
                     </td>
                 </tr>
             </table>

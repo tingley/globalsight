@@ -1448,12 +1448,15 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         String tmx14bPath = null;
         String fname = null;
         String penaltyTmxName = null;
+        String mtTmxName = null;
+        String mtTmxNamePath = null;
         String fullPenaltyPath = null;
         String fullPlainPath = null;
         String full14bPath = null;
         int resMode = p_downloadParams.getResInsOption();
         boolean isOmegaT = (DOWNLOAD_FILE_FORMAT_OMEGAT == p_downloadParams
                 .getFileFormatId());
+        boolean separateTmFile = p_downloadParams.getChangeSeparateTMFile();
         long penalty = 0;
         boolean needPenaltyTmx = false;
 
@@ -1491,6 +1494,12 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         p_downloadParams, penalty) + "." + FILE_EXT_TMX_NO_DOT;
             }
         }
+        
+		if (!isOmegaT && separateTmFile)
+		{
+			mtTmxName = getMtTmxName(FileUtils.getPrefix(fname)) + "."
+					+ FILE_EXT_TMX_NO_DOT;
+		}
 
         if (resMode == AmbassadorDwUpConstants.MAKE_RES_TMX_14B)
         {
@@ -1500,6 +1509,10 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 fullPenaltyPath = tmx14bPath + penaltyTmxName;
             }
+			if (!isOmegaT && separateTmFile)
+			{
+				mtTmxNamePath = tmx14bPath + mtTmxName;
+			}
         }
         else if (resMode == AmbassadorDwUpConstants.MAKE_RES_TMX_PLAIN)
         {
@@ -1516,11 +1529,15 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 fullPenaltyPath = tmx14bPath + penaltyTmxName;
             }
+        	if (!isOmegaT && separateTmFile)
+			{
+				mtTmxNamePath = tmx14bPath + mtTmxName;
+			}
         }
 
-        if (full14bPath != null || fullPlainPath != null
-                || fullPenaltyPath != null)
-        {
+		if (full14bPath != null || fullPlainPath != null
+				|| fullPenaltyPath != null || mtTmxNamePath != null)
+		{
             StringBuffer sb = new StringBuffer();
             sb.append(m_resource.getString("msg_dnld_adding_file"));
             sb.append(fname);
@@ -1560,7 +1577,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             }
 
             if (seperateMT && full14bPath != null)
-            {
+		   {
                 // add ice files
                 mode = TmxUtil.TMX_MODE_ICE_ONLY;
                 String icePath = DownloadHelper
@@ -1699,7 +1716,19 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     m_status.speak(m_pageCounter, sb.toString());
                 }
             }
+			if (!isOmegaT && separateTmFile && mtTmxNamePath != null)
+			{
+				mode = TmxUtil.TMX_MODE_MT_ONLY;
+				sb = new StringBuffer();
+				sb.append(m_resource.getString("msg_dnld_adding_file"));
+				sb.append(mtTmxName);
+				m_pageCounter++;
+				m_status.speak(m_pageCounter, sb.toString());
 
+				m_zipper.writePath(mtTmxNamePath);
+				m_zipper.writeTmxPage(p_page, p_downloadParams,
+						TmxUtil.TMX_LEVEL_TWO, convertLF, mode, false);
+			}
         }
     }
 
@@ -1772,6 +1801,20 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         return penaltyTmxName.toString();
     }
 
+	private String getMtTmxName(String jobName)
+	{
+		StringBuffer mtTmxName = new StringBuffer();
+		int idx = jobName.lastIndexOf("_");
+		if(idx>-1){
+			String randomNumber = jobName.substring(idx + 1);
+			mtTmxName.append(jobName.substring(0, idx));
+			mtTmxName.append("_");
+			mtTmxName.append("MT");
+			mtTmxName.append("_");
+			mtTmxName.append(randomNumber);
+		}
+		return mtTmxName.toString();
+	}
     private void addTermFile(OfflinePageData page, DownloadParams downloadParams)
             throws IOException
     {

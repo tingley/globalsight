@@ -75,6 +75,8 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);// 12
             DOWNLOAD_OPTIONS
                     .add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);// 13
+            DOWNLOAD_OPTIONS
+            .add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE);// 13
             DOWNLOAD_OPTIONS.add(OfflineConstants.INCLUDE_REPETITIONS);// 14
             DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);// 15
             DOWNLOAD_OPTIONS
@@ -88,7 +90,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
                     .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE);// 21
             DOWNLOAD_OPTIONS
                     .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER);// 22
-
+            
             // NOTES:These constants must be added in sequence!!!!
             DOWNLOAD_OPTIONS_DEFAULT
                     .add(UserParamNames.DOWNLOAD_OPTION_FORMAT_DEFAULT);// 0
@@ -119,6 +121,9 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS_DEFAULT
                     .add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);// 13
             DOWNLOAD_OPTIONS_DEFAULT.add("no");// 14
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE_DEFAULT);// 13
+			DOWNLOAD_OPTIONS_DEFAULT.add("no");// 14
             DOWNLOAD_OPTIONS_DEFAULT
                     .add(String
                             .valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));// 15
@@ -248,7 +253,10 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
 
         String key = UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-
+        
+        key = UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE;
+        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+        
         key = UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
 

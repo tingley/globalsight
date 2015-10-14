@@ -130,6 +130,7 @@ public interface OfflineConstants
     String DISPLAY_EXACT_MATCH = "displayExactMatch";
 
     String CHANGE_CREATION_ID_FOR_MT_SEGMENTS = "changeCreationIdForMT";
+    String CHANGE_SEPARATE_TM_FILE = "separateTMfile";
 
     String POPULATE_100 = "populate100";
     String POPULATE_FUZZY = "populatefuzzy";

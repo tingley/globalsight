@@ -34,8 +34,10 @@ function tmxTypeSelection(){
 		$(".tmxTypeSelector").show();
 		if("OmegaT" == format){
 		   $("#penalizedReferenceTm").hide();
+		   $("#separateTMfileTD").hide();
 	    }else{
 		   $("#penalizedReferenceTm").show();
+		   $("#separateTMfileTD").show();
 	    }
 	}else{
 		$(".tmxTypeSelector").hide();
@@ -53,12 +55,14 @@ function formatSelection(){
 	var tmxType=$("#tmxTypeSelector").val();
 	if("OmegaT" == val){
 		$("#penalizedReferenceTm").hide();
+		$("#separateTMfileTD").hide();
 	}else{
 	    if(tmxType.match("resInsTmx")){
 		   $("#penalizedReferenceTm").show();
 		}else{
 		   $("#penalizedReferenceTm").hide();
 		}
+	    $("#separateTMfileTD").show();
 	}
 	$("#tmxTypeSelector").children("span").each(function(){
 		 $(this).children().clone().replaceAll($(this)); 
@@ -100,6 +104,7 @@ var disOmegaT=function(){
 var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 				"TTX":function(){
 					$("#includeXmlNodeContextInformationBox").hide();
+					$("#separateTMfileTD").show();
 					populateShow();
 					disPtag();
 					var ttx=$(".TTX");
@@ -115,12 +120,14 @@ var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 				},
 				"xlf12":function(){
 					$("#includeXmlNodeContextInformationBox").show();
+					$("#separateTMfileTD").show();
 					populateHide();
 					disPtag();
 					disOmegaT();
 				},
 				"Xliff 2.0":function(){
 					$("#includeXmlNodeContextInformationBox").show();
+					$("#separateTMfileTD").show();
 					populateHide();
 					disPtag();
 					disOmegaT();
@@ -129,6 +136,7 @@ var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 					$("#includeXmlNodeContextInformationBox").show();
 					populateHide();
 					$('#populate100').hide();
+					$("#separateTMfileTD").hide();
 					disPtag();	
 					var unOmegaT=$(".unOmegaT");
 					unOmegaT.each(function(){
@@ -195,6 +203,11 @@ function setClientDwnldOptions(formSent)
     if (dwnldOpt.changeCreationIdForMT == 'yes')
     {
     	document.getElementById("changeCreationIdForMT").checked = true;
+    }
+    
+    if (dwnldOpt.separateTMfile == 'yes')
+    {
+    	document.getElementById("separateTMfile").checked = true;
     }
     
     if (dwnldOpt.penalizedReferenceTmPre == 'yes')

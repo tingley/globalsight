@@ -90,7 +90,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_CALENDAR_HOLIDAY = "delete from CALENDAR_HOLIDAY where CALENDAR_ID in ";
     private static final String SQL_DELETE_CALENDAR_WORKING_DAY = "delete from CALENDAR_WORKING_DAY where CALENDAR_ID in ";
     private static final String SQL_DELETE_CALENDAR_WORKING_HOUR = "delete from CALENDAR_WORKING_HOUR where CALENDAR_WORKING_DAY_ID in ";
-    private static final String SQL_DELETE_CATEGORY = "delete from CATEGORY where COMPANY_ID=?";
+    private static final String SQL_DELETE_CATEGORY = "delete from CATEGORY_SEGMENT_COMMENT where COMPANY_ID=?";
     private static final String SQL_DELETE_COMMENTS = "delete from COMMENTS where CREATOR_USER_ID in ";
     private static final String SQL_DELETE_COMPANY = "delete from COMPANY where ID=?";
     private static final String SQL_DELETE_CORPUS_MAP = "delete from CORPUS_MAP where TM_ID in ";
@@ -203,10 +203,10 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TARGET_PAGE = "delete from TARGET_PAGE where ID in ";
     private static final String SQL_DELETE_TARGET_PAGE_LEVERAGE_GROUP = "delete from TARGET_PAGE_LEVERAGE_GROUP where TP_ID in ";
     private static final String SQL_DELETE_TASK_INFO_BY_COMPANY_ID = "delete from TASK_INFO where COMPANY_ID=?";
-    private static final String SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID = "delete from SCORECARD_CATEGORY WHERE COMPANY_ID = ?";
+    private static final String SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID = "delete from CATEGORY_SCORECARD WHERE COMPANY_ID = ?";
     private static final String SQL_DELETE_GIT_CONNECTOR_BY_COMPANY_ID = "delete from CONNECTOR_GIT WHERE COMPANY_ID = ?";
     private static final String SQL_DELETE_GIT_CONNECTOR_FILE_MAPPING_BY_COMPANY_ID = "delete from CONNECTOR_GIT_FILE_MAPPING WHERE COMPANY_ID = ?";
-    private static final String SQL_DELETE_POST_REVIEW_CATEGORY_BY_COMPANY_ID = "delete from POST_REVIEW_CATEGORY WHERE COMPANY_ID = ?";
+    private static final String SQL_DELETE_POST_REVIEW_CATEGORY_BY_COMPANY_ID = "delete from CATEGORY_POST_REVIEW WHERE COMPANY_ID = ?";
     private static final String SQL_DELETE_TASK_INFO_BY_TASK_ID = "delete from TASK_INFO where TASK_ID in ";
     private static final String SQL_DELETE_TASK_INTERIM = "delete from TASK_INTERIM where USER_ID in ";
     private static final String SQL_DELETE_TASK_TUV = "delete from TASK_TUV where TASK_ID in ";
@@ -1576,9 +1576,9 @@ public class CompanyRemoval
 
     private void removeCategory(Connection conn) throws SQLException
     {
-        logStart("CATEGORY");
+        logStart("CATEGORY_SEGMENT_COMMENT");
         execOnce(conn, SQL_DELETE_CATEGORY, company.getId());
-        logEnd("CATEGORY");
+        logEnd("CATEGORY_SEGMENT_COMMENT");
     }
 
     private void removeComment(Connection conn, List<List<Object>> userIds,
@@ -3236,11 +3236,11 @@ public class CompanyRemoval
 
     private void removeScorecardCategory(Connection conn) throws SQLException
     {
-        logStart("SCORECARD_CATEGORY");
+        logStart("CATEGORY_SCORECARD");
         long companyId = company.getId();
         execOnce(conn, SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID, companyId);
 
-        logEnd("SCORECARD_CATEGORY");
+        logEnd("CATEGORY_SCORECARD");
     }
 
     private void removeMindTouchTargetServers(Connection conn) throws SQLException
@@ -3291,11 +3291,11 @@ public class CompanyRemoval
     
     private void romovePostReviewCategory(Connection conn) throws SQLException
     {
-        logStart("POST_REVIEW_CATEGORY");
+        logStart("CATEGORY_POST_REVIEW");
         long companyId = company.getId();
         execOnce(conn, SQL_DELETE_POST_REVIEW_CATEGORY_BY_COMPANY_ID, companyId);
 
-        logEnd("POST_REVIEW_CATEGORY");
+        logEnd("CATEGORY_POST_REVIEW");
     }
     
     private void removeTaskInfo(Connection conn) throws SQLException

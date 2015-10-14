@@ -4,7 +4,9 @@ import com.globalsight.everest.persistence.PersistentObject;
 
 public class ScorecardCategory extends PersistentObject
 {
-    private long id;
+	private static final long serialVersionUID = 5195461040470880414L;
+
+	private long id;
     private String scorecardCategory;
     private long companyId;
     

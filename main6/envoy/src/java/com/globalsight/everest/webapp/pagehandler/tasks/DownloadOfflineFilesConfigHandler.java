@@ -75,8 +75,6 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);// 12
             DOWNLOAD_OPTIONS
                     .add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);// 13
-            DOWNLOAD_OPTIONS
-            .add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE);// 13
             DOWNLOAD_OPTIONS.add(OfflineConstants.INCLUDE_REPETITIONS);// 14
             DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);// 15
             DOWNLOAD_OPTIONS
@@ -90,6 +88,9 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
                     .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE);// 21
             DOWNLOAD_OPTIONS
                     .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER);// 22
+			DOWNLOAD_OPTIONS
+					.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE);// 23
+            
             
             // NOTES:These constants must be added in sequence!!!!
             DOWNLOAD_OPTIONS_DEFAULT
@@ -121,9 +122,6 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS_DEFAULT
                     .add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);// 13
             DOWNLOAD_OPTIONS_DEFAULT.add("no");// 14
-			DOWNLOAD_OPTIONS_DEFAULT
-					.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE_DEFAULT);// 13
-			DOWNLOAD_OPTIONS_DEFAULT.add("no");// 14
             DOWNLOAD_OPTIONS_DEFAULT
                     .add(String
                             .valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));// 15
@@ -136,6 +134,8 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
                     .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE_DEFAULT);// 21
             DOWNLOAD_OPTIONS_DEFAULT
                     .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER_DEFAULT);// 22
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE_DEFAULT);// 23
         }
         catch (Throwable ignore)
         {

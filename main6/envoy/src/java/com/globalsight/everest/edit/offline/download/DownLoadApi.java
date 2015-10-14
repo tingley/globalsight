@@ -1549,6 +1549,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 mode = TmxUtil.TMX_MODE_NON_ICE;
             }
+            
+			if (separateTmFile)
+			{
+				mode = TmxUtil.TMX_MODE_TM_ONLY;
+			}
 
             if (full14bPath != null)
             {

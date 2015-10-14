@@ -215,7 +215,7 @@ public interface UserParamNames
     public static final String DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT = "yes";
     
     public static final String DOWNLOAD_OPTION_SEPARATE_TM_FILE = "separateTMfile";
-    public static final String DOWNLOAD_OPTION_SEPARATE_TM_FILE_DEFAULT = "yes";
+    public static final String DOWNLOAD_OPTION_SEPARATE_TM_FILE_DEFAULT = "no";
 
     // GBS-3776
     public static final String DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE = "penalizedReferenceTmPre";

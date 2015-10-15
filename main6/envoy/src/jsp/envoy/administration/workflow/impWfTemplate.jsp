@@ -331,7 +331,7 @@ function confirmForm() {
         <TR>
             <TD colspan="3">
                 <%=labelName%><SPAN CLASS="asterisk">*</SPAN>:<BR>
-                <INPUT TYPE="TEXT" SIZE="20" MAXLENGTH="13" NAME="nameTF" CLASS="standardText" />
+                <INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="48" NAME="nameTF" CLASS="standardText" /> (<%=bundle.getString("msg_wf_dup_note")%>)
             </TD>
         </TR>
         <TR>

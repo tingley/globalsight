@@ -473,7 +473,7 @@ function updateWFMS(projObj)
         <INPUT TYPE="HIDDEN" NAME="formAction" VALUE="">
 		<TR>
             <TD><%=labelName%><SPAN CLASS="asterisk">*</SPAN>:<BR>
-            <INPUT TYPE="TEXT" SIZE="20" MAXLENGTH="50" NAME="<%=nameField%>" onkeypress="return noenter()" CLASS="standardText"
+            <INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="60" NAME="<%=nameField%>" onkeypress="return noenter()" CLASS="standardText"
             <%  if (chosenName != null) { %> 
                 VALUE="<%= chosenName %>"
             <%  }%>

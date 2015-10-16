@@ -322,6 +322,12 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
    'XML_IMPORTED_EVENT',
    'XML_LOCALIZED_EVENT'
 );
+
+INSERT INTO KNOWN_FORMAT_TYPE VALUES (
+56, 'Xliff2.0','Xliff document 2.0','xlf2.0',
+   'XML_IMPORTED_EVENT',
+   'XML_LOCALIZED_EVENT'
+);
 -- 
 --  NOTE: ids > 500 are reserved for customer-specific file formats.
 -- 

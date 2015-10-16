@@ -14,7 +14,6 @@
  *  limitations under the License.
  *  
  */
-
 package com.globalsight.everest.page;
 
 import java.util.ArrayList;
@@ -26,7 +25,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
@@ -376,7 +377,8 @@ public class PageTemplate extends PersistentObject
                             // if the job creating file is from worldserver,
                             // then add the leverage match results into the
                             // alt-trans parts
-                            altStr = pt.getAltTrans(sourceTuv, targetTuv, jobId);
+                            altStr = pt
+                                    .getAltTrans(sourceTuv, targetTuv, jobId);
 
                             // If the tuv state is "localized" or
                             // "exact_match_localized"", add an attribute "isLocalized=yes"
@@ -406,7 +408,7 @@ public class PageTemplate extends PersistentObject
                 Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(), jobId);
 
                 // Revert original target content in some cases for XLF format.
-                if (tu.getDataType().equals(IFormatNames.FORMAT_XLIFF)
+                if (tu.getDataType().startsWith(IFormatNames.FORMAT_XLIFF)
                         && tu instanceof TuImpl)
                 {
                     // For GBS-1864 by York on 2011-03-07
@@ -416,8 +418,7 @@ public class PageTemplate extends PersistentObject
                             targetTuv);
                     if (revertTrgCase1 || revertTrgCase2)
                     {
-                        tuvString = revertTargetForXlf(tu, sourceTuv,
-                                targetTuv);                        
+                        tuvString = revertTargetForXlf(tu, sourceTuv, targetTuv);
                     }
                 }
                 // Revert original target content in some cases for PO format.
@@ -481,7 +482,7 @@ public class PageTemplate extends PersistentObject
                 result = GxmlUtil.resetInnerText(result, "");
             }
         }
-        
+
         if (result == null)
         {
             result = GxmlUtil.resetInnerText(sourceTuv.getGxml(), "");

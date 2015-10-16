@@ -253,6 +253,7 @@ public abstract class AbstractTargetPagePersistence implements
         {
             /****** Priority 1 : Handle XLF/PO/ matches ******/
             if (IFormatNames.FORMAT_XLIFF.equalsIgnoreCase(dataType)
+                    || IFormatNames.FORMAT_XLIFF20.equalsIgnoreCase(dataType)
                     || IFormatNames.FORMAT_PO.equalsIgnoreCase(dataType)
                     || IFormatNames.FORMAT_PASSOLO.equalsIgnoreCase(dataType))
             {
@@ -318,13 +319,13 @@ public abstract class AbstractTargetPagePersistence implements
                         isXlf ? "true" : "false");
                 paramMap.put(MachineTranslator.DATA_TYPE,
                         MTHelper2.getDataType(p_sourcePage.getId()));
-				if (MachineTranslator.ENGINE_MSTRANSLATOR
-						.equalsIgnoreCase(machineTranslator.getEngineName())
-						&& p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
+                if (MachineTranslator.ENGINE_MSTRANSLATOR
+                        .equalsIgnoreCase(machineTranslator.getEngineName())
+                        && p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
                 {
-					String srLang = mtProfile
-							.getPreferedLangForSr(p_targetLocale.toString());
-					paramMap.put(MachineTranslator.SR_LANGUAGE, srLang);
+                    String srLang = mtProfile
+                            .getPreferedLangForSr(p_targetLocale.toString());
+                    paramMap.put(MachineTranslator.SR_LANGUAGE, srLang);
                 }
                 machineTranslator.setMtParameterMap(paramMap);
                 boolean isLocalePairSupportedByMT = isLocalePairSupportedByMT(
@@ -696,37 +697,39 @@ public abstract class AbstractTargetPagePersistence implements
                         .getIdAsLong());
                 if (lss != null && lss.size() > 0)
                 {
-					LeverageSegment segment = SegmentUtil2
-							.getNextBestLeverageSegment(sourceTuv, lss);
-                	while (segment != null)
-                	{
+                    LeverageSegment segment = SegmentUtil2
+                            .getNextBestLeverageSegment(sourceTuv, lss);
+                    while (segment != null)
+                    {
                         hasOneHundredMatch = true;
-						boolean isTagMatched = SegmentUtil2.canBeModified(
-								targetTuv, segment.getSegment(), jobId);
-						if (!isTagMatched)
-						{
-							String segment2 = SegmentUtil2.adjustSegmentAttributeValues(
-									targetTuv.getGxmlElement(), 
-									SegmentUtil2.getGxmlElement(segment.getSegment()),
-									tu.getDataType());
-							isTagMatched = SegmentUtil2.canBeModified(
-									targetTuv, segment2, jobId);
-							if (isTagMatched)
-							{
-								segment.setSegment(segment2);
-							}
-						}
+                        boolean isTagMatched = SegmentUtil2.canBeModified(
+                                targetTuv, segment.getSegment(), jobId);
+                        if (!isTagMatched)
+                        {
+                            String segment2 = SegmentUtil2
+                                    .adjustSegmentAttributeValues(targetTuv
+                                            .getGxmlElement(), SegmentUtil2
+                                            .getGxmlElement(segment
+                                                    .getSegment()), tu
+                                            .getDataType());
+                            isTagMatched = SegmentUtil2.canBeModified(
+                                    targetTuv, segment2, jobId);
+                            if (isTagMatched)
+                            {
+                                segment.setSegment(segment2);
+                            }
+                        }
                         if (isTagMatched)
                         {
-							String segment2 = getTargetGxmlFitForItsOwnSourceContent(
-									sourceTuv, segment.getSegment(), jobId);
-							segment.setSegment(segment2);
+                            String segment2 = getTargetGxmlFitForItsOwnSourceContent(
+                                    sourceTuv, segment.getSegment(), jobId);
+                            segment.setSegment(segment2);
                             targetTuv = modifyTUV(targetTuv, segment);
                             tuvGotChanged = true;
                             break;
                         }
-						segment = SegmentUtil2.getNextBestLeverageSegment(
-								sourceTuv, lss);
+                        segment = SegmentUtil2.getNextBestLeverageSegment(
+                                sourceTuv, lss);
                     }
                 }
             }
@@ -850,8 +853,8 @@ public abstract class AbstractTargetPagePersistence implements
         if (needHitTDAMap != null && needHitTDAMap.size() > 0)
         {
             TdaHelper tdaHelper = new TdaHelper();
-			String directory = AmbFileStoragePathUtils
-					.getFileStorageDirPath(p_sourcePage.getCompanyId());
+            String directory = AmbFileStoragePathUtils
+                    .getFileStorageDirPath(p_sourcePage.getCompanyId());
 
             String filepath = directory + File.separator + "TDA"
                     + File.separator + p_targetLocale;
@@ -1620,15 +1623,16 @@ public abstract class AbstractTargetPagePersistence implements
     private String getTargetGxmlFitForItsOwnSourceContent(Tuv p_sourceTuv,
             String p_gxml, long p_jobId)
     {
-    	try
-    	{
+        try
+        {
             String srcGxml = p_sourceTuv.getGxml();
             int index = srcGxml.indexOf(">");
             String startSegment = srcGxml.substring(0, index + 1);
 
             OnlineTagHelper sourceTagHelper = new OnlineTagHelper();
-            sourceTagHelper.setInputSegment(p_sourceTuv.getGxmlExcludeTopTags(),
-                    "", p_sourceTuv.getDataType(p_jobId));
+            sourceTagHelper.setInputSegment(
+                    p_sourceTuv.getGxmlExcludeTopTags(), "",
+                    p_sourceTuv.getDataType(p_jobId));
             sourceTagHelper.getCompact();// This step is required
 
             OnlineTagHelper targetTagHelper = new OnlineTagHelper();
@@ -1639,10 +1643,10 @@ public abstract class AbstractTargetPagePersistence implements
             String targetGxml = sourceTagHelper.getTargetDiplomat(compact);
 
             return startSegment + targetGxml + "</segment>";
-    	}
-    	catch (Exception e)
-    	{
-    		return p_gxml;
-    	}
+        }
+        catch (Exception e)
+        {
+            return p_gxml;
+        }
     }
 }

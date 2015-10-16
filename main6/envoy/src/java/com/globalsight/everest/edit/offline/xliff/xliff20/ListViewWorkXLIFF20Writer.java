@@ -191,8 +191,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
         content = content.substring(i2 + 1);
         StringBuffer sb = new StringBuffer(xliff);
-        
-        //update \n to \r\n in first note
+
+        // update \n to \r\n in first note
         int i3 = content.indexOf("<unit");
         if (i3 > 0)
         {
@@ -200,7 +200,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             note = StringUtil.replace(note, "\n", "\r\n");
             content = note + content.substring(i3);
         }
-        
+
         boolean notFormat = false;
         for (int i = 0; i < content.length(); i++)
         {
@@ -278,16 +278,17 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         StringBuffer sb = new StringBuffer(strEOL);
 
         sb.append("# GlobalSight Download File").append(strEOL);
-        
+
         // Activity Type. Should be removed
-        sb.append("# Activity Type: ").append(downloadParams.getActivityType()).append(strEOL);
-        
+        sb.append("# Activity Type: ").append(downloadParams.getActivityType())
+                .append(strEOL);
+
         // User name. Should be removed.
         String user = null;
         if (downloadParams.getUser() != null)
         {
-            user = UserUtil.getUserNameById(downloadParams
-                    .getUser().getUserId());
+            user = UserUtil.getUserNameById(downloadParams.getUser()
+                    .getUserId());
         }
         else
         {
@@ -313,11 +314,11 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         {
             sb.append("# User name: ").append(user).append(strEOL);
         }
-        
+
         // Accept time. Should be removed.
         String acceptTaskTime = getAcceptTaskTime(getTasks(downloadParams));
         sb.append("# Accept time: ").append(acceptTaskTime).append(strEOL);
-        
+
         sb.append("# Encoding: ").append(XLIFF_ENCODING).append(strEOL);
         sb.append("# Document Format: ").append(page.getDocumentFormat())
                 .append(strEOL);
@@ -356,22 +357,22 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                 .append(page.getFuzzyMatchWordCountAsString()).append(strEOL);
         sb.append("# No Match word count: ")
                 .append(page.getNoMatchWordCountAsString()).append(strEOL);
-        
+
         sb.append("# Populate 100% Target Segments: ")
                 .append(page.isPopulate100() ? "YES" : "NO").append(strEOL);
-        
+
         // Server Instance ID
         if (page.getServerInstanceID() != null)
         {
             sb.append("# GlobalSight Instance ID: ")
                     .append(page.getServerInstanceID()).append(strEOL);
         }
-        
+
         Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
                 Long.parseLong(page.getWorkflowId()));
         sb.append("# In-Context Match word count: ")
                 .append(wf.getInContextMatchWordCount()).append(strEOL);
-        
+
         sb.append("# Edit all: ").append(page.getDisplayTMEditType())
                 .append(strEOL);
 
@@ -395,7 +396,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             sb.append("# GlobalSight Offline Toolkit Format: ").append(format)
                     .append(strEOL);
         }
-        
+
         return sb.toString();
     }
 
@@ -403,10 +404,11 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
     {
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         StringBuffer acceptTime = new StringBuffer();
-        for(Task task:tasks)
+        for (Task task : tasks)
         {
-            acceptTime.append(dateFormat.format(task.getEstimatedAcceptanceDate()))
-                        .append(",");
+            acceptTime.append(
+                    dateFormat.format(task.getEstimatedAcceptanceDate()))
+                    .append(",");
         }
         return acceptTime.substring(0, acceptTime.length() - 1);
     }
@@ -414,10 +416,10 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
     private List<Task> getTasks(DownloadParams p_downloadParams)
     {
         List<Task> tasks = new ArrayList<Task>();
-        List<Long>  taskIds = p_downloadParams.getAllTaskIds();
-        if(taskIds != null)
-        {           
-            for(Long taskId:taskIds)
+        List<Long> taskIds = p_downloadParams.getAllTaskIds();
+        if (taskIds != null)
+        {
+            for (Long taskId : taskIds)
             {
                 tasks.add(TaskHelper.getTask(taskId));
             }
@@ -429,7 +431,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         }
         return tasks;
     }
-    
+
     /**
      * Gets the skeleton from database.
      * 
@@ -453,10 +455,10 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         for (TemplatePart tp : templatePartList)
         {
             String richSkeletonString = tp.getSkeletonString();
-			if (StringUtil.isNotEmpty(richSkeletonString)
-					&& richSkeletonString.contains("<skeleton>")
-					&& richSkeletonString.contains("</skeleton>"))
-			{
+            if (StringUtil.isNotEmpty(richSkeletonString)
+                    && richSkeletonString.contains("<skeleton>")
+                    && richSkeletonString.contains("</skeleton>"))
+            {
                 String skeleton = richSkeletonString.substring(
                         richSkeletonString.indexOf("<skeleton>") + 10,
                         richSkeletonString.indexOf("</skeleton>"));
@@ -513,7 +515,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             }
         }
     }
-    
+
     /**
      * The sub id is like 38305:[l2]:1. The [ and ] is not allowed.
      * 
@@ -607,7 +609,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
         Unit unit = new Unit();
         file.getUnitOrGroup().add(unit);
-        
+
         // Handle edit type
         YesNo translate = YesNo.YES;
         if (TMEditType != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH)
@@ -636,7 +638,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         {
             seg.setId(getXliffId(osd.getDisplaySegmentID()));
         }
-        
+
         // Add SID
         String sid = osd.getSourceTuv().getSid();
         if (sid != null && sid.length() > 0)
@@ -659,9 +661,9 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             }
 
             Note note = new Note();
-        	note.setContent(osd.getDisplayMatchType());
-        	note.setCategory("MatchType");
-        	notes.getNote().add(note);
+            note.setContent(osd.getDisplayMatchType());
+            note.setCategory("MatchType");
+            notes.getNote().add(note);
         }
 
         // Adds source.
@@ -717,7 +719,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                     notes = new Notes();
                     unit.setNotes(notes);
                 }
-                
+
                 Note note = new Note();
                 note.setContent(EditUtil.decodeXmlEntities(skeletonMap
                         .get(tuId)));
@@ -768,13 +770,13 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
      */
     private boolean isInContextMatch(OfflineSegmentData data)
     {
-    	String matchType = data.getDisplayMatchType();
-    	if (matchType != null && matchType.startsWith("Context Exact Match"))
-    	{
-    		return true;
-    	}
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.startsWith("Context Exact Match"))
+        {
+            return true;
+        }
 
-    	return false;
+        return false;
     }
 
     /**
@@ -819,7 +821,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
      * @param unit
      * @throws IOException
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     private void writeTmMatch(OfflineSegmentData osd, long jobId, Unit unit)
             throws IOException
     {
@@ -863,7 +866,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         {
             LeverageMatch.orderMatchResult(list2);
 
-            Matches ms = new Matches();           
+            Matches ms = new Matches();
 
             for (int i = 0; i < list2.size(); i++)
             {
@@ -874,7 +877,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                     ms.getMatch().add(m);
                 }
             }
-            
+
             if (ms.getMatch().size() > 0)
             {
                 unit.setMatches(ms);
@@ -916,7 +919,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
                 if (sourceTuv != null
                         && sourceTuv.getTu(p_jobId).getDataType()
-                                .equals(IFormatNames.FORMAT_XLIFF))
+                                .startsWith(IFormatNames.FORMAT_XLIFF))
                 {
                     isFromXliff = true;
                 }
@@ -1006,13 +1009,14 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
             // Adds source
             sourceStr = processInternalText(sourceStr);
-            
+
             Match m = new Match();
             m.setRef("#" + getXliffId(osd.getDisplaySegmentID()));
-            
+
             Source s = new Source();
             m.setSource(s);
-            String score = StringUtil.formatPercent(leverageMatch.getScoreNum(), 2);
+            String score = StringUtil.formatPercent(
+                    leverageMatch.getScoreNum(), 2);
             m.setMatchQuality(score);
             Tmx2Xliff20Handler handler = new Tmx2Xliff20Handler();
             handler.setSource(true);
@@ -1021,7 +1025,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             tmxXliff.parse(sourceStr);
             s.getContent().addAll(handler.getResult());
             List<Data> data = tmxXliff.getDatas();
-            
+
             OriginalData originalData = new OriginalData();
             originalData.getData().addAll(data);
 
@@ -1036,7 +1040,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             t.getContent().addAll(tmxXliff.getResult());
             List<Data> data2 = tmxXliff.getDatas();
             originalData.getData().addAll(data2);
-            
+
             // Adds data
             if (originalData.getData().size() > 0)
             {
@@ -1189,10 +1193,10 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                 tag = result.getNextTargetTerm();
             }
         }
-        
+
         if (ms.getMatch().size() > 0)
         {
-            unit.setMatches(ms);            
+            unit.setMatches(ms);
         }
     }
 
@@ -1204,7 +1208,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
     private void addHeader() throws Exception
     {
         xliff.setVersion("2.0");
-        
+
         String sLocale = page.getSourceLocaleName();
         if (sLocale != null)
         {

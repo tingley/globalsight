@@ -105,9 +105,9 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             DownloadParams p_downloadParams) throws AmbassadorDwUpException
     {
         OfflineSegmentData osd = null;
-        
+
         HashMap<Long, String> skeletonMap = new HashMap<Long, String>();
-        if(p_downloadParams.isIncludeXmlNodeContextInformation())
+        if (p_downloadParams.isIncludeXmlNodeContextInformation())
         {
             List<Long> tuIdList = new ArrayList<Long>();
             Task task = TaskHelper.getTask(Long.parseLong(m_page.getTaskId()));
@@ -117,7 +117,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 osd = (OfflineSegmentData) it.next();
                 tuIdList.add(osd.getTargetTuv().getTu(jobId).getId());
             }
-        	getSkeleton(tuIdList, skeletonMap);
+            getSkeleton(tuIdList, skeletonMap);
         }
 
         for (ListIterator it = m_page.getSegmentIterator(); it.hasNext();)
@@ -135,30 +135,33 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             }
         }
     }
-    
-    private void getSkeleton(List<Long> p_tuIdList, HashMap<Long, String> p_skeletonMap)
+
+    private void getSkeleton(List<Long> p_tuIdList,
+            HashMap<Long, String> p_skeletonMap)
     {
-    	StringBuffer sqlBuffer = new StringBuffer();
-    	sqlBuffer.append(" FROM TemplatePart as tp WHERE " +
-    			" tp.pageTemplate.typeValue = 'EXP' and tp.tuId in ( ");
-		for(Long tuId: p_tuIdList)
-		{
-			sqlBuffer.append(tuId).append(",");
-		}
-		String hql = sqlBuffer.substring(0, sqlBuffer.length() - 1) + ")";
-		List<TemplatePart> templatePartList = (List<TemplatePart>) HibernateUtil.search(hql);
-		for(TemplatePart tp: templatePartList)
-		{
-			String richSkeletonString = tp.getSkeletonString();
-			if (StringUtil.isNotEmpty(richSkeletonString)
-					&& richSkeletonString.contains("<skeleton>")
-					&& richSkeletonString.contains("</skeleton>"))
-			{
-				String skeleton = richSkeletonString.substring(richSkeletonString.indexOf("<skeleton>") + 10,
-						richSkeletonString.indexOf("</skeleton>"));
-				p_skeletonMap.put(tp.getTuId(), skeleton);
-			}
-		}
+        StringBuffer sqlBuffer = new StringBuffer();
+        sqlBuffer.append(" FROM TemplatePart as tp WHERE "
+                + " tp.pageTemplate.typeValue = 'EXP' and tp.tuId in ( ");
+        for (Long tuId : p_tuIdList)
+        {
+            sqlBuffer.append(tuId).append(",");
+        }
+        String hql = sqlBuffer.substring(0, sqlBuffer.length() - 1) + ")";
+        List<TemplatePart> templatePartList = (List<TemplatePart>) HibernateUtil
+                .search(hql);
+        for (TemplatePart tp : templatePartList)
+        {
+            String richSkeletonString = tp.getSkeletonString();
+            if (StringUtil.isNotEmpty(richSkeletonString)
+                    && richSkeletonString.contains("<skeleton>")
+                    && richSkeletonString.contains("</skeleton>"))
+            {
+                String skeleton = richSkeletonString.substring(
+                        richSkeletonString.indexOf("<skeleton>") + 10,
+                        richSkeletonString.indexOf("</skeleton>"));
+                p_skeletonMap.put(tp.getTuId(), skeleton);
+            }
+        }
     }
 
     protected void writeXlfDocHeader(DownloadParams p_downloadParams)
@@ -238,7 +241,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
                 if (sourceTuv != null
                         && sourceTuv.getTu(p_jobId).getDataType()
-                                .equals(IFormatNames.FORMAT_XLIFF))
+                                .startsWith(IFormatNames.FORMAT_XLIFF))
                 {
                     isFromXliff = true;
                 }
@@ -318,8 +321,10 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 }
                 else
                 {
-                    String srcTmTuvString = leverageMatch.getMatchedOriginalSource();
-                    // TmUtil.getSourceTextForTuv(  leverageMatch.getTmId(), matchedTmTuvId, sourceTuv.getLocaleId());
+                    String srcTmTuvString = leverageMatch
+                            .getMatchedOriginalSource();
+                    // TmUtil.getSourceTextForTuv( leverageMatch.getTmId(),
+                    // matchedTmTuvId, sourceTuv.getLocaleId());
                     sourceStr = GxmlUtil.stripRootTag(srcTmTuvString);
                 }
             }
@@ -547,8 +552,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
     private void writeTranslationUnit(OfflineSegmentData p_osd,
             OfflinePageData m_page, boolean isTmx, int TMEditType,
-            DownloadParams p_downloadParams,HashMap<Long, String> p_skeletonMap)
-    		throws IOException, RegExException
+            DownloadParams p_downloadParams, HashMap<Long, String> p_skeletonMap)
+            throws IOException, RegExException
     {
         String srcSegment;
         String trgSegment;
@@ -657,19 +662,19 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             {
                 m_outputStream.write(" resname=\"SID\"");
             }
-            
-            if(p_downloadParams.isIncludeXmlNodeContextInformation())
+
+            if (p_downloadParams.isIncludeXmlNodeContextInformation())
             {
-            	long tuId = p_osd.getTargetTuv().getTu(jobId).getId();
-            	
-            	if(StringUtil.isNotEmpty(p_skeletonMap.get(tuId)))
-            	{
-            		m_outputStream.write(" extradata=\"");
-            		m_outputStream.write(p_skeletonMap.get(tuId));
-            		m_outputStream.write("\"");
-            	}
+                long tuId = p_osd.getTargetTuv().getTu(jobId).getId();
+
+                if (StringUtil.isNotEmpty(p_skeletonMap.get(tuId)))
+                {
+                    m_outputStream.write(" extradata=\"");
+                    m_outputStream.write(p_skeletonMap.get(tuId));
+                    m_outputStream.write("\"");
+                }
             }
-            
+
             m_outputStream.write(">");
             m_outputStream.write(m_strEOL);
         }
@@ -690,7 +695,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             String s = XLIFFStandardUtil.convertToStandard(p_osd, trgSegment);
             m_outputStream.write("<target");
             m_outputStream.write(" state=");
-            m_outputStream.write(str2DoubleQuotation(getState(p_osd, p_downloadParams)));
+            m_outputStream.write(str2DoubleQuotation(getState(p_osd,
+                    p_downloadParams)));
             m_outputStream.write(">");
             m_outputStream.write(s);
             m_outputStream.write("</target>");
@@ -767,14 +773,13 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         if (m_page.getDocumentFormat() != null)
         {
             String docFormat = m_page.getDocumentFormat();
-            
+
             if (docFormat.equals("multi-format"))
             {
                 docFormat = "x-" + docFormat;
             }
-            
-            m_outputStream.write("datatype="
-                    + str2DoubleQuotation(docFormat));
+
+            m_outputStream.write("datatype=" + str2DoubleQuotation(docFormat));
         }
 
         m_outputStream.write(">");
@@ -788,36 +793,36 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     private void writePhase(DownloadParams p_downloadParams) throws IOException
     {
         List<Task> tasks = getTasks(p_downloadParams);
-        
-        for(Task task:tasks)
-        {	
-        	String name = task.getTaskDisplayName();
-        	String typeName = "Translation";
-        	
-        	try
-        	{
-        		Activity act = ServerProxy.getJobHandler().getActivity(
-        				task.getTaskName());
-        		
-        		int type = act.getActivityType();
-        		
-        		if (Activity.TYPE_REVIEW == type)
-        		{
-        			typeName = "Review";
-        		}
-        		else if (TaskImpl.TYPE_REVIEW_EDITABLE == type)
-        		{
-        			typeName = "Review Editable";
-        		}
-        	}
-        	catch (Exception e)
-        	{
-        		logger.error(e.getMessage(), e);
-        		throw new AmbassadorDwUpException(e);
-        	}
-        	
-        	String phase = MessageFormat.format(PHASE, name, typeName);
-        	m_outputStream.write(phase);
+
+        for (Task task : tasks)
+        {
+            String name = task.getTaskDisplayName();
+            String typeName = "Translation";
+
+            try
+            {
+                Activity act = ServerProxy.getJobHandler().getActivity(
+                        task.getTaskName());
+
+                int type = act.getActivityType();
+
+                if (Activity.TYPE_REVIEW == type)
+                {
+                    typeName = "Review";
+                }
+                else if (TaskImpl.TYPE_REVIEW_EDITABLE == type)
+                {
+                    typeName = "Review Editable";
+                }
+            }
+            catch (Exception e)
+            {
+                logger.error(e.getMessage(), e);
+                throw new AmbassadorDwUpException(e);
+            }
+
+            String phase = MessageFormat.format(PHASE, name, typeName);
+            m_outputStream.write(phase);
         }
     }
 
@@ -921,18 +926,18 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
         m_outputStream.write(XliffConstants.HASH_MARK);
         m_outputStream.write("Task ID:");
-        if(m_page.getTaskIds() != null)
+        if (m_page.getTaskIds() != null)
         {
-        	StringBuffer taskIds = new StringBuffer();
-            for(Long taskId: m_page.getTaskIds())
+            StringBuffer taskIds = new StringBuffer();
+            for (Long taskId : m_page.getTaskIds())
             {
-            	taskIds.append(taskId).append(",");
+                taskIds.append(taskId).append(",");
             }
             m_outputStream.write(taskIds.substring(0, taskIds.length() - 1));
         }
         else
-        {       	
-        	m_outputStream.write(m_page.getTaskId());
+        {
+            m_outputStream.write(m_page.getTaskId());
         }
         m_outputStream.write(m_strEOL);
 
@@ -951,8 +956,9 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         m_outputStream.write(m_page.getNoMatchWordCountAsString());
         m_outputStream.write(m_strEOL);
 
-        m_outputStream.write(AmbassadorDwUpConstants.HEADER_POPULATE_100_SEGMENTS + " "
-                + (m_page.isPopulate100() ? "YES":"NO"));
+        m_outputStream
+                .write(AmbassadorDwUpConstants.HEADER_POPULATE_100_SEGMENTS
+                        + " " + (m_page.isPopulate100() ? "YES" : "NO"));
         m_outputStream.write(m_strEOL);
 
         // Server Instance ID
@@ -1051,21 +1057,21 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     private List getComments(List<Task> p_tasks)
     {
         List<Comment> comments = new ArrayList<Comment>();
-        for(Task task:p_tasks)
+        for (Task task : p_tasks)
         {
-        	Workflow wf = task.getWorkflow();
-        	Job job = wf.getJob();
-        	Iterator workflows = job.getWorkflows().iterator();
-        	while (workflows.hasNext())
-        	{
-        		Workflow t_wf = (Workflow) workflows.next();
-        		Hashtable tasks = t_wf.getTasks();
-        		for (Iterator i = tasks.values().iterator(); i.hasNext();)
-        		{
-        			Task t = (Task) i.next();
-        			comments.addAll(t.getTaskComments());
-        		}
-        	}
+            Workflow wf = task.getWorkflow();
+            Job job = wf.getJob();
+            Iterator workflows = job.getWorkflows().iterator();
+            while (workflows.hasNext())
+            {
+                Workflow t_wf = (Workflow) workflows.next();
+                Hashtable tasks = t_wf.getTasks();
+                for (Iterator i = tasks.values().iterator(); i.hasNext();)
+                {
+                    Task t = (Task) i.next();
+                    comments.addAll(t.getTaskComments());
+                }
+            }
         }
         return comments;
     }
@@ -1074,10 +1080,11 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     {
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         StringBuffer acceptTime = new StringBuffer();
-        for(Task task:tasks)
+        for (Task task : tasks)
         {
-        	acceptTime.append(dateFormat.format(task.getEstimatedAcceptanceDate()))
-        				.append(",");
+            acceptTime.append(
+                    dateFormat.format(task.getEstimatedAcceptanceDate()))
+                    .append(",");
         }
         return acceptTime.substring(0, acceptTime.length() - 1);
     }
@@ -1085,18 +1092,18 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     private List<Task> getTasks(DownloadParams p_downloadParams)
     {
         List<Task> tasks = new ArrayList<Task>();
-        List<Long>  taskIds = p_downloadParams.getAllTaskIds();
-        if(taskIds != null)
-        {       	
-        	for(Long taskId:taskIds)
-        	{
-        		tasks.add(TaskHelper.getTask(taskId));
-        	}
+        List<Long> taskIds = p_downloadParams.getAllTaskIds();
+        if (taskIds != null)
+        {
+            for (Long taskId : taskIds)
+            {
+                tasks.add(TaskHelper.getTask(taskId));
+            }
         }
         else
         {
-        	long taskId = Long.parseLong(p_downloadParams.getTaskID());
-        	tasks.add(TaskHelper.getTask(taskId));
+            long taskId = Long.parseLong(p_downloadParams.getTaskID());
+            tasks.add(TaskHelper.getTask(taskId));
         }
         return tasks;
     }

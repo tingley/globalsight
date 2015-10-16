@@ -223,4 +223,8 @@ public interface SegmentTmInfo
     public void setJob(Job job);
 
     public Job getJob();
+    
+    public void setLock(boolean lock);
+
+    public boolean getLock();
 }

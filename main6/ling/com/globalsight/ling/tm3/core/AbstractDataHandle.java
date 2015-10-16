@@ -35,6 +35,11 @@ abstract class AbstractDataHandle<T extends TM3Data> implements TM3Handle<T> {
         purgeData();
     }
     
+    @Override
+    public void purgeWithoutLock() {
+        purgeData();
+    }
+    
     protected abstract void purgeData();
 
     abstract class TuIterator implements Iterator<TM3Tu<T>> {

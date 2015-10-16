@@ -122,6 +122,8 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             .getLogger(Tm3SegmentTmInfo.class);
 
     private TM3Manager manager = DefaultManager.create();
+    
+    private boolean lock = false;
 
     public static List<TM3Tu<GSTuvData>> tusRemove = new ArrayList<TM3Tu<GSTuvData>>();
 
@@ -175,7 +177,14 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                     + "ids " + ids);
 
             // Delete the segments by ID
-            tm3tm.getDataById(ids).purge();
+            if (lock)
+            {
+                tm3tm.getDataById(ids).purge();
+            }
+            else
+            {
+                tm3tm.getDataById(ids).purgeWithoutLock();
+            }
 
             // update the Lucene index
             luceneRemoveBaseTus(pTm.getId(), pTus);
@@ -1908,4 +1917,16 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 		}
 		return localeList;
 	}
+	
+    @Override
+    public void setLock(boolean lock)
+    {
+        this.lock = lock;
+    }
+
+    @Override
+    public boolean getLock()
+    {
+        return this.lock;
+    }
 }

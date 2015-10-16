@@ -245,6 +245,12 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
     {
         m_localInstance.deleteSegmentTmTus(p_tm, p_tus);
     }
+    
+    public void deleteSegmentTmTus(Tm p_tm, Collection<SegmentTmTu> p_tus, boolean lock)
+            throws RemoteException, LingManagerException
+    {
+        m_localInstance.deleteSegmentTmTus(p_tm, p_tus, lock);
+    }
 
     @Override
     public boolean removeTmData(Tm pTm, ProgressReporter pReporter,

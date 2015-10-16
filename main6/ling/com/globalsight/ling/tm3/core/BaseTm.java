@@ -34,6 +34,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.LockOptions;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -63,6 +64,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     private TM3Manager manager;
     private TM3DataFactory<T> factory;
     private Connection connection = null;
+    
+    private boolean locked = false;
 
     // Transient
     private StorageInfo<T> storage;
@@ -1377,7 +1380,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
 
     void lockForWrite() throws TM3Exception
     {
-        getSession().lock(this, LockMode.UPGRADE);
+        if (!locked)
+        {
+            getSession().buildLockRequest(LockOptions.UPGRADE).lock(this);
+            //getSession().lock(this, LockMode.UPGRADE);
+            
+            locked = true;
+        }
     }
 
     // TODO: on save, check that all required attrs are present

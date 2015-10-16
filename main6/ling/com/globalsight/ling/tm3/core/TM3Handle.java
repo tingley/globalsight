@@ -36,4 +36,10 @@ public interface TM3Handle<T extends TM3Data> extends Iterable<TM3Tu<T>> {
      * associated translation memory.
      */
     public void purge() throws TM3Exception; 
+    
+    /**
+     * Purge all TUs identified by this handle from its 
+     * associated translation memory.
+     */
+    public void purgeWithoutLock() throws TM3Exception; 
 }

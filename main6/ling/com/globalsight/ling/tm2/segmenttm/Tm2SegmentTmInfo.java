@@ -69,7 +69,8 @@ import com.globalsight.util.progress.ProgressReporter;
 
 public class Tm2SegmentTmInfo implements SegmentTmInfo
 {
-
+    private boolean lock = false;
+    
     @Override
     public LeverageMatchResults leverage(List<Tm> pTms,
             LeverageDataCenter pLeverageDataCenter, long p_jobId)
@@ -753,5 +754,17 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     public Job getJob()
     {
         return m_job;
+    }
+
+    @Override
+    public void setLock(boolean lock)
+    {
+        this.lock = lock;
+    }
+
+    @Override
+    public boolean getLock()
+    {
+        return this.lock;
     }
 }

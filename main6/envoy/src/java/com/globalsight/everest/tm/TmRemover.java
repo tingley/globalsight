@@ -194,6 +194,7 @@ public class TmRemover extends MultiCompanySupportedThread implements
                     if (deleteTUListingFlag)
                     {
                         String tmName = tm.getName();
+                        // tm3
                         if (tm.getTm3Id() != null)
                         {
                             List<Long> tm3tuIds = new ArrayList<Long>();
@@ -236,7 +237,7 @@ public class TmRemover extends MultiCompanySupportedThread implements
 
                             if (resultList.size() > 0)
                             {
-                                manager.deleteSegmentTmTus(tm, resultList);
+                                manager.deleteSegmentTmTus(tm, resultList, false);
                                 this.setMessageKey("", tmName + " - TUs ("
                                         + tm3tuIds
                                         + ") have been successfully removed.");
@@ -247,6 +248,7 @@ public class TmRemover extends MultiCompanySupportedThread implements
                                         + " - Nothing has been removed.");
                             }
                         }
+                        // tm2 : do not testing as TM2 is hidden from 8.6.5
                         else
                         {
                             List<SegmentTmTu> tus = tm.getSegmentTmInfo()

@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.tm2.TmxTypeMapper;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.EmojiUtil;
@@ -86,10 +87,6 @@ public class GxmlElement implements Serializable
     { GxmlElement.TEXT_NODE };
     public static final int[] USPECIFIED_TYPE = new int[]
     { GxmlElement.UNSPECIFIED };
-
-    public static final String XLF = "xlf";
-
-    // member variables
 
     /** element type */
     protected int m_type = NONE;
@@ -709,7 +706,8 @@ public class GxmlElement implements Serializable
         {
             return toGxml("", false, true);
         }
-        else if (XLF.equalsIgnoreCase(dataType))
+        else if (IFormatNames.FORMAT_XLIFF.equalsIgnoreCase(dataType)
+                || IFormatNames.FORMAT_XLIFF20.equalsIgnoreCase(dataType))
         {
             return toGxml("", false, false, true);
         }

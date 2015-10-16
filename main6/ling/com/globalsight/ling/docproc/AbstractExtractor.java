@@ -795,7 +795,9 @@ public abstract class AbstractExtractor implements ExtractorInterface
                     encoding = m_input.getCodeset();
 
                 if (m_input.getType() == m_ExtractorRegistry
-                        .getFormatId(IFormatNames.FORMAT_XLIFF))
+                        .getFormatId(IFormatNames.FORMAT_XLIFF)
+                        || m_input.getType() == m_ExtractorRegistry
+                                .getFormatId(IFormatNames.FORMAT_XLIFF20))
                 {
                     BufferedReader buffReader = new BufferedReader(
                             new InputStreamReader(in, encoding));
@@ -839,11 +841,10 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
                     while (tempString != null)
                     {
-                        tempString = EscapingHelper
-                                .handleString4Import(tempString, es,
-                                        m_ExtractorRegistry
-                                                .getFormatName(m_input
-                                                        .getType()), true, null);
+                        tempString = EscapingHelper.handleString4Import(
+                                tempString, es, m_ExtractorRegistry
+                                        .getFormatName(m_input.getType()),
+                                true, null);
                         // keep empty cdata section
                         tempString = tempString
                                 .replace("<![CDATA[]]>",
@@ -879,7 +880,9 @@ public abstract class AbstractExtractor implements ExtractorInterface
         {
             // read from Unicode string
             if (m_input.getType() == m_ExtractorRegistry
-                    .getFormatId(IFormatNames.FORMAT_XLIFF))
+                    .getFormatId(IFormatNames.FORMAT_XLIFF)
+                    || m_input.getType() == m_ExtractorRegistry
+                            .getFormatId(IFormatNames.FORMAT_XLIFF20))
             {
                 String str = SegmentUtil.protectEntity(m_input
                         .getUnicodeInput());

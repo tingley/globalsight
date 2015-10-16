@@ -666,6 +666,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
 
             if (isContent() && !FORMAT_XLIFF.equals(format)
+                    && !FORMAT_XLIFF20.equals(format)
                     && !FORMAT_PO.equals(mainFormat)
                     && !FORMAT_HTML.equals(mainFormat))
             {
@@ -749,7 +750,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     tmp = entityEncodeForSkeleton(tmp);
                 }
             }
-            else if (ExtractorRegistry.FORMAT_XLIFF.equalsIgnoreCase(format))
+            else if (FORMAT_XLIFF.equalsIgnoreCase(format)
+                    || FORMAT_XLIFF20.equalsIgnoreCase(format))
             {
                 if (isContent())
                 {
@@ -1009,9 +1011,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     }
                     tmp = applyNativeEncodingForSkeleton(tmp,
                             encoderForSkeleton);
-                    if (IFormatNames.FORMAT_XLIFF.equals(srcDataType)
-                            || IFormatNames.FORMAT_XLIFF_NAME
-                                    .equals(srcDataType)
+                    if (FORMAT_XLIFF.equals(srcDataType)
+                            || FORMAT_XLIFF_NAME.equals(srcDataType)
+                            || FORMAT_XLIFF20.equals(srcDataType)
                             || IFormatNames.FORMAT_PO.equals(srcDataType))
                     {
                         tmp = entityEncodeForSkeleton(tmp, true);

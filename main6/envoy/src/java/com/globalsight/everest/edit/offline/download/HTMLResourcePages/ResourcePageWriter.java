@@ -39,7 +39,6 @@ import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.ling.tw.PtagStringFormatter;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
@@ -271,7 +270,7 @@ public class ResourcePageWriter extends DownloadWriter implements
                 Tuv sourceTuv = p_segment.getSourceTuv();
 
                 if (sourceTuv.getTu(p_jobId).getDataType()
-                        .equals(IFormatNames.FORMAT_XLIFF))
+                        .startsWith(IFormatNames.FORMAT_XLIFF))
                 {
                     sourceStr = EditUtil.encodeHtmlEntities(SegmentUtil
                             .restoreSegment(sourceStr,
@@ -364,12 +363,12 @@ public class ResourcePageWriter extends DownloadWriter implements
         {
             LeverageMatch lm = (LeverageMatch) l1.get(i);
 
-			args[0] = (lm == null) ? "??" : ""
-					+ String.valueOf(Math.floor(lm.getScoreNum())).substring(
-							0,
-							String.valueOf(Math.floor(lm.getScoreNum()))
-									.indexOf(".")) + "%";
-           
+            args[0] = (lm == null) ? "??" : ""
+                    + String.valueOf(Math.floor(lm.getScoreNum())).substring(
+                            0,
+                            String.valueOf(Math.floor(lm.getScoreNum()))
+                                    .indexOf(".")) + "%";
+
             try
             {
                 if (m_rtlTargetLocale)

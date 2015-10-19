@@ -151,14 +151,14 @@ public final class OfflineEditManagerWLImpl
         return m_localInstance.newInstance();
     }
 
-	@Override
+    @Override
     public void runProcessDownloadRequest(DownloadParams downloadParams)
             throws OfflineEditorManagerException, RemoteException
     {
         m_localInstance.runProcessDownloadRequest(downloadParams);
     }
 
-	@Override
+    @Override
     public String runProcessUploadReportPage(File p_tmpFile, User p_user,
             Task p_task, String p_fileName, String p_reportName)
             throws AmbassadorDwUpException
@@ -167,7 +167,7 @@ public final class OfflineEditManagerWLImpl
                 p_task, p_fileName, p_reportName);
     }
 
-	@Override
+    @Override
     public String runProcessUploadPage(File p_tmpFile, User p_user, Task p_task,
             String p_fileName) throws AmbassadorDwUpException
     {
@@ -176,14 +176,14 @@ public final class OfflineEditManagerWLImpl
     }
 
     @Override
-	public void cancel() 
-	{
-		if (m_localInstance instanceof Cancelable) 
-		{
-			Cancelable cancel = (Cancelable) m_localInstance;
-			cancel.cancel();
-		}
-	}
+    public void cancel() 
+    {
+        if (m_localInstance instanceof Cancelable) 
+        {
+            Cancelable cancel = (Cancelable) m_localInstance;
+            cancel.cancel();
+        }
+    }
 
     @Override
     public DownloadParams getDownloadParamsByUser(String p_userId, Task p_task)

@@ -43,6 +43,7 @@ import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
+import com.globalsight.everest.edit.offline.OfflineEditManagerLocal;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.PageData;
@@ -70,7 +71,6 @@ import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
-import com.globalsight.util.edit.SegmentUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 import com.globalsight.util.gxml.GxmlElement;
 
@@ -362,24 +362,34 @@ public class OfflinePtagErrorChecker implements Cancelable
                 c.set(Calendar.HOUR_OF_DAY, next + 1);
                 Date d = c.getTime();
 
-                while (status.getIsContinue() == null)
+                OfflineEditManagerLocal manager = new OfflineEditManagerLocal();
+                manager.startConfirm();
+                try
                 {
-                    Date d2 = new Date();
-                    if (d2.after(d))
+                    while (status.getIsContinue() == null)
                     {
-                        String msg = "Wait for confirmation has spent 1 hours";
-                        CATEGORY.info(msg);
-                        return msg;
+                        Date d2 = new Date();
+                        if (d2.after(d))
+                        {
+                            String msg = "Wait for confirmation has spent 1 hours";
+                            CATEGORY.info(msg);
+                            return msg;
+                        }
+
+                        try
+                        {
+                            Thread.sleep(1000);
+                        }
+                        catch (InterruptedException e)
+                        {
+                            CATEGORY.error(e);
+                        }
                     }
 
-                    try
-                    {
-                        Thread.sleep(1000);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        CATEGORY.error(e);
-                    }
+                }
+                finally
+                {
+                    manager.endConfirm();
                 }
             }
         }
@@ -477,7 +487,7 @@ public class OfflinePtagErrorChecker implements Cancelable
         // Create PTag resources
         pTagData = new PseudoData();
         pTagData.setXliff20File(p_uploadPage.isXliff20());
-        
+
         pTagData.setLocale(m_errWriter.getLocale());
 
         convertor = new TmxPseudo();
@@ -652,7 +662,7 @@ public class OfflinePtagErrorChecker implements Cancelable
 
                             // avoid entity difference impacting
                             tempUploadTargetDisplayText = xmlEncoder
-									.decodeStringBasic(tempUploadTargetDisplayText);
+                                    .decodeStringBasic(tempUploadTargetDisplayText);
                         }
 
                         pTagData.setIsXliffXlfFile(isXliff);
@@ -1114,24 +1124,33 @@ public class OfflinePtagErrorChecker implements Cancelable
                 c.set(Calendar.HOUR_OF_DAY, n + 1);
                 Date d = c.getTime();
 
-                while (status.getIsContinue() == null)
+                OfflineEditManagerLocal manager = new OfflineEditManagerLocal();
+                manager.startConfirm();
+                try
                 {
-                    Date d2 = new Date();
-                    if (d2.after(d))
+                    while (status.getIsContinue() == null)
                     {
-                        String msg = "Wait for confirmation has spent 1 hours";
-                        CATEGORY.info(msg);
-                        return msg;
-                    }
+                        Date d2 = new Date();
+                        if (d2.after(d))
+                        {
+                            String msg = "Wait for confirmation has spent 1 hours";
+                            CATEGORY.info(msg);
+                            return msg;
+                        }
 
-                    try
-                    {
-                        Thread.sleep(1000);
+                        try
+                        {
+                            Thread.sleep(1000);
+                        }
+                        catch (InterruptedException e)
+                        {
+                            CATEGORY.error(e);
+                        }
                     }
-                    catch (InterruptedException e)
-                    {
-                        CATEGORY.error(e);
-                    }
+                }
+                finally
+                {
+                    manager.endConfirm();
                 }
 
             }

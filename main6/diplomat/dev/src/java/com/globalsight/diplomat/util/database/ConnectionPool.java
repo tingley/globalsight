@@ -378,18 +378,10 @@ public class ConnectionPool
     private static ConnectionPool _getPool(long p_profileId)
             throws ConnectionPoolException
     {
-        ConnectionPool pool = null;
-        Long id = new Long(p_profileId);
-
-
-        synchronized (m_pools)
+        ConnectionPool pool = (ConnectionPool) m_pools.get(p_profileId);
+        if (pool == null)
         {
-            pool = (ConnectionPool) m_pools.get(id);
-
-            if (pool == null)
-            {
-                pool = _createPool(p_profileId);
-            }
+            pool = _createPool(p_profileId);
         }
 
         return pool;
@@ -402,15 +394,7 @@ public class ConnectionPool
      */
     private static ConnectionPool __removePool(long p_profileId)
     {
-        ConnectionPool pool = null;
-        Long id = new Long(p_profileId);
-
-        synchronized (m_pools)
-        {
-            pool = (ConnectionPool) m_pools.remove(id);
-        }
-
-        return pool;
+        return (ConnectionPool) m_pools.remove(p_profileId);
     }
 
     /**
@@ -697,6 +681,8 @@ public class ConnectionPool
      * connection, false otherwise.
      *
      * This is a "public" method on the pool instance.
+     * 
+     * @deprecated for performance
      */
     private synchronized boolean _contains(Connection p_conn)
     {
@@ -829,6 +815,8 @@ public class ConnectionPool
      * Return true if the given connection is in the "allocated" array.
      *
      * This method is called by the synchronized _contains().
+     * 
+     * @deprecated for performance
      */
     private boolean __isAllocated(Connection p_conn)
     {
@@ -849,6 +837,8 @@ public class ConnectionPool
      * Return true if the given connection is in the "unallocated" array.
      *
      * This method is called by the synchronized _contains().
+     * 
+     * @deprecated for performance 
      */
     private boolean __isUnallocated(Connection p_conn)
     {

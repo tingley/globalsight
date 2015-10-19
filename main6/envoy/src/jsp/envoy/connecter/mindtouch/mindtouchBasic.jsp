@@ -237,18 +237,8 @@ function add()
 	var idPageHtml=$("#idPageHtml");
 	var temp=trnode.clone(true);
 	var targetUrl = $("#targetUrl").val();
-	var targetUsername = "";
-	var targetPassword = "";
-	if($("#useSourceServerUsernamePassword").is(':checked') == true)
-	{
-		var targetUsername = $("#username").val();
-		var targetPassword = $("#password").val();
-	}
-	else
-	{
-		var targetUsername = $("#targetUsername").val();
-		var targetPassword = $("#targetPassword").val();
-	}
+	var targetUsername = $("#targetUsername").val();
+	var targetPassword = $("#targetPassword").val();
 	
 	temp.attr("id","tr"+targetLocale);
 	temp.children('td').eq(0).html(targetLocale + "<input type='hidden' name='targetLocale" + targetLocale + "' value='" + targetLocale+"'>");
@@ -271,34 +261,17 @@ function confirmTargetServer()
         return false;
     }
 	
-	if($("#useSourceServerUsernamePassword").is(':checked') == true)
-	{
-		if (isEmptyString(mindtouchForm.username.value))
-	    {
-	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_user_name")))%>");
-	        return false;
-	    }
-
-	    if (isEmptyString(mindtouchForm.password.value))
-	    {
-	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_password")))%>");
-	        return false;
-	    }
-	}
-	else
-	{
-	    if (isEmptyString(mindtouchForm.targetUsername.value))
-	    {
-	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_user_name")))%>");
-	        return false;
-	    }
+    if (isEmptyString(mindtouchForm.targetUsername.value))
+    {
+        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_user_name")))%>");
+        return false;
+    }
 	
-	    if (isEmptyString(mindtouchForm.targetPassword.value))
-	    {
-	        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_password")))%>");
-	        return false;
-	    }
-	}
+    if (isEmptyString(mindtouchForm.targetPassword.value))
+    {
+        alert("<%=EditUtil.toJavascript(MessageFormat.format(msgTemp, bundle.getString("lb_password")))%>");
+        return false;
+    }
 
     return true;
 }
@@ -311,6 +284,21 @@ function removetest(targetLocale)
 	$("tr[id=tr"+targetLocale+"]").remove();
 	targetLocaleStr = targetLocaleStr.replace(targetLocale,"");
 }
+
+$(document).ready(function ()
+{
+	// Source username/password as default for target servers.
+	$("#targetUsername").val($("#username").val());
+	$("#targetPassword").val($("#password").val());
+
+	$("#username").blur(function () {
+    	$("#targetUsername").val($("#username").val());
+    });
+
+	$("#password").blur(function () {
+		$("#targetPassword").val($("#password").val());
+	});
+});
 </script>
 </head>
 <body id="idBody" leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()">
@@ -412,9 +400,6 @@ function removetest(targetLocale)
         <tr>
             <td><%=bundle.getString("lb_password")%>:</td>
             <td><input type="password" name="targetPassword" id="targetPassword" style="width: 360px;" maxLength="200"></td>
-        </tr>
-        <tr>
-        	<td colspan="2" align="left"><%=bundle.getString("lb_use_source_server_username_password")%>:<input type="checkbox" id="useSourceServerUsernamePassword" checked></td>
         </tr>
         <tr>
         	<td colspan="2" align="left"><input type="button" name="addTarget" value="<%=bundle.getString("lb_add")%>" onclick="add()"/></td>

@@ -170,7 +170,7 @@ public class TmPopulator
             SegmentTmInfo segtmInfo = tm.getSegmentTmInfo();
             segtmInfo.setJob(job);
 			mappingHolder = segtmInfo.saveToSegmentTm(
-					pageJobData.getTusToSaveToSegmentTm(p_options),
+					pageJobData.getTusToSaveToSegmentTm(p_options,p_targetLocales,p_page),
 					sourceLocale, tm, p_targetLocales,
 					TmCoreManager.SYNC_MERGE, false);
         }
@@ -206,7 +206,7 @@ public class TmPopulator
                 {
                     TermbaseManager tbm = new TermbaseManager();
                     Collection p_segmentsToSave = pageJobData
-                            .getTusToSaveToSegmentTm(p_options);
+                            .getTusToSaveToSegmentTm(p_options,null,null);
                     Iterator it = p_segmentsToSave.iterator();
                     while (it.hasNext())
                     {

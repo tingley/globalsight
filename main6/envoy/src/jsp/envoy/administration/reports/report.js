@@ -21,6 +21,11 @@ function JobInfo(p_jobId, p_jobName, p_projectId, p_jobStatus, p_targetLocals)
 	};
 }
 
+function GlobalSightLocale(p_id, p_displayName){
+	this.id = p_id;
+	this.displayName= p_displayName;
+}
+
 // If array contains item, then return true.
 function contains(array, item){
 	for(var i=0; i<array.length; i++){

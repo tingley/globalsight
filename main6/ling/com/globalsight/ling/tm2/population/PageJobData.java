@@ -163,7 +163,8 @@ public class PageJobData
      *            LeverageOptions object
      */
 	public Collection<PageTmTu> getTusToSaveToSegmentTm(
-			LeverageOptions p_options,Set<GlobalSightLocale> p_targetLocales,SourcePage p_page) throws Exception
+			LeverageOptions p_options, Set<GlobalSightLocale> p_targetLocales,
+			SourcePage p_page) throws Exception
 	{
 		boolean saveUntranslated = p_options.savesUntranslatedInSegmentTm();
 		boolean saveLocailzed = p_options.saveLocalizedInSegmentTM();
@@ -237,16 +238,17 @@ public class PageJobData
 
 		tuList = getTusByState(excludeStates, EXCLUDE_STATE);
 
-
 		if (!p_saveExactMatch)
 			return filterExactMatchData(tuList, p_targetLocales, p_page.getId());
-		else return tuList;
+		else
+			return tuList;
 	}
 
 	/**
 	 * GBS-4068 : No new TU (with SID) created in the storage TM for AuthorIT SID
 	 * */
-	private ArrayList<PageTmTu> filterExactMatchData(Collection<PageTmTu> tuList,
+	private ArrayList<PageTmTu> filterExactMatchData(
+			Collection<PageTmTu> tuList,
 			Set<GlobalSightLocale> p_targetLocales, long pageId)
 	{
 		ArrayList<PageTmTu> returnTuList = new ArrayList<PageTmTu>();
@@ -258,10 +260,9 @@ public class PageJobData
 					.getExactLeverageMatches(pageId, targetLocale.getId());
 			for (LeverageMatch match : leverageMatches)
 			{
-				String key = new Long(match.getOriginalSourceTuvId()) + "_"
+				String key = match.getOriginalSourceTuvId() + "_"
 						+ targetLocale.getId();
-				Set<LeverageMatch> set = (TreeSet<LeverageMatch>) leverageMatchMap
-						.get(key);
+				Set<LeverageMatch> set = (TreeSet<LeverageMatch>) leverageMatchMap.get(key);
 				if (set == null)
 				{
 					set = new TreeSet<LeverageMatch>();
@@ -281,36 +282,33 @@ public class PageJobData
 			Iterator itLocale = tu.getAllTuvLocales().iterator();
 			while (itLocale.hasNext())
 			{
-				GlobalSightLocale tuvLocale = (GlobalSightLocale) itLocale
-						.next();
-				PageTmTuv tuv = (PageTmTuv) tu.getFirstTuv(tuvLocale);
+				GlobalSightLocale tuvLocale = (GlobalSightLocale) itLocale.next();
 				if (!tuvLocale.equals(m_sourceLocale))
 				{
+					PageTmTuv tuv = (PageTmTuv) tu.getFirstTuv(tuvLocale);
 					leverageMatchSet = leverageMatchMap.get(sourceTuv.getId()
 							+ "_" + tuvLocale.getId());
 					if (TuvState.EXACT_MATCH_LOCALIZED.getName().equals(
-							tuv.getState()))
+							tuv.getState())
+							&& leverageMatchSet != null)
 					{
-						if (leverageMatchSet != null)
+						for (LeverageMatch match : leverageMatchSet)
 						{
-							for (LeverageMatch match : leverageMatchSet)
+							String mathcText = GxmlUtil.stripRootTag(match
+									.getMatchedText());
+							if (mathcText.equals(tuv.getSegmentNoTopTag()))
 							{
-								String mathcText = GxmlUtil.stripRootTag(match
-										.getMatchedText());
-								if (mathcText.equals(tuv.getSegmentNoTopTag()))
+								if (match.getSid() != null
+										&& tuv.getSid() != null
+										&& !match.getSid().equals(
+												tuv.getSid()))
 								{
-									if (match.getSid() != null
-											&& tuv.getSid() != null
-											&& !match.getSid().equals(
-													tuv.getSid()))
-									{
-										clonedTu.addTuv(tuv);
-									}
-									else if (match.getSid() == null
-											&& tuv.getSid() != null)
-									{
-										clonedTu.addTuv(tuv);
-									}
+									clonedTu.addTuv(tuv);
+								}
+								else if (match.getSid() == null
+										&& tuv.getSid() != null)
+								{
+									clonedTu.addTuv(tuv);
 								}
 							}
 						}

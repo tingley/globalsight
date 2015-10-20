@@ -161,7 +161,7 @@ public class TmPopulator
                     p_targetLocales);
 
             // populate into term-base if "Terminology Approval" is yes.
-			populateIntoTermbase(pageJobData, job, p_page, p_options,p_targetLocales);
+			populateIntoTermbase(pageJobData, job, p_page, p_options, p_targetLocales);
 
             // populate Segment TM
             LOGGER.debug("Populating Segment TM");

@@ -25,9 +25,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatchLingManagerLocal;
 import com.globalsight.everest.page.SourcePage;
@@ -237,49 +239,55 @@ public class PageJobData
 
 
 		if (!p_saveExactMatch)
-			return getExactMatchData(tuList, p_targetLocales, p_page.getId());
+			return filterExactMatchData(tuList, p_targetLocales, p_page.getId());
 		else return tuList;
 	}
 
 	/**
 	 * GBS-4068 : No new TU (with SID) created in the storage TM for AuthorIT SID
-	 * 
 	 * */
-	private ArrayList<PageTmTu> getExactMatchData(Collection<PageTmTu> tuList,
+	private ArrayList<PageTmTu> filterExactMatchData(Collection<PageTmTu> tuList,
 			Set<GlobalSightLocale> p_targetLocales, long pageId)
 	{
 		ArrayList<PageTmTu> returnTuList = new ArrayList<PageTmTu>();
-		LeverageMatchLingManagerLocal leverageMatch = new LeverageMatchLingManagerLocal();
-		Map<Long, Set<LeverageMatch>> leverageMatchMap = new HashMap<Long, Set<LeverageMatch>>();
+		Map<String, Set<LeverageMatch>> leverageMatchMap = new HashMap<String, Set<LeverageMatch>>();
+		List<LeverageMatch> leverageMatches = null;
 		for (GlobalSightLocale targetLocale : p_targetLocales)
 		{
-			leverageMatchMap
-					.putAll(leverageMatch.getExactMatchesForDownLoadTmx(pageId,
-							targetLocale.getId()));
+			leverageMatches = LingServerProxy.getLeverageMatchLingManager()
+					.getExactLeverageMatches(pageId, targetLocale.getId());
+			for (LeverageMatch match : leverageMatches)
+			{
+				String key = new Long(match.getOriginalSourceTuvId()) + "_"
+						+ targetLocale.getId();
+				Set<LeverageMatch> set = (TreeSet<LeverageMatch>) leverageMatchMap
+						.get(key);
+				if (set == null)
+				{
+					set = new TreeSet<LeverageMatch>();
+					leverageMatchMap.put(key, set);
+				}
+				set.add(match);
+			}
 		}
 
+		Set<LeverageMatch> leverageMatchSet = null;
 		for (PageTmTu tu : tuList)
 		{
 			PageTmTu clonedTu = (PageTmTu) tu.clone();
-
+			PageTmTuv sourceTuv = (PageTmTuv)tu.getFirstTuv(m_sourceLocale);
+			clonedTu.addTuv(sourceTuv);
+			
 			Iterator itLocale = tu.getAllTuvLocales().iterator();
-			Set<LeverageMatch> leverageMatchSet = null;
 			while (itLocale.hasNext())
 			{
 				GlobalSightLocale tuvLocale = (GlobalSightLocale) itLocale
 						.next();
 				PageTmTuv tuv = (PageTmTuv) tu.getFirstTuv(tuvLocale);
-
-				if (tuvLocale.equals(m_sourceLocale))
+				if (!tuvLocale.equals(m_sourceLocale))
 				{
-					if (leverageMatchMap.size() > 0)
-					{
-						leverageMatchSet = leverageMatchMap.get(tuv.getId());
-					}
-					clonedTu.addTuv(tuv);
-				}
-				else
-				{
+					leverageMatchSet = leverageMatchMap.get(sourceTuv.getId()
+							+ "_" + tuvLocale.getId());
 					if (TuvState.EXACT_MATCH_LOCALIZED.getName().equals(
 							tuv.getState()))
 					{

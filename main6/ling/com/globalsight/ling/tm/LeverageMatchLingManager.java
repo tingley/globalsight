@@ -193,6 +193,12 @@ public interface LeverageMatchLingManager
     public Map<Long, Set<LeverageMatch>> getExactMatchesForDownLoadTmx(
             Long pageId, Long idAsLong);
 
+    /**
+     * GBS-4068 : No new TU (with SID) created in the storage TM for AuthorIT SID
+     * */
+	public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId,
+			Long p_targetLocaleId);
+	
     public List<LeverageMatch> getLeverageMatchesForOfflineDownLoad(
             Long p_sourcePageId, Long p_targetLocaleId);
 

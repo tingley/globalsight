@@ -161,7 +161,7 @@ public class TmPopulator
                     p_targetLocales);
 
             // populate into term-base if "Terminology Approval" is yes.
-			populateIntoTermbase(pageJobData, job, p_page, p_options);
+			populateIntoTermbase(pageJobData, job, p_page, p_options,p_targetLocales);
 
             // populate Segment TM
             LOGGER.debug("Populating Segment TM");
@@ -170,9 +170,9 @@ public class TmPopulator
             SegmentTmInfo segtmInfo = tm.getSegmentTmInfo();
             segtmInfo.setJob(job);
 			mappingHolder = segtmInfo.saveToSegmentTm(
-					pageJobData.getTusToSaveToSegmentTm(p_options,p_targetLocales,p_page),
-					sourceLocale, tm, p_targetLocales,
-					TmCoreManager.SYNC_MERGE, false);
+					pageJobData.getTusToSaveToSegmentTm(p_options,
+							p_targetLocales, p_page), sourceLocale, tm,
+					p_targetLocales, TmCoreManager.SYNC_MERGE, false);
         }
         catch (LingManagerException le)
         {
@@ -191,8 +191,9 @@ public class TmPopulator
     }
 
 	private void populateIntoTermbase(PageJobData pageJobData, Job job,
-			SourcePage p_page, LeverageOptions p_options)
-    {
+			SourcePage p_page, LeverageOptions p_options,
+			Set<GlobalSightLocale> p_targetLocales)
+	{
         try
         {
             if (job.getFileProfile().getTerminologyApproval() == 1)
@@ -203,23 +204,24 @@ public class TmPopulator
                         .get(String.valueOf(p_page.getCompanyId()),
                                 termbaseName);
                 if (tb != null)
-                {
-                    TermbaseManager tbm = new TermbaseManager();
-                    Collection p_segmentsToSave = pageJobData
-                            .getTusToSaveToSegmentTm(p_options,null,null);
-                    Iterator it = p_segmentsToSave.iterator();
-                    while (it.hasNext())
-                    {
-                        // separate subflows out of the main text and save
-                        // them as
-                        // independent segments
-                        BaseTmTu baseTu = (BaseTmTu) it.next();
-                        List baseTuvs = baseTu.getTuvs();
-                        tbm.batchAddTuvsAsNew(tb.getId(), baseTuvs, p_page
-                                .getRequest().getL10nProfile().getProject()
-                                .getProjectManager().getUserId());
-                    }
-                }
+				{
+					TermbaseManager tbm = new TermbaseManager();
+					Collection p_segmentsToSave = pageJobData
+							.getTusToSaveToSegmentTm(p_options,
+									p_targetLocales, p_page);
+					Iterator it = p_segmentsToSave.iterator();
+					while (it.hasNext())
+					{
+						// separate subflows out of the main text and save
+						// them as
+						// independent segments
+						BaseTmTu baseTu = (BaseTmTu) it.next();
+						List baseTuvs = baseTu.getTuvs();
+						tbm.batchAddTuvsAsNew(tb.getId(), baseTuvs, p_page
+								.getRequest().getL10nProfile().getProject()
+								.getProjectManager().getUserId());
+					}
+				}
             }
         }
         catch (Exception e)

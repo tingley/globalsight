@@ -391,7 +391,8 @@ public class CreateMindTouchJobThread implements Runnable
             MindTouchPage mtp = pageInfoMap.get(pageId);
             if (mtp == null)
             {
-                pageInfoXml = helper.getPageInfo(Long.parseLong(pageId));
+				pageInfoXml = helper.getPageInfo(conn.getUrl(),
+						Long.parseLong(pageId));
                 if (pageInfoXml != null)
                 {
                     mtp = helper.parsePageInfoXml(pageInfoXml);

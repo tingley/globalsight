@@ -413,12 +413,12 @@ public class MindTouchHelper
         return null;
     }
     
-    public String getPageProperties(String pagePath)
+    public String getPageProperties(String url, String pagePath)
     {
         CloseableHttpClient httpClient = getHttpClient();
         try
         {
-            String url = mtc.getUrl() + "/@api/deki/pages/=" + pagePath + "/properties";
+            url += "/@api/deki/pages/=" + pagePath + "/properties";
             HttpGet httpget = getHttpGet(url);
 
             HttpResponse httpResponse = httpClient.execute(httpget);
@@ -586,9 +586,9 @@ public class MindTouchHelper
      * @param pageId
      * @return String
      */
-    public String getPageInfo(long pageId)
+    public String getPageInfo(String url, long pageId)
     {
-        String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/info";
+        url += "/@api/deki/pages/" + pageId + "/info";
         return getPageInfo2(url);
     }
 
@@ -598,9 +598,9 @@ public class MindTouchHelper
      * @param path
      * @return String
      */
-    public String getPageInfo(String path)
+    public String getPageInfo(String url, String path)
     {
-        String url = mtc.getUrl() + "/@api/deki/pages/=" + path + "/info";
+        url += "/@api/deki/pages/=" + path + "/info";
         return getPageInfo2(url);
     }
 
@@ -783,19 +783,20 @@ public class MindTouchHelper
     	
         CloseableHttpClient httpClient = getHttpClient();
         String path = null;
+        String url = null;
         try
         {
-            path = getNewPath(pageInfo, sourceLocale, targetLocale);
-            
+            url = getPutServerUrl(targetLocale);
+        	path = getNewPath(pageInfo, sourceLocale, targetLocale);
             // To add tags to page, the page must exist. Wait at most 3 minutes.
             int count = 0;
-            while (count < 300 && getPageInfo(path) == null)
+            while (count < 300 && getPageInfo(url, path) == null)
             {
                 count++;
                 Thread.sleep(1000);
             }
 
-            String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path + "/tags";
+            url += "/@api/deki/pages/=" + path + "/tags";
             HttpPut httpput = getHttpPut(url, targetLocale);
 
             String content = FileUtil.readFile(tagsTrgFile, "UTF-8");
@@ -916,8 +917,8 @@ public class MindTouchHelper
      * @param pageInfo
      * @param targetLocale
      */
-    public void putPageProperties(File propertiesTrgFile, MindTouchPageInfo pageInfo,
-            String sourceLocale, String targetLocale)
+	public void putPageProperties(File propertiesTrgFile,
+			MindTouchPageInfo pageInfo, String sourceLocale, String targetLocale)
     {
     	if(!isTargetServerExist(targetLocale) && !mtc.getIsPostToSourceServer())
     	{
@@ -926,20 +927,29 @@ public class MindTouchHelper
     	
         CloseableHttpClient httpClient = getHttpClient();
         String path = null;
+        String url = null;
         try
         {
+            url = getPutServerUrl(targetLocale);
             path = getNewPath(pageInfo, sourceLocale, targetLocale);
-            HashMap<String, String> etagMap =  getePropertiesEtagMap(getPageProperties(path));
-
             // To add properties to page, the page must exist. Wait at most 3 minutes.
             int count = 0;
-            while (count < 300 && getPageInfo(path) == null)
+            while (count < 300 && getPageInfo(url, path) == null)
             {
                 count++;
                 Thread.sleep(1000);
             }
 
-            String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path + "/properties";
+            // Use Etag from target server if exists.
+            HashMap<String, String> etagMap =
+            		getePropertiesEtagMap(getPageProperties(url, path));
+            if (etagMap.size() == 0)
+            {
+				etagMap = getePropertiesEtagMap(
+						getPageProperties(mtc.getUrl(), path));
+            }
+
+            url += "/@api/deki/pages/=" + path + "/properties";
             HttpPut httpput = getHttpPut(url, targetLocale);
 
             String content = FileUtil.readFile(propertiesTrgFile, "UTF-8");
@@ -1177,7 +1187,8 @@ public class MindTouchHelper
      * @throws DocumentException
      */
     @SuppressWarnings("rawtypes")
-    private String getPropertiesContentsXml(String propertiesXml, HashMap<String, String> etagMap) throws DocumentException
+	private String getPropertiesContentsXml(String propertiesXml,
+			HashMap<String, String> etagMap) throws DocumentException
     {
         StringBuffer titles = new StringBuffer();
         titles.append("<properties>");
@@ -1204,20 +1215,30 @@ public class MindTouchHelper
     }
     
     @SuppressWarnings("rawtypes")
-    private HashMap<String, String> getePropertiesEtagMap(String propertiesXml) throws DocumentException
+	private HashMap<String, String> getePropertiesEtagMap(String propertiesXml)
     {
     	HashMap<String, String> etagMap = new HashMap<String, String>();
-    	Document doc = getDocument(propertiesXml);
-    	List propertyNodes = doc.selectNodes("//property");
-    	Iterator it = propertyNodes.iterator();
-    	String name = null;
-        String etag = null;
-    	while(it.hasNext())
+    	try
     	{
-    		Element propertyNode = (Element) it.next();
-            name = propertyNode.attributeValue("name");
-            etag =  propertyNode.attributeValue("etag");
-            etagMap.put(name, etag);
+        	if (propertiesXml != null)
+        	{
+            	Document doc = getDocument(propertiesXml);
+            	List propertyNodes = doc.selectNodes("//property");
+            	Iterator it = propertyNodes.iterator();
+            	String name = null;
+                String etag = null;
+            	while(it.hasNext())
+            	{
+            		Element propertyNode = (Element) it.next();
+                    name = propertyNode.attributeValue("name");
+                    etag =  propertyNode.attributeValue("etag");
+                    etagMap.put(name, etag);
+            	}
+        	}
+    	}
+    	catch (DocumentException e)
+    	{
+    		logger.warn(e);
     	}
     	return etagMap;
     }

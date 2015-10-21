@@ -151,7 +151,7 @@ public class TmPopulator
             BaseTmTu tu = null;
             while ((tu = result.getNextTu()) != null)
             {
-                pageJobData.addTu((PageTmTu) tu);
+                pageJobData.addTu((PageTmTu) tu, sourceLocale);
             }
             pageJobDataRetriever.close();
 

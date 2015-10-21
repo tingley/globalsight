@@ -31,7 +31,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
-import com.globalsight.everest.integration.ling.tm2.LeverageMatchLingManagerLocal;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvAttributeUtil;
 import com.globalsight.everest.tuv.TuTuvAttributeImpl;
@@ -96,7 +95,7 @@ public class PageJobData
         now = new Timestamp(System.currentTimeMillis());
     }
 
-    public void addTu(PageTmTu p_tu)
+    public void addTu(PageTmTu p_tu, GlobalSightLocale sourceLocale)
     {
     	PageTmTu previousTu = null;
         if (m_tentativeTus.size() > 0)
@@ -105,22 +104,27 @@ public class PageJobData
         }
     	m_tentativeTus.add(p_tu);
         // Use current date as "creationDate", "modifyDate" and "lastUsageDate".
-    	for (BaseTmTuv tuv : p_tu.getTuvs())
+    	BaseTmTuv curSrcTuv = p_tu.getFirstTuv(sourceLocale);
+    	for (BaseTmTuv curTuv : p_tu.getTuvs())
         {
-        	tuv.setJobId(m_jobId);
-        	tuv.setJobName(m_jobName);
-        	tuv.setLastUsageDate(now);
-        	tuv.setCreationDate(now);
-        	tuv.setModifyDate(now);
+        	curTuv.setJobId(m_jobId);
+        	curTuv.setJobName(m_jobName);
+        	curTuv.setLastUsageDate(now);
+        	curTuv.setCreationDate(now);
+        	curTuv.setModifyDate(now);
 
-        	tuv.setPreviousHash(BaseTmTuv.FIRST_HASH);
-    		tuv.setNextHash(BaseTmTuv.LAST_HASH);
+			// TUV uses its previous source tuv's hash value as previous
+			// hash, and use next source tuv's hash value as next hash. Never
+			// store target tuv's hash value.
+        	// Will this be an issue in the further?
+        	curTuv.setPreviousHash(BaseTmTuv.FIRST_HASH);
+    		curTuv.setNextHash(BaseTmTuv.LAST_HASH);
         	if (previousTu != null)
         	{
-				BaseTmTuv preTuv = (BaseTmTuv) previousTu
-						.getTuvList(tuv.getLocale()).iterator().next();
-				preTuv.setNextHash(getHashValue(tuv.getSegment()));
-				tuv.setPreviousHash(getHashValue(preTuv.getSegment()));
+        		BaseTmTuv preSrcTuv = previousTu.getFirstTuv(sourceLocale);
+				BaseTmTuv preTuv = previousTu.getFirstTuv(curTuv.getLocale());
+				preTuv.setNextHash(getHashValue(curSrcTuv.getSegment()));
+				curTuv.setPreviousHash(getHashValue(preSrcTuv.getSegment()));
         	}
         }
     }

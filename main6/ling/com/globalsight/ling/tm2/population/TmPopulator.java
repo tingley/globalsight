@@ -505,8 +505,8 @@ public class TmPopulator
         }
         finally
         {
-            DbUtil.silentReturnConnection(conn);
             DbUtil.unlockTables(conn);
+        	DbUtil.silentReturnConnection(conn);
         }
     }
 

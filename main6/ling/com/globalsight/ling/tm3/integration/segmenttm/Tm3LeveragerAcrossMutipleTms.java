@@ -125,6 +125,7 @@ class Tm3LeveragerAcrossMutipleTms
         for (TM3LeverageMatch<GSTuvData> match : results.getMatches())
         {
             TM3Tu<GSTuvData> tu = match.getTu();
+            TM3Tuv<GSTuvData> tmSrcTuv = match.getTuv();
             TM3Tm<GSTuvData> tm = tu.getTm();
             Tm projectTm = tmMap.get(tm);
             
@@ -194,8 +195,9 @@ class Tm3LeveragerAcrossMutipleTms
                 ltuv.setLastUsageDate(getLastUsageDate(tuv));
                 ltuv.setJobId(tuv.getJobId());
                 ltuv.setJobName(tuv.getJobName());
-                ltuv.setPreviousHash(tuv.getPreviousHash());
-                ltuv.setNextHash(tuv.getNextHash());
+                // for hash ICE, it should rely on source pre-next hash
+                ltuv.setPreviousHash(tmSrcTuv.getPreviousHash());
+                ltuv.setNextHash(tmSrcTuv.getNextHash());
                 if (tuv.getSid() != null)
                 {
                 	ltuv.setSid(tuv.getSid());

@@ -3,7 +3,7 @@ GlobalSight Source Mirror
 
 This is *not* the official GlobalSight git repository.  The official
 git repository is located at [http://125.35.10.59:7990/scm/globalsight/globalsightsource.git](http://125.35.10.59:7990/scm/globalsight/globalsightsource.git).
-This repo is mirrored automatically by cron.
+This repo is a mirror that I periodically update.
 
 GlobalSight
 ===========
@@ -22,17 +22,16 @@ How to Build and Run GlobalSight
 
 About Branches
 --------------
-* `master` represents CVS HEAD with any local changes (eg, this README).
+* `master` represents the git master branch with any local changes (eg, this README).
 
-Older release branches are available in CVS, but aren't currently pushed to
-git.
+Older release branches (back to the 8.6.1 release) are available in git, but
+aren't currently pushed to this mirror.  Releases prior to 8.6.1 aren't
+available in git, nor is revision history prior to the migration from CVS to
+git (which happened in early 2015).
 
 Support
 -------
-The
-[globalsight-devel](https://groups.google.com/forum/#!forum/globalsight-dev)
-mailing list or the [GlobalSight
-forums](http://www.globalsight.com/forums/) are the best bet.
+The [GlobalSight forums](http://www.globalsight.com/forums/) are the best bet.
 
 You are also welcome to contact me (chase@spartansoftwareinc.com) with
 questions; however, I am not currently actively involved with GlobalSight

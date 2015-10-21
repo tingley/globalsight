@@ -14,3 +14,7 @@ minConnections=5
 #3600000=60*60*1000 means 1 hour.
 maxConnectionWaitTime=3600000
 useConnectionPool=true
+
+# If "false", use GlobalSight own connection pool;
+# If "true", it will turn to C3P0 to request connection.
+use_c3p0_connection_pool = true

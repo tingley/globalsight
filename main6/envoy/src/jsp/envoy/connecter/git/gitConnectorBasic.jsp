@@ -75,24 +75,6 @@ var guideNode = "GitConnector";
 var needWarning = false;
 var helpFile = "<%=bundle.getString("help_git_connector_basic")%>";
 
-var changed = true;
-<%if(edit){%>
-var originalName = "<%=name%>";
-var originalUsername = "<%=username%>";
-var originalPassword = "<%=password%>";
-var originalUrl = "<%=url%>";
-var originalPrivateKeyFile = "<%=privateKeyFile%>";
-
-function isChanged()
-{
-	if(originalName == $("#name").val() && originalUsername == $("#username").val() && originalPassword == $("#password").val()
-			&& originalUrl == $("#url").val() && originalPrivateKeyFile == $("#privateKeyFile").val())
-	{
-		changed = false;
-	}
-}
-<%}%>
-
 function cancel()
 {
 	$("#gitForm").attr("action", "<%=cancelURL%>").submit();
@@ -103,8 +85,7 @@ function save()
     if (confirmForm())
     {
     	<%if(edit){%>
-    	$("#branch").attr("disabled",false);
-    	isChanged();
+	    	$("#branch").attr("disabled",false);
     	<%}%>
         testConnect();
     }
@@ -112,8 +93,8 @@ function save()
 
 function testConnect()
 {
-    $("#idDiv").mask("<%=bundle.getString("msg_git_wait_connect")%>");
-    var url = "<%=testURL%>" + "&changed=" + changed;
+	$("#idDiv").mask("<%=bundle.getString("msg_git_wait_connect")%>");
+    var url = "<%=testURL%>";
     $("#gitForm").ajaxSubmit({
         type: 'post',  
         url: url , 

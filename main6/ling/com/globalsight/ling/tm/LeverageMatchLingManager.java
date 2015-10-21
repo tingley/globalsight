@@ -193,6 +193,9 @@ public interface LeverageMatchLingManager
     public Map<Long, Set<LeverageMatch>> getExactMatchesForDownLoadTmx(
             Long pageId, Long idAsLong);
 
+	public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId,
+			Long p_targetLocaleId);
+
     public List<LeverageMatch> getLeverageMatchesForOfflineDownLoad(
             Long p_sourcePageId, Long p_targetLocaleId);
 

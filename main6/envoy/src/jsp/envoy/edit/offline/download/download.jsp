@@ -822,7 +822,10 @@ function disablePTFOptions(p_state)
     	}
         theForm.resInsertionSelector.disabled = state;
         
+        alert(state);
          document.getElementById("changeCreationIdForMT").disabled = state;
+         
+         document.getElementById("separateTMfile").disabled = state;
      
          theForm.tmEditTypeSelector.disabled = state;
          theForm.resTermSelector.disabled = state;
@@ -1313,6 +1316,12 @@ $(document).ready(function(){
               <TD></TD>
 			  <TD><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="changeCreationIdForMT" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN></TD>
 			</TR>
+			<!-- GBS-3831 -->
+			<TR>
+              <TD></TD>
+			  <TD id="separateTMfileTD"><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="separateTMfile" name="<%=UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE %>"/><%=bundle.getString("lb_mt_matches_into_separate_tm_file")%></SPAN></TD>
+			</TR>
+			
 			<TR id="penalizedReferenceTm">
               <TD><SPAN CLASS="standardText"><%=labelPenalizedReferenceTm%>:</SPAN></TD>
               <TD><SPAN CLASS="standardText">

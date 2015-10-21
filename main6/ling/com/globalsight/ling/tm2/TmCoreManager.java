@@ -218,6 +218,9 @@ public interface TmCoreManager
      */
     public void deleteSegmentTmTus(Tm p_tm, Collection<SegmentTmTu> p_tus)
             throws RemoteException, LingManagerException;
+    
+    public void deleteSegmentTmTus(Tm p_tm, Collection<SegmentTmTu> p_tus, boolean lock)
+            throws RemoteException, LingManagerException;
 
     /**
      * Remove all data for the specified TM, including corpus data and the TM

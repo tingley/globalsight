@@ -454,6 +454,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                             + MAX_THREAD + ", Running Thread: "
                             + RUNNING_FORMS.size() + ", Waiting Thread: "
                             + WAITING_FORMS.size());
+                    s_category.info("The file name is: " + form.getFileName()
+                            + ", user is: " + form.getUser().getUserName());
                     runProcessUploadPage(form.getTmpFile(), form.getUser(),
                             form.getTask(), form.getFileName());
                 }
@@ -533,7 +535,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 finally
                 {
                     HibernateUtil.closeSession();
-                    
+
+                    OfflineUploadForm waitForm = null;
+
                     synchronized (LOCKER)
                     {
                         RUNNING_FORMS.remove(form);
@@ -546,16 +550,19 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                                         + WAITING_FORMS.size());
                         if (WAITING_FORMS.size() > 0)
                         {
-                            OfflineUploadForm waitForm = WAITING_FORMS
-                                    .remove(0);
-                            try
-                            {
-                                processUploadPage(waitForm);
-                            }
-                            catch (AmbassadorDwUpException e1)
-                            {
-                                s_category.error(e1);
-                            }
+                            waitForm = WAITING_FORMS.remove(0);
+                        }
+                    }
+
+                    if (waitForm != null)
+                    {
+                        try
+                        {
+                            processUploadPage(waitForm);
+                        }
+                        catch (AmbassadorDwUpException e1)
+                        {
+                            s_category.error(e1);
                         }
                     }
                 }
@@ -566,6 +573,57 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         Thread t = new MultiCompanySupportedThread(runnable);
         t.setName("UPLOADER" + String.valueOf(counter++));
         t.start();
+    }
+
+    /**
+     * For internal tag miss confirm.
+     * 
+     * <p>
+     * GBS-4106, when detecting a thread is waiting for user respond, do not
+     * count the waiting thread as an available thread.
+     */
+    public void startConfirm()
+    {
+        OfflineUploadForm waitForm = null;
+        synchronized (LOCKER)
+        {
+            MAX_THREAD++;
+
+            if (WAITING_FORMS.size() > 0)
+            {
+                waitForm = WAITING_FORMS.remove(0);
+
+                s_category.info("Processing a Running Thread. Max Thread: "
+                        + MAX_THREAD + ", Running Thread: "
+                        + RUNNING_FORMS.size() + ", Waiting Thread: "
+                        + WAITING_FORMS.size());
+            }
+        }
+
+        if (waitForm != null)
+        {
+            try
+            {
+                processUploadPage(waitForm);
+            }
+            catch (AmbassadorDwUpException e1)
+            {
+                s_category.error(e1);
+            }
+        }
+    }
+
+    /**
+     * For internal tag miss confirm.
+     * 
+     * @since GBS-4106
+     */
+    public void endConfirm()
+    {
+        synchronized (LOCKER)
+        {
+            MAX_THREAD--;
+        }
     }
 
     /**
@@ -1130,7 +1188,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             if (p_reportName.equals(WebAppConstants.TRANSLATION_EDIT)
                     || WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName)
                     || WebAppConstants.POST_REVIEW_QA.equals(p_reportName)
-                    ||WebAppConstants.TRANSLATION_VERIFICATION.equals(p_reportName))
+                    || WebAppConstants.TRANSLATION_VERIFICATION
+                            .equals(p_reportName))
             {
                 m_status.setUseProcess(true);
             }
@@ -1890,8 +1949,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
     }
 
     @SuppressWarnings("static-access")
-	private String convertSegment2Pseudo(String textContent,
-			boolean isXliffXlf, TuImpl currentTu)
+    private String convertSegment2Pseudo(String textContent,
+            boolean isXliffXlf, TuImpl currentTu)
     {
         textContent = XLIFFStandardUtil.convertToTmx(textContent);
 
@@ -1906,14 +1965,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         // configure addable ptags for this format
         if (currentTu != null)
         {
-    		String tuDataType = currentTu.getDataType();
-    		String tuType = currentTu.getTuType();
-			PTagData.setAddables(tuDataType);
-			// special treatment for html
-			if ("html".equalsIgnoreCase(tuDataType) && !"text".equals(tuType))
-			{
-				PTagData.setAddables(tuType);
-			}
+            String tuDataType = currentTu.getDataType();
+            String tuType = currentTu.getTuType();
+            PTagData.setAddables(tuDataType);
+            // special treatment for html
+            if ("html".equalsIgnoreCase(tuDataType) && !"text".equals(tuType))
+            {
+                PTagData.setAddables(tuType);
+            }
         }
         PTagData.setIsXliffXlfFile(isXliffXlf);
 
@@ -1987,7 +2046,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 String textContent = note.getText();
                 if (textContent.startsWith("Match Type:"))
                 {
-                	continue;
+                    continue;
                 }
                 textContent = entity.decodeString(textContent, null);
 

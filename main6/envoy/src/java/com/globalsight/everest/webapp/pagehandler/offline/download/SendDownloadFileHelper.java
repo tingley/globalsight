@@ -399,6 +399,7 @@ public class SendDownloadFileHelper implements WebAppConstants
         params.setPenalizedReferenceTmPer(p_request
                 .getParameter(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER) != null);
         boolean changeCreationId = false;
+        boolean changeSeparateTMFile = false;
         try
         {
             String strchangeCreationId = p_request
@@ -407,11 +408,19 @@ public class SendDownloadFileHelper implements WebAppConstants
             {
                 changeCreationId = true;
             }
+            
+            String strchangeSeparateTMFile = p_request
+                    .getParameter(OfflineConstants.CHANGE_SEPARATE_TM_FILE);
+            if (strchangeSeparateTMFile != null && strchangeSeparateTMFile.equals("on"))
+            {
+            	changeSeparateTMFile = true;
+            }
         }
         catch (Exception ex)
         {
         }
         params.setChangeCreationIdForMTSegments(changeCreationId);
+        params.setChangeSeparateTMFile(changeSeparateTMFile);
 
         try
         {

@@ -1157,6 +1157,7 @@ public class DiplomatAPI implements IFormatNames
         ExtractorRegistry registry = ExtractorRegistry.getObject();
         String formatName = registry.getFormatName(m_inputFormat);
         boolean isXLIFF = IFormatNames.FORMAT_XLIFF.equals(formatName)
+                || IFormatNames.FORMAT_XLIFF20.equals(formatName)
                 || IFormatNames.FORMAT_PASSOLO.equals(formatName);
         boolean isPO = IFormatNames.FORMAT_PO.equals(formatName);
 

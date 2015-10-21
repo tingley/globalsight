@@ -173,7 +173,7 @@ function filterItems(e)
         dataClass="com.globalsight.cxe.entity.mindtouch.MindTouchConnector"
         pageUrl="self"
         hasFilter="true"
-        emptyTableMsg="msg_mindcoutch_connector_none">
+        emptyTableMsg="msg_mindtouch_connector_none">
             <amb:column label="checkbox" width="2%">
                 <input type="checkbox" name="mtConnectorIds" value="<%=mindtouchConnector.getId()%>" onclick="setButtonState();">
             </amb:column>

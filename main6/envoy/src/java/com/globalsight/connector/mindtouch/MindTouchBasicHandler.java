@@ -18,16 +18,19 @@ package com.globalsight.connector.mindtouch;
 
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Vector;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.globalsight.connector.mindtouch.util.MindTouchHelper;
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -36,6 +39,9 @@ import com.globalsight.util.StringUtil;
 
 public class MindTouchBasicHandler extends PageActionHandler
 {
+    static private final Logger logger = Logger
+            .getLogger(MindTouchBasicHandler.class);
+
     @ActionHandler(action = "test", formClass = "com.globalsight.cxe.entity.mindtouch.MindTouchConnector")
     public void test(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
@@ -45,39 +51,42 @@ public class MindTouchBasicHandler extends PageActionHandler
 
         try 
         {
+        	// Test source server
             MindTouchConnector mtc = (MindTouchConnector) form;
             MindTouchHelper helper = new MindTouchHelper(mtc);
-            String testResult = helper.doTest();
             JSONObject json = new JSONObject();
             String errorMsg = "";
-            if(StringUtil.isNotEmpty(testResult))
+            if(StringUtil.isNotEmpty(helper.doTest()))
             {
-            	errorMsg = testResult;
+            	errorMsg = "Failed to connect to MindTouch source server";
             }
-            
-            String targetLocaleStr = request.getParameter("targetLocaleStr");
-            if(StringUtil.isNotEmpty(targetLocaleStr))
+
+            // Test target servers
+            if (StringUtil.isEmpty(errorMsg))
             {
-            	String[] targetLocales = targetLocaleStr.split(",");
-            	for(String targetLocale: targetLocales)
-            	{
-            		if(StringUtil.isNotEmpty(targetLocale))
-            		{
-            			mtc.setUrl( request.getParameter("targetUrl" + targetLocale));
-            			mtc.setUsername( request.getParameter("targetUsername" + targetLocale));
-            			mtc.setPassword( request.getParameter("targetPassword" + targetLocale));
-            			helper = new MindTouchHelper(mtc);
-            			testResult = helper.doTest();
-            			if(StringUtil.isNotEmpty(testResult))
-                        {
-                        	errorMsg = testResult;
-                        }
-            		}
-            	}
+                String targetLocaleStr = request.getParameter("targetLocaleStr");
+                if(StringUtil.isNotEmpty(targetLocaleStr))
+                {
+                	String[] targetLocales = targetLocaleStr.split(",");
+                	for(String targetLocale: targetLocales)
+                	{
+                		if(StringUtil.isNotEmpty(targetLocale))
+                		{
+                			mtc.setUrl(request.getParameter("targetUrl" + targetLocale));
+                			mtc.setUsername(request.getParameter("targetUsername" + targetLocale));
+                			mtc.setPassword(request.getParameter("targetPassword" + targetLocale));
+                			helper = new MindTouchHelper(mtc);
+                			if(StringUtil.isNotEmpty(helper.doTest()))
+                            {
+                            	errorMsg = "Failed to connect to MindTouch source server for locale: " + targetLocale;
+                            	break;
+                            }
+                		}
+                	}
+                }
             }
-            
+
             json.put("error", errorMsg);
-            
             out.write(json.toString().getBytes("UTF-8"));
         }
         catch (Exception e)
@@ -111,7 +120,7 @@ public class MindTouchBasicHandler extends PageActionHandler
             MindTouchConnector connector = HibernateUtil.get(
                     MindTouchConnector.class, Long.parseLong(id));
             request.setAttribute("mindtouch", connector);
-            
+
             List<MindTouchConnectorTargetServer> targetServers = 
             		MindTouchManager.getAllTargetServers(Long.parseLong(id));
             request.setAttribute("targetServers", targetServers);
@@ -119,7 +128,7 @@ public class MindTouchBasicHandler extends PageActionHandler
 
         String names = "";
         List mtConnectors = MindTouchManager.getAllConnectors();
-        for (Object o :mtConnectors)
+		for (Object o : mtConnectors)
         {
             MindTouchConnector mtc = (MindTouchConnector) o;
             if (id != null && id.equals("" + mtc.getId()))
@@ -132,8 +141,17 @@ public class MindTouchBasicHandler extends PageActionHandler
         request.setAttribute("names", names);
         request.setAttribute("targetLocales", MindTouchHelper.getAllTargetLocales());
 
-        response.setCharacterEncoding("utf-8");
+		try
+		{
+			Vector allLocales = ServerProxy.getLocaleManager()
+					.getAvailableLocales();
+			request.setAttribute("allAvailableLocales", allLocales);
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+		}
+
+		response.setCharacterEncoding("utf-8");
     }
-    
-    
 }

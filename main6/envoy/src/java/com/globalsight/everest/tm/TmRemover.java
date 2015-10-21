@@ -17,6 +17,17 @@
 
 package com.globalsight.everest.tm;
 
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FORMAT;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FROM_WORLDSERVER;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.SID;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TRANSLATABLE;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +37,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
@@ -33,7 +45,15 @@ import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
+import com.globalsight.ling.tm3.core.TM3Attribute;
+import com.globalsight.ling.tm3.core.TM3Tm;
+import com.globalsight.ling.tm3.core.TM3Tu;
+import com.globalsight.ling.tm3.integration.GSTuvData;
+import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
+import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentResultSet;
+import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -67,6 +87,10 @@ public class TmRemover extends MultiCompanySupportedThread implements
     private InterruptMonitor m_monitor = new InterruptMonitor();
 
     private boolean deleteLanguageFlag = false;
+    
+    private boolean deleteTUListingFlag = false;
+    
+    private File tmxFile = null;
 
     private long localeID;
     
@@ -85,6 +109,7 @@ public class TmRemover extends MultiCompanySupportedThread implements
 
     public void run()
     {
+        FileInputStream fileInputStream = null;
         try
         {
             super.run();
@@ -102,7 +127,43 @@ public class TmRemover extends MultiCompanySupportedThread implements
             long tmId = -1l;
             if (size > 0)
             {
-                int round = Math.round(80 / size);
+                int leftRound = 80;
+                List<Long> tuIds = new ArrayList<Long>();
+                if (deleteTUListingFlag)
+                {
+                    leftRound = 70;
+                    fileInputStream = new FileInputStream(tmxFile);
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(fileInputStream, "UTF-8"));
+
+                    String line = reader.readLine();
+
+                    while (line != null)
+                    {
+                        line = line.trim();
+                        if (line.startsWith("<tu "))
+                        {
+                            StringIndex si = StringIndex.getValueBetween(line,
+                                    0, "tuid=\"", "\"");
+
+                            if (si != null)
+                            {
+                                Long tuId = Long.parseLong(si.value);
+
+                                if (!tuIds.contains(tuId))
+                                {
+                                    tuIds.add(tuId);
+                                }
+                            }
+                        }
+
+                        line = reader.readLine();
+                    }
+
+                    setPercentage(10);
+                }
+                
+                int round = Math.round(leftRound / size);
                 int index = 1;
                 Tm tm = null;
                 GlobalSightLocale locale = null;
@@ -130,7 +191,78 @@ public class TmRemover extends MultiCompanySupportedThread implements
                         }
                     }
 
-                    if (deleteLanguageFlag)
+                    if (deleteTUListingFlag)
+                    {
+                        String tmName = tm.getName();
+                        // tm3
+                        if (tm.getTm3Id() != null)
+                        {
+                            List<Long> tm3tuIds = new ArrayList<Long>();
+                            TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo())
+                                    .getTM3Tm(tm.getTm3Id());
+
+                            List<TM3Tu<GSTuvData>> tus = tm3tm.getTu(tuIds);
+                            Iterator<TM3Tu<GSTuvData>> tuIt = tus.iterator();
+
+                            List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
+                            while (tuIt.hasNext())
+                            {
+                                TM3Tu<GSTuvData> tm3tu = tuIt.next();
+
+                                if (tm3tu.getTm().getId().equals(tm.getTm3Id()))
+                                {
+                                    TM3Attribute typeAttr = TM3Util
+                                            .getAttr(tm3tm, TYPE);
+                                    TM3Attribute formatAttr = TM3Util
+                                            .getAttr(tm3tm, FORMAT);
+                                    TM3Attribute sidAttr = TM3Util
+                                            .getAttr(tm3tm, SID);
+                                    TM3Attribute translatableAttr = TM3Util
+                                            .getAttr(tm3tm, TRANSLATABLE);
+                                    TM3Attribute fromWsAttr = TM3Util
+                                            .getAttr(tm3tm, FROM_WORLDSERVER);
+                                    TM3Attribute projectAttr = TM3Util
+                                            .getAttr(tm3tm, UPDATED_BY_PROJECT);
+
+                                    SegmentTmTu segmentTmTu = TM3Util
+                                            .toSegmentTmTu(tm3tu, tm.getId(),
+                                                    formatAttr, typeAttr,
+                                                    sidAttr, fromWsAttr,
+                                                    translatableAttr,
+                                                    projectAttr);
+                                    resultList.add(segmentTmTu);
+                                    tm3tuIds.add(tm3tu.getId());
+                                }
+                            }
+
+                            if (resultList.size() > 0)
+                            {
+                                manager.deleteSegmentTmTus(tm, resultList, false);
+                                this.setMessageKey("", tmName + " - TUs ("
+                                        + tm3tuIds
+                                        + ") have been successfully removed.");
+                            }
+                            else
+                            {
+                                this.setMessageKey("", tmName
+                                        + " - Nothing has been removed.");
+                            }
+                        }
+                        // tm2 : do not testing as TM2 is hidden from 8.6.5
+                        else
+                        {
+                            List<SegmentTmTu> tus = tm.getSegmentTmInfo()
+                                    .getSegmentsById(tm, tuIds);
+
+                            manager.deleteSegmentTmTus(tm, tus);
+                            this.setMessageKey("", tmName + " - TUs (" + tuIds
+                                    + ") has been successfully removed.");
+                        }
+
+                        OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                                OperationLog.COMPONET_TM, tm.getName());
+                    }
+                    else if (deleteLanguageFlag)
                     {
                         locale = ServerProxy.getLocaleManager().getLocaleById(
                                 localeID);
@@ -175,6 +307,14 @@ public class TmRemover extends MultiCompanySupportedThread implements
         finally
         {
             m_done = true;
+
+            try
+            {
+                fileInputStream.close();
+            }
+            catch (Exception ignored)
+            {
+            }
         }
     }
 
@@ -257,7 +397,17 @@ public class TmRemover extends MultiCompanySupportedThread implements
     {
         deleteLanguageFlag = flag;
     }
+    
+    public void SetDeleteTUListingFlag(boolean flag)
+    {
+        deleteTUListingFlag = flag;
+    }
 
+    public void setTmxFile(File tmxFile)
+    {
+        this.tmxFile = tmxFile;
+    }
+    
     synchronized public void cancelProcess()
     {
         m_monitor.interrupt();

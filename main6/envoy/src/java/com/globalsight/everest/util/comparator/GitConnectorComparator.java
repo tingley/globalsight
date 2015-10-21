@@ -36,14 +36,8 @@ public class GitConnectorComparator extends StringComparator
 
         switch (m_type)
         {
-        default:
         case ID:
             rv = (int)(a.getId() - b.getId());
-            break;
-        case NAME:
-            aValue = a.getName();
-            bValue = b.getName();
-            rv = this.compareStrings(aValue, bValue);
             break;
         case DESC:
             aValue = a.getDescription();
@@ -75,6 +69,12 @@ public class GitConnectorComparator extends StringComparator
              bValue = b.getEmail();
              rv = this.compareStrings(aValue, bValue);
              break;
+        default:
+        case NAME:
+            aValue = a.getName();
+            bValue = b.getName();
+            rv = this.compareStrings(aValue, bValue);
+            break;
         }
         return rv;
     }

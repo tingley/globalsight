@@ -6,7 +6,7 @@
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>
-		<property name="name" length="30" column="NAME" type="string"
+		<property name="name" length="60" column="NAME" type="string"
 			not-null="true" unique="false" />
 
 		<property name="description" length="200" column="DESCRIPTION"

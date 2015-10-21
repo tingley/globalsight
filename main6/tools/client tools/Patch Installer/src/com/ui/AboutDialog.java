@@ -53,7 +53,7 @@ public class AboutDialog extends JDialog {
 			txtpnGlobalsightPatchInstaller.setContentType("text/html");
 			txtpnGlobalsightPatchInstaller.setEditable(false);
 			txtpnGlobalsightPatchInstaller.setBackground(contentPanel.getBackground());
-			String content = "<body>\r\nGlobalSight Patch Installer for managing patches on GlobalSight server.<br><br>\r\nVersion: 8.6.2<br>\u00A91998-year, Welocalize Inc\r\n<br><br>\r\nYou can get more information about GlobalSight from<br>\r\n<a href=\"http://www.GlobalSight.com\">www.GlobalSight.com</a>\r\n</body>";
+			String content = "<body>\r\nGlobalSight Patch Installer for managing patches on GlobalSight server.<br><br>\r\nVersion: 8.6.4<br>\u00A91998-year, Welocalize Inc\r\n<br><br>\r\nYou can get more information about GlobalSight from<br>\r\n<a href=\"http://www.GlobalSight.com\">www.GlobalSight.com</a>\r\n</body>";
 			Calendar cal=Calendar.getInstance();
 			int year=cal.get(Calendar.YEAR);
 			content = content.replace("year", year + "");

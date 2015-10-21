@@ -40,7 +40,6 @@ public class XmlFilterHelper
 {
     private static final String NUMBER_ENTITY_START = "&#";
     private static final String NUMBER_ENTITY_END = ";";
-    private XMLRuleFilter m_xmlFilter = null;
     private XmlFilterConfigParser m_xmlFilterConfigParser = null;
     private XmlEntities m_entities = null;
     private String m_extendedWhiteSpaceChars = null;
@@ -53,7 +52,6 @@ public class XmlFilterHelper
      */
     public XmlFilterHelper(XMLRuleFilter xmlFilter)
     {
-        m_xmlFilter = xmlFilter;
         m_xmlFilterConfigParser = (xmlFilter == null) ? null
                 : new XmlFilterConfigParser(xmlFilter);
     }
@@ -218,7 +216,8 @@ public class XmlFilterHelper
         while (currentNode != null
                 && currentNode.getNodeType() == Node.ELEMENT_NODE
                 && !isEmptyTag(currentNode)
-                && currentNode.getNextSibling() == null)
+                && currentNode.getNextSibling() == null
+                && !Rule.isInternal(p_ruleMap, currentNode))
         {
             boolean isCurrentEmbeddable = Rule.isInline(p_ruleMap, currentNode);
             boolean isCurrentExtractable = Rule

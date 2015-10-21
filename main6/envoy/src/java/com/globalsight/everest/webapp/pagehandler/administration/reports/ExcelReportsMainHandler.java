@@ -117,7 +117,7 @@ public class ExcelReportsMainHandler extends PageHandler
                     jsonObject = new JSONObject();
                     GlobalSightLocale targetLocale = wf.getTargetLocale();
                     jsonObject.put("targetLocId", targetLocale.getId());
-                    jsonObject.put("targetLocName",targetLocale.getDisplayName());
+                    jsonObject.put("targetLocName",targetLocale.getDisplayName(uiLocale));
                     jsonArray.add(jsonObject);
                 }
                 result = jsonArray.toJSONString();

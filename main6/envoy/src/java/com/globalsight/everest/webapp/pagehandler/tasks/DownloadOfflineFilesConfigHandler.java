@@ -53,84 +53,129 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
     {
         try
         {
-            s_isParagraphEditorEnabled = EditHelper
-                    .isParagraphEditorInstalled();
+            s_isParagraphEditorEnabled = EditHelper.isParagraphEditorInstalled();
 
-            // NOTES:These constants must be added in sequence!!!!
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_FORMAT);// 0
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITOR);// 1
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_ENCODING);// 2
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER);// 3
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT);// 4
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT);// 5
-            DOWNLOAD_OPTIONS
-                    .add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH);// 6
-            DOWNLOAD_OPTIONS
-                    .add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX);// 7
-            DOWNLOAD_OPTIONS
-                    .add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM);// 8
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY);// 9
-            DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_100);// 10
-            DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_FUZZY);// 11
-            DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);// 12
-            DOWNLOAD_OPTIONS
-                    .add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);// 13
-            DOWNLOAD_OPTIONS.add(OfflineConstants.INCLUDE_REPETITIONS);// 14
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);// 15
-            DOWNLOAD_OPTIONS
-                    .add(OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES);// 16
-            DOWNLOAD_OPTIONS.add(OfflineConstants.PRESERVE_SOURCE_FOLDER);// 17
-            DOWNLOAD_OPTIONS
-                    .add(OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION);// 18
-            DOWNLOAD_OPTIONS.add(OfflineConstants.CONSOLIDATE_FILE_TYPE);// 19
-            DOWNLOAD_OPTIONS.add(OfflineConstants.WORD_COUNT_FOR_DOWNLOAD);// 20
-            DOWNLOAD_OPTIONS
-                    .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE);// 21
-            DOWNLOAD_OPTIONS
-                    .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER);// 22
+            // NOTES:These constants must be added in PAIRS!!!
+            // 1
+			DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_FORMAT);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_FORMAT_DEFAULT);
 
-            // NOTES:These constants must be added in sequence!!!!
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_FORMAT_DEFAULT);// 0
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_EDITOR_DEFAULT);// 1
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_ENCODING_DEFAULT);// 2
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER_DEFAULT);// 3
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT_DEFAULT);// 4
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT_DEFAULT);// 5
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH_DEFAULT);// 6
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX_DEFAULT);// 7
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM_DEFAULT);// 8
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY_DEFAULT);// 9
-            // populate 100
-            DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 10
-            // populate fuzzy target segments (only for bilingual RTF)
-            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 11
-            // need consolidate output file (for XLF format)
-            DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 12
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);// 13
-            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 14
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(String
-                            .valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));// 15
-            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 16
-            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 17
-            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 18
-            DOWNLOAD_OPTIONS_DEFAULT.add("consolidate");// 19
-            DOWNLOAD_OPTIONS_DEFAULT.add("2000");// 20
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE_DEFAULT);// 21
-            DOWNLOAD_OPTIONS_DEFAULT
-                    .add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER_DEFAULT);// 22
+			// 2
+			DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITOR);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_EDITOR_DEFAULT);
+
+			// 3
+			DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_ENCODING);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_ENCODING_DEFAULT);
+
+			// 4
+			DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER_DEFAULT);
+
+			// 5
+			DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT_DEFAULT);
+
+			// 6
+			DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT_DEFAULT);
+
+			// 7
+			DOWNLOAD_OPTIONS
+					.add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH_DEFAULT);
+
+			// 8
+			DOWNLOAD_OPTIONS
+					.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX_DEFAULT);
+
+			// 9
+			DOWNLOAD_OPTIONS
+					.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM_DEFAULT);
+
+			// 10
+			DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY_DEFAULT);
+
+			// 11: populate 100
+			DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_100);
+			DOWNLOAD_OPTIONS_DEFAULT.add("yes");
+
+			// 12: populate fuzzy target segments (only for bilingual RTF
+			DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_FUZZY);
+			DOWNLOAD_OPTIONS_DEFAULT.add("no");
+
+			// 13: need consolidate output file (for XLF format)
+			DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);
+			DOWNLOAD_OPTIONS_DEFAULT.add("yes");
+
+			// 14
+			DOWNLOAD_OPTIONS
+					.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);
+
+			// 15
+			DOWNLOAD_OPTIONS.add(OfflineConstants.INCLUDE_REPETITIONS);
+			DOWNLOAD_OPTIONS_DEFAULT.add("no");
+
+			// 16
+			DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(String
+							.valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));
+
+			// 17
+			DOWNLOAD_OPTIONS
+					.add(OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES);
+			DOWNLOAD_OPTIONS_DEFAULT.add("no");
+
+			// 18
+			DOWNLOAD_OPTIONS.add(OfflineConstants.PRESERVE_SOURCE_FOLDER);
+			DOWNLOAD_OPTIONS_DEFAULT.add("no");
+
+			// 19
+			DOWNLOAD_OPTIONS
+					.add(OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION);
+			DOWNLOAD_OPTIONS_DEFAULT.add("no");
+
+			// 20
+			DOWNLOAD_OPTIONS.add(OfflineConstants.CONSOLIDATE_FILE_TYPE);
+			DOWNLOAD_OPTIONS_DEFAULT.add("consolidate");
+
+			// 21
+			DOWNLOAD_OPTIONS.add(OfflineConstants.WORD_COUNT_FOR_DOWNLOAD);
+			DOWNLOAD_OPTIONS_DEFAULT.add("2000");
+
+			// 22
+			DOWNLOAD_OPTIONS
+					.add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PRE_DEFAULT);
+
+			// 23
+			DOWNLOAD_OPTIONS
+					.add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER_DEFAULT);
+
+			// 24
+			DOWNLOAD_OPTIONS
+					.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE);
+			DOWNLOAD_OPTIONS_DEFAULT
+					.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE_DEFAULT);
         }
         catch (Throwable ignore)
         {
@@ -248,7 +293,10 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
 
         String key = UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-
+        
+        key = UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE;
+        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+        
         key = UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
 

@@ -28,8 +28,11 @@ File result  = null;
 boolean canDownload = false;
 String onload="";
 
-ProcessStatus status =
-  (ProcessStatus)sessionMgr.getAttribute(WebAppConstants.DOWNLOAD_STATUS);
+ProcessStatus status = null;
+if (sessionMgr != null)
+{
+	status = (ProcessStatus)sessionMgr.getAttribute(WebAppConstants.DOWNLOAD_STATUS);
+}
 
 if (status !=null)
 {

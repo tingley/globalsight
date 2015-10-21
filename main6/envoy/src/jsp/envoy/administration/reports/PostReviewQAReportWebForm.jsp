@@ -4,9 +4,11 @@
                   com.globalsight.everest.webapp.WebAppConstants,
                   com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                   com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
+                  com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
                   com.globalsight.everest.webapp.pagehandler.PageHandler,
                   com.globalsight.everest.jobhandler.Job,
                   com.globalsight.util.GlobalSightLocale,
+                  com.globalsight.util.edit.EditUtil,
                   java.util.Locale,
                   java.util.ResourceBundle"
           session="true"
@@ -14,7 +16,7 @@
 <%
     List<ReportJobInfo> reportJobInfoList = 
         (List<ReportJobInfo>) request.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
-    ArrayList<GlobalSightLocale> targetLocales = 
+    ArrayList<GlobalSightLocale> targetLocalesList = 
         (ArrayList<GlobalSightLocale>) request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
 
     Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
@@ -24,8 +26,8 @@
     }
 
    	ResourceBundle bundle = PageHandler.getBundle(session);
-   	String formAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS"
-        + "&action=" + ReportConstants.GENERATE_REPORTS;
+   	String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS";
+    String formAction = basicAction + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
 <!-- This JSP is: /envoy/administration/reports/LisaPostReviewQAReportWebForm.jsp-->
@@ -35,42 +37,93 @@
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
 <script type="text/javascript">
+var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
+var targetLocales = new Array();
+<%
+for(int i=0; i<targetLocalesList.size(); i++)  
+{
+    GlobalSightLocale gsl = targetLocalesList.get(i);
+%>
+	targetLocales[<%=i%>] = new GlobalSightLocale(<%=gsl.getId()%>, "<%=gsl.getDisplayName(uiLocale)%>");
+<%
+}
+%>
+
+var jobInfos = new Array();
+<%
+for(int i=0; i<reportJobInfoList.size(); i++)  
+{
+    ReportJobInfo j = reportJobInfoList.get(i);
+%>
+	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=EditUtil.encodeTohtml(j.getJobName())%>", <%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
+<%
+}
+%>
+
 function doSubmit()
 {
+	var jobIDArr = fnGetSelectedJobIds();
+
+	// Submit the Form, if possible(No report is generating.)
+	$.ajax({
+		type: 'POST',
+		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+		data: {'inputJobIDS': jobIDArr.toString(),
+			   'reportType': $("input[name='reportType']").val()},
+		success: function(data) {
+					if (data != null && data.status == inProgressStatus) {
+		          		alert("<%=bundle.getString("msg_duplilcate_report")%>");
+		        	}
+					else
+					{
+						document.getElementById("inputJobIDS").value = jobIDArr.toString();
+						$("form[name='lisaQAForm']").submit();
+					}
+    			 },
+		dataType: 'json'
+	});
+}
+
+function fnGetSelectedJobIds()
+{
+	var jobIDArr = new Array();
 	if(document.getElementsByName("reportOn")[0].checked)
 	{
-		var jobID = lisaQAForm.jobId.value;
-		var jobIDArr = jobID.split(",");
+		var jobIDText = lisaQAForm.jobId.value;;
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
+		jobIDArr = jobIDText.split(",");
 		if(jobIDArr.length>1)
 		{
-			alert('<%=bundle.getString("lb_invalid_jobid")%>');
+			alert('<%=bundle.getString("lb_invalid_jobid_one")%>');
         	return;
 		}
-        var idInput=$("#jobName").find("option");
-		var idArray=new Array();
-		idInput.each(function()
+		if(!isNumeric(jobIDText)){
+			alert('<%=bundle.getString("msg_invalid_jobId")%>');
+			return;
+		}
+	
+		if(!validateIDS(jobIDArr, jobInfos))
 		{
-			idArray.push({"jobId":$(this).val()});
-		});
-			
-	    if(!validateIDS(jobIDArr, idArray))
-	        {
-	        	alert('<%=bundle.getString("lb_invalid_jobid")%>');
-	        	return;
-	        } 
+			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
+			return;
+		}
+		
+		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+		{
+			alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
+			return;
+		}
 	}
 	else
 	{
-		var jobID = lisaQAForm.jobName.value;
-		if(jobID == "*")
+		var jobIDArr = lisaQAForm.jobName.value;
+		if(jobIDArr == "*")
 		{
 			alert('<%=bundle.getString("msg_invalid_jobName")%>');
 			return;
 		}
 	}
-	
-	document.getElementById("inputJobIDS").value = jobID;
-	lisaQAForm.submit();
+	return jobIDArr;
 }
 
 function doOnload()
@@ -85,29 +138,36 @@ function setDisableTRWrapper(trid)
 	{
 		setDisableTR("idTRJobId", true);
 		setDisableTR("idTRJobName", false);
+		filterTargetLocale();
 	}
 	else if(trid == "idTRJobName")
 	{
 		setDisableTR("idTRJobId", false);
 		setDisableTR("idTRJobName", true);
+		$("#targetLocalesList").find("option").remove();
+		if(jobInfos == null || jobInfos.length ==0)
+		{
+			var sel = document.getElementById("targetLocalesList");
+			var option = new Option("<%=bundle.getString("no_job")%>", "*");
+			sel.options.add(option);
+		}else
+		{
+			for(var i=0; i<targetLocales.length; i++)
+			{
+				var sel = document.getElementById("targetLocalesList");
+				var option = new Option(targetLocales[i].displayName, targetLocales[i].id);
+				sel.options.add(option); 
+			}
+		}
 	}
 }
 
 function filterTargetLocale()
 {
-	if(document.getElementsByName("reportOn")[0].checked)
-	{
-		var jobID = lisaQAForm.jobId.value;
-		if(!isNumeric(jobID)){
-			alert('<%=bundle.getString("lb_invalid_jobid")%>');
-			return;
-		}
-	}else{
-		var jobID = lisaQAForm.jobName.value;
-		if(!isNumeric(jobID)){
-			alert('<%=bundle.getString("msg_invalid_jobName")%>');
-			return;
-		}
+	var jobID = lisaQAForm.jobName.value;
+	if(!isNumeric(jobID)){
+		alert('<%=bundle.getString("msg_invalid_jobName")%>');
+		return;
 	}
 	$("#targetLocalesList").find("option").remove();
 	var url ="${self.pageURL}&action=ajaxTERS"
@@ -115,7 +175,7 @@ function filterTargetLocale()
 		$(data).each(function(i, item){
 			var sel = document.getElementById("targetLocalesList");
 			var option = new Option(item.targetLocName, item.targetLocId);
-			sel.options.add(option);
+			sel.options.add(option); 
 		});
 	});
 }
@@ -161,7 +221,7 @@ function isNumeric(str){
                 <tr id="idTRJobName">
                     <td><input type="radio" name="reportOn" onclick="setDisableTRWrapper('idTRJobId');" value="jobName"/><%=bundle.getString("lb_job_name")%>:</td>
                     <td class="standardText" VALIGN="BOTTOM">
-            <select id="jobName" name="jobName" style="width:300px">
+            <select id="jobName" name="jobName" style="width:300px" onChange="filterTargetLocale()">
 <%
           	if (reportJobInfoList == null || reportJobInfoList.size() == 0)
             {
@@ -193,21 +253,6 @@ function isNumeric(str){
         <td class="standardText"><%=bundle.getString("lb_target_language")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
             <select name="targetLocalesList"  id="targetLocalesList">
-<%
-            if (reportJobInfoList == null || reportJobInfoList.size() == 0)
-            {
-%>
-                <option VALUE="*"><%=bundle.getString("no_job")%></option>
-<%
-            }
-            else
-            {
-                for (GlobalSightLocale gsl : targetLocales)
-                {
-%>              <option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option><%
-                }
-            }
-%>
             </select>
         </td>
     </tr>

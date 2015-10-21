@@ -27,6 +27,7 @@ public class MindTouchConnectorTargetServer extends PersistentObject
     private String username = null;
     private String password = null;
     private long sourceServerId = 0;
+    private long companyId;
     
     public String getTargetLocale() 
     {
@@ -78,4 +79,13 @@ public class MindTouchConnectorTargetServer extends PersistentObject
 		this.sourceServerId = sourceServerId;
 	}
 
+	public long getCompanyId()
+    {
+        return companyId;
+    }
+
+    public void setCompanyId(long companyId)
+    {
+        this.companyId = companyId;
+    }
 }

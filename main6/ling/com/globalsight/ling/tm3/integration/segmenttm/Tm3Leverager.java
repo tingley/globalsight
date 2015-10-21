@@ -118,11 +118,13 @@ class Tm3Leverager {
         }
         
         int order = 0;
-        for (TM3LeverageMatch<GSTuvData> match : results.getMatches()) {
+        for (TM3LeverageMatch<GSTuvData> match : results.getMatches())
+        {
             TM3Tu<GSTuvData> tu = match.getTu();
-            LeveragedSegmentTu ltu = new LeveragedSegmentTu(tu.getId(), projectTm.getId(),
-                    (String) tu.getAttribute(formatAttr),
-                    (String) tu.getAttribute(typeAttr), true, srcLocale);
+            TM3Tuv<GSTuvData> tmSrcTuv = match.getTuv();
+			LeveragedSegmentTu ltu = new LeveragedSegmentTu(tu.getId(),
+					projectTm.getId(), (String) tu.getAttribute(formatAttr),
+					(String) tu.getAttribute(typeAttr), true, srcLocale);
             ltu.setScore(match.getScore());
             ltu.setMatchState(getMatchState(leverageOptions, match.getScore()));
             ltu.setFromWorldServer((Boolean) tu.getAttribute(fromWsAttr));
@@ -161,8 +163,9 @@ class Tm3Leverager {
                 ltuv.setLastUsageDate(getLastUsageDate(tuv));
                 ltuv.setJobId(tuv.getJobId());
                 ltuv.setJobName(tuv.getJobName());
-                ltuv.setPreviousHash(tuv.getPreviousHash());
-                ltuv.setNextHash(tuv.getNextHash());
+                // for hash ICE, it should rely on source pre-next hash
+                ltuv.setPreviousHash(tmSrcTuv.getPreviousHash());
+                ltuv.setNextHash(tmSrcTuv.getNextHash());
                 if (tuv.getSid() != null)
                 {
                 	ltuv.setSid(tuv.getSid());

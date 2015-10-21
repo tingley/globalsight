@@ -17,9 +17,11 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.management;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
@@ -28,6 +30,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.projecthandler.ProjectHandler;
@@ -38,7 +43,6 @@ import com.globalsight.everest.tm.TmRemover;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.OperationLog;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -97,23 +101,49 @@ public class RemoveTmHandler extends PageHandler implements WebAppConstants
         ResourceBundle bundle = PageHandler.getBundle(session);
         String errorMsg = null;
         StringBuilder errors = new StringBuilder();
-
+        
         try
         {
             if (TM_ACTION_DELETE.equals(action)
-                    || TM_ACTION_DELETE_LANGUAGE.equals(action))
+                    || TM_ACTION_DELETE_LANGUAGE.equals(action)
+                    || TM_ACTION_DELETE_TULISTING.equals(action))
             {
-                String tmIdArray = (String) p_request.getParameter(TM_TM_ID);
-                String[] tmIds = tmIdArray.split(",");
-                String language = null;
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                factory.setSizeThreshold(1024000);
+                ServletFileUpload upload = new ServletFileUpload(factory);
 
-                if (TM_ACTION_DELETE_LANGUAGE.equals(action))
+                List<FileItem> fileItems = upload.parseRequest(p_request);
+
+                String tmIdArray = (String) p_request.getParameter(TM_TM_ID);
+                String language = null;
+                File tmxFile = null;
+                for (FileItem item : fileItems)
                 {
-                    language = p_request.getParameter("LanguageList");
+                    if (TM_TM_ID.equals(item.getFieldName()))
+                    {
+                        tmIdArray = item.getString();
+                    }
+                    else if ("tmxFile".equals(item.getFieldName()))
+                    {
+                        tmxFile = File.createTempFile("GSTUListing", null);
+                        String fileName = item.getName();
+                        item.write(tmxFile);
+                    }
+                    else if ("LanguageList".equals(item.getFieldName()))
+                    {
+                        language = item.getString();
+                    }
+                }
+
+                String[] tmIds = tmIdArray.split(",");
+                if (!TM_ACTION_DELETE_LANGUAGE.equals(action))
+                {
+                    language = null;
                 }
 
                 long tmId = -1l;
-                errorMsg = removeTM(sessionMgr, tmIds, bundle, language);
+                errorMsg = removeTM(sessionMgr, tmIds, bundle, language,
+                        tmxFile);
             }
             else if (TM_ACTION_CANCEL.equals(action))
             {
@@ -135,7 +165,7 @@ public class RemoveTmHandler extends PageHandler implements WebAppConstants
     }
     
     private String removeTM(SessionManager sessionManager, String[] tmIds,
-            ResourceBundle bundle, String languageList)
+            ResourceBundle bundle, String languageList, File tmxFile)
     {
         logger.info("Removing TM (tm id = " + Arrays.toString(tmIds) + ")");
 
@@ -150,12 +180,24 @@ public class RemoveTmHandler extends PageHandler implements WebAppConstants
         {
             // Start remove TM in a separate thread.
             TmRemover tmRemover = new TmRemover(tmIdsArray, m_userId);
-            if (!StringUtil.isEmpty(languageList))
+            
+            if (tmxFile != null && tmxFile.exists())
+            {
+                tmRemover.setTmxFile(tmxFile);
+                tmRemover.SetDeleteTUListingFlag(true);
+                tmRemover.SetDeleteLanguageFlag(false);
+            }
+            else if (!StringUtil.isEmpty(languageList))
             {
                 tmRemover.setLocaleId(Long.parseLong(languageList));
+                tmRemover.SetDeleteTUListingFlag(false);
                 tmRemover.SetDeleteLanguageFlag(true);
-            } else
+            }
+            else
+            {
+                tmRemover.SetDeleteTUListingFlag(false);
                 tmRemover.SetDeleteLanguageFlag(false);
+            }
             tmRemover.setResourceBundle(bundle);
             tmRemover.initReplacingMessage();
             sessionManager.setAttribute(TM_REMOVER, tmRemover);

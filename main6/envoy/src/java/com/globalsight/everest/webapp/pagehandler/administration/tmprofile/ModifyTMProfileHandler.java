@@ -237,8 +237,7 @@ public class ModifyTMProfileHandler extends PageHandler implements
         String actionType = (String) p_request.getParameter(ACTION);
         sessionMgr.setAttribute(ACTION, actionType);
 
-        List<String> allAtt = TMPAttributeManager
-                .getAvailableAttributenames(tmProfile);
+		List<String> allAtt = TMPAttributeManager.getAvailableAttributenames();
         p_request.setAttribute(TMP_AVAILABLE_ATTS,
                 TMPAttributeManager.toOneStr(allAtt));
 

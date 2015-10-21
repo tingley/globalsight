@@ -22,10 +22,11 @@ import com.globalsight.exception.WrappedException;
  * ConnectionPoolException represents a wrapped exception that occurs during
  * any attempt to obtain a connection from the connection pool.
  */
-public class ConnectionPoolException
-    extends WrappedException
+public class ConnectionPoolException extends WrappedException
 {
-    //
+	private static final long serialVersionUID = -3588061220758234214L;
+
+	//
     // PRIVATE CONSTANTS
     //
     private static final String DEFAULT_MSG = "Connection Pool Exception";

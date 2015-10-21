@@ -189,4 +189,11 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance.getBestMatchScore(p_connection,
                 p_originalSourceTuvId, p_targetLocaleId, p_subId, p_jobId);
     }
+
+	public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId,
+			Long p_targetLocaleId)
+	{
+		return m_localInstance.getExactLeverageMatches(p_sourcePageId,
+				p_targetLocaleId);
+	}
 }

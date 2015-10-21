@@ -55,11 +55,46 @@ function submitForm(selectedButton) {
                              "&" + WebAppConstants.TM_ACTION +
                              "=" + WebAppConstants.TM_ACTION_DELETE%>';
         }
-        else {
+        else if (TMForm.checkboxTm[1].checked){
             TMForm.action =  '<%=delete.getPageURL() +
                              "&" + WebAppConstants.TM_ACTION +
                              "=deleteTMLanguage"%>';
         }
+        else if (TMForm.checkboxTm[2].checked)
+        {
+        	// check file
+        	var path = TMForm.tmxFile.value;
+        	if (typeof(path) == "undefined")
+        	{
+        		alert("Please choose a TMX file (xml or tmx).");
+        	}
+        	else
+        	{
+        		var index = path.lastIndexOf(".");
+        	    if (index < 0)
+        	    {
+        	    	alert("Please choose a TMX file (xml or tmx).");
+        	      	return;
+        	    }
+        	    
+        	    var ext = path.substring(index + 1).toLowerCase();
+        	    if (!(ext == "xml" || ext == "tmx"))
+        	    {
+        	    	alert("Please choose a TMX file (xml or tmx).");
+        	      	return;
+        	    }
+        	}
+        	
+        	TMForm.action =  '<%=delete.getPageURL() +
+                "&" + WebAppConstants.TM_ACTION +
+                "=deleteTUListing"%>';
+        }
+        else
+        {
+        	// cannot going here
+        	return;
+        }
+        
 
         TMForm.submit();
         return;
@@ -67,11 +102,17 @@ function submitForm(selectedButton) {
 }
 
 function clickRadio(flag) {
-    if(flag == true) {
-        TMForm.LanguageList.disabled = true;
+    if(flag == "tm") {
+    	TMForm.LanguageList.disabled = true;
+    	TMForm.tmxFile.disabled = true;
     }
-    else if(flag == false) {
+    else if(flag == "language") {
         TMForm.LanguageList.disabled = false;
+        TMForm.tmxFile.disabled = true;
+    }
+    else if(flag == "tuListing") {
+    	TMForm.LanguageList.disabled = true;
+        TMForm.tmxFile.disabled = false;
     }
 }
 </SCRIPT>
@@ -86,14 +127,14 @@ function clickRadio(flag) {
 
 <SPAN CLASS="mainHeading"><%=bundle.getString("lb_tm_removing")%></SPAN>
 <br><br>
-<FORM NAME=TMForm method="post">
+<FORM NAME=TMForm method="post" ENCTYPE="multipart/form-data">
 <INPUT TYPE="hidden" NAME="<%=WebAppConstants.TM_TM_ID%>" VALUE="<%=tmIdStr%>">
     <div class='standardText'nowrap>
        <%=bundle.getString("lb_select_entries_to_remove")%>
     </div>
     <div class='standardText'nowrap>
-	    <input type="radio" name="checkboxTm" value="deleteTm" checked onclick="clickRadio(true)"> 
-	       <%= bundle.getString("lb_entire_tm")%>
+	    <input type="radio" name="checkboxTm" value="deleteTm" checked onclick="clickRadio('tm')"> 
+	      <span style="display:inline-block;width:120px" class='standardText'><%= bundle.getString("lb_entire_tm")%></span>
 	    <br>
 	      <%
 		  for (ProjectTM tm : tms) {
@@ -103,8 +144,8 @@ function clickRadio(flag) {
     </div>
     <br>
     <div class='standardText'nowrap>
-        <input type="radio" name="checkboxTm" value="deleteLanguage" onclick="clickRadio(false)">
-           <%= bundle.getString("lb_by_language")%>
+        <input type="radio" name="checkboxTm" value="deleteLanguage" onclick="clickRadio('language')">
+           <span style="display:inline-block;width:120px" class='standardText'><%= bundle.getString("lb_by_language")%></span>
         <select name="LanguageList" id="LanguageList" disabled=true>
           <%
           GlobalSightLocale locale = null;
@@ -118,6 +159,12 @@ function clickRadio(flag) {
           }
           %>
        </select>
+    </div>
+    <br>
+    <div class='standardText'nowrap>
+	    <input type="radio" name="checkboxTm" value="deleteTuListing" onclick="clickRadio('tuListing')"> 
+	       <span style="display:inline-block;width:120px" class='standardText'><%= bundle.getString("lb_by_tuListing")%></span>
+	    <input type="file" NAME="tmxFile" id="tmxFile" SIZE=40 disabled=true>
     </div>
     <br>
 

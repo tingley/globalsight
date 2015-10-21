@@ -23,12 +23,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
@@ -72,24 +73,29 @@ public class ConnectionPool
     private static final String PASSWORD = "password";
     private static final String PROFILE_NAME = "GSA";
     private static final String PROP_MAX_CONNECTIONS = "maxConnections";
-    private static final String PROP_MIN_CONNECTIONS = "minConnections";
+//    private static final String PROP_MIN_CONNECTIONS = "minConnections";
     private static final String PROP_MAX_CONNECTION_WAIT_TIME = "maxConnectionWaitTime";
     private static final String PROP_USE_CONNECTION_POOL = "useConnectionPool";
     private static boolean s_doPooling = true;
 
+    private static final String PROP_USE_C3P0_POOL = "use_c3p0_connection_pool";
+    private static boolean useC3P0ConnectionPool = false;
+
     //
     // PRIVATE STATIC MEMBER VARIABLES
     //
-    private static HashMap m_pools = new HashMap();
+	private static ConcurrentMap<Long, ConnectionPool> m_pools = new ConcurrentHashMap<Long, ConnectionPool>();
     private static SystemConfiguration m_systemConfiguration;
     private static Properties s_props = new Properties();
+
+	private static final ConcurrentMap<Connection, ConnectionPool> m_connToPools = new ConcurrentHashMap<Connection, ConnectionPool>();
 
     //
     // PRIVATE INSTANCE MEMBER VARIABLES
     //
     private ConnectionProfile m_connectionProfile;
-    private Vector m_unallocatedConns;
-    private Vector m_allocatedConns;
+    private Vector<Connection> m_unallocatedConns;
+    private Vector<Connection> m_allocatedConns;
 
     private static Timer timer = new Timer(true);
     //
@@ -110,6 +116,10 @@ public class ConnectionPool
                     s_props.getProperty(PROP_USE_CONNECTION_POOL))
                     .booleanValue();
             CATEGORY.info("Use Connection Pooling = " + s_doPooling);
+
+			useC3P0ConnectionPool = Boolean.valueOf(s_props
+					.getProperty(PROP_USE_C3P0_POOL));
+			CATEGORY.info("Use C3P0 connection pool to replace GS own pool!!!");
         }
         catch (Throwable e)
         {
@@ -223,7 +233,12 @@ public class ConnectionPool
     public static Connection getConnection(long p_profileId)
             throws ConnectionPoolException
     {
-        ConnectionPool pool = _getPool(p_profileId);
+    	if (useC3P0ConnectionPool)
+    	{
+        	return ConnectionPoolBridgeToC3P0.getInstance().getConnection();
+    	}
+
+    	ConnectionPool pool = _getPool(p_profileId);
         Connection c = null;
         if (CATEGORY.isDebugEnabled())
         {
@@ -247,23 +262,31 @@ public class ConnectionPool
         {
             CATEGORY.debug("Got connection " + c.hashCode());
         }
+        m_connToPools.put(c, pool);
         return c;
     }
 
     /**
      * Put the given connection back into the unallocated collection, assuming
      * that it actually was allocated by the connection pool in the first place.
-     * 
+     *
      * @param p_connection
      *            the connection to recirculate.
-     * 
+     *
      * @throws ConnectionPoolException
      *             if the connection was not allocated by the ConnectionPool.
      */
     public static void returnConnection(Connection p_connection)
             throws ConnectionPoolException
     {
-        if (CATEGORY.isDebugEnabled())
+    	if (useC3P0ConnectionPool)
+    	{
+			ConnectionPoolBridgeToC3P0.getInstance().returnConnection(
+					p_connection);
+			return;
+    	}
+
+    	if (CATEGORY.isDebugEnabled())
         {
             CATEGORY.debug("Returning connection " + p_connection.hashCode());
         }
@@ -286,12 +309,13 @@ public class ConnectionPool
 
             if (pool == null)
             {
+                m_connToPools.remove(p_connection);
                 throw new ConnectionPoolException(
                         "Returned connection does not belong to the pool");
             }
 
             pool._returnConnection(p_connection);
-
+            m_connToPools.remove(p_connection);
             CloseConnectionTask task = new CloseConnectionTask(pool,
                     p_connection);
             timer.schedule(task, MAX_CONNECTION_WAIT_TIME);
@@ -304,8 +328,16 @@ public class ConnectionPool
      */
     public static synchronized void terminate()
     {
-        Iterator it = m_pools.values().iterator();
+		if (useC3P0ConnectionPool) {
+			try {
+				ConnectionPoolBridgeToC3P0.getInstance().finalize();
+			} catch (Throwable e) {
+				CATEGORY.error(e);
+			}
+			return;
+		}
 
+    	Iterator<ConnectionPool> it = m_pools.values().iterator();
         while (it.hasNext())
         {
             ConnectionPool pool = (ConnectionPool) it.next();
@@ -318,7 +350,16 @@ public class ConnectionPool
 
     public static void terminate(long p_connectionProfileId)
     {
-        ConnectionPool pool = __removePool(p_connectionProfileId);
+		if (useC3P0ConnectionPool) {
+			try {
+				ConnectionPoolBridgeToC3P0.getInstance().finalize();
+			} catch (Throwable e) {
+				CATEGORY.error(e);
+			}
+			return;
+		}
+
+    	ConnectionPool pool = __removePool(p_connectionProfileId);
 
         if (pool != null)
         {
@@ -337,17 +378,10 @@ public class ConnectionPool
     private static ConnectionPool _getPool(long p_profileId)
             throws ConnectionPoolException
     {
-        ConnectionPool pool = null;
-        Long id = new Long(p_profileId);
-
-        synchronized (m_pools)
+        ConnectionPool pool = (ConnectionPool) m_pools.get(p_profileId);
+        if (pool == null)
         {
-            pool = (ConnectionPool) m_pools.get(id);
-
-            if (pool == null)
-            {
-                pool = _createPool(p_profileId);
-            }
+            pool = _createPool(p_profileId);
         }
 
         return pool;
@@ -360,21 +394,13 @@ public class ConnectionPool
      */
     private static ConnectionPool __removePool(long p_profileId)
     {
-        ConnectionPool pool = null;
-        Long id = new Long(p_profileId);
-
-        synchronized (m_pools)
-        {
-            pool = (ConnectionPool) m_pools.remove(id);
-        }
-
-        return pool;
+        return (ConnectionPool) m_pools.remove(p_profileId);
     }
 
     /**
      * Create a new connection pool, add it to the map, and return it. Depending
      * on the given id, the pool may be loaded from the database.
-     * 
+     *
      * This method is called by the synchronized _getPool().
      */
     private static ConnectionPool _createPool(long p_profileId)
@@ -570,20 +596,7 @@ public class ConnectionPool
      */
     private static ConnectionPool _poolThatOwns(Connection p_conn)
     {
-        synchronized (m_pools)
-        {
-            for (Iterator it = m_pools.values().iterator(); it.hasNext();)
-            {
-                ConnectionPool pool = (ConnectionPool) it.next();
-
-                if (pool._contains(p_conn))
-                {
-                    return pool;
-                }
-            }
-        }
-
-        return null;
+        return m_connToPools.get(p_conn);
     }
 
     //
@@ -598,8 +611,8 @@ public class ConnectionPool
         super();
 
         m_connectionProfile = null;
-        m_unallocatedConns = new Vector();
-        m_allocatedConns = new Vector();
+        m_unallocatedConns = new Vector<Connection>();
+        m_allocatedConns = new Vector<Connection>();
     }
 
     /**
@@ -632,7 +645,7 @@ public class ConnectionPool
      * Return the first available connection from this connection pool. If no
      * connection is available and none can be allocated, a
      * ConnectionPoolException is thrown.
-     * 
+     *
      * This is a "public" method on the pool instance.
      */
     private synchronized Connection _getConnection()
@@ -666,8 +679,10 @@ public class ConnectionPool
     /**
      * Return true if this connection pool has a reference to the given
      * connection, false otherwise.
-     * 
+     *
      * This is a "public" method on the pool instance.
+     * 
+     * @deprecated for performance
      */
     private synchronized boolean _contains(Connection p_conn)
     {
@@ -679,7 +694,7 @@ public class ConnectionPool
      * alive, add it to the unallocated list; otherwise, since _findConnection
      * may be waiting for a connection, create a new one and add it to the
      * unallocated list.
-     * 
+     *
      * This is a "public" method on the pool instance.
      */
     private synchronized void _returnConnection(Connection p_conn)
@@ -692,7 +707,7 @@ public class ConnectionPool
 
     /**
      * Close all connections for this instance.
-     * 
+     *
      * This is a "public" method on the pool instance.
      */
     private synchronized void _closeAllConnections()
@@ -709,7 +724,7 @@ public class ConnectionPool
     /**
      * Find an unallocated connection, or create one if there is space available
      * to do so. If this is not possible, return null.
-     * 
+     *
      * This method is called by the synchronized _getConnection().
      */
     private Connection __findConnection() throws ConnectionPoolException
@@ -778,7 +793,7 @@ public class ConnectionPool
 
     /**
      * Add the given connection to the allocated connections array.
-     * 
+     *
      * Called by the synchronized _findConnection().
      */
     private void __allocateConnection(Connection p_conn)
@@ -788,7 +803,7 @@ public class ConnectionPool
 
     /**
      * Add the given connection to the unallocated connections array.
-     * 
+     *
      * Called by the synchronized _returnConnection().
      */
     private void __unallocateConnection(Connection p_conn)
@@ -798,8 +813,10 @@ public class ConnectionPool
 
     /**
      * Return true if the given connection is in the "allocated" array.
-     * 
+     *
      * This method is called by the synchronized _contains().
+     * 
+     * @deprecated for performance
      */
     private boolean __isAllocated(Connection p_conn)
     {
@@ -818,8 +835,10 @@ public class ConnectionPool
 
     /**
      * Return true if the given connection is in the "unallocated" array.
-     * 
+     *
      * This method is called by the synchronized _contains().
+     * 
+     * @deprecated for performance 
      */
     private boolean __isUnallocated(Connection p_conn)
     {
@@ -840,7 +859,7 @@ public class ConnectionPool
      * Create a new connection based in the connection profile information.
      * Creation of a new connection implies that it is automatically added to
      * the "allocated" connection.
-     * 
+     *
      * Called by the synchronized _findConnection().
      */
     private synchronized Connection __createConnection()
@@ -880,17 +899,17 @@ public class ConnectionPool
 
     /**
      * Return the total number of connections maintained by this pool.
-     * 
+     *
      * This method is called from _findConnection().
      */
-    public int __totalConnections()
+    private int __totalConnections()
     {
         return m_unallocatedConns.size() + m_allocatedConns.size();
     }
 
     /**
      * Remove the given connection from the allocated list.
-     * 
+     *
      * This method is called from the synchronized_returnConnection().
      */
     private void __removeAllocatedConnection(Connection p_conn)
@@ -902,6 +921,7 @@ public class ConnectionPool
             if (p_conn == conn)
             {
                 m_allocatedConns.remove(i);
+                m_connToPools.remove(p_conn);
                 return;
             }
         }
@@ -909,7 +929,7 @@ public class ConnectionPool
 
     /**
      * Close all the connections in the allocated vector.
-     * 
+     *
      * This method is called from the synchronized closeAllConnections().
      */
     private void __closeAllocatedConnections()
@@ -922,7 +942,7 @@ public class ConnectionPool
 
     /**
      * Close all the connections in the unallocated vector.
-     * 
+     *
      * This method is called from the synchronized closeAllConnections().
      */
     private void __closeUnallocatedConnections()
@@ -941,6 +961,7 @@ public class ConnectionPool
         try
         {
             p_conn.close();
+            m_connToPools.remove(p_conn);
         }
         catch (Throwable e)
         {
@@ -952,11 +973,11 @@ public class ConnectionPool
      * Try to close a connection in m_unallocatedConns. If the connection is not
      * in m_unallocatedConns or the size of all connection is < min number, the
      * connection will not be closed.
-     * 
+     *
      * <p>
      * Notice: The method will be run automatice, so please <b>NOT</b> call this
      * method.
-     * 
+     *
      * @param conn
      *            The connection try to close.
      */

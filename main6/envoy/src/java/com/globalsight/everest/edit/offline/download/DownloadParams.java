@@ -107,6 +107,7 @@ public class DownloadParams implements Serializable
     HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
 
     private boolean m_changeCreationIdForMTSegments = true;
+    private boolean m_changeSeparateTMFile = true;
 
     private boolean populate100 = true;
     private boolean populateFuzzy = true;
@@ -1174,6 +1175,16 @@ public class DownloadParams implements Serializable
         this.autoActionNodeEmail = nodeEmail;
     }
 
+	public void setChangeSeparateTMFile(boolean p_changeSeparateTMFile)
+	{
+		this.m_changeSeparateTMFile = p_changeSeparateTMFile;
+	}
+
+	public boolean getChangeSeparateTMFile()
+	{
+		return this.m_changeSeparateTMFile;
+	}
+    
     public void setChangeCreationIdForMTSegments(
             boolean p_changeCreationIdForMTSegments)
     {

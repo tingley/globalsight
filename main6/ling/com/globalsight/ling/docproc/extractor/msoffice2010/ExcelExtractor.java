@@ -87,7 +87,7 @@ public class ExcelExtractor extends AbstractExtractor
     private XmlFilterHelper filterHelp = new XmlFilterHelper(null);
 
     private int siIndex = 0;
-    private int siIndexForInternal = 0;
+    private int siIndexForInternal = -1;
 
     public static Set<String> EXTRACT_NODE = new HashSet<String>();
     static
@@ -974,7 +974,6 @@ public class ExcelExtractor extends AbstractExtractor
             {
                 List<String> internalSis = getInternalSis();
                 String siId = Integer.toString(siIndexForInternal);
-                siIndexForInternal++;
                 return internalSis.contains(siId);
             }
         }
@@ -990,6 +989,7 @@ public class ExcelExtractor extends AbstractExtractor
                 List<String> unSis = getUnSis();
                 String s = Integer.toString(siIndex);
                 siIndex++;
+                siIndexForInternal++;
                 return unSis.contains(s);
             }
         }

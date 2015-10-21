@@ -583,7 +583,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return getLeverageMatchMap(leverageMatches);
     }
 
-    private List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId,
+    public List<LeverageMatch> getExactLeverageMatches(Long p_sourcePageId,
             Long p_targetLocaleId) throws LingManagerException
     {
         List<LeverageMatch> leverageMatches = new ArrayList<LeverageMatch>();

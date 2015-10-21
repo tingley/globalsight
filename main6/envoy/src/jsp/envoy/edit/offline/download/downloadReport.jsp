@@ -770,6 +770,10 @@ $(document).ready(function(){
 	$("#taskWorkOfflineTab").addClass("tableHeadingListOn");
 	$("#taskWorkOfflineTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
 	$("#taskWorkOfflineTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
+
+	<% if (review_only && reviewCommentReport && reviewCommentSimpleReport) {%>
+	$("#ReviewersSimpleIncludeTags").attr("disabled", true);
+	<% } %>
 })
 </SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -880,11 +884,11 @@ if (!review_only)
     <TR id="ReviewersSimpleIncludeTagsTR">
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        	<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="ReviewersSimpleIncludeTags" disabled="true"><%=bundle.getString("with_compact_tags")%>
+        	<INPUT TYPE="checkbox" ID="ReviewersSimpleIncludeTags" NAME="ReviewersSimpleIncludeTags"><%=bundle.getString("with_compact_tags")%>
      	</TD>
     </TR>
 <%   }
-	if (postReviewQAReport) {%>
+	if (postReviewQAReport && reviewPermsNum > 1) {%>
 	<TR>
     	<TD>&nbsp;</TD> 	
     	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

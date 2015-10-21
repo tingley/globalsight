@@ -552,6 +552,26 @@ public class TmCoreManagerLocal implements TmCoreManager
             throw new LingManagerException(e);
         }
     }
+    
+    public void deleteSegmentTmTus(Tm p_tm, Collection<SegmentTmTu> p_tus, boolean lock)
+            throws LingManagerException
+    {
+        if (p_tus.size() == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            SegmentTmInfo segTmInfo = p_tm.getSegmentTmInfo();
+            segTmInfo
+            .deleteSegmentTmTus(p_tm, p_tus);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+    }
 
     //
     // Stubs created during the refactoring process

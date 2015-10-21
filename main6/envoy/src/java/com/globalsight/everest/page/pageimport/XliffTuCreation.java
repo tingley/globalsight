@@ -14,7 +14,6 @@
  *  limitations under the License.
  *
  */
-
 package com.globalsight.everest.page.pageimport;
 
 import java.util.ArrayList;
@@ -29,7 +28,9 @@ import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.common.Text;
+import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
+import com.globalsight.ling.docproc.extractor.xliff20.XliffHelper;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlElement;
 
@@ -64,9 +65,10 @@ public class XliffTuCreation implements IXliffTuCreation
             {
                 return false;
             }
-            
-            boolean isMadCapLingo = "true".equals(attributeMap.get("isMadCapLingo"));
-            
+
+            boolean isMadCapLingo = "true".equals(attributeMap
+                    .get("isMadCapLingo"));
+
             String mrkId = elem.getAttribute("xliffSegSourceMrkId");
             String mrkIndex = elem.getAttribute("xliffSegSourceMrkIndex");
             GxmlElement seg = (GxmlElement) childs.get(0);
@@ -75,7 +77,7 @@ public class XliffTuCreation implements IXliffTuCreation
             // "array" and "p_tuList" will be different?
             TuImpl tuPre = getRightTu(mrkId, mrkIndex, array, isMadCapLingo);
             TuImpl tu = getRightTu(mrkId, mrkIndex, p_tuList, isMadCapLingo);
-            
+
             if (Text.isBlank(seg.getTextValue()))
             {
                 tuPre.setXliffTarget(seg.toGxml());
@@ -83,13 +85,14 @@ public class XliffTuCreation implements IXliffTuCreation
             }
             else
             {
-                tuPre.setXliffTarget(seg.toGxml(GxmlElement.XLF));
-                tu.setXliffTarget(seg.toGxml("xlf"));
+                tuPre.setXliffTarget(seg.toGxml(IFormatNames.FORMAT_XLIFF));
+                tu.setXliffTarget(seg.toGxml(IFormatNames.FORMAT_XLIFF));
             }
 
-            if (attributeMap.get("xliffTargetLan") != null)
+            if (attributeMap.get(XliffHelper.MARK_XLIFF_TARGET_LANG) != null)
             {
-                tuPre.setXliffTargetLanguage(attributeMap.get("xliffTargetLan"));
+                tuPre.setXliffTargetLanguage(attributeMap
+                        .get(XliffHelper.MARK_XLIFF_TARGET_LANG));
             }
 
             if (attributeMap.get("generatFrom") != null)
@@ -115,7 +118,7 @@ public class XliffTuCreation implements IXliffTuCreation
             String altMid = elem.getAttribute("altMid");
             GxmlElement seg = (GxmlElement) elem.getChildElements().get(0);
             ArrayList<Tu> array = (ArrayList<Tu>) p_lg.getTus(false);
-            
+
             TuImpl tuPre = null;
             if (altMid == null)
             {
@@ -136,7 +139,7 @@ public class XliffTuCreation implements IXliffTuCreation
                 {
                     Tu tu = array.get(i);
                     String tuMrkId = tu.getXliffMrkId();
-                    
+
                     if ("true".equals(attributeMap.get("isMadCapLingo")))
                     {
                         boolean parsed = false;
@@ -159,7 +162,7 @@ public class XliffTuCreation implements IXliffTuCreation
                             tuMrkId = "" + (paredResult - 1);
                         }
                     }
-                    
+
                     if (altMid.equals(tuMrkId))
                     {
                         tuPre = (TuImpl) tu;
@@ -167,15 +170,15 @@ public class XliffTuCreation implements IXliffTuCreation
                     }
                 }
             }
-            
+
             if (tuPre == null)
             {
                 tuPre = (TuImpl) array.get(array.size() - 1);
             }
-            
+
             TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
                     p_jobId);
-            alt.setSegment(seg.toGxml(GxmlElement.XLF));
+            alt.setSegment(seg.toGxml(IFormatNames.FORMAT_XLIFF));
             alt.setLanguage(altLanguage);
             alt.setQuality(altQuality);
             alt.setTuv(tuvPre);
@@ -190,7 +193,7 @@ public class XliffTuCreation implements IXliffTuCreation
             GxmlElement seg = (GxmlElement) elem.getChildElements().get(0);
 
             alt = new XliffAlt();
-            alt.setSourceSegment(seg.toGxml(GxmlElement.XLF));
+            alt.setSourceSegment(seg.toGxml(IFormatNames.FORMAT_XLIFF));
             return false;
         }
 
@@ -234,10 +237,13 @@ public class XliffTuCreation implements IXliffTuCreation
                 }
             }
         }
-        
+
         if (tuPre == null)
         {
-            tuPre = (TuImpl) tuList.get(tuList.size() - 1);
+            if (tuList != null && tuList.size() > 0)
+            {
+                tuPre = (TuImpl) tuList.get(tuList.size() - 1);
+            }
         }
 
         return tuPre;

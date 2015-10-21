@@ -172,15 +172,20 @@ public class CompanyBasicHandler extends PageHandler implements
                     p_request.setAttribute("marketToList", marketToList);
                     
                     p_request.setAttribute("action", "edit");
-                    keyList.removeAll(containedCategories);
-                    sorcecardKeyList.removeAll(containedScorecardCategories);
-                    qualityKeyList.removeAll(containedQualityCategories);
-                    marketKeyList.removeAll(containedMarketCategories);
+                    
+                    List<String> availableCategories = CompanyWrapper
+                            .getCompanyCategoryAvailList(companyID);
+                    List<String> availableScorecardCategories = CompanyWrapper
+                            .getCompanyScorecardCategoryAvailList(companyID);
+                    List<String> availableQualityCategories = CompanyWrapper
+                            .getCompanyQualityCategoryAvailList(companyID);
+                    List<String> availableMarketCategories = CompanyWrapper
+                            .getCompanyMarketCategoryAvailList(companyID);
                     // init the "from" select table, add default value to it
-                    List<Select> fromList = initSelectList(keyList, bundle);
-                    List<Select> scorecardFromList = initSelectList(sorcecardKeyList, bundle);
-                    List<Select> qualityFromList = initSelectList(qualityKeyList, bundle);
-                    List<Select> marketFromList = initSelectList(marketKeyList, bundle);
+                    List<Select> fromList = initSelectList(availableCategories, bundle);
+                    List<Select> scorecardFromList = initSelectList(availableScorecardCategories, bundle);
+                    List<Select> qualityFromList = initSelectList(availableQualityCategories, bundle);
+                    List<Select> marketFromList = initSelectList(availableMarketCategories, bundle);
                     p_request.setAttribute("fromList", fromList);
                     p_request.setAttribute("scorecardFromList", scorecardFromList);
                     p_request.setAttribute("qualityFromList", qualityFromList);

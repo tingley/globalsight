@@ -49,6 +49,7 @@ import com.globalsight.cxe.entity.gitconnector.GitConnectorCacheFile;
 import com.globalsight.everest.util.comparator.FileComparator;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 public class GitConnectorHelper
@@ -74,7 +75,7 @@ public class GitConnectorHelper
 			} 
 			catch (JSchException e)
 			{
-				e.printStackTrace();
+				logger.error(e);
 			}
 			
 			java.util.Properties config = new java.util.Properties(); 
@@ -138,21 +139,24 @@ public class GitConnectorHelper
     public File getGitFolder()
     {
     	File docFolder = AmbFileStoragePathUtils.getCxeDocDir(gc.getCompanyId());
-        String gitFolderStr = docFolder + File.separator + GIT_CONNECTOR + File.separator + gc.getName() + "_" + gc.getId();
+		String gitFolderStr = docFolder + File.separator + GIT_CONNECTOR
+				+ File.separator + gc.getName() + "_" + gc.getId();
         return new File(gitFolderStr);
     }
     
     public CredentialsProvider getCredentialsProvider()
     {
-    	return new UsernamePasswordCredentialsProvider(gc.getUsername(),gc.getPassword());
+		return new UsernamePasswordCredentialsProvider(gc.getUsername(), gc.getPassword());
     }
     
-    public void gitConnectorClone() throws InvalidRemoteException, TransportException, GitAPIException, 
-    					NotSupportedException, org.eclipse.jgit.errors.TransportException, URISyntaxException
+	public void gitConnectorClone() throws InvalidRemoteException,
+			TransportException, GitAPIException, NotSupportedException,
+			org.eclipse.jgit.errors.TransportException, URISyntaxException
     {
     	String url = gc.getUrl();
     	CloneCommand cloneCommand = Git.cloneRepository();
-    	cloneCommand.setURI(gc.getUrl()).setBranch(gc.getBranch()).setDirectory(getGitFolder());
+		cloneCommand.setURI(gc.getUrl()).setBranch(gc.getBranch())
+				.setDirectory(getGitFolder());
     	if(url.startsWith("http"))
     	{
     		cloneCommand.setCredentialsProvider(getCredentialsProvider());
@@ -171,9 +175,11 @@ public class GitConnectorHelper
     	cloneCommand.call().close();
     }
     
-    public void gitConnectorPull() throws IOException, WrongRepositoryStateException, 
-    			InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, 
-    			CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException
+	public void gitConnectorPull() throws IOException,
+			WrongRepositoryStateException, InvalidConfigurationException,
+			DetachedHeadException, InvalidRemoteException, CanceledException,
+			RefNotFoundException, NoHeadException, TransportException,
+			GitAPIException
     {
     	FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
     	repositoryBuilder.setMustExist(true);
@@ -210,10 +216,12 @@ public class GitConnectorHelper
     	repository.close();
     }
     
-    public void gitConnectorPush(GitConnectorCacheFile cacheFile) throws InvalidRemoteException, 
-    			TransportException, GitAPIException, IOException
+	public void gitConnectorPush(GitConnectorCacheFile cacheFile)
+			throws InvalidRemoteException, TransportException, GitAPIException,
+			IOException
     {
-    		FileUtil.copyFile(new File(cacheFile.getSrcFilePath()), new File(cacheFile.getDstFilePath()));
+		FileUtil.copyFile(new File(cacheFile.getSrcFilePath()), new File(
+				cacheFile.getDstFilePath()));
     	
     		FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
     		repositoryBuilder.setMustExist(true);
@@ -326,14 +334,15 @@ public class GitConnectorHelper
         return gitConnectorFiles;
     }
     
-    private void setChildren(GitConnectorFile p_gitConnectorFolder, File p_folder)
+    @SuppressWarnings("unchecked")
+	private void setChildren(GitConnectorFile p_gitConnectorFolder, File p_folder)
     {
         if (FileUtil.isEmpty(p_folder))
             return;
 
         List<GitConnectorFile> children = new ArrayList<GitConnectorFile>();
         File[] files = p_folder.listFiles();
-        Arrays.sort(files, new FileComparator(0, null, true));
+        SortUtil.sort(files, new FileComparator(0, null, true));
         for (File file : files)
         {
             GitConnectorFile gitConnectorFile = new GitConnectorFile(file);

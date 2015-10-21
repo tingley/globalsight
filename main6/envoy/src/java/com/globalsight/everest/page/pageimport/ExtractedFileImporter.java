@@ -14,7 +14,6 @@
  *  limitations under the License.
  *
  */
-
 package com.globalsight.everest.page.pageimport;
 
 // globalsight - general
@@ -81,9 +80,9 @@ import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
-import com.globalsight.ling.docproc.extractor.po.POToken;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
+import com.globalsight.ling.docproc.extractor.xliff20.XliffHelper;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.Leverager;
 import com.globalsight.ling.tm.LeveragingLocales;
@@ -168,8 +167,8 @@ public class ExtractedFileImporter extends FileImporter
             if (c_logger.isDebugEnabled())
             {
                 c_logger.debug("Performance:: Creating source page time = "
-                        + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
-                        + p_request.getExternalPageId());
+                        + +(System.currentTimeMillis() - time_PERFORMANCE)
+                        + " " + p_request.getExternalPageId());
             }
 
             if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
@@ -182,7 +181,8 @@ public class ExtractedFileImporter extends FileImporter
                             + p_request.getExternalPageId());
                     time_PERFORMANCE = System.currentTimeMillis();
 
-                    exactMatchedSegments = leveragePage(p_request, sourcePage, jobId);
+                    exactMatchedSegments = leveragePage(p_request, sourcePage,
+                            jobId);
 
                     if (c_logger.isDebugEnabled())
                     {
@@ -450,7 +450,7 @@ public class ExtractedFileImporter extends FileImporter
             {
                 HibernateUtil.save(pTemplate.getTemplateParts());
             }
-            
+
             if (haveInddPageNum)
             {
                 long srcPageId = srcPage.getId();
@@ -459,8 +459,8 @@ public class ExtractedFileImporter extends FileImporter
                 {
                     if (tu.getInddPageNum() != 0)
                     {
-                        InddTuMappingHelper.saveMapping(jobId, srcPageId, tu.getId(), companyId,
-                                tu.getInddPageNum());
+                        InddTuMappingHelper.saveMapping(jobId, srcPageId,
+                                tu.getId(), companyId, tu.getInddPageNum());
                     }
                 }
             }
@@ -496,8 +496,8 @@ public class ExtractedFileImporter extends FileImporter
      * @return SourcePage The page for importing.
      * @throws FileImportException
      */
-    private SourcePage createPage(Request p_request, GxmlRootElement p_element, long jobId)
-            throws FileImportException
+    private SourcePage createPage(Request p_request, GxmlRootElement p_element,
+            long jobId) throws FileImportException
     {
         SourcePage srcPage = null;
         PageManager pm = getPageManager();
@@ -632,7 +632,8 @@ public class ExtractedFileImporter extends FileImporter
      * @return java.util.List
      */
     private ArrayList<Tu> createTUs(Request p_request, SourcePage p_page,
-            GxmlRootElement p_GxmlRootElement, long jobId) throws FileImportException
+            GxmlRootElement p_GxmlRootElement, long jobId)
+            throws FileImportException
     {
         LeverageGroup lg = getLeverageGroupForPage(p_page);
         long tmId = getTMId(p_request);
@@ -701,9 +702,10 @@ public class ExtractedFileImporter extends FileImporter
         // for PO File
         if (IFormatNames.FORMAT_PO.equals(pageDataType))
         {
-            String xliffTargetLan = p_GxmlElement
+            String xliffTargetLang = p_GxmlElement
                     .getAttribute(DiplomatNames.Attribute.TARGETLANGUAGE);
-            attributeMap.put("xliffTargetLan", xliffTargetLan);
+            attributeMap.put(XliffHelper.MARK_XLIFF_TARGET_LANG,
+                    xliffTargetLang);
             tuc.setAttribute(attributeMap);
         }
 
@@ -735,13 +737,13 @@ public class ExtractedFileImporter extends FileImporter
                     if (isCreateTu)
                     {
                         int inddPageNumInt = 0;
-                        String inddPageNum = elem.getAttribute(
-                                DiplomatNames.Attribute.INDDPAGENUM);
+                        String inddPageNum = elem
+                                .getAttribute(DiplomatNames.Attribute.INDDPAGENUM);
                         if (inddPageNum != null)
                         {
                             inddPageNumInt = Integer.parseInt(inddPageNum);
                         }
-                        
+
                         ArrayList<Tu> tus = createTranslatableSegments(elem,
                                 p_request, p_page, p_sourceLocale, p_tmId,
                                 pageDataType);
@@ -749,13 +751,13 @@ public class ExtractedFileImporter extends FileImporter
                         for (int j = 0, maxj = tus.size(); j < maxj; j++)
                         {
                             tu = tus.get(j);
-                            
+
                             if (inddPageNumInt != 0)
                             {
                                 tu.setInddPageNum(inddPageNumInt);
                                 haveInddPageNum = true;
                             }
-                            
+
                             Tuv tuv = tu.getTuv(p_sourceLocale.getId(), jobId);
                             if (tuv.getSid() == null)
                             {
@@ -785,62 +787,69 @@ public class ExtractedFileImporter extends FileImporter
                     break;
 
                 default: // other
-                    String nodeValue1 = elem.getTextValue();
+                    String skeleton = elem.getTextValue();
                     if (supportSid)
                     {
                         if (isJavaProperties)
                         {
-                            String nodeValue = elem.getTextValue();
-                            if (nodeValue != null)
+                            if (skeleton != null)
                             {
-                                nodeValue = nodeValue.trim();
-                                if (nodeValue.endsWith("="))
+                                skeleton = skeleton.trim();
+                                if (skeleton.endsWith("="))
                                 {
-                                    int index = nodeValue.lastIndexOf("\n");
+                                    int index = skeleton.lastIndexOf("\n");
                                     if (index > -1)
                                     {
-                                        nodeValue = nodeValue
+                                        skeleton = skeleton
                                                 .substring(index + 1);
                                     }
 
                                     // remove "="
-                                    nodeValue = nodeValue.substring(0,
-                                            nodeValue.length() - 1);
-                                    sid = nodeValue.trim();
+                                    skeleton = skeleton.substring(0,
+                                            skeleton.length() - 1);
+                                    sid = skeleton.trim();
                                 }
                             }
                         }
                     }
 
-                    String lowcase = nodeValue1.toLowerCase();
+                    skeleton = skeleton.toLowerCase();
 
-                    if (lowcase.indexOf("xliff") > -1
-                            && lowcase.indexOf("file") > -1)
+                    String xliffVersion = XliffHelper.getXliffVersion(skeleton);
+                    boolean isXliff = xliffVersion != null;
+                    if (isXliff)
                     {
-                        if (lowcase.indexOf("target-language") > -1)
+                        String trgLang = null;
+                        if ("1.2".equals(xliffVersion))
                         {
-                            String tempStr = lowcase.substring(lowcase
-                                    .indexOf("target-language"));
-                            String tempStr2 = tempStr.substring(tempStr
-                                    .indexOf("\"") + 1);
-                            String tempStr3 = tempStr2.substring(0,
-                                    tempStr2.indexOf("\""));
+                            trgLang = XliffHelper
+                                    .getXliff12TargetLanguage(skeleton);
 
-                            attributeMap.put("xliffTargetLan", tempStr3);
+                            if (skeleton.indexOf("tool") > -1
+                                    && skeleton.indexOf("worldserver") > -1)
+                            {
+                                generatFrom = TuImpl.FROM_WORLDSERVER;
+                                attributeMap.put("generatFrom", generatFrom);
+                                tuc = new WsTuCreation();
+                            }
+
+                            if (skeleton.indexOf("tool") > -1
+                                    && skeleton.indexOf("madcap lingo v") > -1)
+                            {
+                                attributeMap.put("isMadCapLingo", "true");
+                            }
+                        }
+                        else if ("2.0".equals(xliffVersion))
+                        {
+                            trgLang = XliffHelper
+                                    .getXliff20TargetLanguage(skeleton);
                         }
 
-                        if (lowcase.indexOf("tool") > -1
-                                && lowcase.indexOf("worldserver") > -1)
+                        if (trgLang != null)
                         {
-                            generatFrom = TuImpl.FROM_WORLDSERVER;
-                            attributeMap.put("generatFrom", generatFrom);
-                            tuc = new WsTuCreation();
-                        }
-                        
-                        if (lowcase.indexOf("tool") > -1
-                                && lowcase.indexOf("madcap lingo v") > -1)
-                        {
-                            attributeMap.put("isMadCapLingo", "true");
+                            attributeMap
+                                    .put(XliffHelper.MARK_XLIFF_TARGET_LANG,
+                                            trgLang);
                         }
 
                         tuc.setAttribute(attributeMap);
@@ -858,8 +867,8 @@ public class ExtractedFileImporter extends FileImporter
      * 
      * @return java.util.List
      */
-    private ArrayList<Tuv> createTUVs(Request p_request, ArrayList<Tu> p_tus, long jobId)
-            throws Exception
+    private ArrayList<Tuv> createTUVs(Request p_request, ArrayList<Tu> p_tus,
+            long jobId) throws Exception
     {
         ArrayList<Tuv> srcTuvs = new ArrayList<Tuv>(p_tus.size());
         long sourceLocaleId = getSourceLocale(p_request).getId();
@@ -1053,7 +1062,8 @@ public class ExtractedFileImporter extends FileImporter
                     segWordCount = null;
                 }
                 // For Idiom World Server XLF, should keep its word-count info.
-                String wordCountFromWs = p_elem.getAttribute(Extractor.IWS_WORDCOUNT);
+                String wordCountFromWs = p_elem
+                        .getAttribute(Extractor.IWS_WORDCOUNT);
                 if (wordCountFromWs != null)
                 {
                     try
@@ -1074,18 +1084,18 @@ public class ExtractedFileImporter extends FileImporter
 
                 String fileName = p_page.getExternalPageId();
                 String oriGxml = seg.toGxml(p_pageDataType);
-        		if (WordExtractor.useNewExtractor(""
-						+ p_request.getDataSourceId()))
-        		{
-        			Office2Optimizer op = new Office2Optimizer();
-        			op.setGxml((TuvImpl) tuv, oriGxml, tuDataType,
-                            fileName, p_pageDataType, jobId);
-        		}
-        		else
+                if (WordExtractor.useNewExtractor(""
+                        + p_request.getDataSourceId()))
                 {
-                	 OptimizeUtil op = new OptimizeUtil();
-                     op.setGxml((TuvImpl) tuv, oriGxml, tuDataType,
-                             fileName, p_pageDataType, jobId);
+                    Office2Optimizer op = new Office2Optimizer();
+                    op.setGxml((TuvImpl) tuv, oriGxml, tuDataType, fileName,
+                            p_pageDataType, jobId);
+                }
+                else
+                {
+                    OptimizeUtil op = new OptimizeUtil();
+                    op.setGxml((TuvImpl) tuv, oriGxml, tuDataType, fileName,
+                            p_pageDataType, jobId);
                 }
 
                 tuv.setSid(p_elem.getAttribute("sid"));
@@ -1894,7 +1904,8 @@ public class ExtractedFileImporter extends FileImporter
      * 
      * @param p_sourcePage
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     private void setTuTuvIds(SourcePage p_sourcePage, long p_jobId)
     {
         if (p_sourcePage == null)

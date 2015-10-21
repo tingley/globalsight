@@ -27,9 +27,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -77,10 +75,10 @@ import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
 import com.globalsight.cxe.entity.mindtouch.MindTouchConnectorTargetServer;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -98,6 +96,8 @@ public class MindTouchHelper
     public MindTouchHelper(MindTouchConnector mtc)
     {
         this.mtc = mtc;
+
+        setTargetServersMap();
     }
 
     /**
@@ -259,6 +259,10 @@ public class MindTouchHelper
                 }
                 else if ("title".equals(name))
                 {
+                	// title cannot have "<" and ">"
+                	text = text.replace("<", "&lt;").replace(">", "&gt;");
+                	// as json does not allow "\" and "/", remove them for displaying.
+                	text = text.replace("\\", "").replace("/", "");
                     mtp.setTitle(text);
                 }
                 else if ("path".equals(name))
@@ -409,12 +413,12 @@ public class MindTouchHelper
         return null;
     }
     
-    public String getPageProperties(String pagePath)
+    public String getPageProperties(String url, String pagePath)
     {
         CloseableHttpClient httpClient = getHttpClient();
         try
         {
-            String url = mtc.getUrl() + "/@api/deki/pages/=" + pagePath + "/properties";
+            url += "/@api/deki/pages/=" + pagePath + "/properties";
             HttpGet httpget = getHttpGet(url);
 
             HttpResponse httpResponse = httpClient.execute(httpget);
@@ -491,6 +495,7 @@ public class MindTouchHelper
             	File docFolder = AmbFileStoragePathUtils.getCxeDocDir(mtc.getCompanyId());
                 String filePath = docFolder + File.separator + "MindTouchConnectorFiles" + File.separator + fileName;
             	File storeFile = new File(filePath);
+            	storeFile.getParentFile().mkdirs();
             	if(!storeFile.exists())
             	{
             		storeFile.createNewFile();
@@ -525,9 +530,11 @@ public class MindTouchHelper
 
         return null;
     }
-    
+
     @SuppressWarnings("rawtypes")
-	public String handleFiles(String pageId, String content, String targetLocale, String sourceLocale,  MindTouchPageInfo pageInfo) throws DocumentException
+	public String handleFiles(String pageId, String content,
+			String targetLocale, String sourceLocale, MindTouchPageInfo pageInfo)
+			throws DocumentException
     {
     	String filesXml = getPageFiles(pageId);
     	HashMap<String, String> fileMap = new HashMap<String, String>();
@@ -542,29 +549,34 @@ public class MindTouchHelper
     		sourceFileUrl = propertyNode.attributeValue("href");
     		fileMap.put(sourceFileUrl, getPageFile(sourceFileUrl));
     	}
-    	
+
     	if(fileMap.size() > 0)
     	{
     		for(String tempSourceFileUrl: fileMap.keySet())
     		{
-    			String fileXml = putPageFile(fileMap.get(tempSourceFileUrl), targetLocale, sourceLocale, pageInfo);
-    			doc = getDocument(fileXml);
-    			propertyNodes = doc.selectNodes("//contents ");
-    			it = propertyNodes.iterator();
-    			while(it.hasNext())
-    			{
-    				Element propertyNode = (Element) it.next();
-    				String targetFileUrl = propertyNode.attributeValue("href");
-    				fileMap.put(tempSourceFileUrl, targetFileUrl);
-    			}
+				String fileXml = putPageFile(fileMap.get(tempSourceFileUrl),
+						targetLocale, sourceLocale, pageInfo);
+				if (StringUtil.isNotEmpty(fileXml))
+				{
+	    			doc = getDocument(fileXml);
+	    			propertyNodes = doc.selectNodes("//contents ");
+	    			it = propertyNodes.iterator();
+	    			while(it.hasNext())
+	    			{
+	    				Element propertyNode = (Element) it.next();
+	    				String targetFileUrl = propertyNode.attributeValue("href");
+	    				fileMap.put(tempSourceFileUrl, targetFileUrl);
+	    			}
+				}
     		}
-    		
+
     		for(String tempSourceFileUrl: fileMap.keySet())
     		{
-    			content = content.replaceAll(tempSourceFileUrl, fileMap.get(tempSourceFileUrl));
+				content = StringUtil.replace(content, tempSourceFileUrl,
+						fileMap.get(tempSourceFileUrl));
     		}
     	}
-    	
+
         return content;
     }
 
@@ -574,9 +586,9 @@ public class MindTouchHelper
      * @param pageId
      * @return String
      */
-    public String getPageInfo(long pageId)
+    public String getPageInfo(String url, long pageId)
     {
-        String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/info";
+        url += "/@api/deki/pages/" + pageId + "/info";
         return getPageInfo2(url);
     }
 
@@ -586,9 +598,9 @@ public class MindTouchHelper
      * @param path
      * @return String
      */
-    public String getPageInfo(String path)
+    public String getPageInfo(String url, String path)
     {
-        String url = mtc.getUrl() + "/@api/deki/pages/=" + path + "/info";
+        url += "/@api/deki/pages/=" + path + "/info";
         return getPageInfo2(url);
     }
 
@@ -686,11 +698,11 @@ public class MindTouchHelper
      * @param targetLocale
      * @throws Exception
      */
-    public synchronized void postPageContents(File contentsTrgFile,
-            MindTouchPageInfo pageInfo, String sourceLocale, String targetLocale)
-            throws Exception
+	public synchronized void postPageContents(File contentsTrgFile,
+			MindTouchPageInfo pageInfo, String sourceLocale, String targetLocale)
+			throws Exception
     {
-    	if(!isPutServerExist(targetLocale))
+    	if(!isTargetServerExist(targetLocale) && !mtc.getIsPostToSourceServer())
     	{
     		return;
     	}
@@ -702,9 +714,9 @@ public class MindTouchHelper
             // to be safe, it must use "text/plain" content type instead of
             // "text/xml" or "application/xml".
             String content = FileUtil.readFile(contentsTrgFile, "UTF-8");
-            path = getNewPath(pageInfo, sourceLocale, targetLocale);
             String title = getTitleFromTranslatedContentXml(content);
-            content = handleFiles(pageInfo.getPageId(), content, targetLocale,  sourceLocale,   pageInfo);
+			content = handleFiles(pageInfo.getPageId(), content, targetLocale,
+					sourceLocale, pageInfo);
             content = EditUtil.decodeXmlEntities(content);
             content = EditUtil.decodeXmlEntities(content);
             content = content.substring(content.indexOf("<body>") + 6);
@@ -712,6 +724,7 @@ public class MindTouchHelper
             StringEntity reqEntity = new StringEntity(content, "UTF-8");
             reqEntity.setContentType("text/plain; charset=UTF-8");
 
+            path = getNewPath(pageInfo, sourceLocale, targetLocale);
 			String strUrl = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path
 					+ "/contents?edittime=now&abort=never";
 			if (title != null)
@@ -763,26 +776,27 @@ public class MindTouchHelper
     public void putPageTags(File tagsTrgFile, MindTouchPageInfo pageInfo,
             String sourceLocale, String targetLocale)
     {
-    	if(!isPutServerExist(targetLocale))
+    	if(!isTargetServerExist(targetLocale) && !mtc.getIsPostToSourceServer())
     	{
     		return;
     	}
     	
         CloseableHttpClient httpClient = getHttpClient();
         String path = null;
+        String url = null;
         try
         {
-            path = getNewPath(pageInfo, sourceLocale, targetLocale);
-            
+            url = getPutServerUrl(targetLocale);
+        	path = getNewPath(pageInfo, sourceLocale, targetLocale);
             // To add tags to page, the page must exist. Wait at most 3 minutes.
             int count = 0;
-            while (count < 300 && getPageInfo(path) == null)
+            while (count < 300 && getPageInfo(url, path) == null)
             {
                 count++;
                 Thread.sleep(1000);
             }
 
-            String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path + "/tags";
+            url += "/@api/deki/pages/=" + path + "/tags";
             HttpPut httpput = getHttpPut(url, targetLocale);
 
             String content = FileUtil.readFile(tagsTrgFile, "UTF-8");
@@ -814,10 +828,17 @@ public class MindTouchHelper
             shutdownHttpClient(httpClient);
         }
     }
-    
-    public String putPageFile(String filePath, String targetLocale, String sourceLocale,  MindTouchPageInfo pageInfo)
+
+	public String putPageFile(String filePath, String targetLocale,
+			String sourceLocale, MindTouchPageInfo pageInfo)
     {
-        CloseableHttpClient httpClient = getHttpClient();
+		if (!isTargetServerExist(targetLocale)
+				&& !mtc.getIsPostToSourceServer())
+    	{
+    		return null;
+    	}
+
+    	CloseableHttpClient httpClient = getHttpClient();
         String path = null;
         try
         {
@@ -825,7 +846,8 @@ public class MindTouchHelper
         	String tempFileName = URLEncoder.encode(fileName);
         	tempFileName = URLEncoder.encode(tempFileName);
         	path = getNewPath(pageInfo, sourceLocale, targetLocale);
-            String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/="+path+"/files/="+tempFileName;
+			String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/="
+					+ path + "/files/=" + tempFileName;
             HttpPut httpput = getHttpPut(url, targetLocale);
             
             FileEntity reqEntity = new FileEntity(new File(filePath));
@@ -895,30 +917,39 @@ public class MindTouchHelper
      * @param pageInfo
      * @param targetLocale
      */
-    public void putPageProperties(File propertiesTrgFile, MindTouchPageInfo pageInfo,
-            String sourceLocale, String targetLocale)
+	public void putPageProperties(File propertiesTrgFile,
+			MindTouchPageInfo pageInfo, String sourceLocale, String targetLocale)
     {
-    	if(!isPutServerExist(targetLocale))
+    	if(!isTargetServerExist(targetLocale) && !mtc.getIsPostToSourceServer())
     	{
     		return;
     	}
     	
         CloseableHttpClient httpClient = getHttpClient();
         String path = null;
+        String url = null;
         try
         {
+            url = getPutServerUrl(targetLocale);
             path = getNewPath(pageInfo, sourceLocale, targetLocale);
-            HashMap<String, String> etagMap =  getePropertiesEtagMap(getPageProperties(path));
-
             // To add properties to page, the page must exist. Wait at most 3 minutes.
             int count = 0;
-            while (count < 300 && getPageInfo(path) == null)
+            while (count < 300 && getPageInfo(url, path) == null)
             {
                 count++;
                 Thread.sleep(1000);
             }
 
-            String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path + "/properties";
+            // Use Etag from target server if exists.
+            HashMap<String, String> etagMap =
+            		getePropertiesEtagMap(getPageProperties(url, path));
+            if (etagMap.size() == 0)
+            {
+				etagMap = getePropertiesEtagMap(
+						getPageProperties(mtc.getUrl(), path));
+            }
+
+            url += "/@api/deki/pages/=" + path + "/properties";
             HttpPut httpput = getHttpPut(url, targetLocale);
 
             String content = FileUtil.readFile(propertiesTrgFile, "UTF-8");
@@ -950,88 +981,59 @@ public class MindTouchHelper
             shutdownHttpClient(httpClient);
         }
     }
-    
-    private boolean isPutServerExist(String targetLocale)
+
+    private boolean isTargetServerExist(String targetLocale)
     {
-    	if(StringUtil.isEmpty(getPutServerUrl(targetLocale))
-    			|| StringUtil.isEmpty(getPutServerUrl(targetLocale))
-    			|| StringUtil.isEmpty(getPutServerUrl(targetLocale)))
-    	{
-    		return false;
-    	}
-    	
-    	return true;
+		if(targetServersMap.get(targetLocale) != null)
+		{
+			return true;
+		}
+
+    	return false;
     }
-    
+
     private String getPutServerUrl(String targetLocale)
     {
-    	if(mtc.getIsPostToSourceServer())
+		if(targetServersMap.get(targetLocale) != null)
+		{
+			return targetServersMap.get(targetLocale).getUrl();
+		}
+		else if (mtc.getIsPostToSourceServer())
     	{
     		return mtc.getUrl();
     	}
-    	else
-    	{
-    		if(targetServersMap == null)
-    		{
-    			setTargetServersMap();
-    		}
-    		
-    		if(targetServersMap.get(targetLocale) != null)
-    		{
-    			return targetServersMap.get(targetLocale).getUrl();
-    		}
-    		
-    	}
-    	
+
     	return null;
     }
-    
+
     private String getPutServerUsername(String targetLocale)
     {
-    	if(mtc.getIsPostToSourceServer())
+		if(targetServersMap.get(targetLocale) != null)
+		{
+			return targetServersMap.get(targetLocale).getUsername();
+		}
+		else if(mtc.getIsPostToSourceServer())
     	{
     		return mtc.getUsername();
     	}
-    	else
-    	{
-    		if(targetServersMap == null)
-    		{
-    			setTargetServersMap();
-    		}
-    		
-    		if(targetServersMap.get(targetLocale) != null)
-    		{
-    			return targetServersMap.get(targetLocale).getUsername();
-    		}
-    		
-    	}
-    	
+
     	return null;
     }
-    
+
     private String getPutServerPassword(String targetLocale)
     {
-    	if(mtc.getIsPostToSourceServer())
+		if(targetServersMap.get(targetLocale) != null)
+		{
+			return targetServersMap.get(targetLocale).getPassword();
+		}
+		else if (mtc.getIsPostToSourceServer())
     	{
     		return mtc.getPassword();
     	}
-    	else
-    	{
-    		if(targetServersMap == null)
-    		{
-    			setTargetServersMap();
-    		}
-    		
-    		if(targetServersMap.get(targetLocale) != null)
-    		{
-    			return targetServersMap.get(targetLocale).getPassword();
-    		}
-    		
-    	}
-    	
+
     	return null;
     }
-    
+
     private void setTargetServersMap()
     {
     	HashMap<String, MindTouchConnectorTargetServer> tempMap = 
@@ -1060,36 +1062,41 @@ public class MindTouchHelper
     private String getNewPath(MindTouchPageInfo pageInfo, String sourceLocale,
             String targetLocale)
     {
-        sourceLocale = sourceLocale.replace("_", "-").toLowerCase();
-        String sourceLang = null;
-        if (sourceLocale.indexOf("-") > 0)
-        {
-        	sourceLang = sourceLocale.substring(0, sourceLocale.indexOf("-"));
-        }
-        targetLocale = targetLocale.replace("_", "-").toLowerCase();
-
         String path = pageInfo.getPath();
-        // this must be root page
-        if (StringUtil.isEmpty(path))
-        {
-            path = pageInfo.getTitle() + "(" + targetLocale + ")";
-        }
-        // any non-root pages
-        else
-        {
-            path = path.replace("\\", "/");// to be safe
-            int index = path.indexOf(sourceLocale);
-            if (index > -1)
+        // If no target server and post to source server, need re-organize path
+    	if (!isTargetServerExist(targetLocale) && mtc.getIsPostToSourceServer())
+    	{
+        	sourceLocale = sourceLocale.replace("_", "-").toLowerCase();
+            String sourceLang = null;
+            if (sourceLocale.indexOf("-") > 0)
             {
-                String part1 = path.substring(0, index);
-                String part2 = path.substring(index + sourceLocale.length());
-                path = part1 + targetLocale + part2;
+            	sourceLang = sourceLocale.substring(0, sourceLocale.indexOf("-"));
             }
+            targetLocale = targetLocale.replace("_", "-").toLowerCase();
+
+            // this must be root page
+            if (StringUtil.isEmpty(path))
+            {
+                path = pageInfo.getTitle() + "(" + targetLocale + ")";
+            }
+            // any non-root pages
             else
             {
-            	path = getNewPathByLangOnly(path, sourceLang, targetLocale);
+                path = path.replace("\\", "/");// to be safe
+                int index = path.indexOf(sourceLocale);
+                if (index > -1)
+                {
+                    String part1 = path.substring(0, index);
+                    String part2 = path.substring(index + sourceLocale.length());
+                    path = part1 + targetLocale + part2;
+                }
+                else
+                {
+                	path = getNewPathByLangOnly(path, sourceLang, targetLocale);
+                }
             }
-        }
+    	}
+
         path = URLEncoder.encode(path);
         path = URLEncoder.encode(path);
         return path;
@@ -1180,7 +1187,8 @@ public class MindTouchHelper
      * @throws DocumentException
      */
     @SuppressWarnings("rawtypes")
-    private String getPropertiesContentsXml(String propertiesXml, HashMap<String, String> etagMap) throws DocumentException
+	private String getPropertiesContentsXml(String propertiesXml,
+			HashMap<String, String> etagMap) throws DocumentException
     {
         StringBuffer titles = new StringBuffer();
         titles.append("<properties>");
@@ -1207,20 +1215,30 @@ public class MindTouchHelper
     }
     
     @SuppressWarnings("rawtypes")
-    private HashMap<String, String> getePropertiesEtagMap(String propertiesXml) throws DocumentException
+	private HashMap<String, String> getePropertiesEtagMap(String propertiesXml)
     {
     	HashMap<String, String> etagMap = new HashMap<String, String>();
-    	Document doc = getDocument(propertiesXml);
-    	List propertyNodes = doc.selectNodes("//property");
-    	Iterator it = propertyNodes.iterator();
-    	String name = null;
-        String etag = null;
-    	while(it.hasNext())
+    	try
     	{
-    		Element propertyNode = (Element) it.next();
-            name = propertyNode.attributeValue("name");
-            etag =  propertyNode.attributeValue("etag");
-            etagMap.put(name, etag);
+        	if (propertiesXml != null)
+        	{
+            	Document doc = getDocument(propertiesXml);
+            	List propertyNodes = doc.selectNodes("//property");
+            	Iterator it = propertyNodes.iterator();
+            	String name = null;
+                String etag = null;
+            	while(it.hasNext())
+            	{
+            		Element propertyNode = (Element) it.next();
+                    name = propertyNode.attributeValue("name");
+                    etag =  propertyNode.attributeValue("etag");
+                    etagMap.put(name, etag);
+            	}
+        	}
+    	}
+    	catch (DocumentException e)
+    	{
+    		logger.warn(e);
     	}
     	return etagMap;
     }
@@ -1251,6 +1269,36 @@ public class MindTouchHelper
     		return null;
     	}
     	return null;
+    }
+
+    /**
+	 * If there are "<", ">" in value of "title" attribute, it will fail to
+	 * create job because of bad XML, need fix them.
+	 * 
+	 * @param contentXml
+	 * @return Fixed contentXml
+	 */
+    public static String fixTitleValueInContentXml(String contentXml)
+    {
+		StringBuilder xml = new StringBuilder();
+    	try
+    	{
+    		int index = contentXml.indexOf(" title=");
+    		String a = contentXml.substring(0, index + " title=\"".length());
+    		xml.append(a);
+    		String b = contentXml.substring(index + " title=\"".length());
+    		String title = b.substring(0, b.indexOf("\""));
+    		title = title.replace("<", "&lt;").replace(">", "&gt;");
+    		xml.append(title);
+    		xml.append(b.substring(b.indexOf("\"")));
+
+    		return new String(xml.toString().trim().getBytes("UTF-8"), "UTF-8");
+    	}
+    	catch (Exception e)
+    	{
+			logger.error("Fail to fix title in contents xml: " + contentXml, e);
+			return contentXml;
+    	}
     }
 
     /**
@@ -1300,8 +1348,10 @@ public class MindTouchHelper
     private HttpPost getHttpPost(URI uri, String targetLocale)
     {
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.AUTHORIZATION,
-                authorizationHeader(getPutServerUsername(targetLocale),getPutServerPassword(targetLocale)));
+		httppost.setHeader(
+				HttpHeaders.AUTHORIZATION,
+				authorizationHeader(getPutServerUsername(targetLocale),
+						getPutServerPassword(targetLocale)));
         return httppost;
     }
 
@@ -1316,8 +1366,10 @@ public class MindTouchHelper
     private HttpPut getHttpPut(String url, String targetLocale)
     {
         HttpPut httpput = new HttpPut(url);
-        httpput.setHeader(HttpHeaders.AUTHORIZATION,
-                authorizationHeader(getPutServerUsername(targetLocale),getPutServerPassword(targetLocale)));
+		httpput.setHeader(
+				HttpHeaders.AUTHORIZATION,
+				authorizationHeader(getPutServerUsername(targetLocale),
+						getPutServerPassword(targetLocale)));
         return httpput;
     }
 
@@ -1388,32 +1440,22 @@ public class MindTouchHelper
         return authHeader;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
 	public static Vector<GlobalSightLocale> getAllTargetLocales()
     {
     	Vector<GlobalSightLocale> targetLocales = new Vector<GlobalSightLocale>();
     	try 
 		{
-			targetLocales = ServerProxy.getLocaleManager().getAllTargetLocales();
-			SortUtil.sort(targetLocales, new Comparator() 
-			{
-				public int compare(Object o1, Object o2) 
-				{
-					return ((GlobalSightLocale) o1).getDisplayName(Locale.US)
-							.compareToIgnoreCase(((GlobalSightLocale) o2).getDisplayName(Locale.US));
-				}
-			});
+			targetLocales = ServerProxy.getLocaleManager()
+					.getAllTargetLocales();
+			SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(
+					GlobalSightLocaleComparator.DISPLAYNAME, Locale.US));
 		}
-		catch (RemoteException re)
+		catch (Exception e)
 		{
-			throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-					re);
+			throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
 		}
-		catch (GeneralException ge) 
-		{
-			throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-					ge);
-		}
+
     	return targetLocales;
     }
 }

@@ -1,8 +1,12 @@
 package com.globalsight.everest.company;
 
-public class Category
+import com.globalsight.everest.persistence.PersistentObject;
+
+public class Category extends PersistentObject
 {
-    private long id;
+	private static final long serialVersionUID = -3683727712213438456L;
+
+	private long id;
     private String category;
     private long companyId;
     

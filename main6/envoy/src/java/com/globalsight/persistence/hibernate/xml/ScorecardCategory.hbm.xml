@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
     <class name="com.globalsight.everest.company.ScorecardCategory"
-        table="SCORECARD_CATEGORY">
+        table="CATEGORY_SCORECARD">
         <id name="id" column="ID" type="long">
             <generator class="native" />
         </id>
@@ -11,5 +11,7 @@
             unique="false" />
         <property name="companyId" 
         	column="COMPANY_ID" type="long" not-null="true"/>
+         <property name="isActive" column="IS_ACTIVE" type="yes_no"
+			not-null="true" unique="false" />
     </class>
 </hibernate-mapping>

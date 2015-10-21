@@ -16,6 +16,8 @@
             not-null="false" unique="false" />
         <property name="sourceServerId" column="SOURCE_SERVER_ID" length="20"
             type="long" not-null="true" />
+        <property name="companyId" column="COMPANY_ID" length="20"
+            type="long" not-null="true" />
         <property name="isActive" column="IS_ACTIVE" type="yes_no"
             not-null="true" unique="false" />
     </class>

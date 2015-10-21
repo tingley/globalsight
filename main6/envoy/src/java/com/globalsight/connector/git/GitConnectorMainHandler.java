@@ -31,7 +31,7 @@ public class GitConnectorMainHandler extends PageActionHandler
 
     private List<?> allConns = null;
 
-    @ActionHandler(action = "save", formClass = "com.globalsight.cxe.entity.gitconnector.GitConnector", loadFromDb = true)
+    @ActionHandler(action = "save", formClass = "com.globalsight.cxe.entity.gitconnector.GitConnector")
     public void save(HttpServletRequest request, HttpServletResponse response,
             Object form) throws Exception
     {

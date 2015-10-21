@@ -78,7 +78,7 @@ public class ConnectionPool
     private static final String PROP_USE_CONNECTION_POOL = "useConnectionPool";
     private static boolean s_doPooling = true;
 
-    private static final String PROP_USE_C3P0_POOL = "user_c3p0_connection_pool";
+    private static final String PROP_USE_C3P0_POOL = "use_c3p0_connection_pool";
     private static boolean useC3P0ConnectionPool = false;
 
     //

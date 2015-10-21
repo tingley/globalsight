@@ -6548,9 +6548,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 if(needOriginalTarget)
                 {
                 	JSONObject originalTargetj = new JSONObject();
+                	StringBuffer mainClass = new StringBuffer();
+                	String dir = "";
                 	String temp = "";
-                	if(originalTargetTuvMap.size() > 0)
-                	{
+					if (originalTargetTuvMap.size() > 0)
+					{
                 		Tuv tempTuv = originalTargetTuvMap.get(trgTuv.getId());
                 		if(tempTuv != null)
                 		{
@@ -6560,8 +6562,21 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 			temp = getEditorSegment(tempTuv,
                 	                EditorConstants.PTAGS_COMPACT, segment,
                 	                editorState.getNeedShowPTags(), jobId);
+                			boolean b_rtlOriginalLocale = EditUtil.isRTLLocale(tempTuv.getGlobalSightLocale());
+                	        // Make the segment RTL if it's 1) Translatable 2) In an RTL
+                	        // language and 3) it has bidi characters in it.
+                	        if (b_rtlOriginalLocale && !tempTuv.isLocalizable(jobId)
+                	                && Text.containsBidiChar(tempTuv.getGxml()))
+                	        {
+                	            dir = "rtl ";
+                	        }
                 			List subflows = tempTuv.getSubflowsAsGxmlElements(true);
                 	        boolean b_subflows = (subflows != null && subflows.size() > 0);
+                	        if (!b_subflows)
+                	        {
+                	        	mainClass.append(dir);
+                	        }
+                	        
                 	        if (b_subflows)
             	            {
             	                JSONArray subArray = new JSONArray();
@@ -6599,6 +6614,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             	            }
                 		}
                 	}
+                	originalTargetj.put("mainstyle", mainClass);
                 	originalTargetj.put("tuId", trgTuv.getTuId());
                 	originalTargetj.put("originalTarget", temp);
                 	originalTargetjArray.put(originalTargetj);

@@ -445,6 +445,10 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 		temp.children('td').eq(2).append(htmlcontent);
 	}
 	
+	if(originalTargetData.mainstyle.match("rtl")){
+		temp.children('td').eq(2).attr("dir","rtl");
+	}
+	
 	if(originalTargetData.originalTarget == "")
 	{
 		temp.children('td').eq(2).addClass("center");

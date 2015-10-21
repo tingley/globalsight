@@ -1709,7 +1709,7 @@ public class Ambassador extends AbstractWebService
 
 					RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
 				}
-				else
+				else if(!"true".equalsIgnoreCase(recreateFlag))
                 {
                     AttributeSet as = ((JobImpl)job).getAttributeSet();
                     List<Attribute> jas = as.getAttributeAsList();

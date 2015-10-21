@@ -240,67 +240,6 @@ public class ClientTester
     }
     */
     
-    private static void testUploadCommentReferenceFiles(String p_accessToken) throws Exception
-    {
-    	File file = new File("C:\\Documents and Settings\\york\\Desktop\\974.txt");
-		if (!file.exists())
-		{
-			throw new Exception("File(" + file.getPath() + ") is not exist");
-		}
-
-		// Init some parameters.
-		String path = file.getAbsolutePath();
-		String filePath = path.substring(path.indexOf(File.separator) + 1);
-		int len = (int) file.length();
-		BufferedInputStream inputStream = null;
-		ArrayList fileByteList = new ArrayList();
-
-		try
-		{
-			inputStream = new BufferedInputStream(new FileInputStream(file));
-			int size = len / MAX_SEND_SIZE;
-
-			// Separates the file to several parts according to the size.
-			for (int i = 0; i < size; i++)
-			{
-				byte[] fileBytes = new byte[MAX_SEND_SIZE];
-				inputStream.read(fileBytes);
-				fileByteList.add(fileBytes);
-			}
-
-			if (len % MAX_SEND_SIZE > 0)
-			{
-				byte[] fileBytes = new byte[len % MAX_SEND_SIZE];
-				inputStream.read(fileBytes);
-				fileByteList.add(fileBytes);
-			}
-			
-			// Uploads all parts of files.
-			Ambassador abmassador = getAmbassador();
-			for (int i = 0; i < fileByteList.size(); i++)
-			{
-				HashMap map = new HashMap();
-				map.put("accessToken", p_accessToken);
-				map.put("fileName", "974.txt");
-				map.put("originalTaskId", "6666");
-				map.put("wsdlUrl", "http://10.10.11.206:80/globalsight/services/AmbassadorWebService?wsdl");
-				map.put("bytes", fileByteList.get(i));
-				map.put("access", "Restricted");
-				abmassador.uploadCommentReferenceFiles(map);
-			}
-		}
-		catch (Exception e)
-		{
-            throw e;
-		}
-		finally
-		{
-			if (inputStream != null)
-			{
-				inputStream.close();
-			}
-		}
-    }
 
     private static boolean testGetImportExportStatus(Ambassador ambassador,
             String p_accessToken)

@@ -905,6 +905,7 @@ public class Install extends installer.EventBroadcaster
                 || p_propertyFileName
                         .equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
         {
+            p_properties.put("corpus_install_key","false");
             decode();
         }
     }

@@ -145,6 +145,8 @@ SegmentView segmentView = state.getEditorManager().getSegmentView(
             state.getTargetLocale().getId(), state.getTmNames(),
             state.getDefaultTermbaseName());
 
+boolean b_rtlLocale = EditUtil.isRTLLocale(state.getTargetLocale());
+
 GxmlElement srcGxml = segmentView.getSourceSegment();
 GxmlElement tgtGxml = segmentView.getTargetSegment();
 
@@ -602,9 +604,25 @@ function doOnLoad()
   </tr>
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_target") %>:</span></td>
-    <td class="standardtext" width="100%">
-      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
-    </td>
+      <% 
+    	if(b_rtlLocale)
+    	{
+       %>
+   		<td class="standardtext" width="100%" dir="rtl">
+	      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
+	    </td>
+        <%		
+    	}
+    	else
+    	{
+        %>
+	    <td class="standardtext" width="100%">
+	      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
+	    </td>
+       <%
+    	}
+       %>
+    
   </tr>
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_comment_log") %>:</span></td>

@@ -17,12 +17,14 @@
 package com.globalsight.everest.edit.offline;
 
 import java.io.File;
+import java.io.Serializable;
 
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.taskmanager.Task;
 
-public class OfflineUploadForm
+public class OfflineUploadForm implements Serializable
 {
+    private static final long serialVersionUID = 2950709159545138762L;
     private File tmpFile;
     private User user;
     private Task task;

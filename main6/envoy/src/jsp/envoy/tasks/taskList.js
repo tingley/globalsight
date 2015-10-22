@@ -666,7 +666,7 @@ function initButtonActions() {
             if(!isFinishUnUploadReportTask)
             {
             	if (data.isFinishedReportUploadTaskId) {
-                	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
+                	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
                     for(var i=0;i<rowsPerPage;i++)
                     {
                     	taskIds = taskIds.replace(","," ");
@@ -678,7 +678,7 @@ function initButtonActions() {
 	            	{
 	            		$.post(selfUrl, {
 	            			state:currentTaskState,
-	            			taskAction:"completeActivity",
+	            			taskAction:"completeWorkflow",
 	            			taskParam:data.isFinishedReportUploadTaskId
 	            		}, function(data) {
 	            			submitSearch();

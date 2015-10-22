@@ -5,16 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 
 import netscape.javascript.JSObject;
 
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+
 import com.globalsight.everest.webapp.applet.common.AppletHelper;
 import com.globalsight.webservices.client2.Ambassador2;
-import com.globalsight.webservices.client2.WebService2ClientHelper;
 
 import de.innosystec.unrar.rarfile.FileHeader;
 
@@ -22,30 +19,23 @@ public class FileUploadThread extends Thread
 {
     private static int MAX_SEND_SIZE = 5 * 1000 * 1024; // 5M
 
-    private String hostName;
-    private String port;
-    private String userName;
-    private String password;
-    private boolean enableHttps;
     private String companyIdWorkingFor;
     private File file;
     private String savingPath;
     private JSObject win;
+    private Ambassador2 ambassador;
+    private String fullAccessToken;
 
-    public FileUploadThread(String p_hostName, String p_port,
-            String p_userName, String p_password, boolean p_enableHttps,
-            String companyIdWorkingFor, File file, String p_savingPath,
-            JSObject win)
+	public FileUploadThread(String companyIdWorkingFor, File file,
+			String p_savingPath, JSObject win, Ambassador2 ambassador,
+			String fullAccessToken)
     {
-        this.hostName = p_hostName;
-        this.port = p_port;
-        this.userName = p_userName;
-        this.password = p_password;
-        this.enableHttps = p_enableHttps;
         this.companyIdWorkingFor = companyIdWorkingFor;
         this.file = file;
         this.savingPath = p_savingPath;
         this.win = win;
+        this.ambassador = ambassador;
+        this.fullAccessToken = fullAccessToken;
     }
 
     public void run()
@@ -214,9 +204,6 @@ public class FileUploadThread extends Thread
                 fileByteList.add(fileBytes);
             }
             // Uploads all parts of files.
-            Ambassador2 ambassador = WebService2ClientHelper.getClientAmbassador2(
-                    hostName, port, userName, password, enableHttps);
-            String fullAccessToken = ambassador.dummyLogin(userName, password);
             for (int i = 0; i < fileByteList.size(); i++)
             {
                 ambassador.uploadFiles(fullAccessToken, companyIdWorkingFor, 1,

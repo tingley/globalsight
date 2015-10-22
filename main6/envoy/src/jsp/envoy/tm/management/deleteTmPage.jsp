@@ -39,6 +39,7 @@ var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 var needWarning = true;
 var objectName = "<%=bundle.getString("lb_user")%>";
 var guideNode = "tm";
+var helpFile = "<%=bundle.getString("help_tm_remove_page")%>";
     
 function doOnLoad() {
     loadGuides();

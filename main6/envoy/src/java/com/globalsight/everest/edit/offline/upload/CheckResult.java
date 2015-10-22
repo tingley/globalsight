@@ -16,11 +16,13 @@
  */
 package com.globalsight.everest.edit.offline.upload;
 
+import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.List;
 
-public class CheckResult
+public class CheckResult implements Serializable
 {
+    private static final long serialVersionUID = 3047933151689780471L;
     private String errMsg;
     private String fileName;
     private List<List<String>> errorInternalList;

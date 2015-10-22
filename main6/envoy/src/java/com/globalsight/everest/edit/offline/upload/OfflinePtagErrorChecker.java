@@ -371,7 +371,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                         Date d2 = new Date();
                         if (d2.after(d))
                         {
-                            String msg = "Wait for confirmation has spent 1 hours";
+                            String msg = "One hour has passed waiting for user confirmation";
                             CATEGORY.info(msg);
                             return msg;
                         }
@@ -1133,7 +1133,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                         Date d2 = new Date();
                         if (d2.after(d))
                         {
-                            String msg = "Wait for confirmation has spent 1 hours";
+                            String msg = "One hour has passed waiting for user confirmation";
                             CATEGORY.info(msg);
                             return msg;
                         }

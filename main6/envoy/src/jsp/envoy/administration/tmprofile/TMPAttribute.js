@@ -165,7 +165,12 @@ function initAttbutesUI()
 				ccc.append(tmpatt.operator);
 				ccc.append("  </td>");
 				ccc.append("  <td class='standardText'>");
-				ccc.append(tmpatt.valueType == "VALUE_INPUT" ? "[Input Value] " + tmpatt.valueData : "From Job Attribute of same name");
+				var inputValueData = tmpatt.valueData;
+				if (inputValueData != "" && tmpatt.valueType == "VALUE_INPUT")
+				{
+					inputValueData = inputValueData.replace('<', '&#60;').replace('>', '&#62;');
+				}
+				ccc.append(tmpatt.valueType == "VALUE_INPUT" ? "[Input Value] " + inputValueData : "From Job Attribute of same name");
 				ccc.append("  </td>");
 				ccc.append("  <td class='standardText'>");
 				ccc.append(tmpatt.order);

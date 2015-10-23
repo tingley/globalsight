@@ -702,32 +702,35 @@ public abstract class AbstractTargetPagePersistence implements
                     while (segment != null)
                     {
                         hasOneHundredMatch = true;
-                        boolean isTagMatched = SegmentUtil2.canBeModified(
-                                targetTuv, segment.getSegment(), jobId);
-                        if (!isTagMatched)
-                        {
-                            String segment2 = SegmentUtil2
-                                    .adjustSegmentAttributeValues(targetTuv
-                                            .getGxmlElement(), SegmentUtil2
-                                            .getGxmlElement(segment
-                                                    .getSegment()), tu
-                                            .getDataType());
-                            isTagMatched = SegmentUtil2.canBeModified(
-                                    targetTuv, segment2, jobId);
-                            if (isTagMatched)
-                            {
-                                segment.setSegment(segment2);
-                            }
-                        }
+						boolean isTagMatched = SegmentUtil2.canBeModified(
+								targetTuv, segment.getSegment(), jobId);
+						// for most cases
                         if (isTagMatched)
                         {
-                            String segment2 = getTargetGxmlFitForItsOwnSourceContent(
-                                    sourceTuv, segment.getSegment(), jobId);
-                            segment.setSegment(segment2);
                             targetTuv = modifyTUV(targetTuv, segment);
                             tuvGotChanged = true;
                             break;
                         }
+                        // for special cases, had better to have
+                        else
+                        {
+							String segment2 = SegmentUtil2.adjustSegmentAttributeValues(
+								targetTuv.getGxmlElement(), 
+									SegmentUtil2.getGxmlElement(segment.getSegment()),
+										tu.getDataType());
+							isTagMatched = SegmentUtil2.canBeModified(
+									targetTuv, segment2, jobId);
+                            if (isTagMatched)
+                            {
+								segment2 = getTargetGxmlFitForItsOwnSourceContent(
+										sourceTuv, segment2, jobId);
+                                segment.setSegment(segment2);
+                                targetTuv = modifyTUV(targetTuv, segment);
+                                tuvGotChanged = true;
+                                break;
+                            }
+                        }
+
                         segment = SegmentUtil2.getNextBestLeverageSegment(
                                 sourceTuv, lss);
                     }

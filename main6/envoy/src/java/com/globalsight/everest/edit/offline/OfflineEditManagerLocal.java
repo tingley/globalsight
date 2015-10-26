@@ -966,7 +966,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             }
             else
             {
-                status.addFileState(p_task.getId(), p_fileName,
+                status.addFileState(taskId, p_fileName,
                         "Failed. Error:Cannot generate offline page data successfully.");
             }
 

@@ -1700,7 +1700,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     	}
     }
 
-    private static long getHashValue(String data)
+    public static long getHashValue(String data)
     {
         try
         {

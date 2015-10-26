@@ -33,17 +33,15 @@ import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvAttributeUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvMerger;
 import com.globalsight.everest.tuv.TuvState;
-import com.globalsight.ling.common.DiplomatBasicParser;
-import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.ling.tm3.core.Fingerprint;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -123,28 +121,10 @@ public class PageJobData
         	{
         		BaseTmTuv preSrcTuv = previousTu.getFirstTuv(sourceLocale);
 				BaseTmTuv preTuv = previousTu.getFirstTuv(curTuv.getLocale());
-				preTuv.setNextHash(getHashValue(curSrcTuv.getSegment()));
-				curTuv.setPreviousHash(getHashValue(preSrcTuv.getSegment()));
+				preTuv.setNextHash(SegmentTuvUtil.getHashValue(curSrcTuv.getSegment()));
+				curTuv.setPreviousHash(SegmentTuvUtil.getHashValue(preSrcTuv.getSegment()));
         	}
         }
-    }
-
-    private long getHashValue(String data)
-    {
-        try
-        {
-            SegmentTmExactMatchFormatHandler handler =
-                new SegmentTmExactMatchFormatHandler();
-            DiplomatBasicParser diplomatParser =
-                new DiplomatBasicParser(handler);
-            diplomatParser.parse(data);
-            return Fingerprint.fromString(handler.toString());
-        }
-        catch (Exception ex)
-        {
-        	c_logger.error("Error to get hash value for data: " + data, ex);
-        }
-    	return -1;
     }
 
     /**

@@ -232,7 +232,9 @@ public class LeverageMatches
 
             try
             {
-    			if (!isAllTmpAttrMatched(tu))
+				// As we have not implemented in-progress TM for GBS-3650, below
+				// rules only apply for golden TM matches.
+    			if (tu instanceof LeveragedSegmentTu && !isAllTmpAttrMatched(tu))
                 {
                     TranslationMemoryProfile tmp = m_leverageOptions.getTmProfile();
     				// "Disregard if TU attributes not matched"

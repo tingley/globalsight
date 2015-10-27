@@ -598,31 +598,30 @@ function doOnLoad()
   </tr>
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_source") %>:</span></td>
-    <td class="standardtext" width="100%">
+    <td class="standardtext" >
       <div style="width: 394px;max-height: 60px;overflow: auto; "><%=sourceSegment %></div>
     </td>
   </tr>
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_target") %>:</span></td>
-      <% 
-    	if(b_rtlLocale)
-    	{
-       %>
-   		<td class="standardtext" width="100%" dir="rtl">
-	      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
-	    </td>
-        <%		
-    	}
-    	else
-    	{
-        %>
-	    <td class="standardtext" width="100%">
-	      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
-	    </td>
-       <%
-    	}
-       %>
-    
+   <% 
+   	if(b_rtlLocale)
+   	{
+    %>
+  	 <td class="standardtext"  dir="rtl">
+      <div style="width: 394px;max-height: 60px;overflow: auto;margin-right:80px;"><%=targetSegment %></div>
+    </td>
+    <%		
+   	}
+   	else
+   	{
+    %>
+    <td class="standardtext">
+      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
+    </td>
+    <%
+   	}
+    %>
   </tr>
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_comment_log") %>:</span></td>

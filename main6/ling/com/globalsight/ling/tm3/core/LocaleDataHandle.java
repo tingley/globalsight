@@ -2,6 +2,7 @@ package com.globalsight.ling.tm3.core;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +45,9 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 	{
 		try
 		{
+			putValueToParamMap();
 			return getTm().getStorageInfo().getTuStorage()
-					.getTuCountByLocalesAndParamMap(localeList, m_paramMap);
+					.getTuCountByParamMap(m_paramMap);
 		}
 		catch (SQLException e)
 		{
@@ -68,6 +70,22 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
         return new LocaleTusIterator();
     }
 
+	private void putValueToParamMap()
+	{
+		if (m_paramMap == null || m_paramMap.isEmpty())
+		{
+			m_paramMap = new HashMap<String, Object>();
+			m_paramMap.put("language", localeList);
+		}
+		else
+		{
+			List<TM3Locale> list = (List<TM3Locale>) m_paramMap.get("language");
+			if (list == null && localeList != null)
+			{
+				m_paramMap.put("language", localeList);
+			}
+		}
+	}
     /**
      * For testing
      **/
@@ -82,11 +100,10 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 		{
 			try
 			{
-				List<TM3Tu<T>> page = getTm()
-						.getStorageInfo()
-						.getTuStorage()
-						.getTuPageByLocalesAndParamMap(startId, increment,
-								localeList, m_paramMap);
+				putValueToParamMap();
+				List<TM3Tu<T>> page = getTm().getStorageInfo().getTuStorage()
+						.getTuPageByParamMap(startId, 100, m_paramMap);
+
 				if (page.size() > 0)
 				{
 					startId = page.get(page.size() - 1).getId();

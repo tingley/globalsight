@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.ling.tm3.core.TM3Locale;
 import com.globalsight.util.StringUtil;
 

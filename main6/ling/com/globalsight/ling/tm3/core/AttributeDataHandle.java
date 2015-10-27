@@ -2,6 +2,7 @@ package com.globalsight.ling.tm3.core;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +36,9 @@ class AttributeDataHandle<T extends TM3Data> extends
 	{
 		try
 		{
-			return getTm()
-					.getStorageInfo()
-					.getTuStorage()
-					.getTuCountByAttributesAndParamMap(inlineAttrs,
-							customAttrs, m_paramMap);
+			putValueToParamMap();
+			return getTm().getStorageInfo().getTuStorage()
+					.getTuCountByParamMap(m_paramMap);
 		}
 		catch (SQLException e)
 		{
@@ -69,18 +68,42 @@ class AttributeDataHandle<T extends TM3Data> extends
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+	private void putValueToParamMap()
+	{
+		if (m_paramMap == null || m_paramMap.isEmpty())
+		{
+			m_paramMap = new HashMap<String, Object>();
+			m_paramMap.put("inlineAttrs", inlineAttrs);
+			m_paramMap.put("customAttrs", customAttrs);
+		}
+		else
+		{
+			Map<TM3Attribute, Object> inlineAttrsMap = (Map<TM3Attribute, Object>) m_paramMap
+					.get("inlineAttrs");
+			Map<TM3Attribute, String> customAttrsMap = (Map<TM3Attribute, String>) m_paramMap
+					.get("customAttrs");
+			if ((inlineAttrsMap == null || inlineAttrsMap.isEmpty())
+					&& inlineAttrs != null)
+			{
+				m_paramMap.put("inlineAttrs", inlineAttrs);
+			}
+			if ((customAttrsMap == null || customAttrsMap.isEmpty())
+					&& customAttrs != null)
+			{
+				m_paramMap.put("customAttrs", customAttrs);
+			}
+		}
+	}
+    
     class AttributesTuIterator extends TuIterator {
         @Override
 		protected void loadPage()
 		{
 			try
 			{
-				// Load 100 at a time
-				List<TM3Tu<T>> page = getTm()
-						.getStorageInfo()
-						.getTuStorage()
-						.getTuPageByAttributesAndParamMap(startId, 100,
-								inlineAttrs, customAttrs, m_paramMap);
+				putValueToParamMap();
+				List<TM3Tu<T>> page = getTm().getStorageInfo().getTuStorage()
+						.getTuPageByParamMap(startId, 100, m_paramMap);
 
 				if (page.size() > 0)
 				{

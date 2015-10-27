@@ -842,23 +842,6 @@ public class TmCoreManagerLocal implements TmCoreManager
 		return getInfo(tm).getAllSegmentsByParamMap(tm, paramMap, conn);
 	}
 
-	@Deprecated
-	public SegmentResultSet getSegmentsByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, Object> paramMap,
-			Connection conn) throws RemoteException, LingManagerException
-	{
-		return getInfo(tm).getSegmentsByLocalesAndParamMap(tm, localeList,
-				paramMap, conn);
-	}
-	@Deprecated
-	public SegmentResultSet getSegmentsByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, Object> paramMap, Connection conn)
-			throws RemoteException, LingManagerException
-	{
-		return getInfo(tm).getSegmentsByProjectNameAndParamMap(tm, projectName,
-				paramMap, conn);
-	}
-
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException
@@ -870,21 +853,6 @@ public class TmCoreManagerLocal implements TmCoreManager
 			throws RemoteException, LingManagerException
 	{
 		return getInfo(tm).getAllSegmentsCountByParamMap(tm, paramMap);
-	}
-	@Deprecated
-	public int getSegmentsCountByLocalesAndParamMap(Tm tm,
-			List<String> localeList, Map<String, Object> paramMap)
-			throws RemoteException, LingManagerException
-	{
-		return getInfo(tm).getSegmentsCountByLocalesAndParamMap(tm, localeList, paramMap);
-	}
-	@Deprecated
-	public int getSegmentsCountByProjectNameAndParamMap(Tm tm,
-			String projectName, Map<String, Object> paramMap)
-			throws RemoteException, LingManagerException
-	{
-		return getInfo(tm).getSegmentsCountByProjectNameAndParamMap(tm,
-				projectName, paramMap);
 	}
 
     // TODO: this needs to have session handling code added

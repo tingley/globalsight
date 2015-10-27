@@ -1600,7 +1600,7 @@ private String getSubFileName(String p_filename)
         for (FileProfile fp : fps)
         {
             knownFormatTypeId = fp.getKnownFormatTypeId();
-            isXlfSrcAsTrgEnabled = (knownFormatTypeId == 39 || knownFormatTypeId == 48);
+            isXlfSrcAsTrgEnabled = (knownFormatTypeId == 39 || knownFormatTypeId == 48 || knownFormatTypeId == 56);
             if (isXlfSrcAsTrgEnabled)
                 break;
         }

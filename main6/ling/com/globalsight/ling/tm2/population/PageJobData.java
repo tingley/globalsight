@@ -256,6 +256,7 @@ public class PageJobData
 				set.add(match);
 			}
 		}
+		
 		if (!leverageMatchMap.isEmpty())
 		{
 			returnTuList = new ArrayList<PageTmTu>();
@@ -277,30 +278,38 @@ public class PageJobData
 						PageTmTuv tuv = (PageTmTuv) tu.getFirstTuv(tuvLocale);
 						leverageMatchSet = leverageMatchMap.get(sourceTuv
 								.getId() + "_" + tuvLocale.getId());
-						if (TuvState.EXACT_MATCH_LOCALIZED.getName().equals(
-								tuv.getState())
-								&& leverageMatchSet != null)
+						if (leverageMatchSet != null)
 						{
-							for (LeverageMatch match : leverageMatchSet)
+							if (TuvState.EXACT_MATCH_LOCALIZED.getName()
+									.equals(tuv.getState()))
 							{
-								String mathcText = GxmlUtil.stripRootTag(match
-										.getMatchedText());
-								if (mathcText.equals(tuv.getSegmentNoTopTag()))
+								for (LeverageMatch match : leverageMatchSet)
 								{
-									if (match.getSid() != null
-											&& tuv.getSid() != null
-											&& !match.getSid().equals(
-													tuv.getSid()))
+									String mathcText = GxmlUtil
+											.stripRootTag(match
+													.getMatchedText());
+									if (mathcText.equals(tuv.getSegmentNoTopTag()))
 									{
-										clonedTu.addTuv(tuv);
-									}
-									else if (match.getSid() == null
-											&& tuv.getSid() != null)
-									{
-										clonedTu.addTuv(tuv);
+										if (match.getSid() != null && tuv.getSid() != null
+												&& !match.getSid().equals(tuv.getSid()))
+										{
+											clonedTu.addTuv(tuv);
+										}
+										else if (match.getSid() == null && tuv.getSid() != null)
+										{
+											clonedTu.addTuv(tuv);
+										}
 									}
 								}
 							}
+							else
+							{
+								clonedTu.addTuv(tuv);
+							}
+						}
+						else
+						{
+							clonedTu.addTuv(tuv);
 						}
 					}
 				}

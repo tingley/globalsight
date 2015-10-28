@@ -170,11 +170,15 @@
                         <amb:column label="lb_job_id" sortBy="<%=RequestFileComparator.JOB_ID%>">
                             ${requestVo.jobId}
                         </amb:column>
-                        <amb:column label="lb_job_name" sortBy="<%=RequestFileComparator.JOB_NAME%>">
+                        <amb:column label="lb_job_name" sortBy="<%=RequestFileComparator.JOB_NAME%>" width="30%" >
+                            <div style="text-align: left; word-break: break-all; word-wrap: break-word; width:100%">
                             ${requestVo.jobName}
+                            </div>
                         </amb:column>
-                        <amb:column label="lb_file" sortBy="<%=RequestFileComparator.FILE_NAME%>" width="40%" style="text-align: left; word-break: break-all; word-wrap: break-word;">
+                        <amb:column label="lb_file" sortBy="<%=RequestFileComparator.FILE_NAME%>" width="30%" >
+                            <div style="text-align: left; word-break: break-all; word-wrap: break-word; width:100%">
                             ${requestVo.file}
+                            </div>
                         </amb:column>
                         <amb:column label="lb_size" sortBy="<%=RequestFileComparator.FILE_SIZE%>">
                             ${requestVo.size}
@@ -185,8 +189,10 @@
                         <amb:column label="lb_file_profile" sortBy="<%=RequestFileComparator.FILE_PROFILE%>">
                             ${requestVo.fileProfile}
                         </amb:column>
-                        <amb:column label="jobinfo.jobdetail.jobpriority" sortBy="<%=RequestFileComparator.PRIORITY%>">
+                        <amb:column label="jobinfo.jobdetail.jobpriority" sortBy="<%=RequestFileComparator.PRIORITY%>" >
+                            <div style="text-align: center; word-break: break-all; word-wrap: break-word; width:70px">
                             ${requestVo.priority}
+                            </div>
                         </amb:column>
                         <amb:column label="lb_date_request" sortBy="<%=RequestFileComparator.REQUEST_TIME%>">
                             ${requestVo.requestTime}

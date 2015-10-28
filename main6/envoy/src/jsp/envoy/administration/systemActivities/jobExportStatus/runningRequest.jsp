@@ -170,11 +170,15 @@
                         <amb:column label="lb_job_id" sortBy="<%=ExportRequestComparator.JOB_ID%>">
                             ${requestVo.jobId}
                         </amb:column>
-                        <amb:column label="lb_job_name" sortBy="<%=ExportRequestComparator.JOB_NAME%>">
+                        <amb:column label="lb_job_name" sortBy="<%=ExportRequestComparator.JOB_NAME%>" width="30%">
+                           <div style="text-align: left; word-break: break-all; word-wrap: break-word; width:100%">
                             ${requestVo.jobName}
+                            </div>
                         </amb:column>
-                        <amb:column label="lb_file" sortBy="<%=ExportRequestComparator.FILE_NAME%>" width="40%" style="text-align: left; word-break: break-all; word-wrap: break-word;">
+                        <amb:column label="lb_file" sortBy="<%=ExportRequestComparator.FILE_NAME%>" width="30%" style="text-align: left; word-break: break-all; word-wrap: break-word;">
+                            <div style="text-align: left; word-break: break-all; word-wrap: break-word; width:100%">
                             ${requestVo.file}
+                            </div>
                         </amb:column>
                         <amb:column label="lb_project" sortBy="<%=ExportRequestComparator.FILE_PROFILE%>">
                             ${requestVo.project}

@@ -608,8 +608,8 @@ function doOnLoad()
    	if(b_rtlLocale)
    	{
     %>
-  	 <td class="standardtext"  dir="rtl">
-      <div style="width: 394px;max-height: 60px;overflow: auto;margin-right:80px;"><%=targetSegment %></div>
+  	 <td class="standardtext">
+      <div style="width: 394px;max-height: 60px;overflow: auto;" dir="rtl"><%=targetSegment %></div>
     </td>
     <%		
    	}
@@ -617,7 +617,7 @@ function doOnLoad()
    	{
     %>
     <td class="standardtext">
-      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
+      <div style="width: 394px;max-height: 60px;overflow: auto;"><%=targetSegment %></div>
     </td>
     <%
    	}

@@ -273,12 +273,16 @@
                         </amb:column>
                                 <amb:column label="lb_job_id" sortBy="<%=ExportRequestComparator.JOB_ID%>">
                             ${requestVo.jobId}
-                        </amb:column>
-                                <amb:column label="lb_job_name" sortBy="<%=ExportRequestComparator.JOB_NAME%>">
+                        </amb:column >
+                                <amb:column label="lb_job_name" sortBy="<%=ExportRequestComparator.JOB_NAME%>" width="30%">
+                                <div style="text-align: left; word-break: break-all; word-wrap: break-word; width:100%">
                             ${requestVo.jobName}
-                        </amb:column>
-                                <amb:column label="lb_file" sortBy="<%=ExportRequestComparator.FILE_NAME%>" width="40%" style="text-align: left; word-break: break-all; word-wrap: break-word;">
+                            </div>
+                        </amb:column >
+                                <amb:column label="lb_file" sortBy="<%=ExportRequestComparator.FILE_NAME%>" width="30%" style="text-align: left; word-break: break-all; word-wrap: break-word;">
+                            <div style="text-align: left; word-break: break-all; word-wrap: break-word; width:100%">
                             ${requestVo.file}
+                            </div>
                         </amb:column>
                                 <amb:column label="lb_project" sortBy="<%=ExportRequestComparator.FILE_PROFILE%>">
                             ${requestVo.project}
@@ -289,8 +293,10 @@
                                 <amb:column label="lb_date_request" sortBy="<%=ExportRequestComparator.REQUEST_TIME%>">
                             ${requestVo.requestTime}
                         </amb:column>
-                                <amb:column label="lb_priority">
-                            ${requestVo.sortIndex}
+                                <amb:column label="lb_priority" align="center" width="40">
+                                <div style="text-align: center; word-break: break-all; word-wrap: break-word; width:40px">
+                                 ${requestVo.sortIndex}
+                                 </div>
                         </amb:column>
                             </amb:table>
                             <div align='right' style="padding-top: 5px;" class="standardText">

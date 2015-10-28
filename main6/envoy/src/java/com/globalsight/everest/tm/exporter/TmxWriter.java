@@ -527,7 +527,10 @@ public class TmxWriter implements IWriter
 			{
 				selectLang = "id_ID";
 			}
-			filterLangList.add(selectLang);
+			if (StringUtil.isNotEmpty(selectLang))
+			{
+				filterLangList.add(selectLang);
+			}
 		}
         
         String sourceLang = p_tu.getSourceLocale().toString();
@@ -548,7 +551,8 @@ public class TmxWriter implements IWriter
                 localeCode = "he_IL";
             }
             
-			if (!filterLangList.contains(localeCode)
+			if (filterLangList.size() > 0
+					&& !filterLangList.contains(localeCode)
 					&& !localeCode.equalsIgnoreCase(sourceLang))
 			{
 				continue;
@@ -631,7 +635,10 @@ public class TmxWriter implements IWriter
         HashSet<String> filterLangList = new HashSet<String>();
 		for (String selectLang : oldfilterLangList)
 		{
-			filterLangList.add(handleSpecialLocaleCode(selectLang));
+			if (StringUtil.isNotEmpty(selectLang))
+			{
+				filterLangList.add(handleSpecialLocaleCode(selectLang));
+			}
 		}
         filterLangList.remove(sourceLang);
 
@@ -658,14 +665,12 @@ public class TmxWriter implements IWriter
         for (Iterator it = locales.iterator(); it.hasNext();)
         {
             GlobalSightLocale locale = (GlobalSightLocale) it.next();
-//			if (doFilter)
-//			{
 			String localeCode = handleSpecialLocaleCode(locale.toString());
-			if (!filterLangList.contains(localeCode.toLowerCase()))
+			if (filterLangList.size() > 0
+					&& !filterLangList.contains(localeCode.toLowerCase()))
 			{
 				continue;
 			}
-//			}
 
 			Collection tuvs = p_tu.getTuvList(locale);
             for (Iterator it2 = tuvs.iterator(); it2.hasNext();)
@@ -1514,7 +1519,10 @@ public class TmxWriter implements IWriter
 			{
 				selectLang = "id_ID";
 			}
-			filterLangList.add(selectLang);
+			if (StringUtil.isNotEmpty(selectLang))
+			{
+				filterLangList.add(selectLang);
+			}
 		}
          
         String sourceLang = p_tu.getSourceLocale().getLocale().toString();
@@ -1535,8 +1543,9 @@ public class TmxWriter implements IWriter
             {
                 localeCode = "he_IL";
             }
-			if (!(filterLangList.contains(localeCode) || localeCode
-					.equals(sourceLang)))
+			if (filterLangList.size() > 0
+					&& !(filterLangList.contains(localeCode) || localeCode
+							.equals(sourceLang)))
 			{
 				continue;
 			}

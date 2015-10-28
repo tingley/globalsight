@@ -499,7 +499,13 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
     private boolean isInContextMatch(OfflineSegmentData data)
     {
-        return "Context Exact Match".equals(data.getDisplayMatchType());
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.startsWith("Context Exact Match"))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isExtractMatch2(OfflineSegmentData data)

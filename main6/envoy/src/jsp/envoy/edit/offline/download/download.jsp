@@ -822,9 +822,7 @@ function disablePTFOptions(p_state)
     	}
         theForm.resInsertionSelector.disabled = state;
         
-        alert(state);
          document.getElementById("changeCreationIdForMT").disabled = state;
-         
          document.getElementById("separateTMfile").disabled = state;
      
          theForm.tmEditTypeSelector.disabled = state;

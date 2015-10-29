@@ -697,6 +697,7 @@ public abstract class AbstractTargetPagePersistence implements
                         .getIdAsLong());
                 if (lss != null && lss.size() > 0)
                 {
+                	int hashMatchedNum = getHashMatchedNum(sourceTuv, lss);
                     LeverageSegment segment = SegmentUtil2
                             .getNextBestLeverageSegment(sourceTuv, lss);
                     while (segment != null)
@@ -709,6 +710,15 @@ public abstract class AbstractTargetPagePersistence implements
                         {
                             targetTuv = modifyTUV(targetTuv, segment);
                             tuvGotChanged = true;
+							// If there is only one hash matched match in
+							// multiple exact matches, target TUV state should
+							// be exact match instead of not_localized for
+							// multiple translation.
+                            if (hashMatchedNum == 1
+                            		&& isHashValueMatched(sourceTuv, segment))
+                            {
+                            	targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
+                            }
                             break;
                         }
                         // for special cases, had better to have
@@ -727,6 +737,11 @@ public abstract class AbstractTargetPagePersistence implements
                                 segment.setSegment(segment2);
                                 targetTuv = modifyTUV(targetTuv, segment);
                                 tuvGotChanged = true;
+								if (hashMatchedNum == 1
+										&& isHashValueMatched(sourceTuv, segment))
+                                {
+                                	targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
+                                }
                                 break;
                             }
                         }
@@ -830,6 +845,38 @@ public abstract class AbstractTargetPagePersistence implements
     }
 
     /**
+	 * Return the number of leverage segments that have same previous hash and
+	 * next hash as source TUV's.
+	 */
+	private int getHashMatchedNum(Tuv srcTuv, List<LeverageSegment> lss)
+	{
+		long preHash = srcTuv.getPreviousHash();
+		long nextHash = srcTuv.getNextHash();
+		int num = 0;
+		for (LeverageSegment ls : lss)
+		{
+			if (preHash != -1 && nextHash != -1
+					&& preHash == ls.getPreviousHash()
+					&& nextHash == ls.getNextHash())
+			{
+				num++;
+			}
+		}
+		return num;
+	}
+
+	private boolean isHashValueMatched(Tuv srcTuv, LeverageSegment ls)
+	{
+		if (srcTuv.getPreviousHash() != -1 && srcTuv.getNextHash() != -1
+				&& srcTuv.getPreviousHash() == ls.getPreviousHash()
+				&& srcTuv.getNextHash() == ls.getNextHash())
+		{
+			return true;
+		}
+		return false;
+	}
+
+	/**
      * Hit TDA to get matches for un-applied segments. TDA matches will be
      * stored in DB (As TDA won't return 100% match, so no matches will be
      * populated into target TUVs.)

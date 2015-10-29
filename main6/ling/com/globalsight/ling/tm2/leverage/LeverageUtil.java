@@ -268,22 +268,15 @@ public class LeverageUtil
             return ICE_TYPE_PASSOLO_MATCHING;
         }
 
-        if (isSidExistsAndNotEqual(p_sourceTuvs.get(index), p_matchTypes))
-        {
-            return ICE_TYPE_NOT_ICE;
-        }
-
-        // Check current tuv is exact match.
-        if (!isExactMatchLocalized(index, p_sourceTuvs, p_targetTuvs,
-                p_matchTypes, p_subId, p_jobId))
-        {
-            return ICE_TYPE_NOT_ICE;
-        }
-
         // For PO segment,if its target is valid, count it as "ICE" directly.
         if (isPoXlfICE(index, p_sourceTuvs, p_matchTypes, p_jobId))
         {
             return ICE_TYPE_PO_XLF_MATCHING;
+        }
+
+        if (isSidExistsAndNotEqual(p_sourceTuvs.get(index), p_matchTypes))
+        {
+            return ICE_TYPE_NOT_ICE;
         }
 
         if (isApplySidMatchToIceOnly(p_jobId))
@@ -297,11 +290,18 @@ public class LeverageUtil
         	return ICE_TYPE_HASH_MATCHING;
         }
 
-		// Don't apply "bracketed" ICE promotion.
+        // Don't apply "bracketed" ICE promotion.
 		if (isBracketIceMatchesDisabled(p_jobId))
 		{
 			return ICE_TYPE_NOT_ICE;
 		}
+
+		// Check current tuv is exact match.
+        if (!isExactMatchLocalized(index, p_sourceTuvs, p_targetTuvs,
+                p_matchTypes, p_subId, p_jobId))
+        {
+            return ICE_TYPE_NOT_ICE;
+        }
 
 		// Check if it is bracketed ICE:
 		// Check previous tuv is exact match.
@@ -633,26 +633,29 @@ public class LeverageUtil
         long preHash = -1;
         long nextHash = -1;
         Object o = p_sourceTuvs.get(index);
-        if (o instanceof Tuv)
-        {
-        	Tuv sourceTuv = (Tuv) o;
-            preHash = sourceTuv.getPreviousHash();
-            nextHash = sourceTuv.getNextHash();
-        }
-        else
-        {
-            SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
-            preHash = sourceTuv.getPreviousHash();
-            nextHash = sourceTuv.getNextHash();
-        }
+    	if (isExactMatch(o, p_matchTypes))
+    	{
+            if (o instanceof Tuv)
+            {
+            	Tuv sourceTuv = (Tuv) o;
+                preHash = sourceTuv.getPreviousHash();
+                nextHash = sourceTuv.getNextHash();
+            }
+            else
+            {
+                SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
+                preHash = sourceTuv.getPreviousHash();
+                nextHash = sourceTuv.getNextHash();
+            }
 
-        if (preHash != -1 && nextHash != -1 && preHash != BaseTmTuv.FIRST_HASH
-				&& nextHash != BaseTmTuv.LAST_HASH
-				&& preHash == lm.getPreviousHash()
-				&& nextHash == lm.getNextHash())
-		{
-			return true;
-		}
+            if (preHash != -1 && nextHash != -1 && preHash != BaseTmTuv.FIRST_HASH
+    				&& nextHash != BaseTmTuv.LAST_HASH
+    				&& preHash == lm.getPreviousHash()
+    				&& nextHash == lm.getNextHash())
+    		{
+    			return true;
+    		}
+    	}
 
         return false;
     }

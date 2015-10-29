@@ -30,7 +30,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.comment.IssueImpl;
@@ -39,6 +38,7 @@ import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvPersistence;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
@@ -202,6 +202,7 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
         // wouldn't have reached this place in the code.
         Iterator<LeverageGroup> it1 = getExtractedFile(p_sourcePage)
                 .getLeverageGroups().iterator();
+        List<Tuv> srcTuvList = new ArrayList<Tuv>();
         while (it1.hasNext())
         {
             LeverageGroup leverageGroup = it1.next();
@@ -211,10 +212,12 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
             {
                 Tu tu = it2.next();
                 Tuv tuv = tu.getTuv(p_sourcePage.getLocaleId(), jobId);
-
+                srcTuvList.add(tuv);
                 result.put(tu, tuv);
             }
         }
+
+        SegmentTuvUtil.setHashValues(srcTuvList);
 
         return result;
     }

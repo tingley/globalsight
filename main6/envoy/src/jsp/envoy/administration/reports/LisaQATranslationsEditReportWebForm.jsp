@@ -32,7 +32,7 @@
 <html>
 <!-- This JSP is: /envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp-->
 <head>
-<title><%=bundle.getString("language_web_form")%></title>
+<title><%=bundle.getString("translations_web_form")%></title>
 <script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>

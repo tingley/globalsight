@@ -1331,8 +1331,8 @@ function HasFormattingTags()
 
 function openPtags()
 {
-	if (g_datatype == "xlf" || g_datatype == "mif" || g_datatype == "fm"
-       || g_datatype == "po" || g_datatype =="office-xml")
+	if (g_datatype == "xlf" || g_datatype == "xlf2.0" || g_datatype == "mif" 
+	   || g_datatype == "fm" || g_datatype == "po" || g_datatype =="office-xml")
     {
        return true;
     } 

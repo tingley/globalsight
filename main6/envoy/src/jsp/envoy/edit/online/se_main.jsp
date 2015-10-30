@@ -524,8 +524,8 @@ function HasOfficeTags()
 
 function openPtags()
 {
-	if (datatype == "xlf" || datatype == "mif" || datatype == "fm" 
-		|| datatype == "po" || "office-xml" == datatype)
+	if (datatype == "xlf" || datatype == "xlf2.0" || datatype == "mif" 
+	    || datatype == "fm" || datatype == "po" || "office-xml" == datatype)
 	{
 		return true;
 	}

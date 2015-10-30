@@ -327,7 +327,9 @@ public abstract class AbstractTmTuv
                         && m_exactMatchKey == otherTuv.getExactMatchKey()
                         && getExactMatchFormat().equals(
                                 otherTuv.getExactMatchFormat())
-                        && hashCode() == otherTuv.hashCode())
+                        && hashCode() == otherTuv.hashCode()
+                        && getPreviousHash() == otherTuv.getPreviousHash()
+                        && getNextHash() == otherTuv.getNextHash())
                 {
                     ret = true;
                 }

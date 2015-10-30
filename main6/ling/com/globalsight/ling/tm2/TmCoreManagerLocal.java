@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvAttributeUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -198,16 +199,23 @@ public class TmCoreManagerLocal implements TmCoreManager
             pageJobDataRetriever = new PageJobDataRetriever(conn,
                     p_sourcePage.getId(), sourceLocale, p_jobId);
             SegmentQueryResult result = pageJobDataRetriever.queryForLeverage();
-
-            List<Long> tuvIds = new ArrayList<Long>();
-            List<BaseTmTuv> tuvs = new ArrayList<BaseTmTuv>();
+            List<BaseTmTu> tus = new ArrayList<BaseTmTu>();
             BaseTmTu tu = null;
             while ((tu = result.getNextTu()) != null)
             {
+            	tus.add(tu);
+            }
+
+            setPreNextHashValues(tus, sourceLocale);
+
+            List<Long> tuvIds = new ArrayList<Long>();
+            List<BaseTmTuv> tuvs = new ArrayList<BaseTmTuv>();
+            for (BaseTmTu tu2 : tus)
+            {
                 // Don't add a tuv that has an excluded type
-                if (!p_leverageOptions.isExcluded(tu.getType()))
+                if (!p_leverageOptions.isExcluded(tu2.getType()))
                 {
-                    BaseTmTuv tuv = tu.getFirstTuv(sourceLocale);
+                    BaseTmTuv tuv = tu2.getFirstTuv(sourceLocale);
 
                     SegmentTmExactMatchFormatHandler handler = new SegmentTmExactMatchFormatHandler();
                     DiplomatBasicParser diplomatParser = new DiplomatBasicParser(
@@ -272,6 +280,39 @@ public class TmCoreManagerLocal implements TmCoreManager
         }
 
         return leverageDataCenter;
+    }
+
+	private void setPreNextHashValues(List<BaseTmTu> tus,
+			GlobalSightLocale sourceLocale) throws Exception
+    {
+        List<BaseTmTu> m_tentativeTus = new ArrayList<BaseTmTu>();
+        BaseTmTu previousTu = null;
+        for (BaseTmTu curTu : tus)
+        {
+            if (m_tentativeTus.size() > 0)
+            {
+            	previousTu = m_tentativeTus.get(m_tentativeTus.size() - 1);
+            }
+        	m_tentativeTus.add(curTu);
+
+        	BaseTmTuv curSrcTuv = curTu.getFirstTuv(sourceLocale);
+        	for (BaseTmTuv curTuv : curTu.getTuvs())
+            {
+    			// TUV uses its previous source tuv's hash value as previous
+    			// hash, and use next source tuv's hash value as next hash. Never
+    			// store target tuv's hash value.
+            	// Will this be an issue in the further?
+            	curTuv.setPreviousHash(BaseTmTuv.FIRST_HASH);
+        		curTuv.setNextHash(BaseTmTuv.LAST_HASH);
+            	if (previousTu != null)
+            	{
+            		BaseTmTuv preSrcTuv = previousTu.getFirstTuv(sourceLocale);
+    				BaseTmTuv preTuv = previousTu.getFirstTuv(curTuv.getLocale());
+    				preTuv.setNextHash(SegmentTuvUtil.getHashValue(curSrcTuv.getSegment()));
+    				curTuv.setPreviousHash(SegmentTuvUtil.getHashValue(preSrcTuv.getSegment()));
+            	}
+            }
+        }
     }
 
     /**

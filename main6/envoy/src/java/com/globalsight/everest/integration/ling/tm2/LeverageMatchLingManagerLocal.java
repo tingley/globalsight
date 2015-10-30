@@ -1696,7 +1696,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             boolean isTmProcedence = p_leverageOptions.getTmProfile()
                     .isTmProcendence();
             filterMatchesForMultipleTranslations(results, allLeverageMatches,
-                    p_srcTuvId2SidMap, isTmProcedence, mode);
+                    p_srcTuvId2SidMap, isTmProcedence, mode, p_sourcePage);
         }
         else
         {
@@ -1713,14 +1713,22 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * @param results
      * @param allLeverageMatches
      * @param mode
+     * @throws Exception 
      */
     private void filterMatchesForMultipleTranslations(
             Collection<LeverageMatch> results,
-            Collection<LeverageMatch> allLeverageMatches, 
+            Collection<LeverageMatch> allLeverageMatches,
             Map<Long, String> p_srcTuvId2SidMap, boolean isTmProcedence,
-            int mode)
+            int mode, SourcePage sourcePage) throws Exception
     {
-        // SourceTuvId_subId : List<LeverageMatch>
+    	ArrayList<Tuv> srcTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
+    	Map<Long, Tuv> srcTuvMap = new HashMap<Long, Tuv>();
+    	for (Tuv tuv : srcTuvs)
+    	{
+    		srcTuvMap.put(tuv.getIdAsLong(), tuv);
+    	}
+
+    	// SourceTuvId_subId : List<LeverageMatch>
         Map<String, List<LeverageMatch>> map = new HashMap<String, List<LeverageMatch>>();
         for (LeverageMatch lm : allLeverageMatches)
         {
@@ -1803,10 +1811,27 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     }
                     else
                     {
-                        LeverageMatch firstLM = listForOne.get(0);
-                        firstLM.setMatchType(MatchState.SEGMENT_TM_EXACT_MATCH
-                                .getName());
-                        results.add(firstLM);                        
+                    	boolean flag = false;
+                    	for (LeverageMatch lm : listForOne)
+                    	{
+                    		Tuv srcTuv = srcTuvMap.get(lm.getOriginalSourceTuvId());
+                    		if (srcTuv.getPreviousHash() != -1 && srcTuv.getNextHash() != -1 
+                    				&& srcTuv.getPreviousHash() == lm.getPreviousHash()
+                    				&& srcTuv.getNextHash() == lm.getNextHash())
+                    		{
+                                lm.setMatchType(MatchState.SEGMENT_TM_EXACT_MATCH.getName());
+                                results.add(lm);
+                                flag = true;
+                                break;
+                    		}
+                    	}
+
+                    	if (!flag)
+                    	{
+                        	LeverageMatch firstLM = listForOne.get(0);
+							firstLM.setMatchType(MatchState.SEGMENT_TM_EXACT_MATCH.getName());
+                            results.add(firstLM);
+                    	}
                     }
                 }
             }

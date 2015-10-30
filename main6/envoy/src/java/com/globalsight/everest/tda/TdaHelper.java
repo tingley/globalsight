@@ -54,6 +54,7 @@ import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.docproc.extractor.xml.GsDOMParser;
 import com.globalsight.ling.tm2.TmCoreManager;
+import com.globalsight.util.StringUtil;
 
 public class TdaHelper
 {
@@ -586,12 +587,15 @@ public class TdaHelper
      */
     public static double PecentToDouble(String percentValue)
     {
-        percentValue = percentValue.replaceAll("%", "");
         double newValue = 0;
 
         try
         {
-            newValue = Double.parseDouble(percentValue);
+			if (StringUtil.isNotEmpty(percentValue))
+			{
+				percentValue = percentValue.replaceAll("%", "");
+				newValue = Double.parseDouble(percentValue);
+			}
         }
         catch (Exception e)
         {

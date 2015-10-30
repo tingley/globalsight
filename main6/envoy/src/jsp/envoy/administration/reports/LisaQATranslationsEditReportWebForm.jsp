@@ -110,7 +110,7 @@ function fnGetSelectedJobIds()
 		
 		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
 		{
-			alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
+			alert("<%=bundle.getString("lb_invalid_target_language")%>");
 			return;
 		}
 	}

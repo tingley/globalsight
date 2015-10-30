@@ -651,7 +651,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             note.setCategory("SID");
         }
 
-        if (osd.getDisplayMatchType() != null)
+        if (StringUtil.isNotEmpty(osd.getDisplayMatchType()))
         {
             Notes notes = unit.getNotes();
             if (notes == null)

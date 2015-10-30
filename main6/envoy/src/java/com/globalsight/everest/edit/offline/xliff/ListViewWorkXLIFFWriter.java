@@ -717,7 +717,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             m_outputStream.write(m_strEOL);
         }
 
-        if (p_osd.getDisplayMatchType() != null)
+        if (StringUtil.isNotEmpty(p_osd.getDisplayMatchType()))
         {
             m_outputStream.write("<note>");
             m_outputStream.write("Match Type: " + p_osd.getDisplayMatchType());

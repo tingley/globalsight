@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class NodeInfo implements INodeInfo
 {
@@ -58,6 +59,24 @@ public class NodeInfo implements INodeInfo
                         {
                             map.put(XliffHelper.MARK_XLIFF_PART,
                                     XliffHelper.SOURCE);
+
+                            NodeList ns = parentNode.getChildNodes();
+                            if (ns != null && ns.getLength() == 1)
+                            {
+                                Node n = ns.item(0);
+                                if (n.getNodeType() == Node.ELEMENT_NODE
+                                        && "mrk".equalsIgnoreCase(n
+                                                .getNodeName()))
+                                {
+                                    NamedNodeMap atts = n.getAttributes();
+                                    Node idNode = atts.getNamedItem("id");
+                                    if (idNode != null)
+                                    {
+                                        map.put(XliffHelper.MRK_ID,
+                                                idNode.getNodeValue());
+                                    }
+                                }
+                            }
                         }
                         else if (XliffHelper.TARGET.equals(name))
                         {
@@ -102,6 +121,42 @@ public class NodeInfo implements INodeInfo
                                     {
                                         map.put(XliffHelper.MARK_TU_ID, value);
                                     }
+                                }
+                            }
+                        }
+                    }
+                    else if (XliffHelper.MATCH.equals(pNodeName)) 
+                    {
+                        if (XliffHelper.SOURCE.equals(name))
+                        {
+                            map.put(XliffHelper.MARK_XLIFF_PART, XliffHelper.ALT_SOURCE);
+                        }
+                        else if (XliffHelper.TARGET.equals(name))
+                        {
+                            map.put(XliffHelper.MARK_XLIFF_PART, XliffHelper.ALT_TARGET);
+                            map.put(XliffHelper.XLIFF_VERSION, XliffHelper.XLIFF_VERSION_20);
+                        }
+
+                        String attname = null;
+                        NamedNodeMap grandAttrs = parentNode.getParentNode()
+                                .getAttributes();
+
+                        if (grandAttrs != null)
+                        {
+                            for (int i = 0; i < grandAttrs.getLength(); ++i)
+                            {
+                                Node att = grandAttrs.item(i);
+                                attname = att.getNodeName();
+                                String value = att.getNodeValue();
+
+                                if (attname.equalsIgnoreCase("matchQuality"))
+                                {
+                                    map.put("altQuality", value);
+                                }
+                                else if (attname.equals("ref"))
+                                {
+                                    // the value is always start with #
+                                    map.put("altMid", value.substring(1));
                                 }
                             }
                         }

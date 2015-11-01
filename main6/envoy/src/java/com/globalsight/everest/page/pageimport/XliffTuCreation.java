@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.tuv.LeverageGroup;
@@ -37,7 +38,12 @@ import com.globalsight.util.gxml.GxmlElement;
 public class XliffTuCreation implements IXliffTuCreation
 {
     protected HashMap<String, String> attributeMap;
+    
+    // for xliff 1.0 
     private XliffAlt alt = new XliffAlt();
+    
+    // for xliff 2.0
+    private Map<String, XliffAlt> alts = new HashMap<String, XliffAlt>();
 
     @Override
     public void setAttribute(HashMap<String, String> map)
@@ -105,6 +111,20 @@ public class XliffTuCreation implements IXliffTuCreation
             {
                 tuPre.setPassoloState(state);
             }
+            
+            // for xliff 2.0
+            String mId = elem.getAttribute(XliffHelper.MRK_ID);
+            if (mId != null)
+            {
+                XliffAlt alt = alts.get(mId);
+                if (alt != null)
+                {
+                    TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
+                            p_jobId);
+                    alt.setTuv(tuvPre);
+                    tuvPre.addXliffAlt(alt);
+                }
+            }
 
             // Not required, but nice to have.
             setDefaultValueForXliffTargetColumn(p_tuList);
@@ -118,80 +138,95 @@ public class XliffTuCreation implements IXliffTuCreation
             String altMid = elem.getAttribute("altMid");
             GxmlElement seg = (GxmlElement) elem.getChildElements().get(0);
             ArrayList<Tu> array = (ArrayList<Tu>) p_lg.getTus(false);
+            boolean isXliff20 = XliffHelper.XLIFF_VERSION_20.equals(elem
+                    .getAttribute(XliffHelper.XLIFF_VERSION));
 
-            TuImpl tuPre = null;
-            if (altMid == null)
+            if (isXliff20)
             {
-                for (int i = array.size() - 1; i >= 0; i--)
-                {
-                    Tu tu = array.get(i);
-                    String tuMrkId = tu.getXliffMrkId();
-                    if (tuMrkId == null || "1".equals(tuMrkId))
-                    {
-                        tuPre = (TuImpl) tu;
-                        break;
-                    }
-                }
+                alt.setSegment(seg.toGxml(IFormatNames.FORMAT_XLIFF));
+                alt.setLanguage(altLanguage);
+                alt.setQuality(altQuality);
+                
+                alts.put(altMid, alt);
             }
             else
             {
-                for (int i = array.size() - 1; i >= 0; i--)
+                TuImpl tuPre = null;
+                if (altMid == null)
                 {
-                    Tu tu = array.get(i);
-                    String tuMrkId = tu.getXliffMrkId();
-
-                    if ("true".equals(attributeMap.get("isMadCapLingo")))
+                    for (int i = array.size() - 1; i >= 0; i--)
                     {
-                        boolean parsed = false;
-                        int paredResult = -1;
-                        if (tuMrkId != null)
+                        Tu tu = array.get(i);
+                        String tuMrkId = tu.getXliffMrkId();
+                        if (tuMrkId == null || "1".equals(tuMrkId))
                         {
-                            try
-                            {
-                                paredResult = Integer.parseInt(tuMrkId);
-                                parsed = true;
-                            }
-                            catch (Exception ex)
-                            {
-                                parsed = false;
-                            }
+                            tuPre = (TuImpl) tu;
+                            break;
                         }
-
-                        if (parsed)
-                        {
-                            tuMrkId = "" + (paredResult - 1);
-                        }
-                    }
-
-                    if (altMid.equals(tuMrkId))
-                    {
-                        tuPre = (TuImpl) tu;
-                        break;
                     }
                 }
+                else
+                {
+                    for (int i = array.size() - 1; i >= 0; i--)
+                    {
+                        Tu tu = array.get(i);
+                        String tuMrkId = tu.getXliffMrkId();
+
+                        if ("true".equals(attributeMap.get("isMadCapLingo")))
+                        {
+                            boolean parsed = false;
+                            int paredResult = -1;
+                            if (tuMrkId != null)
+                            {
+                                try
+                                {
+                                    paredResult = Integer.parseInt(tuMrkId);
+                                    parsed = true;
+                                }
+                                catch (Exception ex)
+                                {
+                                    parsed = false;
+                                }
+                            }
+
+                            if (parsed)
+                            {
+                                tuMrkId = "" + (paredResult - 1);
+                            }
+                        }
+
+                        if (altMid.equals(tuMrkId))
+                        {
+                            tuPre = (TuImpl) tu;
+                            break;
+                        }
+                    }
+                }
+
+                if (tuPre == null)
+                {
+                    tuPre = (TuImpl) array.get(array.size() - 1);
+                }
+
+                TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
+                        p_jobId);
+                alt.setSegment(seg.toGxml(IFormatNames.FORMAT_XLIFF));
+                alt.setLanguage(altLanguage);
+                alt.setQuality(altQuality);
+                alt.setTuv(tuvPre);
+                tuvPre.addXliffAlt(alt);
+
+                array.set(array.indexOf(tuPre), tuPre);
             }
-
-            if (tuPre == null)
-            {
-                tuPre = (TuImpl) array.get(array.size() - 1);
-            }
-
-            TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
-                    p_jobId);
-            alt.setSegment(seg.toGxml(IFormatNames.FORMAT_XLIFF));
-            alt.setLanguage(altLanguage);
-            alt.setQuality(altQuality);
-            alt.setTuv(tuvPre);
-            tuvPre.addXliffAlt(alt);
-
-            array.set(array.indexOf(tuPre), tuPre);
 
             return false;
         }
         else if (xliffpart != null && xliffpart.equals("altSource"))
         {
+            boolean isXliff20 = XliffHelper.XLIFF_VERSION_20.equals(elem
+                    .getAttribute(XliffHelper.XLIFF_VERSION));
+            
             GxmlElement seg = (GxmlElement) elem.getChildElements().get(0);
-
             alt = new XliffAlt();
             alt.setSourceSegment(seg.toGxml(IFormatNames.FORMAT_XLIFF));
             return false;

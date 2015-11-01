@@ -78,6 +78,10 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private StringBuilder targetContent = new StringBuilder();
     // For recording the tag transformed source content to write target tuv.
     private StringBuilder tuvTargetContent = new StringBuilder();
+    // For recording the alt source content to write into tuv.
+    private StringBuilder tuvAltSource = new StringBuilder();
+    // For recording the alt target content to write into tuv.
+    private StringBuilder tuvAltTarget = new StringBuilder();
 
     private List<Integer> sourceIndex = new ArrayList<Integer>();
     private int lastIndex = 1;
@@ -420,6 +424,34 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
                     tuvTargetContent.append(stuff.toString());
                 }
+                else if (XliffHelper.ALT_SOURCE.equals(xliffPart))
+                {
+                    bptIndex = m_admin.incrementBptIndex();
+                    sourceIndex.add(bptIndex);
+
+                    sourceContent.append("<");
+                    sourceContent.append(name);
+                    sourceContent.append(outputAttributesAsString(
+                            p_node.getAttributes(), false));
+                    sourceContent.append(">");
+
+                    tuvAltSource.append(stuff.toString());
+                }
+                else if (XliffHelper.ALT_TARGET.equals(xliffPart))
+                {
+                    if (sourceIndex.size() > 0)
+                    {
+                        sourceIndex.remove(0);
+                    }
+
+                    targetContent.append("<");
+                    targetContent.append(name);
+                    targetContent.append(outputAttributesAsString(
+                            p_node.getAttributes(), false));
+                    targetContent.append(">");
+
+                    tuvAltTarget.append(stuff.toString());
+                }
             }
             else
             {
@@ -515,6 +547,51 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         tuvTargetContent.append(stuff.toString());
                     }
                 }
+                if (XliffHelper.ALT_SOURCE.equals(xliffPart))
+                {
+                    bptIndex = m_admin.incrementBptIndex();
+                    sourceIndex.add(bptIndex);
+
+                    sourceContent.append("<");
+                    sourceContent.append(name);
+                    sourceContent.append(outputAttributesAsString(
+                            p_node.getAttributes(), false));
+                    sourceContent.append(">");
+
+                    if (isEmbeddedInline(p_node))
+                    {
+                        tuvAltSource.append("&lt;");
+                        tuvAltSource.append(name);
+                        tuvAltSource.append(outputAttributesAsString(
+                                p_node.getAttributes(), false));
+                        tuvAltSource.append("&gt;");
+                    }
+                    else
+                    {
+                        tuvAltSource.append(stuff.toString());
+                    }
+                }
+                else if (XliffHelper.ALT_TARGET.equals(xliffPart))
+                {
+                    targetContent.append("<");
+                    targetContent.append(name);
+                    targetContent.append(outputAttributesAsString(
+                            p_node.getAttributes(), false));
+                    targetContent.append(">");
+
+                    if (isEmbeddedInline(p_node))
+                    {
+                        tuvAltTarget.append("&lt;");
+                        tuvAltTarget.append(name);
+                        tuvAltTarget.append(outputAttributesAsString(p_node
+                                .getAttributes()));
+                        tuvAltTarget.append("&gt;");
+                    }
+                    else
+                    {
+                        tuvAltTarget.append(stuff.toString());
+                    }
+                }
             }
         }
         else
@@ -601,6 +678,78 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     }
                 }
             }
+            else if (XliffHelper.ALT_SOURCE.equals(xliffPart))
+            {
+                sourceContent.append("</");
+                sourceContent.append(name);
+                sourceContent.append(">");
+
+                if (isEmbeddedInline(p_node) && !isEmptyElement)
+                {
+                    tuvAltSource.append("&lt;/");
+                    tuvAltSource.append(name);
+                    tuvAltSource.append("&gt;");
+                }
+                else
+                {
+                    if (isInlineTag(name))
+                    {
+                        if (!isEmptyElement)
+                        {
+                            tuvAltSource.append("&lt;/");
+                            tuvAltSource.append(name);
+                            tuvAltSource.append("&gt;</ph>");
+                        }
+                    }
+                    else
+                    {
+                        if (!isEmptyElement)
+                        {
+                            tuvAltSource.append("<ept i=\"");
+                            tuvAltSource.append(bptIndex);
+                            tuvAltSource.append("\">&lt;/");
+                            tuvAltSource.append(name);
+                            tuvAltSource.append("&gt;</ept>");
+                        }
+                    }
+                }
+            }
+            else if (XliffHelper.ALT_TARGET.equals(xliffPart))
+            {
+                targetContent.append("</");
+                targetContent.append(name);
+                targetContent.append(">");
+
+                if (isEmbeddedInline(p_node) && !isEmptyElement)
+                {
+                    tuvAltTarget.append("&lt;/");
+                    tuvAltTarget.append(name);
+                    tuvAltTarget.append("&gt;");
+                }
+                else
+                {
+                    if (isInlineTag(name))
+                    {
+                        if (!isEmptyElement)
+                        {
+                            tuvAltTarget.append("&lt;/");
+                            tuvAltTarget.append(name);
+                            tuvAltTarget.append("&gt;</ph>");
+                        }
+                    }
+                    else
+                    {
+                        if (!isEmptyElement)
+                        {
+                            tuvAltTarget.append("<ept i=\"");
+                            tuvAltTarget.append(bptIndex);
+                            tuvAltTarget.append("\">&lt;/");
+                            tuvAltTarget.append(name);
+                            tuvAltTarget.append("&gt;</ept>");
+                        }
+                    }
+                }
+            }
         }
         else
         {
@@ -641,6 +790,29 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     if (!isSourceEmpty(sourceContentWithoutTag.toString()))
                     {
                         outputExtractedStuff(tuvTargetContent.toString(),
+                                isTranslatable, map, false);
+                    }
+                    else
+                    {
+                        outputSkeleton(targetContent.toString());
+                        m_admin.setBptIndex(lastIndex);
+                    }
+                    clearContent();
+                }
+                else if (isSource && XliffHelper.ALT_SOURCE.equals(xliffPart))
+                {
+                    outputSkeleton(sourceContent.toString());
+                    if (!isSourceEmpty(sourceContentWithoutTag.toString()))
+                    {
+                        outputExtractedStuff(tuvAltSource.toString(),
+                                isTranslatable, map, true);
+                    }
+                }
+                else if (isTarget && XliffHelper.ALT_TARGET.equals(xliffPart))
+                {
+                    if (!isSourceEmpty(sourceContentWithoutTag.toString()))
+                    {
+                        outputExtractedStuff(tuvAltTarget.toString(),
                                 isTranslatable, map, false);
                     }
                     else
@@ -694,6 +866,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         targetContent = new StringBuilder();
         tuvTargetContent = new StringBuilder();
         sourceIndex.clear();
+        tuvAltSource = new StringBuilder();
+        tuvAltTarget = new StringBuilder();
     }
 
     private void textProcessor(Node p_node, boolean isTranslatable)
@@ -713,6 +887,17 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         {
             targetContent.append(nodeValue);
             tuvTargetContent.append(nodeValue);
+        }
+        else if (XliffHelper.ALT_SOURCE.equals(xliffPart))
+        {
+            sourceContent.append(nodeValue);
+            tuvAltSource.append(nodeValue);
+            sourceContentWithoutTag.append(nodeValue);
+        }
+        else if (XliffHelper.ALT_TARGET.equals(xliffPart))
+        {
+            targetContent.append(nodeValue);
+            tuvAltTarget.append(nodeValue);
         }
         else
         {

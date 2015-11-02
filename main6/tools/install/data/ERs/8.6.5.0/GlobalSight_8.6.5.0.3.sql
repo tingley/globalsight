@@ -126,7 +126,7 @@ BEGIN
 <rule break="no"><beforebreak>\\bJun\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\bLtd\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Mm]ar\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
-<rule break="no"><beforebreak>\\b[Mm]ax\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
+<rule break="no"><beforebreak>\\b[Mm]ax\\.</beforebreak><afterbreak>\\s+[^A-Z]</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Mm]essrs\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Mm]fg\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Mm]gr\\.</beforebreak><afterbreak>\\s</afterbreak></rule>

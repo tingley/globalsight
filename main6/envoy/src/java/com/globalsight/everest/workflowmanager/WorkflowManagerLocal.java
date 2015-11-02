@@ -1047,40 +1047,47 @@ public class WorkflowManagerLocal implements WorkflowManager
                             startDate, emailInfo);
 
                     long taskId = ((Long) returnValue.get(0)).longValue();
-                    Object actionType = returnValue.get(3);
-                    if (actionType != null)
-                    {
-                        etfMap.put(taskId, (String) actionType);
-                    }
+					if (taskId != -1)
+					{
+						Object actionType = returnValue.get(3);
+						if (actionType != null)
+						{
+							etfMap.put(taskId, (String) actionType);
+						}
 
-                    Task task = (Task) wfClone.getTasks().get(taskId);
-                    long jobId = task.getJobId();
-                    L10nProfile l10nProfile = ServerProxy.getJobHandler()
-                            .getL10nProfileByJobId(jobId);
-                    long wfStatePostId = l10nProfile.getWfStatePostId();
-                    if (wfStatePostId != -1)
-                    {
-                        ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
-                        WfStatePostThread myTask = new WfStatePostThread(task,
-                                null, true);
-                        pool.execute(myTask);
-                        pool.shutdown();
-                    }
+						Task task = (Task) wfClone.getTasks().get(taskId);
+						long jobId = task.getJobId();
+						L10nProfile l10nProfile = ServerProxy.getJobHandler()
+								.getL10nProfileByJobId(jobId);
+						long wfStatePostId = l10nProfile.getWfStatePostId();
+						if (wfStatePostId != -1)
+						{
+							ExecutorService pool = Executors
+									.newFixedThreadPool(MAX_THREAD);
+							WfStatePostThread myTask = new WfStatePostThread(
+									task, null, true);
+							pool.execute(myTask);
+							pool.shutdown();
+						}
 
-                    // For sla issue
-                    if (wfClone.isEstimatedTranslateCompletionDateOverrided())
-                    {
-                        updateEstimatedTranslateCompletionDate(wfClone.getId(),
-                                wfClone.getEstimatedTranslateCompletionDate());
-                    }
+						// For sla issue
+						if (wfClone
+								.isEstimatedTranslateCompletionDateOverrided())
+						{
+							updateEstimatedTranslateCompletionDate(
+									wfClone.getId(),
+									wfClone.getEstimatedTranslateCompletionDate());
+						}
 
-                    // prepare the map for possible creation of secondary target
-                    // files
-                    if (((Boolean) returnValue.get(1)).booleanValue())
-                    {
-                        map.put(new Long(taskId), wfClone);
-                    }
-                    session.saveOrUpdate(wfClone);
+						// prepare the map for possible creation of secondary
+						// target
+						// files
+						if (((Boolean) returnValue.get(1)).booleanValue())
+						{
+							map.put(new Long(taskId), wfClone);
+						}
+					}
+					session.saveOrUpdate(wfClone);
                 }
             }
 

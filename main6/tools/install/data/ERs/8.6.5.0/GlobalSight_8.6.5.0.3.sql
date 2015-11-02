@@ -116,7 +116,7 @@ BEGIN
 <rule break="no"><beforebreak>\\b[Gg]ovt\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Ii]\\.e\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\bie\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
-<rule break="no"><beforebreak>\\b[Ii]nc\\.</beforebreak><afterbreak>\\s[^A-Z]</afterbreak></rule>
+<rule break="no"><beforebreak>\\b[Ii]nc\\.</beforebreak><afterbreak>\\s+[^A-Z]</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Ii]ncl\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Ii]nd\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Ii]ng\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
@@ -7649,7 +7649,7 @@ BEGIN
 <afterbreak>(\\s|\\xA0)[\\(\\[]+[0-9]+</afterbreak></rule>
 <rule break="no">
 <beforebreak>\\b[Ee][Tt][Cc]\\.</beforebreak>
-<afterbreak>\\s</afterbreak></rule>
+<afterbreak>\\s+[^A-Z]</afterbreak></rule>
 <rule break="no">
 <beforebreak>\\b:</beforebreak>
 <afterbreak>\\s+\\{\\d\\}</afterbreak></rule>

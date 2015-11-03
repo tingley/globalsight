@@ -40,6 +40,7 @@ public class CmdUtil
             throws Exception
     {
         Process p = Runtime.getRuntime().exec(cmd);
+
         BufferedReader in = null;
         BufferedReader sin = null;
         BufferedWriter out = null;
@@ -74,24 +75,24 @@ public class CmdUtil
 
             while ((line = sin.readLine()) != null)
             {
-                log.info(line);
-                if (line.indexOf(":") > 0)
-                {
-                    line = line.substring(line.indexOf(":") + 1);
-                }
-                if (line.indexOf("(") > 0)
-                {
-                    line = line.substring(0, line.lastIndexOf("("));
-                }
+                log.warn(line);
+//                if (line.indexOf(":") > 0)
+//                {
+//                    line = line.substring(line.indexOf(":") + 1);
+//                }
+//                if (line.indexOf("(") > 0)
+//                {
+//                    line = line.substring(0, line.lastIndexOf("("));
+//                }
+//
+//                line = line.trim();
+//
+//                if (!line.endsWith("."))
+//                {
+//                    line += ".";
+//                }
 
-                line = line.trim();
-
-                if (!line.endsWith("."))
-                {
-                    line += ".";
-                }
-
-                throw new Exception(line);
+//                throw new Exception(line);
             }
         }
         finally

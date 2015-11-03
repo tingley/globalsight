@@ -45,6 +45,7 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.ling.common.srccomment.SourceComment;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -125,6 +126,10 @@ public class TargetPageWorkflowAdditionPersistence extends
             }
 
             Collection sourceTuvs = SegmentTuvUtil.getSourceTuvs(p_sourcePage);
+            for (Iterator<Tuv> it = sourceTuvs.iterator(); it.hasNext();)
+            {
+            	it.next().setState(TuvState.NOT_LOCALIZED);
+            }
             SegmentTuUtil.getTusBySourcePageId(p_sourcePage.getId());
             HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(sourceTuvs, jobId);
             Set<Tuv> targetTuvs = createPersistenceTuv(p_sourcePage,

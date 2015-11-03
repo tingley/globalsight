@@ -108,6 +108,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ObjectUtil;
 import com.globalsight.util.PropertiesFactory;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.XmlParser;
@@ -298,6 +299,22 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         Thread t = new MultiCompanySupportedThread(runnable);
         t.setName("DOWNLOADER" + String.valueOf(counter++));
         t.start();
+    }
+    
+    static public List<OfflineUploadForm> getCloneRunningRequests()
+    {
+        synchronized (LOCKER)
+        {
+            return ObjectUtil.deepClone(RUNNING_FORMS);
+        }
+    }
+    
+    static public List<OfflineUploadForm> getCloneHoldingRequests()
+    {
+        synchronized (LOCKER)
+        {
+            return ObjectUtil.deepClone(WAITING_FORMS);
+        }
     }
 
     /**

@@ -48,7 +48,7 @@ public class RunningRequestHandler extends RequestAbstractHandler
     private List<Vo> getAllRequestVos()
     {
         List<Vo> forms = new ArrayList<Vo>();
-        List<OfflineUploadForm> fs = ObjectUtil.deepClone(OfflineEditManagerLocal.RUNNING_FORMS);
+        List<OfflineUploadForm> fs = OfflineEditManagerLocal.getCloneRunningRequests();
         for (OfflineUploadForm f : fs)
         {
             String companyName = null;

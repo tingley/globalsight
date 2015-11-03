@@ -117,14 +117,13 @@ public class WaitingRequestHandler extends RequestAbstractHandler
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
         HashMap<String, Hashtable> ms = new HashMap<String, Hashtable>();
         
-        HashMap<String, List<Hashtable>> wms = ObjectUtil.deepClone(FileExportUtil.ON_HOLD_MESSAGE);
+        HashMap<String, List<Hashtable>> wms = FileExportUtil.getCloneHoldingRequests();
         for (List<Hashtable> ms2 : wms.values())
         {
             int i = 1;
             
             for (Hashtable args : ms2)
             {   
-
                 RequestFile requestVo = new RequestFile();
                 String cId = (String) args.get("currentCompanyId");
                 String companyName = CompanyWrapper.getCompanyNameById(cId);

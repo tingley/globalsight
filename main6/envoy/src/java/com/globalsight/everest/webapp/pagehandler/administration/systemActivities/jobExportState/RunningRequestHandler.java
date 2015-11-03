@@ -60,7 +60,7 @@ public class RunningRequestHandler extends RequestAbstractHandler
         HashMap<String, FileProfileImpl> fileProfiles = new HashMap<String, FileProfileImpl>();
         
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
-        HashMap<String, Hashtable> ms = ObjectUtil.deepClone(FileExportUtil.RUNNING_REQUEST);
+        HashMap<String, Hashtable> ms = FileExportUtil.getCloneRunningRequests();
         for (Hashtable args : ms.values())
         {   
 

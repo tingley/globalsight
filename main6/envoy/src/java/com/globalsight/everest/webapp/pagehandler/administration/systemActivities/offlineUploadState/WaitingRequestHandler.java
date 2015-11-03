@@ -28,7 +28,6 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.comparator.OfflineUploadRequestComparator;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.systemActivities.RequestAbstractHandler;
-import com.globalsight.util.ObjectUtil;
 
 public class WaitingRequestHandler extends RequestAbstractHandler
 {
@@ -49,7 +48,7 @@ public class WaitingRequestHandler extends RequestAbstractHandler
     private List<Vo> getAllRequestVos()
     {
         List<Vo> forms = new ArrayList<Vo>();
-        List<OfflineUploadForm> fs = ObjectUtil.deepClone(OfflineEditManagerLocal.WAITING_FORMS);
+        List<OfflineUploadForm> fs = OfflineEditManagerLocal.getCloneHoldingRequests();
         for (OfflineUploadForm f : fs)
         {
             String companyName = null;

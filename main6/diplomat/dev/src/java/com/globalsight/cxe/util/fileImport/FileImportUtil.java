@@ -57,6 +57,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ObjectUtil;
 import com.globalsight.util.PropertiesFactory;
 import com.globalsight.util.edit.EditUtil;
 
@@ -134,6 +135,23 @@ public class FileImportUtil
 
         return true;
     }
+    
+    static public HashMap<String, CxeMessage> getCloneRunningRequests()
+    {
+        synchronized (LOCKER)
+        {
+            return ObjectUtil.deepClone(RUNNING_REQUEST);
+        }
+    }
+    
+    static public HashMap<String, List<CxeMessage>> getCloneHoldingRequests()
+    {
+        synchronized (LOCKER)
+        {
+            return ObjectUtil.deepClone(ON_HOLD_MESSAGE);
+        }
+    }
+    
 
     /**
      * This method uses the thread to create job, not JMS.

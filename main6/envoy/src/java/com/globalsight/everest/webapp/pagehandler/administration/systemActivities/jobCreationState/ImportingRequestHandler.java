@@ -136,7 +136,7 @@ public class ImportingRequestHandler extends PageActionHandler
         HashMap<String, FileProfileImpl> fileProfiles = new HashMap<String, FileProfileImpl>();
         
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
-        HashMap<String, CxeMessage> ms = ObjectUtil.deepClone(FileImportUtil.RUNNING_REQUEST);
+        HashMap<String, CxeMessage> ms = FileImportUtil.getCloneRunningRequests();
         for (CxeMessage t : ms.values())
         {
             RequestFile requestVo = new RequestFile();

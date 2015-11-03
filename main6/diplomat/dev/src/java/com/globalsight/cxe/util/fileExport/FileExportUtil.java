@@ -46,6 +46,7 @@ import com.globalsight.everest.projecthandler.ProjectHandlerLocal;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.ObjectUtil;
 import com.globalsight.util.PropertiesFactory;
 
 /**
@@ -150,6 +151,22 @@ public class FileExportUtil
         String name = getSuffix(file);
         
         return name;
+    }
+    
+    static public HashMap<String, Hashtable> getCloneRunningRequests()
+    {
+        synchronized (LOCKER)
+        {
+            return ObjectUtil.deepClone(RUNNING_REQUEST);
+        }
+    }
+    
+    static public HashMap<String, List<Hashtable>> getCloneHoldingRequests()
+    {
+        synchronized (LOCKER)
+        {
+            return ObjectUtil.deepClone(ON_HOLD_MESSAGE);
+        }
     }
     
     /**

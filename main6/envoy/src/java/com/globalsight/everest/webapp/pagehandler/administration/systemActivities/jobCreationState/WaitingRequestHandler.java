@@ -172,7 +172,7 @@ public class WaitingRequestHandler extends PageActionHandler
         HashMap<String, FileProfileImpl> fileProfiles = new HashMap<String, FileProfileImpl>();
         
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
-        HashMap<String, List<CxeMessage>> ms = ObjectUtil.deepClone(FileImportUtil.ON_HOLD_MESSAGE);
+        HashMap<String, List<CxeMessage>> ms = FileImportUtil.getCloneHoldingRequests();
         for (List<CxeMessage> ms2 : ms.values())
         {
             int i = 1;

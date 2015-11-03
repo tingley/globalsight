@@ -206,12 +206,13 @@ public class SegmentationRuleFileBasicHandler extends PageHandler
 
             StringBuffer testResult = new StringBuffer();
 
-            String msg = doValidator(p_request, rule);
-            if (msg == null)
+            String testRule = rule.getRuleText();
+
+            if ("default".equalsIgnoreCase(testRule))
             {
                 String[] results = com.globalsight.everest.segmentationhelper.SegmentationHelper
-                        .segment(rule.getRuleText(), locale.getLocale(),
-                                testText);
+                        .segmentWithDefault(locale.getLocale(), testText);
+
                 for (int i = 0; i < results.length; i++)
                 {
                     testResult.append(i + 1).append(". ");
@@ -221,7 +222,23 @@ public class SegmentationRuleFileBasicHandler extends PageHandler
             }
             else
             {
-                testResult.append("Validate Error. ");
+                String msg = doValidator(p_request, rule);
+                if (msg == null)
+                {
+                    String[] results = com.globalsight.everest.segmentationhelper.SegmentationHelper
+                            .segment(testRule, locale.getLocale(),
+                                    testText);
+                    for (int i = 0; i < results.length; i++)
+                    {
+                        testResult.append(i + 1).append(". ");
+                        testResult.append(results[i]);
+                        testResult.append("\n");
+                    }
+                }
+                else
+                {
+                    testResult.append("Validate Error. ");
+                }
             }
 
             p_request.setAttribute("tmpRule", rule);
@@ -267,16 +284,26 @@ public class SegmentationRuleFileBasicHandler extends PageHandler
     private String doValidator(HttpServletRequest p_request,
             SegmentationRuleFileImpl rule) throws ExtractorException
     {
-        SegmentationRuleFileValidator validator = new SegmentationRuleFileValidator();
-        if (!validator.validate(rule.getRuleText(), rule.getType()))
-        {
-            p_request.setAttribute("invalid", validator.getErrorMessage());
-            return validator.getErrorMessage();
-        }
-        else
+        String testRule = rule.getRuleText();
+
+        if ("default".equalsIgnoreCase(testRule))
         {
             p_request.setAttribute("invalid", "");
             return null;
+        }
+        else
+        {
+            SegmentationRuleFileValidator validator = new SegmentationRuleFileValidator();
+            if (!validator.validate(testRule, rule.getType()))
+            {
+                p_request.setAttribute("invalid", validator.getErrorMessage());
+                return validator.getErrorMessage();
+            }
+            else
+            {
+                p_request.setAttribute("invalid", "");
+                return null;
+            }
         }
     }
 

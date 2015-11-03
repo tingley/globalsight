@@ -618,10 +618,11 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                     && isInContextMatch(osd))
                 translate = YesNo.NO;
             else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
-                    && isExtractMatch(osd))
+                    && isExactMatch(osd))
                 translate = YesNo.NO;
-            else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
-                    && (isExtractMatch(osd) || isInContextMatch(osd)))
+			else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
+					&& (isExactMatch(osd) || isInContextMatch(osd))
+					&& osd.isWriteAsProtectedSegment())
                 translate = YesNo.NO;
             else
                 translate = YesNo.YES;
@@ -651,7 +652,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             note.setCategory("SID");
         }
 
-        if (StringUtil.isNotEmpty(osd.getDisplayMatchType()))
+        if (isInContextMatch(osd))
         {
             Notes notes = unit.getNotes();
             if (notes == null)
@@ -745,7 +746,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
     {
         if (downloadParams.isPopulate100())
         {
-            if (isInContextMatch(data) || isExtractMatch(data))
+            if (isInContextMatch(data) || isExactMatch(data))
             {
                 return StateType.FINAL;
             }
@@ -785,7 +786,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
      * @param data
      * @return
      */
-    private boolean isExtractMatch(OfflineSegmentData data)
+    private boolean isExactMatch(OfflineSegmentData data)
     {
         return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(data
                 .getDisplayMatchType());

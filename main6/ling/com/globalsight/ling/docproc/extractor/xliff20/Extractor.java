@@ -812,6 +812,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 {
                     if (!isSourceEmpty(sourceContentWithoutTag.toString()))
                     {
+                        outputSkeleton(targetContent.toString());
                         outputExtractedStuff(tuvAltTarget.toString(),
                                 isTranslatable, map, false);
                     }

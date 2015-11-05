@@ -108,10 +108,31 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 	private static final Logger CATEGORY = Logger
             .getLogger(EditorPageHandler.class);
 	private static int DEFAULT_VIEWMODE_IF_NO_PREVIEW = VIEWMODE_TEXT;
-	public boolean s_pmCanEditTargetPages = false;
-	public boolean s_pmCanEditSnippets = false;
-	
-	@ActionHandler(action = "refresh", formClass = "")
+
+	public static boolean s_pmCanEditTargetPages = false;
+	public static boolean s_pmCanEditSnippets = false;
+
+    static
+    {
+        try
+        {
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            s_pmCanEditTargetPages = sc
+                    .getBooleanParameter("editalltargetpages.allowed");
+            s_pmCanEditSnippets = sc
+                    .getBooleanParameter("editallsnippets.allowed");
+        }
+        catch (Throwable e)
+        {
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Error when get 'editalltargetpages.allowed' and 'editallsnippets.allowed' configurations");
+            }
+            // Do nothing if configuration is not available.
+        }
+    }
+
+    @ActionHandler(action = "refresh", formClass = "")
     public void refresh(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
@@ -249,7 +270,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 
                     if (p_state.getUserIsPm())
                     {
-                        if (EditorHelper.pmCanEditCurrentPage(p_state))
+						if (s_pmCanEditTargetPages
+								&& EditorHelper.pmCanEditCurrentPage(p_state))
                         {
                             p_state.setReadOnly(false);
                             p_state.setAllowEditAll(true);
@@ -292,7 +314,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 
                 if (p_state.getUserIsPm())
                 {
-                    if (EditorHelper.pmCanEditCurrentPage(p_state))
+					if (s_pmCanEditTargetPages
+							&& EditorHelper.pmCanEditCurrentPage(p_state))
                     {
                         p_state.setReadOnly(false);
                         p_state.setAllowEditAll(true);
@@ -336,7 +359,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 
                     if (p_state.getUserIsPm())
                     {
-                        if (EditorHelper.pmCanEditCurrentPage(p_state))
+						if (s_pmCanEditTargetPages
+								&& EditorHelper.pmCanEditCurrentPage(p_state))
                         {
                             p_state.setReadOnly(false);
                             p_state.setAllowEditAll(true);
@@ -380,7 +404,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 
                 if (p_state.getUserIsPm())
                 {
-                    if (EditorHelper.pmCanEditCurrentPage(p_state))
+					if (s_pmCanEditTargetPages
+							&& EditorHelper.pmCanEditCurrentPage(p_state))
                     {
                         p_state.setReadOnly(false);
                         p_state.setAllowEditAll(true);
@@ -1187,9 +1212,6 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
         }
     	else if (jobId != null && srcPageId != null)
         {
-    		SystemConfiguration sc = SystemConfiguration.getInstance();
-    		s_pmCanEditTargetPages = sc.getBooleanParameter("editalltargetpages.allowed");
-    		s_pmCanEditSnippets = sc.getBooleanParameter("editallsnippets.allowed");
             isAssignee = false;
             TaskHelper.storeObject(session, IS_ASSIGNEE,new Boolean(isAssignee));
 

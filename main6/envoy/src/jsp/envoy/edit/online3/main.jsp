@@ -493,7 +493,6 @@ var isFirstPage = '<%=state.isFirstPage()%>';
 var isLastPage = '<%=state.isLastPage()%>';
 var isFirstBatch = '<%=state.isFirstBatch()%>';
 var isLastBatch = '<%=state.isLastBatch()%>';
-var g_reviewMode = eval("<%=state.isReviewMode()%>");
 var g_isReviewActivity = eval("<%=b_isReviewActivity%>");
 var g_readOnly = eval("<%=b_readOnly%>");
 var currentIssuesSize = "<%=currentIssuesSize%>";

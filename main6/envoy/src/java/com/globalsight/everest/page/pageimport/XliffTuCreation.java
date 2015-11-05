@@ -43,7 +43,7 @@ public class XliffTuCreation implements IXliffTuCreation
     private XliffAlt alt = new XliffAlt();
     
     // for xliff 2.0
-    private Map<String, XliffAlt> alts = new HashMap<String, XliffAlt>();
+    private Map<String, List<XliffAlt>> alts = new HashMap<String, List<XliffAlt>>();
 
     @Override
     public void setAttribute(HashMap<String, String> map)
@@ -116,13 +116,17 @@ public class XliffTuCreation implements IXliffTuCreation
             String mId = elem.getAttribute(XliffHelper.MRK_ID);
             if (mId != null)
             {
-                XliffAlt alt = alts.get(mId);
-                if (alt != null)
+                List<XliffAlt> altList = alts.get(mId);
+                if (altList != null)
                 {
                     TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
                             p_jobId);
-                    alt.setTuv(tuvPre);
-                    tuvPre.addXliffAlt(alt);
+                    
+                    for (XliffAlt a : altList)
+                    {
+                        a.setTuv(tuvPre);
+                        tuvPre.addXliffAlt(a);
+                    }
                 }
             }
 
@@ -143,11 +147,18 @@ public class XliffTuCreation implements IXliffTuCreation
 
             if (isXliff20)
             {
+                List<XliffAlt> altList = alts.get(altMid);
+                if (altList == null)
+                {
+                    altList = new ArrayList<XliffAlt>();
+                    alts.put(altMid, altList);
+                }
+                
                 alt.setSegment(seg.toGxml(IFormatNames.FORMAT_XLIFF));
                 alt.setLanguage(altLanguage);
                 alt.setQuality(altQuality);
                 
-                alts.put(altMid, alt);
+                altList.add(alt);
             }
             else
             {

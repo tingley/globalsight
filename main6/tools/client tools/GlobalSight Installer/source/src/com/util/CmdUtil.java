@@ -75,24 +75,28 @@ public class CmdUtil
 
             while ((line = sin.readLine()) != null)
             {
-                log.warn(line);
-//                if (line.indexOf(":") > 0)
-//                {
-//                    line = line.substring(line.indexOf(":") + 1);
-//                }
-//                if (line.indexOf("(") > 0)
-//                {
-//                    line = line.substring(0, line.lastIndexOf("("));
-//                }
-//
-//                line = line.trim();
-//
-//                if (!line.endsWith("."))
-//                {
-//                    line += ".";
-//                }
+                log.info(line);
+                if (line.indexOf(":") > 0)
+                {
+                    line = line.substring(line.indexOf(":") + 1);
+                }
+                if (line.indexOf("(") > 0)
+                {
+                    line = line.substring(0, line.lastIndexOf("("));
+                }
 
-//                throw new Exception(line);
+                line = line.trim();
+
+                if (!line.endsWith("."))
+                {
+                    line += ".";
+                }
+
+                // ignore this for mysql 5.7.9
+                if (line.indexOf("Using a password on the command line interface can be insecure") == -1)
+                {
+                    throw new Exception(line);                	
+                }
             }
         }
         finally

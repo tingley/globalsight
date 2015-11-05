@@ -73,7 +73,7 @@ function showPageInfo()
 
 function showSupportFiles()
 {
-    w_resources = window.open(url_resources, "MESupportFiles",
+    w_resources = window.open(urlResourcesPath, "MESupportFiles",
        "height=400,width=500,resizable=yes,scrollbars=yes");
 }
 

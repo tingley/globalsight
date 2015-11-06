@@ -36,6 +36,7 @@ import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -285,7 +286,8 @@ public class LeverageUtil
         }
 
         // Check hash values.
-		if (isKeyMatchICE(index, p_sourceTuvs, p_matchTypes, p_subId, p_jobId))
+		if (isKeyMatchICE(index, p_sourceTuvs, p_targetTuvs, p_matchTypes,
+				p_subId, p_jobId))
         {
         	return ICE_TYPE_HASH_MATCHING;
         }
@@ -623,7 +625,8 @@ public class LeverageUtil
 
     @SuppressWarnings("rawtypes")
 	private static boolean isKeyMatchICE(int index, List p_sourceTuvs,
-            MatchTypeStatistics p_matchTypes, String p_subId, long p_jobId)
+			List p_targetTuvs, MatchTypeStatistics p_matchTypes,
+			String p_subId, long p_jobId)
     {
 		LeverageMatch lm = getLeverageMatchObject(index, p_sourceTuvs,
 				p_matchTypes, p_subId);
@@ -640,6 +643,14 @@ public class LeverageUtil
             	Tuv sourceTuv = (Tuv) o;
                 preHash = sourceTuv.getPreviousHash();
                 nextHash = sourceTuv.getNextHash();
+                if (lm.getMatchState().equals(MatchState.MULTIPLE_TRANSLATION))
+                {
+                    Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
+                    if (targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
+                    {
+                    	return false;
+                    }
+                }
             }
             else
             {

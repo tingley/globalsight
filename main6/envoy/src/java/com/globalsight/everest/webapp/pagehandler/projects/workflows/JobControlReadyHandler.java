@@ -103,7 +103,6 @@ public class JobControlReadyHandler extends JobManagementHandler
         p_request.setAttribute("searchType",
                 p_request.getParameter("searchType"));
 
-        
         if (m_exportUrl == null)
         {
             m_exportUrl = ((NavigationBean) beanMap.get(EXPORT_BEAN))
@@ -135,7 +134,6 @@ public class JobControlReadyHandler extends JobManagementHandler
             out.close();
             return;
 		}
-        
         
         if ("validateBeforeDispatch".equals(p_request.getParameter("action")))
         {
@@ -185,7 +183,6 @@ public class JobControlReadyHandler extends JobManagementHandler
                         || wfState.equals(Workflow.EXPORT_FAILED)
                         || wfState.equals(Workflow.EXPORTED)
                         || wfState.equals(Workflow.LOCALIZED)
-                        || wfState.equals(Workflow.WORKFLOW_JOB)
                         || wfState.equals(Workflow.READY_TO_BE_DISPATCHED))
                 {
                     jobName.append("\r\n"
@@ -256,19 +253,8 @@ public class JobControlReadyHandler extends JobManagementHandler
                 getPagingText(p_request,
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
                         Job.READY_TO_BE_DISPATCHED));
-    	try
-		{
-			Company company = ServerProxy.getJobHandler().getCompanyById(
-					CompanyWrapper.getCurrentCompanyIdAsLong());
-			p_request.setAttribute("company", company);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-        
+
         p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
-        p_request.setAttribute(JOB_ID, JOB_ID);
         sessionMgr.setAttribute("destinationPage", "ready");
         setJobProjectsLocales(sessionMgr, session);
 

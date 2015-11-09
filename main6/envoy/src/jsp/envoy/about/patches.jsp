@@ -13,6 +13,11 @@
               com.globalsight.util.Hotfix,
 			  java.io.File" session="true" 
 %>
+<%
+response.addHeader("X-Frame-Options", "SAMEORIGIN");
+response.addHeader("X-Content-Type-Options", "nosniff");
+response.addHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+%>
 <%!
 class ReadMeFilter implements FilenameFilter
 {

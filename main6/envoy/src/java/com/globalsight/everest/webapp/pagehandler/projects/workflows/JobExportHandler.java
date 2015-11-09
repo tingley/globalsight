@@ -138,7 +138,8 @@ public class JobExportHandler extends PageHandler
                     || wfState.equals(Workflow.ARCHIVED)
                     || wfState.equals(Workflow.EXPORT_FAILED)
                     || wfState.equals(Workflow.EXPORTED)
-                    || wfState.equals(Workflow.LOCALIZED))
+                    || wfState.equals(Workflow.LOCALIZED)
+                 	|| wfState.equals(Workflow.READY_TO_BE_DISPATCHED))
             {
                 wfs.add(wf);
             }
@@ -213,7 +214,7 @@ public class JobExportHandler extends PageHandler
                 || p_workflowState.equals(Workflow.DISPATCHED)
                 || p_workflowState.equals(Workflow.EXPORT_FAILED)
                 || p_workflowState.equals(Workflow.EXPORTED) || p_workflowState
-                    .equals(Workflow.ARCHIVED));
+                    .equals(Workflow.ARCHIVED)||p_workflowState.equals(Workflow.READY_TO_BE_DISPATCHED));
     }
 
     /**

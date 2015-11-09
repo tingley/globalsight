@@ -17,10 +17,12 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -37,12 +39,15 @@ import javax.servlet.http.HttpSession;
 
 import org.hibernate.HibernateException;
 
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tm.searchreplace.TuvInfo;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
@@ -58,7 +63,7 @@ import com.globalsight.util.edit.EditUtil;
 public class JobControlReadyHandler extends JobManagementHandler
 {
     private static final String BASE_BEAN = "ready";
-
+    
     /**
      * Invokes this EntryPageHandler object
      * <p>
@@ -77,6 +82,7 @@ public class JobControlReadyHandler extends JobManagementHandler
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
+    	String m_exportUrl = null;
     	HttpSession session = p_request.getSession(false);
     	SessionManager sessionMgr = (SessionManager) session
     		.getAttribute(SESSION_MANAGER);
@@ -97,6 +103,40 @@ public class JobControlReadyHandler extends JobManagementHandler
         p_request.setAttribute("searchType",
                 p_request.getParameter("searchType"));
 
+        
+        if (m_exportUrl == null)
+        {
+            m_exportUrl = ((NavigationBean) beanMap.get(EXPORT_BEAN))
+                    .getPageURL();
+        }
+
+        if(p_request.getParameter("checkIsUploadingForExport") != null)
+        {
+        	long jobId = Long.parseLong(p_request.getParameter("jobId"));
+        	Job job = WorkflowHandlerHelper.getJobById(jobId);
+        	String result = "";
+        	for (Workflow workflow: job.getWorkflows())
+        	{
+        		if(result.length() > 0)
+        			break;
+        		Hashtable<Long, Task> tasks = workflow.getTasks();
+        		for(Long taskKey:  tasks.keySet())
+        		{
+        			if(tasks.get(taskKey).getIsUploading() == 'Y')
+        			{
+        				result = "uploading";
+        				break;
+        			}
+        		}
+        	}
+            PrintWriter out = p_response.getWriter();
+            p_response.setContentType("text/html");
+            out.write(result);
+            out.close();
+            return;
+		}
+        
+        
         if ("validateBeforeDispatch".equals(p_request.getParameter("action")))
         {
             String[] ids = p_request.getParameterValues("ids");
@@ -144,7 +184,9 @@ public class JobControlReadyHandler extends JobManagementHandler
                         || wfState.equals(Workflow.ARCHIVED)
                         || wfState.equals(Workflow.EXPORT_FAILED)
                         || wfState.equals(Workflow.EXPORTED)
-                        || wfState.equals(Workflow.LOCALIZED))
+                        || wfState.equals(Workflow.LOCALIZED)
+                        || wfState.equals(Workflow.WORKFLOW_JOB)
+                        || wfState.equals(Workflow.READY_TO_BE_DISPATCHED))
                 {
                     jobName.append("\r\n"
                             + wf.getTargetLocale().getDisplayName(uiLocale));
@@ -206,7 +248,7 @@ public class JobControlReadyHandler extends JobManagementHandler
         sessionMgr.setMyjobsAttribute("lastState", Job.READY_TO_BE_DISPATCHED);
         JobVoReadySearcher searcher = new JobVoReadySearcher();
         searcher.setJobVos(p_request, true);
-        
+
         p_request.setAttribute(JOB_LIST_START_PARAM,
                 p_request.getParameter(JOB_LIST_START_PARAM));
         p_request.setAttribute(
@@ -214,7 +256,19 @@ public class JobControlReadyHandler extends JobManagementHandler
                 getPagingText(p_request,
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
                         Job.READY_TO_BE_DISPATCHED));
-
+    	try
+		{
+			Company company = ServerProxy.getJobHandler().getCompanyById(
+					CompanyWrapper.getCurrentCompanyIdAsLong());
+			p_request.setAttribute("company", company);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+        
+        p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
+        p_request.setAttribute(JOB_ID, JOB_ID);
         sessionMgr.setAttribute("destinationPage", "ready");
         setJobProjectsLocales(sessionMgr, session);
 

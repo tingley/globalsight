@@ -489,7 +489,7 @@ function dotmSearch()
 {
    var url = "<%=url_tmSearch%>&action=tmSearchPage";
    w_tmsearch = window.open(url, "<%=lb_tm_search%>",
-   'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=800,HEIGHT=600');
+   'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=1600,HEIGHT=400');
 }
 
 function doDetails()

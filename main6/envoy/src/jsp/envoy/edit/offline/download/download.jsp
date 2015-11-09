@@ -1422,6 +1422,16 @@ $(document).ready(function(){
             <TR>
                     <TD  COLSPAN="3"><SPAN CLASS="smallText"><%= labelResInsertionNote %></SPAN></TD>
             </TR>
+                <TR>
+                    <TD>
+                      <% if(E_PTFList.size()>=30){%>
+	                      <INPUT TYPE="BUTTON" NAME="<%=lbCancel%>" VALUE="<%=lbCancel%>"
+	                      onclick="location.replace('<%=cancelUrl%>')">
+	                      <INPUT TYPE="BUTTON" NAME="<%=lbStartDownload%>"
+	                      VALUE="<%=lbStartDownload%>" onclick="submitForm()">
+	                  <%}%>
+                    </TD>
+            </TR>
           </TABLE>
         </TD>
     </TR>

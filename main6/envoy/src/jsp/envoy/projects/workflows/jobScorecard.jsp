@@ -140,6 +140,14 @@
   border: 2px outset white;
 }
 </style>
+<script   type="text/javascript">
+$(document).ready(function(){
+$("#lb_spelling_grammar").attr("title","<%=bundle.getString("lb_spelling_grammar_title")%>");
+$("#lb_consistency").attr("title","<%=bundle.getString("lb_consistency_title")%>");
+$("#lb_style").attr("title","<%=bundle.getString("lb_style_title")%>");
+$("#lb_terminology").attr("title","<%=bundle.getString("lb_terminology_title")%>");
+})
+</script>
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()"; onunload="closeOpenedWindow();"; id="idBody"  class="tundra">
 <%@ include file="/envoy/common/header.jspIncl" %>
@@ -163,7 +171,7 @@
 <TR CLASS="tableHeadingBasic">
     <TD style="border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;text-align:center">Target Locale</TD>
     <% for(Select category: categoryList){%>
-    <TD style="border-right: #FFFFFF 1px solid;text-align:center;max-width:150px;word-break: break-all"><%=category.getValue()%></TD>
+    <TD style="border-right: #FFFFFF 1px solid;text-align:center;max-width:150px;word-break: break-all"><div id=<%=category.getKey()%> ><%=category.getValue()%></div></TD>
     <%}%>
     <TD style="border-right: #FFFFFF 1px solid;width:50px;text-align:center;">AVG</TD>
     <TD style="border-right: #FFFFFF 1px solid;width:260px;text-align:center;">Comments</TD>

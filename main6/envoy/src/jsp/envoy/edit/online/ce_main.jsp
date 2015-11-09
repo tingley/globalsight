@@ -3,6 +3,7 @@
     contentType="text/html; charset=UTF-8"
     errorPage="error.jsp"
     import="com.globalsight.util.edit.EditUtil,
+            com.globalsight.everest.edit.online.SegmentView,
             com.globalsight.util.edit.GxmlUtil,
             com.globalsight.everest.edit.online.CommentView,
             com.globalsight.everest.comment.Issue,
@@ -152,6 +153,11 @@ GxmlElement tgtGxml = segmentView.getTargetSegment();
 
 String sourceSegment = srcGxml.getTextValue();
 String targetSegment = tgtGxml.getTextValue();
+String str_sid = segmentView.getTargetTuv().getSid();
+if (str_sid == null || str_sid.trim().length()==0)
+{
+    str_sid = "N/A";
+} 
 
 OnlineTagHelper applet = new OnlineTagHelper();
 try
@@ -622,6 +628,12 @@ function doOnLoad()
     <%
    	}
     %>
+  </tr>
+    <tr>
+    <td valign="top"><span class="label"><%=bundle.getString("lb_sid") %>:</span></td>
+    <td class="standardtext">
+      <div style="width: 394px;max-height: 60px;overflow: auto;"><%=str_sid%></div>
+    </td>
   </tr>
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_comment_log") %>:</span></td>

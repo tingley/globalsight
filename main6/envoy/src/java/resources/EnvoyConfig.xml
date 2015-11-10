@@ -2119,7 +2119,7 @@
         <PageLink linkName="taskScorecard" destinationPageName="TK2_scorecard"></PageLink>
         <PageLink linkName="uploadDitaReport" destinationPageName="QA_uploadDitaReport"/>
         <PageLink linkName="downloadDitaReport" destinationPageName="QA_downloadDitaReport"></PageLink>
-       
+
       </WebPage>
       <WebPage pageName="TK2_secondary" isDefault="false" jspName="/envoy/tasks/taskSecondaryTargetFiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler">
         <PageLink linkName="addcomment" destinationPageName="TK10"></PageLink>

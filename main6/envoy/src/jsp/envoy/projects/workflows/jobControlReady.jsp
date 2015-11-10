@@ -61,7 +61,6 @@
 
     String DEFAULT_PARAM = "&jobListStart=0";
     Object param = request.getAttribute(JobManagementHandler.JOB_LIST_START_PARAM);
-    String paramJobId = JobManagementHandler.JOB_ID;
     String startIndex = param == null ? DEFAULT_PARAM : "&jobListStart="+param;
     String thisSearch = (String) request.getAttribute("searchType");
     if (thisSearch == null)
@@ -646,7 +645,7 @@ function submitForm(buttonClicked, curJobId)
    else if (buttonClicked == "changeWFMgr")
    {
       JobForm.action = "<%=changeWfMgrURL%>";
-      jobActionParam = "<%=paramJobId%>";
+      jobActionParam = "jobId";
    }
    else if (buttonClicked == "search")
    {
@@ -764,7 +763,6 @@ function submitForm(buttonClicked, curJobId)
 	   JobForm.submit();
 	   return;
    }
-
    else  if (buttonClicked == "Export")
    {
 	 	var checkUrl = "${self.pageURL}&checkIsUploadingForExport=true&jobId=" + jobId + "&t=" + new Date().getTime();
@@ -781,16 +779,13 @@ function submitForm(buttonClicked, curJobId)
 	
 		if(!isContinue)
 			return false;
-		  
+
 		ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
 	    JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
-	    jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
-	    <%--JobForm.action += "&jobId=" + jobId + "&searchType=<%=thisSearch%>";--%>
-	    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=<%=thisSearch%>";
+	    JobForm.action += "&jobId=" + jobId + "&searchType=<%=thisSearch%>";
 	    JobForm.submit();
 	    return;
    }
-   
    else if (buttonClicked == "Download")
    {
       $("#downloadJobIds").val(jobId);

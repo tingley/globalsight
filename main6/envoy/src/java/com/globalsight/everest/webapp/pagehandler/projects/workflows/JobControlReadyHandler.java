@@ -53,7 +53,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoReadySearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -104,7 +103,6 @@ public class JobControlReadyHandler extends JobManagementHandler
         p_request.setAttribute("searchType",
                 p_request.getParameter("searchType"));
 
-        
         if (m_exportUrl == null)
         {
             m_exportUrl = ((NavigationBean) beanMap.get(EXPORT_BEAN))
@@ -136,7 +134,6 @@ public class JobControlReadyHandler extends JobManagementHandler
             out.close();
             return;
 		}
-        
         
         if ("validateBeforeDispatch".equals(p_request.getParameter("action")))
         {
@@ -248,8 +245,7 @@ public class JobControlReadyHandler extends JobManagementHandler
         sessionMgr.setMyjobsAttribute("lastState", Job.READY_TO_BE_DISPATCHED);
         JobVoReadySearcher searcher = new JobVoReadySearcher();
         searcher.setJobVos(p_request, true);
-        p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
-        p_request.setAttribute(JOB_ID, JOB_ID);
+
         p_request.setAttribute(JOB_LIST_START_PARAM,
                 p_request.getParameter(JOB_LIST_START_PARAM));
         p_request.setAttribute(
@@ -258,11 +254,8 @@ public class JobControlReadyHandler extends JobManagementHandler
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
                         Job.READY_TO_BE_DISPATCHED));
 
-        sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,
-                BASE_BEAN);
+        p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
         sessionMgr.setAttribute("destinationPage", "ready");
-        sessionMgr.setAttribute(DownloadFileHandler.DOWNLOAD_JOB_LOCALES, null);
-        sessionMgr.setAttribute(DownloadFileHandler.DESKTOP_FOLDER, null);
         setJobProjectsLocales(sessionMgr, session);
 
         // turn on cache. do both. "pragma" for the older browsers.

@@ -174,19 +174,24 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
         // Change the short name of match to mtc.
         // This is a bug exist in JAXB 1.0 that we can not set the short name of
-        // the
-        // name space.
+        // the name space.
         String regex = "xmlns:([^=]*)=\"urn:oasis:names:tc:xliff:matches:2.0\"";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(xliff);
         if (m.find())
         {
-            String tag = m.group(1);
-            content = content.replace("<" + tag + ":", "<mtc:");
-            content = content.replace("</" + tag + ":", "</mtc:");
             xliff = xliff.replace(m.group(),
                     "xmlns:mtc=\"urn:oasis:names:tc:xliff:matches:2.0\"");
             xliff = xliff.replace("<xliff ", "\r\n<xliff ");
+        }
+        
+        regex = "xmlns:([^=]*)=\"urn:oasis:names:tc:xliff:metadata:2.0\"";
+        p = Pattern.compile(regex);
+        m = p.matcher(xliff);
+        if (m.find())
+        {
+            xliff = xliff.replace(m.group(),
+                    "xmlns:mda=\"urn:oasis:names:tc:xliff:metadata:2.0\"");
         }
 
         content = content.substring(i2 + 1);

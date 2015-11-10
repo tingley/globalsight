@@ -830,6 +830,9 @@ public class StatisticsService
         for (int i = 0; i < sTuvs.size(); i++)
         {
             SegmentTmTuv curSrcTuv = (SegmentTmTuv) sTuvs.get(i);
+            // Repetitions do not care hash values, refer to "AbstractTmTuv.equals(..)".
+            curSrcTuv.setPreviousHash(-1);
+            curSrcTuv.setNextHash(-1);
             Types types = p_matches.getTypes(curSrcTuv.getId(),
                     ((SegmentTmTu) curSrcTuv.getTu()).getSubId());
             int matchType = types == null ? MatchTypeStatistics.NO_MATCH

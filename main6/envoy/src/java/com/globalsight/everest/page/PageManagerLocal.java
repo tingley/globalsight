@@ -1161,12 +1161,18 @@ public final class PageManagerLocal implements PageManager
                         map.put("key", key);
                     }
 
-                    long jobId = page.getJobId();
-                    JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
-                    if (job != null)
+                    int priority = 3;
+                    if(page != null)
                     {
-                        map.put("priority", job.getPriority());
+                        long jobId = page.getJobId();
+                        JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
+                        if (job != null)
+                        {
+                            priority = job.getPriority();
+                        }
                     }
+                    
+                    map.put("priority", priority);
                     
                     FileExportUtil.exportFileWithThread(map);
                 }

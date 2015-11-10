@@ -477,7 +477,7 @@ ul.dropdown li:hover > ul 		    { visibility: visible;}
 <script>
 var tempTotalPageNum = <%=(pi.getTotalPageNum())%>;
 var g_disableLink = eval("<%=disableComment%>");
-
+var urlResourcesPath = "<%=url_resources%>";
 var g_reviewMode = eval("<%=state.isReviewMode()%>");
 var marklable = "<%=marklable%>";
 var unmarklable = "<%=unmarklable%>";
@@ -493,7 +493,6 @@ var isFirstPage = '<%=state.isFirstPage()%>';
 var isLastPage = '<%=state.isLastPage()%>';
 var isFirstBatch = '<%=state.isFirstBatch()%>';
 var isLastBatch = '<%=state.isLastBatch()%>';
-var g_reviewMode = eval("<%=state.isReviewMode()%>");
 var g_isReviewActivity = eval("<%=b_isReviewActivity%>");
 var g_readOnly = eval("<%=b_readOnly%>");
 var currentIssuesSize = "<%=currentIssuesSize%>";

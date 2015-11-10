@@ -776,7 +776,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             {
                 // Load xliff_alt data in page level to improve performance.
                 loadXliffAlts(result, p_localeId, p_sourcePageId, tuTableName,
-                        tuvTableName);                
+                        tuvTableName);
             }
 
             setHashValues(result);
@@ -1682,7 +1682,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     /**
      * Set previous hash and next hash for the ordered TUVs.
      */
-    private static void setHashValues(List<Tuv> tuvs)
+    public static void setHashValues(List<Tuv> tuvs)
     {
     	TuvImpl preTuv = null;
     	TuvImpl curTuv = null;
@@ -1700,7 +1700,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     	}
     }
 
-    private static long getHashValue(String data)
+    public static long getHashValue(String data)
     {
         try
         {

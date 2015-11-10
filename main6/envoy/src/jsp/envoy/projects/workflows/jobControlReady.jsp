@@ -3,6 +3,7 @@
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
+            com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
             com.globalsight.everest.projecthandler.ProjectInfo,
@@ -45,6 +46,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="search" scope="request" 
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="download" scope="request" 
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" /> 
 <jsp:useBean id="estimatedCompletionDate" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="estimatedTranslateCompletionDate" scope="request"
@@ -58,13 +61,13 @@
 
     String DEFAULT_PARAM = "&jobListStart=0";
     Object param = request.getAttribute(JobManagementHandler.JOB_LIST_START_PARAM);
-    String paramJobId = JobManagementHandler.JOB_ID;
     String startIndex = param == null ? DEFAULT_PARAM : "&jobListStart="+param;
     String thisSearch = (String) request.getAttribute("searchType");
     if (thisSearch == null)
         thisSearch = (String) session.getAttribute("searchType");
     
     ResourceBundle bundle = PageHandler.getBundle(session);
+    String downloadURL = download.getPageURL();
     String archivedURL = archived.getPageURL()+ DEFAULT_PARAM;
     String pendingURL = pending.getPageURL()+ DEFAULT_PARAM;
     String progressURL = progress.getPageURL()+ DEFAULT_PARAM;
@@ -130,6 +133,13 @@ var needWarning = false;
 var objectName = "";
 var guideNode = "myJobs";
 var helpFile = "<%=bundle.getString("help_workflow_ready_tab")%>";
+var downloadCheck;
+var startExportDate;
+var exportEnd = false;
+var exportDownloadRandom;
+var exportFrom = "jobList";
+var exportPercent = 0;
+var w_updateLeverage = null;
 var ajaxUrl="<%=refreshUrl%>";
 var confirmInfo="<%=bundle.getString("jsmsg_admin_system_parameters")%>";
 var unableInfo="<%=bundle.getString("msg_unable_rename_job")%>";
@@ -157,6 +167,190 @@ $(
     });
 	
 })
+function startExport()
+{
+	var jobId = getSelectJobId();
+    var random = Math.random();
+    exportDownloadRandom = Math.random();
+    $.getJSON("/globalsight/TaskListServlet", {
+        action:"checkUploadingStatus",
+        state:8,
+        jobId:jobId,
+        exportFrom:exportFrom,
+        random:random
+    }, function(data) {
+    	if(data.isUploading)
+    	{
+    		alert("The activities of the job are uploading. Please wait.");
+    	}
+    	else
+    	{
+    		$.getJSON("/globalsight/TaskListServlet", {
+                action:"export",
+                state:8,
+                jobId:jobId,
+                exportFrom:exportFrom,
+                random:random
+            }, function(data) {
+            	startExportDate = data.startExportDate;
+            	exportEnd = false;
+            	exportPercent = 0;
+            	if(downloadCheck != null)
+            	{
+            		clearInterval(downloadCheck);
+            		downloadCheck = null;
+            	}
+            	showExportDownloadProgressDiv();
+            });
+    	}
+    });
+}
+
+function doExportDownload()
+{
+	var jobId = getSelectJobId();
+    var random = Math.random();
+    var exportDownloadMessage = "";
+	$.getJSON("/globalsight/TaskListServlet", {
+        action:"download",
+        state:8,
+        jobId:jobId,
+        startExportDate:startExportDate,
+        exportDownloadRandom:exportDownloadRandom,
+        exportFrom:exportFrom,
+        random:random
+    }, function(data) {
+    	if(!exportEnd)
+	    {
+	    	if(data.selectFiles != "")
+	    	{
+	    		exportEnd = true;
+	    		clearInterval(downloadCheck);
+	    		downloadCheck = null;
+	    		var selectedFiles = "";
+	    		$("#selectedFileList").val(selectedFiles);
+	    		$.each(data.selectFiles, function(i, item) {
+	    			item = encodeURIComponent(item.replace(/%C2%A0/g, "%20"));
+	    			selectedFiles += ("," + item);
+	    		});
+	    		selectedFiles = selectedFiles.substring(1,selectedFiles.length);
+	    		$("#selectedFileList").val(selectedFiles);
+	    		downloadFilesForm.action = "/globalsight/ControlServlet?linkName=downloadApplet&pageName=CUST_FILE_Download&action=download&taskId="+null+"&state=8&isChecked="+false;
+	    		downloadFilesForm.submit();
+	    	}
+	    	if(data.percent == 100 && data.selectFiles != "")
+    		{
+    			exportDownloadMessage = "Finish export. Start download."
+    			showExportDownloadProgress("", data.percent, exportDownloadMessage);
+    			exportPercent = 0;
+    		}
+    		if(exportPercent < data.percent && data.percent < 100 )
+    		{
+    			exportPercent = data.percent;
+    			showExportDownloadProgress("", data.percent, exportDownloadMessage);
+    		}
+		}
+    });
+}
+
+function showExportDownloadProgressDiv()
+{
+	if(downloadCheck == null)
+	{
+	    idExportDownloadMessagesDownload.innerHTML = "";
+	    document.getElementById("idExportDownloadProgressDownload").innerHTML = "0%"
+	    document.getElementById("idExportDownloadProgressBarDownload").style.width = 0;
+	    document.getElementById("idExportDownloadProgressDivDownload").style.display = "";
+	    showExportDownloadProgress("", 0 , "Start Export...");
+	    downloadCheck = window.setInterval("doExportDownload()", 2000);
+	}
+}
+
+function getSelectJobId()
+{
+	var jobId = "";
+	var dtpIndexes = dtpSelectedIndex();
+	var transIndexes = transSelectedIndex();
+
+	   // If more than one radio button is displayed, loop
+	   // through the array to find the one checked
+	   // Note that valuesArray[1], the jobState is not used in this jsp page.
+	   if (transIndexes.length > 0)
+	   {
+		   if (JobForm.transCheckbox.length)
+		   {
+		      for (var i = 0; i < JobForm.transCheckbox.length; i++)
+		      {
+		         if (JobForm.transCheckbox[i].checked == true)
+		         {
+		            if( jobId != "" )
+		            {
+		               jobId += " "; // must add a [white space] delimiter
+		            }
+		            valuesArray = getRadioValuesConGroupId(JobForm.transCheckbox[i].value);
+		            jobId += valuesArray[0];
+		         }
+		      }
+		   }
+		   // If only one radio button is displayed, there is no radio button array, so
+		   // just check if the single radio button is checked
+		   else
+		   {
+		      if (JobForm.transCheckbox.checked == true)
+		      {
+		         valuesArray = getRadioValuesConGroupId(JobForm.transCheckbox.value);
+		         jobId += valuesArray[0];
+		      }
+		   }
+	   }
+	   if (dtpIndexes.length > 0)
+	   {
+		   if (JobForm.dtpCheckbox.length)
+		   {
+		      for (var i = 0; i < JobForm.dtpCheckbox.length; i++)
+		      {
+		         if (JobForm.dtpCheckbox[i].checked == true)
+		         {
+		            if( jobId != "" )
+		            {
+		               jobId += " "; // must add a [white space] delimiter
+		            }
+		            valuesArray = getRadioValuesConGroupId(JobForm.dtpCheckbox[i].value);
+		            jobId += valuesArray[0];
+		         }
+		      }
+		   }
+		   // If only one radio button is displayed, there is no radio button array, so
+		   // just check if the single radio button is checked
+		   else
+		   {
+		      if (JobForm.dtpCheckbox.checked == true)
+		      {
+		         valuesArray = getRadioValuesConGroupId(JobForm.dtpCheckbox.value);
+		         jobId += valuesArray[0];
+		      }
+		   }
+	   }
+	   
+	   if (JobForm.jobIdHidden && JobForm.jobIdHidden.length)
+	   {
+	      for (i = 0; i < JobForm.jobIdHidden.length; i++)
+	      {
+	         if (JobForm.jobIdHidden[i].checked == true)
+	         {
+	            if( jobId != "" )
+	            {
+	               jobId += " "; // must add a [white space] delimiter
+	            }
+	            valuesArray = getRadioValuesConGroupId(JobForm.jobIdHidden[i].value);
+	            jobId += valuesArray[0];
+	         }
+	       }
+	    }
+	   return jobId;
+}
+
+
 
 function isInteger(str){  
       var regu = /^[-]{0,1}[0-9]{1,}$/; 
@@ -451,7 +645,7 @@ function submitForm(buttonClicked, curJobId)
    else if (buttonClicked == "changeWFMgr")
    {
       JobForm.action = "<%=changeWfMgrURL%>";
-      jobActionParam = "<%=paramJobId%>";
+      jobActionParam = "jobId";
    }
    else if (buttonClicked == "search")
    {
@@ -465,8 +659,7 @@ function submitForm(buttonClicked, curJobId)
 	    }
 	   JobForm.action = "<%=refreshUrl%>";
        jobActionParam = "reCreateJob";   
-   }
-
+   }  
    var valuesArray;
    var jobId = "";
    // If more than one radio button is displayed, loop
@@ -570,7 +763,38 @@ function submitForm(buttonClicked, curJobId)
 	   JobForm.submit();
 	   return;
    }
+   else  if (buttonClicked == "Export")
+   {
+	 	var checkUrl = "${self.pageURL}&checkIsUploadingForExport=true&jobId=" + jobId + "&t=" + new Date().getTime();
+		var isContinue = true;
+		$.ajaxSetup({async: false}); 
+		$.get(checkUrl,function(data){
+			if(data == "uploading")
+			{
+				alert("The job is uploading. Please wait.");
+				isContinue =  false;
+			}
+		});
+		$.ajaxSetup({ async: true}); 
+	
+		if(!isContinue)
+			return false;
 
+		ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
+	    JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
+	    JobForm.action += "&jobId=" + jobId + "&searchType=<%=thisSearch%>";
+	    JobForm.submit();
+	    return;
+   }
+   else if (buttonClicked == "Download")
+   {
+      $("#downloadJobIds").val(jobId);
+      JobForm.action = "<%=downloadURL%>&firstEntry=true"
+                        + "&<%=DownloadFileHandler.DOWNLOAD_FROM_JOB%>=true";
+      JobForm.submit();
+      return;
+   }
+   
    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
    JobForm.submit();
 }
@@ -803,11 +1027,15 @@ is defined in header.jspIncl which must be included in the body.
 </TD></TR>
 <TR><TD>
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" width="100%">
+ <FORM METHOD="post" NAME="downloadFilesForm" style="display:none">
+<INPUT NAME="fileAction" VALUE="download" TYPE="HIDDEN">
+<INPUT ID="selectedFileList" NAME="selectedFileList" VALUE="" TYPE="HIDDEN">
+</FORM>
 <FORM NAME="JobForm" METHOD="POST">
+<input type="hidden" id="downloadJobIds" name="<%=DownloadFileHandler.PARAM_JOB_ID%>" value=""/>
 <input type="hidden" id="checkedJobIds" name="checkedJobIds" value=""/>
     <TR>
         <TD COLSPAN=3>
-
 <!-- Data Table  -->             
 <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" id="list" CLASS="list" width="100%">
 <COL> <!-- Radio button -->
@@ -1002,7 +1230,25 @@ is defined in header.jspIncl which must be included in the body.
 	 <amb:permission name="<%=Permission.JOBS_RECREATE%>" >
         <INPUT TYPE="BUTTON" NAME="Recreate" VALUE="<%=bundle.getString("action_recreate")%>" onClick="submitForm('Recreate');">
     </amb:permission>
+     <amb:permission name="<%=Permission.JOBS_EXPORT%>" >
+        <INPUT TYPE="BUTTON" NAME=Export VALUE="<%=bundle.getString("lb_export")%>..." onClick="submitForm('Export');">
+    </amb:permission>
+    <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
+        <INPUT TYPE="BUTTON" NAME=Download VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');">
+    </amb:permission>
+    <amb:permission name="<%=Permission.JOBS_EXPORT_DOWNLOAD%>" >
+        <INPUT TYPE="BUTTON" NAME=ExportDownload VALUE="<%=bundle.getString("lb_export_download")%>..." onClick="startExport()">
+    </amb:permission>
+    
+   
 </DIV>
+<P id="statusMessage" CLASS="standardText" >&nbsp;</P>
+ <span id="exportdownload_progress_content">
+    <div id="idExportDownloadProgressDivDownload"
+         style='border-style: solid; border-width: 1pt; border-color: #0c1476; background-color: white; display:none; left: 300px; height: 370; width: 500px; position: absolute; top: 150px; z-index: 21'>
+        <%@ include file="/envoy/tasks/exportDownloadProgressIncl.jsp" %>
+    </div>
+</span>
 </TD></TR>
 </TABLE>
 <P id="statusMessage" CLASS="standardText" >&nbsp;</P>

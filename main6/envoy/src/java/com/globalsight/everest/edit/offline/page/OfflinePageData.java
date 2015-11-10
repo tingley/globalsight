@@ -2631,7 +2631,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         targetText = osd.getTargetTuv().getGxml();
 
                         if (osd.getTargetTuv().getTu(jobId).getDataType()
-                                .startsWith(IFormatNames.FORMAT_XLIFF))
+                                .equals(IFormatNames.FORMAT_XLIFF))
                         {
                             isFromXliff = true;
                         }
@@ -2801,7 +2801,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             sid = osd.getSourceTuv().getSid();
 
                             if (osd.getTargetTuv().getTu(jobId).getDataType()
-                                    .startsWith(IFormatNames.FORMAT_XLIFF))
+                                    .equals(IFormatNames.FORMAT_XLIFF))
                             {
                                 isFromXliff = true;
                             }

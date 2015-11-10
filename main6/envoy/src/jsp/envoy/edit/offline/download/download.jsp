@@ -822,9 +822,7 @@ function disablePTFOptions(p_state)
     	}
         theForm.resInsertionSelector.disabled = state;
         
-        alert(state);
          document.getElementById("changeCreationIdForMT").disabled = state;
-         
          document.getElementById("separateTMfile").disabled = state;
      
          theForm.tmEditTypeSelector.disabled = state;
@@ -1423,6 +1421,16 @@ $(document).ready(function(){
             </TR>
             <TR>
                     <TD  COLSPAN="3"><SPAN CLASS="smallText"><%= labelResInsertionNote %></SPAN></TD>
+            </TR>
+                <TR>
+                    <TD>
+                      <% if(E_PTFList.size()>=30){%>
+	                      <INPUT TYPE="BUTTON" NAME="<%=lbCancel%>" VALUE="<%=lbCancel%>"
+	                      onclick="location.replace('<%=cancelUrl%>')">
+	                      <INPUT TYPE="BUTTON" NAME="<%=lbStartDownload%>"
+	                      VALUE="<%=lbStartDownload%>" onclick="submitForm()">
+	                  <%}%>
+                    </TD>
             </TR>
           </TABLE>
         </TD>

@@ -237,8 +237,9 @@ if(targetPages != null && targetPages.size() > 0)
         sizePutf = (r!=0) ? ((sizePutf/1024)+1) : sizePutf;  //round up
     }
     String sizePutfStr = numberFormat.format(sizePutf);
+    String strhref=WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING + putf.getStoragePath();
     %> 
-    <A HREF="<%out.print(WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING + putf.getStoragePath());%>" 
+    <A HREF="<%out.print(strhref.replace("\\", "/"));%>" 
         CLASS="standardHREF"><%out.print(putf.getStoragePath());%></A>  
     <%out.print(sizePutfStr);%>K<BR> 
     <SPAN CLASS="smallText">

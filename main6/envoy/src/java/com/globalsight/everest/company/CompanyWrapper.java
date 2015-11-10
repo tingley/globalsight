@@ -52,7 +52,8 @@ public class CompanyWrapper
     public static final String CURRENT_COMPANY_ID = "currentCompanyId";
 
     private static Company superCompany;
-    private static HashMap<String, String> idViewName = new HashMap<String, String>();
+    private static HashMap<String, String> id2NameMap = new HashMap<String, String>();
+    private static HashMap<String, String> name2IdMap = new HashMap<String, String>();
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -97,18 +98,18 @@ public class CompanyWrapper
             throws PersistenceException
     {
         String hql = "from Company c where c.isActive = 'Y'";
-        idViewName = new HashMap<String, String>();
+        id2NameMap = new HashMap<String, String>();
 
         Collection<?> col = HibernateUtil.search(hql);
         for (Iterator<?> iter = col.iterator(); iter.hasNext();)
         {
             Company company = (Company) iter.next();
 
-            idViewName.put(Long.toString(company.getId()),
+            id2NameMap.put(Long.toString(company.getId()),
                     company.getCompanyName());
         }
 
-        return idViewName;
+        return id2NameMap;
     }
 
     public static Vector<Long> addCompanyIdBoundArgs(Vector<Long> args)
@@ -169,13 +170,13 @@ public class CompanyWrapper
 
     public static String getCompanyNameById(String id)
     {
-        String name = idViewName.get(id);
+        String name = id2NameMap.get(id);
         if (name == null)
         {
             getAllCompanyRefer();
         }
 
-        name = idViewName.get(id);
+        name = id2NameMap.get(id);
         if (name == null)
         {
             return "Null Company";
@@ -189,7 +190,30 @@ public class CompanyWrapper
     public static String getCompanyIdByName(String strName)
             throws PersistenceException
     {
-        return String.valueOf(getCompanyByName(strName).getId());
+    	strName = strName.toUpperCase();
+    	String id = name2IdMap.get(strName);
+    	if (id == null)
+    	{
+    		getAllCompanyNameIdMap();
+    	}
+
+    	return name2IdMap.get(strName);
+    }
+
+    private static HashMap<String, String> getAllCompanyNameIdMap()
+    {
+        String hql = "from Company c where c.isActive = 'Y'";
+        name2IdMap = new HashMap<String, String>();
+
+        Collection<?> col = HibernateUtil.search(hql);
+        for (Iterator<?> iter = col.iterator(); iter.hasNext();)
+        {
+            Company company = (Company) iter.next();
+			name2IdMap.put(company.getCompanyName().toUpperCase(),
+					String.valueOf(company.getId()));
+        }
+
+        return name2IdMap;
     }
 
     /**

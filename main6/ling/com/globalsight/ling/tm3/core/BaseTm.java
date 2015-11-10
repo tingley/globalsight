@@ -33,7 +33,6 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
 import org.hibernate.LockOptions;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
@@ -1290,13 +1289,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new LocaleDataHandle<T>(this, localeList, start, end);
     }
 
-    @Deprecated
-	public TM3Handle<T> getDataByLocalesAndParamMap(List<TM3Locale> localeList,
-			Map<String, Object> paramMap)
-	{
-		return new LocaleDataHandle<T>(this, localeList, paramMap);
-	}
-
     @Override
     public TM3Handle<T> getDataById(List<Long> tuIds)
     {
@@ -1311,14 +1303,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
                 getCustomAttributes(attrs), start, end);
     }
-
-    @Deprecated
-    public TM3Handle<T> getDataByAttributesAndParamMap(
-			Map<TM3Attribute, Object> attrs, Map<String, Object> paramMap)
-	{
-		return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
-				getCustomAttributes(attrs), paramMap);
-	}
 
     @Override
     public void removeDataByLocale(TM3Locale locale)

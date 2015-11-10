@@ -33,17 +33,15 @@ import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvAttributeUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.tuv.TuTuvAttributeImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvMerger;
 import com.globalsight.everest.tuv.TuvState;
-import com.globalsight.ling.common.DiplomatBasicParser;
-import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.ling.tm3.core.Fingerprint;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -123,28 +121,10 @@ public class PageJobData
         	{
         		BaseTmTuv preSrcTuv = previousTu.getFirstTuv(sourceLocale);
 				BaseTmTuv preTuv = previousTu.getFirstTuv(curTuv.getLocale());
-				preTuv.setNextHash(getHashValue(curSrcTuv.getSegment()));
-				curTuv.setPreviousHash(getHashValue(preSrcTuv.getSegment()));
+				preTuv.setNextHash(SegmentTuvUtil.getHashValue(curSrcTuv.getSegment()));
+				curTuv.setPreviousHash(SegmentTuvUtil.getHashValue(preSrcTuv.getSegment()));
         	}
         }
-    }
-
-    private long getHashValue(String data)
-    {
-        try
-        {
-            SegmentTmExactMatchFormatHandler handler =
-                new SegmentTmExactMatchFormatHandler();
-            DiplomatBasicParser diplomatParser =
-                new DiplomatBasicParser(handler);
-            diplomatParser.parse(data);
-            return Fingerprint.fromString(handler.toString());
-        }
-        catch (Exception ex)
-        {
-        	c_logger.error("Error to get hash value for data: " + data, ex);
-        }
-    	return -1;
     }
 
     /**
@@ -251,11 +231,11 @@ public class PageJobData
 	/**
 	 * GBS-4068 : No new TU (with SID) created in the storage TM for AuthorIT SID
 	 * */
-	private ArrayList<PageTmTu> filterExactMatchData(
+	private Collection<PageTmTu> filterExactMatchData(
 			Collection<PageTmTu> tuList,
 			Set<GlobalSightLocale> p_targetLocales, long pageId)
 	{
-		ArrayList<PageTmTu> returnTuList = new ArrayList<PageTmTu>();
+		ArrayList<PageTmTu> returnTuList = null;
 		Map<String, Set<LeverageMatch>> leverageMatchMap = new HashMap<String, Set<LeverageMatch>>();
 		List<LeverageMatch> leverageMatches = null;
 		for (GlobalSightLocale targetLocale : p_targetLocales)
@@ -266,7 +246,8 @@ public class PageJobData
 			{
 				String key = match.getOriginalSourceTuvId() + "_"
 						+ targetLocale.getId();
-				Set<LeverageMatch> set = (TreeSet<LeverageMatch>) leverageMatchMap.get(key);
+				Set<LeverageMatch> set = (TreeSet<LeverageMatch>) leverageMatchMap
+						.get(key);
 				if (set == null)
 				{
 					set = new TreeSet<LeverageMatch>();
@@ -275,57 +256,74 @@ public class PageJobData
 				set.add(match);
 			}
 		}
-
-		Set<LeverageMatch> leverageMatchSet = null;
-		for (PageTmTu tu : tuList)
+		
+		if (!leverageMatchMap.isEmpty())
 		{
-			PageTmTu clonedTu = (PageTmTu) tu.clone();
-			PageTmTuv sourceTuv = (PageTmTuv)tu.getFirstTuv(m_sourceLocale);
-			clonedTu.addTuv(sourceTuv);
-			
-			Iterator itLocale = tu.getAllTuvLocales().iterator();
-			while (itLocale.hasNext())
+			returnTuList = new ArrayList<PageTmTu>();
+			Set<LeverageMatch> leverageMatchSet = null;
+			for (PageTmTu tu : tuList)
 			{
-				GlobalSightLocale tuvLocale = (GlobalSightLocale) itLocale.next();
-				if (!tuvLocale.equals(m_sourceLocale))
+				PageTmTu clonedTu = (PageTmTu) tu.clone();
+				PageTmTuv sourceTuv = (PageTmTuv) tu
+						.getFirstTuv(m_sourceLocale);
+				clonedTu.addTuv(sourceTuv);
+
+				Iterator itLocale = tu.getAllTuvLocales().iterator();
+				while (itLocale.hasNext())
 				{
-					PageTmTuv tuv = (PageTmTuv) tu.getFirstTuv(tuvLocale);
-					leverageMatchSet = leverageMatchMap.get(sourceTuv.getId()
-							+ "_" + tuvLocale.getId());
-					if (TuvState.EXACT_MATCH_LOCALIZED.getName().equals(
-							tuv.getState())
-							&& leverageMatchSet != null)
+					GlobalSightLocale tuvLocale = (GlobalSightLocale) itLocale
+							.next();
+					if (!tuvLocale.equals(m_sourceLocale))
 					{
-						for (LeverageMatch match : leverageMatchSet)
+						PageTmTuv tuv = (PageTmTuv) tu.getFirstTuv(tuvLocale);
+						leverageMatchSet = leverageMatchMap.get(sourceTuv
+								.getId() + "_" + tuvLocale.getId());
+						if (leverageMatchSet != null)
 						{
-							String mathcText = GxmlUtil.stripRootTag(match
-									.getMatchedText());
-							if (mathcText.equals(tuv.getSegmentNoTopTag()))
+							if (TuvState.EXACT_MATCH_LOCALIZED.getName()
+									.equals(tuv.getState()))
 							{
-								if (match.getSid() != null
-										&& tuv.getSid() != null
-										&& !match.getSid().equals(
-												tuv.getSid()))
+								for (LeverageMatch match : leverageMatchSet)
 								{
-									clonedTu.addTuv(tuv);
-								}
-								else if (match.getSid() == null
-										&& tuv.getSid() != null)
-								{
-									clonedTu.addTuv(tuv);
+									String mathcText = GxmlUtil
+											.stripRootTag(match
+													.getMatchedText());
+									if (mathcText.equals(tuv.getSegmentNoTopTag()))
+									{
+										if (match.getSid() != null && tuv.getSid() != null
+												&& !match.getSid().equals(tuv.getSid()))
+										{
+											clonedTu.addTuv(tuv);
+										}
+										else if (match.getSid() == null && tuv.getSid() != null)
+										{
+											clonedTu.addTuv(tuv);
+										}
+									}
 								}
 							}
+							else
+							{
+								clonedTu.addTuv(tuv);
+							}
+						}
+						else
+						{
+							clonedTu.addTuv(tuv);
 						}
 					}
 				}
-			}
 
-			if (clonedTu.getTuvSize() > 1)
-			{
-				returnTuList.add(clonedTu);
+				if (clonedTu.getTuvSize() > 1)
+				{
+					returnTuList.add(clonedTu);
+				}
 			}
 		}
-		return returnTuList;
+		if (returnTuList != null)
+			return returnTuList;
+		else 
+			return tuList;
 	}
     /**
      * Returns a Collection of Tus in this object that have Tuvs that satisfies

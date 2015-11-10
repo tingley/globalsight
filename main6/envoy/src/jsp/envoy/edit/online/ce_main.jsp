@@ -3,6 +3,7 @@
     contentType="text/html; charset=UTF-8"
     errorPage="error.jsp"
     import="com.globalsight.util.edit.EditUtil,
+            com.globalsight.everest.edit.online.SegmentView,
             com.globalsight.util.edit.GxmlUtil,
             com.globalsight.everest.edit.online.CommentView,
             com.globalsight.everest.comment.Issue,
@@ -145,11 +146,18 @@ SegmentView segmentView = state.getEditorManager().getSegmentView(
             state.getTargetLocale().getId(), state.getTmNames(),
             state.getDefaultTermbaseName());
 
+boolean b_rtlLocale = EditUtil.isRTLLocale(state.getTargetLocale());
+
 GxmlElement srcGxml = segmentView.getSourceSegment();
 GxmlElement tgtGxml = segmentView.getTargetSegment();
 
 String sourceSegment = srcGxml.getTextValue();
 String targetSegment = tgtGxml.getTextValue();
+String str_sid = segmentView.getTargetTuv().getSid();
+if (str_sid == null || str_sid.trim().length()==0)
+{
+    str_sid = "N/A";
+} 
 
 OnlineTagHelper applet = new OnlineTagHelper();
 try
@@ -596,14 +604,35 @@ function doOnLoad()
   </tr>
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_source") %>:</span></td>
-    <td class="standardtext" width="100%">
+    <td class="standardtext" >
       <div style="width: 394px;max-height: 60px;overflow: auto; "><%=sourceSegment %></div>
     </td>
   </tr>
   <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_target") %>:</span></td>
-    <td class="standardtext" width="100%">
-      <div style="width: 394px;max-height: 60px;overflow: auto; "><%=targetSegment %></div>
+   <% 
+   	if(b_rtlLocale)
+   	{
+    %>
+  	 <td class="standardtext">
+      <div style="width: 394px;max-height: 60px;overflow: auto;" dir="rtl"><%=targetSegment %></div>
+    </td>
+    <%		
+   	}
+   	else
+   	{
+    %>
+    <td class="standardtext">
+      <div style="width: 394px;max-height: 60px;overflow: auto;"><%=targetSegment %></div>
+    </td>
+    <%
+   	}
+    %>
+  </tr>
+    <tr>
+    <td valign="top"><span class="label"><%=bundle.getString("lb_sid") %>:</span></td>
+    <td class="standardtext">
+      <div style="width: 394px;max-height: 60px;overflow: auto;"><%=str_sid%></div>
     </td>
   </tr>
   <tr>

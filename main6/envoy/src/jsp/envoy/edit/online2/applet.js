@@ -386,6 +386,7 @@ function DisplayHtmlToPTagString(html)
     result = result.replace(/&lt;/g, "<");
     result = result.replace(/&gt;/g, ">");
     result = result.replace(/&amp;/g, "&");
+    result = result.replace(/\n/g, "");
 
     return result;
 }

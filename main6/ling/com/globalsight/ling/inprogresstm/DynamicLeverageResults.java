@@ -386,6 +386,14 @@ public class DynamicLeverageResults implements Serializable
             {
                 DynamicLeveragedSegment segment1 = (DynamicLeveragedSegment) o1;
                 DynamicLeveragedSegment segment2 = (DynamicLeveragedSegment) o2;
+
+				result = (int) (segment1.getMatchedTuvId() - segment2
+						.getMatchedTuvId());
+                if (result != 0)
+                {
+                	return result;
+                }
+
                 int tmIndex1 = segment1.getTmIndex();
                 float score1 = segment1.getScore();
                 int tmIndex2 = segment2.getTmIndex();
@@ -529,6 +537,13 @@ public class DynamicLeverageResults implements Serializable
             {
                 DynamicLeveragedSegment segment1 = (DynamicLeveragedSegment) o1;
                 DynamicLeveragedSegment segment2 = (DynamicLeveragedSegment) o2;
+
+				result = (int) (segment1.getMatchedTuvId() - segment2
+						.getMatchedTuvId());
+                if (result != 0)
+                {
+                	return result;
+                }
 
                 result = (int) (segment2.getScore() - segment1.getScore());
                 if (result != 0)

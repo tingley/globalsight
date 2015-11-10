@@ -31,13 +31,22 @@ public class XliffHelper
     public static final String MARK_TU_ID = "tuId";
     public static final String MARK_TUV_ID = "tuvId";
     public static final String MARK_XLIFF_TARGET_LANG = "xliffTargetLang";
+    public static final String XLIFF_VERSION = "xliffVersion";
+    public static final String XLIFF_VERSION_20 = "2.0";
+    
+    // for xliff alt
+    public static final String MRK = "mrk";
+    public static final String MATCH = "mtc:match";
+    public static final String MRK_ID = "mrkId";
+    public static final String ALT_SOURCE = "altSource";
+    public static final String ALT_TARGET = "altTarget";
+    
     // xliff 2.0 elements
     public static final String XLIFF = "xliff";
     public static final String FILE = "file";
     public static final String UNIT = "unit";
     public static final String SEGMENT = "segment";
     public static final String SOURCE = "source";
-    public static final String MRK = "mrk";
     public static final String TARGET = "target";
     public static final String ATTR_VERSION = "version";
     public static final String ATTR_ID = "id";

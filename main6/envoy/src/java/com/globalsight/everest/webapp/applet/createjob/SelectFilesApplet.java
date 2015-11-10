@@ -11,19 +11,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.ZipEntry;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
-
 import netscape.javascript.JSObject;
 
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+
 import com.globalsight.everest.webapp.applet.common.EnvoyJApplet;
+import com.globalsight.webservices.client2.Ambassador2;
+import com.globalsight.webservices.client2.WebService2ClientHelper;
 
 import de.innosystec.unrar.rarfile.FileHeader;
 
@@ -37,12 +37,12 @@ public class SelectFilesApplet extends EnvoyJApplet
     private JSObject win;
     private List<String> fileList;
     private String baseFolder = "";
-    
+
     static 
     { 
-        Locale.setDefault(Locale.ENGLISH); 
+        Locale.setDefault(Locale.ENGLISH);
     }
-    
+
     public void init()
     {
         win = JSObject.getWindow(this);
@@ -374,9 +374,12 @@ public class SelectFilesApplet extends EnvoyJApplet
                     .replace("/", File.separator);
             String filePathName = savingPath + File.separator + originalFilePath;
 
-            FileUploadThread tt = new FileUploadThread(hostName,
-                    String.valueOf(port), userName, password, enableHttps,
-                    companyIdWorkingFor, file, filePathName, win);
+			Ambassador2 ambassador = WebService2ClientHelper
+					.getClientAmbassador2(hostName, String.valueOf(port),
+							userName, password, enableHttps);
+            String fullAccessToken = ambassador.dummyLogin(userName, password);
+			FileUploadThread tt = new FileUploadThread(companyIdWorkingFor,
+					file, filePathName, win, ambassador, fullAccessToken);
             pool.execute(tt);
         }
 

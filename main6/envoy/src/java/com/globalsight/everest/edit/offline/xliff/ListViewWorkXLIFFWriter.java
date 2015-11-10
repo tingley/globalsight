@@ -486,7 +486,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         }
     }
 
-    private boolean isExtractMatch(OfflineSegmentData data)
+    private boolean isExactMatch(OfflineSegmentData data)
     {
         return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(data
                 .getDisplayMatchType());
@@ -499,21 +499,13 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
     private boolean isInContextMatch(OfflineSegmentData data)
     {
-        return "Context Exact Match".equals(data.getDisplayMatchType());
-    }
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.startsWith("Context Exact Match"))
+        {
+            return true;
+        }
 
-    private boolean isExtractMatch2(OfflineSegmentData data)
-    {
-        String mtype = data.getDisplayMatchType();
-        return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(mtype)
-                || (mtype != null && mtype.contains("Exact Match."));
-    }
-
-    private boolean isInContextMatch2(OfflineSegmentData data)
-    {
-        String mtype = data.getDisplayMatchType();
-        return "Context Exact Match".equals(mtype)
-                || "Default Context Exact Match".equals(mtype);
+        return false;
     }
 
     private boolean isFuzzyMatch(OfflineSegmentData data)
@@ -533,7 +525,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         String state = "new";
         if (p_downloadParams.isPopulate100())
         {
-            if (isInContextMatch(data) || isExtractMatch(data))
+            if (isInContextMatch(data) || isExactMatch(data))
             {
                 state = "final";
             }
@@ -637,25 +629,16 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                         && isInContextMatch(p_osd))
                     m_outputStream.write(str2DoubleQuotation("no"));
                 else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
-                        && isExtractMatch(p_osd))
+                        && isExactMatch(p_osd))
                     m_outputStream.write(str2DoubleQuotation("no"));
                 else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
-                        && (isExtractMatch(p_osd) || isInContextMatch(p_osd)))
+                        && (isExactMatch(p_osd) || isInContextMatch(p_osd)))
                     m_outputStream.write(str2DoubleQuotation("no"));
                 else
                     m_outputStream.write(str2DoubleQuotation("yes"));
             }
             else
                 m_outputStream.write(str2DoubleQuotation("yes"));
-            // if (!editAll && (isInContextMatch(p_osd) ||
-            // isExtractMatch(p_osd)))
-            // {
-            // m_outputStream.write(str2DoubleQuotation("no"));
-            // }
-            // else
-            // {
-            // m_outputStream.write(str2DoubleQuotation("yes"));
-            // }
 
             // SID
             if (sid != null && sid.length() > 0)
@@ -711,7 +694,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             m_outputStream.write(m_strEOL);
         }
 
-        if (p_osd.getDisplayMatchType() != null)
+        if (isInContextMatch(p_osd))
         {
             m_outputStream.write("<note>");
             m_outputStream.write("Match Type: " + p_osd.getDisplayMatchType());

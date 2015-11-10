@@ -371,47 +371,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
     }
 
-    @Deprecated
-	public long getTuCountByLocalesAndParamMap(List<TM3Locale> localeList,
-			Map<String, Object> paramMap) throws SQLException
-	{
-		Connection conn = null;
-		try
-		{
-			String localeIds = getLocaleIds(localeList);
-			conn = DbUtil.getConnection();
-			long count = 0;
-			StatementBuilder sb = new StatementBuilder();
-
-			String stringId = null;
-			String isRegex = null;
-			if (paramMap != null)
-			{
-				stringId = (String) paramMap.get("stringId");
-				isRegex = (String) paramMap.get("isRegex");
-			}
-			getSqlByParamMap(sb, paramMap, -1, -1);
-
-			if (StringUtil.isNotEmpty(stringId))
-			{
-				count = filterTuBySid(conn, sb, stringId, isRegex).size();
-			}
-			else
-			{
-				count = getIdList(conn, sb).size();
-			}
-
-			return count;
-		}
-		catch (Exception e)
-		{
-			throw new SQLException(e);
-		}
-		finally
-		{
-			DbUtil.silentReturnConnection(conn);
-		}
-	}
+    
 
     @Override
     public long getTuvCountByLocales(List<TM3Locale> localeList, Date start, Date end)
@@ -496,51 +456,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
     }
 
-    //
-    // AttributeDataHandle
-    //
-    @Deprecated
-	public long getTuCountByAttributesAndParamMap(
-			Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
-			throws SQLException
-	{
-		Connection conn = null;
-		try
-		{
-			conn = DbUtil.getConnection();
-			long count = 0;
-			StatementBuilder sb = new StatementBuilder();
-
-			String stringId = null;
-			String isRegex = null;
-			if (paramMap != null)
-			{
-				stringId = (String) paramMap.get("stringId");
-				isRegex = (String) paramMap.get("isRegex");
-			}
-			getSqlByParamMap(sb, paramMap, -1, -1);
-
-			if (StringUtil.isNotEmpty(stringId))
-			{
-				count = filterTuBySid(conn, sb, stringId, isRegex).size();
-			}
-			else
-			{
-				count = getIdList(conn, sb).size();
-			}
-
-			return count;
-		}
-		catch (Exception e)
-		{
-			throw new SQLException(e);
-		}
-		finally
-		{
-			DbUtil.silentReturnConnection(conn);
-		}
-	}
+   
 
 	@Override
     public long getTuvCountByAttributes(Map<TM3Attribute, Object> inlineAttrs,
@@ -610,90 +526,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				isRegex = (String) paramMap.get("isRegex");
 			}
 			getSqlByParamMap(sb, paramMap, startId, count);
-			if (StringUtil.isNotEmpty(stringId))
-			{
-				ids = filterTuBySid(conn, sb, stringId, isRegex);
-			}
-			else
-			{
-				ids = getIdList(conn, sb);
-			}
-
-			return getTu(ids, false);
-		}
-		catch (Exception e)
-		{
-			throw new SQLException(e);
-		}
-		finally
-		{
-			DbUtil.silentReturnConnection(conn);
-		}
-	}
-
-	@Deprecated
-	public List<TM3Tu<T>> getTuPageByLocalesAndParamMap(long startId,
-			int count, List<TM3Locale> localeList, Map<String, Object> paramMap)
-			throws SQLException
-	{
-		Connection conn = null;
-		try
-		{
-			String localeIds = getLocaleIds(localeList);
-			List<Long> ids = new ArrayList<Long>();;
-			conn = DbUtil.getConnection();
-			StatementBuilder sb = new StatementBuilder();
-			String stringId = null;
-			String isRegex = null;
-			if (paramMap != null)
-			{
-				stringId = (String) paramMap.get("stringId");
-				isRegex = (String) paramMap.get("isRegex");
-			}
-			getSqlByParamMap(sb, paramMap, startId, count);
-
-			if (StringUtil.isNotEmpty(stringId))
-			{
-				ids = filterTuBySid(conn, sb, stringId, isRegex);
-			}
-			else
-			{
-				ids = getIdList(conn, sb);
-			}
-
-			return getTu(ids, false);
-		}
-		catch (Exception e)
-		{
-			throw new SQLException(e);
-		}
-		finally
-		{
-			DbUtil.silentReturnConnection(conn);
-		}
-	}
-
-	@Deprecated
-	public List<TM3Tu<T>> getTuPageByAttributesAndParamMap(long startId,
-			int count, Map<TM3Attribute, Object> inlineAttrs,
-			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
-			throws SQLException
-	{
-		Connection conn = null;
-		try
-		{
-			List<Long> ids = new ArrayList<Long>();;
-			conn = DbUtil.getConnection();
-			StatementBuilder sb = new StatementBuilder();
-			String stringId = null;
-			String isRegex = null;
-			if (paramMap != null)
-			{
-				stringId = (String) paramMap.get("stringId");
-				isRegex = (String) paramMap.get("isRegex");
-			}
-			getSqlByParamMap(sb, paramMap, startId, count);
-
 			if (StringUtil.isNotEmpty(stringId))
 			{
 				ids = filterTuBySid(conn, sb, stringId, isRegex);

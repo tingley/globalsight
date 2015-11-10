@@ -431,7 +431,11 @@ public abstract class AbstractTranslator implements MachineTranslator
 						separatedSegmentMap);
 				// MS Translator will add extra space before < and after > like
 				// "> <", " <" and "> ".
-	        	injected = StringUtil.replace(injected, "> <", "><");
+				// If original segment has "><", not regardless it has "> <" or not.
+				if (segments[i].indexOf("><") > -1)
+				{
+		        	injected = StringUtil.replace(injected, "> <", "><");
+				}
 //	        	injected = StringUtil.replace(injected, "> ", ">");
 //	        	injected = StringUtil.replace(injected, " <", "<");
 	        	injected = heads.get(i) + injected + "</segment>";

@@ -262,7 +262,11 @@ public class ConnectionPool
         {
             CATEGORY.debug("Got connection " + c.hashCode());
         }
-        m_connToPools.put(c, pool);
+
+		if (c != null) {
+			m_connToPools.put(c, pool);
+		}
+
         return c;
     }
 
@@ -648,8 +652,7 @@ public class ConnectionPool
      *
      * This is a "public" method on the pool instance.
      */
-    private synchronized Connection _getConnection()
-            throws ConnectionPoolException
+    private Connection _getConnection() throws ConnectionPoolException
     {
         Connection conn = null;
 
@@ -677,19 +680,6 @@ public class ConnectionPool
     }
 
     /**
-     * Return true if this connection pool has a reference to the given
-     * connection, false otherwise.
-     *
-     * This is a "public" method on the pool instance.
-     * 
-     * @deprecated for performance
-     */
-    private synchronized boolean _contains(Connection p_conn)
-    {
-        return (__isAllocated(p_conn) || __isUnallocated(p_conn));
-    }
-
-    /**
      * Remove the given connection from the allocated list; if it is still
      * alive, add it to the unallocated list; otherwise, since _findConnection
      * may be waiting for a connection, create a new one and add it to the
@@ -697,12 +687,10 @@ public class ConnectionPool
      *
      * This is a "public" method on the pool instance.
      */
-    private synchronized void _returnConnection(Connection p_conn)
+    private void _returnConnection(Connection p_conn)
     {
         __removeAllocatedConnection(p_conn);
         __unallocateConnection(p_conn);
-
-        notifyAll();
     }
 
     /**
@@ -739,6 +727,7 @@ public class ConnectionPool
 
         if (m_unallocatedConns.size() > 0)
         {
+        	// "remove" is thread safe
             conn = (Connection) m_unallocatedConns.remove(0);
             try
             {
@@ -748,15 +737,9 @@ public class ConnectionPool
                 }
                 else
                 {
-                    boolean autoCommit = conn.getAutoCommit();
-
-                    try
+                	try
                     {
-                        // Test the connection if it is timeout or not
-                        conn.setAutoCommit(true);
-                        conn.setAutoCommit(autoCommit);
-
-                        __allocateConnection(conn);
+                		__allocateConnection(conn);
                     }
                     catch (Exception e)
                     {
@@ -798,6 +781,7 @@ public class ConnectionPool
      */
     private void __allocateConnection(Connection p_conn)
     {
+    	// "addElement" is thread safe
         m_allocatedConns.addElement(p_conn);
     }
 
@@ -808,51 +792,8 @@ public class ConnectionPool
      */
     private void __unallocateConnection(Connection p_conn)
     {
+    	// "addElement" is thread safe
         m_unallocatedConns.addElement(p_conn);
-    }
-
-    /**
-     * Return true if the given connection is in the "allocated" array.
-     *
-     * This method is called by the synchronized _contains().
-     * 
-     * @deprecated for performance
-     */
-    private boolean __isAllocated(Connection p_conn)
-    {
-        for (int i = 0; i < m_allocatedConns.size(); ++i)
-        {
-            Connection conn = (Connection) m_allocatedConns.elementAt(i);
-
-            if (p_conn == conn)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Return true if the given connection is in the "unallocated" array.
-     *
-     * This method is called by the synchronized _contains().
-     * 
-     * @deprecated for performance 
-     */
-    private boolean __isUnallocated(Connection p_conn)
-    {
-        for (int i = 0; i < m_unallocatedConns.size(); ++i)
-        {
-            Connection conn = (Connection) m_unallocatedConns.elementAt(i);
-
-            if (p_conn == conn)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -862,8 +803,7 @@ public class ConnectionPool
      *
      * Called by the synchronized _findConnection().
      */
-    private synchronized Connection __createConnection()
-            throws ConnectionPoolException
+	private Connection __createConnection() throws ConnectionPoolException
     {
         Connection conn = null;
         Properties props = new Properties();
@@ -912,19 +852,14 @@ public class ConnectionPool
      *
      * This method is called from the synchronized_returnConnection().
      */
-    private void __removeAllocatedConnection(Connection p_conn)
+    private synchronized void __removeAllocatedConnection(Connection p_conn)
     {
-        for (int i = 0; i < m_allocatedConns.size(); ++i)
-        {
-            Connection conn = (Connection) m_allocatedConns.elementAt(i);
+    	// "remove" is not thread safe
+    	m_allocatedConns.remove(p_conn);
 
-            if (p_conn == conn)
-            {
-                m_allocatedConns.remove(i);
-                m_connToPools.remove(p_conn);
-                return;
-            }
-        }
+    	m_connToPools.remove(p_conn);
+
+    	notifyAll();
     }
 
     /**

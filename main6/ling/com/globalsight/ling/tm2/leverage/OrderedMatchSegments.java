@@ -280,7 +280,9 @@ class OrderedMatchSegments
                  String sText2 = getSegmentText(tuv2.getSourceTuv().getSegment());
                  String tText2 = getSegmentText(tuv2.getSegment());
                  
-                 if (sText1.equals(sText2) && tText1.equals(tText2))
+				if (sText1.equals(sText2) && tText1.equals(tText2)
+						&& tuv1.getPreviousHash() == tuv2.getPreviousHash()
+						&& tuv1.getNextHash() == tuv1.getNextHash())
                  {
                      removedTuv.add(tuv2);
                  }
@@ -710,6 +712,24 @@ class OrderedMatchSegments
             if (score1 == 100)
             {
                 result = LeverageUtil.compareSid(tuv1, tuv2, jobId);
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            if (tuv1.getPreviousHash() != -1 && tuv2.getPreviousHash() != -1)
+            {
+                result = (int) (tuv2.getPreviousHash() - tuv1.getPreviousHash());
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            if (tuv1.getNextHash() != -1 && tuv2.getNextHash() != -1)
+            {
+                result = (int) (tuv2.getNextHash() - tuv1.getNextHash());
                 if (result != 0)
                 {
                     return result;

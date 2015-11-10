@@ -184,14 +184,18 @@ function initRichEdit(el)
             // notice that IE4 cannot get the document.documentElement
             // so we'll use the body
             // not that it matters when it comes to innerText.
+			var text = "";
+        	
             if(document.recalc)
 			{
-				return el.frameWindow.document.body.innerText;
+            	text = el.frameWindow.document.body.innerText;
 			}
 			else
 			{
-				return document.getElementById(el.id).contentWindow.document.body.textContent;
+				text = document.getElementById(el.id).contentWindow.document.body.textContent;
 			}
+            
+            return text.replace(/\n/g, "");
         }
 
         // and now some text manipulations

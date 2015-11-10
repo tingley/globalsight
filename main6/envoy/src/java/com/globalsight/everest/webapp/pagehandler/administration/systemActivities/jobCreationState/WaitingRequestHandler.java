@@ -35,6 +35,7 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.util.fileImport.FileImportUtil;
 import com.globalsight.cxe.util.fileImport.sort.ImportRequestSortUtil;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.util.comparator.RequestFileComparator;
@@ -167,10 +168,11 @@ public class WaitingRequestHandler extends PageActionHandler
     @SuppressWarnings("rawtypes")
     private List<RequestFile> getAllRequestVos()
     {
+        HashMap<String, String> fileProfileId2priority = new HashMap<String, String>();
         HashMap<String, FileProfileImpl> fileProfiles = new HashMap<String, FileProfileImpl>();
         
         List<RequestFile> requestVos = new ArrayList<RequestFile>();
-        HashMap<String, List<CxeMessage>> ms = ObjectUtil.deepClone(FileImportUtil.ON_HOLD_MESSAGE);
+        HashMap<String, List<CxeMessage>> ms = FileImportUtil.getCloneHoldingRequests();
         for (List<CxeMessage> ms2 : ms.values())
         {
             int i = 1;
@@ -210,6 +212,20 @@ public class WaitingRequestHandler extends PageActionHandler
                 requestVo.setJobId(job.getJobId());
                 requestVo.setJobName(job.getJobName());
                 String priority = (String) args.get("priority");
+                if (priority == null || priority.length() == 0)
+                {
+                    priority = fileProfileId2priority.get(fileProfileId);
+                    if (priority == null)
+                    {
+                        long l10Id = fp.getL10nProfileId();
+                        BasicL10nProfile l10Profile = HibernateUtil.get(
+                                BasicL10nProfile.class, l10Id);
+                        priority = Integer.toString(l10Profile.getPriority());
+                        
+                        fileProfileId2priority.put(fileProfileId, priority);
+                    }
+                }
+                
                 int sortPriority = (Integer) args.get("sortPriority");
                 
                 requestVo.setPriority(priority);

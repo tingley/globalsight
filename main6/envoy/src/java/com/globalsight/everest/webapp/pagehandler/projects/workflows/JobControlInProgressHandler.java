@@ -209,7 +209,6 @@ public class JobControlInProgressHandler extends JobManagementHandler
         // the user back here after they Export
         sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,
                 BASE_BEAN);
-
         sessionMgr.setAttribute("destinationPage", "inprogress");
         // clear the session for download job from joblist page
         sessionMgr.setAttribute(DownloadFileHandler.DOWNLOAD_JOB_LOCALES, null);

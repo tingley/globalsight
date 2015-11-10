@@ -269,35 +269,43 @@
                                 <amb:column label="checkbox">
                                     <INPUT TYPE=checkbox NAME=key VALUE="${requestVo.key}" id="${requestVo.key}">
                                 </amb:column>
-                                <amb:column label="lb_company" sortBy="<%=RequestFileComparator.Company%>">
+                                <amb:column label="lb_company" sortBy="<%=RequestFileComparator.Company%>" >
 		                            ${requestVo.company}
 		                        </amb:column>
-                                <amb:column label="lb_job_id" sortBy="<%=RequestFileComparator.JOB_ID%>">
+                                <amb:column label="lb_job_id" sortBy="<%=RequestFileComparator.JOB_ID%>"  width="5%">
 		                            ${requestVo.jobId}
 		                        </amb:column>
-                                <amb:column label="lb_job_name" sortBy="<%=RequestFileComparator.JOB_NAME%>">
+                                <amb:column label="lb_job_name" sortBy="<%=RequestFileComparator.JOB_NAME%>" width="30%" >
+                                    <div style="text-align: left; word-break: break-all; word-wrap: break-word; width:100%">
 		                            ${requestVo.jobName}
+                                    </div>
 		                        </amb:column>
-                                <amb:column label="lb_file" sortBy="<%=RequestFileComparator.FILE_NAME%>" width="40%" style="text-align: left; word-break: break-all; word-wrap: break-word;">
-		                            ${requestVo.file}
+                                <amb:column label="lb_file" sortBy="<%=RequestFileComparator.FILE_NAME%>" width="30%">
+		                            <div style="text-align: left; word-break: break-all; word-wrap: break-word; width:100%">
+                                    ${requestVo.file}
+                                    </div>
 		                        </amb:column>
-                                <amb:column label="lb_size" sortBy="<%=RequestFileComparator.FILE_SIZE%>">
+                                <amb:column label="lb_size" sortBy="<%=RequestFileComparator.FILE_SIZE%>" width="5%">
 		                            ${requestVo.size}
 		                        </amb:column>
-                                <amb:column label="lb_project" sortBy="<%=RequestFileComparator.FILE_PROFILE%>">
+                                <amb:column label="lb_project" sortBy="<%=RequestFileComparator.FILE_PROFILE%>" width="5%">
 		                            ${requestVo.project}
 		                        </amb:column>
-                                <amb:column label="lb_file_profile" sortBy="<%=RequestFileComparator.FILE_PROFILE%>">
+                                <amb:column label="lb_file_profile" sortBy="<%=RequestFileComparator.FILE_PROFILE%>" width="5%">
 		                            ${requestVo.fileProfile}
 		                        </amb:column>
-                                <amb:column label="jobinfo.jobdetail.jobpriority" sortBy="<%=RequestFileComparator.PRIORITY%>">
+                                <amb:column label="jobinfo.jobdetail.jobpriority" sortBy="<%=RequestFileComparator.PRIORITY%>" >
+                                    <div style="text-align: center; word-break: break-all; word-wrap: break-word; width:100%">
 		                            ${requestVo.priority}
+                                    </div>
 		                        </amb:column>
-                                <amb:column label="lb_date_request" sortBy="<%=RequestFileComparator.REQUEST_TIME%>">
+                                <amb:column label="lb_date_request" sortBy="<%=RequestFileComparator.REQUEST_TIME%>" width="8%">
 		                            ${requestVo.requestTime}
 		                        </amb:column>
-                                <amb:column label="lb_priority">
+                                <amb:column label="lb_priority" width="15px;" align="center">
+                                    <div style="text-align: center; word-break: break-all; word-wrap: break-word; width:100%">
 		                            ${requestVo.sortIndex}
+                                    </div>
 		                        </amb:column>
                             </amb:table>
                             <div align='right' style="padding-top: 5px;" class="standardText">

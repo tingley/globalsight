@@ -1306,6 +1306,8 @@
         <PageLink linkName="estimatedCompletionDate" destinationPageName="ECDATE"></PageLink>
         <PageLink linkName="estimatedTranslateCompletionDate" destinationPageName="ETCDATE"></PageLink>
         <PageLink linkName="addJobToGroup" destinationPageName="ADDJTG"></PageLink>
+        <PageLink linkName="export" destinationPageName="EJ"></PageLink>
+        <PageLink linkName="download" destinationPageName="CUST_FILE"></PageLink>
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="jobsInProgress">
@@ -1864,6 +1866,7 @@
         <PageLink linkName="bottomMenu" destinationPageName="SE3"></PageLink>
         <PageLink linkName="details" destinationPageName="SE9"></PageLink>
         <PageLink linkName="options" destinationPageName="SE11"></PageLink>
+        <PageLink linkName="tmSearch" destinationPageName="TMSEARCH"></PageLink>
       </WebPage>
       <WebPage pageName="SE2" isDefault="false" jspName="/envoy/edit/online/se_topMenu.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.SegmentEditorPageHandler">
         <PageLink linkName="save" destinationPageName="SE1"></PageLink>
@@ -2004,7 +2007,8 @@
         <PageLink linkName="splitmerge" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="refresh" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="search" destinationPageName="EDN2Search"></PageLink>
-         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
+        <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
+        <PageLink linkName="tmSearch" destinationPageName="TMSEARCH"></PageLink>
       </WebPage>
       <WebPage pageName="EDN2Search" isDefault="false" jspName="/envoy/edit/online2/search.jsp" 
          pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online2.EditorPageHandler"> 
@@ -2115,6 +2119,7 @@
         <PageLink linkName="taskScorecard" destinationPageName="TK2_scorecard"></PageLink>
         <PageLink linkName="uploadDitaReport" destinationPageName="QA_uploadDitaReport"/>
         <PageLink linkName="downloadDitaReport" destinationPageName="QA_downloadDitaReport"></PageLink>
+
       </WebPage>
       <WebPage pageName="TK2_secondary" isDefault="false" jspName="/envoy/tasks/taskSecondaryTargetFiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler">
         <PageLink linkName="addcomment" destinationPageName="TK10"></PageLink>

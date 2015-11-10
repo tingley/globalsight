@@ -30,6 +30,7 @@ String url_save = save.getPageURL();
 
 String lb_compactTags = bundle.getString("lb_editor_compact_tags");
 String lb_verboseTags = bundle.getString("lb_editor_verbose_tags");
+String lb_tm_search   = bundle.getString("lb_tm_search");
 String lb_revert  = bundle.getString("lb_revert");
 String lb_details = bundle.getString("lb_details");
 String lb_options = bundle.getString("lb_options");
@@ -118,6 +119,8 @@ function ShowPTagBox()
     </TD>
     <TD ALIGN="RIGHT" VALIGN="TOP">
       <IMG SRC="/globalsight/images/spacer.gif" HEIGHT="12"><BR>
+      <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"
+       onclick="parent.dotmSearch(); return false;" ><%=lb_tm_search%></A> |
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"
        onclick="parent.doRevert(); return false;" ><%=lb_revert%></A> |
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"

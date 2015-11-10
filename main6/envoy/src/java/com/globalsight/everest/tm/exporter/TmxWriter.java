@@ -515,12 +515,6 @@ public class TmxWriter implements IWriter
 
         // Add all TUVs.
         Collection locales = p_tu.getAllTuvLocales();
-        boolean doFilter = false;
-        if (com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED
-                .equals(options.getSelectMode()))
-        {
-            doFilter = true;
-        }
 		FilterOptions filterString = options.getFilterOptions();
 		Date createdAfter = parseStartDate(filterString.m_createdAfter);
 		Date createdBefore = parseEndDate(filterString.m_createdBefore);
@@ -533,7 +527,10 @@ public class TmxWriter implements IWriter
 			{
 				selectLang = "id_ID";
 			}
-			filterLangList.add(selectLang);
+			if (StringUtil.isNotEmpty(selectLang))
+			{
+				filterLangList.add(selectLang);
+			}
 		}
         
         String sourceLang = p_tu.getSourceLocale().toString();
@@ -553,15 +550,14 @@ public class TmxWriter implements IWriter
             {
                 localeCode = "he_IL";
             }
-			if (doFilter)
+            
+			if (filterLangList.size() > 0
+					&& !filterLangList.contains(localeCode)
+					&& !localeCode.equalsIgnoreCase(sourceLang))
 			{
-				if (!filterLangList.contains(localeCode)
-						&& !localeCode.equalsIgnoreCase(sourceLang))
-				{
-					continue;
-				}
+				continue;
 			}
-
+			
             Collection tuvs = p_tu.getTuvList(locale);
             for (Iterator it2 = tuvs.iterator(); it2.hasNext();)
 			{
@@ -628,12 +624,6 @@ public class TmxWriter implements IWriter
         StringBuffer result = new StringBuffer();
         // Add all TUVs.
         Collection locales = p_tu.getAllTuvLocales();
-        boolean doFilter = false;
-        if (com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED
-                .equals(options.getSelectMode()))
-        {
-            doFilter = true;
-        }
 		FilterOptions filterString = options.getFilterOptions();
 		Date createdAfter = parseStartDate(filterString.m_createdAfter);
 		Date createdBefore = parseEndDate(filterString.m_createdBefore);
@@ -645,7 +635,10 @@ public class TmxWriter implements IWriter
         HashSet<String> filterLangList = new HashSet<String>();
 		for (String selectLang : oldfilterLangList)
 		{
-			filterLangList.add(handleSpecialLocaleCode(selectLang));
+			if (StringUtil.isNotEmpty(selectLang))
+			{
+				filterLangList.add(handleSpecialLocaleCode(selectLang));
+			}
 		}
         filterLangList.remove(sourceLang);
 
@@ -672,13 +665,11 @@ public class TmxWriter implements IWriter
         for (Iterator it = locales.iterator(); it.hasNext();)
         {
             GlobalSightLocale locale = (GlobalSightLocale) it.next();
-			if (doFilter)
+			String localeCode = handleSpecialLocaleCode(locale.toString());
+			if (filterLangList.size() > 0
+					&& !filterLangList.contains(localeCode.toLowerCase()))
 			{
-	            String localeCode = handleSpecialLocaleCode(locale.toString());
-				if (!filterLangList.contains(localeCode.toLowerCase()))
-				{
-					continue;
-				}
+				continue;
 			}
 
 			Collection tuvs = p_tu.getTuvList(locale);
@@ -1516,11 +1507,6 @@ public class TmxWriter implements IWriter
     private ArrayList getAllTuvsInTu(SegmentTmTu p_tu)
     {
         ArrayList result = new ArrayList();
-        boolean doFilter = false;
-        if (m_options.SELECT_FILTERED.equals(m_options.getSelectMode()))
-        {
-            doFilter = true;
-        }
         FilterOptions filterString = m_options.getFilterOptions();
         Date createdAfter = parseStartDate(filterString.m_createdAfter);
         Date createdBefore = parseEndDate(filterString.m_createdBefore);
@@ -1533,7 +1519,10 @@ public class TmxWriter implements IWriter
 			{
 				selectLang = "id_ID";
 			}
-			filterLangList.add(selectLang);
+			if (StringUtil.isNotEmpty(selectLang))
+			{
+				filterLangList.add(selectLang);
+			}
 		}
          
         String sourceLang = p_tu.getSourceLocale().getLocale().toString();
@@ -1554,13 +1543,11 @@ public class TmxWriter implements IWriter
             {
                 localeCode = "he_IL";
             }
-			if (doFilter)
+			if (filterLangList.size() > 0
+					&& !(filterLangList.contains(localeCode) || localeCode
+							.equals(sourceLang)))
 			{
-				if (!(filterLangList.contains(localeCode) || localeCode
-						.equals(sourceLang)))
-				{
-					continue;
-				}
+				continue;
 			}
 			
 			Collection tuvCollection = p_tu.getTuvList(locale);

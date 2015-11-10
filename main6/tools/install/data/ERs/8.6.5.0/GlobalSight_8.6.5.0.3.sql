@@ -116,7 +116,7 @@ BEGIN
 <rule break="no"><beforebreak>\\b[Gg]ovt\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Ii]\\.e\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\bie\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
-<rule break="no"><beforebreak>\\b[Ii]nc\\.</beforebreak><afterbreak>\\s[^A-Z]</afterbreak></rule>
+<rule break="no"><beforebreak>\\b[Ii]nc\\.</beforebreak><afterbreak>\\s+[^A-Z]</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Ii]ncl\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Ii]nd\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Ii]ng\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
@@ -126,7 +126,7 @@ BEGIN
 <rule break="no"><beforebreak>\\bJun\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\bLtd\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Mm]ar\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
-<rule break="no"><beforebreak>\\b[Mm]ax\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
+<rule break="no"><beforebreak>\\b[Mm]ax\\.</beforebreak><afterbreak>\\s+[^A-Z]</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Mm]essrs\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Mm]fg\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Mm]gr\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
@@ -149,7 +149,7 @@ BEGIN
 <rule break="no"><beforebreak>\\bpag\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Pp]ar\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Pp]ara\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
-<rule break="no"><beforebreak>\\b[Pp]os\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
+<!-- <rule break="no"><beforebreak>\\b[Pp]os\\.</beforebreak><afterbreak>\\s</afterbreak></rule> -->
 <rule break="no"><beforebreak>\\b[Pp]p\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Pp]rep\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
 <rule break="no"><beforebreak>\\b[Pp]rof\\.</beforebreak><afterbreak>\\s</afterbreak></rule>
@@ -7639,14 +7639,17 @@ BEGIN
 <rule break="no">
 <beforebreak>[\\(\\[\\{][\\.\\?!][\\)\\]\\}]</beforebreak></rule>
 <rule break="no">
-<beforebreak>\\b\\S{1,4}\\.</beforebreak>
-<afterbreak>(\\s|\\xA0)[0-9\\[\\(]+</afterbreak></rule>
+<beforebreak>\\b\\S+\\.</beforebreak>
+<afterbreak>(\\s|\\xA0)[0-9\\[]+</afterbreak></rule>
+<!-- <rule break="no">
+<beforebreak>\\b\\S+\\.</beforebreak>
+<afterbreak>(\\s|\\xA0)[A-Z]{1,2}\\d</afterbreak></rule> -->
 <rule break="no">
-<beforebreak>\\b\\S{1,4}\\.</beforebreak>
-<afterbreak>(\\s|\\xA0)[A-Z]{1,2}\\d</afterbreak></rule>
+<beforebreak>\\b\\S+\\.</beforebreak>
+<afterbreak>(\\s|\\xA0)[\\(\\[]+[0-9]+</afterbreak></rule>
 <rule break="no">
 <beforebreak>\\b[Ee][Tt][Cc]\\.</beforebreak>
-<afterbreak>\\s</afterbreak></rule>
+<afterbreak>\\s+[^A-Z]</afterbreak></rule>
 <rule break="no">
 <beforebreak>\\b:</beforebreak>
 <afterbreak>\\s+\\{\\d\\}</afterbreak></rule>
@@ -7671,7 +7674,19 @@ BEGIN
 <afterbreak>\\\\n</afterbreak></rule>
 <rule break="no">
 <beforebreak>[\\n\\r]+[A-Z]\\.</beforebreak>
-<afterbreak>\\s+[A-Z]</afterbreak></rule>
+<afterbreak>(\\s|\\xA0)+[A-Z]</afterbreak></rule>
+<rule break="no">
+<beforebreak>[A-Z]{1,2}\\.</beforebreak>
+<afterbreak>(\\s|\\xA0)+[A-Z]{1,2}[\\d]*\\.</afterbreak></rule>
+<rule break="no">
+<beforebreak>[A-Z]{1,2}\\.</beforebreak>
+<afterbreak>(\\s|\\xA0)+["''‘“]</afterbreak></rule>
+<rule break="no">
+<beforebreak>[:;]+(\\s|\\xA0)+[A-Z]{1,2}\\.</beforebreak>
+<afterbreak>(\\s|\\xA0)+[A-Za-z]</afterbreak></rule>
+<rule break="no">
+<beforebreak>[A-Z]{1,2}\\.(\\s|\\xA0)+[A-Z]{1,2}\\.</beforebreak>
+<afterbreak>(\\s|\\xA0)+[A-Za-z]</afterbreak></rule>
 </languagerule>
 </languagerules>
     <maprules>

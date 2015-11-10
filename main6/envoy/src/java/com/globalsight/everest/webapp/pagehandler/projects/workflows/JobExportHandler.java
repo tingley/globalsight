@@ -45,7 +45,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GlobalSightLocale;
@@ -97,7 +96,7 @@ public class JobExportHandler extends PageHandler
         NavigationBean exportedBean = new NavigationBean(
                 JobManagementHandler.EXPORTED_BEAN, pageName);
         HttpSession session = p_request.getSession(false);
-        ResourceBundle bundle = getBundle(session);
+
         Locale uiLocale = (Locale) session
                 .getAttribute(WebAppConstants.UILOCALE);
         p_request.setAttribute(JobManagementHandler.EXPORT_BEAN, baseBean);
@@ -138,7 +137,8 @@ public class JobExportHandler extends PageHandler
                     || wfState.equals(Workflow.ARCHIVED)
                     || wfState.equals(Workflow.EXPORT_FAILED)
                     || wfState.equals(Workflow.EXPORTED)
-                    || wfState.equals(Workflow.LOCALIZED))
+                    || wfState.equals(Workflow.LOCALIZED)
+                 	|| wfState.equals(Workflow.READY_TO_BE_DISPATCHED))
             {
                 wfs.add(wf);
             }
@@ -209,11 +209,12 @@ public class JobExportHandler extends PageHandler
 
     public static boolean isValidState(String p_workflowState)
     {
-        return (p_workflowState.equals(Workflow.LOCALIZED)
-                || p_workflowState.equals(Workflow.DISPATCHED)
-                || p_workflowState.equals(Workflow.EXPORT_FAILED)
-                || p_workflowState.equals(Workflow.EXPORTED) || p_workflowState
-                    .equals(Workflow.ARCHIVED));
+		return (p_workflowState.equals(Workflow.LOCALIZED)
+				|| p_workflowState.equals(Workflow.DISPATCHED)
+				|| p_workflowState.equals(Workflow.EXPORT_FAILED)
+				|| p_workflowState.equals(Workflow.EXPORTED)
+				|| p_workflowState.equals(Workflow.ARCHIVED)
+				|| p_workflowState.equals(Workflow.READY_TO_BE_DISPATCHED));
     }
 
     /**

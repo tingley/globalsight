@@ -27,6 +27,8 @@
 %>
 <jsp:useBean id="topMenu" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+ <jsp:useBean id="tmSearch" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="bottomMenu" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="segmentEditor" scope="request"
@@ -65,9 +67,11 @@ String url_imageEditor   = imageEditor.getPageURL();
 String url_textEditor    = textEditor.getPageURL();
 String url_details       = details.getPageURL();
 String url_options       = options.getPageURL();
+String url_tmSearch      = tmSearch.getPageURL();
 
 String lb_segmentChanged = bundle.getString("jsmsg_save_segment");
 String lb_saveTheChanges = bundle.getString("jsmsg_save_the_changes");
+String lb_tm_search      = bundle.getString("lb_tm_search");
 
 String lb_title;
 String url_theEditor;
@@ -228,6 +232,7 @@ var fr_source = null;
 var fr_target = null;
 var fr_editor = null;
 var w_details = null;
+var w_tmsearch=null;
 var match_details = null;
 var w_options = null;
 var w_concordance = null;
@@ -312,6 +317,7 @@ function init()
 
 function exit()
 {
+	try { w_tmsearch.close(); } catch (ignore) {}
     try { w_details.close(); } catch (ignore) {}
     try { w_options.close(); } catch (ignore) {}
     try { w_concordance.close(); } catch (ignore) {}
@@ -477,6 +483,13 @@ function getTargetDiplomatString()
 function showSource(text)
 {
     fr_editor.ShowSourceSegment(text, IsWhitePreserving());
+}
+
+function dotmSearch()
+{
+   var url = "<%=url_tmSearch%>&action=tmSearchPage";
+   w_tmsearch = window.open(url, "<%=lb_tm_search%>",
+   'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=800,HEIGHT=600');
 }
 
 function doDetails()

@@ -36,6 +36,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="options" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+<jsp:useBean id="tmSearch" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="splitmerge" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="refresh" scope="request"
@@ -69,6 +71,7 @@ String url_pageInfo = pageInfo.getPageURL();
 String url_editorSameWindow =editorSameWindow.getPageURL();
 String url_tmInfo   = tminfo.getPageURL();
 String url_options  = options.getPageURL();
+String url_tmSearch = tmSearch.getPageURL();
 String url_splitmerge  = splitmerge.getPageURL();
 String url_refresh = refresh.getPageURL();
 String url_search = search.getPageURL();
@@ -83,6 +86,7 @@ String lb_title = bundle.getString("lb_inline_editor");
 lb_title = lb_title + " - " + str_pageName;
 String lb_loading = bundle.getString("msg_loading");
 String lb_saving  = bundle.getString("msg_saving");
+String lb_tm_search = bundle.getString("lb_tm_search");
 String lb_compactTags = bundle.getString("lb_editor_compact_tags");
 String lb_verboseTags = bundle.getString("lb_editor_verbose_tags");
 String lb_fileNavigation = bundle.getString("lb_fileNavigation");
@@ -341,6 +345,7 @@ var w_scwin = null;
 var w_pageinfo = null;
 var w_options = null;
 var w_concordance = null;
+var w_tmsearch = null;
 var w_progress = null;
 var w_search = null;
 var w_termbases = null;
@@ -394,6 +399,8 @@ tmp.mnemonic = "t";
 <% } %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_search") %>...", searchByUserSid));
 tmp.mnemonic = "s";
+actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_tm_search") %>...", dotmSearch));
+tmp.mnemonic = "t";
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_page_info") %>...", showPageInfo));
 tmp.mnemonic = "p";
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_options") %>...", showOptions));
@@ -1887,6 +1894,13 @@ function showPageInfo()
       ("resizable,width=400,height=400"));
 }
 
+function dotmSearch()
+{
+   var url = "<%=url_tmSearch%>&action=tmSearchPage";
+   w_tmsearch = window.open(url, "<%=lb_tm_search%>",
+   'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=800,HEIGHT=600');
+}
+
 function unlockSegments(self)
 {
 	if(self){
@@ -2313,6 +2327,7 @@ function doExit()
   try { w_pageinfo.close(); } catch (e) {};
   try { w_options.close(); } catch (e) {};
   try { w_concordance.close(); } catch (e) {};
+  try { w_tmsearch.close(); } catch (e) {};
   try { w_progress.close(); } catch (e) {};
   try { w_termbases.close(); } catch (e) {};
   try { w_autoPropagate.close(); } catch (e) {};
@@ -3044,12 +3059,13 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
     <span id="idCloseEditor" class="help" style="padding-top:8px;" onclick="closeEditor()"><%=bundle.getString("lb_close") %></span>
     
     <div id="actionDropDown" class="help wrapper-dropdown-5" style="display:none;padding-top:8px;" onclick="$(this).toggleClass('active');"><%=bundle.getString("lb_actions") %>
-	    <ul class="dropdown" style="font-family:Arial,Helvetica,sans-serif; font-size:9pt;">
+	    <ul class="dropdown" style="font-family:Arial,Helvetica,sans-serif; font-size:9pt;">    
+	        <li><a href="javascript:dotmSearch();"><%=bundle.getString("lb_tm_search") %>...</a></li>
 	        <li><a href="javascript:showTermbases();"><%=bundle.getString("lb_termbases")%>...</a></li>
 	        <% if (b_updateLeverage) { %>
 	        	<li><a href="javascript:updateLeverage();"><%=bundle.getString("permission.activities.updateLeverage")%>...</a></li>
-	        <% } %>
-	        <li><a href="javascript:searchByUserSid();"><%=bundle.getString("lb_search")%>...</a></li>
+	        <% } %>        
+	        <li><a href="javascript:searchByUserSid();"><%=bundle.getString("lb_search")%>...</a></li>  
 	        <li><a href="javascript:showPageInfo();"><%=bundle.getString("lb_page_info") %>...</a></li>
 	        <li><a href="javascript:showOptions();"><%=bundle.getString("lb_options") %>...</a></li>
 	    </ul>

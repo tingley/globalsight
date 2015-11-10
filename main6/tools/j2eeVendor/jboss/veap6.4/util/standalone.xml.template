@@ -30,6 +30,7 @@
         <property name="org.apache.tomcat.util.http.Parameters.MAX_COUNT" value="50000"/>
         <property name="org.apache.coyote.http11.Http11Protocol.COMPRESSION" value="on"/>
         <property name="org.apache.coyote.http11.Http11Protocol.COMPRESSION_MIME_TYPES" value="text/javascript,text/css,text/html"/>
+        <property name="org.apache.coyote.http11.Http11Protocol.SERVER" value="GlobalSightServer"/>
     </system-properties>
     <management>
         <security-realms>

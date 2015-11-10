@@ -53,6 +53,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoReadySearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -245,18 +246,25 @@ public class JobControlReadyHandler extends JobManagementHandler
         sessionMgr.setMyjobsAttribute("lastState", Job.READY_TO_BE_DISPATCHED);
         JobVoReadySearcher searcher = new JobVoReadySearcher();
         searcher.setJobVos(p_request, true);
-
+        p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
         p_request.setAttribute(JOB_LIST_START_PARAM,
                 p_request.getParameter(JOB_LIST_START_PARAM));
         p_request.setAttribute(
                 PAGING_SCRIPTLET,
                 getPagingText(p_request,
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
-                        Job.READY_TO_BE_DISPATCHED));
-
-        p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
-        sessionMgr.setAttribute("destinationPage", "ready");
+                        Job.READY_TO_BE_DISPATCHED));       
+        
+        // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
+        // the user back here after they Export
+        sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,BASE_BEAN);
+        sessionMgr.setAttribute("destinationPage", "ready");       
+        // clear the session for download job from joblist page
+        sessionMgr.setAttribute(DownloadFileHandler.DOWNLOAD_JOB_LOCALES, null);
+        sessionMgr.setAttribute(DownloadFileHandler.DESKTOP_FOLDER, null);
         setJobProjectsLocales(sessionMgr, session);
+
+        
 
         // turn on cache. do both. "pragma" for the older browsers.
         p_response.setHeader("Pragma", "yes-cache"); // HTTP 1.0

@@ -58,6 +58,7 @@ import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoReadySearc
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
@@ -183,10 +184,9 @@ public class JobControlReadyHandler extends JobManagementHandler
                         || wfState.equals(Workflow.ARCHIVED)
                         || wfState.equals(Workflow.EXPORT_FAILED)
                         || wfState.equals(Workflow.EXPORTED)
-                        || wfState.equals(Workflow.LOCALIZED)
-                        || wfState.equals(Workflow.READY_TO_BE_DISPATCHED))
+                        || wfState.equals(Workflow.LOCALIZED))
                 {
-                    jobName.append("\r\n"
+                	jobName.append("\r\n"
                             + wf.getTargetLocale().getDisplayName(uiLocale));
                 }
             }

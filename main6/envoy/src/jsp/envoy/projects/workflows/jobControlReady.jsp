@@ -594,6 +594,39 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
      if(document.JobForm.Rename)
      	document.JobForm.Rename.disabled = true;
   }
+  if (transSelectedIndex.length == 0 && dtpSelectedIndex.length == 1)
+  {
+     if (document.JobForm.ChangeWFMgr)
+         document.JobForm.ChangeWFMgr.disabled = false;
+     if (document.JobForm.Export)
+     {
+         document.JobForm.Export.disabled = false;
+         document.JobForm.Export.value = "<%=bundle.getString("lb_move_to_dtp")%>...";
+     }
+     if (document.JobForm.ExportDownload)
+         document.JobForm.ExportDownload.disabled = false;
+  }
+  else if (transSelectedIndex.length == 1 && dtpSelectedIndex.length == 0)
+  {
+     if (document.JobForm.ChangeWFMgr)
+         document.JobForm.ChangeWFMgr.disabled = false;
+     if (document.JobForm.Export)
+     {
+         document.JobForm.Export.disabled = false;
+         document.JobForm.Export.value = "<%=bundle.getString("lb_export")%>...";
+     }
+     if (document.JobForm.ExportDownload)
+         document.JobForm.ExportDownload.disabled = false;
+  }
+  else
+  {
+     if (document.JobForm.ChangeWFMgr)
+         document.JobForm.ChangeWFMgr.disabled = true;
+     if (document.JobForm.Export)
+         document.JobForm.Export.disabled = true;
+     if (document.JobForm.ExportDownload)
+         document.JobForm.ExportDownload.disabled = true;
+  }
 }
 
 function setButtonState()

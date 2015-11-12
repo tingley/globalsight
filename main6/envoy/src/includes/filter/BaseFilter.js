@@ -912,7 +912,7 @@ BaseFilter.prototype.setPageValue = function()
 	var curOption = baseFilter.currentOption;
 	var maxPages = baseFilter.getPageSize(baseFilter.optionObjsMap[curOption].length);
 	baseFilter.currentPage = (baseFilter.currentPage >= maxPages) ? maxPages - 1 : baseFilter.currentPage;
-	document.getElementById("pageTotalSizeBaseFilter").innerText = maxPages;
+	document.getElementById("pageTotalSizeBaseFilter").innerHTML = maxPages;
 	
 	document.getElementById("pageCountBaseFilter").value = baseFilter.currentPage + 1;
 }

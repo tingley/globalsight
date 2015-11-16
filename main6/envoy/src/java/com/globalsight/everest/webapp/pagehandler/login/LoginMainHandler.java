@@ -78,10 +78,6 @@ public class LoginMainHandler extends PageHandler
         p_response.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
         p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to cache
         p_response.addHeader("Cache-Control", "max-age=0"); // stale right away
-        
-        p_response.addHeader("X-Frame-Options", "SAMEORIGIN");
-        p_response.addHeader("X-Content-Type-Options", "nosniff");
-        p_response.addHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 
         p_request.setAttribute(SystemConfiguration.UI_LOCALES, m_supportedLocales);
         p_request.setAttribute(SystemConfiguration.DEFAULT_UI_LOCALE, m_defaultLocale);

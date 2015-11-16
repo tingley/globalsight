@@ -1911,9 +1911,8 @@ XMLRuleFilter.prototype.setPageValue = function()
 	var curOption = xmlFilter.currentOption;
 	var maxPages = xmlFilter.getPageSize(xmlFilter.optionObjsMap[curOption].length);
 	xmlFilter.currentPage = (xmlFilter.currentPage >= maxPages) ? maxPages - 1 : xmlFilter.currentPage;
-	document.getElementById("pageTotalSize").innerText = maxPages;
-	
-	document.getElementById("pageCountXmlFilter").value = xmlFilter.currentPage + 1;
+	document.getElementById("pageTotalSize").innerHTML = maxPages;
+   	document.getElementById("pageCountXmlFilter").value = xmlFilter.currentPage + 1;
 }
 
 XMLRuleFilter.prototype.prePage = function()

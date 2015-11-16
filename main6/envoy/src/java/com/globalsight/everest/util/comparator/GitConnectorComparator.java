@@ -8,8 +8,8 @@ public class GitConnectorComparator extends StringComparator
 {
 	private static final long serialVersionUID = 6119352480197119220L;
 	// types of comparison
-    public static final int ID = 0;
-    public static final int NAME = 1;
+    public static final int NAME = 0;
+    public static final int ID = 1;
     public static final int DESC = 2;
     public static final int URL = 3;
     public static final int USER_NAME = 4;

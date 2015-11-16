@@ -43,6 +43,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
@@ -244,17 +245,22 @@ public class JobSummaryHelper
         String safeBaseFileName = null;
         try
         {
-            evenFlowXmlParser.parse(eventFlowXml);
-            Element category = evenFlowXmlParser.getCategory("OfficeXmlAdapter");
-            if (category != null)
-            {
-                String[] safeBaseFileNames = evenFlowXmlParser
-                        .getCategoryDaValue(category, "safeBaseFileName");
-                if (safeBaseFileNames != null && safeBaseFileNames.length == 1)
-                {
-                    safeBaseFileName = safeBaseFileNames[0];
-                }
-            }
+			if (StringUtil.isNotEmpty(eventFlowXml))
+			{
+				evenFlowXmlParser.parse(eventFlowXml);
+				Element category = evenFlowXmlParser
+						.getCategory("OfficeXmlAdapter");
+				if (category != null)
+				{
+					String[] safeBaseFileNames = evenFlowXmlParser
+							.getCategoryDaValue(category, "safeBaseFileName");
+					if (safeBaseFileNames != null
+							&& safeBaseFileNames.length == 1)
+					{
+						safeBaseFileName = safeBaseFileNames[0];
+					}
+				}
+			}
         }
         catch (Exception ignore)
         {
@@ -330,19 +336,22 @@ public class JobSummaryHelper
 
     private String readOffice2010AppXmlFile(File appXmlFile)
     {
-        if (appXmlFile == null || appXmlFile.isDirectory())
-            return null;
+		if (!appXmlFile.exists() || appXmlFile.isDirectory())
+			return null;
 
         StringBuffer appXml = new StringBuffer();
         BufferedReader reader = null;
         try
         {
             reader = new BufferedReader(new FileReader(appXmlFile));
-            String tempString = null;
-            while ((tempString = reader.readLine()) != null)
-            {
-                appXml.append(tempString);
-            }
+			if (reader != null)
+			{
+				String tempString = null;
+				while ((tempString = reader.readLine()) != null)
+				{
+					appXml.append(tempString);
+				}
+			}
             reader.close();
         }
         catch (Exception e)
@@ -356,31 +365,41 @@ public class JobSummaryHelper
     private int getInfoFromAppXml(String appXml, String fileType)
     {
         try
-        {
-        	if(appXml == null)
-        		return 0;
-            StringReader sr = new StringReader(appXml);
-            InputSource is = new InputSource(sr);
-            DOMParser parser = new DOMParser();
-            String numStr = null;
-            parser.setFeature("http://xml.org/sax/features/validation", false);
-            parser.parse(is);
-            Element rootElement = parser.getDocument().getDocumentElement();
-            if (fileType.equals("pptx"))
-            {
-                numStr = rootElement.getElementsByTagName("Slides").item(0)
-                        .getFirstChild().getNodeValue();
-            }
-            else if (fileType.equals("docx"))
-            {
-                numStr = rootElement.getElementsByTagName("Pages").item(0)
-                        .getFirstChild().getNodeValue();
-            }
-            if (numStr != null)
-            {
-                return Integer.parseInt(numStr);
-            }
-        }
+		{
+			if (StringUtil.isEmpty(appXml))
+				return 0;
+			StringReader sr = new StringReader(appXml);
+			InputSource is = new InputSource(sr);
+			DOMParser parser = new DOMParser();
+			String numStr = null;
+			parser.setFeature("http://xml.org/sax/features/validation", false);
+			parser.parse(is);
+			Element rootElement = parser.getDocument().getDocumentElement();
+			if (fileType.equals("pptx"))
+			{
+				NodeList slidesNodeList = rootElement
+						.getElementsByTagName("Slides");
+				if (slidesNodeList != null && slidesNodeList.getLength() > 0)
+				{
+					numStr = slidesNodeList.item(0).getFirstChild()
+							.getNodeValue();
+				}
+			}
+			else if (fileType.equals("docx"))
+			{
+				NodeList pagesNodeList = rootElement
+						.getElementsByTagName("Pages");
+				if (pagesNodeList != null && pagesNodeList.getLength() > 0)
+				{
+					numStr = pagesNodeList.item(0).getFirstChild()
+							.getNodeValue();
+				}
+			}
+			if (StringUtil.isNotEmpty(numStr))
+			{
+				return Integer.parseInt(numStr);
+			}
+		}
         catch (Exception e)
         {
             CATEGORY.error(e);

@@ -205,15 +205,24 @@ public abstract class BaseAdapter
         String name = null;
         try
         {
-            // preprocessor
-            name = m_adapterConfig.getStringParameter(m_loggingCategory
-                    + ".preProcessor");
-            m_preProcessor = loadProcessorClass(name);
-            // postprocessor
-            name = m_adapterConfig.getStringParameter(m_loggingCategory
-                    + ".postProcessor");
-            m_postProcessor = loadProcessorClass(name);
-
+        	if (m_adapterConfig != null)
+        	{
+                // preprocessor
+                name = m_adapterConfig.getStringParameter(m_loggingCategory
+                        + ".preProcessor");
+                m_preProcessor = loadProcessorClass(name);
+                // postprocessor
+                name = m_adapterConfig.getStringParameter(m_loggingCategory
+                        + ".postProcessor");
+                m_postProcessor = loadProcessorClass(name);
+        	}
+        	else
+        	{
+        		if (m_logger.isDebugEnabled())
+        		{
+            		m_logger.warn("m_adapterConfig is null");        			
+        		}
+        	}
         }
         catch (Exception e)
         {

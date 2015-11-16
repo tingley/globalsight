@@ -39,7 +39,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.cvsconfig.modulemapping.ModuleMapping;
 import com.globalsight.everest.cvsconfig.modulemapping.ModuleMappingHelper;
@@ -600,7 +599,10 @@ public class CVSUtil
         }
         if (isJobFromDI) {
             jobId = "";
-            logger.info("current job [" + jobName + "] is not a CVS job.");
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("current job [" + jobName + "] is not a CVS job.");            	
+            }
         } else if (job != null) {
             jobId = String.valueOf(job.getJobId());
             jobName = job.getJobName();

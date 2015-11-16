@@ -160,7 +160,7 @@ function filterItems(e)
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 <amb:header title="<%=title%>" helperText="<%=helperText%>" />
 <form name="mindtouchForm" id="mindtouchForm" method="post">
-<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" >
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" style="min-width:1024px;">
     <tr valign="top">
         <td align="right">
             <amb:tableNav bean="mindtouchConnectorList" key="mindtouchConnectorKey" pageUrl="self" />

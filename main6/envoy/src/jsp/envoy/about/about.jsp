@@ -9,10 +9,6 @@
 %>
 <%@ include file="/envoy/common/installedModules.jspIncl" %>
 <%
-response.addHeader("X-Frame-Options", "SAMEORIGIN");
-response.addHeader("X-Content-Type-Options", "nosniff");
-response.addHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-
     //locale bundle labels
     ResourceBundle bundle = PageHandler.getBundle(session);
     String lbAboutGlobalsightSystem = bundle.getString("lb_about_globalsight_system4");

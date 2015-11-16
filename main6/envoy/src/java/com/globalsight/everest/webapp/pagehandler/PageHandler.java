@@ -115,10 +115,6 @@ public class PageHandler implements WebAppConstants
             p_response.addHeader("Cache-Control", "max-age=0"); // stale right
                                                                 // away
         }
-        
-        p_response.addHeader("X-Frame-Options", "SAMEORIGIN");
-        p_response.addHeader("X-Content-Type-Options", "nosniff");
-        p_response.addHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 
         RequestDispatcher dispatcher = p_context
                 .getRequestDispatcher(p_pageDescriptor.getJspURL());

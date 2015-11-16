@@ -1470,6 +1470,7 @@
       </WebPage>
       <WebPage pageName="EJ" isDefault="false" jspName="/envoy/projects/workflows/jobExport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobExportHandler">
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
+        <PageLink linkName="ready" destinationPageName="WF2"></PageLink>
         <PageLink linkName="complete" destinationPageName="WF4"></PageLink>
         <PageLink linkName="exported" destinationPageName="WF5"></PageLink>
         <PageLink linkName="progress" destinationPageName="WF3"></PageLink>
@@ -2119,7 +2120,6 @@
         <PageLink linkName="taskScorecard" destinationPageName="TK2_scorecard"></PageLink>
         <PageLink linkName="uploadDitaReport" destinationPageName="QA_uploadDitaReport"/>
         <PageLink linkName="downloadDitaReport" destinationPageName="QA_downloadDitaReport"></PageLink>
-
       </WebPage>
       <WebPage pageName="TK2_secondary" isDefault="false" jspName="/envoy/tasks/taskSecondaryTargetFiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler">
         <PageLink linkName="addcomment" destinationPageName="TK10"></PageLink>

@@ -1205,7 +1205,7 @@ PlainTextFilter.prototype.setPageValue = function()
 	var curOption = plaintextFilter.currentOption;
 	var maxPages = plaintextFilter.getPageSize(plaintextFilter.optionObjsMap[curOption].length);
 	plaintextFilter.currentPage = (plaintextFilter.currentPage >= maxPages) ? maxPages - 1 : plaintextFilter.currentPage;
-	document.getElementById("pageTotalSizePlainTextFilter").innerText = maxPages;
+	document.getElementById("pageTotalSizePlainTextFilter").innerHTML = maxPages;
 	
 	document.getElementById("pageCountPlainTextFilter").value = plaintextFilter.currentPage + 1;
 }

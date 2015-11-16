@@ -1037,7 +1037,7 @@ QAFilter.prototype.setPageValue = function()
 	var curOption = qaFilter.currentOption;
 	var maxPages = qaFilter.getPageSize(qaFilter.optionObjsMap[curOption].length);
 	qaFilter.currentPage = (qaFilter.currentPage >= maxPages) ? maxPages - 1 : qaFilter.currentPage;
-	document.getElementById("pageTotalSizeQAFilter").innerText = maxPages;
+	document.getElementById("pageTotalSizeQAFilter").innerHTML = maxPages;
 	
 	document.getElementById("pageCountQAFilter").value = qaFilter.currentPage + 1;
 }

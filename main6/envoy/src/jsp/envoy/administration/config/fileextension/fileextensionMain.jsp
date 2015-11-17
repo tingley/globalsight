@@ -8,6 +8,9 @@
          com.globalsight.everest.util.comparator.FileExtensionComparator,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.webapp.pagehandler.administration.config.fileextension.FileExtensionMainHandler,
+         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+         com.globalsight.everest.webapp.WebAppConstants,
+         com.globalsight.everest.servlet.util.SessionManager,
          com.globalsight.cxe.entity.fileextension.FileExtensionImpl,
          com.globalsight.everest.company.CompanyWrapper,
          java.util.ArrayList,
@@ -28,6 +31,10 @@
   String confirmRemove = bundle.getString("msg_remove_file_extension");
   SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
   String deps = (String)sessionMgr.getAttribute("dependencies");
+  String FileExtensionName = (String) sessionMgr.getAttribute("FileExtensionName");
+  FileExtensionName = FileExtensionName == null ? "" : FileExtensionName;
+  String selfURL = self.getPageURL();
+  String emptyMsg  = "msg_no_users";
   
   boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
 %>
@@ -74,7 +81,17 @@ function enableButtons()
 {
     if (feForm.removeBtn)
         feForm.removeBtn.disabled = false;
-}</SCRIPT>
+}
+
+function filterItems(e) {
+	e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+	if (keyCode == 13) {
+       feForm.action = "<%=selfURL%>";
+       feForm.submit();
+	}
+}
+</SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     ONLOAD="loadGuides()">
@@ -90,7 +107,7 @@ function enableButtons()
     <amb:header title="<%=title%>" helperText="<%=helperText%>" />
 <% }  %>
 <form name="feForm" method="post">
-    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+    <table cellpadding=0 cellspacing=0 border=0 class="standardText"  width="100%">
         <tr valign="top">
           <td align="right">
             <amb:tableNav bean="extensions" key="<%=FileExtensionMainHandler.EXTENSION_KEY
@@ -103,13 +120,16 @@ function enableButtons()
                      key="<%=FileExtensionMainHandler.EXTENSION_KEY%>"
                      dataClass="com.globalsight.cxe.entity.fileextension.FileExtensionImpl"
                      pageUrl="self"
-                     emptyTableMsg="msg_no_file_profiles" >
-                <amb:column label="" width="20px">
+                     emptyTableMsg="msg_no_file_profiles" hasFilter="true">
+                <amb:column label="" width="2%">
                     <input type="radio" name="radioBtn" value="<%=fe.getId()%>" onclick="enableButtons()">
                 </amb:column>
                 <amb:column label="lb_name" sortBy="<%=FileExtensionComparator.NAME%>"
-                    width="250px">
+                 filter="FileExtensionName" filterValue="<%=FileExtensionName%>"   width="22%">
                     <%= fe.getName() %>
+                </amb:column>
+                <amb:column label="" sortBy=""width="76%">
+                    &nbsp
                 </amb:column>
                 <% if (isSuperAdmin) { %>
                 <amb:column label="lb_company_name" sortBy="<%=FileExtensionComparator.ASC_COMPANY%>">
@@ -119,8 +139,12 @@ function enableButtons()
               </amb:table>
             </td>
          </tr>
-         <tr>
-        <td style="padding-top:5px" align="right">
+        <tr valign="top">
+          <td align="right">
+            <amb:tableNav bean="extensions" key="<%=FileExtensionMainHandler.EXTENSION_KEY%>"  scope="10,20,50,All"  showTotalCount="false"  pageUrl="self" />
+          </td>
+        </tr>
+        <td style="padding-top:5px" align="left">
 		    <amb:permission name="<%=Permission.FILE_EXT_NEW%>" >
 		            <input type="BUTTON" value="<%=bundle.getString("lb_new")%>"  onClick="submitForm('New');">
 		    </amb:permission>

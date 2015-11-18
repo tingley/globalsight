@@ -190,6 +190,20 @@ public abstract class IExportManagerImpl
         return m_options.getXml();
     }
 
+	public String analyzeTm() throws ExporterException
+	{
+		CATEGORY.info("Starting database analysis");
+
+		// We need an output file. Grab one.
+		m_options = setExportFile(createFilename(m_options));
+		m_reader.setExportOptions(m_options);
+
+		m_writer.setExportOptions(m_options);
+		m_options = m_writer.analyze();
+
+		return m_options.getXml();
+	}
+	
     public void doExport()
         throws ExporterException
     {

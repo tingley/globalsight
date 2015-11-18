@@ -51,6 +51,19 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T>
         }
     }
 
+	public long getTuCountByLocaleId(Long localeId) throws TM3Exception
+	{
+		try
+		{
+			return getTm().getStorageInfo().getTuStorage()
+					.getTuCountByLocaleId(localeId);
+		}
+		catch (SQLException e)
+		{
+			throw new TM3Exception(e);
+		}
+	}
+    
     @Override
     public void purgeData() throws TM3Exception {
         try {
@@ -85,4 +98,21 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T>
             }
         }
     }
+
+    /**
+     * GBS-3885:Exporting TM takes long time
+     * In the absence of the search conditions, get tu id of total
+     * */
+	@Override
+	public long getTuIdsCount() throws TM3Exception
+	{
+		try
+		{
+			return getTm().getStorageInfo().getTuStorage().getTuIdsCount();
+		}
+		catch (SQLException e)
+		{
+			throw new TM3Exception(e);
+		}
+	}
 }

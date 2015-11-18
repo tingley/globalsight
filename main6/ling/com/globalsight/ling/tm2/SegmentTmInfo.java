@@ -122,6 +122,9 @@ public interface SegmentTmInfo
 
     public StatisticsInfo getStatistics(Tm pTm, Locale pUILocale,
             boolean p_includeProjects) throws LingManagerException;
+    
+	public StatisticsInfo getTmExportInformation(Tm pTm, Locale pUILocale)
+			throws LingManagerException;
 
     public List<SegmentTmTu> getSegmentsById(Tm tm, List<Long> tuIds)
             throws LingManagerException;

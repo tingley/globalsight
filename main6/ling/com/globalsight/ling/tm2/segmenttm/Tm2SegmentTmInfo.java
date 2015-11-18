@@ -689,4 +689,12 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     {
         return this.lock;
     }
+
+	@Override
+	public StatisticsInfo getTmExportInformation(Tm pTm, Locale pUILocale)
+			throws LingManagerException
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

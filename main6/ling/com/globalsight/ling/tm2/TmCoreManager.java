@@ -280,6 +280,9 @@ public interface TmCoreManager
     public StatisticsInfo getTmStatistics(Tm p_tm, Locale p_uiLocale,
             boolean p_includeProjects) throws RemoteException,
             LingManagerException;
+    
+	public StatisticsInfo getTmExportInformation(Tm p_tm, Locale p_uiLocale)
+			throws RemoteException, LingManagerException;
 
     /**
      * Single-segment leveraging. This is extracted from

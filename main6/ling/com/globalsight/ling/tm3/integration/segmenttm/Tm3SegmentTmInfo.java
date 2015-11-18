@@ -24,7 +24,6 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
 
 import java.io.File;
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -606,19 +605,17 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             }
 
             StatisticsInfo stats = new StatisticsInfo();
-            int tuCount = (int) tm3tm.getAllData(null, null).getCount();
+            TM3Handle<GSTuvData> handle = tm3tm.getAllData(null, null);
+            int tuCount = (int) handle.getTuIdsCount();
+				
             // We could query this directly, but for now it's cheaper to
             // add it up from the locale data
             int tuvCount = 0;
-			List localeList = null;
+            GlobalSightLocale locale = null;
             for (TM3Locale l : tm3tm.getTuvLocales())
             {
-            	localeList = new ArrayList();
-                GlobalSightLocale locale = (GlobalSightLocale) l;
-                localeList.add(locale);
-				TM3Handle<GSTuvData> handle = tm3tm.getDataByLocales(
-						localeList, null, null);
-                int localeTuCount = (int) handle.getCount();
+               locale = (GlobalSightLocale) l;
+                int localeTuCount = (int) handle.getTuCountByLocaleId(locale.getId());
                 int localeTuvCount = (int) handle.getTuvCount();
                 stats.addLanguageInfo(locale.getId(), locale.getLocale(),
                         locale.getLocale().getDisplayName(pUILocale),
@@ -637,12 +634,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                         .getAllAttributeValues(projectAttr);
                 for (Object pv : projectValues)
                 {
-                    TM3Handle<GSTuvData> handle = tm3tm.getDataByAttributes(
-                            TM3Attributes.one(projectAttr, pv), null, null);
-                    // stats.addUpdateProjectInfo((String) pv,
-                    // (int) handle.getCount(), (int) handle.getTuvCount());
-                    // To set tu and tuv count as 0 is because that in
-                    // statistics
                     // it does not need to show the count info in page
                     stats.addUpdateProjectInfo((String) pv, 0, 0);
                 }
@@ -654,7 +645,54 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+    
+	@Override
+	public StatisticsInfo getTmExportInformation(Tm pTm, Locale pUILocale)
+			throws LingManagerException
+	{
+		try
+		{
+			TM3Tm<GSTuvData> tm3tm = getTM3Tm(pTm);
+			if (LOGGER.isDebugEnabled())
+			{
+				LOGGER.debug("getTmExportInformation: "
+						+ describeTm(pTm, tm3tm));
+			}
 
+			StatisticsInfo stats = new StatisticsInfo();
+			TM3Handle<GSTuvData> handle = tm3tm.getAllData(null, null);
+			int tuCount = (int) handle.getTuIdsCount();
+
+			// We could query this directly, but for now it's cheaper to
+			// add it up from the locale data
+			GlobalSightLocale locale = null;
+			for (TM3Locale l : tm3tm.getTuvLocales())
+			{
+				locale = (GlobalSightLocale) l;
+				stats.addLanguageInfo(locale.getId(), locale.getLocale(),
+						locale.getLocale().getDisplayName(pUILocale), 0, 0);
+			}
+			stats.setTm(pTm.getName());
+			stats.setTUs(tuCount);
+			stats.setTUVs(0);
+
+			TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+					UPDATED_BY_PROJECT);
+			List<Object> projectValues = tm3tm
+					.getAllAttributeValues(projectAttr);
+			for (Object pv : projectValues)
+			{
+				// it does not need to show the count info in page
+				stats.addUpdateProjectInfo((String) pv, 0, 0);
+			}
+			return stats;
+		}
+		catch (TM3Exception e)
+		{
+			throw new LingManagerException(e);
+		}
+	}
+    
     /**
      * Delete all TM data.
      */

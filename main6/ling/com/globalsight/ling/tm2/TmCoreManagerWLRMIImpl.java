@@ -276,6 +276,13 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance.getTmStatistics(pTm, pUiLocale,
                 p_includeProjects);
     }
+    
+	@Override
+	public StatisticsInfo getTmExportInformation(Tm p_tm, Locale p_uiLocale)
+			throws RemoteException, LingManagerException
+	{
+		return m_localInstance.getTmExportInformation(p_tm, p_uiLocale);
+	}
 
     @Override
     public DynamicLeverageResults leverageSegment(BaseTmTuv p_tuv,
@@ -416,5 +423,4 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
     {
         return jobid;
     }
-
 }

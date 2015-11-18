@@ -18736,7 +18736,10 @@ public class Ambassador extends AbstractWebService
                 try
                 {
                     exporter.setExportOptions(options);
-                    options = exporter.analyze();
+					if (StringUtil.isEmpty(p_exportedFileName))
+					{
+						options = exporter.analyzeTm();
+					}
                     // pass down new options from client
                     exporter.setExportOptions(options);
                     ((com.globalsight.everest.tm.exporter.ExportOptions) exporter

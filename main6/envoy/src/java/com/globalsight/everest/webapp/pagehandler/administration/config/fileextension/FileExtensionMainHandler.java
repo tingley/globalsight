@@ -111,6 +111,8 @@ public class FileExtensionMainHandler extends PageHandler
             }
 
             // checkExtention();
+
+
             handleFilters(p_request, sessionManager, action);
             dataForTable(p_request, session);
         }
@@ -227,7 +229,9 @@ public class FileExtensionMainHandler extends PageHandler
         
         Object[] extensions=fileextensions.toArray();
         ArrayList fes=new ArrayList();
-        
+
+        if(FileExtensionName!="")
+        {
         if(FileExtensionName!=null)
         {
          for(int i=0;i<extensions.length;i++)
@@ -247,6 +251,15 @@ public class FileExtensionMainHandler extends PageHandler
              }
          
         }
+        }
+        else
+        {
+            for(int i=0;i<extensions.length;i++)
+            {     		
+      		    fes.add(extensions[i]);        	
+            }	
+        }
+        
         int  numberPerPage=getNumPerPage(p_request,p_session);
         setTableNavigation(p_request, p_session,(ArrayList)fes,
                 new FileExtensionComparator(uiLocale), numberPerPage, EXTENSION_LIST,

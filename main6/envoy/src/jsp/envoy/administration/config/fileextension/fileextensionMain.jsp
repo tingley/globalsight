@@ -44,6 +44,7 @@
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -57,19 +58,26 @@ function submitForm(button)
     {
 	    feForm.action = "<%=newURL%>";
 	}
-	else if(feForm.radioBtn != null) 
-	{
-	    var radio = document.getElementsByName("radioBtn");
-	    if(radio.length)
+	else if(feForm.checkboxBtn != null) 
+	{   
+	    var checkbox = document.getElementsByName("checkboxBtn");
+	    if(checkbox.length)
 		{
-	        value = getRadioValue(feForm.radioBtn);
+	    	for( k=0;k<checkbox.length;k++)
+	    	{
+	    		if(checkbox[k].checked==true)
+	    		{
+	    			break;
+	    		}
+	    			
+	    	}
             if (button == "Remove") 
 			{
 			    if (!confirm('<%=confirmRemove%>'))
-			    {
+			    {    
 			        return false;
 			    } 
-			    feForm.action = "<%=removeURL%>" + "&id=" + value;
+			    feForm.action = "<%=removeURL%>" + "&id=" + checkbox[k].value;
 			 }
 		 }
 	}
@@ -77,10 +85,17 @@ function submitForm(button)
     return;
 }
 
-function enableButtons()
+function buttonManagement()
 {
-    if (feForm.removeBtn)
-        feForm.removeBtn.disabled = false;
+    var count = $("input[name='checkboxBtn']:checked").length;
+    if (count == 1)
+    {
+        $("#removeBtn").attr("disabled", false);
+    }
+    else
+    {
+        $("#removeBtn").attr("disabled", true);
+    }
 }
 
 function filterItems(e) {
@@ -122,7 +137,7 @@ function filterItems(e) {
                      pageUrl="self"
                      emptyTableMsg="msg_no_file_profiles" hasFilter="true">
                 <amb:column label="" width="2%">
-                    <input type="radio" name="radioBtn" value="<%=fe.getId()%>" onclick="enableButtons()">
+                    <input type="checkbox" name="checkboxBtn"  id="checkboxBtn"  value="<%=fe.getId()%>"   onClick="buttonManagement()">
                 </amb:column>
                 <amb:column label="lb_name" sortBy="<%=FileExtensionComparator.NAME%>"
                  filter="FileExtensionName" filterValue="<%=FileExtensionName%>"   width="22%">
@@ -149,7 +164,7 @@ function filterItems(e) {
 		            <input type="BUTTON" value="<%=bundle.getString("lb_new")%>"  onClick="submitForm('New');">
 		    </amb:permission>
 		    <amb:permission name="<%=Permission.FILE_EXT_REMOVE%>" >
-		            <input type="BUTTON" name="removeBtn" disabled value="<%=bundle.getString("lb_remove")%>"  onClick="submitForm('Remove');" >
+		            <input type="BUTTON" name="removeBtn"   id="removeBtn"  disabled value="<%=bundle.getString("lb_remove")%>"  onClick="submitForm('Remove');" >
 		    </amb:permission>
         </td>
     </tr>

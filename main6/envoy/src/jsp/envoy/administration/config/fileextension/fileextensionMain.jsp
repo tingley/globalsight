@@ -63,21 +63,25 @@ function submitForm(button)
 	    var checkbox = document.getElementsByName("checkboxBtn");
 	    if(checkbox.length)
 		{
-	    	for( k=0;k<checkbox.length;k++)
-	    	{
-	    		if(checkbox[k].checked==true)
-	    		{
-	    			break;
-	    		}
-	    			
-	    	}
+
             if (button == "Remove") 
 			{
 			    if (!confirm('<%=confirmRemove%>'))
 			    {    
 			        return false;
 			    } 
-			    feForm.action = "<%=removeURL%>" + "&id=" + checkbox[k].value;
+			    var rv="";
+			    $(":checkbox:checked").each(
+			        function(i){
+			        	rv+=$(this).val()+" ";
+			        }		
+			    )
+			    $(":checkbox:checked").each(
+			        function(i){
+			        	$(this).val(rv);
+			        }		
+			    )
+			    feForm.action = "<%=removeURL%>";
 			 }
 		 }
 	}
@@ -85,10 +89,20 @@ function submitForm(button)
     return;
 }
 
+function handleSelectAll() {
+	var ch = $("#selectAll").attr("checked");
+	if (ch == "checked") {
+		$("[name='checkboxBtn']").attr("checked", true);
+	} else {
+		$("[name='checkboxBtn']").attr("checked", false);
+	}
+	buttonManagement();
+}
+
 function buttonManagement()
 {
     var count = $("input[name='checkboxBtn']:checked").length;
-    if (count == 1)
+    if (count != 0)
     {
         $("#removeBtn").attr("disabled", false);
     }
@@ -136,7 +150,7 @@ function filterItems(e) {
                      dataClass="com.globalsight.cxe.entity.fileextension.FileExtensionImpl"
                      pageUrl="self"
                      emptyTableMsg="msg_no_file_profiles" hasFilter="true">
-                <amb:column label="" width="2%">
+                <amb:column label="checkbox" width="2%">
                     <input type="checkbox" name="checkboxBtn"  id="checkboxBtn"  value="<%=fe.getId()%>"   onClick="buttonManagement()">
                 </amb:column>
                 <amb:column label="lb_name" sortBy="<%=FileExtensionComparator.NAME%>"

@@ -708,6 +708,12 @@ public class TmCoreManagerLocal implements TmCoreManager
                 p_includeProjects);
     }
 
+	@Override
+	public StatisticsInfo getTmExportInformation(Tm pTm, Locale pUiLocale)
+	{
+		return pTm.getSegmentTmInfo().getTmExportInformation(pTm, pUiLocale);
+	}
+	
     @Override
     public DynamicLeverageResults leverageSegment(BaseTmTuv pTuv,
             LeverageOptions pOptions) throws RemoteException,

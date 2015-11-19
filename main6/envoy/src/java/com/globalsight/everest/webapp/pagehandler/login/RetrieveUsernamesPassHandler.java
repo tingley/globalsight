@@ -95,10 +95,6 @@ public class RetrieveUsernamesPassHandler extends PageHandler
         p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to
                                                            // cache
         p_response.addHeader("Cache-Control", "max-age=0"); // stale right away
-        
-        p_response.addHeader("X-Frame-Options", "SAMEORIGIN");
-        p_response.addHeader("X-Content-Type-Options", "nosniff");
-        p_response.addHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 
         String[] supportedLocales = (String[]) p_request
                 .getAttribute(SystemConfigParamNames.UI_LOCALES);

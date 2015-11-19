@@ -76,7 +76,10 @@ public interface IExportManager
      */
     String analyze()
         throws ExporterException, RemoteException;
-
+    
+    String analyzeTm()
+            throws ExporterException, RemoteException;
+    
     /**
      * With all ExportOptions set, start the actual export.  During
      * export, a registered IProcessStatusListener receives status events and

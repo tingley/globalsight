@@ -21,7 +21,7 @@ class AttributeDataHandle<T extends TM3Data> extends
         this.inlineAttrs = inlineAttrs;
         this.customAttrs = customAttrs;
     }
-    
+
 	AttributeDataHandle(BaseTm<T> tm, Map<TM3Attribute, Object> inlineAttrs,
 			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
 	{

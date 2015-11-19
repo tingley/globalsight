@@ -8,6 +8,9 @@
          com.globalsight.everest.util.comparator.FileExtensionComparator,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.webapp.pagehandler.administration.config.fileextension.FileExtensionMainHandler,
+         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+         com.globalsight.everest.webapp.WebAppConstants,
+         com.globalsight.everest.servlet.util.SessionManager,
          com.globalsight.cxe.entity.fileextension.FileExtensionImpl,
          com.globalsight.everest.company.CompanyWrapper,
          java.util.ArrayList,
@@ -28,6 +31,10 @@
   String confirmRemove = bundle.getString("msg_remove_file_extension");
   SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
   String deps = (String)sessionMgr.getAttribute("dependencies");
+  String FileExtensionName = (String) sessionMgr.getAttribute("FileExtensionName");
+  FileExtensionName = FileExtensionName == null ? "" : FileExtensionName;
+  String selfURL = self.getPageURL();
+  String emptyMsg  = "msg_no_users";
   
   boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
 %>
@@ -37,6 +44,7 @@
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -50,19 +58,30 @@ function submitForm(button)
     {
 	    feForm.action = "<%=newURL%>";
 	}
-	else if(feForm.radioBtn != null) 
-	{
-	    var radio = document.getElementsByName("radioBtn");
-	    if(radio.length)
+	else if(feForm.checkboxBtn != null) 
+	{   
+	    var checkbox = document.getElementsByName("checkboxBtn");
+	    if(checkbox.length)
 		{
-	        value = getRadioValue(feForm.radioBtn);
+
             if (button == "Remove") 
 			{
 			    if (!confirm('<%=confirmRemove%>'))
-			    {
+			    {    
 			        return false;
 			    } 
-			    feForm.action = "<%=removeURL%>" + "&id=" + value;
+			    var rv="";
+			    $(":checkbox:checked").each(
+			        function(i){
+			        	rv+=$(this).val()+" ";
+			        }		
+			    )
+			    $(":checkbox:checked").each(
+			        function(i){
+			        	$(this).val(rv);
+			        }		
+			    )
+			    feForm.action = "<%=removeURL%>";
 			 }
 		 }
 	}
@@ -70,11 +89,38 @@ function submitForm(button)
     return;
 }
 
-function enableButtons()
+function handleSelectAll() {
+	var ch = $("#selectAll").attr("checked");
+	if (ch == "checked") {
+		$("[name='checkboxBtn']").attr("checked", true);
+	} else {
+		$("[name='checkboxBtn']").attr("checked", false);
+	}
+	buttonManagement();
+}
+
+function buttonManagement()
 {
-    if (feForm.removeBtn)
-        feForm.removeBtn.disabled = false;
-}</SCRIPT>
+    var count = $("input[name='checkboxBtn']:checked").length;
+    if (count != 0)
+    {
+        $("#removeBtn").attr("disabled", false);
+    }
+    else
+    {
+        $("#removeBtn").attr("disabled", true);
+    }
+}
+
+function filterItems(e) {
+	e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+	if (keyCode == 13) {
+       feForm.action = "<%=selfURL%>";
+       feForm.submit();
+	}
+}
+</SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     ONLOAD="loadGuides()">
@@ -90,7 +136,7 @@ function enableButtons()
     <amb:header title="<%=title%>" helperText="<%=helperText%>" />
 <% }  %>
 <form name="feForm" method="post">
-    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+    <table cellpadding=0 cellspacing=0 border=0 class="standardText"  width="100%">
         <tr valign="top">
           <td align="right">
             <amb:tableNav bean="extensions" key="<%=FileExtensionMainHandler.EXTENSION_KEY
@@ -103,13 +149,16 @@ function enableButtons()
                      key="<%=FileExtensionMainHandler.EXTENSION_KEY%>"
                      dataClass="com.globalsight.cxe.entity.fileextension.FileExtensionImpl"
                      pageUrl="self"
-                     emptyTableMsg="msg_no_file_profiles" >
-                <amb:column label="" width="20px">
-                    <input type="radio" name="radioBtn" value="<%=fe.getId()%>" onclick="enableButtons()">
+                     emptyTableMsg="msg_no_file_profiles" hasFilter="true">
+                <amb:column label="checkbox" width="2%">
+                    <input type="checkbox" name="checkboxBtn"  id="checkboxBtn"  value="<%=fe.getId()%>"   onClick="buttonManagement()">
                 </amb:column>
                 <amb:column label="lb_name" sortBy="<%=FileExtensionComparator.NAME%>"
-                    width="250px">
+                 filter="FileExtensionName" filterValue="<%=FileExtensionName%>"   width="22%">
                     <%= fe.getName() %>
+                </amb:column>
+                <amb:column label="" sortBy=""width="76%">
+                    &nbsp
                 </amb:column>
                 <% if (isSuperAdmin) { %>
                 <amb:column label="lb_company_name" sortBy="<%=FileExtensionComparator.ASC_COMPANY%>">
@@ -119,13 +168,17 @@ function enableButtons()
               </amb:table>
             </td>
          </tr>
-         <tr>
-        <td style="padding-top:5px" align="right">
+        <tr valign="top">
+          <td align="right">
+            <amb:tableNav bean="extensions" key="<%=FileExtensionMainHandler.EXTENSION_KEY%>"  scope="10,20,50,All"  showTotalCount="false"  pageUrl="self" />
+          </td>
+        </tr>
+        <td style="padding-top:5px" align="left">
 		    <amb:permission name="<%=Permission.FILE_EXT_NEW%>" >
 		            <input type="BUTTON" value="<%=bundle.getString("lb_new")%>"  onClick="submitForm('New');">
 		    </amb:permission>
 		    <amb:permission name="<%=Permission.FILE_EXT_REMOVE%>" >
-		            <input type="BUTTON" name="removeBtn" disabled value="<%=bundle.getString("lb_remove")%>"  onClick="submitForm('Remove');" >
+		            <input type="BUTTON" name="removeBtn"   id="removeBtn"  disabled value="<%=bundle.getString("lb_remove")%>"  onClick="submitForm('Remove');" >
 		    </amb:permission>
         </td>
     </tr>

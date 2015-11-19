@@ -17,10 +17,10 @@
 
 package com.globalsight.everest.webapp.pagehandler;
 
-import java.beans.PropertyEditorSupport;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorManager;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -39,16 +39,11 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.StringUtil;
-import com.sun.beans.editors.BooleanEditor;
-import com.sun.beans.editors.IntegerEditor;
-import com.sun.beans.editors.LongEditor;
-import com.sun.beans.editors.StringEditor;
 
 public abstract class PageActionHandler extends PageHandler
 {
     static private final Logger logger = Logger
             .getLogger(PageActionHandler.class);
-    static private Map<Class, Class> EDITS = null;
     private ThreadLocal<Boolean> isReturn = new ThreadLocal<Boolean>();
     private HttpServletRequest request = null;
 
@@ -189,6 +184,7 @@ public abstract class PageActionHandler extends PageHandler
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private Object loadForm(HttpServletRequest request, String classPath,
             boolean loadFromDb)
     {
@@ -263,7 +259,7 @@ public abstract class PageActionHandler extends PageHandler
 
 				if (value != null && StringUtil.isNotEmpty(value[0]))
 				{
-                    PropertyEditorSupport editor = getEdit(parameterTypes[0]);
+				    PropertyEditor editor = getEdit(parameterTypes[0]);
                     if (editor != null)
                     {
                         editor.setAsText(getAsString(value));
@@ -298,41 +294,9 @@ public abstract class PageActionHandler extends PageHandler
         return result.toString();
     }
 
-    private Map<Class, Class> getEdits()
+    private PropertyEditor getEdit(Class<?> clazz)
     {
-        if (EDITS == null)
-        {
-            EDITS = new HashMap<Class, Class>();
-            EDITS.put(String.class, StringEditor.class);
-            EDITS.put(int.class, IntegerEditor.class);
-            EDITS.put(long.class, LongEditor.class);
-            EDITS.put(boolean.class, BooleanEditor.class);
-        }
-
-        return EDITS;
-    }
-
-    private PropertyEditorSupport getEdit(Class clazz)
-    {
-        Class edit = getEdits().get(clazz);
-        PropertyEditorSupport editor = null;
-        if (edit != null)
-        {
-            try
-            {
-                editor = (PropertyEditorSupport) edit.newInstance();
-            }
-            catch (InstantiationException e)
-            {
-                logger.error(e.getMessage(), e);
-            }
-            catch (IllegalAccessException e)
-            {
-                logger.error(e.getMessage(), e);
-            }
-        }
-
-        return editor;
+        return PropertyEditorManager.findEditor(clazz);
     }
 
     protected boolean getCheckBoxParameter(HttpServletRequest request,

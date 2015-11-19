@@ -17,25 +17,18 @@
 
 package com.globalsight.exporter;
 
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.exporter.ExportOptions;
-import com.globalsight.exporter.ExporterException;
-import com.globalsight.exporter.IReader;
-import com.globalsight.exporter.IWriter;
-import com.globalsight.util.ReaderResult;
-import com.globalsight.util.progress.IProcessStatusListener;
-import com.globalsight.util.progress.ProcessStatus;
-import com.globalsight.util.SessionInfo;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.tm.exporter.ExportUtil;
-import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
-
-import java.rmi.RemoteException;
-
-import java.util.*;
-import java.io.File;
-import java.io.IOException;
+import com.globalsight.util.ReaderResult;
+import com.globalsight.util.SessionInfo;
+import com.globalsight.util.progress.IProcessStatusListener;
+import com.globalsight.util.progress.ProcessStatus;
 
 /**
  * <p>The RMI interface implementation for an Exporter.</p>
@@ -189,6 +182,17 @@ public abstract class IExportManagerImpl
 
         return m_options.getXml();
     }
+
+	public String analyzeTm() throws ExporterException
+	{
+		CATEGORY.info("Starting database analysis");
+
+		m_options = setExportFile(createFilename(m_options));
+		m_reader.setExportOptions(m_options);
+		m_writer.setExportOptions(m_options);
+
+		return m_options.getXml();
+	}
 
     public void doExport()
         throws ExporterException

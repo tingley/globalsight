@@ -982,6 +982,10 @@ abstract class TuStorage<T extends TM3Data>
 
 	public abstract long getTuCountByParamMap(Map<String, Object> paramMap)
 			throws SQLException;
+	
+	public abstract long getAllTuCount() throws SQLException;
+
+	public abstract long getTuCountByLocale(Long localeId) throws SQLException;
 
     public abstract long getTuvCount(Date start, Date end) throws SQLException;
 

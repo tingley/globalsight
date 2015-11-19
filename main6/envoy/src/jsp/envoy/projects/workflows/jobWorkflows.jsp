@@ -866,7 +866,6 @@ function realSubmitForm(specificButton){
       // has not started.
       if (wfState.indexOf("BATCH_RESERVED") != -1 ||
           wfState.indexOf("PENDING") != -1 ||
-          wfState.indexOf("READY_TO_BE_DISPATCHED") != -1 ||
           wfState.indexOf("IMPORT_FAILED") != -1)
       {
          // You can only archive workflows that are...EXPORTED

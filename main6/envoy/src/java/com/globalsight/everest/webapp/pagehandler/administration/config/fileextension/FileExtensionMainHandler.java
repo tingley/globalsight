@@ -37,6 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
+import com.globalsight.cxe.entity.fileextension.FileExtension;
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
 import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -52,6 +54,7 @@ import com.globalsight.persistence.dependencychecking.FileExtensionDependencyChe
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 
 /**
  * FileExtensionPageHandler, A page handler to produce the entry page(index.jsp)
@@ -85,7 +88,9 @@ public class FileExtensionMainHandler extends PageHandler
     {
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
-
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        
         try
         {
             if ("cancel".equals(action))
@@ -107,6 +112,8 @@ public class FileExtensionMainHandler extends PageHandler
 
             // checkExtention();
 
+
+            handleFilters(p_request, sessionManager, action);
             dataForTable(p_request, session);
         }
         catch (NamingException ne)
@@ -130,9 +137,15 @@ public class FileExtensionMainHandler extends PageHandler
 
     private void removeFileExtension(HttpServletRequest p_request)
     {
-        String id = p_request.getParameter("id");
+        String ids = p_request.getParameter("checkboxBtn");
         try
         {
+        	if(ids==null || p_request.getMethod().equals("get"))
+        	{
+        		return;
+        	}
+        	String[] idarr=ids.trim().split(" ");
+        	for(String id : idarr){
             FileExtensionImpl fileExtension = ServerProxy
                     .getFileProfilePersistenceManager().getFileExtension(
                             Long.valueOf(id));
@@ -150,6 +163,7 @@ public class FileExtensionMainHandler extends PageHandler
                                 WebAppConstants.SESSION_MANAGER);
                 sessionMgr.setAttribute("dependencies", deps);
             }
+         }
         }
         catch (Exception e)
         {
@@ -210,13 +224,52 @@ public class FileExtensionMainHandler extends PageHandler
             HttpSession p_session) throws RemoteException, NamingException,
             GeneralException
     {
-        Collection fileextensions = ServerProxy
+        Collection fileextensions =ServerProxy
                 .getFileProfilePersistenceManager().getAllFileExtensions();
         Locale uiLocale = (Locale) p_session
                 .getAttribute(WebAppConstants.UILOCALE);
+        
+        SessionManager sessionManager = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        String FileExtensionName = (String) sessionManager
+                .getAttribute("FileExtensionName");
+        
+        Object[] extensions=fileextensions.toArray();
+        ArrayList fes=new ArrayList();
 
-        setTableNavigation(p_request, p_session, (ArrayList) fileextensions,
-                new FileExtensionComparator(uiLocale), 10, EXTENSION_LIST,
+        if(FileExtensionName!="")
+        {
+        if(FileExtensionName!=null)
+        {
+         for(int i=0;i<extensions.length;i++)
+         {
+        	if(extensions[i].toString().equals(FileExtensionName)||extensions[i].toString().indexOf(FileExtensionName.charAt(0))!=-1)
+        	 {      	
+        		fes.add(extensions[i]);
+        	 }
+         }
+        }
+        
+        else{
+        	
+         for(int i=0;i<extensions.length;i++)
+             {     		
+       		    fes.add(extensions[i]);        	
+             }
+         
+        }
+        }
+        else
+        {
+            for(int i=0;i<extensions.length;i++)
+            {     		
+      		    fes.add(extensions[i]);        	
+            }	
+        }
+        
+        int  numberPerPage=getNumPerPage(p_request,p_session);
+        setTableNavigation(p_request, p_session,(ArrayList)fes,
+                new FileExtensionComparator(uiLocale), numberPerPage, EXTENSION_LIST,
                 EXTENSION_KEY);
     }
 
@@ -266,5 +319,54 @@ public class FileExtensionMainHandler extends PageHandler
         {
         }
         ;
+      }
+	private int getNumPerPage(HttpServletRequest p_request,
+			HttpSession p_session)
+	{
+		int result = 10;
+
+		SessionManager sessionManager = (SessionManager) p_session
+				.getAttribute(WebAppConstants.SESSION_MANAGER);
+		String fxNumPerPage = p_request.getParameter("numOfPageSize");
+		if (StringUtil.isEmpty(fxNumPerPage))
+		{
+			fxNumPerPage = (String) sessionManager.getAttribute("fxNumPerPage");
+		}
+
+		if (fxNumPerPage != null)
+		{
+			sessionManager.setAttribute("fxNumPerPage", fxNumPerPage.trim());
+			if ("all".equalsIgnoreCase(fxNumPerPage))
+			{
+				result = Integer.MAX_VALUE;
+			}
+			else
+			{
+				try
+				{
+					result = Integer.parseInt(fxNumPerPage);
+				}
+				catch (NumberFormatException ignore)
+				{
+					result = 10;
+				}
+			}
+		}
+
+		return result;
+
+	}
+    private void handleFilters(HttpServletRequest p_request,
+            SessionManager sessionMgr, String action)
+    {
+        String FileExtensionName = (String) p_request.getParameter("FileExtensionName");
+        if (p_request.getMethod().equalsIgnoreCase(
+                WebAppConstants.REQUEST_METHOD_GET))
+        {
+        	FileExtensionName = (String) sessionMgr.getAttribute("FileExtensionName");
+        }
+        sessionMgr.setAttribute("FileExtensionName", FileExtensionName);
     }
+
+
 }

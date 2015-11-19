@@ -111,6 +111,8 @@ public class FileExtensionMainHandler extends PageHandler
             }
 
             // checkExtention();
+
+
             handleFilters(p_request, sessionManager, action);
             dataForTable(p_request, session);
         }
@@ -135,9 +137,15 @@ public class FileExtensionMainHandler extends PageHandler
 
     private void removeFileExtension(HttpServletRequest p_request)
     {
-        String id = p_request.getParameter("id");
+        String ids = p_request.getParameter("checkboxBtn");
         try
         {
+        	if(ids==null || p_request.getMethod().equals("get"))
+        	{
+        		return;
+        	}
+        	String[] idarr=ids.trim().split(" ");
+        	for(String id : idarr){
             FileExtensionImpl fileExtension = ServerProxy
                     .getFileProfilePersistenceManager().getFileExtension(
                             Long.valueOf(id));
@@ -155,6 +163,7 @@ public class FileExtensionMainHandler extends PageHandler
                                 WebAppConstants.SESSION_MANAGER);
                 sessionMgr.setAttribute("dependencies", deps);
             }
+         }
         }
         catch (Exception e)
         {
@@ -227,7 +236,9 @@ public class FileExtensionMainHandler extends PageHandler
         
         Object[] extensions=fileextensions.toArray();
         ArrayList fes=new ArrayList();
-        
+
+        if(FileExtensionName!="")
+        {
         if(FileExtensionName!=null)
         {
          for(int i=0;i<extensions.length;i++)
@@ -247,6 +258,15 @@ public class FileExtensionMainHandler extends PageHandler
              }
          
         }
+        }
+        else
+        {
+            for(int i=0;i<extensions.length;i++)
+            {     		
+      		    fes.add(extensions[i]);        	
+            }	
+        }
+        
         int  numberPerPage=getNumPerPage(p_request,p_session);
         setTableNavigation(p_request, p_session,(ArrayList)fes,
                 new FileExtensionComparator(uiLocale), numberPerPage, EXTENSION_LIST,

@@ -42,7 +42,21 @@ abstract class AbstractDataHandle<T extends TM3Data> implements TM3Handle<T> {
     
     protected abstract void purgeData();
 
-    abstract class TuIterator implements Iterator<TM3Tu<T>> {
+	@Override
+	public long getAllTuCount() throws TM3Exception
+	{
+		// NOTE: fake implementation.
+		return 0;
+	}
+
+	@Override
+	public long getTuCountByLocale(Long localeId) throws TM3Exception
+	{
+		// NOTE: fake implementation.
+		return 0;
+	}
+
+	abstract class TuIterator implements Iterator<TM3Tu<T>> {
 
         protected Iterator<TM3Tu<T>> currentPage;
         protected long startId = 0;

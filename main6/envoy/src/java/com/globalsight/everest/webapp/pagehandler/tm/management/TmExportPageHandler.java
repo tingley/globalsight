@@ -51,7 +51,6 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.exporter.IExportManager;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.ProcessStatus;
 
@@ -147,7 +146,7 @@ public class TmExportPageHandler
                 // Note that the JSP uses both the languages and whether or 
                 // not the TM is empty.
                 StatisticsInfo tmStatistics = LingServerProxy.getTmCoreManager()
-                        .getTmStatistics(tm, uiLocale, true);
+                        .getTmExportInformation(tm, uiLocale);
                 definition = tmStatistics.asXML(true);
                 
                 Long tm3id = tm.getTm3Id();

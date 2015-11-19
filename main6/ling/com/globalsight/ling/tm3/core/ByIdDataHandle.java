@@ -3,6 +3,7 @@ package com.globalsight.ling.tm3.core;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 class ByIdDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 
@@ -63,7 +64,7 @@ class ByIdDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
             throw new TM3Exception(e);
         }
     }
-    
+
     class ByIdTuIterator extends TuIterator {
         boolean done = false;
         

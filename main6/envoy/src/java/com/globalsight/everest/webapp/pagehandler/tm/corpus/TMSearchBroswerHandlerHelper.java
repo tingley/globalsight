@@ -611,16 +611,9 @@ public class TMSearchBroswerHandlerHelper
         searchTrgLocales.add(searchInSource ? targetGSL : sourceGSL);
         LeveragingLocales searchLevLocales = new LeveragingLocales();
 
-        List<String> leveragesFrom = getLeverageLocales(uiLocale,
-                searchInSource ? targetLocaleId : sourceLocaleId);
         Set<GlobalSightLocale> set = new HashSet<GlobalSightLocale>();
-
-        for (String str : leveragesFrom)
-        {
-            GlobalSightLocale gsl = ServerProxy.getLocaleManager()
-                    .getLocaleByString(str);
-            set.add(gsl);
-        }
+        set.add(searchInSource ? targetGSL : sourceGSL);
+        
         searchLevLocales.setLeveragingLocale(searchInSource ? targetGSL
                 : sourceGSL, set);
 

@@ -58,7 +58,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -270,7 +269,6 @@ import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.mail.MailerConstants;
-import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.util.zip.ZipIt;
 import com.globalsight.webservices.AmbassadorHelper.TaskJbpmNode;
 import com.globalsight.webservices.AmbassadorHelper.TaskJbpmTransition;
@@ -18736,16 +18734,15 @@ public class Ambassador extends AbstractWebService
                 try
                 {
                     exporter.setExportOptions(options);
-                    options = exporter.analyze();
+					if (StringUtil.isEmpty(p_exportedFileName))
+					{
+						options = exporter.analyzeTm();
+					}
                     // pass down new options from client
                     exporter.setExportOptions(options);
                     ((com.globalsight.everest.tm.exporter.ExportOptions) exporter
                             .getExportOptionsObject())
                             .setIdentifyKey(identifyKey);
-                    ProcessStatus status = new ProcessStatus();
-                    ResourceBundle bundle = PageHandler.getBundle(null);
-                    status.setResourceBundle(bundle);
-                    exporter.attachListener(status);
                     exporter.doExport();
                 }
                 catch (Exception e)

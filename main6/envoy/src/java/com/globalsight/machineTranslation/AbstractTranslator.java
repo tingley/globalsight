@@ -125,24 +125,24 @@ public abstract class AbstractTranslator implements MachineTranslator
                 translatedSegs = trSafaba(sourceLocale, targetLocale, segments);
                 break;
             case MS_Translator:
-            	String type = MTHelper.getMTConfig("ms_translator.translate.type");
-            	// old version
-            	if ("1".equals(type))
-            	{
-            		translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
-            	}
-            	else
-            	{
-            		// Seems MS Translator cannot return valid GXML for certain languages
-            		// such as "sr_Cyrl", we have to try pure text way.
-        			String trgSrLang = (String) getMtParameterMap().get(
-        					MachineTranslator.SR_LANGUAGE);
-            		if ("sr-Cyrl".equalsIgnoreCase(trgSrLang)) {
-            			translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
-            		} else {
+                String type = MTHelper.getMTConfig("ms_translator.translate.type");
+                // old version
+                if ("1".equals(type))
+                {
+                    translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
+                }
+                else
+                {
+                    // Seems MS Translator cannot return valid GXML for certain languages
+                    // such as "sr_Cyrl", we have to try pure text way.
+                    String trgSrLang = (String) getMtParameterMap().get(
+                            MachineTranslator.SR_LANGUAGE);
+                    if ("sr-Cyrl".equalsIgnoreCase(trgSrLang)) {
+                        translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
+                    } else {
                         translatedSegs = trMs2(sourceLocale, targetLocale, segments);
-            		}
-            	}
+                    }
+                }
                 break;
             case IPTranslator:
                 translatedSegs = trIPTranslator(sourceLocale, targetLocale, segments);
@@ -151,8 +151,8 @@ public abstract class AbstractTranslator implements MachineTranslator
                 translatedSegs = doBatchTranslation(sourceLocale, targetLocale, segments);
                 break;
             case Google_Translate:
-            	translatedSegs = trGoogle(sourceLocale, targetLocale, segments, containTags);
-            	break;
+                translatedSegs = trGoogle(sourceLocale, targetLocale, segments, containTags);
+                break;
         }
 
         if (translatedSegs != null && translatedSegs.length > 0 && !isHaveRootTag)
@@ -296,7 +296,7 @@ public abstract class AbstractTranslator implements MachineTranslator
             String[] segments, boolean containTags)
             throws MachineTranslationException
     {
-    	 long start = System.currentTimeMillis();
+         long start = System.currentTimeMillis();
          List<String> translatedList = new ArrayList<String>();
          List<String> subList = new ArrayList<String>();
          int charCount = 0;
@@ -306,7 +306,7 @@ public abstract class AbstractTranslator implements MachineTranslator
              subList.add(segments[i]);
              
              if (i == segments.length - 1 
-            		 || charCount + GxmlUtil.stripRootTag(segments[i + 1]).length() > GoogleProxy.MT_GOOGLE_MAX_CHARACTER_NUM)
+                     || charCount + GxmlUtil.stripRootTag(segments[i + 1]).length() > GoogleProxy.MT_GOOGLE_MAX_CHARACTER_NUM)
              {
                  Object[] segmentObjArray = subList.toArray();
                  String[] segmentsArray = new String[segmentObjArray.length];
@@ -351,109 +351,131 @@ public abstract class AbstractTranslator implements MachineTranslator
              CATEGORY.debug("Used time: " + (System.currentTimeMillis() - start));
          }
          return results;
-    	
-    	
+        
+        
     }
 
     // The whole segment GXML is sent for translation.
-	private String[] trMs2(Locale sourceLocale, Locale targetLocale,
-			String[] segments) throws MachineTranslationException
-	{
-		String seg = null;
-
-		List<String> heads = new ArrayList<String>();
-		String[] segmentsNoStyleInfo = new String[segments.length];
-		for (int i = 0; i < segments.length; i++)
-		{
-			seg = segments[i];
+    private String[] trMs2(Locale sourceLocale, Locale targetLocale,
+            String[] segments) throws MachineTranslationException
+    {
+        String seg = null;
+        List<String> heads = new ArrayList<String>();
+        String[] segmentsNoStyleInfo = new String[segments.length];
+        for (int i = 0; i < segments.length; i++)
+        {
+            seg = segments[i];
             String head = seg.substring(0, seg.indexOf(">") + 1);
             heads.add(head);
 
-			BaseTmTuv srcTuv = TmUtil.createTmSegment(seg, 0, null, "unknown",
-					true);
-			segmentsNoStyleInfo[i] = GxmlUtil.stripRootTag(srcTuv.getSegment());
-		}
+            BaseTmTuv srcTuv = TmUtil.createTmSegment(seg, 0, null, "unknown",
+                    true);
+            segmentsNoStyleInfo[i] = GxmlUtil.stripRootTag(srcTuv.getSegment());
+        }
 
         List<String> translatedList = new ArrayList<String>();
         List<String> subList = new ArrayList<String>();
         int charCount = 0;
-		for (int i = 0; i < segmentsNoStyleInfo.length; i++)
-		{
-			subList.add(segmentsNoStyleInfo[i]);
-			if (i == segmentsNoStyleInfo.length - 1
-					|| charCount + segmentsNoStyleInfo[i].length() > TMProfileConstants.MT_MS_MAX_CHARACTER_NUM)
-			{
-                Object[] segmentObjArray = subList.toArray();
-                String[] segmentsArray = new String[segmentObjArray.length];
-                for (int j = 0; j < segmentObjArray.length; j++)
+        for (int i = 0; i < segmentsNoStyleInfo.length; i++)
+        {
+            if (segmentsNoStyleInfo[i].length() > TMProfileConstants.MT_MS_MAX_CHARACTER_NUM)
+            {
+                if (subList.size() > 0)
                 {
-                    segmentsArray[j] = (String) segmentObjArray[j];
+                    translatedList.addAll(doMSTranslation(subList, sourceLocale, targetLocale));
                 }
-
-				String[] subResults = doBatchTranslation(sourceLocale,
-						targetLocale, segmentsArray);
-
-                if (subResults != null)
-                {
-					translatedList.addAll(Arrays.asList(subResults));
-//					for (int j = 0; j < subResults.length; j++)
-//                	{
-						// We have to do so as MS Translator returns
-						// unreasonable translations with bad tags. We know this
-						// is not 100% reliable.
-//						translatedList.add(StringUtil.replace(subResults[j],
-//								"_", " "));
-//                	}
-                }
+                translatedList.add("");
                 subList.clear();
                 charCount = 0;
-			}
-			else
-			{
-				charCount += segmentsNoStyleInfo[i].length();
-			}
- 		}
-
-		if (translatedList == null
-				|| translatedList.size() != segments.length)
-			return null;
-
-		String[] results = new String[segments.length];
-		Map<String, String> separatedSegmentMap = new HashMap<String, String>();
-    	String injected = null;
-		for (int i = 0; i < translatedList.size(); i++)
+            }
+            else if (charCount + segmentsNoStyleInfo[i].length() > TMProfileConstants.MT_MS_MAX_CHARACTER_NUM)
+            {
+                i--;
+                translatedList.addAll(doMSTranslation(subList, sourceLocale,
+                        targetLocale));
+                subList.clear();
+                charCount = 0;
+            }
+            else
+            {
+                subList.add(segmentsNoStyleInfo[i]);
+                charCount += segmentsNoStyleInfo[i].length();
+            }
+        }
+        if (subList.size() > 0)
         {
-        	separatedSegmentMap.clear();
-        	separatedSegmentMap.put("0", translatedList.get(i));
-			try
-			{
-				injected = TmUtil.composeCompleteText(segments[i],
-						separatedSegmentMap);
-				// MS Translator will add extra space before < and after > like
-				// "> <", " <" and "> ".
-				// If original segment has "><", not regardless it has "> <" or not.
-				if (segments[i].indexOf("><") > -1)
-				{
-		        	injected = StringUtil.replace(injected, "> <", "><");
-				}
-//	        	injected = StringUtil.replace(injected, "> ", ">");
-//	        	injected = StringUtil.replace(injected, " <", "<");
-	        	injected = heads.get(i) + injected + "</segment>";
+            translatedList.addAll(doMSTranslation(subList, sourceLocale,
+                    targetLocale));
+            subList.clear();
+            charCount = 0;
+        }
+        String[] results = new String[segments.length];
+        Map<String, String> separatedSegmentMap = new HashMap<String, String>();
+        String injected = null;
+        for (int i = 0; i < translatedList.size(); i++)
+        {
+            if (StringUtil.isEmpty(translatedList.get(i)))
+            {
+                results[i] = "";
+                continue;
+            }
+            separatedSegmentMap.clear();
+            separatedSegmentMap.put("0", translatedList.get(i));
+            try
+            {
+                injected = TmUtil.composeCompleteText(segments[i],
+                        separatedSegmentMap);
+                // MS Translator will add extra space before < and after > like
+                // "> <", " <" and "> ".
+                // If original segment has "><", not regardless it has "> <" or not.
+                if (segments[i].indexOf("><") > -1)
+                {
+                    injected = StringUtil.replace(injected, "> <", "><");
+                }
+//              injected = StringUtil.replace(injected, "> ", ">");
+//              injected = StringUtil.replace(injected, " <", "<");
+                injected = heads.get(i) + injected + "</segment>";
 
-				results[i] = MTHelper.fixInternalTextAfterMTTranslation(
-						segments[i], injected);
-			}
-			catch (Exception e)
-			{
-				results[i] = null;
-				CATEGORY.error(e);
-			}
+                results[i] = MTHelper.fixInternalTextAfterMTTranslation(
+                        segments[i], injected);
+            }
+            catch (Exception e)
+            {
+                results[i] = null;
+                CATEGORY.error(e);
+            }
         }
 
-		return results;
-	}
+        return results;
+    }
 
-	// Text nodes are sent to MS separately, return bad translation.
+    private List<String>  doMSTranslation(List<String> subList, Locale sourceLocale,
+            Locale targetLocale) throws MachineTranslationException
+    {
+        List<String> translatedResult = new ArrayList<String>();
+        Object[] segmentObjArray = subList.toArray();
+        String[] segmentsArray = new String[segmentObjArray.length];
+        for (int j = 0; j < segmentObjArray.length; j++)
+        {
+            segmentsArray[j] = (String) segmentObjArray[j];
+        }
+        String[] subResults = doBatchTranslation(sourceLocale,
+                targetLocale, segmentsArray);
+        if (subResults != null)
+        {
+            translatedResult.addAll(Arrays.asList(subResults));
+        }
+        else
+        {
+            for (int k = 0; k < segmentsArray.length; k++)
+            {
+                translatedResult.add("");
+            }
+        }
+        return translatedResult;
+    }
+
+    // Text nodes are sent to MS separately, return bad translation.
     private String[] trMs1(Locale sourceLocale, Locale targetLocale,
             String[] segments, boolean containTags)
             throws MachineTranslationException
@@ -735,7 +757,7 @@ public abstract class AbstractTranslator implements MachineTranslator
             Locale p_targetLocale, String[] p_segments)
             throws MachineTranslationException
     {
-    	return null;
+        return null;
     }
 
     public void setMtParameterMap(HashMap hm)

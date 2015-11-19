@@ -64,7 +64,7 @@ class ByIdDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
             throw new TM3Exception(e);
         }
     }
-    
+
     class ByIdTuIterator extends TuIterator {
         boolean done = false;
         
@@ -79,18 +79,4 @@ class ByIdDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
             }
         }
     }
-
-	@Override
-	public long getTuIdsCount() throws TM3Exception
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long getTuCountByLocaleId(Long localeId) throws TM3Exception
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }

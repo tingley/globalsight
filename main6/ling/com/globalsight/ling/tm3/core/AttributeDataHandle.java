@@ -21,7 +21,7 @@ class AttributeDataHandle<T extends TM3Data> extends
         this.inlineAttrs = inlineAttrs;
         this.customAttrs = customAttrs;
     }
-    
+
 	AttributeDataHandle(BaseTm<T> tm, Map<TM3Attribute, Object> inlineAttrs,
 			Map<TM3Attribute, String> customAttrs, Map<String, Object> paramMap)
 	{
@@ -117,18 +117,4 @@ class AttributeDataHandle<T extends TM3Data> extends
 			}
 		}
     }
-
-	@Override
-	public long getTuIdsCount() throws TM3Exception
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long getTuCountByLocaleId(Long localeId) throws TM3Exception
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }

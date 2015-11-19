@@ -957,24 +957,17 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 	}
 
 	@Override
-	public long getTuIdsCount() throws SQLException
+	public long getAllTuCount() throws SQLException
 	{
-		long count = 0;
-		StatementBuilder sb = new StatementBuilder();
-		sb.append("SELECT COUNT(tu.id) FROM ");
-		sb.append(getStorage().getTuTableName()).append(" AS tu ");
-		sb.append(" WHERE tu.tmId = ? ").addValue(tmId);
 		Connection conn = null;
 		try
 		{
 			conn = DbUtil.getConnection();
-			PreparedStatement ps = sb.toPreparedStatement(conn);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next())
-			{
-				count = rs.getLong(1);
-			}
-			ps.close();
+			StatementBuilder sb = new StatementBuilder(
+					"SELECT COUNT(id) FROM ")
+					.append(getStorage().getTuTableName())
+					.append(" WHERE tmId = ? ").addValue(tmId);
+			return SQLUtil.execCountQuery(conn, sb);
 		}
 		catch (Exception e)
 		{
@@ -984,29 +977,24 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		{
 			DbUtil.silentReturnConnection(conn);
 		}
-		return count;
 	}
 
 	@Override
-	public long getTuCountByLocaleId(Long localeId) throws SQLException
+	public long getTuCountByLocale(Long localeId) throws SQLException
 	{
-		long count = 0;
-		StatementBuilder sb = new StatementBuilder();
-		sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ");
-		sb.append(getStorage().getTuvTableName()).append(" AS tuv ");
-		sb.append(" WHERE tuv.tmId = ? ").addValue(tmId);
-		sb.append(" AND tuv.localeId = ? ").addValue(localeId);
 		Connection conn = null;
 		try
 		{
 			conn = DbUtil.getConnection();
-			PreparedStatement ps = sb.toPreparedStatement(conn);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next())
-			{
-				count = rs.getLong(1);
-			}
-			ps.close();
+			// It is for performance to inner join TU table.
+			StatementBuilder sb = new StatementBuilder(
+					"SELECT COUNT(DISTINCT tu.id) FROM ")
+					.append(getStorage().getTuTableName()).append(" as tu, ")
+					.append(getStorage().getTuvTableName()).append(" as tuv ")
+					.append(" WHERE tu.id = tuv.tuId ")
+					.append(" AND tu.tmId = ?").addValue(tmId)
+					.append(" AND tuv.localeId = ?").addValue(localeId);
+			return SQLUtil.execCountQuery(conn, sb);
 		}
 		catch (Exception e)
 		{
@@ -1016,6 +1004,5 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		{
 			DbUtil.silentReturnConnection(conn);
 		}
-		return count;
 	}
 }

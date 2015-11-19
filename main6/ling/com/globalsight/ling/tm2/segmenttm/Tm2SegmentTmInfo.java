@@ -23,7 +23,6 @@ import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TUV
 import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TU_L;
 import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TU_T;
 
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -376,7 +375,14 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
 
-    @Override
+	@Override
+	public StatisticsInfo getTmExportInformation(Tm pTm, Locale pUILocale)
+			throws LingManagerException
+	{
+		return getStatistics(pTm, pUILocale, true);
+	}
+
+	@Override
     // note this doesn't need the Tm, but it is needed in TM3 and we go along
     public List<SegmentTmTu> getSegmentsById(Tm tm, List<Long> tuIds)
             throws LingManagerException
@@ -689,12 +695,4 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     {
         return this.lock;
     }
-
-	@Override
-	public StatisticsInfo getTmExportInformation(Tm pTm, Locale pUILocale)
-			throws LingManagerException
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

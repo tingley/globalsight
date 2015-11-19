@@ -20,16 +20,17 @@ public interface TM3Handle<T extends TM3Data> extends Iterable<TM3Tu<T>> {
      */
     public long getCount() throws TM3Exception;
     
-    public long getTuIdsCount() throws TM3Exception;
-    
+    public long getAllTuCount() throws TM3Exception;
+
+    public long getTuCountByLocale(Long localeId) throws TM3Exception;
+
     /**
      * Get the number of TUVs represented by this handle.
      * @return number of tuvs referred to by this data handle.
      */
     public long getTuvCount() throws TM3Exception;
 
-	public long getTuCountByLocaleId(Long localeId) throws TM3Exception;
-    /**
+	/**
      * Get an iterator to the data.
      * @return iterator to the TU referred to by this handle
      */

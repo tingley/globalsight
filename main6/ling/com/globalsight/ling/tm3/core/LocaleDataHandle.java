@@ -116,18 +116,4 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
 			}
 		}
 	}
-
-	@Override
-	public long getTuIdsCount() throws TM3Exception
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long getTuCountByLocaleId(Long localeId) throws TM3Exception
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }

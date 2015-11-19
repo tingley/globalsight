@@ -606,8 +606,8 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
             StatisticsInfo stats = new StatisticsInfo();
             TM3Handle<GSTuvData> handle = tm3tm.getAllData(null, null);
-            int tuCount = (int) handle.getTuIdsCount();
-				
+            int tuCount = (int) handle.getAllTuCount();
+
             // We could query this directly, but for now it's cheaper to
             // add it up from the locale data
             int tuvCount = 0;
@@ -615,7 +615,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             for (TM3Locale l : tm3tm.getTuvLocales())
             {
                locale = (GlobalSightLocale) l;
-                int localeTuCount = (int) handle.getTuCountByLocaleId(locale.getId());
+                int localeTuCount = (int) handle.getTuCountByLocale(locale.getId());
                 int localeTuvCount = (int) handle.getTuvCount();
                 stats.addLanguageInfo(locale.getId(), locale.getLocale(),
                         locale.getLocale().getDisplayName(pUILocale),
@@ -661,7 +661,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
 			StatisticsInfo stats = new StatisticsInfo();
 			TM3Handle<GSTuvData> handle = tm3tm.getAllData(null, null);
-			int tuCount = (int) handle.getTuIdsCount();
+			int tuCount = (int) handle.getAllTuCount();
 
 			// We could query this directly, but for now it's cheaper to
 			// add it up from the locale data

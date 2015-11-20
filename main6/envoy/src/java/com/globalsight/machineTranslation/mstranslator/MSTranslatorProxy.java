@@ -175,19 +175,20 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
    		}
    		catch (Exception ex)
    		{
-   		    if (ex.getMessage().contains(MS_MT_EXPIRE_ERROR))
-   		    {
-   		        try
-   		        {
+            if (ex.getMessage().contains(MS_MT_EXPIRE_ERROR)
+                    || ex.getMessage().toLowerCase().contains("connection timed out"))
+            {
+                try
+                {
                     MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msClientId,
                             msClientSecret);
-   		            boolean needTranslateAgain = true;
-   		            int count = 0;
-   		            //try at most 3 times
+                    boolean needTranslateAgain = true;
+                    int count = 0;
+                    // try at most 3 times
                     while (MSMT_ACCESS_TOKEN != null && needTranslateAgain
                             && count < 3)
                     {
-   		                count++;
+                        count++;
                         result = service
                                 .translate(MSMT_ACCESS_TOKEN, p_string,
                                         sourceLang, targetLang,
@@ -200,7 +201,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
                 {
                     CATEGORY.error(e.getMessage());
                 }
-   		    }
+            }
 
    		    exceptionMsg = ex.getMessage();
    		    if (result == null || "".equals(result))
@@ -277,7 +278,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         catch (Exception ex)
         {
             if (ex.getMessage().contains(MS_MT_EXPIRE_ERROR)
-                    || ex.getMessage().toLowerCase().contains("Connection timed out"))
+                    || ex.getMessage().toLowerCase().contains("connection timed out"))
             {
                 try
                 {

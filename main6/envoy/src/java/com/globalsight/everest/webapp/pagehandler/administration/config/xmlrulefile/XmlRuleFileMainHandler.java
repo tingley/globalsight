@@ -44,6 +44,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -68,7 +69,8 @@ public class XmlRuleFileMainHandler
     {
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
-
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         try
         {
             if (XmlRuleConstant.CANCEL.equals(action))
@@ -98,7 +100,7 @@ public class XmlRuleFileMainHandler
                 removeRule(p_request, session);
                 clearSessionExceptTableInfo(session, XmlRuleConstant.XMLRULE_KEY);
             }
-
+            handleFilters(p_request, sessionManager, action);
             dataForTable(p_request, session);
         }
         catch (NamingException ne)
@@ -142,7 +144,7 @@ public class XmlRuleFileMainHandler
                             + names);
 		}
 		else
-		{
+		{   
 			XmlRuleFile xrf = ServerProxy.getXmlRuleFilePersistenceManager()
 					.readXmlRuleFile(Long.parseLong(id));
 			ServerProxy.getXmlRuleFilePersistenceManager().deleteXmlRuleFile(
@@ -203,12 +205,98 @@ public class XmlRuleFileMainHandler
         Collection xmlrulefiles = ServerProxy.getXmlRuleFilePersistenceManager().
             getAllXmlRuleFiles();
         Locale uiLocale = (Locale)p_session.getAttribute(WebAppConstants.UILOCALE);
+        
+        SessionManager sessionManager = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        String xmlruleName = (String) sessionManager
+                .getAttribute("xmlruleName");
+        
+        Object[] extensions=xmlrulefiles.toArray();
+        ArrayList fes=new ArrayList();
 
-        setTableNavigation(p_request, p_session, new ArrayList(xmlrulefiles),
+        if(xmlruleName!="")
+        {
+        if(xmlruleName!=null)
+        {
+         for(int i=0;i<extensions.length;i++)
+         {
+        	if(extensions[i].toString().equals(xmlruleName)||extensions[i].toString().indexOf(xmlruleName.charAt(0))!=-1)
+        	 {      	
+        		fes.add(extensions[i]);
+        	 }
+         }
+        }
+        
+        else{
+        	
+         for(int i=0;i<extensions.length;i++)
+             {     		
+       		    fes.add(extensions[i]);        	
+             }
+         
+        }
+        }
+        else
+        {
+            for(int i=0;i<extensions.length;i++)
+            {     		
+      		    fes.add(extensions[i]);        	
+            }	
+        }
+        
+        int numPerPage=getNumPerPage(p_request,p_session);
+        setTableNavigation(p_request, p_session,fes,
             new XmlRuleFileComparator(uiLocale),
-            10,
+            numPerPage,
             XmlRuleConstant.XMLRULE_LIST, XmlRuleConstant.XMLRULE_KEY);
     }
+
+private int getNumPerPage(HttpServletRequest p_request,
+		HttpSession p_session)
+{
+	int result = 10;
+
+	SessionManager sessionManager = (SessionManager) p_session
+			.getAttribute(WebAppConstants.SESSION_MANAGER);
+	String xmlruleNumPerPage = p_request.getParameter("numOfPageSize");
+	if (StringUtil.isEmpty(xmlruleNumPerPage))
+	{
+		xmlruleNumPerPage = (String) sessionManager.getAttribute("xmlruleNumPerPage");
+	}
+
+	if (xmlruleNumPerPage != null)
+	{
+		sessionManager.setAttribute("xmlruleNumPerPage", xmlruleNumPerPage.trim());
+		if ("all".equalsIgnoreCase(xmlruleNumPerPage))
+		{
+			result = Integer.MAX_VALUE;
+		}
+		else
+		{
+			try
+			{
+				result = Integer.parseInt(xmlruleNumPerPage);
+			}
+			catch (NumberFormatException ignore)
+			{
+				result = 10;
+			}
+		}
+	}
+
+	return result;
 }
 
+private void handleFilters(HttpServletRequest p_request,
+        SessionManager sessionMgr, String action)
+{
+    String xmlruleName = (String) p_request.getParameter("xmlruleName");
+    if (p_request.getMethod().equalsIgnoreCase(
+            WebAppConstants.REQUEST_METHOD_GET))
+    {
+    	xmlruleName = (String) sessionMgr.getAttribute("xmlruleName");
+    }
+    sessionMgr.setAttribute("xmlruleName", xmlruleName);
+}
 
+}

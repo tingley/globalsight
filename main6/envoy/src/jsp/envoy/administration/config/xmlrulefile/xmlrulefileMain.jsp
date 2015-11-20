@@ -10,6 +10,7 @@
             com.globalsight.everest.util.comparator.XmlRuleFileComparator, 
             com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl,
             com.globalsight.everest.company.CompanyWrapper,
+            com.globalsight.everest.servlet.util.SessionManager,
             java.util.*"
     session="true"
 %>
@@ -37,8 +38,10 @@
   String remURL = rem.getPageURL() + "&action=" + XmlRuleConstant.REMOVE;
   String title= bundle.getString("lb_xml_rules");
   String helperText = bundle.getString("helper_text_xml_rules");
-  String confirmRemove = bundle.getString("msg_remove_xml_rule");
-  
+  String confirmRemove = bundle.getString("msg_remove_xml_rule"); 
+  SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+  String xmlruleName = (String) sessionMgr.getAttribute("xmlruleName");
+  xmlruleName = xmlruleName == null ? "" : xmlruleName;
   String invalid = (String)request.getAttribute("invalid");
   
   boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
@@ -49,6 +52,7 @@
 <TITLE><%=title%></TITLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT>
@@ -66,8 +70,13 @@ function submitForm(button)
     }
     else
     {
-        value = getRadioValue(xmlForm.radioBtn);
-
+        var  ch=document.getElementsByName("radioBtn");
+        for(i=0;i<ch.length;i++){
+        	if(ch[i].checked==true){
+        		break;
+        	}
+        }
+        value=ch[i].value;
         if (button == "Edit")
         {
             xmlForm.action = "<%=editURL%>";
@@ -92,15 +101,34 @@ function submitForm(button)
     }
 }
 
-function enableButtons()
-{
-    if (xmlForm.editBtn)
-        xmlForm.editBtn.disabled = false;
-    if (xmlForm.dupBtn)
-        xmlForm.dupBtn.disabled = false;
-    if (xmlForm.remBtn)
-        xmlForm.remBtn.disabled = false;    
+
+function handleSelectAll() {
+	var ch = $("#selectAll").attr("checked");
+	if (ch == "checked") {
+		$("[name='radioBtn']").attr("checked", true);
+	} else {
+		$("[name='radioBtn']").attr("checked", false);
+	}
+	buttonManagement();
 }
+
+function buttonManagement()
+{
+    var count = $("input[name='radioBtn']:checked").length;
+    if (count==1)
+    {
+        $("#removeBtn").attr("disabled", false);  
+        $("#dupBtn").attr("disabled",false);
+        $("#editBtn").attr("disabled",false);
+    }
+    else 
+    {
+        $("#removeBtn").attr("disabled", true);  
+        $("#dupBtn").attr("disabled",true);
+        $("#editBtn").attr("disabled",true);
+    }
+}
+
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -112,7 +140,7 @@ function enableButtons()
 <amb:header title="<%=title%>" helperText="<%=helperText%>" />
 <span class=errorMsg><% if (invalid != null && invalid.length() > 0) out.print(invalid); %></span>
 <form name="xmlForm" method="post">
-<table cellpadding=0 cellspacing=0 border=0 class="standardText">
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" width=100%>
   <tr valign="top">
     <td align="right">
       <amb:tableNav bean="xmlRules" key="<%=XmlRuleConstant.XMLRULE_KEY%>"
@@ -125,19 +153,22 @@ function enableButtons()
        key="<%=XmlRuleConstant.XMLRULE_KEY%>"
        dataClass="com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl"
        pageUrl="self"
-       emptyTableMsg="msg_no_xmlrulefile" >
-        <amb:column label="">
-          <input type="radio" name="radioBtn" value="<%=xmlRule.getId()%>"
-           onclick="enableButtons()">
+       emptyTableMsg="msg_no_xmlrulefile"  hasFilter="true">
+        <amb:column label="checkbox">
+          <input type="checkbox" name="radioBtn" value="<%=xmlRule.getId()%>"
+           onclick="buttonManagement()">
         </amb:column>
         <amb:column label="lb_name" sortBy="<%=XmlRuleFileComparator.NAME%>"
-         width="150px">
+        filter="xmlruleName" filterValue="<%=xmlruleName%>"  width="22%">
          <%= xmlRule.getName() %>
         </amb:column>
         <amb:column label="lb_description" sortBy="<%=XmlRuleFileComparator.DESC%>"
-         width="400px">
+         width="22%">
           <% out.print(xmlRule.getDescription() == null ? "" :
              xmlRule.getDescription()); %>
+        </amb:column>
+        <amb:column label="" sortBy=""  width="56%">
+         &nbsp
         </amb:column>
         <% if (isSuperAdmin) { %>
         <amb:column label="lb_company_name" sortBy="<%=XmlRuleFileComparator.ASC_COMPANY%>">
@@ -147,19 +178,25 @@ function enableButtons()
       </amb:table>
     </td>
   </tr>
+  <tr valign="top">
+    <td align="right">
+      <amb:tableNav bean="xmlRules" key="<%=XmlRuleConstant.XMLRULE_KEY%>"
+       pageUrl="self"  scope="10,20,50,All"  showTotalCount="false"/>
+    </td>
+  </tr>
   <tr>
-    <td style="padding-top:5px" align="right">
+    <td style="padding-top:5px" align="left">
     <amb:permission name="<%=Permission.XMLRULE_REMOVE%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"
-      name="remBtn" disabled onclick="submitForm('Remove');">
+      name="removeBtn"  id="removeBtn" disabled onclick="submitForm('Remove');">
     </amb:permission>
     <amb:permission name="<%=Permission.XMLRULE_DUP%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_duplicate")%>"
-      name="dupBtn" disabled onclick="submitForm('Dup');">
+      name="dupBtn" id="dupBtn" disabled onclick="submitForm('Dup');">
     </amb:permission>
     <amb:permission name="<%=Permission.XMLRULE_EDIT%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit")%>..."
-      name="editBtn" disabled onclick="submitForm('Edit');">
+      name="editBtn" id="editBtn" disabled onclick="submitForm('Edit');">
     </amb:permission>
     <amb:permission name="<%=Permission.XMLRULE_NEW%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."

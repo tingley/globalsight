@@ -354,7 +354,6 @@ public class FileExtensionMainHandler extends PageHandler
 		}
 
 		return result;
-
 	}
     private void handleFilters(HttpServletRequest p_request,
             SessionManager sessionMgr, String action)

@@ -9,6 +9,8 @@
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
             com.globalsight.everest.servlet.util.SessionManager,
+            com.globalsight.everest.permission.Permission,
+   			com.globalsight.everest.permission.PermissionSet,
             java.util.Locale,
             java.util.ResourceBundle"
     session="true"
@@ -40,6 +42,12 @@ String lb_help    = bundle.getString("lb_help");
 boolean b_ptagsVerbose =
   state.getPTagFormat().equals(EditorConstants.PTAGS_VERBOSE);
 
+
+PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+boolean b_termsearch=true;
+if(state.isReadOnly()||!perms.getPermissionFor(Permission.TM_SEARCH)||!perms.getPermissionFor(Permission.TERMINOLOGY_SEARCH)){
+        b_termsearch=false;
+}
 %>
 <HTML>
 <HEAD>
@@ -119,8 +127,10 @@ function ShowPTagBox()
     </TD>
     <TD ALIGN="RIGHT" VALIGN="TOP">
       <IMG SRC="/globalsight/images/spacer.gif" HEIGHT="12"><BR>
+      <%if(b_termsearch) { %>
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"
        onclick="parent.dotmSearch(); return false;" ><%=lb_tm_search%></A> |
+      <%} %>
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"
        onclick="parent.doRevert(); return false;" ><%=lb_revert%></A> |
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"

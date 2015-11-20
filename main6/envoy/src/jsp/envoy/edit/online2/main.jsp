@@ -174,6 +174,14 @@ if (newStatus != null)
     }
 }
 
+//Determine if show "Term_search"  link
+
+PermissionSet perms = (PermissionSet)session.getAttribute(WebAppConstants.PERMISSIONS);
+boolean b_termsearch=true;
+if(state.isReadOnly()||!perms.getPermissionFor(Permission.TM_SEARCH)||!perms.getPermissionFor(Permission.TERMINOLOGY_SEARCH)){
+        b_termsearch=false;
+}
+
 //Determine if show "Auto-Propagate" link
 boolean b_showAutoPropagateLink = true;
 if (state.isReadOnly() || state.getIsReviewActivity()
@@ -183,7 +191,6 @@ if (state.isReadOnly() || state.getIsReviewActivity()
 }
 
 //Determine if show "Update Leverage" link
-PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 boolean b_updateLeverage = true;
 if (b_readonly || !perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)){
     b_updateLeverage = false;
@@ -399,8 +406,10 @@ tmp.mnemonic = "t";
 <% } %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_search") %>...", searchByUserSid));
 tmp.mnemonic = "s";
+<% if (b_termsearch) { %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_tm_search") %>...", dotmSearch));
 tmp.mnemonic = "t";
+<% } %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_page_info") %>...", showPageInfo));
 tmp.mnemonic = "p";
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_options") %>...", showOptions));
@@ -3059,8 +3068,10 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
     <span id="idCloseEditor" class="help" style="padding-top:8px;" onclick="closeEditor()"><%=bundle.getString("lb_close") %></span>
     
     <div id="actionDropDown" class="help wrapper-dropdown-5" style="display:none;padding-top:8px;" onclick="$(this).toggleClass('active');"><%=bundle.getString("lb_actions") %>
-	    <ul class="dropdown" style="font-family:Arial,Helvetica,sans-serif; font-size:9pt;">    
+	    <ul class="dropdown" style="font-family:Arial,Helvetica,sans-serif; font-size:9pt;">
+            <% if (b_termsearch) { %>
 	        <li><a href="javascript:dotmSearch();"><%=bundle.getString("lb_tm_search") %>...</a></li>
+            <% } %>
 	        <li><a href="javascript:showTermbases();"><%=bundle.getString("lb_termbases")%>...</a></li>
 	        <% if (b_updateLeverage) { %>
 	        	<li><a href="javascript:updateLeverage();"><%=bundle.getString("permission.activities.updateLeverage")%>...</a></li>

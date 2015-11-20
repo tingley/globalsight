@@ -103,7 +103,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         }
         catch (Exception ex)
         {
-            if (ex.getMessage().contains(MS_MT_EXPIRE_ERROR))
+            if (ex.getMessage().contains(MS_MT_EXPIRE_ERROR)
+                    || ex.getMessage().toLowerCase().contains("connection timed out"))
             {
                 try
                 {

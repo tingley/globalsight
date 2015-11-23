@@ -283,48 +283,55 @@ public class SegmentationRuleFileMainHandler extends PageHandler
     private void removeRule(HttpServletRequest p_request, HttpSession p_session)
             throws RemoteException, NamingException, GeneralException
     {
-        String id = (String) p_request.getParameter(RADIO_BUTTON);
+       // String id = (String) p_request.getParameter(RADIO_BUTTON);
+    	String value = (String) p_request.getParameter("value");
         StringBuffer invalid = new StringBuffer();
-        // can not remove default rule
-        if (id.equals("1"))
-        {
-            p_request.setAttribute("invalid",
-                    "Cannot remove default Segmentation Rule. ");
+        if(value.length()>2){      	
+        	value = value.substring(0, value.length()-1);
         }
-        else
-        {
-            // check whether some tm profiles using it.
-            String[] tmpids = ServerProxy
-                    .getSegmentationRuleFilePersistenceManager()
-                    .getTmpIdsBySegmentationRuleId(id);
-
-            if (tmpids != null)
-            {
-
-                for (int i = 0; i < tmpids.length; i++)
-                {
-                    TranslationMemoryProfile tmp = TMProfileHandlerHelper
-                            .getTMProfileById(Long.parseLong(tmpids[i]));
-
-                    invalid.append(tmp.getName()).append(", ");
-                }
-
-                p_request.setAttribute("invalid",
-                        "This Segmentation Rule is being used by these TM Profiles: "
-                                + invalid.substring(0, invalid.length() - 2));
-            }
-            else
-            {
-                SegmentationRuleFile segmentationRuleFile = ServerProxy
-                        .getSegmentationRuleFilePersistenceManager()
-                        .readSegmentationRuleFile(Long.parseLong(id));
-
-                ServerProxy.getSegmentationRuleFilePersistenceManager()
-                        .deleteSegmentationRuleFile(segmentationRuleFile);
-                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
-                        OperationLog.COMPONET_SEGMENTATION_RULE,
-                        segmentationRuleFile.getName());
-            }
+        String[] ids = value.split(",");
+        for(String id : ids){
+	        // can not remove default rule
+	        if (id.equals("1"))
+	        {
+	            p_request.setAttribute("invalid",
+	                    "Cannot remove default Segmentation Rule. ");
+	        }
+	        else
+	        {
+	            // check whether some tm profiles using it.
+	            String[] tmpids = ServerProxy
+	                    .getSegmentationRuleFilePersistenceManager()
+	                    .getTmpIdsBySegmentationRuleId(id);
+	
+	            if (tmpids != null)
+	            {
+	
+	                for (int i = 0; i < tmpids.length; i++)
+	                {
+	                    TranslationMemoryProfile tmp = TMProfileHandlerHelper
+	                            .getTMProfileById(Long.parseLong(tmpids[i]));
+	
+	                    invalid.append(tmp.getName()).append(", ");
+	                }
+	
+	                p_request.setAttribute("invalid",
+	                        "This Segmentation Rule is being used by these TM Profiles: "
+	                                + invalid.substring(0, invalid.length() - 2));
+	            }
+	            else
+	            {
+	                SegmentationRuleFile segmentationRuleFile = ServerProxy
+	                        .getSegmentationRuleFilePersistenceManager()
+	                        .readSegmentationRuleFile(Long.parseLong(id));
+	
+	                ServerProxy.getSegmentationRuleFilePersistenceManager()
+	                        .deleteSegmentationRuleFile(segmentationRuleFile);
+	                OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+	                        OperationLog.COMPONET_SEGMENTATION_RULE,
+	                        segmentationRuleFile.getName());
+	            }
+	        }
         }
     }
 
@@ -422,6 +429,11 @@ public class SegmentationRuleFileMainHandler extends PageHandler
             HttpSession p_session) throws RemoteException, NamingException,
             GeneralException
     {
+    	String numOfPageSize = p_request.getParameter("numOfPageSize");
+    	if("".equals(numOfPageSize)||numOfPageSize==null){
+    		numOfPageSize="10";
+    	}
+    	int pageSizeNum = Integer.parseInt(numOfPageSize);
         Collection segmentationrulefiles = ServerProxy
                 .getSegmentationRuleFilePersistenceManager()
                 .getAllSegmentationRuleFiles();
@@ -431,7 +443,8 @@ public class SegmentationRuleFileMainHandler extends PageHandler
 
         setTableNavigation(p_request, p_session, new ArrayList(
                 segmentationrulefiles), new SegmentationRuleFileComparator(
-                uiLocale), 10, SegmentationRuleConstant.SEGMENTATIONRULE_LIST,
+                uiLocale), pageSizeNum, SegmentationRuleConstant.SEGMENTATIONRULE_LIST,
                 SegmentationRuleConstant.SEGMENTATIONRULE_KEY);
     }
+    
 }

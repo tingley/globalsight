@@ -114,7 +114,7 @@ public class SegmentationRuleFileBasicHandler extends PageHandler
             else if (SegmentationRuleConstant.EDIT.equals(action))
             {
                 // Fetch the segmentationRuleFile to edit and store in session
-                String id = (String) p_request.getParameter(RADIO_BUTTON);
+                String id = (String) p_request.getParameter("segmentId");
                 SegmentationRuleFile segmentationRuleFile = ServerProxy
                         .getSegmentationRuleFilePersistenceManager()
                         .readSegmentationRuleFile(Long.parseLong(id));

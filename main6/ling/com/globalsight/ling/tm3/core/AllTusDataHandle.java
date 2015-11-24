@@ -73,7 +73,7 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T>
 			{
 				// Load 100 at a time
 				List<TM3Tu<T>> page = getTm().getStorageInfo().getTuStorage()
-						.getTuPageByParamMap(startId, 100, m_paramMap);
+						.getTuPageByParamMap(startId, 1000, m_paramMap);
 				if (page.size() > 0)
 				{
 					startId = page.get(page.size() - 1).getId();

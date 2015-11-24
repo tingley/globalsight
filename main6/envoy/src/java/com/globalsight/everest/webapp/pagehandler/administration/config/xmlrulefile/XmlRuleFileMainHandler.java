@@ -35,6 +35,7 @@ import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -210,23 +211,41 @@ public class XmlRuleFileMainHandler
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         String xmlruleName = (String) sessionManager
                 .getAttribute("xmlruleName");
+        String xmlruleCompName = (String) sessionManager
+        		.getAttribute("xmlruleCompName"); 
+        
         
         Object[] extensions=xmlrulefiles.toArray();
         ArrayList fes=new ArrayList();
 
-        if(xmlruleName!="")
+
+        
+        if(xmlruleName!=""||xmlruleCompName!="")
         {
-        if(xmlruleName!=null)
+        if(xmlruleName!=null && xmlruleName!="")
         {
          for(int i=0;i<extensions.length;i++)
          {
-        	if(extensions[i].toString().equals(xmlruleName)||extensions[i].toString().indexOf(xmlruleName.charAt(0))!=-1)
+        	if(extensions[i].toString().equals(xmlruleName)||
+        			extensions[i].toString().indexOf(xmlruleName.charAt(0))!=-1)
         	 {      	
         		fes.add(extensions[i]);
         	 }
          }
         }
         
+        else if(xmlruleCompName!=null && xmlruleCompName!=""){
+        	for(int i=0;i<extensions.length;i++)
+            {
+               String compName = CompanyWrapper.getCompanyNameById(
+                		((XmlRuleFileImpl) extensions[i]).getCompanyId()).toLowerCase();
+           	if(compName.equals(xmlruleCompName)||
+           			compName.indexOf(xmlruleCompName.charAt(0))!=-1)
+           	 {      	
+           		fes.add(extensions[i]);
+           	 }
+            }
+        }
         else{
         	
          for(int i=0;i<extensions.length;i++)
@@ -243,6 +262,8 @@ public class XmlRuleFileMainHandler
       		    fes.add(extensions[i]);        	
             }	
         }
+        
+
         
         int numPerPage=getNumPerPage(p_request,p_session);
         setTableNavigation(p_request, p_session,fes,
@@ -291,12 +312,15 @@ private void handleFilters(HttpServletRequest p_request,
         SessionManager sessionMgr, String action)
 {
     String xmlruleName = (String) p_request.getParameter("xmlruleName");
+    String xmlruleCompName=(String)p_request.getParameter("xmlruleCompName");
     if (p_request.getMethod().equalsIgnoreCase(
             WebAppConstants.REQUEST_METHOD_GET))
     {
     	xmlruleName = (String) sessionMgr.getAttribute("xmlruleName");
+    	xmlruleCompName=(String)sessionMgr.getAttribute("xmlruleCompName");
     }
     sessionMgr.setAttribute("xmlruleName", xmlruleName);
+    sessionMgr.setAttribute("xmlruleCompName",xmlruleCompName);
 }
 
 }

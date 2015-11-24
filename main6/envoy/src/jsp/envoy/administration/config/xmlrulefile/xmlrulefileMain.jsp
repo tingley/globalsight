@@ -32,6 +32,7 @@
 
 <%
   ResourceBundle bundle = PageHandler.getBundle(session);
+  String selfUrl = self.getPageURL();
   String newURL = new1.getPageURL() + "&action=" + XmlRuleConstant.NEW;
   String editURL = edit.getPageURL() + "&action=" + XmlRuleConstant.EDIT;
   String dupURL = dup.getPageURL() + "&action=" + XmlRuleConstant.DUPLICATE;
@@ -42,6 +43,8 @@
   SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
   String xmlruleName = (String) sessionMgr.getAttribute("xmlruleName");
   xmlruleName = xmlruleName == null ? "" : xmlruleName;
+  String xmlruleCompName = (String) sessionMgr.getAttribute("xmlruleCompName");
+  xmlruleCompName = xmlruleCompName == null ? "" : xmlruleCompName;
   String invalid = (String)request.getAttribute("invalid");
   
   boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
@@ -77,11 +80,7 @@ function submitForm(button)
         	}
         }
         value=ch[i].value;
-        if (button == "Edit")
-        {
-            xmlForm.action = "<%=editURL%>";
-        }
-        else if (button == "Dup")
+        if (button == "Dup")
         {
             xmlForm.action = "<%=dupURL%>";
         }
@@ -129,6 +128,26 @@ function buttonManagement()
     }
 }
 
+function filterItems(e)
+{
+    e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+    if (keyCode == 13)
+    {
+    	xmlForm.action = "<%=selfUrl%>";
+    	xmlForm.submit();
+    }
+}
+
+function modifyuser(name){
+	
+	var url = "<%=editURL%>&radioBtn=" + name;
+	xmlForm.action = url;
+
+	xmlForm.submit();
+	
+}
+
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -154,24 +173,27 @@ function buttonManagement()
        dataClass="com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl"
        pageUrl="self"
        emptyTableMsg="msg_no_xmlrulefile"  hasFilter="true">
-        <amb:column label="checkbox">
+        <amb:column label="checkbox"  width="2%">
           <input type="checkbox" name="radioBtn" value="<%=xmlRule.getId()%>"
-           onclick="buttonManagement()">
+           onclick="buttonManagement()" >
         </amb:column>
         <amb:column label="lb_name" sortBy="<%=XmlRuleFileComparator.NAME%>"
-        filter="xmlruleName" filterValue="<%=xmlruleName%>"  width="22%">
-         <%= xmlRule.getName() %>
+        filter="xmlruleName" filterValue="<%=xmlruleName%>"     width="22%">
+        <amb:permission name="<%=Permission.XMLRULE_EDIT%>" > <a href='javascript:void(0)' title='Edit xmlRule' onclick="modifyuser('<%=xmlRule.getId()%>')"> </amb:permission>
+               <%= xmlRule.getName() %>
+        <amb:permission name="<%=Permission.XMLRULE_EDIT%>" > </a> </amb:permission> 
         </amb:column>
         <amb:column label="lb_description" sortBy="<%=XmlRuleFileComparator.DESC%>"
          width="22%">
           <% out.print(xmlRule.getDescription() == null ? "" :
              xmlRule.getDescription()); %>
         </amb:column>
-        <amb:column label="" sortBy=""  width="56%">
-         &nbsp
+        <amb:column label="" sortBy=""  width="10%">
+         &nbsp;
         </amb:column>
         <% if (isSuperAdmin) { %>
-        <amb:column label="lb_company_name" sortBy="<%=XmlRuleFileComparator.ASC_COMPANY%>">
+        <amb:column label="lb_company_name" sortBy="<%=XmlRuleFileComparator.ASC_COMPANY%>"
+        filter="xmlruleCompName" filterValue="<%=xmlruleCompName%>">
             <%=CompanyWrapper.getCompanyNameById(xmlRule.getCompanyId())%>
         </amb:column>
         <% } %>
@@ -193,10 +215,6 @@ function buttonManagement()
     <amb:permission name="<%=Permission.XMLRULE_DUP%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_duplicate")%>"
       name="dupBtn" id="dupBtn" disabled onclick="submitForm('Dup');">
-    </amb:permission>
-    <amb:permission name="<%=Permission.XMLRULE_EDIT%>" >
-      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit")%>..."
-      name="editBtn" id="editBtn" disabled onclick="submitForm('Edit');">
     </amb:permission>
     <amb:permission name="<%=Permission.XMLRULE_NEW%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."

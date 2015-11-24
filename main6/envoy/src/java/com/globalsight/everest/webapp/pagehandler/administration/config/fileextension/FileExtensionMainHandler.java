@@ -38,10 +38,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+
 import com.globalsight.cxe.entity.fileextension.FileExtension;
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
+import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl;
 import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -233,13 +236,15 @@ public class FileExtensionMainHandler extends PageHandler
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         String FileExtensionName = (String) sessionManager
                 .getAttribute("FileExtensionName");
+        String FileExtensionCName = (String) sessionManager
+                .getAttribute("FileExtensionCName");
         
         Object[] extensions=fileextensions.toArray();
         ArrayList fes=new ArrayList();
 
-        if(FileExtensionName!="")
+        if(FileExtensionName!=""||FileExtensionCName!="")
         {
-        if(FileExtensionName!=null)
+        if(FileExtensionName!=null && FileExtensionName!="")
         {
          for(int i=0;i<extensions.length;i++)
          {
@@ -248,6 +253,20 @@ public class FileExtensionMainHandler extends PageHandler
         		fes.add(extensions[i]);
         	 }
          }
+        }
+        
+        else if(FileExtensionCName!=null && FileExtensionCName!="")
+        {
+        	for(int i=0;i<extensions.length;i++)
+            {
+               String compName = CompanyWrapper.getCompanyNameById(
+                		((FileExtensionImpl) extensions[i]).getCompanyId()).toLowerCase();
+           	if(compName.equals(FileExtensionCName)||
+           			compName.indexOf(FileExtensionCName.charAt(0))!=-1)
+           	 {      	
+           		fes.add(extensions[i]);
+           	 }
+            }
         }
         
         else{
@@ -359,12 +378,15 @@ public class FileExtensionMainHandler extends PageHandler
             SessionManager sessionMgr, String action)
     {
         String FileExtensionName = (String) p_request.getParameter("FileExtensionName");
+        String FileExtensionCName = (String) p_request.getParameter("FileExtensionCName");
         if (p_request.getMethod().equalsIgnoreCase(
                 WebAppConstants.REQUEST_METHOD_GET))
         {
         	FileExtensionName = (String) sessionMgr.getAttribute("FileExtensionName");
+        	FileExtensionCName = (String) sessionMgr.getAttribute("FileExtensionCName");
         }
         sessionMgr.setAttribute("FileExtensionName", FileExtensionName);
+        sessionMgr.setAttribute("FileExtensionCName", FileExtensionCName);
     }
 
 

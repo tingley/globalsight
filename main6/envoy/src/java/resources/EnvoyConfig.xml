@@ -1826,7 +1826,6 @@
         <PageLink linkName="segmentEditor" destinationPageName="SE1"></PageLink>
         <PageLink linkName="commentEditor" destinationPageName="CE1"></PageLink>
         <PageLink linkName="refreshSelf" destinationPageName="ED8"></PageLink>
-        <PageLink linkName="showDetails" destinationPageName="ED8"></PageLink>
         
       </WebPage>
       <WebPage pageName="ED9" isDefault="false" jspName="/envoy/edit/online/me_targetMenu.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.EditorPageHandler">

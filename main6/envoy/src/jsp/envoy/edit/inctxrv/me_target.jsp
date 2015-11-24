@@ -45,8 +45,6 @@ static {
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="commentEditor" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
- <jsp:useBean id="showDetails" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <%
 ResourceBundle bundle = PageHandler.getBundle(session);
 
@@ -65,7 +63,7 @@ String b_refreshSource = (String) request.getAttribute("refreshSource");
 String url_refresh = refreshSelf.getPageURL();
 String url_segmentEditor = segmentEditor.getPageURL();
 String url_commentEditor = commentEditor.getPageURL();
-String url_showDetails = showDetails.getPageURL();
+
 String lb_id = bundle.getString("lb_id");
 String lb_segment = bundle.getString("lb_segment");
 String lb_comment = "Comment" /*bundle.getString("lb_comment")*/;
@@ -81,16 +79,6 @@ String str_displayLocale = state.getTargetViewLocale().getDisplayName();
 long l_targetPageId = state.getTargetPageId().longValue();
 boolean b_isReviewActivity = state.getIsReviewActivity();
 boolean b_readOnly = state.isReadOnly();
-
-String lb_title = bundle.getString("lb_segment_details");
-String lb_details = lb_title;
-
-String lb_segmentId = bundle.getString("lb_segmentId");
-String lb_segmentFormat = bundle.getString("lb_segmentFormat");
-String lb_segmentType = bundle.getString("lb_segmentType");
-String lb_wordCount = bundle.getString("lb_totalWordCount");
-String lb_close = bundle.getString("lb_close");
-String lb_tagInfo = bundle.getString("lb_tagInfo");
 
 Boolean assigneeValue = (Boolean)TaskHelper.retrieveObject(
    session, WebAppConstants.IS_ASSIGNEE);
@@ -489,71 +477,6 @@ function forceCloseEditor(p_type)
     {
         window.top.ForceCloseCommentEditor();
     }
-}
-
-function showDetails(tuId, tuvId, subId){
-	if (!CanClose())
-    {
-        cancelEvent();
-        RaiseEditor();
-    }
-    else
-    {
-        forceCloseEditor('segment');
-        hideContextMenu();
-     show(tuId, tuvId, subId);
-    }
-}
-
-function show(tuId, tuvId, subId){
-	var details = "seg"+tuId+"_"+tuvId+"_"+subId;
-	var X = $('#'+details).offset().top;
-	var Y = $('#'+details).offset().left;
-	//alert("x:"+X+"y:"+Y);
-	$("#showDetails").css({top:X,left:Y});
-	$("#showDetails").html("");
-	var str_url = "<%=url_showDetails%>" ;
-	var str = jsonUrl + str_url;
-    var details = "tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId;
-    $.post(str,{param:details},function(data){
-	    var result = eval("("+data+")");
-		$("#showDetails").html('<div id="details-title" style="background:#708EB3; text-align:right;cursor:move;"><div><a href="##" style="color:#FFF" onclick="closeDetails()"><%=lb_close%></a></div></div><table cellspacing="0" cellpadding="2" border="0" style="width:240px;height:200px;"><tr class="standardText"><td nowrap="nowrap" align="center" colspan="2"><span class="mainHeading"><%=lb_title%></span></td></tr>'
-		+'<tr class="standardText"><td><B><%=lb_segmentId%>:</B></td><td>'+ result.str_segmentId +'</td></tr><tr class="standardText"><td><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
-		+'<tr class="standardText"><td><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr><tr class="standardText"><td><B><%=lb_tagInfo%>:</B></td><td>AAAAAAAAAAA</td></tr>'
-		+'<tr class="standardText"><td><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr><tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr></table>');
-	 });
-	 $("#showDetails").show();	 
-	 var _move=false;
-	 var _x,_y;
-	 $(document).ready(function(){
-	 $("#showDetails").click(function(){
-	  }).mousedown(function(e){
-	  _move=true;
-	  _x=e.pageX-parseInt($("#showDetails").css("left"));
-	  _y=e.pageY-parseInt($("#showDetails").css("top"));
-	  $("#showDetails").fadeTo(20, 0.25);
-	  });
-	  $(document).mousemove(function(e){
-
-	  if(_move){
-	  var x=e.pageX-_x;
-	  var y=e.pageY-_y;
-	  $("#showDetails").css({top:y,left:x});
-
-	  }
-	  }).mouseup(function(){
-		  var display =$('#showDetails').css('display');
-		  if(display == 'none'){
-			  return;
-			}else{
-	       _move=false;
-	        $("#showDetails").fadeTo("fast", 1);}
-	  });
-	  });
-}
-
-function closeDetails(){
-	$("#showDetails").css("display", "none");
 }
 
 function editComment(tuId, tuvId, subId)
@@ -1001,9 +924,7 @@ function contextForSegment(obj, e)
     {
       popupoptions = [
         new ContextItem("<B>Add/edit comment</B>",
-          function(){editComment(ids[0], ids[1], ids[2])}),
-        new ContextItem("Segment details",
-          function(){showDetails(ids[0], ids[1], ids[2])})
+          function(){editComment(ids[0], ids[1], ids[2])})
         ];
     }
     else if (g_reviewMode)
@@ -1355,8 +1276,6 @@ function doSegmentFilter(p_segmentFilter)
   </THEAD>
   <TBODY id="idPageHtml"><%=str_pageHtml%></TBODY>
 </TABLE>
-<div id="showDetails" style="display:none;position: absolute;z-index:999;background-color:#FFFFFF;border:1px #000000 solid;">
-</div>
 <% } else { %>
 <DIV id="idPageHtml" style="font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
 	<%=str_pageHtml%>

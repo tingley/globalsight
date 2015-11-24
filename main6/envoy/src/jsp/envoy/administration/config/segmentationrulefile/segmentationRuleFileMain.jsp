@@ -241,15 +241,15 @@ function edit(segmentId){
            onclick="enableButtons()">
         </amb:column>
         <amb:column label="lb_name" sortBy="<%=SegmentationRuleFileComparator.NAME%>"
-         width="28%">
+         width="25%">
          <a href="##" onclick="edit(<%=segmentationRuleFile.getId()%>)" >  <%= segmentationRuleFile.getName() %> </a>
         </amb:column>
         <amb:column label="lb_type" sortBy="<%=SegmentationRuleFileComparator.TYPE%>"
-            width="20%">
+            width="18%">
              <% out.print(SegmentationRuleFileType.getTypeString(segmentationRuleFile.getType())); %>
            </amb:column>
         <amb:column label="lb_is_default" sortBy="<%=SegmentationRuleFileComparator.IS_DEFAULT%>"
-            width="20%">
+            width="15%">
              <% out.print(segmentationRuleFile.getIsDefault() ? "<IMG SRC='/globalsight/images/checkmark.gif' HEIGHT=9 WIDTH=13 HSPACE=10 VSPACE=3></IMG>" : ""); %>
            </amb:column>
         <amb:column label="lb_description" sortBy="<%=SegmentationRuleFileComparator.DESC%>"

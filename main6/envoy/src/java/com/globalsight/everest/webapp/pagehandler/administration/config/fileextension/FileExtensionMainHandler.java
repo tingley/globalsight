@@ -248,7 +248,7 @@ public class FileExtensionMainHandler extends PageHandler
         {
          for(int i=0;i<extensions.length;i++)
          {
-        	if(extensions[i].toString().equals(FileExtensionName)||extensions[i].toString().indexOf(FileExtensionName.charAt(0))!=-1)
+        	if(extensions[i].toString().indexOf(FileExtensionName)>=0)
         	 {      	
         		fes.add(extensions[i]);
         	 }
@@ -261,8 +261,8 @@ public class FileExtensionMainHandler extends PageHandler
             {
                String compName = CompanyWrapper.getCompanyNameById(
                 		((FileExtensionImpl) extensions[i]).getCompanyId()).toLowerCase();
-           	if(compName.equals(FileExtensionCName)||
-           			compName.indexOf(FileExtensionCName.charAt(0))!=-1)
+               
+           	if(compName.indexOf(FileExtensionCName)>=0)
            	 {      	
            		fes.add(extensions[i]);
            	 }

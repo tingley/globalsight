@@ -871,13 +871,13 @@ function doOnLoad()
    </thead>
    <!-- language -->
    <tr>
-   	 <td><%= bundle.getString("lb_by_language")%></td>
-     <td><select name="oEntryLang" id="idLanguageList"  MULTIPLE  size="6"></select></td>
+   	 <td valign="middle"><%= bundle.getString("lb_by_language")%>:</td>
+     <td><select name="oEntryLang" id="idLanguageList" style="width:203px;" MULTIPLE  size="6"></select></td>
    </tr>
    <!-- project -->
    <tr>
-        <td><%= propTypeTitle%></td>
-        <td><select name="oEntryPropType" id="idPropTypeList"  MULTIPLE></select></td>
+        <td valign="middle"><%= propTypeTitle%>:</td>
+        <td><select name="oEntryPropType" id="idPropTypeList" style="width:203px;" MULTIPLE></select></td>
    </tr>
    <%--TU ID --%>
    <tr>

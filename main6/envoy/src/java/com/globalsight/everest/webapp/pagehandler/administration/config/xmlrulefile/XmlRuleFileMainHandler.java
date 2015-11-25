@@ -226,8 +226,7 @@ public class XmlRuleFileMainHandler
         {
          for(int i=0;i<extensions.length;i++)
          {
-        	if(extensions[i].toString().equals(xmlruleName)||
-        			extensions[i].toString().indexOf(xmlruleName.charAt(0))!=-1)
+        	if(extensions[i].toString().indexOf(xmlruleName)>=0)
         	 {      	
         		fes.add(extensions[i]);
         	 }
@@ -239,8 +238,7 @@ public class XmlRuleFileMainHandler
             {
                String compName = CompanyWrapper.getCompanyNameById(
                 		((XmlRuleFileImpl) extensions[i]).getCompanyId()).toLowerCase();
-           	if(compName.equals(xmlruleCompName)||
-           			compName.indexOf(xmlruleCompName.charAt(0))!=-1)
+           	if(compName.indexOf(xmlruleCompName)>=0)
            	 {      	
            		fes.add(extensions[i]);
            	 }

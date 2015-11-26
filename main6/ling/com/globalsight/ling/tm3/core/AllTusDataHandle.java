@@ -50,7 +50,7 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T>
             throw new TM3Exception(e);
         }
     }
-
+    
     @Override
     public void purgeData() throws TM3Exception {
         try {
@@ -109,6 +109,20 @@ class AllTusDataHandle<T extends TM3Data> extends AbstractDataHandle<T>
 		{
 			return getTm().getStorageInfo().getTuStorage()
 					.getTuCountByLocale(localeId);
+		}
+		catch (SQLException e)
+		{
+			throw new TM3Exception(e);
+		}
+	}
+	
+	public long getTuvCountByLocale(List<TM3Locale> localeList)
+			throws TM3Exception
+	{
+		try
+		{
+			return getTm().getStorageInfo().getTuStorage()
+					.getTuvCountByLocales(localeList, getStart(), getEnd());
 		}
 		catch (SQLException e)
 		{

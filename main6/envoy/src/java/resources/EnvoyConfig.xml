@@ -439,7 +439,7 @@
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
 	<WebPage pageName="TMI1" isDefault="false"
-		jspName="/envoy/tm/management/export.jsp"
+		jspName="/envoy/tm/management/import.jsp"
 		pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
 		<PageLink linkName="next" destinationPageName="TM_IMPORT_VALIDATION"></PageLink>
 		<PageLink linkName="cancel" destinationPageName="TM"></PageLink>	
@@ -775,7 +775,6 @@
         <PageLink linkName="ok" destinationPageName="cojs"></PageLink>
       </WebPage>
     </WebActivity>
-    
     <WebActivity webActivityName="eloqua">
       <WebPage pageName="em" isDefault="true" jspName="/envoy/connecter/eloqua/eloquaMain.jsp" pageHandlerClassName="com.globalsight.connector.eloqua.EloquaMainHandler">
         <PageLink linkName="self" destinationPageName="em"></PageLink>
@@ -1550,7 +1549,7 @@
         <PageLink linkName="jobDetailsPDFs" destinationPageName="JOBDETAILSPDFS"></PageLink>
         <PageLink linkName="jobScorecard" destinationPageName="SCORECARD"></PageLink>
       </WebPage>
-      <WebPage pageName="SOURCEFILES" isDefault="false" jspName="/envoy/projects/workflows/+.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSourceFilesHandler">
+      <WebPage pageName="SOURCEFILES" isDefault="false" jspName="/envoy/projects/workflows/jobSourceFiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSourceFilesHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
         <PageLink linkName="jobSourceFiles" destinationPageName="SOURCEFILES"></PageLink>
         <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
@@ -1826,7 +1825,6 @@
         <PageLink linkName="segmentEditor" destinationPageName="SE1"></PageLink>
         <PageLink linkName="commentEditor" destinationPageName="CE1"></PageLink>
         <PageLink linkName="refreshSelf" destinationPageName="ED8"></PageLink>
-        
       </WebPage>
       <WebPage pageName="ED9" isDefault="false" jspName="/envoy/edit/online/me_targetMenu.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.EditorPageHandler">
         <PageLink linkName="changeViewMode" destinationPageName="ED8"></PageLink>

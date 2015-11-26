@@ -410,7 +410,9 @@ public class FileProfileMainHandler extends PageHandler
             String idString = (String) p_request.getParameter(RADIO_BUTTON);
             if (idString != null)
             {
-                String id = idString.split(",")[0];
+                String[] idarray = idString.split(" ");
+                for(int i=0;i<idarray.length;i++){
+                String id=idarray[i].split(",")[0];
 				FileProfileImpl fp = (FileProfileImpl) ServerProxy
 						.getFileProfilePersistenceManager().getFileProfileById(
 								Long.parseLong(id), true);
@@ -428,6 +430,7 @@ public class FileProfileMainHandler extends PageHandler
 
                 // Don't really remove
                 // removeRelevantXslFile(id);
+            }
             }
         }
         catch (Exception e)

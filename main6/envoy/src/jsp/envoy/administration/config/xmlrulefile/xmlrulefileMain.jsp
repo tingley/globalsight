@@ -86,6 +86,17 @@ function submitForm(button)
         }
         else if (button == "Remove")
         {
+		    var rv="";
+		    $(":checkbox:checked").each(
+		        function(i){
+		        	rv+=$(this).val()+" ";
+		        }		
+		    )
+		    $(":checkbox:checked").each(
+		        function(i){
+		        	$(this).val(rv);
+		        }		
+		    )
         	if (!confirm('<%=confirmRemove%>'))
         	{
         		isOk = false;
@@ -122,7 +133,7 @@ function buttonManagement()
     }
     else 
     {
-        $("#removeBtn").attr("disabled", true);  
+        $("#removeBtn").attr("disabled", false);  
         $("#dupBtn").attr("disabled",true);
         $("#editBtn").attr("disabled",true);
     }

@@ -123,8 +123,10 @@ public class XmlRuleFileMainHandler
     private void removeRule(HttpServletRequest p_request, HttpSession session)
 			throws RemoteException, NamingException, GeneralException {
 
-		String id = (String) p_request.getParameter(RADIO_BUTTON);
-
+		String ids = (String) p_request.getParameter(RADIO_BUTTON);
+        String[] idarr=ids.split(" ");
+        for(int j=0;j<idarr.length;j++){
+        	String id=idarr[j];
 		// check whether some file profiles using it.
 		String companyId = CompanyThreadLocal.getInstance().getValue();
 		List xmlRuleFilters = FilterHelper.getXmlRuleFilters(id, companyId);
@@ -151,7 +153,7 @@ public class XmlRuleFileMainHandler
 			ServerProxy.getXmlRuleFilePersistenceManager().deleteXmlRuleFile(
 					xrf);
 		}
-
+        }
 	}
 
 	/**

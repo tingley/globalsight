@@ -754,19 +754,30 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 	private void getParameterSql(StatementBuilder sb,
 			Map<String, Object> paramMap,String stringId)
 	{
+		Map<TM3Attribute, Object> inlineAttrs = null;
+		Map<TM3Attribute, String> customAttrs = null;
 		if (checkContainExtTable(paramMap))
 		{
 			sb.append(",").append(getStorage().getTuvExtTableName())
 					.append(" AS ext ");
 		}
 		sb.append(",").append(getStorage().getTuTableName()).append(" AS tu");
-
 		if (paramMap != null)
 		{
-			Map<TM3Attribute, Object> inlineAttrs = (Map<TM3Attribute, Object>) paramMap
+			inlineAttrs = (Map<TM3Attribute, Object>) paramMap
 					.get("inlineAttrs");
-			Map<TM3Attribute, String> customAttrs = (Map<TM3Attribute, String>) paramMap
+			customAttrs = (Map<TM3Attribute, String>) paramMap
 					.get("customAttrs");
+			if (inlineAttrs != null && !inlineAttrs.isEmpty())
+			{
+				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+			}
+		}
+		sb.append(" WHERE tu.id = tuv.tuId ");
+		sb.append(" AND  tu.tmId = ? ").addValue(tmId);
+		
+		if (paramMap != null)
+		{
 			Set<String> jobAttributeSet = (Set<String>) paramMap
 					.get("jobAttributeSet");
 			String createUser = (String) paramMap.get("createUser");
@@ -786,17 +797,11 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				localeIds = getLocaleIds(localeIdList);
 			}
 
-			if (inlineAttrs != null && !inlineAttrs.isEmpty())
-			{
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-			}
-			sb.append(" WHERE tu.id = tuv.tuId ");
 			if (checkContainExtTable(paramMap))
 			{
 				sb.append(" AND tuv.id = ext.tuvId ");
 				sb.append(" AND tu.id = ext.tuId ");
 			}
-			sb.append(" AND  tu.tmId = ? ").addValue(tmId);
 			
 			if (StringUtil.isNotEmpty(lastUsageAfter)
 					&& StringUtil.isNotEmpty(lastUsageBefore))
@@ -1033,4 +1038,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			DbUtil.silentReturnConnection(conn);
 		}
 	}
+	
+	
 }

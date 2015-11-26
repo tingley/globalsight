@@ -119,28 +119,43 @@ function submitForm(button)
    {
        fpForm.action = "<%=searchUrl%>";
    }
-	  else if(fpForm.radioBtn != null) 
-	        {
+   else if(fpForm.radioBtn != null) 
+	    {
 	        	var radio = document.getElementsByName("radioBtn");
 	        	if(radio.length)
 		        {
+				    var rv="";
+				    $(":checkbox:checked").each(
+				        function(i){
+				        	rv+=$(this).val()+" ";
+				        }		
+				    )
+				    $(":checkbox:checked").each(
+				        function(i){
+				        	$(this).val(rv);
+				        }		
+				    )
 		        	 value = getRadioValue(fpForm.radioBtn);
-		        	 varray = value.split(",");
+		        	 varray = value.split(" ");
 		        	 if (button == "Remove") 
-			        {
-				        if (varray[1] == "1") {
+			        {	        	
+		        		for(var i=0;i<varray.length-1;i++){
+		        			array=varray[i].split(",");
+				        if (array[1] == "1") {
 					        alert('The file profile is referred by CVS file profile. Please remove referred CVS file profile first.');
 					        return false;
-				        } else {
+				        } 
+		        		}
 				            if (!confirm('<%=confirmRemove%>'))
 				            {
 				            	 return false;
-				            }
-				        } 
-				        fpForm.action = "<%=removeURL%>";
+				            }	
+				            fpForm.action = "<%=removeURL%>";
+				        
+		        		}
 			        }
 		        }
-	        }
+	          
     fpForm.submit();
     return;
 
@@ -168,16 +183,11 @@ function handleSelectAll() {
 function buttonManagement()
 {
 	var count = $("input[name='radioBtn']:checked").length;
-	if (count > 0) {
-		
-	    if (count == 1) {
-	    	$("#removeBtn").attr("disabled", false);
+	if (count == 0) {
+	    	$("#removeBtn").attr("disabled", true);
 		} else {
-			$("#removeBtn").attr("disabled", true);
-		}
-	} else {
-        $("#removeBtn").attr("disabled", true);
-	}
+			$("#removeBtn").attr("disabled", false);
+		}	
 }
 
 function filterItems(e)

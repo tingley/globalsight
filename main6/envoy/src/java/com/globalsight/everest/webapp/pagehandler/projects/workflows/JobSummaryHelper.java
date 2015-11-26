@@ -336,7 +336,8 @@ public class JobSummaryHelper
 
     private String readOffice2010AppXmlFile(File appXmlFile)
     {
-		if (!appXmlFile.exists() || appXmlFile.isDirectory())
+		if (appXmlFile == null || !appXmlFile.exists()
+				|| appXmlFile.isDirectory())
 			return null;
 
         StringBuffer appXml = new StringBuffer();

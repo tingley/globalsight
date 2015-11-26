@@ -1,12 +1,36 @@
 <%@ page contentType="text/html; charset=UTF-8"
 	errorPage="/envoy/common/error.jsp"
 	import="java.util.*,com.globalsight.everest.webapp.pagehandler.PageHandler,
+			com.globalsight.util.GlobalSightLocale,
+			com.globalsight.util.edit.EditUtil,
+			com.globalsight.everest.servlet.util.ServerProxy,
+			com.globalsight.ling.common.Text,
 	        com.globalsight.everest.webapp.WebAppConstants"
 	session="true"%>
 <jsp:useBean id="self" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     String saveUrl = self.getPageURL()+"&action="+WebAppConstants.TM_ACTION_SAVE_ENTRY;
+    String sourceLocaleStr = (String) request.getAttribute("sourceLocale");
+    String targetLocaleStr = (String) request.getAttribute("targetLocale");
+	String srcSegment =(String)request.getAttribute("srcSegment");
+	String trgSegment =(String)request.getAttribute("trgSegment");
+    GlobalSightLocale sourceLocale = ServerProxy.getLocaleManager()
+    .getLocaleByString(sourceLocaleStr);
+    GlobalSightLocale targetLocale = ServerProxy.getLocaleManager()
+    .getLocaleByString(targetLocaleStr);
+    boolean b_rtl = EditUtil.isRTLLocale(targetLocale);
+    boolean b_source_rtl = EditUtil.isRTLLocale(sourceLocale);
+    String srcDir="LTR";
+    String trgDir="LTR";
+    if (b_source_rtl)
+    {
+        srcDir = (Text.containsBidiChar(srcSegment)) ? "RTL": "LTR";
+    }
+    if (b_rtl)
+    {
+        trgDir = (Text.containsBidiChar(trgSegment)) ? "RTL": "LTR";
+    }
 %>
 <html>
 <head>
@@ -71,6 +95,8 @@ border:solid 1px #6e8bde;
 <%@ include file="/envoy/common/warning.jspIncl"%>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript">
+var trgDir = "<%=trgDir%>";
+var srcDir ="<%=srcDir%>";
 var entryInfo;
 var tuId;
 var sourceTuvId;
@@ -292,7 +318,10 @@ function init()
 	
 	textboxSource = document.getElementById("editSource");
 	textboxTarget = document.getElementById("editTarget");
-
+	
+	textboxSource.dir=srcDir;
+	textboxTarget.dir=trgDir;
+	
 	setSegment(textboxSource, entryInfo.source);
 	setSegment(textboxTarget, entryInfo.target);
 	$("#idSourceSegment").html(entryInfo.source);

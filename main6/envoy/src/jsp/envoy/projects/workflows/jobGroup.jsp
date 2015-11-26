@@ -11,6 +11,7 @@
     com.globalsight.everest.projecthandler.ProjectImpl,
     com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
     com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+    com.globalsight.everest.jobhandler.JobGroup,
     com.globalsight.everest.webapp.pagehandler.projects.workflows.JobGroupComparator"
     session="true"
 %>
@@ -35,6 +36,12 @@
     String newJobGroupUrl = create.getPageURL();
     String deleteUrl = delete.getPageURL();
     String selfUrl = self.getPageURL()+ DEFAULT_PARAM;
+    List<JobGroup> allGroupsList = (List<JobGroup>)request.getAttribute("allGroups");
+    boolean empty = false;
+    if(allGroupsList.size() == 0)
+    {
+    	empty = true;
+    }
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
 %>
 <HTML>
@@ -256,12 +263,21 @@ function getSelectRadioBtn()
 </TR>
 </thead>
 <tbody>
+<%
+	if(empty){
+	%>
+		<TR>
+			<td colspan="8" CLASS=standardText style="text-align: left;"><%=bundle.getString("msg_no_job_groups")%></td>
+		</TR>
+	<%
+	}
+%>
 <c:forEach items="${allGroups}" var="group" varStatus="i">
 	<TR>
 	    <TD style="width:20px;"><INPUT onclick="" TYPE=checkbox NAME="RadioBtn" VALUE="${group.id}"></TD>
 		<TD CLASS=standardText style="text-align: left;width:80px">${group.id}</TD>
 		<TD CLASS=standardText style="text-align: left;word-break:break-all;width:150px" >
-			<A HREF="/globalsight/ControlServlet?linkName=jobList&pageName=GROUPS&jobGroupId=${group.id}" oncontextmenu="contextForTab('${group.id}',event)">${group.name}</A>
+			<A HREF="/globalsight/ControlServlet?linkName=jobList&pageName=GROUPS&jobGroupId=${group.id}" oncontextmenu="contextForTab('${group.id}',event)">${group.name}</A></TD>
 		<TD CLASS= standardText style="text-align: left;width:150px" >${group.project.getName()}</TD>
 		<TD CLASS=standardText style="text-align: left;width:150px"} >${group.sourceLocale.getDisplayName()}</TD>
 		<TD CLASS=standardText style="text-align: left;width:150px"} >${group.getCreateUser().getUserName()}</TD>

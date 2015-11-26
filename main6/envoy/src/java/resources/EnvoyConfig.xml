@@ -439,7 +439,7 @@
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
 	<WebPage pageName="TMI1" isDefault="false"
-		jspName="/envoy/tm/management/import.jsp"
+		jspName="/envoy/tm/management/export.jsp"
 		pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
 		<PageLink linkName="next" destinationPageName="TM_IMPORT_VALIDATION"></PageLink>
 		<PageLink linkName="cancel" destinationPageName="TM"></PageLink>	

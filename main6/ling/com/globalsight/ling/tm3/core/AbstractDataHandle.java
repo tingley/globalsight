@@ -2,6 +2,7 @@ package com.globalsight.ling.tm3.core;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 abstract class AbstractDataHandle<T extends TM3Data> implements TM3Handle<T> {
     private BaseTm<T> tm;
@@ -51,6 +52,12 @@ abstract class AbstractDataHandle<T extends TM3Data> implements TM3Handle<T> {
 
 	@Override
 	public long getTuCountByLocale(Long localeId) throws TM3Exception
+	{
+		// NOTE: fake implementation.
+		return 0;
+	}
+	
+	public long getTuvCountByLocale(List<TM3Locale> localeList) throws TM3Exception
 	{
 		// NOTE: fake implementation.
 		return 0;

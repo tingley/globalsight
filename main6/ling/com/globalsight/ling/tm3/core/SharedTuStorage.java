@@ -249,7 +249,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 				stringId = (String) paramMap.get("stringId");
 				isRegex = (String) paramMap.get("isRegex");
 			}
-			getSqlByParamMap(sb, paramMap, -1, -1);
+			getCountSqlByParamMap(sb, paramMap);
 
 			if (StringUtil.isNotEmpty(stringId))
 			{
@@ -257,7 +257,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			}
 			else
 			{
-				count = getIdList(conn, sb).size();
+				count = SQLUtil.execCountQuery(conn, sb);
 			}
 
 			return count;
@@ -697,6 +697,29 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		return projectValue.substring(0, projectValue.lastIndexOf(","));
 	}
 
+	private void getCountSqlByParamMap(StatementBuilder sb,
+			Map<String, Object> paramMap)
+	{
+		String stringId = null;
+		if (paramMap != null)
+		{
+			stringId = (String) paramMap.get("stringId");
+		}
+
+		// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...
+		if (StringUtil.isNotEmpty(stringId))
+		{
+			sb.append("SELECT DISTINCT tu.id AS tuId, ext.sid AS sid FROM ");
+		}
+		else
+		{
+			sb.append("SELECT COUNT(DISTINCT tu.id)  FROM ");
+		}
+		sb.append(getStorage().getTuvTableName()).append(" as tuv ");
+		
+		getParameterSql(sb, paramMap,stringId);
+	}
+	
 	private void getSqlByParamMap(StatementBuilder sb,
 			Map<String, Object> paramMap, long startId, int count)
 	{
@@ -709,11 +732,11 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		// If SID is not empty, query "tm3_tuv_ext_shared_xx" table...
 		if (StringUtil.isNotEmpty(stringId))
 		{
-			sb.append("SELECT DISTINCT tuv.tuId AS tuId, ext.sid AS sid FROM ");
+			sb.append("SELECT DISTINCT tu.id AS tuId, ext.sid AS sid FROM ");
 		}
 		else
 		{
-			sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ");
+			sb.append("SELECT DISTINCT tu.id AS tuId FROM ");
 		}
 		
 		sb.append(getStorage().getTuvTableName()).append(" as tuv ");
@@ -731,12 +754,30 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 	private void getParameterSql(StatementBuilder sb,
 			Map<String, Object> paramMap,String stringId)
 	{
+		Map<TM3Attribute, Object> inlineAttrs = null;
+		Map<TM3Attribute, String> customAttrs = null;
+		if (checkContainExtTable(paramMap))
+		{
+			sb.append(",").append(getStorage().getTuvExtTableName())
+					.append(" AS ext ");
+		}
+		sb.append(",").append(getStorage().getTuTableName()).append(" AS tu");
 		if (paramMap != null)
 		{
-			Map<TM3Attribute, Object> inlineAttrs = (Map<TM3Attribute, Object>) paramMap
+			inlineAttrs = (Map<TM3Attribute, Object>) paramMap
 					.get("inlineAttrs");
-			Map<TM3Attribute, String> customAttrs = (Map<TM3Attribute, String>) paramMap
+			customAttrs = (Map<TM3Attribute, String>) paramMap
 					.get("customAttrs");
+			if (inlineAttrs != null && !inlineAttrs.isEmpty())
+			{
+				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+			}
+		}
+		sb.append(" WHERE tu.id = tuv.tuId ");
+		sb.append(" AND  tu.tmId = ? ").addValue(tmId);
+		
+		if (paramMap != null)
+		{
 			Set<String> jobAttributeSet = (Set<String>) paramMap
 					.get("jobAttributeSet");
 			String createUser = (String) paramMap.get("createUser");
@@ -750,62 +791,35 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			String lastUsageAfter = (String) paramMap.get("lastUsageAfter");
 			String lastUsageBefore = (String) paramMap.get("lastUsageBefore");
 			List localeIdList = (List) paramMap.get("language");
-
 			String localeIds = null;
 			if (localeIdList != null)
 			{
 				localeIds = getLocaleIds(localeIdList);
 			}
 
-			if (StringUtil.isNotEmpty(stringId)
-					|| (StringUtil.isNotEmpty(lastUsageAfter) && StringUtil
-							.isNotEmpty(lastUsageBefore))
-					|| StringUtil.isNotEmpty(jobId))
+			if (checkContainExtTable(paramMap))
 			{
-				if (StringUtil.isNotEmpty(stringId))
-				{
-					sb.append(" INNER JOIN (SELECT tuvid, sid FROM ");
-				}
-				else
-				{
-					sb.append(" INNER JOIN (SELECT tuvid FROM ");
-				}
-				sb.append(getStorage().getTuvExtTableName())
-						.append(" WHERE tmid = ? ").addValue(tmId);
-
-				if (StringUtil.isNotEmpty(lastUsageAfter)
-						&& StringUtil.isNotEmpty(lastUsageBefore))
-				{
-					sb.append(" AND lastUsageDate >= ? AND lastUsageDate <= ?")
-							.addValues(
-									parseStartDate(new Date(lastUsageAfter)),
-									parseEndDate(new Date(lastUsageBefore)));
-				}
-
-				if (StringUtil.isNotEmpty(jobId))
-				{
-					sb.append(" AND jobId in (").append(jobId).append(")");
-				}
-
-				if (StringUtil.isNotEmpty(stringId))
-				{
-					sb.append(" AND sid IS NOT NULL");
-				}
-				
-				sb.append(") AS ext ON tuv.id = ext.tuvid ");
+				sb.append(" AND tuv.id = ext.tuvId ");
+				sb.append(" AND tu.id = ext.tuId ");
+			}
+			
+			if (StringUtil.isNotEmpty(lastUsageAfter)
+					&& StringUtil.isNotEmpty(lastUsageBefore))
+			{
+				sb.append(
+						" AND ext.lastUsageDate >= ? AND ext.lastUsageDate <= ?")
+						.addValues(parseStartDate(new Date(lastUsageAfter)),
+								parseEndDate(new Date(lastUsageBefore)));
 			}
 
-			if (inlineAttrs != null && !inlineAttrs.isEmpty())
+			if (StringUtil.isNotEmpty(jobId))
 			{
-				sb.append(",").append(getStorage().getTuTableName())
-						.append(" as tu ");
-				getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+				sb.append(" AND ext.jobId in (").append(jobId).append(")");
 			}
-			sb.append(" WHERE tuv.tmId = ?").addValue(tmId);
 
-			if (inlineAttrs != null && !inlineAttrs.isEmpty())
+			if (StringUtil.isNotEmpty(stringId))
 			{
-				sb.append(" AND tu.id = tuv.tuId ");
+				sb.append(" AND ext.sid IS NOT NULL");
 			}
 
 			if (StringUtil.isNotEmpty(createdAfter)
@@ -854,6 +868,25 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		}
 	}
 
+	private boolean checkContainExtTable(Map<String, Object> paramMap)
+	{
+		if (paramMap != null)
+		{
+			String stringId = (String) paramMap.get("stringId");
+			String jobId = (String) paramMap.get("jobId");
+			String lastUsageAfter = (String) paramMap.get("lastUsageAfter");
+			String lastUsageBefore = (String) paramMap.get("lastUsageBefore");
+			if (StringUtil.isNotEmpty(stringId)
+					|| (StringUtil.isNotEmpty(lastUsageAfter) && StringUtil
+							.isNotEmpty(lastUsageBefore))
+					|| StringUtil.isNotEmpty(jobId))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private void getTuIds(StatementBuilder sb, String tuIds)
 	{
 		String tuIdStr = "";
@@ -1005,4 +1038,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 			DbUtil.silentReturnConnection(conn);
 		}
 	}
+	
+	
 }

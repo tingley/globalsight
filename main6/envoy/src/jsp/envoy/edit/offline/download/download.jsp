@@ -1388,7 +1388,7 @@ $(document).ready(function(){
                     <SPAN CLASS="standardText">
                     <select name="consolidateFileType" id="consolidateFileType" onchange="setWordCountDisplay();uniquenessCheck('needConsolidate')" CLASS="standardText">
                     	<option value="consolidate">Consolidate All Files</option>
-                    	<option value="notConsolidate">File by File</option>
+                    	<option value="notConsolidate" selected>File by File</option>
                     	<option value="consolidateByWordCount">Split File per Word Count</option>
                     </select>
                     <input name="wordCountForDownload" id="wordCountForDownload" style="display:none;width:60px;height:19px" class="standardText"/>

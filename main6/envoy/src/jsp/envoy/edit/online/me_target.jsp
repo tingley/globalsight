@@ -503,51 +503,56 @@ function showDetails(tuId, tuvId, subId){
 }
 
 function show(tuId, tuvId, subId){
-	var details = "seg"+tuId+"_"+tuvId+"_"+subId;
-	var X = $('#'+details).offset().top;
-	var Y = $('#'+details).offset().left;
-	//alert("x:"+X+"y:"+Y);
-	$("#showDetails").css({top:X,left:Y});
+	var detail = "seg"+tuId+"_"+tuvId+"_"+subId;
+    var Y = ($(window).height())/2;
+    var X = ($(window).width())/2;
+    var scrollTop = $(document).scrollTop();     
+    var scrollLeft = $(document).scrollLeft(); 
+	$("#showDetails").css({top:Y+scrollTop,left:X+scrollLeft});
 	$("#showDetails").html("");
 	var str_url = "<%=url_refresh%>" ;
 	var str = jsonUrl + str_url;
     var details = "tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId;
     $.post(str,{param:details},function(data){
 	    var result = eval("("+data+")");
-		$("#showDetails").html('<div id="details-title" style="background:#708EB3; text-align:right;cursor:move;"><div><a href="##" style="color:#FFF" onclick="closeDetails()"><%=lb_close%></a></div></div><table cellspacing="0" cellpadding="2" border="0" style="width:240px;height:200px;"><tr class="standardText"><td nowrap="nowrap" align="center" colspan="2"><span class="mainHeading"><%=lb_title%></span></td></tr>'
+		$("#showDetails").html('<div id="details-title" onmousedown="Milan_StartMove(event,this.parentNode)" onmouseup="Milan_StopMove(event)" style="background:#708EB3; text-align:right;cursor:move;"><div><a href="##" style="color:#FFF" onclick="closeDetails()"><%=lb_close%></a></div></div><table cellspacing="0" cellpadding="2" border="0" style="width:240px;table-layout:fixed;"><tr class="standardText"><td nowrap="nowrap" align="center" colspan="2"><span class="mainHeading"><%=lb_title%></span></td></tr>'
 		+'<tr class="standardText"><td><B><%=lb_segmentId%>:</B></td><td>'+ result.str_segmentId +'</td></tr><tr class="standardText"><td><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
-		+'<tr class="standardText"><td><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr><tr class="standardText"><td><B><%=lb_tagInfo%>:</B></td><td>AAAAAAAAAAA</td></tr>'
+		+'<tr class="standardText"><td><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr><tr class="standardText"><td nowrap="nowrap"><B><%=lb_tagInfo%>:</B></td><td style="WORD-WRAP: break-word" width="20">AAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td></tr>'
 		+'<tr class="standardText"><td><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr><tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr></table>');
 	 });
-	 $("#showDetails").show();	 
-	 var _move=false;
-	 var _x,_y;
-	 $(document).ready(function(){
-	 $("#showDetails").click(function(){
-	  }).mousedown(function(e){
-	  _move=true;
-	  _x=e.pageX-parseInt($("#showDetails").css("left"));
-	  _y=e.pageY-parseInt($("#showDetails").css("top"));
-	  $("#showDetails").fadeTo(20, 0.25);
-	  });
-	  $(document).mousemove(function(e){
-
-	  if(_move){
-	  var x=e.pageX-_x;
-	  var y=e.pageY-_y;
-	  $("#showDetails").css({top:y,left:x});
-
-	  }
-	  }).mouseup(function(){
-		  var display =$('#showDetails').css('display');
-		  if(display == 'none'){
-			  return;
-			}else{
-	       _move=false;
-	        $("#showDetails").fadeTo("fast", 1);}
-	  });
-	  });
+	 $("#showDetails").show();	 	 
 }
+
+function Milan_StartMove(oEvent,div_id)
+{
+    var whichButton;
+    if(document.all&&oEvent.button==1) whichButton=true;
+    else { if(oEvent.button==0)whichButton=true;}
+    if(whichButton)
+    {
+        var oDiv=div_id;
+        offset_x=parseInt(oEvent.clientX-oDiv.offsetLeft);
+        offset_y=parseInt(oEvent.clientY-oDiv.offsetTop);
+        document.documentElement.onmousemove=function(mEvent)
+        {   
+            var eEvent;
+            if(document.all) eEvent=event;
+            else{eEvent=mEvent;}
+            var oDiv=div_id;
+            var x=eEvent.clientX-offset_x;
+            var y=eEvent.clientY-offset_y;
+            oDiv.style.left=(x)+"px";
+            oDiv.style.top=(y)+"px";
+            var d_oDiv=document.getElementById("disable_"+oDiv.id);
+            d_oDiv.style.left=(x)+"px";
+            d_oDiv.style.top=(y)+"px";
+        }
+    }
+}
+
+function Milan_StopMove(oEvent){
+	document.documentElement.onmousemove=null; 
+	}
 
 function closeDetails(){
 	$("#showDetails").css("display", "none");
@@ -1268,7 +1273,7 @@ function doSegmentFilter(p_segmentFilter)
   </THEAD>
   <TBODY id="idPageHtml"><%=str_pageHtml%></TBODY>
 </TABLE>
-<div id="showDetails" style="display:none;position: absolute;z-index:999;background-color:#FFFFFF;border:1px #000000 solid;">
+<div id="showDetails" style="display:none;position: absolute;z-index:999;background-color:#FFFFFF;border:1px #000000 solid;overflow:auto;width:250px;heigth:220px;">
 </div>
 <% } else { %>
 <DIV id="idPageHtml" style="font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">

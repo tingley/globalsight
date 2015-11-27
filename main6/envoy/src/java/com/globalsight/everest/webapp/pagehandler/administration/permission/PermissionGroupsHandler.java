@@ -145,7 +145,6 @@ public class PermissionGroupsHandler extends PageHandler
             HttpSession p_session) throws RemoteException, NamingException,
             GeneralException
     {
-
         SessionManager sessionMgr = (SessionManager) p_session
                 .getAttribute(SESSION_MANAGER);
         String pNameFilter = (String) sessionMgr.getAttribute("pNameFilter");
@@ -307,6 +306,7 @@ public class PermissionGroupsHandler extends PageHandler
         String pNameFilter = (String) p_request.getParameter("pNameFilter");
         String pCompanyFilter = (String) p_request
                 .getParameter("pCompanyFilter");
+        pNameFilter = pNameFilter.replace("\'", "\"");
         if (p_request.getMethod().equalsIgnoreCase(
                 WebAppConstants.REQUEST_METHOD_GET))
         {

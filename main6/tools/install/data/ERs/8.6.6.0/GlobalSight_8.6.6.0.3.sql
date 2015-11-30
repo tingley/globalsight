@@ -7,63 +7,44 @@ DROP PROCEDURE IF EXISTS createIdxFor3885$$
 
 CREATE PROCEDURE createIdxFor3885()
 BEGIN
- DECLARE done INTEGER DEFAULT 0;
- DECLARE tm3TuvTable VARCHAR(60);
+	DECLARE done INTEGER DEFAULT 0;
+	DECLARE duplicate_key CONDITION FOR 1061;
+	DECLARE tm3TuvTable VARCHAR(60);
+	-- cursor
+	DECLARE tm3_tuv_shared_table_cur CURSOR FOR 
+		SELECT table_name FROM information_schema.TABLES 
+		WHERE TABLE_SCHEMA = DATABASE() 
+		AND table_name LIKE 'tm3_tuv_shared_%';
 
- -- cursor
- DECLARE tm3_tuv_shared_table_cur CURSOR FOR 
-  SELECT table_name FROM information_schema.TABLES 
-  WHERE TABLE_SCHEMA = DATABASE() 
-  AND table_name LIKE 'tm3_tuv_shared_%';
+	-- error handler
+	DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+	DECLARE CONTINUE HANDLER FOR duplicate_key SET done = 2;
+	
+	OPEN tm3_tuv_shared_table_cur;
+	    tm3TuvTableName_lable: LOOP
 
- -- error handler 
- DECLARE EXIT HANDLER FOR SQLSTATE '02000' SET done = 1;
+		FETCH tm3_tuv_shared_table_cur INTO tm3TuvTable;
 
- OPEN tm3_tuv_shared_table_cur;
- tm3TuvTableName_lable: LOOP
-  FETCH tm3_tuv_shared_table_cur INTO tm3TuvTable;
-  # logger
-  SELECT tm3TuvTable AS CURRENT_TM3_TUV_TABLE_NAME;
+		IF done = 1 THEN
+			SELECT 'Finished to add INDEX_LOCALE_ID to all tuv tables, end loop.' AS MESSAGE;
+			LEAVE tm3TuvTableName_lable;
+		END IF;
 
-  IF done = 1 THEN
-   LEAVE tm3TuvTableName_lable;
-  END IF;
-  
-  SET @checkTableExistSql = CONCAT("SELECT COUNT(*) INTO @tableNum FROM information_schema.TABLES WHERE TABLE_NAME = 'innodb_sys_indexes'");
-  PREPARE stmt0 FROM @checkTableExistSql;
-  EXECUTE stmt0;
-  DEALLOCATE PREPARE stmt0;
-  # logger
-  SELECT @tableNum AS TABLE_IS_EXIST;
-  
-  IF @tableNum = 0 THEN
-	SET @checkIndexSql = CONCAT("SELECT COUNT(*) INTO @indexNum FROM information_schema.KEY_COLUMN_USAGE AS kcu WHERE kcu.TABLE_SCHEMA = '",
-			DATABASE(),"'"," AND kcu.CONSTRAINT_NAME ='INDEX_LOCALE_ID' AND kcu.table_name =","'",tm3TuvTable,"'");
-  ELSE
-	SET @checkIndexSql = CONCAT(
-			"SELECT COUNT(*) INTO @indexNum FROM information_schema.innodb_sys_indexes AS idx, ",
-			"(SELECT table_id FROM information_schema.innodb_sys_tables WHERE NAME LIKE ", "'", DATABASE(),"/", tm3TuvTable, "') AS tableId ",
-			"WHERE idx.table_id = tableId.table_id AND idx.name = 'INDEX_LOCALE_ID'");
-  PREPARE stmt1 FROM @checkIndexSql;
-  EXECUTE stmt1;
-  DEALLOCATE PREPARE stmt1;
-  END IF;
-  # logger
-  SELECT @indexNum AS INDEX_IS_CREATED;
+		SELECT CONCAT('Trying to add INDEX_LOCALE_ID to \'', tm3TuvTable, '\'.') AS MESSAGE;
+		SET @a = CONCAT("ALTER TABLE ", tm3TuvTable, " ADD INDEX INDEX_LOCALE_ID(localeId)");
+		PREPARE s FROM @a; EXECUTE s;
 
-  IF @indexNum = 0 THEN
-	SET @createIdx = CONCAT("ALTER TABLE ", tm3TuvTable, " ADD INDEX INDEX_LOCALE_ID(localeId)");
-   PREPARE stmt2 FROM @createIdx;
-   EXECUTE stmt2;
-   DEALLOCATE PREPARE stmt2;
-  END IF;
+		IF done = 2 THEN
+			SET done = 0;
+			SELECT CONCAT('Table \'', tm3TuvTable, '\' has been added the INDEX_LOCALE_ID, ignore...') AS MESSAGE;
+		END IF;
 
- END LOOP;
- CLOSE tm3_tuv_shared_table_cur;
+	    END LOOP;
+	CLOSE tm3_tuv_shared_table_cur;
+
     END$$
 
 DELIMITER ;
-
 
 CALL createIdxFor3885;
 DROP PROCEDURE IF EXISTS createIdxFor3885;

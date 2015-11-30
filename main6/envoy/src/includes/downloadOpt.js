@@ -200,10 +200,10 @@ function setClientDwnldOptions(formSent)
     }
     
 
-    if (dwnldOpt.changeCreationIdForMT == 'yes')
-    {
-    	document.getElementById("changeCreationIdForMT").checked = true;
-    }
+  //  if (dwnldOpt.changeCreationIdForMT == 'yes')
+ //   {
+ //   	document.getElementById("changeCreationIdForMT").checked = true;
+//    }
     
     if (dwnldOpt.separateTMfile == 'yes')
     {

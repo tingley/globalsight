@@ -276,6 +276,9 @@ public class ColumnTag extends TagSupport implements TableConstants
                         filterContent = "";
 
                     if (!StringUtil.isEmpty(filter)) {
+                    	if(filterValue!=null){
+                    		filterValue = filterValue.replace("\'", "&#39");
+                    	}
                         filterContent += "<td>";
                         filterContent += "<input type='text' id='" + filter + "' name='" + filter + "' value='" + filterValue + "' onkeydown='filterItems(event);' class='standardText' title='Input the filter, press Enter to filter'/>";
                         filterContent += "</td>";

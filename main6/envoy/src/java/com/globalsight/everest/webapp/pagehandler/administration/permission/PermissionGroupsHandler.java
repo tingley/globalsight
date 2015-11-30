@@ -153,7 +153,12 @@ public class PermissionGroupsHandler extends PageHandler
         String condition = "";
         if (StringUtils.isNotBlank(pNameFilter))
         {
-            condition += " and " + "p.name LIKE '%" + pNameFilter.trim() + "%'";
+        	if(pNameFilter.indexOf("\'")>-1){
+        		String pNameFilter1 = pNameFilter.replace("\'", "\'\'");
+                condition += " and " + "p.name LIKE '%" + pNameFilter1.trim() + "%'";
+        	}else{
+        		condition += " and " + "p.name LIKE '%" + pNameFilter.trim() + "%'";      		
+        	}
         }
         if (StringUtils.isNotBlank(pCompanyFilter))
         {
@@ -306,7 +311,7 @@ public class PermissionGroupsHandler extends PageHandler
         String pNameFilter = (String) p_request.getParameter("pNameFilter");
         String pCompanyFilter = (String) p_request
                 .getParameter("pCompanyFilter");
-        pNameFilter = pNameFilter.replace("\'", "\"");
+//        pNameFilter = pNameFilter.replace("\'", "\"");
         if (p_request.getMethod().equalsIgnoreCase(
                 WebAppConstants.REQUEST_METHOD_GET))
         {

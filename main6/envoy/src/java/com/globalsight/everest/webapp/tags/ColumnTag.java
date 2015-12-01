@@ -275,19 +275,19 @@ public class ColumnTag extends TagSupport implements TableConstants
                     if (StringUtil.isEmpty(filterContent))
                         filterContent = "";
 
-                    if (!StringUtil.isEmpty(filter)) {
-                    	if(filterValue!=null){
-                    		filterValue = filterValue.replace("\'", "&#39");
+                    if (StringUtil.isNotEmpty(filter)) {
+						if (filterValue != null) {
+                    		filterValue = filterValue.replace("'", "&#39;");
                     	}
                         filterContent += "<td>";
                         filterContent += "<input type='text' id='" + filter + "' name='" + filter + "' value='" + filterValue + "' onkeydown='filterItems(event);' class='standardText' title='Input the filter, press Enter to filter'/>";
                         filterContent += "</td>";
-                    } 
-                    else if (StringUtil.isEmpty(filter)&&!StringUtil.isEmpty(filterSelect)) {
+                    }
+                    else if (StringUtil.isEmpty(filter) && StringUtil.isNotEmpty(filterSelect)) {
                         filterContent += "<td>";
                         filterContent += "<select id='" + filterSelect + "' name='" + filterSelect + "' onkeydown='filterSelectItems(event);' class='standardText' title='Select the filter,press Enter to filter'></select>";
                         filterContent += "</td>";
-                    } 
+                    }
                     else {
                         filterContent += "<td>&nbsp;</td>";
                     }

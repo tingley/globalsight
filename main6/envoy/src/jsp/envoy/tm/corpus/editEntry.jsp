@@ -11,26 +11,24 @@
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     String saveUrl = self.getPageURL()+"&action="+WebAppConstants.TM_ACTION_SAVE_ENTRY;
+
     String sourceLocaleStr = (String) request.getAttribute("sourceLocale");
     String targetLocaleStr = (String) request.getAttribute("targetLocale");
-	String srcSegment =(String)request.getAttribute("srcSegment");
+    GlobalSightLocale sourceLocale = ServerProxy.getLocaleManager().getLocaleByString(sourceLocaleStr);
+    GlobalSightLocale targetLocale = ServerProxy.getLocaleManager().getLocaleByString(targetLocaleStr);
+    String srcSegment =(String)request.getAttribute("srcSegment");
 	String trgSegment =(String)request.getAttribute("trgSegment");
-    GlobalSightLocale sourceLocale = ServerProxy.getLocaleManager()
-    .getLocaleByString(sourceLocaleStr);
-    GlobalSightLocale targetLocale = ServerProxy.getLocaleManager()
-    .getLocaleByString(targetLocaleStr);
-    boolean b_rtl = EditUtil.isRTLLocale(targetLocale);
-    boolean b_source_rtl = EditUtil.isRTLLocale(sourceLocale);
-    String srcDir="LTR";
+
+	String srcDir="LTR";
+	if (EditUtil.isRTLLocale(sourceLocale) && Text.containsBidiChar(srcSegment))
+	{
+		srcDir = "RTL";
+	}
     String trgDir="LTR";
-    if (b_source_rtl)
-    {
-        srcDir = (Text.containsBidiChar(srcSegment)) ? "RTL": "LTR";
-    }
-    if (b_rtl)
-    {
-        trgDir = (Text.containsBidiChar(trgSegment)) ? "RTL": "LTR";
-    }
+	if (EditUtil.isRTLLocale(targetLocale) && Text.containsBidiChar(trgSegment))
+	{
+		trgDir = "RTL";
+	}
 %>
 <html>
 <head>
@@ -95,8 +93,8 @@ border:solid 1px #6e8bde;
 <%@ include file="/envoy/common/warning.jspIncl"%>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript">
+var srcDir = "<%=srcDir%>";
 var trgDir = "<%=trgDir%>";
-var srcDir ="<%=srcDir%>";
 var entryInfo;
 var tuId;
 var sourceTuvId;

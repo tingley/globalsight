@@ -63,7 +63,6 @@ String b_refreshSource = (String) request.getAttribute("refreshSource");
 String url_refresh = refreshSelf.getPageURL();
 String url_segmentEditor = segmentEditor.getPageURL();
 String url_commentEditor = commentEditor.getPageURL();
-
 String lb_id = bundle.getString("lb_id");
 String lb_segment = bundle.getString("lb_segment");
 String lb_comment = "Comment" /*bundle.getString("lb_comment")*/;
@@ -79,6 +78,16 @@ String str_displayLocale = state.getTargetViewLocale().getDisplayName();
 long l_targetPageId = state.getTargetPageId().longValue();
 boolean b_isReviewActivity = state.getIsReviewActivity();
 boolean b_readOnly = state.isReadOnly();
+
+String lb_title = bundle.getString("lb_segment_details");
+String lb_details = lb_title;
+
+String lb_segmentId = bundle.getString("lb_segmentId");
+String lb_segmentFormat = bundle.getString("lb_segmentFormat");
+String lb_segmentType = bundle.getString("lb_segmentType");
+String lb_wordCount = bundle.getString("lb_totalWordCount");
+String lb_close = bundle.getString("lb_close");
+String lb_tagInfo = bundle.getString("lb_tagInfo");
 
 Boolean assigneeValue = (Boolean)TaskHelper.retrieveObject(
    session, WebAppConstants.IS_ASSIGNEE);
@@ -479,6 +488,76 @@ function forceCloseEditor(p_type)
     }
 }
 
+function showDetails(tuId, tuvId, subId){
+	if (!CanClose())
+    {
+        cancelEvent();
+        RaiseEditor();
+    }
+    else
+    {
+        forceCloseEditor('segment');
+        hideContextMenu();
+     show(tuId, tuvId, subId);
+    }
+}
+
+function show(tuId, tuvId, subId){
+	var detail = "seg"+tuId+"_"+tuvId+"_"+subId;
+    var Y = ($(window).height())/2;
+    var X = ($(window).width())/2;
+    var scrollTop = $(document).scrollTop();     
+    var scrollLeft = $(document).scrollLeft(); 
+	$("#showDetails").css({top:Y+scrollTop,left:X+scrollLeft});
+	$("#showDetails").html("");
+	var str_url = "<%=url_refresh%>" ;
+	var str = jsonUrl + str_url;
+    var details = "tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId;
+    $.post(str,{param:details},function(data){
+	    var result = eval("("+data+")");
+		$("#showDetails").html('<div id="details-title" onmousedown="Milan_StartMove(event,this.parentNode)" onmouseup="Milan_StopMove(event)" style="background:#708EB3; text-align:right;cursor:move;"><div><a href="##" style="color:#FFF" onclick="closeDetails()"><%=lb_close%></a></div></div><table cellspacing="0" cellpadding="2" border="0" style="width:240px;table-layout:fixed;"><tr class="standardText"><td nowrap="nowrap" align="center" colspan="2"><span class="mainHeading"><%=lb_title%></span></td></tr>'
+		+'<tr class="standardText"><td><B><%=lb_segmentId%>:</B></td><td>'+ result.str_segmentId +'</td></tr><tr class="standardText"><td><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
+		+'<tr class="standardText"><td><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr><tr class="standardText"><td nowrap="nowrap"><B><%=lb_tagInfo%>:</B></td><td style="WORD-WRAP: break-word" width="20">AAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td></tr>'
+		+'<tr class="standardText"><td><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr><tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr></table>');
+	 });
+	 $("#showDetails").show();	 	 
+}
+
+function Milan_StartMove(oEvent,div_id)
+{
+    var whichButton;
+    if(document.all&&oEvent.button==1) whichButton=true;
+    else { if(oEvent.button==0)whichButton=true;}
+    if(whichButton)
+    {
+        var oDiv=div_id;
+        offset_x=parseInt(oEvent.clientX-oDiv.offsetLeft);
+        offset_y=parseInt(oEvent.clientY-oDiv.offsetTop);
+        document.documentElement.onmousemove=function(mEvent)
+        {   
+            var eEvent;
+            if(document.all) eEvent=event;
+            else{eEvent=mEvent;}
+            var oDiv=div_id;
+            var x=eEvent.clientX-offset_x;
+            var y=eEvent.clientY-offset_y;
+            oDiv.style.left=(x)+"px";
+            oDiv.style.top=(y)+"px";
+            var d_oDiv=document.getElementById("disable_"+oDiv.id);
+            d_oDiv.style.left=(x)+"px";
+            d_oDiv.style.top=(y)+"px";
+        }
+    }
+}
+
+function Milan_StopMove(oEvent){
+	document.documentElement.onmousemove=null; 
+	}
+
+function closeDetails(){
+	$("#showDetails").css("display", "none");
+}
+
 function editComment(tuId, tuvId, subId)
 {
     if (!CanClose())
@@ -490,11 +569,8 @@ function editComment(tuId, tuvId, subId)
     {
         var str_url = "<%=url_commentEditor%>" +
           "&tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId + "&refresh=0";
-
         forceCloseEditor('segment');
-
         hideContextMenu();
-
         w_editor = window.open(str_url, "CommentEditor",
           "width=550,height=610,top=100,left=100"); //resizable,
     }
@@ -512,7 +588,6 @@ function editSegment(tuId, tuvId, subId)
         var str_url = "<%=url_segmentEditor%>" +
           "&tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId +
           "&refresh=0&releverage=false";
-
         forceCloseEditor('comment');
 
         hideContextMenu();
@@ -858,7 +933,7 @@ function contextForSegment(obj, e)
         ];
     }
     else
-    {
+    {	
       popupoptions = [
         new ContextItem("<B>Edit segment</B>",
           function(){editSegment(ids[0], ids[1], ids[2])}),
@@ -866,6 +941,8 @@ function contextForSegment(obj, e)
           function(){editComment(ids[0], ids[1], ids[2])})
         ];
     }
+    popupoptions.push(new ContextItem("Segment details",
+            function(){showDetails(ids[0], ids[1], ids[2])}));
     
     ContextMenu.display(popupoptions, e);
 }
@@ -1196,6 +1273,8 @@ function doSegmentFilter(p_segmentFilter)
   </THEAD>
   <TBODY id="idPageHtml"><%=str_pageHtml%></TBODY>
 </TABLE>
+<div id="showDetails" style="display:none;position: absolute;z-index:999;background-color:#FFFFFF;border:1px #000000 solid;overflow:auto;width:250px;heigth:220px;">
+</div>
 <% } else { %>
 <DIV id="idPageHtml" style="font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
 	<%=str_pageHtml%>

@@ -145,7 +145,6 @@ public class PermissionGroupsHandler extends PageHandler
             HttpSession p_session) throws RemoteException, NamingException,
             GeneralException
     {
-
         SessionManager sessionMgr = (SessionManager) p_session
                 .getAttribute(SESSION_MANAGER);
         String pNameFilter = (String) sessionMgr.getAttribute("pNameFilter");
@@ -154,7 +153,8 @@ public class PermissionGroupsHandler extends PageHandler
         String condition = "";
         if (StringUtils.isNotBlank(pNameFilter))
         {
-            condition += " and " + "p.name LIKE '%" + pNameFilter.trim() + "%'";
+        	pNameFilter = pNameFilter.replace("'", "''");
+        	condition += " and " + "p.name LIKE '%" + pNameFilter.trim() + "%'";
         }
         if (StringUtils.isNotBlank(pCompanyFilter))
         {
@@ -298,7 +298,6 @@ public class PermissionGroupsHandler extends PageHandler
             Permission.getPermissionManager().deletePermissionGroup(permGroup);
 
         }
-
     }
 
     private void handleFilters(HttpServletRequest p_request,

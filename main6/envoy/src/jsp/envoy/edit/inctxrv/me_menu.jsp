@@ -773,8 +773,8 @@ function init()
     }
 
     // update navigation arrow after onload.
-    //updateFileNavigationArrow();
-    //updatePageNavigationArrow();
+    updateFileNavigationArrow();
+    updatePageNavigationArrow();
     updateContentFlagMark();
 }
 
@@ -959,6 +959,7 @@ function showPtags()
 <DIV ID="main" STYLE="POSITION: ABSOLUTE; Z-INDEX: 10; LEFT: 0px; TOP: 0px; width:100%">
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" WIDTH="100%">
   <TR CLASS="tableHeadingBasic">
+  <!-- 
     <TD VALIGN="TOP">
       <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0">
 	<TR CLASS="tableHeadingBasic">
@@ -966,13 +967,57 @@ function showPtags()
 	  <TD NOWRAP VALIGN="TOP" ALIGN="CENTER">
 	  <p>&nbsp; <br> &nbsp; <br> &nbsp; <br> &nbsp;</p>
 	  </TD>
+   -->
 	  <!-- File Navigation -->
+	  <!-- 
 	  <TD WIDTH="20">&nbsp;</TD>
 	  <TD NOWRAP VALIGN="middle" ALIGN="Left"></TD>
 	    <td></td>
 	</TR>
       </TABLE>
     </TD>
+	   -->
+    <TD VALIGN="TOP">
+      <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0">
+	<TR CLASS="tableHeadingBasic">
+	  <TD WIDTH="20">&nbsp;</TD>
+	  <!-- File Navigation -->
+	  <TD WIDTH="20">&nbsp;</TD>
+	  <TD NOWRAP VALIGN="TOP" ALIGN="CENTER"><%=lb_fileNavigation%><BR>
+	    <label id="fileNavPre"><%=lb_prevFile%></label>
+	    <label id="fileNavNext"><%=lb_nextFile%></label>
+	  </TD>
+	  <!-- Page Navigation -->
+	  <TD WIDTH="20">&nbsp;</TD>
+	  <TD NOWRAP VALIGN="TOP" ALIGN="CENTER"><%=lb_pageNavigation%>&nbsp;
+	    (<%=pi.getCurrentPageNum()%> of <%=pi.getTotalPageNum()%>)<BR/>
+	    <label id="pageNavPre"><%=lb_prevPage%></label>
+	    <label id="pageNavNext"><%=lb_nextPage%></label> 
+	    <label style="position: relative; bottom: 6px; left: 8px; hight: 1px">Goto
+			<input type="text" id="gotoPageNav"
+			onkeypress="EnterPress(event)" style="height: 18px; width: 30px" value="" />
+		</label>
+	  </TD>
+	  <TD WIDTH="20">&nbsp;</TD>
+	  <TD VALIGN="TOP">
+	    <DIV id='radiobuttons'
+	     STYLE='POSITION: relative; VISIBILITY: hidden'>
+	    <FORM NAME='bob'>
+	    <INPUT TYPE='radio' NAME='display' id='idShowSource'
+	     onfocus='blur()' onclick='return showSourcePage();'
+	    <% if (layout.singlePageIsSource()) { out.print(" CHECKED"); } %>
+	    ><label for='idShowSource'><%=lb_source%></label><BR>
+	    <INPUT TYPE='radio' NAME='display' id='idShowTarget'
+	     onfocus='blur()' onclick='return showTargetPage();'
+	    <% if (!layout.singlePageIsSource()) { out.print(" CHECKED"); } %>
+	    ><label for='idShowTarget'><%=lb_target%></label>
+	    </FORM>
+	    </DIV>
+	  </TD>
+	</TR>
+      </TABLE>
+    </TD>
+    
     <TD ALIGN="RIGHT" VALIGN="TOP">
       <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0">
 	<TR>

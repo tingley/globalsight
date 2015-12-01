@@ -363,7 +363,7 @@ public class TMSearchEditEntryHandlerHelper
         entryInfo.put("target", target);
         entryInfo.put("ptagsTarget", ptagsTarget);
         List<String> targetInternals = sutil.getInternalWords(trgSegment);
-        
+
         if (targetInternals != null && targetInternals.size() > 0)
         {
             StringBuffer sb = new StringBuffer();
@@ -387,6 +387,8 @@ public class TMSearchEditEntryHandlerHelper
         }
 
         request.setAttribute("entryInfo", JsonUtil.toJson(entryInfo));
+        request.setAttribute("srcSegment", srcSegment);
+        request.setAttribute("trgSegment", trgSegment);
     }
     
 	private static String getSegmentWithBR(String segment)

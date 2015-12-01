@@ -33,6 +33,8 @@
   String deps = (String)sessionMgr.getAttribute("dependencies");
   String FileExtensionName = (String) sessionMgr.getAttribute("FileExtensionName");
   FileExtensionName = FileExtensionName == null ? "" : FileExtensionName;
+  String FileExtensionCName = (String) sessionMgr.getAttribute("FileExtensionCName");
+  FileExtensionCName = FileExtensionCName == null ? "" : FileExtensionCName;
   String selfURL = self.getPageURL();
   String emptyMsg  = "msg_no_users";
   
@@ -157,11 +159,12 @@ function filterItems(e) {
                  filter="FileExtensionName" filterValue="<%=FileExtensionName%>"   width="22%">
                     <%= fe.getName() %>
                 </amb:column>
-                <amb:column label="" sortBy=""width="76%">
-                    &nbsp
+                <amb:column label="" sortBy=""width="40%">
+                    &nbsp;
                 </amb:column>
                 <% if (isSuperAdmin) { %>
-                <amb:column label="lb_company_name" sortBy="<%=FileExtensionComparator.ASC_COMPANY%>">
+                <amb:column label="lb_company_name" sortBy="<%=FileExtensionComparator.ASC_COMPANY%>"
+                filter="FileExtensionCName" filterValue="<%=FileExtensionCName%>">
                     <%=CompanyWrapper.getCompanyNameById(fe.getCompanyId())%>
                 </amb:column>
                 <% } %>

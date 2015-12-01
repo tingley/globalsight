@@ -30,12 +30,15 @@ import java.util.Vector;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.comment.Issue;
@@ -305,6 +308,50 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
         }
 
+        // show segment datails
+        if ((value = p_request.getParameter("param")) != null)
+        {
+        	SegmentView view;
+        	String param[] = value.split("&");
+        	String tuid[] = param[0].split("=");
+        	String tuvid[] = param[1].split("=");
+        	String subid[] = param[2].split("=");
+            long tuId  = Long.valueOf(tuid[1]).longValue();
+            long tuvId = Long.valueOf(tuvid[1]).longValue();
+            long subId = Long.valueOf(subid[1]).longValue();
+            
+            Long targetPageId   = state.getTargetPageId();
+            long sourceLocaleId = state.getSourceLocale().getId();
+            long targetLocaleId = state.getTargetLocale().getId();
+        	
+            view = EditorHelper.getSegmentView(state, tuId, tuvId, subId,
+                    targetPageId.longValue(), sourceLocaleId, targetLocaleId);
+        	JSONObject json = new JSONObject();
+        	 ServletOutputStream out = p_response.getOutputStream();
+        	try {
+				json.put("str_segmentId", tuvid[1]);
+				json.put("str_segmentFormat", view.getDataType());//view.getDataType()
+				json.put("str_segmentType", view.getItemType());//view.getItemType()
+				json.put("str_wordCount",String.valueOf(view.getWordCount()));//String.valueOf(view.getWordCount())
+				String str_sid = view.getTargetTuv().getSid();
+				if (str_sid == null || str_sid.trim().length()==0)
+				{
+				    str_sid = "N/A";
+				}
+				json.put("str_sid", str_sid);//view.getTargetTuv().getSid()
+				String str_lastModifyUser = view.getTargetTuv().getLastModifiedUser();
+				if (str_lastModifyUser == null || str_lastModifyUser.equalsIgnoreCase("xlf")
+				        || str_lastModifyUser.equalsIgnoreCase("Xliff"))
+				{
+				    str_lastModifyUser = "N/A";
+				}
+				json.put("str_lastModifyUser", str_lastModifyUser);//view.getTargetTuv().getLastModifiedUser()
+				out.write(json.toString().getBytes("UTF-8"));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+        	return;
+        }
         // Find Repeated Segments
         if ((value = p_request.getParameter(WebAppConstants.PROPAGATE_ACTION)) != null)
         {

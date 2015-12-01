@@ -146,12 +146,16 @@ class SharedStorageTables {
 	                ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
 	            );
 
-	            //Create index on TUV table
-	            stmt = new StringBuilder();
-	            stmt.append("CREATE INDEX INDEX_").append(tuvTableName)
-	                .append("_TMID ON ").append(tuvTableName) 
-	                .append(" (tmId)");
-	            SQLUtil.exec(conn, stmt.toString());
+			// Create index on TUV table
+			stmt = new StringBuilder();
+			stmt.append("CREATE INDEX INDEX_").append(tuvTableName)
+					.append("_TMID ON ").append(tuvTableName).append(" (tmId)");
+			SQLUtil.exec(conn, stmt.toString());
+
+			stmt = new StringBuilder();
+			stmt.append("CREATE INDEX INDEX_LOCALE_ID ON ")
+					.append(tuvTableName).append(" (localeId)");
+			SQLUtil.exec(conn, stmt.toString());
 		}
 
         // Create TUV extension table to store extra attributes

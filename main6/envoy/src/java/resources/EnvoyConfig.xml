@@ -775,7 +775,6 @@
         <PageLink linkName="ok" destinationPageName="cojs"></PageLink>
       </WebPage>
     </WebActivity>
-    
     <WebActivity webActivityName="eloqua">
       <WebPage pageName="em" isDefault="true" jspName="/envoy/connecter/eloqua/eloquaMain.jsp" pageHandlerClassName="com.globalsight.connector.eloqua.EloquaMainHandler">
         <PageLink linkName="self" destinationPageName="em"></PageLink>

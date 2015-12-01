@@ -225,6 +225,7 @@ function saveBaseFilter()
 	sendAjax(obj, "isFilterValid", "isBaseFilterValidCallback");
 	
 	isFilterValidCallback.obj = obj;
+	baseFilter.currentPage=0;
 }
 
 function isBaseFilterValidCallback(data)
@@ -356,9 +357,9 @@ BaseFilter.prototype.closeAllTagPopup = function()
 {
 	closePopupDialog("baseFilter_InternalText_Dialog");
 	closePopupDialog("editPriorityDialog");
-	closePopupDialog("deleteBaseTagDialog");
-	
+	closePopupDialog("deleteBaseTagDialog");	
 	closePopupDialog("baseFilter_Escaping_Dialog");
+	baseFilter.currentPage=0;
 }
 
 BaseFilter.prototype.addTag = function(radioId)
@@ -870,6 +871,7 @@ BaseFilter.prototype.savePriorities = function()
 	closePopupDialog("editPriorityDialog");
 	var content = baseFilter.generateTagsContent(baseFilter.currentOption, baseFilter.currentPage);
 	baseFilter.refreshTagsContent(content);
+	
 }
 
 BaseFilter.prototype.isDefined = function(objj)
@@ -918,6 +920,7 @@ BaseFilter.prototype.setPageValue = function()
 }
 
 BaseFilter.prototype.prePage = function()
+
 {
     if(baseFilter.currentPage > 0)
 	{

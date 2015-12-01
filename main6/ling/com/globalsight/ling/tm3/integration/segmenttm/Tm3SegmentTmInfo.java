@@ -611,12 +611,15 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // We could query this directly, but for now it's cheaper to
             // add it up from the locale data
             int tuvCount = 0;
+            List localeList = null;
             GlobalSightLocale locale = null;
             for (TM3Locale l : tm3tm.getTuvLocales())
             {
                locale = (GlobalSightLocale) l;
+               localeList = new ArrayList();
+               localeList.add(locale);
                 int localeTuCount = (int) handle.getTuCountByLocale(locale.getId());
-                int localeTuvCount = (int) handle.getTuvCount();
+                int localeTuvCount = (int) handle.getTuvCountByLocale(localeList);
                 stats.addLanguageInfo(locale.getId(), locale.getLocale(),
                         locale.getLocale().getDisplayName(pUILocale),
                         localeTuCount, localeTuvCount);

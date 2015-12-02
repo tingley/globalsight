@@ -106,7 +106,7 @@ BaseFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 {
 // alert("filterId :" + filterId + "\n" + "topFilterId :" + topFilterId);
 	this.initOptionMap(this.filter);
-	
+	baseFilter.currentPage=0;
 	var str = new StringBuffer("<table border=0 width='400px'>");
 	str.append("<tr>");
 	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
@@ -136,6 +136,7 @@ BaseFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 	var dialogObj = document.getElementById('baseFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
 	this.showDialog();
+	
 	
 	saveBaseFilter.edit = true;
 	saveBaseFilter.filterId = filterId;

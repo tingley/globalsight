@@ -237,8 +237,11 @@ function vilidateRename(){
 			<c:if test="${countPptx > 0}">
 				<span class="jobSummaryContentName"><%=bundle.getString("lb_pptx_slide_number")%>:</span><span class="jobSummaryContentValue">${numPagesPptx}  (from ${countPptx} pptx file(s))</span>
 			</c:if>
-			<c:if test="${countDocx > 0}">
+			<c:if test="${countDocx > 0 && countPptx > 0}">
 				<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_docx_page_number")%>:</span><span class="jobSummaryContentValue">${numPagesDocx}  (from ${countDocx} docx file(s))</span>
+			</c:if>
+			<c:if test="${countDocx > 0 && countPptx == 0}">
+				<span class="jobSummaryContentName"><%=bundle.getString("lb_docx_page_number")%>:</span><span class="jobSummaryContentValue">${numPagesDocx}  (from ${countDocx} docx file(s))</span>
 			</c:if>
 		</div>
 		<c:if test="${isCostingEnabled}">

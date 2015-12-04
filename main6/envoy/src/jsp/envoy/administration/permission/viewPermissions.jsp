@@ -15,10 +15,17 @@ String xml = (String)sessionMgr.getAttribute("permissionXML");
 //replace the \" with "
 Pattern p = Pattern.compile("\\\\\"");
 Matcher m = p.matcher(xml);
-String x = m.replaceAll("\"");
+xml = m.replaceAll("\"");
 //replace the \r\n with real newlines
-Pattern p2 = Pattern.compile("\\\\" + "r" + "\\\\" + "n");
-Matcher m2 = p2.matcher(x);
-String newXml = m2.replaceAll("\r\n");
-%><%=newXml%>
+p = Pattern.compile("\\\\" + "r" + "\\\\" + "n");
+m = p.matcher(xml);
+xml = m.replaceAll("\r\n");
 
+p = Pattern.compile("\\\\" + "t" );
+m = p.matcher(xml);
+xml = m.replaceAll("\t");
+
+p = Pattern.compile("\\\\" + "n" );
+m = p.matcher(xml);
+xml = m.replaceAll("\n");
+%><%=xml%>

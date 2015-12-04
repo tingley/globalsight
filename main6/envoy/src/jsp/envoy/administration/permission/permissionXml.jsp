@@ -26,7 +26,7 @@
             sc.getBooleanParameter(SystemConfigParamNames.JOB_SEARCH_REPLACE_ALLOWED);
         b_dupsEnabled =
             sc.getBooleanParameter(SystemConfigParamNames.DUPLICATION_OF_OBJECTS_ALLOWED);
-        b_isDell = sc.getBooleanParameter(SystemConfigParamNames.IS_DELL);     
+        b_isDell = sc.getBooleanParameter(SystemConfigParamNames.IS_DELL);
     }
     catch (Exception ge)
     {
@@ -39,19 +39,19 @@
 <% if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId)) { %>
   <permission id="<%=Permission.COMPANY_VIEW%>">
      <permission id="<%=Permission.COMPANY_REMOVE%>"/>
-     <permission id="<%=Permission.COMPANY_EDIT%>"/>     
+     <permission id="<%=Permission.COMPANY_EDIT%>"/>
      <permission id="<%=Permission.COMPANY_NEW%>"/>
      <permission id="<%=Permission.COMPANY_MIGRATE%>"/>
   </permission>
 <% } %>
   <permission id="<%=Permission.ATTRIBUTE_VIEW%>">
      <permission id="<%=Permission.ATTRIBUTE_NEW%>"/>
-     <permission id="<%=Permission.ATTRIBUTE_EDIT%>"/>     
+     <permission id="<%=Permission.ATTRIBUTE_EDIT%>"/>
      <permission id="<%=Permission.ATTRIBUTE_REMOVE%>"/>
   </permission>
   <permission id="<%=Permission.ATTRIBUTE_GROUP_VIEW%>">
      <permission id="<%=Permission.ATTRIBUTE_GROUP_NEW%>"/>
-     <permission id="<%=Permission.ATTRIBUTE_GROUP_EDIT%>"/>     
+     <permission id="<%=Permission.ATTRIBUTE_GROUP_EDIT%>"/>
      <permission id="<%=Permission.ATTRIBUTE_GROUP_REMOVE%>"/>
   </permission>
   <permission id="<%=Permission.LOCALE_PAIRS_VIEW%>">
@@ -65,40 +65,40 @@
   </permission>
   <permission id="<%=Permission.GSEDITION_VIEW%>">
      <permission id="<%=Permission.GSEDITION_REMOVE%>"/>
-     <permission id="<%=Permission.GSEDITION_EDIT%>"/>     
+     <permission id="<%=Permission.GSEDITION_EDIT%>"/> 
      <permission id="<%=Permission.GSEDITION_NEW%>"/>
   </permission>
   <permission id="<%=Permission.ACTIVITY_TYPES_VIEW%>">
      <permission id="<%=Permission.ACTIVITY_TYPES_REMOVE%>"/>
-     <permission id="<%=Permission.ACTIVITY_TYPES_EDIT%>"/>     
+     <permission id="<%=Permission.ACTIVITY_TYPES_EDIT%>"/>
      <permission id="<%=Permission.ACTIVITY_TYPES_NEW%>"/>
   </permission>
 <% if (b_costing) { %>
   <permission id="<%=Permission.CURRENCY_VIEW%>">
-     <permission id="<%=Permission.CURRENCY_EDIT%>"/>     
+     <permission id="<%=Permission.CURRENCY_EDIT%>"/>
      <permission id="<%=Permission.CURRENCY_NEW%>"/>
   </permission>
   <permission id="<%=Permission.RATES_VIEW%>">
-     <permission id="<%=Permission.RATES_EDIT%>"/>     
+     <permission id="<%=Permission.RATES_EDIT%>"/>
      <permission id="<%=Permission.RATES_NEW%>"/>
   </permission>
 <% } %>
 <% if (b_calendaring) { %>
   <permission id="<%=Permission.SYS_CAL_VIEW%>">
-     <permission id="<%=Permission.SYS_CAL_DUP%>"/>     
-     <permission id="<%=Permission.SYS_CAL_DEFAULT%>"/>     
-     <permission id="<%=Permission.SYS_CAL_REMOVE%>"/>     
-     <permission id="<%=Permission.SYS_CAL_EDIT%>"/>     
+     <permission id="<%=Permission.SYS_CAL_DUP%>"/>
+     <permission id="<%=Permission.SYS_CAL_DEFAULT%>"/>
+     <permission id="<%=Permission.SYS_CAL_REMOVE%>"/>
+     <permission id="<%=Permission.SYS_CAL_EDIT%>"/>
      <permission id="<%=Permission.SYS_CAL_NEW%>"/>
   </permission>
   <permission id="<%=Permission.USER_CAL_VIEW%>">
-     <permission id="<%=Permission.USER_CAL_EDIT%>"/>     
-     <permission id="<%=Permission.USER_CAL_EDIT_YOURS%>"/>     
+     <permission id="<%=Permission.USER_CAL_EDIT%>"/>
+     <permission id="<%=Permission.USER_CAL_EDIT_YOURS%>"/>
   </permission>
   <permission id="<%=Permission.HOLIDAY_VIEW%>">
-     <permission id="<%=Permission.HOLIDAY_REMOVE%>"/>     
-     <permission id="<%=Permission.HOLIDAY_EDIT%>"/>     
-     <permission id="<%=Permission.HOLIDAY_NEW%>"/>     
+     <permission id="<%=Permission.HOLIDAY_REMOVE%>"/>
+     <permission id="<%=Permission.HOLIDAY_EDIT%>"/>
+     <permission id="<%=Permission.HOLIDAY_NEW%>"/>
   </permission>
 <% } %>
   <permission id="<%=Permission.PERMGROUPS_VIEW%>">
@@ -108,7 +108,7 @@
       <permission id="<%=Permission.PERMGROUPS_NEW%>"/>
   </permission>
   <permission id="<%=Permission.USERS_VIEW%>">
-     <permission id="<%=Permission.USERS_REMOVE%>"/>     
+     <permission id="<%=Permission.USERS_REMOVE%>"/>
      <permission id="<%=Permission.USERS_EDIT%>">
         <permission id="<%=Permission.USERS_EDIT_ASSIGN_ANY_PERMGROUPS%>"/>
         <permission id="<%=Permission.USERS_ACCESS_CCEMAIL%>"/>
@@ -125,7 +125,7 @@
      <permission id="<%=Permission.USERS_EXPORT%>"/>
   </permission>
   <permission id="<%=Permission.TM_VIEW%>">
-     <permission id="<%=Permission.TM_STATS%>"/>     
+     <permission id="<%=Permission.TM_STATS%>"/>
      <permission id="<%=Permission.TM_MAINTENANCE%>"/>
      <permission id="<%=Permission.TM_IMPORT%>"/>
      <permission id="<%=Permission.TM_EXPORT%>"/>
@@ -143,30 +143,30 @@
      <permission id="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>"/>
   </permission>
   <permission id="<%=Permission.TMP_VIEW%>">
-     <permission id="<%=Permission.TMP_EDIT%>"/>     
+     <permission id="<%=Permission.TMP_EDIT%>"/>
      <permission id="<%=Permission.TMP_NEW%>"/>
      <permission id="<%=Permission.TMP_REMOVE%>"/>
      <permission id="<%=Permission.IN_CONTEXT_MATCH%>"/>
      <permission id="<%=Permission.SERVICE_TM_GET_ALL_TMPROFILES%>"/>
   </permission>
    <permission id="<%=Permission.MTP_VIEW%>">
-     <permission id="<%=Permission.MTP_EDIT%>"/>     
+     <permission id="<%=Permission.MTP_EDIT%>"/>
      <permission id="<%=Permission.MTP_NEW%>"/>
      <permission id="<%=Permission.MTP_REMOVE%>"/>
      <permission id="<%=Permission.MTP_EXPORT%>"/>
      <permission id="<%=Permission.MTP_IMPORT%>"/>
   </permission>
   <permission id="<%=Permission.TERMINOLOGY_VIEW%>">
-     <permission id="<%=Permission.TERMINOLOGY_STATS%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_INDEXES%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_REMOVE%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_DUPLICATE%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_EDIT%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_NEW%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_BROWSE%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_IMPORT%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_EXPORT%>"/>     
-     <permission id="<%=Permission.TERMINOLOGY_MAINTENANCE%>"/>     
+     <permission id="<%=Permission.TERMINOLOGY_STATS%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_INDEXES%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_REMOVE%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_DUPLICATE%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_EDIT%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_NEW%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_BROWSE%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_IMPORT%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_EXPORT%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_MAINTENANCE%>"/>
      <permission id="<%=Permission.TERMINOLOGY_INPUT_MODELS%>"/>
      <permission id="<%=Permission.TERMINOLOGY_SEARCH%>"/>
      <permission id="<%=Permission.SERVICE_TB_CREATE_ENTRY%>"/>
@@ -176,22 +176,22 @@
   </permission>
   <permission id="<%=Permission.PROJECTS_VIEW%>">
     <% if (b_calendaring) { %>
-     <permission id="<%=Permission.PROJECTS_IMPORT%>"/>     
-     <permission id="<%=Permission.PROJECTS_EXPORT%>"/>     
+     <permission id="<%=Permission.PROJECTS_IMPORT%>"/>
+     <permission id="<%=Permission.PROJECTS_EXPORT%>"/>
     <% } %>
-     <permission id="<%=Permission.PROJECTS_EDIT%>">     
-         <permission id="<%=Permission.PROJECTS_EDIT_PM%>"/>     
+     <permission id="<%=Permission.PROJECTS_EDIT%>">
+         <permission id="<%=Permission.PROJECTS_EDIT_PM%>"/>
      </permission>
      <permission id="<%=Permission.PROJECTS_NEW%>"/>
      <permission id="<%=Permission.PROJECTS_REMOVE%>"/>
   </permission>
   <permission id="<%=Permission.WORKFLOWS_VIEW%>">
      <% if (b_dupsEnabled) { %>
-       <permission id="<%=Permission.WORKFLOWS_DUPLICATE%>"/>     
+       <permission id="<%=Permission.WORKFLOWS_DUPLICATE%>"/>
      <% } %>
-     <permission id="<%=Permission.WORKFLOWS_REMOVE%>"/>     
-     <permission id="<%=Permission.WORKFLOWS_EDIT%>"/>     
-     <permission id="<%=Permission.WORKFLOWS_NEW%>"/>     
+     <permission id="<%=Permission.WORKFLOWS_REMOVE%>"/>
+     <permission id="<%=Permission.WORKFLOWS_EDIT%>"/>
+     <permission id="<%=Permission.WORKFLOWS_NEW%>"/>
   </permission>
   <permission id="<%=Permission.LOCPROFILES_VIEW%>">
      <permission id="<%=Permission.LOCPROFILES_REMOVE%>"/>
@@ -203,8 +203,8 @@
      <permission id="<%=Permission.LOCPROFILES_NEW%>"/>
   </permission>
   <permission id="<%=Permission.SUPPORT_FILES_VIEW%>">
-     <permission id="<%=Permission.SUPPORT_FILES_REMOVE%>"/>     
-     <permission id="<%=Permission.SUPPORT_FILES_UPLOAD%>"/>     
+     <permission id="<%=Permission.SUPPORT_FILES_REMOVE%>"/>
+     <permission id="<%=Permission.SUPPORT_FILES_UPLOAD%>"/>
   </permission>
 <% if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId)) { %>
   <permission id="<%=Permission.UILOCALE_VIEW%>">
@@ -215,27 +215,6 @@
      <permission id="<%=Permission.UILOCALE_NEW%>"/>     
   </permission>
 <%  }%>
-  <permission id="<%=Permission.CVS_Servers%>">
-    <permission id="<%=Permission.CVS_Servers_NEW%>"/>
-    <permission id="<%=Permission.CVS_Servers_EDIT%>"/>
-    <permission id="<%=Permission.CVS_Servers_REMOVE%>"/>
-  </permission>
-  <permission id="<%=Permission.CVS_MODULES%>">
-    <permission id="<%=Permission.CVS_MODULES_NEW%>"/>
-    <permission id="<%=Permission.CVS_MODULES_EDIT%>"/>
-    <permission id="<%=Permission.CVS_MODULES_REMOVE%>"/>
-    <permission id="<%=Permission.CVS_MODULES_CHECKOUT%>"/>
-  </permission>
-  <permission id="<%=Permission.CVS_MODULE_MAPPING%>">
-    <permission id="<%=Permission.CVS_MODULE_MAPPING_NEW%>"/>
-    <permission id="<%=Permission.CVS_MODULE_MAPPING_EDIT%>"/>
-    <permission id="<%=Permission.CVS_MODULE_MAPPING_REMOVE%>"/>
-  </permission>
-  <permission id="<%=Permission.CVS_FILE_PROFILES%>">
-   <permission id="<%=Permission.CVS_FILE_PROFILES_NEW%>"/>
-   <permission id="<%=Permission.CVS_FILE_PROFILES_EDIT%>"/>
-   <permission id="<%=Permission.CVS_FILE_PROFILES_REMOVE%>"/>
-  </permission>
 <% if(b_snippets) { %>
   <permission id="<%=Permission.SNIPPET_IMPORT%>"/>
 <%  }%>
@@ -259,17 +238,17 @@
   <% if (EventNotificationHelper.systemNotificationEnabled()) { %>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_SYSTEM%>"/>
   <% } %>
-  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_WFMGMT%>"/>  
+  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_WFMGMT%>"/>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_GENERAL%>"/>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_NOMATCHES%>"/>
-  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_REPETITIONS%>"/>  
+  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_REPETITIONS%>"/>
 </category>
 <category id="lb_data_sources">
   <permission id="<%=Permission.FILE_PROFILES_VIEW%>">
-     <permission id="<%=Permission.FILE_PROFILES_REMOVE%>"/>     
-     <permission id="<%=Permission.FILE_PROFILES_EDIT%>"/>     
+     <permission id="<%=Permission.FILE_PROFILES_REMOVE%>"/>
+     <permission id="<%=Permission.FILE_PROFILES_EDIT%>"/>
      <permission id="<%=Permission.FILE_PROFILES_NEW%>"/>
-     <permission id="<%=Permission.FILE_PROFILES_SEE_ALL%>"/>          
+     <permission id="<%=Permission.FILE_PROFILES_SEE_ALL%>"/>
   </permission>
   <permission id="<%=Permission.FILTER_CONFIGURATION_VIEW%>">
      <permission id="<%=Permission.FILTER_CONFIGURATION_REMOVE_FILTERS%>"/>
@@ -278,87 +257,111 @@
      <permission id="<%=Permission.FILTER_CONFIGURATION_EXPORT_FILTERS%>"/>
      <permission id="<%=Permission.FILTER_CONFIGURATION_IMPORT_FILTERS%>"/>
   </permission>
-  
   <permission id="<%=Permission.FILE_EXT_VIEW%>">
-     <permission id="<%=Permission.FILE_EXT_NEW%>"/>     
-     <permission id="<%=Permission.FILE_EXT_REMOVE%>"/>     
+     <permission id="<%=Permission.FILE_EXT_NEW%>"/>
+     <permission id="<%=Permission.FILE_EXT_REMOVE%>"/>
   </permission>
   <permission id="<%=Permission.XMLRULE_VIEW%>">
-     <permission id="<%=Permission.XMLRULE_DUP%>"/>     
-     <permission id="<%=Permission.XMLRULE_EDIT%>"/> 
-     <permission id="<%=Permission.XMLRULE_REMOVE%>"/>      
-     <permission id="<%=Permission.XMLRULE_NEW%>"/>     
+     <permission id="<%=Permission.XMLRULE_DUP%>"/>
+     <permission id="<%=Permission.XMLRULE_EDIT%>"/>
+     <permission id="<%=Permission.XMLRULE_REMOVE%>"/>
+     <permission id="<%=Permission.XMLRULE_NEW%>"/>
   </permission>
   <permission id="<%=Permission.XMLDTD_VIEW%>">
-     <permission id="<%=Permission.XMLDTD_EDIT%>"/> 
-     <permission id="<%=Permission.XMLDTD_REMOVE%>"/>      
-     <permission id="<%=Permission.XMLDTD_NEW%>"/>     
+     <permission id="<%=Permission.XMLDTD_EDIT%>"/>
+     <permission id="<%=Permission.XMLDTD_REMOVE%>"/>
+     <permission id="<%=Permission.XMLDTD_NEW%>"/>
   </permission>
   <permission id="<%=Permission.SEGMENTATIONRULE_VIEW%>">
-    <permission id="<%=Permission.SEGMENTATIONRULE_NEW%>"/>     
-    <permission id="<%=Permission.SEGMENTATIONRULE_EDIT%>"/>     
+    <permission id="<%=Permission.SEGMENTATIONRULE_NEW%>"/>
+    <permission id="<%=Permission.SEGMENTATIONRULE_EDIT%>"/>
     <permission id="<%=Permission.SEGMENTATIONRULE_EXPORT%>"/>
     <permission id="<%=Permission.SEGMENTATIONRULE_REMOVE%>"/>
     <permission id="<%=Permission.SEGMENTATIONRULE_DUP%>"/>
   </permission>
   <permission id="<%=Permission.SGMLRULE_VIEW%>">
-     <permission id="<%=Permission.SGMLRULE_UPLOAD%>"/>     
-     <permission id="<%=Permission.SGMLRULE_CREATE%>"/>     
-     <permission id="<%=Permission.SGMLRULE_REMOVE%>"/>     
-     <permission id="<%=Permission.SGMLRULE_EDIT%>"/>     
+     <permission id="<%=Permission.SGMLRULE_UPLOAD%>"/>
+     <permission id="<%=Permission.SGMLRULE_CREATE%>"/>
+     <permission id="<%=Permission.SGMLRULE_REMOVE%>"/>
+     <permission id="<%=Permission.SGMLRULE_EDIT%>"/>
+  </permission>
+  <permission id="<%=Permission.EXPORT_LOC_VIEW%>">
+     <permission id="<%=Permission.EXPORT_LOC_REMOVE%>"/>
+     <permission id="<%=Permission.EXPORT_LOC_DEFAULT%>"/>
+     <permission id="<%=Permission.EXPORT_LOC_EDIT%>"/>
+     <permission id="<%=Permission.EXPORT_LOC_NEW%>"/>
   </permission>
   <permission id="<%=Permission.IMPORT%>"/>
 <% if (b_serviceware) { %>
   <permission id="<%=Permission.SERVICEWARE_IMPORT%>"/>
 <% } %>
 <% if (b_vignette) { %>
-     <permission id="<%=Permission.VIGNETTE_IMPORT%>"/>     
+     <permission id="<%=Permission.VIGNETTE_IMPORT%>"/>
 <% } %>
 <% if (b_teamsite) { %>
   <permission id="<%=Permission.TEAMSITE_SERVER_VIEW%>">
-     <permission id="<%=Permission.TEAMSITE_SERVER_REMOVE%>"/>     
-     <permission id="<%=Permission.TEAMSITE_SERVER_CREATE%>"/>     
-     <permission id="<%=Permission.TEAMSITE_SERVER_EDIT%>"/>     
-     <permission id="<%=Permission.TEAMSITE_SERVER_NEW%>"/>     
+     <permission id="<%=Permission.TEAMSITE_SERVER_REMOVE%>"/>
+     <permission id="<%=Permission.TEAMSITE_SERVER_CREATE%>"/>
+     <permission id="<%=Permission.TEAMSITE_SERVER_EDIT%>"/>
+     <permission id="<%=Permission.TEAMSITE_SERVER_NEW%>"/>
   </permission>
   <permission id="<%=Permission.TEAMSITE_PROFILES_VIEW%>">
-     <permission id="<%=Permission.TEAMSITE_PROFILES_REMOVE%>"/>     
-     <permission id="<%=Permission.TEAMSITE_PROFILES_NEW%>"/>     
+     <permission id="<%=Permission.TEAMSITE_PROFILES_REMOVE%>"/>
+     <permission id="<%=Permission.TEAMSITE_PROFILES_NEW%>"/>
   </permission>
 <% } %>
 <% if (b_database) { %>
   <permission id="<%=Permission.DATABASE_INTEGRATION%>"/>
 <% } %>
-  <permission id="<%=Permission.EXPORT_LOC_VIEW%>">
-     <permission id="<%=Permission.EXPORT_LOC_REMOVE%>"/>     
-     <permission id="<%=Permission.EXPORT_LOC_DEFAULT%>"/>     
-     <permission id="<%=Permission.EXPORT_LOC_EDIT%>"/>     
-     <permission id="<%=Permission.EXPORT_LOC_NEW%>"/>     
-  </permission>
 <% if (b_documentum) { %>
-     <permission id="<%=Permission.DOCUMENTUM_IMPORT%>"/>     
+     <permission id="<%=Permission.DOCUMENTUM_IMPORT%>"/>
 <% } %>
 <% if (b_corpusAligner) { %>
   <permission id="<%=Permission.CORPUS_ALIGNER_VIEW%>">
-     <permission id="<%=Permission.CORPUS_ALIGNER_CREATE%>"/>     
-     <permission id="<%=Permission.CORPUS_ALIGNER_DOWNLOAD%>"/>     
-     <permission id="<%=Permission.CORPUS_ALIGNER_UPLOAD%>"/>     
+     <permission id="<%=Permission.CORPUS_ALIGNER_CREATE%>"/>
+     <permission id="<%=Permission.CORPUS_ALIGNER_DOWNLOAD%>"/>
+     <permission id="<%=Permission.CORPUS_ALIGNER_UPLOAD%>"/>
   </permission>
-<% } %>  
+<% } %>
 <% if (b_customerAccessGroup) { %>
- <permission id="<%=Permission.CUSTOMER_UPLOAD%>"/>
- <permission id="<%=Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE%>"/>
+  <permission id="<%=Permission.CUSTOMER_UPLOAD%>"/>
+  <permission id="<%=Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE%>"/>
   <% } %>
- <permission id="<%=Permission.CONNECT_TO_CVS%>"/>
- <permission id="<%=Permission.CVS_OPERATE%>"/>
- <permission id="<%=Permission.RSS_READER%>"/>
- <permission id="<%=Permission.CREATE_JOB%>"/>
- <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
- <permission id="<%=Permission.COTI_JOB%>"/>
- <permission id="<%=Permission.ELOQUA%>"/>
- <permission id="<%=Permission.MIND_TOUCH%>"/>
- <permission id="<%=Permission.GIT_CONNECTOR%>"/>
- <permission id="<%=Permission.BLAISE_CONNECTOR%>"/>
+  <permission id="<%=Permission.CREATE_JOB%>"/>
+  <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
+</category>
+<category id="lb_connectors">
+  <permission id="<%=Permission.BLAISE_CONNECTOR%>"/>
+  <permission id="<%=Permission.COTI_JOB%>"/>
+  <permission id="<%=Permission.GIT_CONNECTOR%>"/>
+  <permission id="<%=Permission.MIND_TOUCH%>"/>
+  <permission id="<%=Permission.ELOQUA%>"/>
+  <permission id="<%=Permission.RSS_READER%>"/>
+  <category id="lb_cvs">
+      <permission id="<%=Permission.CVS_Servers%>">
+          <permission id="<%=Permission.CVS_Servers_NEW%>"/>
+          <permission id="<%=Permission.CVS_Servers_EDIT%>"/>
+          <permission id="<%=Permission.CVS_Servers_REMOVE%>"/>
+      </permission>
+      <permission id="<%=Permission.CVS_MODULES%>">
+          <permission id="<%=Permission.CVS_MODULES_NEW%>"/>
+          <permission id="<%=Permission.CVS_MODULES_EDIT%>"/>
+          <permission id="<%=Permission.CVS_MODULES_REMOVE%>"/>
+          <permission id="<%=Permission.CVS_MODULES_CHECKOUT%>"/>
+      </permission>
+      <permission id="<%=Permission.CVS_MODULE_MAPPING%>">
+          <permission id="<%=Permission.CVS_MODULE_MAPPING_NEW%>"/>
+          <permission id="<%=Permission.CVS_MODULE_MAPPING_EDIT%>"/>
+          <permission id="<%=Permission.CVS_MODULE_MAPPING_REMOVE%>"/>
+      </permission>
+      <permission id="<%=Permission.CVS_FILE_PROFILES%>">
+          <permission id="<%=Permission.CVS_FILE_PROFILES_NEW%>"/>
+          <permission id="<%=Permission.CVS_FILE_PROFILES_EDIT%>"/>
+          <permission id="<%=Permission.CVS_FILE_PROFILES_REMOVE%>"/>
+      </permission>
+      <permission id="<%=Permission.CONNECT_TO_CVS%>"/>
+      <permission id="<%=Permission.CVS_OPERATE%>"/>
+  </category>
 </category>
 <category id="lb_job_scope">
   <permission id="<%=Permission.JOB_SCOPE_ALL%>"/>
@@ -495,10 +498,10 @@
           <permission id="<%=Permission.ACTIVITIES_COMMENTS_EDIT%>"/>
           <permission id="<%=Permission.ACTIVITIES_COMMENTS_NEW%>"/>
           <permission id="<%=Permission.ACTIVITIES_COMMENTS_JOB%>"/>  
-          <permission id="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>"/>       
+          <permission id="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>"/>
       </permission>
       <permission id="<%=Permission.ACTIVITIES_DETAIL_STATISTICS%>"/>
-      <permission id="<%=Permission.ACTIVITIES_SUMMARY_STATISTICS%>"/>      
+      <permission id="<%=Permission.ACTIVITIES_SUMMARY_STATISTICS%>"/>
       <permission id="<%=Permission.ACTIVITIES_SECONDARYTARGETFILE%>"/>
       <permission id="<%=Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY%>"/>
   </permission>

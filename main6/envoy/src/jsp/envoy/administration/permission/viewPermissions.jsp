@@ -20,9 +20,5 @@ String x = m.replaceAll("\"");
 Pattern p2 = Pattern.compile("\\\\" + "r" + "\\\\" + "n");
 Matcher m2 = p2.matcher(x);
 String newXml = m2.replaceAll("\r\n");
-
-Pattern p3 = Pattern.compile("\\\\" + "t" );
-Matcher m3 = p3.matcher(newXml);
-String newXml2 = m3.replaceAll("\t");
-%><%=newXml2%>
+%><%=newXml%>
 

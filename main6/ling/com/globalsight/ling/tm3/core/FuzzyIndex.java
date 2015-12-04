@@ -246,7 +246,7 @@ abstract class FuzzyIndex<T extends TM3Data>
             }
         }
 
-        sb.append(" GROUP BY tuvId ORDER BY score DESC");
+        sb.append(" GROUP BY tuvId, tuId ORDER BY score DESC");
         if (targetLocales != null)
         {
             // an exists subselect seems simpler, but mysql bug 46947 causes

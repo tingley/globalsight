@@ -103,7 +103,7 @@ public class StoredProcCaller implements TuvQueryConstants
             + "                AND src.tu_id = tu.id "
             + "                AND trg.tu_id = tu.id "
             + "                AND src.tu_id = trg.tu_id "
-            + "           GROUP BY trg.exact_match_key, trg.locale_id ";
+            + "           GROUP BY :src_tuv_id, trg.exact_match_key, trg.locale_id ";
 
     private static String INSERT_SQL = "INSERT INTO tmp_lev_match(orig_src_id, match_tgt_id) values (?, ?)";
 

@@ -432,7 +432,7 @@ public class ActivityDurationReportGenerator implements ReportGenerator
                 cell_G.setCellStyle((isExportFailed) ? getRedCellStyle(p_workbook) :
                 	getContentStyle(p_workbook));
 
-                long taskBecomeAvailableTime = 0;
+                Date taskBecomeAvailableDate = null;
                 if (job.getCreateDate() == null)
                 {
                     logger.error("No Create data for this job:"
@@ -442,18 +442,17 @@ public class ActivityDurationReportGenerator implements ReportGenerator
 
                 if (prevTask == null)
                 {
-                    taskBecomeAvailableTime = job.getCreateDate().getTime();
+                    taskBecomeAvailableDate = w.getDispatchedDate();
                 }
                 else
                 {
                     if (prevTask.getCompletedDate() != null)
                     {
-                        taskBecomeAvailableTime = prevTask.getCompletedDate()
-                                .getTime();
+                        taskBecomeAvailableDate = prevTask.getCompletedDate();
                     }
                     else
                     {
-                        taskBecomeAvailableTime = job.getCreateDate().getTime();
+                        taskBecomeAvailableDate = w.getDispatchedDate();
                     }
                 }
 
@@ -512,13 +511,14 @@ public class ActivityDurationReportGenerator implements ReportGenerator
                         	getContentStyle(p_workbook));
                     }
                     else{
-                    	cell_I.setCellValue(new Date(taskBecomeAvailableTime));
+                    	cell_I.setCellValue(taskBecomeAvailableDate);
                     	cell_I.setCellStyle((isExportFailed) ? getRedDateCellStyle(p_workbook) :
                         	getDateCellStyle(p_workbook));
                     }
 
                 }
 
+                long taskDurationAcceptedMillis=-1;
                 // Accepted Date Column
                 Cell cell_J = getCell(p_row, COL_ACTIVITY_ACCEPTED);
                 if (skipped)
@@ -535,12 +535,14 @@ public class ActivityDurationReportGenerator implements ReportGenerator
                     	cell_J.setCellValue(ti.getAcceptedDate());
                     	cell_J.setCellStyle((isExportFailed) ? getRedDateCellStyle(p_workbook) :
                         	getDateCellStyle(p_workbook));
+                    	taskDurationAcceptedMillis=ti.getAcceptedDate().getTime();
                     }
                     else
                     {
                     	cell_J.setCellValue(bundle.getString("lb_not_accepted_report"));
                     	cell_J.setCellStyle((isExportFailed) ? getRedCellStyle(p_workbook) :
                         	getContentStyle(p_workbook));
+                    	taskDurationAcceptedMillis = _currentTimeMillis;
                     }
                 }
 
@@ -590,7 +592,7 @@ public class ActivityDurationReportGenerator implements ReportGenerator
                 else
                 {
                     long taskDuration = taskDurationEndMillis
-                            - taskBecomeAvailableTime;
+                            - taskDurationAcceptedMillis;
 
                     // Make this minutes
                     taskDuration /= 1000; // get it in seconds

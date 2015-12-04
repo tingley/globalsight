@@ -45,7 +45,7 @@ boolean b_ptagsVerbose =
 
 PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 boolean b_termsearch=true;
-if(state.isReadOnly()||!perms.getPermissionFor(Permission.TM_SEARCH)||!perms.getPermissionFor(Permission.TERMINOLOGY_SEARCH)){
+if(state.isReadOnly()||!perms.getPermissionFor(Permission.ACTIVITIES_TM_SEARCH)){
         b_termsearch=false;
 }
 %>

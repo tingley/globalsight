@@ -97,11 +97,20 @@ public class JobCreationMonitor
                 state);
     }
 
+    public static Job initializeJob(String jobName, String uuid, String userId,
+            long l10nProfileId, String priority, String state)
+            throws JobCreationException
+    {
+    	String jobType = null;
+        return initializeJob(jobName, uuid, userId, l10nProfileId, priority,
+                state, jobType);
+    }
+
     /**
      * Initializes a new job when a file is uploaded.
      */
     public static Job initializeJob(String jobName, String uuid, String userId,
-            long l10nProfileId, String priority, String state)
+            long l10nProfileId, String priority, String state, String jobType)
             throws JobCreationException
     {
         JobImpl job = null;
@@ -123,6 +132,7 @@ public class JobCreationMonitor
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             job.setCreateDate(ts);
             job.setTimestamp(ts);
+            job.setJobType(jobType);
             long companyId = Long.parseLong(CompanyThreadLocal.getInstance()
                     .getValue());
             job.setCompanyId(companyId);

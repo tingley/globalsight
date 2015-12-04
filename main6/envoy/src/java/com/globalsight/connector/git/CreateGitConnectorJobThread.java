@@ -121,8 +121,9 @@ public class CreateGitConnectorJobThread implements Runnable
 
             String locs = this.initTargetLocale(targetLocales);
 
-            Job job = JobCreationMonitor.initializeJob(jobName, uuid,
-                    user.getUserId(), l10Id, priority, Job.IN_QUEUE);
+			Job job = JobCreationMonitor.initializeJob(jobName, uuid,
+					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
+					Job.JOB_TYPE_GIT);
 
             String sourceLocaleName = l10Profile.getSourceLocale()
                     .getLocaleCode();

@@ -67,6 +67,14 @@ public interface Job extends WorkObject
     public static final String EXPORTING = "EXPORTING";
     public static final String SKIPPING = "SKIPPING";
 
+    public static final String JOB_TYPE_BLAISE = "blaise";
+    public static final String JOB_TYPE_GIT = "git";
+    public static final String JOB_TYPE_CVS = "cvs";
+    public static final String JOB_TYPE_MINDTOUCH = "mindtouch";
+    public static final String JOB_TYPE_ELOQUA  = "eloqua";
+    public static final String JOB_TYPE_COTI = "coti";
+    public static final String JOB_TYPE_RSS = "rss";
+
     @SuppressWarnings("serial")
     public static final List<String> ALLSTATUSLIST = new ArrayList<String>()
     {
@@ -440,4 +448,10 @@ public interface Job extends WorkObject
 	public String getLmExtArchiveTable();
 
 	public void setLmExtArchiveTable(String lmExtArchiveTable);
+
+    public String getJobType();
+
+    public void setJobType(String jobType);
+
+    public boolean isBlaiseJob();
 }

@@ -40,6 +40,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.globalsight.connector.blaise.util.BlaiseHelper;
+import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.connector.eloqua.models.Email;
 import com.globalsight.connector.eloqua.models.LandingPage;
 import com.globalsight.connector.eloqua.util.EloquaHelper;
@@ -51,6 +53,8 @@ import com.globalsight.connector.mindtouch.vo.MindTouchPageInfo;
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.cxe.entity.eloqua.EloquaConnector;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
@@ -501,21 +505,16 @@ public class Exporter
             handleMindTouchFiles(finalFileName, fp, wf);
 
             // For GitConnector file
-            handleGitConnectorFiles(
-                    finalFileName,
-                    wf,
-                    m_displayName.substring(0,
-                            m_displayName.indexOf(File.separator)));
+			String tmpDisplayName = m_displayName.substring(0,
+					m_displayName.indexOf(File.separator));
+			handleGitConnectorFiles(finalFileName, wf, tmpDisplayName);
 
-            // Added by Vincent Yan
+			// For CVS file
             HashMap<String, String> infos = CVSUtil.seperateFileInfo(
                     finalFileStr, m_exportLocation);
             if (infos != null && CVSUtil.isCVSJob(infos.get("jobId")))
             {
-                CVSUtil.saveCVSFile(
-                        infos,
-                        m_displayName.substring(0,
-                                m_displayName.indexOf(File.separator)));
+				CVSUtil.saveCVSFile(infos, tmpDisplayName);
             }
 
             XmlDtd xmlDtd = getXmlDtd();
@@ -602,6 +601,9 @@ public class Exporter
                     XliffFileUtil.processXLZFiles(wf);
                 }
             }
+
+            // For Blaise file (AFTER processing XLIFF/XLZ files)
+            handleBlaiseFiles(finalFileName, wf);
         }
         catch (FileSystemAdapterException fsae)
         {
@@ -696,6 +698,45 @@ public class Exporter
                         }
                     }
                 }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
+    }
+
+    /**
+     * When export, post Blaise xliff back to Blaise server.
+     * 
+     * @param finalFileName
+     *            -- the absolute full pathname.
+     */
+	private void handleBlaiseFiles(String finalFileName, Workflow wf)
+    {
+        try
+        {
+        	// If job is in exported state, it must have been "uploadXliff(..)".
+        	if (Job.EXPORTED.equals(wf.getJob().getState()))
+        	{
+        		return;
+        	}
+
+        	long jobId = wf.getJob().getJobId();
+			BlaiseConnectorJob bcj = BlaiseManager
+					.getBlaiseConnectorJobByJobId(jobId);
+        	if (bcj != null)
+        	{
+				BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(bcj
+						.getBlaiseConnectorId());
+				if (blc != null)
+				{
+	        		finalFileName = finalFileName.replace("/", "\\");
+	                File trgFile = new File(finalFileName);
+	                BlaiseHelper helper = new BlaiseHelper(blc);
+	                helper.uploadXliff(bcj.getBlaiseEntryId(), trgFile);
+	                logger.info("Blaise file is uploaded successfully: " + finalFileName);
+				}
             }
         }
         catch (Exception e)

@@ -534,6 +534,7 @@ public class Permission
     static public final String ELOQUA = "eloqua";
     static public final String MIND_TOUCH = "mindtouch";
     static public final String GIT_CONNECTOR = "gitConnector";
+    static public final String BLAISE_CONNECTOR = "blaiseConnector";
 
     // Limit the range of global LP permissions,super LocalizationParticipant
     // user can only edit below permissions.
@@ -1095,6 +1096,8 @@ public class Permission
         added = addPermission(419, GIT_CONNECTOR) || added;
         added = addPermission(420, REPORTS_TRANSLATIONS_VERIFICATION) || added;
         added = addPermission(422, JOB_WORKFLOWS_TRANSLATED_TEXT) || added;
+        added = addPermission(423, BLAISE_CONNECTOR) || added;
+
         return added;
     }
 

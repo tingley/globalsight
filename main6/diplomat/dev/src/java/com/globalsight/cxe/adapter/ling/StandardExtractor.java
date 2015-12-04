@@ -385,6 +385,15 @@ public class StandardExtractor
     private String extractWithLingAPI() throws Exception
     {
         DiplomatAPI diplomat = new DiplomatAPI();
+        diplomat.setCxeMessage(m_cxeMessage);
+        // Blaise xliff file does not need segmentation even source equals target.
+        String jobId = (String) m_cxeMessage.getParameters().get("JobId");
+		boolean isBlaiseJob = ServerProxy.getJobHandler()
+				.getJobById(Long.parseLong(jobId)).isBlaiseJob();
+        if (isBlaiseJob)
+        {
+        	diplomat.setSentenceSegmentation(false);
+        }
         addExcelStyleMap(diplomat);
 
         // Now we get segmentationRuleFile through FileProfileId parameter

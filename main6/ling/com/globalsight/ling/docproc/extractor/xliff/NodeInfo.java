@@ -193,17 +193,16 @@ public class NodeInfo implements INodeInfo
                             map.put("xliffPart", "seg-source");
                         }
                         
-                        NodeList nodes = parentNode.getParentNode()
-                                .getChildNodes();
+                        NodeList nodes = parentNode.getParentNode().getChildNodes();
                         for (int i = 0; i < nodes.getLength(); i++)
                         {
-                            Node cnode = nodes.item(i);
-                            String cnodeName = cnode.getNodeName();
+                            Node curNode = nodes.item(i);
+                            String curNodeName = curNode.getNodeName();
 
-                            if ("seg-source".equals(cnodeName))
+                            if ("seg-source".equals(curNodeName))
                             {
                                 map.put("xliffSegSource", "true");
-                                NodeList jnodes = cnode.getChildNodes();
+                                NodeList jnodes = curNode.getChildNodes();
                                 if (jnodes != null)
                                 {
                                     int mrkCount = 0;
@@ -249,7 +248,7 @@ public class NodeInfo implements INodeInfo
                             }
                             else if ("target".equals(name))
                             {
-                                NodeList jnodes = cnode.getChildNodes();
+                                NodeList jnodes = curNode.getChildNodes();
                                 if (jnodes != null)
                                 {
                                     for (int j = 0; j < jnodes.getLength(); j++)
@@ -264,6 +263,31 @@ public class NodeInfo implements INodeInfo
                                     }
                                 }
                             }
+
+							// Store "state" and "state-qualifier" attributes
+							// from "target" for both "source" and "target".
+							if ("target".equals(curNodeName)
+									&& ("source".equals(name) || "target".equals(name)))
+                            {
+                                NamedNodeMap targetAttrs = curNode.getAttributes();
+                                if (targetAttrs != null)
+                                {
+                                    for (int k = 0; k < targetAttrs.getLength(); ++k)
+                                    {
+                                        Node att = targetAttrs.item(k);
+                                        String attname = att.getNodeName();
+                                        String value = att.getNodeValue();
+                                        if ("state".equals(attname))
+                                        {
+                                            map.put("state", value);
+                                        }
+                                        else if ("state-qualifier".equals(attname))
+                                        {
+                                            map.put("state-qualifier", value);
+                                        }
+                                    }
+                                }
+                            }                            
                         }
 
                         NamedNodeMap grandAttrs = parentNode.getParentNode()

@@ -746,7 +746,7 @@
         <PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
       </WebPage>
     </WebActivity>
-    <WebActivity webActivityName="createZipJobs">
+    <WebActivity webActivityName="createZipJobs" clearSession="false">
       <WebPage pageName="CZJ" isDefault="true" jspName="/envoy/administration/createjob/createZipJobs.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler">
         <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
         <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>
@@ -811,7 +811,25 @@
         <PageLink linkName="self" destinationPageName="mt3"></PageLink>
       </WebPage>
     </WebActivity>
-    
+
+    <WebActivity webActivityName="blaiseConnector">
+      <WebPage pageName="blaiseMain" isDefault="true" jspName="/envoy/connecter/blaise/blaiseMain.jsp" pageHandlerClassName="com.globalsight.connector.blaise.BlaiseMainHandler">
+        <PageLink linkName="self" destinationPageName="blaiseMain"></PageLink>
+        <PageLink linkName="new1" destinationPageName="blaise2"></PageLink>
+        <PageLink linkName="edit" destinationPageName="blaise2"></PageLink>
+        <PageLink linkName="remove" destinationPageName="blaiseMain"></PageLink>
+        <PageLink linkName="connect" destinationPageName="blaise3"></PageLink>
+      </WebPage>
+      <WebPage pageName="blaise2" isDefault="false" jspName="/envoy/connecter/blaise/blaiseBasic.jsp" pageHandlerClassName="com.globalsight.connector.blaise.BlaiseBasicHandler">
+        <PageLink linkName="self" destinationPageName="blaise2"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="blaiseMain"></PageLink>
+        <PageLink linkName="save" destinationPageName="blaiseMain"></PageLink>
+      </WebPage>
+      <WebPage pageName="blaise3" isDefault="false" jspName="/envoy/connecter/blaise/blaiseCreateJob.jsp" pageHandlerClassName="com.globalsight.connector.blaise.BlaiseCreateJobHandler">
+        <PageLink linkName="self" destinationPageName="blaise3"></PageLink>
+      </WebPage>
+    </WebActivity>
+
     <WebActivity webActivityName="gitconnector">
       <WebPage pageName="GCM" isDefault="true" jspName="/envoy/connecter/git/gitConnectorMain.jsp" pageHandlerClassName="com.globalsight.connector.git.GitConnectorMainHandler">
       	<PageLink linkName="new1" destinationPageName="GCB"></PageLink>

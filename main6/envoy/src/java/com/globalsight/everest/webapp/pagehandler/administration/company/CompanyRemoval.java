@@ -252,6 +252,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_WORKFLOW_REQUEST = "delete from WORKFLOW_REQUEST where ID in ";
     private static final String SQL_DELETE_SCORE = "delete from SCORECARD_SCORE where JOB_ID in ";
     private static final String SQL_DELETE_GIT_CONNECTOR_JOB = "delete from CONNECTOR_GIT_JOB where JOB_ID in ";
+    private static final String SQL_DELETE_BLAISE_CONNECTOR_JOB = "delete from CONNECTOR_BLAISE_JOB WHERE JOB_ID in ";
     private static final String SQL_DELETE_WORKFLOW_REQUEST_WFTEMPLATE = "delete from WORKFLOW_REQUEST_WFTEMPLATE where WORKFLOW_TEMPLATE_ID in ";
     private static final String SQL_DELETE_XLIFF_ALT = "delete from XLIFF_ALT where TUV_ID in ";
     private static final String SQL_DELETE_XML_DTD = "delete from XML_DTD where COMPANY_ID=?";
@@ -588,6 +589,8 @@ public class CompanyRemoval
                 
                 // for git files
                 removeGitConnectorJobByJobId(conn, jobIds);
+
+                removeBlaiseConnectorJobByJobId(conn, jobIds);
             }
 
             // remove requests
@@ -932,6 +935,10 @@ public class CompanyRemoval
             removeMindTouchTargetServers(conn);
             // remove mindtouch connectors
             removeMindTouchConnectors(conn);
+            // remove blaise connector job
+            removeBlaiseConnectorJob(conn);
+            // remove blaise connectors
+            removeBlaiseConnectors(conn);
             //remove post review category
             romovePostReviewCategory(conn);
             // remove workflows
@@ -3259,6 +3266,25 @@ public class CompanyRemoval
         logEnd("CONNECTOR_MINDTOUCH");
     }
 
+    private void removeBlaiseConnectorJob(Connection conn) throws SQLException
+    {
+    	long companyId = company.getId();
+        List<List<Object>> jobIds = queryBatchList(conn, SQL_QUERY_JOB,
+                companyId);
+        if (jobIds.size() > 0)
+        {
+        	removeBlaiseConnectorJobByJobId(conn, jobIds);
+        }
+    }
+
+    private void removeBlaiseConnectors(Connection conn) throws SQLException
+    {
+        logStart("CONNECTOR_BLAISE");
+		String sql = "delete from CONNECTOR_BLAISE where company_id = ?";
+        execOnce(conn, sql, company.getId());
+        logEnd("CONNECTOR_BLAISE");
+    }
+
     private void removeGitConnector(Connection conn) throws SQLException
     {
         logStart("CONNECTOR_GIT");
@@ -3267,7 +3293,7 @@ public class CompanyRemoval
 
         logEnd("CONNECTOR_GIT");
     }
-    
+
     private void removeGitConnectorJob(Connection conn) 
     		throws SQLException
     {
@@ -3279,7 +3305,7 @@ public class CompanyRemoval
         	removeGitConnectorJobByJobId(conn, jobIds);
         }
     }
-    
+
     private void removeGitConnectorFileMapping(Connection conn) throws SQLException
     {
         logStart("CONNECTOR_GIT_FILE_MAPPING");
@@ -3987,6 +4013,14 @@ public class CompanyRemoval
     	logStart("CONNECTOR_GIT_JOB");
         exec(conn, SQL_DELETE_GIT_CONNECTOR_JOB, jobIds);
         logEnd("CONNECTOR_GIT_JOB");
+    }
+
+    private void removeBlaiseConnectorJobByJobId(Connection conn,
+    		List<List<Object>> jobIds) throws SQLException
+    {
+    	logStart("CONNECTOR_BLAISE_JOB");
+        exec(conn, SQL_DELETE_BLAISE_CONNECTOR_JOB, jobIds);
+        logEnd("CONNECTOR_BLAISE_JOB");
     }
 
     private void removeWorkflowRequest(Connection conn,

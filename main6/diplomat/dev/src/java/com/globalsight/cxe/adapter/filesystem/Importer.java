@@ -601,7 +601,8 @@ public class Importer
      */
     private String getBaseHref(String p_filename)
     {
-        int endIndex = p_filename.lastIndexOf(File.separator);
-        return p_filename.substring(0, endIndex).replace('\\', '/');
+    	p_filename = p_filename.replace('\\', '/');
+        int endIndex = p_filename.lastIndexOf("/");
+        return p_filename.substring(0, endIndex);
     }
 }

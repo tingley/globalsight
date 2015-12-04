@@ -1088,14 +1088,6 @@ public class DiplomatAPI implements IFormatNames
         {
 
         }
-        // Is Html
-        // if(m_inputFormat == 1)
-        // {
-        // com.globalsight.ling.docproc.extractor.html.Extractor htmlExtractor =
-        // (Extractor) extractor;
-        // htmlExtractor.setFileProfileId(fileProfileId);
-        // htmlExtractor.setFilterId(filterId);
-        // }
 
         boolean isIdmlXml = false;
         boolean isInddXml = false;
@@ -1132,6 +1124,9 @@ public class DiplomatAPI implements IFormatNames
                 xmlExtractor.addExtractRule(r);
             }
         }
+
+        // XLF extractor need to know if it is a Blaise job file
+        setBlaiseJobFlagForXlfExtractor();
 
         extractor.extract();
 
@@ -1959,4 +1954,25 @@ public class DiplomatAPI implements IFormatNames
         this.extractor = extractor;
     }
 
+    private void setBlaiseJobFlagForXlfExtractor()
+    {
+        if (extractor instanceof com.globalsight.ling.docproc.extractor.xliff.Extractor)
+        {
+        	if (cxeMessage != null)
+        	{
+        		boolean isBlaiseJob = false;
+            	try
+            	{
+            		String jobId = (String) cxeMessage.getParameters().get("JobId");
+            		isBlaiseJob = ServerProxy.getJobHandler()
+            				.getJobById(Long.parseLong(jobId)).isBlaiseJob();
+            	}
+            	catch (Exception e)
+            	{
+            	}
+				((com.globalsight.ling.docproc.extractor.xliff.Extractor) extractor)
+						.setIsBlaiseJob(isBlaiseJob);
+        	}
+        }
+    }
 }

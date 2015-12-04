@@ -115,6 +115,8 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnectorCacheFile.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnectorFileMapping.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/GitConnectorJob.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/BlaiseConnector.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/BlaiseConnectorJob.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RemoteIp.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/JSPFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CVSFileProfile.hbm.xml" />

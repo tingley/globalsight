@@ -656,8 +656,14 @@ public class ExportHelper
                     sourcePageBomType = m_sourcePage.getBOMType();
                     PageTemplate pageTemplate = getExportTemplate();
                     pageTemplate.setTabsTrip(isTabstrip);
-                    pageTemplate.setXlfSrcAsTrg(p_exportParameters
-                            .getXlfSrcAsTrg());
+					boolean srcAsTrg = ServerProxy.getJobHandler()
+							.getJobById(m_sourcePage.getJobId()).isBlaiseJob();
+					if (srcAsTrg) {
+						pageTemplate.setXlfSrcAsTrg(1);
+					} else {
+						pageTemplate.setXlfSrcAsTrg(p_exportParameters
+								.getXlfSrcAsTrg());
+					}
                     String page = populatePage(pageTemplate,
                             getSegments(m_page.getGlobalSightLocale()),
                             targetLocale, false, false, null);

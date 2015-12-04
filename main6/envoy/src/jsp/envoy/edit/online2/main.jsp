@@ -177,9 +177,9 @@ if (newStatus != null)
 //Determine if show "Term_search"  link
 
 PermissionSet perms = (PermissionSet)session.getAttribute(WebAppConstants.PERMISSIONS);
-boolean b_termsearch=true;
-if(state.isReadOnly()|| !perms.getPermissionFor(Permission.ACTIVITIES_TM_SEARCH)){
-        b_termsearch=false;
+boolean b_tmsearch=true;
+if(state.isReadOnly()||(!perms.getPermissionFor(Permission.ACTIVITIES_TM_SEARCH)&&!perms.getPermissionFor(Permission.TM_SEARCH))){
+        b_tmsearch=false;
 }
 
 //Determine if show "Auto-Propagate" link
@@ -406,7 +406,7 @@ tmp.mnemonic = "t";
 <% } %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_search") %>...", searchByUserSid));
 tmp.mnemonic = "s";
-<% if (b_termsearch) { %>
+<% if (b_tmsearch) { %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_tm_search") %>...", dotmSearch));
 tmp.mnemonic = "t";
 <% } %>
@@ -3069,7 +3069,7 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
     
     <div id="actionDropDown" class="help wrapper-dropdown-5" style="display:none;padding-top:8px;" onclick="$(this).toggleClass('active');"><%=bundle.getString("lb_actions") %>
 	    <ul class="dropdown" style="font-family:Arial,Helvetica,sans-serif; font-size:9pt;">
-            <% if (b_termsearch) { %>
+            <% if (b_tmsearch) { %>
 	        <li><a href="javascript:dotmSearch();"><%=bundle.getString("lb_tm_search") %>...</a></li>
             <% } %>
 	        <li><a href="javascript:showTermbases();"><%=bundle.getString("lb_termbases")%>...</a></li>

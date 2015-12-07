@@ -44,9 +44,9 @@ boolean b_ptagsVerbose =
 
 
 PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
-boolean b_termsearch=true;
-if(state.isReadOnly()||!perms.getPermissionFor(Permission.TM_SEARCH)||!perms.getPermissionFor(Permission.TERMINOLOGY_SEARCH)){
-        b_termsearch=false;
+boolean b_tmsearch=true;
+if(state.isReadOnly()||(!perms.getPermissionFor(Permission.ACTIVITIES_TM_SEARCH)&&!perms.getPermissionFor(Permission.TM_SEARCH))){
+        b_tmsearch=false;
 }
 %>
 <HTML>
@@ -127,7 +127,7 @@ function ShowPTagBox()
     </TD>
     <TD ALIGN="RIGHT" VALIGN="TOP">
       <IMG SRC="/globalsight/images/spacer.gif" HEIGHT="12"><BR>
-      <%if(b_termsearch) { %>
+      <%if(b_tmsearch) { %>
       <A CLASS="HREFBoldWhite" HREF="#" onfocus="this.blur();"
        onclick="parent.dotmSearch(); return false;" ><%=lb_tm_search%></A> |
       <%} %>

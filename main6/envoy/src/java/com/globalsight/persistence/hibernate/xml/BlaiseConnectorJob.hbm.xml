@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.cxe.entity.blaise.BlaiseConnectorJob"
+        table="CONNECTOR_BLAISE_JOB">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="blaiseConnectorId" column="BLAISE_CONNECTOR_ID" 
+        	length="20" type="long" not-null="true" />
+        <property name="blaiseEntryId" column="BLAISE_ENTRY_ID" 
+        	length="20" type="long" not-null="true" />
+        <property name="jobId" column="JOB_ID" 
+        	length="20" type="long" not-null="true" />
+    </class>
+
+</hibernate-mapping>

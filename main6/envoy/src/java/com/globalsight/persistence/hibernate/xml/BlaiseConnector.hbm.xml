@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.cxe.entity.blaise.BlaiseConnector" table="CONNECTOR_BLAISE">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="name" length="300" column="NAME" type="string"
+            not-null="true" unique="false" />
+        <property name="description" length="300" column="DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+        <property name="url" length="300" column="URL" type="string"
+            not-null="true" unique="false" />
+        <property name="username" length="300" column="USER_NAME" type="string"
+            not-null="false" unique="false" />
+        <property name="password" length="300" column="PASSWORD" type="string"
+            not-null="false" unique="false" />
+        <property name="clientCoreVersion" length="30" column="CLIENT_CORE_VERSION" 
+            type="string" not-null="false" unique="false" />
+        <property name="clientCoreRevision" length="3" column="CLIENT_CORE_REVISION"
+            type="int" not-null="true" />
+        <property name="workflowId" length="30" column="WORKFLOW_ID" type="string"
+            not-null="false" unique="false" />
+        <property name="isActive" column="IS_ACTIVE" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="companyId" column="COMPANY_ID" length="20"
+            type="long" not-null="true" />
+    </class>
+</hibernate-mapping>

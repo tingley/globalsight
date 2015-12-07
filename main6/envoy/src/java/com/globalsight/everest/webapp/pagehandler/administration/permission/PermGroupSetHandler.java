@@ -97,17 +97,5 @@ public class PermGroupSetHandler extends PageHandler
         }
         return permGroup;
     }
-
-    private String getPermissionXml(SessionManager sessionMgr)
-    {
-        String permissionXml = null;
-        permissionXml = (String) sessionMgr.getAttribute("permissionXml");
-        if (permissionXml == null)
-        {
-            permissionXml = Permission.getPermissionXml();
-            sessionMgr.setAttribute("permissionXml", permissionXml);
-        }
-        return permissionXml;
-    }
 }
 

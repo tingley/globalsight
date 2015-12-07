@@ -173,6 +173,7 @@
    String cvsFileProfileUrl = LinkHelper.getWebActivityURL(request, "cvsfileprofile");
    String cvsJobUrl = LinkHelper.getWebActivityURL(request, "cvsjob");
    String gitconnectorUrl = LinkHelper.getWebActivityURL(request, "gitconnector");
+   String blaiseConnectorUrl = LinkHelper.getWebActivityURL(request, "blaiseConnector");
    String rssReaderUrl = LinkHelper.getWebActivityURL(request, "rssReader");
    String createJobUrl = LinkHelper.getWebActivityURL(request, "createJobs");
    String createZipJobUrl = LinkHelper.getWebActivityURL(request, "createZipJobs");
@@ -576,6 +577,10 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_mindtouch
 
 <% if (userPerms.getPermissionFor(Permission.GIT_CONNECTOR)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_git_connector")%>", "javascript:goToUrl('<%=gitconnectorUrl%>');", ""));
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.BLAISE_CONNECTOR)) { %>
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_blaise_connector")%>", "javascript:goToUrl('<%=blaiseConnectorUrl%>');", ""));
 <% } %>
 
 <% } //end if hasDataSourceMenu %>

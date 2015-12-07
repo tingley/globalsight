@@ -134,8 +134,9 @@ public class CreateJobThread implements Runnable
 
             // init target locale infomation
             String locs = this.initTargetLocale(targetLocales);
-            Job job = JobCreationMonitor.initializeJob(jobName, uuid,
-                    user.getUserId(), l10Id, priority, Job.IN_QUEUE);
+			Job job = JobCreationMonitor.initializeJob(jobName, uuid,
+					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
+					Job.JOB_TYPE_ELOQUA);
             String sourceLocaleName = l10Profile.getSourceLocale()
                     .getLocaleCode();
             initDescAndFileProfile(descList, job, files, sourceLocaleName);

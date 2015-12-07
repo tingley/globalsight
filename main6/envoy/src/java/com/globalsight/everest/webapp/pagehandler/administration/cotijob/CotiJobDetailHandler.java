@@ -320,7 +320,7 @@ public class CotiJobDetailHandler extends PageHandler
                     : (String) sessionMgr.getAttribute("uuid");
             Job job = JobCreationMonitor.initializeJob(jobName, uuid,
                     user.getUserId(), l10Profile.getId(), priority,
-                    Job.IN_QUEUE);
+                    Job.IN_QUEUE, Job.JOB_TYPE_COTI);
             initDescAndFileProfile(descList, fpIdList, filePaths,
                     l10nAndfileProfiles, l10Profile, job, sourceFilesList,
                     fileProfileList);

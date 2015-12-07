@@ -74,6 +74,8 @@
             type="yes_no" not-null="false" />
         <property name="isAllRequestGenerated" column="IS_ALL_REQUEST_GENERATED"
             type="yes_no" not-null="false" />
+        <property name="jobType" length="30" column="JOB_TYPE"
+            type="string" not-null="false" />
 
         <many-to-one name="sourceLocale" column="SOURCE_LOCALE_ID"
             class="com.globalsight.util.GlobalSightLocale" not-null="true" />

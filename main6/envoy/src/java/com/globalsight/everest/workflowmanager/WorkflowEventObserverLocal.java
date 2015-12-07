@@ -27,6 +27,10 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.globalsight.connector.blaise.util.BlaiseHelper;
+import com.globalsight.connector.blaise.util.BlaiseManager;
+import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -306,6 +310,11 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
         if (checkStateOfWorkflows(workflows, p_wfState))
         {
             JobImpl jobClone = (JobImpl) p_wf.getJob();
+            
+            if (Job.EXPORTED.equals(p_wfState))
+            {
+            	possibllyCompleteBlaiseEntry(jobClone);
+            }
 
             jobClone.setState(p_wfState);
             HibernateUtil.update(jobClone);
@@ -332,7 +341,41 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
         }
     }
 
-    private boolean checkStateOfWorkflows(Collection p_workflows, String p_state)
+    /**
+	 * If current job is a Blaise job, and it has been in EXPORTED state, invoke
+	 * Blaise API to complete it.
+	 * 
+	 * @param job
+	 */
+	private void possibllyCompleteBlaiseEntry(JobImpl job)
+    {
+		BlaiseConnectorJob bcj = BlaiseManager
+				.getBlaiseConnectorJobByJobId(job.getJobId());
+		try
+        {
+        	if (bcj != null)
+        	{
+				BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(bcj
+						.getBlaiseConnectorId());
+				if (blc != null) {
+	                BlaiseHelper helper = new BlaiseHelper(blc);
+					// If this entry has been completed, it will be removed from
+					// Blaise inbox entries, this will throw "object with id xxx
+					// not found" exception. Ignore this exception.
+	                helper.complete(bcj.getBlaiseEntryId());
+					s_logger.info("Blaise entry is completed successfully: "
+							+ bcj.getBlaiseEntryId());
+				}
+            }
+        }
+        catch (Exception ignore)
+        {
+			s_logger.warn("Error when possiblly complete entry: "
+					+ bcj.getBlaiseEntryId() + ", " + ignore.getMessage());
+        }
+    }
+
+	private boolean checkStateOfWorkflows(Collection p_workflows, String p_state)
     {
         boolean result = false;
         int i = 0;

@@ -150,6 +150,8 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private String lmExtTable = null;
     private String lmExtArchiveTable = null;
 
+    private String jobType = null;
+
     public JobImpl()
     {
         m_leverageMatchThreshold = 50;
@@ -1700,5 +1702,41 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     public void setTuTable(String tuTable)
     {
         this.tuTable = tuTable;
+    }
+
+    public String getJobType()
+    {
+    	return jobType;
+    }
+
+    public void setJobType(String jobType)
+    {
+    	this.jobType = jobType;
+    }
+
+    // Utility
+    public boolean isBlaiseJob()
+    {
+    	return Job.JOB_TYPE_BLAISE.equalsIgnoreCase(jobType);
+    }
+
+    public boolean isCotiJob()
+    {
+    	return Job.JOB_TYPE_COTI.equalsIgnoreCase(jobType);
+    }
+
+    public boolean isEloquaJob()
+    {
+    	return Job.JOB_TYPE_ELOQUA.equalsIgnoreCase(jobType);
+    }
+
+    public boolean isGitJob()
+    {
+    	return Job.JOB_TYPE_GIT.equalsIgnoreCase(jobType);
+    }
+
+    public boolean isMindTouchJob()
+    {
+    	return Job.JOB_TYPE_MINDTOUCH.equalsIgnoreCase(jobType);
     }
 }

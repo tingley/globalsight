@@ -714,7 +714,9 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             sql.append(" and p.PROJECT_NAME LIKE '%" + filterParams[3] + "%'");
         }
-        sql.append(" group by l10n.ID, l10n.NAME, l10n.DESCRIPTION, l10n.COMPANYID");
+        sql.append(" group by l10n.ID, l10n.NAME, l10n.DESCRIPTION, "
+                    + "l10n.COMPANYID, tmp.NAME, p.PROJECT_NAME, "
+                    + "l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID");
         sql.append(" order by l10n.NAME ");
         return sql.toString();
     }

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,11 +43,15 @@ import com.globalsight.ling.common.RegExMatchInterface;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
+import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.DocumentElementException;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 import com.globalsight.ling.docproc.ExtractorInterface;
 import com.globalsight.ling.docproc.ExtractorRegistry;
+import com.globalsight.ling.docproc.Output;
+import com.globalsight.ling.docproc.Segmentable;
+import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.extractor.xml.GsDOMParser;
 import com.globalsight.util.edit.SegmentUtil;
 
@@ -191,6 +196,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private List<NamedNodeMap> m_segSourceInlineAtts = null;
     private List<String> m_segSourceInlineTags = null;
 
+    private boolean isBlaiseJob = false;
+
     //
     // Constructors
     //
@@ -251,6 +258,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
             // traverse the DOM tree
             domNodeVisitor(document, true);
+
+            if (isBlaiseJob)
+            {
+            	moveTranslatedSegmentsToSkeleton();
+            }
         }
         catch (Exception e)
         {
@@ -2227,6 +2239,70 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             {
                 String value = sNode.getNodeValue();
                 m_xliffVersion = value;
+            }
+        }
+    }
+
+    public void setIsBlaiseJob(boolean p_isBlaiseJob)
+    {
+    	this.isBlaiseJob = p_isBlaiseJob;
+    }
+
+    public boolean isBlaiseJob()
+    {
+    	return this.isBlaiseJob;
+    }
+
+    /**
+	 * For Blaise job, if target state is "translated", such segments should be
+	 * in skeleton.
+	 */
+    @SuppressWarnings("rawtypes")
+	private void moveTranslatedSegmentsToSkeleton()
+    {
+        Output extractedOutPut = getOutput();
+        Iterator it = extractedOutPut.documentElementIterator();
+        extractedOutPut.clearDocumentElements();
+        while (it.hasNext())
+        {
+            DocumentElement de = (DocumentElement) it.next();
+            switch (de.type())
+            {
+                case DocumentElement.TRANSLATABLE:
+                case DocumentElement.LOCALIZABLE:
+                {
+                	Segmentable ele = (Segmentable) de;
+                    String xliffPart = (String) ele.getXliffPart().get("xliffPart");
+                    String state = (String) ele.getXliffPart().get("state");
+                    if ("translated".equals(state))
+                    {
+                    	// Revert target content and put into skeleton
+                    	if ("target".equals(xliffPart))
+                    	{
+                        	String chunk = ele.getChunk();
+                        	// XLF extractor has wrapped target content...
+                        	if (chunk != null && chunk.indexOf("<") > -1)
+                        	{
+                            	chunk = SegmentUtil.restoreSegment(chunk, "");                        		
+                        	}
+                        	SkeletonElement skel = new SkeletonElement();
+                        	skel.setSkeleton(chunk == null ? "" : chunk);
+                        	extractedOutPut.addDocumentElement(skel);
+                    	}
+                    	else if ("source".equals(xliffPart))
+                    	{
+                    		// Do nothing as source is in skeleton already.
+                    	}
+                    }
+                    else
+                    {
+                    	extractedOutPut.addDocumentElement(de);
+                    }
+                    break;
+                }
+                default:
+                	extractedOutPut.addDocumentElement(de);
+                    break;
             }
         }
     }

@@ -11,6 +11,8 @@
             com.globalsight.everest.taskmanager.Task,
             com.globalsight.everest.company.CompanyWrapper,
             com.globalsight.everest.company.Company,
+            com.globalsight.everest.servlet.util.SessionManager,
+            com.globalsight.everest.foundation.User,
             java.util.ResourceBundle"
     session="true"%>
 <%
@@ -484,6 +486,9 @@ function openWizardWindow(url)
         </amb:permission>
         <amb:permission name="<%=Permission.GIT_CONNECTOR%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=gitconnectorUrl%>"><%=bundle.getString("lb_git_connector")%></A><BR>
+      	</amb:permission>
+        <amb:permission name="<%=Permission.BLAISE_CONNECTOR%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=blaiseConnectorUrl%>"><%=bundle.getString("lb_blaise_connector")%></A><BR>
       	</amb:permission>
       </TD>
     <%

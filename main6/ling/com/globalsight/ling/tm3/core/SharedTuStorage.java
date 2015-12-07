@@ -745,7 +745,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
 		
 		if (startId != -1 && count != -1)
 		{
-			sb.append(" AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
+			sb.append(" AND tuv.tuId > ? ORDER BY tu.id ASC LIMIT ?")
 					.addValues(startId, count);
 		}
 	}

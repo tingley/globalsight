@@ -82,28 +82,20 @@ public class StoredProcCaller implements TuvQueryConstants
             + "       AND tu.id = src.tu_id "
             + " ORDER BY lev.orig_src_id ";
 
-    private static String SELECT_SQL = " SELECT :src_tuv_id, MIN(trg.id) "
-            + "          FROM  "
-            + TUV_TABLE_PLACEHOLDER
-            + " src, "
-            + "          "
-            + TUV_TABLE_PLACEHOLDER
-            + " trg, "
-            + "          "
-            + TU_TABLE_PLACEHOLDER
-            + " tu "
-            + "          WHERE tu.leverage_group_id IN "
-            + "                   (:lev_grp_ids)"
-            + "                AND tu.localize_type = :src_type "
-            + "                AND src.locale_id = :src_loc_id "
-            + "                AND src.exact_match_key = :src_crc "
-            + "                AND trg.locale_id IN "
-            + "                   (:loc_list) "
-            + "                AND trg.state in ('LOCALIZED', 'UNVERIFIED_EXACT_MATCH') "
-            + "                AND src.tu_id = tu.id "
-            + "                AND trg.tu_id = tu.id "
-            + "                AND src.tu_id = trg.tu_id "
-            + "           GROUP BY trg.exact_match_key, trg.locale_id ";
+    private static String SELECT_SQL = " SELECT MIN(trg.id) FROM "
+            + TUV_TABLE_PLACEHOLDER + " src, "
+    		+ TUV_TABLE_PLACEHOLDER + " trg, "
+            + TU_TABLE_PLACEHOLDER + " tu "
+            + " WHERE tu.leverage_group_id IN (:lev_grp_ids)"
+            + " AND tu.localize_type = :src_type "
+            + " AND src.locale_id = :src_loc_id "
+            + " AND src.exact_match_key = :src_crc "
+            + " AND trg.locale_id IN (:loc_list) "
+            + " AND trg.state in ('LOCALIZED', 'UNVERIFIED_EXACT_MATCH') "
+            + " AND src.tu_id = tu.id "
+            + " AND trg.tu_id = tu.id "
+            + " AND src.tu_id = trg.tu_id "
+            + " AND src.id = :src_tuv_id ";
 
     private static String INSERT_SQL = "INSERT INTO tmp_lev_match(orig_src_id, match_tgt_id) values (?, ?)";
 
@@ -247,8 +239,8 @@ public class StoredProcCaller implements TuvQueryConstants
 
                 while (values.next())
                 {
-                    insertStatement.setLong(1, values.getLong(1));
-                    insertStatement.setLong(2, values.getLong(2));
+                    insertStatement.setLong(1, src_tuv_id);
+                    insertStatement.setLong(2, values.getLong(1));
 
                     insertStatement.execute();
                 }

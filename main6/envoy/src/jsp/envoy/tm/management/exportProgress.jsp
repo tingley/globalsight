@@ -274,18 +274,6 @@ function doOnLoad()
 	   </td>
 	 </tr>
 	 <tr>
-	   <td CLASS="standardText"><%=bundle.getString("lb_tm_gs_seg_rules") %>:</td>
-	   <td CLASS="standardText"><A href="/globalsight/downloadresource?file=globalsight.srx"
-	     id="idResource" target="_new">globalsight.srx</A>
-	   </td>
-	 </tr>
-	 <tr>
-	   <td CLASS="standardText"><%=bundle.getString("lb_tm_gs_seg_dtd") %>:</td>
-	   <td CLASS="standardText"><A href="/globalsight/downloadresource?file=srx.dtd"
-	     id="idResource" target="_new">srx.dtd</A>
-	   </td>
-	 </tr>
-	 <tr>
 	   <td CLASS="standardText"><%=bundle.getString("lb_tm_tms_dtd") %> v1.4:</td>
 	   <td CLASS="standardText"><A href="/globalsight/downloadresource?file=tmx14.dtd"
 	     id="idResource" target="_new">tmx14.dtd</A>

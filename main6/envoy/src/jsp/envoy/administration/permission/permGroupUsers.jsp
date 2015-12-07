@@ -86,7 +86,7 @@
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <script>
-var needWarning = true;
+var needWarning = false;
 var objectName = "<%=bundle.getString("lb_permission_group")%>";
 var guideNode="permissionGroups";
 var helpFile = "<%=helpFile%>";

@@ -76,9 +76,6 @@
 		<copy todir="${serverclassesDest}">
 			<fileset dir="${lingSrc}" includes="com/globalsight/ling/tm2/persistence/error/html/*.htm" />
 		</copy>
-		<copy todir="${globalsight_home}/globalsight-web.war/resources">
-			<fileset dir="${lingSrc}/com/globalsight/resources" includes="globalsight.srx, srx.dtd" />
-		</copy>
 		<copy todir="${serverclassesDest}/properties" flatten="yes">
 			<fileset dir="${lingSrc}" includes="com/**/docproc/abbreviation*.properties, 
                 com/**/docproc/Diplomat.properties,

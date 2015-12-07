@@ -59,6 +59,7 @@ public class BlaiseHelper
     	specialChars.add("*");
     	specialChars.add("?");
     	specialChars.add("\"");
+    	specialChars.add("'");
     	specialChars.add("<");
     	specialChars.add(">");
     	specialChars.add("|");

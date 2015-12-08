@@ -20,7 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,10 +49,19 @@ import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.cxe.entity.customAttribute.Attribute;
+import com.globalsight.cxe.entity.customAttribute.Condition;
+import com.globalsight.cxe.entity.customAttribute.DateCondition;
+import com.globalsight.cxe.entity.customAttribute.FloatCondition;
+import com.globalsight.cxe.entity.customAttribute.IntCondition;
+import com.globalsight.cxe.entity.customAttribute.JobAttribute;
+import com.globalsight.cxe.entity.customAttribute.ListCondition;
+import com.globalsight.cxe.entity.customAttribute.TextCondition;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -67,6 +78,8 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -261,22 +274,43 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         	}
         }
 
-        // Every entry creates one job with one workflow
+        long l10Id = fileProfileList.get(0).getL10nProfileId();
+        BasicL10nProfile l10Profile = HibernateUtil.get(
+                BasicL10nProfile.class, l10Id);
+
+        String publicUuid = (String) sessionMgr.getAttribute("uuid");
+        sessionMgr.removeElement("uuid");
+		File srcFolder = new File(
+				AmbFileStoragePathUtils.getJobAttributeDir(), publicUuid);
+		// Every entry creates one job with one workflow
 		for (int i = 0; i < entryIds.size(); i++)
         {
         	TranslationInboxEntryVo curEntry =
         			allInboxEntryMap.get(entryIds.get(i));
         	FileProfile curFileProfile = fileProfileList.get(i);
             String uuid = JobImpl.createUuid();
-            sessionMgr.removeElement("uuid");
+            // Locate file attribute by uuid
+			File trgFolder = new File(
+					AmbFileStoragePathUtils.getJobAttributeDir(), uuid);
+            if (srcFolder.exists())
+            {
+                FileUtil.copyFolder(srcFolder, trgFolder);
+            }
 
-            CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
+			List<JobAttribute> jobAttribtues = getJobAttributes(
+					blaiseForm.getAttributeString(), l10Profile);
+			CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
 					currentCompanyId, blc, blaiseForm, curEntry,
-					curFileProfile, attachFile, attachFileName, uuid);
+					curFileProfile, attachFile, attachFileName, uuid,
+					jobAttribtues);
             Thread t = new MultiCompanySupportedThread(runnable);
             pool.execute(t);
         }
         pool.shutdown();
+        if (srcFolder.exists())
+        {
+        	FileUtil.deleteFile(srcFolder);
+        }
 
         pageReturn();
     }
@@ -611,7 +645,88 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 		return connector;
 	}
 
-	private SessionManager getSessionManager(HttpServletRequest request)
+    private List<JobAttribute> getJobAttributes(String attributeString,
+            BasicL10nProfile l10Profile)
+    {
+        List<JobAttribute> jobAttributeList = new ArrayList<JobAttribute>();
+
+        if (l10Profile.getProject().getAttributeSet() == null)
+        {
+            return null;
+        }
+
+        if (StringUtils.isNotEmpty(attributeString))
+        {
+            String[] attributes = attributeString.split(";.;");
+            for (String ele : attributes)
+            {
+                try
+                {
+                    String attributeId = ele.substring(ele.indexOf(",.,") + 3,
+                            ele.lastIndexOf(",.,"));
+                    String attributeValue = ele.substring(ele
+                            .lastIndexOf(",.,") + 3);
+
+                    Attribute attribute = HibernateUtil.get(Attribute.class,
+                            Long.parseLong(attributeId));
+                    JobAttribute jobAttribute = new JobAttribute();
+                    jobAttribute.setAttribute(attribute.getCloneAttribute());
+                    if (attribute != null
+                            && StringUtils.isNotEmpty(attributeValue))
+                    {
+                        Condition condition = attribute.getCondition();
+                        if (condition instanceof TextCondition)
+                        {
+                            jobAttribute.setStringValue(attributeValue);
+                        }
+                        else if (condition instanceof IntCondition)
+                        {
+                            jobAttribute.setIntegerValue(Integer
+                                    .parseInt(attributeValue));
+                        }
+                        else if (condition instanceof FloatCondition)
+                        {
+                            jobAttribute.setFloatValue(Float
+                                    .parseFloat(attributeValue));
+                        }
+                        else if (condition instanceof DateCondition)
+                        {
+                            SimpleDateFormat sdf = new SimpleDateFormat(
+                                    DateCondition.FORMAT);
+                            jobAttribute
+                                    .setDateValue(sdf.parse(attributeValue));
+                        }
+                        else if (condition instanceof ListCondition)
+                        {
+                            String[] options = attributeValue.split("#@#");
+                            List<String> optionValues = Arrays.asList(options);
+                            jobAttribute.setValue(optionValues, false);
+                        }
+                    }
+                    jobAttributeList.add(jobAttribute);
+                }
+                catch (Exception e)
+                {
+                    logger.error("Failed to get job attributes", e);
+                }
+            }
+        }
+        else
+        {
+            List<Attribute> attsList = l10Profile.getProject()
+                    .getAttributeSet().getAttributeAsList();
+            for (Attribute att : attsList)
+            {
+                JobAttribute jobAttribute = new JobAttribute();
+                jobAttribute.setAttribute(att.getCloneAttribute());
+                jobAttributeList.add(jobAttribute);
+            }
+        }
+
+        return jobAttributeList;
+    }
+
+    private SessionManager getSessionManager(HttpServletRequest request)
 	{
 		HttpSession session = request.getSession(false);
 		return (SessionManager) session

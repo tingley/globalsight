@@ -619,7 +619,7 @@ var approveAction = "<%=approveAction%>";
       <%if(approveAction.equals("true")){%>
       <TD ALIGN="LEFT" width='50'>
         <ul class="dropdown" style="padding: 0px;margin: 0px;" >
-        	<li style="background:#708EB3;"><input type="checkbox" id="checkAll" style="float:left;margin-top:5px" onclick="checkAll()"/><a href="#" style="padding: 0px;"><img src="/globalsight/envoy/edit/online3/action.jpg"></a>
+        	<li style="background:#708EB3;"><input type="checkbox" id="checkAll" style="float:left;margin-top:5px" onclick="checkAll()"/><a href="#" style="padding: 0px;"><img src="/globalsight/envoy/edit/online3/action.gif"></a>
         		<ul class="sub_menu">
         			 <li class="actionli"><a href="#" class="noUnderline" onclick="approve();">Approve</a></li>
         			 <li class="actionli"><a href="#" class="noUnderline" onclick="unapprove();">Unapprove</a></li>

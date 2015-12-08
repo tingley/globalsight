@@ -77,6 +77,7 @@ import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
+import com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -358,7 +359,9 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 
 		setJobIdsForEntries(blc.getId(), inboxEntries);
 
-		dataForTable(request);
+		setCreatingJobsNum(request);
+
+        dataForTable(request);
 	}
 
 	private void setEntryInfo(HttpServletRequest request)
@@ -519,7 +522,15 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 		}
     }
 
-    private void dataForTable(HttpServletRequest request)
+	private void setCreatingJobsNum(HttpServletRequest request)
+	{
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        Integer creatingJobsNum = CreateJobsMainHandler.getCreatingJobsNum(Long
+                .parseLong(currentCompanyId));
+        request.setAttribute("creatingJobsNum", creatingJobsNum);
+	}
+
+	private void dataForTable(HttpServletRequest request)
             throws GeneralException
     {
         HttpSession session = request.getSession(false);

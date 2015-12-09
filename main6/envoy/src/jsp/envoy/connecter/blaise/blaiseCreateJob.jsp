@@ -766,10 +766,10 @@ $(document).ready(function ()
 	                        <td colspan="3" height="265px">
 	                            <table class="listborder" width="100%" height="100%" cellspacing="0" cellpadding="0" border="0">
 	                                <tr class="listborder" height="30">
-	                                    <td width="50%" class="titletext" style="padding-left:5px; border-bottom:1px solid #0C1476;"><c:out value='${lb_name}'/></td>
-	                                    <td width="20%" class="titletext" style="border-bottom:1px solid #0C1476;"><c:out value="${lb_file_profile}"/></td>
-	                                    <td width="25%" class="titletext" style="border-bottom:1px solid #0C1476;">Target Locale</td>
-	                                    <td width="5%" class="titletext" style="border-bottom:1px solid #0C1476;">&nbsp;</td>
+	                                    <td width="490px" class="titletext" style="padding-left:3px; border-bottom:1px solid #0C1476;"><c:out value='${lb_name}'/></td>
+	                                    <td width="196px" class="titletext" style="border-bottom:1px solid #0C1476;"><c:out value="${lb_file_profile}"/></td>
+	                                    <td width="245px" class="titletext" style="border-bottom:1px solid #0C1476;">Target Locale</td>
+	                                    <td width="49px" class="titletext" style="border-bottom:1px solid #0C1476;">&nbsp;</td>
 	                                </tr>
 	                                <tr>
 	                                    <td id="uploadArea" height="265px" colspan="4">

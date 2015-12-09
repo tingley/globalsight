@@ -211,11 +211,11 @@ function validName()
         </tr>
         <tr>
             <td><%=bundle.getString("lb_user_name")%><span class="asterisk">*</span>:</td>
-            <td><input type="text" name="username" id="username" style="width: 360px;" value="<%=username%>" maxLength="200"></td>
+            <td><input type="text" name="username" id="username" style="width: 360px;" value="<%=username%>" maxLength="200" autocomplete="off"></td>
         </tr>
         <tr>
             <td><%=bundle.getString("lb_password")%><span class="asterisk">*</span>:</td>
-            <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200"></td>
+            <td><input type="password" name="password" id="password" style="width: 360px;" value="<%=password%>" maxLength="200" autocomplete="off"></td>
         </tr>
 
     	<tr>

@@ -281,8 +281,12 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 
         String publicUuid = (String) sessionMgr.getAttribute("uuid");
         sessionMgr.removeElement("uuid");
-		File srcFolder = new File(
-				AmbFileStoragePathUtils.getJobAttributeDir(), publicUuid);
+        File srcFolder = null;
+        if (publicUuid != null)
+        {
+			srcFolder = new File(AmbFileStoragePathUtils.getJobAttributeDir(),
+					publicUuid);
+        }
 		// Every entry creates one job with one workflow
 		for (int i = 0; i < entryIds.size(); i++)
         {
@@ -290,11 +294,11 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         			allInboxEntryMap.get(entryIds.get(i));
         	FileProfile curFileProfile = fileProfileList.get(i);
             String uuid = JobImpl.createUuid();
-            // Locate file attribute by uuid
-			File trgFolder = new File(
-					AmbFileStoragePathUtils.getJobAttributeDir(), uuid);
-            if (srcFolder.exists())
+            if (srcFolder!= null && srcFolder.exists())
             {
+                // Locate file attribute by uuid
+				File trgFolder = new File(
+						AmbFileStoragePathUtils.getJobAttributeDir(), uuid);
                 FileUtil.copyFolder(srcFolder, trgFolder);
             }
 
@@ -308,7 +312,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
             pool.execute(t);
         }
         pool.shutdown();
-        if (srcFolder.exists())
+        if (srcFolder != null && srcFolder.exists())
         {
         	FileUtil.deleteFile(srcFolder);
         }

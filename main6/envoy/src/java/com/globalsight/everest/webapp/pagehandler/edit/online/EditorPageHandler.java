@@ -335,9 +335,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 			try
 			{
 				json.put("str_segmentId", tuvid[1]);
-				json.put("str_segmentFormat", view.getDataType());// view.getDataType()
-				json.put("str_segmentType", view.getItemType());// view.getItemType()
-				json.put("str_wordCount", String.valueOf(view.getWordCount()));// String.valueOf(view.getWordCount())
+				json.put("str_segmentFormat", view.getDataType());
+				json.put("str_segmentType", view.getItemType());
+				json.put("str_wordCount", String.valueOf(view.getWordCount()));
 				String str_sid = view.getTargetTuv().getSid();
 				if (str_sid == null || str_sid.trim().length() == 0)
 				{
@@ -352,34 +352,16 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 				{
 					str_lastModifyUser = "N/A";
 				}
-				json.put("str_lastModifyUser", str_lastModifyUser);// view.getTargetTuv().getLastModifiedUser()
+				json.put("str_lastModifyUser", str_lastModifyUser);
 				try
 				{
-					OnlineService onlineService = new OnlineService();
 					OnlineHelper helper = new OnlineHelper();
-					boolean b_colorPtags = false;
-					int editorType = state.getEditorType();
 					String str_sourceSegment = GxmlUtil.getInnerXml(view
 							.getSourceSegment());
 					String str_dataType = view.getDataType();
-					
+
 					helper.setInputSegment(str_sourceSegment, "", str_dataType);
-					
-					if (str_sourceSegment != null
-							&& str_sourceSegment.contains("internal=\"yes\"")
-							&& str_dataType != null
-							&& (str_dataType
-									.equals(IFormatNames.FORMAT_JAVAPROP)
-									|| str_dataType
-											.equals(IFormatNames.FORMAT_JAVAPROP_MSG) || str_dataType
-										.equals(IFormatNames.FORMAT_PLAINTEXT)))
-					{
-						b_colorPtags = true;
-					}
-					else if (EditorConstants.SE_SEGMENTEDITOR == editorType)
-					{
-						b_colorPtags = true;
-					}
+
 					if (EditorConstants.PTAGS_VERBOSE.equals(state
 							.getPTagFormat()))
 					{
@@ -389,10 +371,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 					{
 						helper.getCompact();
 					}
-					onlineService.initTargetWithParamter(
-							GxmlUtil.getInnerXml(view.getTargetSegment()),
-							str_dataType, state.getPTagFormat(),b_colorPtags);
-					String str_segementPtag = helper.getPtagToNativeMappingTable();
+
+					String str_segementPtag = helper
+							.getPtagToNativeMappingTable();
 					if (StringUtil.isEmpty(str_segementPtag))
 					{
 						str_segementPtag = "N/A";
@@ -401,13 +382,15 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 				}
 				catch (Exception e1)
 				{
-					e1.printStackTrace();
+					CATEGORY.error("Get segement tag information. ", e1);
+					throw new EnvoyServletException(e1);
 				}
 				out.write(json.toString().getBytes("UTF-8"));
 			}
 			catch (JSONException e)
 			{
-				e.printStackTrace();
+				CATEGORY.error("Get segement detail. ", e);
+	            throw new EnvoyServletException(e);
 			}
 			return;
 		}

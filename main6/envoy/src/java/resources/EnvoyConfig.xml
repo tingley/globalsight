@@ -1609,6 +1609,7 @@
         <PageLink linkName="jobAttributes" destinationPageName="JOBATTRIBUTES"></PageLink>
         <PageLink linkName="jobReports" destinationPageName="JOBREPORTS"></PageLink>        
         <PageLink linkName="editPages" destinationPageName="EDITPAGES"></PageLink>
+        <PageLink linkName="jobScorecard" destinationPageName="SCORECARD"></PageLink>
       </WebPage>
       <WebPage pageName="JOBCOMMENTS" isDefault="false" jspName="/envoy/administration/comment/jobComments.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.comment.CommentMainHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>

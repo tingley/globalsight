@@ -28,6 +28,7 @@
 <jsp:useBean id="jobComments" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="jobAttributes" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="jobReports" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+<jsp:useBean id="jobScorecard" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <% 
    ResourceBundle bundle = PageHandler.getBundle(session);
    long jobId = (Long) request.getAttribute("jobId");

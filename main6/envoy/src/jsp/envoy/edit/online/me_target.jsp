@@ -515,9 +515,12 @@ function show(tuId, tuvId, subId){
     var details = "tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId;
     $.post(str,{param:details},function(data){
 	    var result = eval("("+data+")");
-		$("#showDetails").html('<div id="details-title" onmousedown="Milan_StartMove(event,this.parentNode)" onmouseup="Milan_StopMove(event)" style="background:#708EB3; text-align:right;cursor:move;"><div><a href="##" style="color:#FFF" onclick="closeDetails()"><%=lb_close%></a></div></div><table cellspacing="0" cellpadding="2" border="0" style="width:240px;table-layout:fixed;"><tr class="standardText"><td nowrap="nowrap" align="center" colspan="2"><span class="mainHeading"><%=lb_title%></span></td></tr>'
+		$("#showDetails").html('<div id="details-title" onmousedown="Milan_StartMove(event,this.parentNode)" onmouseup="Milan_StopMove(event)" style="background:#708EB3; text-align:right;cursor:move;">'
+		+'<div><a href="##" style="color:#FFF" onclick="closeDetails()"><%=lb_close%></a></div></div><table cellspacing="0" cellpadding="2" border="0" style="width:240px;table-layout:fixed;">'
+		+'<tr class="standardText"><td nowrap="nowrap" align="center" colspan="2"><span class="mainHeading"><%=lb_title%></span></td></tr>'
 		+'<tr class="standardText"><td><B><%=lb_segmentId%>:</B></td><td>'+ result.str_segmentId +'</td></tr><tr class="standardText"><td><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
-		+'<tr class="standardText"><td><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr><tr class="standardText"><td nowrap="nowrap"><B><%=lb_tagInfo%>:</B></td><td style="WORD-WRAP: break-word" width="20">AAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td></tr>'
+		+'<tr class="standardText"><td><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr>'
+		+'<tr class="standardText"><td nowrap="nowrap"><B><%=lb_tagInfo%>:</B></td><td style="WORD-WRAP: break-word" width="20"></td><td>'+ result.str_segementPtag +'</td></tr>'
 		+'<tr class="standardText"><td><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr><tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr></table>');
 	 });
 	 $("#showDetails").show();	 	 

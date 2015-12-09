@@ -261,6 +261,30 @@ public class OnlineService extends HttpServlet
         writeString(result);
     }
     
+	public void initTargetWithParamter(String text, String dataType,
+			String pTagFormat,boolean colorPtags) throws Exception
+	{
+		String result = text;
+		OnlineTagHelper applet = new OnlineTagHelper();
+		applet.setInputSegment(text, "", dataType);
+		if (EditorConstants.PTAGS_VERBOSE.equals(pTagFormat))
+		{
+			result = applet.getVerbose();
+			if (colorPtags)
+			{
+				result = applet.makeVerboseColoredPtags(text);
+			}
+		}
+		else
+		{
+			result = applet.getCompact();
+			if (colorPtags)
+			{
+				result = applet.makeCompactColoredPtags(text);
+			}
+		}
+
+	}
     /**
      * Do error check and send the result back.
      * 

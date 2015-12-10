@@ -378,6 +378,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 					{
 						str_segementPtag = "N/A";
 					}
+					else
+					{
+						str_segementPtag = str_segementPtag.replace("<TR>", "<TR valign=top>").replace("<TD", "<TD noWrap"); 
+						str_segementPtag = str_segementPtag.replace("<tr>", "<TR valign=top>").replace("<td", "<TD noWrap"); 	
+					}
+					
 					json.put("str_segementPtag", str_segementPtag);
 				}
 				catch (Exception e1)

@@ -112,6 +112,16 @@ public class TmxWriter implements IWriter
         m_outputFormat = new OutputFormat();
         m_outputFormat.setExpandEmptyElements(true);
     }
+    
+    public TmxWriter(ExportOptions p_options, Tm p_database,Tmx tmx)
+    {
+    	m_tmx = tmx;
+        m_database = p_database;
+        setExportOptions(p_options);
+
+        m_outputFormat = new OutputFormat();
+        m_outputFormat.setExpandEmptyElements(true);
+    }
 
     //
     // Interface Implementation -- IWriter
@@ -246,6 +256,27 @@ public class TmxWriter implements IWriter
         checkIOError();
     }
 
+    public String getSegmentTmForXml(Object p_entry) throws IOException
+	{
+		String xml = null;
+		if (p_entry == null)
+		{
+			return xml;
+		}
+		try
+		{
+			SegmentTmTu tu = (SegmentTmTu) p_entry;
+			convertTuToTmxLevel(tu, m_tmxLevel);
+			xml = convertToTmx(tu, m_tmx, m_options, m_outputFormat, true);
+			xml = TmxUtil.operateCDATA(xml);
+		}
+		catch (Throwable ignore)
+		{
+			CATEGORY.error("Can't convert TU to TMX, skipping.", ignore);
+		}
+		return xml;
+	}
+    
     //
     // Private Methods
     //

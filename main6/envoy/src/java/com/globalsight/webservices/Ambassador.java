@@ -11282,9 +11282,44 @@ public class Ambassador extends AbstractWebService
             }
 
             StringBuffer result = new StringBuffer();
-            for (SegmentTmTu segTmTu : segTmTus)
+            IExportManager exporter = null;
+            String options = null;
+            try
+			{
+				exporter = TmManagerLocal.getProjectTmExporter(ptm.getName());
+				options = exporter.getExportOptions();
+				Document doc = DocumentHelper.parseText(options);
+				Element rootElt = doc.getRootElement();
+				Iterator filterIter = rootElt.elementIterator("filterOptions");
+				while (filterIter.hasNext())
+				{
+					Element filterEle = (Element) filterIter.next();
+					Element language = filterEle.element("language");
+					if (trgGSLocale != null)
+					{
+						language.setText(trgGSLocale.getLanguage() + "_"
+								+ trgGSLocale.getCountry());
+					}
+				}
+
+				options = doc.asXML().substring(
+						doc.asXML().indexOf("<exportOptions>"));
+				exporter.setExportOptions(options);
+				
+				Tmx tmx = new Tmx();
+				tmx.setSourceLang(Tmx.DEFAULT_SOURCELANG);
+				tmx.setDatatype(Tmx.DATATYPE_HTML);
+
+				TmxWriter tmxWriter = new TmxWriter(
+						exporter.getExportOptionsObject(), ptm,tmx);
+				for (SegmentTmTu segTmTu : segTmTus)
+				{
+					result.append(tmxWriter.getSegmentTmForXml(segTmTu));
+				}
+			}
+            catch (Exception e)
             {
-                result.append(TmxUtil.convertToTmx(segTmTu, targetLocales));
+                return makeErrorXml(EXPORT_TM, "Invaild tm name.");
             }
 
             return result.toString();

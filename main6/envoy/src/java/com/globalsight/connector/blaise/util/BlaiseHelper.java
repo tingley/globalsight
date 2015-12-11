@@ -282,10 +282,24 @@ public class BlaiseHelper
 	public static String getEntryFileName(TranslationInboxEntryVo entry)
 	{
 		StringBuilder fileName = new StringBuilder();
+		String des = entry.getDescription();
+		if (des == null || des.trim().length() == 0)
+		{
+			des = "No Description";
+		}
+		else
+		{
+			des = des.trim();
+			if (des.length() > 55)
+			{
+				des = des.substring(0, 50);
+			}
+		}
+
 		fileName.append("Blaise Entry ")
 				.append(entry.getId())
 				.append(DASH)
-				.append(entry.getDescription()).append(DASH)
+				.append(des).append(DASH)
 				.append(entry.getRelatedObjectId()).append(DASH)
 				.append(entry.getSourceRevision()).append(DASH)
 				.append(entry.getEntry().getTargetLocale().getLocaleCode())

@@ -239,10 +239,10 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
 					&& isInContextMatch(p_osd))
 				writeTu = false;
 			else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
-					&& isExtractMatch(p_osd))
+					&& isExactMatch(p_osd))
 				writeTu = false;
 			else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
-					&& (isExtractMatch(p_osd) || isInContextMatch(p_osd)))
+					&& (isExactMatch(p_osd) || isInContextMatch(p_osd)))
 				writeTu = false;
 		}
 
@@ -477,33 +477,20 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
 
     }
     
-    private boolean isExtractMatch(OfflineSegmentData data)
+    private boolean isExactMatch(OfflineSegmentData data)
     {
         return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(data
                 .getDisplayMatchType());
     }
 
-    private boolean isPenaltiedExtarctMatch(OfflineSegmentData data)
-    {
-        return "Exact Match.".equals(data.getDisplayMatchType());
-    }
-
     private boolean isInContextMatch(OfflineSegmentData data)
     {
-        return "Context Exact Match".equals(data.getDisplayMatchType());
-    }
-    
-    private boolean isExtractMatch2(OfflineSegmentData data)
-    {
-        String mtype = data.getDisplayMatchType();
-        return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(mtype)
-                || (mtype != null && mtype.contains("Exact Match."));
-    }
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.startsWith("Context Exact Match"))
+        {
+            return true;
+        }
 
-    private boolean isInContextMatch2(OfflineSegmentData data)
-    {
-        String mtype = data.getDisplayMatchType();
-        return "Context Exact Match".equals(mtype)
-                || "Default Context Exact Match".equals(mtype);
+        return false;
     }
 }

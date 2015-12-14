@@ -11281,48 +11281,41 @@ public class Ambassador extends AbstractWebService
                 targetLocales.add(trgGSLocale);
             }
 
-            StringBuffer result = new StringBuffer();
-            IExportManager exporter = null;
-            String options = null;
-            try
+			StringBuffer result = new StringBuffer();
+			IExportManager exporter = null;
+			String options = null;
+			exporter = TmManagerLocal.getProjectTmExporter(ptm.getName());
+			options = exporter.getExportOptions();
+			Document doc = DocumentHelper.parseText(options);
+			Element rootElt = doc.getRootElement();
+			Iterator filterIter = rootElt.elementIterator("filterOptions");
+			while (filterIter.hasNext())
 			{
-				exporter = TmManagerLocal.getProjectTmExporter(ptm.getName());
-				options = exporter.getExportOptions();
-				Document doc = DocumentHelper.parseText(options);
-				Element rootElt = doc.getRootElement();
-				Iterator filterIter = rootElt.elementIterator("filterOptions");
-				while (filterIter.hasNext())
+				Element filterEle = (Element) filterIter.next();
+				Element language = filterEle.element("language");
+				if (trgGSLocale != null)
 				{
-					Element filterEle = (Element) filterIter.next();
-					Element language = filterEle.element("language");
-					if (trgGSLocale != null)
-					{
-						language.setText(trgGSLocale.getLanguage() + "_"
-								+ trgGSLocale.getCountry());
-					}
-				}
-
-				options = doc.asXML().substring(
-						doc.asXML().indexOf("<exportOptions>"));
-				exporter.setExportOptions(options);
-				
-				Tmx tmx = new Tmx();
-				tmx.setSourceLang(Tmx.DEFAULT_SOURCELANG);
-				tmx.setDatatype(Tmx.DATATYPE_HTML);
-
-				TmxWriter tmxWriter = new TmxWriter(
-						exporter.getExportOptionsObject(), ptm,tmx);
-				for (SegmentTmTu segTmTu : segTmTus)
-				{
-					result.append(tmxWriter.getSegmentTmForXml(segTmTu));
+					language.setText(trgGSLocale.getLanguage() + "_"
+							+ trgGSLocale.getCountry());
 				}
 			}
-            catch (Exception e)
-            {
-                return makeErrorXml(EXPORT_TM, "Invaild tm name.");
-            }
 
-            return result.toString();
+			options = doc.asXML().substring(
+					doc.asXML().indexOf("<exportOptions>"));
+			exporter.setExportOptions(options);
+
+			Tmx tmx = new Tmx();
+			tmx.setSourceLang(Tmx.DEFAULT_SOURCELANG);
+			tmx.setDatatype(Tmx.DATATYPE_HTML);
+
+			TmxWriter tmxWriter = new TmxWriter(
+					exporter.getExportOptionsObject(), ptm, tmx);
+			for (SegmentTmTu segTmTu : segTmTus)
+			{
+				result.append(tmxWriter.getSegmentTmForXml(segTmTu));
+			}
+
+			return result.toString();
         }
         catch (Exception e)
         {

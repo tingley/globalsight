@@ -1314,7 +1314,7 @@ $(document).ready(function(){
               <TD></TD>
 			  <TD>
 			      <!--  <SPAN CLASS="standardText tmxTypeSelector"> <input type="checkbox" id="changeCreationIdForMT" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN> -->
-			       <input type="hidden" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>" value="true"/>   
+			       <input type="hidden" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>" value="on"/>   
 			  </TD>
 			</TR>
 			<!-- GBS-3831 -->

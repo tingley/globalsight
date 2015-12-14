@@ -132,7 +132,7 @@ function generateFilterTable(filterConfigurations)
 		}
 		
 		str.append("<td width='5%' class='main_table_head' align='center'>");
-		str.append("<img id=img_"+filter.id+" src='/globalsight/images/expand.jpg'   onclick='expand(this)'></img>");
+		str.append("<img id=img_"+filter.id+" src='/globalsight/images/enlarge.jpg'   onclick='expand(this)'></img>");
 		str.append("</td>");
 		
 		str.append("<td width='25%' class='main_table_head'>");
@@ -188,14 +188,14 @@ function generateFilterTable(filterConfigurations)
 function expand(obj)
 {
 	var id = "filterName_" + obj.id.split("_")[1];
-	if(obj.src.indexOf('expand.jpg') != -1)
+	if(obj.src.indexOf('enlarge.jpg') != -1)
 	{
-		obj.src = "/globalsight/images/ellapse.jpg";
+		obj.src = "/globalsight/images/ecllapse.jpg";
 		document.getElementById(id).style.display = "block";
 	}
 	else
 	{
-		obj.src = "/globalsight/images/expand.jpg";
+		obj.src = "/globalsight/images/enlarge.jpg";
 		document.getElementById(id).style.display = "none";
 	}
 	
@@ -208,7 +208,7 @@ function expandAllSpecialFilters()
 		var filterConfiguration = filterConfigurations[i];
 		var topFilterId = filterConfiguration.id;
 		var expandImg = document.getElementById("img_" + topFilterId);
-		expandImg.src = "/globalsight/images/expand.jpg";
+		expandImg.src = "/globalsight/images/enlarge.jpg";
 		expand(expandImg);
 	}
 }
@@ -220,7 +220,7 @@ function collapseAllSpecialFilters()
 		var filterConfiguration = filterConfigurations[i];
 		var topFilterId = filterConfiguration.id;
 		var expandImg = document.getElementById("img_" + topFilterId);
-		expandImg.src = "/globalsight/images/ellapse.jpg";
+		expandImg.src = "/globalsight/images/ecllapse.jpg";
 		expand(expandImg);
 	}
 }

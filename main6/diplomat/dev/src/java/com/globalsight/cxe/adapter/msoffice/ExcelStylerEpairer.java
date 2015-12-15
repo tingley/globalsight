@@ -30,11 +30,11 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.xalan.transformer.TransformerIdentityImpl;
+import org.apache.xpath.XPathAPI;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,7 +43,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import org.apache.xpath.XPathAPI;
 import com.globalsight.util.FileUtil;
 
 public class ExcelStylerEpairer
@@ -294,12 +293,12 @@ public class ExcelStylerEpairer
 
                 n2 = n2.getNextSibling();
             }
-            
+
             Node n3 = n.getFirstChild();
             if (n3 != null && n3.getNodeName().equals("r"))
             {
                 Node n3Child = n3.getFirstChild();
-                
+
                 while (n3Child != null)
                 {
                     if (n3Child.getNodeName().equals("rPr"))
@@ -328,8 +327,7 @@ public class ExcelStylerEpairer
      */
     private void saveToFile(Document document, String path) throws Exception
     {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
+        TransformerIdentityImpl transformer = new TransformerIdentityImpl();
         DOMSource source = new DOMSource(document);
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");

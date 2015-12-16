@@ -146,7 +146,52 @@ public class BlaiseHelper
 		return results;
 	}
 
-    /**
+    public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids)
+    {
+    	TranslationAgencyClient client = null;
+		try
+		{
+			client = getTranslationClient();
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+		}
+		if (client != null)
+		{
+	    	return listInboxByIds(client, ids);
+		}
+
+		return null;
+    }
+
+	private List<TranslationInboxEntryVo> listInboxByIds(
+			TranslationAgencyClient client, Set<Long> ids)
+    {
+		List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
+		try
+		{
+			List<InboxEntry> inboxEntries = client.listInbox(ids);
+			for (InboxEntry entry : inboxEntries)
+			{
+				TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
+						(TranslationInboxEntry) entry);
+				results.add(vo);
+			}
+		}
+		catch (Exception e)
+		{
+			logger.warn("Error when invoke listInboxByIds: " + e.getMessage());
+			if (logger.isDebugEnabled())
+			{
+				logger.error(e);
+			}
+		}
+
+		return results;
+    }
+
+	/**
 	 * Claim Blaise inbox entries. If it has been claimed, Blaise API will throw
 	 * exception/warning.
 	 * 
@@ -161,11 +206,11 @@ public class BlaiseHelper
 			TranslationAgencyClient client = getTranslationClient();
     		Set<Long> ids = new HashSet<Long>();
     		ids.add(id);
-			client.claim(ids);
+    		client.claim(ids);
 		}
 		catch (Exception e)
 		{
-			if (e.getMessage().toLowerCase().contains("task already claimed"))
+			if (e.getMessage().toLowerCase().contains("task already claimed."))
 			{
 				logger.warn("Warning when claim entry(" + id + "): "
 						+ e.getMessage());
@@ -229,10 +274,25 @@ public class BlaiseHelper
 
 	public void complete(Set<Long> ids)
     {
-    	for (Long id : ids)
-    	{
-    		complete(id);
-    	}
+		try
+		{
+			TranslationAgencyClient client = getTranslationClient();
+	    	for (Long id : ids)
+	    	{
+	    		try
+	    		{
+	    			client.complete(id);
+	    		}
+	    		catch (Exception e)
+	    		{
+	    			logger.error("Failed to complete entry: " + id, e);
+	    		}
+	    	}
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+		}
     }
 
     public void complete(long id)

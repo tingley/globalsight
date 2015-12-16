@@ -11288,6 +11288,14 @@ public class Ambassador extends AbstractWebService
 			options = exporter.getExportOptions();
 			Document doc = DocumentHelper.parseText(options);
 			Element rootElt = doc.getRootElement();
+			Iterator fileIter = rootElt.elementIterator("fileOptions");
+			while (fileIter.hasNext())
+			{
+				Element fileEle = (Element) fileIter.next();
+				Element fileTypeElem = fileEle.element("fileType");
+				fileTypeElem.setText("xml");
+			}
+			
 			Iterator filterIter = rootElt.elementIterator("filterOptions");
 			while (filterIter.hasNext())
 			{

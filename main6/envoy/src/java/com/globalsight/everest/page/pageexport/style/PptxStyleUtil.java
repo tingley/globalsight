@@ -32,12 +32,11 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
+import org.apache.xalan.transformer.TransformerIdentityImpl;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -77,7 +76,7 @@ public class PptxStyleUtil extends StyleUtil
     @Override
     public String preHandle(String content)
     {
-    	OfficeTagUtil util = new OfficeTagUtil();
+        OfficeTagUtil util = new OfficeTagUtil();
         content = util.handleString(content);
 
         List<String> bs = new ArrayList<String>();
@@ -157,8 +156,8 @@ public class PptxStyleUtil extends StyleUtil
     {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
-        BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(path)),"utf-8"));
-
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                new FileInputStream(new File(path)), "utf-8"));
 
         Document document = db.parse(new InputSource(br));
         List<Style> styles = getAllStyles();
@@ -214,7 +213,7 @@ public class PptxStyleUtil extends StyleUtil
     {
         try
         {
-        	repairAttributeValue(filePath);
+            repairAttributeValue(filePath);
             forStylesInWt(filePath);
             forStylesNotInWt(filePath);
         }
@@ -223,25 +222,26 @@ public class PptxStyleUtil extends StyleUtil
             s_logger.error(e);
         }
     }
-    
+
     private void forStylesNotInWt(String filePath)
     {
-    	try 
-    	{
-			String content = FileUtil.readFile(new File(filePath), "utf-8");
-			content = content.replaceAll("<[/]?[biu]?>", "");
-			content = content.replaceAll("<[/]?su[bp]?>", "");
-			
-			//For text not in node.
-			content = content.replaceAll("</>\\s*[^\\t\\n\\x0B\\f\\r<]\\s*<", "");
-			FileUtil.writeFile(new File(filePath), content, "utf-8");
-		} 
-    	catch (IOException e) 
-		{
-			s_logger.error(e);
-		}
+        try
+        {
+            String content = FileUtil.readFile(new File(filePath), "utf-8");
+            content = content.replaceAll("<[/]?[biu]?>", "");
+            content = content.replaceAll("<[/]?su[bp]?>", "");
+
+            // For text not in node.
+            content = content.replaceAll("</>\\s*[^\\t\\n\\x0B\\f\\r<]\\s*<",
+                    "");
+            FileUtil.writeFile(new File(filePath), content, "utf-8");
+        }
+        catch (IOException e)
+        {
+            s_logger.error(e);
+        }
     }
-    
+
     /**
      * Saves the document to a XML files.
      * 
@@ -253,12 +253,12 @@ public class PptxStyleUtil extends StyleUtil
      */
     private void saveToFile(Document document, String path) throws Exception
     {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
+        TransformerIdentityImpl transformer = new TransformerIdentityImpl();
         DOMSource source = new DOMSource(document);
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
+        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(
+                path), "UTF-8");
         StreamResult result = new StreamResult(ou);
         transformer.transform(source, result);
     }

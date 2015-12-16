@@ -106,7 +106,7 @@ BaseFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 {
 // alert("filterId :" + filterId + "\n" + "topFilterId :" + topFilterId);
 	this.initOptionMap(this.filter);
-	baseFilter.currentPage=0;
+	baseFilter.currentPage = 0;
 	var str = new StringBuffer("<table border=0 width='400px'>");
 	str.append("<tr>");
 	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
@@ -226,7 +226,6 @@ function saveBaseFilter()
 	sendAjax(obj, "isFilterValid", "isBaseFilterValidCallback");
 	
 	isFilterValidCallback.obj = obj;
-	baseFilter.currentPage=0;
 }
 
 function isBaseFilterValidCallback(data)
@@ -360,7 +359,6 @@ BaseFilter.prototype.closeAllTagPopup = function()
 	closePopupDialog("editPriorityDialog");
 	closePopupDialog("deleteBaseTagDialog");	
 	closePopupDialog("baseFilter_Escaping_Dialog");
-	baseFilter.currentPage=0;
 }
 
 BaseFilter.prototype.addTag = function(radioId)

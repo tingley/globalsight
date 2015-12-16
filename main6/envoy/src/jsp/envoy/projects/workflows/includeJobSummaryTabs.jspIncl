@@ -66,8 +66,8 @@ $(
 		}
 )
 
- function updatePriorityValue(selectOption){
-  	var selectValue = selectOption.value;
+ function updatePriorityValue(){
+  	var selectValue = $("#jobPriority").val();
  	$.ajax({
 		   type: "POST",
 		   dataType : "text",
@@ -218,11 +218,11 @@ function vilidateRename(){
 			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_priority")%>(<a id="editPriority" href="#" class="standardHREFDetail" ><%=bundle.getString("lb_edit")%></A>):</span>
 			<span class="jobSummaryContentValue"><span class="priority${jobId}" id="priority${jobId}">${Job.priority}</span> 
 				<span id="uptadePrioritySpan" style="display:none;">
-					<select >
+					<select id="jobPriority" onchange="return updatePriorityValue()" >
 						<%for(int i=0;i<priorityList.size();i++){
 	    						String selected = priorityList.get(i) == priority ? "selected" : "";
 	    				%>
-	    						<option value="<%=priorityList.get(i)%>" <%=selected %> onclick = "updatePriorityValue(this);"><%=priorityList.get(i)%></option>
+	    						<option value="<%=priorityList.get(i)%>" <%=selected %> ><%=priorityList.get(i)%></option>
 	    				<%}%>
 					</select>
 				</span>

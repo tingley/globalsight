@@ -175,7 +175,7 @@ QAFilter.prototype.generateDefaultRulesTable = function(optionValue)
 QAFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId)
 {
 	this.initOptionMap(this.filter);
-	
+	qaFilter.currentPage=0;
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
@@ -506,7 +506,7 @@ QAFilter.prototype.generateRulesTable = function(filter)
 	var pageTotalSize = filter ? qaFilter.getPageSize(qaFilter.optionObjsMap[qaFilter.currentOption].length) : 1;
 	str.append("<a href='#' class='specialFilter_dialog_label' onclick=qaFilter.prePage()>" + jsPrevious + "</a>|");
 	str.append("<a href='#' class='specialFilter_dialog_label' onclick=qaFilter.nextPage()>" + jsNext + "</a>|");
-	str.append("<input id='pageCountQAFilter' size=3 type='text' class='specialFilter_dialog_label' value=1>");
+	str.append("<input id='pageCountQAFilter' size=3 type='text' class='specialFilter_dialog_label' value="+((filter) ? qaFilter.currentPage+1 : 1)+">");
 	str.append(" / <span id='pageTotalSizeQAFilter' class='standardText'>" + pageTotalSize + " </span>");
 	str.append("<input type='button' class='specialFilter_dialog_label' value='" + jsGo + "' onclick=qaFilter.goToPage()>");
 	

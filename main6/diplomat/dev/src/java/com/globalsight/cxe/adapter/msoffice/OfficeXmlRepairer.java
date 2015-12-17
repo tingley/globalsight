@@ -47,10 +47,6 @@ public class OfficeXmlRepairer
     private static String s_wrPrEndTag = "</w:rPr>";
     private static String s_wrtlTag = "<w:rtl/>";
 
-    private static String s_wtStartTag = "<w:t ";
-    private static String s_wtStartTag2 = "<w:t>";
-    private static String s_wtEndTag = "</w:t>";
-
     private static String s_arStartTag = "<a:r ";
     private static String s_arEndTag = "</a:r>";
     private static String s_arPrStartTag = "<a:rPr";
@@ -259,15 +255,14 @@ public class OfficeXmlRepairer
     {
         List<StringBuffer> splits = new ArrayList<StringBuffer>();
 
-        List<String> tags = new ArrayList<String>();
-        tags.add(s_wtStartTag);
-        tags.add(s_wtStartTag2);
-        StringIndex si = StringIndex.getValueBetween(src, 0, tags, s_wtEndTag);
-        if (si != null)
+        Pattern p = Pattern.compile("(<w:t[^>]*>)(.*?)</w:t>");
+        Matcher m = p.matcher(src);
+        if (m.find())
         {
-            String before = src.substring(0, si.start);
-            String v = si.value;
-            String after = src.substring(si.end);
+            int n = m.start();
+            String before = src.substring(0, n) + m.group(1);
+            String v = m.group(2);
+            String after = src.substring(m.end());
 
             List<SplitString> rs = split(v);
 
@@ -325,6 +320,7 @@ public class OfficeXmlRepairer
                 }
 
                 sb.append(r.getString());
+                sb.append("</w:t>");
                 sb.append(after);
                 splits.add(sb);
             }
@@ -334,7 +330,7 @@ public class OfficeXmlRepairer
     }
 
     /**
-     * When a sentence contains both English and Latin, Add RTL for whole
+     * When a sentence contains both English and Latin, Adding RTL to whole
      * sentence will cause display issue in word 2013.
      * 
      * The fix is to split English content from the sentence and not to add RTL

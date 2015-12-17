@@ -434,8 +434,7 @@ public class LocalePairImportHandler extends PageHandler implements
 			}
 			catch (Exception e)
 			{
-				// TODO Auto-generated catch block
-				logger.error("Failed to import Locale Pair.", e);
+				logger.error("Failed to import Locale Pairs.", e);
 				addToError(e.getMessage());
 			}
 		}
@@ -476,8 +475,7 @@ public class LocalePairImportHandler extends PageHandler implements
 			}
 			catch (Exception e)
 			{
-				// TODO Auto-generated catch block
-				String msg = "Upload GlobalSightLocaler data failed !";
+				String msg = "Upload GlobalSight Locale data failed!";
 				logger.warn(msg);
 				addToError(msg);
 			}

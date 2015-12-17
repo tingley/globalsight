@@ -52,19 +52,7 @@ public class BlaiseHelper
     private BlaiseConnector blc = null;
 
     private static List<String> specialChars = new ArrayList<String>();
-    {
-    	specialChars.add("\\");
-    	specialChars.add("/");
-    	specialChars.add(":");
-    	specialChars.add("*");
-    	specialChars.add("?");
-    	specialChars.add("\"");
-    	specialChars.add("'");
-    	specialChars.add("<");
-    	specialChars.add(">");
-    	specialChars.add("|");
-    }
-    
+
     public BlaiseHelper (BlaiseConnector blc)
     {
     	this.blc = blc;
@@ -380,6 +368,8 @@ public class BlaiseHelper
 
 	private static String handleFileName(String fileName)
 	{
+		initSpecialChars();
+
 		for (String specialChar : specialChars)
 		{
 			fileName = fileName.replace(specialChar, " ");
@@ -393,7 +383,24 @@ public class BlaiseHelper
 		return fileName;
 	}
 
-    public static String fixLocale(String localeString)
+	private synchronized static void initSpecialChars()
+	{
+		if (specialChars.size() == 0)
+		{
+			specialChars.add("\\");
+			specialChars.add("/");
+			specialChars.add(":");
+			specialChars.add("*");
+			specialChars.add("?");
+			specialChars.add("\"");
+			specialChars.add("'");
+			specialChars.add("<");
+			specialChars.add(">");
+			specialChars.add("|");
+		}
+	}
+
+	public static String fixLocale(String localeString)
     {
     	if (localeString.startsWith("iw"))
         {

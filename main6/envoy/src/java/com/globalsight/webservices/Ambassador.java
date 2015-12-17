@@ -1868,7 +1868,7 @@ public class Ambassador extends AbstractWebService
      * @param p_jobname
      * @return
      */
-    private String validateJobName(String p_jobname)
+    protected String validateJobName(String p_jobname)
     {
         if (StringUtil.isEmpty(p_jobname))
         {

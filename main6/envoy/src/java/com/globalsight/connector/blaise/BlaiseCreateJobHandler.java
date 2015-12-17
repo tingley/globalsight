@@ -382,8 +382,9 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 					BlaiseHelper.getEntryFileName(entry));
 
 			Locale javaLocale = entry.getTargetLocale();
-			StringBuilder sb = new StringBuilder(javaLocale.getLanguage())
-					.append("_").append(javaLocale.getCountry()).append(" (")
+			String localeCode = BlaiseHelper.fixLocale(javaLocale.getLanguage()
+					+ "_" + javaLocale.getCountry());
+			StringBuilder sb = new StringBuilder(localeCode).append(" (")
 					.append(javaLocale.getDisplayLanguage(uiLocale))
 					.append("_").append(javaLocale.getDisplayCountry(uiLocale))
 					.append(")");

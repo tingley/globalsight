@@ -103,7 +103,7 @@ public class CreateBlaiseJobThread  extends Thread
 
             Locale trgLocale = curEntry.getTargetLocale();
             String targetLocale = trgLocale.getLanguage() + "_" + trgLocale.getCountry();
-            targetLocale = fixLocale(targetLocale);
+            targetLocale = BlaiseHelper.fixLocale(targetLocale);
 
 			Job job = JobCreationMonitor.initializeJob(jobName, uuid,
 					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
@@ -254,24 +254,6 @@ public class CreateBlaiseJobThread  extends Thread
 			randomStr = "0" + randomStr;
 		}
         return jobName + "_" + randomStr;
-    }
-
-    private String fixLocale(String localeString)
-    {
-    	if (localeString.startsWith("iw"))
-        {
-    		localeString = "he" + localeString.substring(2);
-    	}
-    	else if (localeString.startsWith("ji"))
-    	{
-    		localeString = "yi" + localeString.substring(2);
-    	}
-    	else if (localeString.startsWith("in"))
-    	{
-    		localeString = "id" + localeString.substring(2);
-    	}
-
-    	return localeString;
     }
 
 	@Override

@@ -356,13 +356,15 @@ public class BlaiseHelper
 			}
 		}
 
+		String localeInfo = fixLocale(entry.getEntry().getTargetLocale()
+				.getLocaleCode());
 		fileName.append("Blaise Entry ")
 				.append(entry.getId())
 				.append(DASH)
 				.append(des).append(DASH)
 				.append(entry.getRelatedObjectId()).append(DASH)
 				.append(entry.getSourceRevision()).append(DASH)
-				.append(entry.getEntry().getTargetLocale().getLocaleCode())
+				.append(localeInfo)
 				.append(".xlf").toString();
 		String fileNameStr = fileName.toString();
 
@@ -390,4 +392,22 @@ public class BlaiseHelper
 		}
 		return fileName;
 	}
+
+    public static String fixLocale(String localeString)
+    {
+    	if (localeString.startsWith("iw"))
+        {
+    		localeString = "he" + localeString.substring(2);
+    	}
+    	else if (localeString.startsWith("ji"))
+    	{
+    		localeString = "yi" + localeString.substring(2);
+    	}
+    	else if (localeString.startsWith("in"))
+    	{
+    		localeString = "id" + localeString.substring(2);
+    	}
+
+    	return localeString;
+    }
 }

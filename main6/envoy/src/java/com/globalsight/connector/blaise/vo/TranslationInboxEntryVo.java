@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
+import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
 
 public class TranslationInboxEntryVo
@@ -84,7 +85,9 @@ public class TranslationInboxEntryVo
 
 	private String getLocaleCode(Locale locale)
 	{
-		return " [" + locale.getLanguage() + "_" + locale.getCountry() + "]";
+		String fixedLocale = BlaiseHelper.fixLocale(locale.getLanguage() + "_"
+				+ locale.getCountry());
+		return " [" + fixedLocale + "]";
 	}
 
 	public String getDescription()

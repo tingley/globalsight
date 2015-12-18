@@ -383,8 +383,7 @@ public class OfficeXmlRepairer
     private static List<SplitString> split(String s)
     {
         ArrayList<SplitString> result = new ArrayList<SplitString>();
-        Pattern p = Pattern
-                .compile("[\\w\\pP]+[\\pP\\w\\s]*[\\w\\pP]+|[a-zA-Z]");
+        Pattern p = Pattern.compile("[a-zA-Z][a-zA-Z\\s]+[a-zA-Z]|[a-zA-Z]");
         Matcher m = p.matcher(s);
         int n = 0;
         while (m.find(n))

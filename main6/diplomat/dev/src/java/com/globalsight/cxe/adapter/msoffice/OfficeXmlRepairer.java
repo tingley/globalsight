@@ -265,6 +265,7 @@ public class OfficeXmlRepairer
             String after = src.substring(m.end());
 
             List<SplitString> rs = split(v);
+            rs = mergeSplit(rs);
 
             for (SplitString r : rs)
             {
@@ -380,28 +381,86 @@ public class OfficeXmlRepairer
         return sb;
     }
 
-    private static List<SplitString> split(String s)
+    private static List<SplitString> mergeSplit(List<SplitString> ss)
     {
-        ArrayList<SplitString> result = new ArrayList<SplitString>();
-        Pattern p = Pattern
-                .compile("[\\w\\pP]+[\\pP\\w\\s]*[\\w\\pP]+|[a-zA-Z]");
-        Matcher m = p.matcher(s);
-        int n = 0;
-        while (m.find(n))
+        List<SplitString> result = new ArrayList<SplitString>();
+
+        SplitString last = null;
+
+        for (SplitString s : ss)
         {
-            int start = m.start();
-            int end = m.end();
-            if (start != n)
+            if (last == null)
             {
-                result.add(new SplitString(s.substring(n, start), true));
+                last = s;
             }
-            n = end;
-            result.add(new SplitString(m.group(), false));
+            else
+            {
+                if (last.isNeedRtl() == s.isNeedRtl())
+                {
+                    last.setString(last.getString() + s.getString());
+                }
+                else
+                {
+                    result.add(last);
+                    last = s;
+                }
+            }
         }
 
-        if (n < s.length())
+        if (last != null)
         {
-            result.add(new SplitString(s.substring(n), true));
+            result.add(last);
+        }
+
+        return result;
+    }
+
+    private static List<SplitString> split(String s)
+    {
+        List<SplitString> result = new ArrayList<SplitString>();
+
+        Pattern p2 = Pattern.compile("&[\\a-zA-Z]+?;");
+        Matcher m2 = p2.matcher(s);
+        int n = 0;
+        while (m2.find(n))
+        {
+            int start = m2.start();
+            int end = m2.end();
+
+            if (start != n)
+            {
+                result.addAll(split(s.substring(n, start)));
+            }
+
+            n = end;
+            result.add(new SplitString(m2.group(), false));
+        }
+
+        if (n < s.length() && n > 0)
+        {
+            result.addAll(split(s.substring(n)));
+        }
+        else
+        {
+            Pattern p = Pattern.compile("[\\p{IsLatin}]+");
+            Matcher m = p.matcher(s);
+            n = 0;
+            while (m.find(n))
+            {
+                int start = m.start();
+                int end = m.end();
+                if (start != n)
+                {
+                    result.add(new SplitString(s.substring(n, start), true));
+                }
+                n = end;
+                result.add(new SplitString(m.group(), false));
+            }
+
+            if (n < s.length())
+            {
+                result.add(new SplitString(s.substring(n), true));
+            }
         }
 
         return result;

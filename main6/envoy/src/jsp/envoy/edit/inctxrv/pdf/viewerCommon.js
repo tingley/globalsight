@@ -402,11 +402,11 @@ function sortDivByOffset(divA, divB)
 
 function getSegmentByTuid(tuId)
 {
-	var localData = window.parent.parent.parent.localData;
+	var localDataForInCtxRv = window.parent.parent.parent.localDataForInCtxRv;
 
-	for (var i = 0; i < localData.source.length; i++)
+	for (var i = 0; i < localDataForInCtxRv.source.length; i++)
 	{
-		var seg = localData.source[i];
+		var seg = localDataForInCtxRv.source[i];
 		
 		if (seg.tuId && seg.tuId == tuId)
 		{
@@ -415,13 +415,13 @@ function getSegmentByTuid(tuId)
 			var segment = new Object();
 			segment.tuId = seg.tuId;
 			segment.subId = seg.subId;
-			segment.srcTuvId = localData.source[i].tuvId;
-			segment.srcSegment = localData.source[i].segment;
-			segment.srcSegmentNoTag = handleSpecialChar(localData.source[i].segmentNoTag);
+			segment.srcTuvId = localDataForInCtxRv.source[i].tuvId;
+			segment.srcSegment = localDataForInCtxRv.source[i].segment;
+			segment.srcSegmentNoTag = handleSpecialChar(localDataForInCtxRv.source[i].segmentNoTag);
 			
-			segment.tgtTuvId = localData.target[i].tuvId;
-			segment.tgtSegment = localData.target[i].segment;
-			segment.tgtSegmentNoTag = handleSpecialChar(localData.target[i].segmentNoTag);
+			segment.tgtTuvId = localDataForInCtxRv.target[i].tuvId;
+			segment.tgtSegment = localDataForInCtxRv.target[i].segment;
+			segment.tgtSegmentNoTag = handleSpecialChar(localDataForInCtxRv.target[i].segmentNoTag);
 			
 			segment.pageNum = seg.pageNum;
 			
@@ -437,15 +437,15 @@ function getSegmentByTuid(tuId)
 	return false;
 }
 
-function buildPageContent(pageNum, localData, isTarget)
+function buildPageContent(pageNum, localDataForInCtxRv, isTarget)
 {
 	var content = "";
 	var segments = new Array();
 	var format1 = "";
 	
-	for (var i = 0; i < localData.source.length; i++)
+	for (var i = 0; i < localDataForInCtxRv.source.length; i++)
 	{
-		var seg = isTarget ? localData.target[i] : localData.source[i];
+		var seg = isTarget ? localDataForInCtxRv.target[i] : localDataForInCtxRv.source[i];
 		var isOfficeXml = ("office-xml" == seg.format || "xml" == seg.format);
 		format1 = seg.format;
 		
@@ -455,13 +455,13 @@ function buildPageContent(pageNum, localData, isTarget)
 			segment.format = seg.format;
 			segment.tuId = seg.tuId;
 			segment.subId = seg.subId;
-			segment.srcTuvId = localData.source[i].tuvId;
-			segment.srcSegment = localData.source[i].segment;
-			segment.srcSegmentNoTag = handleSpecialChar(localData.source[i].segmentNoTag);
+			segment.srcTuvId = localDataForInCtxRv.source[i].tuvId;
+			segment.srcSegment = localDataForInCtxRv.source[i].segment;
+			segment.srcSegmentNoTag = handleSpecialChar(localDataForInCtxRv.source[i].segmentNoTag);
 			
-			segment.tgtTuvId = localData.target[i].tuvId;
-			segment.tgtSegment = localData.target[i].segment;
-			segment.tgtSegmentNoTag = handleSpecialChar(localData.target[i].segmentNoTag);
+			segment.tgtTuvId = localDataForInCtxRv.target[i].tuvId;
+			segment.tgtSegment = localDataForInCtxRv.target[i].segment;
+			segment.tgtSegmentNoTag = handleSpecialChar(localDataForInCtxRv.target[i].segmentNoTag);
 			
 			segment.pageNum = isOfficeXml ? 1 : seg.pageNum;
 			

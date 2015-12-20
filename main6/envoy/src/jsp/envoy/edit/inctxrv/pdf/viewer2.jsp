@@ -195,7 +195,7 @@ function highlightObjects(o)
     }
 
 //2
-var pageContent = buildPageContent(loPn, window.parent.parent.parent.localData, true);
+var pageContent = buildPageContent(loPn, window.parent.parent.parent.localDataForInCtxRv, true);
 
 var loPn1 = loPn;
 while (pageContent.segments.length == 0 && pageContent.content.length == 0)
@@ -204,7 +204,7 @@ while (pageContent.segments.length == 0 && pageContent.content.length == 0)
 	
 	if (loPn1 > 0)
 	{
-		pageContent = buildPageContent(loPn1, window.parent.parent.parent.localData, true);
+		pageContent = buildPageContent(loPn1, window.parent.parent.parent.localDataForInCtxRv, true);
 	}
 	else
 	{

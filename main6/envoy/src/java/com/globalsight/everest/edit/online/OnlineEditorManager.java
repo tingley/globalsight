@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
 
+import org.json.JSONObject;
+
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
@@ -291,6 +293,9 @@ public interface OnlineEditorManager extends UIConstants
             HashMap<String, String> hm);
 
     public String getTargetJsonData(EditorState state, boolean isAssignee,
+            HashMap<String, String> hm, boolean fromInCtxRv);
+    
+    public JSONObject getTargetJsonObject(EditorState state, boolean isAssignee,
             HashMap<String, String> hm, boolean fromInCtxRv);
 
 	public void updateApprovedTuvCache(List<Long> approvedTuvIds, Date modifiedDate, String user);

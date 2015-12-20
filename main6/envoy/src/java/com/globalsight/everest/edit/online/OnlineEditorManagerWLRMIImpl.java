@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
 
+import org.json.JSONObject;
+
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.system.RemoteServer;
@@ -339,6 +341,13 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
             HashMap<String, String> hm, boolean fromInCtxRv)
     {
         return m_localReference.getTargetJsonData(p_state, isAssignee, hm, fromInCtxRv);
+    }
+    
+    @Override
+    public JSONObject getTargetJsonObject(EditorState p_state, boolean isAssignee,
+            HashMap<String, String> hm, boolean fromInCtxRv)
+    {
+        return m_localReference.getTargetJsonObject(p_state, isAssignee, hm, fromInCtxRv);
     }
     
     @Override

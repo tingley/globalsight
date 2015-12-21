@@ -47,10 +47,6 @@ public class OfficeXmlRepairer
     private static String s_wrPrEndTag = "</w:rPr>";
     private static String s_wrtlTag = "<w:rtl/>";
 
-    private static String s_wtStartTag = "<w:t ";
-    private static String s_wtStartTag2 = "<w:t>";
-    private static String s_wtEndTag = "</w:t>";
-
     private static String s_arStartTag = "<a:r ";
     private static String s_arEndTag = "</a:r>";
     private static String s_arPrStartTag = "<a:rPr";
@@ -259,17 +255,17 @@ public class OfficeXmlRepairer
     {
         List<StringBuffer> splits = new ArrayList<StringBuffer>();
 
-        List<String> tags = new ArrayList<String>();
-        tags.add(s_wtStartTag);
-        tags.add(s_wtStartTag2);
-        StringIndex si = StringIndex.getValueBetween(src, 0, tags, s_wtEndTag);
-        if (si != null)
+        Pattern p = Pattern.compile("(<w:t[^>]*>)(.*?)</w:t>");
+        Matcher m = p.matcher(src);
+        if (m.find())
         {
-            String before = src.substring(0, si.start);
-            String v = si.value;
-            String after = src.substring(si.end);
+            int n = m.start();
+            String before = src.substring(0, n) + m.group(1);
+            String v = m.group(2);
+            String after = src.substring(m.end());
 
             List<SplitString> rs = split(v);
+            rs = mergeSplit(rs);
 
             for (SplitString r : rs)
             {
@@ -325,6 +321,7 @@ public class OfficeXmlRepairer
                 }
 
                 sb.append(r.getString());
+                sb.append("</w:t>");
                 sb.append(after);
                 splits.add(sb);
             }
@@ -334,7 +331,7 @@ public class OfficeXmlRepairer
     }
 
     /**
-     * When a sentence contains both English and Latin, Add RTL for whole
+     * When a sentence contains both English and Latin, Adding RTL to whole
      * sentence will cause display issue in word 2013.
      * 
      * The fix is to split English content from the sentence and not to add RTL
@@ -384,28 +381,86 @@ public class OfficeXmlRepairer
         return sb;
     }
 
-    private static List<SplitString> split(String s)
+    private static List<SplitString> mergeSplit(List<SplitString> ss)
     {
-        ArrayList<SplitString> result = new ArrayList<SplitString>();
-        Pattern p = Pattern
-                .compile("[\\w\\pP]+[\\pP\\w\\s]*[\\w\\pP]+|[a-zA-Z]");
-        Matcher m = p.matcher(s);
-        int n = 0;
-        while (m.find(n))
+        List<SplitString> result = new ArrayList<SplitString>();
+
+        SplitString last = null;
+
+        for (SplitString s : ss)
         {
-            int start = m.start();
-            int end = m.end();
-            if (start != n)
+            if (last == null)
             {
-                result.add(new SplitString(s.substring(n, start), true));
+                last = s;
             }
-            n = end;
-            result.add(new SplitString(m.group(), false));
+            else
+            {
+                if (last.isNeedRtl() == s.isNeedRtl())
+                {
+                    last.setString(last.getString() + s.getString());
+                }
+                else
+                {
+                    result.add(last);
+                    last = s;
+                }
+            }
         }
 
-        if (n < s.length())
+        if (last != null)
         {
-            result.add(new SplitString(s.substring(n), true));
+            result.add(last);
+        }
+
+        return result;
+    }
+
+    private static List<SplitString> split(String s)
+    {
+        List<SplitString> result = new ArrayList<SplitString>();
+
+        Pattern p2 = Pattern.compile("&[\\a-zA-Z]+?;");
+        Matcher m2 = p2.matcher(s);
+        int n = 0;
+        while (m2.find(n))
+        {
+            int start = m2.start();
+            int end = m2.end();
+
+            if (start != n)
+            {
+                result.addAll(split(s.substring(n, start)));
+            }
+
+            n = end;
+            result.add(new SplitString(m2.group(), false));
+        }
+
+        if (n < s.length() && n > 0)
+        {
+            result.addAll(split(s.substring(n)));
+        }
+        else
+        {
+            Pattern p = Pattern.compile("[\\p{IsLatin}]+");
+            Matcher m = p.matcher(s);
+            n = 0;
+            while (m.find(n))
+            {
+                int start = m.start();
+                int end = m.end();
+                if (start != n)
+                {
+                    result.add(new SplitString(s.substring(n, start), true));
+                }
+                n = end;
+                result.add(new SplitString(m.group(), false));
+            }
+
+            if (n < s.length())
+            {
+                result.add(new SplitString(s.substring(n), true));
+            }
         }
 
         return result;

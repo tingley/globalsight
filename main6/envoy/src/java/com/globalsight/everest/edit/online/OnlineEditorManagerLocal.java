@@ -6333,9 +6333,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 	{
 	    return getTargetJsonData(p_state, isAssignee, p_searchMap, false);
 	}
+	
+	@Override
+    public String getTargetJsonData(EditorState p_state, boolean isAssignee,
+            HashMap<String, String> p_searchMap, boolean fromInCtxRv)
+    {
+        return getTargetJsonObject(p_state, isAssignee, p_searchMap,
+                fromInCtxRv).toString();
+    }
 
     @Override
-    public String getTargetJsonData(EditorState p_state, boolean isAssignee,
+    public JSONObject getTargetJsonObject(EditorState p_state, boolean isAssignee,
             HashMap<String, String> p_searchMap, boolean fromInCtxRv)
     {
         JSONObject mainJson = new JSONObject();
@@ -6471,7 +6479,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     jobId);
             m_pageCache.setCurrentPageTuIDS(displayTuIdList);
             if (displayTuIdList == null || displayTuIdList.size() == 0)
-                return "";
+                return new JSONObject();
             boolean b_rtlLocale = EditUtil.isRTLLocale(sourcePage
                     .getGlobalSightLocale());
             // insert all tuv content into template despite of current page
@@ -6656,7 +6664,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     OnlineEditorException.MSG_FAILED_TO_GET_PAGEVIEW, args, ex);
         }
 
-        return mainJson.toString();
+        return mainJson;
     }
     
     private void setOriginalTargetTuvMap(List<Tuv> filterTargetTuvs, List<Tuv> allTargetTuvs, 

@@ -517,8 +517,38 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         if (isGetJsonData)
         {
-            jsonStr = state.getEditorManager().getTargetJsonData(state, isAssignee,
+            JSONObject forList = state.getEditorManager().getTargetJsonObject(state, isAssignee,
                     getSearchParamsInMap(p_request), true);
+            JSONObject forInCtxRv = null;
+            PaginateInfo paginateInfo = state.getPaginateInfo();
+            if (paginateInfo.getTotalPageNum() > 1)
+            {
+                EditorState stateClone = EditorState.cloneState(state);
+                PaginateInfo newpaginateInfo = new PaginateInfo(paginateInfo.getTotalSegmentNum(), 0, 1);
+                stateClone.setPaginateInfo(newpaginateInfo);
+                forInCtxRv = state.getEditorManager().getTargetJsonObject(stateClone, isAssignee,
+                        getSearchParamsInMap(p_request), true);
+            }
+            else
+            {
+                forInCtxRv = forList;
+            }
+            
+            try
+            {
+                JSONObject mainJson = new JSONObject();
+                mainJson.put("forList", forList);
+                mainJson.put("forInCtxRv", forInCtxRv);
+
+                jsonStr = mainJson.toString();
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
+
+            }
+            
+            
             /*
             long _trgPageId = state.getTargetPageId().longValue();
             TargetPage _targetPage = ServerProxy.getPageManager().getTargetPage(_trgPageId);

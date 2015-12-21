@@ -575,7 +575,7 @@ function editComment(tuId, tuvId, subId)
         forceCloseEditor('segment');
         hideContextMenu();
         w_editor = window.open(str_url, "CommentEditor",
-          "width=550,height=610,top=100,left=100"); //resizable,
+          "width=550,height=750,top=100,left=100"); //resizable,
     }
 }
 

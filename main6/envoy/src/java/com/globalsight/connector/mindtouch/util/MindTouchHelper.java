@@ -678,6 +678,7 @@ public class MindTouchHelper
             // to be safe, it must use "text/plain" content type instead of
             // "text/xml" or "application/xml".
             String content = FileUtil.readFile(contentsTrgFile, "UTF-8");
+            content = StringUtil.replace(content, "&nbsp;", "&#160;");
             String title = getTitleFromTranslatedContentXml(content);
             // Only when target server exists, do this...
             if (isTargetServerExist(targetLocale))
@@ -685,37 +686,49 @@ public class MindTouchHelper
 				content = handleFiles(pageInfo.getPageId(), content,
 						targetLocale, sourceLocale, pageInfo);
             }
-            content = EditUtil.decodeXmlEntities(content);
-            content = EditUtil.decodeXmlEntities(content);
-            content = content.substring(content.indexOf("<body>") + 6);
-            content = content.substring(0, content.indexOf("</body>"));
-            StringEntity reqEntity = new StringEntity(content, "UTF-8");
-            reqEntity.setContentType("text/plain; charset=UTF-8");
 
-            path = getNewPath(pageInfo, sourceLocale, targetLocale);
-			String strUrl = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path
-					+ "/contents?edittime=now&abort=never";
-			if (title != null)
-			{
-				strUrl += "&title=" + title;
-			}
-
-			URL url = new URL(strUrl);
-			URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(),
-					url.getQuery(), null);
-			HttpPost httppost = getHttpPost(uri, targetLocale);
-            httppost.setEntity(reqEntity);
-
-            HttpResponse response = httpClient.execute(httppost);
-
-            String entityContent = null;
-            if (response.getEntity() != null) {
-                entityContent = EntityUtils.toString(response.getEntity());
-            }
-            if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+            int times = 0;
+            while (times < 2)
             {
-				logger.error("Fail to post contents back to MindTouch server for page '"
-						+ path + "' : " + entityContent);
+        		times++;
+        		String tmpContent = content;
+            	if (times == 1) {
+            		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
+            		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
+            	}
+            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
+            	tmpContent = tmpContent.substring(tmpContent.indexOf("<body>") + 6);
+            	tmpContent = tmpContent.substring(0, tmpContent.indexOf("</body>"));
+                StringEntity reqEntity = new StringEntity(tmpContent, "UTF-8");
+                reqEntity.setContentType("text/plain; charset=UTF-8");
+
+                path = getNewPath(pageInfo, sourceLocale, targetLocale);
+    			String strUrl = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path
+    					+ "/contents?edittime=now&abort=never";
+    			if (title != null) {
+    				strUrl += "&title=" + title;
+    			}
+    			URL url = new URL(strUrl);
+    			URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(),
+    					url.getQuery(), null);
+    			HttpPost httppost = getHttpPost(uri, targetLocale);
+
+    			httppost.setEntity(reqEntity);
+                HttpResponse response = httpClient.execute(httppost);
+
+                String entityContent = null;
+                if (response.getEntity() != null) {
+                    entityContent = EntityUtils.toString(response.getEntity());
+                }
+                if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+                {
+					logger.error("Fail to post contents back to MindTouch server for page '"
+							+ path + "' : " + entityContent);
+                }
+                else
+                {
+                	break;
+                }
             }
         }
         catch (Exception e)

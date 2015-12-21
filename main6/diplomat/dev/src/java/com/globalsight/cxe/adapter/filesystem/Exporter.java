@@ -502,7 +502,10 @@ public class Exporter
             handleEloquaFiles(finalFileName, fp, wf, hasScript);
 
             // For Blaise file
-            handleBlaiseFiles(finalFileName, wf);
+            if (wf.getJob().isBlaiseJob())
+            {
+                handleBlaiseFiles(finalFileName, wf);
+            }
 
             // For GitConnector file
 			String tmpDisplayName = m_displayName.substring(0,
@@ -722,7 +725,7 @@ public class Exporter
 							srcLocale, trgLocale, trgFile);
 					helper.postPageContents(trgFile, pageInfo, sourceLocale,
 							targetLocale);
-                    logger.info("MindTouch content is posted to target server: " + trgFile);    			
+                    logger.info("MindTouch content is posted to target server: " + trgFile);
         		}
         		catch (Exception e)
         		{

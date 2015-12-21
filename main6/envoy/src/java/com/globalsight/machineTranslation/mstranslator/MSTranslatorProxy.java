@@ -99,6 +99,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             langs.add("pt-PT");//GBS-4000
             langs.add("es-419");
             langs.add("en-gb");//GBS-4007
+
+            CATEGORY.info("Supported languages: " + langs);
             return langs.contains(sourceLang) && langs.contains(targetLang);
         }
         catch (Exception ex)
@@ -112,8 +114,18 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
                             msClientSecret);
                     String[] languageArray = service
                             .getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
-                    List<String> tmp = Arrays.asList(languageArray);
-                    return tmp.contains(sourceLang) && tmp.contains(targetLang);
+
+                    Vector<String> langs = new Vector<String>();
+                    for (String lang : languageArray)
+                    {
+                    	langs.add(lang);
+                    }
+                    langs.add("pt-PT");//GBS-4000
+                    langs.add("es-419");
+                    langs.add("en-gb");//GBS-4007
+
+                    CATEGORY.info("Supported languages: " + langs);
+                    return langs.contains(sourceLang) && langs.contains(targetLang);
                 }
                 catch (Exception e)
                 {

@@ -360,7 +360,7 @@ public class CreateMindTouchJobThread implements Runnable
     
     private void retrieveRealFilesFromMindTouch(List<String> descList, Job job,
             List<String> files, String sourceLocale)
-            throws FileNotFoundException, Exception
+            throws Exception
     {
         String pageId = null;
         String pageInfoXml = null;
@@ -371,79 +371,94 @@ public class CreateMindTouchJobThread implements Runnable
         // <pageId:MindTouchPage>
         HashMap<String, MindTouchPage> pageInfoMap = new HashMap<String, MindTouchPage>();
         MindTouchHelper helper = new MindTouchHelper(conn);
-        for (String f : files)
+        try
         {
-            if (f.endsWith("contents"))
+            for (String f : files)
             {
-                pageId = f.substring(0, f.indexOf("contents"));
-                flag = "contents";
-            }
-            else if (f.endsWith("tags"))
-            {
-                pageId = f.substring(0, f.indexOf("tags"));
-                flag = "tags";
-            }
-            else if (f.endsWith("properties"))
-            {
-            	 pageId = f.substring(0, f.indexOf("properties"));
-                 flag = "properties";
-            }
+                if (f.endsWith("contents"))
+                {
+                    pageId = f.substring(0, f.indexOf("contents"));
+                    flag = "contents";
+                }
+                else if (f.endsWith("tags"))
+                {
+                    pageId = f.substring(0, f.indexOf("tags"));
+                    flag = "tags";
+                }
+                else if (f.endsWith("properties"))
+                {
+                	 pageId = f.substring(0, f.indexOf("properties"));
+                     flag = "properties";
+                }
 
-            MindTouchPage mtp = pageInfoMap.get(pageId);
-            if (mtp == null)
-            {
-				pageInfoXml = helper.getPageInfo(conn.getUrl(),
-						Long.parseLong(pageId));
-                if (pageInfoXml != null)
+                MindTouchPage mtp = pageInfoMap.get(pageId);
+                if (mtp == null)
                 {
-                    mtp = helper.parsePageInfoXml(pageInfoXml);
+    				pageInfoXml = helper.getPageInfo(conn.getUrl(),
+    						Long.parseLong(pageId));
+                    if (pageInfoXml != null)
+                    {
+                        mtp = helper.parsePageInfoXml(pageInfoXml);
+                    }
                 }
-            }
-            if (mtp != null)
-            {
-                String externalPageId = getFilePath(sourceLocale, job.getId(),
-                        mtp, flag);
-                srcFile = new File(
-                        AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
-                                + File.separator + externalPageId);
-                if ("contents".equals(flag))
-                {
-                    sourceContent = helper.getPageContents(pageId);
-                }
-                else if ("tags".equals(flag))
-                {
-                    sourceContent = helper.getPageTags(Long.parseLong(pageId));
-                }
-                else if("properties".equals(flag))
-                {
-                	sourceContent = helper.getPageProperties(Long.parseLong(pageId));
-                }
-				// Per testing, decode is required; but need fix "title"
-				// attribute value for "contents".
-                sourceContent = EditUtil.decodeXmlEntities(sourceContent);
-                if ("contents".equals(flag))
-                {
-					sourceContent = MindTouchHelper
-							.fixTitleValueInContentXml(sourceContent);
-                }
-                FileUtil.writeFile(srcFile, sourceContent);
-                descList.add(externalPageId);
 
-                // save one ".obj" file with same pathname which is used to send
-                // translated files back to MindTouch server.
-                String objFilePathName = externalPageId + ".obj";
-                objFile = new File(
-                        AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
-                                + File.separator + objFilePathName);
-                JSONObject json = new JSONObject();
-                json.put("mindTouchConnectorId", String.valueOf(conn.getId()));
-                json.put("pageId", pageId);
-                json.put("path", mtp.getPath());
-                json.put("title", mtp.getTitle());
-                FileUtil.writeFile(objFile, json.toString());
+                if (mtp != null)
+                {
+					String externalPageId = getFilePath(sourceLocale,
+							job.getId(), mtp, flag);
+                    srcFile = new File(
+                            AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
+                                    + File.separator + externalPageId);
+                    if ("contents".equals(flag))
+                    {
+                        sourceContent = helper.getPageContents(pageId);
+                        int index = sourceContent.indexOf("<body>");
+                        String content = sourceContent.substring(0, index);
+                        String body = sourceContent.substring(index);
+        				// Per testing, decode is required. Only decode <body>.
+                        body = EditUtil.decodeXmlEntities(body);
+                        sourceContent = content + body;
+    					sourceContent = MindTouchHelper
+    							.fixTitleValueInContentXml(sourceContent);
+                    }
+                    else if ("tags".equals(flag))
+                    {
+                        sourceContent = helper.getPageTags(Long.parseLong(pageId));
+                        sourceContent = EditUtil.decodeXmlEntities(sourceContent);
+                    }
+                    else if("properties".equals(flag))
+                    {
+                    	sourceContent = helper.getPageProperties(Long.parseLong(pageId));
+                    	sourceContent = EditUtil.decodeXmlEntities(sourceContent);
+                    }
+                    FileUtil.writeFile(srcFile, sourceContent);
+                    descList.add(externalPageId);
+                    logger.info("MindTouch page is retrieved from MindTouch server: " + externalPageId);
+
+                    // save one ".obj" file with same pathname which is used to send
+                    // translated files back to MindTouch server.
+                    String objFilePathName = externalPageId + ".obj";
+					objFile = new File(
+							AmbFileStoragePathUtils
+									.getCxeDocDir(currentCompanyId)
+									+ File.separator + objFilePathName);
+                    JSONObject json = new JSONObject();
+                    json.put("mindTouchConnectorId", String.valueOf(conn.getId()));
+                    json.put("pageId", pageId);
+                    json.put("path", mtp.getPath());
+                    json.put("title", mtp.getTitle());
+                    FileUtil.writeFile(objFile, json.toString());
+                }
             }
         }
-        pageInfoMap = null;
+        catch(Exception e)
+        {
+        	logger.error(e);
+        }
+        finally
+        {
+        	helper.shutdownHttpClient();
+        }
     }
 
     private String getFilePath(String sourceLocale, long jobId,

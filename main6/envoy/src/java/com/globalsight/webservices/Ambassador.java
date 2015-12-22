@@ -222,6 +222,7 @@ import com.globalsight.importer.IImportManager;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.tm.LeveragingLocales;
+import com.globalsight.ling.tm2.AbstractTmTuv;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
@@ -11752,9 +11753,22 @@ public class Ambassador extends AbstractWebService
         {
             Element elem = (Element) nodes.get(i);
             SegmentTmTuv tuv = new SegmentTmTuv();
+            PageTmTu pageTmTu = new PageTmTu(-1, -1, "plaintext", "text",
+            		true);
+            tuv.setTu(pageTmTu);
             tuv.setSid(sid);
             TmxUtil.convertFromTmx(elem, tuv);
 
+            Collection splitSegments = tuv.prepareForSegmentTm();
+
+            Iterator itSplit = splitSegments.iterator();
+            while (itSplit.hasNext())
+			{
+				AbstractTmTuv.SegmentAttributes segAtt = (AbstractTmTuv.SegmentAttributes) itSplit
+						.next();
+				String segmentString = segAtt.getText();
+				tuv.setSegment(segmentString);
+			}
             // Check the locale
             List<SegmentTmTuv> savedTuvs = new ArrayList<SegmentTmTuv>();
             for (BaseTmTuv savedTuv : tu.getTuvs())

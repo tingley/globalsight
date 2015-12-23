@@ -1233,7 +1233,12 @@ public class MindTouchHelper
     		String title = root.attributeValue("title");
     		if (title.trim().length() > 0)
     		{
-    			title = URLEncoder.encode(title);
+				// Encode the whole title is the right behavior, but as
+				// MindTouch does not decode title, we have to only encode # = &
+				// title = URLEncoder.encode(title);
+    			title = title.replace("#", "%23");
+    			title = title.replace("=", "%3D");
+    			title = title.replace("&", "%26");
     			return new String(title.trim().getBytes("UTF-8"), "UTF-8");
     		}
     	}

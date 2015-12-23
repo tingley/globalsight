@@ -254,7 +254,12 @@ public class MindTouchHelper
                 	text = text.replace("<", "&lt;").replace(">", "&gt;");
                 	// as json does not allow "\" and "/", remove them for displaying.
                 	text = text.replace("\\", "").replace("/", "");
-                	text = java.net.URLDecoder.decode(text, "UTF-8");
+                	text = text.replace("%22", "\"");
+                	text = text.replace("%3F", "?");
+                	text = text.replace("%23", "#");
+                	text = text.replace("%3D", "=");
+                	text = text.replace("%26", "&");
+                	text = text.replace("%25", "%");
                     mtp.setTitle(text);
                 }
                 else if ("path".equals(name))

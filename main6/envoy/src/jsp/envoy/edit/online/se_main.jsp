@@ -639,22 +639,36 @@ function shouldSave()
 
 function doClose()
 {
+	
     if (fr_target.IsChanged())
     {
+    	autosave="false";
         if (shouldSave())
         {
             if (!checkError())
-            {
-                window.opener.SaveSegment("<%=l_tuId%>", "<%=l_tuvId%>",
-                  "<%=l_subId%>", getTargetDiplomatString(), verbose);
+            {   
+            	var str_segment;
+                str_segment = getTargetDiplomatString();
+                var o_form = menu.document.Save;
+                o_form.save.value    = str_segment;
+                o_form.refresh.value = 0;
+                o_form.releverage.value = "false";
+                o_form.tuId.value    = "<%=l_tuId%>";
+                o_form.tuvId.value   = "<%=l_tuvId%>";
+                o_form.subId.value   = "<%=l_subId%>";
+                o_form.ptags.value   = verbose;
+                o_form.isClosedComment.value = fr_source.getIsClosedComment();
+                o_form.submit();
+             	window.opener.editAll(true);
                 window.close();
             }
+
             
         }
         else
         {
-            window.opener.Refresh();
-            window.close();
+        	   window.opener.editAll(true);
+               window.close();
         }
     }
     else
@@ -668,6 +682,7 @@ function doClose()
         window.opener.parent.parent.parent.review.location = iframeSrc;
     }
 }
+
 
 function showHourglass()
 {

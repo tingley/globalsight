@@ -1231,6 +1231,7 @@ public class MindTouchHelper
     {
     	try
     	{
+    		contentXml = fixTitleValueInContentXml(contentXml);
     		String content = contentXml.substring(0, contentXml.indexOf("<body>"));
     		content = content.replace("&nbsp;", " ");
     		content += "</content>";
@@ -1272,10 +1273,23 @@ public class MindTouchHelper
     		String a = contentXml.substring(0, index + " title=\"".length());
     		xml.append(a);
     		String b = contentXml.substring(index + " title=\"".length());
-    		String title = b.substring(0, b.indexOf("\""));
-    		title = title.replace("<", "&lt;").replace(">", "&gt;");
-    		xml.append(title);
-    		xml.append(b.substring(b.indexOf("\"")));
+    		index = b.indexOf("=");
+    		if (index > -1)
+    		{
+    			a = b.substring(0, index);
+    			b = b.substring(index);
+    			index = a.lastIndexOf(" ");
+    			String title = a.substring(0, index - 1);
+				title = title.replace("\"", "&quot;").replace("<", "&lt;")
+						.replace(">", "&gt;");
+    			xml.append(title);
+    			xml.append(a.substring(index - 1));
+    			xml.append(b);
+    		}
+    		else
+    		{
+    			xml.append(b);
+    		}
 
     		return new String(xml.toString().trim().getBytes("UTF-8"), "UTF-8");
     	}

@@ -16,30 +16,42 @@
  */
 package com.globalsight.cxe.adapter.msoffice;
 
-public abstract class OfficeRepairer 
+public abstract class OfficeRepairer
 {
-	protected String path =  null;
-	
-	protected abstract boolean accept();
-	protected abstract void repair() throws Exception;
-	
-	public OfficeRepairer(String path)
-	{
-		this.path = path;
-	}
-	
-	public void repairFiles()
-	{
-		if (accept())
-		{
-			try 
-			{
-				repair();
-			} 
-			catch (Exception e) 
-			{
-				//Do nothing
-			}
-		}
-	}
+    protected String path = null;
+    protected String targetLocale;
+
+    protected abstract boolean accept();
+
+    protected abstract void repair() throws Exception;
+
+    public OfficeRepairer(String path)
+    {
+        this.path = path;
+    }
+
+    public void repairFiles()
+    {
+        if (accept())
+        {
+            try
+            {
+                repair();
+            }
+            catch (Exception e)
+            {
+                // Do nothing
+            }
+        }
+    }
+
+    public String getTargetLocale()
+    {
+        return targetLocale;
+    }
+
+    public void setTargetLocale(String targetLocale)
+    {
+        this.targetLocale = targetLocale;
+    }
 }

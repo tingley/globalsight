@@ -18,8 +18,6 @@ package com.globalsight.cxe.adapter.msoffice;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -66,10 +64,17 @@ public class OfficeXmlRepairer
 
     public static void repair(String path)
     {
+        repair(path, null);
+    }
+
+    public static void repair(String path, String targetLocale)
+    {
         try
         {
             List<OfficeRepairer> repairers = new ArrayList<OfficeRepairer>();
-            repairers.add(new WordRepairer(path));
+            WordRepairer wordRepairer = new WordRepairer(path);
+            wordRepairer.setTargetLocale(targetLocale);
+            repairers.add(wordRepairer);
             repairers.add(new PptxRepairer(path));
             repairers.add(new ExcelRepairer(path));
 
@@ -102,9 +107,10 @@ public class OfficeXmlRepairer
 
         if (xmlContent.endsWith("</w:document>"))
         {
-            String result = fixRtlDocumentXml(xmlContent, lang);
+            // has been moved to WordRepairer.forRtl
+            // String result = fixRtlDocumentXml(xmlContent, lang);
 
-            return result;
+            return xmlContent;
         }
         else if (xmlContent.endsWith("</w:ftr>")
                 || xmlContent.endsWith("</w:hdr>")
@@ -232,8 +238,9 @@ public class OfficeXmlRepairer
                     s_wrtlTag);
             if (needToAddRTL)
             {
-                vsb = splitEnglishAndAddRtl(vsb);
-                result.append(vsb);
+                String addRTL = addStyleTag2(vsb, s_wrtlTag, s_wrStartTag,
+                        s_wrEndTag, s_wrPrStartTag, s_wrPrEndTag);
+                result.append(addRTL);
             }
             else
             {
@@ -249,221 +256,6 @@ public class OfficeXmlRepairer
 
         String rrr = result.toString();
         return rrr;
-    }
-
-    private static List<StringBuffer> splitEnglishWt(String src)
-    {
-        List<StringBuffer> splits = new ArrayList<StringBuffer>();
-
-        Pattern p = Pattern.compile("(<w:t[^>]*>)(.*?)</w:t>");
-        Matcher m = p.matcher(src);
-        if (m.find())
-        {
-            int n = m.start();
-            String before = src.substring(0, n) + m.group(1);
-            String v = m.group(2);
-            String after = src.substring(m.end());
-
-            List<SplitString> rs = split(v);
-            rs = mergeSplit(rs);
-
-            for (SplitString r : rs)
-            {
-                StringBuffer sb = new StringBuffer();
-
-                if (r.isNeedRtl())
-                {
-                    StringBuffer temp = new StringBuffer(before);
-                    StringIndex tempSi = StringIndex.getValueBetween(temp, 0,
-                            s_wrPrStartTag, s_gtMark);
-                    if (tempSi == null)
-                    {
-                        int endIndex = 0;
-                        if (!before.startsWith("<")
-                                && !before.trim().startsWith("<"))
-                        {
-                            // add the rest part of w:r or w:p like
-                            // w:rsidRPr="0065076E">
-                            String sss = before.substring(0, 1);
-                            tempSi = StringIndex.getValueBetween(temp, 0, sss,
-                                    s_gtMark);
-                            sb.append(tempSi.allValue);
-
-                            endIndex = tempSi.end + 1;
-                        }
-                        sb.append(s_wrPrStartTag).append(s_gtMark);
-                        sb.append(s_wrtlTag).append(s_wrPrEndTag);
-                        sb.append(temp.substring(endIndex));
-                    }
-                    else
-                    {
-                        sb.append(temp.substring(0, tempSi.start));
-                        String tempV = tempSi.value;
-                        if (tempV.endsWith("/"))
-                        {
-                            sb.append(tempV.substring(0, tempV.length() - 1));
-                            sb.append(s_gtMark);
-                            sb.append(s_wrtlTag);
-                            sb.append(s_wrPrEndTag);
-                        }
-                        else
-                        {
-                            sb.append(tempV);
-                            sb.append(s_gtMark);
-                            sb.append(s_wrtlTag);
-                        }
-                        sb.append(temp.substring(tempSi.end + 1));
-                    }
-                }
-                else
-                {
-                    sb.append(before);
-                }
-
-                sb.append(r.getString());
-                sb.append("</w:t>");
-                sb.append(after);
-                splits.add(sb);
-            }
-        }
-
-        return splits;
-    }
-
-    /**
-     * When a sentence contains both English and Latin, Adding RTL to whole
-     * sentence will cause display issue in word 2013.
-     * 
-     * The fix is to split English content from the sentence and not to add RTL
-     * for it. (A better fix is to pick up the Latin content from the sentence,
-     * but there seems to be no good method to make it.)
-     * 
-     * @since GBS-4185
-     */
-    private static StringBuffer splitEnglishAndAddRtl(StringBuffer content)
-    {
-        StringBuffer sb = new StringBuffer();
-
-        StringIndex si = StringIndex.getValueBetween(content, 0, s_wrStartTag,
-                s_wrEndTag);
-        while (si != null)
-        {
-            String before = content.substring(0, si.start);
-            String v = si.value;
-            String after = content.substring(si.end);
-
-            sb.append(before);
-            List<StringBuffer> wts = splitEnglishWt(v);
-            if (wts.size() > 1)
-            {
-                for (int i = 0; i < wts.size(); i++)
-                {
-                    sb.append(wts.get(i));
-                    if (i != wts.size() - 1)
-                    {
-                        sb.append(s_wrEndTag);
-                        sb.append(s_wrStartTag);
-                    }
-                }
-            }
-            else
-            {
-                sb.append(v);
-            }
-            sb.append(after);
-
-            content.delete(0, content.length());
-            content.append(after);
-            si = StringIndex.getValueBetween(content, 0, s_wrStartTag,
-                    s_wrEndTag);
-        }
-
-        return sb;
-    }
-
-    private static List<SplitString> mergeSplit(List<SplitString> ss)
-    {
-        List<SplitString> result = new ArrayList<SplitString>();
-
-        SplitString last = null;
-
-        for (SplitString s : ss)
-        {
-            if (last == null)
-            {
-                last = s;
-            }
-            else
-            {
-                if (last.isNeedRtl() == s.isNeedRtl())
-                {
-                    last.setString(last.getString() + s.getString());
-                }
-                else
-                {
-                    result.add(last);
-                    last = s;
-                }
-            }
-        }
-
-        if (last != null)
-        {
-            result.add(last);
-        }
-
-        return result;
-    }
-
-    private static List<SplitString> split(String s)
-    {
-        List<SplitString> result = new ArrayList<SplitString>();
-
-        Pattern p2 = Pattern.compile("&[\\a-zA-Z]+?;");
-        Matcher m2 = p2.matcher(s);
-        int n = 0;
-        while (m2.find(n))
-        {
-            int start = m2.start();
-            int end = m2.end();
-
-            if (start != n)
-            {
-                result.addAll(split(s.substring(n, start)));
-            }
-
-            n = end;
-            result.add(new SplitString(m2.group(), false));
-        }
-
-        if (n < s.length() && n > 0)
-        {
-            result.addAll(split(s.substring(n)));
-        }
-        else
-        {
-            Pattern p = Pattern.compile("[\\p{IsLatin}]+");
-            Matcher m = p.matcher(s);
-            n = 0;
-            while (m.find(n))
-            {
-                int start = m.start();
-                int end = m.end();
-                if (start != n)
-                {
-                    result.add(new SplitString(s.substring(n, start), true));
-                }
-                n = end;
-                result.add(new SplitString(m.group(), false));
-            }
-
-            if (n < s.length())
-            {
-                result.add(new SplitString(s.substring(n), true));
-            }
-        }
-
-        return result;
     }
 
     private static String addStyleTag2(StringBuffer src, String valueToAdd,

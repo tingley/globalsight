@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -93,6 +94,8 @@ public class MindTouchHelper
     
     private HashMap<String, MindTouchConnectorTargetServer> targetServersMap = null;
 
+    private CloseableHttpClient httpClient = null;
+
     public MindTouchHelper(MindTouchConnector mtc)
     {
         this.mtc = mtc;
@@ -130,10 +133,6 @@ public class MindTouchHelper
             logger.warn("Fail to test MindTouch connector: " + e.getMessage());
             return "Failed to connect to MindTouch server";
         }
-        finally
-        {
-            shutdownHttpClient(httpClient);
-        }
     }
 
     public void deletePage(long pageId) throws Exception
@@ -157,10 +156,6 @@ public class MindTouchHelper
         catch (Exception e)
         {
             logger.error("Fail to delete page: " + pageId, e);
-        }
-        finally
-        {
-            shutdownHttpClient(httpClient);
         }
     }
 
@@ -195,10 +190,6 @@ public class MindTouchHelper
             logger.error("Fail to get sitemap tree: " + e.getMessage());
             return null;
         }
-        finally
-        {
-            shutdownHttpClient(httpClient);
-        }
     }
 
     /**
@@ -210,7 +201,7 @@ public class MindTouchHelper
      */
     @SuppressWarnings("rawtypes")
     public MindTouchPage parseTreeXml(String treeXml)
-            throws DocumentException
+            throws Exception
     {
         MindTouchPage rootMtp = null;
         Document doc = getDocument(treeXml);
@@ -263,6 +254,12 @@ public class MindTouchHelper
                 	text = text.replace("<", "&lt;").replace(">", "&gt;");
                 	// as json does not allow "\" and "/", remove them for displaying.
                 	text = text.replace("\\", "").replace("/", "");
+                	text = text.replace("%22", "\"");
+                	text = text.replace("%3F", "?");
+                	text = text.replace("%23", "#");
+                	text = text.replace("%3D", "=");
+                	text = text.replace("%26", "&");
+                	text = text.replace("%25", "%");
                     mtp.setTitle(text);
                 }
                 else if ("path".equals(name))
@@ -327,10 +324,6 @@ public class MindTouchHelper
         {
             logger.error("Fail to get page content for pageId: " + pageId, e);
         }
-        finally
-        {
-            shutdownHttpClient(httpClient);
-        }
 
         return null;
     }
@@ -365,10 +358,6 @@ public class MindTouchHelper
         catch (Exception e)
         {
             logger.error("Fail to get page tags for pageId: " + pageId, e);
-        }
-        finally
-        {
-            shutdownHttpClient(httpClient);
         }
 
         return null;
@@ -405,10 +394,6 @@ public class MindTouchHelper
         {
             logger.error("Fail to get page properties for pageId: " + pageId, e);
         }
-        finally
-        {
-            shutdownHttpClient(httpClient);
-        }
 
         return null;
     }
@@ -438,10 +423,6 @@ public class MindTouchHelper
         {
             logger.error("Fail to get page properties for pagePath: " + pagePath, e);
         }
-        finally
-        {
-            shutdownHttpClient(httpClient);
-        }
 
         return null;
     }
@@ -470,10 +451,6 @@ public class MindTouchHelper
         catch (Exception e)
         {
             logger.error("Fail to get page files for pageId: " + pageId, e);
-        }
-        finally
-        {
-            shutdownHttpClient(httpClient);
         }
 
         return null;
@@ -522,10 +499,6 @@ public class MindTouchHelper
         catch (Exception e)
         {
             logger.error("Fail to get page file for url: " + url, e);
-        }
-        finally
-        {
-            shutdownHttpClient(httpClient);
         }
 
         return null;
@@ -623,10 +596,6 @@ public class MindTouchHelper
         {
             logger.warn("Fail to get page info for page: " + url, e);
         }
-        finally
-        {
-            shutdownHttpClient(httpClient);
-        }
 
         return null;
     }
@@ -698,7 +667,7 @@ public class MindTouchHelper
      * @param targetLocale
      * @throws Exception
      */
-	public synchronized void postPageContents(File contentsTrgFile,
+	public void postPageContents(File contentsTrgFile,
 			MindTouchPageInfo pageInfo, String sourceLocale, String targetLocale)
 			throws Exception
     {
@@ -714,40 +683,57 @@ public class MindTouchHelper
             // to be safe, it must use "text/plain" content type instead of
             // "text/xml" or "application/xml".
             String content = FileUtil.readFile(contentsTrgFile, "UTF-8");
+            content = StringUtil.replace(content, "&nbsp;", "&#160;");
             String title = getTitleFromTranslatedContentXml(content);
-			content = handleFiles(pageInfo.getPageId(), content, targetLocale,
-					sourceLocale, pageInfo);
-            content = EditUtil.decodeXmlEntities(content);
-            content = EditUtil.decodeXmlEntities(content);
-            content = content.substring(content.indexOf("<body>") + 6);
-            content = content.substring(0, content.indexOf("</body>"));
-            StringEntity reqEntity = new StringEntity(content, "UTF-8");
-            reqEntity.setContentType("text/plain; charset=UTF-8");
-
-            path = getNewPath(pageInfo, sourceLocale, targetLocale);
-			String strUrl = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path
-					+ "/contents?edittime=now&abort=never";
-			if (title != null)
-			{
-				strUrl += "&title=" + title;
-			}
-
-			URL url = new URL(strUrl);
-			URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(),
-					url.getQuery(), null);
-			HttpPost httppost = getHttpPost(uri, targetLocale);
-            httppost.setEntity(reqEntity);
-
-            HttpResponse response = httpClient.execute(httppost);
-
-            String entityContent = null;
-            if (response.getEntity() != null) {
-                entityContent = EntityUtils.toString(response.getEntity());
-            }
-            if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+            // Only when target server exists, do this...
+            if (isTargetServerExist(targetLocale))
             {
-				logger.error("Fail to post contents back to MindTouch server for page '"
-						+ path + "' : " + entityContent);
+				content = handleFiles(pageInfo.getPageId(), content,
+						targetLocale, sourceLocale, pageInfo);
+            }
+
+            int times = 0;
+            while (times < 2)
+            {
+        		times++;
+        		String tmpContent = content;
+            	if (times == 1) {
+            		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
+            		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
+            	}
+            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
+            	tmpContent = tmpContent.substring(tmpContent.indexOf("<body>") + 6);
+            	tmpContent = tmpContent.substring(0, tmpContent.indexOf("</body>"));
+                StringEntity reqEntity = new StringEntity(tmpContent, "UTF-8");
+                reqEntity.setContentType("text/plain; charset=UTF-8");
+
+                path = getNewPath(pageInfo, sourceLocale, targetLocale);
+    			String strUrl = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path
+    					+ "/contents?edittime=now&abort=never";
+    			if (title != null) {
+    				strUrl += "&title=" + title;
+    			}
+    			URL url = new URL(strUrl);
+    			URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(),
+    					url.getQuery(), null);
+    			HttpPost httppost = getHttpPost(uri, targetLocale);
+
+    			httppost.setEntity(reqEntity);
+                HttpResponse response = httpClient.execute(httppost);
+
+                String entityContent = null;
+                if (response.getEntity() != null) {
+                    entityContent = EntityUtils.toString(response.getEntity());
+                }
+                if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+                {
+					logger.error("Fail to post contents back to MindTouch server for page '"
+							+ path + "' : " + entityContent);
+                }
+                else
+                {
+                	break;
+                }
             }
         }
         catch (Exception e)
@@ -755,10 +741,6 @@ public class MindTouchHelper
             logger.error(
                     "Fail to post contents back to MindTouch server for page '"
                             + path + "'.", e);
-        }
-        finally
-        {
-            shutdownHttpClient(httpClient);
         }
     }
 
@@ -788,9 +770,11 @@ public class MindTouchHelper
         {
             url = getPutServerUrl(targetLocale);
         	path = getNewPath(pageInfo, sourceLocale, targetLocale);
-            // To add tags to page, the page must exist. Wait at most 3 minutes.
+			// To add tags to page, the page must exist. Should ensure the page
+			// has been created before this. The loop waiting should not happen
+			// actually.
             int count = 0;
-            while (count < 300 && getPageInfo(url, path) == null)
+            while (count < 5 && getPageInfo(url, path) == null)
             {
                 count++;
                 Thread.sleep(1000);
@@ -822,10 +806,6 @@ public class MindTouchHelper
             logger.error(
                     "Fail to put tags back to MindTouch server for page '"
                             + path + "'.", e);
-        }
-        finally
-        {
-            shutdownHttpClient(httpClient);
         }
     }
 
@@ -872,10 +852,6 @@ public class MindTouchHelper
             logger.error(
                     "Fail to put file back to MindTouch server for file '"
                             + filePath + "'.", e);
-        }
-        finally
-        {
-            shutdownHttpClient(httpClient);
         }
         
         return null;
@@ -932,9 +908,11 @@ public class MindTouchHelper
         {
             url = getPutServerUrl(targetLocale);
             path = getNewPath(pageInfo, sourceLocale, targetLocale);
-            // To add properties to page, the page must exist. Wait at most 3 minutes.
+			// To add properties to page, the page must exist. Should ensure the
+			// page has been created before this. The loop waiting should not
+			// happen actually.
             int count = 0;
-            while (count < 300 && getPageInfo(url, path) == null)
+            while (count < 5 && getPageInfo(url, path) == null)
             {
                 count++;
                 Thread.sleep(1000);
@@ -975,10 +953,6 @@ public class MindTouchHelper
             logger.error(
                     "Fail to put properties back to MindTouch server for page '"
                             + path + "'.", e);
-        }
-        finally
-        {
-            shutdownHttpClient(httpClient);
         }
     }
 
@@ -1058,11 +1032,14 @@ public class MindTouchHelper
      * @param sourceLocale -- sample "en_US"
      * @param targetLocale -- sample "zh_CN"
      * @return String
+     * 
+     * @throws UnsupportedEncodingException 
      */
     private String getNewPath(MindTouchPageInfo pageInfo, String sourceLocale,
-            String targetLocale)
+            String targetLocale) throws UnsupportedEncodingException
     {
         String path = pageInfo.getPath();
+        path = java.net.URLDecoder.decode(path, "UTF-8");
         // If no target server and post to source server, need re-organize path
     	if (!isTargetServerExist(targetLocale) && mtc.getIsPostToSourceServer())
     	{
@@ -1260,7 +1237,15 @@ public class MindTouchHelper
     		Element root = getDocument(content).getRootElement();
     		String title = root.attributeValue("title");
     		if (title.trim().length() > 0)
+    		{
+				// Encode the whole title is the right behavior, but as
+				// MindTouch does not decode title, we have to only encode # = &
+				// title = URLEncoder.encode(title);
+    			title = title.replace("#", "%23");
+    			title = title.replace("=", "%3D");
+    			title = title.replace("&", "%26");
     			return new String(title.trim().getBytes("UTF-8"), "UTF-8");
+    		}
     	}
     	catch (Exception e)
     	{
@@ -1404,18 +1389,21 @@ public class MindTouchHelper
 			.build();
 
 	RequestConfig requestConfig = RequestConfig.custom()
-			.setCookieSpec("mySpec").build();
+			.setCookieSpec("mySpec").setConnectTimeout(5000)
+			.setSocketTimeout(20000).build();
 
 	private CloseableHttpClient getHttpClient()
     {
-        CloseableHttpClient httpClient = HttpClients.custom()  
-                .setDefaultCookieSpecRegistry(reg)  
-                .setDefaultRequestConfig(requestConfig)  
-                .build();
+		if (httpClient == null)
+		{
+			httpClient = HttpClients.custom().setDefaultCookieSpecRegistry(reg)
+					.setDefaultRequestConfig(requestConfig).build();
+		}
+
         return httpClient;
     }
 
-    private void shutdownHttpClient(CloseableHttpClient httpClient)
+    public void shutdownHttpClient()
     {
         if (httpClient == null)
             return;

@@ -19,9 +19,7 @@ package com.globalsight.connector.blaise;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -37,14 +35,7 @@ import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
-import com.globalsight.cxe.entity.customAttribute.Attribute;
-import com.globalsight.cxe.entity.customAttribute.Condition;
-import com.globalsight.cxe.entity.customAttribute.DateCondition;
-import com.globalsight.cxe.entity.customAttribute.FloatCondition;
-import com.globalsight.cxe.entity.customAttribute.IntCondition;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
-import com.globalsight.cxe.entity.customAttribute.ListCondition;
-import com.globalsight.cxe.entity.customAttribute.TextCondition;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.cxe.util.CxeProxy;
@@ -72,13 +63,15 @@ public class CreateBlaiseJobThread  extends Thread
     private File attachFile;
     private String attachFileName;
     private String uuid;
+    List<JobAttribute> jobAttribtues = null;
     private TranslationInboxEntryVo curEntry = null;
     private FileProfile curFileProfile = null;
 
 	public CreateBlaiseJobThread(User user, String currentCompanyId,
 			BlaiseConnector conn, CreateBlaiseJobForm blaiseForm,
 			TranslationInboxEntryVo curEntry, FileProfile curFileProfile,
-			File attachFile, String attachFileName, String uuid)
+			File attachFile, String attachFileName, String uuid,
+			List<JobAttribute> jobAttribtues)
     {
         super();
 
@@ -89,6 +82,7 @@ public class CreateBlaiseJobThread  extends Thread
         this.attachFile = attachFile;
         this.attachFileName = attachFileName;
         this.uuid = uuid;
+        this.jobAttribtues = jobAttribtues;
         this.curEntry = curEntry;
         this.curFileProfile = curFileProfile;
     }
@@ -109,6 +103,7 @@ public class CreateBlaiseJobThread  extends Thread
 
             Locale trgLocale = curEntry.getTargetLocale();
             String targetLocale = trgLocale.getLanguage() + "_" + trgLocale.getCountry();
+            targetLocale = BlaiseHelper.fixLocale(targetLocale);
 
 			Job job = JobCreationMonitor.initializeJob(jobName, uuid,
 					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
@@ -126,8 +121,7 @@ public class CreateBlaiseJobThread  extends Thread
 
             Set<String> fileNames = filesToFpId.keySet();
             Integer pageCount = new Integer(fileNames.size());
-            List<JobAttribute> jobAttribtues = getJobAttributes(
-                    blaiseForm.getAttributeString(), l10Profile);
+
             // cache job attributes if there are any
             if (jobAttribtues != null && jobAttribtues.size() != 0)
             {
@@ -253,87 +247,6 @@ public class CreateBlaiseJobThread  extends Thread
         thread.createJobAttributes();
     }
 
-    private List<JobAttribute> getJobAttributes(String attributeString,
-            BasicL10nProfile l10Profile)
-    {
-        List<JobAttribute> jobAttributeList = new ArrayList<JobAttribute>();
-
-        if (l10Profile.getProject().getAttributeSet() == null)
-        {
-            return null;
-        }
-
-        if (StringUtils.isNotEmpty(attributeString))
-        {
-            String[] attributes = attributeString.split(";.;");
-            for (String ele : attributes)
-            {
-                try
-                {
-                    String attributeId = ele.substring(ele.indexOf(",.,") + 3,
-                            ele.lastIndexOf(",.,"));
-                    String attributeValue = ele.substring(ele
-                            .lastIndexOf(",.,") + 3);
-
-                    Attribute attribute = HibernateUtil.get(Attribute.class,
-                            Long.parseLong(attributeId));
-                    JobAttribute jobAttribute = new JobAttribute();
-                    jobAttribute.setAttribute(attribute.getCloneAttribute());
-                    if (attribute != null
-                            && StringUtils.isNotEmpty(attributeValue))
-                    {
-                        Condition condition = attribute.getCondition();
-                        if (condition instanceof TextCondition)
-                        {
-                            jobAttribute.setStringValue(attributeValue);
-                        }
-                        else if (condition instanceof IntCondition)
-                        {
-                            jobAttribute.setIntegerValue(Integer
-                                    .parseInt(attributeValue));
-                        }
-                        else if (condition instanceof FloatCondition)
-                        {
-                            jobAttribute.setFloatValue(Float
-                                    .parseFloat(attributeValue));
-                        }
-                        else if (condition instanceof DateCondition)
-                        {
-                            SimpleDateFormat sdf = new SimpleDateFormat(
-                                    DateCondition.FORMAT);
-                            jobAttribute
-                                    .setDateValue(sdf.parse(attributeValue));
-                        }
-                        else if (condition instanceof ListCondition)
-                        {
-                            String[] options = attributeValue.split("#@#");
-                            List<String> optionValues = Arrays.asList(options);
-                            jobAttribute.setValue(optionValues, false);
-                        }
-                    }
-                    jobAttributeList.add(jobAttribute);
-                }
-                catch (Exception e)
-                {
-                    logger.error("Failed to get job attributes", e);
-                }
-            }
-        }
-        else
-        {
-            List<Attribute> attsList = l10Profile.getProject()
-                    .getAttributeSet().getAttributeAsList();
-            for (Attribute att : attsList)
-            {
-                JobAttribute jobAttribute = new JobAttribute();
-                jobAttribute.setAttribute(att.getCloneAttribute());
-                jobAttributeList.add(jobAttribute);
-            }
-        }
-
-        return jobAttributeList;
-    }
-
     private String addJobNameSuffix(String jobName)
     {
         String randomStr = String.valueOf((new Random()).nextInt(999999999));
@@ -343,7 +256,7 @@ public class CreateBlaiseJobThread  extends Thread
         return jobName + "_" + randomStr;
     }
 
-    @Override
+	@Override
     public void run()
     {
         try

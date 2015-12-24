@@ -53,13 +53,14 @@ public class MindTouchBasicHandler extends PageActionHandler
         {
         	// Test source server
             MindTouchConnector mtc = (MindTouchConnector) form;
-            MindTouchHelper helper = new MindTouchHelper(mtc);
+            MindTouchHelper srcHelper = new MindTouchHelper(mtc);
             JSONObject json = new JSONObject();
             String errorMsg = "";
-            if(StringUtil.isNotEmpty(helper.doTest()))
+            if(StringUtil.isNotEmpty(srcHelper.doTest()))
             {
             	errorMsg = "Failed to connect to MindTouch source server";
             }
+            srcHelper.shutdownHttpClient();
 
             // Test target servers
             if (StringUtil.isEmpty(errorMsg))
@@ -68,19 +69,20 @@ public class MindTouchBasicHandler extends PageActionHandler
                 if(StringUtil.isNotEmpty(targetLocaleStr))
                 {
                 	String[] targetLocales = targetLocaleStr.split(",");
-                	for(String targetLocale: targetLocales)
+					for (String targetLocale : targetLocales)
                 	{
                 		if(StringUtil.isNotEmpty(targetLocale))
                 		{
                 			mtc.setUrl(request.getParameter("targetUrl" + targetLocale));
                 			mtc.setUsername(request.getParameter("targetUsername" + targetLocale));
                 			mtc.setPassword(request.getParameter("targetPassword" + targetLocale));
-                			helper = new MindTouchHelper(mtc);
-                			if(StringUtil.isNotEmpty(helper.doTest()))
+                			MindTouchHelper trgHelper = new MindTouchHelper(mtc);
+                			if(StringUtil.isNotEmpty(trgHelper.doTest()))
                             {
                             	errorMsg = "Failed to connect to MindTouch source server for locale: " + targetLocale;
                             	break;
                             }
+                			trgHelper.shutdownHttpClient();
                 		}
                 	}
                 }

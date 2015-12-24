@@ -123,6 +123,7 @@ public class MindTouchCreateJobHandler extends PageActionHandler
             MindTouchHelper helper = new MindTouchHelper(mtc);
             String treeXml = helper.getTreeXml("home");
             MindTouchPage mtp = helper.parseTreeXml(treeXml);
+            helper.shutdownHttpClient();
 
             out.write(getJSON(mtp).getBytes("UTF-8"));
         }

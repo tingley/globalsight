@@ -909,7 +909,7 @@ function confirmForm(formSent) {
        alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
        return false;
     }
-    if (!isAllDigits(formSent.tuAttNotMatchPenalty.value))
+    if (formSent.tuAttNotMatchPenalty && !isAllDigits(formSent.tuAttNotMatchPenalty.value))
     {
        alert("<%= bundle.getString("msg_tu_attribute_penalty") %>" + "<%= bundle.getString("jsmsg_numeric") %>");
        return false;
@@ -947,7 +947,9 @@ function confirmForm(formSent) {
 	   return false;
 	}
 	//check penalty between 1 and 100
-	if (!checkIsVaildPercent2(formSent.tuAttNotMatchPenalty.value)){
+	if (formSent.tuAttNotMatchPenalty 
+			&& !checkIsVaildPercent2(formSent.tuAttNotMatchPenalty.value))
+	{
 	   return false;
 	}
 
@@ -1650,10 +1652,7 @@ function doOnLoad()
 
                                 </SELECT>
                               </TD>
-							  
                         </TR>
-
-						
                         <TR>
                            <TD ALIGN="LEFT" STYLE="vertical-align: middle">
                               <%=lbmultLingLeveraging%>:

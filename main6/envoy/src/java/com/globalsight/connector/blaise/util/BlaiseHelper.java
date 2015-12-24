@@ -52,19 +52,7 @@ public class BlaiseHelper
     private BlaiseConnector blc = null;
 
     private static List<String> specialChars = new ArrayList<String>();
-    {
-    	specialChars.add("\\");
-    	specialChars.add("/");
-    	specialChars.add(":");
-    	specialChars.add("*");
-    	specialChars.add("?");
-    	specialChars.add("\"");
-    	specialChars.add("'");
-    	specialChars.add("<");
-    	specialChars.add(">");
-    	specialChars.add("|");
-    }
-    
+
     public BlaiseHelper (BlaiseConnector blc)
     {
     	this.blc = blc;
@@ -146,7 +134,52 @@ public class BlaiseHelper
 		return results;
 	}
 
-    /**
+    public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids)
+    {
+    	TranslationAgencyClient client = null;
+		try
+		{
+			client = getTranslationClient();
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+		}
+		if (client != null)
+		{
+	    	return listInboxByIds(client, ids);
+		}
+
+		return null;
+    }
+
+	private List<TranslationInboxEntryVo> listInboxByIds(
+			TranslationAgencyClient client, Set<Long> ids)
+    {
+		List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
+		try
+		{
+			List<InboxEntry> inboxEntries = client.listInbox(ids);
+			for (InboxEntry entry : inboxEntries)
+			{
+				TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
+						(TranslationInboxEntry) entry);
+				results.add(vo);
+			}
+		}
+		catch (Exception e)
+		{
+			logger.warn("Error when invoke listInboxByIds: " + e.getMessage());
+			if (logger.isDebugEnabled())
+			{
+				logger.error(e);
+			}
+		}
+
+		return results;
+    }
+
+	/**
 	 * Claim Blaise inbox entries. If it has been claimed, Blaise API will throw
 	 * exception/warning.
 	 * 
@@ -161,11 +194,11 @@ public class BlaiseHelper
 			TranslationAgencyClient client = getTranslationClient();
     		Set<Long> ids = new HashSet<Long>();
     		ids.add(id);
-			client.claim(ids);
+    		client.claim(ids);
 		}
 		catch (Exception e)
 		{
-			if (e.getMessage().toLowerCase().contains("task already claimed"))
+			if (e.getMessage().toLowerCase().contains("task already claimed."))
 			{
 				logger.warn("Warning when claim entry(" + id + "): "
 						+ e.getMessage());
@@ -229,10 +262,25 @@ public class BlaiseHelper
 
 	public void complete(Set<Long> ids)
     {
-    	for (Long id : ids)
-    	{
-    		complete(id);
-    	}
+		try
+		{
+			TranslationAgencyClient client = getTranslationClient();
+	    	for (Long id : ids)
+	    	{
+	    		try
+	    		{
+	    			client.complete(id);
+	    		}
+	    		catch (Exception e)
+	    		{
+	    			logger.error("Failed to complete entry: " + id, e);
+	    		}
+	    	}
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+		}
     }
 
     public void complete(long id)
@@ -282,13 +330,29 @@ public class BlaiseHelper
 	public static String getEntryFileName(TranslationInboxEntryVo entry)
 	{
 		StringBuilder fileName = new StringBuilder();
+		String des = entry.getDescription();
+		if (des == null || des.trim().length() == 0)
+		{
+			des = "No Description";
+		}
+		else
+		{
+			des = des.trim();
+			if (des.length() > 55)
+			{
+				des = des.substring(0, 50);
+			}
+		}
+
+		String localeInfo = fixLocale(entry.getEntry().getTargetLocale()
+				.getLocaleCode());
 		fileName.append("Blaise Entry ")
 				.append(entry.getId())
 				.append(DASH)
-				.append(entry.getDescription()).append(DASH)
+				.append(des).append(DASH)
 				.append(entry.getRelatedObjectId()).append(DASH)
 				.append(entry.getSourceRevision()).append(DASH)
-				.append(entry.getEntry().getTargetLocale().getLocaleCode())
+				.append(localeInfo)
 				.append(".xlf").toString();
 		String fileNameStr = fileName.toString();
 
@@ -304,6 +368,8 @@ public class BlaiseHelper
 
 	private static String handleFileName(String fileName)
 	{
+		initSpecialChars();
+
 		for (String specialChar : specialChars)
 		{
 			fileName = fileName.replace(specialChar, " ");
@@ -316,4 +382,39 @@ public class BlaiseHelper
 		}
 		return fileName;
 	}
+
+	private synchronized static void initSpecialChars()
+	{
+		if (specialChars.size() == 0)
+		{
+			specialChars.add("\\");
+			specialChars.add("/");
+			specialChars.add(":");
+			specialChars.add("*");
+			specialChars.add("?");
+			specialChars.add("\"");
+			specialChars.add("'");
+			specialChars.add("<");
+			specialChars.add(">");
+			specialChars.add("|");
+		}
+	}
+
+	public static String fixLocale(String localeString)
+    {
+    	if (localeString.startsWith("iw"))
+        {
+    		localeString = "he" + localeString.substring(2);
+    	}
+    	else if (localeString.startsWith("ji"))
+    	{
+    		localeString = "yi" + localeString.substring(2);
+    	}
+    	else if (localeString.startsWith("in"))
+    	{
+    		localeString = "id" + localeString.substring(2);
+    	}
+
+    	return localeString;
+    }
 }

@@ -64,10 +64,17 @@ public class OfficeXmlRepairer
 
     public static void repair(String path)
     {
+        repair(path, null);
+    }
+
+    public static void repair(String path, String targetLocale)
+    {
         try
         {
             List<OfficeRepairer> repairers = new ArrayList<OfficeRepairer>();
-            repairers.add(new WordRepairer(path));
+            WordRepairer wordRepairer = new WordRepairer(path);
+            wordRepairer.setTargetLocale(targetLocale);
+            repairers.add(wordRepairer);
             repairers.add(new PptxRepairer(path));
             repairers.add(new ExcelRepairer(path));
 
@@ -89,7 +96,7 @@ public class OfficeXmlRepairer
         {
             return xmlContent;
         }
-        
+
         String lang = locale;
         if (locale != null)
         {
@@ -100,9 +107,10 @@ public class OfficeXmlRepairer
 
         if (xmlContent.endsWith("</w:document>"))
         {
-            String result = fixRtlDocumentXml(xmlContent, lang);
+            // has been moved to WordRepairer.forRtl
+            // String result = fixRtlDocumentXml(xmlContent, lang);
 
-            return result;
+            return xmlContent;
         }
         else if (xmlContent.endsWith("</w:ftr>")
                 || xmlContent.endsWith("</w:hdr>")
@@ -379,7 +387,7 @@ public class OfficeXmlRepairer
             result.append(before);
 
             StringBuffer vsb = new StringBuffer();
-            
+
             // add rtl="1" for a:p in p:sld XML
             if (v.contains(s_apPrRtl))
             {
@@ -466,13 +474,13 @@ public class OfficeXmlRepairer
         {
             return ccc;
         }
-        
+
         StringBuffer src = new StringBuffer(ccc);
         StringBuffer result = new StringBuffer();
-        StringIndex si = StringIndex.getValueBetween(src, 0, startTag,
-                s_gtMark);
+        StringIndex si = StringIndex
+                .getValueBetween(src, 0, startTag, s_gtMark);
         String after = null;
-        
+
         while (si != null)
         {
             String b = src.substring(0, si.start);
@@ -484,7 +492,7 @@ public class OfficeXmlRepairer
             {
                 int index1 = v.indexOf(attStart) + attStart.length();
                 int index2 = v.indexOf("\"", index1);
-                
+
                 if (index1 != -1 && index2 != -1)
                 {
                     result.append(v.substring(0, index1));
@@ -495,7 +503,7 @@ public class OfficeXmlRepairer
                 {
                     result.append(v);
                 }
-                
+
             }
             else
             {

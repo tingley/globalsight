@@ -222,6 +222,7 @@ import com.globalsight.importer.IImportManager;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.tm.LeveragingLocales;
+import com.globalsight.ling.tm2.AbstractTmTuv;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
@@ -11281,13 +11282,49 @@ public class Ambassador extends AbstractWebService
                 targetLocales.add(trgGSLocale);
             }
 
-            StringBuffer result = new StringBuffer();
-            for (SegmentTmTu segTmTu : segTmTus)
-            {
-                result.append(TmxUtil.convertToTmx(segTmTu, targetLocales));
-            }
+			StringBuffer result = new StringBuffer();
+			IExportManager exporter = null;
+			String options = null;
+			exporter = TmManagerLocal.getProjectTmExporter(ptm.getName());
+			options = exporter.getExportOptions();
+			Document doc = DocumentHelper.parseText(options);
+			Element rootElt = doc.getRootElement();
+			Iterator fileIter = rootElt.elementIterator("fileOptions");
+			while (fileIter.hasNext())
+			{
+				Element fileEle = (Element) fileIter.next();
+				Element fileTypeElem = fileEle.element("fileType");
+				fileTypeElem.setText("xml");
+			}
+			
+			Iterator filterIter = rootElt.elementIterator("filterOptions");
+			while (filterIter.hasNext())
+			{
+				Element filterEle = (Element) filterIter.next();
+				Element language = filterEle.element("language");
+				if (trgGSLocale != null)
+				{
+					language.setText(trgGSLocale.getLanguage() + "_"
+							+ trgGSLocale.getCountry());
+				}
+			}
 
-            return result.toString();
+			options = doc.asXML().substring(
+					doc.asXML().indexOf("<exportOptions>"));
+			exporter.setExportOptions(options);
+
+			Tmx tmx = new Tmx();
+			tmx.setSourceLang(Tmx.DEFAULT_SOURCELANG);
+			tmx.setDatatype(Tmx.DATATYPE_HTML);
+
+			TmxWriter tmxWriter = new TmxWriter(
+					exporter.getExportOptionsObject(), ptm, tmx);
+			for (SegmentTmTu segTmTu : segTmTus)
+			{
+				result.append(tmxWriter.getSegmentTmForXml(segTmTu));
+			}
+
+			return result.toString();
         }
         catch (Exception e)
         {
@@ -11716,9 +11753,22 @@ public class Ambassador extends AbstractWebService
         {
             Element elem = (Element) nodes.get(i);
             SegmentTmTuv tuv = new SegmentTmTuv();
+            PageTmTu pageTmTu = new PageTmTu(-1, -1, "plaintext", "text",
+            		true);
+            tuv.setTu(pageTmTu);
             tuv.setSid(sid);
             TmxUtil.convertFromTmx(elem, tuv);
 
+            Collection splitSegments = tuv.prepareForSegmentTm();
+
+            Iterator itSplit = splitSegments.iterator();
+            while (itSplit.hasNext())
+			{
+				AbstractTmTuv.SegmentAttributes segAtt = (AbstractTmTuv.SegmentAttributes) itSplit
+						.next();
+				String segmentString = segAtt.getText();
+				tuv.setSegment(segmentString);
+			}
             // Check the locale
             List<SegmentTmTuv> savedTuvs = new ArrayList<SegmentTmTuv>();
             for (BaseTmTuv savedTuv : tu.getTuvs())

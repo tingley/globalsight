@@ -33,12 +33,11 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
+import org.apache.xalan.transformer.TransformerIdentityImpl;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -307,12 +306,11 @@ public class ExcelStyleUtil extends StyleUtil
                 // negative also needs to be filtered
                 continue;
             }
-            
+
             String group1 = sheetMatcher.group(1);
             group1 = group1.replaceAll(" t=\"[^\"]*\"", "");
-            String newString = group1 + " t=\"s\""
-                    + sheetMatcher.group(2) + siNumberInSharedString
-                    + sheetMatcher.group(4);
+            String newString = group1 + " t=\"s\"" + sheetMatcher.group(2)
+                    + siNumberInSharedString + sheetMatcher.group(4);
 
             Matcher sharedStringMatcher = PATTERN_SHARED_STRING_SI
                     .matcher(sharedString);
@@ -456,8 +454,7 @@ public class ExcelStyleUtil extends StyleUtil
      */
     private void saveToFile(Document document, String path) throws Exception
     {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
+        TransformerIdentityImpl transformer = new TransformerIdentityImpl();
         DOMSource source = new DOMSource(document);
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");

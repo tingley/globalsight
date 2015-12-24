@@ -178,8 +178,10 @@ public class Upgrade
             String upgradePath = UPGRADE_UTIL.getPath().replace("\\", "/");
             
             path = path.replace(serverPath, upgradePath);
-            
+            if (!path.contains("globe_header.gif"))
+            {//Add condition to skip globe_header.gif
             FileUtil.copyFile(f, new File(path));
+            }
     	}
     }
     

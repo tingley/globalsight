@@ -501,8 +501,11 @@ public class Exporter
             // For eloqua file
             handleEloquaFiles(finalFileName, fp, wf, hasScript);
 
-            // For MindTouch file
-            handleMindTouchFiles(finalFileName, fp, wf);
+            // For Blaise file
+            if (wf.getJob().isBlaiseJob())
+            {
+                handleBlaiseFiles(finalFileName, wf);
+            }
 
             // For GitConnector file
 			String tmpDisplayName = m_displayName.substring(0,
@@ -594,6 +597,9 @@ public class Exporter
 
                 if (isLastFile())
                 {
+                    // Post/push files back to MindTouch server
+                    handleMindTouchFiles(wf, FILE_STATES.get(m_batchId));
+
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);
 
@@ -601,9 +607,6 @@ public class Exporter
                     XliffFileUtil.processXLZFiles(wf);
                 }
             }
-
-            // For Blaise file (AFTER processing XLIFF/XLZ files)
-            handleBlaiseFiles(finalFileName, wf);
         }
         catch (FileSystemAdapterException fsae)
         {
@@ -643,68 +646,143 @@ public class Exporter
     }
 
     /**
-     * When export, post contents/tags back to MindTouch server.
-     * 
-     * @param finalFileName
-     *            -- the absolute full pathname.
+     * When export, post contents/tags/properties back to MindTouch server.
+     *
      */
-    private void handleMindTouchFiles(String finalFileName, FileProfile fp,
-            Workflow wf)
+    private void handleMindTouchFiles(Workflow wf, FileState[] fileStates)
     {
-        try
-        {
-            // MindTouch file name is like "$MindTouch Title$(contents).xml" or
-            // ""$MindTouch Title$(tags).xml".
-            if (finalFileName.endsWith("(contents).xml")
-                    || finalFileName.endsWith("(tags).xml")
-                    || finalFileName.endsWith("(properties).xml"))
-            {
-                finalFileName = finalFileName.replace("/", "\\");
-                String sourceLocale = wf.getJob().getL10nProfile()
-                        .getSourceLocale().toString();
-                String targetLocale = wf.getTargetLocale().toString();
-                String sourceFilePathName = finalFileName
-                        .replaceFirst("\\\\" + targetLocale + "\\\\", "\\\\"
-                                + sourceLocale + "\\\\");
+    	File docDir = AmbFileStoragePathUtils.getCxeDocDir(wf.getCompanyId());
 
-                File trgFile = new File(finalFileName);
-                File srcFile = new File(sourceFilePathName);
-                if (srcFile.exists())
-                {
-                    File objFile = new File(sourceFilePathName + ".obj");
-                    if (objFile.exists())
-                    {
-                        MindTouchPageInfo pageInfo = MindTouchHelper
-                                .parseObjFile(objFile);
-                        long mtcId = Long.parseLong(pageInfo
-                                .getMindTouchConnectorId());
-                        MindTouchConnector mtc = MindTouchManager
-                                .getMindTouchConnectorById(mtcId);
-                        MindTouchHelper helper = new MindTouchHelper(mtc);
-                        if (finalFileName.endsWith("(contents).xml"))
-                        {
-                            helper.postPageContents(trgFile, pageInfo,
-                                    sourceLocale, targetLocale);
-                        }
-                        else if (finalFileName.endsWith("(tags).xml"))
-                        {
-                            helper.putPageTags(trgFile, pageInfo, sourceLocale,
-                                    targetLocale);
-                        }
-                        else if(finalFileName.endsWith("(properties).xml"))
-                        {
-                        	helper.putPageProperties(trgFile, pageInfo, sourceLocale,
-                                    targetLocale);
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error(e);
-        }
+    	// Get all target files that are exported
+    	List<File> trgFiles = new ArrayList<File>();
+    	if (fileStates != null)
+    	{
+    		for (FileState fs : fileStates)
+    		{
+    			String file = fs.getFile();
+    			File f = new File(docDir, file);
+    			if (f != null && f.exists())
+    			{
+        			trgFiles.add(f);
+    			}
+    		}
+    	}
+
+    	MindTouchHelper helper = null;
+    	try
+    	{
+    		// Initialize one MindTouchHelper for all files from one job
+            String sourceLocale = wf.getJob().getL10nProfile()
+                    .getSourceLocale().toString();
+            String targetLocale = wf.getTargetLocale().toString();
+        	long jobId = wf.getJob().getJobId();
+            String srcLocale = "/" + sourceLocale + "/" + jobId + "/";
+    		String trgLocale = "/" + targetLocale + "/" + jobId + "/";
+        	for (File trgFile : trgFiles)
+        	{
+				MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale,
+						trgLocale, trgFile);
+        		if (pageInfo != null)
+        		{
+					long mtcId = Long.parseLong(pageInfo
+							.getMindTouchConnectorId());
+					MindTouchConnector mtc = MindTouchManager
+							.getMindTouchConnectorById(mtcId);
+					helper = new MindTouchHelper(mtc);
+
+					break;
+        		}
+        	}
+
+        	// As need post content to create page first, group them first
+        	List<File> contentFiles = new ArrayList<File>();
+        	List<File> tagFiles = new ArrayList<File>();
+        	List<File> propFiles = new ArrayList<File>();
+        	String path = null;
+        	for (File trgFile : trgFiles)
+        	{
+        		path = trgFile.getAbsolutePath();
+        		if (path.endsWith("(contents).xml"))
+        		{
+        			contentFiles.add(trgFile);
+        		}
+        		else if (path.endsWith("(tags).xml"))
+        		{
+        			tagFiles.add(trgFile);
+        		}
+        		else if (path.endsWith("(properties).xml"))
+        		{
+        			propFiles.add(trgFile);
+        		}
+        	}
+
+        	// Post content files one by one
+        	for (File trgFile : contentFiles)
+        	{
+        		try
+        		{
+					MindTouchPageInfo pageInfo = getMindTouchPageInfo(
+							srcLocale, trgLocale, trgFile);
+					helper.postPageContents(trgFile, pageInfo, sourceLocale,
+							targetLocale);
+                    logger.info("MindTouch content is posted to target server: " + trgFile);
+        		}
+        		catch (Exception e)
+        		{
+        			logger.error("postPageContents: " + trgFile, e);
+        		}
+        	}
+
+        	// Put tag files one by one
+        	for (File trgFile : tagFiles)
+        	{
+				MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale,
+						trgLocale, trgFile);
+				helper.putPageTags(trgFile, pageInfo, sourceLocale,
+						targetLocale);
+                logger.info("MindTouch tag is put to target server: " + trgFile);
+        	}
+
+        	// put properties files one by one
+        	for (File trgFile : propFiles)
+        	{
+				MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale,
+						trgLocale, trgFile);
+				helper.putPageProperties(trgFile, pageInfo, sourceLocale,
+						targetLocale);
+                logger.info("MindTouch properties is put to target server: " + trgFile);
+        	}
+    	}
+    	finally
+    	{
+    		if (helper != null)
+    		{
+            	helper.shutdownHttpClient();
+    		}
+    	}
     }
+
+    /**
+     * 
+     * @param sourceLocale -- like "/en_US/1234/"
+     * @param targetLocale -- like "/fr_FR/1234/"
+     * @param trgFile
+     * @return
+     */
+	private MindTouchPageInfo getMindTouchPageInfo(String sourceLocale,
+			String targetLocale, File trgFile)
+	{
+		String trgPath = trgFile.getAbsolutePath().replace("\\", "/");
+		String srcPath = trgPath.replace(targetLocale, sourceLocale);
+
+		File objFile = new File(srcPath + ".obj");
+		if (objFile != null && objFile.exists())
+		{
+			return MindTouchHelper.parseObjFile(objFile);
+		}
+
+		return null;
+	}
 
     /**
      * When export, post Blaise xliff back to Blaise server.

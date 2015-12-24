@@ -80,13 +80,14 @@ public class StatisticsService
      * Calculate word counts for all target pages in a workflow, and calculate
      * the repetitions in the scope of workflow.
      */
-    public static void calculateTargetPagesWordCount(Workflow p_workflow,
+    @SuppressWarnings("rawtypes")
+	public static void calculateTargetPagesWordCount(Workflow p_workflow,
             Vector<String> p_excludedTuTypes)
     {
         try
         {
             List<TargetPage> targetPages = getAllTargetPagesForWorkflow(p_workflow);
-            Map<SegmentTmTuv, List<SegmentTmTuv>> uniqueSegments = new HashMap<SegmentTmTuv, List<SegmentTmTuv>>();
+            Map<Long, List<SegmentTmTuv>> uniqueSegments = new HashMap<Long, List<SegmentTmTuv>>();
             Map uniqueSegments2 = new HashMap();
             int threshold = p_workflow.getJob().getLeverageMatchThreshold();
             long jobId = p_workflow.getJob().getId();
@@ -504,7 +505,7 @@ public class StatisticsService
     private static PageWordCounts calculateTargetPageWordCounts(
             ArrayList<BaseTmTuv> sTuvs, MatchTypeStatistics p_matches,
             Vector<String> p_excludedTuTypes,
-            Map<SegmentTmTuv, List<SegmentTmTuv>> m_uniqueSegments)
+            Map<Long, List<SegmentTmTuv>> m_uniqueSegments)
     {
         // 100 cases
         int contextMatchWordCount = 0;
@@ -581,12 +582,12 @@ public class StatisticsService
                     poMatchWordCount += wordCount;
                     break;
                 case MatchTypeStatistics.LOW_FUZZY:
-                    identicalSegments = (ArrayList<SegmentTmTuv>) m_uniqueSegments
-                            .get(tuv);
+                	identicalSegments = (ArrayList<SegmentTmTuv>) m_uniqueSegments
+						.get(tuv.getExactMatchKey());
                     if (identicalSegments == null)
                     {
                         identicalSegments = new ArrayList<SegmentTmTuv>();
-                        m_uniqueSegments.put(tuv, identicalSegments);
+                        m_uniqueSegments.put(tuv.getExactMatchKey(), identicalSegments);
                         identicalSegments.add(tuv);
                         lowFuzzyWordCount += wordCount;
                         if (isMtTranslation)
@@ -602,11 +603,11 @@ public class StatisticsService
                     break;
                 case MatchTypeStatistics.MED_FUZZY:
                     identicalSegments = (ArrayList<SegmentTmTuv>) m_uniqueSegments
-                            .get(tuv);
+                            .get(tuv.getExactMatchKey());
                     if (identicalSegments == null)
                     {
                         identicalSegments = new ArrayList<SegmentTmTuv>();
-                        m_uniqueSegments.put(tuv, identicalSegments);
+                        m_uniqueSegments.put(tuv.getExactMatchKey(), identicalSegments);
                         identicalSegments.add(tuv);
                         medFuzzyWordCount += wordCount;
                         if (isMtTranslation)
@@ -622,11 +623,11 @@ public class StatisticsService
                     break;
                 case MatchTypeStatistics.MED_HI_FUZZY:
                     identicalSegments = (ArrayList<SegmentTmTuv>) m_uniqueSegments
-                            .get(tuv);
+                            .get(tuv.getExactMatchKey());
                     if (identicalSegments == null)
                     {
                         identicalSegments = new ArrayList<SegmentTmTuv>();
-                        m_uniqueSegments.put(tuv, identicalSegments);
+                        m_uniqueSegments.put(tuv.getExactMatchKey(), identicalSegments);
                         identicalSegments.add(tuv);
                         medHighFuzzyWordCount += wordCount;
                         if (isMtTranslation)
@@ -641,12 +642,12 @@ public class StatisticsService
                     }
                     break;
                 case MatchTypeStatistics.HI_FUZZY:
-                    identicalSegments = (ArrayList<SegmentTmTuv>) m_uniqueSegments
-                            .get(tuv);
+                	identicalSegments = (ArrayList<SegmentTmTuv>) m_uniqueSegments
+						.get(tuv.getExactMatchKey());
                     if (identicalSegments == null)
                     {
                         identicalSegments = new ArrayList<SegmentTmTuv>();
-                        m_uniqueSegments.put(tuv, identicalSegments);
+                        m_uniqueSegments.put(tuv.getExactMatchKey(), identicalSegments);
                         identicalSegments.add(tuv);
                         highFuzzyWordCount += wordCount;
                         if (isMtTranslation)
@@ -664,12 +665,12 @@ public class StatisticsService
                 default:
                     // no-match is counted only once and the rest are
                     // repetitions
-                    identicalSegments = (ArrayList<SegmentTmTuv>) m_uniqueSegments
-                            .get(tuv);
+                	identicalSegments = (ArrayList<SegmentTmTuv>) m_uniqueSegments
+						.get(tuv.getExactMatchKey());
                     if (identicalSegments == null)
                     {
                         identicalSegments = new ArrayList<SegmentTmTuv>();
-                        m_uniqueSegments.put(tuv, identicalSegments);
+                        m_uniqueSegments.put(tuv.getExactMatchKey(), identicalSegments);
                         identicalSegments.add(tuv);
                         noMatchWordCount += wordCount;
                         if (isMtTranslation)
@@ -830,9 +831,6 @@ public class StatisticsService
         for (int i = 0; i < sTuvs.size(); i++)
         {
             SegmentTmTuv curSrcTuv = (SegmentTmTuv) sTuvs.get(i);
-            // Repetitions do not care hash values, refer to "AbstractTmTuv.equals(..)".
-            curSrcTuv.setPreviousHash(-1);
-            curSrcTuv.setNextHash(-1);
             Types types = p_matches.getTypes(curSrcTuv.getId(),
                     ((SegmentTmTu) curSrcTuv.getTu()).getSubId());
             int matchType = types == null ? MatchTypeStatistics.NO_MATCH
@@ -917,7 +915,7 @@ public class StatisticsService
                     else
                     {
                         identicalSegments = (ArrayList) p_uniqueSegments
-                                .get(curSrcTuv);
+                                .get(curSrcTuv.getExactMatchKey());
                         /*
                          * If identicalSegments is not null, that means current
                          * TU has a same segment before, then we should get the
@@ -981,7 +979,7 @@ public class StatisticsService
                                 // Record this "srcTuv" into identicalSegments
                                 identicalSegments = new ArrayList<SegmentTmTuv>();
                                 identicalSegments.add(curSrcTuv);
-                                p_uniqueSegments.put(curSrcTuv,
+                                p_uniqueSegments.put(curSrcTuv.getExactMatchKey(),
                                         identicalSegments);
                             }
                         }

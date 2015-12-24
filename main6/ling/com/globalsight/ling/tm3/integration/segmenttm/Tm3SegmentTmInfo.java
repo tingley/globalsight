@@ -978,8 +978,10 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
             UniqueSegmentRepositoryForCorpus usr = getUniqueRepository(
                     pSourceLocale, pSegmentsToSave);
-			LOGGER.info(pSegmentsToSave.size()
-					+ " TUs from TMX are merged into " + usr.getAllTus().size());
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug(pSegmentsToSave.size()
+						+ " TUs from TMX are merged into " + usr.getAllTus().size());
+			}
 
             // Use the first TU's filename/username info for the even, on the
             // assumption that they are all the same.

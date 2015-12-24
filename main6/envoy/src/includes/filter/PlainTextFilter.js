@@ -97,7 +97,7 @@ PlainTextFilter.prototype.refreshCheckedIds = function()
 PlainTextFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId)
 {
 	this.initOptionMap(this.filter);
-	
+    plaintextFilter.currentPage = 0;
 	var str = new StringBuffer("<div style='float:left;width:500px'><table border=0 width='500px'>");
 	str.append("<tr>");
 	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	

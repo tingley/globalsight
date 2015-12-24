@@ -188,6 +188,7 @@ XMLRuleFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 {
 // alert("filterId :" + filterId + "\n" + "topFilterId :" + topFilterId);
 	this.initOptionMap(this.filter);
+	xmlFilter.currentPage=0;
 	var str = new StringBuffer("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label>");

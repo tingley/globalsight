@@ -188,11 +188,13 @@ function SegmentFilter(p_segmentFilter)
 }
 
 var localData;
+var localDataForInCtxRv;
 var jsonUrl;
 function getData(url){
 	jsonUrl=url;
 	$.getJSON(url+"&random="+Math.random(), function(data) {
-		localData = data;
+		localData = data.forList;
+		localDataForInCtxRv = data.forInCtxRv;
 		showTargetList();
 		showSourceList();
 		var refreshData;
@@ -257,7 +259,8 @@ function getData(url){
 function getDataByFrom(url,modeFrom){
 	jsonUrl=url;
 	$.getJSON(url+"&random="+Math.random(), function(data) {
-		localData = data;
+		localData = data.forList;
+		localDataForInCtxRv = data.forInCtxRv;
 		if(modeFrom == "target")
 		{
 			showTargetList();
@@ -345,6 +348,7 @@ function resetTRHeight(){
 
 function getRedata() {
 	localData = null;
+	localDataForInCtxRv = null;
 	getData(jsonUrl);
 }
 

@@ -18,6 +18,7 @@ package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,6 +68,7 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.util.online.OnlineService;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -79,6 +81,7 @@ import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUpl
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.EmojiUtil;
@@ -86,6 +89,7 @@ import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
 
 /**
  * <p>
@@ -310,48 +314,92 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         // show segment datails
         if ((value = p_request.getParameter("param")) != null)
-        {
-        	SegmentView view;
-        	String param[] = value.split("&");
-        	String tuid[] = param[0].split("=");
-        	String tuvid[] = param[1].split("=");
-        	String subid[] = param[2].split("=");
-            long tuId  = Long.valueOf(tuid[1]).longValue();
-            long tuvId = Long.valueOf(tuvid[1]).longValue();
-            long subId = Long.valueOf(subid[1]).longValue();
-            
-            Long targetPageId   = state.getTargetPageId();
-            long sourceLocaleId = state.getSourceLocale().getId();
-            long targetLocaleId = state.getTargetLocale().getId();
-        	
-            view = EditorHelper.getSegmentView(state, tuId, tuvId, subId,
-                    targetPageId.longValue(), sourceLocaleId, targetLocaleId);
-        	JSONObject json = new JSONObject();
-        	 ServletOutputStream out = p_response.getOutputStream();
-        	try {
+		{
+			SegmentView view;
+			String param[] = value.split("&");
+			String tuid[] = param[0].split("=");
+			String tuvid[] = param[1].split("=");
+			String subid[] = param[2].split("=");
+			long tuId = Long.valueOf(tuid[1]).longValue();
+			long tuvId = Long.valueOf(tuvid[1]).longValue();
+			long subId = Long.valueOf(subid[1]).longValue();
+			Long targetPageId = state.getTargetPageId();
+			long sourceLocaleId = state.getSourceLocale().getId();
+			long targetLocaleId = state.getTargetLocale().getId();
+
+			view = EditorHelper.getSegmentView(state, tuId, tuvId, subId,
+					targetPageId.longValue(), sourceLocaleId, targetLocaleId);
+
+			JSONObject json = new JSONObject();
+			ServletOutputStream out = p_response.getOutputStream();
+			try
+			{
 				json.put("str_segmentId", tuvid[1]);
-				json.put("str_segmentFormat", view.getDataType());//view.getDataType()
-				json.put("str_segmentType", view.getItemType());//view.getItemType()
-				json.put("str_wordCount",String.valueOf(view.getWordCount()));//String.valueOf(view.getWordCount())
+				json.put("str_segmentFormat", view.getDataType());
+				json.put("str_segmentType", view.getItemType());
+				json.put("str_wordCount", String.valueOf(view.getWordCount()));
 				String str_sid = view.getTargetTuv().getSid();
-				if (str_sid == null || str_sid.trim().length()==0)
+				if (str_sid == null || str_sid.trim().length() == 0)
 				{
-				    str_sid = "N/A";
+					str_sid = "N/A";
 				}
-				json.put("str_sid", str_sid);//view.getTargetTuv().getSid()
-				String str_lastModifyUser = view.getTargetTuv().getLastModifiedUser();
-				if (str_lastModifyUser == null || str_lastModifyUser.equalsIgnoreCase("xlf")
-				        || str_lastModifyUser.equalsIgnoreCase("Xliff"))
+				json.put("str_sid", str_sid);// view.getTargetTuv().getSid()
+				String str_lastModifyUser = view.getTargetTuv()
+						.getLastModifiedUser();
+				if (str_lastModifyUser == null
+						|| str_lastModifyUser.equalsIgnoreCase("xlf")
+						|| str_lastModifyUser.equalsIgnoreCase("Xliff"))
 				{
-				    str_lastModifyUser = "N/A";
+					str_lastModifyUser = "N/A";
 				}
-				json.put("str_lastModifyUser", str_lastModifyUser);//view.getTargetTuv().getLastModifiedUser()
+				json.put("str_lastModifyUser", str_lastModifyUser);
+				try
+				{
+					OnlineHelper helper = new OnlineHelper();
+					String str_sourceSegment = GxmlUtil.getInnerXml(view
+							.getSourceSegment());
+					String str_dataType = view.getDataType();
+
+					helper.setInputSegment(str_sourceSegment, "", str_dataType);
+
+					if (EditorConstants.PTAGS_VERBOSE.equals(state
+							.getPTagFormat()))
+					{
+						helper.getVerbose();
+					}
+					else
+					{
+						helper.getCompact();
+					}
+
+					String str_segementPtag = helper
+							.getPtagToNativeMappingTable();
+					if (StringUtil.isEmpty(str_segementPtag))
+					{
+						str_segementPtag = "N/A";
+					}
+					else
+					{
+						str_segementPtag = str_segementPtag.replace("<TR>", "<TR valign=top>").replace("<TD", "<TD noWrap"); 
+						str_segementPtag = str_segementPtag.replace("<tr>", "<TR valign=top>").replace("<td", "<TD noWrap"); 	
+					}
+					
+					json.put("str_segementPtag", str_segementPtag);
+				}
+				catch (Exception e1)
+				{
+					CATEGORY.error("Get segement tag information. ", e1);
+					throw new EnvoyServletException(e1);
+				}
 				out.write(json.toString().getBytes("UTF-8"));
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
-        	return;
-        }
+			catch (JSONException e)
+			{
+				CATEGORY.error("Get segement detail. ", e);
+	            throw new EnvoyServletException(e);
+			}
+			return;
+		}
         // Find Repeated Segments
         if ((value = p_request.getParameter(WebAppConstants.PROPAGATE_ACTION)) != null)
         {

@@ -178,8 +178,13 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         String regex = "xmlns:([^=]*)=\"urn:oasis:names:tc:xliff:matches:2.0\"";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(xliff);
+        
         if (m.find())
         {
+            String tag = m.group(1);
+            content = content.replace("<" + tag + ":", "<mtc:");
+            content = content.replace("</" + tag + ":", "</mtc:");
+            
             xliff = xliff.replace(m.group(),
                     "xmlns:mtc=\"urn:oasis:names:tc:xliff:matches:2.0\"");
             xliff = xliff.replace("<xliff ", "\r\n<xliff ");

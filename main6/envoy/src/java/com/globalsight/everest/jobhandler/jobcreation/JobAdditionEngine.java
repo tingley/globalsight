@@ -311,8 +311,7 @@ public class JobAdditionEngine
                     .getTranslationMemoryProfile().getFuzzyMatchThreshold());
             newJob.setSourceLocale(p_request.getL10nProfile().getSourceLocale());
             newJob.setCreateDate(new Date());
-            listOfWorkflows = createWorkflowInstances(p_request, newJob,
-                    p_targetPages);
+            listOfWorkflows = createWorkflowInstances(p_request, newJob);
             RequestImpl request = (RequestImpl) p_request;
             persistJobs(newJob, request, listOfWorkflows, session);
 
@@ -326,11 +325,8 @@ public class JobAdditionEngine
                         + "and w.targetLocale.id = :tId";
                 Map map = new HashMap();
                 map.put("jId", newJob.getIdAsLong());
-                Connection connection = null;
                 try
                 {
-                    connection = ConnectionPool.getConnection();
-
                     while (it.hasNext())
                     {
                         TargetPage tp = (TargetPage) it.next();
@@ -339,7 +335,7 @@ public class JobAdditionEngine
                                 hql, map).get(0);
                         tp.setWorkflowInstance(w);
                         w.addTargetPage(tp);
-                        tp.setCVSTargetModule(getTargetModule(tp, connection));
+                        tp.setCVSTargetModule(getTargetModule(tp));
                         tp.setTimestamp(new Timestamp(System
                                 .currentTimeMillis()));
                         session.update(tp);
@@ -349,10 +345,6 @@ public class JobAdditionEngine
                 catch (Exception e)
                 {
                     c_logger.error("Error found in createJob.", e);
-                }
-                finally
-                {
-                    ConnectionPool.silentReturnConnection(connection);
                 }
             }
 
@@ -595,8 +587,8 @@ public class JobAdditionEngine
     /*
      * Create the workflow instances that are part of the new job.
      */
-    List<Workflow> createWorkflowInstances(Request p_request, JobImpl p_job,
-            HashMap p_targetPages) throws JobCreationException
+	List<Workflow> createWorkflowInstances(Request p_request, JobImpl p_job)
+			throws JobCreationException
     {
         GlobalSightLocale[] targetLocales = p_request
                 .getTargetLocalesToImport();
@@ -860,12 +852,13 @@ public class JobAdditionEngine
         return jobDispatchEngine;
     }
 
-    String getTargetModule(TargetPage p_tp, Connection connection)
+    String getTargetModule(TargetPage p_tp)
     {
         if (p_tp == null)
         {
             return "";
         }
+        Connection conn = null;
         Statement stmt = null;
         try
         {
@@ -883,7 +876,8 @@ public class JobAdditionEngine
             tmp = tmp.substring(index);
             String sourceModule = tmp.substring(tmp.indexOf("/"));
 
-            stmt = connection.createStatement();
+            conn = DbUtil.getConnection();
+            stmt = conn.createStatement();
             StringBuffer sql = new StringBuffer();
             sql.append(
                     "select * from module_mapping where is_active='1' and source_locale='")
@@ -902,7 +896,8 @@ public class JobAdditionEngine
         }
         finally
         {
-            ConnectionPool.silentClose(stmt);
+        	DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
     }
 }

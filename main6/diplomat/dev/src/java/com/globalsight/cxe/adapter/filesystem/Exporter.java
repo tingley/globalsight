@@ -72,6 +72,7 @@ import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.everest.cvsconfig.CVSUtil;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportConstants;
@@ -597,8 +598,11 @@ public class Exporter
 
                 if (isLastFile())
                 {
-                    // Post/push files back to MindTouch server
-                    handleMindTouchFiles(wf, FILE_STATES.get(m_batchId));
+					if (((JobImpl) wf.getJob()).isMindTouchJob())
+                	{
+                        // Post/push files back to MindTouch server
+                        handleMindTouchFiles(wf, FILE_STATES.get(m_batchId));
+                	}
 
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);

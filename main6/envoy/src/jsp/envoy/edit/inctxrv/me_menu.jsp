@@ -325,7 +325,7 @@ function refresh(direction)
     else
     {
         str_url  = "<%=url_refresh%>";
-        str_url += "&refresh=" + direction;
+        str_url += "&isContextReview=true&refresh=" + direction;
         showHourglass();
         parent.Refresh(str_url);
     }

@@ -454,4 +454,8 @@ public interface Job extends WorkObject
     public void setJobType(String jobType);
 
     public boolean isBlaiseJob();
+    public boolean isCotiJob();
+    public boolean isEloquaJob();
+    public boolean isGitJob();
+    public boolean isMindTouchJob();
 }

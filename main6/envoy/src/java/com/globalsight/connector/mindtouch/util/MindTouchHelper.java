@@ -697,11 +697,13 @@ public class MindTouchHelper
             {
         		times++;
         		String tmpContent = content;
+            	tmpContent = StringUtil.replace(tmpContent, "&lt;", "&#60;");
+            	tmpContent = StringUtil.replace(tmpContent, "&gt;", "&#62;");
+            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
             	if (times == 1) {
             		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
             		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
             	}
-            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
             	tmpContent = tmpContent.substring(tmpContent.indexOf("<body>") + 6);
             	tmpContent = tmpContent.substring(0, tmpContent.indexOf("</body>"));
                 StringEntity reqEntity = new StringEntity(tmpContent, "UTF-8");

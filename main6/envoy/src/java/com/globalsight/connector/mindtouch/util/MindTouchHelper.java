@@ -697,11 +697,13 @@ public class MindTouchHelper
             {
         		times++;
         		String tmpContent = content;
+            	tmpContent = StringUtil.replace(tmpContent, "&lt;", "&#60;");
+            	tmpContent = StringUtil.replace(tmpContent, "&gt;", "&#62;");
+            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
             	if (times == 1) {
             		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
             		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
             	}
-            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
             	tmpContent = tmpContent.substring(tmpContent.indexOf("<body>") + 6);
             	tmpContent = tmpContent.substring(0, tmpContent.indexOf("</body>"));
                 StringEntity reqEntity = new StringEntity(tmpContent, "UTF-8");
@@ -829,8 +831,8 @@ public class MindTouchHelper
 			String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/="
 					+ path + "/files/=" + tempFileName;
             HttpPut httpput = getHttpPut(url, targetLocale);
-            
-            FileEntity reqEntity = new FileEntity(new File(filePath));
+            File picFile = new File(filePath);
+            FileEntity reqEntity = new FileEntity(picFile);
             httpput.setEntity(reqEntity);
             
             HttpResponse response = httpClient.execute(httpput);
@@ -844,7 +846,8 @@ public class MindTouchHelper
 				logger.error("Fail to put file back to MindTouch server for file '"
 						+ filePath + "' : " + entityContent);
             }
-            
+            picFile.delete();
+
             return entityContent;
         }
         catch (Exception e)
@@ -956,7 +959,7 @@ public class MindTouchHelper
         }
     }
 
-    private boolean isTargetServerExist(String targetLocale)
+    public boolean isTargetServerExist(String targetLocale)
     {
 		if(targetServersMap.get(targetLocale) != null)
 		{

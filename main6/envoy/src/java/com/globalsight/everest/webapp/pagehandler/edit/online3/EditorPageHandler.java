@@ -206,12 +206,15 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
         }
         else if (value.startsWith("0")) // goto page
         {
-        	int oldCurrentPageNum = state.getPaginateInfo()
-                    .getCurrentPageNum();
-            i_direction = Integer.parseInt(value);
-			if (oldCurrentPageNum != i_direction)
+        	i_direction = Integer.parseInt(value);
+			if (value.equals("0"))
 			{
-				i_direction = oldCurrentPageNum;
+				int oldCurrentPageNum = state.getPaginateInfo()
+						.getCurrentPageNum();
+				if (oldCurrentPageNum != i_direction)
+				{
+					i_direction = oldCurrentPageNum;
+				}
 			}
             state.getPaginateInfo().setCurrentPageNum(i_direction);
         }

@@ -37,7 +37,6 @@ public class OfficeXmlConverter
 
     private boolean isIncontextReview = false;
     private long companyId = 1;
-    private String targetLocale;
 
     public OfficeXmlConverter()
     {
@@ -64,7 +63,7 @@ public class OfficeXmlConverter
     public String convertXmlToOffice(String p_odFileName, String p_xmlDir)
             throws Exception
     {
-        OfficeXmlRepairer.repair(p_xmlDir, getTargetLocale());
+        OfficeXmlRepairer.repair(p_xmlDir);
 
         File xmlDir = new File(p_xmlDir);
         File parent = xmlDir.getParentFile();
@@ -191,16 +190,6 @@ public class OfficeXmlConverter
         }
 
         return isIncontextReview ? convertDir_incontextReview : convertDir;
-    }
-
-    public String getTargetLocale()
-    {
-        return targetLocale;
-    }
-
-    public void setTargetLocale(String targetLocale)
-    {
-        this.targetLocale = targetLocale;
     }
 
 }

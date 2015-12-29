@@ -1092,8 +1092,6 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
 
             String filename = getCategory().getValue("safeBaseFileName");
-            String targetLocale = m_eventFlow.getTargetLocale();
-            oxc.setTargetLocale(targetLocale);
             oxc.convertXmlToOffice(filename, dirName);
         }
     }

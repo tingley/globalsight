@@ -23,8 +23,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -40,7 +38,6 @@ import com.globalsight.everest.page.pageexport.style.StyleFactory;
 import com.globalsight.everest.page.pageexport.style.StyleUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.XmlParser;
-import com.globalsight.util.edit.EditUtil;
 
 public class WordRepairer extends OfficeRepairer
 {
@@ -100,7 +97,7 @@ public class WordRepairer extends OfficeRepairer
         }
     }
 
-    public void repairDocFiles(File f) throws Exception
+    private static void repairDocFiles(File f) throws Exception
     {
         if (!f.exists())
             return;
@@ -148,7 +145,6 @@ public class WordRepairer extends OfficeRepairer
         forWrInWr(element);
         forTextInWp(element);
         forNodesInWt(element);
-        forRtl(element);
 
         Writer fileWriter = new OutputStreamWriter(new FileOutputStream(f),
                 "UTF-8");
@@ -159,158 +155,6 @@ public class WordRepairer extends OfficeRepairer
         if (content.contains("</mc:AlternateContent>"))
         {
             forAlternateContent(f);
-        }
-    }
-
-    private static List<SplitString> mergeSplit(List<SplitString> ss)
-    {
-        List<SplitString> result = new ArrayList<SplitString>();
-
-        SplitString last = null;
-
-        for (SplitString s : ss)
-        {
-            if (last == null)
-            {
-                last = s;
-            }
-            else
-            {
-                if (last.isNeedRtl() == s.isNeedRtl())
-                {
-                    last.setString(last.getString() + s.getString());
-                }
-                else
-                {
-                    result.add(last);
-                    last = s;
-                }
-            }
-        }
-
-        if (last != null)
-        {
-            result.add(last);
-        }
-
-        return result;
-    }
-
-    private static List<SplitString> split(String s)
-    {
-        ArrayList<SplitString> result = new ArrayList<SplitString>();
-
-        Pattern p2 = Pattern.compile("&[\\a-zA-Z]+?;");
-        Matcher m2 = p2.matcher(s);
-        int n = 0;
-        while (m2.find(n))
-        {
-
-            int start = m2.start();
-            int end = m2.end();
-
-            if (start != n)
-            {
-                result.addAll(split(s.substring(n, start)));
-            }
-
-            n = end;
-            result.add(new SplitString(m2.group(), false));
-        }
-
-        if (n < s.length() && n > 0)
-        {
-            result.addAll(split(s.substring(n)));
-        }
-        else
-        {
-            Pattern p = Pattern
-                    .compile("[a-zA-Z][a-zA-Z\\s]+[a-zA-Z]|[a-zA-Z]");
-            Matcher m = p.matcher(s);
-            n = 0;
-            while (m.find(n))
-            {
-                int start = m.start();
-                int end = m.end();
-                if (start != n)
-                {
-                    result.add(new SplitString(s.substring(n, start), true));
-                }
-                n = end;
-                result.add(new SplitString(m.group(), false));
-            }
-
-            if (n < s.length())
-            {
-                result.add(new SplitString(s.substring(n), true));
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Fixes the RTL display issue for GBS-4185.
-     */
-    private void forRtl(Element element)
-    {
-        String locale = getTargetLocale();
-        if (locale == null || !EditUtil.isRTLLocale(locale))
-        {
-            return;
-        }
-
-        List<Element> ts = element
-                .selectNodes("//*[local-name()=\"r\"]/*[local-name()=\"t\"]");
-
-        for (Element wt : ts)
-        {
-            Element wr = wt.getParent();
-
-            if (wr == null)
-                continue;
-
-            Element root = wr.getParent();
-
-            if (root == null)
-                continue;
-
-            String text = wt.getStringValue();
-            List<SplitString> ss = split(text);
-
-            ss = mergeSplit(ss);
-
-            for (SplitString s : ss)
-            {
-                Element wrclone = (Element) wr.clone();
-                Element wtClone = wrclone.element("t");
-                wtClone.setText(s.getString());
-
-                if (s.isNeedRtl())
-                {
-                    Element rprClone = wrclone.element("rPr");
-                    if (rprClone == null)
-                    {
-                        List es = wrclone.content();
-                        int index = wrclone.indexOf(wtClone);
-
-                        rprClone = DocumentHelper.createElement("w:rPr");
-                        es.add(index, rprClone);
-                    }
-
-                    if (rprClone.element("rtl") == null)
-                    {
-                        Element rtl = DocumentHelper.createElement("w:rtl");
-                        rprClone.add(rtl);
-                    }
-                }
-
-                List es = root.content();
-                int index = es.indexOf(wr);
-                es.add(index, wrclone);
-            }
-
-            root.remove(wr);
         }
     }
 

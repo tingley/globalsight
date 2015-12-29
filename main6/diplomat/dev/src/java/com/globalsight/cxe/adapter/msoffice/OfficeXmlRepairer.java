@@ -64,17 +64,10 @@ public class OfficeXmlRepairer
 
     public static void repair(String path)
     {
-        repair(path, null);
-    }
-
-    public static void repair(String path, String targetLocale)
-    {
         try
         {
             List<OfficeRepairer> repairers = new ArrayList<OfficeRepairer>();
-            WordRepairer wordRepairer = new WordRepairer(path);
-            wordRepairer.setTargetLocale(targetLocale);
-            repairers.add(wordRepairer);
+            repairers.add(new WordRepairer(path));
             repairers.add(new PptxRepairer(path));
             repairers.add(new ExcelRepairer(path));
 
@@ -107,10 +100,9 @@ public class OfficeXmlRepairer
 
         if (xmlContent.endsWith("</w:document>"))
         {
-            // has been moved to WordRepairer.forRtl
-            // String result = fixRtlDocumentXml(xmlContent, lang);
+            String result = fixRtlDocumentXml(xmlContent, lang);
 
-            return xmlContent;
+            return result;
         }
         else if (xmlContent.endsWith("</w:ftr>")
                 || xmlContent.endsWith("</w:hdr>")

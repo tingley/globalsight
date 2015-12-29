@@ -19,7 +19,6 @@ package com.globalsight.cxe.adapter.msoffice;
 public abstract class OfficeRepairer
 {
     protected String path = null;
-    protected String targetLocale;
 
     protected abstract boolean accept();
 
@@ -43,15 +42,5 @@ public abstract class OfficeRepairer
                 // Do nothing
             }
         }
-    }
-
-    public String getTargetLocale()
-    {
-        return targetLocale;
-    }
-
-    public void setTargetLocale(String targetLocale)
-    {
-        this.targetLocale = targetLocale;
     }
 }

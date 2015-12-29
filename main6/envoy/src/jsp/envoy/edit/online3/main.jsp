@@ -503,7 +503,7 @@ var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 var approveAction = "<%=approveAction%>";
 </script>
 </HEAD>
-<BODY id="idBody" oncontextmenu="contextForX(event)">
+<BODY id="idBody" oncontextmenu="contextForX(event)" onbeforeunload="exit()">
 <FORM name="ShutdownForm" METHOD="POST" TARGET="idShutdown" ACTION="/globalsight/envoy/common/shutdownPopup.jsp">
 <input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=jobId%>">
 <input type="hidden" name="<%=ReportConstants.TARGETLOCALE_LIST%>" value="<%=tgtIDS%>">

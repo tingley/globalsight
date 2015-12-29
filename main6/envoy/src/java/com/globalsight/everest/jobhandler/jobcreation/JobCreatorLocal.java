@@ -46,7 +46,6 @@ import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.cxe.util.fileImport.eventFlow.Category;
 import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
-import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.corpus.CorpusDoc;
 import com.globalsight.everest.corpus.CorpusDocGroup;
 import com.globalsight.everest.corpus.CorpusManagerWLRemote;
@@ -166,9 +165,11 @@ public class JobCreatorLocal implements JobCreator
             {
                 job = JobCreationMonitor
                         .loadJobFromDB(Long.parseLong(theJobId));
+                c_logger.info("debug info: job state is: " + job.getState());
                 // Update the job to "LEVERAGING" state (GBS-2137)
                 if (Job.EXTRACTING.equals(job.getState()))
                 {
+                	c_logger.info("Update job state from 'EXTRACTING' to 'LEVERAGING' for job ID: " + theJobId);
                     JobCreationMonitor.updateJobState(Long.parseLong(theJobId),
                             Job.LEVERAGING);
                 }
@@ -250,6 +251,7 @@ public class JobCreatorLocal implements JobCreator
         catch (Exception e)
         {
             c_logger.debug("Exception in job creation", e);
+            c_logger.error("addRequestToJob: ", e);
 
             if (job != null)
             {
@@ -288,24 +290,21 @@ public class JobCreatorLocal implements JobCreator
      * Since GBS-2137, creating job will use this method instead of
      * availableJob().
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private synchronized Job processJob(String p_jobId, Request p_request,
             HashMap p_targetPages) throws JobCreationException
     {
         Job job = JobCreationMonitor.refreshJobFromDB(Long.parseLong(p_jobId));
 
         Transaction transaction = HibernateUtil.getTransaction();
-        Connection connection = null;
         try
         {
+        	// If workflows have not been created, create them...
             Collection<Workflow> listOfWorkflows = job.getWorkflows();
-            if (listOfWorkflows != null && listOfWorkflows.size() > 0)
-            {
-                listOfWorkflows = new ArrayList<Workflow>(listOfWorkflows);
-            }
-            else
+            if (listOfWorkflows == null || listOfWorkflows.size() == 0)
             {
                 listOfWorkflows = m_jobAdditionEngine.createWorkflowInstances(
-                        p_request, (JobImpl) job, p_targetPages);
+                        p_request, (JobImpl) job);
                 persistJob((JobImpl) job, (RequestImpl) p_request,
                         (List<Workflow>) listOfWorkflows);
             }
@@ -314,8 +313,6 @@ public class JobCreatorLocal implements JobCreator
                     + "and w.targetLocale.id = :targetLocaleId";
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("jobId", job.getId());
-
-            connection = ConnectionPool.getConnection();
 
             for (Iterator it = p_targetPages.values().iterator(); it.hasNext();)
             {
@@ -331,8 +328,7 @@ public class JobCreatorLocal implements JobCreator
                     }
                     tp.setWorkflowInstance(w);
                     w.addTargetPage(tp);
-                    tp.setCVSTargetModule(m_jobAdditionEngine.getTargetModule(
-                            tp, connection));
+                    tp.setCVSTargetModule(m_jobAdditionEngine.getTargetModule(tp));
                     tp.setTimestamp(new Timestamp(System.currentTimeMillis()));
                     HibernateUtil.update(tp);
                     HibernateUtil.update(w);
@@ -365,10 +361,6 @@ public class JobCreatorLocal implements JobCreator
                         JobCreationException.MSG_FAILED_TO_CREATE_NEW_JOB,
                         args, e);
             }
-        }
-        finally
-        {
-            ConnectionPool.silentReturnConnection(connection);
         }
 
         try
@@ -746,7 +738,7 @@ public class JobCreatorLocal implements JobCreator
                     if (Job.LEVERAGING.equals(p_job.getState()))
                     {
                         JobCreationMonitor
-                                .updateJobState(p_job, Job.PROCESSING);
+                        		.updateJobState(p_job, Job.PROCESSING);
                     }
                 }
             }

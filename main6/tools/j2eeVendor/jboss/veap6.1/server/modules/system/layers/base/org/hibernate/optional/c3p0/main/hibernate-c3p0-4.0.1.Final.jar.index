@@ -1,8 +1,0 @@
-org/hibernate
-
-org/hibernate/service/jdbc/connections/internal
-org/hibernate/service/jdbc/connections
-org
-org/hibernate/service
-META-INF
-org/hibernate/service/jdbc

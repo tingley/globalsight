@@ -597,8 +597,11 @@ public class Exporter
 
                 if (isLastFile())
                 {
-                    // Post/push files back to MindTouch server
-                    handleMindTouchFiles(wf, FILE_STATES.get(m_batchId));
+					if (wf.getJob().isMindTouchJob())
+                	{
+                        // Post/push files back to MindTouch server
+                        handleMindTouchFiles(wf, FILE_STATES.get(m_batchId));
+                	}
 
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);
@@ -678,6 +681,7 @@ public class Exporter
         	long jobId = wf.getJob().getJobId();
             String srcLocale = "/" + sourceLocale + "/" + jobId + "/";
     		String trgLocale = "/" + targetLocale + "/" + jobId + "/";
+    		MindTouchConnector mtc = null;
         	for (File trgFile : trgFiles)
         	{
 				MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale,
@@ -686,15 +690,20 @@ public class Exporter
         		{
 					long mtcId = Long.parseLong(pageInfo
 							.getMindTouchConnectorId());
-					MindTouchConnector mtc = MindTouchManager
-							.getMindTouchConnectorById(mtcId);
+					mtc = MindTouchManager.getMindTouchConnectorById(mtcId);
 					helper = new MindTouchHelper(mtc);
 
 					break;
         		}
         	}
 
-        	// As need post content to create page first, group them first
+			if (!helper.isTargetServerExist(targetLocale)
+					&& !mtc.getIsPostToSourceServer())
+        	{
+        		return;
+        	}
+
+			// As need post content to create page first, group them first
         	List<File> contentFiles = new ArrayList<File>();
         	List<File> tagFiles = new ArrayList<File>();
         	List<File> propFiles = new ArrayList<File>();

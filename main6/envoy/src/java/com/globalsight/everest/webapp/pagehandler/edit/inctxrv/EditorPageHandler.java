@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -37,12 +36,14 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.globalsight.config.UserParamNames;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.online.CommentThreadView;
 import com.globalsight.everest.edit.online.CommentView;
@@ -55,7 +56,6 @@ import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -77,7 +77,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportC
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
@@ -867,6 +866,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // with a specific segment highlighted.
         setCurrentEditorSegment(p_state, p_request);
 
+		boolean isContextReview = p_request.getParameter("isContextReview") != null ? true
+				: false;
+        
         // next & previous page
         if ((value = p_request.getParameter("refresh")) != null)
         {
@@ -881,25 +883,29 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 fromActivity = true;
             }
             if (i_direction == -1) // previous file
-            {
-                previousPage(p_state, p_request.getSession(), fromActivity);
-                while (!p_state.isFirstPage()
-                        && (p_state.getTuIds() == null || p_state.getTuIds()
-                                .size() == 0))
-                {
-                    previousPage(p_state, p_request.getSession(), fromActivity);
-                }
-            }
+			{
+				previousPage(p_state, p_request.getSession(), fromActivity,
+						isContextReview);
+				while (!p_state.isFirstPage()
+						&& (p_state.getTuIds() == null || p_state.getTuIds()
+								.size() == 0))
+				{
+					previousPage(p_state, p_request.getSession(), fromActivity,
+							isContextReview);
+				}
+			}
             else if (i_direction == 1) // next file
-            {
-                nextPage(p_state, p_request.getSession(), fromActivity);
-                while (!p_state.isLastPage()
-                        && (p_state.getTuIds() == null || p_state.getTuIds()
-                                .size() == 0))
-                {
-                    nextPage(p_state, p_request.getSession(), fromActivity);
-                }
-            }
+			{
+				nextPage(p_state, p_request.getSession(), fromActivity,
+						isContextReview);
+				while (!p_state.isLastPage()
+						&& (p_state.getTuIds() == null || p_state.getTuIds()
+								.size() == 0))
+				{
+					nextPage(p_state, p_request.getSession(), fromActivity,
+							isContextReview);
+				}
+			}
             else if (i_direction == -11) // previous page
             {
                 bUpdateSource = true;
@@ -962,7 +968,13 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
             else if (value.startsWith("0")) // goto page
             {
+            	int oldCurrentPageNum = p_state.getPaginateInfo()
+                        .getCurrentPageNum();
                 i_direction = Integer.parseInt(value);
+				if (oldCurrentPageNum != i_direction)
+				{
+					i_direction = oldCurrentPageNum;
+				}
                 bUpdateSource = true;
                 bUpdateTarget = true;
                 if (layout.isSinglePage())
@@ -1116,12 +1128,17 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         return hm;
     }
 
-    private void previousPage(EditorState p_state, HttpSession p_session,
-            boolean p_fromActivity) throws EnvoyServletException
-    {
+	private void previousPage(EditorState p_state, HttpSession p_session,
+			boolean p_fromActivity, boolean isContextReview)
+			throws EnvoyServletException
+	{
         ArrayList<EditorState.PagePair> pages = p_state.getPages();
         pages = (ArrayList<EditorState.PagePair>) getPagePairList(p_session,
                 pages);
+		if (isContextReview)
+		{
+			pages.removeAll(getRemovePages(pages));
+		}
         int i_index = pages.indexOf(p_state.getCurrentPage());
 
         if (p_fromActivity)
@@ -1203,12 +1220,17 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
     }
 
-    private void nextPage(EditorState p_state, HttpSession p_session,
-            boolean p_fromActivity) throws EnvoyServletException
-    {
+	private void nextPage(EditorState p_state, HttpSession p_session,
+			boolean p_fromActivity, boolean isContextReview)
+			throws EnvoyServletException
+	{
         ArrayList<EditorState.PagePair> pages = p_state.getPages();
         pages = (ArrayList<EditorState.PagePair>) getPagePairList(p_session,
                 pages);
+		if (isContextReview)
+		{
+			pages.removeAll(getRemovePages(pages));
+		}
         int i_index = pages.indexOf(p_state.getCurrentPage());
 
         if (p_fromActivity)
@@ -1292,6 +1314,58 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
 
     }
+    
+	private ArrayList<EditorState.PagePair> getRemovePages(
+			ArrayList<EditorState.PagePair> pages)
+	{
+		ArrayList<EditorState.PagePair> newPages = new ArrayList<EditorState.PagePair>();
+		com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper helper = new com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper();
+		String companyId = CompanyThreadLocal.getInstance().getValue();
+		boolean okForInContextReviewXml = helper.isXMLEnabled(companyId);
+		boolean okForInContextReviewIndd = helper.isInDesignEnabled(companyId);
+		boolean okForInContextReviewOffice = helper.isOfficeEnabled(companyId);
+		FileProfile fp = null;
+		try
+		{
+			for (EditorState.PagePair page : pages)
+			{
+				SourcePage sp = ServerProxy.getPageManager().getSourcePage(
+						page.getSourcePageId());
+				fp = ServerProxy.getFileProfilePersistenceManager()
+						.readFileProfile(sp.getRequest().getDataSourceId());
+				String pageNameLow = page.getPageName().toLowerCase();
+				boolean isXml = pageNameLow.endsWith(".xml");
+				boolean isInDesign = pageNameLow.endsWith(".indd")
+						|| pageNameLow.endsWith(".idml");
+				boolean isOffice = pageNameLow.endsWith(".docx")
+						|| pageNameLow.endsWith(".pptx")
+						|| pageNameLow.endsWith(".xlsx");
+				boolean enableInContextReivew = false;
+				if (isXml)
+				{
+					enableInContextReivew = okForInContextReviewXml ? FileProfileUtil
+							.isXmlPreviewPDF(fp) : false;
+				}
+				if (isInDesign)
+				{
+					enableInContextReivew = okForInContextReviewIndd;
+				}
+				if (isOffice)
+				{
+					enableInContextReivew = okForInContextReviewOffice;
+				}
+				if (!enableInContextReivew)
+				{
+					newPages.add(page);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return newPages;
+	}
 
     private void updateSourcePageView(EditorState p_state,
             HttpServletRequest p_request, boolean p_isTaskAssignee,

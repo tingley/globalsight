@@ -609,10 +609,10 @@ var approveAction = "<%=approveAction%>";
 </TABLE>
 </div>
 <div id="nav" class="nav" style="overflow:auto;">
-<TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;font-family: Arial, Helvetica, sans-serif;font-size: 10pt;table-layout: fixed;">
+<TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;font-family: Arial, Helvetica, sans-serif;font-size: 10pt;">
   <THEAD>
     <TR CLASS="tableHeadingGray" style="height:19pt;">
-      <TD ALIGN="CENTER" class="sourceTempClass"  width='35'><%=lb_id%></TD>
+      <TD ALIGN="CENTER" class="sourceTempClass"  width='25'><%=lb_id%></TD>
       <TD ALIGN="LEFT"><%=lb_source_segment%></TD>
       <TD ALIGN="LEFT"><%=lb_previous_translation%></TD>
       <TD ALIGN="LEFT"><%=lb_current_translation%></TD>

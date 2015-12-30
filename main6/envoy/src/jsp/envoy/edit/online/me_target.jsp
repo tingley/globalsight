@@ -179,7 +179,6 @@ File jsFile = new File(jsPath);
 <HTML xmlns:gs>
 <!-- This is envoy\edit\online\me_target.jsp -->
 <HEAD>
-<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" content="ie=edge"/>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
@@ -191,8 +190,6 @@ File jsFile = new File(jsPath);
 <link type="text/css" rel="StyleSheet" id="cssEditorTouched" href="/globalsight/envoy/edit/online/editorTouched.css">
 <link type="text/css" rel="StyleSheet" id="cssEditorTranslated" href="/globalsight/envoy/edit/online/editorTranslated.css">
 <link type="text/css" rel="StyleSheet" id="cssEditorUntranslated" href="/globalsight/envoy/edit/online/editorUntranslated.css">
-<link rel="stylesheet" type="text/css" href="/globalsight/jquery/easyui.css">
-<link rel="stylesheet" type="text/css" href="/globalsight/jquery/icon.css">
 <STYLE>
 .editorComment { cursor: hand;cursor:pointer; }
 
@@ -233,7 +230,6 @@ pre {
 }
 </STYLE>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
-<script type="text/javascript" src="/globalsight/jquery/jquery.easyui.min.js"></script>
 <%if(jsFile.exists()){ %>
 <link href="/globalsight/javaScriptClient/jqueryUI/css/smoothness/jquery-ui-1.9.1.custom.min.css" rel="stylesheet"></link>
 <script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-1.8.2.min.js"></script>
@@ -508,30 +504,61 @@ function showDetails(tuId, tuvId, subId){
 
 function show(tuId, tuvId, subId){
 	var detail = "seg"+tuId+"_"+tuvId+"_"+subId;
+    var Y = ($(window).height())/2;
+    var X = ($(window).width())/2;
+    var scrollTop = $(document).scrollTop();     
+    var scrollLeft = $(document).scrollLeft(); 
+	$("#showDetails").css({top:Y+scrollTop,left:X+scrollLeft});
 	$("#showDetails").html("");
 	var str_url = "<%=url_refresh%>" ;
 	var str = jsonUrl + str_url;
     var details = "tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId;
     $.post(str,{param:details},function(data){
 	    var result = eval("("+data+")");
-	    var Y = ($(window).height())/2;
-		var X = ($(window).width())/2;
-		var scrollTop = $(document).scrollTop();
-		var scrollLeft = $(document).scrollLeft();
-		$("#showDetails").window({
-			title:'<%=lb_title%>',
-			width:400,
-			height:260,
-			left:X+scrollLeft,
-			top:Y+scrollTop,
-            content:'<table cellspacing="5" cellpadding="2" border="0" style="table-layout:fixed;"><tr class="standardText"><td noWrap style="width:100px;"><B><%=lb_segmentId%>:</B></td><td>'+ result.str_segmentId +'</td></tr><tr class="standardText"><td noWrap><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
-    		        +'<tr class="standardText"><td noWrap><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr>'
-    				+'<tr class="standardText"><td noWrap><B><%=lb_tagInfo%>:</B></td><td><table border="0">'+ result.str_segementPtag +'</table></td></tr>'
-    				+'<tr class="standardText"><td noWrap><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr><tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr></table>',
-			minimizable:false,
-			closable:true
-	    });
+		$("#showDetails").html('<div id="details-title" onmousedown="Milan_StartMove(event,this.parentNode)" onmouseup="Milan_StopMove(event)" style="background:#0C1476; text-align:right;cursor:move;">'
+		+'<div><a href="##" style="color:#FFF" onclick="closeDetails()"><%=lb_close%></a></div></div><div style="position: absolute;overflow:auto;background-color:#FFFFFF;width:400px;height:240px"><table cellspacing="5" cellpadding="2" border="0" style="table-layout:fixed;">'
+		+'<tr class="standardText"><td noWrap colspan="2"><span class="mainHeading"><%=lb_title%></span></td></tr>'
+		+'<tr class="standardText"><td noWrap style="width:100px;"><B><%=lb_segmentId%>:</B></td><td>'+ result.str_segmentId +'</td></tr><tr class="standardText"><td noWrap><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
+		+'<tr class="standardText"><td noWrap><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr>'
+		+'<tr class="standardText"><td noWrap><B><%=lb_tagInfo%>:</B></td><td><table border="0">'+ result.str_segementPtag +'</table></td></tr>'
+		+'<tr class="standardText"><td noWrap><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr><tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr></table></div>');
 	 });
+	 $("#showDetails").show();	 	 
+}
+
+function Milan_StartMove(oEvent,div_id)
+{
+    var whichButton;
+    if(document.all&&oEvent.button==1) whichButton=true;
+    else { if(oEvent.button==0)whichButton=true;}
+    if(whichButton)
+    {
+        var oDiv=div_id;
+        offset_x=parseInt(oEvent.clientX-oDiv.offsetLeft);
+        offset_y=parseInt(oEvent.clientY-oDiv.offsetTop);
+        document.documentElement.onmousemove=function(mEvent)
+        {   
+            var eEvent;
+            if(document.all) eEvent=event;
+            else{eEvent=mEvent;}
+            var oDiv=div_id;
+            var x=eEvent.clientX-offset_x;
+            var y=eEvent.clientY-offset_y;
+            oDiv.style.left=(x)+"px";
+            oDiv.style.top=(y)+"px";
+            var d_oDiv=document.getElementById("disable_"+oDiv.id);
+            d_oDiv.style.left=(x)+"px";
+            d_oDiv.style.top=(y)+"px";
+        }
+    }
+}
+
+function Milan_StopMove(oEvent){
+	document.documentElement.onmousemove=null; 
+	}
+
+function closeDetails(){
+	$("#showDetails").css("display", "none");
 }
 
 function editComment(tuId, tuvId, subId)
@@ -1249,7 +1276,8 @@ function doSegmentFilter(p_segmentFilter)
   </THEAD>
   <TBODY id="idPageHtml"><%=str_pageHtml%></TBODY>
 </TABLE>
-<div id="showDetails"></div>
+<div id="showDetails" style="display:none;position: absolute;z-index:999;width:400px;height:260px;border-style:ridge;border-width:5pt; border-color:#0C1476">
+</div>
 <% } else { %>
 <DIV id="idPageHtml" style="font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
 	<%=str_pageHtml%>

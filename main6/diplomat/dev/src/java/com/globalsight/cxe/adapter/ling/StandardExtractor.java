@@ -386,13 +386,16 @@ public class StandardExtractor
     {
         DiplomatAPI diplomat = new DiplomatAPI();
         diplomat.setCxeMessage(m_cxeMessage);
-        // Blaise xliff file does not need segmentation even source equals target.
-        String jobId = (String) m_cxeMessage.getParameters().get("JobId");
-		boolean isBlaiseJob = ServerProxy.getJobHandler()
-				.getJobById(Long.parseLong(jobId)).isBlaiseJob();
-        if (isBlaiseJob)
-        {
-        	diplomat.setSentenceSegmentation(false);
+        // Blaise XLF file does not need segmentation even source equals target.
+        try {
+            String jobId = (String) m_cxeMessage.getParameters().get("JobId");
+    		boolean isBlaiseJob = ServerProxy.getJobHandler()
+    				.getJobById(Long.parseLong(jobId)).isBlaiseJob();
+            if (isBlaiseJob) {
+            	diplomat.setSentenceSegmentation(false);
+            }
+        } catch (Exception ignore) {
+
         }
         addExcelStyleMap(diplomat);
 

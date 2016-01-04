@@ -121,16 +121,6 @@ function openWizardWindow(url)
         <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" href="javascript: showGuide('fileSystem');location.replace('<%=startUrl%>');">
         <%=bundle.getString("lb_filesystem_guide")%></A><BR>
         <%
-            if (b_teamsite) {
-        %>
-        <amb:permission name="<%=Permission.TEAMSITE_SERVER_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" href="javascript: showGuide('teamSite');location.replace('<%=startUrl%>');">
-        <%=bundle.getString("lb_teamsite_guide")%></A><BR>
-        </amb:permission>
-        <%
-            }
-        %>
-        <%
             if (b_database) {
         %> 
         <amb:permission name="<%=Permission.DATABASE_INTEGRATION%>" >
@@ -412,20 +402,6 @@ function openWizardWindow(url)
         %>
         <amb:permission name="<%=Permission.CUSTOMER_UPLOAD%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=customerUploadUrl%>"><%=bundle.getString("lb_upload")%></A><BR>
-        </amb:permission>
-        <%
-            }
-        %>
-        <%
-            if (b_teamsite) {
-        %>
-        <amb:permission name="<%=Permission.TEAMSITE_SERVER_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=teamsiteConfigUrl%>"><%=bundle
-                                                .getString("lb_teamsite_server_configuration")%></A><BR>
-        </amb:permission>
-        <amb:permission name="<%=Permission.TEAMSITE_PROFILES_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=teamsiteBranchesUrl%>"><%=bundle
-                                                .getString("lb_teamsite_branches")%></A><BR>
         </amb:permission>
         <%
             }

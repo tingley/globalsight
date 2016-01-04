@@ -54,7 +54,7 @@ public class WebServicesLog
 								.toString());
         	}
 
-        	webServiceLog.info("; ->  ;" + activity + json);
+        	webServiceLog.info(" -> " + activity + json);
             return new RealStart(activity);
         }
         catch (Exception e)
@@ -77,7 +77,7 @@ public class WebServicesLog
 
     private static void end(String activity, long dt)
     {
-		webServiceLog.info("; <-  ;" + activity + " ("
+		webServiceLog.info(" <- " + activity + " ("
 				+ String.format("%.3f", dt / 1000f) + "s)");
     }
 

@@ -390,16 +390,14 @@
       <WebPage pageName="MTD" isDefault="false" jspName="/envoy/administration/mtprofiles/mtDetail.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTDetailHandler">  
         <PageLink linkName="cancelMTOptions" destinationPageName="MTP"></PageLink>
         <PageLink linkName="saveMTOptions" destinationPageName="MTD"></PageLink>
-         <PageLink linkName="self" destinationPageName="MTD"></PageLink>
+        <PageLink linkName="self" destinationPageName="MTD"></PageLink>
       </WebPage>
    </WebActivity>
   </WebModule>
   
   <WebModule webModuleName="tm">
     <WebActivity webActivityName="tm">
-      <WebPage pageName="TM" isDefault="true" 
-      jspName="/envoy/tm/management/main.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
+      <WebPage pageName="TM" isDefault="true" jspName="/envoy/tm/management/main.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
         <PageLink linkName="_new" destinationPageName="NTM"></PageLink>
         <PageLink linkName="modify" destinationPageName="MTM"></PageLink>
         <PageLink linkName="clone" destinationPageName="MTM"></PageLink>
@@ -414,106 +412,71 @@
         <PageLink linkName="users" destinationPageName="TMUSER"></PageLink>
         <PageLink linkName="tmSearch" destinationPageName="TMSEARCH"></PageLink>
       </WebPage>
-      <WebPage pageName="TMUSER" isDefault="false" 
-      jspName="/envoy/tm/management/tmUsers.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmUsersHandler">
+      <WebPage pageName="TMUSER" isDefault="false" jspName="/envoy/tm/management/tmUsers.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmUsersHandler">
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
         <PageLink linkName="save" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="DTM" isDefault="false" 
-      jspName="/envoy/tm/management/deleteTmPage.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
+      <WebPage pageName="DTM" isDefault="false" jspName="/envoy/tm/management/deleteTmPage.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
         <PageLink linkName="delete" destinationPageName="TMD"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="NTM" isDefault="false" 
-      jspName="/envoy/tm/management/newTm.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
+      <WebPage pageName="NTM" isDefault="false" jspName="/envoy/tm/management/newTm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
         <PageLink linkName="ok" destinationPageName="TM"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="MTM" isDefault="false" 
-      jspName="/envoy/tm/management/newTm.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
+      <WebPage pageName="MTM" isDefault="false" jspName="/envoy/tm/management/newTm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
         <PageLink linkName="ok" destinationPageName="TM"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-	<WebPage pageName="TMI1" isDefault="false"
-		jspName="/envoy/tm/management/import.jsp"
-		pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
+      <WebPage pageName="TMI1" isDefault="false" jspName="/envoy/tm/management/import.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
 		<PageLink linkName="next" destinationPageName="TM_IMPORT_VALIDATION"></PageLink>
-		<PageLink linkName="cancel" destinationPageName="TM"></PageLink>	
-	</WebPage>
-      <WebPage pageName="TM_IMPORT_VALIDATION" isDefault="false" 
-      jspName="/envoy/tm/management/validationProgress.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
+		<PageLink linkName="cancel" destinationPageName="TM"></PageLink>
+      </WebPage>
+      <WebPage pageName="TM_IMPORT_VALIDATION" isDefault="false" jspName="/envoy/tm/management/validationProgress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
         <PageLink linkName="next" destinationPageName="TMI2"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>      
-      <WebPage pageName="TMCONVERT" isDefault="false" 
-      jspName="/envoy/tm/management/convertProgress.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
+      <WebPage pageName="TMCONVERT" isDefault="false" jspName="/envoy/tm/management/convertProgress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
         <PageLink linkName="self" destinationPageName="TMCONVERT"></PageLink>
         <PageLink linkName="ok" destinationPageName="TM"></PageLink>
       </WebPage>      
-      <WebPage pageName="TMI2" isDefault="false" 
-      jspName="/envoy/tm/management/importOptions.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
+      <WebPage pageName="TMI2" isDefault="false" jspName="/envoy/tm/management/importOptions.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
         <PageLink linkName="prev" destinationPageName="TMI1"></PageLink>
         <PageLink linkName="next" destinationPageName="TMI3"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="TMI3" isDefault="false" 
-      jspName="/envoy/tm/management/importProgress.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
+      <WebPage pageName="TMI3" isDefault="false" jspName="/envoy/tm/management/importProgress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
         <PageLink linkName="ok" destinationPageName="TM"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TMI2"></PageLink>
         <PageLink linkName="refresh" destinationPageName="TMI3_status"></PageLink>
       </WebPage>
-      <WebPage pageName="TMI3_status" isDefault="false" 
-      jspName="/envoy/tm/management/importProgress2.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
+      <WebPage pageName="TMI3_status" isDefault="false" jspName="/envoy/tm/management/importProgress2.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmImportPageHandler">
       </WebPage>
-      <WebPage pageName="TME1" isDefault="false" 
-      jspName="/envoy/tm/management/export.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmExportPageHandler">
+      <WebPage pageName="TME1" isDefault="false" jspName="/envoy/tm/management/export.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmExportPageHandler">
         <PageLink linkName="next" destinationPageName="TME2"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="TME2" isDefault="false" 
-      jspName="/envoy/tm/management/exportOutputOptions.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmExportPageHandler">
+      <WebPage pageName="TME2" isDefault="false" jspName="/envoy/tm/management/exportOutputOptions.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmExportPageHandler">
         <PageLink linkName="prev" destinationPageName="TME1"></PageLink>
         <PageLink linkName="next" destinationPageName="TME3"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="TME3" isDefault="false" 
-      jspName="/envoy/tm/management/exportProgress.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmExportPageHandler">
+      <WebPage pageName="TME3" isDefault="false" jspName="/envoy/tm/management/exportProgress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmExportPageHandler">
         <PageLink linkName="ok" destinationPageName="TM"></PageLink>
         <PageLink linkName="refresh" destinationPageName="TME3_status"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TME2"></PageLink>
       </WebPage>
-      <WebPage pageName="TME3_status" isDefault="false" 
-      jspName="/envoy/tm/management/exportProgress2.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmExportPageHandler">
-      </WebPage>
-      <WebPage pageName="STM" isDefault="false" 
-      jspName="/envoy/tm/maintenance/tmSearch.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmSearchHandler">
+      <WebPage pageName="TME3_status" isDefault="false" jspName="/envoy/tm/management/exportProgress2.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmExportPageHandler"></WebPage>
+      <WebPage pageName="STM" isDefault="false" jspName="/envoy/tm/maintenance/tmSearch.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmSearchHandler">
         <PageLink linkName="replace" destinationPageName="STM_PROGRESS"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="STM_PROGRESS" isDefault="false" 
-      jspName="/envoy/tm/maintenance/tmSearchProgress.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmReplaceHandler">
+      <WebPage pageName="STM_PROGRESS" isDefault="false" jspName="/envoy/tm/maintenance/tmSearchProgress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmReplaceHandler">
         <PageLink linkName="done" destinationPageName="STM_RESULTS"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
         <PageLink linkName="refresh" destinationPageName="STM_PROGRESS"></PageLink>
       </WebPage>
-      <WebPage pageName="STM_RESULTS" isDefault="false" 
-      jspName="/envoy/tm/maintenance/tmReplace.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmReplaceHandler">
+      <WebPage pageName="STM_RESULTS" isDefault="false" jspName="/envoy/tm/maintenance/tmReplace.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmReplaceHandler">
         <PageLink linkName="search" destinationPageName="STM"></PageLink>
         <PageLink linkName="replace" destinationPageName="STM_GLOBAL_REPLACE"></PageLink>
         <PageLink linkName="deleteTuv" destinationPageName="STM_DELETE"></PageLink>
@@ -521,119 +484,53 @@
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
         <PageLink linkName="self" destinationPageName="STM_RESULTS"></PageLink>
       </WebPage>
-      <WebPage pageName="STM_GLOBAL_REPLACE" isDefault="false" 
-      jspName="/envoy/tm/maintenance/tmBatchReplaceReport.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmBatchReplaceHandler">
+      <WebPage pageName="STM_GLOBAL_REPLACE" isDefault="false" jspName="/envoy/tm/maintenance/tmBatchReplaceReport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmBatchReplaceHandler">
         <PageLink linkName="search" destinationPageName="STM"></PageLink>
         <PageLink linkName="done" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="STM_DELETE" isDefault="false" 
-      jspName="/envoy/tm/maintenance/tmDeleteSegmentsReport.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmSegmentDeleteHandler">
+      <WebPage pageName="STM_DELETE" isDefault="false" jspName="/envoy/tm/maintenance/tmDeleteSegmentsReport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmSegmentDeleteHandler">
         <PageLink linkName="search" destinationPageName="STM"></PageLink>
         <PageLink linkName="done" destinationPageName="TM"></PageLink>
       </WebPage>
-
-      <WebPage pageName="TMS" isDefault="false" 
-      jspName="/envoy/tm/management/statistics.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
+      <WebPage pageName="TMS" isDefault="false" jspName="/envoy/tm/management/statistics.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.TmMainHandler">
         <PageLink linkName="ok" destinationPageName="TM"></PageLink>
       </WebPage>
-
-      <WebPage pageName="TMR1" isDefault="false" 
-      jspName="/envoy/tm/maintenance/reindex.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmReindexHandler">
+      <WebPage pageName="TMR1" isDefault="false" jspName="/envoy/tm/maintenance/reindex.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmReindexHandler">
         <PageLink linkName="next" destinationPageName="TMR2"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-      <WebPage pageName="TMR2" isDefault="false" 
-      jspName="/envoy/tm/maintenance/reindexProgress.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmReindexHandler">
+      <WebPage pageName="TMR2" isDefault="false" jspName="/envoy/tm/maintenance/reindexProgress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmReindexHandler">
         <PageLink linkName="ok" destinationPageName="TM"></PageLink>
         <PageLink linkName="refresh" destinationPageName="TMR2"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TMR1"></PageLink>
         <PageLink linkName="status" destinationPageName="TMR_status"></PageLink>
       </WebPage>
-      <WebPage pageName="TMR_status" isDefault="false" 
-      jspName="/envoy/tm/maintenance/reindexProgressData.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.PageHandler">
+      <WebPage pageName="TMR_status" isDefault="false" jspName="/envoy/tm/maintenance/reindexProgressData.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.PageHandler">
       </WebPage>
-
-      <WebPage pageName="TMD" isDefault="false" 
-      jspName="/envoy/tm/management/deleteTm.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.RemoveTmHandler">
+      <WebPage pageName="TMD" isDefault="false" jspName="/envoy/tm/management/deleteTm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.management.RemoveTmHandler">
         <PageLink linkName="ok" destinationPageName="TM"></PageLink>
         <PageLink linkName="refresh" destinationPageName="TMD"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TMD"></PageLink>
         <PageLink linkName="status" destinationPageName="TMD_status"></PageLink>
       </WebPage>
-      <WebPage pageName="TMD_status" isDefault="false" 
-      jspName="/envoy/tm/management/deleteTmProgressData.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.PageHandler">
+      <WebPage pageName="TMD_status" isDefault="false" jspName="/envoy/tm/management/deleteTmProgressData.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.PageHandler">
       </WebPage>
-      <WebPage pageName="TMSEARCH" isDefault="false" 
-      jspName="/envoy/tm/corpus/tmSearch.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.TMSearchBrowserHandler">
-      <PageLink linkName="self" destinationPageName="TMSEARCH"></PageLink>
-      <PageLink linkName="addEntry" destinationPageName="ADDENTRY"></PageLink>
-      <PageLink linkName="editEntry" destinationPageName="EDITENTRY"></PageLink>
-      <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
+      <WebPage pageName="TMSEARCH" isDefault="false" jspName="/envoy/tm/corpus/tmSearch.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.TMSearchBrowserHandler">
+        <PageLink linkName="self" destinationPageName="TMSEARCH"></PageLink>
+        <PageLink linkName="addEntry" destinationPageName="ADDENTRY"></PageLink>
+        <PageLink linkName="editEntry" destinationPageName="EDITENTRY"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="TM"></PageLink>
       </WebPage>
-      
-      <WebPage pageName="ADDENTRY" isDefault="false" 
-      jspName="/envoy/tm/corpus/addEntry.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.TMSearchAddEntryHandler">
-      <PageLink linkName="self" destinationPageName="ADDENTRY"></PageLink>
+      <WebPage pageName="ADDENTRY" isDefault="false" jspName="/envoy/tm/corpus/addEntry.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.TMSearchAddEntryHandler">
+        <PageLink linkName="self" destinationPageName="ADDENTRY"></PageLink>
       </WebPage>
-      
-      <WebPage pageName="EDITENTRY" isDefault="false" 
-      jspName="/envoy/tm/corpus/editEntry.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.TMSearchEditEntryHandler">
-      <PageLink linkName="self" destinationPageName="EDITENTRY"></PageLink>
+      <WebPage pageName="EDITENTRY" isDefault="false" jspName="/envoy/tm/corpus/editEntry.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.TMSearchEditEntryHandler">
+        <PageLink linkName="self" destinationPageName="EDITENTRY"></PageLink>
       </WebPage>
-      
-  </WebActivity>
+    </WebActivity>
   </WebModule>
+
   <WebModule webModuleName="datasources">
-    <WebActivity webActivityName="tsservers">
-      <WebPage pageName="TSS" isDefault="true" jspName="/envoy/administration/config/teamsite/TeamsiteServers.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.teamsite.TeamSiteServerHandler">
-        <PageLink linkName="new1" destinationPageName="NTSS"></PageLink>
-        <PageLink linkName="modify" destinationPageName="NTSS"></PageLink>
-        <PageLink linkName="remove" destinationPageName="TSS"></PageLink>
-        <PageLink linkName="create" destinationPageName="TSS"></PageLink>
-        <PageLink linkName="self" destinationPageName="TSS"></PageLink>
-      </WebPage>
-      <WebPage pageName="NTSS" isDefault="false" jspName="/envoy/administration/config/teamsite/addEditTeamSiteServer.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.teamsite.BasicTeamSiteServerHandler">
-        <PageLink linkName="next" destinationPageName="ACS"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="TSS"></PageLink>
-        <PageLink linkName="self" destinationPageName="NTSS"></PageLink>
-      </WebPage>
-      <WebPage pageName="ACS" isDefault="false" jspName="/envoy/administration/config/teamsite/addAnotherContentStore.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.teamsite.ContentStoreHandler">
-        <PageLink linkName="add" destinationPageName="ACS"></PageLink>
-        <PageLink linkName="delete" destinationPageName="ACS"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="TSS"></PageLink>
-        <PageLink linkName="done" destinationPageName="TSS"></PageLink>
-        <PageLink linkName="self" destinationPageName="ACS"></PageLink>
-      </WebPage>
-    </WebActivity>
-    <WebActivity webActivityName="teamsite">
-      <WebPage pageName="TBR1" isDefault="true" jspName="/envoy/administration/config/teamsite/TeamsiteBranchMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.teamsite.TeamSiteBranchMainHandler">
-        <PageLink linkName="new1" destinationPageName="TBRN"></PageLink>
-        <PageLink linkName="self" destinationPageName="TBR1"></PageLink>
-        <PageLink linkName="remove" destinationPageName="TBR1"></PageLink>
-      </WebPage>
-      <WebPage pageName="TBRN" isDefault="false" jspName="/envoy/administration/config/teamsite/TeamsiteBranchNew.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.teamsite.TeamSiteBranchNewHandler">
-        <PageLink linkName="news" destinationPageName="TBR2"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="TBR1"></PageLink>
-        <PageLink linkName="self" destinationPageName="TBRN"></PageLink>
-      </WebPage>
-      <WebPage pageName="TBR2" isDefault="false" jspName="/envoy/administration/config/teamsite/TeamsiteBranchNew1.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.teamsite.TeamSiteBranchNew1Handler">
-        <PageLink linkName="new2" destinationPageName="TBR3"></PageLink>
-      </WebPage>
-      <WebPage pageName="TBR3" isDefault="false" jspName="/envoy/administration/config/teamsite/TeamsiteBranchNew2.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.teamsite.TeamSiteBranchNew2Handler">
-        <PageLink linkName="new3" destinationPageName="TBR1"></PageLink>
-      </WebPage>
-    </WebActivity>
     <WebActivity webActivityName="xmlrules">
       <WebPage pageName="XRF1" isDefault="true" jspName="/envoy/administration/config/xmlrulefile/xmlrulefileMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.xmlrulefile.XmlRuleFileMainHandler">
         <PageLink linkName="new1" destinationPageName="XRF2"></PageLink>

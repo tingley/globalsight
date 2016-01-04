@@ -1,7 +1,6 @@
 <%@ page import="java.util.*,com.globalsight.util.modules.Modules"
 %><%!
     /* This just records whether all the different modules are installed */
-    static boolean b_teamsite = Modules.isTeamSiteAdapterInstalled();
     static boolean b_database = Modules.isDatabaseAdapterInstalled();
     static boolean b_vignette = Modules.isVignetteAdapterInstalled();
     static boolean b_cms = Modules.isCmsAdapterInstalled();

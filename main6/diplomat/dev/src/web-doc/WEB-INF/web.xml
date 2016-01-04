@@ -309,28 +309,6 @@
     </servlet>
 
     <servlet>
-        <servlet-name>TSPreviewServlet</servlet-name>
-        <servlet-class>
-            com.globalsight.cxe.servlet.cms.teamsite.TSPreviewServlet
-        </servlet-class>
-        <init-param>
-            <param-name>wl-dispatch-policy</param-name>
-            <param-value>ServletExecuteQueue</param-value>
-        </init-param>
-    </servlet>
-
-    <servlet>
-        <servlet-name>TeamSiteImageReplaceHandler</servlet-name>
-        <servlet-class>
-            com.globalsight.cxe.servlet.imagereplace.TeamSiteImageReplaceHandler
-        </servlet-class>
-        <init-param>
-            <param-name>wl-dispatch-policy</param-name>
-            <param-value>ServletExecuteQueue</param-value>
-        </init-param>
-    </servlet>
-
-    <servlet>
         <servlet-name>TerminologyServlet</servlet-name>
         <servlet-class>
             com.globalsight.terminology.servlet.TerminologyServlet
@@ -345,17 +323,6 @@
         <servlet-name>UserdataServlet</servlet-name>
         <servlet-class>
             com.globalsight.terminology.servlet.UserdataServlet
-        </servlet-class>
-        <init-param>
-            <param-name>wl-dispatch-policy</param-name>
-            <param-value>ServletExecuteQueue</param-value>
-        </init-param>
-    </servlet>
-
-    <servlet>
-        <servlet-name>TranslateServlet</servlet-name>
-        <servlet-class>
-            com.globalsight.cxe.servlet.cms.teamsite.TranslateServlet
         </servlet-class>
         <init-param>
             <param-name>wl-dispatch-policy</param-name>
@@ -719,11 +686,6 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>TeamSiteImageReplaceHandler</servlet-name>
-        <url-pattern>/TeamSiteImageReplaceHandler/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
         <servlet-name>proxy</servlet-name>
         <url-pattern>/proxy/*</url-pattern>
     </servlet-mapping>
@@ -809,11 +771,6 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>TSPreviewServlet</servlet-name>
-        <url-pattern>/TSPreviewServlet/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
         <servlet-name>Certificate</servlet-name>
         <url-pattern>/Certificate/*</url-pattern>
     </servlet-mapping>
@@ -827,12 +784,6 @@
         <servlet-name>AdminConnections</servlet-name>
         <url-pattern>/AdminConnections/*</url-pattern>
     </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>TranslateServlet</servlet-name>
-        <url-pattern>/TranslateServlet/*</url-pattern>
-    </servlet-mapping>
-
 
     <servlet-mapping>
         <servlet-name>ImageReplace</servlet-name>

@@ -19,15 +19,7 @@ package com.globalsight.everest.edit;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.entity.cms.teamsitedbmgr.TeamSiteBranch;
 import com.globalsight.everest.tuv.TuType;
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-
-import java.util.Collection;
-import java.util.Vector;
 
 /**
  * Methods for handling original and uploaded images, which are shared
@@ -36,11 +28,7 @@ import java.util.Vector;
  */
 public class ImageHelper
 {
-    private static Logger s_logger =
-        Logger.getLogger(
-            ImageHelper.class);
-
-    //private static String s_docRoot = null;
+	private static Logger s_logger = Logger.getLogger(ImageHelper.class);
 
     /**
      * Private constructor: this class can not be instantiated.
@@ -48,24 +36,6 @@ public class ImageHelper
     private ImageHelper()
     {
     }
-
-    /**
-     * Retrieves System 4's docroot string dynamically at runtime.
-     */
-    /*
-    static private String getDocRoot()
-        throws GeneralException
-    {
-        if (s_docRoot == null)
-        {
-            SystemConfiguration sc = SystemConfiguration.getInstance();
-            s_docRoot = sc.getStringParameter(
-                SystemConfiguration.WEB_SERVER_DOC_ROOT);
-        }
-
-        return s_docRoot;
-    }
-    */
 
     /**
      * <P>Determines which TU types (item types) are displayed in the
@@ -251,146 +221,6 @@ public class ImageHelper
                 e);
             return "";
         }
-    }
-
-    /**
-     * <P>TEAMSITE: Converts a image url in a segment to a display url
-     * that can be used inside an IMG tag.</P>
-     *
-     * @param p_url The url from a web page's image tag.
-     * @param p_int The page's internal BASE HREF. Cannot be null but
-     * can be the empty string.
-     * @param p_ext The page's external BASE, which has protocol for TeamSite.
-     * Cannot be null but can be the empty string.
-     */
-    static public String getTeamSiteSourceImageUrl(String p_url, String p_int,
-        String p_ext)
-    {
-        if (hasProtocol(p_url))
-        {
-            // I win, said the fully qualified url
-            return p_url;
-        }
-
-        try
-        {
-            if (isAbsolute(p_url))
-            {
-                int waIndex = p_ext.indexOf("/WORKAREA/");
-                int waNameIndex = p_ext.substring(waIndex+10).indexOf("/");
-                return p_ext.substring(0, waIndex+waNameIndex+10) + p_url;
-            }
-            else /* relative url*/
-            {
-                int slashIndex = p_ext.lastIndexOf("/");
-                return p_ext.substring(0, slashIndex+1) + p_url;
-            }
-        }
-        catch (Exception e)
-        {
-            return "";
-        }
-    }
-
-    /**
-     * <P>TEAMSITE: Converts a image url in a segment to a display url
-     * that can be used inside an IMG tag.</P>
-     *
-     * @param p_url The url from a web page's image tag.
-     * @param p_int The page's internal BASE HREF. Cannot be null but
-     * can be the empty string.
-     * @param p_ext The page's external BASE, which has protocol for TeamSite.
-     * Cannot be null but can be the empty string.
-     */
-    static public String getTeamSiteTargetImageUrl(String p_url, String p_int,
-        String p_ext, GlobalSightLocale p_locale)
-    {
-        if (hasProtocol(p_url))
-        {
-            // I win, said the fully qualified url
-            return p_url;
-        }
-
-        try
-        {
-            // determine source branch
-            int defaultIndex = p_ext.indexOf("default/");
-            int waIndex = p_ext.indexOf("/WORKAREA/");
-            // do not include trailing slash
-            String fileSB = p_ext.substring(defaultIndex+8, waIndex);
-
-            // bring in the specified branches
-            Vector branches = null;
-            String fileTB = fileSB;
-            boolean isBranchTarget = false;
-
-            /**
-             * Commenting out the branch stuff
-             * uncomment after you get a better fix
-             Collection coll =
-             ServerProxy.getTeamSiteDBManager().getAllBranches();
-
-             branches = (coll == null ? new Vector() : new Vector(coll));
-
-             for (int i = 0 ; i < branches.size() ; i++)
-             {
-             TeamSiteBranch branch = (TeamSiteBranch)branches.elementAt(i);
-
-             if (!(fileSB.equals(branch.getBranchSource())))
-             {
-             continue;
-             }
-
-             if (p_locale.getId() != (long)branch.getBranchLanguage())
-             {
-             continue;
-             }
-
-             isBranchTarget = true;
-             fileTB = branch.getBranchTarget();
-             break;
-             }
-            */
-
-            // compose target url
-            int waNameIndex = p_ext.substring(waIndex+10).indexOf("/");
-
-            if (isAbsolute(p_url))
-            {
-                return p_ext.substring(0, defaultIndex+8) + fileTB +
-                    p_ext.substring(waIndex, waIndex+waNameIndex+10) + p_url;
-            }
-            else /* relative url*/
-            {
-                int slashIndex = p_ext.lastIndexOf("/");
-
-                // Hardcoding isBranchTarget to false.
-                // If images start showing up properly then
-                // remove the following line isBranchTarget = false;
-                isBranchTarget = false;
-                if (isBranchTarget) // target branch
-                {
-                    return p_ext.substring(0, defaultIndex+8) + fileTB +
-                        p_ext.substring(waIndex, slashIndex+1) + p_url;
-                }
-                else // default target
-                {
-                    // construct destination directory from locale
-                    String localeDir = p_locale.toString();
-                    localeDir = localeDir.replace('_','-');
-
-                    return p_ext.substring(0, defaultIndex+8) + fileTB +
-                        p_ext.substring(waIndex, waIndex+waNameIndex+11) +
-                        p_ext.substring(waIndex+waNameIndex+10, slashIndex+1) +
-                        p_url;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            return "";
-        }
-
     }
 
     static public boolean hasProtocol(String p_url)

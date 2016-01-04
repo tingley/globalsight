@@ -68,8 +68,6 @@
         userPerms.getPermissionFor(Permission.SEGMENTATIONRULE_VIEW) || 
         userPerms.getPermissionFor(Permission.SGMLRULE_VIEW) || 
         userPerms.getPermissionFor(Permission.IMPORT) || 
-        userPerms.getPermissionFor(Permission.TEAMSITE_SERVER_VIEW) || 
-        userPerms.getPermissionFor(Permission.TEAMSITE_PROFILES_VIEW) || 
         userPerms.getPermissionFor(Permission.EXPORT_LOC_VIEW) || 
         userPerms.getPermissionFor(Permission.CORPUS_ALIGNER_VIEW) ||
         userPerms.getPermissionFor(Permission.CREATE_JOB) ||
@@ -184,8 +182,6 @@
    String adminSystemParametersUrl = LinkHelper.getWebActivityURL(request, "adminConfiguration");
    String remoteIpUrl = LinkHelper.getWebActivityURL(request, "remoteIpConfiguration");
    String uiLocaleUrl = LinkHelper.getWebActivityURL(request, "uiLocaleConfiguration");
-   String teamsiteConfigUrl = LinkHelper.getWebActivityURL(request, "tsservers");
-   String teamsiteBranchesUrl = LinkHelper.getWebActivityURL(request, "teamsite");
    String templatesUrl = LinkHelper.getWebActivityURL(request, "templates");
    String workflowStatePostUrl = LinkHelper.getWebActivityURL(request, "workflowStatePost");
    String terminologyUrl = LinkHelper.getWebActivityURL(request, "termbases");
@@ -502,16 +498,6 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_servicewa
 <% } %>
 <% } %>
 
-
-<%if (b_teamsite) {%>
-<% if (userPerms.getPermissionFor(Permission.TEAMSITE_SERVER_VIEW)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_teamsite_server_configuration")%>", "javascript:goToUrl('<%=teamsiteConfigUrl%>');", ""));
-<% } %>
-<% if (userPerms.getPermissionFor(Permission.TEAMSITE_PROFILES_VIEW)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_teamsite_branches")%>", "javascript:goToUrl('<%=teamsiteBranchesUrl%>');", ""));
-<% } %>
-<%}%>
-
 <%if (b_database){%>
 <% if (userPerms.getPermissionFor(Permission.DATABASE_INTEGRATION)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_db_connections2")%>", "javascript:goToUrl('<%=dbConnectionsUrl%>');", ""));
@@ -590,13 +576,6 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_blaise_co
 var guidesMenu = new WebFXMenu;
 
 guidesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_filesystem")%>", "javascript:showGuide('fileSystem');", ""));
-
-<%if (b_teamsite) {%>
-<% if (userPerms.getPermissionFor(Permission.TEAMSITE_SERVER_VIEW) || 
-        userPerms.getPermissionFor(Permission.TEAMSITE_PROFILES_VIEW)) { %>
-guidesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_teamsite")%>", "javascript:showGuide('teamSite');", ""));
-<%}%>
-<%}%>
 
 <%if (b_database) {%>
 <% if (userPerms.getPermissionFor(Permission.DATABASE_INTEGRATION)) { %>

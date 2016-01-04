@@ -49,8 +49,6 @@ import com.globalsight.cxe.adaptermdb.quarkframe.QuarkFrameSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.quarkframe.QuarkFrameTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.serviceware.ServiceWareSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.serviceware.ServiceWareTargetAdapterMDB;
-import com.globalsight.cxe.adaptermdb.teamsite.TeamSiteSourceAdapterMDB;
-import com.globalsight.cxe.adaptermdb.teamsite.TeamSiteTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.vignette.VignetteSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.vignette.VignetteTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.windowspe.WindowsPESourceAdapterMDB;
@@ -73,8 +71,6 @@ public class EventTopicMap
     public static final String FOR_CAP_TARGET_ADAPTER = "ForCapTargetAdapter";
     public static final String FOR_CAP_SOURCE_ADAPTER = "ForCapSourceAdapter";
     public static final String FOR_CAP_EXPORT_LISTENER = "ForCapExportListener";
-    public static final String FOR_TEAMSITE_SOURCE_ADAPTER = "ForTeamSiteSourceAdapter";
-    public static final String FOR_TEAMSITE_TARGET_ADAPTER = "ForTeamSiteTargetAdapter";
     public static final String FOR_VIGNETTE_SOURCE_ADAPTER = "ForVignetteSourceAdapter";
     public static final String FOR_VIGNETTE_TARGET_ADAPTER = "ForVignetteTargetAdapter";
     public static final String FOR_DATABASE_TARGET_ADAPTER = "ForDatabaseTargetAdapter";
@@ -193,16 +189,6 @@ public class EventTopicMap
                 FOR_COPYFLOW_SOURCE_ADAPTER);
         fillMap(CxeMessageType.COPYFLOW_LOCALIZED_EVENT,
                 FOR_COPYFLOW_TARGET_ADAPTER);
-
-        // teamsite events
-        fillMap(CxeMessageType.TEAMSITE_FILE_SELECTED_EVENT,
-                FOR_TEAMSITE_SOURCE_ADAPTER);
-        fillMap(CxeMessageType.TEAMSITE_JOB_STATUS_EVENT,
-                FOR_TEAMSITE_SOURCE_ADAPTER);
-        fillMap(CxeMessageType.TEAMSITE_IGNORE_EVENT,
-                FOR_TEAMSITE_SOURCE_ADAPTER);
-        fillMap(CxeMessageType.TEAMSITE_EXPORT_EVENT,
-                FOR_TEAMSITE_TARGET_ADAPTER);
 
         // vignette
         fillMap(CxeMessageType.VIGNETTE_FILE_SELECTED_EVENT,
@@ -340,16 +326,6 @@ public class EventTopicMap
                 new CopyFlowSourceAdapterMDB());
         m_classMap.put(CxeMessageType.COPYFLOW_LOCALIZED_EVENT,
                 new CopyFlowTargetAdapterMDB());
-
-        // teamsite events
-        m_classMap.put(CxeMessageType.TEAMSITE_FILE_SELECTED_EVENT,
-                new TeamSiteSourceAdapterMDB());
-        m_classMap.put(CxeMessageType.TEAMSITE_JOB_STATUS_EVENT,
-                new TeamSiteSourceAdapterMDB());
-        m_classMap.put(CxeMessageType.TEAMSITE_IGNORE_EVENT,
-                new TeamSiteSourceAdapterMDB());
-        m_classMap.put(CxeMessageType.TEAMSITE_EXPORT_EVENT,
-                new TeamSiteTargetAdapterMDB());
 
         // vignette
         m_classMap.put(CxeMessageType.VIGNETTE_FILE_SELECTED_EVENT,

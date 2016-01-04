@@ -52,11 +52,6 @@ public interface DataSourceType
     public final static String DOCUMENTUM = "documentum";
 
     /**
-     * Constant used for identifying a "TeamSite CMS" data source type.
-     */
-    public final static String TEAM_SITE = "teamsite";
-
-    /**
      * Constant used for identifying a "Vignette CMS" data source type.
      */
     public final static String VIGNETTE = "vignette";    

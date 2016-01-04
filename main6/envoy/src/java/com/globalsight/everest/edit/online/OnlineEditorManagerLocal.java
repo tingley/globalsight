@@ -922,9 +922,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             // If this is a Prs template, we must remove the dynamic
             // preview link and its associated data.
 
-            if (/* p_options.getViewMode() == VIEWMODE_TEXT && */
-            srcPage.getDataSourceType().equals("db")
-                    || srcPage.getDataSourceType().equals("teamsite"))
+            if (srcPage.getDataSourceType().equals("db"))
             {
                 result = removePreviewLink(result);
             }
@@ -1238,8 +1236,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                 // There must be a good way to find out when to do this,
                 // i.e, we don't want to do this for a large HTML page.
-                if (targetPage.getDataSourceType().equals("db")
-                        || targetPage.getDataSourceType().equals("teamsite"))
+                if (targetPage.getDataSourceType().equals("db"))
                 {
                     if (sourcePage.getRequest().isPageCxePreviewable())
                     {
@@ -2517,32 +2514,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         // Assume this an extracted file
         ExtractedFile ef = getExtractedFile(p_page);
-        boolean teamsiteUrl = false;
-        String extUrl = "";
+        String extUrl = ef.getExternalBaseHref();
 
-        if (ef.getExternalBaseHref().indexOf("/iw-mount/") > -1)
-        {
-            teamsiteUrl = true;
-        }
-
-        if (teamsiteUrl)
-        {
-            extUrl = ef.getExternalBaseHref().substring(0,
-                    ef.getExternalBaseHref().lastIndexOf("/"));
-        }
-        else
-        {
-            extUrl = ef.getExternalBaseHref();
-        }
-
-        String srcUrl = ImageHelper.getDisplayImageUrl(p_result
-                .getSourceSegment().getTotalTextValue(),
-                WebAppConstants.VIRTUALDIR_CXEDOCS, ef.getInternalBaseHref(),
-                extUrl
-        // GSDEF00010714: this breaks the online editor.
-        // ef.getExternalBaseHref().substring(0,
-        // ef.getExternalBaseHref().lastIndexOf("/"))
-                );
+		String srcUrl = ImageHelper.getDisplayImageUrl(p_result
+				.getSourceSegment().getTotalTextValue(),
+				WebAppConstants.VIRTUALDIR_CXEDOCS, ef.getInternalBaseHref(),
+				extUrl);
 
         long subId = Long.parseLong(p_subId);
 

@@ -49,7 +49,6 @@ boolean isOOO = pageFormat.startsWith("openoffice");
 boolean isOfficeXml = pageFormat.equals(IFormatNames.FORMAT_OFFICE_XML);
 boolean hasDynamicPreview = false;
 boolean hasPDFPreview = EditUtil.hasPDFPreviewMode(state);
-boolean isTeamsiteSource = false;
 Object vpdfobj = sessionMgr.getAttribute("src_view_pdf");
 boolean viewPdf = vpdfobj == null ? false : true;
 String targetLocale = "";
@@ -78,37 +77,6 @@ if (!hasPDFPreview)
 String dataSource = pageInfo.getDataSourceType();
 String pageName = pageInfo.getPageName();
 String pageNamePath = pageName.replaceAll("\\\\","/");
-
-if (dataSource.equals(ExportConstants.TEAMSITE))
-{
-    isTeamsiteSource = true;
-
-    String formatType = pageInfo.getPageFormat();
-
-    // CvdL: shouldn't this use the filename?
-    String externalBaseHref = pageInfo.getExternalBaseHref();
-    String fileName = externalBaseHref.substring(
-        externalBaseHref.lastIndexOf('/') + 1);
-    int extension = fileName.lastIndexOf('.');
-    String ext= fileName.substring(extension + 1);
-
-    if (((ext.equals("dcr")) || (extension == -1)) && (formatType.equals("xml")) )
-    {
-        // Is this a DCR? No extension to a file indicates presence of DCR.
-        // Don't show static preview for a DCR.
-        hasPreview = false;
-        formatType = "dcr";
-    }
-
-    if (formatType.equals("html") || formatType.equals("asp") ||
-        formatType.equals("dcr")  || formatType.equals("jsp") ||
-        formatType.equals("word-html") || formatType.equals("excel-html") ||
-        formatType.equals("powerpoint-html") || formatType.equals("pdf"))
-    {
-        hasDynamicPreview = true;
-    }
-}
-
 
 // LABELS
 String lb_sourceLocale = bundle.getString("lb_source_locale");
@@ -272,7 +240,7 @@ function showXMLPreview()
   highlight(idXMLPreview);
 }
 
-// For TeamSite
+// dead codes ???
 function exportForPreview()
 {
       var url = "/globalsight/CapExportServlet?" +

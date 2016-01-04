@@ -43,7 +43,6 @@ import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
 import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
-import com.globalsight.cxe.adapter.teamsite.TeamSiteAdapter;
 import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
 import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
 import com.globalsight.cxe.adaptermdb.EventTopicMap;
@@ -555,139 +554,6 @@ public class CxeProxy
     }
 
     /**
-     * Initiates a teamsite import using JMS.
-     * 
-     * @param p_originalFilename
-     * @param p_convertedFileName
-     * @param p_fileSize
-     * @param p_locale
-     * @param p_charset
-     * @param p_batchId
-     * @param p_pageNum
-     * @param p_pageCount
-     * @param p_fileProfileId
-     * @param p_localizationProfile
-     * @param p_jobName
-     * @param p_userName
-     * @param p_importRequestType
-     *            IMPORT_TYPE_XXX
-     * @exception JMSException
-     * @exception NamingException
-     */
-    static public void importFromTeamSite(String p_originalFilename,
-            String p_convertedFileName, int p_fileSize, String p_locale,
-            String p_charset, String p_batchId, int p_pageNum, int p_pageCount,
-            int p_docPageNum, int p_docPageCount, String p_fileProfileId,
-            String p_localizationProfile, String p_jobName, String p_userName,
-            String p_serverName, String p_storeName, String p_taskId,
-            String p_overwriteSource, String p_callbackImmediately,
-            String p_importRequestType) throws JMSException, NamingException
-    {
-        importFromTeamSite(p_originalFilename, p_convertedFileName, p_fileSize,
-                p_locale, p_charset, p_batchId, p_pageNum, p_pageCount,
-                p_docPageNum, p_docPageCount, p_fileProfileId,
-                p_localizationProfile, p_jobName, p_userName, p_serverName,
-                p_storeName, p_taskId, p_overwriteSource,
-                p_callbackImmediately, Boolean.FALSE, p_importRequestType);
-    }
-
-    /**
-     * Initiates a teamsite import using JMS.
-     * 
-     * @param p_originalFilename
-     * @param p_convertedFileName
-     * @param p_fileSize
-     * @param p_locale
-     * @param p_charset
-     * @param p_batchId
-     * @param p_pageNum
-     * @param p_pageCount
-     * @param p_docPageNum
-     *            this is not the p_pageNum
-     * @param p_docPageCount
-     *            this is not the p_pageCount
-     * @param p_fileProfileId
-     * @param p_localizationProfile
-     * @param p_jobName
-     * @param p_userName
-     * @param p_overrideFileProfileAsUnextracted
-     *            - Determines whether the import process is invoked upon a
-     *            failure for an extracted file (will override the file
-     *            profile's format type).
-     * @param p_importRequestType
-     *            IMPORT_TYPE_XXX
-     * @exception JMSException
-     * @exception NamingException
-     */
-    static public void importFromTeamSite(String p_originalFilename,
-            String p_convertedFileName, int p_fileSize, String p_locale,
-            String p_charset, String p_batchId, int p_pageNum, int p_pageCount,
-            int p_docPageNum, int p_docPageCount, String p_fileProfileId,
-            String p_localizationProfile, String p_jobName, String p_userName,
-            String p_serverName, String p_storeName, String p_taskId,
-            String p_overwriteSource, String p_callbackImmediately,
-            Boolean p_overrideFileProfileAsUnextracted,
-            String p_importRequestType) throws JMSException, NamingException
-    {
-        if (s_logger.isDebugEnabled())
-        {
-            s_logger.debug("CXE import server is " + p_serverName);
-            s_logger.debug("CXE import store is " + p_storeName);            
-        }
-
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.TEAMSITE_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = new HashMap();
-        String companyId = getCompanyIdByFileProfileId(p_fileProfileId);
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-        params.put("TeamSiteServer", p_serverName);
-        params.put("TeamSiteStore", p_storeName);
-        params.put("TeamSiteTaskId", p_taskId);
-        params.put("TeamSiteOverwriteSource", p_overwriteSource);
-        params.put("TeamSiteCallbackImmediately", p_callbackImmediately);
-        params.put("SourceFileName", p_originalFilename);
-        params.put("FileName", p_convertedFileName);
-        params.put("FileSize", new Integer(p_fileSize));
-        params.put("Locale", p_locale);
-        params.put("Charset", p_charset);
-        params.put("BatchId", p_batchId);
-        params.put("PageNum", new Integer(p_pageNum));
-        params.put("PageCount", new Integer(p_pageCount));
-        params.put("DocPageNum", new Integer(p_docPageNum));
-        params.put("DocPageCount", new Integer(p_docPageCount));
-        params.put("DataSourceProfile", p_fileProfileId);
-        params.put("LocalizationProfile", p_localizationProfile);
-        params.put("JobName", p_jobName);
-        params.put("UserName", p_userName);
-        params.put("OverrideFileProfileAsUnextracted",
-                p_overrideFileProfileAsUnextracted);
-
-        cxeMessage.setParameters(params);
-
-        String jmsTopic = EventTopicMap.JMS_PREFIX
-                + EventTopicMap.FOR_TEAMSITE_SOURCE_ADAPTER;
-        sendCxeMessage(cxeMessage, jmsTopic);
-    }
-
-    static public void importFromTeamSite(String p_originalFilename,
-            String p_convertedFileName, int p_fileSize, String p_locale,
-            String p_charset, String p_batchId, int p_pageNum, int p_pageCount,
-            int p_docPageNum, int p_docPageCount, String p_fileProfileId,
-            String p_localizationProfile, String p_jobName, String p_userName,
-            String p_serverName, String p_storeName,
-            Boolean p_overrideFileProfileAsUnextracted,
-            String p_importRequestType) throws JMSException, NamingException
-    {
-        importFromTeamSite(p_originalFilename, p_convertedFileName, p_fileSize,
-                p_locale, p_charset, p_batchId, p_pageNum, p_pageCount,
-                p_docPageNum, p_docPageCount, p_fileProfileId,
-                p_localizationProfile, p_jobName, p_userName, p_serverName,
-                p_storeName, "", "", "", p_overrideFileProfileAsUnextracted,
-                p_importRequestType);
-    }
-
-    /**
      * Publishes the CxeMessage objects contained in AdapterResult[]
      * 
      * @param p_msgs
@@ -878,16 +744,6 @@ public class CxeProxy
     static public boolean isMsOfficeAdapterInstalled()
     {
         return MsOfficeAdapter.isInstalled();
-    }
-
-    /**
-     * Returns true if the TeamSite Adapter is installed
-     * 
-     * @return true | false
-     */
-    static public boolean isTeamSiteAdapterInstalled()
-    {
-        return TeamSiteAdapter.isInstalled();
     }
 
     /**
@@ -1282,38 +1138,6 @@ public class CxeProxy
         exportMsg.setMessageData(p_gxml);
 
         return exportMsg;
-    }
-
-    /**
-     * Returns the Import success or Failure message to TeamSite
-     * 
-     * @param p_efxml
-     *            string of event flow xml
-     * @param p_jobState
-     *            string of IMPORT_FAILED or PENDING
-     * @param p_message
-     *            string of message with details of files
-     * @exception IOException
-     * @exception JMSException
-     * @exception NamingException
-     */
-    static public void returnImportStatusToTeamSite(String p_efxml,
-            String p_jobState, String p_message, String p_companyId)
-            throws JMSException, NamingException, IOException
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.TEAMSITE_JOB_STATUS_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        cxeMessage.setEventFlowXml(p_efxml);
-        HashMap params = new HashMap();
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, p_companyId);
-        params.put("TeamSiteJobState", p_jobState);
-        params.put("TeamSiteMessage", p_message);
-        cxeMessage.setParameters(params);
-
-        String jmsTopic = EventTopicMap.JMS_PREFIX
-                + EventTopicMap.FOR_TEAMSITE_SOURCE_ADAPTER;
-        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     /**

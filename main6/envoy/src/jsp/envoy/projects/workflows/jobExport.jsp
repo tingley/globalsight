@@ -706,7 +706,6 @@ private String getSubFileName(String p_filename)
             ds = ((TargetPage)targetPages.get(0)).getDataSourceType();       
         }     
         boolean isFileSystem = ds.startsWith(DataSourceType.FILE_SYSTEM);
-        boolean isTeamSite = DataSourceType.TEAM_SITE.equals(ds);
         boolean isDatabase = DataSourceType.DATABASE.equals(ds);
         boolean isMicrosoftOffice = false;
         long wfId = curWF.getId();
@@ -1049,7 +1048,6 @@ private String getSubFileName(String p_filename)
                 ds = ((TargetPage)targetPages.get(0)).getDataSourceType(); 
             }             
             boolean isFileSystem = ds.startsWith(DataSourceType.FILE_SYSTEM); //could be fs or fsAutoImport
-            boolean isTeamSite = DataSourceType.TEAM_SITE.equals(ds);
             boolean isDatabase = DataSourceType.DATABASE.equals(ds);
             boolean isMicrosoftOffice = false;
             boolean isNativeRtf = false;

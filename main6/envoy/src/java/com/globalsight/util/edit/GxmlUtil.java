@@ -730,24 +730,12 @@ public class GxmlUtil
                     ExtractedFile ef = (ExtractedFile) p_page.getPrimaryFile();
                     if (map == null)
                     {
-                        if (p_page.getDataSourceType().equals("teamsite"))
-                        {
-                            p_res.append(disableLinks(ImageHelper
-                                    .getTeamSiteTargetImageUrl(
-                                            p_node.getTextValue(),
-                                            ef.getInternalBaseHref(),
-                                            ef.getExternalBaseHref(),
-                                            p_page.getGlobalSightLocale())));
-                        }
-                        else
                         // use original image from docs directory
-                        {
-                            p_res.append(disableLinks(ImageHelper
-                                    .getDisplayImageUrl(p_node.getTextValue(),
-                                            WebAppConstants.VIRTUALDIR_CXEDOCS,
-                                            ef.getInternalBaseHref(),
-                                            ef.getExternalBaseHref())));
-                        }
+                        p_res.append(disableLinks(ImageHelper
+                                .getDisplayImageUrl(p_node.getTextValue(),
+                                        WebAppConstants.VIRTUALDIR_CXEDOCS,
+                                        ef.getInternalBaseHref(),
+                                        ef.getExternalBaseHref())));
                     }
                     else
                     {
@@ -1128,17 +1116,9 @@ public class GxmlUtil
 
                     if (ImageHelper.isImageItemType(itemType))
                     {
-                        if (p_dataSourceType.equals("teamsite"))
-                        {
-                            value = ImageHelper.getTeamSiteSourceImageUrl(
-                                    value, p_int, p_ext);
-                        }
-                        else
-                        {
-                            value = ImageHelper.getDisplayImageUrl(value,
-                                    WebAppConstants.VIRTUALDIR_CXEDOCS, p_int,
-                                    p_ext);
-                        }
+						value = ImageHelper.getDisplayImageUrl(value,
+								WebAppConstants.VIRTUALDIR_CXEDOCS, p_int,
+								p_ext);
                         p_result.append(value);
 
                         return;

@@ -729,7 +729,6 @@ public class JobCreatorLocal implements JobCreator
                         // Import Failed
                         sendEmailFromAdmin(job, false);
                     }
-                    notifyCXEofJobState(job, p_sp, details, ex);
                 }
                 else
                 {
@@ -1379,22 +1378,7 @@ public class JobCreatorLocal implements JobCreator
         String jobName = p_job.getJobName();
         String batchId = jobName + System.currentTimeMillis();
         String dataSourceType = ex.getSource().getDataSourceType();
-
-        if (DataSourceType.TEAM_SITE.equals(dataSourceType))
-        {
-            CxeProxy.importFromTeamSite(ex.getCategory().get(0).getValue("SourceFileName"),
-                    ex.getSource().getValue("ConvertedFileName"),
-                    Integer.parseInt(ex.getSource().getValue("FileSize")),
-                    ex.getSourceLocale(),ex.getSource().getCharset(),
-                    ex.getBatchInfo().getBatchId(), 1, 1, 1, 1,
-                    ex.getSource().getDataSourceId(),
-                    ex.getBatchInfo().getL10NProfileId(), jobName,
-                    ex.getCategory().get(0).getValue("UserName"),
-                    ex.getValue("ServerName"), ex.getValue("StoreName"),
-                    Boolean.TRUE, CxeProxy.IMPORT_TYPE_L10N);
-
-        }
-        else if (DataSourceType.VIGNETTE.equals(dataSourceType))
+        if (DataSourceType.VIGNETTE.equals(dataSourceType))
         {
             Category c = ex.getCategory().get(0);
             CxeProxy.importFromVignette(
@@ -1533,52 +1517,6 @@ public class JobCreatorLocal implements JobCreator
     }
 
     // package methods
-
-    /**
-     * Notify TeamSite regarding the Job State
-     * 
-     * @exception RemoteException
-     */
-    private void notifyCXEofJobState(Job p_job, SourcePage p_sp,
-            String p_details, EventFlowXml ex) throws RemoteException
-    {
-        String state = p_job.getState();
-        try
-        {
-            String efxml = p_sp.getRequest().getEventFlowXml();
-
-            Collection<Request> requests = p_job.getRequestList();
-            if (requests.size() == 0)
-            {
-                return;
-            }
-
-            Request r = requests.iterator().next();
-
-            String dataSourceType = ex.getSource().getDataSourceType();
-
-            if (DataSourceType.TEAM_SITE.equals(dataSourceType))
-            {
-                CxeProxy.returnImportStatusToTeamSite(efxml, state, p_details,
-                        String.valueOf(p_job.getCompanyId()));
-            }
-            else if (DataSourceType.VIGNETTE.equals(dataSourceType))
-            {
-                // CxeProxy.returnImportStatusToVignette(efxml, state,
-                // p_details);
-            }
-            else if (dataSourceType != null
-                    && dataSourceType.startsWith(DataSourceType.FILE_SYSTEM))
-            {
-                // CxeProxy.returnImportStatusTofileSystem(efxml, state,
-                // p_details);
-            }
-        }
-        catch (Exception e)
-        {
-            c_logger.error("Failed to notify TeamSite", e);
-        }
-    }
 
     private String getJobContentInfo(Job p_job)
     {

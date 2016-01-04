@@ -1246,27 +1246,7 @@ public class Install extends installer.EventBroadcaster
                 concatPath(DIR_EAR,
                         "globalsight-web.war/reports/datasource.xml"));
 
-        // teamsite auto import
-        m_configFileList
-                .put(concatPath(DIR_EAR,
-                        "lib/classes/properties/autoTeamSiteImport.map"),
-                        concatPath(INSTALLATION_DATA_DIRECTORY,
-                                "teamsite/tsautoimport/properties/autoTeamSiteImport.map"));
-
-        m_configFileList
-                .put(concatPath(DIR_EAR,
-                        "lib/classes/properties/autoTeamSiteImport.properties"),
-                        concatPath(INSTALLATION_DATA_DIRECTORY,
-                                "teamsite/tsautoimport/properties/autoTeamSiteImport.properties"));
-
-        m_configFileList
-                .put(concatPath(INSTALLATION_DATA_DIRECTORY,
-                        "teamsite/tsautoimport/properties/teamsiteParams.properties.template"),
-                        concatPath(INSTALLATION_DATA_DIRECTORY,
-                                "teamsite/tsautoimport/properties/teamsiteParams.properties"));
-
-        // files for LDAP (Windows Version)
-        // ldif file
+        // files for LDAP (Windows Version) ldif file
         m_configFileList
                 .put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
                         "globalsight.ldif.template"),

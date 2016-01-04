@@ -64,16 +64,6 @@ function toggleStyle(obj, wizard)
                       obj_xmlFileProfiles,
                       obj_xmlImport);
     }
-    else if (wizard == 'teamsite') 
-    {
-         obj_teamsiteFileProfiles = getRef('teamsiteFileProfiles');
-         obj_teamsiteBranches = getRef('teamsiteBranches');
-         obj_teamsiteImport = getRef('teamsiteImport');
-         objects.push(obj_teamsiteFileProfiles,
-                      obj_teamsiteBranches,
-                      obj_teamsiteImport);
-
-    }
     else if (wizard == 'database')
     {
        obj_dbConnections = getRef('dbConnections');

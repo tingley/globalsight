@@ -28,9 +28,7 @@ server.classes=\
   com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFilePersistenceManagerWLRMIImpl,\
   com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManagerWLRMIImpl,\
   com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManagerWLRMIImpl,\
-  com.globalsight.cxe.persistence.cms.teamsite.server.TeamSiteServerPersistenceManagerWLRMIImpl,\
   com.globalsight.cxe.persistence.dbconnection.DBConnectionPersistenceManagerWLRMIImpl,\
-  com.globalsight.cxe.persistence.cms.teamsitedbmgr.TeamSiteDBManagerWLRMIImpl,\
   com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManagerWLRMIImpl,\
   com.globalsight.cxe.persistence.databasecolumn.DatabaseColumnPersistenceManagerWLRMIImpl,\
   com.globalsight.cxe.persistence.previewurl.PreviewUrlPersistenceManagerWLRMIImpl,\

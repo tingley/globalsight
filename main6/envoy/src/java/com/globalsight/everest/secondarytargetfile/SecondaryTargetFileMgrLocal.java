@@ -501,7 +501,7 @@ public final class SecondaryTargetFileMgrLocal implements
     private String constructRelativePath(String p_relativePath, long p_jobId,
             Long p_wfId)
     {
-        // make sure there are no slashed (for TeamSite)
+        // make sure there are no slashed
         if (p_relativePath.startsWith("/") || p_relativePath.startsWith("\\"))
         {
             p_relativePath = p_relativePath.substring(1, p_relativePath

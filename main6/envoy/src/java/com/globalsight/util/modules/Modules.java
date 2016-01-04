@@ -23,7 +23,6 @@ import com.globalsight.cxe.adapter.mediasurface.MediasurfaceAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
-import com.globalsight.cxe.adapter.teamsite.TeamSiteAdapter;
 import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
 import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
 import com.globalsight.cxe.adapter.documentum.DocumentumAdapter;
@@ -46,8 +45,7 @@ public class Modules
             .getLogger(Modules.class);
 
     // Keeps track of whether certain modules are installed
-    private static boolean s_cms, s_db, s_teamsite, s_vignette,
-            s_serviceware = false;
+    private static boolean s_cms, s_db, s_vignette, s_serviceware = false;
 
     private static boolean s_documentum = false;
 
@@ -78,7 +76,6 @@ public class Modules
             SystemConfiguration sc = SystemConfiguration.getInstance();
             s_cms = MediasurfaceAdapter.isInstalled();
             s_db = DatabaseAdapter.isInstalled();
-            s_teamsite = TeamSiteAdapter.isInstalled();
             s_vignette = VignetteAdapter.isInstalled();
             s_pdf = PdfAdapter.isInstalled();
             s_quark = QuarkFrameAdapter.isQuarkInstalled();
@@ -129,16 +126,6 @@ public class Modules
     public static boolean isDatabaseAdapterInstalled()
     {
         return s_db;
-    }
-
-    /**
-     * Returns true if the TeamSite Adapter is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isTeamSiteAdapterInstalled()
-    {
-        return TeamSiteAdapter.isInstalled();
     }
 
     /**

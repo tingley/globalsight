@@ -402,11 +402,9 @@ public class UILocaleManager
         
         srcFiles.add(new File(enUSImgRoot, "guide_logo_database.gif"));
         srcFiles.add(new File(enUSImgRoot, "guide_logo_fileSystem.gif"));
-        srcFiles.add(new File(enUSImgRoot, "guide_logo_teamSite.gif"));
         
         tgtFiles.add(new File(tgtLocaleImgRoot, "guide_logo_database.gif"));
         tgtFiles.add(new File(tgtLocaleImgRoot, "guide_logo_fileSystem.gif"));
-        tgtFiles.add(new File(tgtLocaleImgRoot, "guide_logo_teamSite.gif"));
         
         CopyFiles(srcFiles, tgtFiles, false);
     }

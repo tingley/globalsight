@@ -29,6 +29,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -37,6 +38,8 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.CostingException;
+import com.globalsight.everest.foundation.CountryCode;
+import com.globalsight.everest.foundation.LanguageCode;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.jobhandler.JobException;
@@ -455,6 +458,7 @@ public class LocaleManagerLocal implements LocaleManager
         Session session = null;
         Transaction transaction = null;
 
+        if (p_source==null||p_target==null) return;
         try
         {
             session = HibernateUtil.getSession();
@@ -474,9 +478,11 @@ public class LocaleManagerLocal implements LocaleManager
             }
             else
             {
-                lp = new LocalePair(p_source, p_target, companyId);
+                GlobalSightLocale sourceLocal =  constructLocal(p_source, session);
+                GlobalSightLocale targetLocal = constructLocal(p_target, session);
+                if (sourceLocal==null||targetLocal==null) return;
+                lp = new LocalePair(sourceLocal, targetLocal, companyId);
             }
-
             session.saveOrUpdate(lp);
             // add all the roles
             addRoles(p_source, p_target);
@@ -505,6 +511,75 @@ public class LocaleManagerLocal implements LocaleManager
                 // //session.close();
             }
         }
+    }
+
+    private GlobalSightLocale constructLocal(GlobalSightLocale locale, Session session) {
+        GlobalSightLocale localnew = null;
+        String languageCode = locale.toString().substring(0,2);
+        String countryCode = locale.toString().substring(3, 5);
+        List<GlobalSightLocale> list = getLocalPair(session, languageCode, countryCode);
+        if (list.isEmpty())
+        {
+            List<LanguageCode> listLanguage = getLanguage(session, languageCode);
+            List<CountryCode> listCountry = getCountry(session, countryCode);
+            if (!(listLanguage.isEmpty()||listCountry.isEmpty()))
+            {
+                GlobalSightLocale local = new GlobalSightLocale(listLanguage.get(0).toString(),
+                        listCountry.get(0).toString(),false);
+                session.saveOrUpdate(local);
+                List<GlobalSightLocale> listnew = getLocalPair(session, 
+                        listLanguage.get(0).toString(), listCountry.get(0).toString()); 
+                localnew = listnew.get(0);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            GlobalSightLocale source = list.get(0);
+            if (source.getId()!=locale.getId())
+            {
+                session.delete(source);
+                localnew = new GlobalSightLocale(locale.getLanguage(),locale.getCountry(),false);
+                session.save(localnew);
+                List<GlobalSightLocale> listnewlocal = getLocalPair(session,localnew.getLanguage(),
+                        localnew.getCountry());
+                localnew = listnewlocal.get(0);
+            }
+            else
+            {
+                localnew = source;
+            }
+        }
+        return localnew;
+    }
+
+    private List<LanguageCode> getLanguage(Session session,String languageCodeStr)
+    {
+        Query query = session.getNamedQuery("queryLanguage");
+        query.setParameter("code", languageCodeStr);
+        List<LanguageCode> list = query.list();
+        return list;
+    }
+    
+    private List<CountryCode> getCountry(Session session,String countryCodeStr)
+    {
+        Query query = session.getNamedQuery("queryCountry");
+        query.setParameter("code", countryCodeStr);
+        List<CountryCode> list = query.list();
+        return list;
+    }
+    
+    private List<GlobalSightLocale> getLocalPair(Session session, String languageCode1, String countryCode1) {
+        
+         String hql = "FROM GlobalSightLocale l WHERE l.language =:languageCode AND l.country =:countryCode ";
+         Map map = new HashMap();
+         map.put("languageCode", languageCode1);
+         map.put("countryCode", countryCode1);
+         List result = HibernateUtil.search(hql, map);
+        return result;    
     }
 
     /**

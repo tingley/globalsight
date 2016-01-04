@@ -179,5 +179,7 @@
         <mapping resource="com/globalsight/persistence/hibernate/xml/InddTuMapping.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/LoginAttemptConfig.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/LoginAttempt.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/Language.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/Country.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

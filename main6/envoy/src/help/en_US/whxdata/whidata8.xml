@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1' ?>
 <indexdata>
 <key name="Handled" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="Segment Editor" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Segment_Editor.htm" />
   <topic name="Toolbar" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Toolbar.htm" />
   <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
@@ -18,7 +17,6 @@
   <topic name="Basic Information" url="Customer_Upload/Basic_Information.htm" />
   <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
   <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
   <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
   <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
@@ -34,7 +32,6 @@
   <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
   <topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
   <topic name="Filter Configuration Import Screen" url="Data_Sources/File_Profiles/Filter_Configuration_Import_Screen.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="How is a GlobalSight segment different from a Trados segment" url="Appendix/Linguistic_FAQ/How_is_a_GlobalSight_segment_different_from_a_Trados_segment.htm" />
   <topic name="Import" url="Setup/Terminology/Import.htm" />
   <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
@@ -43,7 +40,6 @@
   <topic name="Import Schedule Data (Import p.3)" url="Setup/Projects/Import_Schedule_Data_(Import_p.3).htm" />
   <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
   <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
   <topic name="Job" url="Glossary/Job.htm" />
   <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
@@ -77,7 +73,6 @@
 </key>
 <key name="Import Error" >
   <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
 </key>
 <key name="Import into Termbase" >
   <topic name="Import into Termbase" url="Setup/Terminology/Import_into_Termbase.htm" />
@@ -90,7 +85,6 @@
   <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
 </key>
 <key name="Import screen" >
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
 </key>
 <key name="Import setting" >
@@ -108,9 +102,6 @@
 <key name="Import Snippet File" >
   <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
 </key>
-<key name="Import TeamSite File into GlobalSight" >
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
-</key>
 <key name="Import TM" >
   <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
 </key>
@@ -120,9 +111,6 @@
 </key>
 <key name="Insert Image" >
   <topic name="Insert Image" url="Setup/Terminology/Insert_Image.htm" />
-</key>
-<key name="Introduction" >
-  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
 </key>
 
 </indexdata>

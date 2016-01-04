@@ -198,8 +198,7 @@ public class CapExportServlet extends HttpServlet
             // if request is export for preview
             if (ExportConstants.PREVIEW.equals(requestType))
             {
-                if (ExportConstants.TEAMSITE.equals(dataSourceType) ||
-                    ExportConstants.MEDIASURFACE.equals(dataSourceType))
+                if (ExportConstants.MEDIASURFACE.equals(dataSourceType))
                 {
                     c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForDynamicPreview()");
                     exportForDynamicPreview(p_request, p_response,

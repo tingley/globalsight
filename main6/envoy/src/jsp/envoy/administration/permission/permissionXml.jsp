@@ -298,18 +298,6 @@
 <% if (b_vignette) { %>
      <permission id="<%=Permission.VIGNETTE_IMPORT%>"/>
 <% } %>
-<% if (b_teamsite) { %>
-  <permission id="<%=Permission.TEAMSITE_SERVER_VIEW%>">
-     <permission id="<%=Permission.TEAMSITE_SERVER_REMOVE%>"/>
-     <permission id="<%=Permission.TEAMSITE_SERVER_CREATE%>"/>
-     <permission id="<%=Permission.TEAMSITE_SERVER_EDIT%>"/>
-     <permission id="<%=Permission.TEAMSITE_SERVER_NEW%>"/>
-  </permission>
-  <permission id="<%=Permission.TEAMSITE_PROFILES_VIEW%>">
-     <permission id="<%=Permission.TEAMSITE_PROFILES_REMOVE%>"/>
-     <permission id="<%=Permission.TEAMSITE_PROFILES_NEW%>"/>
-  </permission>
-<% } %>
 <% if (b_database) { %>
   <permission id="<%=Permission.DATABASE_INTEGRATION%>"/>
 <% } %>

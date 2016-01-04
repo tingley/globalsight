@@ -24,10 +24,11 @@ import java.util.NoSuchElementException;
  * The CxeMessageType class contains all the definitions of CXE
  * Message types (event types)
  */
-public class CxeMessageType
-    implements Serializable
+public class CxeMessageType implements Serializable
 {
-    //////////////////////////////////////
+	private static final long serialVersionUID = -6106621398313197845L;
+
+	//////////////////////////////////////
     // Public Constants                 //
     //////////////////////////////////////
 
@@ -104,8 +105,6 @@ public class CxeMessageType
     public static final int CXE_IMPORT_ERROR_EVENT = 504;
     public static final int CAP_IMPORT_ERROR_EVENT = 505;
     public static final int STF_CREATION_EVENT = 506;
-    public static final int TEAMSITE_FILE_SELECTED_EVENT = 507;
-    public static final int TEAMSITE_EXPORT_EVENT = 508;
 
     public static final int VIGNETTE_FILE_SELECTED_EVENT = 509;
     public static final int VIGNETTE_EXPORT_EVENT = 510;
@@ -122,12 +121,8 @@ public class CxeMessageType
     public static final int SERVICEWARE_FILE_SELECTED_EVENT = 517;
     public static final int SERVICEWARE_EXPORT_EVENT = 518;
 
-    public static final int TEAMSITE_JOB_STATUS_EVENT = 519;
-    public static final int TEAMSITE_IGNORE_EVENT = 520;
-
     public static final int DOCUMENTUM_FILE_SELECTED_EVENT = 521;
     public static final int DOCUMENTUM_EXPORT_EVENT = 522;
-
 
     //////////////////////////////////////
     // Private Members                  //
@@ -212,12 +207,6 @@ public class CxeMessageType
         //rtf
         fillMaps(RTF_IMPORTED_EVENT,"RTF_IMPORTED_EVENT");
         fillMaps(RTF_LOCALIZED_EVENT,"RTF_LOCALIZED_EVENT");
-
-        //teamsite
-        fillMaps(TEAMSITE_EXPORT_EVENT,"TEAMSITE_EXPORT_EVENT");
-        fillMaps(TEAMSITE_FILE_SELECTED_EVENT,"TEAMSITE_FILE_SELECTED_EVENT");
-        fillMaps(TEAMSITE_JOB_STATUS_EVENT,"TEAMSITE_JOB_STATUS_EVENT");
-        fillMaps(TEAMSITE_IGNORE_EVENT,"TEAMSITE_IGNORE_EVENT");
 
         //vignette
         fillMaps(VIGNETTE_FILE_SELECTED_EVENT,"VIGNETTE_FILE_SELECTED_EVENT");
@@ -371,8 +360,6 @@ public class CxeMessageType
         {
             if (p_oldEventName.indexOf("Database") > 0)
                 newEventValue= DATABASE_EXPORT_EVENT;
-            else if (p_oldEventName.indexOf("Teamsite") > 0)
-                newEventValue = TEAMSITE_EXPORT_EVENT;
             else if (p_oldEventName.indexOf("Vignette") > 0)
                 newEventValue = VIGNETTE_EXPORT_EVENT;
             else

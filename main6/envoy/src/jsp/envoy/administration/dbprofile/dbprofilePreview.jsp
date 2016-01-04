@@ -12,7 +12,6 @@
 		 session="true" %>
 
 <jsp:useBean id="autodispatch" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
-<jsp:useBean id="teamsitebranch" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="xmlrulefile" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="systemparms" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="next5" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
@@ -32,7 +31,6 @@
    HashtableValueOrderWalker PreviewUrlPairs = (HashtableValueOrderWalker)sessionMgr.getAttribute("PreviewUrlPairs");
    HashtableValueOrderWalker DBConnectionPairs = (HashtableValueOrderWalker)sessionMgr.getAttribute("DBConnectionPairs");
    String autodispatchURL = autodispatch.getPageURL();
-   String teamsitebranchURL = teamsitebranch.getPageURL();
    String xmlrulefileURL = xmlrulefile.getPageURL();
    String systemparmsURL = systemparms.getPageURL();
    String next5URL = next5.getPageURL();

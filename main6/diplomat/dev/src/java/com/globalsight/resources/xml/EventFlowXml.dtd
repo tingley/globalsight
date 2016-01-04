@@ -35,7 +35,7 @@
 <!ELEMENT docPageCount (#PCDATA)>
 <!ELEMENT docPageNumber (#PCDATA)>
 <!ELEMENT displayName (#PCDATA)>
-<!-- The base href to display the page properly.  Optional, only needed for CMS (ie. TeamSite) -->
+<!-- The base href to display the page properly.  Optional, only needed for CMS. -->
 <!ELEMENT baseHref (#PCDATA)>
 <!-- Optionally, a job prefix name -->
 <!ELEMENT jobName (#PCDATA)>
@@ -54,8 +54,8 @@
 <!--     locale is the locale of the original content                    -->
 <!--     charset is the charset of the original content                  -->
 <!--     name is the name of the data source adapter                     -->
-<!--     dataSourceType is \"fs\" for file system, \"db\" for database, or \"teamsite\" for   -->
-<!--             Interwoven TeamSite content management system, or whatever  -->
+<!--     dataSourceType is \"fs\" for file system, \"db\" for database   -->
+<!--             Interwoven content management system, or whatever  -->
 <!--             the appropriate CMS name is -->
 <!--     dataSourceId is the id for the required file profile, db profile, etc -->
 <!--     formatType is the value for the kind of data contained -->
@@ -86,11 +86,10 @@
 	databaseMode (preview | final) "final"
 	previewUrl (true | false) "false"
 >
-<!-- A gsamd has attributes relevant to GlobalSight (for future use)      -->
+<!-- A gsamd has attributes relevant to GlobalSight (for future use)     -->
 <!ELEMENT gsamd (da*)>
 <!-- A category specifies attributes specific to a content source        -->
-<!--     name specifies the name of the content source (e.g. Teamsite,   -->
-<!--             database, etc).                                         -->
+<!--     name specifies the name of the content source etc.              -->
 <!ELEMENT category (da*)>
 <!ATTLIST category
 	name CDATA #REQUIRED

@@ -111,10 +111,6 @@ public class ImageReplace extends HttpServlet
         //
         //  com.globalsight.ImageReplaceHandler.<sourcename>=<servletname>
         //
-        //  For e.g
-        //
-        //  com.globalsight.ImageReplaceHandler.teamsite=TeamSiteImageReplaceHandler
-        //  
         //  If there is one defined, we forward the request to that servlet, else
         //  return a failure response back to requester.
         //

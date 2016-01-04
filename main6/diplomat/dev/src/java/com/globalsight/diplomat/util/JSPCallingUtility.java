@@ -30,6 +30,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Vector;
 
+/**
+ * @deprecated since 8.6.7
+ * @author YorkJin
+ *
+ */
 public class JSPCallingUtility
 {
   // JSP used for error messages

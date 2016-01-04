@@ -68,11 +68,6 @@ public class ExportConstants
     public static final String DATA_SOURCE_TYPE = "DataSourceType";
 
     /**
-     * Constant used for identifying a Data source type for Teamsite
-     */
-    public static final String TEAMSITE = "teamsite";
-
-    /**
      * Constant used for identifying a Data source type for Mediasurface
      */
     public static final String MEDIASURFACE = "mediasurface";

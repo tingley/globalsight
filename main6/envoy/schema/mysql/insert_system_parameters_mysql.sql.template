@@ -17,7 +17,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (6, 'nonSSLPor
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (7, 'cxe.docsDir', '%%cxe_docsDir%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (8, 'cap.servlet.url', '/globalsight/CapExportServlet', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (9, 'cxe.servlet.url', '/globalsight/CxeExportServlet', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (10, 'teamsite.installKey', '%%teamsite%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (11, 'quark.installKey', 'false', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (12, 'frame.installKey', '%%frame_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (13, 'word.installKey', '%%word_install_key%%', '1');

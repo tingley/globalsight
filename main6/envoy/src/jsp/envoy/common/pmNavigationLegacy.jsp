@@ -44,8 +44,6 @@
    String serviceWareUrl = LinkHelper.getWebActivityURL(request,"swimport");
    String snippetImportUrl = LinkHelper.getWebActivityURL(request, "snippetimport");
    String systemParametersUrl = LinkHelper.getWebActivityURL(request, "configuration");
-   String teamsiteBranchesUrl = LinkHelper.getWebActivityURL(request, "teamsite");
-   String teamsiteServersUrl = LinkHelper.getWebActivityURL(request, "tsservers");
    String templatesUrl = LinkHelper.getWebActivityURL(request, "templates");
    String terminologyUrl = LinkHelper.getWebActivityURL(request, "termbases");
    String tmUrl = LinkHelper.getWebActivityURL(request, "tm");
@@ -200,16 +198,7 @@ arMenu1 = new Array (
      ,
      "<%=menuBundle.getString("lb_serviceware_import") %>",
      "<%=serviceWareUrl%>",
-    0<%}%><%if (b_teamsite) {%>
-     ,
-     "<%= menuBundle.getString("lb_teamsite_server_configuration") %>",
-     "<%= teamsiteServersUrl %>",
-    0,
-    "<%= menuBundle.getString("lb_teamsite_branches") %>",
-    "<%= teamsiteBranchesUrl %>",
-     0
-    <%}%>
-    <%if (b_database){%>
+    0<%}%><%if (b_database){%>
     ,
     "<%= menuBundle.getString("lb_db_connections2") %>",
     "<%= dbConnectionsUrl %>",
@@ -259,23 +248,13 @@ arMenu3 = new Array(
 
     "<%= menuBundle.getString("lb_filesystem") %>",
     "javascript: showGuide('fileSystem');",
-    0<%if (b_teamsite) {%>
-     ,
-     "<%= menuBundle.getString("lb_teamsite_server_configuration") %>",
-     "javascript: showGuide('teamSiteServer');",
-     0
-    ,
-    "<%= menuBundle.getString("lb_teamsite") %>",
-    "javascript: showGuide('teamSite');",
-    0
-    <%}%>
-    <%if (b_database) {%>
+    0<%if (b_database) {%>
     ,
     "<%= menuBundle.getString("lb_database") %>",
     "javascript: showGuide('database');",
     0
     <%}%>
-);      
+);
       
 
 // My Jobs

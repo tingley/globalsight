@@ -24,8 +24,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.calendar.CalendarManagerWLRemote;
 import com.globalsight.config.SystemParameterPersistenceManager;
 import com.globalsight.config.UserParameterPersistenceManager;
-import com.globalsight.cxe.persistence.cms.teamsite.server.TeamSiteServerPersistenceManagerWLRemote;
-import com.globalsight.cxe.persistence.cms.teamsitedbmgr.TeamSiteDBManagerWLRemote;
 import com.globalsight.cxe.persistence.databasecolumn.DatabaseColumnPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.dbconnection.DBConnectionPersistenceManagerWLRemote;
@@ -147,8 +145,6 @@ public class ServerProxy
     private static SnippetLibraryWLRemote m_snippetLibrary = null;
     private static SystemParameterPersistenceManager m_sysParamManager = null;
     private static TaskManagerWLRemote m_taskManager = null;
-    private static TeamSiteDBManagerWLRemote m_TeamSiteDBManager = null;
-    private static TeamSiteServerPersistenceManagerWLRemote m_teamsiteManager = null;
     private static TemplateManagerWLRemote m_templateManager = null;
     private static TermLeverageManagerWLRemote m_termLeverageManager = null;
     private static TmManager m_tmManager = null;
@@ -490,26 +486,6 @@ public class ServerProxy
         return m_workflowServer;
     }
 
-    public static TeamSiteServerPersistenceManagerWLRemote getTeamSiteServerPersistenceManager()
-        throws GeneralException
-    {
-        if (m_teamsiteManager == null)
-        {
-            try
-            {
-                m_teamsiteManager = (TeamSiteServerPersistenceManagerWLRemote)
-                    SERVER_REGISTRY.lookup(
-                        TeamSiteServerPersistenceManagerWLRemote.SERVICE_NAME);
-            }
-            catch (NamingException ne)
-            {
-                throwException(ne);
-            }
-        }
-
-        return m_teamsiteManager;
-    }
-
     public static DBConnectionPersistenceManagerWLRemote getDBConnectionPersistenceManager()
         throws GeneralException,
                NamingException,
@@ -563,20 +539,6 @@ public class ServerProxy
         }
 
         return m_fileprofileManager;
-    }
-
-    public static TeamSiteDBManagerWLRemote getTeamSiteDBManager()
-        throws GeneralException,
-               NamingException
-    {
-        if (m_TeamSiteDBManager == null)
-        {
-            m_TeamSiteDBManager = (TeamSiteDBManagerWLRemote)
-                SERVER_REGISTRY.lookup(
-                    TeamSiteDBManagerWLRemote.SERVICE_NAME);
-        }
-
-        return m_TeamSiteDBManager;
     }
 
     public static PageManagerWLRemote getPageManager()

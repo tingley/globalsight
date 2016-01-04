@@ -294,22 +294,33 @@ public class BasicWorkflowTemplateHandler extends PageHandler implements
             {
                 String lang = ((GlobalSightLocale) supportedLocales
                         .elementAt(j)).getLanguageCode();
-                if (newTargetLangCode.equals(lang))
-                {
-                    // check special exclusionary cases
-                    if (!validLeverageLocale(trgLocale,
-                            (GlobalSightLocale) supportedLocales.elementAt(j))
-                            || (targetLeverageLocalesObjects
-                                    .contains(supportedLocales.elementAt(j))))
-                    {
-                        continue;
-                    }
-
-                    targetLeverageLocalesObjects.addElement(supportedLocales
-                            .elementAt(j));
-                    targetLeverageLocalesDisplays
-                            .addElement((String) displayNames.elementAt(j));
+                if (newTargetLangCode.equals("no")){
+                	if (newTargetLangCode.equals(lang)||lang.equals("nb")){
+                		 targetLeverageLocalesObjects.addElement(supportedLocales
+                                 .elementAt(j));
+                         targetLeverageLocalesDisplays
+                                 .addElement((String) displayNames.elementAt(j));
+                	}
                 }
+                else
+                {
+	                if (newTargetLangCode.equals(lang))
+	                {
+	                    // check special exclusionary cases
+	                    if (!validLeverageLocale(trgLocale,
+	                            (GlobalSightLocale) supportedLocales.elementAt(j))
+	                            || (targetLeverageLocalesObjects
+	                                    .contains(supportedLocales.elementAt(j))))
+	                    {
+	                        continue;
+	                    }
+	
+	                    targetLeverageLocalesObjects.addElement(supportedLocales
+	                            .elementAt(j));
+	                    targetLeverageLocalesDisplays
+	                            .addElement((String) displayNames.elementAt(j));
+	                }
+               }
             }
         }
         sessionMgr.setAttribute(LEVERAGE_OBJ,

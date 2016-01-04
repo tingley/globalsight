@@ -475,6 +475,17 @@ public class OfflinePtagErrorChecker implements Cancelable
     public String check(ArrayList<PageData> p_referencePages,
             OfflinePageData p_uploadPage, boolean p_adjustWS)
     {
+        List<String> stateList = new ArrayList<String>();
+        stateList.add("final");
+        stateList.add("needs-adaptation");
+        stateList.add("needs-l10n");
+        stateList.add("needs-review-adaptation");
+        stateList.add("needs-review-l10n");
+        stateList.add("needs-review-translation");
+        stateList.add("needs-translation");
+        stateList.add("signed-off");
+        stateList.add("translated");
+
         PseudoData pTagData = null;
         TmxPseudo convertor = null;
         PseudoErrorChecker errorChecker = null;
@@ -687,8 +698,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                         {
                             if (refSource.equals(tempUploadTargetDisplayText))
                             {
-                                if ("translated"
-                                        .equalsIgnoreCase(xlfTargetState))
+                                if (stateList.contains(xlfTargetState.toLowerCase()))
                                 {
                                     uploadSeg.setTargetHasBeenEdited(true);
                                     uploadSeg.setStateTranslated(true);

@@ -498,7 +498,7 @@ public class Tmx2Xliff20
             String id = seg.getId();
             id = StringUtil.replace(id, ":-", ":[");
             id = StringUtil.replace(id, "-:", "]:");
-            sb.append("# ").append(id).append("\r\n");
+            sb.append("# ").append(id).append("\r\n"); 
             getContentAsString(t.getContent(), sb);
             sb.append("\r\n");
         }
@@ -522,6 +522,7 @@ public class Tmx2Xliff20
             {
                 String s = (String) o;
                 s = StringUtil.replace(s, "[", "[[");
+                s = s.replace("#", "tag");
                 sb.append(s);
             }
             else if (o instanceof Pc)

@@ -1333,6 +1333,10 @@ public class Ambassador extends AbstractWebService
         checkAccess(accessToken, CREATE_JOB);
         checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
+        Connection connection=null;
+        PreparedStatement query=null;
+        ResultSet results=null;
+        
         // Read parameters.
         String jobName = (String) args.get("jobName");
         jobName = EditUtil.removeCRLF(jobName);
@@ -1370,7 +1374,15 @@ public class Ambassador extends AbstractWebService
                 {
                     fileProfileIds = (Vector<String>) fpIdsObj;
                 }
-
+                connection=ConnectionPool.getConnection();
+                String sql = "select ID from file_profile where ID = "+(String)fileProfileIds.get(0)+" and is_active = 'Y'";
+                query = connection.prepareStatement(sql);
+                results = query.executeQuery();
+                if(results.next() == false )
+                {
+                	String msg = "fileProfileIds is not used no longer or incorrect.";
+                	throw new WebServiceException(makeErrorXml("createJob",msg));
+                }
                 if (fileProfileIds != null && fileProfileIds.size() > 0)
                 {
                     String fpId = (String) fileProfileIds.get(0);
@@ -1395,6 +1407,7 @@ public class Ambassador extends AbstractWebService
         }
         finally
         {
+        	releaseDBResource(results,query,connection);
             if (activityStart != null)
             {
                 activityStart.end();
@@ -1440,7 +1453,16 @@ public class Ambassador extends AbstractWebService
             NamingException
     {
         Job job = null;
-
+        Connection con = null;    
+        PreparedStatement query1 = null;
+        PreparedStatement query2 = null;
+        PreparedStatement query3 = null;
+        PreparedStatement query4 = null;
+        ResultSet results1 = null ;
+        ResultSet results2 = null ;
+        ResultSet results3 = null ;
+        ResultSet results4 = null ;
+        
         // Checks authority.
         String accessToken = (String) args.get("accessToken");
         checkAccess(accessToken, CREATE_JOB);
@@ -1450,6 +1472,15 @@ public class Ambassador extends AbstractWebService
         {
             // Read parameters.
             String jobId = (String) args.get("jobId");
+            con = ConnectionPool.getConnection();
+            String sql1 = "select name from job where id="+jobId;
+            query1 = con.prepareStatement(sql1);
+            results1 = query1.executeQuery();
+            if(results1.next()==false)
+            {
+            	String msg = "jobId is missing or incorrect.";
+            	throw  new WebServiceException(makeErrorXml("createJobOnInitial",msg));
+            }
             job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
             String jobName = job.getJobName();
             String recreateFlag = (String) args.get("recreate");
@@ -1494,9 +1525,57 @@ public class Ambassador extends AbstractWebService
             {
                 fileProfileIds = (Vector<String>) fpIdsObj;
             }
+            String sql2 = "select id from file_profile where id ="+(String)fileProfileIds.get(0)+" and is_active = 'Y'";
+            query2 = con.prepareStatement(sql2);
+            results2 = query2.executeQuery();
+            if(results2.next()==false)
+            {
+            	String msg = "fileProfileIds is not used no longer or incorrect.";
+            	throw new WebServiceException(makeErrorXml("createJobOnInitial",msg));
+            	
+            }
             // targetLocales
             Vector<String> targetLocales = new Vector<String>();
             Object trgLocalesObj = args.get("targetLocales");
+            ArrayList<String> list1 = new ArrayList();
+        	ArrayList<String> list2 = new ArrayList();
+        	if( trgLocalesObj!=null  && !trgLocalesObj.toString().matches("^[_,]{1,}") )
+        	{
+                String sql3 = "SELECT wft.target_locale_id FROM file_profile fp,l10n_profile_wftemplate_info lpwi,workflow_template wft  WHERE lpwi.wf_template_id=wft.id  AND  lpwi.l10n_profile_id=fp.l10n_profile_id AND fp.id="
+                                                           +(String)fileProfileIds.get(0);
+                query3 = con.prepareStatement(sql3);
+                results3 = query3.executeQuery();
+                while(results3.next())
+                {
+            	    list1.add(results3.getString(1));
+                }
+                String[] trglocal1 = ((String) trgLocalesObj).split(",");
+                for(int i=0;i<=trglocal1.length-1;i++)
+                {
+                    String[] trglocal2 = trglocal1[i].split("_");
+                    String sql4 = "select id from locale where  iso_lang_code='"+trglocal2[0]+"' and iso_country_code='"+trglocal2[1]+"'";
+                    query4 = con.prepareStatement(sql4);
+                    results4 = query4.executeQuery();
+                    if(results4.next()==true)
+                    {
+       	                list2.add(results4.getString(1));
+                    }
+                    else
+                    {
+                    	String msg = "targetLocales you entered is incorrect.";
+           	            throw new WebServiceException(makeErrorXml("createJobOnInitial",msg));
+                    }
+                    for (String p : list2)
+                    {
+                     if(list1.indexOf(p)==-1)
+                     {
+            	         String msg = "targetLocales you entered is incorrect.";
+            	         throw new WebServiceException(makeErrorXml("createJobOnInitial",msg));
+                     }
+                    }
+                   	list2.clear();;
+                 }
+        	}
             if (trgLocalesObj instanceof String)
             {
                 targetLocales = handleTargetLocales((String) trgLocalesObj,
@@ -1750,6 +1829,10 @@ public class Ambassador extends AbstractWebService
         }
         finally
         {
+        	releaseDBResource(results1,query1,con);
+        	releaseDBResource(results2,query2,con);
+        	releaseDBResource(results3,query3,con);
+        	releaseDBResource(results4,query4,con);
             if (activityStart != null)
             {
                 activityStart.end();

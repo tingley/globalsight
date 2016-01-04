@@ -32,7 +32,6 @@
   <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
   <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
   <topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
   <topic name="Custom Form Designer" url="Vendor_Management/Custom_Form_Designer.htm" />
   <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
@@ -50,7 +49,6 @@
   <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
   <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
   <topic name="Import Schedule Data (Import p.3)" url="Setup/Projects/Import_Schedule_Data_(Import_p.3).htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
   <topic name="Is extraction customizable in GlobalSight" url="Appendix/Linguistic_FAQ/Is_extraction_customizable_in_GlobalSight.htm" />
   <topic name="Job Costing" url="Appendix/Job_Costing.htm" />

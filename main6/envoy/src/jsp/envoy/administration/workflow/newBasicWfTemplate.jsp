@@ -408,12 +408,21 @@ function populateLeverageFromList(localePairComboBox)
    var count = 0;
    for (var i = 0; i < possibleLevLocales.length; i++)
    {
-      if (possibleLevLocales[i].indexOf(targetLang) != -1)
-      {
-         basicTemplateForm.leverageField.options[count] = 
-            new Option(possibleLevLocalesDisplay[i], possibleLevLocales[i]);
-         count++;
-      }
+	  if ((possibleLevLocales[i]==('nb_NO'))&&(targetLang==('no')))
+	  {
+		  basicTemplateForm.leverageField.options[count] = 
+	            new Option(possibleLevLocalesDisplay[i], possibleLevLocales[i]);
+	         count++; 
+	  }
+	  else
+	  {
+	      if (possibleLevLocales[i].indexOf(targetLang) != -1)
+	      {
+	         basicTemplateForm.leverageField.options[count] = 
+	            new Option(possibleLevLocalesDisplay[i], possibleLevLocales[i]);
+	         count++;
+	      }
+	  }
    }
 }
 
@@ -705,12 +714,14 @@ function updateWFMS(projObj)
                                       }
                                   }
                               }
-                              if(l.getLanguageCode().equals(trgLanguage))
-                              {
-                              %>
-                              <OPTION VALUE="<%=l%>" <%=selected %> > <%=leverage %></OPTION>
-                              <%                           
-                              }
+                            	  if (l.getLanguageCode().equals(trgLanguage)||l.getLanguageCode().equals("nb"))
+                                  {
+	                                 %>
+	                                 <OPTION VALUE="<%=l%>" <%=selected %> > <%=leverage %></OPTION>
+	                                 <%                           
+                                  }  
+                            
+                             
                            }
                         } // end of if chosenLocalePair != null
                     %>

@@ -18,7 +18,6 @@
   <topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
   <topic name="Create/Edit System Calendar" url="Setup/Calendars/Create_Edit_System_Calendar.htm" />
   <topic name="Create/Edit System Holiday" url="Setup/Calendars/Create_Edit_System_Holiday.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Create/Edit Translation Memory" url="Setup/Translation_Memory/Create_Modify_Translation_Memory.htm" />
   <topic name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
   <topic name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
@@ -82,9 +81,6 @@
 </key>
 <key name="Create/Edit System Holiday" >
   <topic name="Create/Edit System Holiday" url="Setup/Calendars/Create_Edit_System_Holiday.htm" />
-</key>
-<key name="Create/Edit TeamSite Server" >
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
 </key>
 <key name="Create/Edit Translation Memory" >
   <topic name="Create/Edit Translation Memory" url="Setup/Translation_Memory/Create_Modify_Translation_Memory.htm" />

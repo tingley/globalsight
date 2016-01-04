@@ -119,9 +119,6 @@
   <topic name="Add Comments" url="My_Jobs/Add_Comments.htm" />
   <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
 </key>
-<key name="Add Content Store" >
-  <topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
-</key>
 <key name="Add Field Constrain" >
   <topic name="Add Field Constraint" url="Setup/Terminology/Add_Field_Constraint.htm" />
 </key>
@@ -157,7 +154,6 @@
   <topic name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
   <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
   <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
   <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
   <topic name="Overview" url="Overview.htm" />

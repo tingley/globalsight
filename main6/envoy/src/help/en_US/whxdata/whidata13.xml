@@ -23,7 +23,6 @@
   <topic name="Edit Pages" url="My_Jobs/Edit_Pages.htm" />
   <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
   <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="GS Tag" url="Glossary/GS_Tag.htm" />
   <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
   <topic name="GS-tagged Source Page" url="Glossary/GS-tagged_Source_Page.htm" />
@@ -126,7 +125,6 @@
   <topic name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
   <topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
   <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
-  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
   <topic name="Translation Memory Profiles Main Screen" url="Setup/Translation_Memory_Profiles/Translation_Memory_Profiles_Main.htm" />
 </key>
 

@@ -705,7 +705,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     CellStyle contentStyle;
                     if(matches.toString().equals("In Context Match"))
                     	contentStyle = getIceContentStyle(p_workBook);
-                    else if(matches.toString().equals("100.00%"))
+                    else if(matches.toString().equals("100%"))
                     	contentStyle = getExactContentStyle(p_workBook);
                     else
                     	contentStyle = getContentStyle(p_workBook);
@@ -718,7 +718,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     {
                     	 if(matches.toString().equals("In Context Match"))
                     		 srcStyle = getIceRtlContentStyle(p_workBook);
-                         else if(matches.toString().equals("100.00%"))
+                         else if(matches.toString().equals("100%"))
                         	 srcStyle = getExactRtlContentStyle(p_workBook);
                          else
                         	 srcStyle = getRtlContentStyle(p_workBook);
@@ -739,7 +739,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     {
                     	 if(matches.toString().equals("In Context Match"))
                     		 trgStyle = getIceRtlContentStyle(p_workBook);
-                         else if(matches.toString().equals("100.00%"))
+                         else if(matches.toString().equals("100%"))
                         	 trgStyle = getExactRtlContentStyle(p_workBook);
                          else
                         	 trgStyle = getRtlContentStyle(p_workBook);
@@ -760,7 +760,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     {
                     	if(matches.toString().equals("In Context Match"))
                     		reviewersCommentStyle = getIceUnlockedRightStyle(p_workBook);
-                        else if(matches.toString().equals("100.00%"))
+                        else if(matches.toString().equals("100%"))
                         	reviewersCommentStyle = getExactUnlockedRightStyle(p_workBook);
                         else
                         	reviewersCommentStyle = getUnlockedRightStyle(p_workBook);
@@ -769,7 +769,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     {
                     	if(matches.toString().equals("In Context Match"))
                     		reviewersCommentStyle = getIceUnlockedStyle(p_workBook);
-                        else if(matches.toString().equals("100.00%"))
+                        else if(matches.toString().equals("100%"))
                         	reviewersCommentStyle = getExactUnlockedStyle(p_workBook);
                         else
                         	reviewersCommentStyle = getUnlockedStyle(p_workBook);

@@ -451,9 +451,6 @@ public class TTXParser
                 break;
             case Node.TEXT_NODE:
                 String nodeValue = p_node.getStringValue();
-                if(nodeValue.startsWith("#")){
-                    nodeValue = nodeValue.replace("#", "tag");
-                }
                 if (isParsingTTXForGS)
                 {
                     boolean isInTargetTuv = isInTargetTuv(p_node);

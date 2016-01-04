@@ -321,9 +321,6 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         trgSegment = p_osd.getDisplayTargetTextWithNewLineBreaks(String
                 .valueOf(NORMALIZED_LINEBREAK));
         // }
-//        if(trgSegment.startsWith("#")){
-//            trgSegment = trgSegment.replace("#", "tag");
-//        }
 
         // write ID
         if (p_osd.getDisplaySegmentID() != null)

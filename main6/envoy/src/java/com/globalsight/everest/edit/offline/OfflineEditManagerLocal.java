@@ -1950,11 +1950,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 textContent = textContent.replace("</" + tagName + ">", "");
                 textContent = convertSegment2Pseudo(textContent,
                         isSrcFileXlf(foo, jobIds), getTu(foo, jobIds));
-                if (tagName.equalsIgnoreCase("target")
-                        && textContent.startsWith("#"))
-                {
-                     textContent = textContent.replace("#", "tag");
-                }
                 sourceElement.setText(textContent);
             }
             catch (Exception e)

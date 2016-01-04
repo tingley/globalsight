@@ -582,13 +582,7 @@ public class RtfOptimizer
             if (o instanceof RtfText)
             {
                 curr = (RtfText)o;
-                RtfTextProperties properties = curr.getProperties();
-                String data = curr.getData();
-                if (properties.getColorName().equalsIgnoreCase("default")
-                        && data.startsWith("#") && prev == null)
-                {
-                    curr.setData(data.replace("#", "tag"));
-                }
+
                 if (prev != null &&
                     prev.getProperties().equals(curr.getProperties()))
                 {

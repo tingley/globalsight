@@ -492,11 +492,6 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             while (it.hasNext())
             {
                 OfflineSegmentData uploadSegment = (OfflineSegmentData) it.next();
-                String targetText = uploadSegment.getDisplayTargetText();
-                if(targetText.indexOf("tag")==0){
-                    targetText = targetText.replace("tag", "#");
-                    uploadSegment.setDisplayTargetText(targetText);
-                }
                 refSegment = (OfflineSegmentData) ref_OPDSegmentMap
                         .get(uploadSegment.getDisplaySegmentID());
 

@@ -434,15 +434,7 @@ class OrderedMatchSegments
         else
         {
             penalty = p_leverageOptions.getMultiTransPenalty();
-
-            if (p_leverageOptions.isLatestLeveragingForReimport())
-            {
-                mode = LeverageOptions.PICK_LATEST;
-            }
-            else
-            {
-                mode = p_leverageOptions.getMultipleExactMatcheMode();
-            }
+            mode = p_leverageOptions.getMultipleExactMatcheMode();
 
             if (mode == LeverageOptions.DEMOTE)
             {

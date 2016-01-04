@@ -408,7 +408,8 @@ function populateLeverageFromList(localePairComboBox)
    var count = 0;
    for (var i = 0; i < possibleLevLocales.length; i++)
    {
-	  if ((possibleLevLocales[i]==('nb_NO'))&&(targetLang==('no')))
+	  if ((possibleLevLocales[i] == 'nb_NO' || possibleLevLocales[i] == 'no_NO')
+			  && (targetLang == 'no' || targetLang == 'nb'))
 	  {
 		  basicTemplateForm.leverageField.options[count] = 
 	            new Option(possibleLevLocalesDisplay[i], possibleLevLocales[i]);
@@ -680,7 +681,6 @@ function updateWFMS(projObj)
                         //GlobalSightLocale leverageLocale = null;
                         String selected = null;
                         String leverage = null;
-                        int size = leverageObjs.size();
                         if(chosenLocalePair != null)
                         {
                           lpId = -1;
@@ -692,18 +692,15 @@ function updateWFMS(projObj)
 
                           LocalePair lp = (LocalePair)ServerProxy.getLocaleManager().getLocalePairById(lpId);
 
-
                           GlobalSightLocale trgLocale = (GlobalSightLocale)lp.getTarget();
                           String trgLanguage = trgLocale.getLanguageCode();
-                           for (int h=0; h<size; h++)
-                           {                
-                              selected = "";        
-                              
-                              GlobalSightLocale l= (GlobalSightLocale)leverageObjs.elementAt(h);
-                              
+                           for (int h = 0; h < leverageObjs.size(); h++)
+                           {
+                              selected = "";
+                              GlobalSightLocale l = (GlobalSightLocale) leverageObjs.elementAt(h);
                               if(chosenLeverages != null && chosenLeverages.size()>0)
                               {
-                                 leverage= (String)leverageDisp.elementAt(h);
+	                              leverage= (String)leverageDisp.elementAt(h);
                                   for (Iterator it=chosenLeverages.iterator(); it.hasNext();)
                                   {
                                       GlobalSightLocale e = (GlobalSightLocale)it.next();
@@ -714,14 +711,12 @@ function updateWFMS(projObj)
                                       }
                                   }
                               }
-                            	  if (l.getLanguageCode().equals(trgLanguage)||l.getLanguageCode().equals("nb"))
-                                  {
-	                                 %>
-	                                 <OPTION VALUE="<%=l%>" <%=selected %> > <%=leverage %></OPTION>
-	                                 <%                           
-                                  }  
-                            
-                             
+                          	  if (l.getLanguageCode().equals(trgLanguage) || l.getLanguageCode().equals("nb") || l.getLanguageCode().equals("no"))
+	                          {
+                              %>
+	                             <OPTION VALUE="<%=l%>" <%=selected %> > <%=leverage %></OPTION>
+                              <%
+                              }
                            }
                         } // end of if chosenLocalePair != null
                     %>

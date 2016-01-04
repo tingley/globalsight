@@ -224,7 +224,8 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
     }
 
     // store the info of the new workflow template info
-    private void storeNewInfo(HttpServletRequest p_request,
+    @SuppressWarnings("unchecked")
+	private void storeNewInfo(HttpServletRequest p_request,
             SessionManager sessionMgr, WorkflowTemplateInfo p_wfti)
             throws EnvoyServletException
     {
@@ -258,8 +259,8 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
                             ((GlobalSightLocale) leveragedObjects.elementAt(i))
                             .getLanguageCode().equals("nb"))
             		{
-            			newLeverageObjects
-                        .addElement(leveragedObjects.elementAt(i));
+						newLeverageObjects.addElement(leveragedObjects
+								.elementAt(i));
             		}
             	}
             	else

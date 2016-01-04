@@ -243,7 +243,6 @@ import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.ling.tm3.integration.GSDataFactory;
 import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
-import com.globalsight.log.ActivityLog;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.Hitlist;
@@ -1343,7 +1342,7 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException(makeErrorXml("createJob",
                     jobNameValidation));
         }
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         Job job = null;
         try
         {
@@ -1351,7 +1350,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", jobName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "createJob(args)", activityArgs);
             job = ServerProxy.getJobHandler().getJobByJobName(jobName);
             if (job == null)
@@ -1446,7 +1445,7 @@ public class Ambassador extends AbstractWebService
         String accessToken = (String) args.get("accessToken");
         checkAccess(accessToken, CREATE_JOB);
         checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             // Read parameters.
@@ -1526,7 +1525,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("attributes", attributesXml);
             activityArgs.put("isJobCreatedOriginallyViaWS",
                     (String) args.get("isJobCreatedOriginallyViaWS"));
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "createJobOnInitial(args)", activityArgs);
             if (filePaths != null && filePaths.size() > 0)
             {
@@ -1961,7 +1960,7 @@ public class Ambassador extends AbstractWebService
         Connection connection = null;
         PreparedStatement query = null;
         ResultSet results = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
 
         try
         {
@@ -1969,7 +1968,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName",
                     getUsernameFromSession(accessToken));
             activityArgs.put("jobName", jobName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getUniqueJobName(args)", activityArgs);
             String sql = "SELECT ID FROM JOB WHERE NAME=?";
             connection = ConnectionPool.getConnection();
@@ -2064,7 +2063,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(accessToken, UPLOAD_FILE);
 
         checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         boolean updateJobStateIfException = true;
         try
         {
@@ -2091,11 +2090,11 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobName", jobName);
             activityArgs.put("filePath", filePath);
             activityArgs.put("fileProfileId", fileProfileId);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "uploadFile(accessToken, jobName,filePath,fileProfileId,content)",
                             activityArgs);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "uploadFileForInitial(args)", activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
@@ -2271,14 +2270,14 @@ public class Ambassador extends AbstractWebService
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
 
         String jobName = p_jobName;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
-            String userName = this.getUsernameFromSession(p_accessToken);
+            String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getStatus(p_accessToken, p_jobName)", activityArgs);
             StringBuffer xml = new StringBuffer(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
@@ -2385,7 +2384,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_JOB_AND_WORKFLOW_INFO);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_VIEW);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             StringBuffer xml = new StringBuffer(
@@ -2394,7 +2393,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobId", p_jobId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getJobAndWorkflowInfo(p_accessToken, p_jobId)",
                     activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
@@ -2617,7 +2616,7 @@ public class Ambassador extends AbstractWebService
     {
         checkAccess(p_accessToken, GET_JOB_STATUS);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         Connection connection = null;
         PreparedStatement query = null;
         ResultSet results = null;
@@ -2629,7 +2628,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", user.getUserName());
             activityArgs.put("jobName", p_jobName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getJobStatus(p_accessToken, p_jobName)", activityArgs);
             String condition = appendJobCondition(p_jobName);
             String sql = "SELECT ID, STATE FROM JOB WHERE COMPANY_ID=? AND "
@@ -2723,7 +2722,7 @@ public class Ambassador extends AbstractWebService
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
 
         String jobName = p_jobName;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         Job job = queryJob(jobName, p_accessToken);
         long jobId = job.getId();
         String jobCompanyId = String.valueOf(job.getCompanyId());
@@ -2766,11 +2765,11 @@ public class Ambassador extends AbstractWebService
         }
         try
         {
-            String userName = this.getUsernameFromSession(p_accessToken);
+            String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "getJobExportFiles(p_accessToken, p_jobName)",
                             activityArgs);
@@ -2955,7 +2954,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_JOB_EXPORT_WORKFLOW_FILES);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         String jobName = p_jobName;
         Job job = queryJob(jobName, p_accessToken);
         long jobId = job.getId();
@@ -3000,12 +2999,12 @@ public class Ambassador extends AbstractWebService
 
         try
         {
-            String userName = this.getUsernameFromSession(p_accessToken);
+            String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
             activityArgs.put("workflowLocale", workflowLocale);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "getJobExportWorkflowFiles(p_accessToken, p_jobName,workflowLocale)",
                             activityArgs);
@@ -3432,17 +3431,17 @@ public class Ambassador extends AbstractWebService
     {
         checkAccess(p_accessToken, CANCEL_WORKFLOW);
         checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_DISCARD);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         String jobName = p_jobName;
         String workflowLocale = p_workflowLocale;
         try
         {
-            String userName = this.getUsernameFromSession(p_accessToken);
+            String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
             activityArgs.put("workflowLocale", p_workflowLocale);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "cancelWorkflow(p_accessToken, p_jobName,p_workflowLocale)",
                             activityArgs);
@@ -3533,14 +3532,14 @@ public class Ambassador extends AbstractWebService
     {
         checkAccess(p_accessToken, CANCEL_JOB);
         checkPermission(p_accessToken, Permission.JOBS_DISCARD);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
-            String userName = this.getUsernameFromSession(p_accessToken);
+            String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "cancelJob(p_accessToken, p_jobName)", activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
 
@@ -3593,14 +3592,14 @@ public class Ambassador extends AbstractWebService
     {
         checkAccess(p_accessToken, CANCEL_JOB_BY_ID);
         checkPermission(p_accessToken, Permission.JOBS_DISCARD);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
-            String userName = this.getUsernameFromSession(p_accessToken);
+            String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobId", p_jobId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "cancelJobById(p_accessToken, p_jobId)", activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
             Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
@@ -3680,14 +3679,14 @@ public class Ambassador extends AbstractWebService
 
         checkAccess(p_accessToken, CANCEL_JOB_BY_ID);
         checkPermission(p_accessToken, Permission.JOBS_DISCARD);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobIds", p_jobIds);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "cancelJobs(p_accessToken, p_jobIds)", activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
@@ -3789,7 +3788,7 @@ public class Ambassador extends AbstractWebService
         activityArgs.put("jobName", p_jobName);
         activityArgs.put("estimatedDateXml", p_estimatedDateXml);
         activityArgs.put("priority", p_priority);
-        ActivityLog.Start activityStart = ActivityLog
+        WebServicesLog.Start activityStart = WebServicesLog
                 .start(Ambassador.class,
                         "editJobDetailInfo(p_accessToken,p_jobId,p_jobName,p_estimatedDateXml,p_priority)",
                         activityArgs);
@@ -4143,7 +4142,7 @@ public class Ambassador extends AbstractWebService
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("jobId", p_jobId);
         activityArgs.put("targetLocales", p_targetLocales);
-        ActivityLog.Start activityStart = ActivityLog
+        WebServicesLog.Start activityStart = WebServicesLog
                 .start(Ambassador.class,
                         "getTranslationPercentage(p_accessToken,p_jobId,p_targetLocales)",
                         activityArgs);
@@ -4306,7 +4305,7 @@ public class Ambassador extends AbstractWebService
         String jobName = p_jobName;
         String workflowLocale = p_workflowLocale;
         String returnXml = "";
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
@@ -4314,7 +4313,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
             activityArgs.put("workflowLocale", p_workflowLocale);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "exportWorkflow(p_accessToken, p_jobName,p_workflowLocale)",
                             activityArgs);
@@ -4413,14 +4412,14 @@ public class Ambassador extends AbstractWebService
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
 
         String jobName = p_jobName;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "exportJob(p_accessToken, p_jobName)", activityArgs);
             StringBuffer xml = new StringBuffer(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
@@ -4608,14 +4607,14 @@ public class Ambassador extends AbstractWebService
         checkPermission(p_accessToken, Permission.ACTIVITIES_ACCEPT);
 
         Collection taskInfos = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("workflowId", p_workflowId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getAcceptedTasksInWorkflow(p_accessToken, p_workflowId)",
                     activityArgs);
             StringBuffer xml = new StringBuffer(
@@ -4710,14 +4709,14 @@ public class Ambassador extends AbstractWebService
         checkPermission(p_accessToken, Permission.ACTIVITIES_VIEW);
 
         Collection tasks = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("workflowId", p_workflowId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getCurrentTasksInWorkflow(p_accessToken, p_workflowId)",
                     activityArgs);
             StringBuffer xml = new StringBuffer(
@@ -4784,7 +4783,7 @@ public class Ambassador extends AbstractWebService
 
         Collection taskInfos = null;
         Connection connection = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
@@ -4795,7 +4794,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobId", p_jobId);
             activityArgs.put("taskName", p_taskName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getTasksInJob(p_accessToken, p_jobId, p_taskName)",
                     activityArgs);
 
@@ -4894,7 +4893,7 @@ public class Ambassador extends AbstractWebService
             return makeErrorXml("getTasksInJobs", e.getMessage());
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         Collection taskInfos = null;
         Connection connection = null;
         try
@@ -4911,7 +4910,7 @@ public class Ambassador extends AbstractWebService
                     : jobIdArray.length);
             activityArgs.put("jobIds", jobIds);
             activityArgs.put("taskName", p_taskName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getTasksInJobs(p_accessToken, jobIds, p_taskName)",
                     activityArgs);
             JobHandlerWLRemote jobHandlerLocal = ServerProxy.getJobHandler();
@@ -5056,7 +5055,7 @@ public class Ambassador extends AbstractWebService
                     + p_taskId;
             return makeErrorXml(ACCEPT_TASK, message);
         }
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             if (task != null)
@@ -5064,7 +5063,7 @@ public class Ambassador extends AbstractWebService
                 Map<Object, Object> activityArgs = new HashMap<Object, Object>();
                 activityArgs.put("loggedUserName", acceptorName);
                 activityArgs.put("taskId", p_taskId);
-                activityStart = ActivityLog.start(Ambassador.class,
+                activityStart = WebServicesLog.start(Ambassador.class,
                         "acceptTask(p_accessToken,p_taskId)", activityArgs);
                 if (task.getState() == Task.STATE_ACCEPTED
                         || task.getState() == Task.STATE_COMPLETED)
@@ -5170,14 +5169,14 @@ public class Ambassador extends AbstractWebService
 
         // Compelte task
         String completeUserId = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("taskId", p_taskId);
             activityArgs.put("destinationArrow", p_destinationArrow);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "completeTask(p_accessToken,p_taskId,p_destinationArrow)",
                     activityArgs);
             // Find the user to complete task.
@@ -5314,14 +5313,14 @@ public class Ambassador extends AbstractWebService
         String rejectUserName = getUsernameFromSession(p_accessToken);
         String rejectUserId = UserUtil.getUserIdByName(rejectUserName);
         Task task = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", rejectUserName);
             activityArgs.put("p_taskId", p_taskId);
             activityArgs.put("p_rejectComment", p_rejectComment);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "rejectTask(p_accessToken,p_taskId,p_rejectComment)",
                     activityArgs);
             WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
@@ -5389,7 +5388,7 @@ public class Ambassador extends AbstractWebService
 
         StringBuffer errMessage = new StringBuffer(
                 "Could not add the comment to the object.  ");
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
@@ -5402,7 +5401,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("fileName", p_fileName);
             activityArgs.put("access", p_access);
 
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "addComment(p_accessToken,p_objectId,p_objectType,p_userId,p_comment,p_file,p_fileName,p_access)",
                             activityArgs);
@@ -5557,7 +5556,7 @@ public class Ambassador extends AbstractWebService
 
         StringBuffer errMessage = new StringBuffer(
                 "Could not add the comment to the object.  ");
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
@@ -5568,7 +5567,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("comment", p_comment);
             activityArgs.put("fileName", p_fileName);
             activityArgs.put("access", p_access);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "addJobComment(p_accessToken,p_jobName,p_userId,p_comment,p_file,p_fileName,p_access)",
                             activityArgs);
@@ -5677,10 +5676,10 @@ public class Ambassador extends AbstractWebService
     {
         checkAccess(p_accessToken, GET_USER_UNAVAILABILITY_REPORT);
         checkPermission(p_accessToken, Permission.REPORTS_MAIN);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
-            String loggedUserName = this.getUsernameFromSession(p_accessToken);
+            String loggedUserName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUserName);
             activityArgs.put("activityName", p_activityName);
@@ -5688,7 +5687,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("targetLocale", p_targetLocale);
             activityArgs.put("month", p_month);
             activityArgs.put("year", p_year);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "getUserUnavailabilityReport(p_accessToken,p_activityName,p_sourceLocale,p_targetLocale,p_month,p_year)",
                             activityArgs);
@@ -5904,7 +5903,7 @@ public class Ambassador extends AbstractWebService
         }
 
         StringBuffer errorMessage = new StringBuffer();
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             if (logger.isDebugEnabled())
@@ -5923,7 +5922,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("fileProfileId", fileProfileId);
             activityArgs.put("objectId", objectId);
             activityArgs.put("userId", userId);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "createDocumentumJob(p_accessToken,jobName,fileProfileId,objectId,userId)",
                             activityArgs);
@@ -6029,7 +6028,7 @@ public class Ambassador extends AbstractWebService
     {
 
         checkAccess(p_accessToken, CANCEL_DCTMJOB);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
@@ -6038,7 +6037,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("objectId", objectId);
             activityArgs.put("jobId", jobId);
             activityArgs.put("userId", userId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "cancelDocumentumJob(p_accessToken,objectId,jobId,userId)",
                     activityArgs);
             String uid = UserUtil.getUserIdByName(userName);
@@ -7698,7 +7697,7 @@ public class Ambassador extends AbstractWebService
 
         checkAccess(p_accessToken, "saveEntry");
         checkPermission(p_accessToken, Permission.TM_ADD_ENTRY);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
 
@@ -7712,7 +7711,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("p_targetLocale", p_targetLocale);
             activityArgs.put("p_targetSegment", p_targetSegment);
             activityArgs.put("escapeString", escapeString);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "saveEntry(p_accessToken,p_tmProfileName,sid,p_sourceLocale,p_sourceSegment,p_targetLocale,p_targetSegment,escapeString)",
                             activityArgs);
@@ -8153,7 +8152,7 @@ public class Ambassador extends AbstractWebService
 
         GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
         Session session = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(p_accessToken);
@@ -8163,7 +8162,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("string", p_string);
             activityArgs.put("sourceLocale", p_sourceLocale);
             activityArgs.put("escapeString", escapeString);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "searchEntries(p_accessToken,p_tmProfileName,p_string,p_sourceLocale,escapeString)",
                             activityArgs);
@@ -8810,7 +8809,7 @@ public class Ambassador extends AbstractWebService
 
         checkAccess(p_accessToken, "editEntry");
         checkPermission(p_accessToken, Permission.TM_EDIT_ENTRY);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(p_accessToken);
@@ -8824,7 +8823,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("targetLocale", p_targetLocale);
             activityArgs.put("targetSegment", p_targetSegment);
             activityArgs.put("escapeString", escapeString);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "editEntry(p_accessToken,p_tmProfileName,p_orgSid,p_newSid,p_sourceLocale,p_sourceSegment,p_targetLocale,p_targetSegment,escapeString)",
                             activityArgs);
@@ -9000,7 +8999,7 @@ public class Ambassador extends AbstractWebService
 
         checkAccess(p_accessToken, "editEntry");
         checkPermission(p_accessToken, Permission.TM_EDIT_ENTRY);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(p_accessToken);
@@ -9011,7 +9010,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("sourceLocale", p_sourceLocale);
             activityArgs.put("deleteLocale", p_deleteLocale);
             activityArgs.put("escapeString", escapeString);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "deleteSegment(p_accessToken,p_tmProfileName,p_string,p_sourceLocale,p_deleteLocale,escapeString)",
                             activityArgs);
@@ -9706,7 +9705,7 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException(e.getMessage());
         }
         Connection connection = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(p_accessToken);
@@ -9717,7 +9716,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("sourceTerm", p_sourceTerm);
             activityArgs.put("targetLocale", p_targetLocale);
             activityArgs.put("targetTerm", p_targetTerm);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "saveTBEntry(p_accessToken,p_termbaseName,p_sourceLocale,p_sourceTerm,p_targetLocale,p_targetTerm)",
                             activityArgs);
@@ -10178,7 +10177,7 @@ public class Ambassador extends AbstractWebService
         long cid = -1;
 
         boolean needCloseConnection = false;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(p_accessToken);
@@ -10189,7 +10188,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("sourceTerm", p_sourceTerm);
             activityArgs.put("targetLocale", p_targetLocale);
             activityArgs.put("targetTerm", p_targetTerm);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "editTBEntry(p_accessToken,p_termbaseName,p_sourceLocale,p_sourceTerm,p_targetLocale,p_targetTerm,connection)",
                             activityArgs);
@@ -10329,7 +10328,7 @@ public class Ambassador extends AbstractWebService
         Connection connection = null;
         PreparedStatement query = null;
         ResultSet results = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(p_accessToken);
@@ -10339,7 +10338,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("searchString", p_searchString);
             activityArgs.put("sourceLocale", p_sourceLocale);
             activityArgs.put("targetLocale", p_targetLocale);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "deleteTBEntry(p_accessToken,p_termbaseName,p_searchString,p_sourceLocale,p_targetLocale)",
                             activityArgs);
@@ -10817,7 +10816,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(accessToken, "getFirstTu");
         checkPermission(accessToken, Permission.TM_SEARCH);
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(accessToken);
@@ -10827,7 +10826,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("companyName", companyName);
             activityArgs.put("sourceLocale", sourceLocale);
             activityArgs.put("targetLocale", targetLocale);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "getFirstTu(p_accessToken,tmName,companyName,sourceLocale,targetLocale)",
                             activityArgs);
@@ -11096,7 +11095,7 @@ public class Ambassador extends AbstractWebService
             size = 10000;
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(accessToken);
@@ -11108,7 +11107,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("targetLocale", targetLocale);
             activityArgs.put("maxSize", maxSize);
             activityArgs.put("tuId", tuIdToStart);
-            activityStart = ActivityLog.start(Ambassador.class, "nextTus",
+            activityStart = WebServicesLog.start(Ambassador.class, "nextTus",
                     activityArgs);
 
             Company company = getCompanyByName(companyName);
@@ -11468,13 +11467,13 @@ public class Ambassador extends AbstractWebService
         };
         reader.addHandler("/tu", handler);
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUserName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "editTu(accessToken,tmx)", activityArgs);
             reader.read(new StringReader(tmx));
         }
@@ -12006,7 +12005,7 @@ public class Ambassador extends AbstractWebService
         }
 
         checkAccess(p_accessToken, "getTargetLocales");
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             // get permission set for current user
@@ -12015,7 +12014,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", user.getUserName());
             activityArgs.put("sourceLocale", p_sourceLocale);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getTargetLocales(p_accessToken,p_sourceLocale)",
                     activityArgs);
             LocaleManagerLocal lml = new LocaleManagerLocal();
@@ -12122,14 +12121,14 @@ public class Ambassador extends AbstractWebService
         }
 
         checkAccess(p_accessToken, "getTargetLocales");
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUserName);
             activityArgs.put("l10nID", p_l10nID);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getPriorityByID(p_accessToken,p_l10nID)", activityArgs);
             ProjectHandlerLocal handler = new ProjectHandlerLocal();
             BasicL10nProfile basicL10nProfile = (BasicL10nProfile) handler
@@ -12181,7 +12180,7 @@ public class Ambassador extends AbstractWebService
     public String getAttributesByJobId(String p_accessToken, Long p_jobId)
             throws WebServiceException
     {
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Assert.assertNotEmpty(p_accessToken, "access token");
@@ -12193,7 +12192,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUserName);
             activityArgs.put("jobId", p_jobId);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "getAttributesByJobId(p_accessToken,p_jobId)",
                             activityArgs);
@@ -12260,7 +12259,7 @@ public class Ambassador extends AbstractWebService
     public void setJobAttribute(String accessToken, long jobId,
             String attInternalName, Object value) throws WebServiceException
     {
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Assert.assertNotEmpty(accessToken, "access token");
@@ -12278,7 +12277,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobId", jobId);
             activityArgs.put("attInternalName", attInternalName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "setJobAttribute(accessToken,jobId,attInternalName,value)",
                     activityArgs);
 
@@ -12340,7 +12339,7 @@ public class Ambassador extends AbstractWebService
     public String getJobAttribute(String accessToken, long jobId,
             String attInternalName) throws WebServiceException
     {
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Assert.assertNotEmpty(attInternalName, "access token");
@@ -12363,7 +12362,7 @@ public class Ambassador extends AbstractWebService
                 activityArgs.put("loggedUserName", loggedUserName);
                 activityArgs.put("jobId", jobId);
                 activityArgs.put("attInternalName", attInternalName);
-                activityStart = ActivityLog.start(Ambassador.class,
+                activityStart = WebServicesLog.start(Ambassador.class,
                         "getJobAttribute(accessToken,jobId,attInternalName)",
                         activityArgs);
                 for (JobAttribute attribute : jobAttributes)
@@ -12408,7 +12407,7 @@ public class Ambassador extends AbstractWebService
     public String getAttributesByProjectId(String p_accessToken,
             long p_projectId) throws WebServiceException
     {
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Assert.assertNotEmpty(p_accessToken, "access token");
@@ -12425,7 +12424,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("projectId", p_projectId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getAttributesByProjectId(p_accessToken,p_projectId)",
                     activityArgs);
             Assert.assertFalse(
@@ -12715,7 +12714,7 @@ public class Ambassador extends AbstractWebService
     {
         String yesOrNo = "no";
         checkAccess(p_accessToken, "isSupportCurrentLocalePair");
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
@@ -12725,7 +12724,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("fileProfileId", p_fileProfileId);
             activityArgs.put("srcLangCountry", p_srcLangCountry);
             activityArgs.put("trgLangCountry", p_trgLangCountry);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "isSupportCurrentLocalePair(p_accessToken,p_fileProfileId,p_srcLangCountry,p_trgLangCountry)",
                             activityArgs);
@@ -12928,7 +12927,7 @@ public class Ambassador extends AbstractWebService
 
         long taskId = 0;
         int state = 0;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             taskId = Long.parseLong(p_taskId);
@@ -12949,7 +12948,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", loggedUserName);
             activityArgs.put("taskId", p_taskId);
             activityArgs.put("state", p_state);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "updateTaskState(p_accessToken,p_taskId,p_state)",
                     activityArgs);
             Task task = TaskPersistenceAccessor.getTask(taskId, true);
@@ -13331,7 +13330,7 @@ public class Ambassador extends AbstractWebService
         // }
 
         ArrayList<String> files = new ArrayList<String>();
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         if (fileStates != null)
         {
             if (!StringUtil.isEmpty(filename))
@@ -13342,7 +13341,7 @@ public class Ambassador extends AbstractWebService
                 activityArgs.put("loggedUserName", loggedUserName);
                 activityArgs.put("taskId", taskId);
                 activityArgs.put("filename", filename);
-                activityStart = ActivityLog
+                activityStart = WebServicesLog
                         .start(Ambassador.class,
                                 "getOfflineFileUploadStatus(accessToken,taskId,filename)",
                                 activityArgs);
@@ -13530,13 +13529,13 @@ public class Ambassador extends AbstractWebService
         User loggedUserObj = this.getUser(loggedUserName);
         String loggedComName = loggedUserObj.getCompanyName();
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         String jobIds = new String();
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUserName);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "fetchJobIdsPerCompany(p_accessToken)", activityArgs);
 
             JobSearchParameters sp = new JobSearchParameters();
@@ -13612,7 +13611,7 @@ public class Ambassador extends AbstractWebService
         }
 
         String result = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
@@ -13623,7 +13622,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("offset", p_offset);
             activityArgs.put("p_count", p_count);
             activityArgs.put("isDescOrder", p_isDescOrder);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "fetchJobsByRange(p_accessToken, p_offset,p_count,p_isDescOrder)",
                             activityArgs);
@@ -13695,7 +13694,7 @@ public class Ambassador extends AbstractWebService
         }
 
         String result = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
 
         try
         {
@@ -13708,7 +13707,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("offset", p_count);
             activityArgs.put("count", p_count);
             activityArgs.put("isDescOrder", p_isDescOrder);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "fetchJobsByState(p_accessToken, p_state,p_offset,p_count,p_isDescOrder)",
                             activityArgs);
@@ -13778,7 +13777,7 @@ public class Ambassador extends AbstractWebService
         }
 
         String result = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
 
         try
         {
@@ -13791,7 +13790,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("offset", p_count);
             activityArgs.put("count", p_count);
             activityArgs.put("isDescOrder", p_isDescOrder);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "fetchJobsByCreator(p_accessToken,"
                             + " p_creatorUserName, p_offset, "
                             + "p_count, p_isDescOrder)", activityArgs);
@@ -13958,7 +13957,7 @@ public class Ambassador extends AbstractWebService
 
         checkAccess(p_accessToken, "fetchJobsPerCompany");
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String jobIds = fetchJobIdsPerCompany(p_accessToken);
@@ -13973,7 +13972,7 @@ public class Ambassador extends AbstractWebService
                     getUsernameFromSession(p_accessToken));
             activityArgs.put("jobNum", ids == null ? 0 : ids.length);
             activityArgs.put("jobIds", jobIds);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "fetchJobsPerCompany(p_accessToken)", activityArgs);
 
             if (ids != null && ids.length > 0)
@@ -14057,7 +14056,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, "fetchJobsPerCompany");
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         StringBuffer xml = new StringBuffer(XML_HEAD);
         xml.append("<Jobs>\r\n");
         try
@@ -14084,7 +14083,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("returnWorkflowInfo", p_returnWorkflowInfo);
             activityArgs
                     .put("returnJobAttributeInfo", p_returnJobAttributeInfo);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "fetchJobsPerCompany(p_accessToken, p_jobIds, p_returnSourcePageInfo, p_returnWorkflowInfo, p_returnJobAttributeInfo",
                             activityArgs);
@@ -14569,7 +14568,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, "fetchWorkflowRelevantInfo");
         checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_VIEW);
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         StringBuffer xml = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<WorkflowInfo>\r\n");
@@ -14582,7 +14581,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName",
                     getUsernameFromSession(p_accessToken));
             activityArgs.put("workflowId", p_workflowId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "fetchWorkflowRelevantInfo(p_accessToken, p_workflowId)",
                     activityArgs);
 
@@ -14891,7 +14890,7 @@ public class Ambassador extends AbstractWebService
                     e.getMessage());
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         StringBuffer xml = new StringBuffer(XML_HEAD);
         xml.append("<jobs>\r\n");
         try
@@ -14900,7 +14899,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName",
                     getUsernameFromSession(p_accessToken));
             activityArgs.put("jobIds", jobIds);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "fetchWorkflowRelevantInfoByJobs(p_accessToken, jobIds)",
                     activityArgs);
 
@@ -15361,7 +15360,7 @@ public class Ambassador extends AbstractWebService
         StringBuffer xml = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<exportedFileInfo>\r\n");
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
 
         try
         {
@@ -15371,7 +15370,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobId", p_jobId);
             activityArgs.put("targetLocaleId", p_targetLocaleId);
             activityArgs.put("sourcePageId", p_sourcePageId);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "fetchFileForPreview(p_accessToken, p_jobId,p_targetLocaleId,p_sourcePageId)",
                             activityArgs);
@@ -15512,7 +15511,7 @@ public class Ambassador extends AbstractWebService
         // companyId
         long companyId = -1;
         String companyName = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
@@ -15520,7 +15519,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("commentObjectType", p_commentObjectType);
             activityArgs.put("jobOrTaskId", p_jobOrTaskId);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "getCommentFiles(p_accessToken, p_commentObjectType,p_jobOrTaskId)",
                             activityArgs);
@@ -15785,7 +15784,7 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException(e.getMessage());
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
@@ -15793,7 +15792,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("fileName", p_fileName);
             activityArgs.put("tmName", p_tmName);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "uploadTmxFile(accessToken, fileName, tmName, contentsInBytes)",
                             activityArgs);
@@ -15867,7 +15866,7 @@ public class Ambassador extends AbstractWebService
         }
 
         /** importOptions */
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
@@ -15875,7 +15874,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("tmName", p_tmName);
             activityArgs.put("syncMode", p_syncMode);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "importTmxFile(p_accessToken, p_tmName,p_syncMode)",
                     activityArgs);
 
@@ -15986,14 +15985,14 @@ public class Ambassador extends AbstractWebService
                 p_activity);
         list.add(entry);
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("workflowId", p_workflowId);
             activityArgs.put("activity", p_activity);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "jobsSkipActivity(p_accessToken, p_workflowId,p_activity)",
                     activityArgs);
             Workflow wf = ServerProxy.getWorkflowManager()
@@ -16074,7 +16073,7 @@ public class Ambassador extends AbstractWebService
 
         checkAccess(p_accessToken, "jobsAddLanguages");
         checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_ADD);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
@@ -16082,7 +16081,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobId", p_jobId);
             activityArgs.put("wfInfos", p_wfInfos);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "jobsAddLanguages(p_accessToken, p_jobId,p_wfInfos)",
                     activityArgs);
             String[] wfInfoArray = p_wfInfos.split(",");
@@ -16134,12 +16133,12 @@ public class Ambassador extends AbstractWebService
             logger.error(e.getMessage(), e);
             throw new WebServiceException(e.getMessage());
         }
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         String userName = this.getUsernameFromSession(p_accessToken);
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("jobId", p_jobId);
-        activityStart = ActivityLog.start(Ambassador.class,
+        activityStart = WebServicesLog.start(Ambassador.class,
                 "jobsWorkflowCanBeAdded(p_accessToken, p_jobId)", activityArgs);
         Job job = WorkflowHandlerHelper.getJobById(p_jobId);
         // first validate the state of the existing pages of the job
@@ -16318,14 +16317,14 @@ public class Ambassador extends AbstractWebService
                         + wfIdString + ",non-numeric chars.");
             }
         }
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("wfIds", p_wfIds);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "dispatchWorkflow(p_accessToken, p_wfIds)", activityArgs);
             WorkflowManagerWLRemote wfm = ServerProxy.getWorkflowManager();
             String projectId = null;
@@ -16445,7 +16444,7 @@ public class Ambassador extends AbstractWebService
         StringBuilder xml = new StringBuilder(XML_HEAD);
         xml.append("<jobs>\r\n");
         boolean canRun = true;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = this.getUsernameFromSession(accessToken);
@@ -16453,7 +16452,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("startTime", startTime);
             activityArgs.put("projectId", projectId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getJobsByTimeRange(p_accessToken,startTime, projectId)",
                     activityArgs);
             if (StringUtil.isEmpty(accessToken)
@@ -17028,13 +17027,13 @@ public class Ambassador extends AbstractWebService
         List<WorkflowTaskInstance> taskList = new ArrayList<WorkflowTaskInstance>();
         JbpmContext ctx = null;
         WorkflowInstance workflowInstance = null;
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("workflowId", workflowId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getWorkflowPath(p_accessToken, workflowId)", activityArgs);
             ctx = WorkflowConfiguration.getInstance().getJbpmContext();
             ProcessInstance processInstance = ctx
@@ -17162,14 +17161,14 @@ public class Ambassador extends AbstractWebService
 
         long jobId = task.getJobId();
         Job job = ServerProxy.getJobHandler().getJobById(jobId);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         WorkflowManagerLocal workflowManager = new WorkflowManagerLocal();
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("taskId", taskId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "downloadXliffOfflineFile(p_accessToken, taskId)",
                     activityArgs);
 
@@ -17829,13 +17828,13 @@ public class Ambassador extends AbstractWebService
         }
 
         String returning = "No QA report available for download.";
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("taskId", p_taskId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "generateQAChecksReport(p_accessToken, p_taskId)",
                     activityArgs);
 
@@ -18489,7 +18488,7 @@ public class Ambassador extends AbstractWebService
             return makeErrorXml(TM_EXPORT_STATUS, "Invaild access token.");
         // Check access token
         checkAccess(p_accessToken, TM_EXPORT_STATUS);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         StringBuilder returnXml = null;
         try
         {
@@ -18497,7 +18496,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUser.getUserName());
             activityArgs.put("p_identifyKey", p_identifyKey);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getTmExportStatus", activityArgs);
 
             if (StringUtil.isEmpty(p_identifyKey))
@@ -18639,7 +18638,7 @@ public class Ambassador extends AbstractWebService
             return makeErrorXml(EXPORT_TM, "Invaild access token.");
         // Check access token
         checkAccess(p_accessToken, EXPORT_TM);
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         String identifyKey = null;
         try
         {
@@ -18653,7 +18652,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("p_exportFormat", p_exportFormat);
             activityArgs.put("p_exportedFileName", p_exportedFileName);
             activityArgs.put("p_projectNames", p_projectNames);
-            activityStart = ActivityLog.start(Ambassador.class, "exportTM",
+            activityStart = WebServicesLog.start(Ambassador.class, "exportTM",
                     activityArgs);
 
             if (StringUtil.isEmpty(p_tmName))
@@ -19380,13 +19379,13 @@ public class Ambassador extends AbstractWebService
                     "The current task has been in completed state.");
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggingUserName);
             activityArgs.put("taskId", p_taskId);
-            activityStart = ActivityLog.start(Ambassador.class,
+            activityStart = WebServicesLog.start(Ambassador.class,
                     "getInContextReviewLink(p_accessToken, p_taskId)",
                     activityArgs);
 

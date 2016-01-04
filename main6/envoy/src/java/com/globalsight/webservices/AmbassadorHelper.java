@@ -91,7 +91,6 @@ import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
@@ -888,7 +887,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, "createUser");
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             User loggedUser = getUser(getUsernameFromSession(p_accessToken));
@@ -903,7 +902,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             activityArgs.put("roles", p_roles);
             activityArgs.put("isInAllProject", p_isInAllProject);
             activityArgs.put("projectIds", stringArr2Str(p_projectIds));
-			activityStart = ActivityLog.start(AmbassadorHelper.class,
+			activityStart = WebServicesLog.start(AmbassadorHelper.class,
 					"createUser", activityArgs);
 
 			String returnStr = checkPermissionReturnStr(p_accessToken,
@@ -1232,7 +1231,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, "modifyUser");
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             // Get current user as requesting user
@@ -1249,7 +1248,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             activityArgs.put("roles", p_roles);
             activityArgs.put("isInAllProject", p_isInAllProject);
             activityArgs.put("projectIds", stringArr2Str(p_projectIds));
-			activityStart = ActivityLog.start(AmbassadorHelper.class,
+			activityStart = WebServicesLog.start(AmbassadorHelper.class,
 					"modifyUser", activityArgs);
 
 			String returnStr = checkPermissionReturnStr(p_accessToken,
@@ -1700,7 +1699,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             reassignedUsers.add(userId);
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             String userName = getUsernameFromSession(p_accessToken);
@@ -1708,7 +1707,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("taskId", p_taskId);
             activityArgs.put("users", users.toString());
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador.class,
                             "jobsReassign(p_accessToken, p_workflowId,p_targetLocale,p_workflowId,p_users)",
                             activityArgs);
@@ -2207,14 +2206,14 @@ public class AmbassadorHelper extends JsonTypeWebService
 
         String returning = "";
         String companyName = CompanyWrapper.getCompanyNameById(task.getCompanyId());
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUser.getUserName());
             activityArgs.put("taskId", p_taskId);
             activityArgs.put("workOfflineFileType", p_workOfflineFileType);
-            activityStart = ActivityLog.start(Ambassador4Falcon.class,
+            activityStart = WebServicesLog.start(Ambassador4Falcon.class,
                             "getWorkOfflineFiles", activityArgs);
 
             String fileUrl = null;
@@ -2557,14 +2556,14 @@ public class AmbassadorHelper extends JsonTypeWebService
 		String returning = "";
 		String companyName = CompanyWrapper.getCompanyNameById(task
 				.getCompanyId());
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		try
 		{
 			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 			activityArgs.put("loggedUserName", loggedUser.getUserName());
 			activityArgs.put("taskId", p_taskId);
 			activityArgs.put("workOfflineFileType", p_workOfflineFileType);
-			activityStart = ActivityLog.start(Ambassador4Falcon.class,
+			activityStart = WebServicesLog.start(Ambassador4Falcon.class,
 					"getWorkOfflineFiles", activityArgs);
 
 			OfflineEditManager oem = ServerProxy.getOfflineEditManager();
@@ -2928,7 +2927,7 @@ public class AmbassadorHelper extends JsonTypeWebService
         {
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         FileOutputStream fos = null;
         String returning = "";
         try
@@ -2940,7 +2939,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             activityArgs.put("taskId", p_taskId);
             activityArgs.put("workOfflineFileType", p_workOfflineFileType);
             activityArgs.put("fileName", p_fileName);
-            activityStart = ActivityLog.start(Ambassador4Falcon.class,
+            activityStart = WebServicesLog.start(Ambassador4Falcon.class,
                             "uploadWorkOfflineFiles", activityArgs);
 
             File tmpSaveFile = null;
@@ -3096,14 +3095,14 @@ public class AmbassadorHelper extends JsonTypeWebService
             }
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUser.getUserName());
             activityArgs.put("taskId", p_taskId);
             activityArgs.put("workOfflineFileType", p_workOfflineFileType);
-            activityStart = ActivityLog.start(Ambassador4Falcon.class,
+            activityStart = WebServicesLog.start(Ambassador4Falcon.class,
                     "importWorkOfflineFiles", activityArgs);
 
             OfflineEditManager OEM = ServerProxy.getOfflineEditManager();

@@ -16,7 +16,7 @@
     <parameter name="scope" value="request"/>
     <parameter name="extension" value=".jwr"/>
    </handler>
-   <handler type="java:com.globalsight.log.ActivityLog$AxisRequestHandler">
+   <handler type="java:com.globalsight.webservices.WebServicesLog$AxisRequestHandler">
     <parameter name="scope" value="application"/>
    </handler>
    <handler type="java:com.globalsight.webservices.IpAddressFilterHandler">
@@ -24,7 +24,7 @@
    </handler>
   </requestFlow>
   <responseFlow>
-   <handler type="java:com.globalsight.log.ActivityLog$AxisResponseHandler">
+   <handler type="java:com.globalsight.webservices.WebServicesLog$AxisResponseHandler">
     <parameter name="scope" value="application"/>
    </handler>
   </responseFlow>

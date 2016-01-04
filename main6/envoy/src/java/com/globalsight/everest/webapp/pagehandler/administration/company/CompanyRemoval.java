@@ -219,9 +219,6 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TB_USER_DATA = "delete from TB_USER_DATA where TBID in ";
     private static final String SQL_DELETE_TDA_TM = "delete from TDA_TM where TM_FIPROFILE_ID in ";
     private static final String SQL_DELETE_TERM_LEVERAGE_MATCH = "delete from TERM_LEVERAGE_MATCH where TERMBASE_ID in ";
-    private static final String SQL_DELETE_TEAMSITE_BRANCH_LANGUAGE = "delete from TEAMSITE_BRANCH_LANGUAGE where TEAMSITE_SERVER_ID in ";
-    private static final String SQL_DELETE_TEAMSITE_SERVER = "delete from TEAMSITE_SERVER where COMPANY_ID=?";
-    private static final String SQL_DELETE_TEAMSITE_SERVER_BACKING_STORE = "delete from TEAMSITE_SERVER_BACKING_STORE where TEAMSITE_SERVER_ID in ";
     private static final String SQL_DELETE_TEMPLATE = "delete from TEMPLATE where ID in ";
     private static final String SQL_DELETE_TEMPLATE_PART = "delete from TEMPLATE_PART where ID in ";
     private static final String SQL_DELETE_TEMPLATE_PART_ARCHIVED = "delete from TEMPLATE_PART_ARCHIVED where ID in ";
@@ -301,7 +298,6 @@ public class CompanyRemoval
     private static final String SQL_QUERY_TASK_INFO_BY_COMPANY_ID = "select TASK_ID from TASK_INFO where COMPANY_ID=?";
     private static final String SQL_QUERY_TASK_INFO_BY_WORKFLOW_ID = "select TASK_ID from TASK_INFO where WORKFLOW_ID in ";
     private static final String SQL_QUERY_TB_TERMBASE = "select TBID from TB_TERMBASE where COMPANYID=?";
-    private static final String SQL_QUERY_TEAMSITE_SERVER = "select ID from TEAMSITE_SERVER where COMPANY_ID=?";
     private static final String SQL_QUERY_TEMPLATE = "select ID from TEMPLATE where SOURCE_PAGE_ID in ";
     private static final String SQL_QUERY_TM_PROFILE = "select ID from TM_PROFILE where PROJECT_TM_ID_FOR_SAVE in ";
     private static final String SQL_QUERY_TM3_TM = "select ID from TM3_TM where SHAREDSTORAGEID=?";
@@ -991,8 +987,6 @@ public class CompanyRemoval
             removeSsoUserMapping(conn);
             // remove system parameters
             removeSystemParameter(conn);
-            // remove team site servers
-            removeTeamSiteServer(conn);
             // remove term bases
             removeTermbase(conn);
             // remove Tm3 tables
@@ -3409,37 +3403,6 @@ public class CompanyRemoval
         logStart("TASK_TUV");
         exec(conn, SQL_DELETE_TASK_TUV, taskIds);
         logEnd("TASK_TUV");
-    }
-
-    private void removeTeamSiteBranchLanguage(Connection conn,
-            List<List<Object>> termSiteServerIds) throws SQLException
-    {
-        logStart("TEAMSITE_BRANCH_LANGUAGE");
-        exec(conn, SQL_DELETE_TEAMSITE_BRANCH_LANGUAGE, termSiteServerIds);
-        logEnd("TEAMSITE_BRANCH_LANGUAGE");
-    }
-
-    private void removeTeamSiteServer(Connection conn) throws SQLException
-    {
-        long companyId = company.getId();
-        List<List<Object>> termSiteServerIds = queryBatchList(conn,
-                SQL_QUERY_TEAMSITE_SERVER, companyId);
-        if (termSiteServerIds.size() > 0)
-        {
-            removeTeamSiteBranchLanguage(conn, termSiteServerIds);
-            removeTeamSiteServerBackingStore(conn, termSiteServerIds);
-        }
-        logStart("TEAMSITE_SERVER");
-        execOnce(conn, SQL_DELETE_TEAMSITE_SERVER, companyId);
-        logEnd("TEAMSITE_SERVER");
-    }
-
-    private void removeTeamSiteServerBackingStore(Connection conn,
-            List<List<Object>> termSiteServerIds) throws SQLException
-    {
-        logStart("TEAMSITE_SERVER_BACKING_STORE");
-        exec(conn, SQL_DELETE_TEAMSITE_SERVER_BACKING_STORE, termSiteServerIds);
-        logEnd("TEAMSITE_SERVER_BACKING_STORE");
     }
 
     private void removeTemplate(Connection conn,

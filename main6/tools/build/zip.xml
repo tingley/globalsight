@@ -37,12 +37,6 @@
 			<zipfileset dir="../../tools/install/data/ERs" prefix="${product}/install/data/ERs" />
 			<zipfileset dir="../../tools/install/data" prefix="${product}/install/data" includes="value.mf"/>
 
-			<!-- Teamsite Auto Import -->
-			<zipfileset dir="../teamsite" prefix="${product}/install/data/teamsite" includes="iw_cfg_MenuItems.txt, Makefile, cgiwrap.c, cgiwrapDcr.c, *.tmpl, *.ipl, *.cgi" />
-			<zipfileset dir="../teamsite/properties" prefix="${product}/install/data/teamsite/properties" includes="*.properties" />
-			<zipfileset dir="../teamsite/tsautoimport/properties" prefix="${product}/install/data/teamsite/tsautoimport/properties" includes="teamsiteParams.properties.template" />
-			<zipfileset dir="../teamsite/tsautoimport/properties" prefix="${product}/install/data/teamsite/tsautoimport/properties" includes="log4j.properties,Logger.properties" />
-
 			<!-- GlobalSight Services WAR -->
 			<zipfileset dir="${globalsightServices}/globalsightServices" prefix="${product}/${deployment}/globalsight.ear/globalsightServices.war" excludes="**/*.java" />
 			
@@ -65,10 +59,4 @@
 		</zip>
 	</target>
 
-	<!-- Make the zip file for Teamsite Auto Import -->
-	<target name="TeamsiteAutoImport">
-		<zip update="true" duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}_TeamsiteAutoImport.zip">
-			<zipfileset dir="tsautoimport" prefix="globalsight/tsautoimport" />
-		</zip>
-	</target>
 </project>

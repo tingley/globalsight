@@ -755,10 +755,6 @@ public class EventFlowXmlParser
         return value;
     }
 
-    //
-    // TeamSite related
-    //
-
     /**
      * Get the Server Name
      */

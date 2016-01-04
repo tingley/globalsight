@@ -41,9 +41,9 @@ import com.globalsight.util.XmlParser;
 
 public class WordRepairer extends OfficeRepairer
 {
-//	static private final Logger logger = Logger
-//            .getLogger(WordRepairer.class);
-	
+    // static private final Logger logger = Logger
+    // .getLogger(WordRepairer.class);
+
     public WordRepairer(String path)
     {
         super(path);
@@ -87,12 +87,12 @@ public class WordRepairer extends OfficeRepairer
         {
             try
             {
-            	repairDocFiles(f1);
+                repairDocFiles(f1);
             }
             catch (Exception e)
             {
-				// ignore it.
-				// logger.error(e);
+                // ignore it.
+                // logger.error(e);
             }
         }
     }
@@ -542,12 +542,12 @@ public class WordRepairer extends OfficeRepairer
 
         for (Node t : ts)
         {
-        	String c = t.getText();
+            String c = t.getText();
             if (c.matches("[\n\r]*"))
             {
                 continue;
             }
-            
+
             Element wp = t.getParent();
             Element wr = DocumentHelper.createElement("w:r");
             wp.content().add(wp.indexOf(t), wr);

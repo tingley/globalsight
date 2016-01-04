@@ -41,9 +41,16 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
+import com.globalsight.everest.foundation.CountryCode;
+import com.globalsight.everest.foundation.LanguageCode;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -290,7 +297,7 @@ public class LocalePairImportHandler extends PageHandler implements
 		}
 
 	}
-
+	
 	private class DoImport extends MultiCompanySupportedThread
 	{
 		private Map<String, String> localePairMap = new HashMap<String, String>();
@@ -452,7 +459,7 @@ public class LocalePairImportHandler extends PageHandler implements
 					locale = globalSightLocaleList.get(i);
 					long oldId = locale.getId();
 					long databaseId = getLocaleId(locale);
-					if (String.valueOf(databaseId) != null)
+					if (databaseId != 0)
 					{
 						if (databaseId == oldId)
 						{
@@ -466,10 +473,20 @@ public class LocalePairImportHandler extends PageHandler implements
 					}
 					else
 					{
-						HibernateUtil.save(locale);
-						long newId = getLocaleId(locale);
-						locale.setId(newId);
-						localeMap.put(String.valueOf(oldId), locale);
+						List<LanguageCode> languageCode = getLanguage(locale.getLanguageCode());
+						List<CountryCode> countryCode = getCountry(locale.getCountryCode());
+						if (languageCode.isEmpty()||countryCode.isEmpty()){
+							return;
+						} 
+						else
+						{
+							GlobalSightLocale localnew = new GlobalSightLocale(locale.getLanguage(),
+									locale.getCountry(),false);
+							HibernateUtil.save(localnew);
+							long newId = getLocaleId(localnew);
+							locale.setId(newId);
+							localeMap.put(String.valueOf(oldId), localnew);
+						}
 					}
 				}
 			}
@@ -481,6 +498,31 @@ public class LocalePairImportHandler extends PageHandler implements
 			}
 		}
 
+
+		
+		private List<LanguageCode> getLanguage(String languageCodeStr)
+		{
+	        Session session = null;
+			session = HibernateUtil.getSession();
+			session.beginTransaction();
+			Query query = session.getNamedQuery("queryLanguage");
+			query.setParameter("code", languageCodeStr);
+			List<LanguageCode> list = query.list();
+			session.getTransaction().commit(); 
+			return list;
+		}
+		
+		private List<CountryCode> getCountry(String countryCodeStr)
+		{
+	        Session session = null;
+			session = HibernateUtil.getSession();
+			session.beginTransaction();
+			Query query = session.getNamedQuery("queryCountry");
+			query.setParameter("code", countryCodeStr);
+			List<CountryCode> list = query.list();
+			session.getTransaction().commit(); 
+			return list;
+		}
 		private void storeLocalePairData(Map<String, List> dataMap)
 		{
 			LocalePair localePair = null;
@@ -542,6 +584,7 @@ public class LocalePairImportHandler extends PageHandler implements
 		private long getLocaleId(GlobalSightLocale locale)
 		{
 			String hql = null;
+			long dataId = 0;
 			Map map = new HashMap();
 			hql = "select locale.id from  GlobalSightLocale locale where locale.isUiLocale=:isUiLocale "
 					+ " and  locale.language=:language and  locale.country=:country";
@@ -551,8 +594,11 @@ public class LocalePairImportHandler extends PageHandler implements
 			map.put("country", locale.getCountryCode());
 
 			Long id = (Long) HibernateUtil.getFirst(hql, map);
-
-			return id;
+			if (id!=null)
+			{
+				dataId = id;
+			}
+			return dataId;
 		}
 
 		private LocalePair putDataIntoLocalePair(Map<String, String> valueMap)

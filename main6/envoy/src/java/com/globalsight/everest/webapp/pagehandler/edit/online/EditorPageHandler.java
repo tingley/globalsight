@@ -757,7 +757,17 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
             else if (value.startsWith("0")) // goto page
             {
-                i_direction = Integer.parseInt(value);
+            	i_direction = Integer.parseInt(value);
+				if (value.equals("0"))
+				{
+					int oldCurrentPageNum = p_state.getPaginateInfo()
+							.getCurrentPageNum();
+					if (oldCurrentPageNum != i_direction)
+					{
+						i_direction = oldCurrentPageNum;
+					}
+				}
+				
                 bUpdateSource = true;
                 bUpdateTarget = true;
                 if (layout.isSinglePage())

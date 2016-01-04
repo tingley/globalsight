@@ -36,7 +36,6 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.login.LoginAttemptController;
-import com.globalsight.log.ActivityLog;
 
 /**
  * Abstract base class for web service classes to extend.
@@ -74,7 +73,7 @@ public abstract class AbstractWebService
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("userIP", LoginAttemptController.getIpAddressAxis());
         activityArgs.put("user", p_username);
-        ActivityLog.Start activityStart = ActivityLog.start(
+        WebServicesLog.Start activityStart = WebServicesLog.start(
                 AbstractWebService.class, "doLogin", activityArgs);
 
         String accessToken = null;

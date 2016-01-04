@@ -32,9 +32,9 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeManager;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.action.AttributeAction;
-import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.webservices.WebServicesLog;
 
 public class AddJobAttributeThread extends Thread
 {
@@ -89,7 +89,7 @@ public class AddJobAttributeThread extends Thread
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
             activityArgs.put("jobUuid", jobUuid);
-            ActivityLog.Start activityStart = ActivityLog.start(
+            WebServicesLog.Start activityStart = WebServicesLog.start(
                     AddJobAttributeThread.class, "run", activityArgs);
             try
             {

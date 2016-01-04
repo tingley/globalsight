@@ -8,7 +8,6 @@
             java.util.ResourceBundle"
  %>
 <%!
-    static boolean b_teamsiteGuideJs = Modules.isTeamSiteAdapterInstalled();
     static boolean b_databaseGuideJs = Modules.isDatabaseAdapterInstalled();
     static boolean b_costingGuideJs = Modules.isCostingInstalled();
     static boolean b_calendarGuideJs = Modules.isCalendaringInstalled();
@@ -39,10 +38,9 @@ var dot_bottom_on = new Image();
 dot_bottom_on.src = "/globalsight/images/dot_red_guide_bottom.gif";
 
 var layersArray = ["generic", 
-                   "fileSystem2" 
-                   <%if (b_teamsiteGuideJs) {%>,"teamSite2" <%}%>
+                   "fileSystem2"
                    <%if (b_databaseGuideJs) {%>,"database2"<%}%>
-                  ]; 
+                  ];
 
 function loadGuides() {
    
@@ -108,42 +106,6 @@ function showGuide(guide)
    {
       guide = "generic_fileSystem";
    }
-   <%if (b_teamsiteGuideJs) {%>
-      else if ((guide == "teamSite") && 
-       ((guideNode == "workflows") ||
-        (guideNode == "locProfiles") || 
-        (guideNode == "xmlRules") || 
-        (guideNode == "xmlDtds") || 
-        (guideNode == "segmentationRules") || 
-        (guideNode == "fileExtensions") ||
-        (guideNode == "filterConfiguration") ||
-        (guideNode == "fileProfiles") || 
-        (guideNode == "teamsiteServers") || 
-        (guideNode == "teamsiteBranches") || 
-        (guideNode == "import") ||
-        (guideNode == "createJob") ||
-        (guideNode == "finish")))
-   {
-      guide = "teamSite2";
-   }
-   else if ((guide == "teamSite2") && 
-            ((guideNode != "workflows") ||
-             (guideNode != "locProfiles") || 
-             (guideNode != "xmlRules") || 
-             (guideNode != "xmlDtds") || 
-             (guideNode != "segmentationRules") || 
-             (guideNode != "fileExtensions") ||
-             (guideNode != "filterConfiguration") ||
-             (guideNode != "fileProfiles") || 
-             (guideNode != "teamsiteServers") || 
-             (guideNode != "teamsiteBranches") || 
-             (guideNode != "import") ||
-             (guideNode != "createJob") ||
-             (guideNode != "finish")))
-   {
-      guide = "generic_teamSite";
-   }
-   <%}%>
    <%if (b_databaseGuideJs) {%>
    else if ((guide == "database") && 
             ((guideNode == "workflows") ||
@@ -205,11 +167,6 @@ function showGuide(guide)
    {
       document["guideLogo1"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_fileSystem.gif";
       document["guideLogo2"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_fileSystem.gif";      
-   }
-   else if (guide.indexOf("teamSite") != -1)
-   {
-      document["guideLogo1"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_teamSite.gif";
-      document["guideLogo2"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_teamSite.gif";      
    }
    else if (guide.indexOf("database") != -1)
    {
@@ -332,36 +289,6 @@ function activateNodes(obj, guide)
     <%}%>
                          obj_finish];
     }
-   <%if (b_teamsiteGuideJs) {%>
-    else if (guide == 'teamSite2') 
-    {
-         obj_workflows = getRef('workflowsTeamSite');
-         obj_locProfiles = getRef('locProfilesTeamSite');
-         obj_xmlRules = getRef('xmlRulesTeamSite');
-         obj_xmlDtds = getRef('xmlDtdsTeamSite');
-         obj_segmentationRules = getRef('segmentationRulesTeamSite');
-         obj_fileExtensions = getRef('fileExtensionsTeamSite');
-         obj_filterConfiguration = getRef('filterConfiguration');
-         obj_fileProfiles = getRef('fileProfilesTeamSite');
-         obj_teamsiteServers = getRef('teamsiteServers');
-         obj_teamsiteBranches = getRef('teamsiteBranches');
-         obj_import = getRef('importTeamSite');
-         obj_finish = getRef('finishTeamSite');
-         objects = [obj_workflows,
-                    obj_locProfiles,
-                    obj_xmlRules,
-                    obj_xmlDtds,
-                    obj_segmentationRules,
-                    obj_fileExtensions,
-                    obj_filterConfiguration,
-                    obj_fileProfiles,
-                    obj_teamsiteServers,
-                    obj_teamsiteBranches,
-                    obj_import,
-                    obj_finish];
-
-    }
-    <%}%>
     <%if (b_databaseGuideJs) {%>
     else if (guide == 'database2')
     {
@@ -728,10 +655,6 @@ function guideName()
     if (guide.indexOf("fileSystem") != -1)
     {   
         guideName = "<%= guideBundle.getString("lb_filesystem") %>";
-    }
-    else if (guide.indexOf("teamSite") != -1)
-    {
-        guideName = "<%= guideBundle.getString("lb_teamsite") %>";
     }
     else if (guide.indexOf("database") != -1)
     {

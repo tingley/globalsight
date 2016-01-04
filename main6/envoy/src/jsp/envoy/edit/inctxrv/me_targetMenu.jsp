@@ -52,7 +52,6 @@ boolean isOOO = pageFormat.startsWith("openoffice");
 boolean isOfficeXml = pageFormat.equals(IFormatNames.FORMAT_OFFICE_XML);
 boolean hasDynamicPreview = false;
 boolean hasPDFPreview = EditUtil.hasPDFPreviewMode(state);
-boolean isTeamsiteSource = false;
 long pageId = state.getTargetPageId().longValue();
 Object vpdfobj = sessionMgr.getAttribute("tgt_view_pdf");
 boolean viewPdf = vpdfobj == null ? false : true;
@@ -81,36 +80,6 @@ String pageName = pageInfo.getPageName();
 String pageNamePath = pageName.replaceAll("\\\\","/");
 pageNamePath = EditUtil.toJavascript(pageNamePath);
 String dataSource = pageInfo.getDataSourceType();
-
-if (dataSource.equals(ExportConstants.TEAMSITE))
-{
-    isTeamsiteSource = true;
-
-    String formatType = pageInfo.getPageFormat();
-
-    String externalBaseHref = pageInfo.getExternalBaseHref();
-    String fileName = externalBaseHref.substring(
-        externalBaseHref.lastIndexOf('/') + 1);
-    int extension = fileName.lastIndexOf('.');
-    String ext = fileName.substring(extension + 1);
-
-    if (((ext.equals("dcr")) || (extension == -1)) &&
-        (formatType.equals("xml")) )
-    {
-        // Is this a DCR? No extension to a file indicates presence of DCR.
-        // Don't show static preview for a DCR.
-        hasPreview = false;
-        formatType = "dcr";
-    }
-
-    if (formatType.equals("html") || formatType.equals("asp") ||
-        formatType.equals("dcr")  || formatType.equals("jsp") ||
-        formatType.equals("word-html") || formatType.equals("excel-html") ||
-        formatType.equals("powerpoint-html") || formatType.equals("pdf"))
-    {
-        hasDynamicPreview = true;
-    }
-}
 
 if (dataSource.equals(ExportConstants.MEDIASURFACE))
 {
@@ -168,26 +137,6 @@ else
     str_targetLocale.append(state.getTargetLocale().getDisplayName(uiLocale));
     targetLocale = state.getTargetLocale().toString();
 }
-
-//  String str_showPreviewButton;
-//  if (EditUtil.hasPreviewMode(state.getPageFormat()))
-//  {
-//      str_showPreviewButton = "showPreviewButton()";
-//  }
-//  else
-//  {
-//      str_showPreviewButton = "";
-//  }
-
-//  String str_showDynamicPreviewButton;
-//  if (EditUtil.hasDynamicPreviewMode(tgtPage.getDataSourceType()))
-//  {
-//    str_showDynamicPreviewButton = "showDynamicPreviewButton()";
-//  }
-//  else
-//  {
-//    str_showDynamicPreviewButton = "";
-//  }
 
 String str_currentViewId = null;
 switch (layout.getTargetViewMode())

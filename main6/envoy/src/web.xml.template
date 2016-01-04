@@ -244,15 +244,6 @@
     </init-param>
   </servlet>
 
-  <servlet>
-    <servlet-name>MsOfficeImageReplaceHandler</servlet-name>
-    <servlet-class>com.globalsight.cxe.servlet.imagereplace.MsOfficeImageReplaceHandler</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-  
 	<!-- begin Reports Configuration -->
 	  <servlet>
 	    <servlet-name>TranswareReports</servlet-name>
@@ -412,35 +403,8 @@
   </servlet>
 
   <servlet>
-    <servlet-name>TSPreviewServlet</servlet-name>
-    <servlet-class>com.globalsight.cxe.servlet.cms.teamsite.TSPreviewServlet</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
-    <servlet-name>TeamSiteImageReplaceHandler</servlet-name>
-    <servlet-class>com.globalsight.cxe.servlet.imagereplace.TeamSiteImageReplaceHandler</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
     <servlet-name>TerminologyServlet</servlet-name>
     <servlet-class>com.globalsight.terminology.servlet.TerminologyServlet</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
-    <servlet-name>TranslateServlet</servlet-name>
-    <servlet-class>com.globalsight.cxe.servlet.cms.teamsite.TranslateServlet</servlet-class>
     <init-param>
       <param-name>wl-dispatch-policy</param-name>
       <param-value>ServletExecuteQueue</param-value>
@@ -790,11 +754,6 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>TeamSiteImageReplaceHandler</servlet-name>
-    <url-pattern>/TeamSiteImageReplaceHandler/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>CxeExportServlet</servlet-name>
     <url-pattern>/CxeExportServlet/*</url-pattern>
   </servlet-mapping>
@@ -840,21 +799,10 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>TSPreviewServlet</servlet-name>
-    <url-pattern>/TSPreviewServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>gs</servlet-name>
     <url-pattern>/wl/*</url-pattern>
   </servlet-mapping>
   
-  <servlet-mapping>
-    <servlet-name>TranslateServlet</servlet-name>
-    <url-pattern>/TranslateServlet/*</url-pattern>
-  </servlet-mapping>
-
-
   <servlet-mapping>
     <servlet-name>ImageReplace</servlet-name>
     <url-pattern>/ImageReplace/*</url-pattern>

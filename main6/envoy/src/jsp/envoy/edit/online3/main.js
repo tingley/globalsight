@@ -56,6 +56,13 @@ function CanClose()
 	return true;
 }
 
+function exit()
+{
+    try { w_pageinfo.close();  } catch (ignore) {}
+    try { w_resources.close(); } catch (ignore) {}
+    try { w_termbases.close(); } catch (ignore) {}
+}
+
 function refresh(direction)
 {
 	if(w_editor)

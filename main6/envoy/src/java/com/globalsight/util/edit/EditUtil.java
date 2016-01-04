@@ -850,22 +850,6 @@ public final class EditUtil
         return false;
     }
 
-    static public boolean hasDynamicPreviewMode(String p_dataSourceType)
-    {
-        if (p_dataSourceType == null)
-        {
-            CATEGORY.warn("FIXME hasPreviewMode(): dataSourcetype is null");
-            return false;
-        }
-
-        if (p_dataSourceType.equals("teamsite"))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * Returns true for document formats that are whitespace preserving (like
      * Java, JS, CPP, CSS) and whose segments need to be shown in the

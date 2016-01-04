@@ -222,7 +222,7 @@ public interface Request
      * Returns the type of data source this request is for.
      * 
      * @return String The value that maps to a particular datasource
-     *         DataSourceType (database, filesystem, TeamSite, other content
+     *         DataSourceType (database, filesystem, other content
      *         management systems)
      */
     public String getDataSourceType();

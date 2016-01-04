@@ -90,7 +90,6 @@ import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 import com.globalsight.util.GeneralException;
@@ -171,7 +170,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			return jobsView;
 	
         String json = "";
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         Connection connection = null;
         PreparedStatement query = null;
         ResultSet results = null;
@@ -181,7 +180,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("intervalInMinute", p_intervalInMinute);
-            activityStart = ActivityLog.start(Ambassador4Falcon.class,
+            activityStart = WebServicesLog.start(Ambassador4Falcon.class,
                             "getJobIDsWithStatusChanged(p_accessToken,p_intervalInMinute)",
                     activityArgs);
             if (StringUtil.isEmpty(p_accessToken) || p_intervalInMinute < 1)
@@ -263,11 +262,11 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			throws WebServiceException
 	{
 		checkAccess(p_accessToken, GET_TRANSLATION_PERCENTAGE);
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 
 		Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 		activityArgs.put("taskId", p_taskId);
-		activityStart = ActivityLog
+		activityStart = WebServicesLog
 				.start(Ambassador4Falcon.class,
 						"getTranslationPercentage(accessToken, p_taskId)",
 						activityArgs);
@@ -368,13 +367,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			return returnStr;
 		
         String json = "";
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("jobIds", p_jobIds);
             activityArgs.put("includeMTData", p_includeMTData);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador4Falcon.class,
                             "getDetailedWordcounts(accessToken, jobIds, includeMTData)",
                             activityArgs);
@@ -501,7 +500,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 					+ p_taskId;
 			return makeErrorJson(ACCEPT_TASK, message);
 		}
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		try
 		{
 			if (task != null)
@@ -509,7 +508,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 				Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 				activityArgs.put("loggedUserName", acceptorName);
 				activityArgs.put("taskId", p_taskId);
-				activityStart = ActivityLog.start(Ambassador4Falcon.class,
+				activityStart = WebServicesLog.start(Ambassador4Falcon.class,
 						"acceptTask(p_accessToken,p_taskId)", activityArgs);
 				if (task.getState() == Task.STATE_ACCEPTED
 						|| task.getState() == Task.STATE_COMPLETED)
@@ -620,14 +619,14 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		}
 
 		// Compelte task
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		try
 		{
 			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 			activityArgs.put("loggedUserName", userName);
 			activityArgs.put("taskId", p_taskId);
 			activityArgs.put("destinationArrow", p_destinationArrow);
-			activityStart = ActivityLog.start(Ambassador4Falcon.class,
+			activityStart = WebServicesLog.start(Ambassador4Falcon.class,
 					"completeTask(p_accessToken,p_taskId,p_destinationArrow)",
 					activityArgs);
 			// Find the user to complete task.
@@ -766,14 +765,14 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		String rejectUserName = getUsernameFromSession(p_accessToken);
 		String rejectUserId = UserUtil.getUserIdByName(rejectUserName);
 		Task task = null;
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		try
 		{
 			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 			activityArgs.put("loggedUserName", rejectUserName);
 			activityArgs.put("p_taskId", p_taskId);
 			activityArgs.put("p_rejectComment", p_rejectComment);
-			activityStart = ActivityLog.start(Ambassador4Falcon.class,
+			activityStart = WebServicesLog.start(Ambassador4Falcon.class,
 					"rejectTask(p_accessToken,p_taskId,p_rejectComment)",
 					activityArgs);
 			WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
@@ -857,14 +856,14 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		}
 
 		List<Project> projectList = null;
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		JSONArray projectArray = new JSONArray();
 		try
 		{
 			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 			activityArgs.put("loggedUserName", curUserName);
 			activityArgs.put("p_companyName", p_companyName);
-			activityStart = ActivityLog.start(Ambassador4Falcon.class,
+			activityStart = WebServicesLog.start(Ambassador4Falcon.class,
 					"getAllProjectProfiles(p_accessToken,p_companyName)",
 					activityArgs);
 			projectList = ServerProxy.getProjectHandler()
@@ -1201,7 +1200,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			return returnStr;
 		
 		String jobName = p_jobName;
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		JSONObject jsonObj = new JSONObject();
 		try
 		{
@@ -1209,7 +1208,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 			activityArgs.put("loggedUserName", userName);
 			activityArgs.put("jobName", p_jobName);
-			activityStart = ActivityLog.start(Ambassador4Falcon.class,
+			activityStart = WebServicesLog.start(Ambassador4Falcon.class,
 					"exportJob(p_accessToken, p_jobName)", activityArgs);
 			Job job = queryJob(jobName, p_accessToken, jsonObj);
 			if (job.getDisplayState().equalsIgnoreCase("ready"))
@@ -1280,7 +1279,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		String jobName = p_jobName;
 		String workflowLocale = p_workflowLocale;
 		String returnXml = "";
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		JSONObject jsonObj = new JSONObject();
 		try
 		{
@@ -1289,7 +1288,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			activityArgs.put("loggedUserName", userName);
 			activityArgs.put("jobName", p_jobName);
 			activityArgs.put("workflowLocale", p_workflowLocale);
-			activityStart = ActivityLog
+			activityStart = WebServicesLog
 					.start(Ambassador.class,
 							"exportWorkflow(p_accessToken, p_jobName,p_workflowLocale)",
 							activityArgs);
@@ -1389,7 +1388,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		
 		
 		String jobName = p_jobName;
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		JSONObject jsonObj = new JSONObject();
 		Job job = queryJob(jobName, p_accessToken, jsonObj);
 		String jobCompanyId = String.valueOf(job.getCompanyId());
@@ -1437,7 +1436,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
 			activityArgs.put("loggedUserName", curUserName);
 			activityArgs.put("jobName", p_jobName);
-			activityStart = ActivityLog
+			activityStart = WebServicesLog
 					.start(Ambassador.class,
 							"getJobExportFiles(p_accessToken, p_jobName)",
 							activityArgs);
@@ -1572,7 +1571,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		if (StringUtil.isNotEmpty(jobsExport))
 			return jobsExport;
 		
-		ActivityLog.Start activityStart = null;
+		WebServicesLog.Start activityStart = null;
 		JSONObject jsonObj = new JSONObject();
 		String jobName = p_jobName;
 		Job job = queryJob(jobName, p_accessToken, jsonObj);
@@ -1623,7 +1622,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			activityArgs.put("loggedUserName", curUserName);
 			activityArgs.put("jobName", p_jobName);
 			activityArgs.put("workflowLocale", workflowLocale);
-			activityStart = ActivityLog
+			activityStart = WebServicesLog
 					.start(Ambassador.class,
 							"getJobExportWorkflowFiles(p_accessToken, p_jobName,workflowLocale)",
 							activityArgs);
@@ -2334,13 +2333,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		}
 		
         String json = "";
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("workflowTemplateName", p_workflowTemplateName);
             activityArgs.put("companyName", p_companyName);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador4Falcon.class,
                             "getWorkflowTemplateInfo(accessToken, workflowTemplateName, companyName)",
                             activityArgs);
@@ -2577,15 +2576,15 @@ public class Ambassador4Falcon extends JsonTypeWebService
         }
 
         StringBuffer json = new StringBuffer();
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
-            // ActivityLog
+            // WebServicesLog
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("workflowTemplateName", p_workflowTemplateName);
             activityArgs.put("companyName", p_companyName);
             activityArgs.put("activityAssigneesInJson", p_activityAssigneesInJson);
-            activityStart = ActivityLog
+            activityStart = WebServicesLog
                     .start(Ambassador4Falcon.class,
                             "modifyWorkflowTemplateAssignees(accessToken, workflowTemplateName, companyName, activityAssigneesInJson)",
                             activityArgs);
@@ -3095,13 +3094,13 @@ public class Ambassador4Falcon extends JsonTypeWebService
                     "The current task has been in completed state.");
         }
 
-        ActivityLog.Start activityStart = null;
+        WebServicesLog.Start activityStart = null;
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggingUserName);
             activityArgs.put("taskId", p_taskId);
-            activityStart = ActivityLog.start(Ambassador4Falcon.class,
+            activityStart = WebServicesLog.start(Ambassador4Falcon.class,
                     "getInContextReviewLink(p_accessToken, p_taskId)", activityArgs);
 
             User pm = task.getWorkflow().getJob().getProject()

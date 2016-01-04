@@ -14,7 +14,6 @@
   <topic name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />
   <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
   <topic name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Default Path" url="Glossary/Default_Path.htm" />
   <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
   <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
@@ -29,9 +28,7 @@
   <topic name="Graphical Workflow" url="Setup/Workflows/Graphical_Workflow.htm" />
   <topic name="How does GlobalSight decide how many Fuzzy Matches to display to the user" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_how_many_Fuzzy_Matches_to_display_to_the_user.htm" />
   <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
-  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
   <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
   <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
   <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />

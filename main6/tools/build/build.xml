@@ -106,36 +106,6 @@
 		<ant antfile="../install/build.xml" />
 	</target>
 
-	<target name="tsAutoImport" depends="compile">
-		<copy todir="tsautoimport">
-			<fileset dir="../teamsite/tsautoimport">
-				<exclude name="properties/**" />
-			</fileset>
-		</copy>
-		<jar update="true" duplicate="preserve" filesonly="true" destfile="tsautoimport/lib/tsAutoImport.jar" basedir="${serverclassesDest}" includes="com/globalsight/cxe/message/MessageData.class,
-            com/globalsight/diplomat/util/Logger.class,
-            com/globalsight/log/GlobalSightCategory.class,
-            com/globalsight/log/GlobalSightCategoryFactory.class,
-            com/globalsight/log/GlobalSightPropertyConfigurator.class,
-            com/globalsight/util/CollectionHelper.class,
-            com/globalsight/util/file/DelimitedFileReader.class,
-            com/globalsight/util/file/DirectoryMonitor.class,
-            com/globalsight/util/file/FileWaiter.class,
-            com/globalsight/util/file/FileModificationTimeSnapshot.class,
-            com/globalsight/cxe/adapter/teamsite/autoimport/AutomaticImportMonitor.class,
-            com/globalsight/cxe/adapter/teamsite/autoimport/AutomaticImporter.class,
-            com/globalsight/cxe/adapter/teamsite/autoimport/AutomaticImportService.class,
-            com/globalsight/cxe/adapter/teamsite/autoimport/AutomaticImportDaemon.class,
-            com/globalsight/cxe/adapter/filesystem/autoImport/DirectoryMap.class,
-            com/globalsight/cxe/adapter/filesystem/autoImport/DirectoryMapEntry.class,
-            com/globalsight/cxe/adapter/filesystem/autoImport/DirectoryMapPrinter.class
-                " />
-	</target>
-
-	<target name="tsAutoImportZip" depends="tsAutoImport, distdir">
-		<ant antfile="zip.xml" target="TeamsiteAutoImport" />
-	</target>
-
 	<target name="copy">
 		<copy todir="${globalsight_home}/META-INF">
 			<fileset dir="${jbossUtilDir}">
@@ -489,7 +459,7 @@
 	</target>
 
 	<!--     Build everything and make the zip file -->
-	<target name="dist" depends="clean, zip, tsAutoImportZip, WebServiceClients, LingToolsZip, WebtopZip, DesktopIconZip" />
+	<target name="dist" depends="clean, zip, WebServiceClients, LingToolsZip, WebtopZip, DesktopIconZip" />
 
 	<target name="distnojsp" depends="dist" />
 

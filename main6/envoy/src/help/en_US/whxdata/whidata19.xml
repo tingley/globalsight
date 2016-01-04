@@ -13,7 +13,6 @@
   <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
   <topic name="Export" url="My_Jobs/Export.htm" />
   <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
   <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
   <topic name="Locale" url="Glossary/Locale.htm" />
@@ -27,54 +26,8 @@
   <topic name="Snippet" url="Glossary/Snippet.htm" />
   <topic name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
   <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
-  <topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
   <topic name="Upload Support Files" url="Setup/Support_Files/Upload_Support_Files.htm" />
   <topic name="Workflow" url="Glossary/Workflow.htm" />
-</key>
-<key name="TeamSite" >
-  <topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
-  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
-  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
-  <topic name="New TeamSite Branch Definition" url="Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm" />
-  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
-  <topic name="Overview" url="Overview.htm" />
-  <topic name="Overview_PM" url="Overview_PM.htm" />
-  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
-  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
-  <topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
-</key>
-<key name="TeamSite branch" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
-</key>
-<key name="TeamSite Branch Definitions" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-</key>
-<key name="TeamSite branches for TeamSite" >
-  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
-  <topic name="Overview" url="Overview.htm" />
-  <topic name="Overview_PM" url="Overview_PM.htm" />
-  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
-</key>
-<key name="TeamSite Profiles Main Screen" >
-  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
-</key>
-<key name="TeamSite requires" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-</key>
-<key name="TeamSite Server" >
-  <topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
-  <topic name="TeamSite Server and Store Selection" url="Data_Sources/TeamSite_Branches/TeamSite_Server_and_Store_Selection.htm" />
-  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
-</key>
-<key name="TeamSite Server Configuration" >
-  <topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
-  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
 </key>
 <key name="Term Audit" >
   <topic name="Term Audit" url="Reports/Term_Audit.htm" />

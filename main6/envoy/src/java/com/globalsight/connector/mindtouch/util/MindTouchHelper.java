@@ -254,7 +254,12 @@ public class MindTouchHelper
                 	text = text.replace("<", "&lt;").replace(">", "&gt;");
                 	// as json does not allow "\" and "/", remove them for displaying.
                 	text = text.replace("\\", "").replace("/", "");
-                	text = java.net.URLDecoder.decode(text, "UTF-8");
+                	text = text.replace("%22", "\"");
+                	text = text.replace("%3F", "?");
+                	text = text.replace("%23", "#");
+                	text = text.replace("%3D", "=");
+                	text = text.replace("%26", "&");
+                	text = text.replace("%25", "%");
                     mtp.setTitle(text);
                 }
                 else if ("path".equals(name))
@@ -692,11 +697,13 @@ public class MindTouchHelper
             {
         		times++;
         		String tmpContent = content;
+            	tmpContent = StringUtil.replace(tmpContent, "&lt;", "&#60;");
+            	tmpContent = StringUtil.replace(tmpContent, "&gt;", "&#62;");
+            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
             	if (times == 1) {
             		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
             		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
             	}
-            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
             	tmpContent = tmpContent.substring(tmpContent.indexOf("<body>") + 6);
             	tmpContent = tmpContent.substring(0, tmpContent.indexOf("</body>"));
                 StringEntity reqEntity = new StringEntity(tmpContent, "UTF-8");
@@ -824,8 +831,8 @@ public class MindTouchHelper
 			String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/="
 					+ path + "/files/=" + tempFileName;
             HttpPut httpput = getHttpPut(url, targetLocale);
-            
-            FileEntity reqEntity = new FileEntity(new File(filePath));
+            File picFile = new File(filePath);
+            FileEntity reqEntity = new FileEntity(picFile);
             httpput.setEntity(reqEntity);
             
             HttpResponse response = httpClient.execute(httpput);
@@ -839,7 +846,8 @@ public class MindTouchHelper
 				logger.error("Fail to put file back to MindTouch server for file '"
 						+ filePath + "' : " + entityContent);
             }
-            
+            picFile.delete();
+
             return entityContent;
         }
         catch (Exception e)
@@ -951,7 +959,7 @@ public class MindTouchHelper
         }
     }
 
-    private boolean isTargetServerExist(String targetLocale)
+    public boolean isTargetServerExist(String targetLocale)
     {
 		if(targetServersMap.get(targetLocale) != null)
 		{
@@ -1226,6 +1234,7 @@ public class MindTouchHelper
     {
     	try
     	{
+    		contentXml = fixTitleValueInContentXml(contentXml);
     		String content = contentXml.substring(0, contentXml.indexOf("<body>"));
     		content = content.replace("&nbsp;", " ");
     		content += "</content>";
@@ -1233,7 +1242,12 @@ public class MindTouchHelper
     		String title = root.attributeValue("title");
     		if (title.trim().length() > 0)
     		{
-    			title = URLEncoder.encode(title);
+				// Encode the whole title is the right behavior, but as
+				// MindTouch does not decode title, we have to only encode # = &
+				// title = URLEncoder.encode(title);
+    			title = title.replace("#", "%23");
+    			title = title.replace("=", "%3D");
+    			title = title.replace("&", "%26");
     			return new String(title.trim().getBytes("UTF-8"), "UTF-8");
     		}
     	}
@@ -1262,10 +1276,23 @@ public class MindTouchHelper
     		String a = contentXml.substring(0, index + " title=\"".length());
     		xml.append(a);
     		String b = contentXml.substring(index + " title=\"".length());
-    		String title = b.substring(0, b.indexOf("\""));
-    		title = title.replace("<", "&lt;").replace(">", "&gt;");
-    		xml.append(title);
-    		xml.append(b.substring(b.indexOf("\"")));
+    		index = b.indexOf("=");
+    		if (index > -1)
+    		{
+    			a = b.substring(0, index);
+    			b = b.substring(index);
+    			index = a.lastIndexOf(" ");
+    			String title = a.substring(0, index - 1);
+				title = title.replace("\"", "&quot;").replace("<", "&lt;")
+						.replace(">", "&gt;");
+    			xml.append(title);
+    			xml.append(a.substring(index - 1));
+    			xml.append(b);
+    		}
+    		else
+    		{
+    			xml.append(b);
+    		}
 
     		return new String(xml.toString().trim().getBytes("UTF-8"), "UTF-8");
     	}

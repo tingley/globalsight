@@ -5,7 +5,6 @@
 	<session-factory>
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Activity.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AmountOfWork.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/BackingStoreImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/BasicL10nProfile.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CalendarWorkingDay.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CalendarWorkingHour.hbm.xml" />
@@ -73,8 +72,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TargetPage.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TaskImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TaskTuv.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/TeamSiteBranch.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/TeamSiteServerImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TemplateFormat.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TemplatePart.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/TemplatePartArchived.hbm.xml" />
@@ -182,5 +179,7 @@
         <mapping resource="com/globalsight/persistence/hibernate/xml/InddTuMapping.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/LoginAttemptConfig.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/LoginAttempt.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/Language.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/Country.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

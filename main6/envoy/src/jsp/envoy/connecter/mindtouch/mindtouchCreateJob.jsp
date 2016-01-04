@@ -795,7 +795,7 @@ function removeSelectedFile(id) {
         <span class="mainHeading"><%=treeTitle%></span>
         <table>
             <tr><td height="10">&nbsp;</td></tr>
-            <tr><TD class="standardText"><%=treeHelperText%> MindTouch server: <A class='standardHREF' href="<%=mtc.getUrl()%>" target="_blank"><b><%=mtc.getUrl()%>.</b></A></TD></tr>
+            <tr><TD class="standardText"><%=treeHelperText%> MindTouch server: <A class='standardHREF' href="<%=mtc.getUrl()%>" target="_blank"><b><%=mtc.getUrl()%></b></A></TD></tr>
         </table><br/>
     </div>
     <div id="mtCreateJobHeader" style="display: none">

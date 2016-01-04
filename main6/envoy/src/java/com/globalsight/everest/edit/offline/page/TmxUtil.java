@@ -986,13 +986,15 @@ public class TmxUtil
      * @return the segment text or XML value, encoded as XML.
      */
     private static String getSegmentValue(Element p_root)
-    {
-        StringBuffer result = new StringBuffer();
-        Element seg = p_root.element("seg");
-        seg = removeHiElements(seg);
-        result.append(EditUtil.encodeXmlEntities(seg.getText()));
-        return result.toString();
-    }
+	{
+		StringBuffer result = new StringBuffer();
+		Element seg = p_root.element("seg");
+		seg = removeHiElements(seg);
+		String subSeg = seg.asXML().substring(seg.asXML().indexOf("<seg>")+5,
+				seg.asXML().indexOf("</seg>"));
+		result.append(subSeg);
+		return result.toString();
+	}
 
     /**
      * Removes all TMX 1.4 <hi> elements from the segment. <hi> is special since

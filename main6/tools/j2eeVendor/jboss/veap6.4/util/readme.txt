@@ -2,7 +2,7 @@ This is instruction for importing self-signed certificate to client machine for 
 
 Using self-signed certificate or default one, following commands need to be executed manually in client machine for java applet trust.
 
-1.First get globalsight_ori.keystore from globalsight source located at main6\tools\j2eeVendor\jboss\veap6.1\util.
+1.First get globalsight_ori.keystore from globalsight source located at main6\tools\j2eeVendor\jboss\veap6.4\util.
 
 2.Run command:
 C:\Program Files\Java\jre1.6.0_07\lib\security>"C:\Program Files\Java\jre1.6.0_07\bin\keytool" -export -alias globalsight -file globalsight_ori.crt -keystore <path-of-globalsight_ori.keystore>

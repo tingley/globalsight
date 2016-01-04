@@ -8,7 +8,6 @@
   <topic name="Cost Report" url="Reports/Cost_Report.htm" />
   <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
   <topic name="Create/Edit Location" url="Data_Sources/Export_Locations/Create_Edit_Location.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
   <topic name="Email Notification" url="Email_Notification.htm" />
   <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
@@ -22,7 +21,6 @@
   <topic name="Exporting... (Export p.3)" url="Setup/Translation_Memory/Exporting..._(Export_p.3).htm" />
   <topic name="Exporting... (Export p.3)1" url="Setup/Projects/Exporting..._(Export_p.3)1.htm" />
   <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="Import" url="Setup/Terminology/Import.htm" />
   <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
   <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
@@ -115,7 +113,6 @@
   <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
   <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
   <topic name="Find" url="Reports/Find.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
   <topic name="Search and Replace" url="Setup/Translation_Memory/Search_and_Replace.htm" />
   <topic name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
@@ -177,7 +174,6 @@
   <topic name="Create/Edit Location" url="Data_Sources/Export_Locations/Create_Edit_Location.htm" />
   <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
   <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Create/Edit Translation Memory" url="Setup/Translation_Memory/Create_Modify_Translation_Memory.htm" />
   <topic name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
   <topic name="Create/Edit/Duplicate Termbase" url="Setup/Terminology/Create_Modify_Clone_Termbase.htm" />
@@ -199,7 +195,6 @@
   <topic name="Extracted File" url="Glossary/Extracted_File.htm" />
   <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
   <topic name="GlobalSight Options" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/GlobalSight_Options.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="GS Tag" url="Glossary/GS_Tag.htm" />
   <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
   <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
@@ -209,11 +204,9 @@
   <topic name="How is a GlobalSight segment different from a Trados segment" url="Appendix/Linguistic_FAQ/How_is_a_GlobalSight_segment_different_from_a_Trados_segment.htm" />
   <topic name="How is GlobalSight Word Count different from that of Trados" url="Appendix/Linguistic_FAQ/How_is_GlobalSight_Word_Count_different_from_that_of_Trados.htm" />
   <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
   <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
   <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
-  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
   <topic name="Is extraction customizable in GlobalSight" url="Appendix/Linguistic_FAQ/Is_extraction_customizable_in_GlobalSight.htm" />
   <topic name="Is segmentation customizable in GlobalSight" url="Appendix/Linguistic_FAQ/Is_segmentation_customizable_in_GlobalSight.htm" />
   <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
@@ -248,7 +241,6 @@
   <topic name="Snippet Library" url="Glossary/Snippet_Library.htm" />
   <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
   <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
-  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
   <topic name="Termbase Export" url="Setup/Terminology/Export.htm" />
   <topic name="Toolbar" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Toolbar.htm" />
   <topic name="Unextracted File" url="Glossary/Unextracted_File.htm" />
@@ -271,17 +263,11 @@
   <topic name="Writing DB Preview Rules" url="Appendix/Database_Integration/Writing_DB_Preview_Rules.htm" />
   <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
 </key>
-<key name="GlobalSight adds" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-</key>
 <key name="GlobalSight applies to segments" >
   <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
 </key>
 <key name="GlobalSight calculates" >
   <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
-</key>
-<key name="GlobalSight check" >
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
 </key>
 <key name="GlobalSight defines" >
   <topic name="How does GlobalSight Word Count work" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_Word_Count_work.htm" />
@@ -289,40 +275,19 @@
 <key name="GlobalSight editing" >
   <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
 </key>
-<key name="GlobalSight integrates" >
-  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
-</key>
-<key name="GlobalSight issues" >
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
-</key>
 <key name="GlobalSight logs" >
   <topic name="Log Files" url="Setup/Logs/Log_Files.htm" />
   <topic name="Overview" url="Overview.htm" />
   <topic name="Setup Menus" url="Setup/Setup.htm" />
 </key>
-<key name="GlobalSight modifies" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-</key>
-<key name="GlobalSight names" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-</key>
 <key name="GlobalSight Options" >
   <topic name="GlobalSight Options" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/GlobalSight_Options.htm" />
-</key>
-<key name="GlobalSight remembers" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
 </key>
 <key name="GlobalSight returns" >
   <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
 </key>
 <key name="GlobalSight segment different" >
   <topic name="How is a GlobalSight segment different from a Trados segment" url="Appendix/Linguistic_FAQ/How_is_a_GlobalSight_segment_different_from_a_Trados_segment.htm" />
-</key>
-<key name="GlobalSight TeamSite Branch Definitions" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-</key>
-<key name="GlobalSight understands" >
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
 </key>
 <key name="GlobalSight Word Count different" >
   <topic name="How is GlobalSight Word Count different from that of Trados" url="Appendix/Linguistic_FAQ/How_is_GlobalSight_Word_Count_different_from_that_of_Trados.htm" />

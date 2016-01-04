@@ -19,7 +19,6 @@
   <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
   <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
   <topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
   <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
   <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
@@ -35,9 +34,7 @@
   <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
   <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
   <topic name="Flat Surcharge" url="Glossary/Flat_Surcharge.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
   <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
   <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
@@ -118,7 +115,6 @@
   <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
   <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
   <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
   <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
   <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />

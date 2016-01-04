@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -756,16 +757,53 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // Remove lucene index data for specified locale.
             luceneRemoveTM3Tus(pTm.getId(), tus, pLocale);
 
-            // Remove specified tuvs then recreate lucene index data.
-            for (TM3Tu<GSTuvData> tu : tus)
-            {
-                tu.removeTargetTuvByLocale(pLocale);
-            }
-            luceneIndexTus(pTm.getId(), tus);
-            // pReporter.setPercentage(90);
+			List<TM3Tu<GSTuvData>> removeTus = new ArrayList<TM3Tu<GSTuvData>>();
+			// Remove specified tuvs then recreate lucene index data.
+			for (TM3Tu<GSTuvData> tu : tus)
+			{
+				tu.removeTargetTuvByLocale(pLocale);
+				if (tu.getAllTuv().size() == 1)
+				{
+					removeTus.add(tu);
+				}
+			}
+			luceneIndexTus(pTm.getId(), tus);
+			// pReporter.setPercentage(90);
 
-            // Remove data from DB for specified locale.
-            tm3tm.removeDataByLocale(pLocale);
+			// Remove data from DB for specified locale.
+			tm3tm.removeDataByLocale(pLocale);
+
+			// Removing TM by language caused single TUV left
+			if (removeTus.size() > 0)
+			{
+				Iterator<TM3Tu<GSTuvData>> tuIt = removeTus.iterator();
+
+				List<SegmentTmTu> removeList = new ArrayList<SegmentTmTu>();
+				while (tuIt.hasNext())
+				{
+					TM3Tu<GSTuvData> tm3tu = tuIt.next();
+
+					if (tm3tu.getTm().getId().equals(pTm.getTm3Id()))
+					{
+						TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
+						TM3Attribute formatAttr = TM3Util
+								.getAttr(tm3tm, FORMAT);
+						TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
+						TM3Attribute translatableAttr = TM3Util.getAttr(tm3tm,
+								TRANSLATABLE);
+						TM3Attribute fromWsAttr = TM3Util.getAttr(tm3tm,
+								FROM_WORLDSERVER);
+						TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+								UPDATED_BY_PROJECT);
+
+						SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu,
+								pTm.getId(), formatAttr, typeAttr, sidAttr,
+								fromWsAttr, translatableAttr, projectAttr);
+						removeList.add(segmentTmTu);
+					}
+				}
+				deleteSegmentTmTus(pTm, removeList);
+			}
 
             pReporter.setMessageKey("",
                     tmName + " - " + pLocale.getDisplayName()

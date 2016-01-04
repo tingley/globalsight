@@ -40,10 +40,6 @@
     {   
         guideDesc = "<%= bundle.getString("guide_desc_filesystem") %>";
     }
-    else if (guide.indexOf("teamSite") != -1)
-    {
-        guideDesc = "<%= bundle.getString("guide_desc_teamsite") %>";
-    }
     else if (guide.indexOf("database") != -1)
     {
         guideDesc = "<%= bundle.getString("guide_desc_database") %>";

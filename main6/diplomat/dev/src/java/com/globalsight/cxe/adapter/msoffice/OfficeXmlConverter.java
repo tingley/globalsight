@@ -1,14 +1,25 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.cxe.adapter.msoffice;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.List;
-
-import org.artofsolving.jodconverter.OfficeDocumentConverter;
-import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
-import org.artofsolving.jodconverter.office.OfficeException;
-import org.artofsolving.jodconverter.office.OfficeManager;
 
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -41,14 +52,16 @@ public class OfficeXmlConverter
         this.companyId = companyId;
     }
 
-    public String convertOfficeToXml(String p_odFile, String p_dir) throws Exception
+    public String convertOfficeToXml(String p_odFile, String p_dir)
+            throws Exception
     {
         ZipIt.unpackZipPackage(p_odFile, p_dir);
 
         return p_dir;
     }
 
-    public String convertXmlToOffice(String p_odFileName, String p_xmlDir) throws Exception
+    public String convertXmlToOffice(String p_odFileName, String p_xmlDir)
+            throws Exception
     {
         OfficeXmlRepairer.repair(p_xmlDir);
 
@@ -82,7 +95,8 @@ public class OfficeXmlConverter
         isIncontextReview = vvv;
     }
 
-    public void convertToPdf(String type, File file, File pdfFile, String locale) throws Exception
+    public void convertToPdf(String type, File file, File pdfFile, String locale)
+            throws Exception
     {
         String name = file.getName().toLowerCase();
 
@@ -100,9 +114,10 @@ public class OfficeXmlConverter
 
         String prefixName = name.substring(0, name.lastIndexOf("."));
         String fileType = name.substring(name.lastIndexOf("."));
-        String company = CompanyWrapper.getCompanyNameById(CompanyThreadLocal.getInstance()
-                .getValue());
-        String localeDir = getConvertDir() + "/" + folder + "/" + company + "/" + locale;
+        String company = CompanyWrapper.getCompanyNameById(CompanyThreadLocal
+                .getInstance().getValue());
+        String localeDir = getConvertDir() + "/" + folder + "/" + company + "/"
+                + locale;
         String path = localeDir + "/" + prefixName;
 
         File localeDirFile = new File(localeDir);
@@ -110,7 +125,7 @@ public class OfficeXmlConverter
         {
             localeDirFile.mkdirs();
         }
-        
+
         FileCopier.copy(file, localeDir);
         writeCommandFile(path + ".im_command", type, "pdf");
 
@@ -140,8 +155,8 @@ public class OfficeXmlConverter
         FileUtil.copyFile(expectedPdfFile, pdfFile);
     }
 
-    private void writeCommandFile(String p_commandFileName, String from, String to)
-            throws Exception
+    private void writeCommandFile(String p_commandFileName, String from,
+            String to) throws Exception
     {
         String convertFrom = "ConvertFrom=" + from;
         String convertTo = "ConvertTo=" + to;
@@ -152,7 +167,8 @@ public class OfficeXmlConverter
         text.append(convertTo).append("\r\n");
         text.append(acceptChanges).append("\r\n");
 
-        FileUtil.writeFileAtomically(new File(p_commandFileName), text.toString(), "US-ASCII");
+        FileUtil.writeFileAtomically(new File(p_commandFileName),
+                text.toString(), "US-ASCII");
     }
 
     private String getConvertDir()
@@ -160,16 +176,17 @@ public class OfficeXmlConverter
         if (convertDir == null)
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            convertDir = sc.getStringParameter(SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
+            convertDir = sc.getStringParameter(
+                    SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
                     CompanyWrapper.SUPER_COMPANY_ID);
         }
 
         if (convertDir_incontextReview == null)
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            convertDir_incontextReview = sc
-                    .getStringParameter(SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
-                            CompanyWrapper.SUPER_COMPANY_ID);
+            convertDir_incontextReview = sc.getStringParameter(
+                    SystemConfigParamNames.INCTXRV_CONV_DIR_OFFICE,
+                    CompanyWrapper.SUPER_COMPANY_ID);
         }
 
         return isIncontextReview ? convertDir_incontextReview : convertDir;

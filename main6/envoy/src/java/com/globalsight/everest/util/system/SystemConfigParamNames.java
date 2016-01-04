@@ -250,13 +250,6 @@ public interface SystemConfigParamNames
     public static final String PROXY_SERVER_NAME = "proxy.server.name";
     public static final String PROXY_SERVER_PORT = "proxy.server.port";
 
-    public static final String TEAMSITE = "teamsite";
-    public static final String TEAMSITE_INSTALL_KEY = "teamsite.installKey";
-    public static final String TEAMSITE_SERVER = "teamsite.server";
-    public static final String TEAMSITE_PORT = "teamsite.port";
-    public static final String TEAMSITE_PROXY_PORT = "teamsite.proxy.port";
-    public static final String TEAMSITE_MOUNT_DIR = "teamsite.mount.dir";
-
     /**
      * Parameter used for enabling/disabling the system level notification.
      */

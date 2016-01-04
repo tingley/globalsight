@@ -52,7 +52,7 @@ substituted PreviewUrlXml file -->
 >
 <!-- A gsamd has diplomat attributes relevant to GlobalSight for future use -->
 <!ELEMENT gsamd (da*)>
-<!--A category Element specifies attributes  that are specific to a content source the name attribute specifies the name of the content source (e.g. Teamsite, database, etc). -->
+<!--A category Element specifies attributes  that are specific to a content source the name attribute specifies the name of the content source (e.g. database, etc). -->
 <!ELEMENT category (da*)>
 <!ATTLIST category
 	name CDATA #REQUIRED

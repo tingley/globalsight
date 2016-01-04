@@ -22,12 +22,15 @@ package com.globalsight.webservices;
 */
 public class WebServiceException extends Exception
 {
+	private static final long serialVersionUID = 5562378751879140141L;
 
-    /**
+
+	/**
      * Constructs an empty exception
      */
-    public WebServiceException()
-    {}
+	public WebServiceException() {
+
+	}
 
 
     /**
@@ -37,7 +40,7 @@ public class WebServiceException extends Exception
      */
     public WebServiceException (String p_message)
     {
-	super(p_message);
+    	super(p_message);
     }
 }
 

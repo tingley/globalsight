@@ -5,7 +5,6 @@
   <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
   <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
   <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
   <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
   <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
@@ -19,7 +18,6 @@
   <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
   <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
   <topic name="Import Main Screen" url="Data_Sources/Import/Import_Main_Screen.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
   <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
   <topic name="Localization Profile" url="Glossary/Localization_Profile.htm" />
@@ -60,7 +58,6 @@
 <key name="Main Editor" >
   <topic name="Account Options" url="Account_Options.htm" />
   <topic name="Extracted File" url="Glossary/Extracted_File.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
   <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
   <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />

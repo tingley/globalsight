@@ -410,8 +410,7 @@ public class InstallAmbassador extends InstallerFrame implements
                     installValue, getNumberOfScreens());
 
             if (controlKey.endsWith("install_key")
-                    || controlKey.endsWith("_adapters")
-                    || controlKey.equals("teamsite"))
+                    || controlKey.endsWith("_adapters"))
             {
                 parameter.setValidationMode(InputField.DONT_VALIDATE);
                 parameter.setDefaultValue("0");

@@ -240,11 +240,11 @@ public class GlobalSightLocale
      */
     public boolean equals(Object p_locale)
     {
-	if (p_locale instanceof GlobalSightLocale)
-        {
-	    return (getId() == ((GlobalSightLocale)p_locale).getId());
-	}
-	return false;
+		if (p_locale instanceof GlobalSightLocale)
+		{
+			return (getId() == ((GlobalSightLocale) p_locale).getId());
+		}
+		return false;
     }
 
     /**

@@ -909,7 +909,7 @@ function openInContextReview(url, e)
         {
            url = "<%=incontextreviewUrl%>" + url;
         }
-		 url += "&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>"));
+		 url += "&isContextReview=true&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>"));
          w_editor = window.open(url, 'MainEditor',
           'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
           ',width=' + (screen.availWidth - 20));

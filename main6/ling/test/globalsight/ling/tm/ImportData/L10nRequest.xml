@@ -2,7 +2,7 @@
 <!DOCTYPE l10nRequestXml [
 <!--  l10nRequestXml.dtd describes request to localize data to CAP. -->
 <!ELEMENT l10nRequestXml (externalPageId, originalCharacterEncoding, l10nProfileId, baseHref, batchInfo) >
-<!-- dataSourceType is like FileSystem, Database, Teamsite, Vignette, etc. -->
+<!-- dataSourceType is like FileSystem, Database, Vignette, etc. -->
 <!-- dataSourceId is the ID of the file profile, database source profile, etc.  -->
 <!ATTLIST l10nRequestXml dataSourceType CDATA #REQUIRED 
 	dataSourceId CDATA #REQUIRED>
@@ -15,7 +15,7 @@
 <!ELEMENT originalCharacterEncoding (#PCDATA)>
 <!--  l10nProfile identifier as a database sequence number . -->
 <!ELEMENT l10nProfileId (#PCDATA)>
-<!-- The base href to view the page properly.  Optional, only needed for CMS (ie. TeamSite) -->
+<!-- The base href to view the page properly.  Optional, only needed for CMS. -->
 <!ELEMENT baseHref (#PCDATA)>
 <!--  This page is part of a batch that should be retained into the same job. -->
 <!ELEMENT batchInfo (batchId, pageCount, pageNumber, jobPrefixName)>

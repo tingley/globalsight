@@ -63,11 +63,6 @@
   <item name="Placeholder Tags (Additional Information)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Additional_Information).htm" />
   <item name="Placeholder Tags (Errors)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Errors).htm" />
 </book>
-<book name="TeamSite" >
-  <item name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
-  <item name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
-  <item name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-</book>
 <book name="Working Offline" >
   <book name="RTF (Paragraph Mode)" >
     <item name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />

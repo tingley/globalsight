@@ -5,8 +5,6 @@
   <topic name="Customizing Segmentation Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Segmentation_Rules.htm" />
   <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
   <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
-  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
   <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
   <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
   <topic name="New Field" url="Setup/Terminology/New_Field.htm" />
@@ -35,7 +33,6 @@
   <topic name="Create Aligner Package" url="Data_Sources/Corpus_Aligner/Create_Aligner_Package.htm" />
   <topic name="Create Locale Pair" url="Setup/Locale_Pairs/Create_Locale_Pair.htm" />
   <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
-  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
   <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
   <topic name="Deletable Content" url="Glossary/Deletable_Content.htm" />
   <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
@@ -46,7 +43,6 @@
   <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
   <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
   <topic name="Generic Snippet" url="Glossary/Generic_Snippet.htm" />
-  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="GS Tag" url="Glossary/GS_Tag.htm" />
   <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
   <topic name="How does GlobalSight Word Count work" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_Word_Count_work.htm" />
@@ -84,7 +80,6 @@
   <topic name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
   <topic name="Specific Snippet" url="Glossary/Specific_Snippet.htm" />
   <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
-  <topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
   <topic name="TM Report" url="Reports/TM_Report.htm" />
   <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
   <topic name="Translation Unit Variant" url="Glossary/Translation_Unit_Variant.htm" />

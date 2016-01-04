@@ -17,12 +17,6 @@
   <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
   <topic name="Select Snippet" url="My_Activities/Select_Snippet.htm" />
 </key>
-<key name="Select TeamSite Source Branch" >
-  <topic name="New TeamSite Branch Definition" url="Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm" />
-</key>
-<key name="Select TeamSite Target Branch" >
-  <topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
-</key>
 <key name="Set Import Options" >
   <topic name="Set Import Options (Import p.2)" url="Setup/Translation_Memory/Set_Import_Options_(Import_p.2).htm" />
   <topic name="Set Import Options (Import p.3)" url="Setup/Terminology/Set_Import_Options_(Import_p.3).htm" />
@@ -33,7 +27,6 @@
   <topic name="Overview_PM" url="Overview_PM.htm" />
   <topic name="Overview_WM" url="Overview_WM.htm" />
   <topic name="Setup Menus" url="Setup/Setup.htm" />
-  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
 </key>
 <key name="Setup Guides" >
   <topic name="Overview" url="Overview.htm" />
@@ -119,9 +112,6 @@
 </key>
 <key name="Startup" >
   <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
-</key>
-<key name="Store Selection" >
-  <topic name="TeamSite Server and Store Selection" url="Data_Sources/TeamSite_Branches/TeamSite_Server_and_Store_Selection.htm" />
 </key>
 <key name="Submit Content" >
   <topic name="User Account Information" url="Setup/Users/User_Information.htm" />

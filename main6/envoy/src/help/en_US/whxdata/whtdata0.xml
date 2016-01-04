@@ -48,17 +48,6 @@
     <item name="Select Files To Upload" url="Customer_Upload/Select_Files_to_Upload.htm" />
     <item name="Upload Summary" url="Customer_Upload/Upload_Summary.htm" />
   </book>
-  <book name="TeamSite Server Configuration" >
-    <item name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
-    <item name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
-    <item name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
-  </book>
-  <book name="TeamSite Profiles" >
-    <item name="TeamSite Profiles Main Screen" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
-    <item name="TeamSite Server and Store Selection" url="Data_Sources/TeamSite_Branches/TeamSite_Server_and_Store_Selection.htm" />
-    <item name="TeamSite Source Branch" url="Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm" />
-    <item name="TeamSite Target Branch" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
-  </book>
   <book name="Database Connections" >
     <item name="Database Connections Main Screen" url="Data_Sources/Database_Connections/DB_Connections_Main_Screen.htm" />
     <item name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />

@@ -264,7 +264,8 @@ public class BasicWorkflowTemplateHandler extends PageHandler implements
      * @param localePairs
      * @exception EnvoyServletException
      */
-    public void setLeverageLocales(HttpServletRequest p_request,
+	@SuppressWarnings("unchecked")
+	public void setLeverageLocales(HttpServletRequest p_request,
             List localePairs) throws EnvoyServletException
     {
         HttpSession p_session = p_request.getSession(false);
@@ -277,56 +278,60 @@ public class BasicWorkflowTemplateHandler extends PageHandler implements
                 .getAttribute(WebAppConstants.UILOCALE);
         Hashtable supportedLocale = getSupportedLocales(uiLocale);
 
-        Vector targetLeverageLocalesDisplays = new Vector();
-        Vector targetLeverageLocalesObjects = new Vector();
-        Vector supportedLocales = (Vector) supportedLocale.get("object");
-        Vector displayNames = (Vector) supportedLocale.get("display");
+        Vector<String> targetLeverageLocalesDisplays = new Vector<String>();
+        Vector<GlobalSightLocale> targetLeverageLocalesObjects = new Vector<GlobalSightLocale>();
+        Vector<GlobalSightLocale> supportedLocales = (Vector<GlobalSightLocale>) supportedLocale.get("object");
+        Vector<String> displayNames = (Vector<String>) supportedLocale.get("display");
+        GlobalSightLocale gsl = null;
+        String displayName = null;
         for (int i = 0; i < localePairs.size(); i++)
         {
             LocalePair lp = (LocalePair) localePairs.get(i);
             GlobalSightLocale trgLocale = (GlobalSightLocale) lp.getTarget();
             newTargetLangCode = trgLocale.getLanguageCode();
 
-            int numsupportedLocales = supportedLocales.size();
-
             // add matching cross-locales based on lang code
-            for (int j = 0; j < numsupportedLocales; j++)
+            for (int j = 0; j < supportedLocales.size(); j++)
             {
-                String lang = ((GlobalSightLocale) supportedLocales
-                        .elementAt(j)).getLanguageCode();
-                if (newTargetLangCode.equals("no")){
-                	if (newTargetLangCode.equals(lang)||lang.equals("nb")){
-                		 targetLeverageLocalesObjects.addElement(supportedLocales
-                                 .elementAt(j));
-                         targetLeverageLocalesDisplays
-                                 .addElement((String) displayNames.elementAt(j));
-                	}
-                }
+            	gsl = supportedLocales.elementAt(j);
+            	displayName = displayNames.elementAt(j);
+                String lang = gsl.getLanguageCode();
+
+				if (newTargetLangCode.equals("no") || newTargetLangCode.equals("nb"))
+				{
+					if (!validLeverageLocale(trgLocale, gsl)
+							|| (targetLeverageLocalesObjects.contains(gsl)))
+                    {
+                        continue;
+                    }
+
+					if (lang.equals("no") || lang.equals("nb"))
+					{
+						targetLeverageLocalesObjects.addElement(gsl);
+						targetLeverageLocalesDisplays.addElement(displayName);
+					}
+				}
                 else
                 {
 	                if (newTargetLangCode.equals(lang))
 	                {
 	                    // check special exclusionary cases
-	                    if (!validLeverageLocale(trgLocale,
-	                            (GlobalSightLocale) supportedLocales.elementAt(j))
-	                            || (targetLeverageLocalesObjects
-	                                    .contains(supportedLocales.elementAt(j))))
+						if (!validLeverageLocale(trgLocale, gsl)
+								|| (targetLeverageLocalesObjects.contains(gsl)))
 	                    {
 	                        continue;
 	                    }
 	
-	                    targetLeverageLocalesObjects.addElement(supportedLocales
-	                            .elementAt(j));
-	                    targetLeverageLocalesDisplays
-	                            .addElement((String) displayNames.elementAt(j));
+	                    targetLeverageLocalesObjects.addElement(gsl);
+						targetLeverageLocalesDisplays.addElement(displayName);
 	                }
                }
             }
         }
-        sessionMgr.setAttribute(LEVERAGE_OBJ,
-                (Vector) targetLeverageLocalesObjects);
-        sessionMgr.setAttribute(LEVERAGE_DISP,
-                (Vector) targetLeverageLocalesDisplays);
+		sessionMgr.setAttribute(LEVERAGE_OBJ,
+				(Vector<GlobalSightLocale>) targetLeverageLocalesObjects);
+		sessionMgr.setAttribute(LEVERAGE_DISP,
+				(Vector<String>) targetLeverageLocalesDisplays);
     }
 
     /**

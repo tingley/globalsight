@@ -1373,7 +1373,24 @@ public class Ambassador extends AbstractWebService
                 {
                     fileProfileIds = (Vector<String>) fpIdsObj;
                 }
-
+                ArrayList<String> list = new ArrayList();
+				for (String s : fileProfileIds)
+                {
+					FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
+							Long.parseLong(s), true);
+					if (fp == null)
+                	{
+                		list.add(s);
+                	}
+                }
+				if (list.size() > 0)
+                {
+					String invalidFpIds = AmbassadorUtil.listToString(list);
+					String errXml = makeErrorXml("createJob(HashMap args)",
+							"Below file profiles do not exist or have been inactive: "
+									+ invalidFpIds);
+                	throw new WebServiceException(errXml);
+                }
                 if (fileProfileIds != null && fileProfileIds.size() > 0)
                 {
                     String fpId = (String) fileProfileIds.get(0);
@@ -1453,7 +1470,15 @@ public class Ambassador extends AbstractWebService
         {
             // Read parameters.
             String jobId = (String) args.get("jobId");
+            Assert.assertIsInteger(jobId);
             job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
+			if (job == null)
+            {
+				String msg = "current jobId : " + jobId + " does not exist.";
+            	throw new WebServiceException(makeErrorXml(
+                         "createJobOnInitial", msg));
+            }
+
             String jobName = job.getJobName();
             String recreateFlag = (String) args.get("recreate");
             if (!"true".equalsIgnoreCase(recreateFlag))
@@ -1496,6 +1521,24 @@ public class Ambassador extends AbstractWebService
             else
             {
                 fileProfileIds = (Vector<String>) fpIdsObj;
+            }
+            ArrayList<String> list = new ArrayList<String>();
+			for (String s : fileProfileIds)
+            {
+				FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
+						Long.parseLong(s), true);
+				if (fp == null)
+            	{
+            		list.add(s);
+            	}
+            }
+			if (list.size() > 0)
+            {
+				String invalidFpIds = AmbassadorUtil.listToString(list);
+				String errXml = makeErrorXml("createJobOnInitial",
+						"Below file profiles do not exist or have been inactive: "
+								+ invalidFpIds);
+            	throw new WebServiceException(errXml);
             }
             // targetLocales
             Vector<String> targetLocales = new Vector<String>();
@@ -11044,20 +11087,20 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-     *Delete tu by tu id.
-     *
-     * @param accessToken
-     *            To judge caller has logon or not, can not be null. you can get
-     *            it by calling method <code>login(username, password)</code>.
-     * @param tmName
-     *            TM name, will used to get tm id,can not empty.
-     *  @param companyName
-     *            company name, will used to get tm id,can not empty.
-     *  @param tuId
-     *  		   tu id, will used to delete tu, can not empty, can be one or more.
-     *  @return  String
-     *  @throws WebServiceException
-     */
+	 * Delete tu by tu id.
+	 *
+	 * @param accessToken
+	 *            To judge caller has logon or not, can not be null. you can get
+	 *            it by calling method <code>login(username, password)</code>.
+	 * @param tmName
+	 *            TM name, be used to get tm id, can not be empty.
+	 * @param companyName
+	 *            company name, be used to get tm id, can not be empty.
+	 * @param tuId
+	 *            tu ids to remove, can not be empty, i.e "12,14,15".
+	 * @return String
+	 * @throws WebServiceException
+	 */
 	public String deleteTuByTuIds(String accessToken, String tmName,
 			String companyName, String tuIds) throws WebServiceException
 	{
@@ -11104,80 +11147,70 @@ public class Ambassador extends AbstractWebService
 			if (ptm.getTm3Id() == null)
 			{
 				return makeErrorXml(DELETE_TU_BY_TUID,
-						"DeleteTuByTuIds method does not support delete tm2 tu.");
+						"DeleteTuByTuIds method does not support tm2 tu deletion.");
 			}
-			else
+
+			if (StringUtil.isEmpty(tuIds))
 			{
-				if (StringUtil.isEmpty(tuIds))
+				return makeErrorXml(DELETE_TU_BY_TUID,
+						"Tu ids can not be empty.");
+			}
+
+			String[] tuIdArr = tuIds.split(",");
+			List<Long> tuIdList = new ArrayList<Long>();
+			for (String tuId : tuIdArr)
+			{
+				if (StringUtil.isEmpty(tuId))
 				{
 					return makeErrorXml(DELETE_TU_BY_TUID,
-							"Tu id can not empty.");
+							"Invaild tu id(s): " + tuIds);
 				}
-
-				String[] tuIdArr = tuIds.split(",");
-				List<Long> tuIdList = new ArrayList<Long>();
-				for (String tuId : tuIdArr)
+				try
 				{
-					if (StringUtil.isEmpty(tuId))
-					{
-						return makeErrorXml(DELETE_TU_BY_TUID,
-								"Invaild tu id(s): " + tuIds);
-					}
-					try
-					{
-						Assert.assertIsInteger(tuId);
-						tuIdList.add(Long.parseLong(tuId));
-					}
-					catch (Exception e)
-					{
-						return makeErrorXml(DELETE_TU_BY_TUID,
-								"Invaild tu id(s): " + tuIds);
-					}
+					Assert.assertIsInteger(tuId);
+					tuIdList.add(Long.parseLong(tuId));
 				}
-
-				Tm tm = ServerProxy.getProjectHandler().getProjectTMById(
-						ptm.getId(), true);
-				TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(tm
-						.getTm3Id());
-				List<TM3Tu<GSTuvData>> tus = tm3tm.getTu(tuIdList);
-				Iterator<TM3Tu<GSTuvData>> tuIt = tus.iterator();
-				List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
-				while (tuIt.hasNext())
+				catch (Exception e)
 				{
-					TM3Tu<GSTuvData> tm3tu = tuIt.next();
-
-					if (tm3tu.getTm().getId().equals(tm.getTm3Id()))
-					{
-						TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
-						TM3Attribute formatAttr = TM3Util
-								.getAttr(tm3tm, FORMAT);
-						TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
-						TM3Attribute translatableAttr = TM3Util.getAttr(tm3tm,
-								TRANSLATABLE);
-						TM3Attribute fromWsAttr = TM3Util.getAttr(tm3tm,
-								FROM_WORLDSERVER);
-						TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
-								UPDATED_BY_PROJECT);
-
-						SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu,
-								tm.getId(), formatAttr, typeAttr, sidAttr,
-								fromWsAttr, translatableAttr, projectAttr);
-						resultList.add(segmentTmTu);
-					}
-					else
-					{
-						return makeErrorXml(DELETE_TU_BY_TUID, "Tu id ("
-								+ tm3tu.getId()
-								+ ") does not belong in the current tm.");
-					}
-				}
-				if (resultList.size() > 0)
-				{
-					TmCoreManager manager = LingServerProxy.getTmCoreManager();
-					manager.deleteSegmentTmTus(tm, resultList, false);
+					return makeErrorXml(DELETE_TU_BY_TUID,
+							"Invaild tu id(s): " + tuIds);
 				}
 			}
-			return tuIds + " have been successfully removed.";
+
+			Tm tm = ServerProxy.getProjectHandler().getProjectTMById(
+					ptm.getId(), true);
+			TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(tm
+					.getTm3Id());
+			List<TM3Tu<GSTuvData>> tus = tm3tm.getTu(tuIdList);
+			List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
+			TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
+			TM3Attribute formatAttr = TM3Util.getAttr(tm3tm, FORMAT);
+			TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
+			TM3Attribute translatableAttr = TM3Util.getAttr(tm3tm, TRANSLATABLE);
+			TM3Attribute fromWsAttr = TM3Util.getAttr(tm3tm, FROM_WORLDSERVER);
+			TM3Attribute projectAttr = TM3Util.getAttr(tm3tm, UPDATED_BY_PROJECT);
+			for (TM3Tu<GSTuvData> tm3tu : tus)
+			{
+				if (tm3tu.getTm().getId().equals(tm.getTm3Id()))
+				{
+					SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu,
+							tm.getId(), formatAttr, typeAttr, sidAttr,
+							fromWsAttr, translatableAttr, projectAttr);
+					resultList.add(segmentTmTu);
+				}
+				else
+				{
+					return makeErrorXml(DELETE_TU_BY_TUID, "Tu id ("
+							+ tm3tu.getId()
+							+ ") does not belong to current tm.");
+				}
+			}
+			if (resultList.size() > 0)
+			{
+				TmCoreManager manager = LingServerProxy.getTmCoreManager();
+				manager.deleteSegmentTmTus(tm, resultList, false);
+			}
+			return tuIds + " have been removed successfully.";
 		}
 		catch (Exception e)
 		{

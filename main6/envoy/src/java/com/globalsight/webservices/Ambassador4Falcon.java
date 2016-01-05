@@ -2408,9 +2408,10 @@ public class Ambassador4Falcon extends JsonTypeWebService
                         jsonObj.put("Participants", participantUserIds);
                     }
 
-                    String allAvailableAssignees = listToString(getAllAvailableAssigneeIds(
-                            wfTask.getActivityName(), srcLocale, trgLocale,
-                            projectUserIds));
+					String allAvailableAssignees = AmbassadorUtil
+							.listToString(getAllAvailableAssigneeIds(
+									wfTask.getActivityName(), srcLocale,
+									trgLocale, projectUserIds));
                     jsonObj.put("AvailableAssignees", allAvailableAssignees);
 
                     StringBuffer inArrows = new StringBuffer();
@@ -2804,7 +2805,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
             userNameList.add((String) userName);
         }
 
-        return listToString(userNameList);
+        return AmbassadorUtil.listToString(userNameList);
     }
 
     /**
@@ -3371,28 +3372,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
         User user = ServerProxy.getUserManager().getUserByName(
                 getUsernameFromSession(p_accessToken));
         return new Locale(user.getDefaultUILocale());
-    }
-
-    /**
-     * Change list to string comma separated.
-     * 
-     * @return String like "string1,string2,string3".
-     */
-    private static String listToString(Collection<String> objects)
-    {
-        StringBuilder buffer = new StringBuilder();
-        int counter = 0;
-        for (String str : objects)
-        {
-            if (counter > 0)
-            {
-                buffer.append(",");
-            }
-            counter++;
-            buffer.append(str);
-        }
-
-        return buffer.toString();
     }
 
     /**

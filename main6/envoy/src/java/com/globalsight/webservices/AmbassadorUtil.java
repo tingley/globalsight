@@ -18,6 +18,7 @@
 package com.globalsight.webservices;
 
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Random;
 
 import javax.crypto.Cipher;
@@ -195,5 +196,27 @@ public class AmbassadorUtil
             result[i] = (byte) (high * 16 + low);
         }
         return result;
+    }
+
+    /**
+     * Change list to string comma separated.
+     * 
+     * @return String like "string1,string2,string3".
+     */
+    public static String listToString(Collection<String> objects)
+    {
+        StringBuilder buffer = new StringBuilder();
+        int counter = 0;
+        for (String str : objects)
+        {
+            if (counter > 0)
+            {
+                buffer.append(",");
+            }
+            counter++;
+            buffer.append(str);
+        }
+
+        return buffer.toString();
     }
 }

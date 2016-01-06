@@ -96,14 +96,13 @@ public class Leverager
         Connection conn = null;
         try
         {
-            conn = DbUtil.getConnection();
-            GlobalSightLocale sourceLocale = p_sourcePage
-                    .getGlobalSightLocale();
-
+//            conn = DbUtil.getConnection();
             LeverageOptions leverageOptions = p_leverageDataCenter
                     .getLeverageOptions();
 
             LeverageMatchResults levMatchResult;
+
+            /**
             // Leverage from Page TM if the user didn't choose latest
             // leveraging for re-import
             if (!leverageOptions.isLatestLeveragingForReimport())
@@ -122,7 +121,8 @@ public class Leverager
             else
             {
                 PageTmPersistence ptPersistence = new PageTmPersistence(conn);
-
+				GlobalSightLocale sourceLocale = p_sourcePage
+						.getGlobalSightLocale();
                 long tmId = ptPersistence.getPageTmId(
                         p_sourcePage.getExternalPageId(), sourceLocale);
 
@@ -130,7 +130,8 @@ public class Leverager
                 // if a page tm for the page exists, latest re-import is true
                 leverageOptions.setLatestReimport(tmId != 0);
             }
-            
+			**/
+
             long jobId = p_sourcePage.getJobId();
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
 

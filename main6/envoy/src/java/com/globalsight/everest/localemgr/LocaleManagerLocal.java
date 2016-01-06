@@ -454,7 +454,7 @@ public class LocaleManagerLocal implements LocaleManager
     {
         Session session = null;
         Transaction transaction = null;
-
+        if (p_source==null||p_target==null) return;
         try
         {
             session = HibernateUtil.getSession();

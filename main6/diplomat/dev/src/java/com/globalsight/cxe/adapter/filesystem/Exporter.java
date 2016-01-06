@@ -664,10 +664,17 @@ public class Exporter
     		{
     			String file = fs.getFile();
     			File f = new File(docDir, file);
-    			if (f != null && f.exists())
+    			// If it has script on import/export...
+    			String prefix = "PreProcessed_" + wf.getJob().getId() + "_";
+				if (f != null && f.getParentFile().getName().startsWith(prefix))
     			{
-        			trgFiles.add(f);
-    			}
+                	f = new File(f.getParentFile().getParentFile(), f.getName());
+                }
+
+				if (f != null && f.exists())
+                {
+                	trgFiles.add(f);
+                }
     		}
     	}
 

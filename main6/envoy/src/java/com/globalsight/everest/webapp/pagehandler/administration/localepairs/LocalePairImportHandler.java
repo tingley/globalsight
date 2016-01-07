@@ -460,8 +460,6 @@ public class LocalePairImportHandler extends PageHandler implements
 					else
 					{
 						localeMangerLocal.addLocale(locale);
-						long newId = getLocaleId(locale);
-						locale.setId(newId);
 						localeMap.put(String.valueOf(oldId), locale);
 					}
 				}

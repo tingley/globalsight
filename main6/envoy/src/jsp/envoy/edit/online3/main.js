@@ -446,6 +446,11 @@ function renderHtml(sourceData, originalTargetData, targetData, approveData){
 	
 	//Original
 	htmlcontent=getNodeByClass2(originalTargetData, "");
+	if(htmlcontent.html() != "-")
+	{
+		var otd = document.getElementById("previous_translation");
+		otd.style.width = "30%";
+	}
 	if(originalTargetData.subArray){
 		temp.children('td').eq(2).html("<table width='100%' cellspacing='0' cellpadding='2'>"+htmlcontent.html()+"</table>");
 	}else{

@@ -238,11 +238,14 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.segmenttm.TMidTUid;
 import com.globalsight.ling.tm3.core.BaseTm;
 import com.globalsight.ling.tm3.core.TM3Attribute;
+import com.globalsight.ling.tm3.core.TM3Tm;
 import com.globalsight.ling.tm3.core.TM3Tu;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.ling.tm3.integration.GSDataFactory;
+import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
+import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.Hitlist;
@@ -363,6 +366,7 @@ public class Ambassador extends AbstractWebService
 
     public static final String EXPORT_TM = "exportTM";
 
+    public static final String DELETE_TU_BY_TUID = "deleteTuByTuIds";
     public static final String TM_FULL_TEXT_SEARCH = "tmFullTextSearch";
 
     public static final String TM_EXPORT_STATUS = "getTmExportStatus";
@@ -387,7 +391,6 @@ public class Ambassador extends AbstractWebService
     public static final String GENERATE_DITA_QA_REPORT = "generateDITAQAReport";
     public static final String GENERATE_QA_CHECKS_REPORT = "generateQAChecksReport";
     public static final String GENERATE_QA_CHECKS_REPORTS = "generateQAChecksReports";
-
     public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
 
     public static final String GET_TRANSLATION_PERCENTAGE = "getTranslationPercentage";
@@ -1370,7 +1373,24 @@ public class Ambassador extends AbstractWebService
                 {
                     fileProfileIds = (Vector<String>) fpIdsObj;
                 }
-
+                ArrayList<String> list = new ArrayList();
+				for (String s : fileProfileIds)
+                {
+					FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
+							Long.parseLong(s), true);
+					if (fp == null)
+                	{
+                		list.add(s);
+                	}
+                }
+				if (list.size() > 0)
+                {
+					String invalidFpIds = AmbassadorUtil.listToString(list);
+					String errXml = makeErrorXml("createJob(HashMap args)",
+							"Below file profiles do not exist or have been inactive: "
+									+ invalidFpIds);
+                	throw new WebServiceException(errXml);
+                }
                 if (fileProfileIds != null && fileProfileIds.size() > 0)
                 {
                     String fpId = (String) fileProfileIds.get(0);
@@ -1450,7 +1470,15 @@ public class Ambassador extends AbstractWebService
         {
             // Read parameters.
             String jobId = (String) args.get("jobId");
+            Assert.assertIsInteger(jobId);
             job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
+			if (job == null)
+            {
+				String msg = "current jobId : " + jobId + " does not exist.";
+            	throw new WebServiceException(makeErrorXml(
+                         "createJobOnInitial", msg));
+            }
+
             String jobName = job.getJobName();
             String recreateFlag = (String) args.get("recreate");
             if (!"true".equalsIgnoreCase(recreateFlag))
@@ -1493,6 +1521,24 @@ public class Ambassador extends AbstractWebService
             else
             {
                 fileProfileIds = (Vector<String>) fpIdsObj;
+            }
+            ArrayList<String> list = new ArrayList<String>();
+			for (String s : fileProfileIds)
+            {
+				FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
+						Long.parseLong(s), true);
+				if (fp == null)
+            	{
+            		list.add(s);
+            	}
+            }
+			if (list.size() > 0)
+            {
+				String invalidFpIds = AmbassadorUtil.listToString(list);
+				String errXml = makeErrorXml("createJobOnInitial",
+						"Below file profiles do not exist or have been inactive: "
+								+ invalidFpIds);
+            	throw new WebServiceException(errXml);
             }
             // targetLocales
             Vector<String> targetLocales = new Vector<String>();
@@ -11040,6 +11086,138 @@ public class Ambassador extends AbstractWebService
         }
     }
 
+    /**
+	 * Delete tu by tu id.
+	 *
+	 * @param accessToken
+	 *            To judge caller has logon or not, can not be null. you can get
+	 *            it by calling method <code>login(username, password)</code>.
+	 * @param tmName
+	 *            TM name, be used to get tm id, can not be empty.
+	 * @param companyName
+	 *            company name, be used to get tm id, can not be empty.
+	 * @param tuId
+	 *            tu ids to remove, can not be empty, i.e "12,14,15".
+	 * @return String
+	 * @throws WebServiceException
+	 */
+	public String deleteTuByTuIds(String accessToken, String tmName,
+			String companyName, String tuIds) throws WebServiceException
+	{
+		try
+		{
+			Assert.assertNotEmpty(accessToken, "access token");
+			Assert.assertNotEmpty(tmName, "tm name");
+			Assert.assertNotEmpty(companyName, "company name");
+		}
+		catch (Exception e)
+		{
+			return makeErrorXml(DELETE_TU_BY_TUID, e.getMessage());
+		}
+
+		checkAccess(accessToken, DELETE_TU_BY_TUID);
+		checkPermission(accessToken, Permission.TM_DELETE);
+
+		WebServicesLog.Start activityStart = null;
+		try
+		{
+			String loggedUserName = this.getUsernameFromSession(accessToken);
+			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+			activityArgs.put("loggedUserName", loggedUserName);
+			activityArgs.put("tmName", tmName);
+			activityArgs.put("companyName", companyName);
+			activityStart = WebServicesLog.start(Ambassador.class,
+					DELETE_TU_BY_TUID, activityArgs);
+
+			Company company = getCompanyByName(companyName);
+			if (company == null)
+			{
+				return makeErrorXml(DELETE_TU_BY_TUID,
+						"Can not find the company with name (" + companyName
+								+ ")");
+			}
+			ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
+			if (ptm == null)
+			{
+				return makeErrorXml(DELETE_TU_BY_TUID,
+						"Can not find the tm with tm name (" + tmName
+								+ ") and company name (" + companyName + ")");
+			}
+
+			if (ptm.getTm3Id() == null)
+			{
+				return makeErrorXml(DELETE_TU_BY_TUID,
+						"DeleteTuByTuIds method does not support tm2 tu deletion.");
+			}
+
+			if (StringUtil.isEmpty(tuIds))
+			{
+				return makeErrorXml(DELETE_TU_BY_TUID,
+						"Tu ids can not be empty.");
+			}
+
+			String[] tuIdArr = tuIds.split(",");
+			List<Long> tuIdList = new ArrayList<Long>();
+			for (String tuId : tuIdArr)
+			{
+				if (StringUtil.isEmpty(tuId))
+				{
+					return makeErrorXml(DELETE_TU_BY_TUID,
+							"Invaild tu id(s): " + tuIds);
+				}
+				try
+				{
+					Assert.assertIsInteger(tuId);
+					tuIdList.add(Long.parseLong(tuId));
+				}
+				catch (Exception e)
+				{
+					return makeErrorXml(DELETE_TU_BY_TUID,
+							"Invaild tu id(s): " + tuIds);
+				}
+			}
+
+			Tm tm = ServerProxy.getProjectHandler().getProjectTMById(
+					ptm.getId(), true);
+			TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(tm
+					.getTm3Id());
+			List<TM3Tu<GSTuvData>> tus = tm3tm.getTu(tuIdList);
+			List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
+			TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
+			TM3Attribute formatAttr = TM3Util.getAttr(tm3tm, FORMAT);
+			TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
+			TM3Attribute translatableAttr = TM3Util.getAttr(tm3tm, TRANSLATABLE);
+			TM3Attribute fromWsAttr = TM3Util.getAttr(tm3tm, FROM_WORLDSERVER);
+			TM3Attribute projectAttr = TM3Util.getAttr(tm3tm, UPDATED_BY_PROJECT);
+			for (TM3Tu<GSTuvData> tm3tu : tus)
+			{
+				if (tm3tu.getTm().getId().equals(tm.getTm3Id()))
+				{
+					SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu,
+							tm.getId(), formatAttr, typeAttr, sidAttr,
+							fromWsAttr, translatableAttr, projectAttr);
+					resultList.add(segmentTmTu);
+				}
+				else
+				{
+					return makeErrorXml(DELETE_TU_BY_TUID, "Tu id ("
+							+ tm3tu.getId()
+							+ ") does not belong to current tm.");
+				}
+			}
+			if (resultList.size() > 0)
+			{
+				TmCoreManager manager = LingServerProxy.getTmCoreManager();
+				manager.deleteSegmentTmTus(tm, resultList, false);
+			}
+			return tuIds + " have been removed successfully.";
+		}
+		catch (Exception e)
+		{
+			return makeErrorXml(DELETE_TU_BY_TUID, e.getMessage());
+		}
+	}
+	
     /**
      * Search tus according to the specified tu.
      * 

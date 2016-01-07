@@ -109,7 +109,7 @@ public class LocaleManagerLocal implements LocaleManager
             }
             else
             {
-                locale = p_locale;
+                locale =new GlobalSightLocale(p_locale.getLanguage(),p_locale.getCountry(),false);
             }
 
             session.saveOrUpdate(locale);

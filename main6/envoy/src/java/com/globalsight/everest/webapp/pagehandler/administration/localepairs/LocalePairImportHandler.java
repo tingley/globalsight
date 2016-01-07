@@ -569,8 +569,7 @@ public class LocalePairImportHandler extends PageHandler implements
 					key = valueField;
 					localePair.setId(Long.parseLong(valueField));
 				}
-				else
-					if (keyField.equalsIgnoreCase("SOURCE_LOCALE_ID"))
+				else if (keyField.equalsIgnoreCase("SOURCE_LOCALE_ID"))
 				{
 					value.append(valueField).append(".source").append("|");
 				}

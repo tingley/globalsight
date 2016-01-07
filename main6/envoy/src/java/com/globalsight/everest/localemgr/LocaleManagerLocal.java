@@ -454,18 +454,19 @@ public class LocaleManagerLocal implements LocaleManager
     {
         Session session = null;
         Transaction transaction = null;
-        if (p_source==null||p_target==null) return;
         try
         {
+        	GlobalSightLocale source = getDataLocal(p_source);
+        	GlobalSightLocale target = getDataLocal(p_target);
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
             String hql = "from LocalePair l where l.source.id = :sId "
                     + "and l.target.id = :tId and l.companyId = :cId";
-            Map map = new HashMap();
-            map.put("sId", p_source.getIdAsLong());
-            map.put("tId", p_target.getIdAsLong());
+            Map<String,Long> map = new HashMap<String,Long>();
+            map.put("sId", source.getIdAsLong());
+            map.put("tId", target.getIdAsLong());
             map.put("cId", companyId);
-            List result = HibernateUtil.search(hql, map);
+            List<?> result = HibernateUtil.search(hql, map);
             LocalePair lp;
             if (result != null && result.size() > 0)
             {
@@ -474,7 +475,7 @@ public class LocaleManagerLocal implements LocaleManager
             }
             else
             {
-                lp = new LocalePair(p_source, p_target, companyId);
+                lp = new LocalePair(source, target, companyId);
             }
 
             session.saveOrUpdate(lp);
@@ -507,6 +508,26 @@ public class LocaleManagerLocal implements LocaleManager
         }
     }
 
+    /**
+     * select a GlobalSightLocale from database 
+     * 
+     * @param GlobalSightLocale
+     */
+    private GlobalSightLocale getDataLocal(GlobalSightLocale locale){
+    	GlobalSightLocale globalSightLocale = new GlobalSightLocale();
+    	String hql = "from GlobalSightLocale l "
+                + "where l.language = :language and l.country = :country";
+        HashMap<String,String> map = new HashMap<String,String>();
+        map.put("language", locale.getLanguage());
+        map.put("country", locale.getCountry());
+
+        List<?> result = HibernateUtil.search(hql, map);
+        if (result != null && result.size() > 0)
+        {
+        	globalSightLocale = (GlobalSightLocale) result.get(0);
+        }
+        return globalSightLocale;
+    }
     /**
      * Remove a source/target locales pair
      * <p>

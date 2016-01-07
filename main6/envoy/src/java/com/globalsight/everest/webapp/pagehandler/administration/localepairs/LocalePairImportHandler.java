@@ -455,15 +455,7 @@ public class LocalePairImportHandler extends PageHandler implements
 					long databaseId = getLocaleId(locale);
 					if (databaseId != 0)
 					{
-						if (databaseId == oldId)
-						{
-							localeMap.put(String.valueOf(oldId), locale);
-						}
-						else
-						{
-							locale.setId(databaseId);
-							localeMap.put(String.valueOf(oldId), locale);
-						}
+					    localeMap.put(String.valueOf(oldId), locale);
 					}
 					else
 					{
@@ -579,7 +571,8 @@ public class LocalePairImportHandler extends PageHandler implements
 					key = valueField;
 					localePair.setId(Long.parseLong(valueField));
 				}
-				else if (keyField.equalsIgnoreCase("SOURCE_LOCALE_ID"))
+				else
+					if (keyField.equalsIgnoreCase("SOURCE_LOCALE_ID"))
 				{
 					value.append(valueField).append(".source").append("|");
 				}
@@ -624,7 +617,11 @@ public class LocalePairImportHandler extends PageHandler implements
 			{
 				keyLocale = (String) itor.next();
 				valueLocale = valueMap.get(keyLocale);
-				if (keyLocale.equalsIgnoreCase("ISO_LANG_CODE"))
+				if (keyLocale.equalsIgnoreCase("ID"))
+				{
+					locale.setId(Long.parseLong(valueLocale));
+				}
+				else if (keyLocale.equalsIgnoreCase("ISO_LANG_CODE"))
 				{
 					locale.setLanguage(valueLocale);
 				}

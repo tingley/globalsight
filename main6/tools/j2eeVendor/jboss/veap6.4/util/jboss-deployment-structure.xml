@@ -2,6 +2,7 @@
 	<ear-subdeployments-isolated>false</ear-subdeployments-isolated>
 	<deployment>
 		<dependencies>
+		    <module name="org.apache.commons.beanutils" export="true" />
 			<module name="com.sun.xml.bind" export="true" />
 			<module name="javax.mail.api" export="true" />
 			<module name="javax.wsdl4j.api" export="true" />

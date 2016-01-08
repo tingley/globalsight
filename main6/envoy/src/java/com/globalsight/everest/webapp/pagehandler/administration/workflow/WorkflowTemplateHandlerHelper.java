@@ -844,7 +844,39 @@ public class WorkflowTemplateHandlerHelper
     }
 
     // get the data required for the activity dialog
-    static Hashtable getDataForDialog(ResourceBundle bundle, Locale p_locale,
+    public static Hashtable getWorkflowDetailData(ResourceBundle bundle, Locale p_locale,
+            GlobalSightLocale p_srcLocale, GlobalSightLocale p_targetLocale)
+            throws EnvoyServletException
+    {
+        boolean hasCosting = isCostingEnabled();
+        boolean hasRevenue = isRevenueEnabled();
+        boolean isCalendarInstalled = CalendarManagerLocal.isInstalled();
+        // Start Dialog data
+        Hashtable hashtable = new Hashtable();
+        hashtable.put(WorkflowTemplateConstants.JOB_COSTING_ENABLED,
+                new Boolean(hasCosting));
+        hashtable.put(WorkflowTemplateConstants.JOB_REVENUE_ENABLED,
+                new Boolean(hasRevenue));
+        hashtable.put("isCalendarInstalled", new Boolean(isCalendarInstalled));
+        hashtable.put(WorkflowTemplateConstants.ACTIVITIES,
+                getAllActivities(p_locale));
+        hashtable.put(WorkflowTemplateConstants.SYSTEM_ACTION,
+                systemActions(bundle));
+
+        if (hasCosting)
+        {
+            hashtable.put(WorkflowTemplateConstants.RATES,
+                    getRatesForLocale(p_srcLocale, p_targetLocale));
+        }
+
+        hashtable.put("templateSource", p_srcLocale);
+        hashtable.put("templateTarget", p_targetLocale);
+
+        return hashtable;
+    }
+    
+    // get the data required for the activity dialog
+    public static Hashtable getDataForDialog(ResourceBundle bundle, Locale p_locale,
             GlobalSightLocale p_srcLocale, GlobalSightLocale p_targetLocale)
             throws EnvoyServletException
     {

@@ -117,7 +117,7 @@ function findSelectedLocalePair()
 function buttonManagement()
 {
     var count = $("input[name='checkboxBtn']:checked").length;
-    if (count == 1)
+    if (count != 0)
     {
         $("#removeBtn").attr("disabled", false);
     }

@@ -287,24 +287,29 @@ public class LocalePairMainHandler extends PageHandler implements
 			HttpSession p_session) throws EnvoyServletException,
 			RemoteException
 	{
-		String id = (String) p_request.getParameter("id");
+		String ids = (String) p_request.getParameter("id");
 		try
 		{
+			String[] idsArr = ids.split(",");
 			LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
-			LocalePair pair = localeMgr.getLocalePairById(Long.parseLong(id));
-
-			// check dependencies first
-			String deps = checkDependencies(pair, p_session);
-			if (deps == null)
-			{
-				// removes the locale pair and all the roles associated with it
-				localeMgr.removeSourceTargetLocalePair(pair);
-			}
-			else
-			{
-				SessionManager sessionMgr = (SessionManager) p_session
-						.getAttribute(WebAppConstants.SESSION_MANAGER);
-				sessionMgr.setAttribute(DEPENDENCIES, deps);
+			LocalePair pair = null;
+			for(String id : idsArr)
+			{	
+				 pair = localeMgr.getLocalePairById(Long.parseLong(id));
+				
+				// check dependencies first
+				String deps = checkDependencies(pair, p_session);
+				if (deps == null)
+				{
+					// removes the locale pair and all the roles associated with it
+					localeMgr.removeSourceTargetLocalePair(pair);
+				}
+				else
+				{
+					SessionManager sessionMgr = (SessionManager) p_session
+							.getAttribute(WebAppConstants.SESSION_MANAGER);
+					sessionMgr.setAttribute(DEPENDENCIES, deps);
+				}
 			}
 
 		}

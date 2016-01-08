@@ -289,26 +289,35 @@ public class LocalePairMainHandler extends PageHandler implements
 	{
 		String ids = (String) p_request.getParameter("id");
 		try
-		{
-			String[] idsArr = ids.split(",");
-			LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
-			LocalePair pair = null;
-			for(String id : idsArr)
-			{	
-				 pair = localeMgr.getLocalePairById(Long.parseLong(id));
-				
-				// check dependencies first
-				String deps = checkDependencies(pair, p_session);
-				if (deps == null)
-				{
-					// removes the locale pair and all the roles associated with it
-					localeMgr.removeSourceTargetLocalePair(pair);
+		{   
+			if (ids != null && ids.length()>0)
+			{
+				String[] idsArr = ids.split(",");
+				LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
+				LocalePair pair = null;
+				String deps = null;
+				StringBuffer msg = new StringBuffer();
+				for(String id : idsArr)
+				{	
+					pair = localeMgr.getLocalePairById(Long.parseLong(id.trim()));
+					
+					// check dependencies first
+					deps = checkDependencies(pair, p_session);
+					if (deps == null)
+					{
+						// removes the locale pair and all the roles associated with it
+						localeMgr.removeSourceTargetLocalePair(pair);
+					}
+					else
+					{
+						msg.append(deps);	
+					}
 				}
-				else
+				if (msg.length()>0)
 				{
 					SessionManager sessionMgr = (SessionManager) p_session
 							.getAttribute(WebAppConstants.SESSION_MANAGER);
-					sessionMgr.setAttribute(DEPENDENCIES, deps);
+					sessionMgr.setAttribute(DEPENDENCIES, msg.toString());
 				}
 			}
 

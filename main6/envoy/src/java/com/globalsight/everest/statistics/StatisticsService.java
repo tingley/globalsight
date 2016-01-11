@@ -17,10 +17,6 @@
 
 package com.globalsight.everest.statistics;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,7 +49,6 @@ import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.util.comparator.TuvSourceContentComparator;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
@@ -64,7 +59,6 @@ import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -107,17 +101,6 @@ public class StatisticsService
                             sourcePage, needLoadExtraInfo);
                     ArrayList<BaseTmTuv> splittedTuvs = splitSourceTuvs(sTuvs,
                             sourcePage.getGlobalSightLocale(), jobId);
-                    String sourcePageId = sourcePage.getExternalPageId();
-                    boolean isDefaultContextMatch = false;
-                    // Only when "Leverage Default Matches" option is selected
-                    // in TM profile, it is necessary to judge if the page is
-                    // "DefaultContextMatch"(GBS-2214 by York since 2011-12-13)
-                    if (PageHandler.isDefaultContextMatch(p_workflow.getJob()))
-                    {
-                        isDefaultContextMatch = isDefaultContextMatch(
-                                sourcePageId, sourcePage);
-                    }
-                    targetPage.setIsDefaultContextMatch(isDefaultContextMatch);
                     Long targetLocaleId = targetPage.getLocaleId();
                     boolean isWSXlfSourceFile = ServerProxy.getTuvManager()
                             .isWorldServerXliffSourceFile(
@@ -1193,164 +1176,6 @@ public class StatisticsService
         }
 
         return result;
-    }
-
-    /**
-	 * @deprecated This will not be run since 8.6.5 has removed leveraging
-	 *             default matches from TM profile. To be deleted.
-	 */
-    private static boolean isDefaultContextMatch(String sourcePageId,
-            SourcePage page)
-    {
-        List<Long> list = new ArrayList<Long>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            String localeStr = sourcePageId.substring(0,
-                    sourcePageId.indexOf(File.separator));
-
-            String temp1 = sourcePageId.substring(localeStr.length()
-                    + File.separator.length());
-
-            String isWebservice = temp1.substring(0, temp1.indexOf(File.separator))
-                    + "";
-
-            if (isWebservice.indexOf("webservice") > -1)
-            {
-                temp1 = sourcePageId.substring(localeStr.length()
-                        + File.separator.length() + "webservice".length()
-                        + File.separator.length());
-            }
-
-            String temp2 = temp1.substring(temp1.indexOf(File.separator));
-            String queryStr = localeStr + "%" + temp2;
-
-            if (!File.separator.equals("/"))
-            {
-                queryStr = queryStr.replace("\\", "\\\\\\\\");
-            }
-            queryStr = queryStr.replace("'", "\\'");
-            String sql = "select id from source_page where external_page_id LIKE '"
-                    + queryStr + "' and state not in ('OUT_OF_DATE','IMPORT_FAIL')";
-            conn = DbUtil.getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next())
-            {
-                list.add(rs.getLong(1));
-            }
-            list = removeCurrent(list, page.getId());
-        }
-        catch (Exception e)
-        {
-            // ignore
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(conn);
-        }
-
-        for (int i = 0; i < list.size(); i++)
-        {
-            SourcePage sp = null;
-            // All TUs and TUVs of the other source page will be loaded by
-            // isSameOfSourcePage, bloating the Hibernate (first-level) cache.
-            // Load them in a new session so we can free them by closing the
-            // session after isSameOfSourcePage finishes.
-            Session newSession = HibernateUtil.getSessionFactory()
-                    .openSession();
-            try
-            {
-                sp = (SourcePage) newSession.get(SourcePage.class, list.get(i));
-                if (isSameOfSourcePage(page, sp))
-                {
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                c_logger.info("Can not get source page to compare" + e);
-            }
-            finally
-            {
-                newSession.close();
-            }
-        }
-        return false;
-    }
-
-    private static List<Long> removeCurrent(List<Long> list, long id)
-    {
-        if (list == null || list.size() == 0)
-        {
-            return new ArrayList<Long>();
-        }
-        for (Iterator<Long> it = list.iterator(); it.hasNext();)
-        {
-            long idInList = it.next();
-            if (id == idInList)
-            {
-                it.remove();
-            }
-        }
-        return list;
-    }
-
-    private static boolean isSameOfSourcePage(SourcePage source,
-            SourcePage target)
-    {
-        boolean flag = false;
-        if (source == null || target == null)
-        {
-            return flag;
-        }
-
-        ArrayList<BaseTmTuv> sourceTuvs = new ArrayList<BaseTmTuv>();
-        ArrayList<BaseTmTuv> targetTuvs = new ArrayList<BaseTmTuv>();
-        try
-        {
-            // As here don't need XliffAlt data, don't load them to improve
-            // performance.
-            boolean needLoadExtraInfo = false;
-            long jobId = source.getJobId();
-            ArrayList<Tuv> sourceTuvsTmp = SegmentTuvUtil.getSourceTuvs(source,
-                    needLoadExtraInfo);
-            sourceTuvs = splitSourceTuvs(sourceTuvsTmp,
-                    source.getGlobalSightLocale(), jobId);
-            ArrayList<Tuv> targetTuvsTmp = SegmentTuvUtil.getSourceTuvs(target,
-                    needLoadExtraInfo);
-            targetTuvs = splitSourceTuvs(targetTuvsTmp,
-                    target.getGlobalSightLocale(), jobId);
-        }
-        catch (Exception e)
-        {
-            c_logger.info("Can not get Tuvs to compare" + e);
-        }
-        if (sourceTuvs.size() != targetTuvs.size())
-        {
-            return flag;
-        }
-
-        int i;
-        for (i = 0; i < sourceTuvs.size(); i++)
-        {
-            SegmentTmTuv sourceTuv = (SegmentTmTuv) sourceTuvs.get(i);
-            SegmentTmTuv targetTuv = (SegmentTmTuv) targetTuvs.get(i);
-            if (sourceTuv.getExactMatchKey() != targetTuv.getExactMatchKey())
-            {
-                flag = false;
-                break;
-            }
-        }
-        if (i == sourceTuvs.size())
-        {
-            flag = true;
-        }
-        return flag;
     }
 
     /**

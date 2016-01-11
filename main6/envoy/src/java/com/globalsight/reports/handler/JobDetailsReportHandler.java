@@ -42,7 +42,6 @@ import javax.swing.table.TableModel;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.CurrencyFormat;
 import com.globalsight.everest.jobhandler.Job;
@@ -591,7 +590,6 @@ public class JobDetailsReportHandler extends BasicReportHandler
         WorkflowTableModel wtm = new WorkflowTableModel(workflows, theSession,
                 m_currency, false);
         wtm.setUseInContext(super.isUseInContext());
-        wtm.setUseDefaultContext(super.isUseDefaultContext());
         wtm.fillAllData(null, workflows);
 
         List<Job> jobs = new ArrayList<Job>();
@@ -725,10 +723,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
         {
             subcolSize++;
         }
-        if (super.isUseDefaultContext())
-        {
-            subcolSize++;
-        }
+
         if (isJobCostingOn())
         {
             subcolSize++;
@@ -743,10 +738,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
         {
             subcols[i++] = WorkflowTableModel.IN_CONTEXT_WC;
         }
-        if (super.isUseDefaultContext())
-        {
-            subcols[i++] = WorkflowTableModel.CONTEXT_WC;
-        }
+
         subcols[i++] = WorkflowTableModel.FUZZY_HI_WC;
         subcols[i++] = WorkflowTableModel.FUZZY_MED_HI_WC;
         subcols[i++] = WorkflowTableModel.FUZZY_MED_WC;

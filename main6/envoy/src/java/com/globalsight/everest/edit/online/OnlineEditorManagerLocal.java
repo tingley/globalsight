@@ -1146,19 +1146,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     Tuv srcTuv = (Tuv) sourceTuvs.get(i);
                     Tuv trgTuv = (Tuv) targetTuvs.get(i);
 
-                    boolean isShowDefaultContext = showDefaultContext(
-                            targetPage, i, sourceTuvs, tuvMatchTypes);
-                    if (isShowDefaultContext)
-                    {
-                        html = getDefaultContextTargetDisplayHtml(srcTuv,
-                                trgTuv, options, termLMResultSet,
-                                p_excludedItemTypes, targetPage, tuvMatchTypes,
-                                imageMaps, comments, repetitions, p_searchMap,
-                                p_state);
-                        template.insertTuvContent(trgTuv.getTu(jobId)
-                                .getIdAsLong(), html);
-                    }
-                    else if (LeverageUtil.isIncontextMatch(i, sourceTuvs,
+                    if (LeverageUtil.isIncontextMatch(i, sourceTuvs,
                             targetTuvs, tuvMatchTypes, p_excludedItemTypes,
                             jobId))
                     {
@@ -1318,465 +1306,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return pi;
     }
     
-    private boolean showDefaultContext(TargetPage targetPage, int i,
-            List sourceTuvs, MatchTypeStatistics tuvMatchTypes)
-    {
-        return PageHandler.isDefaultContextMatch(targetPage)
-                && targetPage.getIsDefaultContextMatch()
-                && LeverageUtil.isExactMatch(sourceTuvs.get(i), tuvMatchTypes);
-    }
-
-    private String getDefaultContextTargetDisplayHtml(Tuv p_srcTuv,
-            Tuv p_targetTuv, RenderingOptions p_options,
-            TermLeverageMatchResultSet p_termLMResultSet,
-            Vector p_excludedItemTypes, TargetPage p_targetPage,
-            MatchTypeStatistics p_matchTypes, Collection p_imageMaps,
-            ArrayList p_comments, SegmentRepetitions p_repetitions,
-            HashMap p_searchMap, EditorState p_editorState)
-    {
-        long jobId = p_targetPage.getSourcePage().getJobId();
-        p_options.setTmProfile(p_targetPage.getSourcePage().getRequest()
-                .getJob().getL10nProfile().getTranslationMemoryProfile());
-        Tu tu = p_targetTuv.getTu(jobId);
-        long tuId = tu.getTuId();
-        long tuvId = p_targetTuv.getId();
-        String dataType = p_targetTuv.getDataType(jobId);
-        GxmlElement elem = p_targetTuv.getGxmlElement();
-
-        boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
-        boolean reviewReadOnly = p_options.getUiMode() == UIConstants.UIMODE_REVIEW_READ_ONLY;
-        boolean unlock = p_options.getEditMode() == EDITMODE_EDIT_ALL;
-        // Localizables carry their own type attribute, whereas
-        // segments inherit it from their parent translatable.
-        String itemType = tu.getTuType();
-
-        boolean isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
-                || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
-                        .isTuvInProtectedState(p_targetTuv, jobId));
-
-        boolean isExcluded = SegmentProtectionManager.isTuvExcluded(elem,
-                itemType, p_excludedItemTypes);
-
-        // HTML class attribute that colors the segment in the editor
-        String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
-                DUMMY_SUBID, isExcluded, unlock, p_repetitions, jobId);
-        // For "localized" segment,if target is same with source,commonly
-        // display as "no match" in blue color,for segment with sub,display
-        // according to its LMs.
-        String segment = GxmlUtil.getDisplayHtml(p_targetTuv.getGxmlElement(),
-                dataType, p_options.getViewMode());
-        String segmentSrc = GxmlUtil.getDisplayHtml(p_srcTuv.getGxmlElement(),
-                dataType, p_options.getViewMode());
-        if (STYLE_UPDATED.equals(style))
-        {
-            if (segment.trim().equals(segmentSrc.trim()))
-            {
-                List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
-                if (subFlows != null && subFlows.size() > 0)
-                {
-                    style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
-                            p_targetTuv, DUMMY_SUBID, unlock, p_repetitions,
-                            jobId);
-                }
-                else
-                {
-                    style = STYLE_NO_MATCH;
-                }
-            }
-        }
-        else
-        {
-            // Fixed for GBS-2531
-            // style = STYLE_UNVERIFIED;
-            style = STYLE_EXACT_MATCH;
-        }
-
-        if (!PageHandler.isDefaultContextMatch(p_targetPage))
-        {
-            style = STYLE_EXACT_MATCH;
-        }
-
-        // Get the target page locale so we can set the DIR attribute
-        // for right-to-left languages such as Hebrew and Arabic
-        boolean b_rtlLocale = EditUtil.isRTLLocale(p_targetPage
-                .getGlobalSightLocale());
-        String dir = "";
-
-        // Make the segment RTL if it's 1) Translatable 2) In an RTL
-        // language and 3) it has bidi characters in it.
-        if (b_rtlLocale && !p_targetTuv.isLocalizable(jobId)
-                && Text.containsBidiChar(p_targetTuv.getGxml()))
-        {
-            dir = " DIR=rtl";
-        }
-
-        boolean isHighLight = isHighLight(p_searchMap, p_srcTuv, p_targetTuv);
-
-        StringBuffer result = new StringBuffer(256);
-        switch (p_options.getViewMode())
-        {
-            case VIEWMODE_LIST:
-                // add javascript to synchronize scroll bars
-                // by segment id in the pop-up editor
-                if (isHighLight)
-                {
-                    result.append("<TD bgColor=\"yellow\" ID=seg");
-                }
-                else
-                {
-                    result.append("<TD ID=seg");
-                }
-
-                result.append(tuId);
-                result.append(">");
-                result.append("<Script Language=\"JavaScript\">");
-                result.append("update_tr(\"");
-                result.append("seg");
-                result.append(tuId);
-                result.append("\");");
-                result.append("</Script>");
-
-                result.append(tuId);
-                result.append("</TD>\n");
-
-                // Append "TD" for "Find Repeated Segments".
-                if (p_editorState.getNeedFindRepeatedSegments())
-                {
-                    result.append(appendRepetitionTD(p_targetTuv));
-                }
-
-                if (reviewMode || reviewReadOnly)
-                {
-                    result.append("<TD>");
-                    result.append(getCommentIcon(tuId, tuvId, DUMMY_SUBID,
-                            p_comments));
-                    result.append("</TD>\n");
-
-                    segment = highlightTerms(p_srcTuv, p_targetTuv, segment,
-                            p_termLMResultSet, p_options.getViewMode());
-                }
-
-                if (isHighLight)
-                {
-                    result.append("<TD bgColor=\"yellow\" ID=seg");
-                }
-                else
-                {
-                    result.append("<TD ID=seg");
-                }
-
-                result.append(tuId);
-                result.append('_');
-                result.append(tuvId);
-                result.append("_0");
-
-                List subflows = p_targetTuv.getSubflowsAsGxmlElements(true);
-                boolean b_subflows = (subflows != null && subflows.size() > 0);
-                // b_subflows = hasSubflows(subflows);
-                if (!b_subflows)
-                {
-                    result.append(dir);
-                }
-
-                result.append('>');
-
-                segment = SegmentProtectionManager.handlePreserveWhiteSpace(
-                        elem, segment, null, null);
-                String seg = getEditorSegment(p_targetTuv,
-                        EditorConstants.PTAGS_COMPACT, segment,
-                        p_editorState.getNeedShowPTags(), jobId);
-                if (!b_subflows) // No subflows
-                {
-                    if ((!reviewMode || reviewReadOnly)
-                            && (isReadOnly || isExcluded))
-                    {
-                        result.append(getNonEditableCell(style, seg));
-                    }
-                    else
-                    {
-                        result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, seg, false));
-                    }
-                }
-                else
-                // Subflows
-                {
-                    result.append("<TABLE WIDTH=100% CELLSPACING=0");
-                    result.append(" CELLPADDING=2>\n");
-                    result.append("<COL WIDTH=1%  VALIGN=TOP CLASS=editorId>");
-                    if (reviewMode || reviewReadOnly)
-                    {
-                        result.append("<COL WIDTH=1%  VALIGN=TOP>");
-                    }
-                    result.append("<COL WIDTH=99% VALIGN=TOP>\n");
-                    result.append("<TR><TD COLSPAN=");
-                    result.append((reviewMode || reviewReadOnly) ? '3' : '2');
-                    result.append(dir);
-                    result.append('>');
-
-                    if ((!reviewMode || reviewReadOnly)
-                            && (isReadOnly || isExcluded))
-                    {
-                        result.append(getNonEditableCell(style, seg));
-                    }
-                    else
-                    {
-                        result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, seg, false));
-                    }
-
-                    result.append("</TD></TR>\n");
-
-                    // now process each subflow
-                    List subflowsSRC = p_srcTuv.getSubflowsAsGxmlElements(true);
-                    // hasSubflows(subflows);
-                    // hasSubflows(subflowsSRC);
-                    for (int i = 0; i < subflows.size(); i++)
-                    {
-                        GxmlElement subElmt = (GxmlElement) subflows.get(i);
-                        GxmlElement subElmtSrc = (GxmlElement) subflowsSRC
-                                .get(i);
-                        String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
-                        dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
-
-                        // Inherit datatype from parent element...
-                        if (dataType == null)
-                        {
-                            GxmlElement node = subElmt.getParent();
-
-                            while (dataType == null && node != null)
-                            {
-                                dataType = node
-                                        .getAttribute(GxmlNames.SUB_DATATYPE);
-                                node = node.getParent();
-                            }
-                        }
-
-                        // ... or from document if tuv inherits it.
-                        if (dataType == null)
-                        {
-                            dataType = p_targetTuv.getDataType(jobId);
-                        }
-
-                        if (b_rtlLocale
-                                && isTranslatableSub(subElmt)
-                                && Text.containsBidiChar(subElmt.getTextValue()))
-                        {
-                            dir = " DIR=rtl";
-                        }
-                        else
-                        {
-                            dir = "";
-                        }
-
-                        isExcluded = SegmentProtectionManager.isTuvExcluded(
-                                subElmt, itemType, p_excludedItemTypes);
-
-                        // style = getMatchStyle(p_matchTypes, p_srcTuv,
-                        // p_targetTuv,
-                        // subId, isExcluded, unlock, p_repetitions);
-                        style = STYLE_CONTEXT;
-                        // if(!havePermission){
-                        // style = STYLE_EXACT_MATCH;
-                        // }
-                        if (p_options.getTmProfile() != null
-                                && !p_options.getTmProfile()
-                                        .getIsContextMatchLeveraging())
-                        {
-                            style = STYLE_EXACT_MATCH;
-                        }
-                        segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
-                                p_options.getViewMode());
-
-                        segmentSrc = GxmlUtil.getDisplayHtml(subElmtSrc,
-                                dataType, p_options.getViewMode());
-                        if (STYLE_UPDATED.equals(style)
-                                && segment.trim().equals(segmentSrc.trim()))
-                        {
-                            style = STYLE_NO_MATCH;
-                        }
-
-                        result.append("<TR>");
-                        result.append(getSubIdColumn(tuId, subId));
-
-                        if (reviewMode || reviewReadOnly)
-                        {
-                            result.append("<TD>");
-                            result.append(getCommentIcon(tuId, tuvId, subId,
-                                    p_comments));
-                            result.append("</TD>\n");
-
-                            segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                    segment, p_termLMResultSet,
-                                    p_options.getViewMode());
-                        }
-
-                        // If the TUV is read-only, or the sub is
-                        // excluded, don't show the sub as editable.
-                        if ((!reviewMode || reviewReadOnly)
-                                && (isReadOnly || isExcluded))
-                        {
-                            result.append("<TD");
-                            result.append(dir);
-                            result.append('>');
-                            result.append(getNonEditableCell(style, segment));
-                            result.append("</TD>");
-                        }
-                        else
-                        {
-                            result.append("<TD");
-                            result.append(dir);
-                            result.append(" ID=seg");
-                            result.append(tuId);
-                            result.append('_');
-                            result.append(tuvId);
-                            result.append('_');
-                            result.append(subId);
-                            result.append('>');
-                            result.append(getEditableCell(style, tuId, tuvId,
-                                    subId, segment, false));
-                            result.append("</TD>");
-                        }
-
-                        result.append("</TR>\n");
-                    }
-
-                    result.append("</TABLE>\n");
-                }
-
-                result.append("</TD>\n");
-
-                break;
-
-            case VIEWMODE_TEXT:
-                if ((!reviewMode || reviewReadOnly)
-                        && (isReadOnly || isExcluded))
-                {
-                    // Bug alert: this makes internal tags have the same
-                    // color (blue) as the segment.
-                    segment = p_targetTuv.getGxmlElement().getTotalTextValue();
-                    segment = EditUtil.encodeHtmlEntities(segment);
-
-                    if (reviewMode || reviewReadOnly)
-                    {
-                        segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_termLMResultSet,
-                                p_options.getViewMode());
-                    }
-
-                    result.append("<SPAN");
-                    result.append(dir);
-                    result.append(" ID=seg");
-                    result.append(tuId);
-                    result.append('_');
-                    result.append(tuvId);
-                    result.append("_0");
-                    result.append('>');
-
-                    // This makes the non-editable segment still have a color.
-                    result.append(getNonEditableCell(style, segment));
-
-                    result.append("</SPAN>");
-                }
-                else
-                {
-                    segment = GxmlUtil.getDisplayHtmlForText(elem, dataType,
-                            tuId, tuvId, style, p_excludedItemTypes);
-
-                    if (reviewMode || reviewReadOnly)
-                    {
-                        result.append(getCommentIcon(tuId, tuvId, DUMMY_SUBID,
-                                p_comments));
-
-                        segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_termLMResultSet,
-                                p_options.getViewMode());
-                    }
-
-                    result.append("<SPAN");
-                    result.append(dir);
-                    result.append(" ID=seg");
-                    result.append(tuId);
-                    result.append('_');
-                    result.append(tuvId);
-                    result.append("_0");
-                    result.append('>');
-                    result.append(segment);
-                    result.append("</SPAN>");
-                }
-
-                break;
-
-            case VIEWMODE_PREVIEW: // fall through
-            default:
-                // If this is a visible segment, make it a link if not
-                // excluded; else output it as is.
-
-                if ((elem.getType() == GxmlElement.SEGMENT)
-                        && itemType.equals("text"))
-                {
-                    segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps,
-                            p_targetTuv.getIdAsLong());
-
-                    if (reviewMode || reviewReadOnly)
-                    {
-                        segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_termLMResultSet,
-                                p_options.getViewMode());
-                    }
-
-                    if ((!reviewMode || reviewReadOnly)
-                            && (isReadOnly || isExcluded))
-                    {
-                        result.append(getNonEditableCellForPreview(style,
-                                segment, dir));
-                    }
-                    else
-                    {
-                        if (reviewMode || reviewReadOnly)
-                        {
-                            result.append(getCommentIcon(tuId, tuvId,
-                                    DUMMY_SUBID, p_comments));
-                        }
-
-                        result.append(getEditableCellForPreview(style, tuId,
-                                tuvId, DUMMY_SUBID, segment, true, dir));
-                    }
-                }
-                else
-                {
-                    segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps,
-                            p_targetTuv.getIdAsLong());
-
-                    if (reviewMode || reviewReadOnly)
-                    {
-                        segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_termLMResultSet,
-                                p_options.getViewMode());
-                    }
-
-                    if (EditUtil.isHtmlDerivedFormat(dataType)
-                            || dataType.equals("plaintext"))
-                    {
-                        segment = EditUtil.encodeHtmlEntities(segment);
-                    }
-                    else if (dataType.equals("javascript"))
-                    {
-                        segment = EditUtil.toJavascript(segment);
-                    }
-
-                    result.append(segment);
-                }
-
-                break;
-        }
-
-        return result.toString();
-
-    }
-
     private String getInContextTargetDisplayHtml(Tuv p_srcTuv, Tuv p_targetTuv,
             RenderingOptions p_options,
             TermLeverageMatchResultSet p_termLMResultSet,
@@ -4420,16 +3949,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             }
 
             String style;
-            // Is exact match in "Leverage Default Matches".
-            boolean isExactDefaultContext = showDefaultContext(p_targetPage, i,
-                    p_sourceTuvs, p_matchTypes);
-            if (isExactDefaultContext)
-            {
-                // Modify for GBS-2531
-                // style = STYLE_SEGMENT_UNVERIFIED;
-                style = STYLE_SEGMENT_EXACT;
-            }
-            else if (LeverageUtil.isIncontextMatch(i, p_sourceTuvs,
+            if (LeverageUtil.isIncontextMatch(i, p_sourceTuvs,
                     p_targetTuvs, p_matchTypes, p_excludedItemTypes, jobId))
             {
                 style = STYLE_CONTEXT;
@@ -6494,14 +6014,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     }
                 }
                 _count++;
-                int readyCase = 3;
-                boolean isShowDefaultContext = showDefaultContext(targetPage,
-                        i, sourceTuvs, tuvMatchTypes);
-                if (isShowDefaultContext)
-                {
-                    readyCase = 1;
-                }
-                else if (LeverageUtil.isIncontextMatch(i, sourceTuvs,
+                int readyCase = 1;
+                if (LeverageUtil.isIncontextMatch(i, sourceTuvs,
                         targetTuvs, tuvMatchTypes, p_excludedItemTypes, jobId))
                 {
                     readyCase = 2;
@@ -6777,9 +6291,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             switch (readyCase)
             {
-                case 1:
-                    style = STYLE_EXACT_MATCH;
-                    break;
+            	case 1:
+//            		style = STYLE_NO_MATCH;
+                break;
                 case 2:
                     if (unlock)
                     {
@@ -6791,9 +6305,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     }
                     isReadOnly = !unlock;
                     break;
-                case 3:
-                    // style = STYLE_NO_MATCH;
-                    break;
                 default:
                     break;
             }
@@ -6803,11 +6314,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         switch (readyCase)
         {
             case 1:
+                isRealExactLocalized = EditorHelper.isRealExactMatchLocalied(
+                        p_srcTuv, p_targetTuv, p_matchTypes, DUMMY_SUBID, jobId);
                 isReadOnly = isReadOnly(p_targetTuv, p_options, jobId);
-                if (!PageHandler.isDefaultContextMatch(p_targetPage))
-                {
-                    style = STYLE_EXACT_MATCH;
-                }
                 break;
             case 2:
                 if (!PageHandler.isInContextMatch(p_targetPage.getSourcePage()
@@ -6816,11 +6325,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     style = STYLE_EXACT_MATCH;
                     isReadOnly = isReadOnly(p_targetTuv, p_options, jobId);
                 }
-                break;
-            case 3:
-                isRealExactLocalized = EditorHelper.isRealExactMatchLocalied(
-                        p_srcTuv, p_targetTuv, p_matchTypes, DUMMY_SUBID, jobId);
-                isReadOnly = isReadOnly(p_targetTuv, p_options, jobId);
                 break;
             default:
                 break;

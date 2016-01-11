@@ -124,7 +124,7 @@ public class WordCountHandler extends PageHandler
             p_request.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, new Boolean(isUseInContext));
             p_request.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, new Boolean(exactMatchOnly));
             p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch(job));
-            p_request.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch(job));
+
             prepareTaskList(p_request, p_session, p_sessionMgr, tasks);
         }
         catch (RemoteException re)
@@ -206,12 +206,9 @@ public class WordCountHandler extends PageHandler
 
                     boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
                     boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
-                    boolean isInContextMatch = isInContextMatch(job);
-                    boolean isDefaultContextMatch = isDefaultContextMatch(job);
                     p_request.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, new Boolean(isUseInContext));
                     p_request.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, new Boolean(exactMatchOnly));
-                    p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
-                    p_request.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch);
+                    p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch(job));
                 }
             }
         } 
@@ -256,11 +253,10 @@ public class WordCountHandler extends PageHandler
         boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
         boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
         boolean isInContextMatch = isInContextMatch(job);
-        boolean isDefaultContextMatch = isDefaultContextMatch(job);
         p_request.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, new Boolean(isUseInContext));
         p_request.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, new Boolean(exactMatchOnly));
         p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
-        p_request.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch);
+
         ArrayList targetPgs = new ArrayList(task.getTargetPages());
         p_request.setAttribute(TASK_ID, taskIdParam);
         p_request.setAttribute(TASK_STATE, taskStateParam);

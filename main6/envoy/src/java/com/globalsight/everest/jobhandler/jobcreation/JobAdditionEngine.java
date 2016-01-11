@@ -124,11 +124,7 @@ public class JobAdditionEngine
             job.setPageCount(1);
             job.setCompanyId(companyId);
             request.setJob(job);
-            if (PageHandler.isDefaultContextMatch(request))
-            {
-                job.setLeverageOption(Job.DEFAULT_CONTEXT);
-            }
-            else if (PageHandler.isInContextMatch(request))
+            if (PageHandler.isInContextMatch(request))
             {
                 job.setLeverageOption(Job.IN_CONTEXT);
             }

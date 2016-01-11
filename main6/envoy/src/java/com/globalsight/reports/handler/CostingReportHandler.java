@@ -266,7 +266,6 @@ public class CostingReportHandler extends BasicReportHandler
     public void createReport(HttpServletRequest req)
     {
         super.setUseInContext(false);
-        super.setUseDefaultContext(false);
 
         try
         {
@@ -332,7 +331,6 @@ public class CostingReportHandler extends BasicReportHandler
         WorkflowTableModel2 wtm = new WorkflowTableModel2(workflows,
                 theSession, m_currency, false);
         wtm.setUseInContext(super.isUseInContext());
-        wtm.setUseDefaultContext(super.isUseDefaultContext());
         wtm.fillAllData(null, workflows);
 
         ArrayList jobs = new ArrayList();
@@ -704,10 +702,7 @@ public class CostingReportHandler extends BasicReportHandler
         {
             subcolsList.add(WorkflowTableModel2.IN_CONTEXT_WC);
         }
-        if (super.isUseDefaultContext())
-        {
-            subcolsList.add(WorkflowTableModel2.CONTEXT_WC);
-        }
+
         // subcols[i++] = WorkflowTableModel2.SUBLEVREPS;
         // subcols[i++] = WorkflowTableModel2.SUBLEVMATCHES;
         subcolsList.add(WorkflowTableModel2.PER_COMPLETE);

@@ -1083,7 +1083,6 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         // boolean isUseInContext =
         // l10nProfile.getTranslationMemoryProfile().getIsContextMatchLeveraging();
         boolean isInContextMatch = isInContextMatch(job);
-        boolean isDefaultContextMatch = isDefaultContextMatch(job);
         p_request.setAttribute(JobManagementHandler.L10NPROFILE_NAME_SCRIPTLET,
                 l10nProfile.getName());
 
@@ -1155,11 +1154,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                     // Get the Estimated cost
                     String formattedEstimatedCost = (isInContextMatch) ? cost
                             .getEstimatedCost().getFormattedAmount()
-                            : (isDefaultContextMatch) ? cost
-                                    .getDefaultContextEstimatedCost()
-                                    .getFormattedAmount() : cost
-                                    .getNoUseEstimatedCost()
-                                    .getFormattedAmount();
+                            : cost.getNoUseEstimatedCost().getFormattedAmount();
                     p_request.setAttribute(JobManagementHandler.ESTIMATED_COST,
                             formattedEstimatedCost);
 
@@ -1204,11 +1199,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                         // Get the Estimated cost
                         String formattedEstimatedCost = (isInContextMatch) ? revenue
                                 .getEstimatedCost().getFormattedAmount()
-                                : (isDefaultContextMatch) ? revenue
-                                        .getDefaultContextEstimatedCost()
-                                        .getFormattedAmount() : revenue
-                                        .getNoUseEstimatedCost()
-                                        .getFormattedAmount();
+                                : revenue.getNoUseEstimatedCost().getFormattedAmount();
                         p_request.setAttribute(
                                 JobManagementHandler.ESTIMATED_REVENUE,
                                 formattedEstimatedCost);

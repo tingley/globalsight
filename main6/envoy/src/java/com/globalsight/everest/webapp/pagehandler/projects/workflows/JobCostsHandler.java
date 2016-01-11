@@ -199,10 +199,7 @@ public class JobCostsHandler extends PageHandler implements UserParamNames
                 // Get the Estimated cost
                 String formattedEstimatedCost = (isInContextMatch(job)) ? cost
                         .getEstimatedCost().getFormattedAmount()
-                        : (isDefaultContextMatch(job)) ? cost
-                                .getDefaultContextEstimatedCost()
-                                .getFormattedAmount() : cost
-                                .getNoUseEstimatedCost().getFormattedAmount();
+                        : cost.getNoUseEstimatedCost().getFormattedAmount();
                 p_request.setAttribute("estimatedCost", formattedEstimatedCost);
 
                 // Get the Actual cost
@@ -306,10 +303,7 @@ public class JobCostsHandler extends PageHandler implements UserParamNames
             // Get the Estimated cost
             String formattedEstimatedCost = (isInContextMatch(job)) ? revenue
                     .getEstimatedCost().getFormattedAmount()
-                    : (isDefaultContextMatch(job)) ? revenue
-                            .getDefaultContextEstimatedCost()
-                            .getFormattedAmount() : revenue
-                            .getNoUseEstimatedCost().getFormattedAmount();
+                    : revenue.getNoUseEstimatedCost().getFormattedAmount();
 
             p_request.setAttribute("estimatedRevenue", formattedEstimatedCost);
 

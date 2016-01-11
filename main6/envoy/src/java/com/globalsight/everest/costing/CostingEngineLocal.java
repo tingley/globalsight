@@ -1825,7 +1825,6 @@ public class CostingEngineLocal implements CostingEngine
         totalCost = totalCost.convert(p_currency);
 
         totalCost.isUseInContext = PageHandler.isInContextMatch(p_job);
-        totalCost.isDefaultInContext = PageHandler.isDefaultContextMatch(p_job);
 
         // if the cost should be recalculated
         if (p_recalculateJob && !p_isJobComplete)
@@ -1857,8 +1856,6 @@ public class CostingEngineLocal implements CostingEngine
                     totalCost = totalCost.add(workflowCost);
                     totalCost.isUseInContext = PageHandler
                             .isInContextMatch(p_job);
-                    totalCost.isDefaultInContext = PageHandler
-                            .isDefaultContextMatch(p_job);
                     CostByWordCount workflowCostByWordCount = workflowCost
                             .getCostByWordCount();
                     if (workflowCostByWordCount != null)
@@ -1928,8 +1925,6 @@ public class CostingEngineLocal implements CostingEngine
                     p_currency.getIdAsLong());
 
             totalCost = totalCost.convert(p_currency);
-            totalCost.isDefaultInContext = PageHandler
-                    .isDefaultContextMatch(p_workflow.getJob());
             totalCost.isUseInContext = PageHandler.isInContextMatch(p_workflow
                     .getJob());
 
@@ -1980,8 +1975,6 @@ public class CostingEngineLocal implements CostingEngine
                         // .getIsContextMatchLeveraging();
                         totalCost.isUseInContext = PageHandler
                                 .isInContextMatch(p_workflow.getJob());
-                        totalCost.isDefaultInContext = PageHandler
-                                .isDefaultContextMatch(p_workflow.getJob());
                         totalCost = totalCost.add(taskCost);
                         if (taskCostByWordCount != null)
                         {
@@ -2170,8 +2163,6 @@ public class CostingEngineLocal implements CostingEngine
                 // else - no rate - this is OK
                 cost.calculateFinalCost();
             }
-            cost.isDefaultInContext = PageHandler.isDefaultContextMatch(wf
-                    .getJob());
             cost.isUseInContext = PageHandler.isInContextMatch(wf.getJob());
             // else cost is fine
             p_session.saveOrUpdate(cost);
@@ -2262,8 +2253,6 @@ public class CostingEngineLocal implements CostingEngine
 
         boolean isUseInContext = PageHandler.isInContextMatch(p_workflow
                 .getJob());
-        boolean isDefaultContextMatch = PageHandler
-                .isDefaultContextMatch(p_workflow.getJob());
         if (p_rate.getRateType().equals(Rate.UnitOfWork.WORD_COUNT)
                 || p_rate.getRateType().equals(Rate.UnitOfWork.WORD_COUNT_BY))
         {
@@ -2409,12 +2398,9 @@ public class CostingEngineLocal implements CostingEngine
                 p_cost.setCostByWordCount(wordCountCost_temp);
             }
             p_cost.isUseInContext = isUseInContext;
-            p_cost.isDefaultInContext = isDefaultContextMatch;
             if (addToActualCost)
             {
-                p_cost.setActualCost((isUseInContext) ? amount
-                        : (isDefaultContextMatch) ? defaultContextAmount
-                                : noUseAmount);
+                p_cost.setActualCost((isUseInContext) ? amount : noUseAmount);
             }
         }
         return p_cost;

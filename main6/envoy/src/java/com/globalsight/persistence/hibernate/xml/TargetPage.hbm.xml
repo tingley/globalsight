@@ -123,9 +123,6 @@
         <property name="CVSTargetFilename" length="2000"
             column="CVS_TARGET_FILENAME" type="string" not-null="false"
             unique="false" />
-        <property name="isDefaultContextMatch"
-            column="IS_DEFAULT_CONTEXT_MATCH" type="yes_no"
-            not-null="false" unique="false" />
         <property name="companyId" column="COMPANY_ID" length="20"
             type="long" not-null="false" unique="false" />
         <many-to-one name="sourcePage" column="SOURCE_PAGE_ID"

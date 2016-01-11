@@ -277,14 +277,8 @@ public class JobTableModel extends AbstractTableModel
                         l10nProfile = LocProfileHandlerHelper.getL10nProfile(j
                                 .getL10nProfileId());
                         boolean isInContextMatch = PageHandler.isInContextMatch(j);
-                        boolean isUseDefaultContextMatch = PageHandler.isDefaultContextMatch(j);
                         Cost cost1 = getJobCost(j, m_currency, Cost.EXPENSE);
-                        o = (isInContextMatch) ? ReportsPackage
-                                .getEstimatedCost(cost1)
-                                : (isUseDefaultContextMatch) ? ReportsPackage
-                                        .getUseDefaultContextEstimatedCost(cost1)
-                                        : ReportsPackage
-                                                .getNoUseEstimatCost(cost1);
+                        o = (isInContextMatch) ? ReportsPackage.getEstimatedCost(cost1) : ReportsPackage.getNoUseEstimatCost(cost1);
                     }
                     else
                     {
@@ -297,15 +291,8 @@ public class JobTableModel extends AbstractTableModel
                         l10nProfile = LocProfileHandlerHelper.getL10nProfile(j
                                 .getL10nProfileId());
                         boolean isInContextMatch = PageHandler.isInContextMatch(j);
-                        boolean isDefaultContextMatch = PageHandler
-                                .isDefaultContextMatch(j);
                         Cost revenue1 = getJobCost(j, m_currency, Cost.REVENUE);
-                        o = (isInContextMatch) ? ReportsPackage
-                                .getEstimatedCost(revenue1)
-                                : (isDefaultContextMatch) ? ReportsPackage
-                                        .getUseDefaultContextEstimatedCost(revenue1)
-                                        : ReportsPackage
-                                                .getNoUseEstimatCost(revenue1);
+                        o = (isInContextMatch) ? ReportsPackage.getEstimatedCost(revenue1) : ReportsPackage.getNoUseEstimatCost(revenue1);
                     }
                     else
                     {

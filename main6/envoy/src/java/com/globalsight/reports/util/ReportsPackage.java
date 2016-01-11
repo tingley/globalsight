@@ -159,22 +159,6 @@ public class ReportsPackage
         }
     }
 
-    public static Object getUseDefaultContextEstimatedCost(Cost cost)
-    {
-        if(cost == null)
-        {
-            return ZERO_COST;
-        }
-        Money m = cost.getDefaultContextEstimatedCost();
-        if(m == null)
-        {
-            return ZERO_COST;
-        }
-        else
-        {
-            return (Object) new Float(m.getAmount());
-        }
-    }
     /**
      * Makes getting a final cost from a Cost
      * object easier

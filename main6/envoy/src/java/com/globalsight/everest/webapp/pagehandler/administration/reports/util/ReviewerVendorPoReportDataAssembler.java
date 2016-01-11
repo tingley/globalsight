@@ -236,10 +236,7 @@ public class ReviewerVendorPoReportDataAssembler
                 }
             }
             boolean isInContextMatch = PageHandler.isInContextMatch(j);
-            boolean isDefaultContextMatch = PageHandler
-                    .isDefaultContextMatch(j);
             // only handle jobs in these states
-
             Iterator wfIter = j.getWorkflows().iterator();
             while (wfIter.hasNext())
             {
@@ -353,15 +350,10 @@ public class ReviewerVendorPoReportDataAssembler
 
                     data.segmentTmWordCount += (isInContextMatch) ? w
                             .getSegmentTmWordCount()
-                            : (isDefaultContextMatch) ? w
-                                    .getTotalExactMatchWordCount()
-                                    - w.getContextMatchWordCount() : w
-                                    .getTotalExactMatchWordCount();
+                            : w.getTotalExactMatchWordCount();
                     data.inContextMatchWordCount += (isInContextMatch) ? w
                             .getInContextMatchWordCount() : w
                             .getNoUseInContextMatchWordCount();
-                    data.contextMatchWordCount += (isDefaultContextMatch) ? w
-                            .getContextMatchWordCount() : 0;
                     data.dellExactMatchWordCount = data.segmentTmWordCount;
                     data.dellInContextMatchWordCount = data.inContextMatchWordCount;
                     data.trados100WordCount = data.dellExactMatchWordCount;
@@ -406,9 +398,7 @@ public class ReviewerVendorPoReportDataAssembler
 
                         // exact match costs for activity "REPORT_ACTIVITY"
                         data.contextMatchWordCountCostForDellReview = add(
-                                data.contextMatchWordCountCostForDellReview,
-                                (isDefaultContextMatch) ? dellReivewCostByWordCount
-                                        .getContextMatchCost() : 0);
+                                data.contextMatchWordCountCostForDellReview, 0);
 
                         data.inContextMatchWordCountCostForDellReview = add(
                                 data.inContextMatchWordCountCostForDellReview,
@@ -419,12 +409,7 @@ public class ReviewerVendorPoReportDataAssembler
 
                         data.segmentTmWordCountCostForDellReview = add(
                                 data.segmentTmWordCountCostForDellReview,
-                                (isInContextMatch) ? dellReivewCostByWordCount
-                                        .getSegmentTmMatchCost()
-                                        : (isDefaultContextMatch) ? dellReivewCostByWordCount
-                                                .getDefaultContextExactMatchCost()
-                                                : dellReivewCostByWordCount
-                                                        .getNoUseExactMatchCost());
+                                (isInContextMatch) ? dellReivewCostByWordCount.getSegmentTmMatchCost() : dellReivewCostByWordCount.getNoUseExactMatchCost());
 
                         data.dellExactMatchWordCountCostForDellReview = data.segmentTmWordCountCostForDellReview;
                         data.trados100WordCountCostForDellReview = data.segmentTmWordCountCostForDellReview;
@@ -515,9 +500,7 @@ public class ReviewerVendorPoReportDataAssembler
 
                         // exact match costs
                         data.contextMatchWordCountCost = add(
-                                data.contextMatchWordCountCost,
-                                (isDefaultContextMatch) ? costByWordCount
-                                        .getContextMatchCost() : 0);
+                                data.contextMatchWordCountCost, 0);
 
                         data.inContextMatchWordCountCost = add(
                                 data.inContextMatchWordCountCost,
@@ -528,12 +511,7 @@ public class ReviewerVendorPoReportDataAssembler
 
                         data.segmentTmWordCountCost = add(
                                 data.segmentTmWordCountCost,
-                                (isInContextMatch) ? costByWordCount
-                                        .getSegmentTmMatchCost()
-                                        : (isDefaultContextMatch) ? costByWordCount
-                                                .getDefaultContextExactMatchCost()
-                                                : costByWordCount
-                                                        .getNoUseExactMatchCost());
+                                (isInContextMatch) ? costByWordCount.getSegmentTmMatchCost() : costByWordCount.getNoUseExactMatchCost());
 
                         data.dellExactMatchWordCountCost = data.segmentTmWordCountCost;
                         data.trados100WordCountCost = data.segmentTmWordCountCost;
@@ -821,7 +799,7 @@ public class ReviewerVendorPoReportDataAssembler
 
     private String[] getHeaders(Iterator iter)
     {
-        String[] headers = new String[2];
+        String[] headers = new String[1];
         while (iter.hasNext())
         {
             Job job = (Job) iter.next();
@@ -831,10 +809,6 @@ public class ReviewerVendorPoReportDataAssembler
             {
                 // hava tm profile contains in context match
                 headers[0] = "In Context Match";
-            }
-            if (PageHandler.isDefaultContextMatch(job))
-            {
-                headers[1] = "Context Match";
             }
         }
         return headers;

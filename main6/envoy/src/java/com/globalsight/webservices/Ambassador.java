@@ -14824,7 +14824,6 @@ public class Ambassador extends AbstractWebService
             // leverageOption
             String leverageOption = "unknown";
             boolean isInContextMatch = false;
-            boolean isDefaultContextMatch = false;
             try
             {
                 TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
@@ -14833,16 +14832,11 @@ public class Ambassador extends AbstractWebService
                 if (tmp != null)
                 {
                     isInContextMatch = tmp.getIsContextMatchLeveraging();
-                    isDefaultContextMatch = PageHandler
-                            .isDefaultContextMatch(job);
                 }
+
                 if (isInContextMatch)
                 {
                     leverageOption = "Leverage in context matches";
-                }
-                else if (isDefaultContextMatch)
-                {
-                    leverageOption = "Default";
                 }
                 else
                 {
@@ -14860,11 +14854,6 @@ public class Ambassador extends AbstractWebService
             if (isInContextMatch)
             {
                 wc = wf.getSegmentTmWordCount();
-            }
-            else if (isDefaultContextMatch)
-            {
-                wc = wf.getTotalExactMatchWordCount()
-                        - wf.getContextMatchWordCount();
             }
             else
             {
@@ -14897,13 +14886,6 @@ public class Ambassador extends AbstractWebService
                 xml.append("\t\t<InContextMatches>")
                         .append(wf.getInContextMatchWordCount())
                         .append("</InContextMatches>\r\n");
-            }
-            // Context Matches
-            if (isDefaultContextMatch)
-            {
-                xml.append("\t\t<ContextMatches>")
-                        .append(wf.getContextMatchWordCount())
-                        .append("</ContextMatches>\r\n");
             }
             // total
             xml.append("\t\t<total>").append(wf.getTotalWordCount())
@@ -15225,25 +15207,17 @@ public class Ambassador extends AbstractWebService
         // leverageOption
         String leverageOption = "unknown";
         boolean isInContextMatch = false;
-        boolean isDefaultContextMatch = false;
         try
         {
             Job job = workflow.getJob();
-            if (PageHandler.isDefaultContextMatch(job))
-            {
-                isDefaultContextMatch = true;
-            }
-            else if (PageHandler.isInContextMatch(job))
+            if (PageHandler.isInContextMatch(job))
             {
                 isInContextMatch = true;
             }
+
             if (isInContextMatch)
             {
                 leverageOption = "Leverage in context matches";
-            }
-            else if (isDefaultContextMatch)
-            {
-                leverageOption = "Default";
             }
             else
             {
@@ -15262,11 +15236,6 @@ public class Ambassador extends AbstractWebService
         if (isInContextMatch)
         {
             wc = workflow.getSegmentTmWordCount();
-        }
-        else if (isDefaultContextMatch)
-        {
-            wc = workflow.getTotalExactMatchWordCount()
-                    - workflow.getContextMatchWordCount();
         }
         else
         {
@@ -15302,13 +15271,6 @@ public class Ambassador extends AbstractWebService
             xml.append(tab).append("\t<in_context_match>")
                     .append(workflow.getInContextMatchWordCount())
                     .append("</in_context_match>\r\n");
-        }
-        // Context Matches
-        if (isDefaultContextMatch)
-        {
-            xml.append(tab).append("\t<context_match>")
-                    .append(workflow.getContextMatchWordCount())
-                    .append("</context_match>\r\n");
         }
         // total
         xml.append(tab).append("\t<total>")
@@ -16929,15 +16891,10 @@ public class Ambassador extends AbstractWebService
         // leverageOption
         String leverageOption = "unknown";
         boolean isInContextMatch = false;
-        boolean isDefaultContextMatch = false;
         try
         {
             Job job = workflow.getJob();
-            if (PageHandler.isDefaultContextMatch(job))
-            {
-                isDefaultContextMatch = true;
-            }
-            else if (PageHandler.isInContextMatch(job))
+            if (PageHandler.isInContextMatch(job))
             {
                 isInContextMatch = true;
             }
@@ -16945,10 +16902,6 @@ public class Ambassador extends AbstractWebService
             if (isInContextMatch)
             {
                 leverageOption = "Leverage in context matches";
-            }
-            else if (isDefaultContextMatch)
-            {
-                leverageOption = "Default";
             }
             else
             {
@@ -16966,11 +16919,6 @@ public class Ambassador extends AbstractWebService
         if (isInContextMatch)
         {
             wc = workflow.getSegmentTmWordCount();
-        }
-        else if (isDefaultContextMatch)
-        {
-            wc = workflow.getTotalExactMatchWordCount()
-                    - workflow.getContextMatchWordCount();
         }
         else
         {
@@ -17006,13 +16954,6 @@ public class Ambassador extends AbstractWebService
             xml.append(tab).append("\t\t<in_context_matches>")
                     .append(workflow.getInContextMatchWordCount())
                     .append("</in_context_matches>\r\n");
-        }
-        // Context Matches
-        if (isDefaultContextMatch)
-        {
-            xml.append(tab).append("\t\t<context_matches>")
-                    .append(workflow.getContextMatchWordCount())
-                    .append("</context_matches>\r\n");
         }
         // total
         xml.append(tab).append("\t\t<total>")

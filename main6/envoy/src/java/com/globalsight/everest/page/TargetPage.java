@@ -58,18 +58,7 @@ public class TargetPage
     private String m_exportSubDir = null;
     private String m_CVSTargetModule = null;
     private String m_CVSTargetFilename = null;
-    private boolean isDefaultContextMatch = false;
     private long m_companyId;
-
-    public boolean getIsDefaultContextMatch()
-    {
-        return isDefaultContextMatch;
-    }
-
-    public void setIsDefaultContextMatch(boolean isDefaultContextMatch)
-    {
-        this.isDefaultContextMatch = isDefaultContextMatch;
-    }
 
     //////////////////////////////////////////////////////////////////////
     //  Begin: Constructor

@@ -813,7 +813,6 @@ public interface WebAppConstants
     public static String IS_USE_IN_CONTEXT = "isUseInContext";
     public static String LEVERAGE_EXACT_ONLY = "exactMatchOnly";
     public static String IS_IN_CONTEXT_MATCH = "isInContextMatch";
-    public static String IS_DEFAULT_CONTEXT_MATCH = "isDefaultContextMatch";
 
     public static final String REQUEST_METHOD_GET = "get";
     public static final String RADIO_BUTTON = "radioBtn";

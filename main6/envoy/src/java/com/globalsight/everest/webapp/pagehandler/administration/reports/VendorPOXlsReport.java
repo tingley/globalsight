@@ -287,28 +287,20 @@ public class VendorPOXlsReport
         Cell cell_G_Header = getCell(thirRow, c);
         cell_G_Header.setCellValue(bundle.getString("lb_word_counts"));
         cell_G_Header.setCellStyle(getHeaderStyle(p_workbook));
-        if (p_data.headers[0] != null && p_data.headers[1] != null)
+
+        if (p_data.headers[0] != null)
         {
-        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 6));
-            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 6),
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 5));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 5), 
             		getHeaderStyle(p_workbook));
         }
         else
         {
-            if (p_data.headers[0] != null || p_data.headers[1] != null)
-            {
-            	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 5));
-                setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 5), 
-                		getHeaderStyle(p_workbook));
-            }
-            else
-            {
-            	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 4));
-                setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 4), 
-                		getHeaderStyle(p_workbook));
-            }
-
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 4));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 4), 
+            		getHeaderStyle(p_workbook));
         }
+
         Cell cell_G = getCell(fourRow, c++);
         cell_G.setCellValue(bundle.getString("jobinfo.tmmatches.wordcounts.internalreps"));
         cell_G.setCellStyle(getHeaderStyle(p_workbook));
@@ -322,12 +314,6 @@ public class VendorPOXlsReport
         	cell_InContext.setCellValue(bundle
             		.getString("jobinfo.tmmatches.wordcounts.incontextmatches"));
         	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
-        }
-        if (p_data.headers[1] != null)
-        {
-        	Cell cell_Context = getCell(fourRow, c++);
-        	cell_Context.setCellValue(bundle.getString("lb_context_tm"));
-        	cell_Context.setCellStyle(getHeaderStyle(p_workbook));
         }
         Cell cell_FuzzyMatches = getCell(fourRow, c++);
         cell_FuzzyMatches.setCellValue(bundle
@@ -345,27 +331,20 @@ public class VendorPOXlsReport
         Cell cell_Invoice = getCell(thirRow, c);
         cell_Invoice.setCellValue(bundle.getString("jobinfo.tmmatches.invoice"));
         cell_Invoice.setCellStyle(getHeaderStyle(p_workbook));
-        if (p_data.headers[0] != null && p_data.headers[1] != null)
+
+        if (p_data.headers[0] != null)
         {
-        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 6));
-            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 6), 
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 5));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 5),
             		getHeaderStyle(p_workbook));
         }
         else
         {
-            if (p_data.headers[0] != null || p_data.headers[1] != null)
-            {
-            	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 5));
-                setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 5),
-                		getHeaderStyle(p_workbook));
-            }
-            else
-            {
-            	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 4));
-                setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 4),
-                		getHeaderStyle(p_workbook));
-            }
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 4));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 4),
+            		getHeaderStyle(p_workbook));
         }
+
         Cell cell_InternalReps = getCell(fourRow, c++);
         cell_InternalReps.setCellValue(bundle
         		.getString("jobinfo.tmmatches.invoice.internalreps"));
@@ -382,12 +361,7 @@ public class VendorPOXlsReport
             		.getString("jobinfo.tmmatches.invoice.incontextmatches"));
         	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
-        if (p_data.headers[1] != null)
-        {
-        	Cell cell_Context = getCell(fourRow, c++);
-        	cell_Context.setCellValue(bundle.getString("lb_context_tm"));
-        	cell_Context.setCellStyle(getHeaderStyle(p_workbook));
-        }
+
         Cell cell_FuzzyMatches_Invoice = getCell(fourRow, c++);
         cell_FuzzyMatches_Invoice.setCellValue(bundle
         		.getString("jobinfo.tmmatches.invoice.fuzzymatches"));
@@ -469,27 +443,20 @@ public class VendorPOXlsReport
         Cell cell_G_Header = getCell(thirRow, c);
         cell_G_Header.setCellValue(bundle.getString("jobinfo.tmmatches.wordcounts"));
         cell_G_Header.setCellStyle(getHeaderStyle(p_workbook));
-        if (p_data.headers[0] != null && p_data.headers[1] != null)
+
+        if (p_data.headers[0] != null)
         {
-        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 8));
-            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 8), 
-            		getHeaderStyle(p_workbook));
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 7));
+        	setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 7),
+        			getHeaderStyle(p_workbook));
         }
         else
         {
-            if (p_data.headers[0] != null || p_data.headers[1] != null)
-            {
-            	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 7));
-                setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 7),
-                		getHeaderStyle(p_workbook));
-            }
-            else
-            {
-            	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 6));
-                setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 6), 
-                		getHeaderStyle(p_workbook));
-            }
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 6));
+        	setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 6),
+        			getHeaderStyle(p_workbook));
         }
+
         Cell cell_G = getCell(fourRow, c++);
         cell_G.setCellValue(bundle.getString("jobinfo.tradosmatches.invoice.per100matches"));
         cell_G.setCellStyle(getHeaderStyle(p_workbook));
@@ -519,12 +486,6 @@ public class VendorPOXlsReport
         	cell_InContext.setCellValue(bundle.getString("lb_in_context_tm"));
         	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
-        if (p_data.headers[1] != null)
-        {
-        	Cell cell_Context = getCell(fourRow, c++);
-        	cell_Context.setCellValue(bundle.getString("lb_context_matches"));
-        	cell_Context.setCellStyle(getHeaderStyle(p_workbook));
-        }
         Cell cell_Total = getCell(fourRow, c++);
         cell_Total.setCellValue(bundle.getString("lb_total"));
         cell_Total.setCellStyle(getHeaderStyle(p_workbook));
@@ -532,27 +493,19 @@ public class VendorPOXlsReport
         Cell cell_Invoice = getCell(thirRow, c);
         cell_Invoice.setCellValue(bundle.getString("jobinfo.tmmatches.invoice"));
         cell_Invoice.setCellStyle(getHeaderStyle(p_workbook));
-        if (p_data.headers[0] != null && p_data.headers[1] != null)
+        if (p_data.headers[0] != null)
         {
-        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 8));
-            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 8),
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 7));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 7),
             		getHeaderStyle(p_workbook));
         }
         else
         {
-            if (p_data.headers[0] != null || p_data.headers[1] != null)
-            {
-            	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 7));
-                setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 7),
-                		getHeaderStyle(p_workbook));
-            }
-            else
-            {
-            	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 6));
-                setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 6),
-                		getHeaderStyle(p_workbook));
-            }
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 6));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 6),
+            		getHeaderStyle(p_workbook));
         }
+
         Cell cell_Per100Matches = getCell(fourRow, c++);
         cell_Per100Matches.setCellValue(bundle
         		.getString("jobinfo.tradosmatches.invoice.per100matches"));
@@ -582,12 +535,6 @@ public class VendorPOXlsReport
         	Cell cell_InContext = getCell(fourRow, c++);
         	cell_InContext.setCellValue(bundle.getString("lb_in_context_match"));
         	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
-        }
-        if (p_data.headers[1] != null)
-        {
-        	Cell cell_Context = getCell(fourRow, c++);
-        	cell_Context.setCellValue(bundle.getString("lb_context_match"));
-        	cell_Context.setCellStyle(getHeaderStyle(p_workbook));
         }
         Cell cell_Total_Invoice = getCell(fourRow, c++);
         cell_Total_Invoice.setCellValue(bundle.getString("lb_total"));
@@ -684,13 +631,7 @@ public class VendorPOXlsReport
                 	cell_InContext.setCellStyle(temp_normalStyle);
                     theSheet.setColumnWidth(col - 1, numwidth * 256);
                 }
-                if (p_data.headers[1] != null)
-                {
-                	Cell cell_Context = getCell(theRow, col++);
-                	cell_Context.setCellValue(data.dellContextMatchWordCount);
-                	cell_Context.setCellStyle(temp_normalStyle);
-                    theSheet.setColumnWidth(col - 1, numwidth * 256);
-                }
+
                 Cell cell_FuzzyMatch = getCell(theRow, col++);
                 cell_FuzzyMatch.setCellValue(data.dellFuzzyMatchWordCount);
                 cell_FuzzyMatch.setCellStyle(temp_normalStyle);
@@ -724,13 +665,7 @@ public class VendorPOXlsReport
                 	cell_InContext.setCellStyle(temp_moneyStyle);
                     theSheet.setColumnWidth(col - 1, moneywidth * 256);
                 }
-                if (p_data.headers[1] != null)
-                {
-                	Cell cell_Context = getCell(theRow, col++);
-                	cell_Context.setCellValue(asDouble(data.dellContextMatchWordCountCost));
-                	cell_Context.setCellStyle(temp_moneyStyle);
-                    theSheet.setColumnWidth(col - 1, moneywidth * 256);
-                }
+
                 Cell cell_FuzzyMatch_Invoice = getCell(theRow, col++);
                 cell_FuzzyMatch_Invoice.setCellValue(asDouble(data.dellFuzzyMatchWordCountCost));
                 cell_FuzzyMatch_Invoice.setCellStyle(temp_moneyStyle);
@@ -776,10 +711,8 @@ public class VendorPOXlsReport
 
         // add in word count totals
         int c = 6;
-
-        if (p_data.headers[0] != null && p_data.headers[1] != null)
+        if (p_data.headers[0] != null)
         {
-
             // word counts
         	Cell cell_G = getCell(theRow, c++);
         	cell_G.setCellFormula("SUM(G5:G" + lastRow + ")");
@@ -804,11 +737,11 @@ public class VendorPOXlsReport
         	Cell cell_L = getCell(theRow, c++);
         	cell_L.setCellFormula("SUM(L5:L" + lastRow + ")");
         	cell_L.setCellStyle(getSubTotalStyle(p_workbook));
-        	
+        	// word count costs
         	Cell cell_M = getCell(theRow, c++);
         	cell_M.setCellFormula("SUM(M5:M" + lastRow + ")");
-        	cell_M.setCellStyle(getSubTotalStyle(p_workbook));
-            // word count costs
+        	cell_M.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
         	Cell cell_N = getCell(theRow, c++);
         	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
         	cell_N.setCellStyle(getTotalMoneyStyle(p_workbook));
@@ -828,111 +761,49 @@ public class VendorPOXlsReport
         	Cell cell_R = getCell(theRow, c++);
         	cell_R.setCellFormula("SUM(R5:R" + lastRow + ")");
         	cell_R.setCellStyle(getTotalMoneyStyle(p_workbook));
-        	
-        	Cell cell_S = getCell(theRow, c++);
-        	cell_S.setCellFormula("SUM(S5:S" + lastRow + ")");
-        	cell_S.setCellStyle(getTotalMoneyStyle(p_workbook));
-        	
-        	Cell cell_T = getCell(theRow, c++);
-        	cell_T.setCellFormula("SUM(T5:T" + lastRow + ")");
-        	cell_T.setCellStyle(getTotalMoneyStyle(p_workbook));
         }
         else
         {
-            if (p_data.headers[0] != null || p_data.headers[1] != null)
-            {
-                // word counts
-            	Cell cell_G = getCell(theRow, c++);
-            	cell_G.setCellFormula("SUM(G5:G" + lastRow + ")");
-            	cell_G.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_H = getCell(theRow, c++);
-            	cell_H.setCellFormula("SUM(H5:H" + lastRow + ")");
-            	cell_H.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_I = getCell(theRow, c++);
-            	cell_I.setCellFormula("SUM(I5:I" + lastRow + ")");
-            	cell_I.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_J = getCell(theRow, c++);
-            	cell_J.setCellFormula("SUM(J5:J" + lastRow + ")");
-            	cell_J.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_K = getCell(theRow, c++);
-            	cell_K.setCellFormula("SUM(K5:K" + lastRow + ")");
-            	cell_K.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_L = getCell(theRow, c++);
-            	cell_L.setCellFormula("SUM(L5:L" + lastRow + ")");
-            	cell_L.setCellStyle(getSubTotalStyle(p_workbook));
-            	// word count costs
-            	Cell cell_M = getCell(theRow, c++);
-            	cell_M.setCellFormula("SUM(M5:M" + lastRow + ")");
-            	cell_M.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_N = getCell(theRow, c++);
-            	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
-            	cell_N.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_O = getCell(theRow, c++);
-            	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
-            	cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_P = getCell(theRow, c++);
-            	cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
-            	cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_Q = getCell(theRow, c++);
-            	cell_Q.setCellFormula("SUM(Q5:Q" + lastRow + ")");
-            	cell_Q.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_R = getCell(theRow, c++);
-            	cell_R.setCellFormula("SUM(R5:R" + lastRow + ")");
-            	cell_R.setCellStyle(getTotalMoneyStyle(p_workbook));
-            }
-            else
-            {
-            	 // word counts
-            	Cell cell_G = getCell(theRow, c++);
-            	cell_G.setCellFormula("SUM(G5:G" + lastRow + ")");
-            	cell_G.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_H = getCell(theRow, c++);
-            	cell_H.setCellFormula("SUM(H5:H" + lastRow + ")");
-            	cell_H.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_I = getCell(theRow, c++);
-            	cell_I.setCellFormula("SUM(I5:I" + lastRow + ")");
-            	cell_I.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_J = getCell(theRow, c++);
-            	cell_J.setCellFormula("SUM(J5:J" + lastRow + ")");
-            	cell_J.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_K = getCell(theRow, c++);
-            	cell_K.setCellFormula("SUM(K5:K" + lastRow + ")");
-            	cell_K.setCellStyle(getSubTotalStyle(p_workbook));
-            	// word count costs
-            	Cell cell_L = getCell(theRow, c++);
-            	cell_L.setCellFormula("SUM(L5:L" + lastRow + ")");
-            	cell_L.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_M = getCell(theRow, c++);
-            	cell_M.setCellFormula("SUM(M5:M" + lastRow + ")");
-            	cell_M.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_N = getCell(theRow, c++);
-            	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
-            	cell_N.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_O = getCell(theRow, c++);
-            	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
-            	cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_P = getCell(theRow, c++);
-            	cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
-            	cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
-            }
+        	 // word counts
+        	Cell cell_G = getCell(theRow, c++);
+        	cell_G.setCellFormula("SUM(G5:G" + lastRow + ")");
+        	cell_G.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_H = getCell(theRow, c++);
+        	cell_H.setCellFormula("SUM(H5:H" + lastRow + ")");
+        	cell_H.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_I = getCell(theRow, c++);
+        	cell_I.setCellFormula("SUM(I5:I" + lastRow + ")");
+        	cell_I.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_J = getCell(theRow, c++);
+        	cell_J.setCellFormula("SUM(J5:J" + lastRow + ")");
+        	cell_J.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_K = getCell(theRow, c++);
+        	cell_K.setCellFormula("SUM(K5:K" + lastRow + ")");
+        	cell_K.setCellStyle(getSubTotalStyle(p_workbook));
+        	// word count costs
+        	Cell cell_L = getCell(theRow, c++);
+        	cell_L.setCellFormula("SUM(L5:L" + lastRow + ")");
+        	cell_L.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_M = getCell(theRow, c++);
+        	cell_M.setCellFormula("SUM(M5:M" + lastRow + ")");
+        	cell_M.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_N = getCell(theRow, c++);
+        	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
+        	cell_N.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_O = getCell(theRow, c++);
+        	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
+        	cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_P = getCell(theRow, c++);
+        	cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
+        	cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
         }
     }
 
@@ -1048,13 +919,7 @@ public class VendorPOXlsReport
                 	cell_InContext.setCellStyle(temp_normalStyle);
                     theSheet.setColumnWidth(col - 1, numwidth * 256);
                 }
-                if (p_data.headers[1] != null)
-                {
-                	Cell cell_Context = getCell(theRow, col++);
-                	cell_Context.setCellValue(data.tradosContextMatchWordCount);
-                	cell_Context.setCellStyle(temp_normalStyle);
-                    theSheet.setColumnWidth(col - 1, numwidth * 256);
-                }
+
                 Cell cell_Total = getCell(theRow, col++);
                 cell_Total.setCellValue(data.tradosTotalWordCount);
                 cell_Total.setCellStyle(temp_normalStyle);
@@ -1098,13 +963,6 @@ public class VendorPOXlsReport
                 	cell_InContext.setCellStyle(temp_moneyStyle);
                     theSheet.setColumnWidth(col - 1, moneywidth * 256);
                 }
-                if (p_data.headers[1] != null)
-                {
-                	Cell cell_Context = getCell(theRow, col++);
-                	cell_Context.setCellValue(asDouble(data.tradosContextWordCountCost));
-                	cell_Context.setCellStyle(temp_moneyStyle);
-                    theSheet.setColumnWidth(col - 1, moneywidth * 256);
-                }
                 
                 Cell cell_TotalCost = getCell(theRow, col++);
                 cell_TotalCost.setCellValue(asDouble(data.tradosTotalWordCountCost));
@@ -1141,8 +999,7 @@ public class VendorPOXlsReport
 
         // add in word count totals
         int c = 6;
-
-        if (p_data.headers[0] != null && p_data.headers[1] != null)
+        if (p_data.headers[0] != null)
         {
         	// word counts
         	Cell cell_G = getCell(theRow, c++);
@@ -1176,11 +1033,11 @@ public class VendorPOXlsReport
         	Cell cell_N = getCell(theRow, c++);
         	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
         	cell_N.setCellStyle(getSubTotalStyle(p_workbook));
-        	
+        	// word count costs
         	Cell cell_O = getCell(theRow, c++);
         	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
-        	cell_O.setCellStyle(getSubTotalStyle(p_workbook));
-        	// word count costs
+        	cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
         	Cell cell_P = getCell(theRow, c++);
         	cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
         	cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
@@ -1208,144 +1065,65 @@ public class VendorPOXlsReport
         	Cell cell_V = getCell(theRow, c++);
         	cell_V.setCellFormula("SUM(V5:V" + lastRow + ")");
         	cell_V.setCellStyle(getTotalMoneyStyle(p_workbook));
-        	
-        	Cell cell_W = getCell(theRow, c++);
-        	cell_W.setCellFormula("SUM(W5:W" + lastRow + ")");
-        	cell_W.setCellStyle(getTotalMoneyStyle(p_workbook));
-        	
-        	Cell cell_X = getCell(theRow, c++);
-        	cell_X.setCellFormula("SUM(X5:X" + lastRow + ")");
-        	cell_X.setCellStyle(getTotalMoneyStyle(p_workbook));
         }
         else
         {
-            if (p_data.headers[0] != null || p_data.headers[1] != null)
-            {
-            	// word counts
-            	Cell cell_G = getCell(theRow, c++);
-            	cell_G.setCellFormula("SUM(G5:G" + lastRow + ")");
-            	cell_G.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_H = getCell(theRow, c++);
-            	cell_H.setCellFormula("SUM(H5:H" + lastRow + ")");
-            	cell_H.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_I = getCell(theRow, c++);
-            	cell_I.setCellFormula("SUM(I5:I" + lastRow + ")");
-            	cell_I.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_J = getCell(theRow, c++);
-            	cell_J.setCellFormula("SUM(J5:J" + lastRow + ")");
-            	cell_J.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_K = getCell(theRow, c++);
-            	cell_K.setCellFormula("SUM(K5:K" + lastRow + ")");
-            	cell_K.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_L = getCell(theRow, c++);
-            	cell_L.setCellFormula("SUM(L5:L" + lastRow + ")");
-            	cell_L.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_M = getCell(theRow, c++);
-            	cell_M.setCellFormula("SUM(M5:M" + lastRow + ")");
-            	cell_M.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_N = getCell(theRow, c++);
-            	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
-            	cell_N.setCellStyle(getSubTotalStyle(p_workbook));
-            	// word count costs
-            	Cell cell_O = getCell(theRow, c++);
-            	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
-            	cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_P = getCell(theRow, c++);
-            	cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
-            	cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_Q = getCell(theRow, c++);
-            	cell_Q.setCellFormula("SUM(Q5:Q" + lastRow + ")");
-            	cell_Q.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_R = getCell(theRow, c++);
-            	cell_R.setCellFormula("SUM(R5:R" + lastRow + ")");
-            	cell_R.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_S = getCell(theRow, c++);
-            	cell_S.setCellFormula("SUM(S5:S" + lastRow + ")");
-            	cell_S.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_T = getCell(theRow, c++);
-            	cell_T.setCellFormula("SUM(T5:T" + lastRow + ")");
-            	cell_T.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_U = getCell(theRow, c++);
-            	cell_U.setCellFormula("SUM(U5:U" + lastRow + ")");
-            	cell_U.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_V = getCell(theRow, c++);
-            	cell_V.setCellFormula("SUM(V5:V" + lastRow + ")");
-            	cell_V.setCellStyle(getTotalMoneyStyle(p_workbook));
-            }
-            else
-            {
-            	// word counts
-            	Cell cell_G = getCell(theRow, c++);
-            	cell_G.setCellFormula("SUM(G5:G" + lastRow + ")");
-            	cell_G.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_H = getCell(theRow, c++);
-            	cell_H.setCellFormula("SUM(H5:H" + lastRow + ")");
-            	cell_H.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_I = getCell(theRow, c++);
-            	cell_I.setCellFormula("SUM(I5:I" + lastRow + ")");
-            	cell_I.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_J = getCell(theRow, c++);
-            	cell_J.setCellFormula("SUM(J5:J" + lastRow + ")");
-            	cell_J.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_K = getCell(theRow, c++);
-            	cell_K.setCellFormula("SUM(K5:K" + lastRow + ")");
-            	cell_K.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_L = getCell(theRow, c++);
-            	cell_L.setCellFormula("SUM(L5:L" + lastRow + ")");
-            	cell_L.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_M = getCell(theRow, c++);
-            	cell_M.setCellFormula("SUM(M5:M" + lastRow + ")");
-            	cell_M.setCellStyle(getSubTotalStyle(p_workbook));
-            	// word count costs
-            	Cell cell_N = getCell(theRow, c++);
-            	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
-            	cell_N.setCellStyle(getSubTotalStyle(p_workbook));
-            	
-            	Cell cell_O = getCell(theRow, c++);
-            	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
-            	cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_P = getCell(theRow, c++);
-            	cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
-            	cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_Q = getCell(theRow, c++);
-            	cell_Q.setCellFormula("SUM(Q5:Q" + lastRow + ")");
-            	cell_Q.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_R = getCell(theRow, c++);
-            	cell_R.setCellFormula("SUM(R5:R" + lastRow + ")");
-            	cell_R.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_S = getCell(theRow, c++);
-            	cell_S.setCellFormula("SUM(S5:S" + lastRow + ")");
-            	cell_S.setCellStyle(getTotalMoneyStyle(p_workbook));
-            	
-            	Cell cell_T = getCell(theRow, c++);
-            	cell_T.setCellFormula("SUM(T5:T" + lastRow + ")");
-            	cell_T.setCellStyle(getTotalMoneyStyle(p_workbook));
-
-            }
+        	// word counts
+        	Cell cell_G = getCell(theRow, c++);
+        	cell_G.setCellFormula("SUM(G5:G" + lastRow + ")");
+        	cell_G.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_H = getCell(theRow, c++);
+        	cell_H.setCellFormula("SUM(H5:H" + lastRow + ")");
+        	cell_H.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_I = getCell(theRow, c++);
+        	cell_I.setCellFormula("SUM(I5:I" + lastRow + ")");
+        	cell_I.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_J = getCell(theRow, c++);
+        	cell_J.setCellFormula("SUM(J5:J" + lastRow + ")");
+        	cell_J.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_K = getCell(theRow, c++);
+        	cell_K.setCellFormula("SUM(K5:K" + lastRow + ")");
+        	cell_K.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_L = getCell(theRow, c++);
+        	cell_L.setCellFormula("SUM(L5:L" + lastRow + ")");
+        	cell_L.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_M = getCell(theRow, c++);
+        	cell_M.setCellFormula("SUM(M5:M" + lastRow + ")");
+        	cell_M.setCellStyle(getSubTotalStyle(p_workbook));
+        	// word count costs
+        	Cell cell_N = getCell(theRow, c++);
+        	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
+        	cell_N.setCellStyle(getSubTotalStyle(p_workbook));
+        	
+        	Cell cell_O = getCell(theRow, c++);
+        	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
+        	cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_P = getCell(theRow, c++);
+        	cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
+        	cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_Q = getCell(theRow, c++);
+        	cell_Q.setCellFormula("SUM(Q5:Q" + lastRow + ")");
+        	cell_Q.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_R = getCell(theRow, c++);
+        	cell_R.setCellFormula("SUM(R5:R" + lastRow + ")");
+        	cell_R.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_S = getCell(theRow, c++);
+        	cell_S.setCellFormula("SUM(S5:S" + lastRow + ")");
+        	cell_S.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_T = getCell(theRow, c++);
+        	cell_T.setCellFormula("SUM(T5:T" + lastRow + ")");
+        	cell_T.setCellStyle(getTotalMoneyStyle(p_workbook));
         }
     }
 
@@ -1651,13 +1429,6 @@ public class VendorPOXlsReport
                     data.dellInContextMatchWordCount += w
                             .getInContextMatchWordCount();
                 }
-                else if (PageHandler.isDefaultContextMatch(w.getJob()))
-                {
-                    data.segmentTmWordCount += w.getTotalExactMatchWordCount()
-                            - w.getContextMatchWordCount();
-                    data.dellExactMatchWordCount += data.segmentTmWordCount;
-                    data.contextMatchWordCount += w.getContextMatchWordCount();
-                }
                 else
                 {
                     data.segmentTmWordCount += w.getTotalExactMatchWordCount();
@@ -1714,16 +1485,6 @@ public class VendorPOXlsReport
                         data.segmentTmWordCountCost = add(
                                 data.segmentTmWordCountCost,
                                 costByWordCount.getSegmentTmMatchCost());
-                    }
-                    else if (PageHandler.isDefaultContextMatch(w.getJob()))
-                    {
-                        data.contextMatchWordCountCost = add(
-                                data.contextMatchWordCountCost,
-                                costByWordCount.getContextMatchCost());
-                        data.segmentTmWordCountCost = add(
-                                data.segmentTmWordCountCost,
-                                costByWordCount
-                                        .getDefaultContextExactMatchCost());
                     }
                     else
                     {
@@ -1806,16 +1567,12 @@ public class VendorPOXlsReport
 
     private String[] getHeaders(HashSet<Job> jobs)
     {
-        String[] headers = new String[2];
+        String[] headers = new String[1];
         for(Job job: jobs)
         {
             if (PageHandler.isInContextMatch(job))
             {
                 headers[0] = "In Context Match";
-            }
-            if (PageHandler.isDefaultContextMatch(job))
-            {
-                headers[1] = "Context Match";
             }
         }
         return headers;

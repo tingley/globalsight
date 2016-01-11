@@ -29,6 +29,7 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
+import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 
 public class TTXParser
 {
@@ -451,6 +452,10 @@ public class TTXParser
                 break;
             case Node.TEXT_NODE:
                 String nodeValue = p_node.getStringValue();
+                if (nodeValue.startsWith("#"))
+                {
+                    nodeValue = nodeValue.replace("#", OfflineConstants.PONUD_SIGN);
+                }
                 if (isParsingTTXForGS)
                 {
                     boolean isInTargetTuv = isInTargetTuv(p_node);

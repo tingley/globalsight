@@ -146,4 +146,5 @@ public interface OfflineConstants
     // If the task is TASK_UPLOADING_STATUS, can't complete the task.
     String TASK_UPLOADSTATUS_UPLOADING = "taskUploading";
     String TASK_UPLOADSTATUS_FINISHED = "taskFinished";
+    String PONUD_SIGN = "\uE000" + "_POUND_SIGN_" + "\uE000";
 }

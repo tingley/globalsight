@@ -34,6 +34,7 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.document.Target;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Unit;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Xliff;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.YesNo;
+import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoOverrideMapItem;
@@ -522,6 +523,7 @@ public class Tmx2Xliff20
             {
                 String s = (String) o;
                 s = StringUtil.replace(s, "[", "[[");
+                s = s.replace("#", OfflineConstants.PONUD_SIGN);
                 sb.append(s);
             }
             else if (o instanceof Pc)

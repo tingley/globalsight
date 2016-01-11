@@ -83,6 +83,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler;
@@ -1950,6 +1951,11 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 textContent = textContent.replace("</" + tagName + ">", "");
                 textContent = convertSegment2Pseudo(textContent,
                         isSrcFileXlf(foo, jobIds), getTu(foo, jobIds));
+                if (tagName.equalsIgnoreCase("target")
+                        && textContent.startsWith("#"))
+                {
+                     textContent = textContent.replace("#", OfflineConstants.PONUD_SIGN);
+                }
                 sourceElement.setText(textContent);
             }
             catch (Exception e)

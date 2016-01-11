@@ -42,6 +42,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.Vector;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -66,6 +67,7 @@ import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
 import com.globalsight.everest.edit.offline.XliffConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
+import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.PageData;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
@@ -93,6 +95,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.generat
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ImplementedCommentsCheckReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.edit.EditCommonHelper;
+import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.rtf.RtfAPI;
 import com.globalsight.ling.rtf.RtfDocument;
@@ -2370,7 +2373,17 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             m_errWriter.setFileName(p_fileName);
             m_uploadPageData.setLoadConversionLineBreak(m_normalizedLB);
             m_uploadPageData.loadOfflineTextFile(new_reader, false);
-
+            Vector<OfflineSegmentData> list = m_uploadPageData.getSegmentList();
+            for (OfflineSegmentData object : list)
+            {
+                String targetText = object.getDisplayTargetText();
+                if (targetText.indexOf(OfflineConstants.PONUD_SIGN) == 0)
+                {
+                    targetText = targetText.replace(OfflineConstants.PONUD_SIGN, "#");
+                    object.setDisplayTargetText(targetText);
+                }
+            }
+            
             // set err writer's page, task and job ids
             m_errWriter.processOfflinePageData(m_uploadPageData);
         }

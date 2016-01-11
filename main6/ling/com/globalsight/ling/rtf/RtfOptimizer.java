@@ -33,6 +33,8 @@ package com.globalsight.ling.rtf;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
+
 /**
  * Optimizes the paragraphs and text sequences by collapsing text runs
  * that share the same properties and removing unnecessary RTF controls.
@@ -582,7 +584,13 @@ public class RtfOptimizer
             if (o instanceof RtfText)
             {
                 curr = (RtfText)o;
-
+                RtfTextProperties properties = curr.getProperties();
+                String data = curr.getData();
+                if (properties.getColorName().equalsIgnoreCase("default")
+                        && data.startsWith("#") && prev == null)
+                {
+                    curr.setData(data.replace("#", OfflineConstants.PONUD_SIGN));
+                }
                 if (prev != null &&
                     prev.getProperties().equals(curr.getProperties()))
                 {

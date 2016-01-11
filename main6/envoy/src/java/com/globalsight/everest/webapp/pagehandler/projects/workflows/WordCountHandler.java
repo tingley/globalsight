@@ -40,7 +40,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GeneralException;
@@ -73,7 +72,7 @@ public class WordCountHandler extends PageHandler
         throws ServletException, IOException, EnvoyServletException
     {
         String action = p_request.getParameter("action");
-        String tpSorting = p_request.getParameter(WF_KEY + TableConstants.SORTING);
+//        String tpSorting = p_request.getParameter(WF_KEY + TableConstants.SORTING);
 
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager)
@@ -112,15 +111,15 @@ public class WordCountHandler extends PageHandler
             wf = ServerProxy.getWorkflowManager().
                 getWorkflowByIdRefresh(Long.parseLong(wfid));
             Job job = wf.getJob();
-            List wfs = new ArrayList();
+            List<Workflow> wfs = new ArrayList<Workflow>();
             wfs.add(wf);
             boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
             boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
             p_sessionMgr.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, isUseInContext);
             p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
             p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, PageHandler.isInContextMatch(job));
-            p_sessionMgr.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, PageHandler.isDefaultContextMatch(job));
             p_request.setAttribute(WebAppConstants.JOB_ID,job.getId()+"");
+
             prepareWorkflowList(p_request, p_session, p_sessionMgr, wfs,
                                 job.getJobName(), String.valueOf(
                                     job.getLeverageMatchThreshold()));
@@ -150,7 +149,6 @@ public class WordCountHandler extends PageHandler
         boolean isUseInContext = false;
         boolean exactMatchOnly = false;
         boolean isInContextMatch = false;
-        boolean isDefaultContextMatch = false;
         try
         {
             job = ServerProxy.getJobHandler().getJobById(
@@ -158,7 +156,6 @@ public class WordCountHandler extends PageHandler
             isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
             exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
             isInContextMatch = isInContextMatch(job);
-            isDefaultContextMatch = isDefaultContextMatch(job);
         }
         catch (Exception e)
         {
@@ -168,9 +165,8 @@ public class WordCountHandler extends PageHandler
         p_sessionMgr.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, isUseInContext);
         p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
         p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
-        p_sessionMgr.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch);
-        String wfids = (String) p_request.getParameter(
-            JobManagementHandler.WF_ID);
+		String wfids = (String) p_request
+				.getParameter(JobManagementHandler.WF_ID);
 
         Hashtable hash = new Hashtable();
         StringTokenizer st = new StringTokenizer(wfids, " ");

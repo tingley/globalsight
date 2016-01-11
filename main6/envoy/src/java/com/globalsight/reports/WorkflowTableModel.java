@@ -30,7 +30,6 @@ import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -86,7 +85,6 @@ public class WorkflowTableModel extends AbstractTableModel
             + "workflowTable";
 
     private boolean useInContext = false;
-    private boolean useDefaultContext = false;
 
     public WorkflowTableModel()
     {
@@ -193,11 +191,7 @@ public class WorkflowTableModel extends AbstractTableModel
                     datacolumns.put(IN_CONTEXT_WC,
                             getWorkflowValue(w, IN_CONTEXT_WC));
                 }
-                if (useDefaultContext)
-                {
-                    datacolumns
-                            .put(CONTEXT_WC, getWorkflowValue(w, CONTEXT_WC));
-                }
+
                 datacolumns.put(FUZZY_HI_WC, getWorkflowValue(w, FUZZY_HI_WC));
                 datacolumns.put(FUZZY_MED_HI_WC,
                         getWorkflowValue(w, FUZZY_MED_HI_WC));
@@ -231,21 +225,16 @@ public class WorkflowTableModel extends AbstractTableModel
                     {
                         e.printStackTrace();
                     }
-                    boolean isDefaultContext = PageHandler
-                            .isDefaultContextMatch(w.getJob());
                     // create a wf cost object
                     Cost cost = BasicReportHandler.calculateWorkflowCost(w,
                             m_currency, Cost.EXPENSE);
 
                     // get estimated and actual costs
-                    datacolumns
-                            .put(COST,
-                                    (isInContextMatch) ? ReportsPackage
-                                            .getEstimatedCost(cost)
-                                            : (isDefaultContext) ? ReportsPackage
-                                                    .getUseDefaultContextEstimatedCost(cost)
-                                                    : ReportsPackage
-                                                            .getNoUseEstimatCost(cost));
+					datacolumns.put(
+							COST,
+							(isInContextMatch) ? ReportsPackage
+									.getEstimatedCost(cost) : ReportsPackage
+									.getNoUseEstimatCost(cost));
 
                     if (BasicReportHandler.isJobRevenueOn())
                     {
@@ -439,11 +428,7 @@ public class WorkflowTableModel extends AbstractTableModel
                 case SEGMENT_TM_MATCH_TYPE:
                     count += (PageHandler.isInContextMatch(p_workflow.getJob())) ? wordCounts
                             .getSegmentTmWordCount()
-                            : (PageHandler.isDefaultContextMatch(p_workflow
-                                    .getJob())) ? wordCounts
-                                    .getTotalExactMatchWordCount()
-                                    - wordCounts.getContextMatchWordCount()
-                                    : wordCounts.getTotalExactMatchWordCount();
+                            : wordCounts.getTotalExactMatchWordCount();
                     break;
                 case IN_CONTEXT_MATCH_TYPE:
                 {
@@ -453,9 +438,7 @@ public class WorkflowTableModel extends AbstractTableModel
                 }
                 case CONTEXT_MATCH_TYPE:
                 {
-                    count += (PageHandler.isDefaultContextMatch(p_workflow
-                            .getJob()) ? wordCounts.getContextMatchWordCount()
-                            : -1);
+                    count += -1;
                     break;
                 }
 
@@ -527,13 +510,4 @@ public class WorkflowTableModel extends AbstractTableModel
         this.useInContext = useInContext;
     }
 
-    public boolean isUseDefaultContext()
-    {
-        return useDefaultContext;
-    }
-
-    public void setUseDefaultContext(boolean defaultContext)
-    {
-        this.useDefaultContext = defaultContext;
-    }
 }

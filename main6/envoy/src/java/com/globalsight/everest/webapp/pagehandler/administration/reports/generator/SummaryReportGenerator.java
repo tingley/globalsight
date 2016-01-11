@@ -808,23 +808,6 @@ public class SummaryReportGenerator implements
                         headers[0] = headers[0] + w.getJob().getJobId();
                     }
                 }
-                else if (PageHandler.isDefaultContextMatch(w.getJob()))
-                {
-                    reportWordCount.addTrados100WordCount(w
-                            .getTotalExactMatchWordCount()
-                            - w.getContextMatchWordCount());
-                    reportWordCount.addTradosContextMatchWordCount(w
-                            .getContextMatchWordCount());
-
-                    if (w.getContextMatchWordCount() > 0)
-                    {
-                        if (headers[1] == null)
-                        {
-                            headers[1] = "";
-                        }
-                        headers[1] = headers[1] + w.getJob().getJobId();
-                    }
-                }
                 else
                 {
                     reportWordCount.addTrados100WordCount(w

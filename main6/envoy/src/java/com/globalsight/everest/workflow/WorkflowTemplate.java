@@ -244,7 +244,7 @@ public class WorkflowTemplate implements Serializable
     //////////////////////////////////////////////////////////////////////////////////     
 
     // set the id of the template
-    void setId(long p_templateId)
+    public void setId(long p_templateId)
     {
         m_wfTemplateId = p_templateId;
     }

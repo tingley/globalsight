@@ -403,12 +403,7 @@ public class JobCreatorLocal implements JobCreator
             }
             job.setIsWordCountReached(false);
             job.setLeverageMatchThreshold((int) tmp.getFuzzyMatchThreshold());
-
-            if (PageHandler.isDefaultContextMatch(request))
-            {
-                job.setLeverageOption(Job.DEFAULT_CONTEXT);
-            }
-            else if (PageHandler.isInContextMatch(request))
+            if (PageHandler.isInContextMatch(request))
             {
                 job.setLeverageOption(Job.IN_CONTEXT);
             }

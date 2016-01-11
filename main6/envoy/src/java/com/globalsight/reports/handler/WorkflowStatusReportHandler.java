@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.CurrencyFormat;
 import com.globalsight.everest.jobhandler.Job;
@@ -59,8 +58,8 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
             + "from project p, project_user pu "
             + "where p.project_seq = pu.project_id and pu.user_id = ? "
             + "order by manager_user_id";
-    private static final String PM_QUERY_GS = "select distinct(manager_user_id) "
-            + "from project order by manager_user_id";
+//    private static final String PM_QUERY_GS = "select distinct(manager_user_id) "
+//            + "from project order by manager_user_id";
 
     private static final String LABEL_SUFFIX = ": ";
 
@@ -330,10 +329,6 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                 // and only show cost if jobcosting is on.
                 // int numCols = 6;
                 int numCols = 10;
-                if (super.isUseInContext() && super.isUseDefaultContext())
-                {
-                    numCols++;
-                }
                 boolean hasDispatchInfo = wfstate.equals(DISPATCHED);
                 boolean hasCostInfo = isJobCostingOn();
                 if (hasDispatchInfo)
@@ -354,10 +349,6 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                 if (PageHandler.isInContextMatch(job))
                 {
                     subcols[l++] = WorkflowTableModel.IN_CONTEXT_WC;
-                }
-                if (PageHandler.isDefaultContextMatch(job))
-                {
-                    subcols[l++] = WorkflowTableModel.CONTEXT_WC;
                 }
                 subcols[l++] = WorkflowTableModel.FUZZY_HI_WC;
                 subcols[l++] = WorkflowTableModel.FUZZY_MED_HI_WC;
@@ -598,7 +589,6 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                     p_wfstate, theSession, m_currency, false);
 
             wtm.setUseInContext(super.isUseInContext());
-            wtm.setUseDefaultContext(super.isUseDefaultContext());
             Long jobid = (Long) p_jtm.getValueAt(i, 0);
             wtm.fillAllData(p_wfstate, workflows);
             wtms.put(jobid, wtm);

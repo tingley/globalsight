@@ -51,7 +51,6 @@
     boolean isUseInContext = ((Boolean)sessionMgr.getAttribute(WebAppConstants.IS_USE_IN_CONTEXT)).booleanValue();
     boolean leverageExactOnly = ((Boolean)sessionMgr.getAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY)).booleanValue();
     boolean isInContextMatch = (Boolean)sessionMgr.getAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH);
-    boolean isDefaultContextMatch = (Boolean)sessionMgr.getAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH);
     int threshold = 75;
     try
     {
@@ -115,12 +114,8 @@ var helpFile = "<%=bundle.getString("help_job_wordcounts")%>";
 		      if(isInContextMatch){
 			  	out.print(bundle.getString("lb_leverage_in_context_matches"));
 		      }else{
-		    	  if(isDefaultContextMatch){
-		    		  out.print(bundle.getString("lb_default"));
-		    	  }else{
-		    		  out.print(bundle.getString("lb_100_match_only"));
-		    	  }
-		      } 
+	    	    out.print(bundle.getString("lb_100_match_only"));
+		      }
 	      %>
 	    </amb:column>
         
@@ -129,13 +124,7 @@ var helpFile = "<%=bundle.getString("help_job_wordcounts")%>";
                  sortBy="<%=WorkflowComparator.EXACT%>">
                 <%= wf.getSegmentTmWordCount()%>
             </amb:column>
-        <%}else if(isDefaultContextMatch){ %>
-            <amb:column label="lb_100" width="60px"
-                 sortBy="<%=WorkflowComparator.DEFAULT_CONTEXT_EXACT%>">
-                <%=wf.getTotalExactMatchWordCount() - wf.getContextMatchWordCount()%>
-            </amb:column>
-        <%
-            } else {
+        <%} else {
         %>
             <amb:column label="lb_100" width="60px"
                  sortBy="<%=WorkflowComparator.TOTAL_EXACT%>">
@@ -175,26 +164,8 @@ var helpFile = "<%=bundle.getString("help_job_wordcounts")%>";
 	             sortBy="<%=WorkflowComparator.IN_CONTEXT%>">
 	            <%=wf.getInContextMatchWordCount()%>
 	        </amb:column>
-        <%
-            }else{
-        %>
-			<%
-			    if(isDefaultContextMatch){
-			%>
-		        <amb:column label="lb_context_tm" width="100px"
-		             sortBy="<%=WorkflowComparator.CONTEXT%>">
-		            <%=wf.getContextMatchWordCount()%>
-		        </amb:column>
-			<%
-			    }
-			%>
-		<%
-		    }
-		%>
-        <amb:column label="lb_total" width="60px"
-             sortBy="<%=WorkflowComparator.WC_TOTAL%>">
-            <%=wf.getTotalWordCount()%>
-        </amb:column>
+        <%  } %>
+        <amb:column label="lb_total" width="60px" sortBy="<%=WorkflowComparator.WC_TOTAL%>"><%=wf.getTotalWordCount()%></amb:column>
       </amb:table>
     </td>
   </tr>
@@ -236,93 +207,41 @@ if (userPerms.getPermissionFor(Permission.JOB_WORKFLOWS_SUMMARY_STATISTICS)){
         </amb:column>
         <amb:column label="lb_leverage_match_option" width="180px">
 	      <%
-	          if(isInContextMatch){
-	      			  	out.print(bundle.getString("lb_leverage_in_context_matches"));
-	      		      }else{
-	      		    	  if(isDefaultContextMatch){
-	      		    		  out.print(bundle.getString("lb_default"));
-	      		    	  }else{
-	      		    		  out.print(bundle.getString("lb_100_match_only"));
-	      		    	  }
-	      		      }
+	          if(isInContextMatch) {
+	      		 out.print(bundle.getString("lb_leverage_in_context_matches"));
+	      	  } else {
+	        	  out.print(bundle.getString("lb_100_match_only"));
+              }
 	      %>
 	    </amb:column>
         <%
-                    if(isInContextMatch){
-                %>
-	        <amb:column label="lb_100" width="60px"
-	             sortBy="<%=WorkflowComparator.EXACT%>">
-	            <%=wf.getSegmentTmWordCount()%>
-	        </amb:column>
-        <%
-            }else if(isDefaultContextMatch){
+            if(isInContextMatch) {
         %>
-            <amb:column label="lb_100" width="60px"
-                 sortBy="<%=WorkflowComparator.DEFAULT_CONTEXT_EXACT%>">
-                <%=wf.getTotalExactMatchWordCount() - wf.getContextMatchWordCount()%>
-            </amb:column>
+	        <amb:column label="lb_100" width="60px" sortBy="<%=WorkflowComparator.EXACT%>"><%=wf.getSegmentTmWordCount()%></amb:column>
         <%
-            } else{
+            } else {
         %>
-	        <amb:column label="lb_100" width="60px"
-	             sortBy="<%=WorkflowComparator.TOTAL_EXACT%>">
-	            <%=wf.getTotalExactMatchWordCount()%>
-	        </amb:column>
+	        <amb:column label="lb_100" width="60px" sortBy="<%=WorkflowComparator.TOTAL_EXACT%>"><%=wf.getTotalExactMatchWordCount()%></amb:column>
 		<% }%>
         <%if (isDell) {%>
-        <amb:column label="lb_fuzzy_match" width="60px"
-             sortBy="<%=WorkflowComparator.TOTAL_FUZZY%>">
-            <%= totalFuzzy %>
-        </amb:column>
-        <%}
-        else{%>
-        <amb:column label="lb_95" width="60px"
-             sortBy="<%=WorkflowComparator.BAND1%>">
-            <%= wf.getThresholdHiFuzzyWordCount()%>
-        </amb:column>
-        <amb:column label="lb_85" width="60px"
-             sortBy="<%=WorkflowComparator.BAND2%>">
-            <%= wf.getThresholdMedHiFuzzyWordCount() %>
-        </amb:column>
-        <amb:column label="lb_75" width="60px"
-             sortBy="<%=WorkflowComparator.BAND3%>">
-            <%= wf.getThresholdMedFuzzyWordCount() %>
-        </amb:column>
+        <amb:column label="lb_fuzzy_match" width="60px" sortBy="<%=WorkflowComparator.TOTAL_FUZZY%>"><%= totalFuzzy %></amb:column>
+        <%} else {%>
+        <amb:column label="lb_95" width="60px" sortBy="<%=WorkflowComparator.BAND1%>"><%= wf.getThresholdHiFuzzyWordCount()%></amb:column>
+        <amb:column label="lb_85" width="60px" sortBy="<%=WorkflowComparator.BAND2%>"><%= wf.getThresholdMedHiFuzzyWordCount() %></amb:column>
+        <amb:column label="lb_75" width="60px" sortBy="<%=WorkflowComparator.BAND3%>"><%= wf.getThresholdMedFuzzyWordCount() %></amb:column>
         <%}%>
         <%if (threshold < 75) {%>
-        <amb:column label="lb_74_and_below" width="60px"
-             sortBy="<%=WorkflowComparator.BAND4%>">
-            <%= wf.getThresholdLowFuzzyWordCount() %>
-        </amb:column>
+        <amb:column label="lb_74_and_below" width="60px" sortBy="<%=WorkflowComparator.BAND4%>"><%= wf.getThresholdLowFuzzyWordCount() %></amb:column>
         <%}%>
-        <amb:column label="lb_no_match" width="60px"
-             sortBy="<%=WorkflowComparator.NO_MATCH%>">
-            <%= wf.getThresholdNoMatchWordCount() %>
-        </amb:column>
-        <amb:column label="lb_repetition_word_cnt" width="70px"
-             sortBy="<%=WorkflowComparator.REPETITIONS%>">
-            <%= wf.getRepetitionWordCount()%>
-        </amb:column>
-        <%if (!isDell) {%>
-	        <%if(isInContextMatch){ %>
-		        <amb:column label="lb_in_context_tm" width="100px"
-		             sortBy="<%=WorkflowComparator.IN_CONTEXT%>">
-		            <%= wf.getInContextMatchWordCount() %>
-		        </amb:column>
-	        <%}else{ %>
-				<%if(isDefaultContextMatch){ %>
-			        <amb:column label="lb_context_tm" width="100px"
-			             sortBy="<%=WorkflowComparator.CONTEXT%>">
-			            <%= wf.getContextMatchWordCount() %>
-			        </amb:column>
-				<%} %>
+        <amb:column label="lb_no_match" width="60px" sortBy="<%=WorkflowComparator.NO_MATCH%>"><%= wf.getThresholdNoMatchWordCount() %></amb:column>
+        <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=WorkflowComparator.REPETITIONS%>"><%= wf.getRepetitionWordCount()%></amb:column>
+        <%if (!isDell) { %>
+	        <%if (isInContextMatch) { %>
+		        <amb:column label="lb_in_context_tm" width="100px" sortBy="<%=WorkflowComparator.IN_CONTEXT%>"><%= wf.getInContextMatchWordCount() %></amb:column>
 	        <%} %>
         <%}%>
-        
-        <amb:column label="lb_total" width="60px"
-             sortBy="<%=WorkflowComparator.WC_TOTAL%>">
-            <%= wf.getTotalWordCount() %>
-        </amb:column>
+
+        <amb:column label="lb_total" width="60px" sortBy="<%=WorkflowComparator.WC_TOTAL%>"><%= wf.getTotalWordCount() %></amb:column>
       </amb:table>
     </td>
   </tr>

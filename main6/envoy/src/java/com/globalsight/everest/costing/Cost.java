@@ -77,7 +77,6 @@ public class Cost extends PersistentObject
     private CostByWordCount m_costByWordCount = null;
 
     public boolean isUseInContext = false;
-    public boolean isDefaultInContext = false;
 
     private HashMap<Long, Cost> workflowCost = new HashMap<Long, Cost>();
 
@@ -228,8 +227,7 @@ public class Cost extends PersistentObject
             {
                 m = new Money(
                         (isUseInContext) ? m_estimatedCost.floatValue()
-                                : (isDefaultInContext) ? m_defaultContextEstimatedCost.floatValue()
-                                        : m_noUseEstimatedCost.floatValue(),
+                                : m_noUseEstimatedCost.floatValue(),
                         m_currency);
             }
         }

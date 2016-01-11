@@ -28,7 +28,6 @@ import javax.swing.table.AbstractTableModel;
 
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -120,8 +119,6 @@ public class WorkflowTableModel2 extends AbstractTableModel
             + "workflowTable";
 
     private boolean useInContext = false;
-
-    private boolean useDefaultContext = false;
 
     public WorkflowTableModel2()
     {
@@ -231,10 +228,7 @@ public class WorkflowTableModel2 extends AbstractTableModel
                     dataMap.put(IN_CONTEXT_WC,
                             getWorkflowValue(w, IN_CONTEXT_WC));
                 }
-                if (useDefaultContext)
-                {
-                    dataMap.put(CONTEXT_WC, getWorkflowValue(w, CONTEXT_WC));
-                }
+
                 // dataMap.put(SUBLEVREPS, getWorkflowValue(w, SUBLEVREPS));
                 // dataMap.put(SUBLEVMATCHES, getWorkflowValue(w,
                 // SUBLEVMATCHES));
@@ -312,8 +306,6 @@ public class WorkflowTableModel2 extends AbstractTableModel
         try
         {
             boolean isInContextMatch = PageHandler.isInContextMatch(w.getJob());
-            boolean isUseDefaultContext = PageHandler.isDefaultContextMatch(w
-                    .getJob());
             switch (c)
             {
                 case TRGLOCALE:
@@ -360,15 +352,10 @@ public class WorkflowTableModel2 extends AbstractTableModel
                 case SEGMENT_TM_WC:
                     o = new Integer(
                             (isInContextMatch) ? w.getSegmentTmWordCount()
-                                    : (isUseDefaultContext) ? w
-                                            .getTotalExactMatchWordCount()
-                                            - w.getContextMatchWordCount() : w
-                                            .getTotalExactMatchWordCount());
+                                    : w.getTotalExactMatchWordCount());
                     break;
                 case CONTEXT_WC:
-                    o = new Integer(
-                            (isUseDefaultContext) ? w
-                                    .getContextMatchWordCount() : 0);
+                    o = new Integer(0);
                     break;
                 case IN_CONTEXT_WC:
                     o = new Integer(
@@ -425,11 +412,7 @@ public class WorkflowTableModel2 extends AbstractTableModel
                     // create a wf cost object
                     Cost cost = BasicReportHandler.calculateWorkflowCost(w,
                             m_currency, Cost.EXPENSE);
-                    o = (isInContextMatch) ? ReportsPackage
-                            .getEstimatedCost(cost)
-                            : (isUseDefaultContext) ? ReportsPackage
-                                    .getUseDefaultContextEstimatedCost(cost)
-                                    : ReportsPackage.getNoUseEstimatCost(cost);
+                    o = (isInContextMatch) ? ReportsPackage.getEstimatedCost(cost) : ReportsPackage.getNoUseEstimatCost(cost);
                     break;
                 case ACTUALCOST:
                     Cost cost2 = BasicReportHandler.calculateWorkflowCost(w,
@@ -552,15 +535,5 @@ public class WorkflowTableModel2 extends AbstractTableModel
     public void setUseInContext(boolean useInContext)
     {
         this.useInContext = useInContext;
-    }
-
-    public boolean isUseDefaultContext()
-    {
-        return useDefaultContext;
-    }
-
-    public void setUseDefaultContext(boolean useDefaultContext)
-    {
-        this.useDefaultContext = useDefaultContext;
     }
 }

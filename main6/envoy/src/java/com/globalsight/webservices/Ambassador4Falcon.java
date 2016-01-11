@@ -1028,8 +1028,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
     {
         boolean isInContextMatch = PageHandler.isInContextMatch(tg
                 .getSourcePage().getRequest().getJob());
-        boolean isUseDefaultContextMatch = PageHandler
-                .isDefaultContextMatch(tg);
         PageWordCounts pageWC = tg.getWordCount();
 
         // 100% match
@@ -1046,16 +1044,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
         }
         else
         {
-            if (isUseDefaultContextMatch)
-            {
-                _100MatchWordCount = pageWC.getTotalExactMatchWordCount()
-                        - contextMatchWC;
-            }
-            else
-            {
-                _100MatchWordCount = pageWC.getTotalExactMatchWordCount();
-                contextMatchWC = 0;
-            }
+        	_100MatchWordCount = pageWC.getTotalExactMatchWordCount();
+        	contextMatchWC = 0;
         }
 
         int hiFuzzyWordCount = pageWC.getThresholdHiFuzzyWordCount();

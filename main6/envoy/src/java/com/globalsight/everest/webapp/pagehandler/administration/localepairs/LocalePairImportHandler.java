@@ -441,34 +441,24 @@ public class LocalePairImportHandler extends PageHandler implements
 
 		private void storeGlobalSightLocaleData(Map<String, List> dataMap)
 		{
-			List<GlobalSightLocale> globalSightLocaleList = dataMap
-					.get("Locale");
-			GlobalSightLocale locale = null;
+			List<GlobalSightLocale> globalSightLocaleList = dataMap.get("Locale");
 			LocaleManagerWLRemote localeMangerLocal = ServerProxy.getLocaleManager();
 
+			GlobalSightLocale locale = null;
 			try
 			{
 				for (int i = 0; i < globalSightLocaleList.size(); i++)
 				{
 					locale = globalSightLocaleList.get(i);
 					long oldId = locale.getId();
-					long databaseId = getLocaleId(locale);
-					if (databaseId != 0)
-					{
-					    localeMap.put(String.valueOf(oldId), locale);
-					}
-					else
-					{
-						localeMangerLocal.addLocale(locale);
-						localeMap.put(String.valueOf(oldId), locale);
-					}
+					GlobalSightLocale gslInDb = localeMangerLocal.addLocale(locale);
+					localeMap.put(String.valueOf(oldId), gslInDb);
 				}
 			}
 			catch (Exception e)
 			{
-				String msg = "Upload GlobalSight Locale data failed!";
-				logger.warn(msg);
-				addToError(msg);
+				logger.error("Error when upload GlobalSight Locale data", e);
+				addToError("Upload GlobalSight Locale data failed!");
 			}
 		}
 
@@ -528,26 +518,6 @@ public class LocalePairImportHandler extends PageHandler implements
 				logger.warn(msg);
 				addToError(msg);
 			}
-		}
-
-		private long getLocaleId(GlobalSightLocale locale)
-		{
-			String hql = null;
-			long dataId = 0;
-			Map map = new HashMap();
-			hql = "select locale.id from  GlobalSightLocale locale where locale.isUiLocale=:isUiLocale "
-					+ " and  locale.language=:language and  locale.country=:country";
-
-			map.put("isUiLocale", locale.isIsUiLocale());
-			map.put("language", locale.getLanguageCode());
-			map.put("country", locale.getCountryCode());
-
-			Long id = (Long) HibernateUtil.getFirst(hql, map);
-			if (id!=null)
-			{
-				dataId = id;
-			}
-			return dataId;
 		}
 
 		private LocalePair putDataIntoLocalePair(Map<String, String> valueMap)

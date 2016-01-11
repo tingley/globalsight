@@ -7,33 +7,56 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import net.sf.json.JSONObject;
+import net.sf.json.xml.XMLSerializer;
 
 import org.apache.log4j.Logger;
+import org.jbpm.JbpmContext;
+import org.jbpm.graph.def.ProcessDefinition;
 
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.foundation.ContainerRole;
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.foundation.UserRoleImpl;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.AddingSourcePage;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
+import com.globalsight.everest.workflow.WorkflowConfiguration;
+import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.JsonUtil;
 
 public class AppletService extends HttpServlet
 {
@@ -62,6 +85,7 @@ public class AppletService extends HttpServlet
         catch (Exception e)
         {
             CATEGORY.error("Can not invoke the method:" + method);
+            CATEGORY.error(e);
         }
     }
     
@@ -426,5 +450,233 @@ public class AppletService extends HttpServlet
             realJobPath = tmp.substring(0, tmp.indexOf("\\"));
         }
         return realJobPath;
+    }
+    
+    public void getRoles()
+    {
+        HttpSession session = request.getSession();
+        ResourceBundle bundle = PageHandler.getBundle(session);
+        
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        // always check for the object (whether it's new or existing)
+        WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) sessionMgr
+                .getAttribute(WorkflowTemplateConstants.WF_TEMPLATE_INFO);
+        
+        GlobalSightLocale targetLocale = wfti.getTargetLocale();
+        GlobalSightLocale sourceLocale = wfti.getSourceLocale();
+        
+        String activity = request.getParameter("activity");
+        
+        ContainerRole containerRole = WorkflowTemplateHandlerHelper
+                .getContainerRole(activity, sourceLocale.toString(),
+                        targetLocale.toString(), wfti.getProject().getId());
+
+        if (containerRole != null)
+        {
+            writeString(containerRole.getName());
+        } 
+        else
+        {
+            writeString("");
+        }
+    }
+    
+    public void getParticipantUser()
+    {
+        String activity = request.getParameter("activity");
+        
+        HttpSession session = request.getSession();
+        ResourceBundle bundle = PageHandler.getBundle(session);
+        
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        // always check for the object (whether it's new or existing)
+        WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) sessionMgr
+                .getAttribute(WorkflowTemplateConstants.WF_TEMPLATE_INFO);
+        
+        GlobalSightLocale targetLocale = wfti.getTargetLocale();
+        GlobalSightLocale sourceLocale = wfti.getSourceLocale();
+        
+     // obtain the roles to be turned into grid data.
+        Collection usersCollection = WorkflowTemplateHandlerHelper
+                .getUserRoles(activity, sourceLocale.toString(),
+                        targetLocale.toString());
+
+        ArrayList<Object[]> userRoles = new ArrayList<Object[]>();
+        if (usersCollection != null)
+        {
+            Set projectUserIds = wfti.getProject().getUserIds();
+            Vector<UserRoleImpl> usersInProject = new Vector<UserRoleImpl>();
+
+            // filter out the users that aren't in the project
+            for (Iterator i = usersCollection.iterator(); i.hasNext();)
+            {
+                UserRoleImpl userRole = (UserRoleImpl) i.next();
+                if (projectUserIds.contains(userRole.getUser()))
+                {
+                    usersInProject.add(userRole);
+                }
+            }
+            
+            
+
+            for (int i = 0; i < usersInProject.size(); i++)
+            {
+                UserRoleImpl userRole = (UserRoleImpl) usersInProject
+                        .get(i);
+                User user = WorkflowTemplateHandlerHelper.getUser(userRole
+                        .getUser());
+                if (user != null)
+                {
+                    String[] role = new String[6];
+                    role[0] = user.getFirstName();
+                    role[1] = user.getLastName();
+                    role[2] = user.getUserName();
+                    // 3 - place holder for calendaring
+                    // since the wf instance needs this and uses
+                    // same WorkflowTaskDialog code
+                    role[3] = null;
+                    role[4] = userRole.getName();
+                    role[5] = userRole.getRate();
+                    userRoles.add(role);                        
+                }
+            }
+        }
+        
+        writeString(JsonUtil.toJson(userRoles));
+    }
+    
+    public void getWorkflowDetailData()
+    {
+        Map m = new HashMap();
+        JsonUtil.toJson(m);
+        
+        HttpSession session = request.getSession();
+        ResourceBundle bundle = PageHandler.getBundle(session);
+        Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
+        
+        
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        // always check for the object (whether it's new or existing)
+        WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) sessionMgr
+                .getAttribute(WorkflowTemplateConstants.WF_TEMPLATE_INFO);
+        
+        GlobalSightLocale targetLocale = wfti.getTargetLocale();
+        GlobalSightLocale sourceLocale = wfti.getSourceLocale();
+        
+        Hashtable table = WorkflowTemplateHandlerHelper.getWorkflowDetailData(bundle, uiLocale,
+                sourceLocale, targetLocale);
+        
+        table.put("companyId", wfti.getCompanyId());
+        table.put("workflowName", wfti.getName());
+        table.put("workflowDesc", wfti.getDescription());
+        table.put("workflowPM", wfti.getProjectManagerId());
+        table.put("workflowManager", wfti.getWorkflowManagerIds());
+        
+        writeString(JsonUtil.toJson(table));
+    }
+    
+    private void writeString(String js)
+    {
+        PrintWriter writer = null;
+        try
+        {
+            writer = response.getWriter();
+            writer.write(js);
+        }
+        catch (IOException e)
+        {
+            CATEGORY.error(e.getMessage(), e);
+        }
+        finally
+        {
+            if (writer != null)
+            {
+                writer.flush();
+                writer.close();
+            }
+        }
+    }
+    
+    /**
+     * For edit workflow.
+     * @throws IOException 
+     */
+    public void getWorkflowData() throws IOException 
+    {
+        SessionManager sessionMgr = (SessionManager) request.getSession()
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        // always check for the object (whether it's new or existing)
+        WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) sessionMgr
+                .getAttribute(WorkflowTemplateConstants.WF_TEMPLATE_INFO);
+        
+        String templateName = wfti.getName();
+        String templateFileName = AmbFileStoragePathUtils
+                .getWorkflowTemplateXmlDir().getAbsolutePath()
+                + File.separator
+                + templateName + WorkflowConstants.SUFFIX_XML;
+        File file = new File(templateFileName);
+        
+        if (file.exists())
+        {
+            String content = FileUtil.readFile(file, "utf-8");
+            JSONObject json = (JSONObject) new XMLSerializer().read(content);
+            String js = json.toString();
+            writeString(js);
+        }        
+    }
+    
+    public void saveWorkflow()
+    {
+        String xml = request.getParameter("xml");
+        SessionManager sessionMgr = (SessionManager) request.getSession()
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        // always check for the object (whether it's new or existing)
+        WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) sessionMgr
+                .getAttribute(WorkflowTemplateConstants.WF_TEMPLATE_INFO);
+        
+        WorkflowTemplate temp = new WorkflowTemplate();
+        temp.setName(wfti.getName());
+        temp.setDescription(wfti.getDescription());
+        
+        JbpmContext ctx = null;
+        try
+        {
+            ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+            ProcessDefinition pd = ProcessDefinition.parseXmlString(xml);
+            ctx.deployProcessDefinition(pd);
+            temp.setId(pd.getId());
+            wfti.setWorkflowTemplate(temp);
+            if (wfti.getId() > 0)
+            {
+                ServerProxy.getProjectHandler().modifyWorkflowTemplate(wfti);
+            }
+            else
+            {
+                ServerProxy.getProjectHandler().createWorkflowTemplateInfo(
+                        wfti);
+            }
+            String path = AmbFileStoragePathUtils
+                    .getWorkflowTemplateXmlDir().getAbsolutePath()
+                    + File.separator
+                    + wfti.getName()
+                    + WorkflowConstants.SUFFIX_XML;
+            FileUtil.writeFile(new File(path), xml, "utf-8");
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e.getMessage(), e);
+        }
+        finally
+        {
+            ctx.close();
+        }
     }
 }

@@ -99,7 +99,6 @@ public abstract class BasicReportHandler
     protected String reportKey = "BasicReport";
 
     private boolean useInContext = false;
-    private boolean useDefaultContext = false;
 
     // for pagination
     public static final int PAGE_CONTENT_HEIGTH_PX = 700;
@@ -688,16 +687,6 @@ public abstract class BasicReportHandler
         useInContext = isUseInContext;
     }
 
-    protected boolean isUseDefaultContext()
-    {
-        return useDefaultContext;
-    }
-
-    protected void setUseDefaultContext(boolean defaultContext)
-    {
-        useDefaultContext = defaultContext;
-    }
-
     /**
      * This method judges if the In Context Match Information should display
      * according to the list iterator passed in.
@@ -706,8 +695,6 @@ public abstract class BasicReportHandler
      */
     protected void setUseInContext(Iterator<?> iter)
     {
-        TranslationMemoryProfile tmProfile = null;
-
         while (iter.hasNext())
         {
             Object o = iter.next();
@@ -715,28 +702,20 @@ public abstract class BasicReportHandler
             if (o instanceof Job)
             {
                 job = (Job) iter.next();
-                tmProfile = job.getL10nProfile().getTranslationMemoryProfile();
             }
             else if (o instanceof Workflow)
             {
                 Workflow workflow = (Workflow) iter.next();
                 job = workflow.getJob();
-                tmProfile = job.getL10nProfile().getTranslationMemoryProfile();
             }
             else
             {
                 throw new IllegalArgumentException("The argument is not right");
             }
-            boolean isInContextMatch = PageHandler.isInContextMatch(job);
-            boolean isDefaultContextMatch = PageHandler
-                    .isDefaultContextMatch(job);
-            if (isInContextMatch)
+
+            if (PageHandler.isInContextMatch(job))
             {
                 useInContext = true;
-            }
-            else if (isDefaultContextMatch)
-            {
-                useDefaultContext = true;
             }
         }
     }
@@ -751,19 +730,9 @@ public abstract class BasicReportHandler
     {
         for (Job job : jobs)
         {
-            // boolean isUseInContext =
-            // job.getL10nProfile().getTranslationMemoryProfile()
-            // .getIsContextMatchLeveraging();
-            boolean isInContextMatch = PageHandler.isInContextMatch(job);
-            boolean isDefaultContextMatch = PageHandler
-                    .isDefaultContextMatch(job);
-            if (isInContextMatch)
+            if (PageHandler.isInContextMatch(job))
             {
                 useInContext = true;
-            }
-            else if (isDefaultContextMatch)
-            {
-                useDefaultContext = true;
             }
         }
     }
@@ -776,26 +745,10 @@ public abstract class BasicReportHandler
      */
     protected void setUseInContext(Job job)
     {
-        // boolean isUseInContext =
-        // job.getL10nProfile().getTranslationMemoryProfile()
-        // .getIsContextMatchLeveraging();
-        boolean isInContextMatch = PageHandler.isInContextMatch(job);
-        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(job);
-        if (isInContextMatch)
+    	useInContext = false;
+        if (PageHandler.isInContextMatch(job))
         {
             useInContext = true;
-        }
-        else
-        {
-            useInContext = false;
-        }
-        if (isDefaultContextMatch)
-        {
-            useDefaultContext = true;
-        }
-        else
-        {
-            useDefaultContext = false;
         }
     }
 }

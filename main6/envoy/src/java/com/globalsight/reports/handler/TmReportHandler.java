@@ -85,21 +85,13 @@ public class TmReportHandler extends BasicReportHandler
 
     private boolean useContextMatch = false;
 
-    private boolean isDefaultContextMatch = false;
-
-    private ArrayList<ArrayList<Object>> useInContextInfos = new ArrayList<ArrayList<Object>>();
-
     private Map<Long, String> noUseInContextValues = new HashMap<Long, String>();
 
     private Map<Long, Integer> noUseExactMatchValues = new HashMap<Long, Integer>();
 
     private Map<Long, Boolean> useInContexts = new HashMap<Long, Boolean>();
 
-    private Map<Long, Integer> noUseDefaultExactMatchValues = new HashMap<Long, Integer>();
-
     private Map<Long, String> noUseContextValues = new HashMap<Long, String>();
-
-    private Map<Long, Boolean> useDefaultContexts = new HashMap<Long, Boolean>();
 
     public TmReportHandler()
     {
@@ -258,11 +250,6 @@ public class TmReportHandler extends BasicReportHandler
             fieldnameList.add(ReportsPackage.getMessage(m_bundle,
                     "in_context_match"));
         }
-        if (isDefaultContextMatch)
-        {
-            fieldnameList.add(ReportsPackage.getMessage(m_bundle,
-                    "context_match"));
-        }
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "no_match"));
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "repitition"));
         fieldnameList.add(ReportsPackage.getMessage(m_bundle,
@@ -359,65 +346,8 @@ public class TmReportHandler extends BasicReportHandler
                 Long jobId = Long.parseLong(curRowList.get(1));
                 if (!useInContexts.get(jobId))
                 {
-                    if (!useDefaultContexts.get(jobId))
-                    {
-                        curRowList.set(8, curRowList.get(8) == null ? null
-                                : noUseExactMatchValues.get(jobId).toString());
-                    }
-                    else
-                    {
-                        if (useContextMatch && isDefaultContextMatch)
-                        {
-                            curRowList
-                                    .set(8,
-                                            curRowList.get(8) == null ? null
-                                                    : ""
-                                                            + (Integer
-                                                                    .parseInt(noUseExactMatchValues
-                                                                            .get(jobId)
-                                                                            .toString()) - Integer
-                                                                    .parseInt(curRowList
-                                                                            .get(10))));
-                        }
-                        else if (isDefaultContextMatch)
-                        {
-                            curRowList
-                                    .set(8,
-                                            curRowList.get(8) == null ? null
-                                                    : ""
-                                                            + (Integer
-                                                                    .parseInt(noUseExactMatchValues
-                                                                            .get(jobId)
-                                                                            .toString()) - Integer
-                                                                    .parseInt(curRowList
-                                                                            .get(9))));
-                        }
-                    }
-                }
-                else if (useDefaultContexts.get(jobId))
-                {
-                    if (useContextMatch && isDefaultContextMatch)
-                    {
-                        curRowList.set(
-                                8,
-                                curRowList.get(8) == null ? null
-                                        : ""
-                                                + (Integer.parseInt(curRowList
-                                                        .get(8)) - Integer
-                                                        .parseInt(curRowList
-                                                                .get(10))));
-                    }
-                    else if (isDefaultContextMatch)
-                    {
-                        curRowList.set(
-                                8,
-                                curRowList.get(8) == null ? null
-                                        : ""
-                                                + (Integer.parseInt(curRowList
-                                                        .get(8)) - Integer
-                                                        .parseInt(curRowList
-                                                                .get(9))));
-                    }
+                    curRowList.set(8, curRowList.get(8) == null ? null
+                            : noUseExactMatchValues.get(jobId).toString());
                 }
 
                 if (useContextMatch && !useInContexts.get(jobId))
@@ -425,17 +355,7 @@ public class TmReportHandler extends BasicReportHandler
                     curRowList.set(9, noUseInContextValues.get(jobId)
                             .toString());
                 }
-                if (isDefaultContextMatch && !useDefaultContexts.get(jobId))
-                {
-                    if (useContextMatch)
-                    {
-                        curRowList.set(10, "0");
-                    }
-                    else
-                    {
-                        curRowList.set(9, "0");
-                    }
-                }
+
                 allDataForJsp.add(curRowList);
             }
 
@@ -530,10 +450,7 @@ public class TmReportHandler extends BasicReportHandler
             m_select.append(" target_page.IN_CONTEXT_MATCH_WORD_COUNT as \"")
                     .append(inContextTm).append("\",");
         }
-        if (isDefaultContextMatch)
-        {
-            m_select.append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"Context Match\", ");
-        }
+
         // 9 | 10
         String nomatch = this.commonBundle.getString("lb_no_match");
         m_select.append(" target_page.NO_MATCH_WORD_COUNT as \"")
@@ -632,8 +549,6 @@ public class TmReportHandler extends BasicReportHandler
     {
         while (rs.next())
         {
-            ArrayList<Object> singleRowDataList = new ArrayList<Object>();
-
             Long jobId = rs.getLong(1);
             Integer noUseExactMatchWordCount = rs.getInt(2);
 
@@ -643,36 +558,17 @@ public class TmReportHandler extends BasicReportHandler
             // .getTranslationMemoryProfile()
             // .getIsContextMatchLeveraging();
             boolean isInContextMatch = PageHandler.isInContextMatch(job);
-            boolean defaultContextMatch = PageHandler
-                    .isDefaultContextMatch(job);
-
-            singleRowDataList.add(isInContextMatch);
-            // TOTAL_EXACT_MATCH_WORD_COUNT
-            singleRowDataList.add(noUseExactMatchWordCount);
-            singleRowDataList.add(defaultContextMatch);
-            useInContextInfos.add(singleRowDataList);
-
             if (isInContextMatch)
             {
                 useContextMatch = true;
             }
             else
             {
-                if (defaultContextMatch)
-                {
-                    isDefaultContextMatch = true;
-                }
-                else
-                {
-                    noUseDefaultExactMatchValues.put(jobId,
-                            noUseExactMatchWordCount);
-                    noUseContextValues.put(jobId, "N/A");
-                }
+				noUseContextValues.put(jobId, "N/A");
                 noUseExactMatchValues.put(jobId, noUseExactMatchWordCount);
                 noUseInContextValues.put(jobId, "N/A");
             }
 
-            useDefaultContexts.put(jobId, defaultContextMatch);
             useInContexts.put(jobId, isInContextMatch);
         }
     }
@@ -708,8 +604,6 @@ public class TmReportHandler extends BasicReportHandler
         m_jobSelect = null;
 
         useContextMatch = false;
-
-        useInContextInfos = new ArrayList<ArrayList<Object>>();
 
         noUseInContextValues = new HashMap<Long, String>();
         noUseExactMatchValues = new HashMap<Long, Integer>();

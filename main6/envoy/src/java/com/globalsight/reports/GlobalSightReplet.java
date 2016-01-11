@@ -507,7 +507,7 @@ public abstract class GlobalSightReplet extends BasicReplet
 
     protected void setHeaders(Iterator iter)
     {
-        String[] headers = new String[2];
+        String[] headers = new String[1];
         while (iter.hasNext())
         {
             Object o = iter.next();
@@ -531,10 +531,6 @@ public abstract class GlobalSightReplet extends BasicReplet
                     // hava tm profile contains in context match
                     headers[0] = "In Context Match";
                 }
-                else if (PageHandler.isDefaultContextMatch(job))
-                {
-                    headers[1] = "Context Match";
-                }
             }
             catch (Exception e)
             {
@@ -547,7 +543,7 @@ public abstract class GlobalSightReplet extends BasicReplet
 
     protected void setHeaders(ArrayList jobs)
     {
-        String[] headers = new String[2];
+        String[] headers = new String[1];
         for (int i = 0; i < jobs.size(); i++)
         {
             Job job = (Job) jobs.get(i);
@@ -557,10 +553,6 @@ public abstract class GlobalSightReplet extends BasicReplet
                 {
                     // hava tm profile contains in context match
                     headers[0] = "In Context Match";
-                }
-                else if (PageHandler.isDefaultContextMatch(job))
-                {
-                    headers[1] = "Context Match";
                 }
             }
             catch (Exception e)
@@ -574,17 +566,13 @@ public abstract class GlobalSightReplet extends BasicReplet
 
     protected void setHeaders(Job job)
     {
-        String[] headers = new String[2];
+        String[] headers = new String[1];
         try
         {
             if (PageHandler.isInContextMatch(job))
             {
                 // hava tm profile contains in context match
                 headers[0] = "In Context Match";
-            }
-            else if (PageHandler.isDefaultContextMatch(job))
-            {
-                headers[1] = "Context Match";
             }
         }
         catch (Exception e)

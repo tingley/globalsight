@@ -53,7 +53,6 @@ public interface Job extends WorkObject
     public static final String READY_TO_BE_DISPATCHED = "READY_TO_BE_DISPATCHED";
     public static final String ARCHIVED = "ARCHIVED";
     public static final String ALLSTATUS = "ALL_STATUS";
-    public static final String DEFAULT_CONTEXT = "default";
     public static final String IN_CONTEXT = "in-context";
     public static final String EXACT_ONLY = "exact";
     public static final String ADD_FILE = "ADDING_FILES";

@@ -866,11 +866,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     {
 						OPD = updateOfflinePageData(OPD, matchs, splittedTuvs);
                     }
-                    else if (PageHandler.isDefaultContextMatch(job)
-                            && trgPage.getIsDefaultContextMatch())
-                    {
-                        OPD = updateDefaultContextOfflinePageDate(OPD, matchs);
-                    }
 
                     if (m_firstPage)
                     {
@@ -1242,37 +1237,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         }
 
         return consolidatedData;
-    }
-
-    @SuppressWarnings("unchecked")
-    private OfflinePageData updateDefaultContextOfflinePageDate(
-            OfflinePageData opd, MatchTypeStatistics matchs)
-    {
-        Vector vector = opd.getSegmentList();
-
-        for (int i = 0; i < vector.size(); i++)
-        {
-            OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
-
-            if (segment.isProtectedChangeable()
-                    && segment.getMatchValue() == 100
-                    && segment.getTargetTuv().getState().getValue() == TuvState.EXACT_MATCH_LOCALIZED
-                            .getValue())
-            {
-                segment = (OfflineSegmentData) vector.get(i);
-
-                if (opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
-                        || opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE)
-                    segment.setWriteAsProtectedSegment(false);
-                else
-                    segment.setWriteAsProtectedSegment(true);
-
-                segment.setDisplayMatchType("Default Context Exact Match");
-                vector.set(i, segment);
-            }
-        }
-        opd.setSegmentList(vector);
-        return opd;
     }
 
     @SuppressWarnings("unchecked")

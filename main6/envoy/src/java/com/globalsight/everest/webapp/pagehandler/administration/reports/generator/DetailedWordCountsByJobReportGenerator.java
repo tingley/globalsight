@@ -26,7 +26,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import org.apache.log4j.Logger;
 
 import com.csvreader.CsvWriter;
@@ -66,8 +65,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     private CellStyle subTotalStyle = null;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(
             "MM/dd/yy hh:mm:ss a z");
-    private boolean useInContext = false;
-    private boolean useDefaultContext = false;
+
     private int wordCountCol = 0;
     protected ResourceBundle m_bundle = null;
     protected HttpServletRequest m_request = null;
@@ -173,7 +171,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             file = ReportHelper.getXLSReportFile(getReportType(), null);
             Workbook workBook = new SXSSFWorkbook();
             Sheet sheet = workBook.createSheet(m_bundle.getString("jobinfo.tradosmatches"));
-            getUseInContextInfos(jobs, data.wantsAllLocales, data.trgLocaleList);
             addTitleForXlsx(workBook, sheet);
             addHeaderForXlsx(workBook, sheet);
             addJobsForXlsx(workBook, sheet, jobs, p_targetLocales);
@@ -332,15 +329,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         cell_H_Header.setCellValue(m_bundle.getString("lb_word_counts"));
         cell_H_Header.setCellStyle(getHeaderStyle(p_workBook));
         wordCountCol = col;
-        int span = 6;
-        if (useDefaultContext && useInContext)
-        {
-            span += 2;
-        }
-        else if (useDefaultContext || useInContext)
-        {
-            span += 1;
-        }
+        int span = 7;
         if (data.inludeMtColumn)
         {
             span += 1;
@@ -382,22 +371,10 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         cell_M.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 13 * 256);
         col++;
-        
-        if (useDefaultContext)
-        {
-        	Cell cell_Context = getCell(segHeaderRow, col);
-        	cell_Context.setCellValue(m_bundle.getString("lb_context_tm_report"));
-        	cell_Context.setCellStyle(getHeaderStyle(p_workBook));
-        }
 
-        if (useInContext)
-        {
-            if (useDefaultContext)
-                col++;
-            Cell cell_InContext = getCell(segHeaderRow, col);
-            cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
-            cell_InContext.setCellStyle(getHeaderStyle(p_workBook));
-        }
+        Cell cell_InContext = getCell(segHeaderRow, col);
+        cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+        cell_InContext.setCellStyle(getHeaderStyle(p_workBook));
 
         if (data.inludeMtColumn)
         {
@@ -407,10 +384,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             cell_MT.setCellStyle(getHeaderStyle(p_workBook));
         }
 
-        if (useDefaultContext || useInContext)
-        {
-            col++;
-        }
+        col++;
         Cell cell_Total = getCell(segHeaderRow, col);
         cell_Total.setCellValue(m_bundle.getString("lb_total"));
         cell_Total.setCellStyle(getHeaderStyle(p_workBook));
@@ -559,33 +533,21 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     {
         Job job = tg.getSourcePage().getRequest().getJob();
         boolean isInContextMatch = PageHandler.isInContextMatch(job);
-        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(job);
         PageWordCounts pageWC = tg.getWordCount();
 
         // 100% match
         int _100MatchWordCount = 0;
         // in context word match
         int inContextWordCount = 0;
-        // Context match
-        int contextMatchWC = pageWC.getContextMatchWordCount();
+
         if (isInContextMatch)
         {
             inContextWordCount = pageWC.getInContextWordCount();
             _100MatchWordCount = pageWC.getSegmentTmWordCount();
-            contextMatchWC = 0;
         }
         else
         {
-            if (isDefaultContextMatch)
-            {
-                _100MatchWordCount = pageWC.getTotalExactMatchWordCount()
-                        - contextMatchWC;
-            }
-            else
-            {
-                _100MatchWordCount = pageWC.getTotalExactMatchWordCount();
-                contextMatchWC = 0;
-            }
+        	_100MatchWordCount = pageWC.getTotalExactMatchWordCount();
         }
 
         int hiFuzzyWordCount = pageWC.getThresholdHiFuzzyWordCount();
@@ -667,36 +629,16 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         cell_M.setCellStyle(cs);
 
         cursor++;
-        if (useDefaultContext)
+        Cell cell_InContext = getCell(row, cursor);
+        if (isInContextMatch)
         {
-        	Cell cell_Context = getCell(row, cursor);
-            if (isDefaultContextMatch)
-            {
-            	cell_Context.setCellValue(contextMatchWC);
-            	cell_Context.setCellStyle(cs);
-            }
-            else
-            {
-            	cell_Context.setCellValue(0);
-            	cell_Context.setCellStyle(cs);
-            }
+        	cell_InContext.setCellValue(inContextWordCount);
+        	cell_InContext.setCellStyle(cs);
         }
-        if (useInContext)
+        else
         {
-            if (useDefaultContext)
-                cursor++;
-
-            Cell cell_InContext = getCell(row, cursor);
-            if (isInContextMatch)
-            {
-            	cell_InContext.setCellValue(inContextWordCount);
-            	cell_InContext.setCellStyle(cs);
-            }
-            else
-            {
-            	cell_InContext.setCellValue(0);
-            	cell_InContext.setCellStyle(cs);
-            }
+        	cell_InContext.setCellValue(0);
+        	cell_InContext.setCellStyle(cs);
         }
 
         if (data.inludeMtColumn)
@@ -706,9 +648,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             cell_MT.setCellValue(mtTotalWordCount);
             cell_MT.setCellStyle(cs);
         }
-
-        if (useDefaultContext || useInContext)
-            cursor++;
+         cursor++;
 
         Cell cell_Total = getCell(row, cursor);
         cell_Total.setCellValue(totalWords);
@@ -787,24 +727,12 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                 + sumStartCellCol + lastRow + ")");
         cell_M.setCellStyle(getSubTotalStyle(p_workbook));
         sumStartCellCol++;
-        
-        if (useDefaultContext)
-        {
-        	Cell cell_Context = getCell(segHeaderRow, c++);
-        	cell_Context.setCellFormula("SUM(" + sumStartCellCol + "5:"
-                    + sumStartCellCol + lastRow + ")");
-        	cell_Context.setCellStyle(getSubTotalStyle(p_workbook));
-            sumStartCellCol++;
-        }
 
-        if (useInContext)
-        {
-        	Cell cell_InContext = getCell(segHeaderRow, c++);
-        	cell_InContext.setCellFormula("SUM(" + sumStartCellCol + "5:"
-                    + sumStartCellCol + lastRow + ")");
-        	cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
-            sumStartCellCol++;
-        }
+    	Cell cell_InContext = getCell(segHeaderRow, c++);
+    	cell_InContext.setCellFormula("SUM(" + sumStartCellCol + "5:"
+                + sumStartCellCol + lastRow + ")");
+    	cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCellCol++;
 
         if (data.inludeMtColumn)
         {
@@ -987,7 +915,8 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         }
     }
 
-    private void setTargetLocales(HttpServletRequest p_request)
+    @SuppressWarnings("unchecked")
+	private void setTargetLocales(HttpServletRequest p_request)
             throws LocaleManagerException, RemoteException, GeneralException
     {
         data.trgLocaleList.clear();
@@ -1216,14 +1145,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         csvWriter.write(bundle.getString("lb_75_84") + "*");
         csvWriter.write(bundle.getString("lb_no_match"));
         csvWriter.write(bundle.getString("lb_repetition_word_cnt"));
-        if (useDefaultContext)
-        {
-            csvWriter.write(bundle.getString("lb_context_tm_report"));
-        }
-        if (useInContext)
-        {
-            csvWriter.write(bundle.getString("lb_in_context_tm"));
-        }
+        csvWriter.write(bundle.getString("lb_in_context_tm"));
         if (data.inludeMtColumn)
         {
             csvWriter.write("MT");
@@ -1247,7 +1169,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     {
         // sort jobs by job name
         SortUtil.sort(p_jobs, new JobComparator(Locale.US));
-        getUseInContextInfos(p_jobs, data.wantsAllLocales, data.trgLocaleList);
 
         addHeaderForCsv(m_bundle);
 
@@ -1286,60 +1207,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             }
 
             printMsg("Finished Job: " + j);
-        }
-    }
-
-
-    /**
-     * Get use In context info
-     * 
-     * @param jobs
-     * @param wantsAllLocales
-     * @param trgLocales
-     */
-    private void getUseInContextInfos(List<Job> jobs, boolean wantsAllLocales,
-            List<GlobalSightLocale> trgLocales)
-    {
-        // As different jobs may be using different option in TM profile, so
-        // need check through all jobs to decide the 2 properties.
-        for (Job j : jobs)
-        {
-            for (Workflow wf : j.getWorkflows())
-            {
-                String state = wf.getState();
-
-                // skip certain workflow whose target locale is not selected
-                GlobalSightLocale trgLocale = wf.getTargetLocale();
-                if (!wantsAllLocales && !trgLocales.contains(trgLocale))
-                {
-                    continue;
-                }
-
-                if (Workflow.DISPATCHED.equals(state)
-                        || Workflow.READY_TO_BE_DISPATCHED.equals(state)
-                        || Workflow.PENDING.equals(state)
-                        || Workflow.EXPORTED.equals(state)
-                        || Workflow.EXPORT_FAILED.equals(state)
-                        || Workflow.ARCHIVED.equals(state)
-                        || Workflow.LOCALIZED.equals(state))
-                {
-                    // Once it is set to "true", always true.
-                    if (PageHandler.isInContextMatch(j))
-                    {
-                        useInContext = true;                        
-                    }
-                    // Once it is set to "true", always true.
-                    if (PageHandler.isDefaultContextMatch(j))
-                    {
-                        useDefaultContext = true;                        
-                    }
-                }
-            }
-        }
-
-        if (!useInContext && !useDefaultContext)
-        {
-            useInContext = true;
         }
     }
 
@@ -1427,34 +1294,21 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     {
         Job job = tg.getSourcePage().getRequest().getJob();
         boolean isInContextMatch = PageHandler.isInContextMatch(job);
-        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(job);
         PageWordCounts pageWC = tg.getWordCount();
 
         // 100% match
         int _100MatchWordCount = 0;
         // in context word match
         int inContextWordCount = 0;
-        // Context match
-        int contextMatchWC = pageWC.getContextMatchWordCount();
 
         if (isInContextMatch)
         {
             inContextWordCount = pageWC.getInContextWordCount();
             _100MatchWordCount = pageWC.getSegmentTmWordCount();
-            contextMatchWC = 0;
         }
         else
         {
-            if (isDefaultContextMatch)
-            {
-                _100MatchWordCount = pageWC.getTotalExactMatchWordCount()
-                        - contextMatchWC;
-            }
-            else
-            {
-                _100MatchWordCount = pageWC.getTotalExactMatchWordCount();
-                contextMatchWC = 0;
-            }
+        	_100MatchWordCount = pageWC.getTotalExactMatchWordCount();
         }
 
         // 95% match
@@ -1519,27 +1373,14 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         csvWriter.write(String.valueOf(medFuzzyWordCount));
         csvWriter.write(String.valueOf(noMatchWorcCountForDisplay));
         csvWriter.write(String.valueOf(repetitionsWordCount));
-        if (useDefaultContext)
+
+        if (isInContextMatch)
         {
-            if (isDefaultContextMatch)
-            {
-                csvWriter.write(String.valueOf(contextMatchWC));
-            }
-            else
-            {
-                csvWriter.write(String.valueOf(0));
-            }
+            csvWriter.write(String.valueOf(inContextWordCount));
         }
-        if (useInContext)
+        else
         {
-            if (isInContextMatch)
-            {
-                csvWriter.write(String.valueOf(inContextWordCount));
-            }
-            else
-            {
-                csvWriter.write(String.valueOf(0));
-            }
+            csvWriter.write(String.valueOf(0));
         }
 
         if (data.inludeMtColumn)

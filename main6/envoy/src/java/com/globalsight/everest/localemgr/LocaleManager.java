@@ -66,7 +66,7 @@ public interface LocaleManager
      * @exception RemoteException
      *                System or network related exception
      */
-    void addSourceTargetLocalePair(GlobalSightLocale p_source,
+    public LocalePair addSourceTargetLocalePair(GlobalSightLocale p_source,
             GlobalSightLocale p_target, long companyId)
             throws LocaleManagerException, RemoteException;
 

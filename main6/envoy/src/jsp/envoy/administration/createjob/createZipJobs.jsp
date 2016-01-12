@@ -903,43 +903,34 @@ function checkAndUpload()
 		emptyFileValue();
 		return false;
 	}
-	var tempFileName = $("#selectedSourceFile").val();
-	if(type == "0")
-	{
-		if(tempFileName.lastIndexOf("\\") > 0)
+	var tempFiles = document.getElementById( "selectedSourceFile" );
+	var tempFileName;
+	for(var j=0;j<tempFiles.files.length;j++){
+		tempFileName = tempFiles.files[j].name;
+		if(type == "0")
 		{
-			tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
-		}
-		if(tempFileName == "")
-		{
-			emptyFileValue();
-			return false;
-		}
-		if(uploadedFiles.length > 0)
-		{
-			for(i=0; i<uploadedFiles.length; i++)
+			if(tempFileName.lastIndexOf("\\") > 0)
 			{
-				if(uploadedFiles[i] == tempFileName)
-				{
-					alert(tempFileName + " is already in the uploaded list.");
-					emptyFileValue();
-					return false;
-				}
+				tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
 			}
-		}
-		addTempDivElement(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
-		uploadedFiles.push(tempFileName);
+			if(tempFileName == "")
+			{
+				emptyFileValue();
+				return false;
+			}
+			addTempDivElement(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
+			uploadedFiles.push(tempFileName);
     }
-	else if(type == "1")
-	{
-		tempFileName = $("#selectedAttachmentFile").val();
-		if(tempFileName.lastIndexOf("\\") > 0)
+		else if(type == "1")
 		{
-			tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
+			tempFileName = $("#selectedAttachmentFile").val();
+			if(tempFileName.lastIndexOf("\\") > 0)
+			{
+				tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
+			}
+			addTempAttachment(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
 		}
-		addTempAttachment(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
 	}
-	
     var action = $("#createJobForm").attr("action");
     $("#createJobForm").attr("action", action+"&uploadAction=uploadSelectedFile&type="+type+"&tempFolder="+tempFolder);
 	$("#createJobForm").submit();
@@ -1011,7 +1002,7 @@ function isIE() { //ie?
                 <tr>
                     <td width="100px" height="30px" align="center" valign="middle" onmouseover="setInputFileDisable(0)">
                     <input type="button" id="sourceFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>">
-                    <input type="file" class="sourceFile" value="Add File" name="selectedSourceFile" id="selectedSourceFile" onclick="setType(0)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_add_file_tip}'/>">
+                    <input type="file" class="sourceFile" multiple value="Add File" name="selectedSourceFile" id="selectedSourceFile" onclick="setType(0)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_add_file_tip}'/>">
                     </td>
                     <td width="100px" align="center" valign="middle"><input id="uploadedFiles" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_uploaded_files}'/>" title="<c:out value='${lb_create_job_uploaded_files_tip}'/>"></td>
                     <td align="center" class="footertext">

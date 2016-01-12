@@ -454,7 +454,7 @@ public class TTXParser
                 String nodeValue = p_node.getStringValue();
                 if (nodeValue.startsWith("#"))
                 {
-                    nodeValue = nodeValue.replace("#", OfflineConstants.PONUD_SIGN);
+                    nodeValue = nodeValue.replaceFirst("#", OfflineConstants.PONUD_SIGN);
                 }
                 if (isParsingTTXForGS)
                 {

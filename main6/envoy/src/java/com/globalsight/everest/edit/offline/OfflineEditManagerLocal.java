@@ -1954,7 +1954,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 if (tagName.equalsIgnoreCase("target")
                         && textContent.startsWith("#"))
                 {
-                     textContent = textContent.replace("#", OfflineConstants.PONUD_SIGN);
+                    textContent = textContent.replaceFirst("#", OfflineConstants.PONUD_SIGN);
                 }
                 sourceElement.setText(textContent);
             }

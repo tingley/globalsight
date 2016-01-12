@@ -152,10 +152,7 @@ public class LocalePairMainHandler extends PageHandler implements
 		}
 
 		deps.append("<span class=\"errorMsg\">");
-		Object[] args = { bundle.getString("lb_locale_pair") };
-		deps.append(MessageFormat.format(bundle.getString("msg_dependency"),
-				args));
-
+		deps.append("# Dependencies in Locale Pair(s) ( "+p_pair.toString()+" ):");
 		for (Enumeration e = catDeps.keys(); e.hasMoreElements();)
 		{
 			String key = (String) e.nextElement();
@@ -168,6 +165,7 @@ public class LocalePairMainHandler extends PageHandler implements
 			}
 		}
 		deps.append("</span>");
+		deps.append("<hr style='border:1px dotted #FF0000;padding-left:4px;padding-right:4px;padding-top:1px;padding-bottom:1px'><br>");
 		return deps.toString();
 	}
 
@@ -315,6 +313,11 @@ public class LocalePairMainHandler extends PageHandler implements
 				}
 				if (msg.length()>0)
 				{
+					ResourceBundle bundle = PageHandler.getBundle(p_session);
+
+					Object[] args = { bundle.getString("lb_locale_pair")+"(s)" };
+					msg.insert(0,"<span class=\"errorMsg\">"+MessageFormat.format(bundle.getString("msg_dependency"),
+							args)+"<span><br><br>");
 					SessionManager sessionMgr = (SessionManager) p_session
 							.getAttribute(WebAppConstants.SESSION_MANAGER);
 					sessionMgr.setAttribute(DEPENDENCIES, msg.toString());

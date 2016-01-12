@@ -77,6 +77,10 @@ function isFromConditionNode(line) {
 }
 
 function onRightDown(e) {
+	if (UI.button.value != UI.button.point) {
+		return;
+	}
+	
 	var node = Model.getNodeByPoint(e);
 	if (node != null && node.type == "activityNode") {
 		e.preventDefault();

@@ -28,6 +28,10 @@
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     String confirmRemove = bundle.getString("msg_confirm_locale_pair_removal");
  
+
+    String slFilter = (String) sessionMgr.getAttribute("slFilter");
+    String tgFilter = (String) sessionMgr.getAttribute("tgFilter");
+    String lpCompanyFilter = (String) sessionMgr.getAttribute("lpCompanyFilter"); 
     String newURL = new1.getPageURL() + "&action=" + LocalePairConstants.CREATE;
     String newLocaleURL = newLocale.getPageURL() + "&action=" + LocalePairConstants.CREATE;
     String removeURL = remove.getPageURL() + "&action=" + LocalePairConstants.REMOVE;
@@ -39,6 +43,9 @@
 
     String deps = (String)sessionMgr.getAttribute(LocalePairConstants.DEPENDENCIES);
     
+    slFilter = slFilter == null ? "" : slFilter;
+    tgFilter = tgFilter == null ? "" : tgFilter;
+    lpCompanyFilter = lpCompanyFilter ==null? "" : lpCompanyFilter;
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
 
     String companyFilterValue = (String) sessionMgr.getAttribute(LocalePairConstants.FILTER_COMPANY);
@@ -178,17 +185,17 @@ function filterItems(e){
         <tr>
             <td>
                 <% if (isSuperAdmin) { %>
-                <amb:table bean="lps" id="lp" key="<%=LocalePairConstants.LP_KEY%>" 
+                <amb:table bean="lps" id="lp"   key="<%=LocalePairConstants.LP_KEY%>" 
                     dataClass="com.globalsight.everest.foundation.LocalePair" 
                     pageUrl="self" hasFilter="true"
                     emptyTableMsg="msg_no_locale_pairs">
                     <amb:column label="checkbox" width="2%">
                         <input type="checkbox" name="checkboxBtn" id="checkboxBtn" onclick="buttonManagement()" value="<%=lp.getId()%>">
                     </amb:column>
-                    <amb:column label="lb_source_locale" width="22%" sortBy="<%=LocalePairComparator.SRC%>">
+                    <amb:column label="lb_source_locale" width="22%"  filter="slFilter" filterValue="<%=slFilter%>" sortBy="<%=LocalePairComparator.SRC%>">
                         <%= lp.getSource().getDisplayName(uiLocale) %>
                     </amb:column>
-                    <amb:column label="lb_target_locale" width="23%" sortBy="<%=LocalePairComparator.TARG%>">
+                    <amb:column label="lb_target_locale" width="23%"  filter="tgFilter" filterValue="<%=tgFilter%>" sortBy="<%=LocalePairComparator.TARG%>">
                         <%= lp.getTarget().getDisplayName(uiLocale) %>
                     </amb:column>
                     <amb:column label="lb_company_name" width="120" sortBy="<%=LocalePairComparator.ASC_COMPANY%>"
@@ -198,17 +205,17 @@ function filterItems(e){
                     <amb:column label="" width="55%" sortBy="">&nbsp;</amb:column>
                 </amb:table>
                 <% } else { %>
-                <amb:table bean="lps" id="lp" key="<%=LocalePairConstants.LP_KEY%>" 
+                <amb:table bean="lps" id="lp" hasFilter="true"  key="<%=LocalePairConstants.LP_KEY%>" 
                     dataClass="com.globalsight.everest.foundation.LocalePair" 
                     pageUrl="self" 
                     emptyTableMsg="msg_no_locale_pairs">
                     <amb:column label="checkbox" width="2%">
                         <input type="checkbox" name="checkboxBtn" id="checkboxBtn" onclick="buttonManagement()" value="<%=lp.getId()%>">
                     </amb:column>
-                    <amb:column label="lb_source_locale" width="22%" sortBy="<%=LocalePairComparator.SRC%>">
+                    <amb:column label="lb_source_locale" width="22%" filter="slFilter" filterValue="<%=slFilter%>" sortBy="<%=LocalePairComparator.SRC%>">
                         <%= lp.getSource().getDisplayName(uiLocale) %>
                     </amb:column>
-                    <amb:column label="lb_target_locale" width="23%" sortBy="<%=LocalePairComparator.TARG%>">
+                    <amb:column label="lb_target_locale" width="23%" filter="tgFilter" filterValue="<%=tgFilter%>" sortBy="<%=LocalePairComparator.TARG%>">
                         <%= lp.getTarget().getDisplayName(uiLocale) %>
                     </amb:column>
                     <amb:column label="" width="55%" sortBy="">&nbsp;</amb:column>

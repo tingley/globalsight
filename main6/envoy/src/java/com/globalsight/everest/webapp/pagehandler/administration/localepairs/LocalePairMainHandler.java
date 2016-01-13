@@ -51,7 +51,6 @@ import com.globalsight.everest.util.comparator.LocalePairComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.ExportUtil;
-import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.dependencychecking.LocalePairDependencyChecker;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -83,19 +82,14 @@ public class LocalePairMainHandler extends PageHandler implements
 	{
 		HttpSession session = p_request.getSession(false);
 		String action = p_request.getParameter("action");
-		SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+
 		try
 		{
 			if (isPost(p_request))
 			{
-				if (action == null) 
-				{
-					handleFilters(p_request, sessionMgr, action);
-				}
 				if (LocalePairConstants.CANCEL.equals(action))
 				{
-					resetSessionTableInfo(session,
+					clearSessionExceptTableInfo(session,
 							LocalePairConstants.LP_KEY);
 				}
 				else if (LocalePairConstants.CREATE.equals(action))
@@ -116,7 +110,6 @@ public class LocalePairMainHandler extends PageHandler implements
 					return;
 				}
 			}
-
 			dataForTable(p_request, session);
 		}
 		catch (NamingException ne)
@@ -357,6 +350,7 @@ public class LocalePairMainHandler extends PageHandler implements
 			GlobalSightLocale targLocale = localeMgr.getLocaleById(Long
 					.parseLong(targId));
 			String companyId = CompanyThreadLocal.getInstance().getValue();
+			// all the roles are created by the locale manager
 			localeMgr.addSourceTargetLocalePair(srcLocale, targLocale,
 					Long.parseLong(companyId));
 		}
@@ -400,8 +394,6 @@ public class LocalePairMainHandler extends PageHandler implements
 		Vector lps = localeMgr.getSourceTargetLocalePairs();
 		// Filter locale pairs by company name
 		filterLocalePairsByCompanyName(p_request, p_session, lps);
-		filterLocalePairsByslName(p_session, lps);
-		filterLocalePairsBytgName(p_session, lps);
 		Locale uiLocale = (Locale) p_session
 				.getAttribute(WebAppConstants.UILOCALE);
 		// Get the number per page
@@ -411,49 +403,6 @@ public class LocalePairMainHandler extends PageHandler implements
 				uiLocale), numPerPage, LP_LIST, LP_KEY);
 	}
 
-	private void filterLocalePairsByslName(HttpSession p_session, Vector p_lps)
-	{
-		SessionManager sessionManager = (SessionManager) p_session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
-        String slname = (String) sessionManager
-                .getAttribute("slFilter");
-        if (!StringUtil.isEmpty(slname))
-        {
-        	for(Iterator it = p_lps.iterator(); it.hasNext();)
-        	{
-        		LocalePair lp = (LocalePair) it.next();
-        		GlobalSightLocale GSlp = lp.getSource();
-                String displayName = GSlp.getDisplayName();
-        		if(displayName.toLowerCase().indexOf(slname.toLowerCase()) == -1)
-        		{
-        			it.remove();
-        		}
-        	}
-        }
-        
-	}
-	private void filterLocalePairsBytgName(HttpSession p_session, Vector p_lps)
-	{
-		SessionManager sessionManager = (SessionManager) p_session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
-        String tgname = (String) sessionManager
-                .getAttribute("tgFilter");
-        if (!StringUtil.isEmpty(tgname))
-        {
-        	for(Iterator it = p_lps.iterator(); it.hasNext();)
-        	{
-        		LocalePair lp = (LocalePair) it.next();
-        		GlobalSightLocale GSlp = lp.getTarget();
-                String displayName = GSlp.getDisplayName();
-        		if(displayName.toLowerCase().indexOf(tgname.toLowerCase()) == -1)
-        		{
-        			it.remove();
-        		}
-        	}
-        }
-        
-	}
-	
 	private void filterLocalePairsByCompanyName(HttpServletRequest p_request,
 			HttpSession p_session, Vector p_lps)
 	{
@@ -575,42 +524,4 @@ public class LocalePairMainHandler extends PageHandler implements
 			}
 		}
 	}
-	
-	private void handleFilters(HttpServletRequest p_request,
-	        SessionManager sessionMgr, String action)
-	{
-	    String slFilter = (String) p_request.getParameter("slFilter");
-	    String tgFilter = (String) p_request.getParameter("tgFilter");
-	    String lpCompanyFilter = (String) p_request
-	            .getParameter("lpCompanyFilter");
-
-	    if (p_request.getMethod().equalsIgnoreCase(
-	            WebAppConstants.REQUEST_METHOD_GET))
-	    {
-	        slFilter = (String) sessionMgr.getAttribute("slFilter");
-	        tgFilter = (String) sessionMgr.getAttribute("tgFilter");
-	        lpCompanyFilter = (String) sessionMgr.getAttribute("lpCompanyFilter");
-	    }
-	    sessionMgr.setAttribute("slFilter", slFilter);
-	    sessionMgr.setAttribute("tgFilter", tgFilter);
-	    sessionMgr.setAttribute("lpCompanyFilter", lpCompanyFilter);
-	}
-
-    private  void resetSessionTableInfo(HttpSession p_session, String p_key)
-    {
-        SessionManager sessionMgr = (SessionManager) p_session
-                .getAttribute(SESSION_MANAGER);
-
-        Integer sortType = (Integer) sessionMgr.getAttribute(p_key
-                + TableConstants.SORTING);
-        Boolean reverseSort = (Boolean) sessionMgr.getAttribute(p_key
-                + TableConstants.REVERSE_SORT);
-        Integer lastPage = (Integer) sessionMgr.getAttribute(p_key
-                + TableConstants.LAST_PAGE_NUM);
-        sessionMgr.setAttribute(p_key + TableConstants.SORTING, sortType);
-        sessionMgr.setAttribute(p_key + TableConstants.REVERSE_SORT,
-                reverseSort);
-        sessionMgr.setAttribute(p_key + TableConstants.LAST_PAGE_NUM, lastPage);
-    }
-
 }

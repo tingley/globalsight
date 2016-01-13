@@ -20,6 +20,7 @@
   right: 0;
   bottom: 0;
   overflow: hidden;
+  opacity: 0.2;
 }
 
 .textLayer > div {
@@ -55,7 +56,67 @@
 }
 
 .textLayer .highlight.selected {
+  /***GlobalSight Change*/
   /*background-color: rgb(0, 100, 0);*/
+}
+
+.textLayer ::selection { background: rgb(0,0,255); }
+.textLayer ::-moz-selection { background: rgb(0,0,255); }
+
+
+.annotationLayer .annotLink > a:hover {
+  opacity: 0.2;
+  background: #ff0;
+  box-shadow: 0px 2px 10px #ff0;
+}
+
+.annotationLayer .annotText > img {
+  position: absolute;
+  cursor: pointer;
+}
+
+.annotationLayer .annotTextContentWrapper {
+  position: absolute;
+  width: 20em;
+}
+
+.annotationLayer .annotTextContent {
+  z-index: 200;
+  float: left;
+  max-width: 20em;
+  background-color: #FFFF99;
+  box-shadow: 0px 2px 5px #333;
+  border-radius: 2px;
+  padding: 0.6em;
+  cursor: pointer;
+}
+
+.annotationLayer .annotTextContent > h1 {
+  font-size: 1em;
+  border-bottom: 1px solid #000000;
+  padding-bottom: 0.2em;
+}
+
+.annotationLayer .annotTextContent > p {
+  padding-top: 0.2em;
+}
+
+.annotationLayer .annotLink > a {
+  position: absolute;
+  font-size: 1em;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/***GlobalSight Change*/
+.pdfViewer .page .annotationLayer {
+  display:none;
+}
+
+.annotationLayer .annotLink > a /* -ms-a */  {
+  background: url("data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7") 0 0 repeat;
 }
 
 .pdfViewer .canvasWrapper {
@@ -75,6 +136,11 @@
   background-color: white;
 }
 
+.pdfViewer.removePageBorders .page {
+  margin: 0px auto 10px auto;
+  border: none;
+}
+
 .pdfViewer .page canvas {
   margin: 0;
   display: block;
@@ -90,79 +156,24 @@
   background: url('images/loading-icon.gif') center no-repeat;
 }
 
-.pdfViewer .page .annotLink > a:hover {
-  opacity: 0.2;
-  background: #ff0;
-  box-shadow: 0px 2px 10px #ff0;
-}
-
-:-webkit-full-screen .pdfViewer .page {
+.pdfPresentationMode:-webkit-full-screen .pdfViewer .page {
   margin-bottom: 100%;
   border: 0;
 }
 
-:-moz-full-screen .pdfViewer .page {
+.pdfPresentationMode:-moz-full-screen .pdfViewer .page {
   margin-bottom: 100%;
   border: 0;
 }
 
-:-ms-fullscreen .pdfViewer .page {
+.pdfPresentationMode:-ms-fullscreen .pdfViewer .page {
   margin-bottom: 100% !important;
   border: 0;
 }
 
-:fullscreen .pdfViewer .page {
+.pdfPresentationMode:fullscreen .pdfViewer .page {
   margin-bottom: 100%;
   border: 0;
-}
-
-.pdfViewer .page .annotText > img {
-  position: absolute;
-  cursor: pointer;
-}
-
-.pdfViewer .page .annotTextContentWrapper {
-  position: absolute;
-  width: 20em;
-}
-
-.pdfViewer .page .annotTextContent {
-  z-index: 200;
-  float: left;
-  max-width: 20em;
-  background-color: #FFFF99;
-  box-shadow: 0px 2px 5px #333;
-  border-radius: 2px;
-  padding: 0.6em;
-  cursor: pointer;
-}
-
-.pdfViewer .page .annotTextContent > h1 {
-  font-size: 1em;
-  border-bottom: 1px solid #000000;
-  padding-bottom: 0.2em;
-}
-
-.pdfViewer .page .annotTextContent > p {
-  padding-top: 0.2em;
-}
-
-.pdfViewer .page .annotLink > a {
-  position: absolute;
-  font-size: 1em;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.pdfViewer .page .annotationLayer {
-  display:none;
-}
-
-.pdfViewer .page .annotLink > a /* -ms-a */  {
-  background: url("data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAA\
-                   LAAAAAABAAEAAAIBRAA7") 0 0 repeat;
 }
 
 * {
@@ -178,7 +189,7 @@ html {
 
 body {
   height: 100%;
-  /*** Wayne
+  /*** GlobalSight Change
   background-color: #404040;
   background-image: url(images/texture.png);
   */
@@ -199,7 +210,7 @@ select {
   display: none !important;
 }
 
-#viewerContainer:-webkit-full-screen {
+#viewerContainer.pdfPresentationMode:-webkit-full-screen {
   top: 0px;
   border-top: 2px solid transparent;
   background-color: #000;
@@ -210,7 +221,7 @@ select {
   -webkit-user-select: none;
 }
 
-#viewerContainer:-moz-full-screen {
+#viewerContainer.pdfPresentationMode:-moz-full-screen {
   top: 0px;
   border-top: 2px solid transparent;
   background-color: #000;
@@ -221,7 +232,7 @@ select {
   -moz-user-select: none;
 }
 
-#viewerContainer:-ms-fullscreen {
+#viewerContainer.pdfPresentationMode:-ms-fullscreen {
   top: 0px !important;
   border-top: 2px solid transparent;
   width: 100%;
@@ -231,11 +242,11 @@ select {
   -ms-user-select: none;
 }
 
-#viewerContainer:-ms-fullscreen::-ms-backdrop {
+#viewerContainer.pdfPresentationMode:-ms-fullscreen::-ms-backdrop {
   background-color: #000;
 }
 
-#viewerContainer:fullscreen {
+#viewerContainer.pdfPresentationMode:fullscreen {
   top: 0px;
   border-top: 2px solid transparent;
   background-color: #000;
@@ -248,36 +259,40 @@ select {
   -ms-user-select: none;
 }
 
-:-webkit-full-screen a:not(.internalLink) {
+.pdfPresentationMode:-webkit-full-screen a:not(.internalLink) {
   display: none;
 }
 
-:-moz-full-screen a:not(.internalLink) {
+.pdfPresentationMode:-moz-full-screen a:not(.internalLink) {
   display: none;
 }
 
-:-ms-fullscreen a:not(.internalLink) {
+.pdfPresentationMode:-ms-fullscreen a:not(.internalLink) {
   display: none !important;
 }
 
-:fullscreen a:not(.internalLink) {
+.pdfPresentationMode:fullscreen a:not(.internalLink) {
   display: none;
 }
 
-:-webkit-full-screen .textLayer > div {
+.pdfPresentationMode:-webkit-full-screen .textLayer > div {
   cursor: none;
 }
 
-:-moz-full-screen .textLayer > div {
+.pdfPresentationMode:-moz-full-screen .textLayer > div {
   cursor: none;
 }
 
-:fullscreen .textLayer > div {
+.pdfPresentationMode:-ms-fullscreen .textLayer > div {
   cursor: none;
 }
 
-#viewerContainer.presentationControls,
-#viewerContainer.presentationControls .textLayer > div {
+.pdfPresentationMode:fullscreen .textLayer > div {
+  cursor: none;
+}
+
+.pdfPresentationMode.pdfPresentationModeControls > *,
+.pdfPresentationMode.pdfPresentationModeControls .textLayer > div {
   cursor: default;
 }
 
@@ -739,6 +754,7 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
 .splitToolbarButton > .toolbarButton:focus,
 .dropdownToolbarButton:hover,
 .overlayButton:hover,
+.overlayButton:focus,
 .toolbarButton.textButton:hover,
 .toolbarButton.textButton:focus {
   background-color: hsla(0,0%,0%,.2);
@@ -895,7 +911,7 @@ html[dir='rtl'] .dropdownToolbarButton {
 .dropdownToolbarButton {
   width: 120px;
   max-width: 120px;
-  padding: 3px 2px 2px;
+  padding: 0;
   overflow: hidden;
   background: url(images/toolbarButton-menuArrows.png) no-repeat;
 }
@@ -911,7 +927,7 @@ html[dir='rtl'] .dropdownToolbarButton {
   font-size: 12px;
   color: hsl(0,0%,95%);
   margin: 0;
-  padding: 0;
+  padding: 3px 2px 2px;
   border: none;
   background: rgba(0,0,0,0); /* Opera does not support 'transparent' <select> background */
 }
@@ -1265,23 +1281,27 @@ html[dir='rtl'] .verticalToolbarSeparator {
   margin-bottom: 10px;
 }
 
+#thumbnailView > a:last-of-type > .thumbnail:not([data-loaded]) {
+  margin-bottom: 9px;
+}
+
 .thumbnail:not([data-loaded]) {
   border: 1px dashed rgba(255, 255, 255, 0.5);
-  margin-bottom: 10px;
+  margin: -1px -1px 4px -1px;
 }
 
 .thumbnailImage {
-  transition-duration: 150ms;
   border: 1px solid transparent;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
   opacity: 0.8;
   z-index: 99;
+  background-color: white;
+  background-clip: content-box;
 }
 
 .thumbnailSelectionRing {
   border-radius: 2px;
   padding: 7px;
-  transition-duration: 150ms;
 }
 
 a:focus > .thumbnail > .thumbnailSelectionRing > .thumbnailImage,
@@ -1408,18 +1428,11 @@ html[dir='rtl'] .attachmentsItem > button {
   cursor: default;
 }
 
-
 /* TODO: file FF bug to support ::-moz-selection:window-inactive
    so we can override the opaque grey background when the window is inactive;
    see https://bugzilla.mozilla.org/show_bug.cgi?id=706209 */
 ::selection { background: rgba(0,0,255,0.3); }
 ::-moz-selection { background: rgba(0,0,255,0.3); }
-
-.textLayer ::selection { background: rgb(0,0,255); }
-.textLayer ::-moz-selection { background: rgb(0,0,255); }
-.textLayer {
-  opacity: 0.2;
-}
 
 #errorWrapper {
   background: none repeat scroll 0 0 #FF5555;
@@ -1506,10 +1519,6 @@ html[dir='rtl'] .attachmentsItem > button {
 
 .dialog .toolbarField {
   margin: 5px 0;
-}
-.dialog .toolbarField:hover,
-.dialog .toolbarField:focus {
-  border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
 }
 
 .dialog .separator {
@@ -1864,15 +1873,15 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
   body[data-mozPrintCallback] #printContainer {
     display: block;
   }
-  #printContainer canvas {
+  /* wrapper around (scaled) print canvas elements */
+  #printContainer > div {
     position: relative;
     top: 0;
     left: 0;
-    display: block;
+    overflow: hidden;
   }
-  #printContainer div {
-    page-break-after: always;
-    page-break-inside: avoid;
+  #printContainer canvas {
+    display: block;
   }
 }
 

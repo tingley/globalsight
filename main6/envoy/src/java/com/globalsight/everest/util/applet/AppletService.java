@@ -616,6 +616,9 @@ public class AppletService extends HttpServlet
         WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) sessionMgr
                 .getAttribute(WorkflowTemplateConstants.WF_TEMPLATE_INFO);
         
+        if (wfti.getId() < 0)
+        	return;
+        
         String templateName = wfti.getName();
         String templateFileName = AmbFileStoragePathUtils
                 .getWorkflowTemplateXmlDir().getAbsolutePath()

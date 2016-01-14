@@ -35,9 +35,11 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
+import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -282,8 +284,8 @@ abstract class TuStorage<T extends TM3Data>
             // SID attribute is always stored into another table
             if (".sid".equalsIgnoreCase(e.getKey().getName()))
             {
-            	String sid = (String) e.getValue();
-                long tmId = getStorage().getId();
+//            	String sid = (String) e.getValue();
+//                long tmId = getStorage().getId();
                 continue;
             }
 
@@ -774,20 +776,106 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    public List<TM3Tuv<T>> getExactMatches(Connection conn, T key,
+    public List<TM3Tuv<T>> getExactMatchesForSave(Connection conn, T key,
             TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
             Map<TM3Attribute, Object> inlineAttributes,
             Map<TM3Attribute, String> customAttributes, boolean lookupTarget,
-            boolean locking) throws SQLException
+            boolean locking, long preHash, long nextHash) throws SQLException
     {
-        List<Long> tm3TmIds = new ArrayList<Long>();
+    	List<Long> tm3TmIds = new ArrayList<Long>();
         tm3TmIds.add(getStorage().getId());
 
-        return getExactMatches(conn, key, sourceLocale, targetLocales,
-                inlineAttributes, customAttributes, lookupTarget, locking,
-                tm3TmIds);
+   		// If SID is not empty/null ...
+        String sid = getSidFromInlineAttributes(inlineAttributes);
+
+        Set<Long> tuvIds = new HashSet<Long>();
+        List<Long> tuIds = new ArrayList<Long>();
+        StatementBuilder sb = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        // Fetch candidates by previous/next hash values prior.
+		sb = getHashMatchedStatement(key, sourceLocale, tm3TmIds, preHash,
+				nextHash, sid);
+        ps = sb.toPreparedStatement(conn);
+        rs = SQLUtil.execQuery(ps);
+        while (rs.next())
+        {
+            tuvIds.add(rs.getLong(1));
+            tuIds.add(rs.getLong(2));
+        }
+        ps.close();
+
+        List<TM3Tu<T>> tus = getTu(conn, tuIds, locking);
+        List<TM3Tuv<T>> tuvs = new ArrayList<TM3Tuv<T>>();
+        for (TM3Tu<T> tu : tus)
+        {
+            for (TM3Tuv<T> tuv : tu.getAllTuv())
+            {
+                if (tuvIds.contains(tuv.getId()))
+                {
+                    tuvs.add(tuv);
+                }
+            }
+        }
+
+        return tuvs;
     }
 
+	private String getSidFromInlineAttributes(
+			Map<TM3Attribute, Object> inlineAttributes)
+    {
+        if (!inlineAttributes.isEmpty())
+        {
+            for (Map.Entry<TM3Attribute, Object> e : inlineAttributes.entrySet())
+            {
+				if (e.getKey().getAffectsIdentity()
+						&& "sid".equalsIgnoreCase(e.getKey().getColumnName()))
+                {
+					return (String) e.getValue();
+                }
+            }
+        }
+
+        return null;
+    }
+
+	/**
+	 * When save TU into TM, narrow the tuId/tuvId scope by previous/next hash
+	 * values and SID for performance.
+	 */
+    private StatementBuilder getHashMatchedStatement(T key,
+			TM3Locale srcLocale, List<Long> tm3TmIds, long preHash,
+			long nextHash, String sid)
+    {
+		StatementBuilder sb = new StatementBuilder(
+				"SELECT tuv.id, tuv.tuId FROM ")
+				.append(getStorage().getTuvTableName()).append(" AS tuv, ")
+				.append(getStorage().getTuvExtTableName()).append(" AS ext");
+		sb.append(" WHERE tuv.id = ext.tuvId")
+				.append(" AND tuv.tuId = ext.tuId")
+				.append(" AND tuv.fingerprint = ?").addValue(key.getFingerprint())
+				.append(" AND tuv.localeId = ?").addValue(srcLocale.getId());
+		if (preHash != -1)
+		{
+			sb.append(" AND ext.previousHash = ?").addValue(preHash);
+		}
+		if (nextHash != -1)
+		{
+			sb.append(" AND ext.nextHash = ?").addValue(nextHash);
+		}
+		if (sid != null && sid.trim().length() > 0)
+		{
+			sb.append(" AND ext.sid = ?").addValue(sid);
+		}
+		sb.append(" AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
+		sb.append(" LIMIT 20");
+
+		return sb;
+    }
+
+    /**
+     * For create job to leverage TM, it does not care previous/next hash.
+     */
     public List<TM3Tuv<T>> getExactMatches(Connection conn, T key,
             TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
             Map<TM3Attribute, Object> inlineAttributes,
@@ -799,50 +887,131 @@ abstract class TuStorage<T extends TM3Data>
         {
             return Collections.emptyList();
         }
+
+        //#1. Find all possible candidates, no max number limitation...
         StatementBuilder sb = getExactMatchStatement(key, sourceLocale,
                 targetLocales, inlineAttributes, lookupTarget, tm3TmIds);
-        // if (locking)
-        // {
-        // sb.append(" FOR UPDATE");
-        // }
         if (customAttributes.size() > 0)
         {
             sb = getAttributeMatchWrapper(sb, customAttributes);
-            // if (locking)
-            // {
-            // sb.append(" FOR UPDATE");
-            // }
         }
         PreparedStatement ps = sb.toPreparedStatement(conn);
         ResultSet rs = SQLUtil.execQuery(ps);
         Set<Long> tuvIds = new HashSet<Long>();
         List<Long> tuIds = new ArrayList<Long>();
+		HashMap<Long, Long> tuId2srcTuvId = new HashMap<Long, Long>();
         while (rs.next())
         {
             tuvIds.add(rs.getLong(1));
             tuIds.add(rs.getLong(2));
+            tuId2srcTuvId.put(rs.getLong(2), rs.getLong(1));
         }
         ps.close();
 
+        //#2. If there are too many, need reduce them for performance...
+        boolean isCandidateFiltered = false;
+        int max = 200;
+        if (targetLocales.size() * 10 > max) {
+        	max = targetLocales.size() * 10;
+        }
+        String sid = getSidFromInlineAttributes(inlineAttributes);
+		if (tuvIds.size() > max)
+		{
+			isCandidateFiltered = true;
+			if (logger.isDebugEnabled()) {
+				logger.info("Candidated exact matches tuvIds number: "
+						+ tuvIds.size());				
+			}
+			//#2.1 previous/next hash matched candidates must be returned ...
+	        Set<Long> hashMatchedTuvIds = new HashSet<Long>();
+	        List<Long> hashMatchedTuIds = new ArrayList<Long>();
+			BaseTmTuv srcTuv = ((GSTuvData) key).getSrcTuv();
+			long preHash = srcTuv.getPreviousHash();
+			long nextHash = srcTuv.getNextHash();
+			if (preHash != -1 && nextHash != -1)
+			{
+				sb = new StatementBuilder("SELECT tuv.id, tuv.tuId FROM ");
+				sb.append(getStorage().getTuvTableName()).append(" AS tuv, ");
+				sb.append(getStorage().getTuvExtTableName()).append(" AS ext");
+				sb.append(" WHERE tuv.id = ext.tuvId");
+				sb.append(" AND tuv.tuId = ext.tuId");
+				sb.append(" AND ext.previousHash = ?").addValue(preHash);
+				sb.append(" AND ext.nextHash = ?").addValue(nextHash);
+				if (sid != null && sid.trim().length() > 0)
+				{
+					sb.append(" AND ext.sid = ?").addValue(sid);
+				}
+				sb.append(" AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
+				sb.append(" AND tuv.id IN").append(SQLUtil.longGroup(new ArrayList<Long>(tuvIds)));
+
+				ps = sb.toPreparedStatement(conn);
+				rs = SQLUtil.execQuery(ps);
+				while (rs.next())
+				{
+					hashMatchedTuvIds.add(rs.getLong(1));
+					hashMatchedTuIds.add(rs.getLong(2));
+				}
+				ps.close();
+			}
+
+			//#2.2 Ensure returning at most 10 for every locale...
+	        List<Long> targetLocaleIds = new ArrayList<Long>();
+			if (targetLocales != null) {
+				for (TM3Locale locale : targetLocales) {
+					targetLocaleIds.add(locale.getId());
+				}
+			}
+			sb = new StatementBuilder(
+					"SELECT tuv.tuId, tuv.localeId, COUNT(id) FROM ")
+					.append(getStorage().getTuvTableName()).append(" AS tuv, ")
+					.append(getStorage().getTuvExtTableName()).append(" AS ext");
+			sb.append(" WHERE tuv.id = ext.tuvId")
+					.append(" AND tuv.tmId IN")
+					.append(SQLUtil.longGroup(tm3TmIds))
+					.append(" AND tuv.tuId IN").append(SQLUtil.longGroup(tuIds));
+			if (targetLocaleIds.size() > 0) {
+				sb.append(" AND tuv.localeId IN").append(
+						SQLUtil.longGroup(targetLocaleIds));
+			}
+			sb.append(" GROUP BY tuv.tuId, tuv.localeId");
+
+			tuvIds.clear();
+			tuIds.clear();
+			tuvIds.addAll(hashMatchedTuvIds);
+			tuIds.addAll(hashMatchedTuIds);
+
+			long tuId = -1;
+			long localeId = -1;
+	        HashMap<Long, Long> locale2tuvNum = new HashMap<Long, Long>();
+			ps = sb.toPreparedStatement(conn);
+	        rs = SQLUtil.execQuery(ps);
+	        while (rs.next())
+	        {
+	        	tuId = rs.getLong(1);
+	        	localeId = rs.getLong(2);
+	        	Long tuvNum = locale2tuvNum.get(localeId);
+	        	if (tuvNum == null) {
+	        		tuvNum = new Long(0);
+	        	}
+	        	if (tuvNum < 10)
+	        	{
+	        		tuIds.add(tuId);
+	        		tuvIds.add(tuId2srcTuvId.get(tuId));// add source tuvId!!!
+	        		locale2tuvNum.put(localeId, tuvNum + rs.getLong(3));
+	       		}
+	        }
+	        ps.close();
+		}
+
    		// If SID is not empty/null, need filter the candidate TUs here.
         // To avoid slow query, we filter TUs via 2 queries.
-        String sid = null;
-        if (!inlineAttributes.isEmpty())
-        {
-            for (Map.Entry<TM3Attribute, Object> e : inlineAttributes.entrySet())
-            {
-				if (e.getKey().getAffectsIdentity()
-						&& "sid".equalsIgnoreCase(e.getKey().getColumnName()))
-                {
-					sid = (String) e.getValue();
-                }
-            }
-        }
-        if (tuvIds.size() > 0 && sid != null && sid.length() > 0)
+		if (!isCandidateFiltered && tuvIds.size() > 0 && sid != null
+				&& sid.length() > 0)
         {
 			sb = new StatementBuilder("SELECT tuvId, tuId FROM ")
 					.append(getStorage().getTuvExtTableName())
-					.append(" WHERE sid = ?").addValue(sid)
+					.append(" WHERE tmId IN").append(SQLUtil.longGroup(tm3TmIds))
+					.append(" AND sid = ?").addValue(sid)
 					.append(" AND tuvId IN ")
 					.append(SQLUtil.longGroup(new ArrayList<Long>(tuvIds)));
             ps = sb.toPreparedStatement(conn);

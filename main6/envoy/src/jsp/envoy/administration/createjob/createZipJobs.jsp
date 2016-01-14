@@ -883,7 +883,7 @@ function setType(t)
 
 function setInputFileDisable(t)
 {
-	if(t == '0')
+	if (t == '0')
 	{
 		$("#selectedSourceFile").prop('disabled', false);
 		$("#selectedAttachmentFile").prop('disabled', true);
@@ -897,46 +897,69 @@ function setInputFileDisable(t)
 
 function checkAndUpload()
 {
-	if(isUploading)
+	if (isUploading)
 	{
 		alert("Please wait for the last file upload.");
 		emptyFileValue();
 		return false;
 	}
-	var tempFiles = document.getElementById( "selectedSourceFile" );
-	var tempFileName;
-	for(var j=0;j<tempFiles.files.length;j++){
-		tempFileName = tempFiles.files[j].name;
-		if(type == "0")
+
+	if (type == "0")
+	{
+		var tempFiles = document.getElementById( "selectedSourceFile" );
+		var tempFileName;
+		var Files = new Array();
+		var temp;
+		for (var j=0;j<tempFiles.files.length;j++)
 		{
-			if(tempFileName.lastIndexOf("\\") > 0)
+			temp = tempFiles.files[j];
+			tempFileName = temp.name;
+			var flag = true;
+			if (uploadedFiles.length > 0)
 			{
-				tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
+				for (i=0; i<uploadedFiles.length; i++)
+				{
+					if (uploadedFiles[i] == tempFileName)
+					{
+						Files.push(tempFileName);
+						flag = false;
+					}
+				}
 			}
-			if(tempFileName == "")
+			if (flag)
 			{
-				emptyFileValue();
-				return false;
+				addTempDivElement(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
+				uploadedFiles.push(tempFileName);
 			}
-			addTempDivElement(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
-			uploadedFiles.push(tempFileName);
-    }
-		else if(type == "1")
+		}
+		if (Files.length>0)
 		{
-			tempFileName = $("#selectedAttachmentFile").val();
-			if(tempFileName.lastIndexOf("\\") > 0)
-			{
-				tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
+			var result = Files.join();
+			if (Files.length>1)
+			{		
+				alert(result +" are already in the uploaded list,ignored");
 			}
-			addTempAttachment(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
+			else
+			{
+				alert(result +" is already in the uploaded list,ignored");	
+			}
 		}
 	}
+	else if (type == "1")
+	{
+		tempFileName = $("#selectedAttachmentFile").val();
+		if(tempFileName.lastIndexOf("\\") > 0)
+		{
+			tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
+		}
+		addTempAttachment(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));	
+	}
+
     var action = $("#createJobForm").attr("action");
     $("#createJobForm").attr("action", action+"&uploadAction=uploadSelectedFile&type="+type+"&tempFolder="+tempFolder);
 	$("#createJobForm").submit();
 	$("#createJobForm").attr("action", action);
 	isUploading = true;
-
 	emptyFileValue();
 	$("#selectedSourceFile").prop('disabled', false);
 	$("#selectedAttachmentFile").prop('disabled', false);

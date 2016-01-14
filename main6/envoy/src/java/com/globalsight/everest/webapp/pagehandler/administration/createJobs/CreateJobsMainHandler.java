@@ -37,7 +37,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.zip.ZipEntry;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -53,7 +52,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParameterImpl;
-import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
@@ -101,7 +99,6 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -1807,7 +1804,10 @@ public class CreateJobsMainHandler extends PageHandler
 		String contentType;
 		String boundary;
 		String filePath = "";
+		String path = parentFile.getPath() + File.separator;
 		List<String> filePaths = new ArrayList<String>();
+		File file = new File(path);   
+	    File[] arrayFiles = file.listFiles();
 		
 		// Let's make sure that we have the right type of content
 		//
@@ -1880,13 +1880,29 @@ public class CreateJobsMainHandler extends PageHandler
 					// save the contents in this file for now and
 					// finally rename it to correct file name.
 					//
-			        filePath = parentFile.getPath() + File.separator + fileName;
+					boolean flag = false;
+			        if (arrayFiles.length>0)
+			        {
+			        	for (int i=0;i<arrayFiles.length;i++)
+			        	{   
+		        			if (fileName.equals(arrayFiles[i].getName()))
+		        			{
+		        				flag = true;
+					        	break;
+		        		    }
+			        	}
+			        	if (flag)
+			        	{
+			        		continue;
+			        	}
+			        }
+			        filePath = path + fileName;
 			        filePaths.add(filePath);
 					File m_tempFile = new File(filePath);
 					FileOutputStream fos = new FileOutputStream(m_tempFile);
 					BufferedOutputStream bos = new BufferedOutputStream(fos,
 							MAX_LINE_LENGTH * 4);
-		
+
 					// Read through the file contents and write
 					// it out to a local temp file.
 					boolean writeRN = false;
@@ -1943,9 +1959,9 @@ public class CreateJobsMainHandler extends PageHandler
 		
 					// First get the field name
 		
-					int start = lineRead.indexOf("name=\"");
-					int end = lineRead.indexOf("\"", start + 7);
-					String fieldName = lineRead.substring(start + 6, end);
+//					int start = lineRead.indexOf("name=\"");
+//					int end = lineRead.indexOf("\"", start + 7);
+//					String fieldName = lineRead.substring(start + 6, end);
 		
 					// Read and ignore the blank line
 					bytesRead = in.readLine(inBuf, 0, inBuf.length);
@@ -2005,10 +2021,9 @@ public class CreateJobsMainHandler extends PageHandler
 		
 			bytesRead = in.readLine(inBuf, 0, inBuf.length);
 		}
-		
 		return filePaths;
 	}
-	
+
 	private String getFilename(String p_filenameLine)
 	{
 		int start = 0;

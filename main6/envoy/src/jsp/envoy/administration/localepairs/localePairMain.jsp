@@ -46,6 +46,16 @@
     {
         companyFilterValue = "";
     }
+    String sourceFilterValue = (String) sessionMgr.getAttribute(LocalePairConstants.FILTER_SOURCELOCALE);
+    if (sourceFilterValue == null || sourceFilterValue.trim().length() == 0)
+    {
+    	sourceFilterValue = "";
+    }
+    String targetFilterValue = (String) sessionMgr.getAttribute(LocalePairConstants.FILTER_TARGETLOCALE);
+    if (targetFilterValue == null || targetFilterValue.trim().length() == 0)
+    {
+    	targetFilterValue = "";
+    }
 %>
 <HTML>
 <HEAD>
@@ -185,10 +195,12 @@ function filterItems(e){
                     <amb:column label="checkbox" width="2%">
                         <input type="checkbox" name="checkboxBtn" id="checkboxBtn" onclick="buttonManagement()" value="<%=lp.getId()%>">
                     </amb:column>
-                    <amb:column label="lb_source_locale" width="22%" sortBy="<%=LocalePairComparator.SRC%>">
+                    <amb:column label="lb_source_locale" width="22%" sortBy="<%=LocalePairComparator.SRC%>"  filter="<%=LocalePairConstants.FILTER_SOURCELOCALE%>"
+                    filterValue="<%=sourceFilterValue%>">
                         <%= lp.getSource().getDisplayName(uiLocale) %>
                     </amb:column>
-                    <amb:column label="lb_target_locale" width="23%" sortBy="<%=LocalePairComparator.TARG%>">
+                    <amb:column label="lb_target_locale" width="23%" sortBy="<%=LocalePairComparator.TARG%>" filter="<%=LocalePairConstants.FILTER_TARGETLOCALE%>"
+                    filterValue="<%=targetFilterValue%>">
                         <%= lp.getTarget().getDisplayName(uiLocale) %>
                     </amb:column>
                     <amb:column label="lb_company_name" width="120" sortBy="<%=LocalePairComparator.ASC_COMPANY%>"
@@ -200,15 +212,17 @@ function filterItems(e){
                 <% } else { %>
                 <amb:table bean="lps" id="lp" key="<%=LocalePairConstants.LP_KEY%>" 
                     dataClass="com.globalsight.everest.foundation.LocalePair" 
-                    pageUrl="self" 
+                    pageUrl="self"  hasFilter="true"
                     emptyTableMsg="msg_no_locale_pairs">
                     <amb:column label="checkbox" width="2%">
                         <input type="checkbox" name="checkboxBtn" id="checkboxBtn" onclick="buttonManagement()" value="<%=lp.getId()%>">
                     </amb:column>
-                    <amb:column label="lb_source_locale" width="22%" sortBy="<%=LocalePairComparator.SRC%>">
+                    <amb:column label="lb_source_locale" width="22%" sortBy="<%=LocalePairComparator.SRC%>"  filter="<%=LocalePairConstants.FILTER_SOURCELOCALE%>"
+                    filterValue="<%=sourceFilterValue%>">
                         <%= lp.getSource().getDisplayName(uiLocale) %>
                     </amb:column>
-                    <amb:column label="lb_target_locale" width="23%" sortBy="<%=LocalePairComparator.TARG%>">
+                    <amb:column label="lb_target_locale" width="23%" sortBy="<%=LocalePairComparator.TARG%>" filter="<%=LocalePairConstants.FILTER_TARGETLOCALE%>"
+                    filterValue="<%=targetFilterValue%>">
                         <%= lp.getTarget().getDisplayName(uiLocale) %>
                     </amb:column>
                     <amb:column label="" width="55%" sortBy="">&nbsp;</amb:column>

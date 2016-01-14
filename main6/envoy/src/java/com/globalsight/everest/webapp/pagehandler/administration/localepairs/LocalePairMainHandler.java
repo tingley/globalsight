@@ -398,95 +398,16 @@ public class LocalePairMainHandler extends PageHandler implements
 		LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
 		// Get all locale pairs
 		Vector lps = localeMgr.getSourceTargetLocalePairs();
-		// Filter locale pairs by company name
-		filterLocalePairsByCompanyName(p_request, p_session, lps);
-		filterLocalePairsByslName(p_session, lps);
-		filterLocalePairsBytgName(p_session, lps);
+
+		LocalePairFilter lpfilter = new LocalePairFilter();
+		Vector arrlps = lpfilter.filterLocalePairsByName(p_session,lps);
 		Locale uiLocale = (Locale) p_session
 				.getAttribute(WebAppConstants.UILOCALE);
 		// Get the number per page
 		int numPerPage = getNumPerPage(p_request, p_session);
 
-		setTableNavigation(p_request, p_session, lps, new LocalePairComparator(
+		setTableNavigation(p_request, p_session, arrlps, new LocalePairComparator(
 				uiLocale), numPerPage, LP_LIST, LP_KEY);
-	}
-
-	private void filterLocalePairsByslName(HttpSession p_session, Vector p_lps)
-	{
-		SessionManager sessionManager = (SessionManager) p_session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
-        String slname = (String) sessionManager
-                .getAttribute("slFilter");
-        if (!StringUtil.isEmpty(slname))
-        {
-        	for(Iterator it = p_lps.iterator(); it.hasNext();)
-        	{
-        		LocalePair lp = (LocalePair) it.next();
-        		GlobalSightLocale GSlp = lp.getSource();
-                String displayName = GSlp.getDisplayName();
-        		if(displayName.toLowerCase().indexOf(slname.toLowerCase()) == -1)
-        		{
-        			it.remove();
-        		}
-        	}
-        }
-        
-	}
-	private void filterLocalePairsBytgName(HttpSession p_session, Vector p_lps)
-	{
-		SessionManager sessionManager = (SessionManager) p_session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
-        String tgname = (String) sessionManager
-                .getAttribute("tgFilter");
-        if (!StringUtil.isEmpty(tgname))
-        {
-        	for(Iterator it = p_lps.iterator(); it.hasNext();)
-        	{
-        		LocalePair lp = (LocalePair) it.next();
-        		GlobalSightLocale GSlp = lp.getTarget();
-                String displayName = GSlp.getDisplayName();
-        		if(displayName.toLowerCase().indexOf(tgname.toLowerCase()) == -1)
-        		{
-        			it.remove();
-        		}
-        	}
-        }
-        
-	}
-	
-	private void filterLocalePairsByCompanyName(HttpServletRequest p_request,
-			HttpSession p_session, Vector p_lps)
-	{
-		SessionManager sessionManager = (SessionManager) p_session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
-
-		String lpCompanyFilterValue = p_request
-				.getParameter(LocalePairConstants.FILTER_COMPANY);
-		if (lpCompanyFilterValue == null)
-		{
-			lpCompanyFilterValue = (String) sessionManager
-					.getAttribute(LocalePairConstants.FILTER_COMPANY);
-		}
-		if (lpCompanyFilterValue == null)
-		{
-			lpCompanyFilterValue = "";
-		}
-		sessionManager.setAttribute(LocalePairConstants.FILTER_COMPANY,
-				lpCompanyFilterValue.trim());
-
-		if (!StringUtil.isEmpty(lpCompanyFilterValue))
-		{
-			for (Iterator it = p_lps.iterator(); it.hasNext();)
-			{
-				LocalePair lp = (LocalePair) it.next();
-				String comName = CompanyWrapper.getCompanyNameById(
-						lp.getCompanyId()).toLowerCase();
-				if (comName.indexOf(lpCompanyFilterValue.trim().toLowerCase()) == -1)
-				{
-					it.remove();
-				}
-			}
-		}
 	}
 
 	private int getNumPerPage(HttpServletRequest p_request,
@@ -579,20 +500,20 @@ public class LocalePairMainHandler extends PageHandler implements
 	private void handleFilters(HttpServletRequest p_request,
 	        SessionManager sessionMgr, String action)
 	{
-	    String slFilter = (String) p_request.getParameter("slFilter");
-	    String tgFilter = (String) p_request.getParameter("tgFilter");
+	    String lpSourceFilter = (String) p_request.getParameter("lpSourceFilter");
+	    String lpTargetFilter = (String) p_request.getParameter("lpTargetFilter");
 	    String lpCompanyFilter = (String) p_request
 	            .getParameter("lpCompanyFilter");
 
 	    if (p_request.getMethod().equalsIgnoreCase(
 	            WebAppConstants.REQUEST_METHOD_GET))
 	    {
-	        slFilter = (String) sessionMgr.getAttribute("slFilter");
-	        tgFilter = (String) sessionMgr.getAttribute("tgFilter");
+	    	lpSourceFilter = (String) sessionMgr.getAttribute("lpSourceFilter");
+	        lpTargetFilter = (String) sessionMgr.getAttribute("lpTargetFilter");
 	        lpCompanyFilter = (String) sessionMgr.getAttribute("lpCompanyFilter");
 	    }
-	    sessionMgr.setAttribute("slFilter", slFilter);
-	    sessionMgr.setAttribute("tgFilter", tgFilter);
+	    sessionMgr.setAttribute("lpSourceFilter", lpSourceFilter);
+	    sessionMgr.setAttribute("lpTargetFilter", lpTargetFilter);
 	    sessionMgr.setAttribute("lpCompanyFilter", lpCompanyFilter);
 	}
 

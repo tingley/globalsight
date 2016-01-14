@@ -6,7 +6,8 @@ var Menu = {
 			UI.condition_menu.hide();
 		});
 
-		UI.body.unbind("contextmenu").bind("contextmenu", function(e) {
+		UI.viewport.unbind("contextmenu").bind("contextmenu", function(e) {
+			e.preventDefault();
 			onRightDown(e);
 		});
 

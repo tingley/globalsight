@@ -263,6 +263,7 @@ function validateWorkflow() {
 
 var startData = {};
 var endData = {};
+var startTemplate = $("#startTemplate").html();
 function getWorkflowXml() {
 	startData = {};
 	endData = {};
@@ -294,8 +295,7 @@ function getWorkflowXml() {
 	var ob = getNextNodeXml(to);
 	startData["transition_to"] = ob.name;
 	
-	var temp = $("#startTemplate").html();  
-	xml =Mustache.render(temp, startData); 
+	xml =Mustache.render(startTemplate, startData); 
 	xml = xml + getXmlOnce(ob);
 	
 	var temp = $("#allTemplate").html();  
@@ -305,6 +305,7 @@ function getWorkflowXml() {
 	return Mustache.render(temp, allData); 
 }
 
+var taskNodeTemplate = $("#taskNodeTemplate").html();
 function generateActivityNode(node) {
 	var data = {};
 	var n = getSequence();
@@ -332,8 +333,6 @@ function generateActivityNode(node) {
 	data["x"] = getTemplateNumber(node.locale.x);
 	data["y"] = getTemplateNumber(node.locale.y);
 	
-	var temp = $("#taskNodeTemplate").html();  
-	
 	var tl = node.tos[0];
 	data["transition"] = tl.data.txt;
 	
@@ -342,7 +341,7 @@ function generateActivityNode(node) {
 	var ob = getNextNodeXml(to);
 	data["transition_to"] = ob.name;
 	
-	var xml = Mustache.render(temp, data); 
+	var xml = Mustache.render(taskNodeTemplate, data); 
 	xml = xml + getXmlOnce(ob);
 	
 	var returnValue= {};
@@ -351,6 +350,7 @@ function generateActivityNode(node) {
 	return returnValue;
 }
 
+var endTemplate = $("#endTemplate").html();
 function generateEndNode(node) {
 	var n = getSequence();
 	
@@ -362,9 +362,7 @@ function generateEndNode(node) {
 	endData["x2"] = getTemplateNumber(node.locale.x);
 	endData["y2"] = getTemplateNumber(node.locale.y);
 	endData["max_node_id"] = getSequence();
-	
-	var temp = $("#endTemplate").html();  
-	var xml = Mustache.render(temp, endData); 
+	var xml = Mustache.render(endTemplate, endData); 
 	
 	var returnValue= {};
 	returnValue["name"] = "Exit";
@@ -372,6 +370,8 @@ function generateEndNode(node) {
 	return returnValue;
 }
 
+var decisionTemplate1 = $("#decisionTemplate1").html();
+var decisionTemplate2 = $("#decisionTemplate2").html();
 function generateConditionNode(node) {
 	var n = getSequence();
 	
@@ -395,24 +395,21 @@ function generateConditionNode(node) {
 	var toId = l1.to.id;
 	var to = Model.nodes[toId];		
 	var ob = getNextNodeXml(to);
-	transitionData["transition"] = l1.data.txt;	
-	transitionData["transition_to"] = ob.name;
+	data["transition1"] = l1.data.txt;	
+	data["transition_to1"] = ob.name;
+	var temp = decisionTemplate1;	
 	
-	var temp = $("#transitionTemplate").html();	
-	var transitionXml = Mustache.render(temp, transitionData); 
-	
+	// sometimes the condition only has one output.
 	var ob2;
-	if (l2){
+	if (l2){		
 		toId = l2.to.id;
 		to = Model.nodes[toId];		
 		ob2 = getNextNodeXml(to);
-		transitionData["transition"] = l2.data.txt;	
-		transitionData["transition_to"] = ob2.name;
-		transitionXml = transitionXml + Mustache.render(temp, transitionData);
+		data["transition2"] = l2.data.txt;	
+		data["transition_to2"] = ob2.name;
+		temp = decisionTemplate2;	
 	}
 	
-	data["transition"] = transitionXml;	
-	var temp = $("#decisionTemplate").html();  
 	var xml = Mustache.render(temp, data); 
 	xml = xml + getXmlOnce(ob);
 	if (typeof(ob2) != "undefined"){

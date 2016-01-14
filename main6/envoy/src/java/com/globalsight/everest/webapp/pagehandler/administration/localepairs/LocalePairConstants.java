@@ -43,4 +43,6 @@ public interface LocalePairConstants
 
     // Filter Names
     public static final String FILTER_COMPANY = "lpCompanyFilter";
+    public static final String FILTER_SOURCELOCALE = "lpSourceFilter";
+    public static final String FILTER_TARGETLOCALE = "lpTargetFilter";
 }

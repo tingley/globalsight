@@ -7405,7 +7405,7 @@ public class Ambassador extends AbstractWebService
 			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
 			UserParameter up = uppml.getUserParameter(user.getUserId(),
 					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up.getIntValue() == 1) {
+			if (up != null && up.getIntValue() == 1) {
 				ServerProxy.getMailer().sendMailFromAdmin(user,
 						messageArguments,
 						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
@@ -7463,7 +7463,7 @@ public class Ambassador extends AbstractWebService
                 
     		    up = uppml.getUserParameter(u.getUserId(),
     					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-    			if (up.getIntValue() == 1) {
+    			if (up != null && up.getIntValue() == 1) {
                 ServerProxy.getMailer().sendMailFromAdmin(u, messageArguments,
                         MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
                         MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,

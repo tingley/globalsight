@@ -605,7 +605,7 @@ public class FileSystemViewHandler extends PageHandler
             UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
 			UserParameter up = uppml.getUserParameter(user.getUserId(),
 					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up.getIntValue() == 1) {
+			if (up != null && up.getIntValue() == 1) {
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     subject, message, companyIdStr);
 			}

@@ -433,9 +433,9 @@ public class RSSFileSelectHandler extends PageHandler
                 return;
             }
 			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
-			UserParameter up = uppml.getUserParameter(user.getUserName(),
+			UserParameter up = uppml.getUserParameter(user.getUserId(),
 					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up.getIntValue() == 1) {
+			if (up != null && up.getIntValue() == 1) {
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
@@ -461,15 +461,11 @@ public class RSSFileSelectHandler extends PageHandler
             time.setLocale(Locale.getDefault());
             messageArguments[0] = time.toString();
             // send an email to the default PM
-            up = uppml.getUserParameter(pm.getUserId(),
-					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up.getIntValue() == 1) {
-            ServerProxy.getMailer().sendMailFromAdmin(recipient,
-                    messageArguments,
-                    MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
-                    companyIdStr);
-			}
+			ServerProxy.getMailer().sendMailFromAdmin(recipient,
+					messageArguments,
+					MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
+					MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
+					companyIdStr);
         }
         catch (Exception e)
         {

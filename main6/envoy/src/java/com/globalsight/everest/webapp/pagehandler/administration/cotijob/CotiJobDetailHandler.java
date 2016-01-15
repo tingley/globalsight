@@ -612,11 +612,12 @@ public class CotiJobDetailHandler extends PageHandler
 			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
 			UserParameter up = uppml.getUserParameter(user.getUserId(),
 					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up.getIntValue() == 1) {
-            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                    companyId);
+			if (up != null && up.getIntValue() == 1) {
+				ServerProxy.getMailer().sendMailFromAdmin(user,
+						messageArguments,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+						companyId);
 			}
             // get the PM address
             User pm = UserHandlerHelper.getUser(project.getProjectManagerId());
@@ -636,7 +637,7 @@ public class CotiJobDetailHandler extends PageHandler
 
 			up = uppml.getUserParameter(pm.getUserId(),
 					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up.getIntValue() == 1) {
+			if (up != null && up.getIntValue() == 1) {
 				ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
 						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
 						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,

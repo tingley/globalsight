@@ -45,15 +45,21 @@ function addEnd() {
 	return n;
 }
 
+function isActivityExist(activity){
+	var activities = workflowDetailData["activities"];
+	for (var i in activities){
+		if (activity == activities[i]["name"]){
+			return true;
+		}
+	}
+	return false;
+}
+
 function addActivity(activity) {
 	var node = activity["task"];
 	var assignment = activity["task"]["assignment"];
 	var point = assignment["point"].split(':');
-	
-	var roleName = assignment["role_name"];
 	var activityName = assignment["activity"];
-	var i = activityName.lastIndexOf("_");
-	activityName = activityName.substring(0,i);
 	
 	var name = activity["@name"];
 	var n = Model.getNodeByName(name);
@@ -61,8 +67,10 @@ function addActivity(activity) {
 		n = new ActivityNode();		
 		n.init(parseFloat(point[0]), parseFloat(point[1]));
 		
-		n.data.name = name;		
-		n.json = activity;
+		if (isActivityExist(activityName)){
+			n.data.name = name;		
+			n.json = activity;
+		}
 		
 		n = Model.add(n);
 	}

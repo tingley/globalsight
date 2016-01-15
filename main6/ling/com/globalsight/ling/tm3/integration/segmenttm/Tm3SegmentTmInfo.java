@@ -1244,7 +1244,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                         tuToSave.attr(projectAttr, srcTuv.getUpdatedProject());
                     }
                 }
-                saver.isSaveToSegmentTm = true;
 				savedTus.addAll(saver.save(convertSaveMode(pMode), indexTarget));
                 synchronized (this)
                 {

@@ -40,6 +40,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.ling.common.URLDecoder;
@@ -382,6 +383,7 @@ public class RSSFileSelectHandler extends PageHandler
                     .getAttribute(WebAppConstants.PROJECT_NAME);
             Project project = ServerProxy.getProjectHandler().getProjectByName(
                     projectName);
+            User pm = UserHandlerHelper.getUser(project.getProjectManagerId());
             String companyIdStr = String.valueOf(project.getCompanyId());
 
             User user = (User) p_sessionMgr.getAttribute(WebAppConstants.USER);
@@ -430,9 +432,9 @@ public class RSSFileSelectHandler extends PageHandler
             {
                 return;
             }
-            String param = UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD;
 			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
-			UserParameter up = uppml.getUserParameter(user.getUserName(), param);
+			UserParameter up = uppml.getUserParameter(user.getUserName(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
 			if (up.getIntValue() == 1) {
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
@@ -459,11 +461,15 @@ public class RSSFileSelectHandler extends PageHandler
             time.setLocale(Locale.getDefault());
             messageArguments[0] = time.toString();
             // send an email to the default PM
+            up = uppml.getUserParameter(pm.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+			if (up.getIntValue() == 1) {
             ServerProxy.getMailer().sendMailFromAdmin(recipient,
                     messageArguments,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
                     companyIdStr);
+			}
         }
         catch (Exception e)
         {

@@ -7401,10 +7401,10 @@ public class Ambassador extends AbstractWebService
             {
                 return;
             }
-			String param = UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD;
+
 			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
-			UserParameter up = uppml
-					.getUserParameter(user.getUserName(), param);
+			UserParameter up = uppml.getUserParameter(user.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
 			if (up.getIntValue() == 1) {
 				ServerProxy.getMailer().sendMailFromAdmin(user,
 						messageArguments,
@@ -7460,11 +7460,15 @@ public class Ambassador extends AbstractWebService
                 time.setDate(p_uploadDate);
                 messageArguments[0] = time.toString();
                 messageArguments[6] = u.getSpecialNameForEmail();
-
+                
+    		    up = uppml.getUserParameter(u.getUserId(),
+    					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+    			if (up.getIntValue() == 1) {
                 ServerProxy.getMailer().sendMailFromAdmin(u, messageArguments,
                         MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
                         MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
                         companyIdStr);
+    			}
             }
         }
         catch (Exception e)

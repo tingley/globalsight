@@ -27,6 +27,9 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.log4j.Logger;
 
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
+import com.globalsight.config.UserParameterPersistenceManagerLocal;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
@@ -427,12 +430,15 @@ public class RSSFileSelectHandler extends PageHandler
             {
                 return;
             }
-
+            String param = UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD;
+			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
+			UserParameter up = uppml.getUserParameter(user.getUserName(), param);
+			if (up.getIntValue() == 1) {
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
                     companyIdStr);
-
+			}
             // get the default PM's email address (could be a group alias)
             SystemConfiguration sc = SystemConfiguration.getInstance();
             String recipient = sc.getStringParameter(sc.DEFAULT_PM_EMAIL);

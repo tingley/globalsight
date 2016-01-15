@@ -79,11 +79,15 @@ import org.dom4j.ElementPath;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.jbpm.JbpmContext;
 import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.calendar.ReservedTime;
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
+import com.globalsight.config.UserParameterPersistenceManagerLocal;
 import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
@@ -7397,13 +7401,17 @@ public class Ambassador extends AbstractWebService
             {
                 return;
             }
-
-            // send mail to uploader
-            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                    companyIdStr);
-
+			String param = UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD;
+			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
+			UserParameter up = uppml
+					.getUserParameter(user.getUserName(), param);
+			if (up.getIntValue() == 1) {
+				ServerProxy.getMailer().sendMailFromAdmin(user,
+						messageArguments,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+						companyIdStr);
+			}
             // get the PMs address (could be a group alias)
             List pms = new ArrayList();
             boolean add = true;

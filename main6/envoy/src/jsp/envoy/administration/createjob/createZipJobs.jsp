@@ -908,20 +908,20 @@ function checkAndUpload()
 	{
 		var tempFiles = document.getElementById( "selectedSourceFile" );
 		var tempFileName;
-		var Files = new Array();
+		var dupFiles = new Array();
 		var temp;
-		for (var j=0;j<tempFiles.files.length;j++)
+		for (var j = 0; j < tempFiles.files.length; j++)
 		{
 			temp = tempFiles.files[j];
 			tempFileName = temp.name;
 			var flag = true;
 			if (uploadedFiles.length > 0)
 			{
-				for (i=0; i<uploadedFiles.length; i++)
+				for (i = 0; i < uploadedFiles.length; i++)
 				{
 					if (uploadedFiles[i] == tempFileName)
 					{
-						Files.push(tempFileName);
+						dupFiles.push(tempFileName);
 						flag = false;
 					}
 				}
@@ -932,16 +932,20 @@ function checkAndUpload()
 				uploadedFiles.push(tempFileName);
 			}
 		}
-		if (Files.length>0)
+		if (dupFiles.length > 0)
 		{
-			var result = Files.join();
-			if (Files.length>1)
-			{		
-				alert(result +" are already in the uploaded list,ignored");
+			var result = dupFiles.join("\n");
+			if (dupFiles.length > 1)
+			{
+				alert("Below files are already in the uploaded list, ignored: \n\n" + result);
 			}
 			else
 			{
-				alert(result +" is already in the uploaded list,ignored");	
+				alert("Below file is already in the uploaded list, ignored: \n\n" + result);
+			}
+			if (dupFiles.length == tempFiles.files.length)
+			{
+				return false;
 			}
 		}
 	}

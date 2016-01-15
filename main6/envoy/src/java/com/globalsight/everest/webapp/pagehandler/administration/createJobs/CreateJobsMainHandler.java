@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -209,9 +210,9 @@ public class CreateJobsMainHandler extends PageHandler
                 List<File> uploadedFiles = new ArrayList<File>();
                 try
                 {
-                    uploadedFiles = uploadSelectedFile(request, tempFolder,
-                            type);
-                    for(File uploadedFile : uploadedFiles){
+					uploadedFiles = uploadSelectedFile(request, tempFolder,	type);
+					for (File uploadedFile : uploadedFiles)
+					{
                     	StringBuffer ret = new StringBuffer("[");
                     	response.setContentType("text/html;charset=UTF-8");
                     	if ("0".equals(type))// source files
@@ -1792,17 +1793,18 @@ public class CreateJobsMainHandler extends PageHandler
                     + File.separator + tempFolder);
             parentFile.mkdirs();
         }
+
         fileNames = uploadFile(request, parentFile);
-        for(String fileName : fileNames)
+		for (String fileName : fileNames)
         {
         	File uploadedFile = new File(fileName); 
         	uploadedFiles.add(uploadedFile);
         }
         return uploadedFiles;
     }
-    
-    private List<String> uploadFile(HttpServletRequest p_request, File parentFile)
-			throws GlossaryException, IOException
+
+	private List<String> uploadFile(HttpServletRequest p_request,
+			File parentFile) throws GlossaryException, IOException
 	{
 		byte[] inBuf = new byte[MAX_LINE_LENGTH];
 		int bytesRead;
@@ -1813,7 +1815,10 @@ public class CreateJobsMainHandler extends PageHandler
 		String path = parentFile.getPath() + File.separator;
 		List<String> filePaths = new ArrayList<String>();
 		File file = new File(path);   
-	    File[] arrayFiles = file.listFiles();
+	    Set<String> uploadedFileNames = new HashSet<String>();
+	    for (File f : file.listFiles()) {
+	    	uploadedFileNames.add(f.getName());
+	    }
 		
 		// Let's make sure that we have the right type of content
 		//
@@ -1886,23 +1891,13 @@ public class CreateJobsMainHandler extends PageHandler
 					// save the contents in this file for now and
 					// finally rename it to correct file name.
 					//
-					boolean flag = false;
-			        if (arrayFiles.length>0)
-			        {
-			        	for (int i=0;i<arrayFiles.length;i++)
-			        	{   
-		        			if (fileName.equals(arrayFiles[i].getName()))
-		        			{
-		        				flag = true;
-					        	break;
-		        		    }
-			        	}
-			        	if (flag)
-			        	{
-			        		continue;
-			        	}
-			        }
-			        filePath = path + fileName;
+					
+					// if a file with same name has been uploaded, ignore this
+					if (uploadedFileNames.contains(fileName)) {
+						continue;
+					}
+
+		        	filePath = path + fileName;
 			        filePaths.add(filePath);
 					File m_tempFile = new File(filePath);
 					FileOutputStream fos = new FileOutputStream(m_tempFile);

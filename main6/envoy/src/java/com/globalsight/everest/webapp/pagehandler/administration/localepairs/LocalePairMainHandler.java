@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -40,7 +39,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
@@ -89,7 +87,7 @@ public class LocalePairMainHandler extends PageHandler implements
 		{
 			if (isPost(p_request))
 			{
-				if (action == null) 
+				if (LocalePairConstants.FILTER.equals(action)) 
 				{
 					handleFilters(p_request, sessionMgr, action);
 				}
@@ -400,7 +398,7 @@ public class LocalePairMainHandler extends PageHandler implements
 		Vector lps = localeMgr.getSourceTargetLocalePairs();
 
 		LocalePairFilter lpfilter = new LocalePairFilter();
-		Vector arrlps = lpfilter.filterLocalePairsByName(p_session,lps);
+		List arrlps = lpfilter.filter(p_session, lps);
 		Locale uiLocale = (Locale) p_session
 				.getAttribute(WebAppConstants.UILOCALE);
 		// Get the number per page
@@ -496,25 +494,25 @@ public class LocalePairMainHandler extends PageHandler implements
 			}
 		}
 	}
-	
+
 	private void handleFilters(HttpServletRequest p_request,
 	        SessionManager sessionMgr, String action)
 	{
 	    String lpSourceFilter = (String) p_request.getParameter("lpSourceFilter");
 	    String lpTargetFilter = (String) p_request.getParameter("lpTargetFilter");
-	    String lpCompanyFilter = (String) p_request
-	            .getParameter("lpCompanyFilter");
-
-	    if (p_request.getMethod().equalsIgnoreCase(
-	            WebAppConstants.REQUEST_METHOD_GET))
-	    {
-	    	lpSourceFilter = (String) sessionMgr.getAttribute("lpSourceFilter");
-	        lpTargetFilter = (String) sessionMgr.getAttribute("lpTargetFilter");
-	        lpCompanyFilter = (String) sessionMgr.getAttribute("lpCompanyFilter");
-	    }
-	    sessionMgr.setAttribute("lpSourceFilter", lpSourceFilter);
-	    sessionMgr.setAttribute("lpTargetFilter", lpTargetFilter);
-	    sessionMgr.setAttribute("lpCompanyFilter", lpCompanyFilter);
+	    String lpCompanyFilter = (String) p_request.getParameter("lpCompanyFilter");
+		if (lpSourceFilter == null) {
+			lpSourceFilter = "";
+		}
+		if (lpTargetFilter == null) {
+			lpTargetFilter = "";
+		}
+		if (lpCompanyFilter == null) {
+			lpCompanyFilter = "";
+		}
+	    sessionMgr.setAttribute(LocalePairConstants.FILTER_SOURCELOCALE, lpSourceFilter);
+	    sessionMgr.setAttribute(LocalePairConstants.FILTER_TARGETLOCALE, lpTargetFilter);
+	    sessionMgr.setAttribute(LocalePairConstants.FILTER_COMPANY, lpCompanyFilter);
 	}
 
     private  void resetSessionTableInfo(HttpSession p_session, String p_key)
@@ -528,10 +526,21 @@ public class LocalePairMainHandler extends PageHandler implements
                 + TableConstants.REVERSE_SORT);
         Integer lastPage = (Integer) sessionMgr.getAttribute(p_key
                 + TableConstants.LAST_PAGE_NUM);
-        sessionMgr.setAttribute(p_key + TableConstants.SORTING, sortType);
-        sessionMgr.setAttribute(p_key + TableConstants.REVERSE_SORT,
-                reverseSort);
+		String lpSourceFilter = (String) sessionMgr
+				.getAttribute(LocalePairConstants.FILTER_SOURCELOCALE);
+		String lpTargetFilter = (String) sessionMgr
+				.getAttribute(LocalePairConstants.FILTER_TARGETLOCALE);
+		String lpCompanyFilter = (String) sessionMgr
+				.getAttribute(LocalePairConstants.FILTER_COMPANY);
+
+	    sessionMgr.clear();
+
+	    sessionMgr.setAttribute(p_key + TableConstants.SORTING, sortType);
+        sessionMgr.setAttribute(p_key + TableConstants.REVERSE_SORT, reverseSort);
         sessionMgr.setAttribute(p_key + TableConstants.LAST_PAGE_NUM, lastPage);
+	    sessionMgr.setAttribute(LocalePairConstants.FILTER_SOURCELOCALE, lpSourceFilter);
+	    sessionMgr.setAttribute(LocalePairConstants.FILTER_TARGETLOCALE, lpTargetFilter);
+	    sessionMgr.setAttribute(LocalePairConstants.FILTER_COMPANY, lpCompanyFilter);
     }
 
 }

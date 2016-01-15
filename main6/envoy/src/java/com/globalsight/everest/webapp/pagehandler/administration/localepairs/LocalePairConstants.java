@@ -40,6 +40,7 @@ public interface LocalePairConstants
     public static final String REMOVE = "remove";
     public static final String EXPORT = "export";
     public static final String IMPORT = "import";
+    public static final String FILTER = "filter";
 
     // Filter Names
     public static final String FILTER_COMPANY = "lpCompanyFilter";

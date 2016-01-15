@@ -609,9 +609,9 @@ public class CotiJobDetailHandler extends PageHandler
             messageArguments[6] = user.getSpecialNameForEmail();
 
             // send mail to uploader
-            String param = UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD;
 			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
-			UserParameter up = uppml.getUserParameter(user.getUserName(), param);
+			UserParameter up = uppml.getUserParameter(user.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
 			if (up.getIntValue() == 1) {
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
@@ -634,10 +634,14 @@ public class CotiJobDetailHandler extends PageHandler
             }
             messageArguments[6] = pm.getSpecialNameForEmail();
 
-            ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                    companyId);
+			up = uppml.getUserParameter(pm.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+			if (up.getIntValue() == 1) {
+				ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+						companyId);
+			}
         }
         catch (Exception e)
         {

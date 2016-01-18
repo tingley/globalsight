@@ -408,8 +408,10 @@ function populateLeverageFromList(localePairComboBox)
    var count = 0;
    for (var i = 0; i < possibleLevLocales.length; i++)
    {
-	  if ((possibleLevLocales[i] == 'nb_NO' || possibleLevLocales[i] == 'no_NO')
-			  && (targetLang == 'no' || targetLang == 'nb'))
+	  if ((possibleLevLocales[i] == 'nb_NO' || possibleLevLocales[i] == 'no_NO'
+			  ||possibleLevLocales[i] == 'nn_NO')
+			  && (targetLang == 'no' || targetLang == 'nb' ||
+				  targetLang == 'nn'))
 	  {
 		  basicTemplateForm.leverageField.options[count] = 
 	            new Option(possibleLevLocalesDisplay[i], possibleLevLocales[i]);
@@ -711,7 +713,7 @@ function updateWFMS(projObj)
                                       }
                                   }
                               }
-                          	  if (l.getLanguageCode().equals(trgLanguage) || l.getLanguageCode().equals("nb") || l.getLanguageCode().equals("no"))
+                          	  if (l.getLanguageCode().equals(trgLanguage) || l.getLanguageCode().equals("nb") || l.getLanguageCode().equals("no") || l.getLanguageCode().equals("nn"))
 	                          {
                               %>
 	                             <OPTION VALUE="<%=l%>" <%=selected %> > <%=leverage %></OPTION>

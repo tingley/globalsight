@@ -252,12 +252,16 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
             GlobalSightLocale tgt = lp.getTarget();
             for (int i = 0; i < leveragedObjects.size(); i++)
             {
-            	if (tgt.getLanguageCode().endsWith("no"))
+            	if (tgt.getLanguageCode().endsWith("no")
+            			||tgt.getLanguageCode().endsWith("nb")
+            			||tgt.getLanguageCode().endsWith("nn"))
             	{
             		if( ((GlobalSightLocale) leveragedObjects.elementAt(i))
                             .getLanguageCode().equals("no")||  
                             ((GlobalSightLocale) leveragedObjects.elementAt(i))
-                            .getLanguageCode().equals("nb"))
+                            .getLanguageCode().equals("nb")||
+                            ((GlobalSightLocale) leveragedObjects.elementAt(i))
+                            .getLanguageCode().equals("nn"))
             		{
 						newLeverageObjects.addElement(leveragedObjects
 								.elementAt(i));

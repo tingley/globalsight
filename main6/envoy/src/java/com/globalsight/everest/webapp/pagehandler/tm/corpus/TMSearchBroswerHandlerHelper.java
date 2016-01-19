@@ -627,15 +627,15 @@ public class TMSearchBroswerHandlerHelper
         String segment = "<segment>" + EditUtil.encodeHtmlEntities(queryText)
                 + "</segment>";
         PageTmTu tu = new PageTmTu(-1, -1, "plaintext", "text", true);
-        PageTmTuv tuv = new PageTmTuv(-1, segment, sourceGSL);
+		GlobalSightLocale searchFromLocale = searchInSource ? sourceGSL : targetGSL;
+        PageTmTuv tuv = new PageTmTuv(-1, segment, searchFromLocale);
         tuv.setTu(tu);
         tuv.setExactMatchKey();
         tu.addTuv(tuv);
-
         // Do leverage
         LeverageDataCenter leverageDataCenter = LingServerProxy
                 .getTmCoreManager().leverageSegments(
-                        Collections.singletonList(tuv), sourceGSL,
+                        Collections.singletonList(tuv), searchFromLocale,
                         searchTrgLocales, levOptions);
         Iterator<LeverageMatches> itLeverageMatches = leverageDataCenter
                 .leverageResultIterator();

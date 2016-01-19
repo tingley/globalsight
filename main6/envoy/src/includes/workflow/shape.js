@@ -140,7 +140,7 @@ function Node() {
 
 		var d = Math.sqrt(d2 * d2 + h2 * h2);
 		return d < 40;
-	}
+	};
 
 	this.getSnapLineY = function(x, y) {
 
@@ -160,7 +160,7 @@ function Node() {
 			return y2;
 
 		return -1;
-	}
+	};
 
 	this.getSnapLineX = function(x, y) {
 		if (Math.abs(x - this.locale.x) < 10)
@@ -179,39 +179,15 @@ function Node() {
 			return x2;
 
 		return -1;
-	}
+	};
 
 	// the x, y is used in print.
-	this.showTxt = function(context, x0 , y0) {
-		
-		if (typeof (context) != "undefined"){
-			this.oldContext = context;
-		} else {
-			context = this.oldContext;
-		}
-		
-		context.clearRect(0,0,1000,1000);
-		
-		// not print.
-		if (typeof (x0) == "undefined"){
-			x0 = 0;
-			y0 = 0;
-		}
-		
-		
+	this.showTxt = function() {
 		if (this.type == "activityNode"){
-
-			context.font = "10px Arial";
-			
-			var s = this.getAssignmentValue("role_name");
-			var w = context.measureText(s).width;
-			var x = (this.defaultWidth - w) / 2;
-			context.fillText(s, x + x0, 0.35 * this.prop.h * this.scale + y0);
-						
-			s = this.getDisplayActivity();
-			w = context.measureText(s).width;
-			x = (this.defaultWidth - w) / 2;
-			context.fillText(s, x + x0, 0.8 * this.prop.h * this.scale + y0);
+			var name = this.getAssignmentValue("role_name");
+			var user = this.getDisplayActivity();
+			$('#name' + this.id).html(name);
+			$('#user' + this.id).html(user);			
 		}	
 	};
 	this.showLocale = function(context) {

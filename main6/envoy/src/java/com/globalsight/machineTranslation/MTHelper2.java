@@ -44,6 +44,7 @@ public class MTHelper2
     public static final String MT_TRANSLATION = "MT_TRANSLATION";
 
     public static final String ACTION_GET_MT_TRANSLATION = "getMtTranslation";
+    public static final String ACTION_GET_MT_TRANSLATION_MESSAGE = "getMtTranslationMessage";
 
     public static final String MT_TRANSLATION_DIV = "translatedString_replaced_div";
 
@@ -109,6 +110,23 @@ public class MTHelper2
         return spDataType;
     }
 
+	public static Map getMtTranslationMessage(EditorState p_state)
+	{
+		Map result = new HashMap();
+		long sourcePageId = p_state.getSourcePageId();
+		// MT: SHOW_IN_EDITOR
+		MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+				.getMtProfileBySourcePageId(sourcePageId,
+						p_state.getTargetLocale());
+		MachineTranslator mt = null;
+		if (mtProfile != null)
+		{
+			String mtEngine = mtProfile.getMtEngine();
+			mt = MTHelper.initMachineTranslator(mtEngine);
+			result.put(ENGINE_NAME, mt.getEngineName());
+		}
+		return result;
+	}
     /**
      * If "show_in_editor" is checked on TM profile >> MT Options UI, get MT
      * translation for current segment.
@@ -118,103 +136,91 @@ public class MTHelper2
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Map getMtTranslationForSegEditor(EditorState p_state)
-    {
-        Map result = new HashMap();
+	{
+		Map result = new HashMap();
 
-        long sourcePageId = p_state.getSourcePageId();
-        // MT: SHOW_IN_EDITOR
-        MachineTranslationProfile mtProfile = MTProfileHandlerHelper
-                .getMtProfileBySourcePageId(sourcePageId,
-                        p_state.getTargetLocale());
-        boolean show_in_editor = false;
-        MachineTranslator mt = null;
-        if (mtProfile != null)
-        {
-            show_in_editor = mtProfile.isShowInEditor();
-            if (show_in_editor)
-            {
-                String mtEngine = mtProfile.getMtEngine();
-                mt = MTHelper.initMachineTranslator(mtEngine);
-                HashMap hashMap = mtProfile.getParamHM();
-//                hashMap.put(MachineTranslator.SOURCE_PAGE_ID, sourcePageId);
-				if (MachineTranslator.ENGINE_MSTRANSLATOR
-						.equalsIgnoreCase(mt.getEngineName())
-						&& p_state.getTargetLocale().getLanguage().equalsIgnoreCase("sr"))
-                {
-					String srLang = mtProfile.getPreferedLangForSr(p_state
-							.getTargetLocale().toString());
-					hashMap.put(MachineTranslator.SR_LANGUAGE, srLang);
-                }
-                mt.setMtParameterMap(hashMap);
-            }
-        }
-        result.put(SHOW_IN_EDITOR, String.valueOf(show_in_editor));
+		long sourcePageId = p_state.getSourcePageId();
+		// MT: SHOW_IN_EDITOR
+		MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+				.getMtProfileBySourcePageId(sourcePageId,
+						p_state.getTargetLocale());
+		MachineTranslator mt = null;
+		if (mtProfile != null)
+		{
+			String mtEngine = mtProfile.getMtEngine();
+			mt = MTHelper.initMachineTranslator(mtEngine);
+			HashMap hashMap = mtProfile.getParamHM();
+			if (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(mt
+					.getEngineName())
+					&& p_state.getTargetLocale().getLanguage()
+							.equalsIgnoreCase("sr"))
+			{
+				String srLang = mtProfile.getPreferedLangForSr(p_state
+						.getTargetLocale().toString());
+				hashMap.put(MachineTranslator.SR_LANGUAGE, srLang);
+			}
+			mt.setMtParameterMap(hashMap);
+		}
 
-        // MT: get MT result
-        String mtString = null;
-        try
-        {
-            SourcePage sp = null;
-            try
-            {
-                sp = ServerProxy.getPageManager().getSourcePage(sourcePageId);
-            }
-            catch (Exception e)
-            {
-                logger.error("Could not get source page by source page ID : "
-                        + sourcePageId, e);
-            }
-            if (mt != null)
-            {
-                TuvManager tuvMananger = ServerProxy.getTuvManager();
-                Tuv sourceTuv = tuvMananger.getTuvForSegmentEditor(p_state
-                        .getTuId(), p_state.getSourceLocale().getIdAsLong(), sp
-                        .getJobId());
+		// MT: get MT result
+		String mtString = null;
+		try
+		{
+			SourcePage sp = null;
+			try
+			{
+				sp = ServerProxy.getPageManager().getSourcePage(sourcePageId);
+			}
+			catch (Exception e)
+			{
+				logger.error("Could not get source page by source page ID : "
+						+ sourcePageId, e);
+			}
+			if (mt != null)
+			{
+				TuvManager tuvMananger = ServerProxy.getTuvManager();
+				Tuv sourceTuv = tuvMananger.getTuvForSegmentEditor(p_state
+						.getTuId(), p_state.getSourceLocale().getIdAsLong(), sp
+						.getJobId());
 
-                String sourceString = null;
-                long subId = p_state.getSubId();
-                if (OnlineEditorManagerLocal.DUMMY_SUBID.equals(String
-                        .valueOf(subId)))
-                {
-                    sourceString = sourceTuv.getGxmlElement().getTextValue();
-                }
-                else
-                {
-                    GxmlElement subEle = sourceTuv
-                            .getSubflowAsGxmlElement(String.valueOf(subId));
-                    sourceString = subEle.getTextValue();
-                }
+				String sourceString = null;
+				long subId = p_state.getSubId();
+				if (OnlineEditorManagerLocal.DUMMY_SUBID.equals(String
+						.valueOf(subId)))
+				{
+					sourceString = sourceTuv.getGxmlElement().getTextValue();
+				}
+				else
+				{
+					GxmlElement subEle = sourceTuv
+							.getSubflowAsGxmlElement(String.valueOf(subId));
+					sourceString = subEle.getTextValue();
+				}
 
-                // translate segment
-                if (sourceString != null && sourceString.trim().length() > 0)
-                {
-                    mtString = mt
-                            .translate(p_state.getSourceLocale().getLocale(),
-                                    p_state.getTargetLocale().getLocale(),
-                                    sourceString);
-                }
+				// translate segment
+				if (sourceString != null && sourceString.trim().length() > 0)
+				{
+					mtString = mt
+							.translate(p_state.getSourceLocale().getLocale(),
+									p_state.getTargetLocale().getLocale(),
+									sourceString);
+				}
 
-                // if (sourceString.equals(mtString))
-                // {
-                // mtString = "";
-                // }
-                if (mtString != null && !"".equals(mtString))
-                {
-                    // Encode the translation before sent to web page.
-                    XmlEntities xe = new XmlEntities();
-                    mtString = xe.encodeStringBasic(mtString);
-                }
-                result.put(MT_TRANSLATION, mtString);
-            }
+				if (mtString != null && !"".equals(mtString))
+				{
+					// Encode the translation before sent to web page.
+					XmlEntities xe = new XmlEntities();
+					mtString = xe.encodeStringBasic(mtString);
+				}
+				result.put(MT_TRANSLATION, mtString);
+			}
+		}
+		catch (Exception e)
+		{
+		}
 
-            result.put(ENGINE_NAME, mt.getEngineName());
-        }
-        catch (Exception e)
-        {
-        }
-
-        return result;
-    }
+		return result;
+	}
 
     // For GBS-3454
     /**

@@ -95,7 +95,7 @@
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>
 <%@ include file="/envoy/common/warning.jspIncl"%>
 <SCRIPT>
-var needWarning = false;
+var needWarning = true;
 var objectName = "<%=bundle.getString("lb_workflow")%>";
 var guideNode = "workflows";
 var helpFile = "<%=bundle.getString("help_workflow_graphical")%>";

@@ -123,6 +123,16 @@
 	top: -5px;
 }
 
+.txtDiv {
+	width:85px;
+	height:25px;
+	line-height:25px; 
+	overflow:hidden; 
+	text-align:center;
+	font-family:Arial;
+    font-size: 8pt;
+}
+
 #canvas {
 	z-index: -2;
 }

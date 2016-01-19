@@ -83,7 +83,7 @@ function onRightDown(e) {
 	}
 	
 	var node = Model.getNodeByPoint(e);
-	if (node != null && node.type == "activityNode") {
+	if (node != null && node.type != "startNode") {
 		e.preventDefault();
 
 		UI.node_menu.show();
@@ -95,9 +95,16 @@ function onRightDown(e) {
 			top : e.pageY
 		});
 
-		UI.node_menu.find("li:eq(0)").unbind("click").bind("click", function() {
-			showProperties(node);
-		});
+		if (node.type == "activityNode"){
+			var li = UI.node_menu.find("li:eq(0)");
+			li.show();
+			li.unbind("click").bind("click", function() {
+				showProperties(node);
+			});
+		} else {
+			UI.node_menu.find("li:eq(0)").hide();
+		}
+		
 		
 		UI.node_menu.find("li:eq(1)").unbind("click").bind("click", function() {
 			Model.deleteNode(node);

@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +58,7 @@ import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.ling.tw.PseudoConstants;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -408,12 +408,13 @@ public class SendDownloadFileHelper implements WebAppConstants
             {
                 changeCreationId = true;
             }
-            
+
             String strchangeSeparateTMFile = p_request
                     .getParameter(OfflineConstants.CHANGE_SEPARATE_TM_FILE);
-            if (strchangeSeparateTMFile != null && strchangeSeparateTMFile.equals("on"))
+            if (strchangeSeparateTMFile != null
+                    && strchangeSeparateTMFile.equals("on"))
             {
-            	changeSeparateTMFile = true;
+                changeSeparateTMFile = true;
             }
         }
         catch (Exception ex)
@@ -551,9 +552,8 @@ public class SendDownloadFileHelper implements WebAppConstants
 
     private void sortSourcePage(List<SourcePage> sps)
     {
-        Collections.sort(sps, new Comparator<SourcePage>()
+        SortUtil.sort(sps, new Comparator<SourcePage>()
         {
-
             private String getMainFileName(String p_filename)
             {
                 int index = p_filename.indexOf(")");

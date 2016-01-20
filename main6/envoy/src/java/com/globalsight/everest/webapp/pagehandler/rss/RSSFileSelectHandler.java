@@ -27,6 +27,9 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.log4j.Logger;
 
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
+import com.globalsight.config.UserParameterPersistenceManagerLocal;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
@@ -37,6 +40,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.ling.common.URLDecoder;
@@ -379,6 +383,7 @@ public class RSSFileSelectHandler extends PageHandler
                     .getAttribute(WebAppConstants.PROJECT_NAME);
             Project project = ServerProxy.getProjectHandler().getProjectByName(
                     projectName);
+            User pm = UserHandlerHelper.getUser(project.getProjectManagerId());
             String companyIdStr = String.valueOf(project.getCompanyId());
 
             User user = (User) p_sessionMgr.getAttribute(WebAppConstants.USER);
@@ -427,12 +432,15 @@ public class RSSFileSelectHandler extends PageHandler
             {
                 return;
             }
-
+			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
+			UserParameter up = uppml.getUserParameter(user.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+			if (up != null && up.getIntValue() == 1) {
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
                     MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
                     companyIdStr);
-
+			}
             // get the default PM's email address (could be a group alias)
             SystemConfiguration sc = SystemConfiguration.getInstance();
             String recipient = sc.getStringParameter(sc.DEFAULT_PM_EMAIL);
@@ -453,11 +461,11 @@ public class RSSFileSelectHandler extends PageHandler
             time.setLocale(Locale.getDefault());
             messageArguments[0] = time.toString();
             // send an email to the default PM
-            ServerProxy.getMailer().sendMailFromAdmin(recipient,
-                    messageArguments,
-                    MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
-                    companyIdStr);
+			ServerProxy.getMailer().sendMailFromAdmin(recipient,
+					messageArguments,
+					MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT,
+					MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
+					companyIdStr);
         }
         catch (Exception e)
         {

@@ -81,7 +81,7 @@ function load()
 		<% } %>
 		
 	try{
-		var pages = PDFViewerApplication.pdfViewer.pages;
+		var pages = PDFViewerApplication.pdfViewer._pages;
 		
 		for(var i = 0; i < pages.length; i++)
 		{
@@ -141,9 +141,9 @@ var currentSegment;
 
 function highlightObjects(o)
 {
-	var pagennn = PDFViewerApplication.pdfViewer.location.pageNumber;
-	var pageLeft = PDFViewerApplication.pdfViewer.location.left;
-	var pageTop = PDFViewerApplication.pdfViewer.location.top;
+	var pagennn = PDFViewerApplication.pdfViewer._location.pageNumber;
+	var pageLeft = PDFViewerApplication.pdfViewer._location.left;
+	var pageTop = PDFViewerApplication.pdfViewer._location.top;
 	var curScale = PDFViewerApplication.pdfViewer.currentScale;
 	
 	
@@ -368,10 +368,10 @@ function editComment(o)
               <span data-l10n-id="find_next_label">Next</span>
             </button>
           </div>
-          <input type="checkbox" id="findHighlightAll" class="toolbarField">
-          <label for="findHighlightAll" class="toolbarLabel" tabindex="94" data-l10n-id="find_highlight">Highlight all</label>
-          <input type="checkbox" id="findMatchCase" class="toolbarField">
-          <label for="findMatchCase" class="toolbarLabel" tabindex="95" data-l10n-id="find_match_case_label">Match case</label>
+          <input type="checkbox" id="findHighlightAll" class="toolbarField" tabindex="94">
+          <label for="findHighlightAll" class="toolbarLabel" data-l10n-id="find_highlight">Highlight all</label>
+          <input type="checkbox" id="findMatchCase" class="toolbarField" tabindex="95">
+          <label for="findMatchCase" class="toolbarLabel" data-l10n-id="find_match_case_label">Match case</label>
           <span id="findMsg" class="toolbarLabel"></span>
         </div>  <!-- findbar -->
 
@@ -678,6 +678,14 @@ function editComment(o)
 	</div>
     <div id="printContainer"></div>
 <div id="mozPrintCallback-shim" hidden>
+  <style>
+@media print {
+  #printContainer div {
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+}
+  </style>
   <style scoped>
 #mozPrintCallback-shim {
   position: fixed;

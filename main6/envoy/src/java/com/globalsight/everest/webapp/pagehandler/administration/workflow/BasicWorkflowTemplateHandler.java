@@ -297,7 +297,8 @@ public class BasicWorkflowTemplateHandler extends PageHandler implements
             	displayName = displayNames.elementAt(j);
                 String lang = gsl.getLanguageCode();
 
-				if (newTargetLangCode.equals("no") || newTargetLangCode.equals("nb"))
+				if (newTargetLangCode.equals("no") || newTargetLangCode.equals("nb") 
+						|| newTargetLangCode.equals("nn"))
 				{
 					if (!validLeverageLocale(trgLocale, gsl)
 							|| (targetLeverageLocalesObjects.contains(gsl)))
@@ -305,7 +306,7 @@ public class BasicWorkflowTemplateHandler extends PageHandler implements
                         continue;
                     }
 
-					if (lang.equals("no") || lang.equals("nb"))
+					if (lang.equals("no") || lang.equals("nb") || lang.equals("nn"))
 					{
 						targetLeverageLocalesObjects.addElement(gsl);
 						targetLeverageLocalesDisplays.addElement(displayName);

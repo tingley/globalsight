@@ -46,7 +46,7 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
     }
     
     // clean other color
-    var pages = PDFViewerApplication.pdfViewer.pages;
+    var pages = PDFViewerApplication.pdfViewer._pages;
     for(var ii = 0; ii < pages.length; ii++)
   	{
   		var page = pages[ii];
@@ -103,7 +103,7 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
     // find segment
     var isOfficeXml = ("office-xml" == format || "xml" == format);
     var find = false;
-    var loPn = p_lnPn ? p_lnPn : PDFViewerApplication.pdfViewer.location.pageNumber;
+    var loPn = p_lnPn ? p_lnPn : PDFViewerApplication.pdfViewer._location.pageNumber;
     
     // find by GlobalSight
     var pageDiv = document.getElementById("pageContainer" + loPn);

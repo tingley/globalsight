@@ -45,6 +45,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
+import com.globalsight.config.UserParameterPersistenceManagerLocal;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.Condition;
@@ -606,11 +609,16 @@ public class CotiJobDetailHandler extends PageHandler
             messageArguments[6] = user.getSpecialNameForEmail();
 
             // send mail to uploader
-            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                    companyId);
-
+			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
+			UserParameter up = uppml.getUserParameter(user.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+			if (up != null && up.getIntValue() == 1) {
+				ServerProxy.getMailer().sendMailFromAdmin(user,
+						messageArguments,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+						companyId);
+			}
             // get the PM address
             User pm = UserHandlerHelper.getUser(project.getProjectManagerId());
             if (pm == null)
@@ -627,10 +635,14 @@ public class CotiJobDetailHandler extends PageHandler
             }
             messageArguments[6] = pm.getSpecialNameForEmail();
 
-            ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                    companyId);
+			up = uppml.getUserParameter(pm.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+			if (up != null && up.getIntValue() == 1) {
+				ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+						companyId);
+			}
         }
         catch (Exception e)
         {

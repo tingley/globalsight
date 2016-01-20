@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -46,15 +45,16 @@ import org.dom4j.io.XMLWriter;
 import com.globalsight.everest.edit.offline.page.TmxUtil;
 import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
 import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IWriter;
 import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.machineTranslation.MachineTranslator;
-import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.util.StringUtil;
@@ -289,12 +289,11 @@ public class TmxWriter implements IWriter
     private void convertTuToTmxLevel(SegmentTmTu p_tu, int p_level)
             throws Exception
     {
-        ArrayList tuvs = getAllTuvsInTu(p_tu);
+        List<BaseTmTuv> tuvs = p_tu.getTuvs();
 
-        for (int i = 0, max = tuvs.size(); i < max; i++)
+        for (int i = 0; i < tuvs.size(); i++)
         {
             SegmentTmTuv tuv = (SegmentTmTuv) tuvs.get(i);
-
             convertTuvToTmxLevel(p_tu, tuv, p_level);
         }
 
@@ -304,7 +303,6 @@ public class TmxWriter implements IWriter
         // after export the local tm database segment will have ph tag including
         // id attribute, and export the tmx and reimport other tm, will error.
         // so when export, must remove the id attribute of ph tag.
-
         TmxChecker tmxChecker = new TmxChecker();
         tmxChecker.fixTuvByDtd(tuvs);
 
@@ -314,7 +312,9 @@ public class TmxWriter implements IWriter
         // Fix "x" and "i" numbering for TMX compliance.
         // "x" must start with 1, and "i" in target must use
         // the same value as "i" in source.
-        fixAttributeIX(p_tu);
+        SegmentTmTuv sourceTuv = (SegmentTmTuv) p_tu.getSourceTuv();
+        tuvs.remove(sourceTuv);
+        fixAttributeIX(sourceTuv, tuvs);
     }
 
     /**
@@ -445,209 +445,6 @@ public class TmxWriter implements IWriter
         }
     }
 
-    /**
-     * Converts a GlobalSight TU/TUV group to a TMX TU. Differences:
-     * 
-     * - TU segment type (text, string, css-*) is output as prop.
-     * 
-     * - TU type (T or L) is output as prop.
-     * 
-     * - Not in use, but not delete for now.
-     */
-    public String convertToTmx(SegmentTmTu p_tu, Tmx tmx,
-            com.globalsight.everest.tm.exporter.ExportOptions options,
-            OutputFormat outputFormat) throws Exception
-    {
-        StringBuffer result = new StringBuffer();
-
-        Tmx.Prop prop;
-        GlobalSightLocale srcLocale = p_tu.getSourceLocale();
-        String srcLang = ExportUtil.getLocaleString(srcLocale);
-
-        result.append("<tu");
-
-        // Remember valid TU IDs
-        if (p_tu.getId() > 0)
-        {
-            result.append(" ");
-            result.append(Tmx.TUID);
-            result.append("=\"");
-            result.append(p_tu.getId());
-            result.append("\"");
-        }
-
-        // Default datatype is HTML, mark different TUs.
-        if (!p_tu.getFormat().equals(tmx.getDatatype()))
-        {
-            result.append(" ");
-            result.append(Tmx.DATATYPE);
-            result.append("=\"");
-            result.append(p_tu.getFormat());
-            result.append("\"");
-        }
-
-        // Default srclang is en_US, mark different TUs.
-        if (!srcLang.equalsIgnoreCase(tmx.getSourceLang()))
-        {
-            result.append(" ");
-            result.append(Tmx.SRCLANG);
-            result.append("=\"");
-            result.append(srcLang);
-            result.append("\"");
-        }
-
-        result.append(">\r\n");
-
-        // Property for TU type (text, string), default "text"
-        if (!p_tu.getType().equals("text"))
-        {
-            prop = new Tmx.Prop(Tmx.PROP_SEGMENTTYPE, p_tu.getType());
-            result.append(prop.asXML());
-        }
-
-        // Property for TU type (T, L), default "T"
-        if (!p_tu.isTranslatable())
-        {
-            prop = new Tmx.Prop(Tmx.PROP_TUTYPE, Tmx.VAL_TU_LOCALIZABLE);
-            result.append(prop.asXML());
-        }
-
-        // Property for TU's source TM name.
-        String temp = p_tu.getSourceTmName();
-        if (temp != null && temp.length() > 0)
-        {
-            prop = new Tmx.Prop(Tmx.PROP_SOURCE_TM_NAME, temp);
-            result.append(prop.asXML());
-        }
-
-        // add tu attributes
-        List<ProjectTmTuTProp> props = ProjectTmTuTProp
-                .getTuProps(p_tu.getId());
-        if (props != null)
-        {
-            for (ProjectTmTuTProp pp : props)
-            {
-                result.append(pp.convertToTmx());
-            }
-        }
-
-        // add TU attributes from TM3 convert
-        if (props == null || props.size() == 0)
-        {
-            Collection<ProjectTmTuTProp> tuProps = p_tu.getProps();
-            if (tuProps != null)
-            {
-                for (ProjectTmTuTProp pp : tuProps)
-                {
-                    result.append(pp.convertToTmx());
-                }
-            }
-        }
-
-        // Add all TUVs.
-        Collection locales = p_tu.getAllTuvLocales();
-		FilterOptions filterString = options.getFilterOptions();
-		Date createdAfter = parseStartDate(filterString.m_createdAfter);
-		Date createdBefore = parseEndDate(filterString.m_createdBefore);
-		String filterLang = filterString.m_language;
-        List<String> oldfilterLangList = Arrays.asList(filterLang.split(","));
-        List<String> filterLangList = new ArrayList<String>();
-		for (String selectLang : oldfilterLangList)
-		{
-			if ("in_ID".equalsIgnoreCase(selectLang))
-			{
-				selectLang = "id_ID";
-			}
-			if (StringUtil.isNotEmpty(selectLang))
-			{
-				filterLangList.add(selectLang);
-			}
-		}
-        
-        String sourceLang = p_tu.getSourceLocale().toString();
-
-        // Convert iw_IL to he_IL because changes in ISO 639.
-        // See Locale.getLanguage() for details.
-        if (sourceLang.equalsIgnoreCase("iw_IL"))
-        {
-            sourceLang = "he_IL";
-        }
-        boolean isRun = false;
-        for (Iterator it = locales.iterator(); it.hasNext();)
-        {
-            GlobalSightLocale locale = (GlobalSightLocale) it.next();
-            String localeCode = locale.toString();
-            if (localeCode.equalsIgnoreCase("iw_IL"))
-            {
-                localeCode = "he_IL";
-            }
-            
-			if (filterLangList.size() > 0
-					&& !filterLangList.contains(localeCode)
-					&& !localeCode.equalsIgnoreCase(sourceLang))
-			{
-				continue;
-			}
-			
-            Collection tuvs = p_tu.getTuvList(locale);
-            for (Iterator it2 = tuvs.iterator(); it2.hasNext();)
-			{
-				SegmentTmTuv tuv = (SegmentTmTuv) it2.next();
-
-				try
-				{
-					Date creationDate = format.parse(format.format(tuv
-							.getCreationDate()));
-					if (createdAfter != null && createdBefore == null)
-					{
-						if (!creationDate.after(createdAfter)
-								&& !creationDate.equals(createdAfter))
-						{
-							continue;
-						}
-					}
-					else if (createdAfter == null && createdBefore != null)
-					{
-						if (!creationDate.before(createdBefore)
-								&& creationDate.equals(createdBefore))
-						{
-							continue;
-						}
-					}
-					else if (createdAfter != null && createdBefore != null)
-					{
-						if ((!creationDate.after(createdAfter) && !creationDate
-								.equals(createdAfter))
-								|| (!creationDate.before(createdBefore) && !creationDate
-										.equals(createdBefore)))
-						{
-							continue;
-						}
-					}
-				}
-				catch (ParseException e)
-				{
-					e.printStackTrace();
-				}
-				if (!isRun)
-				{
-					if (tuv.getSid() != null)
-					{
-						prop = new Tmx.Prop(Tmx.PROP_TM_UDA_SID, tuv.getSid());
-						result.append(prop.asXML());
-						isRun = true;
-					}
-				}
-				result.append(convertToTmx(tuv, sourceLang, options,
-						outputFormat));
-			}
-        }
-
-        result.append("</tu>\r\n");
-
-        return result.toString();
-    }
-    
 	public String convertToTmx(SegmentTmTu p_tu, Tmx tmx,
 			com.globalsight.everest.tm.exporter.ExportOptions options,
 			OutputFormat outputFormat, boolean singleExport) throws Exception
@@ -658,7 +455,12 @@ public class TmxWriter implements IWriter
 		FilterOptions filterString = options.getFilterOptions();
 		Date createdAfter = parseStartDate(filterString.m_createdAfter);
 		Date createdBefore = parseEndDate(filterString.m_createdBefore);
-
+		Date modifyAfter = parseStartDate(filterString.m_modifiedAfter);
+		Date modifyBefore = parseEndDate(filterString.m_modifiedBefore);
+		Date lastUsageDateAfter = parseStartDate(filterString.m_lastUsageAfter);
+		Date lastUsageDateBefore = parseEndDate(filterString.m_lastUsageBefore);
+		String creationUser = filterString.m_createdBy;
+		String modifyUser = filterString.m_modifiedBy;
 		String sourceLang = p_tu.getSourceLocale().toString();
 		sourceLang = handleSpecialLocaleCode(sourceLang);
 		String filterLang = filterString.m_language;
@@ -712,37 +514,49 @@ public class TmxWriter implements IWriter
 				{
 					Date creationDate = format.parse(format.format(tuv
 							.getCreationDate()));
-					if (createdAfter != null && createdBefore == null)
+					if (!filterByDate(creationDate, createdAfter, createdBefore))
 					{
-						if (!creationDate.after(createdAfter)
-								&& !creationDate.equals(createdAfter))
+						continue;
+					}
+
+					Date modifyDate = tuv.getModifyDate();
+					if (modifyDate != null)
+					{
+						modifyDate = format.parse(format.format(modifyDate));
+						if (!filterByDate(modifyDate, modifyAfter, modifyBefore))
 						{
 							continue;
 						}
 					}
-					else if (createdAfter == null && createdBefore != null)
+
+					Date lastUsageDate = tuv.getLastUsageDate();
+					if (lastUsageDate != null)
 					{
-						if (!creationDate.before(createdBefore)
-								&& creationDate.equals(createdBefore))
+						lastUsageDate = format.parse(format.format(lastUsageDate));
+						if (!filterByDate(lastUsageDate, lastUsageDateAfter,
+								lastUsageDateBefore))
 						{
 							continue;
 						}
 					}
-					else if (createdAfter != null && createdBefore != null)
+
+					if (StringUtil.isNotEmpty(creationUser)
+							&& !creationUser.equalsIgnoreCase(tuv.getCreationUser()))
 					{
-						if ((!creationDate.after(createdAfter) && !creationDate
-								.equals(createdAfter))
-								|| (!creationDate.before(createdBefore) && !creationDate
-										.equals(createdBefore)))
-						{
-							continue;
-						}
+						continue;
+					}
+
+					if (StringUtil.isNotEmpty(modifyUser) 
+							&& !modifyUser.equalsIgnoreCase(tuv.getModifyUser()))
+					{
+						continue;
 					}
 				}
 				catch (ParseException e)
 				{
-					e.printStackTrace();
+					CATEGORY.error(e);
 				}
+
 				result.append(tuResult);
 				if (!isRun)
 				{
@@ -753,17 +567,36 @@ public class TmxWriter implements IWriter
 						isRun = true;
 					}
 				}
-
 				result.append(tuAndSource.toString());
-				result.append(convertToTmx(tuv, sourceLang, options,
-						outputFormat));
+				result.append(convertToTmx(tuv, sourceLang, options, outputFormat));
 				result.append("</tu>\r\n");
 			}
         }
 
         return result.toString();
     }
-    
+
+	private boolean filterByDate(Date date, Date startDate, Date endDate)
+	{
+		if (startDate != null)
+		{
+			if (!date.after(startDate))
+			{
+				return false;
+			}
+		}
+
+		if (endDate != null)
+		{
+			if (!date.before(endDate))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private static String getTUStr(SegmentTmTu p_tu, Tmx tmx,
 			com.globalsight.everest.tm.exporter.ExportOptions options,
 			Tmx.Prop prop)
@@ -1334,51 +1167,27 @@ public class TmxWriter implements IWriter
      * across all TUVs, for TMX compliance thes "i" linked by "x" must be the
      * same. Furthermore, "x" numbering must start at 1.
      */
-    private void fixAttributeIX(SegmentTmTu p_tu)
+	private void fixAttributeIX(SegmentTmTuv p_sourceTuv, List<BaseTmTuv> p_tuvs)
     {
-        // We don't really know which TUV is the source or which one
-        // has the original "i" attributes, so getAllTuvsInTu() tries
-        // to find the source and put it in first place. After that we
-        // pick the first TUV and make all other TUVs use the same "i"s.
-
-        ArrayList tuvs = getAllTuvsInTu(p_tu);
-
-        if (tuvs.size() == 0)
+        ArrayList<Element> roots = new ArrayList<Element>();
+        for (int i = 0; i < p_tuvs.size(); i++)
         {
-            return;
-        }
-
-        SegmentTmTuv sourceTuv = (SegmentTmTuv) tuvs.remove(0);
-
-        fixAttributeIX(sourceTuv, tuvs);
-    }
-
-    private void fixAttributeIX(SegmentTmTuv p_tuv, ArrayList p_tuvs)
-    {
-        ArrayList roots = new ArrayList();
-
-        for (int i = 0, max = p_tuvs.size(); i < max; i++)
-        {
-            SegmentTmTuv tuv = (SegmentTmTuv) p_tuvs.get(i);
-
+        	SegmentTmTuv tuv = (SegmentTmTuv) p_tuvs.get(i);
             Document dom = getDom(tuv.getSegment());
-            Element root = dom.getRootElement();
-
-            roots.add(root);
+            roots.add(dom.getRootElement());
         }
 
-        Element sroot = getDom(p_tuv.getSegment()).getRootElement();
+        Element sroot = getDom(p_sourceTuv.getSegment()).getRootElement();
 
         fixAttributeIX(sroot, roots);
 
         // Save the modified segments back into the tuvs.
-        p_tuv.setSegment(sroot.asXML());
+        p_sourceTuv.setSegment(sroot.asXML());
 
-        for (int i = 0, max = p_tuvs.size(); i < max; i++)
+        for (int i = 0; i < p_tuvs.size(); i++)
         {
             SegmentTmTuv tuv = (SegmentTmTuv) p_tuvs.get(i);
             Element root = (Element) roots.get(i);
-
             tuv.setSegment(root.asXML());
         }
     }
@@ -1535,119 +1344,6 @@ public class TmxWriter implements IWriter
 		return null;
 	}
     
-    private ArrayList getAllTuvsInTu(SegmentTmTu p_tu)
-    {
-        ArrayList result = new ArrayList();
-        FilterOptions filterString = m_options.getFilterOptions();
-        Date createdAfter = parseStartDate(filterString.m_createdAfter);
-        Date createdBefore = parseEndDate(filterString.m_createdBefore);
-        String filterLang = filterString.m_language;
-		List<String> oldfilterLangList = Arrays.asList(filterLang.split(","));
-		List<String> filterLangList = new ArrayList<String>();
-		for (String selectLang : oldfilterLangList)
-		{
-			if ("in_ID".equalsIgnoreCase(selectLang))
-			{
-				selectLang = "id_ID";
-			}
-			if (StringUtil.isNotEmpty(selectLang))
-			{
-				filterLangList.add(selectLang);
-			}
-		}
-         
-        String sourceLang = p_tu.getSourceLocale().getLocale().toString();
-
-        // Convert iw_IL to he_IL because changes in ISO 639.
-        // See Locale.getLanguage() for details.
-        if (sourceLang.equalsIgnoreCase("iw_IL"))
-        {
-            sourceLang = "he_IL";
-        }
-        Set locales = p_tu.getAllTuvLocales();
-        for (Iterator it = locales.iterator(); it.hasNext();)
-        {
-            GlobalSightLocale locale = (GlobalSightLocale) it.next();
-            String localeCode = locale.toString();
-
-            if (localeCode.equalsIgnoreCase("iw_IL"))
-            {
-                localeCode = "he_IL";
-            }
-			if (filterLangList.size() > 0
-					&& !(filterLangList.contains(localeCode) || localeCode
-							.equals(sourceLang)))
-			{
-				continue;
-			}
-			
-			Collection tuvCollection = p_tu.getTuvList(locale);
-			List tuvList = new ArrayList();
-			for (Iterator tuvIt = tuvCollection.iterator(); tuvIt.hasNext();)
-			{
-				SegmentTmTuv tuv = (SegmentTmTuv)tuvIt.next();
-				try
-				{
-					Date creationDate = format.parse(format.format(tuv
-							.getCreationDate()));
-					if (createdAfter != null && createdBefore == null)
-					{
-						if (creationDate.after(createdAfter)
-								|| creationDate.equals(createdAfter))
-						{
-							tuvList.add(tuv);
-						}
-					}
-					else if (createdAfter == null && createdBefore != null)
-					{
-						if (creationDate.before(createdBefore)
-								|| creationDate.equals(createdBefore))
-						{
-							tuvList.add(tuv);
-						}
-					}
-					else if (createdAfter != null && createdBefore != null)
-					{
-						if ((creationDate.after(createdAfter) || creationDate
-								.equals(createdAfter))
-								&& (creationDate.before(createdBefore) || creationDate
-										.equals(createdBefore)))
-						{
-							tuvList.add(tuv);
-						}
-					}
-					else
-					{
-						tuvList.add(tuv);
-					}
-
-				}
-				catch (ParseException e)
-				{
-					e.printStackTrace();
-				}
-			}
-			if (tuvList != null && tuvList.size() > 0)
-			{
-				result.addAll(tuvList);
-			}
-        }
-
-        // Sort the source tuv first.
-        SegmentTmTuv tuv = (SegmentTmTuv) p_tu.getSourceTuv();
-
-        if (tuv != null)
-        {
-            int index = result.indexOf(tuv);
-            if (index > 0)
-            {
-                result.add(0, result.remove(index));
-            }
-        }
-
-        return result;
-    }
-
     /**
      * Creates a Tmx (header) structure holding all our header info.
      */

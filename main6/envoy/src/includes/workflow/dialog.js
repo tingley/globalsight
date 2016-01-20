@@ -213,6 +213,15 @@ var Dialog = {
             return false;
         }
 		
+		//for jquery 1.6 issues
+		var us = $(".userCheckbox");
+		for (var i = 0; i < us.length; i++){
+			var u = $(us[i]);
+			if (u.attr("checked") == "checked"){
+				u.attr("checked", true);
+			}
+		}
+		
 		$("#selectAllUserCheckbox").attr("checked", false);
 		var dialogUserSelect = $("#dialogUserSelect").val();
 		if (dialogUserSelect == 0){
@@ -298,6 +307,9 @@ function initActivityType() {
 }
 
 function showProperties(node) {
+	if (node.type != "activityNode")
+		return;
+	
 	Menu.showProperty = true;
 	UI.propertiesDiv.dialog({
 		title : msg_edit_activity,

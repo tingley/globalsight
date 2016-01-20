@@ -31,7 +31,7 @@ package com.jacob.com;
  */
 public class WrongThreadException
     extends RuntimeException
-{
+{ 
     /**
      * standard 0 arg constructor with no message
      *

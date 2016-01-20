@@ -94,8 +94,8 @@
 
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>
 <%@ include file="/envoy/common/warning.jspIncl"%>
-<SCRIPT language="JavaScript">
-var needWarning = false;
+<SCRIPT>
+var needWarning = true;
 var objectName = "<%=bundle.getString("lb_workflow")%>";
 var guideNode = "workflows";
 var helpFile = "<%=bundle.getString("help_workflow_graphical")%>";
@@ -134,10 +134,9 @@ function previousForm() {
     
     if (confirmJump() && confirmed)
     {
-    	location.replace('<%=previousURL%>
-	');
-		}
+    	location.replace('<%=previousURL%>');
 	}
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" ONLOAD="loadGuides()" class="standardText">

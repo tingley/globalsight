@@ -26,13 +26,15 @@ public class GSTuvData implements TM3Data {
     private String parsedData = null;
     private GlobalSightLocale locale;
     private Long fingerprint;
-    
+    private BaseTmTuv srcTuv = null;
+
     GSTuvData() {
         
     }
     
     public GSTuvData(BaseTmTuv srcTuv) {
         this(srcTuv.getSegment(), srcTuv.getLocale());
+    	this.srcTuv = srcTuv;
     }
     
     public GSTuvData(String data, GlobalSightLocale locale) {
@@ -180,4 +182,12 @@ public class GSTuvData implements TM3Data {
         // down case the string
         return fuzzyIndexFormat.toLowerCase(locale.getLocale());
     }
+
+	public BaseTmTuv getSrcTuv() {
+		return srcTuv;
+	}
+
+	public void setSrcTuv(BaseTmTuv srcTuv) {
+		this.srcTuv = srcTuv;
+	}
 }

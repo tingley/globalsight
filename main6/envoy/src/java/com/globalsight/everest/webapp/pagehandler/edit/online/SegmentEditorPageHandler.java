@@ -394,6 +394,7 @@ public class SegmentEditorPageHandler extends PageHandler implements
                         p_state.getSourcePageId(), p_state.getTargetLocale());
         if (machineTranslationProfile != null)
         {
+        	sessionMgr.setAttribute("showMachineTranslation", String.valueOf(true));
             sessionMgr.setAttribute(MTHelper2.SHOW_IN_EDITOR,
                     String.valueOf(machineTranslationProfile.isShowInEditor()));
         }

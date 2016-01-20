@@ -20,6 +20,13 @@ var Model = {
 			var rectContext = rectDiv.find(".shape_canvas")[0].getContext("2d");
 			node.drawRect(rectContext);
 			
+		    // for txt
+			if (node.type == "activityNode") {
+				$("<div class='shape_box' style='padding:7px;'>" +
+						"<div class='txtDiv' id='name" + node.id + "'></div>" +
+						"<div class='txtDiv' style='margin-top:5px;' id='user" + node.id + "'></div>" +
+						"</div>").appendTo(modelDiv);
+			}
 
 			// for show point
 			pointsDiv = $("<div id='point" + node.id + "' class='shape_box pointDiv' style='display: none;'><canvas class='shape_canvas'></canvas></div>").appendTo(modelDiv)
@@ -52,7 +59,7 @@ var Model = {
 		var context = modelCanvas[0].getContext("2d");
 
 		node.drawShape(context);
-		node.showTxt(modelCanvas[1].getContext("2d"));
+		node.showTxt();
 		modelDiv.show();
 
 		this.addMethod(modelDiv, node);		

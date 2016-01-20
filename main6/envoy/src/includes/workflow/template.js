@@ -41,12 +41,31 @@
 	</task>
 	<transition name="{{transition}}" to="{{transition_to}}" />
 </task-node></script>
-
-<script type="text/x-mustache" id="transitionTemplate">
-    <transition name="{{transition}}" to="{{transition_to}}" /></script>
  
-<script type="text/x-mustache" id="decisionTemplate">
+<script type="text/x-mustache" id="decisionTemplate1">
   <decision name="{{decision}}">
+	<handler class="com.globalsight.everest.workflow.WorkflowDecision">
+		<point>{{x}}:{{y}}</point>
+		<sequence>{{sequence}}</sequence>
+		<workflow_condition_spec>
+			<condition_attribute></condition_attribute>
+			<workflow_branch_spec_0>
+				<arrow_label>{{transition1}}</arrow_label>
+				<comparison_operator>0</comparison_operator>
+				<structural_state>-1</structural_state>
+				<is_default>true</is_default>
+				<branch_value>0</branch_value>
+			</workflow_branch_spec_0>
+		</workflow_condition_spec>
+	</handler>
+	<transition name="{{transition1}}" to="{{transition_to1}}" />
+	<controller>
+		<variable name="goTo" access="read,write" />
+	</controller>
+</decision></script>
+
+<script type="text/x-mustache" id="decisionTemplate2">
+<decision name="{{decision}}">
 	<handler class="com.globalsight.everest.workflow.WorkflowDecision">
 		<point>{{x}}:{{y}}</point>
 		<sequence>{{sequence}}</sequence>
@@ -67,7 +86,9 @@
 				<branch_value>0</branch_value>
 			</workflow_branch_spec_1>
 		</workflow_condition_spec>
-	</handler>{{{transition}}}
+	</handler>
+	<transition name="{{transition1}}" to="{{transition_to1}}" />
+	<transition name="{{transition2}}" to="{{transition_to2}}" />
 	<controller>
 		<variable name="goTo" access="read,write" />
 	</controller>

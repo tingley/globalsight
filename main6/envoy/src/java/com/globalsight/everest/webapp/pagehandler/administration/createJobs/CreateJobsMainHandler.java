@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -37,7 +38,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.zip.ZipEntry;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -51,9 +51,10 @@ import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParameterImpl;
-import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
+import com.globalsight.config.UserParameterPersistenceManagerLocal;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
@@ -101,7 +102,6 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -207,60 +207,63 @@ public class CreateJobsMainHandler extends PageHandler
             {
                 String tempFolder = request.getParameter("tempFolder");
                 String type = request.getParameter("type");
+                List<File> uploadedFiles = new ArrayList<File>();
                 try
                 {
-                    File uploadedFile = uploadSelectedFile(request, tempFolder,
-                            type);
-                    StringBuffer ret = new StringBuffer("[");
-                    response.setContentType("text/html;charset=UTF-8");
-                    if ("0".equals(type))// source files
-                    {
-                        if (isSupportedZipFileFormat(uploadedFile)
-                                && isUnCompress(uploadedFile))
-                        {
-                            if (CreateJobUtil.isZipFile(uploadedFile))
-                            {
-                                ret.append(addZipFile(uploadedFile));
-                            }
-                            else if (CreateJobUtil.isRarFile(uploadedFile))
-                            {
-                                ret.append(addRarFile(uploadedFile));
-                            }
-                            else if (CreateJobUtil.is7zFile(uploadedFile))
-                            {
-                                ret.append(addZip7zFile(uploadedFile));
-                            }
-                            else
-                            {
-                                ret.append(addCommonFile(uploadedFile));
-                            }
-
-                            ret.append("]");
-                            PrintWriter writer = response.getWriter();
-                            writer.write("<script type='text/javascript'>window.parent.addDivForNewFile("
-                                    + ret.toString() + ")</script>;");
-                            if (CreateJobUtil.isZipFile(uploadedFile)
-                                    || CreateJobUtil.isRarFile(uploadedFile)
-                                    || (CreateJobUtil.is7zFile(uploadedFile)))
-                            {
-                                uploadedFile.delete();
-                            }
-                        }
-                        else
-                        {
-                            ret.append(addCommonFile(uploadedFile));
-                            ret.append("]");
-                            PrintWriter writer = response.getWriter();
-                            writer.write("<script type='text/javascript'>window.parent.addDivForNewFile("
-                                    + ret.toString() + ")</script>;");
-                        }
-                    }
-                    else if ("1".equals(type))// job comment file
-                    {
-                        PrintWriter writer = response.getWriter();
-                        writer.write("<script type='text/javascript'>window.parent.addAttachment('"
-                                + uploadedFile.getName().replace("'", "\\'")
-                                + "')</script>;");
+					uploadedFiles = uploadSelectedFile(request, tempFolder,	type);
+					for (File uploadedFile : uploadedFiles)
+					{
+                    	StringBuffer ret = new StringBuffer("[");
+                    	response.setContentType("text/html;charset=UTF-8");
+                    	if ("0".equals(type))// source files
+                    	{
+                    		if (isSupportedZipFileFormat(uploadedFile)
+                    				&& isUnCompress(uploadedFile))
+                    		{
+                    			if (CreateJobUtil.isZipFile(uploadedFile))
+                    			{
+                    				ret.append(addZipFile(uploadedFile));
+                    			}
+                    			else if (CreateJobUtil.isRarFile(uploadedFile))
+                    			{
+                    				ret.append(addRarFile(uploadedFile));
+                    			}
+                    			else if (CreateJobUtil.is7zFile(uploadedFile))
+                    			{
+                    				ret.append(addZip7zFile(uploadedFile));
+                    			}
+                    			else
+                    			{
+                    				ret.append(addCommonFile(uploadedFile));
+                    			}
+                    			
+                    			ret.append("]");
+                    			PrintWriter writer = response.getWriter();
+                    			writer.write("<script type='text/javascript'>window.parent.addDivForNewFile("
+                    					+ ret.toString() + ")</script>;");
+                    			if (CreateJobUtil.isZipFile(uploadedFile)
+                    					|| CreateJobUtil.isRarFile(uploadedFile)
+                    					|| (CreateJobUtil.is7zFile(uploadedFile)))
+                    			{
+                    				uploadedFile.delete();
+                    			}
+                    		}
+                    		else
+                    		{
+                    			ret.append(addCommonFile(uploadedFile));
+                    			ret.append("]");
+                    			PrintWriter writer = response.getWriter();
+                    			writer.write("<script type='text/javascript'>window.parent.addDivForNewFile("
+                    					+ ret.toString() + ")</script>;");
+                    		}
+                    	}
+                    	else if ("1".equals(type))// job comment file
+                    	{
+                    		PrintWriter writer = response.getWriter();
+                    		writer.write("<script type='text/javascript'>window.parent.addAttachment('"
+                    				+ uploadedFile.getName().replace("'", "\\'")
+                    				+ "')</script>;");
+                    	}
                     }
                 }
                 catch (Exception e)
@@ -1624,11 +1627,16 @@ public class CreateJobsMainHandler extends PageHandler
             messageArguments[6] = user.getSpecialNameForEmail();
 
             // send mail to uploader
-            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                    companyId);
-
+			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
+			UserParameter up = uppml.getUserParameter(user.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+			if (up != null && up.getIntValue() == 1) {
+				ServerProxy.getMailer().sendMailFromAdmin(user,
+						messageArguments,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+						companyId);
+			}
             // get the PM address
             User pm = UserHandlerHelper.getUser(project.getProjectManagerId());
             if (pm == null)
@@ -1645,10 +1653,14 @@ public class CreateJobsMainHandler extends PageHandler
             }
             messageArguments[6] = pm.getSpecialNameForEmail();
 
-            ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                    companyId);
+		    up = uppml.getUserParameter(pm.getUserId(),
+					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+			if (up != null && up.getIntValue() == 1) {
+				ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+						companyId);
+			}
         }
         catch (Exception e)
         {
@@ -1766,10 +1778,12 @@ public class CreateJobsMainHandler extends PageHandler
                 .replace("\"", "&quot;");
     }
     
-    private File uploadSelectedFile(HttpServletRequest request,
+    private List<File> uploadSelectedFile(HttpServletRequest request,
             String tempFolder, String type) throws Exception
     {
         File parentFile = null;
+        List<String> fileNames = new ArrayList<String>();
+        List<File> uploadedFiles = new ArrayList<File>();
         if (type.equals("0"))// source files
         {
             File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
@@ -1784,13 +1798,18 @@ public class CreateJobsMainHandler extends PageHandler
                     + File.separator + tempFolder);
             parentFile.mkdirs();
         }
-        String fileName = uploadFile(request, parentFile);
-        File uploadedFile = new File(fileName);
-        return uploadedFile;
+
+        fileNames = uploadFile(request, parentFile);
+		for (String fileName : fileNames)
+        {
+        	File uploadedFile = new File(fileName); 
+        	uploadedFiles.add(uploadedFile);
+        }
+        return uploadedFiles;
     }
-    
-    private String uploadFile(HttpServletRequest p_request, File parentFile)
-			throws GlossaryException, IOException
+
+	private List<String> uploadFile(HttpServletRequest p_request,
+			File parentFile) throws GlossaryException, IOException
 	{
 		byte[] inBuf = new byte[MAX_LINE_LENGTH];
 		int bytesRead;
@@ -1798,6 +1817,13 @@ public class CreateJobsMainHandler extends PageHandler
 		String contentType;
 		String boundary;
 		String filePath = "";
+		String path = parentFile.getPath() + File.separator;
+		List<String> filePaths = new ArrayList<String>();
+		File file = new File(path);   
+	    Set<String> uploadedFileNames = new HashSet<String>();
+	    for (File f : file.listFiles()) {
+	    	uploadedFileNames.add(f.getName());
+	    }
 		
 		// Let's make sure that we have the right type of content
 		//
@@ -1870,12 +1896,19 @@ public class CreateJobsMainHandler extends PageHandler
 					// save the contents in this file for now and
 					// finally rename it to correct file name.
 					//
-			        filePath = parentFile.getPath() + File.separator + fileName;
+					
+					// if a file with same name has been uploaded, ignore this
+					if (uploadedFileNames.contains(fileName)) {
+						continue;
+					}
+
+		        	filePath = path + fileName;
+			        filePaths.add(filePath);
 					File m_tempFile = new File(filePath);
 					FileOutputStream fos = new FileOutputStream(m_tempFile);
 					BufferedOutputStream bos = new BufferedOutputStream(fos,
 							MAX_LINE_LENGTH * 4);
-		
+
 					// Read through the file contents and write
 					// it out to a local temp file.
 					boolean writeRN = false;
@@ -1932,9 +1965,9 @@ public class CreateJobsMainHandler extends PageHandler
 		
 					// First get the field name
 		
-					int start = lineRead.indexOf("name=\"");
-					int end = lineRead.indexOf("\"", start + 7);
-					String fieldName = lineRead.substring(start + 6, end);
+//					int start = lineRead.indexOf("name=\"");
+//					int end = lineRead.indexOf("\"", start + 7);
+//					String fieldName = lineRead.substring(start + 6, end);
 		
 					// Read and ignore the blank line
 					bytesRead = in.readLine(inBuf, 0, inBuf.length);
@@ -1994,10 +2027,9 @@ public class CreateJobsMainHandler extends PageHandler
 		
 			bytesRead = in.readLine(inBuf, 0, inBuf.length);
 		}
-		
-		return filePath;
+		return filePaths;
 	}
-	
+
 	private String getFilename(String p_filenameLine)
 	{
 		int start = 0;

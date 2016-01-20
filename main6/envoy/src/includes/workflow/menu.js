@@ -6,7 +6,8 @@ var Menu = {
 			UI.condition_menu.hide();
 		});
 
-		UI.body.unbind("contextmenu").bind("contextmenu", function(e) {
+		UI.viewport.unbind("contextmenu").bind("contextmenu", function(e) {
+			e.preventDefault();
 			onRightDown(e);
 		});
 
@@ -77,8 +78,12 @@ function isFromConditionNode(line) {
 }
 
 function onRightDown(e) {
+	if (UI.button.value != UI.button.point) {
+		return;
+	}
+	
 	var node = Model.getNodeByPoint(e);
-	if (node != null && node.type == "activityNode") {
+	if (node != null && node.type != "startNode") {
 		e.preventDefault();
 
 		UI.node_menu.show();
@@ -90,9 +95,16 @@ function onRightDown(e) {
 			top : e.pageY
 		});
 
-		UI.node_menu.find("li:eq(0)").unbind("click").bind("click", function() {
-			showProperties(node);
-		});
+		if (node.type == "activityNode"){
+			var li = UI.node_menu.find("li:eq(0)");
+			li.show();
+			li.unbind("click").bind("click", function() {
+				showProperties(node);
+			});
+		} else {
+			UI.node_menu.find("li:eq(0)").hide();
+		}
+		
 		
 		UI.node_menu.find("li:eq(1)").unbind("click").bind("click", function() {
 			Model.deleteNode(node);

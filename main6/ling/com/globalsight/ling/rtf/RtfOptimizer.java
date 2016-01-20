@@ -589,7 +589,7 @@ public class RtfOptimizer
                 if (properties.getColorName().equalsIgnoreCase("default")
                         && data.startsWith("#") && prev == null)
                 {
-                    curr.setData(data.replace("#", OfflineConstants.PONUD_SIGN));
+                    curr.setData(data.replaceFirst("#", OfflineConstants.PONUD_SIGN));
                 }
                 if (prev != null &&
                     prev.getProperties().equals(curr.getProperties()))

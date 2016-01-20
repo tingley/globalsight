@@ -855,9 +855,11 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
 			Map<TM3Attribute, Object> inlineAttributes,
 			Map<TM3Attribute, String> customAttributes) throws SQLException
     {
-		List<TM3Tuv<T>> tuvs = getStorageInfo().getTuStorage().getExactMatches(
-				conn, sourceTuv.content, sourceTuv.locale, null,
-				inlineAttributes, customAttributes, false, true);
+		List<TM3Tuv<T>> tuvs = getStorageInfo().getTuStorage()
+				.getExactMatchesForSave(conn, sourceTuv.content,
+						sourceTuv.locale, null, inlineAttributes,
+						customAttributes, false, true,
+						sourceTuv.getPreviousHash(), sourceTuv.getNextHash());
         List<TM3Tuv<T>> filtered = new ArrayList<TM3Tuv<T>>();
         int desiredAttrCount = requiredCount(inlineAttributes.keySet())
                 + requiredCount(customAttributes.keySet());
@@ -974,25 +976,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             }
         }
 
-        // When sourceTuv has hashes, filter candidates.
-        if (sourceTuv.getPreviousHash() != -1 && sourceTuv.getNextHash() != -1)
-        {
-        	for (Iterator<TM3Tuv<T>> it = results.iterator(); it.hasNext();)
-        	{
-        		TM3Tuv<T> tuv = it.next();
-        		// If candidate has no hashes, preserve it (overwrite legacy TUVs)
-        		if (tuv.getPreviousHash() == -1 || tuv.getNextHash() == -1)
-        		{
-        			continue;
-        		}
-        		// If both have hashes, they must equals to each other
-				if (sourceTuv.getPreviousHash() != tuv.getPreviousHash()
-						|| sourceTuv.getNextHash() != tuv.getNextHash())
-        		{
-        			it.remove();
-        		}
-        	}
-        }
 
         return results.size() == 0 ? null : results.get(0).getTu();
     }

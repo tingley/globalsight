@@ -226,21 +226,26 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             }
 
             // Do all the deletions
+            List<TM3Tu<GSTuvData>> removeTus = new ArrayList<TM3Tu<GSTuvData>>();
             for (SegmentTmTuv stuv : pTuvs)
-            {
-                long tuId = stuv.getTu().getId();
-                TM3Tu<GSTuvData> tu = map.get(tuId);
-                if (tu == null)
-                {
-                    LOGGER.warn("Can't delete tuv from non-existent tu " + tuId
-                            + ": " + stuv);
-                    continue;
-                }
-                tu.removeTargetTuv(
-                        stuv.getLocale(),
-                        factory.fromSerializedForm(stuv.getLocale(),
-                                stuv.getSegment()));
-            }
+			{
+				long tuId = stuv.getTu().getId();
+				TM3Tu<GSTuvData> tu = map.get(tuId);
+				if (tu == null)
+				{
+					LOGGER.warn("Can't delete tuv from non-existent tu " + tuId
+							+ ": " + stuv);
+					continue;
+				}
+				tu.removeTargetTuv(
+						stuv.getLocale(),
+						factory.fromSerializedForm(stuv.getLocale(),
+								stuv.getSegment()));
+				if (tu.getTargetTuvs().size() == 0)
+				{
+					removeTus.add(tu);
+				}
+			}
             // Now update the affected TUs in the DB.
             // XXX This requires an event, even though TM3 doesn't currently
             // record it for TUV deletion
@@ -248,23 +253,62 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                     "system", null);
             List<TM3Tu<GSTuvData>> newTus = new ArrayList<TM3Tu<GSTuvData>>();
             for (TM3Tu<GSTuvData> tu : map.values())
-            {
-                TM3Tu<GSTuvData> newTu = tm3tm.modifyTu(tu, event,
-                        pTm.isIndexTarget());
-                newTus.add(newTu);
-            }
+			{
+				if (removeTus.size() > 0 && removeTus.contains(tu))
+				{
+					continue;
+				}
+				TM3Tu<GSTuvData> newTu = tm3tm.modifyTu(tu, event,
+						pTm.isIndexTarget());
+				newTus.add(newTu);
+			}
 
             // update the Lucene index
             // target locale lists have changed, so deindex old tus, using the
             // BaseTmTus that haven't been mangled ...
-            Set<BaseTmTu> tusForRemove = new HashSet<BaseTmTu>();
-            for (BaseTmTuv tuv : pTuvs)
-            {
-                tusForRemove.add(tuv.getTu());
-            }
-            luceneRemoveBaseTus(pTm.getId(), tusForRemove);
-            // ... and index new tus
-            luceneIndexTus(pTm.getId(), newTus, pTm.isIndexTarget());
+			if (newTus.size() > 0)
+			{
+				Set<BaseTmTu> tusForRemove = new HashSet<BaseTmTu>();
+				for (BaseTmTuv tuv : pTuvs)
+				{
+					tusForRemove.add(tuv.getTu());
+				}
+				luceneRemoveBaseTus(pTm.getId(), tusForRemove);
+				// ... and index new tus
+				luceneIndexTus(pTm.getId(), newTus, pTm.isIndexTarget());
+			}
+            
+			if (removeTus.size() > 0)
+			{
+				Iterator<TM3Tu<GSTuvData>> tuIt = removeTus.iterator();
+
+				List<SegmentTmTu> removeList = new ArrayList<SegmentTmTu>();
+				while (tuIt.hasNext())
+				{
+					TM3Tu<GSTuvData> tm3tu = tuIt.next();
+
+					if (tm3tu.getTm().getId().equals(pTm.getTm3Id()))
+					{
+						TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
+						TM3Attribute formatAttr = TM3Util
+								.getAttr(tm3tm, FORMAT);
+						TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
+						TM3Attribute translatableAttr = TM3Util.getAttr(tm3tm,
+								TRANSLATABLE);
+						TM3Attribute fromWsAttr = TM3Util.getAttr(tm3tm,
+								FROM_WORLDSERVER);
+						TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
+								UPDATED_BY_PROJECT);
+
+						SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu,
+								pTm.getId(), formatAttr, typeAttr, sidAttr,
+								fromWsAttr, translatableAttr, projectAttr);
+						removeList.add(segmentTmTu);
+					}
+					deleteSegmentTmTus(pTm, removeList);
+				}
+			}
+            
         }
         catch (TM3Exception e)
         {
@@ -1200,7 +1244,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                         tuToSave.attr(projectAttr, srcTuv.getUpdatedProject());
                     }
                 }
-
 				savedTus.addAll(saver.save(convertSaveMode(pMode), indexTarget));
                 synchronized (this)
                 {

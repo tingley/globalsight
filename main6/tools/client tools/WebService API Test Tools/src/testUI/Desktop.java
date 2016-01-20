@@ -423,7 +423,7 @@ public class Desktop extends javax.swing.JFrame
                         PrintStream ps = WriteLog.getPrintStreamForLog(WebServiceConstants.LOG_FILE);
                         te.printStackTrace(ps);
                         te.printStackTrace();
-                        resultTextArea.setText("Error when invoking this method, please check the parameters you input");
+                        resultTextArea.setText(te.getCause().toString());
                     }
 
                 }

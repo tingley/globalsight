@@ -139,15 +139,15 @@ public class OfflinePtagErrorChecker implements Cancelable
     static private final String m_nativeContentEncoding = "UTF8";
     static private final List<String> stateList = new ArrayList<String>();
     static{
-        stateList.add("final");
-        stateList.add("needs-adaptation");
-        stateList.add("needs-l10n");
-        stateList.add("needs-review-adaptation");
-        stateList.add("needs-review-l10n");
-        stateList.add("needs-review-translation");
-        stateList.add("needs-translation");
-        stateList.add("signed-off");
         stateList.add("translated");
+        stateList.add("signed-off");
+    	stateList.add("final");
+//        stateList.add("needs-adaptation");
+//        stateList.add("needs-l10n");
+//        stateList.add("needs-review-adaptation");
+//        stateList.add("needs-review-l10n");
+//        stateList.add("needs-review-translation");
+//        stateList.add("needs-translation");
     }
 
     /**

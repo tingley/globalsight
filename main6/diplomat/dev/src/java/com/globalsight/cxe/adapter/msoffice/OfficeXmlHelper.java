@@ -305,7 +305,8 @@ public class OfficeXmlHelper implements IConverterHelper2
             return;
 
         ExcelFileManager m = new ExcelFileManager();
-        m.sortSegments(dir, hIds, excelOrder, m_hideCellMap);
+        m.sortSegments(dir, hIds, excelOrder, m_hideCellMap,
+                m_excelInternalTextCellStyles);
     }
 
     private void mergeSortSegments(String dir)

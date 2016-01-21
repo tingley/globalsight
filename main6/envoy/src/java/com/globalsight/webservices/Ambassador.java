@@ -79,7 +79,6 @@ import org.dom4j.ElementPath;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.jbpm.JbpmContext;
 import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.taskmgmt.exe.TaskInstance;
@@ -9254,17 +9253,18 @@ public class Ambassador extends AbstractWebService
      */
     private String wrapSegment(String segment, boolean escapeString)
     {
-        if (segment == null)
-        {
-            segment = "";
-        }
+		if (segment == null) {
+			segment = "";
+		}
 
-        if (escapeString)
-        {
-            segment = XmlUtil.escapeString(segment);
-        }
+		if (segment.startsWith("<segment") && segment.endsWith("</segment>")) {
+			segment = GxmlUtil.stripRootTag(segment);
+		}
+		if (escapeString) {
+			segment = XmlUtil.escapeString(segment);
+		}
 
-        return "<segment>" + segment + "</segment>";
+		return "<segment>" + segment + "</segment>";
     }
 
     private Company getCompanyByName(String companyName)

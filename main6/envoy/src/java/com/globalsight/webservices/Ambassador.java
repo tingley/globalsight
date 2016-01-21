@@ -1362,7 +1362,7 @@ public class Ambassador extends AbstractWebService
             if (job == null)
             {
                 String userId = UserUtil.getUserIdByName(userName);
-                String priority = (String) args.get("priority");
+	            String priority = (String) args.get("priority");				
                 Vector<String> fileProfileIds = new Vector<String>();
                 Object fpIdsObj = args.get("fileProfileIds");
                 if (fpIdsObj instanceof String)
@@ -1401,7 +1401,13 @@ public class Ambassador extends AbstractWebService
                     FileProfile fp = ServerProxy
                             .getFileProfilePersistenceManager()
                             .readFileProfile(iFpId);
-
+					if (priority == null) 
+					{
+						long l10nProfileId = fp.getL10nProfileId();
+						BasicL10nProfile blp = HibernateUtil.get(
+								BasicL10nProfile.class, l10nProfileId);
+						priority = String.valueOf(blp.getPriority());
+					}
                     job = JobCreationMonitor.initializeJob(jobName, userId,
                             fp.getL10nProfileId(), priority, Job.PROCESSING);
                 }

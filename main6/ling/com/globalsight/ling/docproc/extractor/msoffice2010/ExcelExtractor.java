@@ -276,7 +276,7 @@ public class ExcelExtractor extends AbstractExtractor
                 Node parent = node.getParentNode();
                 if (parent != null)
                 {
-                    if (isInternalSi(parent.getNodeName()))
+                    if (isInternalSi(parent.getNodeName(), parent))
                     {
                         int n = ++index;
 
@@ -966,7 +966,7 @@ public class ExcelExtractor extends AbstractExtractor
         return false;
     }
 
-    private boolean isInternalSi(String nodeName)
+    private boolean isInternalSi(String nodeName, Node siNode)
     {
         if ("sst".equalsIgnoreCase(rootName))
         {
@@ -975,6 +975,17 @@ public class ExcelExtractor extends AbstractExtractor
                 List<String> internalSis = getInternalSis();
                 String siId = Integer.toString(siIndexForInternal);
                 return internalSis.contains(siId);
+            }
+        }
+        if ("worksheet".equalsIgnoreCase(rootName))
+        {
+            if ("si".equals(nodeName))
+            {
+                NamedNodeMap attrs = siNode.getAttributes();
+
+                Node n = attrs.getNamedItem("isInternalTextCellStyles");
+                if (n != null)
+                    return "1".equals(n.getNodeValue());
             }
         }
         return false;

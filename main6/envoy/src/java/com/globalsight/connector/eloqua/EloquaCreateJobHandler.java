@@ -463,6 +463,8 @@ public class EloquaCreateJobHandler extends PageActionHandler
         String attribute = request.getParameter("attributeString");
         String uuid = sessionMgr.getAttribute("uuid") == null ? JobImpl
                 .createUuid() : (String) sessionMgr.getAttribute("uuid");
+        sessionMgr.removeElement("uuid");
+
         CreateJobThread runnable = new CreateJobThread(user, currentCompanyId,
                 conn, file, eForm, targetLocales, attachmentName, attribute,
                 uuid);

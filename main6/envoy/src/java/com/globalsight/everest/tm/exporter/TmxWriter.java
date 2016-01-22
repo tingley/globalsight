@@ -340,8 +340,6 @@ public class TmxWriter implements IWriter
         // TMX Level 1 does not contain any internal tags.
         if (p_level == TMX_LEVEL_1)
         {
-            // TMX Compliance: nbsp must be output as character.
-            // TODO: handle mso-space and mso-tabrun tags too.
             replaceNbsps(root);
 
             removeNodes(root, "//bpt");
@@ -351,39 +349,16 @@ public class TmxWriter implements IWriter
             removeNodes(root, "//ut");
             removeNodes(root, "//hi");
         }
-        // Trados TMX Level may need all internal tags converted to UT
-        // with RTF codes (and an RTF preamble).
-        else if (p_level == TMX_LEVEL_TRADOS)
-        {
-            // TODO
-
-            // TMX Compliance: nbsp must be output as character.
-            // TODO: handle mso-space and mso-tabrun tags too.
-            replaceNbsps(root);
-
-            removeSubElements(root);
-        }
-        // TMX Level 2 retains all tags.
-        else if (p_level == TMX_LEVEL_2)
-        {
-            // TMX Compliance: nbsp must be output as character.
-            // TODO: handle mso-space and mso-tabrun tags too.
-            replaceNbsps(root);
-
-            // TMX Compliance: output formatting tags like <bpt type=bold />
-            // with an HTML code inside.
-            if (format.equalsIgnoreCase("html"))
-            {
-                injectStandardFormattingCodes(root);
-            }
-
-            // Remove any SUB tags (but TM2 doesn't contain any).
-            removeSubElements(root);
-        }
-        // Native G-TMX retains all tags and attributes.
+        // TMX_LEVEL_2, Native G-TMX, TMX_LEVEL_TRADOS
         else
         {
-            // Remove any SUB tags (but TM2 doesn't contain any).
+			// TMX Compliance: output formatting tags like <bpt type="bold"/>
+			// with an HTML code inside.
+			if (format.equalsIgnoreCase("html")) {
+				injectStandardFormattingCodes(root);
+			}
+
+			// Remove any SUB tags.
             removeSubElements(root);
         }
 

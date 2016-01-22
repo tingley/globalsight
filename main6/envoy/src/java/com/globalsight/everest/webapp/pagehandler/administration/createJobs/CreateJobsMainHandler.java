@@ -857,7 +857,8 @@ public class CreateJobsMainHandler extends PageHandler
                     .get(SESSION_MANAGER);
             String uuid = sessionMgr.getAttribute("uuid") == null ? null
                     : (String) sessionMgr.getAttribute("uuid");
-            
+            sessionMgr.removeElement("uuid");
+
             Job job = JobCreationMonitor.initializeJob(jobName, uuid,
                     user.getUserId(), l10Profile.getId(), priority,
                     Job.IN_QUEUE);

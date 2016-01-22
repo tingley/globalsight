@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -319,7 +320,8 @@ public class ExcelFileManager
 
     @SuppressWarnings("unchecked")
     public void sortSegments(String dir, List<String> hIds, String excelOrder,
-            HashMap<String, String> hideCellMap)
+            HashMap<String, String> hideCellMap,
+            Set<String> p_excelInternalTextCellStyles)
     {
         XmlUtil util = new XmlUtil();
         List<File> fs = FileUtil.getAllFiles(new File(dir, "xl/worksheets"),
@@ -348,16 +350,30 @@ public class ExcelFileManager
         }
         catch (Exception e1)
         {
-            logger.error(e1);
-            return;
+            try
+            {
+                String content = FileUtil.readFile(sharedStrings, "UTF-8");
+
+                while (content.charAt(0) != '<')
+                {
+                    content = content.substring(1);
+                }
+                FileUtil.writeFile(sharedStrings, content, "UTF-8");
+                doc = util.getDocument(sharedStrings);
+            }
+            catch (Exception e2)
+            {
+                logger.error(e1);
+                return;
+            }
         }
 
         List<Node> sis = util.getNodes(doc, "si");
 
         for (File f : fs)
         {
-            String fileName = FileUtils.getPrefix(FileUtils.getBaseName(f
-                    .getName()));
+            String fileName = FileUtils
+                    .getPrefix(FileUtils.getBaseName(f.getName()));
             String value = hideCellMap.get(fileName);
             ArrayList<String> hide = new ArrayList<String>();
             if (value != null)
@@ -366,9 +382,34 @@ public class ExcelFileManager
             }
 
             List<Cell> cs = new ArrayList<Cell>();
+            Document d = null;
+            
             try
             {
-                Document d = util.getDocument(f);
+                d = util.getDocument(f);
+            }
+            catch (Exception e1)
+            {
+                try
+                {
+                    String content = FileUtil.readFile(f, "UTF-8");
+
+                    while (content.charAt(0) != '<')
+                    {
+                        content = content.substring(1);
+                    }
+                    FileUtil.writeFile(f, content, "UTF-8");
+                    d = util.getDocument(f);
+                }
+                catch (Exception e2)
+                {
+                    logger.error(e1);
+                    return;
+                }
+            }
+            
+            try
+            {
                 List<Node> vs = util.getNodes(d, "v");
                 for (Node v : vs)
                 {
@@ -444,9 +485,14 @@ public class ExcelFileManager
                     Element cn = (Element) save.importNode(n, true);
                     if (c.isFromSharedString())
                     {
-                        cn.setAttribute("siIndex", c.getSsId());
+                        String ssid = c.getSsId();
+                        cn.setAttribute("siIndex", ssid);
                         cn.setAttribute("r", c.getR());
                         cn.setAttribute("c", c.getC());
+                        if (p_excelInternalTextCellStyles.contains(ssid))
+                        {
+                            cn.setAttribute("isInternalTextCellStyles", "1");
+                        }
                     }
 
                     root.appendChild(cn);

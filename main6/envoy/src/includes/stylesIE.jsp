@@ -173,7 +173,8 @@ errorPage="/envoy/common/error.jsp" session="false" %>
 }
 
 .helloText {
-    font-family: Arial Black, Helvetica, sans-serif;
+    font-family: Arial,Helvetica,sans-serif;
+    font-weight:bold;
     font-size: 11pt;
 }
 
@@ -320,7 +321,8 @@ errorPage="/envoy/common/error.jsp" session="false" %>
 }
 
 .welcomePageTableHeadingBasic {
-    font-family: Arial Black, Helvetica, sans-serif;
+    font-family: Arial,Helvetica, sans-serif; 
+    font-weight:bold;
     font-size: 9pt;
     color: rgb(37,34,101);
 }

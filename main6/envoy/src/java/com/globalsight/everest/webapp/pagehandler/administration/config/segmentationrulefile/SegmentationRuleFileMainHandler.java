@@ -432,9 +432,10 @@ public class SegmentationRuleFileMainHandler extends PageHandler
     {
     	int pageSizeNum = 0;
     	String numOfPageSize = p_request.getParameter("numOfPageSize");
-    	if("".equals(numOfPageSize)||numOfPageSize==null){
-    		pageSizeNum=10;
-    	}
+		if (StringUtil.isEmpty(numOfPageSize))
+		{
+			pageSizeNum = 10;
+		}
     	else if ("all".equalsIgnoreCase(numOfPageSize))
 		{
     		pageSizeNum = Integer.MAX_VALUE;

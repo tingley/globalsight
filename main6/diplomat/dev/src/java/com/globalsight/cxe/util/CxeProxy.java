@@ -171,7 +171,8 @@ public class CxeProxy
      * <p>
      * From GBS-2137.
      */
-    static public void importFromFileSystem(String p_fileName, String p_jobId,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	static public void importFromFileSystem(String p_fileName, String p_jobId,
             String p_batchId, String p_fileProfileId, Integer p_pageCount,
             Integer p_pageNum, Integer p_docPageCount, Integer p_docPageNum,
             Boolean p_isAutoImport, Boolean p_overrideFileProfileAsUnextracted,
@@ -222,8 +223,7 @@ public class CxeProxy
         params.put("uiKey", KeyUtil.generateKey());
 
         // for GBS-2137, update the new job to "IN_QUEUE" state
-        String state = job.getState();
-        if (state != null && Job.UPLOADING.equals(job.getState()))
+        if (Job.UPLOADING.equals(job.getState()))
         {
             JobCreationMonitor.updateJobState(job, Job.IN_QUEUE);
         }
@@ -238,6 +238,58 @@ public class CxeProxy
         {
             FileImportUtil.importFileWithThread(cxeMessage);
         }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public static CxeMessage formCxeMessageType(String p_fileName,
+			String p_jobId, String p_batchId, String p_fileProfileId,
+			Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
+			Integer p_docPageNum, Boolean p_isAutoImport,
+			Boolean p_overrideFileProfileAsUnextracted,
+			String p_importRequestType, Integer p_exitValueByScript,
+			String p_priority, String p_companyId)
+    {
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
+        CxeMessage cxeMessage = new CxeMessage(type);
+        HashMap params = cxeMessage.getParameters();
+
+		params.put(CompanyWrapper.CURRENT_COMPANY_ID, p_companyId);
+        params.put("Filename", p_fileName);
+        params.put("JobId", p_jobId);
+        params.put("BatchId", p_batchId);
+        params.put("FileProfileId", p_fileProfileId);
+        params.put("PageCount", p_pageCount);
+        params.put("PageNum", p_pageNum);
+        params.put("DocPageCount", p_docPageCount);
+        params.put("DocPageNum", p_docPageNum);
+        params.put("IsAutomaticImport", p_isAutoImport);
+        params.put("OverrideFileProfileAsUnextracted",
+                p_overrideFileProfileAsUnextracted);
+        params.put(IMPORT_TYPE, p_importRequestType);
+        params.put("ScriptOnImport", p_exitValueByScript);
+        params.put("priority", p_priority);
+
+        if (p_isAutoImport.booleanValue() == false)
+        {
+            simulateAutoImportIfNeeded(params);
+        }
+
+        // some target locales can be unchecked before import
+        String key = p_batchId + p_fileName + p_pageNum.intValue();
+        if (s_targetLocales.containsKey(key))
+        {
+            String targetLocales = (String) s_targetLocales.get(key);
+            if (!targetLocales.equals(""))
+                params.put("TargetLocales", targetLocales);
+            s_targetLocales.remove(key);
+        }
+        params.put("key", key);
+
+        // the uiKey is used in system activity page.
+        params.put("uiKey", KeyUtil.generateKey());
+
+        return cxeMessage;
     }
 
     /**

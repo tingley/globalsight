@@ -38,6 +38,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -68,8 +70,11 @@ import com.globalsight.cxe.entity.customAttribute.TextCondition;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
+import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.cxe.util.CxeProxy;
+import com.globalsight.cxe.util.fileImport.FileImportRunnable;
+import com.globalsight.cxe.util.fileImport.FileImportUtil;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
@@ -879,6 +884,7 @@ public class CreateJobsMainHandler extends PageHandler
             }
 
             int count = 0;
+            List<CxeMessage> cxeMsgs = new ArrayList<CxeMessage>();
             for (Iterator<String> i = fileNames.iterator(); i.hasNext();)
             {
                 String fileName = i.next();
@@ -888,10 +894,39 @@ public class CreateJobsMainHandler extends PageHandler
 
                 String key = jobName + fileName + ++count;
                 CxeProxy.setTargetLocales(key, locs);
-                CxeProxy.importFromFileSystem(fileName,
-                        String.valueOf(job.getId()), jobName, fileProfileId,
-                        pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
-                        CxeProxy.IMPORT_TYPE_L10N, exitValue, priority);
+                // If use JMS
+                if (FileImportUtil.USE_JMS)
+                {
+					CxeProxy.importFromFileSystem(fileName,
+							String.valueOf(job.getId()), jobName,
+							fileProfileId, pageCount, count, 1, 1,
+							Boolean.TRUE, Boolean.FALSE,
+							CxeProxy.IMPORT_TYPE_L10N, exitValue, priority);
+                }
+                // If not use JMS, we control the concurrent threads number
+                else
+                {
+					CxeMessage cxeMessage = CxeProxy.formCxeMessageType(
+							fileName, String.valueOf(job.getId()), jobName,
+							fileProfileId, pageCount, count, 1, 1,
+							Boolean.TRUE, Boolean.FALSE,
+							CxeProxy.IMPORT_TYPE_L10N, exitValue, priority,
+							String.valueOf(job.getCompanyId()));
+					cxeMsgs.add(cxeMessage);
+                }
+            }
+
+            // If not use JMS
+            if (cxeMsgs.size() > 0)
+            {
+                ExecutorService pool = Executors.newFixedThreadPool(100);
+                for (CxeMessage msg : cxeMsgs)
+                {
+                    FileImportRunnable runnable = new FileImportRunnable(msg);
+                    Thread t = new MultiCompanySupportedThread(runnable);
+                    pool.execute(t);
+                }
+                pool.shutdown();
             }
 
             // save job attributes if there are any
@@ -905,7 +940,7 @@ public class CreateJobsMainHandler extends PageHandler
                     || !StringUtils.isEmpty(attachmentName))
             {
                 String dir = convertFilePath(AmbFileStoragePathUtils
-                        .getFileStorageDirPath())
+                        .getFileStorageDirPath(job.getCompanyId()))
                         + File.separator
                         + "GlobalSight"
                         + File.separator

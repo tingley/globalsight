@@ -55,6 +55,7 @@
    String isSaveApprovedToProjectTm = TMProfileConstants.SAVE_APPROVED_SEGS_TO_PROJECT_TM;
    String isSaveExactMatchToProjectTm = TMProfileConstants.SAVE_EXACT_MATCH_SEGS_TO_PROJECT_TM;
    String isSaveToPageTm = TMProfileConstants.SAVE_UNLOC_SEGS_TO_PAGE_TM;
+   String isSaveWhollyInternalTextTm = TMProfileConstants.SAVE_WHOLLY_INTERNAL_TEXT_TM;
    String leverageExcludeType = TMProfileConstants.LEVERAGE_EXCLUDE_TYPES;
    String levLocalizable      = TMProfileConstants.LEVERAGE_LOCALIZABLES;
    String levExactMatches =  TMProfileConstants.LEVERAGE_EXACT_MATCH_ONLY;
@@ -103,6 +104,7 @@
    String lbsaveApprovedSegToTM = bundle.getString("msg_save_approved_segments_to_tm");
    String lbisSaveExactMatchToProjectTm = bundle.getString("msg_is_save_exact_match_to_project_tm");
    String lbisSaveToPageTm = bundle.getString("msg_is_save_to_page_tm");
+   String lbisSaveWhollyInternalTextTm = bundle.getString("msg_is_save_wholly_internal_text_tm");
    String lbgeneralLeverageOptions = bundle.getString("msg_general_leverage_options");
    String lbexcludeItemTypes = bundle.getString("msg_exclude_item_types");
    String lblevLocalizable = bundle.getString("msg_lev_localizable");
@@ -1104,6 +1106,9 @@ function doOnLoad()
 			                        </TR>
                                     <TR ALIGN="LEFT">
                                         <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" CHECKED><%=lbisSaveToPageTm%></TD>
+                                    </TR>
+                                    <TR ALIGN="LEFT">
+                                        <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveWhollyInternalTextTm%>" ><%=lbisSaveWhollyInternalTextTm%></TD>
                                     </TR>
                                 </TABLE>
                                 <BR>

@@ -154,8 +154,9 @@ public class PageJobData
 		boolean saveLocailzed = p_options.saveLocalizedInSegmentTM();
 		boolean saveApproved = p_options.savesApprovedInSegmentTm();
 		boolean saveExactMatch = p_options.savesExactMatchInSegmentTm();
+		boolean saveWhollyInternalText = p_options.saveWhollyInternalTextSegmentTm();
 		return getTusToSave(saveUntranslated, saveLocailzed, saveApproved,
-				saveExactMatch, p_targetLocales, p_page);
+				saveExactMatch,saveWhollyInternalText, p_targetLocales, p_page);
 	}
 
     /**
@@ -198,8 +199,9 @@ public class PageJobData
     //To Project TM
 	private Collection<PageTmTu> getTusToSave(boolean p_saveUntranslated,
 			boolean p_saveLocalized, boolean p_saveApproved,
-			boolean p_saveExactMatch, Set<GlobalSightLocale> p_targetLocales,
-			SourcePage p_page) throws Exception
+			boolean p_saveExactMatch, boolean saveWhollyInternalText,
+			Set<GlobalSightLocale> p_targetLocales, SourcePage p_page)
+			throws Exception
 	{
 		populateMergedTus();
 
@@ -219,7 +221,12 @@ public class PageJobData
 		{
 			excludeStates.add(TuvState.APPROVED.getName());
 		}
-
+		
+		if (!saveWhollyInternalText)
+		{
+			excludeStates.add(TuvState.DO_NOT_TRANSLATE.getName());
+		}
+		
 		tuList = getTusByState(excludeStates, EXCLUDE_STATE);
 
 		if (!p_saveExactMatch)

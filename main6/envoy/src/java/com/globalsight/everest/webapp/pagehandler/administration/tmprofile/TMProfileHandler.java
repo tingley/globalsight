@@ -422,6 +422,16 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         {
             tmProfile.setSaveUnLocSegToProjectTM(true);
         }
+        // 29
+        String saveWhollyInternalTextTm = p_request.getParameter("isSaveWhollyInternalTextTm");
+        if (saveWhollyInternalTextTm == null)
+        {
+            tmProfile.setSaveWhollyInternalTextTm(false);
+        }
+        else if (saveWhollyInternalTextTm.equals("true"))
+        {
+            tmProfile.setSaveWhollyInternalTextTm(true);
+        }
         
         String saveLocToProjectTm = p_request.getParameter("isSaveLocSegToProjectTm");
         if (saveLocToProjectTm == null)

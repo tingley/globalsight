@@ -134,7 +134,10 @@
 		    type="int" not-null="false" unique="false" />
         <property name="companyId" length="20" column="COMPANY_ID"
             type="long" not-null="false" />
-
+      <property name="saveWhollyInternalTextTm"
+            column="IS_WHOLLY_INTERNAL_TEXT_TM" type="yes_no"
+            not-null="true" unique="false" />
+            
         <set name="projectTMsToLeverageFromSet"
             table="TM_PROFILE_PROJECT_TM_INFO" cascade="save-update"
             inverse="true">

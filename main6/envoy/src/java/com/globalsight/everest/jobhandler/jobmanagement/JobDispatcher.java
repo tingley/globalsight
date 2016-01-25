@@ -26,6 +26,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -51,6 +52,7 @@ import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.PageStateValidator;
+import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.Project;
@@ -382,14 +384,15 @@ public class JobDispatcher
 
         Vector<String> jobExcludeTypes = job.getL10nProfile()
                 .getTranslationMemoryProfile().getJobExcludeTuTypes();
+        Map<Long, List<PageWordCounts>> workflowWordCounts = new HashMap<Long, List<PageWordCounts>>();
         for (Workflow workflow : job.getWorkflows())
         {
-            StatisticsService.calculateTargetPagesWordCount(workflow,
-                    jobExcludeTypes);
+            List<PageWordCounts> pwc = StatisticsService
+                    .calculateTargetPagesWordCount(workflow, jobExcludeTypes);
+            workflowWordCounts.put(workflow.getIdAsLong(), pwc);
         }
 
-        StatisticsService.calculateWorkflowStatistics(
-                new ArrayList(job.getWorkflows()), jobExcludeTypes);
+        StatisticsService.calculateWorkflowWordCount(workflowWordCounts);
 
         c_category.info("Done calculating word counts for job "
                 + job.getJobId());
@@ -752,9 +755,9 @@ public class JobDispatcher
         }
         fpNames = fpSet.toString();
         fpNames = fpNames.substring(1, fpNames.length() - 1);
-        //get Job Comments
+        // get Job Comments
         String comments = MailerHelper.getJobCommentsByJob(p_job);
-        
+
         String messageArgs[] = new String[10];
         messageArgs[0] = Long.toString(p_job.getId());
         messageArgs[1] = p_job.getJobName();
@@ -765,7 +768,7 @@ public class JobDispatcher
         messageArgs[7] = fpNames;
         messageArgs[8] = getNoMatchesAndRepetitionsWordCount(jobUploader, p_job);
         messageArgs[9] = comments;
-        
+
         String subject = MailerConstants.JOB_IMPORT_SUCC_SUBJECT;
         String message = MailerConstants.JOB_IMPORT_SUCC_MESSAGE;
         List<String> receiverList = new ArrayList<String>();

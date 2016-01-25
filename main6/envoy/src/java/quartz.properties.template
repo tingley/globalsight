@@ -48,7 +48,7 @@ org.quartz.jobStore.dataSource=amb_mysql
 org.quartz.threadPool.class=org.quartz.simpl.SimpleThreadPool
 org.quartz.threadPool.threadCount=5
 
-org.quartz.dataSource.amb_mysql.validationQuery=select name from company where id = 1
+org.quartz.dataSource.amb_mysql.validationQuery=select id as id_from_quartz_c3p0_pool from company where id = 1
 org.quartz.dataSource.amb_mysql.idleConnectionValidationSeconds=50
 org.quartz.dataSource.amb_mysql.validateOnCheckout=true
 org.quartz.dataSource.amb_mysql.discardIdleConnectionsSeconds=1800

@@ -945,6 +945,7 @@ function checkAndUpload()
 			}
 			if (dupFiles.length == tempFiles.files.length)
 			{
+				emptyFileValue();
 				return false;
 			}
 		}

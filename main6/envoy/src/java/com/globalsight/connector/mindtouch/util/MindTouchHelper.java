@@ -462,7 +462,7 @@ public class MindTouchHelper
         try
         {
             HttpGet httpget = getHttpGet(url);
-
+            logger.info("getPageFile url: " + url);
             HttpResponse httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -487,6 +487,7 @@ public class MindTouchHelper
                 }
                 output.flush();
                 output.close();
+                instream.close();
                 
                 return filePath;
             }

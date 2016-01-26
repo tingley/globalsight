@@ -81,6 +81,9 @@ public class TranslationMemoryProfile extends PersistentObject
     // 6
     private boolean m_isSaveUnLocSegToProjectTM = true;
 
+    // 6
+    private boolean m_saveWhollyInternalTextToProjectTM = false;
+
     // 7
     private boolean m_isSaveUnLocSegToPageTM = true;
 
@@ -214,7 +217,12 @@ public class TranslationMemoryProfile extends PersistentObject
     {
         m_isSaveUnLocSegToProjectTM = p_isSaveUnLocSegToProjectTM;
     }
-
+    
+    public void setSaveWhollyInternalTextToProjectTM(boolean p_saveWhollyInternalTextToProjectTM)
+    {
+    	m_saveWhollyInternalTextToProjectTM = p_saveWhollyInternalTextToProjectTM;
+    }
+    
     public void setSaveApprovedSegToProjectTM(boolean p_isSaveApprovedSegToProjectTM)
     {
 		this.m_isSaveApprovedSegToProjectTM = p_isSaveApprovedSegToProjectTM;
@@ -412,6 +420,11 @@ public class TranslationMemoryProfile extends PersistentObject
     public boolean isSaveUnLocSegToProjectTM()
     {
         return m_isSaveUnLocSegToProjectTM;
+    }
+    
+    public boolean isSaveWhollyInternalTextToProjectTM()
+    {
+        return m_saveWhollyInternalTextToProjectTM;
     }
 
     public Vector<String> getJobExcludeTuTypes()

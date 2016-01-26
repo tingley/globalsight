@@ -84,7 +84,7 @@
    
    String jsmsg = "";
    long wfTemplateInfoId = -1;
-   boolean isNew = (wfti == null);
+   boolean isNew = (wfti == null || wfti.getId() < 0);
    if(!isNew) // edit
    {
        wfTemplateInfoId = Long.parseLong(request.getParameter("wfTemplateInfoId"));

@@ -45,6 +45,7 @@ public interface TMProfileConstants
     public static final String SAVE_APPROVED_SEGS_TO_PROJECT_TM = "isSaveApprovedToProjectTm";
     public static final String SAVE_EXACT_MATCH_SEGS_TO_PROJECT_TM = "isSaveExactMatchToProjectTm";
     public static final String SAVE_UNLOC_SEGS_TO_PAGE_TM = "isSaveToPageTm";
+    public static final String SAVE_WHOLLY_INTERNAL_TEXT_TM = "isSaveWhollyInternalTextTm";
     public static final String LEVERAGE_EXCLUDE_TYPES = "excludeItemType";
     public static final String LEVERAGE_LOCALIZABLES = "levLocalizable";
     public static final String LEVERAGE_EXACT_MATCH_ONLY = "levExactMatches";

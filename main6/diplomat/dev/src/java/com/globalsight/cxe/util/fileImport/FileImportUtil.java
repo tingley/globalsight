@@ -220,11 +220,11 @@ public class FileImportUtil
             map.put("sortAxis", 1);
         }
 
-        String name = getName(cxeMessage);
-
+        String name = null;
         // hold the message if the importing file is upper limit
         synchronized (LOCKER)
         {
+            name = getName(cxeMessage);
             Integer max = RUN_MAX_MESSAGE.get(name);
             if (max == null)
                 max = 10;

@@ -53,6 +53,7 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.log.OperationLog;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 
 /**
  * SegmentationRuleFilePageHandler, A page handler to produce the entry page
@@ -429,11 +430,20 @@ public class SegmentationRuleFileMainHandler extends PageHandler
             HttpSession p_session) throws RemoteException, NamingException,
             GeneralException
     {
+    	int pageSizeNum = 0;
     	String numOfPageSize = p_request.getParameter("numOfPageSize");
-    	if("".equals(numOfPageSize)||numOfPageSize==null){
-    		numOfPageSize="10";
+		if (StringUtil.isEmpty(numOfPageSize))
+		{
+			pageSizeNum = 10;
+		}
+    	else if ("all".equalsIgnoreCase(numOfPageSize))
+		{
+    		pageSizeNum = Integer.MAX_VALUE;
+		}
+    	else
+    	{
+    		pageSizeNum = Integer.parseInt(numOfPageSize);
     	}
-    	int pageSizeNum = Integer.parseInt(numOfPageSize);
         Collection segmentationrulefiles = ServerProxy
                 .getSegmentationRuleFilePersistenceManager()
                 .getAllSegmentationRuleFiles();
@@ -446,5 +456,4 @@ public class SegmentationRuleFileMainHandler extends PageHandler
                 uiLocale), pageSizeNum, SegmentationRuleConstant.SEGMENTATIONRULE_LIST,
                 SegmentationRuleConstant.SEGMENTATIONRULE_KEY);
     }
-    
 }

@@ -619,6 +619,9 @@ public class AppletService extends HttpServlet
         if (wfti.getId() < 0)
         	return;
         
+        // the name can be edit
+        wfti = HibernateUtil.get(WorkflowTemplateInfo.class, wfti.getId());
+        
         String templateName = wfti.getName();
         String templateFileName = AmbFileStoragePathUtils
                 .getWorkflowTemplateXmlDir().getAbsolutePath()

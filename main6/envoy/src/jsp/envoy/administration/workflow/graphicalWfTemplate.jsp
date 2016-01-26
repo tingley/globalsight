@@ -102,17 +102,7 @@ var helpFile = "<%=bundle.getString("help_workflow_graphical")%>";
 
 function cancelForm()
 {
-	var confirmed = true;
-	
-    if(confirm('<%=bundle.getString("msg_wf_modify_confirm")%>')) {
-    	confirmed = true;
-    }
-    else
-    {
-    	confirmed = false;
-    }
-    
-    if (confirmJump() && confirmed)
+	if (confirmJump())
     {
     	if (document.layers) theForm = document.contentLayer.document.templateCancel;
     	else theForm = document.all.templateCancel;
@@ -120,19 +110,9 @@ function cancelForm()
     }
 }
 
-function previousForm() {
-	
-	var confirmed = true;
-	
-    if(confirm('<%=bundle.getString("msg_wf_modify_confirm")%>')) {
-    	confirmed = true;
-    }
-    else
-    {
-    	confirmed = false;
-    }
-    
-    if (confirmJump() && confirmed)
+function previousForm() 
+{
+	if (confirmJump())
     {
     	location.replace('<%=previousURL%>');
 	}

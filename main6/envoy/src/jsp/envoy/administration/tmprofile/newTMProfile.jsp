@@ -1088,27 +1088,27 @@ function doOnLoad()
                                     </TR>
                                     <TR ALIGN="LEFT">
                                         <TD COLSPAN=2>
-                                        	<INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>"><%=lbsaveUnlSegToTm%>
+                                        	<INPUT TYPE="checkbox"  NAME="<%=isSaveUnlocToProjectTm%>" VALUE="true"><%=lbsaveUnlSegToTm%>
                                         </TD>
                                     </TR>
                                     <TR ALIGN="LEFT">
 		                               <TD COLSPAN=2>
-			                               <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" CHECKED><%=lbsavelocSegToTm%>
+			                               <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" VALUE="true" CHECKED><%=lbsavelocSegToTm%>
 			                           </TD>
 			                        </TR>
+                                    <TR ALIGN="LEFT">
+                                        <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveWhollyInternalTextTm%>" VALUE="true"><%=lbisSaveWhollyInternalTextTm%></TD>
+                                    </TR>
                                     <TR ALIGN="LEFT">
                                         <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" CHECKED><%=lbisSaveExactMatchToProjectTm%></TD>
                                     </TR>
 			                        <TR ALIGN="LEFT">
 			                           <TD COLSPAN=2>
-			                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>" CHECKED><%=lbsaveApprovedSegToTM%>
+			                           <INPUT TYPE="checkbox" NAME="<%=isSaveApprovedToProjectTm%>"  VALUE="true" CHECKED><%=lbsaveApprovedSegToTM%>
 			                           </TD>
 			                        </TR>
                                     <TR ALIGN="LEFT">
                                         <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" CHECKED><%=lbisSaveToPageTm%></TD>
-                                    </TR>
-                                    <TR ALIGN="LEFT">
-                                        <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveWhollyInternalTextTm%>" ><%=lbisSaveWhollyInternalTextTm%></TD>
                                     </TR>
                                 </TABLE>
                                 <BR>
@@ -1117,7 +1117,6 @@ function doOnLoad()
                         </TR>
                         <TR>
                             <TD>
-
                                 <b><%=lbgeneralLeverageOptions%></b><BR>
                                 <%=lbexcludeItemTypes%>:<BR>
                                 <TEXTAREA CLASS="standardText" NAME="<%=leverageExcludeType%>" ROWS="5" COLS="50"><%=excludeItemTypesLongList%></TEXTAREA>

@@ -20,6 +20,9 @@
         <property name="saveLocSegToProjectTM"
             column="IS_LOC_SEG_SAVED_TO_PROJ_TM" type="yes_no"
             not-null="true" unique="false" />
+        <property name="saveWhollyInternalTextToProjectTM"
+            column="IS_WHOLLY_INTERNAL_TEXT_TO_PROJ_TM" type="yes_no"
+            not-null="true" unique="false" />
         <property name="saveApprovedSegToProjectTM"
             column="IS_APPROVED_SEG_SAVED_TO_PROJ_TM" type="yes_no"
             not-null="true" unique="false" />
@@ -134,9 +137,6 @@
 		    type="int" not-null="false" unique="false" />
         <property name="companyId" length="20" column="COMPANY_ID"
             type="long" not-null="false" />
-      <property name="saveWhollyInternalTextTm"
-            column="IS_WHOLLY_INTERNAL_TEXT_TM" type="yes_no"
-            not-null="true" unique="false" />
             
         <set name="projectTMsToLeverageFromSet"
             table="TM_PROFILE_PROJECT_TM_INFO" cascade="save-update"

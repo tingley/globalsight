@@ -156,7 +156,7 @@ public class PageJobData
 		boolean saveExactMatch = p_options.savesExactMatchInSegmentTm();
 		boolean saveWhollyInternalText = p_options.saveWhollyInternalTextSegmentTm();
 		return getTusToSave(saveUntranslated, saveLocailzed, saveApproved,
-				saveExactMatch,saveWhollyInternalText, p_targetLocales, p_page);
+				saveExactMatch, saveWhollyInternalText, p_targetLocales, p_page);
 	}
 
     /**
@@ -217,14 +217,13 @@ public class PageJobData
 		{
 			excludeStates.add(TuvState.LOCALIZED.getName());
 		}
-		if (!p_saveApproved)
-		{
-			excludeStates.add(TuvState.APPROVED.getName());
-		}
-		
 		if (!saveWhollyInternalText)
 		{
 			excludeStates.add(TuvState.DO_NOT_TRANSLATE.getName());
+		}
+		if (!p_saveApproved)
+		{
+			excludeStates.add(TuvState.APPROVED.getName());
 		}
 		
 		tuList = getTusByState(excludeStates, EXCLUDE_STATE);

@@ -75,7 +75,7 @@ public class LeverageOptions
     
     public boolean saveWhollyInternalTextSegmentTm()
     {
-        return m_tmProfile.isSaveWhollyInternalTextTm();
+        return m_tmProfile.isSaveWhollyInternalTextToProjectTM();
     }
     
     public boolean saveLocalizedInSegmentTM()

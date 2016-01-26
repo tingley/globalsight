@@ -1465,6 +1465,11 @@ function doOnLoad()
                         </TR>
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
+                              <INPUT TYPE="checkbox" NAME="<%=isSaveWhollyInternalTextTm%>" VALUE="true" <%=tmProfile.isSaveWhollyInternalTextToProjectTM()?"CHECKED":""%>><%=lbisSaveWhollyInternalTextTm%>
+                           </TD>
+                        </TR>
+                        <TR ALIGN="LEFT">
+                           <TD COLSPAN=2>
                            <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=tmProfile.isSaveExactMatchSegToProjectTM()?"CHECKED":""%>><%=lbisSaveExactMatchToProjectTm%>
                             </TD>
                         </TR>
@@ -1476,11 +1481,6 @@ function doOnLoad()
                         <TR ALIGN="LEFT">
                            <TD COLSPAN=2>
                               <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=tmProfile.isSaveUnLocSegToPageTM()?"CHECKED":""%>><%=lbisSaveToPageTm%>
-                           </TD>
-                        </TR>
-                        <TR ALIGN="LEFT">
-                           <TD COLSPAN=2>
-                              <INPUT TYPE="checkbox" NAME="<%=isSaveWhollyInternalTextTm%>" VALUE="true" <%=tmProfile.isSaveWhollyInternalTextTm()?"CHECKED":""%>><%=lbisSaveWhollyInternalTextTm%>
                            </TD>
                         </TR>
                      </TABLE>

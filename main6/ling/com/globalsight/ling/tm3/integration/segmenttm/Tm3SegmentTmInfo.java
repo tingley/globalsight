@@ -173,7 +173,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             {
                 ids.add(tu.getId());
             }
-            LOGGER.info("deleteSegmentTmTus: " + describeTm(pTm, tm3tm)
+            LOGGER.debug("deleteSegmentTmTus: " + describeTm(pTm, tm3tm)
                     + "ids " + ids);
 
             // Delete the segments by ID

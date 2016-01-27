@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -57,6 +58,7 @@ import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.PageState;
+import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
@@ -111,11 +113,10 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
     private static final long serialVersionUID = 0L;
 
-    private static final Logger c_logger = Logger
-            .getLogger(WorkflowAdditionMDB.class);
+    private static final Logger c_logger = Logger.getLogger(WorkflowAdditionMDB.class);
 
-    static public final String UNEXTRACTED_SUB_DIRECTORY = "GlobalSight"
-            + File.separator + "UnextractedFiles";
+    static public final String UNEXTRACTED_SUB_DIRECTORY = "GlobalSight" + File.separator
+            + "UnextractedFiles";
 
     static private final String IMPORT_FAILURE = "importFailure";
 
@@ -175,8 +176,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         }
         catch (JMSException jmse)
         {
-            c_logger.error("Failed to get MapMessage or retrieving one "
-                    + "of the parameters " + p_cxeRequest.toString(), jmse);
+            c_logger.error("Failed to get MapMessage or retrieving one " + "of the parameters "
+                    + p_cxeRequest.toString(), jmse);
             HibernateUtil.closeSession();
             return;
         }
@@ -195,36 +196,32 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
             // CvdL: isn't the profile object already loaded???
             long profileId = job.getL10nProfile().getId();
-            l10nProfile = ServerProxy.getProjectHandler().getL10nProfile(
-                    profileId);
+            l10nProfile = ServerProxy.getProjectHandler().getL10nProfile(profileId);
 
             ht.remove("JOB");
 
             WorkflowRequest workflowRequest = new WorkflowRequestImpl();
-            workflowRequest
-                    .setType(WorkflowRequest.ADD_WORKFLOW_REQUEST_TO_EXISTING_JOB);
+            workflowRequest.setType(WorkflowRequest.ADD_WORKFLOW_REQUEST_TO_EXISTING_JOB);
 
             Iterator it2 = ht.values().iterator();
             while (it2.hasNext())
             {
                 long wfTempId = ((Long) it2.next()).longValue();
-                WorkflowTemplateInfo wfTempInfo = ServerProxy
-                        .getProjectHandler().getWorkflowTemplateInfoById(
-                                wfTempId);
+                WorkflowTemplateInfo wfTempInfo = ServerProxy.getProjectHandler()
+                        .getWorkflowTemplateInfoById(wfTempId);
                 workflowTemplates.add(wfTempInfo);
             }
 
-            long workflowRequestId = ServerProxy.getRequestHandler()
-                    .createWorkflowRequest(workflowRequest, job,
-                            workflowTemplates);
+            long workflowRequestId = ServerProxy.getRequestHandler().createWorkflowRequest(
+                    workflowRequest, job, workflowTemplates);
 
             m_map = new HashMap<String, List<Workflow>>();
 
             while (it.hasNext())
             {
                 SourcePage sourcePage = (SourcePage) it.next();
-                addWorkflowsToExistingJob(workflowRequestId, job, sourcePage,
-                        l10nProfile, workflowTemplates);
+                addWorkflowsToExistingJob(workflowRequestId, job, sourcePage, l10nProfile,
+                        workflowTemplates);
             }
             // refresh the job after adding workflows.
             job = ServerProxy.getJobHandler().getJobById(job.getId());
@@ -241,8 +238,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             try
             {
                 sendEmail(job, m_map.get("newworkflows"),
-                        MailerConstants.WF_IMPORT_FAILURE_SUBJECT,
-                        IMPORT_FAILURE);
+                        MailerConstants.WF_IMPORT_FAILURE_SUBJECT, IMPORT_FAILURE);
             }
             catch (Exception e)
             {
@@ -256,12 +252,11 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
     }
 
     private void addWorkflowsToExistingJob(long p_workflowRequestId, Job p_job,
-            SourcePage p_sourcePage, L10nProfile p_l10nProfile,
-            Collection p_workflowTemplates) throws WorkflowManagerException
+            SourcePage p_sourcePage, L10nProfile p_l10nProfile, Collection p_workflowTemplates)
+            throws WorkflowManagerException
     {
         HashMap pages = new HashMap();
-        pages.put(p_sourcePage.getGlobalSightLocale().getIdAsLong(),
-                p_sourcePage);
+        pages.put(p_sourcePage.getGlobalSightLocale().getIdAsLong(), p_sourcePage);
         ArrayList targetLocales = getTargetLocales(p_workflowTemplates);
 
         switch (p_sourcePage.getRequest().getType())
@@ -273,17 +268,15 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                 try
                 {
-                    ExactMatchedSegments esm = leveragePageWithNewTargetLocales(
-                            p_sourcePage, p_l10nProfile, p_workflowTemplates);
+                    ExactMatchedSegments esm = leveragePageWithNewTargetLocales(p_sourcePage,
+                            p_l10nProfile, p_workflowTemplates);
                     TermLeverageResult termMatches = leverageTermsWithNewTargetLocales(
                             p_sourcePage, p_l10nProfile, p_workflowTemplates);
 
-                    extractedTargetPages = createExtractedTargetPages(p_job,
-                            p_sourcePage, p_l10nProfile, targetLocales,
-                            termMatches, esm);
+                    extractedTargetPages = createExtractedTargetPages(p_job, p_sourcePage,
+                            p_l10nProfile, targetLocales, termMatches, esm);
 
-                    for (Iterator it2 = extractedTargetPages.iterator(); it2
-                            .hasNext();)
+                    for (Iterator it2 = extractedTargetPages.iterator(); it2.hasNext();)
                     {
                         TargetPage tp = (TargetPage) it2.next();
                         pages.put(tp.getGlobalSightLocale().getIdAsLong(), tp);
@@ -291,9 +284,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                     if (extractedTargetPages.size() > 0)
                     {
-                        ServerProxy.getPageEventObserver()
-                                .notifyImportSuccessNewTargetPagesEvent(
-                                        extractedTargetPages);
+                        ServerProxy.getPageEventObserver().notifyImportSuccessNewTargetPagesEvent(
+                                extractedTargetPages);
                     }
                     // no successful target pages but the request isn't
                     // marked as a failure yet so set the exception in it
@@ -304,13 +296,11 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                         // set the entire request to a failure since all
                         // target pages failed
 
-                        setExceptionInRequest(
-                                p_workflowRequestId,
-                                new WorkflowManagerException(
-                                        WorkflowManagerException.MSG_FAILED_IMPORT_ALL_TARGETS_ACTIVE,
-                                        null, null));
-                        ServerProxy.getPageEventObserver()
-                                .notifyImportFailEvent(extractedTargetPages);
+                        setExceptionInRequest(p_workflowRequestId, new WorkflowManagerException(
+                                WorkflowManagerException.MSG_FAILED_IMPORT_ALL_TARGETS_ACTIVE,
+                                null, null));
+                        ServerProxy.getPageEventObserver().notifyImportFailEvent(
+                                extractedTargetPages);
                     }
                 }
                 catch (WorkflowManagerException wfme)
@@ -320,49 +310,42 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                 catch (GeneralException ge)
                 {
                     String[] args =
-                    { Long.toString(p_sourcePage.getId()),
-                            p_sourcePage.getExternalPageId() };
+                    { Long.toString(p_sourcePage.getId()), p_sourcePage.getExternalPageId() };
 
                     exception = new WorkflowManagerException(
-                            WorkflowManagerException.MSG_FAILED_TO_IMPORT_PAGE,
-                            args, ge);
+                            WorkflowManagerException.MSG_FAILED_TO_IMPORT_PAGE, args, ge);
                 }
                 catch (Throwable ex)
                 {
                     String[] args =
-                    { Long.toString(p_sourcePage.getId()),
-                            p_sourcePage.getExternalPageId() };
+                    { Long.toString(p_sourcePage.getId()), p_sourcePage.getExternalPageId() };
 
                     exception = new WorkflowManagerException(
-                            WorkflowManagerException.MSG_FAILED_TO_IMPORT_PAGE,
-                            args, new Exception(ex.toString()));
+                            WorkflowManagerException.MSG_FAILED_TO_IMPORT_PAGE, args,
+                            new Exception(ex.toString()));
                 }
 
                 if (exception != null)
                 {
-                    c_logger.error(
-                            "Import failed for page "
-                                    + p_sourcePage.getExternalPageId() + "\n",
-                            exception);
+                    c_logger.error("Import failed for page " + p_sourcePage.getExternalPageId()
+                            + "\n", exception);
 
                     try
                     {
                         setExceptionInRequest(p_workflowRequestId, exception);
 
-                        ServerProxy.getPageEventObserver()
-                                .notifyImportFailEvent(extractedTargetPages);
+                        ServerProxy.getPageEventObserver().notifyImportFailEvent(
+                                extractedTargetPages);
                     }
                     catch (Throwable ex)
                     {
-                        c_logger.error("Cannot mark pages as IMPORT_FAILED.",
-                                ex);
+                        c_logger.error("Cannot mark pages as IMPORT_FAILED.", ex);
                         throw exception;
                     }
                 }
                 else
                 {
-                    c_logger.info("Done importing page: "
-                            + p_sourcePage.getExternalPageId());
+                    c_logger.info("Done importing page: " + p_sourcePage.getExternalPageId());
                 }
 
                 break;
@@ -372,26 +355,20 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                 try
                 {
-                    String userId = p_l10nProfile.getProject()
-                            .getProjectManagerId();
-                    UnextractedFile sourceUf = (UnextractedFile) p_sourcePage
-                            .getPrimaryFile();
+                    String userId = p_l10nProfile.getProject().getProjectManagerId();
+                    UnextractedFile sourceUf = (UnextractedFile) p_sourcePage.getPrimaryFile();
                     // String contentFileName =
                     // getAbsolutePath() + sourceUf.getStoragePath();
-                    String contentFileName = AmbFileStoragePathUtils
-                            .getUnextractedParentDir()
-                            + File.separator
-                            + sourceUf.getStoragePath();
+                    String contentFileName = AmbFileStoragePathUtils.getUnextractedParentDir()
+                            + File.separator + sourceUf.getStoragePath();
 
-                    unextractedTargetPages = createUnExtractedTargetPages(
-                            p_sourcePage, targetLocales);
+                    unextractedTargetPages = createUnExtractedTargetPages(p_sourcePage,
+                            targetLocales);
 
-                    for (Iterator i = unextractedTargetPages.iterator(); i
-                            .hasNext();)
+                    for (Iterator i = unextractedTargetPages.iterator(); i.hasNext();)
                     {
                         TargetPage targetPage = (TargetPage) i.next();
-                        UnextractedFile uf = (UnextractedFile) targetPage
-                                .getPrimaryFile();
+                        UnextractedFile uf = (UnextractedFile) targetPage.getPrimaryFile();
 
                         // if there is another one
                         if (i.hasNext())
@@ -404,8 +381,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                             storeFile(contentFileName, uf, userId, true);
                         }
 
-                        pages.put(targetPage.getGlobalSightLocale()
-                                .getIdAsLong(), targetPage);
+                        pages.put(targetPage.getGlobalSightLocale().getIdAsLong(), targetPage);
                     }
                 }
                 catch (GeneralException e)
@@ -418,16 +394,15 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                 {
                     if (p_sourcePage.getRequest().getType() == Request.UNEXTRACTED_LOCALIZATION_REQUEST)
                     {
-                        ServerProxy.getPageEventObserver()
-                                .notifyImportSuccessNewTargetPagesEvent(
-                                        unextractedTargetPages);
+                        ServerProxy.getPageEventObserver().notifyImportSuccessNewTargetPagesEvent(
+                                unextractedTargetPages);
                     }
                     else
                     {
                         c_logger.info("Import failed - updating the state.");
 
-                        ServerProxy.getPageEventObserver()
-                                .notifyImportFailEvent(unextractedTargetPages);
+                        ServerProxy.getPageEventObserver().notifyImportFailEvent(
+                                unextractedTargetPages);
                     }
                 }
                 catch (Exception e)
@@ -443,8 +418,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
         if (m_map.size() == 0)
         {
-            List<Workflow> workflows = addTargetPageToExistingJob(pages, p_job,
-                    p_workflowTemplates);
+            List<Workflow> workflows = addTargetPageToExistingJob(pages, p_job, p_workflowTemplates);
             m_map.put("newworkflows", workflows);
         }
         else if (m_map.size() > 0)
@@ -454,8 +428,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         }
     }
 
-    private void addTargetPagesToWorkflows(HashMap p_pages, List p_workflows,
-            Job p_job) throws WorkflowManagerException
+    private void addTargetPagesToWorkflows(HashMap p_pages, List p_workflows, Job p_job)
+            throws WorkflowManagerException
     {
         SourcePage sourcePage = null;
 
@@ -469,10 +443,9 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             HashMap targetPages = new HashMap(p_pages);
 
             // get the source page from the map
-            sourcePage = (SourcePage) targetPages.remove(p_job.getL10nProfile()
-                    .getSourceLocale().getIdAsLong());
-            Vector toplinkTargetPages = PagePersistenceAccessor
-                    .getTargetPages(sourcePage.getId());
+            sourcePage = (SourcePage) targetPages.remove(p_job.getL10nProfile().getSourceLocale()
+                    .getIdAsLong());
+            Vector toplinkTargetPages = PagePersistenceAccessor.getTargetPages(sourcePage.getId());
             HashMap mapTargetPages = convertVectorIntoMap(toplinkTargetPages);
             Iterator it = p_workflows.iterator();
 
@@ -480,14 +453,14 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             {
                 Workflow workflow = (Workflow) it.next();
 
-                Workflow wfClone = (WorkflowImpl) session.load(
-                        WorkflowImpl.class, workflow.getIdAsLong());
-                TargetPage targetPage = (TargetPage) targetPages.get(workflow
-                        .getTargetLocale().getIdAsLong());
-                TargetPage toplinkTargetPage = (TargetPage) mapTargetPages
-                        .get(targetPage.getIdAsLong());
-                TargetPage targetPageClone = (TargetPage) session.load(
-                        TargetPage.class, toplinkTargetPage.getIdAsLong());
+                Workflow wfClone = (WorkflowImpl) session.load(WorkflowImpl.class,
+                        workflow.getIdAsLong());
+                TargetPage targetPage = (TargetPage) targetPages.get(workflow.getTargetLocale()
+                        .getIdAsLong());
+                TargetPage toplinkTargetPage = (TargetPage) mapTargetPages.get(targetPage
+                        .getIdAsLong());
+                TargetPage targetPageClone = (TargetPage) session.load(TargetPage.class,
+                        toplinkTargetPage.getIdAsLong());
 
                 wfClone.addTargetPage(targetPageClone);
                 session.update(wfClone);
@@ -505,9 +478,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             String args[] = new String[1];
             args[0] = Long.toString(sourcePage.getId());
 
-            throw new WorkflowManagerException(
-                    WorkflowManagerException.MSG_FAILED_TO_ADD_WORKFLOW, args,
-                    pe);
+            throw new WorkflowManagerException(WorkflowManagerException.MSG_FAILED_TO_ADD_WORKFLOW,
+                    args, pe);
         }
         finally
         {
@@ -539,8 +511,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
         try
         {
-            workflowRequest = ServerProxy.getRequestHandler()
-                    .findWorkflowRequest(p_workflowRequestId);
+            workflowRequest = ServerProxy.getRequestHandler().findWorkflowRequest(
+                    p_workflowRequestId);
         }
         catch (Exception e)
         {
@@ -548,9 +520,10 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             args[1] = new Long(p_workflowRequestId).toString();
             c_logger.error("Unable to retrieve workflow request id" + e);
             throw new WorkflowManagerException(
-                    WorkflowManagerException.MSG_FAILED_TO_RETRIEVE_WORKFLOW_REQUEST,
-                    args, e);
+                    WorkflowManagerException.MSG_FAILED_TO_RETRIEVE_WORKFLOW_REQUEST, args, e);
         }
+
+        HibernateUtil.getSession().close();
 
         if (workflowRequest.getType() == WorkflowRequest.WORKFLOW_REQUEST_FAILURE)
         {
@@ -575,8 +548,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                     }
                     else
                     {
-                        wfClone = (Workflow) session.get(WorkflowImpl.class,
-                                workflow.getIdAsLong());
+                        wfClone = (Workflow) session
+                                .get(WorkflowImpl.class, workflow.getIdAsLong());
                     }
 
                     wfClone.setState(Workflow.IMPORT_FAILED);
@@ -597,8 +570,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                 transaction.commit();
 
                 sendEmail(p_job, m_map.get("newworkflows"),
-                        MailerConstants.WF_IMPORT_FAILURE_SUBJECT,
-                        IMPORT_FAILURE);
+                        MailerConstants.WF_IMPORT_FAILURE_SUBJECT, IMPORT_FAILURE);
             }
             catch (Exception e)
             {
@@ -606,8 +578,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                 String args[] = new String[1];
                 args[0] = new Long(p_job.getId()).toString();
                 throw new WorkflowManagerException(
-                        WorkflowManagerException.MSG_FAILED_TO_UPDATE_WORKFLOWS,
-                        args, e);
+                        WorkflowManagerException.MSG_FAILED_TO_UPDATE_WORKFLOWS, args, e);
             }
             finally
             {
@@ -624,8 +595,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
             try
             {
-                boolean isAutoDispatch = p_job.getL10nProfile()
-                        .dispatchIsAutomatic();
+                boolean isAutoDispatch = p_job.getL10nProfile().dispatchIsAutomatic();
                 Job job = ServerProxy.getJobHandler().getJobById(p_job.getId());
                 Iterator<Workflow> it = (m_map.get("newworkflows")).iterator();
 
@@ -634,7 +604,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                     while (it.hasNext())
                     {
                         Workflow workflow = (Workflow) it.next();
-
+                        workflow = HibernateUtil.get(WorkflowImpl.class, workflow.getId());
                         if (workflow.getState().equals(Workflow.PENDING))
                         {
                             ServerProxy.getWorkflowManager().dispatch(workflow);
@@ -655,8 +625,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                         }
                         else
                         {
-                            workflow = (Workflow) session.get(
-                                    WorkflowImpl.class, workflow.getIdAsLong());
+                            workflow = (Workflow) session.get(WorkflowImpl.class,
+                                    workflow.getIdAsLong());
                         }
 
                         if (workflow.getState().equals(Workflow.PENDING))
@@ -670,8 +640,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                     transaction.commit();
 
-                    sendEmail(job, m_map.get("newworkflows"),
-                            MailerConstants.DISPATCH_SUBJECT,
+                    sendEmail(job, m_map.get("newworkflows"), MailerConstants.DISPATCH_SUBJECT,
                             MailerConstants.DISPATCH_MESSAGE);
                 }
             }
@@ -682,8 +651,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                 String args[] = new String[1];
                 args[0] = new Long(p_job.getId()).toString();
                 throw new WorkflowManagerException(
-                        WorkflowManagerException.MSG_FAILED_TO_DISPATCH_WORKFLOW,
-                        args, e);
+                        WorkflowManagerException.MSG_FAILED_TO_DISPATCH_WORKFLOW, args, e);
             }
             finally
             {
@@ -695,14 +663,12 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         }
     }
 
-    private void calculateEstimatedCompletionDate(Workflow p_workflowClone)
-            throws Exception
+    private void calculateEstimatedCompletionDate(Workflow p_workflowClone) throws Exception
     {
-        List wfTaskInfos = ServerProxy.getWorkflowServer()
-                .timeDurationsInDefaultPath(null, p_workflowClone.getId(), -1);
-        FluxCalendar defaultCalendar = ServerProxy.getCalendarManager()
-                .findDefaultCalendar(
-                        String.valueOf(p_workflowClone.getCompanyId()));
+        List wfTaskInfos = ServerProxy.getWorkflowServer().timeDurationsInDefaultPath(null,
+                p_workflowClone.getId(), -1);
+        FluxCalendar defaultCalendar = ServerProxy.getCalendarManager().findDefaultCalendar(
+                String.valueOf(p_workflowClone.getCompanyId()));
 
         Hashtable tasks = p_workflowClone.getTasks();
         long translateDuration = 0l;
@@ -717,8 +683,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
             workflowDuration += wfTaskInfo.getTotalDuration();
 
-            Activity act = ServerProxy.getJobHandler().getActivity(
-                    task.getTaskName());
+            Activity act = ServerProxy.getJobHandler().getActivity(task.getTaskName());
 
             if (Activity.isTranslateActivity(act.getType()))
             {
@@ -727,19 +692,17 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         }
 
         Date date = new Date();
-        p_workflowClone.setEstimatedTranslateCompletionDate(ServerProxy
-                .getEventScheduler().determineDate(date, defaultCalendar,
-                        translateDuration));
-        p_workflowClone.setEstimatedCompletionDate(ServerProxy
-                .getEventScheduler().determineDate(date, defaultCalendar,
-                        workflowDuration));
+        p_workflowClone.setEstimatedTranslateCompletionDate(ServerProxy.getEventScheduler()
+                .determineDate(date, defaultCalendar, translateDuration));
+        p_workflowClone.setEstimatedCompletionDate(ServerProxy.getEventScheduler().determineDate(
+                date, defaultCalendar, workflowDuration));
 
         // p_workflowClone.updateTranslationCompletedDates();
     }
 
-    private ExactMatchedSegments leveragePageWithNewTargetLocales(
-            SourcePage p_sourcePage, L10nProfile p_l10nProfile,
-            Collection p_workflowTemplates) throws WorkflowManagerException
+    private ExactMatchedSegments leveragePageWithNewTargetLocales(SourcePage p_sourcePage,
+            L10nProfile p_l10nProfile, Collection p_workflowTemplates)
+            throws WorkflowManagerException
     {
         ExactMatchedSegments exactMatchedSegments = null;
 
@@ -750,21 +713,17 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
             while (it.hasNext())
             {
-                WorkflowTemplateInfo wfTempInfo = (WorkflowTemplateInfo) it
-                        .next();
+                WorkflowTemplateInfo wfTempInfo = (WorkflowTemplateInfo) it.next();
                 Set<GlobalSightLocale> c = wfTempInfo.getLeveragingLocales();
-                leveragingLocales.setLeveragingLocale(
-                        wfTempInfo.getTargetLocale(), c);
+                leveragingLocales.setLeveragingLocale(wfTempInfo.getTargetLocale(), c);
             }
 
             if (leveragingLocales.size() > 0)
             {
                 long jobId = p_sourcePage.getJobId();
-                TranslationMemoryProfile tmProfile = p_l10nProfile
-                        .getTranslationMemoryProfile();
+                TranslationMemoryProfile tmProfile = p_l10nProfile.getTranslationMemoryProfile();
 
-                LeverageOptions leverageOptions = new LeverageOptions(
-                        tmProfile, leveragingLocales);
+                LeverageOptions leverageOptions = new LeverageOptions(tmProfile, leveragingLocales);
 
                 TmCoreManager tmCoreManager = null;
 
@@ -774,21 +733,18 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                     // create LeverageDataCenter
                     LeverageDataCenter leverageDataCenter = tmCoreManager
-                            .createLeverageDataCenterForPage(p_sourcePage,
-                                    leverageOptions, jobId);
+                            .createLeverageDataCenterForPage(p_sourcePage, leverageOptions, jobId);
 
                     // leverage
-                    tmCoreManager
-                            .leveragePage(p_sourcePage, leverageDataCenter);
+                    tmCoreManager.leveragePage(p_sourcePage, leverageDataCenter);
 
                     // save the matches results to leverage_match table
                     Connection conn = null;
                     try
                     {
                         conn = DbUtil.getConnection();
-                        LingServerProxy.getLeverageMatchLingManager()
-                                .saveLeverageResults(conn, p_sourcePage,
-                                        leverageDataCenter);
+                        LingServerProxy.getLeverageMatchLingManager().saveLeverageResults(conn,
+                                p_sourcePage, leverageDataCenter);
                     }
                     finally
                     {
@@ -796,8 +752,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                     }
 
                     // retrieve exact match results
-                    exactMatchedSegments = leverageDataCenter
-                            .getExactMatchedSegments(jobId);
+                    exactMatchedSegments = leverageDataCenter.getExactMatchedSegments(jobId);
                 }
                 catch (Exception e)
                 {
@@ -806,8 +761,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                     String[] args = new String[1];
                     args[0] = Long.toString(p_sourcePage.getId());
                     throw new WorkflowManagerException(
-                            WorkflowManagerException.MSG_FAILED_TO_LEVERAGE_SOURCE_PAGE,
-                            args, e);
+                            WorkflowManagerException.MSG_FAILED_TO_LEVERAGE_SOURCE_PAGE, args, e);
                 }
                 catch (Throwable e)
                 {
@@ -816,8 +770,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                     String[] args = new String[1];
                     args[0] = Long.toString(p_sourcePage.getId());
                     throw new WorkflowManagerException(
-                            WorkflowManagerException.MSG_FAILED_TO_LEVERAGE_SOURCE_PAGE,
-                            args, new Exception(e.toString()));
+                            WorkflowManagerException.MSG_FAILED_TO_LEVERAGE_SOURCE_PAGE, args,
+                            new Exception(e.toString()));
                 }
             }
         }
@@ -834,9 +788,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
      * @return collection of TermLeverageMatch objects, grouped by source tuv
      *         id, or null when the database does not exist or an error happens.
      */
-    private TermLeverageResult leverageTermsWithNewTargetLocales(
-            SourcePage p_sourcePage, L10nProfile p_l10nProfile,
-            Collection p_workflowTemplates)
+    private TermLeverageResult leverageTermsWithNewTargetLocales(SourcePage p_sourcePage,
+            L10nProfile p_l10nProfile, Collection p_workflowTemplates)
     {
         TermLeverageResult result = null;
 
@@ -847,11 +800,10 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         {
             ArrayList<Tuv> sourceTuvs = SegmentTuvUtil.getSourceTuvs(p_sourcePage);
 
-            if (sourceTuvs.size() > 0 && termbaseName != null
-                    && termbaseName.length() > 0)
+            if (sourceTuvs.size() > 0 && termbaseName != null && termbaseName.length() > 0)
             {
-                TermLeverageOptions options = getTermLeverageOptions(
-                        p_l10nProfile, p_workflowTemplates, termbaseName);
+                TermLeverageOptions options = getTermLeverageOptions(p_l10nProfile,
+                        p_workflowTemplates, termbaseName);
 
                 if (c_logger.isDebugEnabled())
                 {
@@ -860,9 +812,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                 if (options == null)
                 {
-                    c_logger.warn("Project " + project
-                            + " refers to unknown termbase `" + termbaseName
-                            + "'. Term leverage skipped.");
+                    c_logger.warn("Project " + project + " refers to unknown termbase `"
+                            + termbaseName + "'. Term leverage skipped.");
                 }
                 else if (options.getAllTargetPageLocales().size() == 0
                         || options.getSourcePageLangNames().size() == 0)
@@ -872,10 +823,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                 }
                 else
                 {
-                    result = ServerProxy
-                            .getTermLeverageManager()
-                            .leverageTerms(sourceTuvs, options,
-                                    String.valueOf(p_sourcePage.getCompanyId()));
+                    result = ServerProxy.getTermLeverageManager().leverageTerms(sourceTuvs,
+                            options, String.valueOf(p_sourcePage.getCompanyId()));
                 }
 
             }
@@ -891,9 +840,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
     /**
      * Populates a term leverage options object.
      */
-    private TermLeverageOptions getTermLeverageOptions(
-            L10nProfile p_l10nProfile, Collection p_workflowTemplates,
-            String p_termbaseName) throws GeneralException
+    private TermLeverageOptions getTermLeverageOptions(L10nProfile p_l10nProfile,
+            Collection p_workflowTemplates, String p_termbaseName) throws GeneralException
     {
         TermLeverageOptions options = null;
 
@@ -919,14 +867,13 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             // fuzzy threshold set by object constructor - use defaults.
             // options.setFuzzyThreshold(50);
 
-            ITermbase termbase = manager.connect(p_termbaseName,
-                    ITermbase.SYSTEM_USER, "", companyId);
+            ITermbase termbase = manager.connect(p_termbaseName, ITermbase.SYSTEM_USER, "",
+                    companyId);
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
 
-            List sourceLangNames = termbase.getLanguagesByLocale(sourceLocale
-                    .toString());
+            List sourceLangNames = termbase.getLanguagesByLocale(sourceLocale.toString());
             for (Iterator it = sourceLangNames.iterator(); it.hasNext();)
             {
                 options.addSourcePageLocale2LangName((String) it.next());
@@ -936,10 +883,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             for (Iterator tli = p_workflowTemplates.iterator(); tli.hasNext();)
             {
                 WorkflowTemplateInfo wti = (WorkflowTemplateInfo) tli.next();
-                Locale targetLocale = ((GlobalSightLocale) wti
-                        .getTargetLocale()).getLocale();
-                List targetLangNames = termbase
-                        .getLanguagesByLocale(targetLocale.toString());
+                Locale targetLocale = ((GlobalSightLocale) wti.getTargetLocale()).getLocale();
+                List targetLangNames = termbase.getLanguagesByLocale(targetLocale.toString());
 
                 for (Iterator it = targetLangNames.iterator(); it.hasNext();)
                 {
@@ -961,10 +906,9 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
      * Creates the target pages associated with the source page and the target
      * locales specified in the L10nProfile as part of the request.
      */
-    private Collection createExtractedTargetPages(Job p_job,
-            SourcePage p_sourcePage, L10nProfile p_l10nProfile,
-            Collection p_targetLocales, TermLeverageResult p_termMatches,
-            ExactMatchedSegments p_exactMatchedSegments)
+    private Collection createExtractedTargetPages(Job p_job, SourcePage p_sourcePage,
+            L10nProfile p_l10nProfile, Collection p_targetLocales,
+            TermLeverageResult p_termMatches, ExactMatchedSegments p_exactMatchedSegments)
             throws WorkflowManagerException
     {
         Collection targetPages = new ArrayList();
@@ -994,21 +938,18 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                 TargetPagePersistence tpPersistence = new TargetPageWorkflowAdditionPersistence();
 
-                targetPages = tpPersistence.persistObjectsWithExtractedFile(
-                        p_sourcePage, p_targetLocales, p_termMatches,
-                        useLeveragedSegments, useLeveragedTerms,
+                targetPages = tpPersistence.persistObjectsWithExtractedFile(p_sourcePage,
+                        p_targetLocales, p_termMatches, useLeveragedSegments, useLeveragedTerms,
                         p_exactMatchedSegments);
             }
         }
         catch (Exception e)
         {
-            c_logger.error("Exception occurred when trying to "
-                    + "create target pages.", e);
+            c_logger.error("Exception occurred when trying to " + "create target pages.", e);
             String[] args = new String[1];
             args[0] = Long.toString(p_sourcePage.getId());
             throw new WorkflowManagerException(
-                    WorkflowManagerException.MSG_FAIL_TO_CREATE_TARGET_PAGE,
-                    args, e);
+                    WorkflowManagerException.MSG_FAIL_TO_CREATE_TARGET_PAGE, args, e);
         }
 
         return targetPages;
@@ -1024,27 +965,24 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
             TargetPagePersistence tpPersistence = new TargetPageWorkflowAdditionPersistence();
 
-            targetPages = tpPersistence.persistObjectsWithUnextractedFile(
-                    p_sourcePage, p_targetLocales);
+            targetPages = tpPersistence.persistObjectsWithUnextractedFile(p_sourcePage,
+                    p_targetLocales);
         }
         catch (Exception pe)
         {
-            c_logger.error("Exception occurred when trying to "
-                    + "create target pages.", pe);
+            c_logger.error("Exception occurred when trying to " + "create target pages.", pe);
 
             String[] args = new String[1];
             args[0] = Long.toString(p_sourcePage.getId());
             throw new WorkflowManagerException(
-                    WorkflowManagerException.MSG_FAIL_TO_CREATE_TARGET_PAGE,
-                    args, pe);
+                    WorkflowManagerException.MSG_FAIL_TO_CREATE_TARGET_PAGE, args, pe);
         }
 
         return targetPages;
     }
 
-    private List<Workflow> addTargetPageToExistingJob(HashMap p_pages,
-            Job p_job, Collection p_workflowTemplates)
-            throws WorkflowManagerException
+    private List<Workflow> addTargetPageToExistingJob(HashMap p_pages, Job p_job,
+            Collection p_workflowTemplates) throws WorkflowManagerException
     {
         AddWorkflowPersistenceHandler awph = new AddWorkflowPersistenceHandler();
 
@@ -1084,38 +1022,36 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
      * Wraps the code for setting an exception in a request and catching the
      * appropriate exception.
      */
-    protected void setExceptionInRequest(long p_workflowRequestId,
-            GeneralException p_exception) throws WorkflowManagerException
+    protected void setExceptionInRequest(long p_workflowRequestId, GeneralException p_exception)
+            throws WorkflowManagerException
     {
         try
         {
-            WorkflowRequest workflowRequest = ServerProxy.getRequestHandler()
-                    .findWorkflowRequest(p_workflowRequestId);
+            WorkflowRequest workflowRequest = ServerProxy.getRequestHandler().findWorkflowRequest(
+                    p_workflowRequestId);
 
-            ServerProxy.getRequestHandler().setExceptionInWorkflowRequest(
-                    workflowRequest, p_exception);
+            ServerProxy.getRequestHandler().setExceptionInWorkflowRequest(workflowRequest,
+                    p_exception);
         }
         catch (Exception e)
         {
             String[] args = new String[1];
             args[0] = Long.toString(p_workflowRequestId);
             throw new WorkflowManagerException(
-                    WorkflowManagerException.MSG_FAILED_TO_SET_EXCEPTION_IN_REQUEST,
-                    args, e);
+                    WorkflowManagerException.MSG_FAILED_TO_SET_EXCEPTION_IN_REQUEST, args, e);
         }
     }
 
     /**
      * Store the file out to the application's storage directory.
      */
-    private void storeFile(String p_fileName, UnextractedFile p_uf,
-            String p_modifierId, boolean p_removeOriginal)
-            throws WorkflowManagerException
+    private void storeFile(String p_fileName, UnextractedFile p_uf, String p_modifierId,
+            boolean p_removeOriginal) throws WorkflowManagerException
     {
         try
         {
-            UnextractedFile uf = ServerProxy.getNativeFileManager()
-                    .copyFileToStorage(p_fileName, p_uf, p_removeOriginal);
+            UnextractedFile uf = ServerProxy.getNativeFileManager().copyFileToStorage(p_fileName,
+                    p_uf, p_removeOriginal);
 
             uf.setLastModifiedBy(p_modifierId);
 
@@ -1123,13 +1059,11 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         }
         catch (Exception e)
         {
-            c_logger.error("Failed to copy file " + p_fileName
-                    + " to the storage location");
+            c_logger.error("Failed to copy file " + p_fileName + " to the storage location");
             String args[] =
             { p_fileName };
             throw new WorkflowManagerException(
-                    WorkflowManagerException.MSG_FAILED_TO_COPY_FILE_TO_STORAGE,
-                    args, e);
+                    WorkflowManagerException.MSG_FAILED_TO_COPY_FILE_TO_STORAGE, args, e);
         }
     }
 
@@ -1140,8 +1074,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
         while (it.hasNext())
         {
-            GlobalSightLocale targetLocale = ((WorkflowTemplateInfo) it.next())
-                    .getTargetLocale();
+            GlobalSightLocale targetLocale = ((WorkflowTemplateInfo) it.next()).getTargetLocale();
 
             result.add(targetLocale);
         }
@@ -1149,8 +1082,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         return result;
     }
 
-    private void sendEmail(Job p_job, List p_workflows, String p_subject,
-            String p_message) throws WorkflowManagerException
+    private void sendEmail(Job p_job, List p_workflows, String p_subject, String p_message)
+            throws WorkflowManagerException
     {
         if (!m_systemNotificationEnabled)
         {
@@ -1164,11 +1097,9 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
         try
         {
-            Project project = ServerProxy.getProjectHandler().getProjectById(
-                    projectId);
+            Project project = ServerProxy.getProjectHandler().getProjectById(projectId);
             SystemConfiguration config = SystemConfiguration.getInstance();
-            capLoginUrl = config
-                    .getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
+            capLoginUrl = config.getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
 
             String[] msgArgs = new String[6];
             msgArgs[0] = p_job.getJobName();
@@ -1187,8 +1118,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                     Workflow workflow = (Workflow) it.next();
                     GlobalSightLocale targetLocale = workflow.getTargetLocale();
-                    WorkflowTemplateInfo wfti = l10nProfile
-                            .getWorkflowTemplateInfo(targetLocale);
+                    WorkflowTemplateInfo wfti = l10nProfile.getWorkflowTemplateInfo(targetLocale);
 
                     if (!shouldNotifyPm && wfti.notifyProjectManager())
                     {
@@ -1201,8 +1131,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                         for (Iterator uii = userIds.iterator(); uii.hasNext();)
                         {
                             String userId = (String) uii.next();
-                            sendMailFromAdmin(userId, p_job, msgArgs,
-                                    p_subject, p_message);
+                            sendMailFromAdmin(userId, p_job, msgArgs, p_subject, p_message);
                         }
                     }
                 }
@@ -1212,28 +1141,23 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             // PM.
             if (shouldNotifyPm)
             {
-                sendMailFromAdmin(project.getProjectManagerId(), p_job,
-                        msgArgs, p_subject, p_message);
+                sendMailFromAdmin(project.getProjectManagerId(), p_job, msgArgs, p_subject,
+                        p_message);
             }
         }
         catch (Exception e)
         {
-            c_logger.error("Unable to send email after a dispatch for Job id: "
-                    + p_job.getId()
-                    + " capLoginUrl="
-                    + (capLoginUrl != null ? capLoginUrl : "null")
-                    + " user="
-                    + (user != null ? ((UserImpl) user).toDebugString()
-                            : "null") + " p_subject="
+            c_logger.error("Unable to send email after a dispatch for Job id: " + p_job.getId()
+                    + " capLoginUrl=" + (capLoginUrl != null ? capLoginUrl : "null") + " user="
+                    + (user != null ? ((UserImpl) user).toDebugString() : "null") + " p_subject="
                     + (p_subject != null ? p_subject : "null") + " p_message="
                     + (p_message != null ? p_message : "null"), e);
         }
     }
 
     // send email from Admin
-    private void sendMailFromAdmin(String p_userId, Job p_job,
-            String[] p_msgArgs, String p_subject, String p_message)
-            throws Exception
+    private void sendMailFromAdmin(String p_userId, Job p_job, String[] p_msgArgs,
+            String p_subject, String p_message) throws Exception
     {
         if (!m_systemNotificationEnabled)
         {
@@ -1243,12 +1167,11 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         User user = ServerProxy.getUserManager().getUser(p_userId);
         String userLocale = user.getDefaultUILocale();
         Locale locale = LocaleWrapper.getLocale(userLocale);
-        DateFormat dateformat = DateFormat.getDateInstance(DateFormat.MEDIUM,
-                locale);
+        DateFormat dateformat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
         p_msgArgs[2] = dateformat.format(p_job.getCreateDate());
 
-        ServerProxy.getMailer().sendMailFromAdmin(user, p_msgArgs, p_subject,
-                p_message, String.valueOf(p_job.getCompanyId()));
+        ServerProxy.getMailer().sendMailFromAdmin(user, p_msgArgs, p_subject, p_message,
+                String.valueOf(p_job.getCompanyId()));
     }
 
     private void calculateNewWorkflowStatistics(Job p_job) throws Exception
@@ -1266,8 +1189,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         {
             Workflow w = (Workflow) lr.next();
             boolean found = false;
-            for (Iterator<Workflow> lr1 = jobWorkflows.iterator(); lr1
-                    .hasNext() && !found;)
+            for (Iterator<Workflow> lr1 = jobWorkflows.iterator(); lr1.hasNext() && !found;)
             {
                 Workflow wf = (Workflow) lr1.next();
                 if (w.getTargetLocale().equals(wf.getTargetLocale())
@@ -1279,16 +1201,14 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             }
         }
 
+        Map<Long, List<PageWordCounts>> workflowWordCounts = new HashMap<Long, List<PageWordCounts>>();
         for (Workflow workflow : realWorkflows)
         {
-            StatisticsService.calculateTargetPagesWordCount(workflow, p_job
-                    .getL10nProfile().getTranslationMemoryProfile()
-                    .getJobExcludeTuTypes());
+            List<PageWordCounts> pwc = StatisticsService.calculateTargetPagesWordCount(workflow,
+                    p_job.getL10nProfile().getTranslationMemoryProfile().getJobExcludeTuTypes());
+            workflowWordCounts.put(workflow.getIdAsLong(), pwc);
         }
 
-        // calculate the statistics just for the new workflows
-        StatisticsService.calculateWorkflowStatistics(realWorkflows, p_job
-                .getL10nProfile().getTranslationMemoryProfile()
-                .getJobExcludeTuTypes());
+        StatisticsService.calculateWorkflowWordCount(workflowWordCounts);
     }
 }

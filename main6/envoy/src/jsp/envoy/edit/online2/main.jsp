@@ -146,6 +146,10 @@ boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
 boolean isSaveApprovedSegments =task.getWorkflow().getJob().getL10nProfile().getTranslationMemoryProfile().isSaveApprovedSegToProjectTM();
 int task_state = task.getState();
 String jobName=task.getJobName();
+if (jobName.contains("'"))
+{
+	jobName = jobName.replace("'","&#39");
+}
 long jobId = task.getJobId();
 long companyId = task.getCompanyId();
 String taskParam= "&" + WebAppConstants.TASK_ID +

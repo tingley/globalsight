@@ -28,7 +28,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class BigTableUtil implements TuvQueryConstants
 {
-    static private final Logger logger = Logger.getLogger(BigTableUtil.class);
+    static private final Logger logger = Logger
+            .getLogger(BigTableUtil.class);
 
     /**
      * Decide the TU table when create job.
@@ -46,12 +47,12 @@ public class BigTableUtil implements TuvQueryConstants
     public static String decideTuWorkingTableForJobCreation(long p_companyId,
             long p_jobId) throws Exception
     {
-        if (getCompanyBigDataStoreLevel(p_companyId) == CompanyConstants.BIG_DATA_STORE_LEVEL_JOB)
+		if (getCompanyBigDataStoreLevel(p_companyId) == CompanyConstants.BIG_DATA_STORE_LEVEL_JOB)
         {
             return TRANSLATION_UNIT_TABLE + "_" + p_companyId + "_" + p_jobId;
         }
-        // default
-        return TRANSLATION_UNIT_TABLE + "_" + p_companyId;
+		// default
+		return TRANSLATION_UNIT_TABLE + "_" + p_companyId;
     }
 
     /**
@@ -70,7 +71,7 @@ public class BigTableUtil implements TuvQueryConstants
      */
     public static String decideTuArchiveTableForJobCreation(long p_companyId)
     {
-        return TRANSLATION_UNIT_TABLE + "_" + p_companyId + "_ARCHIVED";
+		return TRANSLATION_UNIT_TABLE + "_" + p_companyId + "_ARCHIVED";
     }
 
     /**
@@ -89,10 +90,10 @@ public class BigTableUtil implements TuvQueryConstants
     public static String decideTuvWorkingTableForJobCreation(long p_companyId,
             long p_jobId) throws Exception
     {
-        if (getCompanyBigDataStoreLevel(p_companyId) == CompanyConstants.BIG_DATA_STORE_LEVEL_JOB)
+		if (getCompanyBigDataStoreLevel(p_companyId) == CompanyConstants.BIG_DATA_STORE_LEVEL_JOB)
         {
-            return TRANSLATION_UNIT_VARIANT_TABLE + "_" + p_companyId + "_"
-                    + p_jobId;
+			return TRANSLATION_UNIT_VARIANT_TABLE + "_" + p_companyId + "_"
+					+ p_jobId;
         }
         // default
         return TRANSLATION_UNIT_VARIANT_TABLE + "_" + p_companyId;
@@ -115,7 +116,7 @@ public class BigTableUtil implements TuvQueryConstants
     public static String decideTuvArchiveTableForJobCreation(long p_companyId)
             throws Exception
     {
-        return TRANSLATION_UNIT_VARIANT_TABLE + "_" + p_companyId + "_ARCHIVED";
+		return TRANSLATION_UNIT_VARIANT_TABLE + "_" + p_companyId + "_ARCHIVED";
     }
 
     /**
@@ -134,10 +135,10 @@ public class BigTableUtil implements TuvQueryConstants
     public static String decideLMWorkingTableForJobCreation(long p_companyId,
             long p_jobId) throws Exception
     {
-        if (getCompanyBigDataStoreLevel(p_companyId) == CompanyConstants.BIG_DATA_STORE_LEVEL_JOB)
-        {
-            return LEVERAGE_MATCH_TABLE + "_" + p_companyId + "_" + p_jobId;
-        }
+		if (getCompanyBigDataStoreLevel(p_companyId) == CompanyConstants.BIG_DATA_STORE_LEVEL_JOB)
+		{
+			return LEVERAGE_MATCH_TABLE + "_" + p_companyId + "_" + p_jobId;
+		}
 
         // default
         return LEVERAGE_MATCH_TABLE + "_" + p_companyId;
@@ -160,7 +161,7 @@ public class BigTableUtil implements TuvQueryConstants
     public static String decideLMArchiveTableForJobCreation(long p_companyId)
             throws Exception
     {
-        return LEVERAGE_MATCH_TABLE + "_" + p_companyId + "_ARCHIVED";
+		return LEVERAGE_MATCH_TABLE + "_" + p_companyId + "_ARCHIVED";
     }
 
     /**
@@ -176,18 +177,18 @@ public class BigTableUtil implements TuvQueryConstants
      * @return String leverage match table name
      * @throws Exception
      */
-    public static String decideLMExtWorkingTableForJobCreation(
-            long p_companyId, long p_jobId) throws Exception
+	public static String decideLMExtWorkingTableForJobCreation(
+			long p_companyId, long p_jobId) throws Exception
     {
-        if (getCompanyBigDataStoreLevel(p_companyId) == CompanyConstants.BIG_DATA_STORE_LEVEL_JOB)
+		if (getCompanyBigDataStoreLevel(p_companyId) == CompanyConstants.BIG_DATA_STORE_LEVEL_JOB)
         {
-            return LEVERAGE_MATCH_EXT_TABLE + "_" + p_companyId + "_" + p_jobId;
+			return LEVERAGE_MATCH_EXT_TABLE + "_" + p_companyId + "_" + p_jobId;
         }
         // default
         return LEVERAGE_MATCH_EXT_TABLE + "_" + p_companyId;
     }
 
-    /**
+	/**
      * Decide the leverage match extension archive table when create job.
      * 
      * <p>
@@ -204,7 +205,7 @@ public class BigTableUtil implements TuvQueryConstants
     public static String decideLMExtArchiveTableForJobCreation(long p_companyId)
             throws Exception
     {
-        return LEVERAGE_MATCH_EXT_TABLE + "_" + p_companyId + "_ARCHIVED";
+		return LEVERAGE_MATCH_EXT_TABLE + "_" + p_companyId + "_ARCHIVED";
     }
 
     /**
@@ -262,7 +263,7 @@ public class BigTableUtil implements TuvQueryConstants
         Job job = getJobBySourcePageId(p_sourcePageId);
         return findTuvTableDataIn(job);
     }
-
+    
     /**
      * Get the leverage match table name that job data is in.
      * 
@@ -291,20 +292,20 @@ public class BigTableUtil implements TuvQueryConstants
         return findLmTableDataIn(job);
     }
 
-    public static String getLMExtTableJobDataInByJobId(long p_jobId)
-    {
+	public static String getLMExtTableJobDataInByJobId(long p_jobId)
+	{
         Job job = getJobById(p_jobId);
         return findLmExtTableDataIn(job);
-    }
+	}
 
-    public static String getLMExtTableJobDataInBySourcePageId(
-            long p_sourcePageId)
-    {
+	public static String getLMExtTableJobDataInBySourcePageId(
+			long p_sourcePageId)
+	{
         Job job = getJobBySourcePageId(p_sourcePageId);
         return findLmExtTableDataIn(job);
-    }
+	}
 
-    /**
+	/**
      * Get the TU archive table name for specified job ID.
      * 
      * @param p_jobId
@@ -351,6 +352,7 @@ public class BigTableUtil implements TuvQueryConstants
         return "TEMPLATE_PART_ARCHIVED";
     }
 
+    
     public static String getTemplatePartTableJobDataIn(long p_sourcePageId)
             throws Exception
     {
@@ -364,13 +366,13 @@ public class BigTableUtil implements TuvQueryConstants
         return templatePartTableName;
     }
 
-    public static String getTuTuvAttributeTableByJobId(long p_jobId)
-    {
-        long companyId = getJobById(p_jobId).getCompanyId();
-        return "TRANSLATION_TU_TUV_ATTR_" + companyId;
-    }
+	public static String getTuTuvAttributeTableByJobId(long p_jobId)
+	{
+		long companyId = getJobById(p_jobId).getCompanyId();
+		return "TRANSLATION_TU_TUV_ATTR_" + companyId;
+	}
 
-    public static boolean isJobDataMigrated(long p_sourcePageId)
+	public static boolean isJobDataMigrated(long p_sourcePageId)
             throws Exception
     {
         boolean isMigrated = false;
@@ -477,16 +479,16 @@ public class BigTableUtil implements TuvQueryConstants
     }
 
     /**
-     * Check if COMPANY level TU/TUV/LM/ATTR tables exist, if not, create them.
-     * 
-     * <p>
-     * The table name styles are: "translation_unit_[companyId]",
-     * "translation_unit_variant_[companyId]", "leverage_match_[companyId]",
-     * "leverage_match_ext_[companyId]", "translation_tu_tuv_attr_[companyId]".
-     * </p>
-     * 
-     * @param companyId
-     */
+	 * Check if COMPANY level TU/TUV/LM/ATTR tables exist, if not, create them.
+	 * 
+	 * <p>
+	 * The table name styles are: "translation_unit_[companyId]",
+	 * "translation_unit_variant_[companyId]", "leverage_match_[companyId]",
+	 * "leverage_match_ext_[companyId]", "translation_tu_tuv_attr_[companyId]".
+	 * </p>
+	 * 
+	 * @param companyId
+	 */
     public static void checkTuTuvLmWorkingTablesForCompany(long companyId)
     {
         String tuTableName = "translation_unit_" + companyId;
@@ -506,19 +508,19 @@ public class BigTableUtil implements TuvQueryConstants
     }
 
     /**
-     * Check if TU/TUV/LM archive tables exist, if not, create them. Note that
-     * archive tables do not support job level, only company level and system
-     * level.
-     * 
-     * <p>
-     * The table name styles are: "translation_unit_[companyId]_archived",
-     * "translation_unit_variant_[companyId]_archived",
-     * "leverage_match_[companyId]_archived" and
-     * "leverage_match_ext_[companyId]_archived".
-     * </p>
-     * 
-     * @param companyId
-     */
+	 * Check if TU/TUV/LM archive tables exist, if not, create them. Note that
+	 * archive tables do not support job level, only company level and system
+	 * level.
+	 * 
+	 * <p>
+	 * The table name styles are: "translation_unit_[companyId]_archived",
+	 * "translation_unit_variant_[companyId]_archived",
+	 * "leverage_match_[companyId]_archived" and
+	 * "leverage_match_ext_[companyId]_archived".
+	 * </p>
+	 * 
+	 * @param companyId
+	 */
     public static void checkTuTuvLmArchiveTablesForCompany(long companyId)
     {
         String suffix = companyId + "_archived";
@@ -830,13 +832,13 @@ public class BigTableUtil implements TuvQueryConstants
     }
 
     /**
-     * Create leverage match extension table with specified table name.
-     * 
-     * Leverage match extension table has 2 styles:
-     * leverage_match_ext_[companyId], leverage_match_ext_[companyId]_[jobId].
-     * 
-     * @param p_lmTableName
-     */
+	 * Create leverage match extension table with specified table name.
+	 * 
+	 * Leverage match extension table has 2 styles:
+	 * leverage_match_ext_[companyId], leverage_match_ext_[companyId]_[jobId].
+	 * 
+	 * @param p_lmTableName
+	 */
     public static void createLMExtTable(String lmExtTable)
     {
         if (DbUtil.isTableExisted(lmExtTable))
@@ -851,28 +853,28 @@ public class BigTableUtil implements TuvQueryConstants
         sb.append("(");
         sb.append(" SOURCE_PAGE_ID INT(11) DEFAULT NULL,");
         sb.append(" ORIGINAL_SOURCE_TUV_ID BIGINT(20) DEFAULT NULL,");
-        sb.append(" SUB_ID VARCHAR(40) DEFAULT NULL,");
-        sb.append(" TARGET_LOCALE_ID BIGINT(20) DEFAULT NULL,");
-        sb.append(" ORDER_NUM SMALLINT(6) DEFAULT NULL,");
-        sb.append(" LAST_USAGE_DATE DATETIME DEFAULT NULL,");
-        sb.append(" JOB_ID BIGINT(20) DEFAULT -1,");
-        sb.append(" JOB_NAME VARCHAR(320) DEFAULT NULL,");
-        sb.append(" PREVIOUS_HASH BIGINT(20) DEFAULT -1,");
-        sb.append(" NEXT_HASH BIGINT(20) DEFAULT -1,");
-        sb.append(" SID TEXT DEFAULT NULL,");
-        sb.append(" varchar1 VARCHAR(512),");
-        sb.append(" varchar2 VARCHAR(512),");
-        sb.append(" varchar3 VARCHAR(512),");
-        sb.append(" varchar4 VARCHAR(512),");
-        sb.append(" text1 TEXT,");
-        sb.append(" text2 TEXT,");
-        sb.append("	long1 BIGINT(20),");
-        sb.append(" long2 BIGINT(20),");
-        sb.append(" date1 DATETIME,");
-        sb.append(" date2 DATETIME,");
-        sb.append(" UNIQUE KEY IDX_4_UNIQUE_KEY (ORIGINAL_SOURCE_TUV_ID, SUB_ID, TARGET_LOCALE_ID, ORDER_NUM),");
-        sb.append(" KEY IDX_SPID_TRGLOCID (SOURCE_PAGE_ID, TARGET_LOCALE_ID)");
-        sb.append(" ) ENGINE=INNODB;");
+   		sb.append(" SUB_ID VARCHAR(40) DEFAULT NULL,");
+   		sb.append(" TARGET_LOCALE_ID BIGINT(20) DEFAULT NULL,");
+   		sb.append(" ORDER_NUM SMALLINT(6) DEFAULT NULL,");
+		sb.append(" LAST_USAGE_DATE DATETIME DEFAULT NULL,");
+		sb.append(" JOB_ID BIGINT(20) DEFAULT -1,");
+		sb.append(" JOB_NAME VARCHAR(320) DEFAULT NULL,");
+		sb.append(" PREVIOUS_HASH BIGINT(20) DEFAULT -1,");
+		sb.append(" NEXT_HASH BIGINT(20) DEFAULT -1,");
+		sb.append(" SID TEXT DEFAULT NULL,");
+		sb.append(" varchar1 VARCHAR(512),");
+		sb.append(" varchar2 VARCHAR(512),");
+		sb.append(" varchar3 VARCHAR(512),");
+		sb.append(" varchar4 VARCHAR(512),");
+		sb.append(" text1 TEXT,");
+		sb.append(" text2 TEXT,");
+		sb.append("	long1 BIGINT(20),");
+		sb.append(" long2 BIGINT(20),");
+		sb.append(" date1 DATETIME,");
+		sb.append(" date2 DATETIME,");
+		sb.append(" UNIQUE KEY IDX_4_UNIQUE_KEY (ORIGINAL_SOURCE_TUV_ID, SUB_ID, TARGET_LOCALE_ID, ORDER_NUM),");
+		sb.append(" KEY IDX_SPID_TRGLOCID (SOURCE_PAGE_ID, TARGET_LOCALE_ID)");
+		sb.append(" ) ENGINE=INNODB;");
         String sql2 = sb.toString();
 
         try
@@ -887,11 +889,11 @@ public class BigTableUtil implements TuvQueryConstants
     }
 
     /**
-     * Create "translation_tu_tuv_[companyId]" table. This table has no archived
-     * table, and it is one table per company, not support job level.
-     * 
-     * @param p_tuTuvAttrTableName
-     */
+	 * Create "translation_tu_tuv_[companyId]" table. This table has no archived
+	 * table, and it is one table per company, not support job level.
+	 * 
+	 * @param p_tuTuvAttrTableName
+	 */
     public static void createTuTuvAttrTable(String p_tuTuvAttrTableName)
     {
         if (DbUtil.isTableExisted(p_tuTuvAttrTableName))
@@ -928,7 +930,7 @@ public class BigTableUtil implements TuvQueryConstants
     // PRIVATE METHODS
     //
 
-    public static String findTuTableDataIn(Job job)
+    private static String findTuTableDataIn(Job job)
     {
         if (job.isMigrated())
         {
@@ -940,7 +942,7 @@ public class BigTableUtil implements TuvQueryConstants
         }
     }
 
-    public static String findTuvTableDataIn(Job job)
+    private static String findTuvTableDataIn(Job job)
     {
         if (job.isMigrated())
         {
@@ -966,13 +968,13 @@ public class BigTableUtil implements TuvQueryConstants
 
     private static String findLmExtTableDataIn(Job job)
     {
-        if (job.isMigrated())
-        {
-            return job.getLmExtArchiveTable();
-        }
-        else
-        {
-            return job.getLmExtTable();
-        }
+    	if (job.isMigrated())
+    	{
+    		return job.getLmExtArchiveTable();
+    	}
+    	else
+    	{
+    		return job.getLmExtTable();
+    	}
     }
 }

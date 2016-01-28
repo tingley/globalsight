@@ -148,7 +148,7 @@ int task_state = task.getState();
 String jobName=task.getJobName();
 if (jobName.contains("'"))
 {
-	jobName = jobName.replace("'","&#39");
+	jobName = jobName.replace("'","&#39;");
 }
 long jobId = task.getJobId();
 long companyId = task.getCompanyId();

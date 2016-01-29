@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -35,6 +37,7 @@ import org.dom4j.Node;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.cxe.util.fileExport.FileExportRunnable;
 import com.globalsight.cxe.util.fileExport.FileExportUtil;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.online.OnlineEditorConstants;
@@ -90,6 +93,8 @@ public final class PageManagerLocal implements PageManager
             + " tu "
             + "WHERE sp.id = splg.sp_id "
             + "AND splg.lg_id = tu.leverage_group_id " + "AND tu.id = ?";
+
+    private static final int MAX_THREAD = 100;
 
     /**
      * PageToDocumentMap is a class mapping a list of page IDs to the name of
@@ -1032,6 +1037,7 @@ public final class PageManagerLocal implements PageManager
         return p_page;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void performExport(ExportParameters exportParameters,
             Integer p_genericPageType, List p_ids, long p_exportBatchId)
             throws PageException
@@ -1047,6 +1053,7 @@ public final class PageManagerLocal implements PageManager
             ArrayList<Hashtable> otherPages = new ArrayList<Hashtable>();
 
             // loop through all pages....
+            ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
             String exportCode = exportParameters.getExportCodeset();
             for (int i = 0; i < pageCount; i++)
             {
@@ -1171,12 +1178,13 @@ public final class PageManagerLocal implements PageManager
                             priority = job.getPriority();
                         }
                     }
-                    
                     map.put("priority", priority);
-                    
-                    FileExportUtil.exportFileWithThread(map);
+
+                    FileExportRunnable runnable = new FileExportRunnable(map);
+                    pool.execute(runnable);
                 }
             }
+            pool.shutdown();
 
             if (slidesPages.size() > 0)
             {

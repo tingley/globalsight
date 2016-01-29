@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -61,12 +62,20 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportC
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.ling.tw.PseudoConstants;
+import com.globalsight.ling.tw.PseudoData;
+import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -75,6 +84,8 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  */
 public class CharacterCountReportGenerator implements ReportGenerator
 {
+    static private final Logger logger = Logger
+            .getLogger(CharacterCountReportGenerator.class);
 	private HttpServletRequest request = null;
     protected Locale m_uiLocale = null;
     protected String m_companyName = "";
@@ -91,6 +102,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
     public static final int LANGUAGE_INFO_ROW = 4;
     public static final int SEGMENT_HEADER_ROW = 6;
     public static final int SEGMENT_START_ROW = 7;
+    
+    private boolean isIncludeCompactTags = false;
     
     public CharacterCountReportGenerator(String p_currentCompanyName)
     {
@@ -147,6 +160,15 @@ public class CharacterCountReportGenerator implements ReportGenerator
             m_targetLocales = ReportHelper.getTargetLocaleList(p_request
                     .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
                     comparator);
+        }
+        String withCompactTags = p_request.getParameter("withCompactTags");
+        if("on".equals(withCompactTags))
+        {
+            isIncludeCompactTags = true;
+        }
+        else
+        {
+            isIncludeCompactTags = false;
         }
     }
 
@@ -292,7 +314,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
             writeLanguageInfo(p_workbook, sheet, srcLang, trgLang, p_job);
             
             // Write Segments Information
-            writeCharacterCountSegmentInfo(p_workbook, sheet, p_job, trgLang, "",
+            writeCharacterCountSegmentInfo(p_workbook, sheet, p_job, trgLocale, "",
                     SEGMENT_START_ROW);
         }
     }
@@ -477,7 +499,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
      * @throws Exception
      */
     private void writeCharacterCountSegmentInfo(Workbook p_workBook, Sheet p_sheet,
-    		Job p_job, String p_targetLang, String p_srcPageId, int p_row)
+    		Job p_job, GlobalSightLocale trgLocale, String p_srcPageId, int p_row)
             throws Exception
     {
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
@@ -485,7 +507,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
         Vector<String> excludItems = null;
         
         long jobId = p_job.getId();
-
+        String p_targetLang = trgLocale.getDisplayName(m_uiLocale);
         for (Workflow workflow : p_job.getWorkflows())
         {
             if (Workflow.PENDING.equals(workflow.getState())
@@ -512,6 +534,10 @@ public class CharacterCountReportGenerator implements ReportGenerator
             String category = null;
             String sourceSegmentString = null;
             String targetSegmentString = null;
+            
+            Locale sourcePageLocale = p_job.getSourceLocale().getLocale();
+            Locale targetPageLocale = trgLocale.getLocale();
+            
             LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
                     .getLeverageMatchLingManager();
             for (int i = 0; i < targetPages.size(); i++)
@@ -536,10 +562,15 @@ public class CharacterCountReportGenerator implements ReportGenerator
                 Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap = leverageMatchLingManager
                         .getFuzzyMatches(sourcePage.getIdAsLong(),
                                 targetPage.getLocaleId());
-                SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
+                SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());              
+                boolean m_rtlSourceLocale = EditUtil
+                        .isRTLLocale(sourcePageLocale.toString());
+                boolean m_rtlTargetLocale = EditUtil
+                        .isRTLLocale(targetPageLocale.toString());               
                 List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
-
+                PseudoData pData = new PseudoData();
+                pData.setMode(PseudoConstants.PSEUDO_COMPACT);                
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
                     int col = 0;
@@ -560,7 +591,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     
                     CellStyle contentStyle = getContentStyle(p_workBook);
                     Row currentRow = getRow(p_sheet, p_row);
-                    
+                                       
                     // Segment id
                     Cell cell_A = getCell(currentRow, col);
                     cell_A.setCellValue(sourceTuv.getTu(jobId).getId());
@@ -584,7 +615,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     
                     // Source segment
                     Cell cell_B = getCell(currentRow, col);
-                    cell_B.setCellValue(sourceSegmentString);
+                    cell_B.setCellValue(getSegment(pData, sourceTuv, m_rtlSourceLocale, jobId));
                     cell_B.setCellStyle(contentStyle);
                     col++;;
 
@@ -596,7 +627,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
                     // Target segment
                     Cell cell_D = getCell(currentRow, col);
-                    cell_D.setCellValue(targetSegmentString);
+                    cell_D.setCellValue(getSegment(pData, sourceTuv, m_rtlTargetLocale, jobId));
                     cell_D.setCellStyle(contentStyle);
                     col++;
 
@@ -651,6 +682,26 @@ public class CharacterCountReportGenerator implements ReportGenerator
         return headerStyle;
     }
 
+    private String getCompactPtagString(GxmlElement p_gxmlElement,
+            String p_dataType)
+    {
+        String compactPtags = null;
+        OnlineTagHelper applet = new OnlineTagHelper();
+        try
+        {
+            String seg = GxmlUtil.getInnerXml(p_gxmlElement);
+            applet.setDataType(p_dataType);
+            applet.setInputSegment(seg, "", p_dataType);
+            compactPtags = applet.getCompact();
+        }
+        catch (Exception e)
+        {
+            logger.info("getCompactPtagString Error.", e);
+        }
+
+        return compactPtags;
+    }
+    
     private CellStyle getContentStyle(Workbook p_workbook) throws Exception
     {
         if (contentStyle == null)
@@ -742,6 +793,67 @@ public class CharacterCountReportGenerator implements ReportGenerator
         return row;
     }
 
+    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale,
+            long p_jobId)
+    {
+        String result = null;
+        StringBuffer content = new StringBuffer();
+        List subFlows = tuv.getSubflowsAsGxmlElements();
+        long tuId = tuv.getTuId();
+        if(isIncludeCompactTags)
+        {
+            String dataType = null;
+            try
+            {
+                dataType = tuv.getDataType(p_jobId);
+                pData.setAddables(dataType);
+                TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+                content.append(pData.getPTagSourceString());
+
+                if (subFlows != null && subFlows.size() > 0)
+                {
+                    for (int i = 0; i < subFlows.size(); i++)
+                    {
+                        GxmlElement sub = (GxmlElement) subFlows.get(i);
+                        String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                        content.append("\r\n#").append(tuId).append(":")
+                                .append(subId).append("\n")
+                                .append(getCompactPtagString(sub, dataType));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                logger.error(tuv.getId(), e);
+            }
+        }
+        else
+        {
+            String mainSeg = tuv.getGxmlElement().getTextValue();
+            content.append(mainSeg);
+
+            if (subFlows != null && subFlows.size() > 0)
+            {
+                for (int i = 0; i < subFlows.size(); i++)
+                {
+                    GxmlElement sub = (GxmlElement) subFlows.get(i);
+                    String subId = sub.getAttribute(GxmlNames.SUB_ID);
+                    content.append("\r\n#").append(tuId).append(":")
+                            .append(subId).append("\n")
+                            .append(sub.getTextValue());
+                }
+            }
+        }
+
+        result = content.toString();
+        if (m_rtlLocale)
+        {
+            result = EditUtil.toRtlString(result);
+        }
+
+        return result;
+    }
+    
     private Cell getCell(Row p_row, int index)
     {
         Cell cell = p_row.getCell(index);

@@ -222,6 +222,7 @@ $(document).ready(function(){
 <input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="">
 <input type="hidden" name="currency" value="US Dollar (USD)">
 <input type="hidden" name="reportStyle" value="trados">
+<input type="hidden" name="withCompactTags" value="on">
 <p></p>
 <SPAN CLASS="standardText"><B><%=bundle.getString("lb_available_reports")%></B></SPAN>
 <TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">

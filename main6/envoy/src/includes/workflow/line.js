@@ -74,7 +74,7 @@ var LineData = {
 		for ( var i in start.froms) {
 			var l = start.tos[i];
 			
-			if (l.from.id == start.id && l.to.id == end.id)
+			if (l && l.from.id == start.id && l.to.id == end.id)
 				return null;
 		}
 		

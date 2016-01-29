@@ -113,14 +113,11 @@ public class StatisticsService
                         lmLingManager.setIncludeMtMatches(false);
                     }
 
-                    MatchTypeStatistics matches = lmLingManager
-                            .getMatchTypesForStatistics(
-                                    sourcePage.getIdAsLong(), targetLocaleId,
-                                    threshold);
+                    MatchTypeStatistics matches = lmLingManager.getMatchTypesForStatistics(
+                            sourcePage.getIdAsLong(), targetLocaleId, threshold);
 
                     PageWordCounts targetPageWordCounts = null;
-                    int mtEngineWordCount = targetPage.getWordCount()
-                            .getMtEngineWordCount();
+                    int mtEngineWordCount = targetPage.getWordCount().getMtEngineWordCount();
                     if (isWSXlfSourceFile)
                     {
                         targetPageWordCounts = calculateWorldServerTargetPageWordCounts(
@@ -128,9 +125,8 @@ public class StatisticsService
                     }
                     else
                     {
-                        targetPageWordCounts = calculateTargetPageWordCounts(
-                                splittedTuvs, matches, p_excludedTuTypes,
-                                uniqueSegments);
+                        targetPageWordCounts = calculateTargetPageWordCounts(splittedTuvs, matches,
+                                p_excludedTuTypes, uniqueSegments);
                     }
                     targetPageWordCounts.setMtEngineWordCount(mtEngineWordCount);
                     targetPage.setWordCount(targetPageWordCounts);                    
@@ -145,8 +141,8 @@ public class StatisticsService
                     Map<Long, TuImpl> cachedTus = getTusMapBySourcePage(sourcePage);
                     // touch to load target TUVs
                     SegmentTuvUtil.getTargetTuvs(targetPage);
-                    updateRepetitionInfoToTu(splittedTuvs, matches,
-                            uniqueSegments2, cachedTus, targetLocaleId, jobId);
+                    updateRepetitionInfoToTu(splittedTuvs, matches, uniqueSegments2, cachedTus,
+                            targetLocaleId, jobId);
 
                     trgPageCount++;
                     if (trgPageCount % 50 == 0)
@@ -813,17 +809,17 @@ public class StatisticsService
         Set<TuvImpl> unRepetitionTuvSet = new HashSet<TuvImpl>();
         for (int i = 0; i < sTuvs.size(); i++)
         {
-            SegmentTmTuv curSrcTuv = (SegmentTmTuv) sTuvs.get(i);
-            Types types = p_matches.getTypes(curSrcTuv.getId(),
-                    ((SegmentTmTu) curSrcTuv.getTu()).getSubId());
-            int matchType = types == null ? MatchTypeStatistics.NO_MATCH
-                    : types.getStatisticsMatchType();
-            long tuId = curSrcTuv.getTu().getId();
-            TuImpl currentTu = getTuFromCache(p_cachedTus, tuId, p_jobId);
-            TuvImpl curTrgTuv = (TuvImpl) currentTu.getTuv(p_targetLocaleId,
-                    p_jobId);
+            SegmentTmTuv curSrcTmTuv = (SegmentTmTuv) sTuvs.get(i);
+            Types types = p_matches.getTypes(curSrcTmTuv.getId(),
+                    ((SegmentTmTu) curSrcTmTuv.getTu()).getSubId());
+            int matchType = types == null ? MatchTypeStatistics.NO_MATCH : types
+                    .getStatisticsMatchType();
+            long tuId = curSrcTmTuv.getTu().getId();
+            TuImpl curTu = getTuFromCache(p_cachedTus, tuId, p_jobId);
+            TuvImpl curSrcTuv = curTu.getSourceTuv();
+            TuvImpl curTrgTuv = (TuvImpl) curTu.getTuv(p_targetLocaleId, p_jobId);
 
-            ArrayList<SegmentTmTuv> identicalSegments = null;
+            ArrayList identicalSegments = null;
             switch (matchType)
             {
                 case MatchTypeStatistics.CONTEXT_EXACT:
@@ -844,29 +840,23 @@ public class StatisticsService
                 case MatchTypeStatistics.HI_FUZZY:
                 case MatchTypeStatistics.NO_MATCH:
                 default:
-                    // WorldServer XLF files are special,
-                    // get repeated and repetition information from TU.
-                    // Because the TU list is sorted, all repeated TUs are in
-                    // front of the list
-                    if ("worldserver".equalsIgnoreCase(currentTu
-                            .getGenerateFrom())
-                            && "xlf".equalsIgnoreCase(currentTu.getDataType()))
+                    // WorldServer XLF files are special, get repeated and
+                    // repetition information from TU. Because the TU list is
+                    // sorted, all repeated TUs are in front of the list
+                    if ("worldserver".equalsIgnoreCase(curTu.getGenerateFrom())
+                            && "xlf".equalsIgnoreCase(curTu.getDataType()))
                     {
-                        if ("repeated".equalsIgnoreCase(currentTu
-                                .getSourceContent()))
+                        if ("repeated".equalsIgnoreCase(curTu.getSourceContent()))
                         {
                             curTrgTuv.setRepeated(true);
                             curTrgTuv.setRepetitionOfId(0);
-                            p_uniqueSegments.put(curSrcTuv.getExactMatchKey(),
-                                    curTrgTuv.getId());
+                            p_uniqueSegments.put(curSrcTmTuv.getExactMatchKey(), curTrgTuv.getId());
                             repetitionTuvSet.add(curTrgTuv);
                         }
-                        else if ("repetition".equalsIgnoreCase(currentTu
-                                .getSourceContent()))
+                        else if ("repetition".equalsIgnoreCase(curTu.getSourceContent()))
                         {
                             long repeatedTrgTuvId = 0;
-                            Object obj = p_uniqueSegments.get(curSrcTuv
-                                    .getExactMatchKey());
+                            Object obj = p_uniqueSegments.get(curSrcTmTuv.getExactMatchKey());
                             if (obj != null && obj instanceof Long)
                             {
                                 repeatedTrgTuvId = (Long) obj;
@@ -882,8 +872,7 @@ public class StatisticsService
                             {
                                 curTrgTuv.setRepeated(true);
                                 curTrgTuv.setRepetitionOfId(0);
-                                p_uniqueSegments.put(
-                                        curSrcTuv.getExactMatchKey(),
+                                p_uniqueSegments.put(curSrcTmTuv.getExactMatchKey(),
                                         curTrgTuv.getId());
                                 repetitionTuvSet.add(curTrgTuv);
                             }
@@ -897,8 +886,9 @@ public class StatisticsService
                     }
                     else
                     {
-                        identicalSegments = (ArrayList) p_uniqueSegments
-                                .get(curSrcTuv.getExactMatchKey());
+                        identicalSegments = (ArrayList) p_uniqueSegments.get(curSrcTuv
+                                .getExactMatchKey());
+
                         /*
                          * If identicalSegments is not null, that means current
                          * TU has a same segment before, then we should get the
@@ -911,32 +901,25 @@ public class StatisticsService
                          * Considering files can be added and removed from jobs,
                          * all TUs must update.
                          */
-                        SegmentTmTuv latestPreSrcTuv = null;
-                        if (identicalSegments != null)
+                        TuvImpl preSrcTuv = null;
+                        if (identicalSegments != null && identicalSegments.size() > 0)
                         {
-                            latestPreSrcTuv = (SegmentTmTuv) identicalSegments
-                                    .get(0);
+                            preSrcTuv = (TuvImpl) identicalSegments.get(0);
                         }
-                        if (identicalSegments != null
-                                && latestPreSrcTuv.getExactMatchKey() == curSrcTuv
-                                        .getExactMatchKey()
-                                && isFullSegmentRepitition(currentTu,
-                                        curSrcTuv, latestPreSrcTuv, p_jobId))
+                        if (preSrcTuv != null
+                                && preSrcTuv.getExactMatchKey() == curSrcTuv.getExactMatchKey())
                         {
                             TuvImpl preTrgTuv = null;
                             try
                             {
-                                long preTuId = latestPreSrcTuv.getTu().getId();
-                                TuImpl preTu = SegmentTuUtil.getTuById(preTuId,
-                                        p_jobId);
-                                preTrgTuv = (TuvImpl) preTu.getTuv(
-                                        p_targetLocaleId, p_jobId);
+                                TuImpl preTu = SegmentTuUtil
+                                        .getTuById(preSrcTuv.getTuId(), p_jobId);
+                                preTrgTuv = (TuvImpl) preTu.getTuv(p_targetLocaleId, p_jobId);
                             }
                             catch (Exception e)
                             {
                                 c_logger.error(e.getMessage(), e);
                             }
-
                             // Set "preTrgTuv" as repeated.
                             preTrgTuv.setRepeated(true);
                             preTrgTuv.setRepetitionOfId(0);
@@ -944,6 +927,7 @@ public class StatisticsService
                             unRepetitionTuvSet.remove(preTrgTuv);
                             // Add "preTrgTuv" to repetitionSet
                             repetitionTuvSet.add(preTrgTuv);
+
                             // Set "currentTargetTuv" as repetition.
                             curTrgTuv.setRepetitionOfId(preTrgTuv.getId());
                             curTrgTuv.setRepeated(false);
@@ -960,7 +944,7 @@ public class StatisticsService
                                 unRepetitionTuvSet.add(curTrgTuv);
 
                                 // Record this "srcTuv" into identicalSegments
-                                identicalSegments = new ArrayList<SegmentTmTuv>();
+                                identicalSegments = new ArrayList<TuvImpl>();
                                 identicalSegments.add(curSrcTuv);
                                 p_uniqueSegments.put(curSrcTuv.getExactMatchKey(),
                                         identicalSegments);
@@ -975,13 +959,11 @@ public class StatisticsService
         {
             if (unRepetitionTuvSet.size() != 0)
             {
-                SegmentTuvUtil.updateTuvs(new ArrayList<TuvImpl>(
-                        unRepetitionTuvSet), p_jobId);
+                SegmentTuvUtil.updateTuvs(new ArrayList<TuvImpl>(unRepetitionTuvSet), p_jobId);
             }
             if (repetitionTuvSet.size() != 0)
             {
-                SegmentTuvUtil.updateTuvs(new ArrayList<TuvImpl>(
-                        repetitionTuvSet), p_jobId);
+                SegmentTuvUtil.updateTuvs(new ArrayList<TuvImpl>(repetitionTuvSet), p_jobId);
             }
         }
         catch (Exception e)
@@ -1013,45 +995,6 @@ public class StatisticsService
         }
 
         return tu;
-    }
-
-    /**
-     * Compare if current TUV has the same exact match key (white space ignored)
-     * with that from latest previous TUV.
-     * 
-     * Only when the full segment (including sub segments) has the same
-     * exactMatchKey, take it as repetition.
-     */
-    @SuppressWarnings("rawtypes")
-    private static boolean isFullSegmentRepitition(TuImpl currentTu,
-            SegmentTmTuv currentSrcTuv, SegmentTmTuv latestPreSrcTuv,
-            long p_jobId)
-    {
-        // If current TUV has no sub segments, no need continue to check, return
-        // true;
-        Tuv tuv1 = currentTu.getTuv(currentSrcTuv.getLocale().getId(), p_jobId);
-        List subEle = tuv1.getSubflowsAsGxmlElements();
-        if (subEle == null || subEle.size() == 0)
-        {
-            return true;
-        }
-
-        // Compare 2 TuvImpl objects exact match key.
-        long currentTuvExactMatchKey = tuv1.getExactMatchKey();
-        long latestTuvExactMatchkey = 0;
-        try
-        {
-            TuImpl tu2 = SegmentTuUtil.getTuById(latestPreSrcTuv.getTu()
-                    .getId(), p_jobId);
-            Tuv tuv2 = tu2.getTuv(latestPreSrcTuv.getLocale().getId(), p_jobId);
-            latestTuvExactMatchkey = tuv2.getExactMatchKey();
-        }
-        catch (Exception e)
-        {
-            c_logger.error(e.getMessage(), e);
-        }
-
-        return (currentTuvExactMatchKey == latestTuvExactMatchkey);
     }
 
     /**

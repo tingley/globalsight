@@ -340,6 +340,7 @@ public class WfStatePostThread implements Runnable
     {
         if (res != null)
         {
+            s_logger.warn("GlobalSight is trying to post workflow transition info to Listener URL of workflow state post profile, but fails.");
             if (res.getStatusLine().getStatusCode() == 400)
             {
                 s_logger.warn("Workflow state post failure: The request payload data failed validation!");

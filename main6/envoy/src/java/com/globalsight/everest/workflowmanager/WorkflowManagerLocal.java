@@ -66,6 +66,7 @@ import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.comment.CommentImpl;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.costing.CostingEngine;
@@ -217,7 +218,7 @@ public class WorkflowManagerLocal implements WorkflowManager
 
     public static final int EXPORTING_STATE = 4;
     
-    public static final int MAX_THREAD = 5;
+    private static final int MAX_THREAD = 5;
 
     public static final String[] ORDERED_STATES =
     { WF_IMPORT_FAILED, WF_READY, WF_DISPATCHED, WF_LOCALIZED, WF_EXPORTING,
@@ -814,11 +815,9 @@ public class WorkflowManagerLocal implements WorkflowManager
                 long wfStatePostId = l10nProfile.getWfStatePostId();
                 if (wfStatePostId != -1)
                 {
-                    ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
-                    WfStatePostThread myTask = new WfStatePostThread(task,
-                            null, true);
-                    pool.execute(myTask);
-                    pool.shutdown();
+                    WfStatePostThread myTask = new WfStatePostThread(task, null, true);
+                    Thread t = new MultiCompanySupportedThread(myTask);
+                    t.start();
                 }
 
                 if (task != null)
@@ -1032,6 +1031,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             HashMap<Long, Workflow> map = new HashMap<Long, Workflow>(1);
             HashMap<Long, String> etfMap = new HashMap<Long, String>(1);
             Date startDate = new Date();
+            ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
             while (it.hasNext())
             {
                 Workflow wf = (Workflow) it.next();
@@ -1062,12 +1062,8 @@ public class WorkflowManagerLocal implements WorkflowManager
 						long wfStatePostId = l10nProfile.getWfStatePostId();
 						if (wfStatePostId != -1)
 						{
-							ExecutorService pool = Executors
-									.newFixedThreadPool(MAX_THREAD);
-							WfStatePostThread myTask = new WfStatePostThread(
-									task, null, true);
+                            WfStatePostThread myTask = new WfStatePostThread(task, null, true);
 							pool.execute(myTask);
-							pool.shutdown();
 						}
 
 						// For sla issue
@@ -1090,6 +1086,7 @@ public class WorkflowManagerLocal implements WorkflowManager
 					session.saveOrUpdate(wfClone);
                 }
             }
+            pool.shutdown();
 
             jobClone.setState(WF_DISPATCHED);
             updatePageState(session, jobClone.getSourcePages(), PG_ACTIVE_JOB);
@@ -1208,11 +1205,9 @@ public class WorkflowManagerLocal implements WorkflowManager
             long wfStatePostId = l10nProfile.getWfStatePostId();
             if (wfStatePostId != -1)
             {
-                ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
-                WfStatePostThread myTask = new WfStatePostThread(p_task,
-                        p_destinationArrow, false);
-                pool.execute(myTask);
-                pool.shutdown();
+                WfStatePostThread myTask = new WfStatePostThread(p_task, p_destinationArrow, false);
+                Thread t = new MultiCompanySupportedThread(myTask);
+                t.start();
             }
         }
         catch (Exception e)

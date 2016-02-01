@@ -213,7 +213,6 @@ function Node() {
 		var y1 = this.locale.y * scale;
 		var w = this.defaultWidth * scale;
 
-		log(x1 + ":" + y1 + ":" + w+ ":");
 		context.save();
 		context.lineWidth = 5*scale;
 		this.draw(context, w, x1, y1, true);

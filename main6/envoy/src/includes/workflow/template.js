@@ -30,7 +30,7 @@
 			<role_name>{{role_name}}</role_name>
 			<role_id>0</role_id>
 			<action_type>{{action_type}}</action_type>
-			<role_preference></role_preference>
+			<role_preference>{{role_preference}}</role_preference>
 			<point>{{x}}:{{y}}</point>
 		</assignment>
 		<controller>

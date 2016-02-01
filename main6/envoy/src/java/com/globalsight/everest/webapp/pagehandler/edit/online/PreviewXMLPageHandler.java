@@ -191,6 +191,7 @@ public class PreviewXMLPageHandler extends PageHandler
                     // html
                     if (result.contains("<html") && result.contains("<body"))
                     {
+                        p_response.setHeader("Content-Type", "text/html");
                         p_response.setCharacterEncoding("UTF-8");
                         p_response.getWriter().write(result);
                     }

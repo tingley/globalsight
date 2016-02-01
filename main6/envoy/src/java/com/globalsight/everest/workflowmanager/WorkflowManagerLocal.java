@@ -66,6 +66,7 @@ import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.comment.CommentImpl;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.costing.CostingEngine;
@@ -216,8 +217,8 @@ public class WorkflowManagerLocal implements WorkflowManager
     public static final int LOCALIZED_STATE = 3;
 
     public static final int EXPORTING_STATE = 4;
-
-    public static final int MAX_THREAD = 5;
+    
+    private static final int MAX_THREAD = 5;
 
     public static final String[] ORDERED_STATES =
     { WF_IMPORT_FAILED, WF_READY, WF_DISPATCHED, WF_LOCALIZED, WF_EXPORTING,
@@ -352,7 +353,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             {
                 wf = (Workflow) session.get(WorkflowImpl.class,
                         p_workflow.getIdAsLong());
-
+                
                 boolean isDispatched = WF_DISPATCHED.equals(wf.getState());
                 String oldWorkflowState = wf.getState();
                 wf.setState(WF_CANCELLED);
@@ -476,7 +477,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 while (it.hasNext())
                 {
                     Workflow wf = (Workflow) it.next();
-
+                    
                     boolean updateIFlow = wf.getState().equals(
                             Workflow.DISPATCHED);
 
@@ -560,6 +561,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 String lastJobState = resetJobState(session, jobClone, wfs,
                         p_reimport);
                 session.saveOrUpdate(jobClone);
+                
 
                 tx.commit();
 
@@ -813,12 +815,9 @@ public class WorkflowManagerLocal implements WorkflowManager
                 long wfStatePostId = l10nProfile.getWfStatePostId();
                 if (wfStatePostId != -1)
                 {
-                    ExecutorService pool = Executors
-                            .newFixedThreadPool(MAX_THREAD);
-                    WfStatePostThread myTask = new WfStatePostThread(task,
-                            null, true);
-                    pool.execute(myTask);
-                    pool.shutdown();
+                    WfStatePostThread myTask = new WfStatePostThread(task, null, true);
+                    Thread t = new MultiCompanySupportedThread(myTask);
+                    t.start();
                 }
 
                 if (task != null)
@@ -853,8 +852,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
     }
 
-    @SuppressWarnings(
-    { "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private DownloadParams getDownloadParams(Task task, Job p_job)
             throws GeneralException, NamingException, IOException
     {
@@ -938,8 +936,8 @@ public class WorkflowManagerLocal implements WorkflowManager
             throws GeneralException, NamingException, IOException
     {
         DownloadParams downloadParams = getDownloadParams(task, p_job);
-        downloadParams
-                .setIncludeXmlNodeContextInformation(isIncludeXmlNodeContextInformation);
+        downloadParams.setIncludeXmlNodeContextInformation(
+        		isIncludeXmlNodeContextInformation);
         downloadParams.setAutoActionNodeEmail(p_nodeEmail);
         if (lockedSegEditType != null)
         {
@@ -1012,7 +1010,6 @@ public class WorkflowManagerLocal implements WorkflowManager
     {
         JobImpl jobClone = null;
         Session session = HibernateUtil.getSession();
-        session.clear();
         Transaction transaction = null;
         JbpmContext ctx = null;
 
@@ -1021,13 +1018,20 @@ public class WorkflowManagerLocal implements WorkflowManager
             transaction = HibernateUtil.getTransaction();
             jobClone = (JobImpl) session.get(JobImpl.class,
                     new Long(p_job.getId()));
-
+            if (jobClone != null)
+            {
+                // refresh job object in the session
+                session.evict(jobClone);
+                jobClone = (JobImpl) session.get(JobImpl.class,
+                        new Long(p_job.getId()));
+            }
             Iterator it = jobClone.getWorkflows().iterator();
             // a Map containing task id as key and workflow as value.
             // This is used for possible creation of STF.
             HashMap<Long, Workflow> map = new HashMap<Long, Workflow>(1);
             HashMap<Long, String> etfMap = new HashMap<Long, String>(1);
             Date startDate = new Date();
+            ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
             while (it.hasNext())
             {
                 Workflow wf = (Workflow) it.next();
@@ -1043,49 +1047,46 @@ public class WorkflowManagerLocal implements WorkflowManager
                             startDate, emailInfo);
 
                     long taskId = ((Long) returnValue.get(0)).longValue();
-                    if (taskId != -1)
-                    {
-                        Object actionType = returnValue.get(3);
-                        if (actionType != null)
-                        {
-                            etfMap.put(taskId, (String) actionType);
-                        }
+					if (taskId != -1)
+					{
+						Object actionType = returnValue.get(3);
+						if (actionType != null)
+						{
+							etfMap.put(taskId, (String) actionType);
+						}
 
-                        Task task = (Task) wfClone.getTasks().get(taskId);
-                        long jobId = task.getJobId();
-                        L10nProfile l10nProfile = ServerProxy.getJobHandler()
-                                .getL10nProfileByJobId(jobId);
-                        long wfStatePostId = l10nProfile.getWfStatePostId();
-                        if (wfStatePostId != -1)
-                        {
-                            ExecutorService pool = Executors
-                                    .newFixedThreadPool(MAX_THREAD);
-                            WfStatePostThread myTask = new WfStatePostThread(
-                                    task, null, true);
-                            pool.execute(myTask);
-                            pool.shutdown();
-                        }
+						Task task = (Task) wfClone.getTasks().get(taskId);
+						long jobId = task.getJobId();
+						L10nProfile l10nProfile = ServerProxy.getJobHandler()
+								.getL10nProfileByJobId(jobId);
+						long wfStatePostId = l10nProfile.getWfStatePostId();
+						if (wfStatePostId != -1)
+						{
+                            WfStatePostThread myTask = new WfStatePostThread(task, null, true);
+							pool.execute(myTask);
+						}
 
-                        // For sla issue
-                        if (wfClone
-                                .isEstimatedTranslateCompletionDateOverrided())
-                        {
-                            updateEstimatedTranslateCompletionDate(
-                                    wfClone.getId(),
-                                    wfClone.getEstimatedTranslateCompletionDate());
-                        }
+						// For sla issue
+						if (wfClone
+								.isEstimatedTranslateCompletionDateOverrided())
+						{
+							updateEstimatedTranslateCompletionDate(
+									wfClone.getId(),
+									wfClone.getEstimatedTranslateCompletionDate());
+						}
 
-                        // prepare the map for possible creation of secondary
-                        // target
-                        // files
-                        if (((Boolean) returnValue.get(1)).booleanValue())
-                        {
-                            map.put(new Long(taskId), wfClone);
-                        }
-                    }
-                    session.saveOrUpdate(wfClone);
+						// prepare the map for possible creation of secondary
+						// target
+						// files
+						if (((Boolean) returnValue.get(1)).booleanValue())
+						{
+							map.put(new Long(taskId), wfClone);
+						}
+					}
+					session.saveOrUpdate(wfClone);
                 }
             }
+            pool.shutdown();
 
             jobClone.setState(WF_DISPATCHED);
             updatePageState(session, jobClone.getSourcePages(), PG_ACTIVE_JOB);
@@ -1175,7 +1176,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 Thread.yield();
             }
         }
-
+        
         // for COTI api finish job
         try
         {
@@ -1195,7 +1196,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             // log the error but don't let it affect job completion
             s_logger.error("Error trying to finish COTI job.", t);
         }
-
+        
         try
         {
             long jobId = p_task.getJobId();
@@ -1204,11 +1205,9 @@ public class WorkflowManagerLocal implements WorkflowManager
             long wfStatePostId = l10nProfile.getWfStatePostId();
             if (wfStatePostId != -1)
             {
-                ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
-                WfStatePostThread myTask = new WfStatePostThread(p_task,
-                        p_destinationArrow, false);
-                pool.execute(myTask);
-                pool.shutdown();
+                WfStatePostThread myTask = new WfStatePostThread(p_task, p_destinationArrow, false);
+                Thread t = new MultiCompanySupportedThread(myTask);
+                t.start();
             }
         }
         catch (Exception e)
@@ -1217,6 +1216,8 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
     }
 
+
+    
     /**
      * @see WorkflowManager.getTaskInfoByTaskId(Workflow, List, long)
      */
@@ -3447,14 +3448,11 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             Workflow wf = p_job.getWorkflows().iterator().next();
             String dataSourceType = DataSourceType.FILE_SYSTEM_AUTO_IMPORT;
-            try
-            {
+            try {
                 dataSourceType = (wf.getTargetPages().iterator().next())
                         .getDataSourceType();
-            }
-            catch (Exception ignore)
-            {
-
+            } catch (Exception ignore) {
+            	
             }
             boolean isAutoImport = dataSourceType
                     .equals(DataSourceType.FILE_SYSTEM_AUTO_IMPORT);
@@ -3778,8 +3776,8 @@ public class WorkflowManagerLocal implements WorkflowManager
 
                     try
                     {
-                        exportLocalizedWorkflow(wfClone.getId(),
-                                projectMgrUserId, isDbJob, isCompleted);
+						exportLocalizedWorkflow(wfClone.getId(),
+								projectMgrUserId, isDbJob, isCompleted);
                     }
                     catch (Throwable t)
                     {

@@ -169,6 +169,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     public static final String STYLE_SEGMENT_UNVERIFIED = "segmentUnverified";
     public static final String STYLE_SEGMENT_REPETITION = "segmentRepetition";
 
+    // Default Context (deprecated)
+    private static int READY_CASE_1 = 1;
+    // In-Context
+    private static int READY_CASE_2 = 2;
+    // No Match
+    private static int READY_CASE_3 = 3;
+    
     /** Sub id 0 represents the top-level segment. */
     public static final String DUMMY_SUBID = "0";
 
@@ -6014,11 +6021,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     }
                 }
                 _count++;
-                int readyCase = 1;
+                int readyCase = READY_CASE_3;
                 if (LeverageUtil.isIncontextMatch(i, sourceTuvs,
                         targetTuvs, tuvMatchTypes, p_excludedItemTypes, jobId))
                 {
-                    readyCase = 2;
+                    readyCase = READY_CASE_2;
                 }
                 JSONObject targetj = getTargetJsonResult(readyCase, srcTuv,
                         trgTuv, options, termLMResultSet, p_excludedItemTypes,
@@ -6291,9 +6298,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             switch (readyCase)
             {
-            	case 1:
-//            		style = STYLE_NO_MATCH;
-                break;
+//                case 1:
+//                    style = STYLE_EXACT_MATCH;
+//                    break;
                 case 2:
                     if (unlock)
                     {
@@ -6305,6 +6312,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     }
                     isReadOnly = !unlock;
                     break;
+                case 3:
+                    // style = STYLE_NO_MATCH;
+                    break;
                 default:
                     break;
             }
@@ -6313,11 +6323,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         switch (readyCase)
         {
-            case 1:
-                isRealExactLocalized = EditorHelper.isRealExactMatchLocalied(
-                        p_srcTuv, p_targetTuv, p_matchTypes, DUMMY_SUBID, jobId);
-                isReadOnly = isReadOnly(p_targetTuv, p_options, jobId);
-                break;
+//            case 1:
+//                isReadOnly = isReadOnly(p_targetTuv, p_options, jobId);
+//                if (!PageHandler.isDefaultContextMatch(p_targetPage))
+//                {
+//                    style = STYLE_EXACT_MATCH;
+//                }
+//                break;
             case 2:
                 if (!PageHandler.isInContextMatch(p_targetPage.getSourcePage()
                         .getRequest().getJob()))
@@ -6325,6 +6337,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     style = STYLE_EXACT_MATCH;
                     isReadOnly = isReadOnly(p_targetTuv, p_options, jobId);
                 }
+                break;
+            case 3:
+                isRealExactLocalized = EditorHelper.isRealExactMatchLocalied(
+                        p_srcTuv, p_targetTuv, p_matchTypes, DUMMY_SUBID, jobId);
+                isReadOnly = isReadOnly(p_targetTuv, p_options, jobId);
                 break;
             default:
                 break;
@@ -6482,7 +6499,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         p_targetTuv, subId, isExcluded, unlock,
                         p_repetitions, jobId);
                 
-                if (readyCase != 3)
+                if (readyCase != READY_CASE_3)
                 {
                     // TODO readyCase
                     style = STYLE_CONTEXT;
@@ -6493,7 +6510,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                 .getIsContextMatchLeveraging())
                 {
                     style = STYLE_EXACT_MATCH;
-                    if (readyCase == 2)
+                    if (readyCase == READY_CASE_2)
                         isSubReadOnly = false;
                 }
                 segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
@@ -6505,7 +6522,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 {
                 	if(segment.trim().equals(segmentSrc.trim()))
         			{                		
-                		if (readyCase == 3)
+                		if (readyCase == READY_CASE_3)
                 		{
                             style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
                                     p_targetTuv, subId, unlock, p_repetitions,
@@ -6514,7 +6531,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 		else
                 		{
                 			style = STYLE_NO_MATCH;
-                			if (readyCase == 2)
+                			if (readyCase == READY_CASE_2)
                 				isSubReadOnly = false;
                 		}
         			}

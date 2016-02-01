@@ -94,8 +94,7 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
         }
         catch (Exception ex)
         {
-            throw new ExtractorException(
-                    ExtractorExceptionConstants.DIPLOMAT_XML_PARSE_ERROR, ex);
+            throw new ExtractorException(ExtractorExceptionConstants.DIPLOMAT_XML_PARSE_ERROR, ex);
         }
     }
 
@@ -115,8 +114,7 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
         }
         catch (Exception ex)
         {
-            throw new ExtractorException(
-                    ExtractorExceptionConstants.DIPLOMAT_XML_PARSE_ERROR, ex);
+            throw new ExtractorException(ExtractorExceptionConstants.DIPLOMAT_XML_PARSE_ERROR, ex);
         }
 
         return getDiplomatXml();
@@ -215,8 +213,8 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
      * Updates the original localizable node by wrapping nbsp in PH and
      * inserting an "x" attribute in all BPT/PH/IT.
      */
-    private void updateSegmentInNode(LocalizableElement p_element,
-            String p_segment) throws DiplomatBasicParserException
+    private void updateSegmentInNode(LocalizableElement p_element, String p_segment)
+            throws DiplomatBasicParserException
     {
         if (p_segment != null)
         {
@@ -246,9 +244,9 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
                 result.append("<ph type=\"x-nbspace\" erasable=\"yes\" x=\"");
                 result.append(m_externalMatchingCount);
                 result.append("\">");
-                if (IFormatNames.FORMAT_XML.equals(formatName))
+                if (isXmlFormat())
                 {
-                    // GBS-3577
+                    // GBS-3577, GBS-4216
                     result.append("&amp;#160;");
                 }
                 else
@@ -266,6 +264,12 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
         }
 
         return result.toString();
+    }
+
+    private boolean isXmlFormat()
+    {
+        return IFormatNames.FORMAT_XML.equals(formatName)
+                || IFormatNames.FORMAT_AUTHORIT_XML.equals(formatName);
     }
 
     /**
@@ -299,8 +303,8 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
         m_currentSegment.append(p_originalTag);
     }
 
-    public void handleStartTag(String p_name, Properties p_attributes,
-            String p_originalString) throws DiplomatBasicParserException
+    public void handleStartTag(String p_name, Properties p_attributes, String p_originalString)
+            throws DiplomatBasicParserException
     {
         // Add x to all tags except ept and sub.
         // If sub contains bpt,ph,it,ut we add x to them as well
@@ -360,8 +364,7 @@ public class DiplomatPostProcessor implements DiplomatBasicHandler
     {
         Integer state = (Integer) m_tmxStateStack.peek();
 
-        if (state == s_TEXT
-                && !OfficeXmlHelper.OFFICE_XML.equalsIgnoreCase(formatName)
+        if (state == s_TEXT && !OfficeXmlHelper.OFFICE_XML.equalsIgnoreCase(formatName)
                 && !OfficeContentPostFilterHelper.isOfficeFormat(formatName)
                 && !IFormatNames.FORMAT_JAVAPROP.equalsIgnoreCase(formatName)
                 && !IFormatNames.FORMAT_HTML.equalsIgnoreCase(formatName))

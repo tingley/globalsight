@@ -70,9 +70,9 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             + "source_page_leverage_group splg "
             + "WHERE tu.leverage_group_id = splg.lg_id "
             + "AND tu.generate_from = '"
-            + TuImpl.FROM_WORLDSERVER
+            + TuImpl.FROM_WORLDSERVER 
             + "' "
-            + "AND splg.sp_id = ? limit 1";
+            + "AND splg.sp_id = ? ";
 
     public static void saveTus(Connection conn, Collection<Tu> p_tus,
             long p_jobId) throws Exception
@@ -170,7 +170,8 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         }
     }
 
-    public static TuImpl getTuById(long p_tuId, long p_jobId) throws Exception
+    public static TuImpl getTuById(long p_tuId, long p_jobId)
+            throws Exception
     {
         TuImpl tu = getTuFromCache(p_tuId);
         if (tu != null)

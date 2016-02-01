@@ -74,7 +74,7 @@ var LineData = {
 		for ( var i in start.froms) {
 			var l = start.tos[i];
 			
-			if (l.from.id == start.id && l.to.id == end.id)
+			if (l && l.from.id == start.id && l.to.id == end.id)
 				return null;
 		}
 		
@@ -99,10 +99,11 @@ var LineData = {
 
 	},
 	getLineByPoint : function(e) {
+		var loc = Utils.toViewPoint(e);
 		for ( var i in this.lines) {
 			var l = this.lines[i];
-			var p = Utils.windowToCanvas(l.getDiv(), e.clientX, e.clientY);
-			if (l.includePoint(p))
+			var r = getLength(l.from, l.to, loc);
+			if (r < 5)
 				return l;
 		}
 
@@ -345,8 +346,6 @@ function Line() {
 		this.showTxt();
 	};
 	this.showTxt = function() {
-		log("showTxt");
-		
 		var s = this.data.txt;
 		var div = this.getDiv();
 		var txtDiv = div.find(".txt");

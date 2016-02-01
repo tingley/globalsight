@@ -1,12 +1,12 @@
 
 function sendAjax(obj, method, callback)
 {
-	dojo.xhrPost(
+	$.ajax(
 	{
 		url:"AjaxService?action=" + method,
-		content:obj,
-		handleAs: "text", 
-		load:function(data){
+		data:obj,
+		dataType: "text", 
+		success:function(data){
 			eval(callback+'(data)');
 		},
 		error:function(error)
@@ -16,25 +16,23 @@ function sendAjax(obj, method, callback)
 	});
 }
 
-function uploadFile(fileType, formId, method, callback) {
-	
-     dojo.require("dojo.io.iframe");
-     var upload_url = "AjaxService?action=" + method + "&fileType=" + fileType;
-     
-     dojo.io.iframe.send({
-		form: dojo.byId(formId),
-		url:  upload_url, 
-        method: 'POST', 
-        contentType: "multipart/form-data",
-		handleAs: "text/plain",
-		handle: function(response, ioArgs){
-			if(response instanceof Error){
-				alert("Failed to upload file, please try later.");
-			}else{
-				eval(callback+'(response)');
-			}	
-		}
-	});
-
+function uploadFile(fileType,formId, method, callback) {	
+    var upload_url = "AjaxService?action=" + method + "&fileType=" + fileType;	     
+    $("#"+formId+"").submit(function () {   
+        $("#"+formId+"").ajaxSubmit({
+            type: "post",
+            url:   upload_url,
+            success: function (data) 
+            {
+            	var str = data.replace(/<[^>]+>/g,"");
+            	eval(callback+'(str)');
+            },
+            error: function(error)
+            {
+            	alert("Failed to upload file, please try later.");      	
+            }
+        });
+           return false;
+});
+        $("#"+formId+"").submit();  
 }
-

@@ -6,6 +6,7 @@
                 com.globalsight.everest.webapp.javabean.NavigationBean,
                 com.globalsight.everest.webapp.pagehandler.PageHandler, 
                 com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateConstants,
+                com.globalsight.calendar.CalendarManagerLocal,
                 java.util.ResourceBundle"
     session="true"%>
 <jsp:useBean id="save" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -54,6 +55,8 @@
 	} else {
 		httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
 	}
+	
+	boolean isCalendarInstalled = CalendarManagerLocal.isInstalled();
 %>
 <HTML>
 <!-- This JSP is: envoy/administration/workflow/graphicalWfTemplate.jsp -->
@@ -296,6 +299,10 @@ function previousForm()
                         <td>
                             <select style="width: 100%" id="dialogUserSelect">
                                 <option value="0"><%=bundle.getString("lb_all_qualified_users")%></option>
+                                <%if (isCalendarInstalled){ %>
+                                <option value="-1"><%=bundle.getString("lb_users_completed")%></option>
+                                <option value="-2"><%=bundle.getString("lb_users_earliest")%></option>
+                                <%} %>>
                                 <option value="1"><%=bundle.getString("lb_user_select")%></option>
                             </select>
                         </td>

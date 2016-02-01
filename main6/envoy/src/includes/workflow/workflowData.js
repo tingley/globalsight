@@ -340,6 +340,7 @@ function generateActivityNode(node) {
 	data["role_name"] = node.getAssignmentValue("role_name"); 
 	
 	data["action_type"] = node.getAssignmentValue("action_type"); 
+	data["role_preference"] = node.getAssignmentValue("role_preference"); 
 	
 	data["x"] = getTemplateNumber(node.locale.x);
 	data["y"] = getTemplateNumber(node.locale.y);

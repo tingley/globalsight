@@ -508,6 +508,7 @@ var approveAction = "<%=approveAction%>";
 <input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=jobId%>">
 <input type="hidden" name="<%=ReportConstants.TARGETLOCALE_LIST%>" value="<%=tgtIDS%>">
 <input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="">
+<input type="hidden" name="withCompactTagsCCR"  value="on">
 </FORM>
 <FORM name="SaveForm" METHOD="POST" ACTION="<%=url_refresh%>&action=segment">
 <INPUT TYPE="hidden" NAME="save" VALUE="">

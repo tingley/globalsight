@@ -161,8 +161,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
                     comparator);
         }
-        String withCompactTags = p_request.getParameter("withCompactTags");
-        if("on".equals(withCompactTags))
+        String withCompactTagsCCR = p_request.getParameter("withCompactTagsCCR");
+        if("on".equals(withCompactTagsCCR))
         {
             isIncludeCompactTags = true;
         }

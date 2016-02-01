@@ -346,7 +346,7 @@ function doOnload()
     </tr>
     <tr>
         <td class="standardText"><%=bundle.getString("with_compact_tags")%>:</td>
-        <td><input id="withCompactTags" name="withCompactTags" type="checkbox"></td>
+        <td><input id="withCompactTagsCCR" name="withCompactTagsCCR" type="checkbox"></td>
     </tr>
     <tr>
         <td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>

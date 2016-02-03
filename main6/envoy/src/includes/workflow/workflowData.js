@@ -214,6 +214,7 @@ function validateWorkflow() {
 	var tl = startNode.tos[0];
 	if (typeof(tl) == "undefined"){
 		alert(msg_start_no_out);
+		Model.selectTheNode(startNode);
 		return false;
 	}
 	
@@ -232,13 +233,25 @@ function validateWorkflow() {
 	
 	if (typeof(endNode) == "undefined"){
 		alert(msg_no_end_node);
+		Model.selectTheNode(endNode);
 		return false;
 	}
 	
 	tl = endNode.froms[0];
 	if (typeof(tl) == "undefined"){
 		alert(msg_end_no_income);
+		Model.selectTheNode(endNode);
 		return false;
+	}
+	
+	for ( var i in LineData.lines) {
+		var l = LineData.lines[i];
+		
+		if (!l.from || l.from.id == -1 || !l.to || l.to.id == -1) {
+			alert(msg_line_no_node);
+			LineData.selectTheLine(l);
+			return false;
+		}
 	}
 	
 	// for other
@@ -248,12 +261,14 @@ function validateWorkflow() {
 			tl = node.froms[0];
 			if (typeof(tl) == "undefined"){
 				alert(msg_no_income);
+				Model.selectTheNode(node);
 				return false;
-			}
+			}			
 			
 			tl = node.tos[0];
 			if (typeof(tl) == "undefined"){
 				alert(msg_no_out);
+				Model.selectTheNode(node);
 				return false;
 			}
 			
@@ -261,6 +276,7 @@ function validateWorkflow() {
 				var activity = node.getAssignmentValue("activity"); 
 				if (activity == "") {
 					alert(msg_no_activity);
+					Model.selectTheNode(node);
 					return false;
 				}
 			}			

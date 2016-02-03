@@ -199,8 +199,7 @@ function onLeftDownForPoint(e) {
 	
 	var l = LineData.getLineByPoint(e);
 	if (l != null) {
-		LineData.selectedLine = l;
-		l.updateLocale();
+		LineData.selectTheLine(l);
 		
 		var p = Utils.windowToCanvas(l.getDiv(), e.clientX, e.clientY);
 		if (l.isOnEndPoint(p)) {
@@ -233,9 +232,7 @@ function onLeftDownForPoint(e) {
 	} else {
 		var node = Model.getNodeByPoint(e);
 		if (node != null) {
-			
-			Model.selectedNode = node;
-			node.showPoints();
+			Model.selectTheNode(node);
 			
 			if (node.isMoveRect(e)) {
 				e.preventDefault();

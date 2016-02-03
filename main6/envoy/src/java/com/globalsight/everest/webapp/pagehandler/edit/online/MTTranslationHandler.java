@@ -101,11 +101,12 @@ public class MTTranslationHandler extends PageActionHandler
 					.append("</SPAN>");
 			result.append("        </TD>");
 			result.append("<TD class=\"standardTextBold\" valign=\"TOP\" align=\"right\">");
-			result.append("<SPAN class=\"link\" TITLE=\"Click to see MT translation\"  onclick=\"mtTranslation()\" oncontextmenu=\"mtTranslation()\">");
+			result.append("<SPAN class=\"link\" TITLE=\"Click to fetch MT translation\"  onclick=\"mtTranslation()\" oncontextmenu=\"mtTranslation()\">");
 			result.append("<font style=\"text-decoration:underline;\">")
-					.append("Translation").append("</font>").append("</SPAN>")
+					.append("Translate").append("</font>").append("</SPAN>")
 					.append("</TD>");
 			result.append("    </TR>");
+			result.append("<TR id=\"blankLine\"><TD height=\"20\"></TD><TD height=\"20\"></TD><TD height=\"20\"></TD></TR>");
 			result.append("</TABLE>");
 			// Table Two
 			result.append("<TABLE CELLPADDING=\"3\" CELLSPACING=\"0\" BORDER=\"0\" WIDTH=\"100%\">");

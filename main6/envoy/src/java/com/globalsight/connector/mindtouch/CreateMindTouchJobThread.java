@@ -137,8 +137,7 @@ public class CreateMindTouchJobThread implements Runnable
 					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
 					Job.JOB_TYPE_MINDTOUCH);
 
-            String sourceLocaleName = l10Profile.getSourceLocale()
-                    .getLocaleCode();
+            String sourceLocaleName = l10Profile.getSourceLocale().getLocaleCode();
             // init files and file profiles infomation
             List<String> descList = new ArrayList<String>();
             retrieveRealFilesFromMindTouch(descList, job, files, sourceLocaleName);
@@ -412,14 +411,13 @@ public class CreateMindTouchJobThread implements Runnable
                     if ("contents".equals(flag))
                     {
                         sourceContent = helper.getPageContents(pageId);
-                        int index = sourceContent.indexOf("<body>");
-                        String content = sourceContent.substring(0, index);
-                        String body = sourceContent.substring(index);
+//                        int index = sourceContent.indexOf("<body>");
+//                        String content = sourceContent.substring(0, index);
+//                        String body = sourceContent.substring(index);
         				// Per testing, decode is required. Only decode <body>.
-                        body = EditUtil.decodeXmlEntities(body);
-                        sourceContent = content + body;
-    					sourceContent = MindTouchHelper
-    							.fixTitleValueInContentXml(sourceContent);
+//                        body = EditUtil.decodeXmlEntities(body);
+//                        sourceContent = content + body;
+//    					sourceContent = MindTouchHelper.fixTitleValueInContentXml(sourceContent);
                     }
                     else if ("tags".equals(flag))
                     {
@@ -431,17 +429,15 @@ public class CreateMindTouchJobThread implements Runnable
                     	sourceContent = helper.getPageProperties(Long.parseLong(pageId));
                     	sourceContent = EditUtil.decodeXmlEntities(sourceContent);
                     }
-                    FileUtil.writeFile(srcFile, sourceContent);
+                    FileUtil.writeFile(srcFile, sourceContent, "UTF-8");
                     descList.add(externalPageId);
                     logger.info("MindTouch page is retrieved from MindTouch server: " + externalPageId);
 
                     // save one ".obj" file with same pathname which is used to send
                     // translated files back to MindTouch server.
                     String objFilePathName = externalPageId + ".obj";
-					objFile = new File(
-							AmbFileStoragePathUtils
-									.getCxeDocDir(currentCompanyId)
-									+ File.separator + objFilePathName);
+                    objFile = new File(AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
+                            + File.separator + objFilePathName);
                     JSONObject json = new JSONObject();
                     json.put("mindTouchConnectorId", String.valueOf(conn.getId()));
                     json.put("pageId", pageId);

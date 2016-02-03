@@ -48,6 +48,10 @@ var LineData = {
 
 		return l;
 	},
+	selectTheLine : function(l){
+		LineData.selectedLine = l;
+		l.updateLocale();
+	},
 	deleteLine : function(l) {
 		if (l.from && l.from.id != -1) {
 			var node = Model.nodes[l.from.id];
@@ -121,6 +125,12 @@ var LineData = {
 		
 		var node = Model.getNodeByPoint(e);
 		if (node != null && node.id != l.from.id) {
+			// can not add line to start node.
+			if (node.type == "startNode"){
+				LineData.deleteLine(l);
+				return;
+			}				
+			
 			l.to.id = node.id;
 			node.froms.push(l);
 			l.updateTo(e);

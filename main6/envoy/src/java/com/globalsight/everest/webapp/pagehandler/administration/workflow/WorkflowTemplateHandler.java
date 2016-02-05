@@ -241,7 +241,7 @@ public class WorkflowTemplateHandler extends PageHandler implements
     // The old method is using CommentFilesDownLoad.sendFileToClient(). 
     // This will cause the XML file to be deleted¡£ So rewrite it again.
     public void sendFileToClient(HttpServletRequest request,
-            HttpServletResponse response, String zipFileName, File tmpFile)
+            HttpServletResponse response, String zipFileName, File workflowXml)
     {
         if (request.isSecure())
         {
@@ -254,9 +254,9 @@ public class WorkflowTemplateHandler extends PageHandler implements
             String attachment = "attachment; filename=\""
                     + UrlUtil.encode(zipFileName, "utf-8") + "\";";
             response.setHeader("Content-Disposition", attachment);
-            response.setContentLength((int) tmpFile.length());
+            response.setContentLength((int) workflowXml.length());
             byte[] inBuff = new byte[4096];
-            fis = new FileInputStream(tmpFile);
+            fis = new FileInputStream(workflowXml);
             int bytesRead = 0;
             while ((bytesRead = fis.read(inBuff)) != -1)
             {

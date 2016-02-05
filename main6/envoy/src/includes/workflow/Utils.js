@@ -164,8 +164,12 @@ function timesAreValid(d, h, m)
             && numberIsValid(m, 0, 12 * 60);
 }
 
-//the p1,p2 is the start and end for a line.
-function getLength(p1,p2,p3) {
+function getDistance(p1, p2){
+	return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
+}
+
+// Gets the distance for the p3 to a line. The p1,p2 is the start and end for the line.
+function getLength(p1, p2, p3) {
 	
 	var x1;
 	var x2;

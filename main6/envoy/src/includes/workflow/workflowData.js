@@ -477,7 +477,8 @@ function getNextNodeXml(node) {
 	v = generatingNode[node.id];
 	if (typeof(v) != "undefined") {
 		return {
-			name : v
+			name : v,
+			xml : " "
 		};
 	}
 	

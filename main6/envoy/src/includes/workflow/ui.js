@@ -43,9 +43,7 @@ var UI = {
 		var l = LineData.getLineByPoint(e);
 		if (l != null) {
 			LineData.tempSelectedLine = l;					
-			
-			var p = Utils.windowToCanvas(l.getDiv(), e.clientX, e.clientY);
-			if (l.isOnEndPoint(p) || l.isOnStartPoint(p)) {
+			if (l.isOnEndPoint(e) || l.isOnStartPoint(e)) {
 				UI.bodyDiv.css("cursor", "move");
 			} else {
 				UI.bodyDiv.css("cursor", "pointer");
@@ -201,8 +199,7 @@ function onLeftDownForPoint(e) {
 	if (l != null) {
 		LineData.selectTheLine(l);
 		
-		var p = Utils.windowToCanvas(l.getDiv(), e.clientX, e.clientY);
-		if (l.isOnEndPoint(p)) {
+		if (l.isOnEndPoint(e)) {
 			e.preventDefault();
 
 			UI.bodyDiv.bind("mousemove.moveLine", function(e) {
@@ -215,7 +212,7 @@ function onLeftDownForPoint(e) {
 				UI.body.unbind("mouseup.endLine");
 				UI.bodyDiv.unbind("mousemove.moveLine");
 			});
-		} else if (l.isOnStartPoint(p)) {
+		} else if (l.isOnStartPoint(e)) {
 			e.preventDefault();
 
 			UI.bodyDiv.bind("mousemove.moveLine", function(e) {

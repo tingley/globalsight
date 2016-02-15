@@ -684,8 +684,7 @@ public class Exporter
     	try
     	{
     		// Initialize one MindTouchHelper for all files from one job
-            String sourceLocale = wf.getJob().getL10nProfile()
-                    .getSourceLocale().toString();
+            String sourceLocale = wf.getJob().getL10nProfile().getSourceLocale().toString();
             String targetLocale = wf.getTargetLocale().toString();
         	long jobId = wf.getJob().getJobId();
             String srcLocale = "/" + sourceLocale + "/" + jobId + "/";
@@ -693,8 +692,7 @@ public class Exporter
     		MindTouchConnector mtc = null;
         	for (File trgFile : trgFiles)
         	{
-				MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale,
-						trgLocale, trgFile);
+                MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
         		if (pageInfo != null)
         		{
                     long mtcId = Long.parseLong(pageInfo.getMindTouchConnectorId());
@@ -705,8 +703,12 @@ public class Exporter
         		}
         	}
 
-			if (!helper.isTargetServerExist(targetLocale)
-					&& !mtc.getIsPostToSourceServer())
+        	if (helper == null)
+        	{
+                logger.error("Fail to initialize MindTouchHelper, MindTouch files will NOT be pushed to target server, re-export is required!");
+        	}
+
+            if (!helper.isTargetServerExist(targetLocale) && !mtc.getIsPostToSourceServer())
         	{
         		return;
         	}
@@ -773,6 +775,10 @@ public class Exporter
                 helper.putPageProperties(trgFile, pageInfo, sourceLocale, targetLocale);
                 logger.info("MindTouch properties is put to target server[" + count + "]: " + trgFile);
         	}
+    	}
+    	catch (Exception e)
+    	{
+    	    logger.error(e);
     	}
     	finally
     	{

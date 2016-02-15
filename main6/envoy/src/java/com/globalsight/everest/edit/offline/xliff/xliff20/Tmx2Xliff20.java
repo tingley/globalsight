@@ -523,7 +523,10 @@ public class Tmx2Xliff20
             {
                 String s = (String) o;
                 s = StringUtil.replace(s, "[", "[[");
-                s = s.replaceFirst("#", OfflineConstants.PONUD_SIGN);
+                if (s.startsWith("#"))
+                {
+                    s = s.replaceFirst("#", OfflineConstants.PONUD_SIGN);
+                }
                 sb.append(s);
             }
             else if (o instanceof Pc)

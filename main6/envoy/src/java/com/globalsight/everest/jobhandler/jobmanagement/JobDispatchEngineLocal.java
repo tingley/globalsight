@@ -443,7 +443,9 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
         }
 
         String dispatchType = job.getDispatchType();
-        if (dispatchType.equals(Job.AUTOMATIC))
+        // do not automatic dispatch job for AEM jobs
+        if (dispatchType.equals(Job.AUTOMATIC)
+                && !"aem_gs_translator".equals(job.getJobType()))
         {
             JobDispatcher jobDispatcher = getDispatcher(job);
             jobDispatcher.dispatchJob(job);

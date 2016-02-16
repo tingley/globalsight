@@ -654,12 +654,14 @@ public class Exporter
      */
     private void handleMindTouchFiles(Workflow wf, FileState[] fileStates)
     {
+        logger.info("Begin to handle MindTouch Files...");
     	File docDir = AmbFileStoragePathUtils.getCxeDocDir(wf.getCompanyId());
 
     	// Get all target files that are exported
     	List<File> trgFiles = new ArrayList<File>();
     	if (fileStates != null)
     	{
+            logger.info("MindTouch content/tag/properties files total size: " + fileStates.length);
     		for (FileState fs : fileStates)
     		{
     			String file = fs.getFile();
@@ -682,8 +684,7 @@ public class Exporter
     	try
     	{
     		// Initialize one MindTouchHelper for all files from one job
-            String sourceLocale = wf.getJob().getL10nProfile()
-                    .getSourceLocale().toString();
+            String sourceLocale = wf.getJob().getL10nProfile().getSourceLocale().toString();
             String targetLocale = wf.getTargetLocale().toString();
         	long jobId = wf.getJob().getJobId();
             String srcLocale = "/" + sourceLocale + "/" + jobId + "/";
@@ -691,12 +692,10 @@ public class Exporter
     		MindTouchConnector mtc = null;
         	for (File trgFile : trgFiles)
         	{
-				MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale,
-						trgLocale, trgFile);
+                MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
         		if (pageInfo != null)
         		{
-					long mtcId = Long.parseLong(pageInfo
-							.getMindTouchConnectorId());
+                    long mtcId = Long.parseLong(pageInfo.getMindTouchConnectorId());
 					mtc = MindTouchManager.getMindTouchConnectorById(mtcId);
 					helper = new MindTouchHelper(mtc);
 
@@ -704,8 +703,12 @@ public class Exporter
         		}
         	}
 
-			if (!helper.isTargetServerExist(targetLocale)
-					&& !mtc.getIsPostToSourceServer())
+        	if (helper == null)
+        	{
+                logger.error("Fail to initialize MindTouchHelper, MindTouch files will NOT be pushed to target server, re-export is required!");
+        	}
+
+            if (!helper.isTargetServerExist(targetLocale) && !mtc.getIsPostToSourceServer())
         	{
         		return;
         	}
@@ -733,15 +736,19 @@ public class Exporter
         	}
 
         	// Post content files one by one
+            logger.info(contentFiles.size() + " content files need to be posted to target server.");
+            int count = 0;
         	for (File trgFile : contentFiles)
         	{
         		try
         		{
-					MindTouchPageInfo pageInfo = getMindTouchPageInfo(
-							srcLocale, trgLocale, trgFile);
-					helper.postPageContents(trgFile, pageInfo, sourceLocale,
-							targetLocale);
-                    logger.info("MindTouch content is posted to target server: " + trgFile);
+        		    count++;
+                    MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
+                    logger.info("Begin to post MindTouch content to target server[" + count + "]: "
+                            + pageInfo.getPath());
+                    helper.postPageContents(trgFile, pageInfo, sourceLocale, targetLocale);
+                    logger.info("End to post MindTouch content to target server[" + count + "]: "
+                            + trgFile);
         		}
         		catch (Exception e)
         		{
@@ -750,24 +757,28 @@ public class Exporter
         	}
 
         	// Put tag files one by one
+        	count = 0;
         	for (File trgFile : tagFiles)
         	{
-				MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale,
-						trgLocale, trgFile);
-				helper.putPageTags(trgFile, pageInfo, sourceLocale,
-						targetLocale);
-                logger.info("MindTouch tag is put to target server: " + trgFile);
+        	    count++;
+                MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
+                helper.putPageTags(trgFile, pageInfo, sourceLocale, targetLocale);
+                logger.info("MindTouch tag is put to target server[" + count + "]: " + trgFile);
         	}
 
         	// put properties files one by one
+        	count = 0;
         	for (File trgFile : propFiles)
         	{
-				MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale,
-						trgLocale, trgFile);
-				helper.putPageProperties(trgFile, pageInfo, sourceLocale,
-						targetLocale);
-                logger.info("MindTouch properties is put to target server: " + trgFile);
+        	    count++;
+                MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
+                helper.putPageProperties(trgFile, pageInfo, sourceLocale, targetLocale);
+                logger.info("MindTouch properties is put to target server[" + count + "]: " + trgFile);
         	}
+    	}
+    	catch (Exception e)
+    	{
+    	    logger.error(e);
     	}
     	finally
     	{

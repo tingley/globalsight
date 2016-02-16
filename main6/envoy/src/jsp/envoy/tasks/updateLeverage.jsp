@@ -33,6 +33,7 @@
     String selectedJobsNumber = bundle.getString("msg_selected_jobs_number");
     String noOptionSelected = bundle.getString("msg_no_update_leverage_option_selected");
     String helpFile = bundle.getString("help_update_leverage");
+    String reTryMT = bundle.getString("lb_retry_mt");
     // URLs
     String selfUrl = self.getPageURL();
     String updateUrl = selfUrl + "&action=updateLeverage";
@@ -167,7 +168,7 @@ $(document).ready(function()
     $("#update").click(function() {
     	selectedJobsForUpdate = "";
     	if (checkBeforeUpdate()) {
-    		var updateFromJobsChecked = null;
+    		var updateFromJobsChecked = null;  
     		if ($("#updateFromJobCheckBoxID").attr("checked") == "checked"){
     			updateFromJobsChecked = "on";
     		}
@@ -175,6 +176,10 @@ $(document).ready(function()
 			if ($("#reApplyReferenceTmsID").attr("checked") == "checked"){
     			reApplyChecked = "on";
     		}
+			var reTryChecked = null;
+			if($("#reTryMTID").attr("checked")=="checked"){
+				reTryChecked = "on";
+			}
     		var penalty = $("#inProgressTmPenaltyID").attr("value");
     		$.get('<%=updateUrl%>',
 				{
@@ -182,6 +187,7 @@ $(document).ready(function()
                   updateFromJobCheckBoxName: updateFromJobsChecked, 
 				  selectJobs: selectedJobsForUpdate,
 				  inProgressTmPenaltyName: penalty,
+				  reTryMTName: reTryChecked,
 				  userId: "<%=currentUserId%>"
 				},
 				function(data) {
@@ -248,7 +254,8 @@ $(document).ready(function()
 	{
 	    var ufj = document.getElementById("updateFromJobCheckBoxID").checked;
 	    var rrt = document.getElementById("reApplyReferenceTmsID").checked;
-	    if (ufj != true && rrt != true) {
+	    var rtm	= document.getElementById("reTryMTID").checked;
+	    if (ufj != true && rrt != true && rtm != true) {
 	        alert("<%=noOptionSelected%>");
 	        return false;
 	    }
@@ -437,9 +444,14 @@ function helpSwitch()
         <TD><input type="text" value="0" size=1 maxlength=3 id="inProgressTmPenaltyID" name="inProgressTmPenaltyName" <%=disabled%>/>%</TD>
     </TR>
     <TR><TD colspan="2" style="border:solid #ccc;border-width:0 0 1px 0;">&nbsp;</TD></TR>
-    <TR>
+     <TR>
       <TD style="padding-top: 15px; padding-bottom: 15px"><%=reApplyReferenceTMs%></TD>
       <TD style="padding-top: 15px; padding-bottom: 15px"><input type="checkbox" id="reApplyReferenceTmsID" name="reApplyReferenceTmsName" onclick="" class="standardText" />
+    </TR>
+     <TR><TD colspan="2" style="border:solid #ccc;border-width:0 0 1px 0;">&nbsp;</TD></TR>
+       <TR>
+      <TD style="padding-top: 15px; padding-bottom: 15px"><%=reTryMT%></TD>
+      <TD style="padding-top: 15px; padding-bottom: 15px"><input type="checkbox" id="reTryMTID" name="reTryMTName" onclick="" class="standardText" />
     </TR>
   </TABLE>
   

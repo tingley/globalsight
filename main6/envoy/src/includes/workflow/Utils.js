@@ -163,3 +163,51 @@ function timesAreValid(d, h, m)
             && numberIsValid(h, 0, 24 * 7)
             && numberIsValid(m, 0, 12 * 60);
 }
+
+function getDistance(p1, p2){
+	return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
+}
+
+// Gets the distance for the p3 to a line. The p1,p2 is the start and end for the line.
+function getLength(p1, p2, p3) {
+	
+	var x1;
+	var x2;
+	var y1;
+	var y2;
+	
+	if (p2.x < p1.x){
+		x1 = p2.x;
+		x2 = p1.x;
+	} else {
+		x1 = p1.x;
+		x2 = p2.x;		
+	}
+	
+	if (p2.y < p1.y){
+		y1 = p2.y;
+		y2 = p1.y;
+	} else {
+		y1 = p1.y;
+		y2 = p2.y;		
+	}
+	
+	if (p3.x < x1 || p3.x > x2){
+		if (x2 - x1 > 30)
+			return;
+	}
+		
+	
+	if (p3.y < y1 || p3.y > y2) {
+		if (y2 - y1 > 30)
+			return
+	}
+	
+	if (x2 - x1 < 3) {
+		return Math.abs(p3.x - p1.x);
+	} else {
+		var k=(p1.y-p2.y)/(p1.x-p2.x);
+	    var L=Math.abs(k * (p3.x-p1.x)-(p3.y-p1.y))/Math.sqrt((1+k*k));
+	    return L;
+	}
+}

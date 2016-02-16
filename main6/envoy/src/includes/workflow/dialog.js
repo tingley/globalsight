@@ -131,7 +131,14 @@ var Dialog = {
 		var roleName = node.getAssignmentValue("role_name");
 		var useAllUsers = node.getAssignmentValue("role_type") == "false";
 		if(useAllUsers){
-			$("#dialogUserSelect option[value='0']").attr("selected", true);
+			var rolePreference = node.getAssignmentValue("role_preference");
+			if (rolePreference == "availableResources")
+				$("#dialogUserSelect option[value='-1']").attr("selected", true);
+			else if (rolePreference == "fastestResources")
+				$("#dialogUserSelect option[value='-2']").attr("selected", true);
+			else
+			    $("#dialogUserSelect option[value='0']").attr("selected", true);
+			
 			UI.dialogUserTable.hide();
 		} else {
 			$("#dialogUserSelect option[value='1']").attr("selected", true);
@@ -224,7 +231,7 @@ var Dialog = {
 		
 		$("#selectAllUserCheckbox").attr("checked", false);
 		var dialogUserSelect = $("#dialogUserSelect").val();
-		if (dialogUserSelect == 0){
+		if (dialogUserSelect < 1){
 			var us = $(".userCheckbox");
 			if (us.length == 0) {
 				alert(msg_no_participant);
@@ -252,11 +259,19 @@ var Dialog = {
 		node.updateAssignmentValue("overdueToPM_time", overduePMTime);
 		node.updateAssignmentValue("overdueToUser_time", overdueUserTime);
 		
-		if (dialogUserSelect == 0){
+		if (dialogUserSelect <= 0){
 			node.updateAssignmentValue("role_type", "false"); 
 			node.updateAssignmentValue("role_name", "All qualified users");
 			var roles = getRoles(activityType);
 			node.updateAssignmentValue("roles", roles);
+			
+			if (dialogUserSelect == -1){
+				node.updateAssignmentValue("role_preference", "availableResources");
+			} else if (dialogUserSelect == -2){
+				node.updateAssignmentValue("role_preference", "fastestResources");
+			} else {
+				node.updateAssignmentValue("role_preference", "");
+			}
 		} else {
 			var us = $(".userCheckbox[checked]");
 			

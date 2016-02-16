@@ -1131,6 +1131,7 @@ function openAutoPropagate()
 <input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=jobId%>">
 <input type="hidden" name="<%=ReportConstants.TARGETLOCALE_LIST%>" value="<%=tgtIDS%>">
 <input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="">
+<input type="hidden" name="withCompactTagsCCR"  value="on">
 </FORM>
 
 <DIV id="idSnippetLibrary"

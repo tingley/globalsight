@@ -37,6 +37,7 @@ import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -557,21 +558,20 @@ public class LeverageUtil
             Tuv sourceTuv = (Tuv) o;
             id = sourceTuv.getId();
             Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
-            isLocalized = EditHelper.isTuvInProtectedState(targetTuv, p_jobId);
+            isLocalized = EditorHelper.isRealExactMatchLocalied(sourceTuv, targetTuv, p_matchTypes,
+                    p_subId, p_jobId);
         }
         else
         {
             SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
             id = sourceTuv.getId();
-            isLocalized = p_matchTypes.isExactMatchLocalized(id, p_subId,
-                    p_jobId);
+            isLocalized = p_matchTypes.isExactMatchLocalized(id, p_subId, p_jobId);
         }
 
         int state = p_matchTypes.getLingManagerMatchType(id, p_subId);
         int matchType = p_matchTypes.getStatisticsMatchType(id, p_subId);
 
-        return state == LeverageMatchLingManager.EXACT && matchType != 6
-                && isLocalized;
+        return state == LeverageMatchLingManager.EXACT && matchType != 6 && isLocalized;
     }
 
     /**

@@ -96,6 +96,10 @@ var Model = {
 			Model.nodeChanged();
  		}
 	},
+	selectTheNode : function (node) {
+		Model.selectedNode = node;
+		node.showPoints();
+	},
 	deleteNode : function(node) {
 		for (var i in node.froms) {
 			var l = node.froms[i];

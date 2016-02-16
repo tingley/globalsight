@@ -75,9 +75,10 @@ function addActivity(activity) {
 		n = Model.add(n);
 	}
 	
+	addedNodes[name] = n;
+	
     var next = activity["transition"]["@to"];
     var name = activity["transition"]["@name"];
-	
     addNext(n, next, name);
 	
 	return n;
@@ -97,6 +98,8 @@ function addCondition(condition) {
 		
 		n.josn = condition;
 	}	
+	
+	addedNodes[name] = n;
 	
 	//get default
 	var spec= handler["workflow_condition_spec"];		
@@ -141,13 +144,11 @@ function addNext(node, next, name, isDefault) {
 	if (t != null) {
 		var activity = addActivity(t);
 		LineData.addLineWithStartAndEnd(node, activity, name, isDefault);
-		addedNodes[next] = activity;
 	} else {
 		t = getCondition(next);
 		if (t != null) {
 			var condition = addCondition(t);
-			LineData.addLineWithStartAndEnd(node, condition, name, isDefault);
-			addedNodes[next] = condition;
+			LineData.addLineWithStartAndEnd(node, condition, name, isDefault);			
 		} 		
 	}
 }
@@ -213,6 +214,7 @@ function validateWorkflow() {
 	var tl = startNode.tos[0];
 	if (typeof(tl) == "undefined"){
 		alert(msg_start_no_out);
+		Model.selectTheNode(startNode);
 		return false;
 	}
 	
@@ -231,13 +233,25 @@ function validateWorkflow() {
 	
 	if (typeof(endNode) == "undefined"){
 		alert(msg_no_end_node);
+		Model.selectTheNode(endNode);
 		return false;
 	}
 	
 	tl = endNode.froms[0];
 	if (typeof(tl) == "undefined"){
 		alert(msg_end_no_income);
+		Model.selectTheNode(endNode);
 		return false;
+	}
+	
+	for ( var i in LineData.lines) {
+		var l = LineData.lines[i];
+		
+		if (!l.from || l.from.id == -1 || !l.to || l.to.id == -1) {
+			alert(msg_line_no_node);
+			LineData.selectTheLine(l);
+			return false;
+		}
 	}
 	
 	// for other
@@ -247,12 +261,14 @@ function validateWorkflow() {
 			tl = node.froms[0];
 			if (typeof(tl) == "undefined"){
 				alert(msg_no_income);
+				Model.selectTheNode(node);
 				return false;
-			}
+			}			
 			
 			tl = node.tos[0];
 			if (typeof(tl) == "undefined"){
 				alert(msg_no_out);
+				Model.selectTheNode(node);
 				return false;
 			}
 			
@@ -260,6 +276,7 @@ function validateWorkflow() {
 				var activity = node.getAssignmentValue("activity"); 
 				if (activity == "") {
 					alert(msg_no_activity);
+					Model.selectTheNode(node);
 					return false;
 				}
 			}			
@@ -289,6 +306,8 @@ function getWorkflowXml() {
 	
 	var node = startNode;
 	var xml = "";
+	
+	generatingNode[node.id] = "Start";
 	
 	// start node.
 	endData["x1"] = getTemplateNumber(node.locale.x);
@@ -337,9 +356,13 @@ function generateActivityNode(node) {
 	data["role_name"] = node.getAssignmentValue("role_name"); 
 	
 	data["action_type"] = node.getAssignmentValue("action_type"); 
+	data["role_preference"] = node.getAssignmentValue("role_preference"); 
 	
 	data["x"] = getTemplateNumber(node.locale.x);
 	data["y"] = getTemplateNumber(node.locale.y);
+	
+	var name = "node_" + n + "_" + node.getAssignmentValue("activity");
+	generatingNode[node.id] = name;
 	
 	var tl = node.tos[0];
 	data["transition"] = tl.data.txt;
@@ -353,7 +376,7 @@ function generateActivityNode(node) {
 	xml = xml + getXmlOnce(ob);
 	
 	var returnValue= {};
-	returnValue["name"] = "node_" + n + "_" + node.getAssignmentValue("activity");
+	returnValue["name"] = name
 	returnValue["xml"] = xml;
 	return returnValue;
 }
@@ -386,6 +409,8 @@ function generateConditionNode(node) {
 	var transitionData = {};
 	var data = {};
 	var name = "node_" + n + "Condition Node";
+	generatingNode[node.id] = name;
+	
 	data["decision"] = name;
 	data["x"] = getTemplateNumber(node.locale.x);
 	data["y"] = getTemplateNumber(node.locale.y);
@@ -440,11 +465,21 @@ function getXmlOnce(node) {
 }
 
 var generatedNode = {};
+var generatingNode = {};
+
 function getNextNodeXml(node) {
 	
 	var v = generatedNode[node.id];
 	if (typeof(v) != "undefined") {
 		return v;
+	} 
+	
+	v = generatingNode[node.id];
+	if (typeof(v) != "undefined") {
+		return {
+			name : v,
+			xml : " "
+		};
 	}
 	
 	if (node.type == "activityNode") {

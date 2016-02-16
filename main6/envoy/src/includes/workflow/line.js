@@ -23,7 +23,6 @@ var LineData = {
 		this.line = l;
 		var c = UI.canvasDiv;
 		var div = $("<div id='" + l.id + "' class='line_box '><canvas class='shape_canvas'></canvas>" +
-				"<canvas class='rect_canvas' width='0' height='0' style='position: absolute;'></canvas>" +
 				"<canvas class='startPoint_canvas' width='0' height='0' style='position: absolute;'></canvas>" +
 				"<canvas class='endPoint_canvas' width='0' height='0' style='position: absolute;'></canvas>" +
 				"<input type='text' class='txt' id='txt" + l.id + "'/>" +
@@ -47,6 +46,10 @@ var LineData = {
 		});
 
 		return l;
+	},
+	selectTheLine : function(l){
+		LineData.selectedLine = l;
+		l.updateLocale();
 	},
 	deleteLine : function(l) {
 		if (l.from && l.from.id != -1) {
@@ -74,7 +77,7 @@ var LineData = {
 		for ( var i in start.froms) {
 			var l = start.tos[i];
 			
-			if (l.from.id == start.id && l.to.id == end.id)
+			if (l && l.from.id == start.id && l.to.id == end.id)
 				return null;
 		}
 		
@@ -99,10 +102,11 @@ var LineData = {
 
 	},
 	getLineByPoint : function(e) {
+		var loc = Utils.toViewPoint(e);
 		for ( var i in this.lines) {
 			var l = this.lines[i];
-			var p = Utils.windowToCanvas(l.getDiv(), e.clientX, e.clientY);
-			if (l.includePoint(p))
+			var r = getLength(l.from, l.to, loc);
+			if (r < 5)
 				return l;
 		}
 
@@ -120,6 +124,12 @@ var LineData = {
 		
 		var node = Model.getNodeByPoint(e);
 		if (node != null && node.id != l.from.id) {
+			// can not add line to start node.
+			if (node.type == "startNode"){
+				LineData.deleteLine(l);
+				return;
+			}				
+			
 			l.to.id = node.id;
 			node.froms.push(l);
 			l.updateTo(e);
@@ -345,8 +355,6 @@ function Line() {
 		this.showTxt();
 	};
 	this.showTxt = function() {
-		log("showTxt");
-		
 		var s = this.data.txt;
 		var div = this.getDiv();
 		var txtDiv = div.find(".txt");
@@ -496,57 +504,19 @@ function Line() {
 
 		div.show();
 		
-		// update rect
-		var context2 = div.find(".rect_canvas")[0].getContext("2d");
-		context2.beginPath();
-		canvas.width = canvas.width;
-		context2.clearRect(0, 0, rect.w + 100, rect.h + 100);
-		
-		var n = 5;
-		context2.beginPath();
-		context2.moveTo(p1.x - n, p1.y - n);
-		context2.lineTo(p1.x + n, p1.y + n);
-		context2.lineTo(p2.x + n, p2.y + n);
-		context2.lineTo(p2.x - n, p2.y - n);
-		context2.closePath();
-		context2.stroke();
-		
-		// update start point
-		var canvas3 = div.find(".startPoint_canvas")[0];
-		var context3 = canvas3.getContext("2d");
-		context3.beginPath();
-		context3.clearRect(0, 0, rect.w + 100, rect.h + 100);
-		context3.rect(p1.x - 10, p1.y - 10, 20, 20);
-		context3.stroke();
-		
-		// update end point
-		var context4 = div.find(".endPoint_canvas")[0].getContext("2d");
-		context4.beginPath();
-		context4.clearRect(0, 0, rect.w + 100, rect.h + 100);
-		context4.rect(p2.x - 20, p2.y - 20, 40, 40);
-		context4.stroke();
-		
 		var txt = div.find("#txt" + this.id);
 		this.data.txt = txt.val();			
 
 		this.showTxt();
 	};
 	
-	this.includePoint = function(p) {
-		var div = this.getDiv();
-		var context2 = div.find(".rect_canvas")[0].getContext("2d");
-		return context2.isPointInPath(p.x, p.y);
+	this.isOnEndPoint = function(e) {
+		var loc = Utils.toViewPoint(e);		
+		return getDistance(loc, this.to) < 150;
 	};
-	
-	this.isOnEndPoint = function(p) {
-		var div = this.getDiv();
-		var context2 = div.find(".endPoint_canvas")[0].getContext("2d");
-		return context2.isPointInPath(p.x, p.y);
-	};
-	this.isOnStartPoint = function(p) {
-		var div = this.getDiv();
-		var context2 = div.find(".startPoint_canvas")[0].getContext("2d");
-		return context2.isPointInPath(p.x, p.y);
+	this.isOnStartPoint = function(e) {
+		var loc = Utils.toViewPoint(e);		
+		return getDistance(loc, this.from) < 150;
 	};
 	this.isSelected = function() {
 		if (LineData.selectedLine && LineData.selectedLine.id == this.id){

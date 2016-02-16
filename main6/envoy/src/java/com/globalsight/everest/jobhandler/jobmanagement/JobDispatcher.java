@@ -356,7 +356,9 @@ public class JobDispatcher
         calculateWordCounts(job);
         if (Job.DISPATCHED.equals(nextState))
         {
-            if (job.hasSetCostCenter())
+         // do not automatic dispatch job for AEM jobs
+            if (job.hasSetCostCenter()
+                    && !"aem_gs_translator".equals(job.getJobType()))
             {
                 toDispatch(job);
             }

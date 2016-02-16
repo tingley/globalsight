@@ -105,6 +105,11 @@ function fnCheckAll()
 				$("#ReviewersSimpleIncludeTagsTR").show();
 				$("#ReviewersSimpleIncludeTags").attr("checked", true);
 			}
+			else if(this.value == "CharacterCountReport")
+			{
+				$("#CharacterCountReportIncludeTagsTR").show();
+				$("#CharacterCountReportIncludeTags").attr("checked", true);
+			}
 		})
 	}else{
 		$("input[name='checkReport']").each(function(){
@@ -118,6 +123,11 @@ function fnCheckAll()
 			{
 				$("#ReviewersSimpleIncludeTagsTR").hide();
 				$("#ReviewersSimpleIncludeTags").attr("checked", false);
+			}
+			else if(this.value == "CharacterCountReport")
+			{
+				$("#CharacterCountReportIncludeTagsTR").hide();
+				$("#CharacterCountReportIncludeTags").attr("checked", false);
 			}
 		})
 	}
@@ -191,6 +201,18 @@ function checkSaveUnlSeg(obj)
 			$("#ReviewersSimpleIncludeTags").attr("checked", false);
 		}
 	}
+	else if(obj.value == "CharacterCountReport")
+	{
+		if(obj.checked)
+		{
+			$("#CharacterCountReportIncludeTagsTR").show();
+		}
+		else
+		{
+			$("#CharacterCountReportIncludeTagsTR").hide();
+			$("#CharacterCountReportIncludeTags").attr("checked", false);
+		}
+	}
 }
 
 $(document).ready(function(){
@@ -202,6 +224,7 @@ $(document).ready(function(){
 	$('#checkAll').click(fnCheckAll);
 	$("#ReviewersIncludeTagsTR").hide();
 	$("#ReviewersSimpleIncludeTagsTR").hide();
+	$("#CharacterCountReportIncludeTagsTR").hide();
 });
 </script>
 </HEAD>
@@ -314,7 +337,7 @@ $(document).ready(function(){
         
         <amb:permission name="<%=Permission.REPORTS_CHARACTER_COUNT%>">
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-        	<TD><input type="checkbox" name="checkReport" value="<%=ReportConstants.CHARACTER_COUNT_REPORT%>"></TD>
+        	<TD><input type="checkbox" name="checkReport"  onclick="checkSaveUnlSeg(this)"  value="<%=ReportConstants.CHARACTER_COUNT_REPORT%>"></TD>
             <TD>
 				<A CLASS=standardHREF href="javascript:;" onclick="javascript:fnGenerateReport(this.parentNode.parentNode);">
              		<%=bundle.getString("character_count_report")%>
@@ -322,6 +345,14 @@ $(document).ready(function(){
             </TD>
             <TD>XLSX</TD>
             <TD><%=bundle.getString("character_count_report_desc")%></TD>
+            <TR id="CharacterCountReportIncludeTagsTR" CLASS="standardText">
+         	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        	<TD>
+        		<INPUT TYPE="checkbox" ID="CharacterCountReportIncludeTags" NAME="withCompactTagsCCR"><%=bundle.getString("with_compact_tags")%>
+        	</TD>
+        	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        	<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        </TR>
         </TR>
         </amb:permission>
         

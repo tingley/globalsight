@@ -17,6 +17,7 @@
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +32,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 
-import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.WfTemplateSearchParameters;
@@ -55,6 +56,7 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.log.OperationLog;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.StringUtil;
+import com.sun.jndi.toolkit.url.UrlUtil;
 
 /**
  * WorkflowTemplateHandler is the page handler responsible for displaying a list
@@ -64,6 +66,8 @@ import com.globalsight.util.StringUtil;
 public class WorkflowTemplateHandler extends PageHandler implements
         WorkflowTemplateConstants
 {
+    private static final Logger CATEGORY = Logger
+            .getLogger(WorkflowTemplateHandler.class.getName());
 
     // non user related state
     private int m_numOfWfsPerPage; // number of workflow templates per page
@@ -230,12 +234,61 @@ public class WorkflowTemplateHandler extends PageHandler implements
                 + File.separator
                 + templateName + WorkflowConstants.SUFFIX_XML;
         File file = new File(templateFileName);
-        // if (!file.exists()) {
-        // throw new EnvoyServletException("");
-        // }
-        CommentFilesDownLoad download = new CommentFilesDownLoad();
-        download.sendFileToClient(p_request, p_response, templateName
+        sendFileToClient(p_request, p_response, templateName
                 + WorkflowConstants.SUFFIX_XML, file);
+    }
+    
+    // The old method is using CommentFilesDownLoad.sendFileToClient(). 
+    // This will cause the XML file to be deleted¡£ So rewrite it again.
+    public void sendFileToClient(HttpServletRequest request,
+            HttpServletResponse response, String zipFileName, File workflowXml)
+    {
+        if (request.isSecure())
+        {
+            PageHandler.setHeaderForHTTPSDownload(response);
+        }
+        FileInputStream fis = null;
+        try
+        {
+            response.setContentType("application/zip");
+            String attachment = "attachment; filename=\""
+                    + UrlUtil.encode(zipFileName, "utf-8") + "\";";
+            response.setHeader("Content-Disposition", attachment);
+            response.setContentLength((int) workflowXml.length());
+            byte[] inBuff = new byte[4096];
+            fis = new FileInputStream(workflowXml);
+            int bytesRead = 0;
+            while ((bytesRead = fis.read(inBuff)) != -1)
+            {
+                response.getOutputStream().write(inBuff, 0, bytesRead);
+            }
+
+            if (bytesRead > 0)
+            {
+                response.getOutputStream().write(inBuff, 0, bytesRead);
+            }
+
+            fis.close();
+        }
+        catch (IOException e)
+        {
+            CATEGORY.error(e);
+        }
+        finally
+        {
+            if (fis != null)
+            {
+                try
+                {
+                    fis.close();
+                }
+                catch (IOException e)
+                {
+                    CATEGORY.error(e);
+                }
+            }
+        }
+
     }
 
     /**

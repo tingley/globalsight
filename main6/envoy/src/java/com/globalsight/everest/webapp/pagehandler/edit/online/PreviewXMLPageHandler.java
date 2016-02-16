@@ -71,6 +71,7 @@ public class PreviewXMLPageHandler extends PageHandler
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
+        p_response.setHeader("Content-Type", "text/html");
         HttpSession session = p_request.getSession(true);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);

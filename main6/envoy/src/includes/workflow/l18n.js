@@ -19,6 +19,7 @@ var lb_add_condition = '<%=bundle.getString("lb_add_condition")%>';
 
 var msg_edit_activity = '<%=bundle.getString("msg_edit_activity")%>';
 var lb_rate_none = '<%=bundle.getString("lb_rate_none")%>';
+var msg_line_no_node = '<%=bundle.getString("msg_line_no_node")%>';
 var msg_noActivity = '<%=bundle.getString("jsmsg_rate_activity_type")%>';
 var msg_loc_profiles_time_restrictions = '<%=bundle.getString("msg_loc_profiles_time_restrictions")%>';
 var msg_loc_profiles_overdue_time_restrictions = '<%=bundle.getString("msg_loc_profiles_overdue_time_restrictions")%>';

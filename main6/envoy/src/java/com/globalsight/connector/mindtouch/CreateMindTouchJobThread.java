@@ -64,7 +64,6 @@ import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.RuntimeCache;
-import com.globalsight.util.edit.EditUtil;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 
 public class CreateMindTouchJobThread implements Runnable
@@ -137,8 +136,7 @@ public class CreateMindTouchJobThread implements Runnable
 					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
 					Job.JOB_TYPE_MINDTOUCH);
 
-            String sourceLocaleName = l10Profile.getSourceLocale()
-                    .getLocaleCode();
+            String sourceLocaleName = l10Profile.getSourceLocale().getLocaleCode();
             // init files and file profiles infomation
             List<String> descList = new ArrayList<String>();
             retrieveRealFilesFromMindTouch(descList, job, files, sourceLocaleName);
@@ -358,9 +356,8 @@ public class CreateMindTouchJobThread implements Runnable
         return targetLocaleString.toString();
     }
     
-    private void retrieveRealFilesFromMindTouch(List<String> descList, Job job,
-            List<String> files, String sourceLocale)
-            throws Exception
+    private void retrieveRealFilesFromMindTouch(List<String> descList, Job job, List<String> files,
+            String sourceLocale) throws Exception
     {
         String pageId = null;
         String pageInfoXml = null;
@@ -404,44 +401,30 @@ public class CreateMindTouchJobThread implements Runnable
 
                 if (mtp != null)
                 {
-					String externalPageId = getFilePath(sourceLocale,
-							job.getId(), mtp, flag);
-                    srcFile = new File(
-                            AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
-                                    + File.separator + externalPageId);
+                    String externalPageId = getFilePath(sourceLocale, job.getId(), mtp, flag);
+                    srcFile = new File(AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
+                            + File.separator + externalPageId);
                     if ("contents".equals(flag))
                     {
                         sourceContent = helper.getPageContents(pageId);
-                        int index = sourceContent.indexOf("<body>");
-                        String content = sourceContent.substring(0, index);
-                        String body = sourceContent.substring(index);
-        				// Per testing, decode is required. Only decode <body>.
-                        body = EditUtil.decodeXmlEntities(body);
-                        sourceContent = content + body;
-    					sourceContent = MindTouchHelper
-    							.fixTitleValueInContentXml(sourceContent);
                     }
                     else if ("tags".equals(flag))
                     {
                         sourceContent = helper.getPageTags(Long.parseLong(pageId));
-                        sourceContent = EditUtil.decodeXmlEntities(sourceContent);
                     }
                     else if("properties".equals(flag))
                     {
                     	sourceContent = helper.getPageProperties(Long.parseLong(pageId));
-                    	sourceContent = EditUtil.decodeXmlEntities(sourceContent);
                     }
-                    FileUtil.writeFile(srcFile, sourceContent);
+                    FileUtil.writeFile(srcFile, sourceContent, "UTF-8");
                     descList.add(externalPageId);
                     logger.info("MindTouch page is retrieved from MindTouch server: " + externalPageId);
 
                     // save one ".obj" file with same pathname which is used to send
                     // translated files back to MindTouch server.
                     String objFilePathName = externalPageId + ".obj";
-					objFile = new File(
-							AmbFileStoragePathUtils
-									.getCxeDocDir(currentCompanyId)
-									+ File.separator + objFilePathName);
+                    objFile = new File(AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
+                            + File.separator + objFilePathName);
                     JSONObject json = new JSONObject();
                     json.put("mindTouchConnectorId", String.valueOf(conn.getId()));
                     json.put("pageId", pageId);

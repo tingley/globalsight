@@ -1947,6 +1947,7 @@ function mtTranslation()
            {
         	   var tranReplaced = returnData.translatedString_replaced;
         	   var tranContents = returnData.translatedString;
+        	   document.getElementById('blankLine').style.display = "none";
         	   document.getElementById('<%=MTHelper2.MT_TRANSLATION_DIV%>').innerHTML=tranReplaced;
         	   document.getElementById('idMtContents').innerHTML = tranContents;
         	   

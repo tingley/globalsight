@@ -429,40 +429,49 @@ public class MindTouchHelper
     
     public String getPageFiles(String pageId)
     {
-    	CloseableHttpClient httpClient = getHttpClient();
-        try
+        CloseableHttpClient httpClient = getHttpClient();
+        String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/files";
+
+        int count = 0;
+        String pageFilesXml = null;
+        while (pageFilesXml == null && count < 3)
         {
-            String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/files";
-            HttpGet httpget = getHttpGet(url);
-
-            HttpResponse httpResponse = httpClient.execute(httpget);
-
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode == 200)
+            count++;
+            if (count > 1)
             {
-                return EntityUtils.toString(httpResponse.getEntity());
+                logger.info("Retry to getPageFiles for url: " + url);
             }
-            else
+            try
             {
-                logger.warn("Fail to get page files for pageId " + pageId
-                        + " : " + httpResponse.getStatusLine().toString());
+                HttpGet httpget = getHttpGet(url);
+                HttpResponse httpResponse = httpClient.execute(httpget);
+                int statusCode = httpResponse.getStatusLine().getStatusCode();
+                if (statusCode == 200)
+                {
+                    pageFilesXml = EntityUtils.toString(httpResponse.getEntity());
+                }
+                else
+                {
+                    logger.warn("Fail to get page files for pageId " + pageId
+                            + " : " + httpResponse.getStatusLine().toString());
+                }
+            }
+            catch (Exception e)
+            {
+                logger.error("Fail to get page files for pageId: " + pageId, e);
             }
         }
-        catch (Exception e)
-        {
-            logger.error("Fail to get page files for pageId: " + pageId, e);
-        }
 
-        return null;
+        return pageFilesXml;
     }
     
     public String getPageFile(String url)
     {
+        logger.info("getPageFile url: " + url);
     	CloseableHttpClient httpClient = getHttpClient();
         try
         {
             HttpGet httpget = getHttpGet(url);
-            logger.info("getPageFile url: " + url);
             HttpResponse httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -511,8 +520,12 @@ public class MindTouchHelper
 			throws DocumentException
     {
     	String filesXml = getPageFiles(pageId);
-    	HashMap<String, String> fileMap = new HashMap<String, String>();
-    	
+        if (StringUtil.isEmpty(filesXml))
+        {
+            return content;
+        }
+
+        HashMap<String, String> fileMap = new HashMap<String, String>();
     	Document doc = getDocument(filesXml);
     	List propertyNodes = doc.selectNodes("//contents ");
     	Iterator it = propertyNodes.iterator();
@@ -521,7 +534,11 @@ public class MindTouchHelper
     	{
     		Element propertyNode = (Element) it.next();
     		sourceFileUrl = propertyNode.attributeValue("href");
-    		fileMap.put(sourceFileUrl, getPageFile(sourceFileUrl));
+    		String filePath = getPageFile(sourceFileUrl);
+    		if (filePath != null)
+    		{
+                fileMap.put(sourceFileUrl, filePath);
+    		}
     	}
 
     	if(fileMap.size() > 0)
@@ -697,46 +714,69 @@ public class MindTouchHelper
             while (times < 2)
             {
         		times++;
-        		String tmpContent = content;
-            	tmpContent = StringUtil.replace(tmpContent, "&lt;", "&#60;");
-            	tmpContent = StringUtil.replace(tmpContent, "&gt;", "&#62;");
-            	tmpContent = StringUtil.replace(tmpContent, "&nbsp;", "&#160;");
-            	if (times == 1) {
-            		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
-            		tmpContent = EditUtil.decodeXmlEntities(tmpContent);
-            	}
-            	tmpContent = tmpContent.substring(tmpContent.indexOf("<body>") + 6);
-            	tmpContent = tmpContent.substring(0, tmpContent.indexOf("</body>"));
-                StringEntity reqEntity = new StringEntity(tmpContent, "UTF-8");
-                reqEntity.setContentType("text/plain; charset=UTF-8");
+        		try
+        		{
+                    String tmpContent = content;
+                    tmpContent = EditUtil.decodeXmlEntities(tmpContent);
+                    // empty body
+                    if (tmpContent.indexOf("<body/>") > -1)
+                    {
+                        tmpContent = "";
+                    }
+                    // normal case
+                    else
+                    {
+                        tmpContent = tmpContent.substring(tmpContent.indexOf("<body>") + 6);
+                        tmpContent = tmpContent.substring(0, tmpContent.indexOf("</body>"));
+                    }
+                    StringEntity reqEntity = new StringEntity(tmpContent, "UTF-8");
+                    reqEntity.setContentType("text/plain; charset=UTF-8");
 
-                path = getNewPath(pageInfo, sourceLocale, targetLocale);
-    			String strUrl = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path
-    					+ "/contents?edittime=now&abort=never";
-    			if (title != null) {
-    				strUrl += "&title=" + title;
-    			}
-    			URL url = new URL(strUrl);
-    			URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(),
-    					url.getQuery(), null);
-    			HttpPost httppost = getHttpPost(uri, targetLocale);
+                    path = getNewPath(pageInfo, sourceLocale, targetLocale);
+                    String strUrl = getPutServerUrl(targetLocale) + "/@api/deki/pages/=" + path
+                            + "/contents?edittime=now&abort=never";
+                    if (title != null)
+                    {
+                        strUrl += "&title=" + title;
+                    }
+                    URL url = new URL(strUrl);
+                    URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(),
+                            url.getQuery(), null);
+                    HttpPost httppost = getHttpPost(uri, targetLocale);
 
-    			httppost.setEntity(reqEntity);
-                HttpResponse response = httpClient.execute(httppost);
+                    httppost.setEntity(reqEntity);
+                    HttpResponse response = httpClient.execute(httppost);
 
-                String entityContent = null;
-                if (response.getEntity() != null) {
-                    entityContent = EntityUtils.toString(response.getEntity());
-                }
-                if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
-                {
-					logger.error("Fail to post contents back to MindTouch server for page '"
-							+ path + "' : " + entityContent);
-                }
-                else
-                {
-                	break;
-                }
+                    if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+                    {
+                        String msg = "";
+                        String entityContent = null;
+                        if (response.getEntity() != null)
+                        {
+                            entityContent = EntityUtils.toString(response.getEntity());
+                        }
+                        if (times == 1)
+                        {
+                            msg = "First try ";
+                        }
+                        else
+                        {
+                            msg = "Second try ";
+                        }
+                        msg += "fails to post contents back to MindTouch server for page '" + path
+                                + "' : " + entityContent;
+                        logger.error(msg);
+                    }
+                    else
+                    {
+                        break;
+                    }
+        		}
+        		catch (Exception e)
+        		{
+                    logger.error("Fail to post contents back to MindTouch server for " + times
+                            + "times for page '" + path + "'.", e);
+        		}
             }
         }
         catch (Exception e)
@@ -822,43 +862,54 @@ public class MindTouchHelper
     	}
 
     	CloseableHttpClient httpClient = getHttpClient();
+        String entityContent = null;
+        int count = 0;
         String path = null;
-        try
+        File picFile = null;
+        while (entityContent == null && count < 3)
         {
-        	String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
-        	String tempFileName = URLEncoder.encode(fileName);
-        	tempFileName = URLEncoder.encode(tempFileName);
-        	path = getNewPath(pageInfo, sourceLocale, targetLocale);
-			String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/="
-					+ path + "/files/=" + tempFileName;
-            HttpPut httpput = getHttpPut(url, targetLocale);
-            File picFile = new File(filePath);
-            FileEntity reqEntity = new FileEntity(picFile);
-            httpput.setEntity(reqEntity);
-            
-            HttpResponse response = httpClient.execute(httpput);
-
-            String entityContent = null;
-            if (response.getEntity() != null) {
-                entityContent = EntityUtils.toString(response.getEntity());
-            }
-            if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+            count++;
+            try
             {
-				logger.error("Fail to put file back to MindTouch server for file '"
-						+ filePath + "' : " + entityContent);
-            }
-            picFile.delete();
+                String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+                String tempFileName = URLEncoder.encode(fileName);
+                tempFileName = URLEncoder.encode(tempFileName);
+                path = getNewPath(pageInfo, sourceLocale, targetLocale);
+                String url = getPutServerUrl(targetLocale) + "/@api/deki/pages/="
+                        + path + "/files/=" + tempFileName;
+                if (count > 1)
+                {
+                    logger.info("Retry to putPageFile for url: " + url);
+                }
+                HttpPut httpput = getHttpPut(url, targetLocale);
+                picFile = new File(filePath);
+                FileEntity reqEntity = new FileEntity(picFile);
+                httpput.setEntity(reqEntity);
+                
+                HttpResponse response = httpClient.execute(httpput);
 
-            return entityContent;
+                if (response.getEntity() != null) {
+                    entityContent = EntityUtils.toString(response.getEntity());
+                }
+                if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+                {
+                    logger.error("Fail to put file back to MindTouch server for file '"
+                            + filePath + "' : " + entityContent);
+                }
+            }
+            catch (Exception e)
+            {
+                logger.error(
+                        "Fail to put file back to MindTouch server for file '"
+                                + filePath + "'.", e);
+            }
         }
-        catch (Exception e)
+        if (picFile != null && picFile.exists())
         {
-            logger.error(
-                    "Fail to put file back to MindTouch server for file '"
-                            + filePath + "'.", e);
+            picFile.delete();
         }
-        
-        return null;
+
+        return entityContent;
     }
     
     public static byte[] File2byte(String filePath)  
@@ -1236,7 +1287,12 @@ public class MindTouchHelper
     	try
     	{
     		contentXml = fixTitleValueInContentXml(contentXml);
-    		String content = contentXml.substring(0, contentXml.indexOf("<body>"));
+    		int index = contentXml.indexOf("<body>");
+    		if (index == -1)
+    		{
+    		    index = contentXml.indexOf("<body");
+    		}
+    		String content = contentXml.substring(0, index);
     		content = content.replace("&nbsp;", " ");
     		content += "</content>";
     		Element root = getDocument(content).getRootElement();

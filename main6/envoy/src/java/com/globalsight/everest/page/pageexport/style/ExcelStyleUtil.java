@@ -171,12 +171,48 @@ public class ExcelStyleUtil extends StyleUtil
      */
     private void forStylesInWt(String path) throws Exception
     {
+        File file = new File(path);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         BufferedReader br = new BufferedReader(new InputStreamReader(
-                new FileInputStream(new File(path)), "utf-8"));
+                new FileInputStream(file), "utf-8"));
 
-        Document document = db.parse(new InputSource(br));
+        Document document = null;
+        try
+        {
+            document = db.parse(new InputSource(br));
+        }
+        catch (Exception e1)
+        {
+            try
+            {
+                br.close();
+            }
+            catch (Exception e2)
+            {
+                // ignore;
+            }
+
+            try
+            {
+                String content = FileUtil.readFile(file, "UTF-8");
+
+                while (content.charAt(0) != '<')
+                {
+                    content = content.substring(1);
+                }
+                FileUtil.writeFile(file, content, "UTF-8");
+
+                br = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(file), "utf-8"));
+                document = db.parse(new InputSource(br));
+            }
+            catch (Exception e2)
+            {
+                s_logger.error(e1);
+            }
+        }
+        
         List<Style> styles = getAllStyles();
 
         // For style node can be nested. Adding styles should be execute several
@@ -229,11 +265,48 @@ public class ExcelStyleUtil extends StyleUtil
     {
         try
         {
+            File file = new File(filePath);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             BufferedReader br = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(new File(filePath)), "utf-8"));
-            Document document = db.parse(new InputSource(br));
+                    new FileInputStream(file), "utf-8"));
+            Document document = null;
+            try
+            {
+                document = db.parse(new InputSource(br));
+            }
+            catch (Exception e1)
+            {
+                try
+                {
+                    br.close();
+                }
+                catch (Exception e2)
+                {
+                    // ignore;
+                }
+
+                try
+                {
+                    String content = FileUtil.readFile(file, "UTF-8");
+
+                    while (content.charAt(0) != '<')
+                    {
+                        content = content.substring(1);
+                    }
+                    FileUtil.writeFile(file, content, "UTF-8");
+
+                    br = new BufferedReader(new InputStreamReader(
+                            new FileInputStream(file), "utf-8"));
+                    document = db.parse(new InputSource(br));
+                }
+                catch (Exception e2)
+                {
+                    s_logger.error(e1);
+                }
+            }
+            
+            
             String name = document.getFirstChild().getNodeName();
             if (ExcelExtractor.usePptxStyle(name))
             {

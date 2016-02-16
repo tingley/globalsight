@@ -1020,6 +1020,11 @@ HtmlFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("</tr>");
 	
 	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsAddRtlDirectionality + "</td>");
+	str.append("<td class='htmlFilter_right_td'><input id='addRtlDirectionality' type='checkbox' name='addRtlDirectionality' checked></td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsWhitespaceHandling + "</td>");
 	str.append("<td class='htmlFilter_right_td'>" + this.generateWhitespaceHandling() + "</td>");
 	str.append("</tr>");
@@ -1185,6 +1190,7 @@ HtmlFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 	
 	var isCheckHtmlEntry = (this.filter.convertHtmlEntry) ? "checked":"";
 	var isCheckIgnoreInvalideHtmlTags = (this.filter.ignoreInvalideHtmlTags) ? "checked":"";
+	var isCheckAddRtlDirectionality = (this.filter.addRtlDirectionality) ? "checked":"";
 	str.append("<table border=0 width='425px'>");
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsConvertHTMLEntity + "</td>");
@@ -1194,6 +1200,11 @@ HtmlFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsIgnoreInvalidHTMLTags + "</td>");
 	str.append("<td class='htmlFilter_right_td'><input id='ignoreInvalideHtmlTags' type='checkbox' name='ignoreInvalideHtmlTags' "+isCheckIgnoreInvalideHtmlTags+"></input></td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsAddRtlDirectionality + "</td>");
+	str.append("<td class='htmlFilter_right_td'><input id='addRtlDirectionality' type='checkbox' name='addRtlDirectionality' "+isCheckAddRtlDirectionality+"></input></td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");
@@ -1344,6 +1355,7 @@ function saveHtmlFilter()
 	var filterDesc = document.getElementById("htmlFilterDesc").value;
 	var convertHtmlEntry = document.getElementById("convertHtmlEntry").checked;
 	var ignoreInvalideHtmlTags = document.getElementById("ignoreInvalideHtmlTags").checked;
+	var addRtlDirectionality = document.getElementById("addRtlDirectionality").checked;
 //	var extractCharset = document.getElementById("extractCharset").checked;
 	var localizeFunction = document.getElementById("localizeFunction").value;
 	var baseFilterId = document.getElementById("html_filter_baseFilterSelect").value;
@@ -1362,6 +1374,7 @@ function saveHtmlFilter()
 		filterDesc : filterDesc,
 		convertHtmlEntry : convertHtmlEntry,
 		ignoreInvalideHtmlTags : ignoreInvalideHtmlTags,
+		addRtlDirectionality : addRtlDirectionality,
 		whitespacePreserve : whitespacePreserve,
 //		extractCharset : extractCharset,
 		localizeFunction : localizeFunction,
@@ -1441,6 +1454,7 @@ function updateHtmlFilterCallback(data)
 		//htFilter.placeHolderTrim = checkExistHtmlFilterCallback.obj.
 		htFilter.convertHtmlEntry = checkExistHtmlFilterCallback.obj.convertHtmlEntry;
 		htFilter.ignoreInvalideHtmlTags = checkExistHtmlFilterCallback.obj.ignoreInvalideHtmlTags;
+		htFilter.addRtlDirectionality = checkExistHtmlFilterCallback.obj.addRtlDirectionality;
 		htFilter.whitespacePreserve = checkExistHtmlFilterCallback.obj.whitespacePreserve;
 //		htFilter.extractCharset = checkExistHtmlFilterCallback.obj.extractCharset;
 		htFilter.jsFunctionText = checkExistHtmlFilterCallback.obj.localizeFunction;
@@ -1489,6 +1503,7 @@ function saveHtmlFilterCallback(data)
 		//htFilter.placeHolderTrim = checkExistHtmlFilterCallback.obj.
 		htFilter.convertHtmlEntry = checkExistHtmlFilterCallback.obj.convertHtmlEntry;
 		htFilter.ignoreInvalideHtmlTags = checkExistHtmlFilterCallback.obj.ignoreInvalideHtmlTags;
+		htFilter.addRtlDirectionality = checkExistHtmlFilterCallback.obj.addRtlDirectionality;
 		htFilter.whitespacePreserve = checkExistHtmlFilterCallback.obj.whitespacePreserve;
 		htFilter.jsFunctionText = checkExistHtmlFilterCallback.obj.localizeFunction;
 		

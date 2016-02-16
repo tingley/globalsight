@@ -105,21 +105,20 @@ public class ConnectionPool
     {
         try
         {
-            InputStream is = ConnectionPool.class
-                    .getResourceAsStream(PROPERTIES);
+            InputStream is = ConnectionPool.class.getResourceAsStream(PROPERTIES);
             s_props.load(is);
-            MAX_CONNECTIONS = Integer.parseInt(s_props
-                    .getProperty(PROP_MAX_CONNECTIONS));
+            MAX_CONNECTIONS = Integer.parseInt(s_props.getProperty(PROP_MAX_CONNECTIONS));
             MAX_CONNECTION_WAIT_TIME = Long.parseLong(s_props
                     .getProperty(PROP_MAX_CONNECTION_WAIT_TIME));
-            s_doPooling = Boolean.valueOf(
-                    s_props.getProperty(PROP_USE_CONNECTION_POOL))
+            s_doPooling = Boolean.valueOf(s_props.getProperty(PROP_USE_CONNECTION_POOL))
                     .booleanValue();
-            CATEGORY.info("Use Connection Pooling = " + s_doPooling);
+            CATEGORY.info("Use Connection Pooling: " + s_doPooling);
 
-			useC3P0ConnectionPool = Boolean.valueOf(s_props
-					.getProperty(PROP_USE_C3P0_POOL));
-			CATEGORY.info("Use C3P0 connection pool to replace GS own pool!!!");
+            useC3P0ConnectionPool = Boolean.valueOf(s_props.getProperty(PROP_USE_C3P0_POOL));
+            if (useC3P0ConnectionPool)
+            {
+                CATEGORY.info("Use C3P0 connection pool to replace GS own pool!!!");
+            }
         }
         catch (Throwable e)
         {

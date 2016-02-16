@@ -97,7 +97,7 @@ public class ConnectionPoolBridgeToC3P0
 		String userName = s_props.getProperty(USER_NAME);
         String password = s_props.getProperty(PASSWORD);
 
-        ds = new ComboPooledDataSource(CONNECTION_POOL_NAME);
+        ds = new ComboPooledDataSource();
 
         ds.setUser(userName);
 		ds.setPassword(password);

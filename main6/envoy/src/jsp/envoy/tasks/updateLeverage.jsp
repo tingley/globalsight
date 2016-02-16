@@ -385,12 +385,6 @@ function helpSwitch()
       <COL align="right" valign="top" CLASS="standardText">
       <COL align="left"  valign="top" CLASS="standardText">
     </THEAD>
-         
-    <TR>
-      <TD style="padding-top: 15px; padding-bottom: 15px"><%=reApplyReferenceTMs%></TD>
-      <TD style="padding-top: 15px; padding-bottom: 15px"><input type="checkbox" id="reApplyReferenceTmsID" name="reApplyReferenceTmsName" onclick="" class="standardText" />
-    </TR>
-     <TR><TD colspan="2" style="border:solid #ccc;border-width:0 0 1px 0;">&nbsp;</TD></TR>
     <TR>
       <TD valign="top" align="LEFT"><%=updateFromJobs%></TD>
       <TD>
@@ -450,7 +444,12 @@ function helpSwitch()
         <TD><input type="text" value="0" size=1 maxlength=3 id="inProgressTmPenaltyID" name="inProgressTmPenaltyName" <%=disabled%>/>%</TD>
     </TR>
     <TR><TD colspan="2" style="border:solid #ccc;border-width:0 0 1px 0;">&nbsp;</TD></TR>
-    <TR>
+     <TR>
+      <TD style="padding-top: 15px; padding-bottom: 15px"><%=reApplyReferenceTMs%></TD>
+      <TD style="padding-top: 15px; padding-bottom: 15px"><input type="checkbox" id="reApplyReferenceTmsID" name="reApplyReferenceTmsName" onclick="" class="standardText" />
+    </TR>
+     <TR><TD colspan="2" style="border:solid #ccc;border-width:0 0 1px 0;">&nbsp;</TD></TR>
+       <TR>
       <TD style="padding-top: 15px; padding-bottom: 15px"><%=reTryMT%></TD>
       <TD style="padding-top: 15px; padding-bottom: 15px"><input type="checkbox" id="reTryMTID" name="reTryMTName" onclick="" class="standardText" />
     </TR>

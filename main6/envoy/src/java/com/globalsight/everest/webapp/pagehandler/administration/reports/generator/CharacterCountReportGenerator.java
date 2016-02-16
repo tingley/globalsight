@@ -627,7 +627,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
                     // Target segment
                     Cell cell_D = getCell(currentRow, col);
-                    cell_D.setCellValue(getSegment(pData, sourceTuv, m_rtlTargetLocale, jobId));
+                    cell_D.setCellValue(getSegment(pData, targetTuv, m_rtlTargetLocale, jobId));
                     cell_D.setCellStyle(contentStyle);
                     col++;
 

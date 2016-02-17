@@ -1,0 +1,2 @@
+# GBS-4261 Extra span tags added for BIDI html file
+ALTER TABLE `html_filter` ADD COLUMN `ADD_RTL_DIRECTIONALITY` char(1) NOT NULL DEFAULT 'N' AFTER `IGNORE_INVALIDE_HTML_TAGS`;

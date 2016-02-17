@@ -107,6 +107,7 @@ var jsTagsToDeleted = "<%= bundle.getString("lb_filter_TagsToDeleted") %>";
 var jsTagsCount = "<%= bundle.getString("lb_filter_TagsCount") %>";
 var jsRemoveTagsNote = "<%= bundle.getString("lb_filter_RemoveTagsNote") %>";
 var jsIgnoreInvalidHTMLTags = "<%= bundle.getString("lb_filter_IgnoreInvalidHTMLTags") %>";
+var jsAddRtlDirectionality = "<%= bundle.getString("lb_filter_AddRtlDirectionality") %>";
 var jsLocalizeFunction = "<%= bundle.getString("lb_filter_LocalizeFunction") %>";
 var jsSecondaryFilter = "<%= bundle.getString("lb_filter_SecondaryFilter") %>";
 var jsContentPostFilter = "<%= bundle.getString("lb_filter_ContentPostFilter") %>";

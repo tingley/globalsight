@@ -17,6 +17,10 @@ function loadWorkflow() {
 
 function initUI() {
 	UI.initUI();
+	
+	//update the workflow info
+	$("#workflowName").html(workflowDetailData.workflowName);
+	$("#workflowLocale").html(workflowDetailData.templateSource.displayName + " -> " + workflowDetailData.templateTarget.displayName);
 
 	$(".standardBtn_mouseout").mouseover(function() {
 		$(this).removeClass("standardBtn_mouseout").addClass("standardBtn_mouseover");

@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
@@ -28,6 +44,7 @@ public class HtmlFilter implements Filter
     private long companyId;
     private boolean convertHtmlEntry;
     private boolean ignoreInvalideHtmlTags;
+    private boolean addRtlDirectionality;
     private boolean whitespacePreserve = false;
     private String jsFunctionText;
     private String defaultPairedTags;
@@ -132,8 +149,7 @@ public class HtmlFilter implements Filter
         return defaultNonTranslatableMetaAttributes;
     }
 
-    public void setDefaultNonTranslatableMetaAttributes(
-            String defaultNonTranslatableMetaAttributes)
+    public void setDefaultNonTranslatableMetaAttributes(String defaultNonTranslatableMetaAttributes)
     {
         this.defaultNonTranslatableMetaAttributes = sortTags(defaultNonTranslatableMetaAttributes);
     }
@@ -143,8 +159,7 @@ public class HtmlFilter implements Filter
         return nonTranslatableMetaAttributes;
     }
 
-    public void setNonTranslatableMetaAttributes(
-            String nonTranslatableMetaAttributes)
+    public void setNonTranslatableMetaAttributes(String nonTranslatableMetaAttributes)
     {
         this.nonTranslatableMetaAttributes = nonTranslatableMetaAttributes;
     }
@@ -154,8 +169,7 @@ public class HtmlFilter implements Filter
         return defaultTranslatableAttributes;
     }
 
-    public void setDefaultTranslatableAttributes(
-            String defaultTranslatableAttributes)
+    public void setDefaultTranslatableAttributes(String defaultTranslatableAttributes)
     {
         this.defaultTranslatableAttributes = sortTags(defaultTranslatableAttributes);
     }
@@ -175,8 +189,7 @@ public class HtmlFilter implements Filter
         return defaultLocalizableAttributeMaps;
     }
 
-    public void setDefaultLocalizableAttributeMaps(
-            String defaultLocalizableAttributeMaps)
+    public void setDefaultLocalizableAttributeMaps(String defaultLocalizableAttributeMaps)
     {
         this.defaultLocalizableAttributeMaps = sortTags(defaultLocalizableAttributeMaps);
     }
@@ -231,7 +244,17 @@ public class HtmlFilter implements Filter
     {
         this.ignoreInvalideHtmlTags = ignoreInvalideHtmlTags;
     }
-    
+
+    public boolean isAddRtlDirectionality()
+    {
+        return addRtlDirectionality;
+    }
+
+    public void setAddRtlDirectionality(boolean addRtlDirectionality)
+    {
+        this.addRtlDirectionality = addRtlDirectionality;
+    }
+
     public boolean getWhitespacePreserve()
     {
         return whitespacePreserve;
@@ -242,16 +265,13 @@ public class HtmlFilter implements Filter
         this.whitespacePreserve = whitespacePreserve;
     }
 
-    public HtmlFilter(String filterName, String filterDescription,
-            String defaultEmbeddableTags, String embeddableTags,
-            String placeHolderTrim, long companyId, boolean convertHtmlEntry,
-            boolean ignoreInvalideHtmlTags, String jsFunctionText,
-            String defaultPairedTags, String pairedTags,
-            String defaultUnpairedTags, String unpairedTags,
-            String defaultSwitchTagMaps, String switchTagMaps,
-            String defaultWhitePreservingTags, String whitePreservingTags,
-            String defaultNonTranslatableMetaAttributes,
-            String nonTranslatableMetaAttributes,
+    public HtmlFilter(String filterName, String filterDescription, String defaultEmbeddableTags,
+            String embeddableTags, String placeHolderTrim, long companyId,
+            boolean convertHtmlEntry, boolean ignoreInvalideHtmlTags, boolean addRtlDirectionality,
+            String jsFunctionText, String defaultPairedTags, String pairedTags,
+            String defaultUnpairedTags, String unpairedTags, String defaultSwitchTagMaps,
+            String switchTagMaps, String defaultWhitePreservingTags, String whitePreservingTags,
+            String defaultNonTranslatableMetaAttributes, String nonTranslatableMetaAttributes,
             String defaultTranslatableAttributes, String translatableAttributes)
     {
         super();
@@ -263,6 +283,7 @@ public class HtmlFilter implements Filter
         this.companyId = companyId;
         this.convertHtmlEntry = convertHtmlEntry;
         this.ignoreInvalideHtmlTags = ignoreInvalideHtmlTags;
+        this.addRtlDirectionality = addRtlDirectionality;
         this.jsFunctionText = jsFunctionText;
         this.defaultPairedTags = defaultPairedTags;
         this.pairedTags = pairedTags;
@@ -279,18 +300,14 @@ public class HtmlFilter implements Filter
     }
 
     public HtmlFilter(long id, String filterName, String filterDescription,
-            String defaultEmbeddableTags, String embeddableTags,
-            String placeHolderTrim, long companyId, boolean convertHtmlEntry,
-            boolean ignoreInvalideHtmlTags, String jsFunctionText,
-            String defaultPairedTags, String pairedTags,
-            String defaultUnpairedTags, String unpairedTags,
-            String defaultSwitchTagMaps, String switchTagMaps,
-            String defaultWhitePreservingTags, String whitePreservingTags,
-            String defaultNonTranslatableMetaAttributes,
-            String nonTranslatableMetaAttributes,
-            String defaultTranslatableAttributes,
-            String translatableAttributes,
-            String defaultLocalizableAttributeMaps,
+            String defaultEmbeddableTags, String embeddableTags, String placeHolderTrim,
+            long companyId, boolean convertHtmlEntry, boolean ignoreInvalideHtmlTags,
+            boolean addRtlDirectionality, String jsFunctionText, String defaultPairedTags,
+            String pairedTags, String defaultUnpairedTags, String unpairedTags,
+            String defaultSwitchTagMaps, String switchTagMaps, String defaultWhitePreservingTags,
+            String whitePreservingTags, String defaultNonTranslatableMetaAttributes,
+            String nonTranslatableMetaAttributes, String defaultTranslatableAttributes,
+            String translatableAttributes, String defaultLocalizableAttributeMaps,
             String localizableAttributeMaps)
     {
         super();
@@ -303,6 +320,7 @@ public class HtmlFilter implements Filter
         this.companyId = companyId;
         this.convertHtmlEntry = convertHtmlEntry;
         this.ignoreInvalideHtmlTags = ignoreInvalideHtmlTags;
+        this.addRtlDirectionality = addRtlDirectionality;
         this.jsFunctionText = jsFunctionText;
         this.defaultPairedTags = defaultPairedTags;
         this.pairedTags = pairedTags;
@@ -398,7 +416,7 @@ public class HtmlFilter implements Filter
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;
     }
-    
+
     public ArrayList<Filter> getFilters(long companyId)
     {
         ArrayList<Filter> filters = null;
@@ -421,89 +439,65 @@ public class HtmlFilter implements Filter
 
     public String toJSON(long companyId)
     {
-        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id,
-                getFilterTableName());
+        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id, getFilterTableName());
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":")
-                .append("\"" + getFilterTableName() + "\"").append(",");
+        sb.append("\"filterTableName\":").append("\"" + getFilterTableName() + "\"").append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"")
-                .append(FilterHelper.escape(filterName)).append("\"")
-                .append(",");
+        sb.append("\"filterName\":").append("\"").append(FilterHelper.escape(filterName))
+                .append("\"").append(",");
         sb.append("\"filterDescription\":").append("\"")
-                .append(FilterHelper.escape(filterDescription)).append("\"")
-                .append(",");
-        sb.append("\"placeHolderTrim\":").append("\"")
-                .append(FilterHelper.escape(placeHolderTrim)).append("\"")
-                .append(",");
-        sb.append("\"embeddableTags\":").append("\"")
-                .append(FilterHelper.escape(embeddableTags)).append("\"")
-                .append(",");
+                .append(FilterHelper.escape(filterDescription)).append("\"").append(",");
+        sb.append("\"placeHolderTrim\":").append("\"").append(FilterHelper.escape(placeHolderTrim))
+                .append("\"").append(",");
+        sb.append("\"embeddableTags\":").append("\"").append(FilterHelper.escape(embeddableTags))
+                .append("\"").append(",");
         sb.append("\"defaultEmbeddableTags\":").append("\"")
-                .append(FilterHelper.escape(defaultEmbeddableTags))
+                .append(FilterHelper.escape(defaultEmbeddableTags)).append("\"").append(",");
+        sb.append("\"jsFunctionText\":").append("\"").append(FilterHelper.escape(jsFunctionText))
                 .append("\"").append(",");
-        sb.append("\"jsFunctionText\":").append("\"")
-                .append(FilterHelper.escape(jsFunctionText)).append("\"")
-                .append(",");
         sb.append("\"defaultPairedTags\":").append("\"")
-                .append(FilterHelper.escape(defaultPairedTags)).append("\"")
-                .append(",");
-        sb.append("\"pairedTags\":").append("\"")
-                .append(FilterHelper.escape(pairedTags)).append("\"")
-                .append(",");
+                .append(FilterHelper.escape(defaultPairedTags)).append("\"").append(",");
+        sb.append("\"pairedTags\":").append("\"").append(FilterHelper.escape(pairedTags))
+                .append("\"").append(",");
         sb.append("\"defaultUnpairedTags\":").append("\"")
-                .append(FilterHelper.escape(defaultUnpairedTags)).append("\"")
-                .append(",");
-        sb.append("\"unpairedTags\":").append("\"")
-                .append(FilterHelper.escape(unpairedTags)).append("\"")
-                .append(",");
+                .append(FilterHelper.escape(defaultUnpairedTags)).append("\"").append(",");
+        sb.append("\"unpairedTags\":").append("\"").append(FilterHelper.escape(unpairedTags))
+                .append("\"").append(",");
         sb.append("\"defaultSwitchTagMaps\":").append("\"")
-                .append(FilterHelper.escape(defaultSwitchTagMaps)).append("\"")
-                .append(",");
-        sb.append("\"switchTagMaps\":").append("\"")
-                .append(FilterHelper.escape(switchTagMaps)).append("\"")
-                .append(",");
+                .append(FilterHelper.escape(defaultSwitchTagMaps)).append("\"").append(",");
+        sb.append("\"switchTagMaps\":").append("\"").append(FilterHelper.escape(switchTagMaps))
+                .append("\"").append(",");
         sb.append("\"defaultInternalTag\":").append("\"")
-                .append(FilterHelper.escape(getDefaultInternalTagMaps()))
-                .append("\"").append(",");
+                .append(FilterHelper.escape(getDefaultInternalTagMaps())).append("\"").append(",");
         sb.append("\"internalTag\":").append("\"")
-                .append(FilterHelper.escape(getInternalTagMaps())).append("\"")
-                .append(",");
+                .append(FilterHelper.escape(getInternalTagMaps())).append("\"").append(",");
         sb.append("\"defaultWhitePreservingTags\":").append("\"")
-                .append(FilterHelper.escape(defaultWhitePreservingTags))
-                .append("\"").append(",");
+                .append(FilterHelper.escape(defaultWhitePreservingTags)).append("\"").append(",");
         sb.append("\"whitePreservingTags\":").append("\"")
-                .append(FilterHelper.escape(whitePreservingTags)).append("\"")
+                .append(FilterHelper.escape(whitePreservingTags)).append("\"").append(",");
+        sb.append("\"defaultNonTranslatableMetaAttributes\":").append("\"")
+                .append(FilterHelper.escape(defaultNonTranslatableMetaAttributes)).append("\"")
                 .append(",");
-        sb.append("\"defaultNonTranslatableMetaAttributes\":")
-                .append("\"")
-                .append(FilterHelper
-                        .escape(defaultNonTranslatableMetaAttributes))
-                .append("\"").append(",");
         sb.append("\"nonTranslatableMetaAttributes\":").append("\"")
-                .append(FilterHelper.escape(nonTranslatableMetaAttributes))
-                .append("\"").append(",");
+                .append(FilterHelper.escape(nonTranslatableMetaAttributes)).append("\"")
+                .append(",");
         sb.append("\"defaultTranslatableAttributes\":").append("\"")
-                .append(FilterHelper.escape(defaultTranslatableAttributes))
-                .append("\"").append(",");
+                .append(FilterHelper.escape(defaultTranslatableAttributes)).append("\"")
+                .append(",");
         sb.append("\"translatableAttributes\":").append("\"")
-                .append(FilterHelper.escape(translatableAttributes))
-                .append("\"").append(",");
+                .append(FilterHelper.escape(translatableAttributes)).append("\"").append(",");
         sb.append("\"defaultLocalizableAttributeMaps\":").append("\"")
-                .append(FilterHelper.escape(defaultLocalizableAttributeMaps))
-                .append("\"").append(",");
+                .append(FilterHelper.escape(defaultLocalizableAttributeMaps)).append("\"")
+                .append(",");
         sb.append("\"localizableAttributeMaps\":").append("\"")
-                .append(FilterHelper.escape(localizableAttributeMaps))
-                .append("\"").append(",");
+                .append(FilterHelper.escape(localizableAttributeMaps)).append("\"").append(",");
         sb.append("\"convertHtmlEntry\":").append(convertHtmlEntry).append(",");
-        sb.append("\"ignoreInvalideHtmlTags\":").append(ignoreInvalideHtmlTags)
-                .append(",");
-        sb.append("\"whitespacePreserve\":").append(whitespacePreserve)
-                .append(",");
-        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId)
-                .append("\"");
+        sb.append("\"ignoreInvalideHtmlTags\":").append(ignoreInvalideHtmlTags).append(",");
+        sb.append("\"addRtlDirectionality\":").append(addRtlDirectionality).append(",");
+        sb.append("\"whitespacePreserve\":").append(whitespacePreserve).append(",");
+        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId).append("\"");
         sb.append("}");
         return sb.toString();
     }

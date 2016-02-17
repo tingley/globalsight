@@ -28,21 +28,18 @@ import com.globalsight.ling.docproc.merger.plaintext.PlaintextPostMergeProcessor
 /**
  * This class post processes a merged HTML document.
  */
-public class HtmlPostMergeProcessor
-    implements PostMergeProcessor
+public class HtmlPostMergeProcessor implements PostMergeProcessor
 {
-    private static final String PROCESS_ERROR =
-        "HTML post merge process error";
-    private static Logger theLogger = Logger
-    .getLogger(PlaintextPostMergeProcessor.class);
+    private static final String PROCESS_ERROR = "HTML post merge process error";
+    private static Logger theLogger = Logger.getLogger(PlaintextPostMergeProcessor.class);
 
     private String m_content = null;
 
     /**
-     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String, java.lang.String)
+     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String,
+     *      java.lang.String)
      */
-    public String process(String p_content, String p_IanaEncoding)
-        throws DiplomatMergerException
+    public String process(String p_content, String p_IanaEncoding) throws DiplomatMergerException
     {
         m_content = p_content;
 
@@ -56,7 +53,7 @@ public class HtmlPostMergeProcessor
 
             // The title tag is an exception in that it does not allow
             // embedded HTML tags. So if the merger inserted <span
-            // dir=rtl> for a bidi language, we have to undo it here.
+            // dir="rtl"> for a bidi language, we have to undo it here.
             rewriteTitleTag();
         }
         else
@@ -67,7 +64,6 @@ public class HtmlPostMergeProcessor
         return m_content;
     }
 
-
     /**
      * Looks for <HTML> tag. Returns true if found, else false.
      */
@@ -77,8 +73,7 @@ public class HtmlPostMergeProcessor
 
         try
         {
-            RegExMatchInterface match =
-                RegEx.matchSubstring(m_content, "<HTML[^>]*", false);
+            RegExMatchInterface match = RegEx.matchSubstring(m_content, "<HTML[^>]*", false);
 
             // no html element found
             if (match == null)
@@ -89,80 +84,76 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            // theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
             theLogger.error(PROCESS_ERROR, e);
         }
 
         return found;
     }
 
-
     /**
-     * Looks for <HEAD> tag. If it's not found, the method puts it as
-     * well as <BODY> tag.
+     * Looks for <HEAD> tag. If it's not found, the method puts it as well as
+     * <BODY> tag.
      */
     private void putHeadTag()
     {
         try
         {
-            RegExMatchInterface match =
-                RegEx.matchSubstring(m_content, "<HEAD", false);
+            RegExMatchInterface match = RegEx.matchSubstring(m_content, "<HEAD", false);
 
             // no head element found
             if (match == null)
             {
-                match =
-                    RegEx.matchSubstring(m_content, "<HTML[^>]*>", false);
+                match = RegEx.matchSubstring(m_content, "<HTML[^>]*>", false);
                 int htmlTagEnd = match == null ? 0 : match.endOffset(0);
-                match =
-                    RegEx.matchSubstring(m_content, "</HTML>", false);
-                int htmlEndTagBegin =
-                    match == null ? m_content.length() : match.beginOffset(0);
+                match = RegEx.matchSubstring(m_content, "</HTML>", false);
+                int htmlEndTagBegin = match == null ? m_content.length() : match.beginOffset(0);
 
                 // match =
-                //   RegEx.matchSubstring(m_content,
-                //     "(.*<HTML[^>]*>)(.*)(</HTML>.*)",
-                //     false, true);
+                // RegEx.matchSubstring(m_content,
+                // "(.*<HTML[^>]*>)(.*)(</HTML>.*)",
+                // false, true);
 
                 String prologue = m_content.substring(0, htmlTagEnd);
-                String content =
-                    m_content.substring(htmlTagEnd, htmlEndTagBegin);
+                String content = m_content.substring(htmlTagEnd, htmlEndTagBegin);
                 String epilogue = m_content.substring(htmlEndTagBegin);
-                
-                //Added by Vincent Yan, 2010/04/27
-                //To test if the source contains BODY tag
+
+                // Added by Vincent Yan, 2010/04/27
+                // To test if the source contains BODY tag
                 RegExMatchInterface match1 = RegEx.matchSubstring(content, "<BODY", false);
-                if (match1 == null) {
-                	//no body element found
-                    m_content = prologue + "\n<HEAD>\n</HEAD>\n<BODY>" +
-                    content + "</BODY>\n" + epilogue;
-                } else {
-                    m_content = prologue + "\n<HEAD>\n</HEAD>\n" +
-                    content + "\n" + epilogue;
+                if (match1 == null)
+                {
+                    // no body element found
+                    m_content = prologue + "\n<HEAD>\n</HEAD>\n<BODY>" + content + "</BODY>\n"
+                            + epilogue;
+                }
+                else
+                {
+                    m_content = prologue + "\n<HEAD>\n</HEAD>\n" + content + "\n" + epilogue;
                 }
             }
         }
         catch (RegExException e)
         {
             // Shouldn't happen
-//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            // theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
             theLogger.error(PROCESS_ERROR, e);
         }
     }
 
-
     /**
-     * Looks for <META> tag with charset attribute. If it's not found,
-     * the method puts it.
+     * Looks for <META> tag with charset attribute. If it's not found, the
+     * method puts it.
      */
     private void putMetaTag()
     {
         try
         {
-            RegExMatchInterface match =
-                RegEx.matchSubstring(m_content,
-                    "<META\\s+([^>]*HTTP-EQUIV\\s*=\\s*['\"]?CONTENT-TYPE['\"]?[^>]+CHARSET\\s*=|[^>]+CHARSET\\s*=[^>]+HTTP-EQUIV\\s*=\\s*['\"]?CONTENT-TYPE['\"]?)",
-                    false);
+            RegExMatchInterface match = RegEx
+                    .matchSubstring(
+                            m_content,
+                            "<META\\s+([^>]*HTTP-EQUIV\\s*=\\s*['\"]?CONTENT-TYPE['\"]?[^>]+CHARSET\\s*=|[^>]+CHARSET\\s*=[^>]+HTTP-EQUIV\\s*=\\s*['\"]?CONTENT-TYPE['\"]?)",
+                            false);
 
             // no charset specifier
             if (match == null)
@@ -173,14 +164,15 @@ public class HtmlPostMergeProcessor
                 String bodyStart = m_content.substring(0, headContentBegin);
                 String rest = m_content.substring(headContentBegin);
 
-                m_content = bodyStart +
-                    "\n<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=ISO-8859-1\">" + rest;
+                m_content = bodyStart
+                        + "\n<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=ISO-8859-1\">"
+                        + rest;
             }
         }
         catch (RegExException e)
         {
             // Shouldn't happen
-//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            // theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
             theLogger.error(PROCESS_ERROR, e);
         }
     }
@@ -192,8 +184,7 @@ public class HtmlPostMergeProcessor
     {
         try
         {
-            RegExMatchInterface match = RegEx.matchSubstring(m_content,
-                "<TITLE\\s*[^>]*?>", false);
+            RegExMatchInterface match = RegEx.matchSubstring(m_content, "<TITLE\\s*[^>]*?>", false);
 
             // no title element
             if (match == null)
@@ -211,31 +202,29 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            // theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
             theLogger.error(PROCESS_ERROR, e);
         }
     }
 
-
     /**
      * Looks for <META> tag and rewrites charset part.
      */
-    private void rewriteMetaTag(String p_encoding)
-        throws DiplomatMergerException
+    private void rewriteMetaTag(String p_encoding) throws DiplomatMergerException
     {
         try
         {
-            RegExMatchInterface match =
-                RegEx.matchSubstring(m_content,
-                    "<META\\s+([^>]*HTTP-EQUIV\\s*=\\s*['\"]?CONTENT-TYPE['\"]?[^>]+CHARSET\\s*=[\"'\\s]*([^>\"' ]+)|[^>]+CHARSET\\s*=[\"'\\s]*([^>\"' ]+)[^>]+HTTP-EQUIV\\s*=\\s*['\"]?CONTENT-TYPE['\"]?)",
-                    false);
+            RegExMatchInterface match = RegEx
+                    .matchSubstring(
+                            m_content,
+                            "<META\\s+([^>]*HTTP-EQUIV\\s*=\\s*['\"]?CONTENT-TYPE['\"]?[^>]+CHARSET\\s*=[\"'\\s]*([^>\"' ]+)|[^>]+CHARSET\\s*=[\"'\\s]*([^>\"' ]+)[^>]+HTTP-EQUIV\\s*=\\s*['\"]?CONTENT-TYPE['\"]?)",
+                            false);
 
             // no charset specifier
             if (match == null)
             {
                 // some exception
-                throw new DiplomatMergerException("MetaTagNotFound",
-                    null, null);
+                throw new DiplomatMergerException("MetaTagNotFound", null, null);
             }
 
             int charsetValueEnd;
@@ -250,7 +239,7 @@ public class HtmlPostMergeProcessor
                 charsetValueEnd = match.endOffset(2);
             }
 
-            String firstHalf  = m_content.substring(0, charsetValueBegin);
+            String firstHalf = m_content.substring(0, charsetValueBegin);
             String secondHalf = m_content.substring(charsetValueEnd);
 
             // Logical ordered Hebrew encoding must be labeled "ISO-8859-8-i"
@@ -265,22 +254,21 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            // theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
             theLogger.error(PROCESS_ERROR, e);
         }
     }
 
     /**
-     * Looks for <TITLE> tag and rewrites any <span dir=rtl> inside to
-     * <title dir=rtl>.
+     * Looks for {@code <TITLE>} tag and rewrites any {@code <span dir="rtl">}
+     * inside to {@code <title dir="rtl">}.
      */
-    private void rewriteTitleTag()
-        throws DiplomatMergerException
+    private void rewriteTitleTag() throws DiplomatMergerException
     {
         try
         {
             RegExMatchInterface match = RegEx.matchSubstring(m_content,
-                "<TITLE\\s*[^>]*?>(.*?)</TITLE\\s*>", false, true);
+                    "<TITLE\\s*[^>]*?>(.*?)</TITLE\\s*>", false, true);
 
             // no title tag
             if (match == null)
@@ -291,7 +279,7 @@ public class HtmlPostMergeProcessor
                 return;
 
                 // throw new DiplomatMergerException("TitleTagNotFound",
-                //    null, null);
+                // null, null);
             }
 
             int titleBegin = match.beginOffset(0);
@@ -302,25 +290,23 @@ public class HtmlPostMergeProcessor
             // This regexp depends upon the string inserted in
             // DiplomatMerger.addSpanRtl().
             RegExMatchInterface match2 = RegEx.matchSubstring(title,
-                "<span dir=rtl>([^.]*?)</span>", false);
+                    "<span dir=\"rtl\">(.*?)</span>", false);
 
             // perform replacement only if necessary
             if (match2 != null)
             {
-                String firstHalf  = m_content.substring(0, titleBegin);
+                String firstHalf = m_content.substring(0, titleBegin);
                 String secondHalf = m_content.substring(titleEnd);
 
-                String realTitle = title.substring(
-                    match2.beginOffset(1), match2.endOffset(1));
+                String realTitle = title.substring(match2.beginOffset(1), match2.endOffset(1));
 
-                m_content = firstHalf + "<TITLE dir=rtl>" + realTitle +
-                    "</TITLE>" + secondHalf;
+                m_content = firstHalf + "<TITLE dir=\"rtl\">" + realTitle + "</TITLE>" + secondHalf;
             }
         }
         catch (RegExException e)
         {
             // Shouldn't happen
-//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            // theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
             theLogger.error(PROCESS_ERROR, e);
         }
     }

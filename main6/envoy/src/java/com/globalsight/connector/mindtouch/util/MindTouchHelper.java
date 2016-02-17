@@ -703,6 +703,7 @@ public class MindTouchHelper
             String content = FileUtil.readFile(contentsTrgFile, "UTF-8");
             content = StringUtil.replace(content, "&nbsp;", "&#160;");
             String title = getTitleFromTranslatedContentXml(content);
+            content = fixTitleValueInContentXml(content);
             // Only when target server exists, do this...
             if (isTargetServerExist(targetLocale))
             {
@@ -717,7 +718,6 @@ public class MindTouchHelper
         		try
         		{
                     String tmpContent = content;
-                    tmpContent = EditUtil.decodeXmlEntities(tmpContent);
                     tmpContent = EditUtil.decodeXmlEntities(tmpContent);
                     // empty body
                     if (tmpContent.indexOf("<body/>") > -1)
@@ -748,15 +748,25 @@ public class MindTouchHelper
                     httppost.setEntity(reqEntity);
                     HttpResponse response = httpClient.execute(httppost);
 
-                    String entityContent = null;
-                    if (response.getEntity() != null)
-                    {
-                        entityContent = EntityUtils.toString(response.getEntity());
-                    }
                     if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
                     {
-                        logger.error("Fail to post contents back to MindTouch server for page '"
-                                + path + "' : " + entityContent);
+                        String msg = "";
+                        String entityContent = null;
+                        if (response.getEntity() != null)
+                        {
+                            entityContent = EntityUtils.toString(response.getEntity());
+                        }
+                        if (times == 1)
+                        {
+                            msg = "First try ";
+                        }
+                        else
+                        {
+                            msg = "Second try ";
+                        }
+                        msg += "fails to post contents back to MindTouch server for page '" + path
+                                + "' : " + entityContent;
+                        logger.error(msg);
                     }
                     else
                     {

@@ -1,76 +1,87 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="com.globalsight.cxe.entity.filterconfiguration.HtmlFilter"
-        table="html_filter">
-        <id name="id" column="ID" type="long">
-            <generator class="native" />
-        </id>
-        <property name="companyId" column="COMPANY_ID" type="long"
-            not-null="true" unique="false" />
-        <property name="filterName" length="255" column="FILTER_NAME"
-            type="string" not-null="true" unique="false" />
-        <property name="filterDescription" length="4000" column="FILTER_DESCRIPTION"
-            type="string" not-null="false" unique="false" />
-        <property name="embeddableTags" length="4000" column="EMBEDDABLE_TAGS"
-            type="string" not-null="true" unique="false" />
-        <property name="defaultEmbeddableTags" length="4000" column="DEFAULT_EMBEDDABLE_TAGS"
-            type="string" not-null="true" unique="false" />
-        <property name="placeHolderTrim" length="255" column="PLACEHOLD_TRIMMING"
-            type="string" not-null="true" unique="false" />
-        <property name="convertHtmlEntry" column="CONVERT_HTML_ENTRY" type="yes_no"
-            not-null="false" />
-        <property name="ignoreInvalideHtmlTags" column="IGNORE_INVALIDE_HTML_TAGS" type="yes_no"
-            not-null="false" />
-        <property name="whitespacePreserve" column="WHITESPACE_PRESERVE" type="yes_no"
-            not-null="false" />
-        <property name="jsFunctionText" length="1000" column="JS_FUNCTION_FILTER"
-            type="string" not-null="true" unique="false" />
-            
-        <property name="defaultPairedTags" length="4000" column="DEFAULT_PAIRED_TAGS"
-            type="string" not-null="true" unique="false" />
-        <property name="pairedTags" length="4000" column="PAIRED_TAGS"
-            type="string" not-null="true" unique="false" />
-            
-        <property name="defaultUnpairedTags" length="4000" column="DEFAULT_UNPAIRED_TAGS"
-            type="string" not-null="true" unique="false" />
-        <property name="unpairedTags" length="4000" column="UNPAIRED_TAGS"
-            type="string" not-null="true" unique="false" />
-            
-        <property name="defaultInternalTagMaps" length="4000" column="DEFAULT_INTERNAL_TAGS"
-            type="string" not-null="true" unique="false" />
-        <property name="internalTagMaps" length="4000" column="INTERNAL_TAGS"
-            type="string" not-null="true" unique="false" />           
-            
-        <property name="defaultSwitchTagMaps" length="4000" column="DEFAULT_SWITCH_TAG_MAPS"
-            type="string" not-null="true" unique="false" />
-        <property name="switchTagMaps" length="4000" column="SWITCH_TAG_MAPS"
-            type="string" not-null="true" unique="false" />
-            
-            
-        <property name="defaultWhitePreservingTags" length="4000" column="DEFAULT_WHITE_PRESERVING_TAGS"
-            type="string" not-null="true" unique="false" />
-        <property name="whitePreservingTags" length="4000" column="WHITE_PRESERVING_TAGS"
-            type="string" not-null="true" unique="false" />
-            
-            
-        <property name="defaultNonTranslatableMetaAttributes" length="4000" column="DEFAULT_NON_TRANSLATABLE_META_ATTRIBUTES"
-            type="string" not-null="true" unique="false" />
-        <property name="nonTranslatableMetaAttributes" length="4000" column="NON_TRANSLATABLE_META_ATTRIBUTES"
-            type="string" not-null="true" unique="false" />
-            
-            
-        <property name="defaultTranslatableAttributes" length="4000" column="DEFAULT_TRANSLATABLE_ATTRIBUTES"
-            type="string" not-null="true" unique="false" />
-        <property name="translatableAttributes" length="4000" column="TRANSLATABLE_ATTRIBUTES"
-            type="string" not-null="true" unique="false" />
-            
-            
-        <property name="defaultLocalizableAttributeMaps" length="4000" column="DEFAULT_LOCALIZABLE_ATTRIBUTE_MAPS"
-            type="string" not-null="true" unique="false" />
-        <property name="localizableAttributeMaps" length="4000" column="LOCALIZABLE_ATTRIBUTE_MAPS"
-            type="string" not-null="true" unique="false" />
-            
-            
-    </class>
+	<class name="com.globalsight.cxe.entity.filterconfiguration.HtmlFilter"
+		table="html_filter">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="companyId" column="COMPANY_ID" type="long"
+			not-null="true" unique="false" />
+		<property name="filterName" length="255" column="FILTER_NAME"
+			type="string" not-null="true" unique="false" />
+		<property name="filterDescription" length="4000"
+			column="FILTER_DESCRIPTION" type="string" not-null="false" unique="false" />
+		<property name="embeddableTags" length="4000" column="EMBEDDABLE_TAGS"
+			type="string" not-null="true" unique="false" />
+		<property name="defaultEmbeddableTags" length="4000"
+			column="DEFAULT_EMBEDDABLE_TAGS" type="string" not-null="true"
+			unique="false" />
+		<property name="placeHolderTrim" length="255" column="PLACEHOLD_TRIMMING"
+			type="string" not-null="true" unique="false" />
+		<property name="convertHtmlEntry" column="CONVERT_HTML_ENTRY"
+			type="yes_no" not-null="false" />
+		<property name="ignoreInvalideHtmlTags" column="IGNORE_INVALIDE_HTML_TAGS"
+			type="yes_no" not-null="false" />
+		<property name="addRtlDirectionality" column="ADD_RTL_DIRECTIONALITY"
+			type="yes_no" not-null="true" />
+		<property name="whitespacePreserve" column="WHITESPACE_PRESERVE"
+			type="yes_no" not-null="false" />
+		<property name="jsFunctionText" length="1000" column="JS_FUNCTION_FILTER"
+			type="string" not-null="true" unique="false" />
+
+		<property name="defaultPairedTags" length="4000"
+			column="DEFAULT_PAIRED_TAGS" type="string" not-null="true" unique="false" />
+		<property name="pairedTags" length="4000" column="PAIRED_TAGS"
+			type="string" not-null="true" unique="false" />
+
+		<property name="defaultUnpairedTags" length="4000"
+			column="DEFAULT_UNPAIRED_TAGS" type="string" not-null="true" unique="false" />
+		<property name="unpairedTags" length="4000" column="UNPAIRED_TAGS"
+			type="string" not-null="true" unique="false" />
+
+		<property name="defaultInternalTagMaps" length="4000"
+			column="DEFAULT_INTERNAL_TAGS" type="string" not-null="true" unique="false" />
+		<property name="internalTagMaps" length="4000" column="INTERNAL_TAGS"
+			type="string" not-null="true" unique="false" />
+
+		<property name="defaultSwitchTagMaps" length="4000"
+			column="DEFAULT_SWITCH_TAG_MAPS" type="string" not-null="true"
+			unique="false" />
+		<property name="switchTagMaps" length="4000" column="SWITCH_TAG_MAPS"
+			type="string" not-null="true" unique="false" />
+
+
+		<property name="defaultWhitePreservingTags" length="4000"
+			column="DEFAULT_WHITE_PRESERVING_TAGS" type="string" not-null="true"
+			unique="false" />
+		<property name="whitePreservingTags" length="4000"
+			column="WHITE_PRESERVING_TAGS" type="string" not-null="true" unique="false" />
+
+
+		<property name="defaultNonTranslatableMetaAttributes" length="4000"
+			column="DEFAULT_NON_TRANSLATABLE_META_ATTRIBUTES" type="string"
+			not-null="true" unique="false" />
+		<property name="nonTranslatableMetaAttributes" length="4000"
+			column="NON_TRANSLATABLE_META_ATTRIBUTES" type="string" not-null="true"
+			unique="false" />
+
+
+		<property name="defaultTranslatableAttributes" length="4000"
+			column="DEFAULT_TRANSLATABLE_ATTRIBUTES" type="string" not-null="true"
+			unique="false" />
+		<property name="translatableAttributes" length="4000"
+			column="TRANSLATABLE_ATTRIBUTES" type="string" not-null="true"
+			unique="false" />
+
+
+		<property name="defaultLocalizableAttributeMaps" length="4000"
+			column="DEFAULT_LOCALIZABLE_ATTRIBUTE_MAPS" type="string" not-null="true"
+			unique="false" />
+		<property name="localizableAttributeMaps" length="4000"
+			column="LOCALIZABLE_ATTRIBUTE_MAPS" type="string" not-null="true"
+			unique="false" />
+
+
+	</class>
 </hibernate-mapping>

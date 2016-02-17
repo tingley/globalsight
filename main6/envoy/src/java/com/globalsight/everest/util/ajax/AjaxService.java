@@ -128,8 +128,7 @@ public class AjaxService extends HttpServlet
             }
             else
             {
-                AjaxService.class.getMethod(method, null).invoke(
-                        AjaxService.this);
+                AjaxService.class.getMethod(method, null).invoke(AjaxService.this);
             }
         }
         catch (Exception e)
@@ -145,8 +144,7 @@ public class AjaxService extends HttpServlet
         {
             try
             {
-                companyId = ServerProxy.getJobHandler().getCompany(companyName)
-                        .getIdAsLong();
+                companyId = ServerProxy.getJobHandler().getCompany(companyName).getIdAsLong();
                 CompanyThreadLocal.getInstance().setIdValue("" + companyId);
                 return true;
             }
@@ -171,8 +169,7 @@ public class AjaxService extends HttpServlet
     public void loadFilterConfigurations()
     {
         // writer = response.getWriter();
-        String filterConfigurationsJSON = FilterHelper
-                .filterConfigurationsToJSON(companyId);
+        String filterConfigurationsJSON = FilterHelper.filterConfigurationsToJSON(companyId);
         writer.write(filterConfigurationsJSON);
         writer.close();
     }
@@ -193,8 +190,7 @@ public class AjaxService extends HttpServlet
         // check if name exists when new and edit
         if (isNew)
         {
-            if (FilterHelper.checkExistNew(filterTableName, filterName,
-                    companyId))
+            if (FilterHelper.checkExistNew(filterTableName, filterName, companyId))
             {
                 writer.write("true");
                 return;
@@ -208,8 +204,7 @@ public class AjaxService extends HttpServlet
         else
         {
             long filterId = Long.parseLong(request.getParameter("filterId"));
-            if (FilterHelper.checkExistEdit(filterId, filterTableName,
-                    filterName, companyId))
+            if (FilterHelper.checkExistEdit(filterId, filterTableName, filterName, companyId))
             {
                 writer.write("true");
                 return;
@@ -227,23 +222,18 @@ public class AjaxService extends HttpServlet
         // writer = response.getWriter();
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean isSupportSid = Boolean.parseBoolean(request
-                .getParameter("isSupportSid"));
-        boolean isUnicodeEscape = Boolean.parseBoolean(request
-                .getParameter("isUnicodeEscape"));
-        boolean isPreserveSpaces = Boolean.parseBoolean(request
-                .getParameter("isPreserveSpaces"));
+        boolean isSupportSid = Boolean.parseBoolean(request.getParameter("isSupportSid"));
+        boolean isUnicodeEscape = Boolean.parseBoolean(request.getParameter("isUnicodeEscape"));
+        boolean isPreserveSpaces = Boolean.parseBoolean(request.getParameter("isPreserveSpaces"));
         long secondFilterId = -2;
         try
         {
-            secondFilterId = Long.parseLong(request
-                    .getParameter("secondFilterId"));
+            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));
         }
         catch (Exception ex)
         {
         }
-        String secondFilterTableName = request
-                .getParameter("secondFilterTableName");
+        String secondFilterTableName = request.getParameter("secondFilterTableName");
 
         JSONArray internalTexts = new JSONArray();
         try
@@ -254,14 +244,12 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("Update java properties filter with error:", e);
         }
-        long filterId = FilterHelper
-                .saveJavaPropertiesFilter(filterName, filterDesc, isSupportSid,
-                        isUnicodeEscape, isPreserveSpaces, companyId,
-                        secondFilterId, secondFilterTableName, internalTexts);
+        long filterId = FilterHelper.saveJavaPropertiesFilter(filterName, filterDesc, isSupportSid,
+                isUnicodeEscape, isPreserveSpaces, companyId, secondFilterId,
+                secondFilterTableName, internalTexts);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
-        saveBaseFilterMapping(filterId,
-                FilterConstants.JAVAPROPERTIES_TABLENAME);
+        saveBaseFilterMapping(filterId, FilterConstants.JAVAPROPERTIES_TABLENAME);
         writer.write(filterId + "");
     }
 
@@ -270,24 +258,19 @@ public class AjaxService extends HttpServlet
         long fId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean isSupportSid = Boolean.parseBoolean(request
-                .getParameter("isSupportSid"));
-        boolean isUnicodeEscape = Boolean.parseBoolean(request
-                .getParameter("isUnicodeEscape"));
-        boolean isPreserveSpaces = Boolean.parseBoolean(request
-                .getParameter("isPreserveSpaces"));
+        boolean isSupportSid = Boolean.parseBoolean(request.getParameter("isSupportSid"));
+        boolean isUnicodeEscape = Boolean.parseBoolean(request.getParameter("isUnicodeEscape"));
+        boolean isPreserveSpaces = Boolean.parseBoolean(request.getParameter("isPreserveSpaces"));
 
         long secondFilterId = -2;
         try
         {
-            secondFilterId = Long.parseLong(request
-                    .getParameter("secondFilterId"));
+            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));
         }
         catch (Exception ex)
         {
         }
-        String secondFilterTableName = request
-                .getParameter("secondFilterTableName");
+        String secondFilterTableName = request.getParameter("secondFilterTableName");
 
         JSONArray internalTexts = new JSONArray();
         try
@@ -298,17 +281,15 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("Update java properties filter with error:", e);
         }
-        long filterId = FilterHelper.updateJavaPropertiesFilter(fId,
-                filterName, filterDesc, isSupportSid, isUnicodeEscape,
-                isPreserveSpaces, companyId, secondFilterId,
+        long filterId = FilterHelper.updateJavaPropertiesFilter(fId, filterName, filterDesc,
+                isSupportSid, isUnicodeEscape, isPreserveSpaces, companyId, secondFilterId,
                 secondFilterTableName, internalTexts);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
 
         if (filterId > 0)
         {
-            saveBaseFilterMapping(filterId,
-                    FilterConstants.JAVAPROPERTIES_TABLENAME);
+            saveBaseFilterMapping(filterId, FilterConstants.JAVAPROPERTIES_TABLENAME);
         }
     }
 
@@ -317,26 +298,21 @@ public class AjaxService extends HttpServlet
         // writer = response.getWriter();
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean altTranslate = Boolean.parseBoolean(request
-                .getParameter("altTranslate"));
-        boolean tabNamesTranslate = Boolean.parseBoolean(request
-                .getParameter("tabNamesTranslate"));
+        boolean altTranslate = Boolean.parseBoolean(request.getParameter("altTranslate"));
+        boolean tabNamesTranslate = Boolean.parseBoolean(request.getParameter("tabNamesTranslate"));
 
         long contentPostFilterId = -2;
         try
         {
-            contentPostFilterId = Long.parseLong(request
-                    .getParameter("contentPostFilterId"));
+            contentPostFilterId = Long.parseLong(request.getParameter("contentPostFilterId"));
         }
         catch (Exception ex)
         {
         }
-        String contentPostFilterTableName = request
-                .getParameter("contentPostFilterTableName");
+        String contentPostFilterTableName = request.getParameter("contentPostFilterTableName");
 
-        long filterId = FilterHelper.saveMSOfficeExcelFilter(filterName,
-                filterDesc, companyId, altTranslate, tabNamesTranslate,
-                contentPostFilterId, contentPostFilterTableName);
+        long filterId = FilterHelper.saveMSOfficeExcelFilter(filterName, filterDesc, companyId,
+                altTranslate, tabNamesTranslate, contentPostFilterId, contentPostFilterTableName);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filterId, FilterConstants.MSOFFICEEXCEL_TABLENAME);
@@ -349,32 +325,27 @@ public class AjaxService extends HttpServlet
         long fId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean altTranslate = Boolean.parseBoolean(request
-                .getParameter("altTranslate"));
-        boolean tabNamesTranslate = Boolean.parseBoolean(request
-                .getParameter("tabNamesTranslate"));
+        boolean altTranslate = Boolean.parseBoolean(request.getParameter("altTranslate"));
+        boolean tabNamesTranslate = Boolean.parseBoolean(request.getParameter("tabNamesTranslate"));
 
         long contentPostFilterId = -2;
         try
         {
-            contentPostFilterId = Long.parseLong(request
-                    .getParameter("contentPostFilterId"));
+            contentPostFilterId = Long.parseLong(request.getParameter("contentPostFilterId"));
         }
         catch (Exception ex)
         {
         }
-        String contentPostFilterTableName = request
-                .getParameter("contentPostFilterTableName");
+        String contentPostFilterTableName = request.getParameter("contentPostFilterTableName");
 
-        long filterId = FilterHelper.updateMSOfficeExcelFilter(fId, filterName,
-                filterDesc, companyId, altTranslate, tabNamesTranslate,
-                contentPostFilterId, contentPostFilterTableName);
+        long filterId = FilterHelper.updateMSOfficeExcelFilter(fId, filterName, filterDesc,
+                companyId, altTranslate, tabNamesTranslate, contentPostFilterId,
+                contentPostFilterTableName);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         if (filterId > 0)
         {
-            saveBaseFilterMapping(filterId,
-                    FilterConstants.MSOFFICEEXCEL_TABLENAME);
+            saveBaseFilterMapping(filterId, FilterConstants.MSOFFICEEXCEL_TABLENAME);
         }
     }
 
@@ -389,8 +360,7 @@ public class AjaxService extends HttpServlet
         HibernateUtil.saveOrUpdate(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
-        saveBaseFilterMapping(filter.getId(),
-                FilterConstants.MSOFFICEPPT_TABLENAME);
+        saveBaseFilterMapping(filter.getId(), FilterConstants.MSOFFICEPPT_TABLENAME);
         writer.write(Long.toString(filter.getId()));
     }
 
@@ -403,18 +373,15 @@ public class AjaxService extends HttpServlet
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("filterId", filterId);
         map.put("companyId", companyId);
-        MSOfficePPTFilter filter = (MSOfficePPTFilter) HibernateUtil.getFirst(
-                hql, map);
+        MSOfficePPTFilter filter = (MSOfficePPTFilter) HibernateUtil.getFirst(hql, map);
 
         if (filter != null)
         {
             loadPPTFilterParameter(filter);
             HibernateUtil.update(filter);
             OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION,
-                    filter.getFilterName());
-            saveBaseFilterMapping(filter.getId(),
-                    FilterConstants.MSOFFICEPPT_TABLENAME);
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
+            saveBaseFilterMapping(filter.getId(), FilterConstants.MSOFFICEPPT_TABLENAME);
         }
     }
 
@@ -422,23 +389,19 @@ public class AjaxService extends HttpServlet
     {
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean altTranslate = Boolean.parseBoolean(request
-                .getParameter("altTranslate"));
-        boolean notesTranslate = Boolean.parseBoolean(request
-                .getParameter("notesTranslate"));
+        boolean altTranslate = Boolean.parseBoolean(request.getParameter("altTranslate"));
+        boolean notesTranslate = Boolean.parseBoolean(request.getParameter("notesTranslate"));
 
         long contentPostFilterId = -2;
         try
         {
-            contentPostFilterId = Long.parseLong(request
-                    .getParameter("contentPostFilterId"));
+            contentPostFilterId = Long.parseLong(request.getParameter("contentPostFilterId"));
         }
         catch (Exception ex)
         {
         }
 
-        String contentPostFilterTableName = request
-                .getParameter("contentPostFilterTableName");
+        String contentPostFilterTableName = request.getParameter("contentPostFilterTableName");
 
         filter.setFilterName(filterName);
         filter.setFilterDescription(filterDesc);
@@ -467,8 +430,7 @@ public class AjaxService extends HttpServlet
     {
         long filterId = Long.parseLong(request.getParameter("filterId"));
 
-        String hql = "from POFilter f where f.id=:filterId "
-                + "and f.companyId = :companyId";
+        String hql = "from POFilter f where f.id=:filterId " + "and f.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("filterId", filterId);
         map.put("companyId", companyId);
@@ -479,8 +441,7 @@ public class AjaxService extends HttpServlet
             loadPOFilterParameter(filter);
             HibernateUtil.update(filter);
             OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION,
-                    filter.getFilterName());
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
             saveBaseFilterMapping(filter.getId(), FilterConstants.PO_TABLENAME);
         }
     }
@@ -493,15 +454,13 @@ public class AjaxService extends HttpServlet
         long secondFilterId = -2;
         try
         {
-            secondFilterId = Long.parseLong(request
-                    .getParameter("secondFilterId"));
+            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));
         }
         catch (Exception ex)
         {
         }
 
-        String secondFilterTableName = request
-                .getParameter("secondFilterTableName");
+        String secondFilterTableName = request.getParameter("secondFilterTableName");
 
         filter.setFilterName(filterName);
         filter.setFilterDescription(filterDesc);
@@ -516,8 +475,8 @@ public class AjaxService extends HttpServlet
         String jsFunctionText = request.getParameter("jsFunctionText");
         boolean enableUnicodeEscape = Boolean.parseBoolean(request
                 .getParameter("enableUnicodeEscape"));
-        long filterId = FilterHelper.saveJavaScriptFilter(filterName,
-                filterDesc, jsFunctionText, companyId, enableUnicodeEscape);
+        long filterId = FilterHelper.saveJavaScriptFilter(filterName, filterDesc, jsFunctionText,
+                companyId, enableUnicodeEscape);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filterId, FilterConstants.JAVASCRIPT_TABLENAME);
@@ -532,8 +491,8 @@ public class AjaxService extends HttpServlet
         String jsFunctionText = request.getParameter("jsFunctionText");
         boolean enableUnicodeEscape = Boolean.parseBoolean(request
                 .getParameter("enableUnicodeEscape"));
-        FilterHelper.updateJavaScriptFilter(filterId, filterName, filterDesc,
-                jsFunctionText, companyId, enableUnicodeEscape);
+        FilterHelper.updateJavaScriptFilter(filterId, filterName, filterDesc, jsFunctionText,
+                companyId, enableUnicodeEscape);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
         saveBaseFilterMapping(filterId, FilterConstants.JAVASCRIPT_TABLENAME);
@@ -544,8 +503,7 @@ public class AjaxService extends HttpServlet
         PlainTextFilter filter = readOutPlainTextFilter();
         long filterId = FilterHelper.saveFilter(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.PLAINTEXT_TABLENAME);
 
         writer.write(filterId + "");
@@ -558,8 +516,7 @@ public class AjaxService extends HttpServlet
         String customTextRules = request.getParameter("customTextRules");
         String customTextRuleSids = request.getParameter("customTextRuleSids");
         String elementPostFilter = request.getParameter("elementPostFilter");
-        String elementPostFilterId = request
-                .getParameter("elementPostFilterId");
+        String elementPostFilterId = request.getParameter("elementPostFilterId");
 
         JSONArray jsonArrayCustomTextRules = new JSONArray();
         JSONArray jsonArrayCustomTextRuleSids = new JSONArray();
@@ -577,8 +534,7 @@ public class AjaxService extends HttpServlet
         try
         {
             configXml = PlainTextFilterParser.toXml(jsonArrayCustomTextRules,
-                    jsonArrayCustomTextRuleSids, elementPostFilter,
-                    elementPostFilterId);
+                    jsonArrayCustomTextRuleSids, elementPostFilter, elementPostFilterId);
         }
         catch (Exception e)
         {
@@ -601,8 +557,7 @@ public class AjaxService extends HttpServlet
         filter.setId(filterId);
         FilterHelper.updateFilter(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.PLAINTEXT_TABLENAME);
     }
 
@@ -613,17 +568,15 @@ public class AjaxService extends HttpServlet
         String customTextRules = request.getParameter("customTextRules");
         String customTextRuleSids = request.getParameter("customTextRuleSids");
         String elementPostFilter = request.getParameter("elementPostFilter");
-        String elementPostFilterId = request
-                .getParameter("elementPostFilterId");
+        String elementPostFilterId = request.getParameter("elementPostFilterId");
         boolean isSid = "true".equalsIgnoreCase(request.getParameter("isSid"));
         try
         {
-            JSONArray jsonArrayCustomTextRules = new JSONArray(
-                    isSid ? customTextRuleSids : customTextRules);
+            JSONArray jsonArrayCustomTextRules = new JSONArray(isSid ? customTextRuleSids
+                    : customTextRules);
 
-            String configXml = PlainTextFilterParser.toXml(
-                    jsonArrayCustomTextRules, null, elementPostFilter,
-                    elementPostFilterId);
+            String configXml = PlainTextFilterParser.toXml(jsonArrayCustomTextRules, null,
+                    elementPostFilter, elementPostFilterId);
             PlainTextFilterParser p = new PlainTextFilterParser(configXml);
             p.parserXml();
 
@@ -655,12 +608,10 @@ public class AjaxService extends HttpServlet
                 .getParameter("translateHiddenLayer"));
         boolean translateMasterLayer = Boolean.parseBoolean(request
                 .getParameter("translateMasterLayer"));
-        boolean translateFileInfo = Boolean.parseBoolean(request
-                .getParameter("translateFileInfo"));
+        boolean translateFileInfo = Boolean.parseBoolean(request.getParameter("translateFileInfo"));
         boolean translateHyperlinks = Boolean.parseBoolean(request
                 .getParameter("translateHyperlinks"));
-        boolean extractLineBreak = Boolean.parseBoolean(request
-                .getParameter("extractLineBreak"));
+        boolean extractLineBreak = Boolean.parseBoolean(request.getParameter("extractLineBreak"));
         boolean replaceNonbreakingSpace = Boolean.parseBoolean(request
                 .getParameter("replaceNonbreakingSpace"));
         boolean translateHiddenCondText = Boolean.parseBoolean(request
@@ -687,8 +638,7 @@ public class AjaxService extends HttpServlet
         loadInddFilterParameter(filter);
         long filterId = FilterHelper.saveFilter(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         writer.write(filterId + "");
     }
 
@@ -708,8 +658,7 @@ public class AjaxService extends HttpServlet
             loadInddFilterParameter(filter);
             HibernateUtil.update(filter);
             OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION,
-                    filter.getFilterName());
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         }
     }
 
@@ -723,8 +672,7 @@ public class AjaxService extends HttpServlet
         HibernateUtil.saveOrUpdate(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
-        saveBaseFilterMapping(filter.getId(),
-                FilterConstants.MSOFFICEDOC_TABLENAME);
+        saveBaseFilterMapping(filter.getId(), FilterConstants.MSOFFICEDOC_TABLENAME);
 
         writer.write(Long.toString(filter.getId()));
     }
@@ -733,45 +681,36 @@ public class AjaxService extends HttpServlet
     {
         filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
-        boolean headerTranslate = Boolean.parseBoolean(request
-                .getParameter("headerTranslate"));
+        boolean headerTranslate = Boolean.parseBoolean(request.getParameter("headerTranslate"));
         filter.setHeaderTranslate(headerTranslate);
-        boolean altTranslate = Boolean.parseBoolean(request
-                .getParameter("altTranslate"));
+        boolean altTranslate = Boolean.parseBoolean(request.getParameter("altTranslate"));
         filter.setAltTranslate(altTranslate);
-        boolean tocTranslate = Boolean.parseBoolean(request
-                .getParameter("TOCTranslate"));
+        boolean tocTranslate = Boolean.parseBoolean(request.getParameter("TOCTranslate"));
         filter.setTocTranslate(tocTranslate);
 
-        String selectParaStyles = request
-                .getParameter("unextractableWordParagraphStyles");
+        String selectParaStyles = request.getParameter("unextractableWordParagraphStyles");
         String allParaStyles = request.getParameter("allParagraphStyles");
         filter.setParaStyles(selectParaStyles, allParaStyles);
 
-        String selectCharStyles = request
-                .getParameter("unextractableWordCharacterStyles");
+        String selectCharStyles = request.getParameter("unextractableWordCharacterStyles");
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
 
-        String selectInternalTextStyles = request
-                .getParameter("selectedInternalTextStyles");
-        String allInternalTextStyles = request
-                .getParameter("allInternalTextStyles");
+        String selectInternalTextStyles = request.getParameter("selectedInternalTextStyles");
+        String allInternalTextStyles = request.getParameter("allInternalTextStyles");
         filter.setInTextStyles(selectInternalTextStyles, allInternalTextStyles);
 
         long contentPostFilterId = -2;
         try
         {
-            contentPostFilterId = Long.parseLong(request
-                    .getParameter("contentPostFilterId"));
+            contentPostFilterId = Long.parseLong(request.getParameter("contentPostFilterId"));
         }
         catch (Exception ex)
         {
         }
         filter.setContentPostFilterId(contentPostFilterId);
 
-        String contentPostFilterTableName = request
-                .getParameter("contentPostFilterTableName");
+        String contentPostFilterTableName = request.getParameter("contentPostFilterTableName");
         filter.setContentPostFilterTableName(contentPostFilterTableName);
     }
 
@@ -784,18 +723,15 @@ public class AjaxService extends HttpServlet
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("filterId", filterId);
         map.put("companyId", companyId);
-        MSOfficeDocFilter filter = (MSOfficeDocFilter) HibernateUtil.getFirst(
-                hql, map);
+        MSOfficeDocFilter filter = (MSOfficeDocFilter) HibernateUtil.getFirst(hql, map);
 
         if (filter != null)
         {
             loadDocFilterParameter(filter);
             HibernateUtil.update(filter);
             OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION,
-                    filter.getFilterName());
-            saveBaseFilterMapping(filter.getId(),
-                    FilterConstants.MSOFFICEDOC_TABLENAME);
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
+            saveBaseFilterMapping(filter.getId(), FilterConstants.MSOFFICEDOC_TABLENAME);
         }
     }
 
@@ -816,17 +752,14 @@ public class AjaxService extends HttpServlet
     {
         filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
-        boolean headerTranslate = Boolean.parseBoolean(request
-                .getParameter("headerTranslate"));
+        boolean headerTranslate = Boolean.parseBoolean(request.getParameter("headerTranslate"));
         filter.setHeaderTranslate(headerTranslate);
 
-        String selectParaStyles = request
-                .getParameter("unextractableWordParagraphStyles");
+        String selectParaStyles = request.getParameter("unextractableWordParagraphStyles");
         String allParaStyles = request.getParameter("allParagraphStyles");
         filter.setParaStyles(selectParaStyles, allParaStyles);
 
-        String selectCharStyles = request
-                .getParameter("unextractableWordCharacterStyles");
+        String selectCharStyles = request.getParameter("unextractableWordCharacterStyles");
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
 
@@ -843,16 +776,14 @@ public class AjaxService extends HttpServlet
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("filterId", filterId);
         map.put("companyId", companyId);
-        OpenOfficeFilter filter = (OpenOfficeFilter) HibernateUtil.getFirst(
-                hql, map);
+        OpenOfficeFilter filter = (OpenOfficeFilter) HibernateUtil.getFirst(hql, map);
 
         if (filter != null)
         {
             loadOpenOfficeFilterParameter(filter);
             HibernateUtil.update(filter);
             OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION,
-                    filter.getFilterName());
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         }
     }
 
@@ -866,8 +797,7 @@ public class AjaxService extends HttpServlet
         HibernateUtil.saveOrUpdate(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
                 OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
-        saveBaseFilterMapping(filter.getId(),
-                FilterConstants.OFFICE2010_TABLENAME);
+        saveBaseFilterMapping(filter.getId(), FilterConstants.OFFICE2010_TABLENAME);
 
         writer.write(Long.toString(filter.getId()));
     }
@@ -876,20 +806,17 @@ public class AjaxService extends HttpServlet
     {
         filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
-        boolean headerTranslate = Boolean.parseBoolean(request
-                .getParameter("headerTranslate"));
+        boolean headerTranslate = Boolean.parseBoolean(request.getParameter("headerTranslate"));
         filter.setHeaderTranslate(headerTranslate);
 
         boolean footendnoteTranslate = Boolean.parseBoolean(request
                 .getParameter("footendnoteTranslate"));
         filter.setFootendnoteTranslate(footendnoteTranslate);
 
-        boolean masterTranslate = Boolean.parseBoolean(request
-                .getParameter("masterTranslate"));
+        boolean masterTranslate = Boolean.parseBoolean(request.getParameter("masterTranslate"));
         filter.setMasterTranslate(masterTranslate);
 
-        boolean notesTranslate = Boolean.parseBoolean(request
-                .getParameter("notesTranslate"));
+        boolean notesTranslate = Boolean.parseBoolean(request.getParameter("notesTranslate"));
         filter.setNotesTranslate(notesTranslate);
 
         boolean pptlayoutTranslate = Boolean.parseBoolean(request
@@ -912,20 +839,17 @@ public class AjaxService extends HttpServlet
                 .getParameter("hiddenTextTranslate"));
         filter.setHiddenTextTranslate(hiddenTextTranslate);
 
-        boolean toolTipsTranslate = Boolean.parseBoolean(request
-                .getParameter("toolTipsTranslate"));
+        boolean toolTipsTranslate = Boolean.parseBoolean(request.getParameter("toolTipsTranslate"));
         filter.setToolTipsTranslate(toolTipsTranslate);
 
         boolean tableOfContentTranslate = Boolean.parseBoolean(request
                 .getParameter("tableOfContentTranslate"));
         filter.setTableOfContentTranslate(tableOfContentTranslate);
 
-        boolean commentTranslate = Boolean.parseBoolean(request
-                .getParameter("commentTranslate"));
+        boolean commentTranslate = Boolean.parseBoolean(request.getParameter("commentTranslate"));
         filter.setCommentTranslate(commentTranslate);
 
-        boolean urlTranslate = Boolean.parseBoolean(request
-                .getParameter("urlTranslate"));
+        boolean urlTranslate = Boolean.parseBoolean(request.getParameter("urlTranslate"));
         filter.setUrlTranslate(urlTranslate);
 
         String excelOrder = request.getParameter("excelOrder");
@@ -940,34 +864,27 @@ public class AjaxService extends HttpServlet
         }
         filter.setExcelOrder(orderValue);
 
-        String selectParaStyles = request
-                .getParameter("unextractableWordParagraphStyles");
+        String selectParaStyles = request.getParameter("unextractableWordParagraphStyles");
         String allParaStyles = request.getParameter("allParagraphStyles");
         filter.setParaStyles(selectParaStyles, allParaStyles);
 
-        String selectCharStyles = request
-                .getParameter("unextractableWordCharacterStyles");
+        String selectCharStyles = request.getParameter("unextractableWordCharacterStyles");
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
 
-        String selectExcelCellStyles = request
-                .getParameter("unextractableExcelCellStyles");
+        String selectExcelCellStyles = request.getParameter("unextractableExcelCellStyles");
         String allExcelCellStyles = request.getParameter("allExcelCellStyles");
         filter.setExcelCellStyles(selectExcelCellStyles, allExcelCellStyles);
 
         String selectedWordInternalTextStyles = request
                 .getParameter("selectedWordInternalTextStyles");
-        String allWordInternalTextStyles = request
-                .getParameter("allWordInternalTextStyles");
-        filter.setWordInTextStyles(selectedWordInternalTextStyles,
-                allWordInternalTextStyles);
+        String allWordInternalTextStyles = request.getParameter("allWordInternalTextStyles");
+        filter.setWordInTextStyles(selectedWordInternalTextStyles, allWordInternalTextStyles);
 
         String selectedExcelInternalTextStyles = request
                 .getParameter("selectedExcelInternalTextStyles");
-        String allExcelInternalTextStyles = request
-                .getParameter("allExcelInternalTextStyles");
-        filter.setExcelInTextStyles(selectedExcelInternalTextStyles,
-                allExcelInternalTextStyles);
+        String allExcelInternalTextStyles = request.getParameter("allExcelInternalTextStyles");
+        filter.setExcelInTextStyles(selectedExcelInternalTextStyles, allExcelInternalTextStyles);
 
         long xmlFilterId = tryParse(request.getParameter("xmlFilterId"), -2);
         filter.setXmlFilterId(xmlFilterId);
@@ -975,14 +892,12 @@ public class AjaxService extends HttpServlet
         long contentPostFilterId = -2;
         try
         {
-            contentPostFilterId = Long.parseLong(request
-                    .getParameter("contentPostFilterId"));
+            contentPostFilterId = Long.parseLong(request.getParameter("contentPostFilterId"));
         }
         catch (Exception ex)
         {
         }
-        String contentPostFilterTableName = request
-                .getParameter("contentPostFilterTableName");
+        String contentPostFilterTableName = request.getParameter("contentPostFilterTableName");
         filter.setContentPostFilterId(contentPostFilterId);
         filter.setContentPostFilterTableName(contentPostFilterTableName);
     }
@@ -996,18 +911,15 @@ public class AjaxService extends HttpServlet
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("filterId", filterId);
         map.put("companyId", companyId);
-        MSOffice2010Filter filter = (MSOffice2010Filter) HibernateUtil
-                .getFirst(hql, map);
+        MSOffice2010Filter filter = (MSOffice2010Filter) HibernateUtil.getFirst(hql, map);
 
         if (filter != null)
         {
             loadMSOffice2010FilterParameter(filter);
             HibernateUtil.update(filter);
             OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILTER_CONFIGURATION,
-                    filter.getFilterName());
-            saveBaseFilterMapping(filter.getId(),
-                    FilterConstants.OFFICE2010_TABLENAME);
+                    OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
+            saveBaseFilterMapping(filter.getId(), FilterConstants.OFFICE2010_TABLENAME);
         }
     }
 
@@ -1037,16 +949,14 @@ public class AjaxService extends HttpServlet
         {
             if (FilterHelper.isFilterExist(filterTableName, filterId))
             {
-                Filter filter = FilterHelper.getFilter(filterTableName,
-                        filterId);
+                Filter filter = FilterHelper.getFilter(filterTableName, filterId);
                 if (FilterHelper.checkExistInFileProfile(filter))
                 {
                     writer.write("deleteFilterExistInFileProfile");
                 }
                 else
                 {
-                    FilterHelper.deleteFilter(filterTableName, filterId,
-                            m_userId);
+                    FilterHelper.deleteFilter(filterTableName, filterId, m_userId);
                 }
             }
         }
@@ -1059,17 +969,13 @@ public class AjaxService extends HttpServlet
 
     public void deleteSpecialFilters()
     {
-        String checkedSpecialFilters = request
-                .getParameter("checkedSpecialFilters");
+        String checkedSpecialFilters = request.getParameter("checkedSpecialFilters");
         String[] specialFilters = checkedSpecialFilters.split(":");
         ArrayList<SpecialFilterToDelete> specialFilterToDeletes = buildSpecialFilterToDeletes(specialFilters);
-        RemoveInfo rmInfo = FilterHelper
-                .checkExistInFileProfile(specialFilterToDeletes);
-        FilterHelper.checkExistInFiters(specialFilterToDeletes, rmInfo,
-                companyId);
+        RemoveInfo rmInfo = FilterHelper.checkExistInFileProfile(specialFilterToDeletes);
+        FilterHelper.checkExistInFiters(specialFilterToDeletes, rmInfo, companyId);
         FilterHelper.checkUsedInJob(specialFilterToDeletes, rmInfo, companyId);
-        if (rmInfo.isExistInFileProfile() || rmInfo.isUsedByFilters()
-                || rmInfo.isUsedInJob())
+        if (rmInfo.isExistInFileProfile() || rmInfo.isUsedByFilters() || rmInfo.isUsedInJob())
         {
             writer.write(rmInfo.toJSON());
         }
@@ -1095,8 +1001,7 @@ public class AjaxService extends HttpServlet
 
     }
 
-    private ArrayList<SpecialFilterToDelete> buildSpecialFilterToDeletes(
-            String[] specialFilters)
+    private ArrayList<SpecialFilterToDelete> buildSpecialFilterToDeletes(String[] specialFilters)
     {
         ArrayList<SpecialFilterToDelete> specialFilterToDeletes = new ArrayList<SpecialFilterToDelete>();
         for (int i = 0; i < specialFilters.length; i++)
@@ -1106,9 +1011,8 @@ public class AjaxService extends HttpServlet
             {
                 String[] filtersArray = specialFilter.split(",");
                 SpecialFilterToDelete specialFilterToDelete = new SpecialFilterToDelete(
-                        Integer.parseInt(filtersArray[0]),
-                        Long.parseLong(filtersArray[1]), filtersArray[2],
-                        filtersArray[3]);
+                        Integer.parseInt(filtersArray[0]), Long.parseLong(filtersArray[1]),
+                        filtersArray[2], filtersArray[3]);
                 specialFilterToDeletes.add(specialFilterToDelete);
             }
         }
@@ -1139,32 +1043,28 @@ public class AjaxService extends HttpServlet
         // 2. check if name exists when new and edit
         if (isNew)
         {
-            if (FilterHelper.checkExistNew(filterTableName, filterName,
-                    companyId))
+            if (FilterHelper.checkExistNew(filterTableName, filterName, companyId))
             {
                 writer.write("name_exists");
                 return;
             }
             else
             {
-                writer.write(FilterHelper.isFilterValid(request,
-                        filterTableName));
+                writer.write(FilterHelper.isFilterValid(request, filterTableName));
                 return;
             }
         }
         else
         {
             long filterId = Long.parseLong(request.getParameter("filterId"));
-            if (FilterHelper.checkExistEdit(filterId, filterTableName,
-                    filterName, companyId))
+            if (FilterHelper.checkExistEdit(filterId, filterTableName, filterName, companyId))
             {
                 writer.write("name_exists");
                 return;
             }
             else
             {
-                writer.write(FilterHelper.isFilterValid(request,
-                        filterTableName));
+                writer.write(FilterHelper.isFilterValid(request, filterTableName));
                 return;
             }
         }
@@ -1175,8 +1075,7 @@ public class AjaxService extends HttpServlet
         XMLRuleFilter filter = readXmlFilterFromRequest();
         long filterId = FilterHelper.saveXmlRuleFilter(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.XMLRULE_TABLENAME);
         writer.write(filterId + "");
     }
@@ -1189,8 +1088,7 @@ public class AjaxService extends HttpServlet
         saveBaseFilterMapping(filterId, FilterConstants.XMLRULE_TABLENAME);
         FilterHelper.updateFilter(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
     }
 
     private XMLRuleFilter readXmlFilterFromRequest()
@@ -1198,29 +1096,24 @@ public class AjaxService extends HttpServlet
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         long xmlRuleId = Long.parseLong(request.getParameter("xmlRuleId"));
-        boolean convertHtmlEntity = Boolean.parseBoolean(request
-                .getParameter("convertHtmlEntity"));
+        boolean convertHtmlEntity = Boolean.parseBoolean(request.getParameter("convertHtmlEntity"));
 
-        boolean useXmlRule = Boolean.parseBoolean(request
-                .getParameter("useXmlRule"));
-        String extendedWhitespaceChars = request
-                .getParameter("extendedWhitespaceChars");
+        boolean useXmlRule = Boolean.parseBoolean(request.getParameter("useXmlRule"));
+        String extendedWhitespaceChars = request.getParameter("extendedWhitespaceChars");
         int phConsolidationMode = XmlFilterConfigParser.PH_CONSOLIDATE_DONOT;
         int phTrimMode = XmlFilterConfigParser.PH_TRIM_DONOT;
         int nonasciiAs = XmlFilterConfigParser.NON_ASCII_AS_CHARACTER;
         int wsHandleMode = XmlFilterConfigParser.WHITESPACE_HANDLE_COLLAPSE;
         int emptyTagFormat = XmlFilterConfigParser.EMPTY_TAG_FORMAT_PRESERVE;
         String elementPostFilter = request.getParameter("elementPostFilter");
-        String elementPostFilterId = request
-                .getParameter("elementPostFilterId");
+        String elementPostFilterId = request.getParameter("elementPostFilterId");
         String cdataPostFilter = request.getParameter("cdataPostFilter");
         String cdataPostFilterId = request.getParameter("cdataPostFilterId");
         String preserveWsTags = request.getParameter("preserveWsTags");
         String embTags = request.getParameter("embTags");
         String transAttrTags = request.getParameter("transAttrTags");
         String contentInclTags = request.getParameter("contentInclTags");
-        String cdataPostfilterTags = request
-                .getParameter("cdataPostfilterTags");
+        String cdataPostfilterTags = request.getParameter("cdataPostfilterTags");
         String sidSupportTagName = request.getParameter("sidSupportTagName");
         String sidSupportAttName = request.getParameter("sidSupportAttName");
         String isCheckWellFormed = request.getParameter("isCheckWellFormed");
@@ -1242,14 +1135,11 @@ public class AjaxService extends HttpServlet
         JSONArray jsonArraySrcCmtXmlTag = new JSONArray();
         try
         {
-            phConsolidationMode = Integer.parseInt(request
-                    .getParameter("phConsolidationMode"));
+            phConsolidationMode = Integer.parseInt(request.getParameter("phConsolidationMode"));
             phTrimMode = Integer.parseInt(request.getParameter("phTrimMode"));
             nonasciiAs = Integer.parseInt(request.getParameter("nonasciiAs"));
-            wsHandleMode = Integer.parseInt(request
-                    .getParameter("wsHandleMode"));
-            emptyTagFormat = Integer.parseInt(request
-                    .getParameter("emptyTagFormat"));
+            wsHandleMode = Integer.parseInt(request.getParameter("wsHandleMode"));
+            emptyTagFormat = Integer.parseInt(request.getParameter("emptyTagFormat"));
 
             jsonArrayPreserveWsTags = new JSONArray(preserveWsTags);
             jsonArrayEmbTags = new JSONArray(embTags);
@@ -1270,24 +1160,22 @@ public class AjaxService extends HttpServlet
         String configXml = XmlFilterConfigParser.nullConfigXml;
         try
         {
-            configXml = XmlFilterConfigParser.toXml(extendedWhitespaceChars,
-                    phConsolidationMode, phTrimMode, nonasciiAs, wsHandleMode,
-                    emptyTagFormat, elementPostFilter, elementPostFilterId,
-                    cdataPostFilter, cdataPostFilterId, sidSupportTagName,
+            configXml = XmlFilterConfigParser.toXml(extendedWhitespaceChars, phConsolidationMode,
+                    phTrimMode, nonasciiAs, wsHandleMode, emptyTagFormat, elementPostFilter,
+                    elementPostFilterId, cdataPostFilter, cdataPostFilterId, sidSupportTagName,
                     sidSupportAttName, isCheckWellFormed, isGerateLangInfo,
-                    jsonArrayPreserveWsTags, jsonArrayEmbTags,
-                    jsonArrayTransAttrTags, jsonArrayContentInclTags,
-                    jsonArrayCdataPostfilterTags, jsonArrayEntities,
-                    jsonArrayProcessIns, jsonArrayInternalTag,
-                    jsonArraySrcCmtXmlComment, jsonArraySrcCmtXmlTag);
+                    jsonArrayPreserveWsTags, jsonArrayEmbTags, jsonArrayTransAttrTags,
+                    jsonArrayContentInclTags, jsonArrayCdataPostfilterTags, jsonArrayEntities,
+                    jsonArrayProcessIns, jsonArrayInternalTag, jsonArraySrcCmtXmlComment,
+                    jsonArraySrcCmtXmlTag);
         }
         catch (Exception e)
         {
             CATEGORY.error("Update xml filter with error:", e);
         }
 
-        XMLRuleFilter filter = new XMLRuleFilter(filterName, filterDesc,
-                xmlRuleId, companyId, convertHtmlEntity);
+        XMLRuleFilter filter = new XMLRuleFilter(filterName, filterDesc, xmlRuleId, companyId,
+                convertHtmlEntity);
         filter.setConfigXml(configXml);
         filter.setUseXmlRule(useXmlRule);
         return filter;
@@ -1298,8 +1186,7 @@ public class AjaxService extends HttpServlet
         QAFilter filter = readQAFilterFromRequest();
         long filterId = FilterHelper.saveFilter(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
         writer.write(filterId + "");
     }
 
@@ -1310,8 +1197,7 @@ public class AjaxService extends HttpServlet
         filter.setId(filterId);
         FilterHelper.updateFilter(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
     }
 
     private QAFilter readQAFilterFromRequest()
@@ -1344,8 +1230,7 @@ public class AjaxService extends HttpServlet
         String configXml = QAFilterParser.nullConfigXml;
         try
         {
-            configXml = QAFilterParser.toXml(jsonArrayRules,
-                    jsonArrayDefaultRules);
+            configXml = QAFilterParser.toXml(jsonArrayRules, jsonArrayDefaultRules);
         }
         catch (Exception e)
         {
@@ -1364,8 +1249,7 @@ public class AjaxService extends HttpServlet
         long filterId = FilterHelper.saveFilter(filter);
         writer.write(filterId + "");
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
     }
 
     public void updateBaseFilter()
@@ -1375,8 +1259,7 @@ public class AjaxService extends HttpServlet
         filter.setId(filterId);
         FilterHelper.updateFilter(filter);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                filter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filter.getFilterName());
     }
 
     private BaseFilter readBaseFilterFromRequest()
@@ -1409,8 +1292,7 @@ public class AjaxService extends HttpServlet
         String configXml = BaseFilterParser.nullConfigXml;
         try
         {
-            configXml = BaseFilterParser.toXml(jsonArrayInternalTexts,
-                    jsonArrayEscapingss);
+            configXml = BaseFilterParser.toXml(jsonArrayInternalTexts, jsonArrayEscapingss);
         }
         catch (Exception e)
         {
@@ -1427,18 +1309,15 @@ public class AjaxService extends HttpServlet
         int baseFilterId = -2;
         try
         {
-            baseFilterId = Integer.parseInt(request
-                    .getParameter("baseFilterId"));
+            baseFilterId = Integer.parseInt(request.getParameter("baseFilterId"));
 
             if (baseFilterId > 0)
             {
-                BaseFilterManager.saveBaseFilterMapping(baseFilterId, filterId,
-                        filterTableName);
+                BaseFilterManager.saveBaseFilterMapping(baseFilterId, filterId, filterTableName);
             }
             else
             {
-                BaseFilterManager.deleteBaseFilterMapping(filterId,
-                        filterTableName);
+                BaseFilterManager.deleteBaseFilterMapping(filterId, filterTableName);
             }
         }
         catch (Exception ex)
@@ -1452,8 +1331,7 @@ public class AjaxService extends HttpServlet
         HtmlFilter htmlFilter = loadHtmlFilter();
         long filterId = FilterHelper.saveFilter(htmlFilter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                htmlFilter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, htmlFilter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.HTML_TABLENAME);
         writer.write(filterId + "");
     }
@@ -1467,10 +1345,11 @@ public class AjaxService extends HttpServlet
     {
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        boolean convertHtmlEntry = Boolean.parseBoolean(request
-                .getParameter("convertHtmlEntry"));
+        boolean convertHtmlEntry = Boolean.parseBoolean(request.getParameter("convertHtmlEntry"));
         boolean ignoreInvalideHtmlTags = Boolean.parseBoolean(request
                 .getParameter("ignoreInvalideHtmlTags"));
+        boolean addRtlDirectionality = Boolean.parseBoolean(request
+                .getParameter("addRtlDirectionality"));
         boolean whitespacePreserve = Boolean.parseBoolean(request
                 .getParameter("whitespacePreserve"));
         String localizeFunction = request.getParameter("localizeFunction");
@@ -1516,15 +1395,13 @@ public class AjaxService extends HttpServlet
         String defaultTranslatableAttributes = getValue("defaultTranslatableAttributes");
         String translatableAttributes = getValue("translatableAttributes");
 
-        HtmlFilter htmlFilter = new HtmlFilter(filterName, filterDesc,
-                defaultEmbeddableTags, embeddableTags, "embeddable_tags",
-                companyId, convertHtmlEntry, ignoreInvalideHtmlTags,
-                localizeFunction, defaultPairedTags, pairedTags,
-                defaultUnpairedTags, unpairedTags, defaultSwitchTagMaps,
-                switchTagMaps, defaultWhitePreservingTags, whitePreservingTags,
-                defaultNonTranslatableMetaAttributes,
-                nonTranslatableMetaAttributes, defaultTranslatableAttributes,
-                translatableAttributes);
+        HtmlFilter htmlFilter = new HtmlFilter(filterName, filterDesc, defaultEmbeddableTags,
+                embeddableTags, "embeddable_tags", companyId, convertHtmlEntry,
+                ignoreInvalideHtmlTags, addRtlDirectionality, localizeFunction, defaultPairedTags,
+                pairedTags, defaultUnpairedTags, unpairedTags, defaultSwitchTagMaps, switchTagMaps,
+                defaultWhitePreservingTags, whitePreservingTags,
+                defaultNonTranslatableMetaAttributes, nonTranslatableMetaAttributes,
+                defaultTranslatableAttributes, translatableAttributes);
 
         htmlFilter.setDefaultInternalTagMaps(defaultInternalTags);
         htmlFilter.setInternalTagMaps(internalTags);
@@ -1540,8 +1417,7 @@ public class AjaxService extends HttpServlet
         String error = "";
         try
         {
-            HtmlInternalTag tag = HtmlInternalTag.string2tag(internalTag,
-                    bundle);
+            HtmlInternalTag tag = HtmlInternalTag.string2tag(internalTag, bundle);
             internalTag = tag.toString();
         }
         catch (InternalTagException e)
@@ -1549,8 +1425,8 @@ public class AjaxService extends HttpServlet
             error = e.getMessage();
         }
 
-        String s = "({\"error\":\"" + error + "\", \"tag\" : "
-                + JsonUtil.toJson(internalTag) + "})";
+        String s = "({\"error\":\"" + error + "\", \"tag\" : " + JsonUtil.toJson(internalTag)
+                + "})";
         writer.write(s);
         writer.close();
     }
@@ -1564,8 +1440,7 @@ public class AjaxService extends HttpServlet
 
         FilterHelper.updateFilter(htmlFilter);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                htmlFilter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, htmlFilter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.HTML_TABLENAME);
     }
 
@@ -1575,14 +1450,12 @@ public class AjaxService extends HttpServlet
         String filterDesc = request.getParameter("filterDesc");
         boolean isAdditionalHeadAdded = Boolean.parseBoolean(request
                 .getParameter("isAdditionalHeadAdded"));
-        boolean isEscapeEntity = Boolean.parseBoolean(request
-                .getParameter("isEscapeEntity"));
-        Filter jspFilter = new JSPFilter(filterName, filterDesc, companyId,
-                isAdditionalHeadAdded, isEscapeEntity);
+        boolean isEscapeEntity = Boolean.parseBoolean(request.getParameter("isEscapeEntity"));
+        Filter jspFilter = new JSPFilter(filterName, filterDesc, companyId, isAdditionalHeadAdded,
+                isEscapeEntity);
         long filterId = FilterHelper.saveFilter(jspFilter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                jspFilter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, jspFilter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.JSP_TABLENAME);
         writer.write(filterId + "");
     }
@@ -1594,14 +1467,12 @@ public class AjaxService extends HttpServlet
         String filterDesc = request.getParameter("filterDesc");
         boolean isAdditionalHeadAdded = Boolean.parseBoolean(request
                 .getParameter("isAdditionalHeadAdded"));
-        boolean isEscapeEntity = Boolean.parseBoolean(request
-                .getParameter("isEscapeEntity"));
-        Filter jspFilter = new JSPFilter(filterId, filterName, filterDesc,
-                companyId, isAdditionalHeadAdded, isEscapeEntity);
+        boolean isEscapeEntity = Boolean.parseBoolean(request.getParameter("isEscapeEntity"));
+        Filter jspFilter = new JSPFilter(filterId, filterName, filterDesc, companyId,
+                isAdditionalHeadAdded, isEscapeEntity);
         FilterHelper.updateFilter(jspFilter);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                jspFilter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, jspFilter.getFilterName());
         saveBaseFilterMapping(filterId, FilterConstants.JSP_TABLENAME);
     }
 
@@ -1617,16 +1488,13 @@ public class AjaxService extends HttpServlet
                 .getParameter("isExposeRightMasterPage"));
         boolean exposeOtherMasterPage = Boolean.parseBoolean(request
                 .getParameter("isExposeOtherMasterPage"));
-        boolean isTOCTranslate = Boolean.parseBoolean(request
-                .getParameter("isTOCTranslate"));
-        FMFilter mfFilter = new FMFilter(filterName, filterDesc, companyId,
-                true, exposeLeftMasterPage, exposeRightMasterPage,
-                exposeOtherMasterPage);
+        boolean isTOCTranslate = Boolean.parseBoolean(request.getParameter("isTOCTranslate"));
+        FMFilter mfFilter = new FMFilter(filterName, filterDesc, companyId, true,
+                exposeLeftMasterPage, exposeRightMasterPage, exposeOtherMasterPage);
         mfFilter.setTableOfContentTranslate(isTOCTranslate);
         long filterId = FilterHelper.saveFilter(mfFilter);
         OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                mfFilter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, mfFilter.getFilterName());
         writer.write(filterId + "");
     }
 
@@ -1643,16 +1511,13 @@ public class AjaxService extends HttpServlet
                 .getParameter("isExposeRightMasterPage"));
         boolean exposeOtherMasterPage = Boolean.parseBoolean(request
                 .getParameter("isExposeOtherMasterPage"));
-        boolean isTOCTranslate = Boolean.parseBoolean(request
-                .getParameter("isTOCTranslate"));
-        FMFilter mfFilter = new FMFilter(filterId, filterName, filterDesc,
-                companyId, true, exposeLeftMasterPage, exposeRightMasterPage,
-                exposeOtherMasterPage);
+        boolean isTOCTranslate = Boolean.parseBoolean(request.getParameter("isTOCTranslate"));
+        FMFilter mfFilter = new FMFilter(filterId, filterName, filterDesc, companyId, true,
+                exposeLeftMasterPage, exposeRightMasterPage, exposeOtherMasterPage);
         mfFilter.setTableOfContentTranslate(isTOCTranslate);
         FilterHelper.updateFilter(mfFilter);
         OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                OperationLog.COMPONET_FILTER_CONFIGURATION,
-                mfFilter.getFilterName());
+                OperationLog.COMPONET_FILTER_CONFIGURATION, mfFilter.getFilterName());
     }
 
     public void uploadFile()
@@ -1660,11 +1525,9 @@ public class AjaxService extends HttpServlet
         boolean isMultiPart = FileUpload.isMultipartContent(request);
         if (isMultiPart)
         {
-            StringBuffer tmpPath = new StringBuffer(AmbFileStoragePathUtils
-                    .getXslDir().getPath());
+            StringBuffer tmpPath = new StringBuffer(AmbFileStoragePathUtils.getXslDir().getPath());
 
-            tmpPath.append("/").append("~TMP")
-                    .append(System.currentTimeMillis()).append("/");
+            tmpPath.append("/").append("~TMP").append(System.currentTimeMillis()).append("/");
 
             try
             {
@@ -1679,8 +1542,7 @@ public class AjaxService extends HttpServlet
                     if (!item.isFormField())
                     {
                         fileName = item.getName();
-                        fileName = fileName.substring(
-                                fileName.lastIndexOf(File.separator) + 1,
+                        fileName = fileName.substring(fileName.lastIndexOf(File.separator) + 1,
                                 fileName.length());
                         if (fileName.toLowerCase().endsWith("xsl")
                                 || fileName.toLowerCase().endsWith("xml")
@@ -1690,8 +1552,7 @@ public class AjaxService extends HttpServlet
                             uploadedFile = new File(filePath);
                             uploadedFile.getParentFile().mkdirs();
                             item.write(uploadedFile);
-                            CATEGORY.info("Succeeded in uploading file: "
-                                    + filePath);
+                            CATEGORY.info("Succeeded in uploading file: " + filePath);
                         }
                         else
                         {
@@ -1702,8 +1563,7 @@ public class AjaxService extends HttpServlet
 
                 if (uploadedFile != null)
                 {
-                    writer.write("<html><body><textarea>" + filePath
-                            + "</textarea></body></html>");
+                    writer.write("<html><body><textarea>" + filePath + "</textarea></body></html>");
                     writer.flush();
                 }
                 else
@@ -1714,8 +1574,7 @@ public class AjaxService extends HttpServlet
             }
             catch (Exception e)
             {
-                CATEGORY.error("Failed to upload XSL file! Details: "
-                        + e.getMessage());
+                CATEGORY.error("Failed to upload XSL file! Details: " + e.getMessage());
                 writer.write("<html><body><textarea>error</textarea></body></html>");
                 writer.flush();
             }
@@ -1761,13 +1620,10 @@ public class AjaxService extends HttpServlet
         try
         {
             Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    edition.getHostName(), edition.getHostPort(),
-                    edition.getUserName(), edition.getPassword(),
-                    edition.getEnableHttps());
-            String fullAccessToken = ambassador.login(edition.getUserName(),
-                    edition.getPassword());
-            String realAccessToken = WebServiceClientHelper
-                    .getRealAccessToken(fullAccessToken);
+                    edition.getHostName(), edition.getHostPort(), edition.getUserName(),
+                    edition.getPassword(), edition.getEnableHttps());
+            String fullAccessToken = ambassador.login(edition.getUserName(), edition.getPassword());
+            String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
 
             HashMap xliffFP = ambassador.getXliffFileProfile(realAccessToken);
             StringBuilder sb = new StringBuilder();
@@ -1785,8 +1641,8 @@ public class AjaxService extends HttpServlet
                     String val = (String) xliffFP.get(key);
                     sb.append("{");
                     sb.append("\"fileprofileID\":").append(key).append(",");
-                    sb.append("\"fileprofileName\":").append("\"").append(val)
-                            .append("\"").append("}");
+                    sb.append("\"fileprofileName\":").append("\"").append(val).append("\"")
+                            .append("}");
 
                     if (i < xliffFP.size())
                     {
@@ -1797,8 +1653,7 @@ public class AjaxService extends HttpServlet
             else
             {
                 sb.append("{");
-                sb.append("\"noXliffFile\":").append("\"true").append("\"")
-                        .append("}");
+                sb.append("\"noXliffFile\":").append("\"true").append("\"").append("}");
             }
 
             sb.append("]");
@@ -1816,8 +1671,7 @@ public class AjaxService extends HttpServlet
                 StringBuilder sb = new StringBuilder();
                 sb.append("[");
                 sb.append("{");
-                sb.append("\"lowVersion\":").append("\"true").append("\"")
-                        .append("}");
+                sb.append("\"lowVersion\":").append("\"true").append("\"").append("}");
                 sb.append("]");
 
                 writer.write(sb.toString());
@@ -1855,8 +1709,7 @@ public class AjaxService extends HttpServlet
                 StringBuilder sb = new StringBuilder();
                 sb.append("[");
                 sb.append("{");
-                sb.append("\"errorInfo\":").append("\"").append(errorInfo)
-                        .append("\"").append("}");
+                sb.append("\"errorInfo\":").append("\"").append(errorInfo).append("\"").append("}");
                 sb.append("]");
                 writer.write(sb.toString());
                 writer.close();
@@ -1877,22 +1730,17 @@ public class AjaxService extends HttpServlet
         try
         {
             Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    edition.getHostName(), edition.getHostPort(),
-                    edition.getUserName(), edition.getPassword(),
-                    edition.getEnableHttps());
-            String fullAccessToken = ambassador.login(edition.getUserName(),
-                    edition.getPassword());
-            String realAccessToken = WebServiceClientHelper
-                    .getRealAccessToken(fullAccessToken);
+                    edition.getHostName(), edition.getHostPort(), edition.getUserName(),
+                    edition.getPassword(), edition.getEnableHttps());
+            String fullAccessToken = ambassador.login(edition.getUserName(), edition.getPassword());
+            String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
 
-            String strAllTmProfiles = ambassador
-                    .getAllTMProfiles(realAccessToken);
+            String strAllTmProfiles = ambassador.getAllTMProfiles(realAccessToken);
             CATEGORY.debug("allTmProfiles :: " + strAllTmProfiles);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
-            InputStream stream = new ByteArrayInputStream(
-                    strAllTmProfiles.getBytes("UTF-8"));
+            InputStream stream = new ByteArrayInputStream(strAllTmProfiles.getBytes("UTF-8"));
             org.w3c.dom.Document doc = db.parse(stream);
 
             StringBuilder sb = new StringBuilder();
@@ -1913,18 +1761,15 @@ public class AjaxService extends HttpServlet
                     {
                         if (childNodeList.item(j) instanceof Element)
                         {
-                            String nodeName = childNodeList.item(j)
-                                    .getNodeName();
-                            NodeList subNodeList = childNodeList.item(j)
-                                    .getChildNodes();
+                            String nodeName = childNodeList.item(j).getNodeName();
+                            NodeList subNodeList = childNodeList.item(j).getChildNodes();
                             String nodeValue = null;
-                            if (subNodeList != null
-                                    && subNodeList.getLength() > 0)
+                            if (subNodeList != null && subNodeList.getLength() > 0)
                             {
                                 nodeValue = subNodeList.item(0).getNodeValue();
                             }
-                            CATEGORY.debug("nodeName :: " + nodeName
-                                    + "; nodeValue :: " + nodeValue);
+                            CATEGORY.debug("nodeName :: " + nodeName + "; nodeValue :: "
+                                    + nodeValue);
 
                             if ("id".equals(nodeName.toLowerCase()))
                             {
@@ -1942,8 +1787,8 @@ public class AjaxService extends HttpServlet
                 {
                     sb.append("{");
                     sb.append("\"tmProfileId\":").append(id).append(",");
-                    sb.append("\"tmProfileName\":").append("\"").append(name)
-                            .append("\"").append("}");
+                    sb.append("\"tmProfileName\":").append("\"").append(name).append("\"")
+                            .append("}");
                 }
                 if ((i + 1) < TMProfileNL.getLength())
                 {
@@ -1963,8 +1808,7 @@ public class AjaxService extends HttpServlet
 
     public void isProjectUseTerbase()
     {
-        long localizitionId = Long.parseLong(request
-                .getParameter("locProfileId"));
+        long localizitionId = Long.parseLong(request.getParameter("locProfileId"));
         L10nProfile lp = LocProfileHandlerHelper.getL10nProfile(localizitionId);
         String outStr = new String();
 
@@ -2000,15 +1844,13 @@ public class AjaxService extends HttpServlet
 
         try
         {
-            ITermbase termbase = (ITermbase) sess
-                    .getAttribute(WebAppConstants.TERMBASE);
+            ITermbase termbase = (ITermbase) sess.getAttribute(WebAppConstants.TERMBASE);
 
             if (termbase == null)
             {
                 SessionManager sessionMgr = (SessionManager) sess
                         .getAttribute(WebAppConstants.SESSION_MANAGER);
-                termbase = (ITermbase) sessionMgr
-                        .getAttribute(WebAppConstants.TERMBASE);
+                termbase = (ITermbase) sessionMgr.getAttribute(WebAppConstants.TERMBASE);
             }
 
             xml = termbase.getDefinition();

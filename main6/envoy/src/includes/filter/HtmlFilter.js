@@ -1021,7 +1021,7 @@ HtmlFilter.prototype.generateDiv = function(topFilterId, color)
 	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsAddRtlDirectionality + "</td>");
-	str.append("<td class='htmlFilter_right_td'><input id='addRtlDirectionality' type='checkbox' name='addRtlDirectionality' checked></td>");
+	str.append("<td class='htmlFilter_right_td'><input id='addRtlDirectionality' type='checkbox' name='addRtlDirectionality'></td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");

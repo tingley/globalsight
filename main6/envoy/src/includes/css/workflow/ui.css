@@ -63,6 +63,13 @@
 	left: 0px;
 	top: 0px;
 }
+#info {
+	-ms-overflow-y: auto;
+	width: 1200px;
+	padding-bottom:8px;
+	margin-left: auto;
+	margin-right: auto;
+}
 #bodyDiv {
 	-ms-overflow-y: auto;
 	box-shadow: 3px 3px 6px #888;
@@ -388,6 +395,8 @@ ul {
 }
 
 .toolbar_button:hover {
+	font-weight:bold;
+	font-style:italic;
 	border-color: rgb(198, 198, 198);
 	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
 	background-image: -ms-linear-gradient(rgb(248, 248, 248),

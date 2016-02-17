@@ -141,10 +141,18 @@ function previousForm()
             </TR>
             <TR>
         </table>
-        <div STYLE="POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;" class="standardText">
-            <div id="toolDiv" style="z-index: 12; border: 1px solid #000000; display: none" width="100%">
-                <div id="info">1</div>
-                <input type="button" value="save">
+        <div STYLE="POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 40px; LEFT: 20px; RIGHT: 20px;" class="standardText">
+            <div id="info">
+                 <table class="standardText">
+                     <tr>
+                         <td width="100"><b><%=bundle.getString("lb_name")%>:</b></td>
+                         <td id="workflowName"></td>
+                     </tr>
+                     <tr>
+                         <td><b><%=bundle.getString("lb_locale_pair")%>:</b></td>
+                         <td id="workflowLocale"></td>
+                     </tr>
+                 </table>
             </div>
             <DIV id="bodyDiv">
                 <table class="toolbar" id="toolbar">
@@ -156,27 +164,25 @@ function previousForm()
                                 </div>
 
 
-                                <div class='panel_box toolbar_button' id="button_activity">
+                                <div class='panel_box toolbar_button' id="button_activity" original-title='<%=bundle.getString("lb_add_activity")%>'>
                                     <canvas class='panel_item' width='50' height='50'></canvas>
                                 </div>
-                                <div class='panel_box toolbar_button' id="button_end">
+                                <div class='panel_box toolbar_button' id="button_end" original-title='<%=bundle.getString("lb_add_end")%>'>
                                     <canvas class='panel_item' width='50' height='50'></canvas>
                                 </div>
-                                <div class='panel_box toolbar_button' id="button_condition">
-                                    <canvas class='panel_item' width='50' height='50'></canvas>
+                                <div class='panel_box toolbar_button' id="button_condition" original-title='<%=bundle.getString("lb_add_condition")%>'>
+                                    <canvas class='panel_item' width='50' height='50' ></canvas>
                                 </div>
-
-
                             </DIV>
                         </td>
                         <td width="1px">
                             <div class="toolbar_small_devider"></div>
                         </td>
                         <td width="120px">
-                            <div class='panel_box toolbar_button ' id="button_line" original-title="Add line">
+                            <div class='panel_box toolbar_button ' id="button_line" original-title="<%=bundle.getString("lb_add_line")%>">
                                 <canvas class='panel_item' width='50' height='50'></canvas>
                             </div>
-                            <div class='panel_box toolbar_button selected' id="button_point" original-title="Select">
+                            <div class='panel_box toolbar_button selected' id="button_point" original-title="<%=bundle.getString("lb_Select")%>">
                                 <canvas class='panel_item' width='50' height='50'></canvas>
                             </div>
                         </td>
@@ -188,7 +194,7 @@ function previousForm()
                             <INPUT TYPE="BUTTON" NAME="<%=lb_cancel%>" VALUE="<%=lb_cancel%>" ONCLICK="cancelForm()" class="toolbar_button " style="width: 80px;">
                             <INPUT TYPE="BUTTON" NAME="<%=lb_previous%>" VALUE="<%=lb_previous%>" ONCLICK="previousForm()" class="toolbar_button " style="width: 80px;">
                         </td>
-                        <td align="right" valign="top" class="toolbar_button">
+                        <td align="right" valign="top" class="">
                             <div id="navButton" class="nav ico " style="display: none"></div>
                         </td>
                     </tr>

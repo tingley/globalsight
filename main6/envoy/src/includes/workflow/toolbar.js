@@ -139,26 +139,6 @@ var Toolbar = {
 	},
 	initToolBarButtonMethod : function(div, node, button) {
 
-		if (node != null) {
-			node = Utils.copy(node);
-
-			div.bind("mouseenter", function() {
-				var q = $("#shape_thumb");
-				q.children("div").html(node.desc);
-				var context = q.children("canvas")[0].getContext("2d");
-				q.attr("current", node.type);
-				var t = 160;
-				var s = 160;
-				context.clearRect(0, 0, t, s);
-				node.drawShape(context, 130, 80, 80);
-				q.show();
-			});
-
-			div.bind("mouseleave", function() {
-				$("#shape_thumb").hide()
-			});
-		}
-
 		div.click(function() {
 			UI.toolbar.find(".selected").removeClass("selected");
 			$(this).toggleClass("selected");

@@ -703,6 +703,7 @@ public class MindTouchHelper
             String content = FileUtil.readFile(contentsTrgFile, "UTF-8");
             content = StringUtil.replace(content, "&nbsp;", "&#160;");
             String title = getTitleFromTranslatedContentXml(content);
+            content = fixTitleValueInContentXml(content);
             // Only when target server exists, do this...
             if (isTargetServerExist(targetLocale))
             {

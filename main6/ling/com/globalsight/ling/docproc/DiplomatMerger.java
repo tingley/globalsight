@@ -374,8 +374,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     }
 
     /**
-     * Adds <span dir=rtl> if the paragraph is text in HTML and it contains bidi
-     * characters.
+     * Adds {@code <span dir="rtl">} if the paragraph is text in HTML and it
+     * contains bidi characters.
      */
     private String addSpanRtl(String p_para)
     {
@@ -401,7 +401,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         {
             // When changing this string, also update the regexp in
             // merger/html/HtmlPostMergeProcessor.
-            p_para = "<ph>&lt;span dir=rtl&gt;</ph>" + p_para + "<ph>&lt;/span&gt;</ph>";
+            p_para = "<ph>&lt;span dir=\"rtl\"&gt;</ph>" + p_para + "<ph>&lt;/span&gt;</ph>";
         }
 
         return p_para;

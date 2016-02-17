@@ -264,8 +264,7 @@ public class LeverageUtil
             return ICE_TYPE_SID_MATCHING;
         }
 
-        if (isPassoloIncontextMatch(p_sourceTuvs.get(index), p_matchTypes,
-                p_jobId))
+        if (isPassoloIncontextMatch(p_sourceTuvs.get(index), p_matchTypes, p_jobId))
         {
             return ICE_TYPE_PASSOLO_MATCHING;
         }
@@ -287,8 +286,7 @@ public class LeverageUtil
         }
 
         // Check hash values.
-		if (isKeyMatchICE(index, p_sourceTuvs, p_targetTuvs, p_matchTypes,
-				p_subId, p_jobId))
+        if (isKeyMatchICE(index, p_sourceTuvs, p_targetTuvs, p_matchTypes, p_subId, p_jobId))
         {
         	return ICE_TYPE_HASH_MATCHING;
         }
@@ -300,8 +298,8 @@ public class LeverageUtil
 		}
 
 		// Check current tuv is exact match.
-        if (!isExactMatchLocalized(index, p_sourceTuvs, p_targetTuvs,
-                p_matchTypes, p_subId, p_jobId))
+        if (!isExactMatchLocalized(index, p_sourceTuvs, p_targetTuvs, p_matchTypes, p_subId,
+                p_jobId))
         {
             return ICE_TYPE_NOT_ICE;
         }
@@ -571,7 +569,9 @@ public class LeverageUtil
         int state = p_matchTypes.getLingManagerMatchType(id, p_subId);
         int matchType = p_matchTypes.getStatisticsMatchType(id, p_subId);
 
-        return state == LeverageMatchLingManager.EXACT && matchType != 6 && isLocalized;
+        return state == LeverageMatchLingManager.EXACT && isLocalized
+                && matchType != MatchTypeStatistics.CONTEXT_EXACT
+                && matchType != MatchTypeStatistics.SEGMENT_MT_EXACT;
     }
 
     /**

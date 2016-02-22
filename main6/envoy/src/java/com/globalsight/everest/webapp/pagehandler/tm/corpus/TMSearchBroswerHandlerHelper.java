@@ -108,6 +108,8 @@ import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlException;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
+import com.globalsight.webservices.WebServiceException;
+
 
 public class TMSearchBroswerHandlerHelper
 {
@@ -1683,7 +1685,7 @@ public class TMSearchBroswerHandlerHelper
     	return attributeFilterTuIds;
     }
  
-    private static boolean searchFilter(HashMap filterMap, BaseTmTuv tuv)
+    private static boolean searchFilter(HashMap filterMap, BaseTmTuv tuv) throws WebServiceException
     {
     	String createStartDateOption = (String) filterMap.get("createStartDateOption");
 		Date createStartDate = (Date) filterMap.get("createStartDate");
@@ -1704,8 +1706,10 @@ public class TMSearchBroswerHandlerHelper
 		String modifyUser = (String) filterMap.get("modifyUser");
 //    	String jobIds = (String) filterMap.get("jobIds");
     	
-    	boolean checkCreateDate = searchByDate("create", createStartDateOption, 
-    			createEndDateOption, createStartDate, createEndDate, tuv);
+    	boolean checkCreateDate;
+        checkCreateDate = searchByDate("create", createStartDateOption, 
+            		createEndDateOption, createStartDate, createEndDate, tuv);
+
     	if(!checkCreateDate)
     	{
     		return false;
@@ -1724,7 +1728,6 @@ public class TMSearchBroswerHandlerHelper
     	{
     		return false;
     	}
-    	
     	if(StringUtil.isNotEmpty(tuIds))
     	{
     		boolean tuidMatch = false;
@@ -1900,7 +1903,7 @@ public class TMSearchBroswerHandlerHelper
     
 	private static boolean searchByDate(String searchByDataType,
 			String startDateOption, String endDateOption, Date startDate,
-			Date endDate, BaseTmTuv tuv)
+			Date endDate, BaseTmTuv tuv) throws WebServiceException
 	{
 		if (startDate == null && endDate == null)
 			return true;
@@ -1911,16 +1914,25 @@ public class TMSearchBroswerHandlerHelper
 			if (StringUtil.isNotEmpty(searchByDataType))
 			{
 				if (searchByDataType.equalsIgnoreCase("create"))
-				{
-					date = format.parse(format.format(tuv.getCreationDate()));
+				{	
+				    if(tuv.getCreationDate()!=null)
+				    {
+				       date = format.parse(format.format(tuv.getCreationDate()));
+				    }
 				}
 				else if (searchByDataType.equalsIgnoreCase("modify"))
 				{
-					date = format.parse(format.format(tuv.getModifyDate()));
+				    if(tuv.getModifyDate()!=null)
+				    {
+					   date = format.parse(format.format(tuv.getModifyDate()));
+				    }
 				}
 				else if (searchByDataType.equalsIgnoreCase("lastUsage"))
-				{
-					date = format.parse(format.format(tuv.getLastUsageDate()));
+				{   
+				    if(tuv.getLastUsageDate()!=null)
+				    {
+	                  date = format.parse(format.format(tuv.getLastUsageDate()));
+				    }
 				}
 			}
 		}
@@ -1928,97 +1940,98 @@ public class TMSearchBroswerHandlerHelper
 		{
 			e.printStackTrace();
 		}
+        if (date != null)
+        {
+            if (startDate != null && endDate == null)
+            {
+                if (startDateOption.equals(DATE_EQUALS))
+                {
+                    if (date.equals(startDate))
+                    {
+                        return true;
+                    }
+                }
+                else if (startDateOption.equals(DATE_NOT_EQUALS))
+                {
+                    if (!date.equals(startDate))
+                    {
+                        return true;
+                    }
+                }
+                else if (startDateOption.equals(DATE_GREATER_THAN))
+                {
+                    if (date.after(startDate))
+                    {
+                        return true;
+                    }
+                }
 
-		if (startDate != null && endDate == null)
-		{
-			if (startDateOption.equals(DATE_EQUALS))
-			{
-				if (date.equals(startDate))
-				{
-					return true;
-				}
-			}
-			else if (startDateOption.equals(DATE_NOT_EQUALS))
-			{
-				if (!date.equals(startDate))
-				{
-					return true;
-				}
-			}
-			else if (startDateOption.equals(DATE_GREATER_THAN))
-			{
-				if (date.after(startDate))
-				{
-					return true;
-				}
-			}
+                else if (startDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+                {
+                    if (date.after(startDate) || date.equals(startDate))
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (startDate == null && endDate != null)
+            {
 
-			else if (startDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
-			{
-				if (date.after(startDate) || date.equals(startDate))
-				{
-					return true;
-				}
-			}
-		}
-		else if (startDate == null && endDate != null)
-		{
-
-			if (endDateOption.equals(DATE_LESS_THAN))
-			{
-				if (date.before(endDate))
-				{
-					return true;
-				}
-			}
-			else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
-			{
-				if (date.before(endDate) || date.equals(endDate))
-				{
-					return true;
-				}
-			}
-		}
-		else if (startDate != null && endDate != null)
-		{
-			if (startDateOption.equals(DATE_GREATER_THAN))
-			{
-				if (endDateOption.equals(DATE_LESS_THAN))
-				{
-					if (date.after(startDate) && date.before(endDate))
-					{
-						return true;
-					}
-				}
-				else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
-				{
-					if (date.after(startDate)
-							&& (date.before(endDate) || date.equals(endDate)))
-					{
-						return true;
-					}
-				}
-			}
-			else if (startDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
-			{
-				if (endDateOption.equals(DATE_LESS_THAN))
-				{
-					if ((date.after(startDate) || date.equals(startDate))
-							&& date.before(endDate))
-					{
-						return true;
-					}
-				}
-				else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
-				{
-					if ((date.after(startDate) || date.equals(startDate))
-							&& (date.before(endDate) || date.equals(endDate)))
-					{
-						return true;
-					}
-				}
-			}
-		}
+                if (endDateOption.equals(DATE_LESS_THAN))
+                {
+                    if (date.before(endDate))
+                    {
+                        return true;
+                    }
+                }
+                else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                {
+                    if (date.before(endDate) || date.equals(endDate))
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (startDate != null && endDate != null)
+            {
+                if (startDateOption.equals(DATE_GREATER_THAN))
+                {
+                    if (endDateOption.equals(DATE_LESS_THAN))
+                    {
+                        if (date.after(startDate) && date.before(endDate))
+                        {
+                            return true;
+                        }
+                    }
+                    else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                    {
+                        if (date.after(startDate) && (date.before(endDate) || date.equals(endDate)))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else if (startDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+                {
+                    if (endDateOption.equals(DATE_LESS_THAN))
+                    {
+                        if ((date.after(startDate) || date.equals(startDate))
+                                && date.before(endDate))
+                        {
+                            return true;
+                        }
+                    }
+                    else if (endDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                    {
+                        if ((date.after(startDate) || date.equals(startDate))
+                                && (date.before(endDate) || date.equals(endDate)))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
 		return false;
 	}
 	

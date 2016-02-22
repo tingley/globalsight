@@ -1705,16 +1705,14 @@ public class TMSearchBroswerHandlerHelper
 		String createUser = (String) filterMap.get("createUser");
 		String modifyUser = (String) filterMap.get("modifyUser");
 //    	String jobIds = (String) filterMap.get("jobIds");
-    	
-    	boolean checkCreateDate;
-        checkCreateDate = searchByDate("create", createStartDateOption, 
-            		createEndDateOption, createStartDate, createEndDate, tuv);
 
+        boolean checkCreateDate = searchByDate("create", createStartDateOption,
+                createEndDateOption, createStartDate, createEndDate, tuv);
     	if(!checkCreateDate)
     	{
     		return false;
     	}
-    	
+
     	boolean checkModifyDate = searchByDate("modify", modifyStartDateOption, 
     			modifyEndDateOption, modifyStartDate, modifyEndDate, tuv);
     	if(!checkModifyDate)
@@ -1728,6 +1726,7 @@ public class TMSearchBroswerHandlerHelper
     	{
     		return false;
     	}
+
     	if(StringUtil.isNotEmpty(tuIds))
     	{
     		boolean tuidMatch = false;
@@ -1909,38 +1908,39 @@ public class TMSearchBroswerHandlerHelper
 			return true;
 
 		Date date = null;
-		try
-		{
-			if (StringUtil.isNotEmpty(searchByDataType))
-			{
-				if (searchByDataType.equalsIgnoreCase("create"))
-				{	
-				    if(tuv.getCreationDate()!=null)
-				    {
-				       date = format.parse(format.format(tuv.getCreationDate()));
-				    }
-				}
-				else if (searchByDataType.equalsIgnoreCase("modify"))
-				{
-				    if(tuv.getModifyDate()!=null)
-				    {
-					   date = format.parse(format.format(tuv.getModifyDate()));
-				    }
-				}
-				else if (searchByDataType.equalsIgnoreCase("lastUsage"))
-				{   
-				    if(tuv.getLastUsageDate()!=null)
-				    {
-	                  date = format.parse(format.format(tuv.getLastUsageDate()));
-				    }
-				}
-			}
-		}
-		catch (ParseException e)
-		{
-			e.printStackTrace();
-		}
-        if (date != null)
+        try
+        {
+            if (StringUtil.isNotEmpty(searchByDataType))
+            {
+                if (searchByDataType.equalsIgnoreCase("create"))
+                {
+                    if (tuv.getCreationDate() != null)
+                    {
+                        date = format.parse(format.format(tuv.getCreationDate()));
+                    }
+                }
+                else if (searchByDataType.equalsIgnoreCase("modify"))
+                {
+                    if (tuv.getModifyDate() != null)
+                    {
+                        date = format.parse(format.format(tuv.getModifyDate()));
+                    }
+                }
+                else if (searchByDataType.equalsIgnoreCase("lastUsage"))
+                {
+                    if (tuv.getLastUsageDate() != null)
+                    {
+                        date = format.parse(format.format(tuv.getLastUsageDate()));
+                    }
+                }
+            }
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+
+		if (date != null)
         {
             if (startDate != null && endDate == null)
             {

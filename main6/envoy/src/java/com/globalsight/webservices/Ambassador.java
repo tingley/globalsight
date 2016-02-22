@@ -11196,15 +11196,15 @@ public class Ambassador extends AbstractWebService
 			activityArgs.put("loggedUserName", loggedUserName);
 			activityArgs.put("tmName", tmName);
 			activityArgs.put("companyName", companyName);
+			activityArgs.put("tuIds", tuIds);
 			activityStart = WebServicesLog.start(Ambassador.class,
 					DELETE_TU_BY_TUID, activityArgs);
 
 			Company company = getCompanyByName(companyName);
 			if (company == null)
 			{
-				return makeErrorXml(DELETE_TU_BY_TUID,
-						"Can not find the company with name (" + companyName
-								+ ")");
+                return makeErrorXml(DELETE_TU_BY_TUID, "Can not find the company with name ("
+                        + companyName + ")");
 			}
 			ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
 			if (ptm == null)
@@ -11280,7 +11280,7 @@ public class Ambassador extends AbstractWebService
 				TmCoreManager manager = LingServerProxy.getTmCoreManager();
 				manager.deleteSegmentTmTus(tm, resultList, false);
 			}
-			return tuIds + " have been removed successfully.";
+			return "Removing is done successfully.";
 		}
 		catch (Exception e)
 		{

@@ -251,6 +251,7 @@ public class BlaiseHelper
 		    String content = FileUtil.readFile(file, "UTF-8");
 		    // A simple replace to "cheat" Blaise API
 		    content = StringUtil.replace(content, "<target state=\"new\"", "<target state=\"translated\"");
+		    FileUtil.writeFile(file, content);
 
 		    InputStream is = new ByteArrayInputStream(content.getBytes());
 			TranslationAgencyClient client = getTranslationClient();

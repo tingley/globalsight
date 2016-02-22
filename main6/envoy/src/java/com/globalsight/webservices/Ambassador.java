@@ -1401,6 +1401,13 @@ public class Ambassador extends AbstractWebService
                     FileProfile fp = ServerProxy
                             .getFileProfilePersistenceManager()
                             .readFileProfile(iFpId);
+                    if (!isInSameCompany(userName, fp.getCompanyId())
+                            && !UserUtil.isSuperPM(userId))
+                    {
+                        String message = makeErrorXml("createJob",
+                                "Current user cannot create job with the file profile which is in other company.");
+                        throw new WebServiceException(message);
+                    }
 					if (priority == null) 
 					{
 						long l10nProfileId = fp.getL10nProfileId();
@@ -1478,6 +1485,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             // Read parameters.
+            String userName = getUsernameFromSession(accessToken);
+            String userId = UserUtil.getUserIdByName(userName);
             String jobId = (String) args.get("jobId");
             Assert.assertIsInteger(jobId);
             job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
@@ -1549,6 +1558,18 @@ public class Ambassador extends AbstractWebService
 								+ invalidFpIds);
             	throw new WebServiceException(errXml);
             }
+            for (String fpids : fileProfileIds)
+            {
+                long iFpId = Long.parseLong(fpids);
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
+                        iFpId);
+                if (!isInSameCompany(userName, fp.getCompanyId()) && !UserUtil.isSuperPM(userId))
+                {
+                    String message = makeErrorXml("createJobOnInitial",
+                            "Current user cannot create job with the file profile which is in other company.");
+                    throw new WebServiceException(message);
+                }
+            }
             // targetLocales
             Vector<String> targetLocales = new Vector<String>();
             Object trgLocalesObj = args.get("targetLocales");
@@ -1565,7 +1586,43 @@ public class Ambassador extends AbstractWebService
             {
                 targetLocales = (Vector<String>) trgLocalesObj;
             }
+            for (String fd : fileProfileIds)
+            {
+                long lfd = Long.parseLong(fd);
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                        .readFileProfile(lfd);
+                long l10nProfileId = fp.getL10nProfileId();
+                ProjectHandler projectHandler = ServerProxy.getProjectHandler();
+                L10nProfile l10nProfile = projectHandler.getL10nProfile(l10nProfileId);
+                GlobalSightLocale[] targetLocales_l10n = l10nProfile.getTargetLocales();
+                boolean flag = false;
+                for (String trgLoc : targetLocales)
+                {
+                    for (String trgLocs : trgLoc.split(","))
+                    {
+                        for (GlobalSightLocale tarLoc_l10n : targetLocales_l10n)
+                        {
+                            if (trgLocs.equalsIgnoreCase(tarLoc_l10n.toString()))
+                            {
+                                flag = true;
+                            }
+                        }
+                        if(flag == false)
+                        {
+                            String message = makeErrorXml("createJobOnInital",
+                                    "current user cannot create job because tagetLocale: " + trgLocs
+                                            + " is Inexistent in current L10nProfile");
+                            throw new WebServiceException(message);
+                        }
+                        else
+                        {
+                            flag = false;
+                        }
+                    }
 
+                }
+
+            }
             String priority = (String) args.get("priority");
             String attributesXml = (String) args.get("attributes");
 

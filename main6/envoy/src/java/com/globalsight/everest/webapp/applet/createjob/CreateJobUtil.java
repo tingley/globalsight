@@ -296,9 +296,10 @@ public class CreateJobUtil
                 {
                     String outFilePath = zipFilePath + File.separator
                             + zipFile.getName().substring(0, zipFile.getName().lastIndexOf("."))
-                            + File.separator + fileHeader.getFileName();
+                            + "_" + getFileExtension(zipFile) + File.separator
+                            + fileHeader.getFileName();
                     File outFile = new File(outFilePath);
-
+                    
                     if (fileHeader.isDirectory())
                     {
                         outFile.mkdirs();
@@ -377,7 +378,8 @@ public class CreateJobUtil
         FileOutputStream fos = null;
         String compressFileName = null;
         String pathname = rarFile.getAbsolutePath();
-        String destDir = pathname.substring(0, pathname.lastIndexOf("."));
+        String destDir = pathname.substring(0, pathname.lastIndexOf(".")) 
+                + "_" + getFileExtension(rarFile);
         try
         {
             File destDirFile = new File(destDir);
@@ -449,8 +451,8 @@ public class CreateJobUtil
         SevenZFile sevenZFile = null;
         FileOutputStream out = null;
         String zipFileFullPathName = zip7zfile.getAbsolutePath();
-        String zipFolder = zipFileFullPathName.substring(0,
-                zipFileFullPathName.lastIndexOf("."));
+        String zipFolder = zipFileFullPathName.substring(0, zipFileFullPathName.lastIndexOf("."))
+                + "_" + getFileExtension(zip7zfile);
 
         try
         {

@@ -1410,9 +1410,21 @@ public class Ambassador extends AbstractWebService
 					}
                     job = JobCreationMonitor.initializeJob(jobName, userId,
                             fp.getL10nProfileId(), priority, Job.PROCESSING);
+                    
+                    for (String fpIdcp : fileProfileIds)
+                    {
+                        long Fpid = Long.parseLong(fpIdcp);
+                        FileProfile fpcp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
+                                Fpid);
+                        if (fpcp.getCompanyId() != job.getCompanyId())
+                        {
+                            String message = makeErrorXml("createJobOnInitial",
+                                    "Current user cannot create job with the file profile which is in other company.");
+                            throw new WebServiceException(message);
+                        }
+                    }
                 }
             }
-
             args.put("jobId", String.valueOf(job.getId()));
 
             createJobOnInitial(args);
@@ -1478,6 +1490,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             // Read parameters.
+            String userName = getUsernameFromSession(accessToken);
+            String userId = UserUtil.getUserIdByName(userName);
             String jobId = (String) args.get("jobId");
             Assert.assertIsInteger(jobId);
             job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
@@ -1549,6 +1563,18 @@ public class Ambassador extends AbstractWebService
 								+ invalidFpIds);
             	throw new WebServiceException(errXml);
             }
+            for (String fpids : fileProfileIds)
+            {
+                long iFpId = Long.parseLong(fpids);
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
+                        iFpId);
+                if (fp.getCompanyId() != job.getCompanyId())
+                {
+                    String message = makeErrorXml("createJobOnInitial",
+                            "Current user cannot create job with the file profile which is in other company.");
+                    throw new WebServiceException(message);
+                }
+            }
             // targetLocales
             Vector<String> targetLocales = new Vector<String>();
             Object trgLocalesObj = args.get("targetLocales");
@@ -1566,6 +1592,32 @@ public class Ambassador extends AbstractWebService
                 targetLocales = (Vector<String>) trgLocalesObj;
             }
 
+            GlobalSightLocale[] targetLocales_l10n = job.getL10nProfile().getTargetLocales();
+            Set<String> gls = new HashSet<String>();
+            for (GlobalSightLocale trgLoc_l10n : targetLocales_l10n)
+            {
+                gls.add(trgLoc_l10n.toString());
+            }
+            StringBuilder sb = new StringBuilder();
+            for (String trgLocs : targetLocales)
+            {
+                for (String trgLoc : trgLocs.split(","))
+                {
+                    if (!gls.contains(trgLoc))
+                    {
+                        sb.append(",");
+                        sb.append(trgLoc);
+                    }
+                }
+            }
+            if (sb.length() > 0)
+            {
+                String message = makeErrorXml("createJobOnInital",
+                        "invalid or non-exsit tagetLocale: " + sb.toString().substring(1)
+                                + "  in current L10nProfile");
+                throw new WebServiceException(message);
+            }
+            
             String priority = (String) args.get("priority");
             String attributesXml = (String) args.get("attributes");
 
@@ -11144,15 +11196,15 @@ public class Ambassador extends AbstractWebService
 			activityArgs.put("loggedUserName", loggedUserName);
 			activityArgs.put("tmName", tmName);
 			activityArgs.put("companyName", companyName);
+			activityArgs.put("tuIds", tuIds);
 			activityStart = WebServicesLog.start(Ambassador.class,
 					DELETE_TU_BY_TUID, activityArgs);
 
 			Company company = getCompanyByName(companyName);
 			if (company == null)
 			{
-				return makeErrorXml(DELETE_TU_BY_TUID,
-						"Can not find the company with name (" + companyName
-								+ ")");
+                return makeErrorXml(DELETE_TU_BY_TUID, "Can not find the company with name ("
+                        + companyName + ")");
 			}
 			ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
 			if (ptm == null)
@@ -11228,7 +11280,7 @@ public class Ambassador extends AbstractWebService
 				TmCoreManager manager = LingServerProxy.getTmCoreManager();
 				manager.deleteSegmentTmTus(tm, resultList, false);
 			}
-			return tuIds + " have been removed successfully.";
+			return "Removing is done successfully.";
 		}
 		catch (Exception e)
 		{

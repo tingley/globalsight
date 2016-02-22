@@ -86,6 +86,18 @@ public class OnlineService extends HttpServlet
             helper = new OnlineHelper();
             try
             {
+                String target =  GxmlUtil.getInnerXml(segmentView.getTargetSegment());
+                helper.setInputSegment(target, "", segmentView.getDataType());
+                
+                if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
+                {
+                    helper.getVerbose();
+                }
+                else
+                {
+                    helper.getCompact();
+                }
+                
                 String seg = getSource();
                 helper.setInputSegment(seg, "", segmentView.getDataType());
                 

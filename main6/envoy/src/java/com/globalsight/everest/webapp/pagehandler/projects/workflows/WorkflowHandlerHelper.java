@@ -971,7 +971,7 @@ public class WorkflowHandlerHelper
             Collection<Request> requests = job.getRequestList();
             Iterator it = job.getWorkflows().iterator();
             String trgLocales = "";
-            if (job.READY_TO_BE_DISPATCHED.equals(state))
+            if (Job.READY_TO_BE_DISPATCHED.equals(state))
             {
                 while (it.hasNext())
                 {
@@ -992,7 +992,7 @@ public class WorkflowHandlerHelper
 
                 EventFlowXmlParser parser = new EventFlowXmlParser();
                 parser.parse(request.getEventFlowXml());
-                if (job.IMPORTFAILED.equals(state))
+                if (Job.IMPORTFAILED.equals(state))
                 {
                     trgLocales = parser.getTargetLocale();
                 }
@@ -1001,8 +1001,7 @@ public class WorkflowHandlerHelper
                 File srcFile = new File(docDir, srcFilePathName);
                 if (XliffFileUtil.isXliffFile(srcFile.getName()))
                 {
-                    srcFile = XliffFileUtil
-                            .getOriginalRealSoureFile(srcFile);
+                    srcFile = XliffFileUtil.getOriginalRealSoureFile(srcFile);
                     if (srcFile.exists() && srcFile.isFile())
                     {
                         String path = srcFile.getAbsolutePath().replace("\\", "/");
@@ -1015,26 +1014,21 @@ public class WorkflowHandlerHelper
 				FileProfile fp = fpManager.getFileProfileById(fpId, true);
 				if (StringUtils.isNotEmpty(fp.getScriptOnImport()))
 				{
-					String scriptedFolderNamePrefix = FileSystemUtil
-							.getScriptedFolderNamePrefixByJob(jobId);
+                    String scriptedFolderNamePrefix = FileSystemUtil
+                            .getScriptedFolderNamePrefixByJob(jobId);
 					String srcFileName = srcFile.getName();
 					int index = srcFileName.lastIndexOf(".");
 					String name = srcFileName.substring(0, index);
 					String extension = srcFileName.substring(index + 1);
-					String folderName = scriptedFolderNamePrefix + "_" + name
-							+ "_" + extension;
-					if (srcFile.getParentFile().getName()
-							.equalsIgnoreCase(folderName))
+                    String folderName = scriptedFolderNamePrefix + "_" + name + "_" + extension;
+                    if (srcFile.getParentFile().getName().equalsIgnoreCase(folderName))
 					{
-						File parentFile = srcFile.getParentFile()
-								.getParentFile();
-						String path = parentFile.getAbsolutePath()
-								+ File.separator + srcFileName;
+                        File parentFile = srcFile.getParentFile().getParentFile();
+                        String path = parentFile.getAbsolutePath() + File.separator + srcFileName;
 						File file = new File(path);
 						if (file.exists())
 						{
-							srcFilePathName = file.getAbsolutePath().substring(
-									docDir.length() + 1);
+                            srcFilePathName = file.getAbsolutePath().substring(docDir.length() + 1);
 						}
 						srcFile = new File(docDir, srcFilePathName);
 					}
@@ -1049,8 +1043,8 @@ public class WorkflowHandlerHelper
                 realFiles.add(srcFilePathName);
 
                 // back up source files
-                File backupFile = new File(docDir + File.separator
-                        + "recreateJob_tmp", srcFilePathName);
+                File backupFile = new File(docDir + File.separator + "recreateJob_tmp",
+                        srcFilePathName);
                 if (srcFile.exists() && srcFile.isFile())
                 {
                     FileUtil.copyFile(srcFile, backupFile);
@@ -1069,12 +1063,26 @@ public class WorkflowHandlerHelper
                 if (srcFilePathName.toLowerCase().endsWith(".email.html")
                         || srcFilePathName.toLowerCase().endsWith(".landingpage.html"))
                 {
-                    String name = srcFilePathName.substring(0,
-                            srcFilePathName.lastIndexOf("."));
+                    String name = srcFilePathName.substring(0, srcFilePathName.lastIndexOf("."));
                     name = name.substring(0, name.lastIndexOf("."))+".obj";
                     File objSrcFile = new File(docDir, name);
-                    File objBackupFile = new File(docDir + File.separator
-                            + "recreateJob_tmp" + name);
+                    File objBackupFile = new File(docDir + File.separator + "recreateJob_tmp"
+                            + File.separator + name);
+                    if (objSrcFile.exists() && objSrcFile.isFile())
+                    {
+                        FileUtil.copyFile(objSrcFile, objBackupFile);
+                        sourceFiles.add(objSrcFile);
+                        backupFiles.add(objBackupFile);
+                    }
+                }
+
+                // For MindTouch job, backup .obj help files too.
+                if (job.isMindTouchJob())
+                {
+                    String objFileName = srcFilePathName + ".obj";
+                    File objSrcFile = new File(docDir, objFileName);
+                    File objBackupFile = new File(docDir + File.separator + "recreateJob_tmp"
+                            + File.separator + objFileName);
                     if (objSrcFile.exists() && objSrcFile.isFile())
                     {
                         FileUtil.copyFile(objSrcFile, objBackupFile);
@@ -1130,17 +1138,15 @@ public class WorkflowHandlerHelper
                 String sslPort = config.getStringParameter("server.ssl.port");
                 String userName = user.getUserName();
                 String password = user.getPassword();
-                Ambassador2 amb2 = WebService2ClientHelper
-                        .getClientAmbassador2(hostName, (httsEnabled ? sslPort
-                                : port), userName, password,
-                                (httsEnabled ? true : false));
+                Ambassador2 amb2 = WebService2ClientHelper.getClientAmbassador2(hostName,
+                        (httsEnabled ? sslPort : port), userName, password, (httsEnabled ? true
+                                : false));
                 String accessToken = amb2.dummyLogin(userName, password);
                 args.put("accessToken", accessToken);
                 args.put("recreate", "true");
-                boolean isViaWS = isJobCreatedOriginallyViaWS(
-                        realFiles.iterator().next(), job.getId()); 
-                args.put("isJobCreatedOriginallyViaWS", isViaWS ? "true"
-                        : "false");
+                boolean isViaWS = isJobCreatedOriginallyViaWS(realFiles.iterator().next(),
+                        job.getId()); 
+                args.put("isJobCreatedOriginallyViaWS", isViaWS ? "true" : "false");
                 amb2.createJobOnInitial(args);
             }
             else

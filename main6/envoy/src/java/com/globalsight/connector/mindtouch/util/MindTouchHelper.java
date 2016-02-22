@@ -744,18 +744,21 @@ public class MindTouchHelper
                     URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(),
                             url.getQuery(), null);
                     HttpPost httppost = getHttpPost(uri, targetLocale);
-
                     httppost.setEntity(reqEntity);
                     HttpResponse response = httpClient.execute(httppost);
 
-                    if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+                    String entityContent = null;
+                    if (response.getEntity() != null)
+                    {
+                        entityContent = EntityUtils.toString(response.getEntity());
+                    }
+                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
+                    {
+                        break;
+                    }
+                    else
                     {
                         String msg = "";
-                        String entityContent = null;
-                        if (response.getEntity() != null)
-                        {
-                            entityContent = EntityUtils.toString(response.getEntity());
-                        }
                         if (times == 1)
                         {
                             msg = "First try ";
@@ -767,10 +770,6 @@ public class MindTouchHelper
                         msg += "fails to post contents back to MindTouch server for page '" + path
                                 + "' : " + entityContent;
                         logger.error(msg);
-                    }
-                    else
-                    {
-                        break;
                     }
         		}
         		catch (Exception e)
@@ -1203,6 +1202,9 @@ public class MindTouchHelper
             title = titleNode.getTextTrim();
             if (title != null && title.length() > 0)
             {
+                title = StringUtil.replace(title, "&", "&amp;");
+                title = StringUtil.replace(title, "<", "&lt;");
+                title = StringUtil.replace(title, ">", "&gt;");
                 titles.append("<tag value=\"").append(title).append("\"/>");
             }
         }
@@ -1239,6 +1241,9 @@ public class MindTouchHelper
             content = contentNode.getTextTrim();
             if (content != null && content.length() > 0)
             {
+                content = StringUtil.replace(content, "&", "&amp;");
+                content = StringUtil.replace(content, "<", "&lt;");
+                content = StringUtil.replace(content, ">", "&gt;");
                 titles.append("<property name=\"").append(name).append("\" etag=\"").append(etagMap.get(name)).append("\"><contents type=\"text/plain\">").append(content).append("</contents></property>");
             }
         }

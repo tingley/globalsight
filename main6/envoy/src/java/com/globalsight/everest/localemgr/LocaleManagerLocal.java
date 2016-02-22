@@ -526,7 +526,7 @@ public class LocaleManagerLocal implements LocaleManager
         try
         {
             // When modify Role, this method need to be modified.
-            removeRoles(p_thePair.getSource(), p_thePair.getTarget());
+            removeRoles(p_thePair);
             HibernateUtil.delete(p_thePair);
         }
         catch (Exception e)
@@ -1250,26 +1250,32 @@ public class LocaleManagerLocal implements LocaleManager
      * Removes all roles (container and user roles) associated with this locale
      * pair.
      */
-    private void removeRoles(GlobalSightLocale p_sourceLocale,
-            GlobalSightLocale p_targetLocale) throws LocaleManagerException
+    private void removeRoles(LocalePair p_thePair) throws LocaleManagerException
     {
         Role curRole = null;
+        GlobalSightLocale sourceLocale = p_thePair.getSource();
+        GlobalSightLocale targetLocale = p_thePair.getTarget();
         try
         {
             JobHandler jh = ServerProxy.getJobHandler();
             UserManager um = ServerProxy.getUserManager();
             CostingEngine ce = ServerProxy.getCostingEngine();
 
+            long lpCompnayId = p_thePair.getCompanyId();
             Collection cActivities = jh.getAllActivities();
             Object activities[] = cActivities.toArray();
             for (int i = 0; i < activities.length; i++)
             {
                 Activity curActivity = (Activity) activities[i];
+                if (curActivity.getCompanyId() != lpCompnayId)
+                {
+                    continue;
+                }
                 String curActivityName = curActivity.getActivityName();
 
                 // remove all the container roles
                 Collection cRoles = um.getContainerRoles(curActivityName,
-                        p_sourceLocale.toString(), p_targetLocale.toString());
+                        sourceLocale.toString(), targetLocale.toString());
                 if (cRoles != null && cRoles.size() > 0)
                 {
                     Object roles[] = cRoles.toArray();
@@ -1291,7 +1297,7 @@ public class LocaleManagerLocal implements LocaleManager
 
                 // remove all the user roles
                 Collection uRoles = um.getUserRoles(curActivityName,
-                        p_sourceLocale.toString(), p_targetLocale.toString());
+                        sourceLocale.toString(), targetLocale.toString());
                 if (uRoles != null && uRoles.size() > 0)
                 {
                     Object roles[] = uRoles.toArray();
@@ -1305,12 +1311,10 @@ public class LocaleManagerLocal implements LocaleManager
         }
         catch (JobException je)
         {
-            CATEGORY.error(
-                    "Failed to get all the activities for removing roles for locale pair "
-                            + p_sourceLocale + " to " + p_targetLocale, je);
-            throw new LocaleManagerException(
-                    LocaleManagerException.MSG_FAILED_TO_GET_ACTIVITES, null,
-                    je);
+            CATEGORY.error("Failed to get all the activities for removing roles for locale pair "
+                    + sourceLocale + " to " + targetLocale, je);
+            throw new LocaleManagerException(LocaleManagerException.MSG_FAILED_TO_GET_ACTIVITES,
+                    null, je);
         }
         catch (UserManagerException ume)
         {

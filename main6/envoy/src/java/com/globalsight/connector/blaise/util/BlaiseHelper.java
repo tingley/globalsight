@@ -16,8 +16,8 @@
  */
 package com.globalsight.connector.blaise.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +42,8 @@ import com.cognitran.workflow.client.InboxEntry;
 import com.cognitran.workflow.client.State;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class BlaiseHelper
 {
@@ -246,17 +248,17 @@ public class BlaiseHelper
 	{
 		try
 		{
-			InputStream is = new FileInputStream(file);
+		    String content = FileUtil.readFile(file, "UTF-8");
+		    // A simple replace to "cheat" Blaise API
+		    content = StringUtil.replace(content, "<target state=\"new\"", "<target state=\"translated\"");
+
+		    InputStream is = new ByteArrayInputStream(content.getBytes());
 			TranslationAgencyClient client = getTranslationClient();
 			client.uploadXliff(entryId, is);
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error when invoke uploadXliff: " + e.getMessage());
-			if (logger.isDebugEnabled())
-			{
-				logger.error(e);
-			}
+			logger.error("Error when invoke 'uploadXliff': ", e);
 		}
 	}
 

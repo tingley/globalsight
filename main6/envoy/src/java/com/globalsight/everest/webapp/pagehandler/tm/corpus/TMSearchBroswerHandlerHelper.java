@@ -108,7 +108,7 @@ import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlException;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
-import com.globalsight.webservices.WebServiceException;
+
 
 
 public class TMSearchBroswerHandlerHelper
@@ -1685,7 +1685,7 @@ public class TMSearchBroswerHandlerHelper
     	return attributeFilterTuIds;
     }
  
-    private static boolean searchFilter(HashMap filterMap, BaseTmTuv tuv) throws WebServiceException
+    private static boolean searchFilter(HashMap filterMap, BaseTmTuv tuv) 
     {
     	String createStartDateOption = (String) filterMap.get("createStartDateOption");
 		Date createStartDate = (Date) filterMap.get("createStartDate");
@@ -1903,7 +1903,7 @@ public class TMSearchBroswerHandlerHelper
     
 	private static boolean searchByDate(String searchByDataType,
 			String startDateOption, String endDateOption, Date startDate,
-			Date endDate, BaseTmTuv tuv) throws WebServiceException
+			Date endDate, BaseTmTuv tuv) 
 	{
 		if (startDate == null && endDate == null)
 			return true;

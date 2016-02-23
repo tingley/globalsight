@@ -401,8 +401,9 @@ function generateEndNode(node) {
 	return returnValue;
 }
 
-var decisionTemplate1 = $("#decisionTemplate1").html();
-var decisionTemplate2 = $("#decisionTemplate2").html();
+var decisionTemplate = $("#decisionTemplate").html();
+var branchTemplate = $("#branchTemplate").html();
+var transitionTemplate = $("#transitionTemplate").html();
 function generateConditionNode(node) {
 	var n = getSequence();
 	
@@ -416,38 +417,33 @@ function generateConditionNode(node) {
 	data["y"] = getTemplateNumber(node.locale.y);
 	data["sequence"] = n;
 	
-	var l1 = node.tos[0];
-	var l2 = node.tos[1];
-	
-	if (l2 && l2.isDefault){
-		var l3 = l2;
-		l2 = l1;
-		l1 = l3;
+	var branchs = "";
+	var transitions = "";
+	var nextXmls = "";
+	for ( var i in node.tos) {
+		var line = node.tos[i];
+		var toId = line.to.id;
+		var to = Model.nodes[toId];		
+		var ob = getNextNodeXml(to);
+		
+		var data2 = {};
+		data2["i"] = i;
+		data2["isDefault"] = line.isDefault;
+		data2["transition"] = line.data.txt;
+		var branchXml = Mustache.render(branchTemplate, data2); 
+		
+		data2["transition_to"] = ob.name;
+		var transitionXMl = Mustache.render(transitionTemplate, data2); 
+		
+		branchs = branchs + branchXml;
+		transitions = transitions + transitionXMl;
+		nextXmls = nextXmls + getXmlOnce(ob);
 	}
 	
-	var toId = l1.to.id;
-	var to = Model.nodes[toId];		
-	var ob = getNextNodeXml(to);
-	data["transition1"] = l1.data.txt;	
-	data["transition_to1"] = ob.name;
-	var temp = decisionTemplate1;	
-	
-	// sometimes the condition only has one output.
-	var ob2;
-	if (l2){		
-		toId = l2.to.id;
-		to = Model.nodes[toId];		
-		ob2 = getNextNodeXml(to);
-		data["transition2"] = l2.data.txt;	
-		data["transition_to2"] = ob2.name;
-		temp = decisionTemplate2;	
-	}
-	
-	var xml = Mustache.render(temp, data); 
-	xml = xml + getXmlOnce(ob);
-	if (typeof(ob2) != "undefined"){
-		xml = xml + getXmlOnce(ob2);
-	}
+	data["branchs"] = branchs;
+	data["transitions"] = transitions;
+	var xml = Mustache.render(decisionTemplate, data); 
+	xml = xml + nextXmls;
 	
 	var returnValue= {};
 	returnValue["name"] = name;

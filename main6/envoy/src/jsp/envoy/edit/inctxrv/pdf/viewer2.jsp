@@ -139,7 +139,7 @@ function contextForPage(e)
 
 var currentSegment;
 
-function highlightObjects(o)
+function highlightObjects(o, divLeft, divWidth, clickX)
 {
 	var pagennn = PDFViewerApplication.pdfViewer._location.pageNumber;
 	var pageLeft = PDFViewerApplication.pdfViewer._location.left;
@@ -232,7 +232,7 @@ if (divArr && divArr.length > 0)
 				return;
 			}
 			
-			var segment = getSegment(pageContent, o, i, divArr);
+			var segment = getSegment(true, pageContent, o, i, divArr, divLeft, divWidth, clickX);
 			
 			if (segment)
 			{

@@ -47,6 +47,7 @@ public class MatchTypeStatistics
     public static final int SEGMENT_MT_EXACT = 8;
     public static final int SEGMENT_XLIFF_EXACT = 9;
     public static final int SEGMENT_PO_EXACT = 10;
+    public static final int IN_PROGRESS_TM_EXACT = 11;
 
     // word count calculated by threshold
     public static final int THRESHOLD_NO_MATCH = 11;
@@ -110,26 +111,26 @@ public class MatchTypeStatistics
     private int determineStatisticsTypeForExactMatch(MatchState p_matchState)
     {
         int statisticsType = NO_MATCH;
-        if (p_matchState != null
-                && (p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH) || p_matchState
-                        .equals(MatchState.PAGE_TM_EXACT_MATCH)))
+        if (MatchState.UNVERIFIED_EXACT_MATCH.equals(p_matchState)
+                || MatchState.PAGE_TM_EXACT_MATCH.equals(p_matchState))
         {
             statisticsType = CONTEXT_EXACT;
         }
-        else if (p_matchState != null
-                && p_matchState.equals(MatchState.MT_EXACT_MATCH))
+        else if (MatchState.MT_EXACT_MATCH.equals(p_matchState))
         {
             statisticsType = SEGMENT_MT_EXACT;
         }
-        else if (p_matchState != null
-                && p_matchState.equals(MatchState.XLIFF_EXACT_MATCH))
+        else if (MatchState.XLIFF_EXACT_MATCH.equals(p_matchState))
         {
             statisticsType = SEGMENT_XLIFF_EXACT;
         }
-        else if (p_matchState != null
-                && p_matchState.equals(MatchState.PO_EXACT_MATCH))
+        else if (MatchState.PO_EXACT_MATCH.equals(p_matchState))
         {
             statisticsType = SEGMENT_PO_EXACT;
+        }
+        else if (MatchState.IN_PROGRESS_TM_EXACT_MATCH.equals(p_matchState))
+        {
+            statisticsType = IN_PROGRESS_TM_EXACT;
         }
         else
         {

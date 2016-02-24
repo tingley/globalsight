@@ -549,6 +549,8 @@ public class StatisticsService
                     contextMatchWordCount += wordCount;
                     break;
                 case MatchTypeStatistics.SEGMENT_TM_EXACT:
+                    // put in-progress tm number here for now (since version:8.6.7)
+                case MatchTypeStatistics.IN_PROGRESS_TM_EXACT:
                     segmentTmWordCount += wordCount;
                     break;
                 case MatchTypeStatistics.SEGMENT_MT_EXACT:
@@ -827,6 +829,7 @@ public class StatisticsService
                 case MatchTypeStatistics.SEGMENT_MT_EXACT:
                 case MatchTypeStatistics.SEGMENT_XLIFF_EXACT:
                 case MatchTypeStatistics.SEGMENT_PO_EXACT:
+                case MatchTypeStatistics.IN_PROGRESS_TM_EXACT:
                     // If current target TUV has repetition flag, after
                     // "update leverage" and "update word counts" to get 100
                     // match, its REP flag should be removed.

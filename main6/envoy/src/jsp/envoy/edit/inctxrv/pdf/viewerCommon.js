@@ -239,6 +239,12 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
 				  obj.div = divChild;
 				  obj.start = index - count;
 				  obj.end = index + segmentLen - count;
+                  if (obj.start == 1)
+				  {
+				      obj.start = isOfficeXml ? ((segment.indexOf(divContent) == 0 || divContent.indexOf(segment) == 0) ? 0 : 1) : 1;
+                      obj.end = isOfficeXml ? ((segment.indexOf(divContent) == 0 || divContent.indexOf(segment) == 0) ? obj.end - 1 : obj.end) : obj.end;
+				  }
+                  
 				  matchedDiv.push(obj);
   				  break;
 			  }
@@ -250,7 +256,7 @@ function findSegment(format, tuId, sourceSegment, targetSegment, donotMove, p_ln
 				  
 				  if (obj.start == 1)
 				  {
-				      obj.start = isOfficeXml ? ((segment.indexOf(divContent) == 0) ? 0 : 1) : 1;
+				      obj.start = isOfficeXml ? ((segment.indexOf(divContent) == 0 || divContent.indexOf(segment) == 0) ? 0 : 1) : 1;
 				  }
 				  
 				  obj.end = divContentLen;
@@ -569,7 +575,7 @@ function sendAjax(obj)
 	});
 }
 
-function getSegment(pageContent, o, i, divArr)
+function getSegment(isTarget, pageContent, o, i, divArr, divLeft, divWidth, clickX)
 {
     var isOfficeXml = ("office-xml" == pageContent.format || "xml" == pageContent.format);
     
@@ -675,9 +681,52 @@ function getSegment(pageContent, o, i, divArr)
 			for (var j = 0; j < pageContent.segments.length; j++)
 			{
 				var seg = pageContent.segments[j];
+                var segContent = isTarget ? seg.tgtSegmentNoTag : seg.srcSegmentNoTag;
 				if (index >= seg.start && index < seg.end)
 				{
-					return seg;
+                    if (o1text == segContent){
+                        return seg;
+                    }
+                    else{
+                        var segArray = [];
+                        var textLen = o1text.length;
+                        var lll = segContent.length;
+                        var j1 = j + 1;
+                        segArray.push({seg: seg, length : segContent.length});
+                        while(lll < textLen && j1 < pageContent.segments.length){
+                            var seg1 = pageContent.segments[j1];
+                            var segContent1 = isTarget ? seg1.tgtSegmentNoTag : seg1.srcSegmentNoTag;
+                            var lll_old = lll;
+                            lll = lll + segContent1.length;
+                            j1 = j1 + 1;
+                            
+                            if (lll > textLen){
+                                segArray.push({seg: seg1, length : textLen - lll_old});
+                            }
+                            else{
+                                segArray.push({seg: seg1, length : segContent1.length});
+                            }
+                        }
+                        var clickLen = clickX - divLeft;
+                        var whereIs = clickLen / divWidth;
+                        
+                        var whereIs2_start = 0;
+                        var whereIs2_end = 0;
+                        var _start = 0;
+                        var _end = 0;
+                        for(var iii = 0; iii < segArray.length; iii++){
+                            var segLen = segArray[iii];
+                            _end = _end + segLen.length;
+                            whereIs2_start = _start / o1text.length;
+                            whereIs2_end = _end / o1text.length;
+                            if(whereIs > whereIs2_start && whereIs <= whereIs2_end){
+                                return segLen.seg;
+                            }
+                            
+                            _start = _start + segLen.length;
+                        }
+                        return pageContent.segments[j];
+                    }
 				}
 			}
 			
@@ -688,4 +737,14 @@ function getSegment(pageContent, o, i, divArr)
 		{
 			return false;
 		}
+}
+
+function getElementPosition(e) {
+            var x = 0, y = 0;
+            while (e != null) {
+                x += e.offsetLeft;
+                y += e.offsetTop;
+                e = e.offsetParent;
+            }
+            return { x: x, y: y };
 }

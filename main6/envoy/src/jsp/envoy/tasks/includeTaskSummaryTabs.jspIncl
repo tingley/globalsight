@@ -164,7 +164,7 @@ function doUpdateLeverage(urlUpdateLeverage)
 			}
 			else
 			{
-				w_updateLeverage = window.open(urlUpdateLeverage, "UpdateLeverage", "height=550,width=700,resizable=no,scrollbars=no");
+				w_updateLeverage = window.open(urlUpdateLeverage, "UpdateLeverage", "height=580,width=700,resizable=no,scrollbars=no");
 			}
 	});
 }

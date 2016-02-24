@@ -813,7 +813,7 @@ function realSubmitForm(specificButton){
 				alert(msg);
 			    return false;
 		    }
-			w_updateLeverage = window.open("${updateLeverage.pageURL}&wfId=" + readyWfIds + "&action=getAvailableJobsForWfs", "UpdateLeverage", "height=550,width=700,resizable=no,scrollbars=no");
+			w_updateLeverage = window.open("${updateLeverage.pageURL}&wfId=" + readyWfIds + "&action=getAvailableJobsForWfs", "UpdateLeverage", "height=580,width=700,resizable=no,scrollbars=no");
 	    });
 	}
    else if (specificButton == "UpdateWordCounts")

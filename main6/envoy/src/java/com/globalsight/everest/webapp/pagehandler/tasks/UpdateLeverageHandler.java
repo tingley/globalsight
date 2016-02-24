@@ -778,7 +778,7 @@ public class UpdateLeverageHandler extends PageActionHandler
     {
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
                 p_sourcePage, p_targetLocale);
-        if (mtProfile == null || mtProfile.isActive())
+        if (mtProfile == null || !(mtProfile.isActive()))
         {
             return;
         }

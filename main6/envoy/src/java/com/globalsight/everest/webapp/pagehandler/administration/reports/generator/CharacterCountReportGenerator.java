@@ -769,17 +769,22 @@ public class CharacterCountReportGenerator implements ReportGenerator
         {
             matches.append(m_bundle.getString("lb_no_match_report"));
         }
-        if (targetTuv.isRepeated())
+
+        if (matches.indexOf("100%") == -1
+                && matches.indexOf(m_bundle.getString("lb_in_context_match")) == -1)
         {
-            matches.append("\r\n")
-                    .append(m_bundle
-                            .getString("jobinfo.tradosmatches.invoice.repeated"));
-        }
-        else if (targetTuv.getRepetitionOfId() > 0)
-        {
-            matches.append("\r\n")
-                    .append(m_bundle
-                            .getString("jobinfo.tradosmatches.invoice.repetition"));
+            if (targetTuv.isRepeated())
+            {
+                matches.append("\r\n")
+                        .append(m_bundle
+                                .getString("jobinfo.tradosmatches.invoice.repeated"));
+            }
+            else if (targetTuv.getRepetitionOfId() > 0)
+            {
+                matches.append("\r\n")
+                        .append(m_bundle
+                                .getString("jobinfo.tradosmatches.invoice.repetition"));
+            }
         }
 
         return matches;

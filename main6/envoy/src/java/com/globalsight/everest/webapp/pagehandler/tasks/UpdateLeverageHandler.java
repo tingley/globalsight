@@ -779,8 +779,10 @@ public class UpdateLeverageHandler extends PageActionHandler
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
                 p_sourcePage, p_targetLocale);
         HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(p_sourcePage);
-        if (mtProfile != null || mtProfile.isActive())
+        try
         {
+            if (mtProfile != null || mtProfile.isActive())
+            {
 
             String mtEngine = mtProfile.getMtEngine();
             machineTranslator = MTHelper.initMachineTranslator(mtEngine);
@@ -948,6 +950,11 @@ public class UpdateLeverageHandler extends PageActionHandler
 
             // Populate into target TUVs
             SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, jobId);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.warn("The job does not use MT.");
         }
     }
 

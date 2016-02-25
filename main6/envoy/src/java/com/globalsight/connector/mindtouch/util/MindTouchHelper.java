@@ -1244,7 +1244,7 @@ public class MindTouchHelper
                 content = StringUtil.replace(content, "&", "&amp;");
                 content = StringUtil.replace(content, "<", "&lt;");
                 content = StringUtil.replace(content, ">", "&gt;");
-                titles.append("<property name=\"").append(name).append("\" etag=\"").append(etagMap.get(name)).append("\"><contents type=\"text/plain\">").append(content).append("</contents></property>");
+                titles.append("<property name=\"").append(name).append("\" etag=\"").append(etagMap.get(name)).append("\"><contents type=\"text/plain; charset=UTF-8\">").append(content).append("</contents></property>");
             }
         }
         titles.append("</properties>");

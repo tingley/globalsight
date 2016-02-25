@@ -68,22 +68,22 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.searchEntries(p_accessToken, p_tmProfileName, p_string, p_sourceLocale, escapeString);
   }
   
-  public java.lang.String getVersion(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.getVersion(p_accessToken);
-  }
-  
   public java.lang.String getConnection(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
     return ambassador.getConnection(p_accessToken);
   }
   
-  public java.lang.String getAllUsers(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String getVersion(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    return ambassador.getAllUsers(p_accessToken);
+    return ambassador.getVersion(p_accessToken);
+  }
+  
+  public java.util.HashMap getXliffFileProfile(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getXliffFileProfile(p_accessToken);
   }
   
   public java.lang.String getStatus(java.lang.String p_accessToken, java.lang.String p_jobName) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -104,52 +104,28 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     ambassador.setJobAttribute(accessToken, jobId, attInternalName, value);
   }
   
-  public java.lang.String login(java.lang.String p_username, java.lang.String p_password) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String getAllUsers(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    return ambassador.login(p_username, p_password);
+    return ambassador.getAllUsers(p_accessToken);
   }
   
-  public java.util.HashMap getXliffFileProfile(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public void uploadFile(java.lang.String accessToken, java.lang.String jobName, java.lang.String filePath, java.lang.String fileProfileId, byte[] content) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    return ambassador.getXliffFileProfile(p_accessToken);
+    ambassador.uploadFile(accessToken, jobName, filePath, fileProfileId, content);
   }
   
-  public java.lang.String cancelWorkflow(java.lang.String p_accessToken, java.lang.String p_jobName, java.lang.String p_workflowLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public void uploadFile(java.lang.String accessToken, java.lang.String jobName, java.lang.String filePath, java.lang.String fileProfileId, java.lang.String content) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    return ambassador.cancelWorkflow(p_accessToken, p_jobName, p_workflowLocale);
+    ambassador.uploadFile(accessToken, jobName, filePath, fileProfileId, content);
   }
   
-  public java.lang.String addJobComment(java.lang.String p_accessToken, java.lang.String p_jobName, java.lang.String p_userId, java.lang.String p_comment, byte[] p_file, java.lang.String p_fileName, java.lang.String p_access) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public void uploadFile(java.util.HashMap args) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    return ambassador.addJobComment(p_accessToken, p_jobName, p_userId, p_comment, p_file, p_fileName, p_access);
-  }
-  
-  public java.lang.String addComment(java.lang.String p_accessToken, long p_objectId, int p_objectType, java.lang.String p_userId, java.lang.String p_comment, byte[] p_file, java.lang.String p_fileName, java.lang.String p_access) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.addComment(p_accessToken, p_objectId, p_objectType, p_userId, p_comment, p_file, p_fileName, p_access);
-  }
-  
-  public java.lang.String getCountsByJobState(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.getCountsByJobState(p_accessToken);
-  }
-  
-  public void updateTaskState(java.lang.String p_accessToken, java.lang.String p_taskId, java.lang.String p_state) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    ambassador.updateTaskState(p_accessToken, p_taskId, p_state);
-  }
-  
-  public java.lang.String getTargetLocales(java.lang.String p_accessToken, java.lang.String p_sourceLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.getTargetLocales(p_accessToken, p_sourceLocale);
+    ambassador.uploadFile(args);
   }
   
   public java.lang.String acceptTask(java.lang.String p_accessToken, java.lang.String p_taskId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -164,6 +140,90 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.rejectTask(p_accessToken, p_taskId, p_rejectComment);
   }
   
+  public void updateTaskState(java.lang.String p_accessToken, java.lang.String p_taskId, java.lang.String p_state) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    ambassador.updateTaskState(p_accessToken, p_taskId, p_state);
+  }
+  
+  public java.lang.String getTargetLocales(java.lang.String p_accessToken, java.lang.String p_sourceLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getTargetLocales(p_accessToken, p_sourceLocale);
+  }
+  
+  public java.lang.String login(java.lang.String p_username, java.lang.String p_password) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.login(p_username, p_password);
+  }
+  
+  public java.lang.String addComment(java.lang.String p_accessToken, long p_objectId, int p_objectType, java.lang.String p_userId, java.lang.String p_comment, byte[] p_file, java.lang.String p_fileName, java.lang.String p_access) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.addComment(p_accessToken, p_objectId, p_objectType, p_userId, p_comment, p_file, p_fileName, p_access);
+  }
+  
+  public java.lang.String getCountsByJobState(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getCountsByJobState(p_accessToken);
+  }
+  
+  public boolean isInstalled() throws java.rmi.RemoteException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.isInstalled();
+  }
+  
+  public java.lang.String cancelWorkflow(java.lang.String p_accessToken, java.lang.String p_jobName, java.lang.String p_workflowLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.cancelWorkflow(p_accessToken, p_jobName, p_workflowLocale);
+  }
+  
+  public java.lang.String addJobComment(java.lang.String p_accessToken, java.lang.String p_jobName, java.lang.String p_userId, java.lang.String p_comment, byte[] p_file, java.lang.String p_fileName, java.lang.String p_access) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.addJobComment(p_accessToken, p_jobName, p_userId, p_comment, p_file, p_fileName, p_access);
+  }
+  
+  public java.lang.String getServerVersion(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getServerVersion(p_accessToken);
+  }
+  
+  public java.lang.String archiveJob(java.lang.String p_accessToken, java.lang.String p_jobIds) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.archiveJob(p_accessToken, p_jobIds);
+  }
+  
+  public java.lang.String getAllTMProfiles(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getAllTMProfiles(p_accessToken);
+  }
+  
+  public java.lang.String getUserTimeZone(java.lang.String p_accessToken, java.lang.String p_userName) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getUserTimeZone(p_accessToken, p_userName);
+  }
+  
+  public java.lang.String getAllProjectTMs(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getAllProjectTMs(p_accessToken);
+  }
+  
+  public java.lang.String getAllProjects(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getAllProjects(p_accessToken);
+  }
+  
   public int createUser(java.lang.String p_accessToken, java.lang.String p_userId, java.lang.String p_password, java.lang.String p_firstName, java.lang.String p_lastName, java.lang.String p_email, java.lang.String[] p_permissionGrps, java.lang.String p_status, java.lang.String p_roles, boolean p_isInAllProject, java.lang.String[] p_projectIds) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
@@ -176,6 +236,12 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.modifyUser(p_accessToken, p_userId, p_password, p_firstName, p_lastName, p_email, p_permissionGrps, p_status, p_roles, p_isInAllProject, p_projectIds);
   }
   
+  public void editEntry(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String p_orgSid, java.lang.String p_newSid, java.lang.String p_sourceLocale, java.lang.String p_sourceSegment, java.lang.String p_targetLocale, java.lang.String p_targetSegment, java.lang.String escapeString) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    ambassador.editEntry(p_accessToken, p_tmProfileName, p_orgSid, p_newSid, p_sourceLocale, p_sourceSegment, p_targetLocale, p_targetSegment, escapeString);
+  }
+  
   public void editEntry(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String p_orgSid, java.lang.String p_newSid, java.lang.String p_sourceLocale, java.lang.String p_sourceSegment, java.lang.String p_targetLocale, java.lang.String p_targetSegment, boolean isEscape) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
@@ -186,12 +252,6 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     if (ambassador == null)
       _initAmbassadorProxy();
     ambassador.editEntry(p_accessToken, p_tmProfileName, p_sourceLocale, p_sourceSegment, p_targetLocale, p_targetSegment);
-  }
-  
-  public void editEntry(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String p_orgSid, java.lang.String p_newSid, java.lang.String p_sourceLocale, java.lang.String p_sourceSegment, java.lang.String p_targetLocale, java.lang.String p_targetSegment, java.lang.String escapeString) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    ambassador.editEntry(p_accessToken, p_tmProfileName, p_orgSid, p_newSid, p_sourceLocale, p_sourceSegment, p_targetLocale, p_targetSegment, escapeString);
   }
   
   public java.lang.String saveEntry(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String sid, java.lang.String p_sourceLocale, java.lang.String p_sourceSegment, java.lang.String p_targetLocale, java.lang.String p_targetSegment, java.lang.String escapeString) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -228,54 +288,6 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     if (ambassador == null)
       _initAmbassadorProxy();
     return ambassador.cancelJob(p_accessToken, p_jobName);
-  }
-  
-  public java.lang.String getServerVersion(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.getServerVersion(p_accessToken);
-  }
-  
-  public java.lang.String generateTranslationVerificationReport(java.lang.String p_accessToken, java.lang.String p_jobId, java.lang.String p_targetLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.generateTranslationVerificationReport(p_accessToken, p_jobId, p_targetLocale);
-  }
-  
-  public java.lang.String generateReviewersCommentSimplifiedReport(java.lang.String p_accessToken, java.lang.String p_jobIds, java.lang.String p_targetLocales, boolean p_includeCompactTags) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.generateReviewersCommentSimplifiedReport(p_accessToken, p_jobIds, p_targetLocales, p_includeCompactTags);
-  }
-  
-  public void uploadFile(java.lang.String accessToken, java.lang.String jobName, java.lang.String filePath, java.lang.String fileProfileId, byte[] content) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    ambassador.uploadFile(accessToken, jobName, filePath, fileProfileId, content);
-  }
-  
-  public void uploadFile(java.lang.String accessToken, java.lang.String jobName, java.lang.String filePath, java.lang.String fileProfileId, java.lang.String content) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    ambassador.uploadFile(accessToken, jobName, filePath, fileProfileId, content);
-  }
-  
-  public void uploadFile(java.util.HashMap args) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    ambassador.uploadFile(args);
-  }
-  
-  public java.lang.String getAllTMProfiles(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.getAllTMProfiles(p_accessToken);
-  }
-  
-  public boolean isInstalled() throws java.rmi.RemoteException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.isInstalled();
   }
   
   public java.lang.String helloWorld() throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -368,10 +380,10 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.getGSVersion(p_accessToken);
   }
   
-  public void deleteSegment(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String p_string, java.lang.String p_sourceLocale, java.lang.String p_deleteLocale, boolean isEscape) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public void deleteSegment(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String p_string, java.lang.String p_sourceLocale, java.lang.String p_deleteLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    ambassador.deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale, p_deleteLocale, isEscape);
+    ambassador.deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale, p_deleteLocale);
   }
   
   public void deleteSegment(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String p_string, java.lang.String p_sourceLocale, java.lang.String p_deleteLocale, java.lang.String escapeString) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -380,10 +392,10 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     ambassador.deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale, p_deleteLocale, escapeString);
   }
   
-  public void deleteSegment(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String p_string, java.lang.String p_sourceLocale, java.lang.String p_deleteLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public void deleteSegment(java.lang.String p_accessToken, java.lang.String p_tmProfileName, java.lang.String p_string, java.lang.String p_sourceLocale, java.lang.String p_deleteLocale, boolean isEscape) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    ambassador.deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale, p_deleteLocale);
+    ambassador.deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale, p_deleteLocale, isEscape);
   }
   
   public java.lang.String getAllTermbases(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -422,16 +434,22 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.getFirstTu(accessToken, tmName, companyName, sourceLocale, targetLocale);
   }
   
+  public java.lang.String nextTus(java.lang.String accessToken, java.lang.String tmName, java.lang.String companyName, java.lang.String sourceLocale, java.lang.String targetLocale, java.lang.String maxSize, java.lang.String tuIdToStart) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.nextTus(accessToken, tmName, companyName, sourceLocale, targetLocale, maxSize, tuIdToStart);
+  }
+  
   public java.lang.String nextTus(java.lang.String accessToken, java.lang.String sourceLocale, java.lang.String targetLocale, java.lang.String maxSize, java.lang.String tuIdToStart) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
     return ambassador.nextTus(accessToken, sourceLocale, targetLocale, maxSize, tuIdToStart);
   }
   
-  public java.lang.String nextTus(java.lang.String accessToken, java.lang.String tmName, java.lang.String companyName, java.lang.String sourceLocale, java.lang.String targetLocale, java.lang.String maxSize, java.lang.String tuIdToStart) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String deleteTuByTuIds(java.lang.String accessToken, java.lang.String tmName, java.lang.String companyName, java.lang.String tuIds) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    return ambassador.nextTus(accessToken, tmName, companyName, sourceLocale, targetLocale, maxSize, tuIdToStart);
+    return ambassador.deleteTuByTuIds(accessToken, tmName, companyName, tuIds);
   }
   
   public java.lang.String editTu(java.lang.String accessToken, java.lang.String tmx) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -548,28 +566,16 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.tmFullTextSearch(p_accessToken, p_string, p_tmNames, p_sourceLocale, p_targetLocale, p_dateType, p_startDate, p_finishDate, p_companyName);
   }
   
-  public java.lang.String getUserTimeZone(java.lang.String p_accessToken, java.lang.String p_userName) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String generateTranslationVerificationReport(java.lang.String p_accessToken, java.lang.String p_jobId, java.lang.String p_targetLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    return ambassador.getUserTimeZone(p_accessToken, p_userName);
+    return ambassador.generateTranslationVerificationReport(p_accessToken, p_jobId, p_targetLocale);
   }
   
-  public java.lang.String getAllProjectTMs(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String generateReviewersCommentSimplifiedReport(java.lang.String p_accessToken, java.lang.String p_jobIds, java.lang.String p_targetLocales, boolean p_includeCompactTags) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
-    return ambassador.getAllProjectTMs(p_accessToken);
-  }
-  
-  public java.lang.String getAllProjects(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.getAllProjects(p_accessToken);
-  }
-  
-  public java.lang.String archiveJob(java.lang.String p_accessToken, java.lang.String p_jobIds) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.archiveJob(p_accessToken, p_jobIds);
+    return ambassador.generateReviewersCommentSimplifiedReport(p_accessToken, p_jobIds, p_targetLocales, p_includeCompactTags);
   }
   
   public java.lang.String getFileProfileInformation(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -716,13 +722,13 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.getAllPermissionsByUser(p_accessToken);
   }
   
-  public java.lang.String getAttributesByJobId(java.lang.String p_accessToken, java.lang.Long p_jobId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String getAttributesByJobId(java.lang.String p_accessToken, long p_jobId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
     return ambassador.getAttributesByJobId(p_accessToken, p_jobId);
   }
   
-  public java.lang.String getAttributesByJobId(java.lang.String p_accessToken, long p_jobId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+  public java.lang.String getAttributesByJobId(java.lang.String p_accessToken, java.lang.Long p_jobId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
     return ambassador.getAttributesByJobId(p_accessToken, p_jobId);
@@ -848,16 +854,16 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.jobsWorkflowCanBeAdded(p_accessToken, p_jobId);
   }
   
-  public java.lang.String getJobsByTimeRange(java.lang.String accessToken, java.lang.String startTime) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.getJobsByTimeRange(accessToken, startTime);
-  }
-  
   public java.lang.String getJobsByTimeRange(java.lang.String accessToken, java.lang.String startTime, long projectId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
     return ambassador.getJobsByTimeRange(accessToken, startTime, projectId);
+  }
+  
+  public java.lang.String getJobsByTimeRange(java.lang.String accessToken, java.lang.String startTime) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.getJobsByTimeRange(accessToken, startTime);
   }
   
   public java.lang.String getAllL10NProfiles(java.lang.String accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
@@ -866,16 +872,16 @@ public class AmbassadorProxy implements com.globalsight.www.webservices.Ambassad
     return ambassador.getAllL10NProfiles(accessToken);
   }
   
-  public java.lang.String downloadXliffOfflineFile(java.lang.String accessToken, java.lang.String taskId, java.lang.String lockedSegEditType, boolean isIncludeXmlNodeContextInformation) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
-    if (ambassador == null)
-      _initAmbassadorProxy();
-    return ambassador.downloadXliffOfflineFile(accessToken, taskId, lockedSegEditType, isIncludeXmlNodeContextInformation);
-  }
-  
   public java.lang.String downloadXliffOfflineFile(java.lang.String accessToken, java.lang.String taskId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador == null)
       _initAmbassadorProxy();
     return ambassador.downloadXliffOfflineFile(accessToken, taskId);
+  }
+  
+  public java.lang.String downloadXliffOfflineFile(java.lang.String accessToken, java.lang.String taskId, java.lang.String lockedSegEditType, boolean isIncludeXmlNodeContextInformation) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador == null)
+      _initAmbassadorProxy();
+    return ambassador.downloadXliffOfflineFile(accessToken, taskId, lockedSegEditType, isIncludeXmlNodeContextInformation);
   }
   
   public java.lang.String generateTranslationEditReport(java.lang.String p_accessToken, java.lang.String p_jobId, java.lang.String p_targetLocale) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{

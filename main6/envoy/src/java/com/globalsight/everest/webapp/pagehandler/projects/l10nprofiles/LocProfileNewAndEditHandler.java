@@ -78,6 +78,7 @@ public class LocProfileNewAndEditHandler extends PageHandler implements
         if ("ajax".equals(action))
         {
             String jsonStr = getJSONWorkflows(p_request);
+            p_response.setCharacterEncoding("utf-8");
             p_response.getWriter().write(jsonStr);
             return;
         }

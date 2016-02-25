@@ -20,10 +20,16 @@ String mtTranslationURL = mtTranslation.getPageURL()
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
 
+String mtTranslationMessageURL = mtTranslation.getPageURL() 
++ "&action=" + MTHelper2.ACTION_GET_MT_TRANSLATION_MESSAGE;
+	
 //if show mt in segment editor
 boolean show_in_editor = false;
+boolean show_MT = false;
 try 
 {
+	String showMachineTranslation = (String) sessionMgr.getAttribute("showMachineTranslation");
+	show_MT = (new Boolean(showMachineTranslation)).booleanValue();
     String showInEditor = (String) sessionMgr.getAttribute(MTHelper2.SHOW_IN_EDITOR);
     show_in_editor = (new Boolean(showInEditor)).booleanValue();
 } 
@@ -40,6 +46,7 @@ A, A:hover, A:active, A:visited, A:link { color: blue; text-decoration: none; }
 	     color: blue; cursor: hand;cursor:pointer; }
 .label     { font-family:Arial, Helvetica, sans-serif; font-size: 9pt;
 	     font-weight: bold; }
+ .link      { color: blue; cursor: hand; cursor:pointer;}
 </STYLE>
 <SCRIPT LANGUAGE="JavaScript">
 function doClick()
@@ -56,17 +63,17 @@ function copyToTarget(value)
 function doLoad()
 {
 	// Try to get MT translation after page is loaded.
-    if (<%=show_in_editor%>)
+     if (<%=show_MT%>)
     {
-    	getMtTranslation();
+    	getMtTranslationMessage();
     }
 }
 
-function getMtTranslation()
+function getMtTranslationMessage()
 {
     dojo.xhrPost(
     {
-       url:"<%=mtTranslationURL%>",
+       url:"<%=mtTranslationMessageURL%>",
        handleAs: "text",
        load:function(data)
        {
@@ -84,11 +91,39 @@ function getMtTranslation()
        },
        error:function(error)
        {
-    	   // do not display XHR error
+           // do not display XHR error
            //alert(error.message);
        }
    });
+}
 
+function mtTranslation()
+{
+	dojo.xhrPost(
+    {
+       url:"<%=mtTranslationURL%>",
+       handleAs: "text",
+       load:function(data)
+       {
+           var returnData = eval(data);
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	   var tranReplaced = returnData.translatedString_replaced;
+        	   var tranContents = returnData.translatedString;
+        	   document.getElementById('blankLine').style.display = "none";
+        	   document.getElementById('<%=MTHelper2.MT_TRANSLATION_DIV%>').innerHTML=tranReplaced;
+        	   document.getElementById('idMtContents').innerHTML = tranContents;
+        	   
+           }
+       },
+       error:function(error)
+       {
+       }
+   });
 }
 </SCRIPT>
 </HEAD>

@@ -2377,11 +2377,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             for (OfflineSegmentData object : list)
             {
                 String targetText = object.getDisplayTargetText();
-                if (targetText.startsWith(OfflineConstants.PONUD_SIGN))
-                {
-                    targetText = targetText.replaceFirst(OfflineConstants.PONUD_SIGN, "#");
-                    object.setDisplayTargetText(targetText);
-                }
+                targetText = StringUtil.replace(targetText, OfflineConstants.PONUD_SIGN, "#");
+                object.setDisplayTargetText(targetText);
             }
             
             // set err writer's page, task and job ids

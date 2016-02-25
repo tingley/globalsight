@@ -571,7 +571,8 @@ public class LeverageUtil
 
         return state == LeverageMatchLingManager.EXACT && isLocalized
                 && matchType != MatchTypeStatistics.CONTEXT_EXACT
-                && matchType != MatchTypeStatistics.SEGMENT_MT_EXACT;
+                && matchType != MatchTypeStatistics.SEGMENT_MT_EXACT
+                && matchType != MatchTypeStatistics.IN_PROGRESS_TM_EXACT;
     }
 
     /**

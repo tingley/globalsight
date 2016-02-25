@@ -778,177 +778,174 @@ public class UpdateLeverageHandler extends PageActionHandler
     {
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
                 p_sourcePage, p_targetLocale);
-        HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(p_sourcePage);
-        if (mtProfile != null || mtProfile.isActive())
+        
+        if (mtProfile == null || !(mtProfile.isActive()))
         {
-
-            String mtEngine = mtProfile.getMtEngine();
-            machineTranslator = MTHelper.initMachineTranslator(mtEngine);
-            HashMap paramMap = mtProfile.getParamHM();
-            paramMap.put(MachineTranslator.SOURCE_PAGE_ID, p_sourcePage.getId());
-            paramMap.put(MachineTranslator.TARGET_LOCALE_ID, p_targetLocale.getIdAsLong());
-            boolean isXlf = MTHelper2.isXlf(p_sourcePage.getId());
-            paramMap.put(MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS, isXlf ? "true"
-                    : "false");
-            paramMap.put(MachineTranslator.DATA_TYPE, MTHelper2.getDataType(p_sourcePage.getId()));
-            if (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(machineTranslator
-                    .getEngineName()) && p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
-            {
-                String srLang = mtProfile.getPreferedLangForSr(p_targetLocale.toString());
-                paramMap.put(MachineTranslator.SR_LANGUAGE, srLang);
-            }
-            machineTranslator.setMtParameterMap(paramMap);
-
-            List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
-            long jobId = p_sourcePage.getJobId();
-            TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-            long mtConfidenceScore = mtProfile.getMtConfidenceScore();
-
-            HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
-            needHitMTTuTuvMap = formTuTuvMap(untranslatedSrcTuvs, sourceTuvMap, p_targetLocale,
-                    jobId);
-
-            XmlEntities xe = new XmlEntities();
-            // put all TUs into array.
-            Object[] key_tus = needHitMTTuTuvMap.keySet().toArray();
-            Tu[] tusInArray = new Tu[key_tus.length];
-            for (int key = 0; key < key_tus.length; key++)
-            {
-                tusInArray[key] = (Tu) key_tus[key];
-            }
-            // put all target TUVs into array
-            Object[] value_tuvs = needHitMTTuTuvMap.values().toArray();
-            Tuv[] targetTuvsInArray = new Tuv[value_tuvs.length];
-            for (int value = 0; value < value_tuvs.length; value++)
-            {
-                targetTuvsInArray[value] = (Tuv) value_tuvs[value];
-            }
-            // put all GXML into array
-            String[] p_segments = new String[targetTuvsInArray.length];
-            for (int index = 0; index < targetTuvsInArray.length; index++)
-            {
-                String segment = targetTuvsInArray[index].getGxml();
-                TuvImpl tuv = new TuvImpl();
-                if (p_sourcePage.getExternalPageId().endsWith(".idml"))
-                {
-                    segment = IdmlHelper.formatForOfflineDownload(segment);
-                }
-
-                tuv.setSegmentString(segment);
-                p_segments[index] = segment;
-            }
-
-            // Send all segments to MT engine for translation.
-            logger.info("Begin to hit " + machineTranslator.getEngineName() + "(Segment number:"
-                    + p_segments.length + "; SourcePageID:" + p_sourcePage.getIdAsLong()
-                    + "; TargetLocale:" + p_targetLocale.getLocale().getLanguage() + ").");
-            String[] translatedSegments = machineTranslator.translateBatchSegments(
-                    p_sourceLocale.getLocale(), p_targetLocale.getLocale(), p_segments,
-                    LeverageMatchType.CONTAINTAGS, true);
-            logger.info("End hit " + machineTranslator.getEngineName() + "(SourcePageID:"
-                    + p_sourcePage.getIdAsLong() + "; TargetLocale:"
-                    + p_targetLocale.getLocale().getLanguage() + ").");
-            // handle translate result one by one.
-            Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
-            for (int tuvIndex = 0; tuvIndex < targetTuvsInArray.length; tuvIndex++)
-            {
-                Tu currentTu = tusInArray[tuvIndex];
-                Tuv sourceTuv = (Tuv) sourceTuvMap.get(currentTu);
-                Tuv currentNewTuv = targetTuvsInArray[tuvIndex];
-
-                String machineTranslatedGxml = null;
-                if (translatedSegments != null
-                        && translatedSegments.length == targetTuvsInArray.length)
-                {
-                    machineTranslatedGxml = translatedSegments[tuvIndex];
-                }
-                boolean isGetMTResult = isValidMachineTranslation(machineTranslatedGxml);
-
-                boolean tagMatched = true;
-                if (isGetMTResult
-                        && MTHelper.needCheckMTTranslationTag(machineTranslator.getEngineName()))
-                {
-                    tagMatched = SegmentUtil2.canBeModified(currentNewTuv, machineTranslatedGxml,
-                            jobId);
-                }
-                // replace the content in target tuv with mt result
-                if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
-                {
-                    // GBS-3722
-                    if (mtProfile.isIncludeMTIdentifiers())
-                    {
-                        String leading = mtProfile.getMtIdentifierLeading();
-                        String trailing = mtProfile.getMtIdentifierTrailing();
-                        if (!StringUtil.isEmpty(leading) || !StringUtil.isEmpty(trailing))
-                        {
-                            machineTranslatedGxml = MTHelper.tagMachineTranslatedContent(
-                                    machineTranslatedGxml, leading, trailing);
-                        }
-                    }
-                    currentNewTuv.setGxml(MTHelper.fixMtTranslatedGxml(machineTranslatedGxml));
-                    currentNewTuv.setMatchType(LeverageMatchType.UNKNOWN_NAME);
-                    currentNewTuv.setLastModifiedUser(machineTranslator.getEngineName() + "_MT");
-                    // mark TUVs as localized so they get committed to the TM
-                    TuvImpl t = (TuvImpl) currentNewTuv;
-                    t.setState(com.globalsight.everest.tuv.TuvState.LOCALIZED);
-                    long trgTuvId = currentTu.getTuv(p_targetLocale.getId(), jobId).getId();
-                    t.setId(trgTuvId);
-                    tuvsToBeUpdated.add(t);
-                }
-
-                // save MT match into "leverage_match"
-                if (isGetMTResult == true)
-                {
-                    LeverageMatch lm = new LeverageMatch();
-                    lm.setSourcePageId(p_sourcePage.getIdAsLong());
-
-                    lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
-                    lm.setSubId("0");
-                    lm.setMatchedText(machineTranslatedGxml);
-                    lm.setMatchedClob(null);
-                    lm.setTargetLocale(currentNewTuv.getGlobalSightLocale());
-                    // This is the first MT matches,its order number is 301.
-                    lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_MT);
-                    lm.setScoreNum(mtConfidenceScore);
-                    if (mtConfidenceScore == 100)
-                    {
-                        lm.setMatchType(MatchState.MT_EXACT_MATCH.getName());
-                    }
-                    else
-                    {
-                        lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-                    }
-                    lm.setMatchedTuvId(-1);
-                    lm.setProjectTmIndex(Leverager.MT_PRIORITY);
-                    lm.setTmId(0);
-                    lm.setTmProfileId(tmProfile.getIdAsLong());
-                    lm.setMtName(machineTranslator.getEngineName() + "_MT");
-                    lm.setMatchedOriginalSource(sourceTuv.getGxml());
-
-                    // lm.setSid(sourceTuv.getSid());
-                    lm.setCreationUser(machineTranslator.getEngineName());
-                    lm.setCreationDate(sourceTuv.getLastModified());
-                    lm.setModifyDate(sourceTuv.getLastModified());
-
-                    lmCollection.add(lm);
-                }
-            }
-            List<Long> originalSourceTuvIds = new ArrayList<Long>();
-            for (Tuv untranslatedSrcTuv : untranslatedSrcTuvs)
-            {
-                originalSourceTuvIds.add(untranslatedSrcTuv.getIdAsLong());
-            }
-            LingServerProxy.getLeverageMatchLingManager().deleteLeverageMatches(
-                    originalSourceTuvIds, p_targetLocale,
-                    LeverageMatchLingManager.DEL_LEV_MATCHES_MT_ONLY, jobId);
-            // Save the LMs into DB
-            LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(lmCollection, jobId);
-
-            /****** END :: Hit MT to get matches if configured ******/
-
-            // Populate into target TUVs
-            SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, jobId);
+            return;
         }
+        HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(p_sourcePage);
+        String mtEngine = mtProfile.getMtEngine();
+        machineTranslator = MTHelper.initMachineTranslator(mtEngine);
+        HashMap paramMap = mtProfile.getParamHM();
+        paramMap.put(MachineTranslator.SOURCE_PAGE_ID, p_sourcePage.getId());
+        paramMap.put(MachineTranslator.TARGET_LOCALE_ID, p_targetLocale.getIdAsLong());
+        boolean isXlf = MTHelper2.isXlf(p_sourcePage.getId());
+        paramMap.put(MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS, isXlf ? "true" : "false");
+        paramMap.put(MachineTranslator.DATA_TYPE, MTHelper2.getDataType(p_sourcePage.getId()));
+        if (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(machineTranslator
+                .getEngineName()) && p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
+        {
+            String srLang = mtProfile.getPreferedLangForSr(p_targetLocale.toString());
+            paramMap.put(MachineTranslator.SR_LANGUAGE, srLang);
+        }
+        machineTranslator.setMtParameterMap(paramMap);
+
+        List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
+        long jobId = p_sourcePage.getJobId();
+        TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
+        long mtConfidenceScore = mtProfile.getMtConfidenceScore();
+
+        HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
+        needHitMTTuTuvMap = formTuTuvMap(untranslatedSrcTuvs, sourceTuvMap, p_targetLocale, jobId);
+
+        XmlEntities xe = new XmlEntities();
+        // put all TUs into array.
+        Object[] key_tus = needHitMTTuTuvMap.keySet().toArray();
+        Tu[] tusInArray = new Tu[key_tus.length];
+        for (int key = 0; key < key_tus.length; key++)
+        {
+            tusInArray[key] = (Tu) key_tus[key];
+        }
+        // put all target TUVs into array
+        Object[] value_tuvs = needHitMTTuTuvMap.values().toArray();
+        Tuv[] targetTuvsInArray = new Tuv[value_tuvs.length];
+        for (int value = 0; value < value_tuvs.length; value++)
+        {
+            targetTuvsInArray[value] = (Tuv) value_tuvs[value];
+        }
+        // put all GXML into array
+        String[] p_segments = new String[targetTuvsInArray.length];
+        for (int index = 0; index < targetTuvsInArray.length; index++)
+        {
+            String segment = targetTuvsInArray[index].getGxml();
+            TuvImpl tuv = new TuvImpl();
+            if (p_sourcePage.getExternalPageId().endsWith(".idml"))
+            {
+                segment = IdmlHelper.formatForOfflineDownload(segment);
+            }
+
+            tuv.setSegmentString(segment);
+            p_segments[index] = segment;
+        }
+
+        // Send all segments to MT engine for translation.
+        logger.info("Begin to hit " + machineTranslator.getEngineName() + "(Segment number:"
+                + p_segments.length + "; SourcePageID:" + p_sourcePage.getIdAsLong()
+                + "; TargetLocale:" + p_targetLocale.getLocale().getLanguage() + ").");
+        String[] translatedSegments = machineTranslator.translateBatchSegments(
+                p_sourceLocale.getLocale(), p_targetLocale.getLocale(), p_segments,
+                LeverageMatchType.CONTAINTAGS, true);
+        logger.info("End hit " + machineTranslator.getEngineName() + "(SourcePageID:"
+                + p_sourcePage.getIdAsLong() + "; TargetLocale:"
+                + p_targetLocale.getLocale().getLanguage() + ").");
+        // handle translate result one by one.
+        Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
+        for (int tuvIndex = 0; tuvIndex < targetTuvsInArray.length; tuvIndex++)
+        {
+            Tu currentTu = tusInArray[tuvIndex];
+            Tuv sourceTuv = (Tuv) sourceTuvMap.get(currentTu);
+            Tuv currentNewTuv = targetTuvsInArray[tuvIndex];
+
+            String machineTranslatedGxml = null;
+            if (translatedSegments != null && translatedSegments.length == targetTuvsInArray.length)
+            {
+                machineTranslatedGxml = translatedSegments[tuvIndex];
+            }
+            boolean isGetMTResult = isValidMachineTranslation(machineTranslatedGxml);
+
+            boolean tagMatched = true;
+            if (isGetMTResult
+                    && MTHelper.needCheckMTTranslationTag(machineTranslator.getEngineName()))
+            {
+                tagMatched = SegmentUtil2
+                        .canBeModified(currentNewTuv, machineTranslatedGxml, jobId);
+            }
+            // replace the content in target tuv with mt result
+            if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
+            {
+                // GBS-3722
+                if (mtProfile.isIncludeMTIdentifiers())
+                {
+                    String leading = mtProfile.getMtIdentifierLeading();
+                    String trailing = mtProfile.getMtIdentifierTrailing();
+                    if (!StringUtil.isEmpty(leading) || !StringUtil.isEmpty(trailing))
+                    {
+                        machineTranslatedGxml = MTHelper.tagMachineTranslatedContent(
+                                machineTranslatedGxml, leading, trailing);
+                    }
+                }
+                currentNewTuv.setGxml(MTHelper.fixMtTranslatedGxml(machineTranslatedGxml));
+                currentNewTuv.setMatchType(LeverageMatchType.UNKNOWN_NAME);
+                currentNewTuv.setLastModifiedUser(machineTranslator.getEngineName() + "_MT");
+                // mark TUVs as localized so they get committed to the TM
+                TuvImpl t = (TuvImpl) currentNewTuv;
+                t.setState(com.globalsight.everest.tuv.TuvState.LOCALIZED);
+                long trgTuvId = currentTu.getTuv(p_targetLocale.getId(), jobId).getId();
+                t.setId(trgTuvId);
+                tuvsToBeUpdated.add(t);
+            }
+
+            // save MT match into "leverage_match"
+            if (isGetMTResult == true)
+            {
+                LeverageMatch lm = new LeverageMatch();
+                lm.setSourcePageId(p_sourcePage.getIdAsLong());
+
+                lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
+                lm.setSubId("0");
+                lm.setMatchedText(machineTranslatedGxml);
+                lm.setMatchedClob(null);
+                lm.setTargetLocale(currentNewTuv.getGlobalSightLocale());
+                // This is the first MT matches,its order number is 301.
+                lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_MT);
+                lm.setScoreNum(mtConfidenceScore);
+                if (mtConfidenceScore == 100)
+                {
+                    lm.setMatchType(MatchState.MT_EXACT_MATCH.getName());
+                }
+                else
+                {
+                    lm.setMatchType(MatchState.FUZZY_MATCH.getName());
+                }
+                lm.setMatchedTuvId(-1);
+                lm.setProjectTmIndex(Leverager.MT_PRIORITY);
+                lm.setTmId(0);
+                lm.setTmProfileId(tmProfile.getIdAsLong());
+                lm.setMtName(machineTranslator.getEngineName() + "_MT");
+                lm.setMatchedOriginalSource(sourceTuv.getGxml());
+
+                // lm.setSid(sourceTuv.getSid());
+                lm.setCreationUser(machineTranslator.getEngineName());
+                lm.setCreationDate(sourceTuv.getLastModified());
+                lm.setModifyDate(sourceTuv.getLastModified());
+
+                lmCollection.add(lm);
+            }
+        }
+        List<Long> originalSourceTuvIds = new ArrayList<Long>();
+        for (Tuv untranslatedSrcTuv : untranslatedSrcTuvs)
+        {
+            originalSourceTuvIds.add(untranslatedSrcTuv.getIdAsLong());
+        }
+        LingServerProxy.getLeverageMatchLingManager().deleteLeverageMatches(originalSourceTuvIds,
+                p_targetLocale, LeverageMatchLingManager.DEL_LEV_MATCHES_MT_ONLY, jobId);
+        // Save the LMs into DB
+        LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(lmCollection, jobId);
+
+        /****** END :: Hit MT to get matches if configured ******/
+
+        // Populate into target TUVs
+        SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, jobId);
     }
 
     private HashMap<Tu, Tuv> formTuTuvMap(Collection<Tuv> untranslatedSrcTuvs,

@@ -167,6 +167,20 @@ public class JobSourceFilesHandler extends PageHandler implements
             jobSourcePageDisplay.setWordCountOverriden(sourcePage
                     .isWordCountOverriden());
             jobSourcePageDisplay.setSourceLink(getSourceLink(sourcePage));
+            String unextractedFileName = sourcePage.getUnextractedFile().getName();
+            if (unextractedFileName != null)
+            {
+                String fileExtension = unextractedFileName.substring(
+                        unextractedFileName.lastIndexOf('.') + 1).toLowerCase();
+                if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
+                {
+                    jobSourcePageDisplay.setImageFile(true);
+                }
+                else
+                {
+                    jobSourcePageDisplay.setImageFile(false);
+                }
+            }
             jobSourcePageDisplayList.add(jobSourcePageDisplay);
 
             if (sourcePage.getPageState().equals(PageState.IMPORT_FAIL))

@@ -259,7 +259,7 @@ public class BlaiseHelper
 		}
 		catch (Exception e)
 		{
-			logger.error("Error when invoke 'uploadXliff': ", e);
+			logger.error("Error when invoke 'uploadXliff' for entryId:" + entryId, e);
 		}
 	}
 
@@ -290,7 +290,16 @@ public class BlaiseHelper
     {
 		try
 		{
-			TranslationAgencyClient client = getTranslationClient();
+		    Set<Long> ids = new HashSet<Long>();
+		    ids.add(id);
+		    List<TranslationInboxEntryVo> entries = listInboxByIds(ids);
+		    if (entries == null || entries.size() == 0)
+		    {
+		        logger.warn("Entry " + id + " has been not available, cannot complete it.");
+		        return;
+		    }
+
+		    TranslationAgencyClient client = getTranslationClient();
 			client.complete(id);
 		}
 		catch (Exception e)

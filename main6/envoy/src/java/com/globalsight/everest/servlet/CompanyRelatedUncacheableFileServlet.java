@@ -59,11 +59,12 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
 
     private static final Logger logger = Logger
             .getLogger(CompanyRelatedUncacheableFileServlet.class);
+//    private static final Map<String, String> extensionMap = new HashMap<String, String>();
 
     static public final int BUFSIZE = 4096;
     private static final String SUPER_COMPANY_ID = "1";
     private static Map<String, String> contentTypeMap = new HashMap<String, String>();
-
+    private static Map<String, String> imageContentTypeMap = new HashMap<String, String>();
     static
     {
         contentTypeMap
@@ -92,6 +93,13 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
         contentTypeMap.put("gz", "application/x-gzip");
         contentTypeMap.put("mif", "application/x-mif");
         contentTypeMap.put("rtf", "application/rtf");
+
+        imageContentTypeMap.put("bmp", "image/bmp");
+        imageContentTypeMap.put("gif", "image/gif");
+        imageContentTypeMap.put("jpeg", "image/jpeg");
+        imageContentTypeMap.put("jpg", "image/jpeg");
+        imageContentTypeMap.put("jpe", "image/jpeg");
+        imageContentTypeMap.put("png", "image/png");
     }
 
     private static List<String> NOT_CHANGE_NAME_FILES = new ArrayList<String>();
@@ -228,9 +236,10 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
             }
             else
             {
-                // String ext = getExtension(fileName);
-                // String contentType = getContentTypeByExtension(ext);
-                p_response.setContentType("application/octet-stream");
+                 String ext = getExtension(fileName);
+                 String contentType = getImageContentTypeByExtension(ext);
+//                p_response.setContentType("application/octet-stream");
+                p_response.setContentType(contentType);
                 String attachment = "attachment; filename=\"" + fileName
                         + "\";";
                 p_response.setHeader("Content-Disposition", attachment);
@@ -345,6 +354,23 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
 
         return "text/plain";
     }
+    
+    private String getImageContentTypeByExtension(String p_ext)
+    {
+        String ext = "";
+
+        if (p_ext != null)
+        {
+            ext = p_ext.toLowerCase();
+        }
+
+        if (imageContentTypeMap != null && imageContentTypeMap.containsKey(ext))
+        {
+            return imageContentTypeMap.get(ext);
+        }
+
+        return "application/octet-stream";
+    }
 
     private String getExtension(String p_fileName)
     {
@@ -355,7 +381,6 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
             {
                 return p_fileName.substring(i + 1).toLowerCase();
             }
-            ;
         }
 
         return "";

@@ -7,6 +7,7 @@ public class JobSourcePageDisplay
     private String dataSourceName;
     private boolean isWordCountOverriden;
     private String sourceLink;
+    private boolean isImageFile;
     
     public JobSourcePageDisplay(SourcePage sourcePage){
         this.sourcePage = sourcePage;
@@ -45,6 +46,16 @@ public class JobSourcePageDisplay
     public void setWordCountOverriden(boolean isWordCountOverriden)
     {
         this.isWordCountOverriden = isWordCountOverriden;
+    }
+    
+    public boolean getIsImageFile()
+    {
+        return isImageFile;
+    }
+
+    public void setImageFile(boolean isImageFile)
+    {
+        this.isImageFile = isImageFile;
     }
 
     public String getSourceLink()

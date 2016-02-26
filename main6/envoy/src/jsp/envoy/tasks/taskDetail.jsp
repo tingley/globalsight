@@ -89,6 +89,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="newEditor" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="pictureEditor" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="incontextreiview" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editorSameWindow" scope="request"
@@ -281,6 +283,7 @@
     String newEditorListUrl = newEditor.getPageURL();
     String newEditorReviewUrl = newEditor.getPageURL() +
        "&" + WebAppConstants.REVIEW_MODE + "=true";
+    String pictureEditorUrl = pictureEditor.getPageURL();
     String incontextreviewUrl = incontextreiview.getPageURL();
     String incontextreviewUrlRe = incontextreiview.getPageURL() +
             "&" + WebAppConstants.REVIEW_MODE + "=true";
@@ -872,6 +875,57 @@ function contextForPage(url, e, displayName)
     ContextMenu.display(popupoptions, e); 
 }
 
+function openPageForImage(url, e, displayName)
+{
+    if(e instanceof Object)
+    {
+	    e.preventDefault();
+	    e.stopPropagation();
+    }
+    var fontB1 = "<B>", fontB2 = "</B>";
+    displayName = pageNames[displayName];
+    
+    var fileName = displayName;
+    if (fileName.match(/\)$/))
+    {
+    	fileName = displayName.substr(0, displayName.lastIndexOf("("));
+    	if (fileName.match(/ $/))
+    	{
+    		fileName = fileName.substr(0, fileName.length - 1);
+    	}
+    }
+    
+    var lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_popup_editor") %>";
+    lb_context_item_popup_editor   = fontB1 + lb_context_item_popup_editor + fontB2;
+    
+    var popupoptions = [new ContextItem(lb_context_item_popup_editor, function(){ openImageEditor(url, e);})];
+    
+    ContextMenu.display(popupoptions, e); 
+}
+
+function openImageEditor(url, e)
+{
+    if (!canClose())
+    {
+        cancelEvent(e);
+        raiseSegmentEditor();
+    }
+    else
+    {
+        hideContextMenu();
+
+       url = "<%=pictureEditorUrl%>" + url;
+        w_editor = window.open(url, 'MainEditor',
+             'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
+            ',width=' + (screen.availWidth - 20));
+    }
+}
+
+function openImageWindow(url, e)
+{
+    openImageEditor(url, e);
+}
+
 function openParaEditor(url, e)
 {
     if (!canClose())
@@ -1193,11 +1247,14 @@ function searchPages(){
 	        {
 	            TargetPage tPage = null;
 	            String pageName = null;
+	            String unextractedFileName = null;
+	            String fileExtension = null;
 	            String pageUrl = null;
 	            // for unextracted
 	            String modifiedBy = null;
 	            String dateStr = null;
 	            long fileSize = 0;
+	            boolean picture = false;
 	
 	            for (int i = 0; i < targetPgs.size(); i++)
 	            {
@@ -1205,29 +1262,41 @@ function searchPages(){
 	                long sourcePageId = tPage.getSourcePage().getId();
 	                long targetPageId = tPage.getId();
 	                tarPageIds.append(String.valueOf(targetPageId) + ",");
-	
+	 
 	                boolean isExtracted =
 			          tPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE;
 	
-	                if (isExtracted)
+                    pageUrl =
+                      "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + sourcePageId +
+                      "&" + WebAppConstants.TARGET_PAGE_ID + "=" + targetPageId +
+                      "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+
+                    if (isExtracted)
 	                {
 	                    pageName = tPage.getExternalPageId();
-	
-	                    pageUrl =
-	                      "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + sourcePageId +
-	                      "&" + WebAppConstants.TARGET_PAGE_ID + "=" + targetPageId +
-	                      "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
 	                }
 	                else
 	                {
 	                    UnextractedFile unextractedFile =
 			              (UnextractedFile)tPage.getPrimaryFile();
+	                    unextractedFileName = unextractedFile.getName();
+	                    fileExtension = unextractedFileName.substring(unextractedFileName.lastIndexOf('.') + 1).toLowerCase();
 	                    pageName = unextractedFile.getStoragePath().replace("\\", "/");
-	                    pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +
-	                      pageName;
 	                    modifiedBy = unextractedFile.getLastModifiedBy();
 	                    modifiedBy = UserHandlerHelper.getUser(modifiedBy).getUserName();
-	
+	                    
+	                    if(WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
+	                    {
+	                    	picture = true;
+	                    }
+	                    else
+	                    {
+	                    	picture = false;
+	                    	pageUrl = null;
+							pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +
+				                      pageName;
+	                    }
+						
 	                    // Get the Last Modified date and format it
 	                    Date date = unextractedFile.getLastModifiedDate();
 	                    ts.setDate(date);
@@ -1266,10 +1335,11 @@ function searchPages(){
 	                <%}
 	                else
 	                {
-	                	
+	                	if(picture)
+	                	{
 	                %>
 	                    <TD CLASS="standardText filelist" style="word-break : break-all; overflow:hidden; ">
-	                    <A CLASS="standardHREF" HREF="<%=pageUrl%>" target="_blank"><%=pageName%>
+	                    <A CLASS="standardHREF" HREF="<%=pageUrl%>" target="_blank" onclick="openImageWindow('<%=pageUrl%>',event);return false;"  oncontextmenu="openPageForImage('<%=pageUrl%>',event,'<%=i%>');"><%=pageName%>
 	                    </A>
 	                    <BR>
 	                    <SPAN CLASS="smallText">
@@ -1279,6 +1349,21 @@ function searchPages(){
 	                    </SPAN>
 	                    </TD>
 	                <%
+	                	}
+	                	else
+	                	{
+                		%>
+                		<TD CLASS="standardText filelist" style="word-break : break-all; overflow:hidden; ">
+		                    <A CLASS="standardHREF" HREF="<%=pageUrl%>" target="_blank"><%=pageName%></A>
+		                    <BR>
+		                    <SPAN CLASS="smallText">
+		                    <%=bundle.getString("lb_last_modified") +  ": " + dateStr%> -
+		                    <%=fileSize%>K<BR>
+		                    <%=bundle.getString("lb_modified_by") +  ": " + modifiedBy%>
+		                    </SPAN>
+	                    </TD>
+                		<%
+	                	}
 	                }
 	                %>
 	                    <TD ALIGN="CENTER"><SPAN CLASS="standardText"><%=tPage.getWordCount().getTotalWordCount()%></SPAN></TD>
@@ -1626,10 +1711,11 @@ if (targetPgsSize > 0)
                 enableInContextReivew = okForInContextReviewOffice;
             }
         %>
-           	pageNames[<%=i%>] = "<%=pageName%>";
+        
            	incontextReviewPDFs[<%=i%>] = <%=(enableInContextReivew ? 1 : 0 )%>;
-      <%}
-    }
+      <%}%>
+        pageNames[<%=i%>] = "<%=pageName%>";
+ <% }
 }%>
 
 </SCRIPT>

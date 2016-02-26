@@ -411,26 +411,26 @@ public class FileProfileMainHandler extends PageHandler
             if (idString != null)
             {
                 String[] idarray = idString.split(" ");
-                for(int i=0;i<idarray.length;i++){
-                String id=idarray[i].split(",")[0];
-				FileProfileImpl fp = (FileProfileImpl) ServerProxy
-						.getFileProfilePersistenceManager().getFileProfileById(
-								Long.parseLong(id), true);
-
-                // CVSFileProfileManagerLocal cvsFPManager = new
-                // CVSFileProfileManagerLocal();
-                // cvsFPManager.removeByFileProfileId(fp.getId());
-                if (fp.isActive())
+                for (int i = 0; i < idarray.length; i++)
                 {
-                    ServerProxy.getFileProfilePersistenceManager()
-                            .deleteFileProfile(fp);
-                    OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
-                            OperationLog.COMPONET_FILE_PROFILE, fp.getName());
-                }
+                    String id = idarray[i].split(",")[0];
+                    FileProfileImpl fp = (FileProfileImpl) ServerProxy
+                            .getFileProfilePersistenceManager().getFileProfileById(
+                                    Long.parseLong(id), true);
 
-                // Don't really remove
-                // removeRelevantXslFile(id);
-            }
+                    // CVSFileProfileManagerLocal cvsFPManager = new
+                    // CVSFileProfileManagerLocal();
+                    // cvsFPManager.removeByFileProfileId(fp.getId());
+                    if (fp.isActive())
+                    {
+                        ServerProxy.getFileProfilePersistenceManager().deleteFileProfile(fp);
+                        OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
+                                OperationLog.COMPONET_FILE_PROFILE, fp.getName());
+                    }
+
+                    // Don't really remove
+                    // removeRelevantXslFile(id);
+                }
             }
         }
         catch (Exception e)
